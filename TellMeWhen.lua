@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70010 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -1829,12 +1829,17 @@ TMW.UpgradeTableByVersions = {}
 
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+
 		[70001] = {
 			global = function(self)
 				local currentProfile = TMW.db:GetCurrentProfile()
 
+				TMW.db:SetProfile(currentProfile)
+
 				for name, p in pairs(TMW.db.profiles) do
-					TMW.safecall(TMW.db.SetProfile, TMW.db, name)
+					if name ~= currentProfile then
+						TMW.safecall(TMW.db.SetProfile, TMW.db, name)
+					end
 				end
 
 				TMW.db:SetProfile(currentProfile)

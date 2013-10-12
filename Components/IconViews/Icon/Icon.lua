@@ -29,7 +29,7 @@ View.desc = L["UIPANEL_GROUPTYPE_ICON_DESC"]
 local ICON_SIZE = 30
 
 TMW:RegisterDatabaseDefaults{
-	profile = {
+	global = {
 		TextLayouts = {
 			icon1 = {
 				Name = L["TEXTLAYOUTS_DEFAULTS_ICON1"],

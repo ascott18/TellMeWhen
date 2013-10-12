@@ -38,8 +38,8 @@ if not TEXT then return end
 
 LibStub("AceHook-3.0"):Embed(TEXT)
 
-local DEFAULT_LAYOUT_SETTINGS = TMW.db.profile.TextLayouts["\000"]
-TMW.db.profile.TextLayouts["\000"] = nil
+local DEFAULT_LAYOUT_SETTINGS = TMW.db.global.TextLayouts["\000"]
+TMW.db.global.TextLayouts["\000"] = nil
 
 local DEFAULT_DISPLAY_SETTINGS = DEFAULT_LAYOUT_SETTINGS[1]
 DEFAULT_LAYOUT_SETTINGS[1] = nil
@@ -48,10 +48,7 @@ DEFAULT_LAYOUT_SETTINGS[1] = nil
 TEXT.usedStrings = {}
 
 function TEXT:GetTextLayoutSettings(GUID)
-	if GUID == "icon" then
-		TMW:Error("Attempted to access layout keyed as 'icon', which is a bad bug, so please report this error")
-	end
-	return GUID and rawget(TMW.db.profile.TextLayouts, GUID) or nil
+	return GUID and rawget(TMW.db.global.TextLayouts, GUID) or nil
 end
 
 function TEXT:GetStringName(settings, num, unnamed)
@@ -139,7 +136,7 @@ function TEXT.Layout_DropDown_Sort(GUID_a, GUID_b)
 end
 
 function TEXT:Layout_DropDown()
-	for GUID, settings in TMW:OrderedPairs(TMW.db.profile.TextLayouts, TEXT.Layout_DropDown_Sort) do
+	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, TEXT.Layout_DropDown_Sort) do
 		if GUID ~= "" then
 			local info = UIDropDownMenu_CreateInfo()
 			
@@ -393,7 +390,7 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 	type = "select",
 	values = function(info)
 		local t = {}
-		for GUID, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
+		for GUID, layoutSettings in pairs(TMW.db.global.TextLayouts) do
 			if GUID ~= "" then
 				t[GUID] = TEXT:GetLayoutName(layoutSettings, GUID)
 			end
@@ -457,13 +454,13 @@ local function findlayout(info)
 end
 local function AddTextLayout()
 	local GUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
-	local newLayout = TMW.db.profile.TextLayouts[GUID]
+	local newLayout = TMW.db.global.TextLayouts[GUID]
 	newLayout.GUID = GUID
 	
 	local Name = "New 1"
 	repeat
 		local found
-		for k, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
+		for k, layoutSettings in pairs(TMW.db.global.TextLayouts) do
 			if layoutSettings.Name == Name then
 				Name = TMW.oneUpString(Name)
 				found = true
@@ -563,7 +560,7 @@ local textLayoutTemplate = {
 				
 				IE:NotifyChanges("textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT (idk why. just do it, asshole)
 				
-				TMW.db.profile.TextLayouts[layout] = nil
+				TMW.db.global.TextLayouts[layout] = nil
 				TMW:CompileOptions()
 				TMW:Update()
 				TEXT:LoadConfig()
@@ -1084,7 +1081,7 @@ TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsT
 			textlayouts_toplevel.args[k] = nil
 		end
 	end
-	for layoutID, layout in pairs(TMW.db.profile.TextLayouts) do
+	for layoutID, layout in pairs(TMW.db.global.TextLayouts) do
 		for fontStringID, fontString in TMW:InNLengthTable(layout) do
 			-- this will expand textLayoutTemplate's args tables to the needed number
 			-- unused textFontStringTemplate in it will not be removed - they are simply hidden.
@@ -1117,8 +1114,8 @@ textlayout.extrasMap = {"GUID"}
 function textlayout:Import_ImportData(Item, GUID)
 	assert(type(GUID) == "string")
 	
-	TMW.db.profile.TextLayouts[GUID] = nil -- restore defaults
-	local textlayout = TMW.db.profile.TextLayouts[GUID]
+	TMW.db.global.TextLayouts[GUID] = nil -- restore defaults
+	local textlayout = TMW.db.global.TextLayouts[GUID]
 	TMW:CopyTableInPlaceWithMeta(Item.Settings, textlayout, true)
 	textlayout.GUID = GUID
 
@@ -1128,7 +1125,7 @@ function textlayout:Import_ImportData(Item, GUID)
 	
 	repeat
 		local found
-		for k, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
+		for k, layoutSettings in pairs(TMW.db.global.TextLayouts) do
 			if layoutSettings ~= textlayout and layoutSettings.Name == textlayout.Name then
 				textlayout.Name = TMW.oneUpString(textlayout.Name)
 				found = true
@@ -1261,7 +1258,7 @@ function textlayout:Export_GetArgs(editbox)
 	assert(type(GUID) == "string")
 	local settings = TMW.TEXT:GetTextLayoutSettings(GUID)
 	
-	return settings, TMW.Defaults.profile.TextLayouts["**"], GUID
+	return settings, TMW.Defaults.global.TextLayouts["**"], GUID
 end
 
 
@@ -1282,17 +1279,31 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 end)
 
 
-TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, type, settings)
+local function GetTextLayouts(event, strings, type, settings)
 	if type == "icon" or type == "group" then
 		for view, settingsPerView in pairs(settings.SettingsPerView) do
 			local GUID = settingsPerView.TextLayout
 
 			if GUID and GUID ~= "" then
-				local layout = rawget(TMW.db.profile.TextLayouts, GUID)
+				local layout = rawget(TMW.db.global.TextLayouts, GUID)
 				if layout and not layout.NoEdit then
-					TMW:GetSettingsStrings(strings, "textlayout", layout, TMW.Defaults.profile.TextLayouts["**"], GUID)
+					TMW:GetSettingsStrings(strings, "textlayout", layout, TMW.Defaults.global.TextLayouts["**"], GUID)
 				end
 			end
 		end
 	end
-end)
+
+	if type == "group" then
+		for iconID, ics in pairs(settings.Icons) do
+			GetTextLayouts(event, strings, "icon", ics)
+		end
+	end
+
+	if type == "profile" then
+		for groupID, gs in pairs(settings.Groups) do
+			GetTextLayouts(event, strings, "group", gs)
+		end
+	end
+end
+
+TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", GetTextLayouts)

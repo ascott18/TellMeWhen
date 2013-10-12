@@ -1,6 +1,7 @@
 ===v7.0.0===
  * You can now create groups that exist for all characters on your account. These groups can be enabled and disabled on a per-profile basis. Changes made to these groups will be reflected for any character that they are enabled for.
- 
+ * Text Layouts are now defined on an account-wide basis instead of beind defined for individual profiles.
+
  * All references from one icon or group to another in TellMeWhen are now tracked by a unique ID that is assigned to an icon that will stay with it no matter where it is moved or exported to.
  ** This includes:
  *** DogTags

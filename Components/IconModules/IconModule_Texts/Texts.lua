@@ -42,7 +42,7 @@ TEXT.MasqueSkinnableTexts = {
 
 
 TMW:RegisterDatabaseDefaults{
-	profile = {
+	global = {
 		TextLayouts = {
 			-- Layout defaults
 			["**"] = {
@@ -109,6 +109,76 @@ TMW:MergeDefaultsTables({
 -- -------------------
 -- SETTINGS UPGRADES
 -- -------------------
+
+TMW:RegisterUpgrade(70010, {
+	recursiveReplaceLayoutGUIDs = function(self, table, GUIDmap)
+		for k, v in pairs(table) do
+			if type(v) == "table" then
+				self:recursiveReplaceLayoutGUIDs(v, GUIDmap)
+			elseif k == "TextLayout" and GUIDmap[v] then
+				table[k] = GUIDmap[v]
+			end
+		end
+	end,
+
+	profile = function(self, profile)
+		local GUIDmap = {}
+
+		for GUID, layout in pairs(profile.TextLayouts) do
+			if type(layout) == "table" and not layout.NoEdit and type(layout.GUID) == "string" then
+
+				if not layout.GUID:match("^TMW:textlayout") then
+					-- Change the GUID into the new GUID syntax.
+
+					local newGUID = "TMW:textlayout:" .. layout.GUID
+
+					GUIDmap[GUID] = newGUID
+					layout.GUID = newGUID
+				end
+
+				if not rawget(TMW.db.global.TextLayouts, layout.GUID) then
+					-- The layout doesn't already exist, so just put it straight in.
+					TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
+
+					-- Upgrade the new layout manually. This is required because this possibly un-upgraded
+					-- layout will be getting mixed into layouts whose version is tracked by the global
+					-- version number. When we are upgrading a profile, global upgrades have already
+					-- happened, so the layout we are sticking into global.TextLayouts will never get
+					-- old upgrades.
+					TMW:DoUpgrade("textlayout", profile.Version, layout, layout.GUID)
+				else
+					-- The layout does already exist.
+
+					-- Check to see if it is exactly the same as the existing layout.
+					-- In order to properly compare, we have to copy the old layout 
+					-- into a new table so that all the database metatables will be in place.
+					local layoutWithMetatables = TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts["\000"])
+					TMW.db.global.TextLayouts["\000"] = nil
+
+					if TMW:DeepCompare(TMW.db.global.TextLayouts[layout.GUID], layoutWithMetatables) then
+						-- The existing layout is the same. Do nothing.
+					else
+						-- The existing layout already exists. Give it a new GUID and then stick it in.
+						local newGUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
+
+						GUIDmap[GUID] = newGUID
+						layout.GUID = newGUID
+
+						TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
+
+						-- See above for an explanation of this upgrade.
+						TMW:DoUpgrade("textlayout", profile.Version, layout, layout.GUID)
+					end
+
+				end
+			end
+		end
+
+		profile.TextLayouts = nil
+
+		self:recursiveReplaceLayoutGUIDs(profile, GUIDmap)
+	end
+})
 
 TMW:RegisterUpgrade(60448, {
 	textlayout = function(self, settings, GUID)
@@ -205,7 +275,7 @@ TMW:RegisterUpgrade(51019, {
 	textlayout = function(self, settings, GUID)
 		-- I don't know why this layout exists, but I know it was my fault, so I am going to delete it.
 		if GUID == "icon" and settings.GUID == "" then
-			TMW.db.profile.TextLayouts[GUID] = nil
+			TMW.db.global.TextLayouts[GUID] = nil
 			TMW.Warn("TMW has deleted the invalid text layout keyed as 'icon' that was probably causing errors for you. If you were using it on any of your icons, then I apologize, but you probably weren't because it probably wasn't even named")
 		end
 	end,
@@ -277,10 +347,10 @@ TMW:RegisterUpgrade(51003, {
 	---------- Upgrade method ----------
 	group = function(self, gs)
 		-- Create a layout table to start storing text layout data for this group in.
-		local layout = TMW.db.profile.TextLayouts[0]
+		local layout = TMW.db.global.TextLayouts[0]
 		
 		-- We don't actually want to define this as a real text layout yet, so take it out of TextLayouts.
-		TMW.db.profile.TextLayouts[0] = nil
+		TMW.db.global.TextLayouts[0] = nil
 		
 		-- The old text system had two displays
 		layout.n = 2
@@ -342,7 +412,7 @@ TMW:RegisterUpgrade(51003, {
 		
 		-- We are done constructing a text layout out of this group's old text settings.
 		-- Now, check and see if there alredy exists a layout with the exact same settings from a previous group's upgrade.
-		for GUID, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
+		for GUID, layoutSettings in pairs(TMW.db.global.TextLayouts) do
 		
 			if layoutSettings ~= layout then -- I don't know why this check was written, but leave it in.
 			
@@ -378,7 +448,7 @@ TMW:RegisterUpgrade(51003, {
 		repeat
 			-- Loop until we find a name that isn't used by any other layouts.
 			local found
-			for k, layoutSettings in pairs(TMW.db.profile.TextLayouts) do
+			for k, layoutSettings in pairs(TMW.db.global.TextLayouts) do
 				if layoutSettings.Name == Name then
 					-- The current name is in use.
 					found = true
@@ -396,7 +466,7 @@ TMW:RegisterUpgrade(51003, {
 		layout.Name = Name
 		
 		-- Store the layout under the new GUID in the TextLayouts table.
-		TMW.db.profile.TextLayouts[GUID] = layout
+		TMW.db.global.TextLayouts[GUID] = layout
 		
 		-- Set the new layout to the group we are upgrading.
 		self:SetLayoutToGroup(gs, GUID)
@@ -427,10 +497,10 @@ TMW:RegisterUpgrade(51002, {
 })
 
 TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
-	-- When a profile settings upgrade is requested, update all text layouts.
+	-- When a global settings upgrade is requested, update all text layouts.
 	
-	if type == "profile" then
-		for GUID, settings in pairs(TMW.db.profile.TextLayouts) do
+	if type == "global" then
+		for GUID, settings in pairs(TMW.db.global.TextLayouts) do
 			TMW:DoUpgrade("textlayout", version, settings, GUID)
 		end
 	end
@@ -452,7 +522,7 @@ function TEXT:GetTextLayoutForIconSettings(gs, ics, view)
 	end
 	
 	-- Rawget from TextLayouts to see if the layout exists.
-	local layoutSettings = GUID and rawget(TMW.db.profile.TextLayouts, GUID)
+	local layoutSettings = GUID and rawget(TMW.db.global.TextLayouts, GUID)
 	
 	local isFallback
 	if not layoutSettings then
@@ -469,7 +539,7 @@ function TEXT:GetTextLayoutForIconSettings(gs, ics, view)
 		end
 		
 		-- Attempt to find the layout settings again.
-		layoutSettings = rawget(TMW.db.profile.TextLayouts, GUID)
+		layoutSettings = rawget(TMW.db.global.TextLayouts, GUID)
 		
 		-- Freak the fuck out if it wasn't found;
 		-- Only happens if a view defines a default layout but doesn't actually define layout itself.

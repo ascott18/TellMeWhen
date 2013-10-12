@@ -25,7 +25,7 @@ View.name = L["UIPANEL_GROUPTYPE_BAR"]
 View.desc = L["UIPANEL_GROUPTYPE_BAR_DESC"]
 
 TMW:RegisterDatabaseDefaults{
-	profile = {
+	global = {
 		TextLayouts = {
 			bar1 = {
 				Name = L["TEXTLAYOUTS_DEFAULTS_BAR1"],
