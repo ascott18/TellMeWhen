@@ -336,34 +336,58 @@ function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
 end
 TMW:RegisterCallback("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", TEXT)
 
-function TEXT:GetNumTimesUsed(layout)
-	local n = 0	
-	TMW.TextLayout_NumTimesUsedTemp = wipe(TMW.TextLayout_NumTimesUsedTemp or {})
-	
-	for gs in TMW:InGroupSettings() do
-		for view, settings in pairs(gs.SettingsPerView) do
-			if settings.TextLayout == layout then
-				n = n + (gs.Rows*gs.Columns)
-				TMW.TextLayout_NumTimesUsedTemp[gs] = true
-				break
-			end
-		end
-	end
-	
-	for ics, gs in TMW:InIconSettings() do
-		if not TMW.TextLayout_NumTimesUsedTemp[gs] then
-			for view, settings in pairs(ics.SettingsPerView) do
-				if settings.TextLayout == layout then
-					n = n + 1
-					break
+
+
+local function deepRecScanTableForLayout(profile, GUID, table, ...)
+	local n = 0
+
+	for k, v in pairs(table) do
+		if type(v) == "table" then
+			n = n + deepRecScanTableForLayout(profile, GUID, v, k, ...)
+		elseif v == GUID then
+			local parentTableKey = select(4, ...)
+
+			if parentTableKey == "Icons" then
+				n = n + 1
+			elseif parentTableKey == "Groups" then
+				local groupID = select(3, ...)
+
+				local gs = profile.Groups[groupID]
+
+				if not TEXT.TextLayout_NumTimesUsedTemp[gs] then
+					TEXT.TextLayout_NumTimesUsedTemp[gs] = true
+
+					n = n + ((gs.Rows or 1) * (gs.Columns or 4))
 				end
 			end
+
+			print(n, ...)
 		end
 	end
+
+	return n
+end
+
+function TEXT:GetNumTimesUsed(layoutGUID)
+	TEXT.TextLayout_NumTimesUsedTemp = wipe(TEXT.TextLayout_NumTimesUsedTemp or {})
+	
+	local result = ""
+
+	for profileName, profile in pairs(TMW.db.profiles) do
+		local n = deepRecScanTableForLayout(profile, layoutGUID, profile)
+
+		if n > 0 then
+			if profileName == TMW.db:GetCurrentProfile() then
+				profileName = "|cff7fffff" .. profileName .. "|r"
+			end
+			result = result .. L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_LISTING"]:format(profileName, n) .. "\r\n"
+		end
+	end
+
 
 	wipe(TEXT.TextLayout_NumTimesUsedTemp)
 
-	return n
+	return result:trim("\r\n")
 end
 
 function TEXT:Display_IsDefault(displaySettings)
@@ -571,16 +595,18 @@ local textLayoutTemplate = {
 			end,
 			confirm = function(info)
 				local layout = findlayout(info)
-				local n = TEXT:GetNumTimesUsed(layout)
+
+				local layoutInUseMessage = TEXT:GetNumTimesUsed(layout)
 			
 				local warning = L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"]:format(TEXT:GetLayoutName(nil, layout))
-				if n > 0 then
-					warning = warning .. "\r\n\r\n" .. L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"]:format(n)
+
+				if layoutInUseMessage ~= "" then
+					warning = warning .. "\r\n\r\n" .. L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM2"] .. "\r\n\r\n" .. layoutInUseMessage
+
 				elseif IsControlKeyDown() then
 					return false
-				--elseif TEXT:Layout_IsDefault(TEXT:GetTextLayoutSettings(layout)) and n == 0 then
-				--	return false
 				end
+
 				return warning
 			end,
 		},
@@ -763,12 +789,20 @@ local anchorSet = {
 	},
 }
 		
-local textFontStringTemplate = {
+local textFontStringTemplate
+textFontStringTemplate = {
 	type = "group",
 	name = function(info)
 		local layout = findlayout(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		
+		if textFontStringTemplate.hidden(info) then
+			-- The name method gets called even if the panel should be hidden
+			-- so we do this to prevent settings tables for unused/undefined 
+			-- font strings from being generated when they shouldn't be.
+			return ""
+		end
+
 		return TEXT:GetStringName(TEXT:GetTextLayoutSettings(layout)[display], display)
 	end,
 	order = function(info) return tonumber(info[#info]) end,
@@ -776,7 +810,9 @@ local textFontStringTemplate = {
 		local layout = findlayout(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		local setting = info[textLayoutInfo.stringSetting]
+
 		TEXT:GetTextLayoutSettings(layout)[display][setting] = val
+
 		UpdateIconsUsingTextLayout(layout)
 		TEXT:LoadConfig()
 	end,
@@ -784,11 +820,13 @@ local textFontStringTemplate = {
 		local layout = findlayout(info)
 		local display = tonumber(info[textLayoutInfo.display])
 		local setting = info[textLayoutInfo.stringSetting]
+
 		return TEXT:GetTextLayoutSettings(layout)[display][setting]
 	end,
 	hidden = function(info)
 		local layout = findlayout(info)
 		local display = tonumber(info[textLayoutInfo.display])
+
 		return layout and display and TEXT:GetTextLayoutSettings(layout).n < display
 	end,
 	args = {
@@ -809,7 +847,9 @@ local textFontStringTemplate = {
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting]
+
 				assert(setting == "SkinAs")
+
 				for id, strSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
 					if strSettings[setting] == val and strSettings[setting] ~= "" then
 						strSettings[setting] = ""
@@ -820,7 +860,9 @@ local textFontStringTemplate = {
 						)
 					end
 				end
+
 				TEXT:GetTextLayoutSettings(layout)[display][setting] = val
+
 				UpdateIconsUsingTextLayout(layout)
 				TEXT:LoadConfig()
 			end,
@@ -844,6 +886,7 @@ local textFontStringTemplate = {
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting + 1]
 				TEXT:GetTextLayoutSettings(layout)[display][setting] = val
+
 				UpdateIconsUsingTextLayout(layout)
 				TEXT:LoadConfig()
 			end,
@@ -851,11 +894,13 @@ local textFontStringTemplate = {
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting + 1]
+
 				return TEXT:GetTextLayoutSettings(layout)[display][setting]
 			end,
 			disabled = function(info)
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
+
 				return
 					TEXT:GetTextLayoutSettings(layout).NoEdit or
 					(LMB and TEXT:GetTextLayoutSettings(layout)[display].SkinAs ~= "")
@@ -919,7 +964,9 @@ local textFontStringTemplate = {
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting + 1]
+
 				TEXT:GetTextLayoutSettings(layout)[display][setting] = val
+
 				UpdateIconsUsingTextLayout(layout)
 				TEXT:LoadConfig()
 			end,
@@ -927,11 +974,13 @@ local textFontStringTemplate = {
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
 				local setting = info[textLayoutInfo.stringSetting + 1]
+
 				return TEXT:GetTextLayoutSettings(layout)[display][setting]
 			end,
 			disabled = function(info)
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
+
 				return
 					TEXT:GetTextLayoutSettings(layout).NoEdit or
 					(LMB and TEXT:GetTextLayoutSettings(layout)[display].SkinAs ~= "")
@@ -958,7 +1007,9 @@ local textFontStringTemplate = {
 						local layout = findlayout(info)
 						local display = tonumber(info[textLayoutInfo.display])
 						local Anchors = TEXT:GetTextLayoutSettings(layout)[display].Anchors
+
 						Anchors.n = Anchors.n + 1
+
 						TMW:CompileOptions()
 						UpdateIconsUsingTextLayout(layout)
 						TEXT:LoadConfig()

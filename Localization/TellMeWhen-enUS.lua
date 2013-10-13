@@ -964,7 +964,8 @@ L["TEXTLAYOUTS_ADDANCHOR_DESC"] = [[Click to add another text anchor.]]
 L["TEXTLAYOUTS_DELANCHOR"] = "Delete Anchor"
 L["TEXTLAYOUTS_DELANCHOR_DESC"] = [[Click to delete this text anchor.]]
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"] = "Are you sure you want to delete the layout %q?"
-L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM"] = "|cFFFF5959The %d |4icon:icons; that |4depends:depend; on it will revert back to using default text layouts.|r"
+L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM2"] = "|cFFFF2929The following profiles use this layout in their icons. If you delete this layout, they will fall back on using a default layout:|r"
+L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_LISTING"] = "%s: %d |4icon:icons;"
 L["TEXTLAYOUTS_LAYOUTDISPLAYS"] = [[Displays:
 %s]]
 L["TEXTLAYOUTS_ADDSTRING"] = "Add Text Display"

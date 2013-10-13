@@ -121,7 +121,7 @@ TMW:RegisterUpgrade(70010, {
 		end
 	end,
 
-	profile = function(self, profile)
+	profile = function(self, profile, profileName)
 		local GUIDmap = {}
 
 		for GUID, layout in pairs(profile.TextLayouts) do
@@ -138,6 +138,8 @@ TMW:RegisterUpgrade(70010, {
 
 				if not rawget(TMW.db.global.TextLayouts, layout.GUID) then
 					-- The layout doesn't already exist, so just put it straight in.
+
+					layout.Name = layout.Name .. " (" .. FROM .. " " .. profileName .. ")"
 					TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
 
 					-- Upgrade the new layout manually. This is required because this possibly un-upgraded
@@ -149,20 +151,32 @@ TMW:RegisterUpgrade(70010, {
 				else
 					-- The layout does already exist.
 
+					local existingName = TMW.db.global.TextLayouts[layout.GUID].Name
+					TMW.db.global.TextLayouts[layout.GUID].Name = ""
+					local layoutName = layout.Name
+					layout.Name = ""
+
 					-- Check to see if it is exactly the same as the existing layout.
 					-- In order to properly compare, we have to copy the old layout 
 					-- into a new table so that all the database metatables will be in place.
 					local layoutWithMetatables = TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts["\000"])
 					TMW.db.global.TextLayouts["\000"] = nil
 
-					if TMW:DeepCompare(TMW.db.global.TextLayouts[layout.GUID], layoutWithMetatables) then
+
+					local comparison = TMW:DeepCompare(TMW.db.global.TextLayouts[layout.GUID], layoutWithMetatables)
+
+					TMW.db.global.TextLayouts[layout.GUID].Name = existingName
+					layout.Name = layoutName
+
+					if comparison then
 						-- The existing layout is the same. Do nothing.
 					else
-						-- The existing layout already exists. Give it a new GUID and then stick it in.
+						-- The existing layout is different. Give it a new GUID and then stick it in.
 						local newGUID = TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE)
 
 						GUIDmap[GUID] = newGUID
 						layout.GUID = newGUID
+						layout.Name = layout.Name .. " (" .. FROM .. " " .. profileName .. ")"
 
 						TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
 

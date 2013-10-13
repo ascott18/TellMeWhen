@@ -2760,7 +2760,7 @@ function TMW:UpgradeProfile()
 	end
 	
 	if TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
-		TMW:DoUpgrade("profile", TMW.db.profile.Version, TMW.db.profile)
+		TMW:DoUpgrade("profile", TMW.db.profile.Version, TMW.db.profile, TMW.db:GetCurrentProfile())
 	end
 end
 
