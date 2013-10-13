@@ -150,6 +150,10 @@ function Group.GetGroupName(group, short)
 	return name .. " (" .. prepend .. format(L["fGROUP"], groupID) .. ")"
 end
 
+function Group.GetFullName(group)
+	return group:GetGroupName()
+end
+
 -- [INTERNAL]
 function Group.ScriptSort(groupA, groupB)
 	local gOrder = -TMW.db.profile.CheckOrder

@@ -346,7 +346,7 @@ function TMW.SetIconPreviewIcon(self, icon)
 
 	local desc = L["ICON_TOOLTIP2NEWSHORT"]
 
-	if TMW.debug then
+	if TMW.db.global.ShowGUIDs then
 		desc = desc .. "\r\n\r\n|cffffffff" .. icon:GetGUID() .. "\r\n" .. icon.group:GetGUID()
 	end
 
@@ -586,7 +586,7 @@ TMW.GroupConfigTemplate = {
 	end,
 	order = function(info)
 		local group = FindGroupFromInfo(info)
-		return group:GetID()
+		return group and group:GetID() or 0
 	end,
 	set = function(info, val)
 		local group = FindGroupFromInfo(info)
@@ -1234,6 +1234,16 @@ end
 								},
 								VersionWarning = {
 									name = L["ALLOWVERSIONWARN"],
+									type = "toggle",
+									order = 52,
+									set = function(info, val)
+										TMW.db.global[info[#info]] = val
+									end,
+									get = function(info) return TMW.db.global[info[#info]] end,
+								},
+								ShowGUIDs = {
+									name = L["SHOWGUIDS_OPTION"],
+									desc = L["SHOWGUIDS_OPTION_DESC"],
 									type = "toggle",
 									order = 52,
 									set = function(info, val)

@@ -57,6 +57,19 @@ If you would like to change the settings of an existing group or create a new gr
 Type '/tellmewhen' or '/tmw' to leave configuration mode.]]
 L["MAINOPTIONS_SHOW"] = "Group Options"
 
+L["GUIDCONFLICT_DESC_PART1"] = [[TellMeWhen has detected that the following things have the same globally-unique identifier (GUID). This can cause quite a few issues if you want to reference either one from another icon or group (E.g. making one the target of a meta icon).
+
+In order to resolve this, please choose one that you would like to generate a new GUID for. Any references that were previously pointing at the one you regenerate will point to the one that you do not regenerate. You may need to adjust your configuration a bit to make sure everything works properly.]]
+
+L["GUIDCONFLICT_DESC_PART2"] = [[If you would like to resolve this issue yourself (by deleting one of the two, for example), then you can do that as well.]]
+
+L["GUIDCONFLICT_REGENERATE"] = "Regenerate GUID for %s"
+L["GUIDCONFLICT_IGNOREFORSESSION"] = "Ignore conflict for this configuration session."
+
+L["SHOWGUIDS_OPTION"] = "Show GUIDs in tooltips."
+L["SHOWGUIDS_OPTION_DESC"] = "Enable this setting to see the GUID (globally-unique identifier) of groups and icon in their tooltips. This can be useful in cases where you want to know what GUID corresponds with what icon."
+
+
 
 L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:

@@ -1447,8 +1447,6 @@
 		</Scripts>
 	</EditBox>
 
-	
-	<!-- END TEMPLATES -->
 
 	<Frame name="TellMeWhen_SimpleDialog" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG" parent="UIParent" virtual="true">
 		<Size x="330"/>
@@ -1488,6 +1486,9 @@
 			</Layer>
 		</Layers>
 	</Frame>
+
+	
+	<!-- END TEMPLATES -->
 
 	<Frame name="TellMeWhen_ConfigWarning" inherits="TellMeWhen_SimpleDialog" >
 		<Frames>
@@ -1559,6 +1560,122 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
+
+
+	<Frame name="TellMeWhen_GUIDConflictResolveDialog" inherits="TellMeWhen_SimpleDialog" >
+		<Size x="500"/>
+
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent" y="50"/>
+		</Anchors>
+
+		<Frames>
+			<Button name="$parentFirst" parentKey="First" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" y="-10"/>
+					<Anchor point="LEFT" x="15" />
+					<Anchor point="RIGHT" x="-15" />
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self.object:GetSettings().GUID = ""
+						self.object:GetGUID(true)
+
+						self:GetParent():Hide()
+
+						TMW:Update()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentSecond" parentKey="Second" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentFirst" relativePoint="BOTTOMLEFT" y="-10"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parentFirst" relativePoint="BOTTOMRIGHT" y="-10"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self.object:GetSettings().GUID = ""
+						self.object:GetGUID(true)
+
+						self:GetParent():Hide()
+
+						TMW:Update()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentDesc2" parentKey="desc2" inherits="GameFontHighlight" justifyH="CENTER" justifyV="TOP">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentSecond" relativePoint="BOTTOM" y="-20"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+
+		<Frames>
+			<Button name="$parentIgnoreForSession" parentKey="IgnoreForSession" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentDesc2" relativePoint="BOTTOM" y="-10"/>
+					<Anchor point="LEFT" x="15" />
+					<Anchor point="RIGHT" x="-15" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["GUIDCONFLICT_IGNOREFORSESSION"])
+						TMW:TT(self, "GUIDCONFLICT_IGNOREFORSESSION")
+					</OnLoad>
+					<OnClick>
+						self:GetParent():Ignore(self:GetParent().GUID)
+						self:GetParent():Hide()
+
+						-- Update to load in another conflict if there is one.
+						TMW:Update()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+
+		<Scripts>
+			<OnLoad>
+				local ignoredForSession = {}
+
+				function self:Ignore(GUID)
+					ignoredForSession[GUID] = true
+				end
+				function self:IsIgnored(GUID)
+					return ignoredForSession[GUID]
+				end
+
+
+
+				self.title:SetText("TellMeWhen")
+
+				self.desc:SetText(TMW.L["GUIDCONFLICT_DESC_PART1"])
+				self.desc2:SetText(TMW.L["GUIDCONFLICT_DESC_PART2"])
+
+				self.desc:SetWidth(self:GetWidth() - 30)
+				self.desc2:SetWidth(self:GetWidth() - 30)
+
+				self:SetScale(0.85)
+				self:SetHeight(self.desc:GetHeight() + self.desc2:GetHeight() + 145)
+
+				TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(locked)
+					wipe(ignoredForSession)
+				end)
+
+				TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+					self:Hide()
+				end)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
 
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
 		<Size x="585" y="380"/>

@@ -74,7 +74,7 @@ Module:SetScriptHandler("OnEnter", function(Module, icon)
 			GameTooltip:AddLine(L["DT_INSERTGUID_TOOLTIP"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
 		end
 
-		if TMW.debug then
+		if TMW.db.global.ShowGUIDs then
 			GameTooltip:AddLine("")
 			GameTooltip:AddLine(icon:GetGUID(), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 			GameTooltip:AddLine(icon.group:GetGUID(), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)

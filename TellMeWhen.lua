@@ -141,6 +141,7 @@ TMW.Defaults = {
 		HasImported			= false,
 		VersionWarning		= true,
 		AllowCombatConfig	= false,
+		ShowGUIDs			= false,
 
 		NumGroups			=	0,
 		-- Groups = {} -- this will be set to the profile group defaults in a second.
@@ -1817,6 +1818,14 @@ function TMW:ParseGUID(GUID)
 end
 
 function TMW:DeclareDataOwner(GUID, object)
+	local old = TMW.GUIDToOwner[GUID]
+
+	if old and object and old ~= object then
+		if old:GetGUID() == object:GetGUID() then
+			TMW:PickNewGUIDForOne(old, object)
+		end
+	end
+
 	TMW.GUIDToOwner[GUID] = object
 end
 
@@ -1857,6 +1866,35 @@ function TMW:GetSettingsFromGUID(GUID)
 			end
 		end
 	end
+end
+
+function TMW:PickNewGUIDForOne(first, second)
+	if (not TMW.IE) or TMW.Locked then
+		return
+	end
+
+	local dialog = TellMeWhen_GUIDConflictResolveDialog
+
+	if dialog:IsShown() then
+		return 
+	end
+
+	dialog.GUID = first:GetGUID()
+
+	if dialog:IsIgnored(dialog.GUID) then
+		return
+	end
+
+	dialog.First.object = first
+	dialog.First:SetFormattedText(L["GUIDCONFLICT_REGENERATE"], first:GetFullName())
+	TMW:TT(dialog.First, dialog.First:GetText(), nil, 1, nil)
+
+	dialog.Second.object = second
+	dialog.Second:SetFormattedText(L["GUIDCONFLICT_REGENERATE"], second:GetFullName())
+	TMW:TT(dialog.Second, dialog.Second:GetText(), nil, 1, nil)
+
+	dialog:Show()
+
 end
 
 

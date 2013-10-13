@@ -289,11 +289,15 @@ function Icon.GetIconName(icon, texture)
 		name = L["DOMAIN_GLOBAL"] .. " " .. name
 	end
 
-	if texture then
+	if texture and icon.attributes.texture and icon.attributes.texture ~= nil then
 		return ("|T%s:0|t %s"):format(icon.attributes.texture, name)
 	else
 		return name
 	end
+end
+
+function Icon.GetFullName(icon)
+	return icon:GetIconName(1)
 end
 
 --- Returns information about the icon that should be included when listing it in a dropdown menu. Wrapper around TMW:GetIconMenuText() with the groupID and iconID added to the tooltip.
@@ -634,9 +638,11 @@ function Icon.DisableIcon(icon, soft)
 	icon:SetUpdateFunction(nil)
 	icon:Hide()
 
-	local iconGUID = icon:GetGUID()
-	if iconGUID then
-		TMW:DeclareDataOwner(iconGUID, nil)
+	if not soft then
+		local iconGUID = icon:GetGUID()
+		if iconGUID then
+			TMW:DeclareDataOwner(iconGUID, nil)
+		end
 	end
 	
 	TMW:Fire("TMW_ICON_DISABLE", icon, soft)
