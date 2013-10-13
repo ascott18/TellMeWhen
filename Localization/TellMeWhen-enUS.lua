@@ -966,7 +966,7 @@ L["TEXTLAYOUTS_DELANCHOR_DESC"] = [[Click to delete this text anchor.]]
 
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"] = "Are you sure you want to delete the layout %q?"
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM2"] = "|cFFFF2929The following profiles use this layout in their icons. If you delete this layout, they will fall back on using a default layout:|r"
-L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_LISTING"] = "%s: %d |4icon:icons;"
+L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_LISTING"] = "%s: ~%d |4icon:icons;"
 
 L["TEXTLAYOUTS_USEDBY_HEADER"] = "The following profiles use this layout in their icons:"
 L["TEXTLAYOUTS_USEDBY_NONE"] = "This layout is not used by any TellMeWhen profiles on this WoW account."
