@@ -1115,14 +1115,6 @@ for k, v in pairs(colorOrder) do
 end
 
 
----------- Options Table Compilation ----------
-function TMW:CompileOptions()
-
-	if TMW:AssertOptionsInitialized() then
-		return
-	end
-
-	if not TMW.OptionsTable then
 		TMW.OptionsTable = {
 			name = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL,
 			type = "group",
@@ -1205,19 +1197,6 @@ function TMW:CompileOptions()
 									order = 1,
 									hidden = true,
 								},
-								SoundChannel = {
-									name = L["SOUND_CHANNEL"],
-									desc = L["SOUND_CHANNEL_DESC"],
-									type = "select",
-									values = {
-										-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME
-										SFX = SOUND_VOLUME,
-										Music = MUSIC_VOLUME,
-										Ambience = AMBIENCE_VOLUME,
-										Master = L["SOUND_CHANNEL_MASTER"],
-									},
-									order = 41,
-								},
 								--[[ColorNames = {
 									name = L["COLORNAMES"],
 									desc = L["COLORNAMES_DESC"],
@@ -1264,6 +1243,20 @@ function TMW:CompileOptions()
 								},
 							},
 						},
+
+						SoundChannel = {
+							name = L["SOUND_CHANNEL"],
+							desc = L["SOUND_CHANNEL_DESC"],
+							type = "select",
+							values = {
+								-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME
+								SFX = SOUND_VOLUME,
+								Music = MUSIC_VOLUME,
+								Ambience = AMBIENCE_VOLUME,
+								Master = L["SOUND_CHANNEL_MASTER"],
+							},
+							order = 29,
+						},
 						CheckOrder = {
 							name = L["CHECKORDER"],
 							desc = L["CHECKORDER_GROUPDESC"],
@@ -1281,8 +1274,31 @@ function TMW:CompileOptions()
 							func = function() TMW.db:ResetProfile() end,
 						},]]
 						importexport = importExportBoxTemplate,
+
+						deleteNonCurrentLocaleData = {
+							name = ("Delete non-essential cached data for non-%s locales."):format(GetLocale()),
+							desc = "TellMeWhen_Options caches some data about WoW's spells for each locale that you play in. You can safely delete that data for other locales to free up space.",
+							type = "execute",
+							width = "full",
+							order = 1000,
+							func = function(info)
+								local currentLocale = GetLocale():lower()
+
+								for locale in pairs(TMW.IE.db.sv.locale) do
+									if locale ~= currentLocale then
+										TMW.IE.db.sv.locale[locale] = nil
+									end
+								end
+							end,
+							hidden = function(info)
+								local locale = TMW.IE.db.sv.locale
+								-- This evaluates to nil when there is only one locale in the table
+								return next(locale, next(locale)) == nil
+							end,
+						},
 					},
 				},
+
 				colors = {
 					type = "group",
 					name = L["UIPANEL_COLORS"],
@@ -1333,6 +1349,17 @@ function TMW:CompileOptions()
 				},
 			},
 		}
+
+---------- Options Table Compilation ----------
+function TMW:CompileOptions()
+
+	if TMW:AssertOptionsInitialized() then
+		return
+	end
+
+	if not TMW.OptionsTableInitialized then
+
+
 		TMW.OptionsTable.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(TMW.db)
 		
 		-- dont copy the entire profiles table because it contains a reference to db
@@ -1345,6 +1372,8 @@ function TMW:CompileOptions()
 			--hidden = function() return IE.ExportBox:IsVisible() end,
 		}
 		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
+
+		TMW.OptionsTableInitialize = true
 	end
 
 	-- Dynamic Icon View Settings --
