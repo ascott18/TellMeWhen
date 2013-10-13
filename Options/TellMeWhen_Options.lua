@@ -2372,8 +2372,6 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 			IE:Show()
 		end
 	end
-
-	IE.ExportBox:SetText("")
 	
 	if 0 > IE:GetBottom() then
 		IE.db.global.EditorScale = IE.Defaults.global.EditorScale
