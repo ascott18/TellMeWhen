@@ -30,8 +30,10 @@ local set = function(info, val)
 	local Module = group:GetModuleOrModuleChild("GroupModule_IconPosition")
 	
 	if Module then
-		Module:PositionIcons()
+	--	Module:PositionIcons()
 	end
+
+	group:Setup()
 end
 local get = function(info)
 	local group = FindGroupFromInfo(info)
