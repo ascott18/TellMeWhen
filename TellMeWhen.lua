@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -1022,6 +1022,22 @@ function TMW:Do504SliderBugFix(slider)
 end
 
 
+-- This code is here to prevent other addons from resetting
+-- the high-precision timer. It isn't fool-proof (if someone upvalues debugprofilestart
+-- then this won't have an effect on calls to that upvalue), but it helps.
+local start_old = debugprofilestart
+local lastReset = 0
+function _G.debugprofilestart()
+    lastReset = lastReset + debugprofilestop()
+    start_old()
+end
+
+function _G.debugprofilestop_SAFE()
+    return debugprofilestop() + lastReset    
+end
+local debugprofilestop = debugprofilestop_SAFE
+
+
 
 ---------------------------------
 -- Iterator Functions
@@ -1742,28 +1758,52 @@ TMW.GUIDToOwner = {}
 
 
 local chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz=_"
+local previousGUIDs = setmetatable({},
+{
+	__mode='kv', 
+	__index=function(t, k) t[k] = {} return t[k] end
+})
 function TMW.generateGUID(length)
-    local ret = format("%.12o", _G.time())
+	-- Start with the current time as a base.
+	-- octalStr will get something like "012226556045"
+	local time = _G.time()
+    local octalStr = format("%.12o", time)
     
-    local time = debugprofilestop() / 1000
+    -- Super-prevision timer. Divide by 1000 to get seconds.
+    local timeMsPrecise = debugprofilestop() / 1000
+
+    -- Remove the whole seconds, leaving only the decimal seconds.
+    timeMsPrecise = timeMsPrecise - floor(timeMsPrecise)
+
+    -- Take the first nine decimal points of the timer and remove "0." from the start
+    local decimalSeconds = format("%.9f", timeMsPrecise):gsub("0%.", "")
     
-    local decimalSeconds = format("%.9f", time - floor(time)):gsub("0%.", "")
+    -- Format the decimal seconds as octal.
+    -- octalStr now looks something like "0122265560456407207044"
+    octalStr = octalStr .. format("%.10o", decimalSeconds)
     
-    ret = ret .. format("%.10o", decimalSeconds)
-    
-    
-    while #ret < length * 2 do
-        ret = ret .. random(0, 7)
+    -- If we need more characters, fill the rest with random numbers
+    while #octalStr < length * 2 do
+        octalStr = octalStr .. random(0, 7)
     end
     
-    local ret2 = ""
+    local GUID = ""
 
-    for segment in ret:sub(1, length*2):gmatch("..") do
+    -- For every two octal numbers, take their value and get the corresponding
+    -- base64 value from the chars string.
+    for segment in octalStr:sub(1, length*2):gmatch("..") do
         local value = tonumber(segment, 8) + 1
-        ret2 = ret2 .. chars:sub(value, value)
+        GUID = GUID .. chars:sub(value, value)
     end
 
-    return ret2
+    -- Some reports of collisions are coming in. Let's try to prevent them:
+    if previousGUIDs[time][GUID] then
+    	TMW:Error("GUID collision happened! Please report this error to TellMeWhen's project page. %q %q", time, timeMsPrecise)
+    	return TMW.generateGUID(length)
+    end
+	previousGUIDs[time][GUID] = true
+
+    return GUID
 end
 
 function TMW:GenerateGUID(type, length)
