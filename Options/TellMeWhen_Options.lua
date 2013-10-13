@@ -1287,6 +1287,7 @@ end
 								for locale in pairs(TMW.IE.db.sv.locale) do
 									if locale ~= currentLocale then
 										TMW.IE.db.sv.locale[locale] = nil
+										TMW:Printf("Deleted cache for locale %s", locale)
 									end
 								end
 							end,
