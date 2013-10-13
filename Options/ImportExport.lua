@@ -86,6 +86,22 @@ function Item:CreateMenuEntry()
 
 	SharableDataType.types[self.Type]:Import_CreateMenuEntry(info, self)
 
+	if self:GetExtra("SourcePlayer") then
+		local fromLine = FROM .. " " .. self:GetExtra("SourcePlayer")
+
+		if info.tooltipText then
+			info.tooltipText = info.tooltipText .. "\r\n\r\n" .. fromLine
+		else
+			if not info.tooltipTitle then
+				info.tooltipTitle = fromLine
+			else
+				info.tooltipText = fromLine
+			end
+		end
+
+		info.tooltipOnButton = true
+	end
+
 	self.Header = info.text
 
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -969,6 +985,7 @@ function Comm:HandleTopLevelMenu(editbox)
 
 		Item.Settings = result.data
 		Item.Version = result.version
+		Item:SetExtra("SourcePlayer", result.who)
 		type:AddExtras(Item, unpack(result))
 
 		Item:CreateMenuEntry()
