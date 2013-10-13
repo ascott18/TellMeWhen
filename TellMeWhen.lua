@@ -1760,7 +1760,7 @@ TMW.GUIDToOwner = {}
 local chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz=_"
 local previousGUIDs = setmetatable({},
 {
-	__mode='kv', 
+	-- __mode='kv',  --TODO: uncomment this when the GUID collision issues are figured out
 	__index=function(t, k) t[k] = {} return t[k] end
 })
 function TMW.generateGUID(length)
