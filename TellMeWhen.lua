@@ -1028,12 +1028,12 @@ end
 local start_old = debugprofilestart
 local lastReset = 0
 function _G.debugprofilestart()
-    lastReset = lastReset + debugprofilestop()
-    start_old()
+	lastReset = lastReset + debugprofilestop()
+	start_old()
 end
 
 function _G.debugprofilestop_SAFE()
-    return debugprofilestop() + lastReset    
+	return debugprofilestop() + lastReset    
 end
 local debugprofilestop = debugprofilestop_SAFE
 
@@ -1767,43 +1767,45 @@ function TMW.generateGUID(length)
 	-- Start with the current time as a base.
 	-- octalStr will get something like "012226556045"
 	local time = _G.time()
-    local octalStr = format("%.12o", time)
-    
-    -- Super-prevision timer. Divide by 1000 to get seconds.
-    local timeMsPrecise = debugprofilestop() / 1000
+	local octalStr = format("%.12o", time)
+	
+	-- Super-prevision timer. Divide by 1000 to get seconds.
+	local timeMsPrecise = debugprofilestop() / 1000
 
-    -- Remove the whole seconds, leaving only the decimal seconds.
-    timeMsPrecise = timeMsPrecise - floor(timeMsPrecise)
+	-- Remove the whole seconds, leaving only the decimal seconds.
+	timeMsPrecise = timeMsPrecise - floor(timeMsPrecise)
 
-    -- Take the first nine decimal points of the timer and remove "0." from the start
-    local decimalSeconds = format("%.9f", timeMsPrecise):gsub("0%.", "")
-    
-    -- Format the decimal seconds as octal.
-    -- octalStr now looks something like "0122265560456407207044"
-    octalStr = octalStr .. format("%.10o", decimalSeconds)
-    
-    -- If we need more characters, fill the rest with random numbers
-    while #octalStr < length * 2 do
-        octalStr = octalStr .. random(0, 7)
-    end
-    
-    local GUID = ""
+	-- Take the first nine decimal points of the timer and remove "0." from the start
+	local decimalSeconds = format("%.9f", timeMsPrecise):gsub("0%.", "")
+	
+	-- Format the decimal seconds as octal.
+	-- octalStr now looks something like "0122265560456407207044"
+	octalStr = octalStr .. format("%.10o", decimalSeconds)
+	
+	-- If we need more characters, fill the rest with random numbers
+	while #octalStr < length * 2 do
+		octalStr = octalStr .. random(0, 7)
+	end
+	
+	local GUID = ""
 
-    -- For every two octal numbers, take their value and get the corresponding
-    -- base64 value from the chars string.
-    for segment in octalStr:sub(1, length*2):gmatch("..") do
-        local value = tonumber(segment, 8) + 1
-        GUID = GUID .. chars:sub(value, value)
-    end
+	-- For every two octal numbers, take their value and get the corresponding
+	-- base64 value from the chars string.
+	for segment in octalStr:sub(1, length*2):gmatch("..") do
+		local value = tonumber(segment, 8) + 1
+		GUID = GUID .. chars:sub(value, value)
+	end
 
-    -- Some reports of collisions are coming in. Let's try to prevent them:
-    if previousGUIDs[time][GUID] then
-    	TMW:Error("GUID collision happened! Please report this error to TellMeWhen's project page. %q %q", time, timeMsPrecise)
-    	return TMW.generateGUID(length)
-    end
+	-- Some reports of collisions are coming in. Let's try to prevent them:
+	if previousGUIDs[time][GUID] then
+		TMW:Error("GUID collision happened! Please report this error to TellMeWhen's project page. %q %q %d %d", 
+			time, timeMsPrecise, IsMacClient() or 0, IsWindowsClient() or 0)
+
+		return TMW.generateGUID(length)
+	end
 	previousGUIDs[time][GUID] = true
 
-    return GUID
+	return GUID
 end
 
 function TMW:GenerateGUID(type, length)
