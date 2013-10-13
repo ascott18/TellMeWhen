@@ -360,8 +360,6 @@ local function deepRecScanTableForLayout(profile, GUID, table, ...)
 					n = n + ((gs.Rows or 1) * (gs.Columns or 4))
 				end
 			end
-
-			print(n, ...)
 		end
 	end
 
@@ -644,6 +642,27 @@ local textLayoutTemplate = {
 				return false
 			end,
 		},
+		
+		usedByDesc = {
+			name = function(info)
+				local layout = findlayout(info)
+				local layoutInUseMessage = TEXT:GetNumTimesUsed(layout)
+
+				if layoutInUseMessage ~= "" then
+					return "\r\n" .. L["TEXTLAYOUTS_USEDBY_HEADER"] .. "\r\n\r\n" .. layoutInUseMessage .. "\r\n"
+				else
+					return "\r\n" .. L["TEXTLAYOUTS_USEDBY_NONE"] .. "\r\n"
+				end
+			end,
+			type = "description",
+			order = 150,
+			disabled = false,
+			hidden = function(info)
+				local layout = findlayout(info)
+				return TEXT:GetTextLayoutSettings(layout).NoEdit
+			end,
+		},
+
 		
 		importExportBox = TMW.importExportBoxTemplate,
 	},
