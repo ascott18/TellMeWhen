@@ -17,7 +17,7 @@
  * You can now enter "none" or "blank" as a custom texture for an icon to force it to display no texture.
  * Dramatically decreased memory usage, especially for icons that have no icon type assigned.
  * New Condition: Specialization Role
- * The Buff/Debuff - Number of conditions now accept semicolon-delimited lists of multiple auras that should be counted.
+ * The Buff/Debuff - "Number of" conditions now accept semicolon-delimited lists of multiple auras that should be counted.
  * Exporting a meta icon will also export the string(s) of its component icons.
  * Exporting groups and icons will also export the string(s) of their text layouts.
 
