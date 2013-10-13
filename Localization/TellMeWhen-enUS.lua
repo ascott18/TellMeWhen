@@ -736,6 +736,13 @@ L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"
 L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
 
+L["UIPANEL_DRDURATION"] = "DR Duration"
+L["UIPANEL_DRDURATION_DESC"] = [[Set the duration that diminishing returns last.
+
+The official time stated by Blizzard is 15 seconds, but in many cases, this can be too short and will cause your DR icons to report completed DR when it isn't quite done. You may wish to add a second or two to compensate for that. TellMeWhen's default is 17 seconds.
+
+This option is account-wide: all of your profiles will share this setting.]]
+
 
 L["UIPANEL_GROUPSORT"] = "Icon Sorting"
 L["UIPANEL_GROUPSORT_DESC"] = "Contains settings for sorting an positioning icons within a group based on their atributes."

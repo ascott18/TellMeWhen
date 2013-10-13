@@ -47,3 +47,20 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(TMW.SpellTextures[firstid])
 	end
 end
+
+
+
+TMW.OptionsTable.args.main.args.sliders.args.DRDuration = {
+	name = L["UIPANEL_DRDURATION"],
+	desc = L["UIPANEL_DRDURATION_DESC"],
+	type = "range",
+	order = 20,
+	min = 15,
+	max = 20,
+	step = 0.5,
+	set = function(info, val)
+		TMW.db.global[info[#info]] = val
+		TMW.Types.dr:SetupIcons()
+	end,
+	get = function(info) return TMW.db.global[info[#info]] end,
+}

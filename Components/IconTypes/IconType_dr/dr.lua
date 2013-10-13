@@ -30,7 +30,7 @@ local clientVersion = select(4, GetBuildInfo())
 local DRData = LibStub("DRData-1.0")
 
 local DRSpells = DRData.spells
-local DRReset = 18
+local DRReset = 17
 local PvEDRs = {}
 for spellID, category in pairs(DRSpells) do
 	if DRData.pveDR[category] then
@@ -57,6 +57,13 @@ Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
+
+
+TMW:MergeDefaultsTables({
+	global = {
+		DRDuration = 17
+	},
+}, TMW.Defaults)
 
 Type:RegisterIconDefaults{
 	Unit					= "player", 
@@ -313,6 +320,7 @@ function Type:Setup(icon)
 		wipe(icon.DRInfo)
 	end
 	
+	DRReset = TMW.db.global.DRDuration
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	

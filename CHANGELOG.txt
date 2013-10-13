@@ -11,6 +11,7 @@
  *** Group anchoring to other groups
  ** The consequence of this is that you can now, for example, import/export meta icons and the icons checked by the meta icons separately and they will automatically find eachother once they are all imported (as long as these export strings were created with TMW v7.0.0+)
 
+ * The duration of Diminishing Returns is now 17 seconds by default, down from 18 seconds, and this value is now customizable in TMW's main options.
  * You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.
  * Added group settings that allow you to specify when a group should be shown based on the role that your current specialization fulfills.
  * You can now enter "none" or "blank" as a custom texture for an icon to force it to display no texture.
