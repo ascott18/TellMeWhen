@@ -350,7 +350,7 @@ database:RegisterMenuBuilder(20, function(Item_database)
 	--other profiles
 	for profilename, profiletable in TMW:OrderedPairs(db.profiles) do
 		-- current profile and default are handled separately
-		if profilename ~= currentProfile and profilename ~= "Default" then
+		if profilename ~= currentProfile --[[and profilename ~= "Default"]] then
 			local Item = Item:New("profile")
 
 			Item:SetParent(Item_database)
@@ -366,7 +366,7 @@ database:RegisterMenuBuilder(20, function(Item_database)
 end)
 
 -- Default Profile
-database:RegisterMenuBuilder(30, function(Item_database)
+--[[database:RegisterMenuBuilder(30, function(Item_database)
 	local db = Item_database.Settings
 	local currentProfile = TMW.db:GetCurrentProfile()
 	
@@ -381,7 +381,7 @@ database:RegisterMenuBuilder(30, function(Item_database)
 
 		Item:CreateMenuEntry()
 	end
-end)
+end)]]
 
 
 -- Copy Profile
