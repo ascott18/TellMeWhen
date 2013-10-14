@@ -79,7 +79,12 @@ function IconDragger:Start(icon)
 	IconDragger.srcicon = icon
 
 	IconDragger.DraggerFrame:SetScale(icon.group:GetEffectiveScale())
-	IconDragger.DraggerFrame.texture:SetTexture(IconDragger.srcicon.attributes.texture)
+
+	local tex = IconDragger.srcicon.attributes.texture
+	if tex == "" or not tex then
+		tex = "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled"
+	end
+	IconDragger.DraggerFrame.texture:SetTexture(tex)
 	
 	IconDragger.DraggerFrame:Show()
 	IconDragger.IsDragging = true
