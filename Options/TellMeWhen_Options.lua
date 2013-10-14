@@ -347,7 +347,7 @@ function TMW.SetIconPreviewIcon(self, icon)
 	local desc = L["ICON_TOOLTIP2NEWSHORT"]
 
 	if TMW.db.global.ShowGUIDs then
-		desc = desc .. "\r\n\r\n|cffffffff" .. icon:GetGUID() .. "\r\n" .. icon.group:GetGUID()
+		desc = desc .. "\r\n\r\n|cffffffff" .. (not icon.TempGUID and (icon:GetGUID() .. "\r\n") or "") .. icon.group:GetGUID()
 	end
 
 	TMW:TT(self, icon:GetIconName(), desc, 1, 1)
