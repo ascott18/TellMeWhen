@@ -1344,13 +1344,23 @@
 					<OnLoad>
 						self:SetStatusBarTexture(self.texture)
 						self.texture:SetVertexColor(1, .5, .2, 1)
-						function self:Set(value, max)
+
+						function self:Set(value, max, nAndMaxN)
 							if not self:IsShown() then
 								self.FadeIn:Play()
 							end
 							self:SetMinMaxValues(0, max)
 							self:SetValue(value)
-							if value >= max then
+
+							if self:IsShown() then
+								if nAndMaxN[2] > 1 then
+									self.text:SetFormattedText("%.0f%% (%d/%d)", value/max*100, nAndMaxN[1], nAndMaxN[2])
+								else
+									self.text:SetFormattedText("%.0f%%", value/max*100)
+								end
+							end
+
+							if value >= max and nAndMaxN[1] >= nAndMaxN[2] then
 								self.FadeOut:Play()
 							end
 						end
@@ -1365,12 +1375,6 @@
 					<OnHide>
 						self.realParent.BackgroundText:Show()
 					</OnHide>
-					<OnValueChanged>
-						local _, max = self:GetMinMaxValues()
-						if self:IsShown() then
-							self.text:SetFormattedText("%.0f%%", value/max*100)
-						end
-					</OnValueChanged>
 				</Scripts>
 			</StatusBar>
 		</Frames>
@@ -1380,10 +1384,14 @@
 				TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_DESC")
 				self:SetTextInsets(0, self.Button:GetTextWidth()+5 + 2, 0, 0)
 
-				function self:callback(soFar, total)
-					self.Status:Set(soFar, total)
+				function self.callback(nAndMaxN, soFar, total)
+					self.Status:Set(soFar, total, nAndMaxN)
 					if soFar == total then
-						TMW:Print(TMW.L["SENDSUCCESSFUL"])
+						if nAndMaxN[2] > 1 then
+							TMW:Printf("%s (%d/%d)", TMW.L["SENDSUCCESSFUL"], nAndMaxN[1], nAndMaxN[2])
+						else
+							TMW:Print(TMW.L["SENDSUCCESSFUL"])
+						end
 					end
 				end
 	

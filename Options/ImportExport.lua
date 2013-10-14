@@ -37,6 +37,10 @@ local function showGUIDConflictHelp(editbox, ...)
 	TMW.HELP:Show("IMPORT_NEWGUIDS", nil, editbox, 0, 0, ...)
 end
 
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+	TMW.HELP:NewCode("ICON_EXPORT_MULTIPLE", 10, false)
+	TMW.HELP:NewCode("ICON_EXPORT_DOCOPY", 11, true)
+end)
 
 
 
@@ -1053,15 +1057,23 @@ local String = ExportDestination:New("String")
 String.Export_DescriptionPrepend = L["EXPORT_TOSTRING_DESC"]
 
 function String:Export(type, settings, defaults, ...)
-	local s = TMW:GetSettingsStrings(nil, type, settings, defaults, ...)
-	s = TMW:MakeSerializedDataPretty(s)
-	TMW.LastExportedString = s
+	local strings = TMW:GetSettingsStrings(nil, type, settings, defaults, ...)
 
-	EDITBOX:SetText(s)
+	local str = table.concat(strings, "\r\n\r\n")
+
+	str = TMW:MakeSerializedDataPretty(str)
+	TMW.LastExportedString = str
+
+	EDITBOX:SetText(str)
 	EDITBOX:HighlightText()
 	EDITBOX:SetFocus()
 
 	CloseDropDownMenus()
+
+	TMW.HELP:Hide("ICON_EXPORT_MULTIPLE")
+	if #strings > 1 then
+		TMW.HELP:Show("ICON_EXPORT_MULTIPLE", nil, EDITBOX, 0, 0, L["HELP_EXPORT_MULTIPLE_STRING"])
+	end
 
 	TMW.HELP:Show("ICON_EXPORT_DOCOPY", nil, EDITBOX, 0, 0, L["HELP_EXPORT_DOCOPY_" .. (IsMacClient() and "MAC" or "WIN")])
 end
@@ -1083,12 +1095,19 @@ Comm.Export_DescriptionPrepend = L["EXPORT_TOCOMM_DESC"]
 function Comm:Export(type, settings, defaults, ...)
 	local player = strtrim(EDITBOX:GetText())
 	if player and #player > 1 then
-		local s = TMW:GetSettingsStrings(nil, type, settings, defaults, ...)
+		local strings = TMW:GetSettingsStrings(nil, type, settings, defaults, ...)
 
-		if player == "RAID" or player == "GUILD" then -- note the upper case
-			TMW:SendCommMessage("TMW", s, player, nil, "BULK", EDITBOX.callback, EDITBOX)
-		else
-			TMW:SendCommMessage("TMW", s, "WHISPER", player, "BULK", EDITBOX.callback, EDITBOX)
+		TMW.HELP:Hide("ICON_EXPORT_MULTIPLE")
+		if #strings > 1 then
+			TMW.HELP:Show("ICON_EXPORT_MULTIPLE", nil, EDITBOX, 0, 0, L["HELP_EXPORT_MULTIPLE_COMM"])
+		end
+
+		for n, str in pairs(strings) do
+			if player == "RAID" or player == "GUILD" then -- note the upper case
+				TMW:SendCommMessage("TMW", str, player, nil, "BULK", EDITBOX.callback, {n, #strings})
+			else
+				TMW:SendCommMessage("TMW", str, "WHISPER", player, "BULK", EDITBOX.callback, {n, #strings})
+			end
 		end
 	end
 	

@@ -2442,6 +2442,7 @@ function IE:CheckLoadedIconIsValid()
 		not CI.group:IsValid()
 		or not CI.icon:IsInRange()
 	then
+		TMW:CompileOptions()
 		TMW.IE:Load(nil, false)
 	end
 end
@@ -3458,7 +3459,7 @@ function TMW:GetSettingsStrings(strings, type, settings, defaults, ...)
 
 	TMW.tRemoveDuplicates(strings)
 
-	return table.concat(strings, " ")
+	return strings
 end
 
 function TMW:CleanDefaults(settings, defaults, blocker)

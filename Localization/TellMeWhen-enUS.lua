@@ -2113,6 +2113,11 @@ Try dragging an icon to a meta icon, another group, or another frame on your scr
 L["HELP_EXPORT_DOCOPY_WIN"] = [[Press |cff7fffffCTRL+C|r to copy]]
 L["HELP_EXPORT_DOCOPY_MAC"] = [[Press |cff7fffffCMD+C|r to copy]]
 
+L["HELP_EXPORT_MULTIPLE_STRING"] = [[The export string contains extra strings for data that is required by the main data that you have exported. To see what this includes, look at the "From String" import menu for the string.
+
+Users of TellMeWhen v7.0.0+ can copy all the strings at once to import them. Others will need to paste each string individually.]]
+L["HELP_EXPORT_MULTIPLE_COMM"] = [[The exported data includes extra data that is required by the main data that you have exported. To see what this includes, export the same data to a string and look at the "From String" import menu for that string.]]
+
 
 L["HELP_CNDT_PARENTHESES_FIRSTSEE"] = [[You can group sets of conditions together for complex checking functionality, especially when coupled with the %q setting.
 
