@@ -590,15 +590,17 @@ profile:RegisterMenuBuilder(40, function(Item_profile)
 
 	local numGroups = tonumber(profile.NumGroups) or 1
 
-	for groupID, gs in TMW:OrderedPairs(profile.Groups) do
-		if groupID >= 1 and groupID <= numGroups then
-			local Item = Item:New("group")
+	if profile.Groups then
+		for groupID, gs in TMW:OrderedPairs(profile.Groups) do
+			if groupID >= 1 and groupID <= numGroups then
+				local Item = Item:New("group")
 
-			Item:SetParent(Item_profile)
-			Item.Settings = gs
-			Item:SetExtra("groupID", groupID)
+				Item:SetParent(Item_profile)
+				Item.Settings = gs
+				Item:SetExtra("groupID", groupID)
 
-			Bundle:Add(Item)
+				Bundle:Add(Item)
+			end
 		end
 	end
 
