@@ -71,6 +71,20 @@ Type:RegisterIconDefaults{
 	ShowWhenNone			= false,
 }
 
+TMW:RegisterUpgrade(70014, {
+	icon = function(self, ics)
+		-- DR categories that no longer exist (or never really existed):
+
+		ics.Name = ics.Name:
+			gsub("DR-DragonsBreath", "DR-ShortDisorient"):
+			gsub("DR-BindElemental", "DR-Disorient"):
+			gsub("DR-Charge", "DR-RandomStun"):
+			gsub("DR-IceWard", "DR-RandomRoot"):
+			gsub("DR-Scatter", "DR-ShortDisorient"):
+			gsub("DR-Banish", "DR-Disorient"):
+			gsub("DR-Entrapment", "DR-RandomRoot")
+	end,
+	})
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "dr",
 })
@@ -101,35 +115,34 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_DRSettings", function(
 	})
 end)
 
+
 TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	if DRData then
 		local myCategories = {
 			ctrlstun		= "DR-ControlledStun",
-			scatters		= "DR-Scatter",
 			fear 			= "DR-Fear",
 			rndstun			= "DR-RandomStun",
 			silence			= "DR-Silence",
-			banish 			= "DR-Banish",
 			mc 				= "DR-MindControl",
-			entrapment		= "DR-Entrapment",
 			taunt 			= "DR-Taunt",
 			disarm			= "DR-Disarm",
 			horror			= "DR-Horrify",
 			cyclone			= "DR-Cyclone",
 			disorient		= "DR-Disorient",
-			ctrlroot		= "DR-ControlledRoot",
-			dragons			= "DR-DragonsBreath",
-			bindelemental	= "DR-BindElemental",
-			charge			= "DR-Charge",
-			iceward			= "DR-IceWard",
+			shortdisorient	= "DR-ShortDisorient",
+			ctrlroot		= "DR-ControlledRoot", 
+			shortroot		= "DR-RandomRoot",
 		}
 		
 		TMW.BE.dr = {}
 		local dr = TMW.BE.dr
 		for spellID, category in pairs(DRData.spells) do
-			local k = myCategories[category] or TMW:Error("The DR category %q is undefined!", category)
+			local k = myCategories[category]
+
 			if k then
 				dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
+			elseif TMW.debug then
+				TMW:Error("The DR category %q is undefined!", category)
 			end
 		end
 	end

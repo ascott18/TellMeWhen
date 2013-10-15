@@ -1520,7 +1520,7 @@ L["EXPORT_f"] = "Export %s"
 L["fPROFILE"] = "Profile: %s"
 L["fTEXTLAYOUT"] = "Text Layout: %s"
 
-L["IMPORT_NEWGUIDS"] = [[The data you just imported conflicted with the unique identifiers of %d |4group:groups; and %d |4icon:icons;. This probably means that you have imported this data before.
+L["IMPORT_NEWGUIDS"] = [[The data you just imported conflicted with the unique identifiers of %d |4group:groups; and %d |4icon:icons;. This probably means that you have imported this data, or an older version of it, before.
 
 New unique identifiers have been assigned to the imported data. Icons that you import in the future that are supposed to reference the new data may not function as desired - they will instead reference the old icons that conflicted with the new data.
 
@@ -2218,25 +2218,26 @@ L["worldboss"] = "World Boss"
 L["RaidWarningFrame"] = "Raid Warning Frame"
 
 
-L["DR-RandomStun"] = "Random stuns"
+L["DR-RandomStun"] = "Short/Random stuns"
 L["DR-ControlledStun"] = "Controlled stuns"
-L["DR-Scatter"] = "Scatter Shot"
+--L["DR-Scatter"] = "Scatter Shot"
 L["DR-Fear"] = "Fears"
 L["DR-Silence"] = "Silences"
-L["DR-Banish"] = "Banish"
+--L["DR-Banish"] = "Banish"
 L["DR-MindControl"] = "Mind Control"
-L["DR-Entrapment"] = "Entrapment"
+--L["DR-Entrapment"] = "Entrapment"
 L["DR-Taunt"] = "Taunts"
 L["DR-Disarm"] = "Disarms"
 L["DR-Horrify"] = "Horrors"
 L["DR-Cyclone"] = "Cyclone"
-L["DR-Disorient"] = "Disorients"
-L["DR-RandomRoot"] = "Random roots"
+L["DR-Disorient"] = "Mesmerizes/Disorients"
+L["DR-ShortDisorient"] = "Short Mesmerizes/Disorients"
+L["DR-RandomRoot"] = "Short/Random roots"
 L["DR-ControlledRoot"] = "Controlled roots"
-L["DR-DragonsBreath"] = "Dragon's Breath"
-L["DR-BindElemental"] = "Bind Elemental"
-L["DR-Charge"] = "Charge"
-L["DR-IceWard"] = "Ice Ward"
+--L["DR-DragonsBreath"] = "Dragon's Breath"
+--L["DR-BindElemental"] = "Bind Elemental"
+--L["DR-Charge"] = "Charge"
+--L["DR-IceWard"] = "Ice Ward"
 
 L["CONDITIONPANEL_CREATURETYPE"] = "Unit Creature Type"
 L["CONDITIONPANEL_CREATURETYPE_LABEL"] = "Creature Type(s)"
