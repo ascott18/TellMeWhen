@@ -1493,10 +1493,15 @@ function TMW:Group_Delete(group)
 	tremove(TMW.db[domain].Groups, groupID)
 	TMW.db[domain].NumGroups = TMW.db[domain].NumGroups - 1
 
-	TMW:Update()
 
-	IE:Load(1)
-	IE:NotifyChanges()
+	-- Delay these updates to try and avoid these errors: 
+	-- AceConfigDialog-3.0-58.lua:804: attempt to index field "rootframe" (a nil value) 
+	TMW:ScheduleTimer(function()
+		TMW:Update()
+
+		IE:Load(1)
+		IE:NotifyChanges()
+	end, 0.1)
 
 	CloseDropDownMenus()
 end
@@ -2048,6 +2053,7 @@ function IE:CreateTabs()
 		TMW:CompileOptions()
 
 		if CI.group then
+			LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 			LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups_" .. TMW.CI.group.Domain, "#Group " .. TMW.CI.group.ID)
 			LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
 		end
@@ -2465,7 +2471,7 @@ function IE:NotifyChanges(...)
 	-- Notify the group settings tab in the icon editor of any changes
 	-- the order here is very specific and breaks if you change it. (:Open(), :SelectGroup(), :NotifyChange())
 	if IE.MainOptionsWidget and IE.MainOptions:IsShown() then
-		--LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
+		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
 		if hasPath then
 			LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", tostringall(...))
 		end
