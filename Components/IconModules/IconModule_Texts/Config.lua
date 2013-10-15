@@ -562,6 +562,7 @@ local textLayoutTemplate = {
 			func = function(info)
 				local layout = findlayout(info)
 				TEXT:GetTextLayoutSettings(layout).n = TEXT:GetTextLayoutSettings(layout).n + 1
+
 				IE:NotifyChanges()
 				TMW:CompileOptions()
 				TMW:Update()
@@ -646,6 +647,20 @@ local textLayoutTemplate = {
 		usedByDesc = {
 			name = function(info)
 				local layout = findlayout(info)
+				local layoutSettings = TEXT:GetTextLayoutSettings(layout)
+
+				if layoutSettings.NoEdit then
+					return ""
+				end
+
+				if not debugstack():find("Select") then
+					-- This text will probably never be seen.
+					-- The reason for this is that AceConfig likes to call the name method for EVERYTHING
+					return "AceConfig-3.0 has reqested information when it should not have. " .. 
+					"The process to calculate what profiles are using a layout is intensive, " .. 
+					"so it is only done when it really needs to be. Re-select the layout to recalculate."
+				end
+
 				local layoutInUseMessage = TEXT:GetNumTimesUsed(layout)
 
 				if layoutInUseMessage ~= "" then
@@ -1129,6 +1144,7 @@ local textlayouts_toplevel = {
 			order = 1,
 			func = function()
 				AddTextLayout()
+
 				IE:NotifyChanges()
 				TMW:CompileOptions()
 				TMW:Update()

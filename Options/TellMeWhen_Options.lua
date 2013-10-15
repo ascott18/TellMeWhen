@@ -732,7 +732,6 @@ TMW.GroupConfigTemplate = {
 						TMW:Update()
 						
 						IE:Load(1)
-						TMW:CompileOptions()
 					end,
 					args = {}
 				},
@@ -787,7 +786,7 @@ TMW.GroupConfigTemplate = {
 						return false
 					end,
 				},
-				switch = {
+				switchDomain = {
 					name = function(info)
 						local group = FindGroupFromInfo(info)
 						if group.Domain == "global" then
@@ -810,7 +809,6 @@ TMW.GroupConfigTemplate = {
 						group:SwitchDomain()
 
 						IE:Load(1)
-						TMW:CompileOptions()
 						IE:NotifyChanges()
 					end,
 				},
@@ -1384,14 +1382,48 @@ function TMW:CompileOptions()
 		}
 		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
 
+
+		-- Dynamic Icon View Settings --
+		for view in pairs(TMW.Views) do
+			TMW.GroupConfigTemplate.args.main.args.View.args[view] = viewSelectToggle
+			addGroupFunctionGroup.args[view] = addGroupButton
+		end
+
+
+		-- Talent Tree group options
+		local parent = TMW.GroupConfigTemplate.args.main.args
+		
+		for i = 1, GetNumSpecializations() do
+			local _, name = GetSpecializationInfo(i)
+			parent["Tree"..i] = {
+				type = "toggle",
+				name = L["TREEf"]:format(name),
+				desc = L["UIPANEL_TREE_DESC"],
+				order = 12+i,
+				hidden = specializationSettingHidden,
+			}
+		end
+	
+
+		-- Dynamic Color Settings --
+		TMW.OptionsTable.args.colors.args.GLOBAL = colorIconTypeTemplate
+		for k, Type in pairs(TMW.Types) do
+			if not Type.NoColorSettings then
+				TMW.OptionsTable.args.colors.args[k] = colorIconTypeTemplate
+			end
+		end
+
+
+	
+		LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW IEOptions", TMW.OptionsTable)
+		
+		LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
+		LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
+
+
 		TMW.OptionsTableInitialize = true
 	end
 
-	-- Dynamic Icon View Settings --
-	for view in pairs(TMW.Views) do
-		TMW.GroupConfigTemplate.args.main.args.View.args[view] = viewSelectToggle
-		addGroupFunctionGroup.args[view] = addGroupButton
-	end
 
 	-- Dynamic Group Settings --
 	for _, domain in TMW:Vararg("profile", "global") do
@@ -1408,39 +1440,8 @@ function TMW:CompileOptions()
 		end
 	end
 	
-	local parent = TMW.GroupConfigTemplate.args.main.args
-	
-	for i = 1, GetNumSpecializations() do
-		local _, name = GetSpecializationInfo(i)
-		parent["Tree"..i] = parent["Tree"..i] or {
-			type = "toggle",
-			name = L["TREEf"]:format(name),
-			desc = L["UIPANEL_TREE_DESC"],
-			order = 12+i,
-			hidden = specializationSettingHidden,
-		}
-	end
-	
-	-- Dynamic Color Settings --
-	TMW.OptionsTable.args.colors.args.GLOBAL = colorIconTypeTemplate
-	for k, Type in pairs(TMW.Types) do
-		if not Type.NoColorSettings then
-			TMW.OptionsTable.args.colors.args[k] = colorIconTypeTemplate
-		end
-	end
-	
 	TMW:Fire("TMW_CONFIG_MAIN_OPTIONS_COMPILE", TMW.OptionsTable)
 
-	
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW IEOptions", TMW.OptionsTable)
-	
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("TMW Options", TMW.OptionsTable)
-	if not TMW.defaultSizeOfTMWOptionsSet then
-		-- Make sure that this only happens once because otherwise the window
-		-- gets resized even if users have adjusted the size of the window.
-		TMW.defaultSizeOfTMWOptionsSet = 1
-		LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMW Options", 781, 512)
-	end
 	
 	if not TMW.AddedToBlizz then
 		-- GLOBALS: INTERFACEOPTIONS_ADDONCATEGORIES, InterfaceAddOnsList_Update
@@ -1495,7 +1496,6 @@ function TMW:Group_Delete(group)
 	TMW:Update()
 
 	IE:Load(1)
-	TMW:CompileOptions()
 	IE:NotifyChanges()
 
 	CloseDropDownMenus()
@@ -1534,7 +1534,6 @@ function TMW:Group_Swap(domain, groupID1, groupID2)
     TMW:Update()
 
 	IE:Load(1)
-	TMW:CompileOptions()
 	IE:NotifyChanges()
 end
 
@@ -2047,9 +2046,12 @@ function IE:CreateTabs()
 	
 	IE.MainOptionsTab:ExtendMethod("ClickHandler", function()
 		TMW:CompileOptions()
+
 		if CI.group then
-			IE:NotifyChanges("groups_" .. TMW.CI.group.Domain, "#Group " .. TMW.CI.group.ID)
+			LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", "groups_" .. TMW.CI.group.Domain, "#Group " .. TMW.CI.group.ID)
+			LibStub("AceConfigRegistry-3.0"):NotifyChange("TMW IEOptions")
 		end
+
 		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
 	end)		
 end
@@ -2332,6 +2334,8 @@ function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
 end
 
 function IE:Load(isRefresh, icon, isHistoryChange)
+	TMW:CompileOptions()
+
 	if icon ~= nil then
 		local ic_old = CI.icon
 
@@ -2442,7 +2446,6 @@ function IE:CheckLoadedIconIsValid()
 		not CI.group:IsValid()
 		or not CI.icon:IsInRange()
 	then
-		TMW:CompileOptions()
 		TMW.IE:Load(nil, false)
 	end
 end
@@ -2462,7 +2465,7 @@ function IE:NotifyChanges(...)
 	-- Notify the group settings tab in the icon editor of any changes
 	-- the order here is very specific and breaks if you change it. (:Open(), :SelectGroup(), :NotifyChange())
 	if IE.MainOptionsWidget and IE.MainOptions:IsShown() then
-		LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
+		--LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", IE.MainOptionsWidget)
 		if hasPath then
 			LibStub("AceConfigDialog-3.0"):SelectGroup("TMW IEOptions", tostringall(...))
 		end
@@ -3332,7 +3335,6 @@ function TMW:Import(SettingsItem, ...)
 
 	TMW:Fire("TMW_IMPORT_POST", SettingsItem, ...)
 	
-	--TMW:ScheduleTimer("CompileOptions", 0.2) -- i dont know why i have to delay it, but I do.
 	TMW:CompileOptions()
 	IE:NotifyChanges()
 end
