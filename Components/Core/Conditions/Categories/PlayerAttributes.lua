@@ -620,7 +620,8 @@ ConditionCategory:RegisterCondition(18,	 "BLIZZEQUIPSET", {
 	events = function(ConditionObject, c)
 		return
 			--ConditionObject:GenerateNormalEventString("EQUIPMENT_SWAP_FINISHED") -- this doesn't fire late enough to get updated returns from GetEquipmentSetInfoByName
-			ConditionObject:GenerateNormalEventString("BAG_UPDATE") -- this is slightly overkill, but it is the first event that fires when the return value of GetEquipmentSetInfoByName has changed
+			ConditionObject:GenerateNormalEventString("BAG_UPDATE"), -- this is slightly overkill, but it is the first event that fires when the return value of GetEquipmentSetInfoByName has changed
+			ConditionObject:GenerateNormalEventString("EQUIPMENT_SETS_CHANGED") -- this is needed to handle saving an equipment set that is alredy equipped
 	end,
 })
 
