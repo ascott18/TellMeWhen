@@ -34,32 +34,12 @@ if not LMB then
 	return
 end
 
-
-do
-	-- I absolutely hate that this exists.
-	-- But, if it doesn't, when switching profiles or skins or a whole shitload of other stuff,
-	-- icons will end up looking like total shit. I almost regret ever implementing Masque into TMW.
-	-- Having it implemented is almost worse than the bombardment of requests to have it implemented.
-	
-	local meta = getmetatable(LMB:Group("TellMeWhen")).__index
-
-	if meta and meta.Skin and meta.Disable and meta.Enable then
-		local function hook(self)
-			if self and self.Addon == "TellMeWhen" then
-				TMW:ScheduleUpdate(.2)
-			end
-		end
-
-		hooksecurefunc(meta, "Skin", hook)
-		hooksecurefunc(meta, "Disable", hook)
-		hooksecurefunc(meta, "Enable", hook)
-		hooksecurefunc(meta, "Update", hook)
-		hooksecurefunc(meta, "ReSkin", hook)
-	end
-end
-
 function IconContainer_Masque:OnNewInstance_IconContainer_Masque(icon)
-	self.lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
+	if icon.group.Domain == "global" then
+		self.lmbGroup = LMB:Group("TellMeWhen", L["DOMAIN_GLOBAL"] .. " " .. L["fGROUP"]:format(icon.group:GetID()))
+	else
+		self.lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
+	end
 end
 
 function IconContainer_Masque:SetupForIcon(icon)
