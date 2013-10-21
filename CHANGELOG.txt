@@ -109,7 +109,7 @@
  ** Fixed an accidental inversion of the 1st param to TMW_LOCK_TOGGLED
  ** Replaced Blood Pact with Dark Intent for the IncreasedStamina equivalency.
  ** The "All Types" setting for Loss of Control icons should now work as intended.
- ** Attempted to fix issue where the "You are not in a raid" message would be cause by TellMeWhen.
+ ** Attempted to fix the issue where the "You are not in a raid" message would be caused by TellMeWhen.
  ** Fixed: Components\IconModules\IconModule_Alpha\Alpha.lua:145 attempt to perform arithmetic on field "actualAlphaAtLastChange" (a nil value)
  ** Fixed: IconType_unitcooldown\unitcooldown.lua:270 attempt to index local "NameHash" (a boolean value)
  ** Conditions that use the c.GCDReplacedNameFirst condition substitution will no longer fail to compile when the spell being subbed in contains a double quote.
