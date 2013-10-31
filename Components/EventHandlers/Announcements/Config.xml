@@ -67,6 +67,10 @@
 							
 							local color, link = text:match("|cff(%x%x%x%x%x%x)(|H.*|h)")
 							
+							if not color or not link then
+								return false
+							end
+							
 							text = '["' .. link .. '":Color("' .. color .. '")]'
 							
 							self.editbox:Insert(text)
