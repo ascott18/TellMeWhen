@@ -22,13 +22,6 @@ local DogTag = LibStub("LibDogTag-3.0")
 local DOGTAGS = TMW:NewModule("DogTags")
 TMW.DOGTAGS = DOGTAGS
 
-function DOGTAGS:InsertIcon(icon)
-	local box = DOGTAGS.AcceptingIcon
-	if box then
-		box:Insert(("%q"):format(icon:GetGUID(1)))
-	end
-end
-
 
 local SUG = TMW.SUG
 
@@ -48,6 +41,21 @@ local function prepareEditBox(box)
 	if not box.PreparedForDogTagInsertion then
 		box:HookScript("OnEditFocusLost", function()
 			DOGTAGS.AcceptingIcon = nil
+		end)
+
+		TMW.Classes.ChatEdit_InsertLink_Hook:New(box, function(self, text, linkType, linkData)
+			-- if this editbox is active
+			-- attempt to extract a TMW icon link and insert it into the box.
+
+			if linkType == "TMW" then
+				-- Reconstruct the GUID
+				local GUID = linkType .. ":" .. linkData
+
+				self.editbox:Insert(("%q"):format(GUID))
+
+				-- notify success
+				return true
+			end
 		end)
 
 		box.PreparedForDogTagInsertion = true

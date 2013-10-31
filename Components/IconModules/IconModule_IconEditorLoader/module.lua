@@ -80,8 +80,18 @@ Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 				ToggleDropDownMenu(1, nil, DD, icon, 0, 0)
 			end
 			
-		elseif TMW.DOGTAGS.AcceptingIcon and IsShiftKeyDown() and button == "LeftButton" then
-			TMW.DOGTAGS:InsertIcon(icon)
+		elseif IsShiftKeyDown() and button == "LeftButton" then
+
+			local GUID = icon:GetGUID()
+			local link = format("|H%s|h%s|h", GUID, GUID)
+
+			local inserted = ChatEdit_InsertLink(link)
+
+			if inserted then
+				-- If the insertion was successful, make the GUID permanant.
+				icon:GetGUID(1)
+			end
+
 		end
 	end
 end)

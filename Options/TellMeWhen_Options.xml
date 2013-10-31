@@ -94,7 +94,7 @@
 							end
 						end)
 						
-						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
+						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
 							if TMW.Types[TMW.CI.ics.Type].checksItems and linkType ~= "item" then
 								-- notify failure if the icon is an item cooldown icon and the link is not an item link
 								return false
@@ -117,6 +117,8 @@
 									break
 								end
 							end
+
+							local linkID = strmatch(linkData, "^(%d+)")
 
 							-- put the cursor right after the semicolon
 							editbox:SetCursorPosition(start)

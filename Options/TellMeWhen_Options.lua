@@ -167,9 +167,9 @@ TMW:NewClass("ChatEdit_InsertLink_Hook"){
 		self.editbox = editbox
 	end,
 	
-	Call = function(self, text, linkType, linkID)
+	Call = function(self, text, linkType, linkData)
 		if self.editbox:HasFocus() then
-			return TMW.safecall(self.func, self, text, linkType, linkID)
+			return TMW.safecall(self.func, self, text, linkType, linkData)
 		end
 	end,
 }
@@ -180,12 +180,10 @@ local function hook_ChatEdit_InsertLink(text)
 		return false
 	end
 	
-	local Type, id = strmatch(text, "|H(.-):(%d+)")
+	local Type, data = strmatch(text, "|H(.-):(.-)|h")
 	
-	if not id then return false end
-
 	for _, instance in pairs(TMW.Classes.ChatEdit_InsertLink_Hook.instances) do
-		local executionSuccess, insertResult = instance:Call(text, Type, id)
+		local executionSuccess, insertResult = instance:Call(text, Type, data)
 		if executionSuccess then
 			return insertResult
 		end

@@ -61,7 +61,7 @@
 						
 						TMW.HELP:NewCode("ANN_LINK_INSERTED", nil, true)
 						
-						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkID)
+						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
 							-- The ability to yell out clickable links is cool.
 							-- However, with DogTag, we need some slight modifications to get colors to work.
 							
