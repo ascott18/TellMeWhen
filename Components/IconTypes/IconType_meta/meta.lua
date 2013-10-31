@@ -129,10 +129,8 @@ local function Meta_OnUpdate(icon, time)
 	local d = Sort == -1 and huge or 0
 
 	for n = 1, #CompiledIcons do
-		local v = CompiledIcons[n]
-		-- values in CompiledIcons are either a string or a table, 
-		-- so in either case, it is safe to index it for IsIcon to check if it is an icon:
-		local ic = v.IsIcon and v or TMW.GUIDToOwner[CompiledIcons[n]]
+		local GUID = CompiledIcons[n]
+		local ic = TMW.GUIDToOwner[GUID]
 
 		local attributes = ic and ic.attributes
 
@@ -244,31 +242,24 @@ end
 local InsertIcon, GetFullIconTable -- both need access to eachother, so scope them above their definitions
 
 local alreadyinserted = {}
-function InsertIcon(icon, GUID, ic)
-	if (GUID and GUID == icon:GetGUID()) or icon == ic then
+function InsertIcon(icon, GUID, ics)
+	if not GUID then
+		error("GUID missing to InsertIcon call!")
+	elseif GUID and GUID == icon:GetGUID() then
 		-- Meta icons should not check themselves.
 		return 
 	end
 
-	local thing = GUID or ic
-
-	local ics 
-	if ic then
-		ics = ic:GetSettings()
-	elseif GUID then
+	if not ics then
 		ics = TMW:GetSettingsFromGUID(GUID)
-	else
-		error("Must either provide a GUID or an icon to InsertIcon")
 	end
 
 	if ics then
 		if ics.Type ~= "meta" or not icon.CheckNext then
-			alreadyinserted[thing] = true
-			if thing.IsIcon and thing:GetGUID() then
-				alreadyinserted[thing:GetGUID()] = true
-			end
+			alreadyinserted[GUID] = true
+
 			if ics.Enabled then
-				tinsert(icon.CompiledIcons, thing)
+				tinsert(icon.CompiledIcons, GUID)
 			end
 		elseif icon.CheckNext then
 			GetFullIconTable(icon, ics.Icons)
@@ -286,7 +277,7 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 			local type = TMW:ParseGUID(GUID)
 
 			if type == "icon" then
-				InsertIcon(icon, GUID, nil)
+				InsertIcon(icon, GUID)
 			elseif type == "group" then
 				local gs, group, domain, groupID = TMW:GetSettingsFromGUID(GUID)
 
@@ -302,8 +293,8 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 							
 							if ic then
 								local GUID = ic:GetGUID()
-								if not GUID or not alreadyinserted[GUID] then
-									InsertIcon(icon, nil, ic)
+								if not alreadyinserted[GUID] then
+									InsertIcon(icon, GUID, ics)
 								end
 							end
 						end
@@ -333,29 +324,20 @@ function Type:Setup(icon)
 	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
 	
 	icon.IconsLookup = wipe(icon.IconsLookup or {})
-	for _, iconOrGUID in pairs(icon.CompiledIcons) do
-		icon.IconsLookup[iconOrGUID] = true
+	for n, GUID in pairs(icon.CompiledIcons) do
+		icon.IconsLookup[GUID] = n
 	end
 	for _, GUID in pairs(icon.Icons) do -- make sure to get meta icons in the table even if they get expanded
-		icon.IconsLookup[GUID] = true
+		icon.IconsLookup[GUID] = icon.IconsLookup[GUID] or true
 	end
 
 	local dontUpdate = true
-	for _, iconOrGUID in pairs(icon.CompiledIcons) do
-
-		if type(iconOrGUID) == "table" and iconOrGUID.IsIcon then
-			-- iconOrGUID is an icon
-			if iconOrGUID.Enabled then
-				dontUpdate = nil
-				break
-			end
-		else
-			-- iconOrGUID is a GUID
-			local ics = TMW:GetSettingsFromGUID(iconOrGUID)
-			if ics and ics.Enabled then
-				dontUpdate = nil
-				break
-			end
+	for _, GUID in pairs(icon.CompiledIcons) do
+		-- iconOrGUID is a GUID
+		local ics = TMW:GetSettingsFromGUID(iconOrGUID)
+		if ics and ics.Enabled then
+			dontUpdate = nil
+			break
 		end
 	end
 

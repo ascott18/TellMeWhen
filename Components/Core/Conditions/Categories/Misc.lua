@@ -296,9 +296,13 @@ ConditionCategory:RegisterCondition(31,	 "LUA", {
 	unit = false,
 	icon = "Interface\\Icons\\INV_Misc_Gear_01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function(c)
+	funcstr = function(c, parent)
 		setmetatable(CNDT.Env, CNDT.EnvMeta)
-		return c.Name ~= "" and c.Name or "true"
+
+		local lua = c.Name
+		lua = lua:gsub("thisobj", parent:GetName())
+		
+		return lua ~= "" and lua or "true"
 	end,
 })
 

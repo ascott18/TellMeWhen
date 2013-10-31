@@ -20,6 +20,7 @@
  * The Buff/Debuff - "Number of" conditions now accept semicolon-delimited lists of multiple auras that should be counted.
  * Exporting a meta icon will also export the string(s) of its component icons.
  * Exporting groups and icons will also export the string(s) of their text layouts.
+ * You can now use "thisobj" in Lua conditions as a reference to the icon or group that is checking the conditions.
 
  * Bug Fixes:
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
