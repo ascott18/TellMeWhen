@@ -184,7 +184,7 @@ local function hook_ChatEdit_InsertLink(text)
 	
 	for _, instance in pairs(TMW.Classes.ChatEdit_InsertLink_Hook.instances) do
 		local executionSuccess, insertResult = instance:Call(text, Type, data)
-		if executionSuccess then
+		if executionSuccess and insertResult then
 			return insertResult
 		end
 	end
