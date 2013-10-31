@@ -131,7 +131,7 @@ local function Meta_OnUpdate(icon, time)
 	for n = 1, #CompiledIcons do
 		local GUID = CompiledIcons[n]
 		local ic = TMW.GUIDToOwner[GUID]
-
+		
 		local attributes = ic and ic.attributes
 
 		if	ic
@@ -333,8 +333,7 @@ function Type:Setup(icon)
 
 	local dontUpdate = true
 	for _, GUID in pairs(icon.CompiledIcons) do
-		-- iconOrGUID is a GUID
-		local ics = TMW:GetSettingsFromGUID(iconOrGUID)
+		local ics = TMW:GetSettingsFromGUID(GUID)
 		if ics and ics.Enabled then
 			dontUpdate = nil
 			break
