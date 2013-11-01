@@ -22,6 +22,8 @@
  * Exporting groups and icons will also export the string(s) of their text layouts.
  * You can now use "thisobj" in Lua conditions as a reference to the icon or group that is checking the conditions.
 
+ * Added Mesmerize and Quaking palm to the Incapacitated and CrowdControl debuff equivalencies.
+ 
  * Bug Fixes:
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
  ** Fixed an issue where strings imported from older version of TellMeWhen (roughly pre-v6.0.0) could have their StackMin/Max and DurationMin/Max settings as strings instead of numbers.
