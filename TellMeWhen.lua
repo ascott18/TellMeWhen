@@ -1030,7 +1030,7 @@ local start_old = debugprofilestart
 local lastReset = 0
 function _G.debugprofilestart()
 	lastReset = lastReset + debugprofilestop()
-	start_old()
+	return start_old()
 end
 
 function _G.debugprofilestop_SAFE()
