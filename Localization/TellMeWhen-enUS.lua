@@ -1348,6 +1348,8 @@ Decimal amounts are valid. Consistent order is not guarenteed if two snippets sh
 L["CODESNIPPET_CODE"] = "Lua Code to Run"
 L["CODESNIPPET_CODE_DESC"] = [[Set the Lua code that will be ran by this snippet when TellMeWhen is intialized.]]
 
+L["CODESNIPPET_AUTORUN"] = "Auto-run at login"
+
 L["CODESNIPPETS"] = "Lua Code Snippets"
 L["CODESNIPPETS_TITLE"] = "Lua Snippets (Advanced)"
 L["CODESNIPPETS_DESC"] = [[This feature allows you to write chunks of Lua code that will be ran when TellMeWhen is being initialized.

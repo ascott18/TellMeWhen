@@ -54,12 +54,18 @@ local snippetTemplate = {
 		return snippet[info[#info]]
 	end,
 	args = {
+		Enabled = {
+			name = L["CODESNIPPET_AUTORUN"],
+			type = "toggle",
+			order = 1,
+			width = "full",
+		},
 		Name = {
 			name = L["CODESNIPPET_RENAME"],
 			desc = L["CODESNIPPET_RENAME_DESC"],
 			type = "input",
 			--width = "double",
-			order = 1,
+			order = 2,
 			set = function(info, val)
 				local snippet = getSnippetSettings(info)
 				snippet.Name = strtrim(val)
@@ -70,7 +76,7 @@ local snippetTemplate = {
 			desc = L["CODESNIPPET_ORDER_DESC"],
 			type = "input",
 			--width = "half",
-			order = 2,
+			order = 3,
 			set = function(info, val)
 				val = tonumber(val)
 				if not val then
@@ -90,7 +96,7 @@ local snippetTemplate = {
 			name = L["CODESNIPPET_RUNNOW"],
 			desc = L["CODESNIPPET_RUNNOW_DESC"],
 			type = "execute",
-			order = 3,
+			order = 4,
 			func = function(info)
 				local snippet, scope, id = getSnippetSettings(info)
 				

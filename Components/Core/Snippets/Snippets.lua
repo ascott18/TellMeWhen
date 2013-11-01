@@ -23,6 +23,7 @@ local SNIPPETS = TMW.SNIPPETS
 SNIPPETS.Snippet_Defaults = {
 	n = 0,
 	["**"] = {
+		Enabled = true,
 		Order = 1,
 		Name = L["CODESNIPPETS_DEFAULTNAME"],
 		Code = "",
@@ -47,7 +48,7 @@ local function RunSnippets()
 	TMW:SortOrderedTables(snippets)
 	
 	for _, snippet in ipairs(snippets) do
-		if not SNIPPETS:HasRanSnippet(snippet) then
+		if snippet.Enabled and not SNIPPETS:HasRanSnippet(snippet) then
 			SNIPPETS:RunSnippet(snippet)
 		end
 	end

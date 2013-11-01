@@ -21,7 +21,7 @@
  * Exporting a meta icon will also export the string(s) of its component icons.
  * Exporting groups and icons will also export the string(s) of their text layouts.
  * You can now use "thisobj" in Lua conditions as a reference to the icon or group that is checking the conditions.
-
+ * Code snippets can now be disabled from autorunning at login.
  * Added Mesmerize and Quaking palm to the Incapacitated and CrowdControl debuff equivalencies.
  
  * Bug Fixes:
