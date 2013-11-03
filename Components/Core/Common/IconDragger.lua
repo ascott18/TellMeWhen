@@ -286,6 +286,7 @@ local function Split(IconDragger, domain)
 	gs.Rows = 1
 	gs.Columns = 1
 	gs.Name = ""
+	gs.Alpha = 1
 
 	-- adjustments and positioning
 	local p = gs.Point
