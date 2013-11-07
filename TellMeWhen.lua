@@ -3297,15 +3297,15 @@ function TMW:SlashCommand(str)
 	local cmd, arg2, arg3 = TMW:GetArgs(str, 3)
 	cmd = strlower(cmd or "")
 
-	if cmd == L["CMD_ENABLE"]:lower() or cmd == "enable" then
+	if cmd == L["CMD_ENABLE"]:lower() then
 		cmd = "enable"
-	elseif cmd == L["CMD_DISABLE"]:lower() or cmd == "disable" then
+	elseif cmd == L["CMD_DISABLE"]:lower() then
 		cmd = "disable"
-	elseif cmd == L["CMD_TOGGLE"]:lower() or cmd == "toggle" then
+	elseif cmd == L["CMD_TOGGLE"]:lower() then
 		cmd = "toggle"
-	elseif cmd == L["CMD_PROFILE"]:lower() or cmd == "profile" then
+	elseif cmd == L["CMD_PROFILE"]:lower() then
 		cmd = "profile"
-	elseif cmd == L["CMD_OPTIONS"]:lower() or cmd == "options" then
+	elseif cmd == L["CMD_OPTIONS"]:lower() then
 		cmd = "options"
 	end
 
@@ -3908,7 +3908,10 @@ function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenam
 			end
 
 			v = TMW:LowerNames(v)
-			hash[v] = k -- Put the final value in the table as well (may or may not be the same as the original value. Value should be NameArrray's key, for use with the duration table.
+
+			-- Put the final value in the table as well (may or may not be the same as the original value).
+			-- Value should be NameArrray's key, for use with the duration table.
+			hash[v] = k	
 		end
 		return hash
 	end
@@ -3920,7 +3923,11 @@ function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenam
 			if (allowRenaming or tonumber(ret)) then
 				ret = GetSpellInfo(ret) or ret 
 			end
-			if icon then ret = TMW:LowerNames(ret) end
+
+			if doLower then
+				ret = TMW:LowerNames(ret)
+			end
+
 			return ret
 		else
 			-- Convert everything to a name
@@ -3929,7 +3936,11 @@ function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenam
 					buffNames[k] = GetSpellInfo(v or "") or v 
 				end
 			end
-			if icon then TMW:LowerNames(buffNames) end
+
+			if doLower
+				then TMW:LowerNames(buffNames)
+			end
+
 			return buffNames
 		end
 	end
