@@ -227,7 +227,15 @@ function Icon.GetSettings(icon)
 	return icon.group:GetSettings().Icons[icon:GetID()]
 end
 
---TODO: doc this
+--- Gets the GUID of the icon. This may be a session-temporary GUID or a permanant GUID.
+-- @name Icon:GetGUID
+-- @paramsig generate
+-- @param generate [boolean|nil] True if a permanant GUID should be generated and stored
+-- with the icon's settings if there isn't already a permanant GUID for the icon.
+-- A permanant GUID should always be generated when creating a reference to an icon that
+-- needs to persist between sessions.
+-- @return [String] The GUID of the icon.
+-- @usage local GUID = icon:GetGUID()
 function Icon.GetGUID(icon, generate)
 	local GUID = icon:GetSettings().GUID
 	if GUID == "" then
