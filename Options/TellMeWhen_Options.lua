@@ -2400,16 +2400,13 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	IE:SetHeight(IE.db.global.EditorHeight)
 
 	
-	IE:PositionPanels()
-	
-	IE:UndoRedoChanged()
-
 	if CI.icon then
 		-- This is really really important. The icon must be setup so that it has the correct components implemented
 		-- so that the correct config panels will be loaded and shown for the icon.
 		CI.icon:Setup()
+
+		IE:PositionPanels()
 		
-		CI.ics.Type = CI.ics.Type
 		if CI.ics.Type == "" then
 			UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
 		else
@@ -2435,6 +2432,8 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	else
 		IE.ResetButton:Disable()
 	end
+	
+	IE:UndoRedoChanged()
 
 	TMW:Fire("TMW_CONFIG_LOADED")
 end
