@@ -274,7 +274,7 @@ function CNDT:TypeMenu_DropDown()
 			local CurrentConditionSet = CNDT.CurrentConditionSet
 			
 			for k, conditionData in ipairs(categoryData.conditionData) do
-				local shouldAdd = not get(conditionData.hidden)
+				local shouldAdd = not get(conditionData.hidden) and conditionData.funcstr ~= "DEPRECATED"
 				
 				if CurrentConditionSet.ConditionTypeFilter then
 					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
@@ -313,9 +313,9 @@ function CNDT:TypeMenu_DropDown()
 		local CurrentConditionSet = CNDT.CurrentConditionSet
 		
 		for k, conditionData in ipairs(categoryData.conditionData) do
-			local shouldAdd = not get(conditionData.hidden) --or TMW.debug
+			local shouldAdd = not get(conditionData.hidden) and conditionData.funcstr ~= "DEPRECATED" --or TMW.debug
 			
-			if not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
+			if shouldAdd and not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
 				if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
 					shouldAdd = false
 				end
@@ -658,7 +658,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	CndtGroup.TextType:SetText(L["CONDITIONPANEL_TYPE"])
 
 	CndtGroup.Type.selectedValue = conditionSettings.Type
-	UIDropDownMenu_SetText(CndtGroup.Type, conditionData and conditionData.text or (conditionSettings.Type .. ": UNKNOWN TYPE"))
+	UIDropDownMenu_SetText(CndtGroup.Type, conditionData and conditionData.text or conditionSettings.Type)
 end)
 
 -- Operator
@@ -873,6 +873,34 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		CndtGroup.ValText:Hide()
 	end
 
+end)
+
+-- Deprecated/Unknown
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	if conditionData then
+		CndtGroup.Unknown:SetText()
+
+		if conditionData.funcstr == "DEPRECATED" then
+			CndtGroup.Deprecated:SetFormattedText(TMW.L["CNDT_DEPRECATED_DESC"], get(conditionData.text))
+
+			if not CndtGroup.Deprecated:IsShown() then
+				-- Need to reset the height to 0 before calling GetStringHeight
+				-- for consistency. Causes weird behavior if we don't do this.
+				CndtGroup.Deprecated:SetHeight(0)
+				CndtGroup.Deprecated:SetHeight(CndtGroup.Deprecated:GetStringHeight())
+
+				CndtGroup:SetHeight(CndtGroup:GetHeight() + CndtGroup.Deprecated:GetHeight())
+				CndtGroup.Deprecated:Show()
+			end
+		else
+			if CndtGroup.Deprecated:IsShown() then
+				CndtGroup:SetHeight(CndtGroup:GetHeight() - CndtGroup.Deprecated:GetHeight())
+				CndtGroup.Deprecated:Hide()
+			end
+		end
+	else
+		CndtGroup.Unknown:SetFormattedText(TMW.L["CNDT_UNKNOWN_DESC"], conditionSettings.Type)
+	end
 end)
 
 

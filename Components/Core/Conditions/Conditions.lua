@@ -843,21 +843,25 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		return ""
 	end
 
-	for n, condition in TMW:InNLengthTable(Conditions) do
-		local t = condition.Type
-		local conditionData = CNDT.ConditionsByType[t]
+	for n, conditionSettings in TMW:InNLengthTable(Conditions) do
+		local Type = conditionSettings.Type
+		local conditionData = CNDT.ConditionsByType[Type]
 		
 		local andor
 		if n == 1 then
 			andor = ""
-		elseif condition.AndOr == "OR" then
+		elseif conditionSettings.AndOr == "OR" then
 			andor = "or "
-		elseif condition.AndOr == "AND" then
+		elseif conditionSettings.AndOr == "AND" then
 			andor = "and"
 		end
 
-		if condition.Operator == "~|=" or condition.Operator == "|="  or condition.Operator == "||=" then
-			condition.Operator = "~=" -- fix potential corruption from importing a string (a single | becaomes || when pasted, "~=" in encoded as "~|=")
+		if conditionSettings.Operator == "~|="
+		or conditionSettings.Operator == "|="
+		or conditionSettings.Operator == "||=" then
+			-- fix potential corruption from importing a string
+			-- (a single | becaomes || when pasted, "~=" in encoded as "~|=")
+			conditionSettings.Operator = "~=" 
 		end
 
 		local thiscondtstr
@@ -868,7 +872,7 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 				for k, v in pairs(conditionData.Env) do
 					local existingValue = rawget(Env, k)
 					if existingValue ~= nil and existingValue ~= v then
-						TMW:Error("Condition " .. t .. " tried to write values to Env different than those that were already in it.")
+						TMW:Error("Condition " .. Type .. " tried to write values to Env different than those that were already in it.")
 					else
 						Env[k] = v
 					end
@@ -880,24 +884,29 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		
 			thiscondtstr = conditionData.funcstr
 			if type(thiscondtstr) == "function" then
-				thiscondtstr = thiscondtstr(condition, parent)
+				thiscondtstr = thiscondtstr(conditionSettings, parent)
+			elseif thiscondtstr == "DEPRECATED" then
+				TMW:QueueValidityCheck(parent, get(conditionData.text), L["VALIDITY_CONDITION2_DESC"], n)
+				thiscondtstr = "true"
 			end
+		else
+			TMW:QueueValidityCheck(parent, Type, L["VALIDITY_CONDITION2_DESC"], n)
 		end
 		
 		thiscondtstr = thiscondtstr or "true"
 		
 		local thisstr
 		if Conditions.n >= 3 then
-			thisstr = andor .. "(" .. strrep("(", condition.PrtsBefore) .. thiscondtstr .. strrep(")", condition.PrtsAfter)  .. ")"
+			thisstr = andor .. "(" .. strrep("(", conditionSettings.PrtsBefore) .. thiscondtstr .. strrep(")", conditionSettings.PrtsAfter)  .. ")"
 		else
 			thisstr = andor .. "(" .. thiscondtstr .. ")"
 		end
 
 		if conditionData then
-			thisstr = CNDT:DoConditionSubstitutions(conditionData, condition, thisstr)
+			thisstr = CNDT:DoConditionSubstitutions(conditionData, conditionSettings, thisstr)
 		end
 		
-		funcstr = funcstr .. "    " .. thisstr .. " -- " .. n .. "_" .. condition.Type .. "\r\n"
+		funcstr = funcstr .. "    " .. thisstr .. " -- " .. n .. "_" .. Type .. "\r\n"
 	end
 	
 	if funcstr ~= "" then

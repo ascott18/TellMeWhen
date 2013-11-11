@@ -3490,7 +3490,6 @@ function TMW:DoValidityCheck()
 		
 		local checker, checkee = checkerIn, checkeeIn
 		local checkerName = "???"
-		local checkeeName
 		
 		local message = description .. " "
 		local shouldWarn = true
@@ -3514,13 +3513,14 @@ function TMW:DoValidityCheck()
 		message = message .. checkerName
 		
 		
-		if type(checkeeIn) == "string" then
+		if type(checkeeIn) == "string" and TMW:ParseGUID(checkeeIn) then
 			checkee = TMW.GUIDToOwner[checkeeIn]
 			if not checkee then
 				
 			end
 		end
 		
+		local checkeeName
 		if type(checkee) == "table" then
 			if checkee.class == TMW.Classes.Icon then
 				checkeeName = checkee:GetIconName(true)

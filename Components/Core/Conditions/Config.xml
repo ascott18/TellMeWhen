@@ -715,6 +715,22 @@
 						<Anchor point="TOP" relativeto="$parentSlider" relativePoint="BOTTOM" y="3"/>
 					</Anchors>
 				</FontString>
+
+				<FontString name="$parentDeprecated" parentKey="Deprecated" inherits="GameFontNormal" hidden="true">
+					<Size x="400"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="30" y="3"/>
+						<Anchor point="BOTTOMRIGHT" x="-30" y="3"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentUnknown" parentKey="Unknown" inherits="GameFontNormal" >
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-5"/>
+						<Anchor point="RIGHT" x="-5" />
+						<Anchor point="TOP" y="-5"/>
+						<Anchor point="BOTTOM" y="5"/>
+					</Anchors>
+				</FontString>
 			</Layer>
 		</Layers>
 	</Frame>
