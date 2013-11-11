@@ -3481,11 +3481,11 @@ TMW.ValidityCheckQueue = {}
 function TMW:QueueValidityCheck(checker, checkee, description, ...)
 	if not TMW.db.profile.WarnInvalids then return end
 	
-	TMW.ValidityCheckQueue[{checker, checkee, description:format(...)}] = 1
+	tinsert(TMW.ValidityCheckQueue, {checker, checkee, description:format(...)})
 end
 
 function TMW:DoValidityCheck()
-	for tbl in pairs(TMW.ValidityCheckQueue) do
+	for n, tbl in pairs(TMW.ValidityCheckQueue) do
 		local checkerIn, checkeeIn, description = unpack(tbl)
 		
 		local checker, checkee = checkerIn, checkeeIn
@@ -3505,8 +3505,16 @@ function TMW:DoValidityCheck()
 		if type(checker) == "table" then
 			if checker.class == TMW.Classes.Icon then
 				checkerName = checker:GetIconName(true)
+
+				if not checker.Enabled then
+					shouldWarn = false
+				end
 			elseif checker.class == TMW.Classes.Group then
 				checkerName = checker:GetGroupName()
+
+				if not checker:ShouldUpdateIcons() then
+					shouldWarn = false
+				end
 			end
 		end
 		

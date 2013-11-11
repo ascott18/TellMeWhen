@@ -886,11 +886,11 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 			if type(thiscondtstr) == "function" then
 				thiscondtstr = thiscondtstr(conditionSettings, parent)
 			elseif thiscondtstr == "DEPRECATED" then
-				TMW:QueueValidityCheck(parent, get(conditionData.text), L["VALIDITY_CONDITION2_DESC"], n)
+				TMW:QueueValidityCheck(parent, "<CONDITION>", L["VALIDITY_CONDITION2_DESC"], n)
 				thiscondtstr = "true"
 			end
 		else
-			TMW:QueueValidityCheck(parent, Type, L["VALIDITY_CONDITION2_DESC"], n)
+			TMW:QueueValidityCheck(parent, "<CONDITION>", L["VALIDITY_CONDITION2_DESC"], n)
 		end
 		
 		thiscondtstr = thiscondtstr or "true"
