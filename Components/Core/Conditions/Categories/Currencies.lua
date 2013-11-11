@@ -28,60 +28,102 @@ local currencies = {
 		order = 7,
 		name = L["CNDTCAT_CURRENCIES"],
 		
-		395,	--Justice Points
-		396,	--Valor Points
-		392,	--Honor Points
-		390,	--Conquest Points
-		--692,	--Conquest Random BG Meta
+		395,	-- Justice Points
+		396,	-- Valor Points
+		392,	-- Honor Points
+		390,	-- Conquest Points
+		--692,	-- Conquest Random BG Meta
 		"SPACE",
-		391,	--Tol Barad Commendation
-		416,	--Mark of the World Tree
-		241,	--Champion\'s Seal
-		515,	--Darkmoon Prize Ticket
+		391,	-- Tol Barad Commendation
+		416,	-- Mark of the World Tree
+		241,	-- Champion\'s Seal
+		515,	-- Darkmoon Prize Ticket
+		777,	-- Timeless Coin
+		789,	-- Bloody Coin
 		"SPACE",
-		738,	--Lesser Charm of Good Fortune
-		697,	--Elder Charm of Good Fortune
-		752,	--Mogu Rune of Fate
+		738,	-- Lesser Charm of Good Fortune
+		697,	-- Elder Charm of Good Fortune
+		752,	-- Mogu Rune of Fate
+		776,	-- Warforged Seal
 		"SPACE",
-		614,	--Mote of Darkness
-		615,	--Essence of Corrupted Deathwing
+		614,	-- Mote of Darkness
+		615,	-- Essence of Corrupted Deathwing
 		"SPACE",
-		698,	--Zen Jewelcrafter\'s Token
-		361,	--Illustrious Jewelcrafter\'s Token
-		402,	--Ironpaw Token
-		61,		--Dalaran Jewelcrafter\'s Token
-		81,		--Epicurean\'s Award
+		698,	-- Zen Jewelcrafter\'s Token
+		361,	-- Illustrious Jewelcrafter\'s Token
+		402,	-- Ironpaw Token
+		61,		-- Dalaran Jewelcrafter\'s Token
+		81,		-- Epicurean\'s Award
 	},
 	{
 		ID = "ARCHFRAGS",
 		order = 8,
 		name = L["CNDTCAT_ARCHFRAGS"],
 		
-		384,	--Dwarf Archaeology Fragment
-		398,	--Draenei Archaeology Fragment
-		393,	--Fossil Archaeology Fragment
-		394,	--Night Elf Archaeology Fragment
-		397,	--Orc Archaeology Fragment
-		385,	--Troll Archaeology Fragment
+		384,	-- Dwarf Archaeology Fragment
+		398,	-- Draenei Archaeology Fragment
+		393,	-- Fossil Archaeology Fragment
+		394,	-- Night Elf Archaeology Fragment
+		397,	-- Orc Archaeology Fragment
+		385,	-- Troll Archaeology Fragment
 		
-		400,	--Nerubian Archaeology Fragment
-		399,	--Vrykul Archaeology Fragment
+		400,	-- Nerubian Archaeology Fragment
+		399,	-- Vrykul Archaeology Fragment
 		
-		401,	--Tol\'vir Archaeology Fragment
+		401,	-- Tol\'vir Archaeology Fragment
 		
-		676,	--Pandaren Archaeology Fragment
-		677,	--Mogu Archaeology Fragment
-		754,	--Mantid Archaeology Fragment
+		676,	-- Pandaren Archaeology Fragment
+		677,	-- Mogu Archaeology Fragment
+		754,	-- Mantid Archaeology Fragment
 	}
 }
 
+blacklist = {
+	483,	-- Conquest Arena Meta
+	484,	-- Conquest Rated BG Meta
+	692,	-- Conquest Random BG Meta
+}
+
+
+do
+	local numFailed = 0
+	local id = 1
+	local addedSpace = false
+	while numFailed < 1000 do
+		local name, _, _, _, _, _, hasSeen = GetCurrencyInfo(id)
+		if name and hasSeen then
+			name = strlower(name)
+
+			local shouldAdd = true
+			for _, tbl in pairs(currencies) do
+				if TMW.tContains(tbl, id) or TMW.tContains(blacklist, id) then
+					shouldAdd = false
+				end
+			end
+
+			if shouldAdd then
+				if not addedSpace then
+					tinsert(currencies[1], "SPACE")
+					addedSpace = true
+				end
+				tinsert(currencies[1], id)
+			end
+
+			numFailed = 0
+		else
+			numFailed = numFailed + 1
+		end
+
+		id = id + 1
+	end
+end
 
 local eventsFunc = function(ConditionObject, c)
 	return
 		ConditionObject:GenerateNormalEventString("CURRENCY_DISPLAY_UPDATE")
 end
 
-local spacenext
+
 Env.GetCurrencyInfo = GetCurrencyInfo
 for i, currenciesSub in ipairs(currencies) do
 	local ConditionCategory = CNDT:GetCategory(currenciesSub.ID, currenciesSub.order, currenciesSub.name, false, false)
@@ -89,71 +131,34 @@ for i, currenciesSub in ipairs(currencies) do
 		if id == "SPACE" then
 			ConditionCategory:RegisterSpacer(i + 0.5)
 		else
+			local name, amount, texture, _, _, totalMax, hasSeen = GetCurrencyInfo(id)
 			ConditionCategory:RegisterCondition(i, "CURRENCY" .. id, {
+				text = name,
+				icon = texture,
 				range = 500,
 				unit = false,
+				hidden = not hasSeen,
 				funcstr = [[select(2, GetCurrencyInfo(]] .. id .. [[)) c.Operator c.Level]],
 				tcoords = CNDT.COMMON.standardtcoords,
-				hidden = true,
 				events = eventsFunc,
 			})
-			spacenext = nil
 		end
 	end
 end
 
-function CNDT:CURRENCY_DISPLAY_UPDATE()
-	for i, currenciesSub in ipairs(currencies) do
-		for _, id in ipairs(currenciesSub) do
-			if id ~= "SPACE" then
-				local data = CNDT.ConditionsByType["CURRENCY" .. id]
-				local name, amount, texture, _, _, totalMax = GetCurrencyInfo(id)
 
-				if name ~= "" then
-					data.text = name
-					data.icon = texture
-					data.hidden = false
-					if TMW.IE then
-						TMW.IE.db.locale.Currencies[id] = name .. "^" .. texture
-					end
-					--[[if totalMax > 0 then -- not using this till blizzard fixes the bug where it shows the honor and conquest caps as 40,000
-						data.max = totalMax
-					end]]
-
-				elseif TMW.IE then
-
-					local cachedCurrencyData = TMW.IE.db.locale.Currencies[id]
-					if cachedCurrencyData then
-						local name, texture = strmatch(cachedCurrencyData, "(.*)^(.*)")
-						if name and texture then
-							data.text = name
-							data.icon = texture
-							data.hidden = false
-						end
-					end
-				end
-			end
-		end
-	end
-end
-
-CNDT:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
-CNDT:CURRENCY_DISPLAY_UPDATE()
-
+-- We used to cache currencies, but this isn't needed anymore.
+-- Currency data is always queryable for all currencies.
 TMW:RegisterCallback("TMW_OPTIONS_LOADING", function()
-	TMW.IE:RegisterDatabaseDefaults{
-		locale = {
-			Currencies	= {
-
-			},
-		},
-	}
-
 	TMW.IE:RegisterUpgrade(62217, {
 		global = function(self)
 			TMW.IE.db.global.Currencies = nil
 		end,
 	})
-end)
 
-TMW:RegisterCallback("TMW_OPTIONS_LOADED", CNDT, "CURRENCY_DISPLAY_UPDATE")
+	TMW.IE:RegisterUpgrade(70021, {
+		locale = function(self)
+			TMW.IE.db.locale.Currencies = nil
+		end,
+	})
+end)
