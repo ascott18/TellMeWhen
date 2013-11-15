@@ -247,10 +247,10 @@ function SUG:NameOnCursor(isClick)
 		SUG.duration = nil
 	end
 
-	if not TMW.debug then
+	--[[if not TMW.debug then
 		-- do not escape the almighty wildcards if testing
 		SUG.lastName = gsub(SUG.lastName, "([%*%.])", "%%%1")
-	end
+	end]]
 	-- always escape parentheses, brackets, percent signs, minus signs, plus signs
 	SUG.lastName = gsub(SUG.lastName, "([%(%)%%%[%]%-%+])", "%%%1")
 
