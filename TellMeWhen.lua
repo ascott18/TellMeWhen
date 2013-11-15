@@ -931,7 +931,7 @@ function TMW:ValidateType(argN, methodName, var, reqType)
 		local varTypeName = varType
 		if varType == "table" then
 			if var.isTMWClassInstance then
-				varTypeName = var.className
+				varTypeName = "TMW.C." .. var.className
 			elseif type(var[0]) == "userdata" then
 				varTypeName = "frame (" .. var:GetObjectType() .. ")"
 			end
