@@ -883,17 +883,33 @@ function TMW:Assert(statement, text, ...)
 	end
 end
 
-function TMW:ValidateType(argN, methodName, var, reqType, errLvl)
+function TMW:ValidateType(argN, methodName, var, reqType)
 	local varType = type(var)
 	
 	local isGood, foundMatch = true, false
 	for _, reqType in TMW:Vararg(strsplit(";", reqType)) do
+		-- Upvalue varType here so that we can change it within the loop body
+		-- without having to redefine it for the references outside the loop.
+		local varType = varType
+
 		local negate = reqType:sub(1, 1) == "!"
 		local reqType = negate and reqType:sub(2) or reqType
 		reqType = reqType:trim(" ")
 		
-		if reqType == "frame" and varType == "table" and type(var[0]) == "userdata" then
-			varType = "frame"
+		if varType == "table" then
+			if type(var[0]) == "userdata" then
+				if reqType == "frame" or reqType == "widget" then
+					varType = reqType
+				elseif var:IsObjectType(reqType) then
+					varType = reqType
+				end
+			end
+			if var.isTMWClassInstance and TMW.C[reqType] then
+				local reqClass = TMW.C[reqType]
+				if var.class == reqClass or var.class.inherits[reqClass] then
+					varType = reqType
+				end
+			end
 		end
 		
 		if negate then
@@ -909,9 +925,20 @@ function TMW:ValidateType(argN, methodName, var, reqType, errLvl)
 			end
 		end
 	end
-	
+
 	if not isGood or not foundMatch then
-		error(("Bad argument #%s to %q. %s expected, got %s"):format(argN, methodName, reqType, varType), 3 + (errLvl or 0))
+	
+		local varTypeName = varType
+		if varType == "table" then
+			if var.isTMWClassInstance then
+				varTypeName = var.className
+			elseif type(var[0]) == "userdata" then
+				varTypeName = "frame (" .. var:GetObjectType() .. ")"
+			end
+		end
+
+
+		error(("Bad argument #%s to %q. %s expected, got %s"):format(argN, methodName, reqType, varTypeName), 3)
 	end
 end
 

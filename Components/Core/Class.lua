@@ -337,7 +337,7 @@ end
 
 --- Asserts that self is a TellMeWhen class.
 -- 
--- Throws a breaking error if it is not.
+-- Throws a breaking error at the level of the caller's caller (user-level) if it is not.
 function Class:AssertSelfIsClass()
 	if not self.isTMWClass then
 		error(("Caller must be the class %q, not an instance of the class"):format(self.className), 3)
@@ -346,7 +346,7 @@ end
 
 --- Asserts that self is an instance of a TellMeWhen class.
 -- 
--- Throws a breaking error if it is not.
+-- Throws a breaking error at the level of the caller's caller (user-level) if it is not.
 function Class:AssertSelfIsInstance()
 	if not self.isTMWClassInstance then
 		error(("Caller must be an instance of the class %q, not the class itself"):format(self.className), 3)
@@ -410,7 +410,7 @@ function Class:CallFunc(funcName, ...)
 end
 
 
---- Sets the __mode of the instances table of the class to "kv" so that instances will be garbage collected when they are orphaned everywhere else.
+--- Sets the __mode metamethod of the instances table of the class to "kv" so that instances will be garbage collected when they are orphaned everywhere else.
 -- This behavior will not be inherited by subclasses.
 function Class:MakeInstancesWeak()
 	setmetatable(self.instances, weakMetatable)
