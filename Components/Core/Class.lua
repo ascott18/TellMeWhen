@@ -22,6 +22,7 @@ local pairs, ipairs, type, error, tostring, setmetatable, getmetatable, rawset, 
 
 --- The table that holds all TellMeWhen classes. Classes are keyed in this table by their name.
 TMW.Classes = {}
+TMW.C = TMW.Classes -- Shortcut
 
 local metamethods = {
 	__add = true,
@@ -190,18 +191,20 @@ function TMW:NewClass(className, ...)
 	end
 	
 	local metatable = {
-		__index = {},
+		__index = { -- this is class.instancemeta as well.
+			isTMWClassInstance = true,
+		},
 		__call = __call,
 	}
 	
 	local class = {
-		className = className,
 		instances = {},
 		inherits = {},
 		inheritedBy = {},
 		embeds = {},
 		initialized = false,
 		isTMWClass = true,
+		isTMWClassInstance = false, -- Override the instancemeta so classes don't think they are instances.
 	}
 
 	class.instancemeta = {__index = metatable.__index}
@@ -209,11 +212,13 @@ function TMW:NewClass(className, ...)
 	setmetatable(class, metatable)
 	metatable.__newindex = metatable.__index
 
+	-- Makes referencing the class really easy - don't have to define a class variable for instances,
+	-- and creates a unified way to definitely get the class for both classes and instances.
+	class.class = class
+	class.className = className
+
 	for n, v in TMW:Vararg(TMW.Classes.Class and "Class", ...) do
-		--TMW.Warn(strconcat(tostringall(n, v, className, ...)))
-	--	if v then
-			inherit(class, v)
-	---	end
+		inherit(class, v)
 	end
 
 	TMW.Classes[className] = class
@@ -249,13 +254,41 @@ function Class:New(...)
 	else
 		instance = {}
 	end
+	
+	return self:NewFromExisting(instance, ...)
+end
+
+--- Creates an instance of the class from an existing object.
+-- 
+-- If the class inherits from a Blizzard widget, any class methods that are valid script handler names for the widget type (like "OnClick" or "OnShow") will be hooked as script handlers on the instance.
+-- @param instance [table] An existing table or widget to instantiate the class on. Cannot be something that has already been instantiated. If passing in a widget, it should
+-- @param ... [...] The constructor parameters of the new instance. In all cases, they will be passed to calls of any class methods whose name **begins** with "OnNewInstance" (E.g. {{{Class:OnNewInstance_Class(self, ...)}}}).
+-- @return A new instance of the class.
+function Class:NewFromExisting(instance, ...)
+	TMW:ValidateType("2 (instance)", "Class:NewFromExisting(instance, ...)", instance, "table")
+
+	if instance.isTMWClassInstance then
+		error("Cannot instantiate something that has already been instantiated!", 2)
+	end
+
+	local isWidget = type(instance[0]) == "userdata"
+
+	if not isWidget and self.isFrameObject then
+		error("Widget classes must be instantiated with widgets.", 2)
+	elseif isWidget then
+		if not self.isFrameObject then
+			error("Non-widget classes must be instantiated on non-widgets.", 2)
+		elseif instance:GetObjectType() ~= self.isFrameObject then
+			error("Expected a " .. self.isFrameObject .. " widget, got a " .. instance:GetObjectType(), 2)
+		end
+	end
+
+	if self.isTMWClassInstance then
+		self = self.class
+	end
 
 	-- if this is the first instance of the class, do some magic to it:
 	initializeClass(self)
-
-	instance.class = self
-	instance.className = self.className
-	instance.isTMWClassInstance = true
 
 	setmetatable(instance, self.instancemeta)
 
