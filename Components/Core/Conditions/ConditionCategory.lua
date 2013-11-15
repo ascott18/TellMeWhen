@@ -25,7 +25,7 @@ local CNDT = TMW.CNDT
 -- It should not be directly instantiated - use CNDT:GetCategory() to get or create a category.
 -- 
 -- @class file
--- @name ConditionObjectConstructor.lua
+-- @name ConditionCategory.lua
 
 
 local ConditionCategory = TMW:NewClass("ConditionCategory")
@@ -84,24 +84,10 @@ function ConditionCategory:RegisterCondition(order, identifier, conditionData)
 	TMW:ValidateType("3 (identifier)", "ConditionCategory:RegisterCondition()", identifier, "string")
 	TMW:ValidateType("4 (conditionData)", "ConditionCategory:RegisterCondition()", conditionData, "table")
 	
-	TMW:ValidateType("funcstr", "conditionData", conditionData.funcstr, "string;function")
-	
-	if CNDT.ConditionsByType[identifier] then
-		error(("Condition %q already exists."):format(identifier), 2)
-	end
-	
-	TMW:ValidateType("categoryIdentifier", "{conditionData}", conditionData.categoryIdentifier, "nil")
-	TMW:ValidateType("identifier", "{conditionData}", conditionData.identifier, "nil")
-	TMW:ValidateType("order", "{conditionData}", conditionData.order, "nil")
-	
-	conditionData.categoryIdentifier = self.identifier
-	conditionData.identifier = identifier
-	conditionData.order = order
+	TMW.C.Condition:NewFromExisting(conditionData, self, order, identifier)
 	
 	tinsert(self.conditionData, conditionData)
 	TMW:SortOrderedTables(self.conditionData)
-	
-	CNDT.ConditionsByType[identifier] = conditionData
 end
 
 --- Registers a spacer in the category's dropdown menu at the specified order (relative to other conditions)

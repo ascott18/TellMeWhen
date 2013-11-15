@@ -313,18 +313,18 @@ function CNDT:TypeMenu_DropDown()
 		local CurrentConditionSet = CNDT.CurrentConditionSet
 		
 		for k, conditionData in ipairs(categoryData.conditionData) do
-			local shouldAdd = not get(conditionData.hidden) and conditionData.funcstr ~= "DEPRECATED" --or TMW.debug
-			
-			if shouldAdd and not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
-				if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
-					shouldAdd = false
+			if conditionData.IS_SPACER then
+				queueSpacer = true
+			else
+				local shouldAdd = not get(conditionData.hidden) and not conditionData:IsDeprecated() --or TMW.debug
+				
+				if shouldAdd and not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
+					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
+						shouldAdd = false
+					end
 				end
-			end
-			
-			if shouldAdd then
-				if conditionData.IS_SPACER then
-					queueSpacer = true
-				else
+				
+				if shouldAdd then
 					if hasAddedOneCondition and queueSpacer then
 						TMW.AddDropdownSpacer()
 						queueSpacer = false

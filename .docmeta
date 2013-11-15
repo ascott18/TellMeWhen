@@ -44,6 +44,10 @@
     output-page: "API/Conditions/API Documentation/Core"
 -
     type: luadoc
+    input-file: "Components/Core/Conditions/Condition.lua"
+    output-page: "API/Conditions/API Documentation/Condition"
+-
+    type: luadoc
     input-file: "Components/Core/Conditions/ConditionCategory.lua"
     output-page: "API/Conditions/API Documentation/ConditionCategory"
 -

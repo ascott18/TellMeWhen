@@ -30,6 +30,7 @@ local NONE = NONE
 
 local _G = _G
 local print = TMW.print
+local get = TMW.get
 local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
@@ -864,43 +865,27 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 			conditionSettings.Operator = "~=" 
 		end
 
-		local thiscondtstr
+		local thisstr = "true"
 		if conditionData then
 		
-			-- Add in anything that the condition wants to include in Env
-			if conditionData.Env then
-				for k, v in pairs(conditionData.Env) do
-					local existingValue = rawget(Env, k)
-					if existingValue ~= nil and existingValue ~= v then
-						TMW:Error("Condition " .. Type .. " tried to write values to Env different than those that were already in it.")
-					else
-						Env[k] = v
-					end
-				end
-				
-				-- nil it, because we don't want to add it again if we are storing a table that will be updated to hold some data.
-				conditionData.Env = nil
-			end
-		
-			thiscondtstr = conditionData.funcstr
-			if type(thiscondtstr) == "function" then
-				thiscondtstr = thiscondtstr(conditionSettings, parent)
-			elseif thiscondtstr == "DEPRECATED" then
+			conditionData:PrepareEnv()
+
+			if conditionData:IsDeprecated() then
 				TMW:QueueValidityCheck(parent, "<CONDITION>", L["VALIDITY_CONDITION2_DESC"], n)
-				thiscondtstr = "true"
+				thisstr = "true"
+			else
+				thisstr = get(conditionData.funcstr, conditionSettings, parent) or "true"
 			end
 		else
 			TMW:QueueValidityCheck(parent, "<CONDITION>", L["VALIDITY_CONDITION2_DESC"], n)
 		end
 		
-		thiscondtstr = thiscondtstr or "true"
-		
-		local thisstr
 		if Conditions.n >= 3 then
-			thisstr = andor .. "(" .. strrep("(", conditionSettings.PrtsBefore) .. thiscondtstr .. strrep(")", conditionSettings.PrtsAfter)  .. ")"
-		else
-			thisstr = andor .. "(" .. thiscondtstr .. ")"
+			thisstr = strrep("(", conditionSettings.PrtsBefore) .. thisstr .. strrep(")", conditionSettings.PrtsAfter)
 		end
+
+		thisstr = andor .. "(" .. thisstr .. ")"
+		
 
 		if conditionData then
 			thisstr = CNDT:DoConditionSubstitutions(conditionData, conditionSettings, thisstr)

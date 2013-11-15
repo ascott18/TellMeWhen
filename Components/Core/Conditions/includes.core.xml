@@ -14,6 +14,7 @@
 
 
 <Script file="ConditionCategory.lua"/>
+<Script file="Condition.lua"/>
 
 <Include file="Categories\includes.core.xml"/>
 

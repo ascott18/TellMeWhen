@@ -84,11 +84,11 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 
 	for _, c in TMW:InNLengthTable(Conditions) do
 		local t = c.Type
-		local v = CNDT.ConditionsByType[t]
+		local condition = CNDT.ConditionsByType[t]
 		
-		if v and v.events then
+		if condition and condition.events then
 			local voidNext
-			for n, argCheckerString in TMW:Vararg(TMW.get(v.events, self, c)) do
+			for n, argCheckerString in TMW:Vararg(TMW.get(condition.events, self, c)) do
 				if argCheckerString == false or argCheckerString == nil then
 					return
 				elseif type(argCheckerString) == "string" then
@@ -107,11 +107,11 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 
 		-- handle code that anticipates when a change in state will occur.
 		-- this is usually used to predict when a duration threshold will be used, but you could really use it for whatever you want.
-		if v.anticipate then
+		if condition.anticipate then
 			numAnticipatorResults = numAnticipatorResults + 1
 
-			local thisstr = TMW.get(v.anticipate, c) -- get the anticipator string from the condition data
-			thisstr = CNDT:DoConditionSubstitutions(v, c, thisstr) -- substitute in any user settings
+			local thisstr = TMW.get(condition.anticipate, c) -- get the anticipator string from the condition data
+			thisstr = CNDT:DoConditionSubstitutions(condition, c, thisstr) -- substitute in any user settings
 
 			-- append a check to make sure that the smallest value out of all anticipation checks isnt less than the current time.
 			thisstr = thisstr .. [[
