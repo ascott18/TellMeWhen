@@ -3025,7 +3025,7 @@ function IE:CreateSettingFrameFromData(frame, arg2, arg3)
 	assert(type(data) == "table", "Usage: IE:CreateSettingFrameFromData(frame, [, className], data)")
 	
 	-- Embed the class into the frame.
-	class:Embed(frame, true)
+	class:NewFromExisting(frame)
 	
 	-- Setup callbacks that will load the settings when needed.
 	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", frame, "ReloadSetting")
