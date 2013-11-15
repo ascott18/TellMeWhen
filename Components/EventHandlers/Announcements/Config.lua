@@ -206,6 +206,12 @@ function Announcements:SelectChannel(channel)
 		else
 			ConfigFrames.Size:Hide()
 		end
+		if channelsettings.duration then
+			ConfigFrames.Duration:SetValue(EventSettings.TextDuration)
+			ConfigFrames.Duration:Show()
+		else
+			ConfigFrames.Duration:Hide()
+		end
 		if channelsettings.editbox then
 			ConfigFrames.WhisperTarget:SetText(EventSettings.Location)
 			ConfigFrames.WhisperTarget:Show()

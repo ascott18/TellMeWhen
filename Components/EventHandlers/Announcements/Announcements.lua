@@ -54,6 +54,7 @@ Announcements:RegisterEventDefaults{
 	Location  		= "",
 	Sticky 	  		= false,
 	ShowIconTex		= true,
+	TextDuration 	= 13,
 	r 		  		= 1,
 	g 		  		= 1,
 	b 		  		= 1,
@@ -395,6 +396,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 	desc = L["RAID_WARNING_FAKE_DESC"],
 	icon = 1,
 	color = 1,
+	duration = 1,
 	handler = function(icon, data, Text)
 		local Location = data.Location
 
@@ -407,7 +409,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 		-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
 		Text = ("|cff%02x%02x%02x"):format(data.r * 0xFF, data.g * 0xFF, data.b * 0xFF) .. Text .. "|r"
 
-		RaidNotice_AddMessage(RaidWarningFrame, Text, bullshitTable) -- arg3 still demands a valid table for the color info, even if it is empty
+		RaidNotice_AddMessage(RaidWarningFrame, Text, bullshitTable, data.TextDuration) -- arg3 still demands a valid table for the color info, even if it is empty
 		
 	end,
 })

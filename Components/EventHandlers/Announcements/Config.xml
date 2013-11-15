@@ -417,6 +417,37 @@
 						</Scripts>
 					</Slider>
 
+					<Slider name="$Duration" inherits="TellMeWhen_SliderTemplate" parentKey="Duration" minvalue="0" maxvalue="38" valuestep="1">
+						<Size x="150" y="17"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentSize" relativePoint="BOTTOMLEFT" y="-17"/>
+						</Anchors>
+						<Scripts>
+							<OnMinMaxChanged>
+								local minValue, maxValue = self:GetMinMaxValues()
+								self.Low:SetText(TMW.L["DEFAULT"])
+								self.High:SetText(maxValue)
+							</OnMinMaxChanged>
+							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
+								value = self:GetValue()
+
+								self.Mid:SetText(value == 0 and TMW.L["DEFAULT"] or value)
+								if TMW.CI.ics then
+									TMW.EVENTS:GetEventSettings().TextDuration = value
+									TMW.IE:ScheduleIconSetup()
+								end
+							</OnValueChanged>
+							<OnLoad>
+								self.text:SetText(TMW.L["DURATION"])
+								self:EnableMouseWheel(true)
+							</OnLoad>
+							<OnMouseWheel>
+								self:SetValue(self:GetValue()+delta)
+							</OnMouseWheel>
+						</Scripts>
+					</Slider>
+
 
 				</Frames>
 			</Frame>
