@@ -258,10 +258,11 @@ function Class:New(...)
 	return self:NewFromExisting(instance, ...)
 end
 
---- Creates an instance of the class from an existing object.
+--- Creates an instance of the class out of an existing object. No additional memory is allocated to perform this.
 -- 
 -- If the class inherits from a Blizzard widget, any class methods that are valid script handler names for the widget type (like "OnClick" or "OnShow") will be hooked as script handlers on the instance.
--- @param instance [table] An existing table or widget to instantiate the class on. Cannot be something that has already been instantiated. If passing in a widget, it should
+-- 
+-- @param instance [table] An existing table or widget to instantiate the class on. Cannot be something that has already been instantiated. If the existing object has a metatable, it will be overwritten with class.instancemeta.
 -- @param ... [...] The constructor parameters of the new instance. In all cases, they will be passed to calls of any class methods whose name **begins** with "OnNewInstance" (E.g. {{{Class:OnNewInstance_Class(self, ...)}}}).
 -- @return A new instance of the class.
 function Class:NewFromExisting(instance, ...)
@@ -308,69 +309,9 @@ function Class:NewFromExisting(instance, ...)
 end
 
 
-
---- Embeds the class into an already existing table.
--- @param target [table] The table to embed the class into. Effectively turns the target into an instance of the class.
--- @param canOverwrite [boolean|nil] True to suppress the non-breaking errors that will be thrown when a member of the class already exists on the target (naming conflicts).
--- @param ... [...] The parameters that will be passed to the class's OnNewInstance methods (see Class:New(...)'s documentation for more info).
--- @return Returns the target that was passed in.
-function Class:Embed(target, canOverwrite, ...)
-	TMW:ValidateType("2 (target)", "Class:Embed(target, canOverwrite)", target, "table")
-	
-	-- if this is the first instance (not really an instance here, but we need to anyway) of the class, do some magic to it:
-	initializeClass(self)
-
-	self.embeds[target] = true
-
-	for k, v in pairs(self.instancemeta.__index) do
-		if target[k] and target[k] ~= v and not canOverwrite then
-			TMW:Error("Error embedding class %s into target %s: Field %q already exists on the target.", self.className, tostring(target:GetName() or target), k)
-		else
-			target[k] = v
-		end
-	end
-	
-	for k, v in pairs(self.instancemeta.__index) do
-		if self.isFrameObject and target.HasScript and target:HasScript(k) then
-			target:HookScript(k, v)
-		end
-	end
-
-	target.class = self
-	target.className = self.className
-	
-	target:CallFunc("OnNewInstance", ...)
-	
-	return target
+function Class:Embed()
+	error("Class:Embed() is now defunct. Use Class:NewFromExisting() instead.", 2)
 end
-
---- Disembeds the class from the target.
--- 
--- This is not always reliable if there were naming conflicts when the class was embedded or if the target has overwritten any of the class's members that were embedded.
--- Can only be used on a target that previously had Class:Embed() called on it.
--- @param target [table] The table to disembed the class from.
--- @param clearDifferentValues [boolean|nil] True to suppress the non-breaking errors that will be thrown if one of the class's members is missing from the target or has had its value changed.
--- @return Returns the target that was passed in.
-function Class:Disembed(target, clearDifferentValues)
-	TMW:ValidateType("2 (target)", "Class:Disembed(target, clearDifferentValues)", target, "table")
-	
-	if not self.embeds[target] then
-		error("Class " .. self.className .. " is not embedded into the target!", 2)
-	end
-	
-	self.embeds[target] = false
-
-	for k, v in pairs(self.instancemeta.__index) do
-		if (target[k] == v) or (target[k] and clearDifferentValues) then
-			target[k] = nil
-		else
-			TMW:Error("Error disembedding class %s from target %s: Field %q should exist on the target, but it doesnt.", self.className, tostring(target:GetName() or target), k)
-		end
-	end
-
-	return target
-end
-
 
 
 --- Extends the specified method so that it when called, it will first call the original method being extended, and then it will call newFunction.
