@@ -182,11 +182,11 @@ EventHandler:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 	Play = function(icon, eventSettings)
 		if not WorldFrame:IsProtected() or not InCombatLockdown() then
 
-			if not WorldFrame.Animations_Start then
-				TMW.Classes.AnimatedObject:Embed(WorldFrame)
+			if not WorldFrame.TMWShakeAnim then
+				WorldFrame.TMWShakeAnim = TMW.Classes.AnimatedObject:New()
 			end
 
-			WorldFrame:Animations_Start{
+			WorldFrame.TMWShakeAnim:Animations_Start{
 				eventSettings = eventSettings,
 				Start = TMW.time,
 				Duration = eventSettings.Duration,
@@ -196,33 +196,33 @@ EventHandler:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 		end
 	end,
 
-	OnUpdate = function(WorldFrame, table)
+	OnUpdate = function(TMWShakeAnim, table)
 		local remaining = table.Duration - (TMW.time - table.Start)
 
 		if remaining < 0 then
-			WorldFrame:Animations_Stop(table)
+			TMWShakeAnim:Animations_Stop(table)
 		else
 			local Amt = (table.Magnitude or 10) / (1 + 10*(300^(-(remaining))))
 			local moveX = random(-Amt, Amt)
 			local moveY = random(-Amt, Amt)
 
 			WorldFrame:ClearAllPoints()
-			for _, v in pairs(TMW.WorldFramePoints) do
+			for _, v in pairs(TMWShakeAnim.WorldFramePoints) do
 				WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + moveX, v[5] + moveY)
 			end
 		end
 	end,
-	OnStart = function(WorldFrame, table)
-		if not TMW.WorldFramePoints then
-			TMW.WorldFramePoints = {}
+	OnStart = function(TMWShakeAnim, table)
+		if not TMWShakeAnim.WorldFramePoints then
+			TMWShakeAnim.WorldFramePoints = {}
 			for i = 1, WorldFrame:GetNumPoints() do
-				TMW.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
+				TMWShakeAnim.WorldFramePoints[i] = { WorldFrame:GetPoint(i) }
 			end
 		end
 	end,
-	OnStop = function(WorldFrame, table)
+	OnStop = function(TMWShakeAnim, table)
 		WorldFrame:ClearAllPoints()
-		for _, v in pairs(TMW.WorldFramePoints) do
+		for _, v in pairs(TMWShakeAnim.WorldFramePoints) do
 			WorldFrame:SetPoint(v[1], v[2], v[3], v[4], v[5])
 		end
 	end,
@@ -250,11 +250,11 @@ EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 			end
 		end
 
-		if not UIParent.Animations_Start then
-			TMW.Classes.AnimatedObject:Embed(UIParent)
+		if not UIParent.TMWFlashAnim then
+			UIParent.TMWFlashAnim = TMW.Classes.AnimatedObject:New()
 		end
 
-		UIParent:Animations_Start{
+		UIParent.TMWFlashAnim:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
 			Duration = Duration,
@@ -268,9 +268,9 @@ EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 		}
 	end,
 	
-	OnUpdate = function(UIParent, table)
+	OnUpdate = function(TMWFlashAnim, table)
 		local FlashPeriod = table.Period
-		local animation_flasher = UIParent.animation_flasher
+		local animation_flasher = TMWFlashAnim.animation_flasher
 
 		local timePassed = TMW.time - table.Start
 		local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 1
@@ -288,27 +288,27 @@ EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 
 		-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
 		if timePassed > table.Duration then
-			UIParent:Animations_Stop(table)
+			TMWFlashAnim:Animations_Stop(table)
 		end
 	end,
-	OnStart = function(UIParent, table)
+	OnStart = function(TMWFlashAnim, table)
 		local animation_flasher
-		if UIParent.animation_flasher then
-			animation_flasher = UIParent.animation_flasher
+		if TMWFlashAnim.animation_flasher then
+			animation_flasher = TMWFlashAnim.animation_flasher
 		else
 			animation_flasher = UIParent:CreateTexture(nil, "BACKGROUND", nil, 6)
 			
 			animation_flasher:SetAllPoints(UIParent)
 			animation_flasher:Hide()
 
-			UIParent.animation_flasher = animation_flasher
+			TMWFlashAnim.animation_flasher = animation_flasher
 		end
 
 		animation_flasher:Show()
 		animation_flasher:SetTexture(table.r, table.g, table.b, 1)
 	end,
-	OnStop = function(UIParent, table)
-		UIParent.animation_flasher:Hide()
+	OnStop = function(TMWFlashAnim, table)
+		TMWFlashAnim.animation_flasher:Hide()
 	end,
 })
 
