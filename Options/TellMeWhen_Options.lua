@@ -3131,9 +3131,8 @@ end
 ---------- Equivalancies ----------
 local equivTipCache = {}
 function IE:Equiv_GenerateTips(equiv)
-	if equivTipCache[equiv] then return equivTipCache[equiv] end
-	local r = "" --tconcat doesnt allow me to exclude duplicates unless i make another garbage table, so lets just do this
 	local tbl = TMW:SplitNames(TMW.EquivFullIDLookup[equiv])
+
 	for k, v in pairs(tbl) do
 		local name, _, texture = GetSpellInfo(v)
 		if not name then
@@ -3145,17 +3144,20 @@ function IE:Equiv_GenerateTips(equiv)
 			end
 			texture = "Interface\\Icons\\INV_Misc_QuestionMark"
 		end
-		if not tiptemp[name] then --prevents display of the same name twice when there are multiple ranks.
-			r = r .. "|T" .. texture .. ":0|t" .. name .. "\r\n"
-		end
-		tiptemp[name] = true
+
+		tiptemp[name] = tiptemp[name] or "|T" .. texture .. ":0|t" .. name
 	end
-	wipe(tiptemp)
+
+	local r = ""
+	for name, line in TMW:OrderedPairs(tiptemp) do
+		r = r .. line .. "\r\n"
+	end
+
 	r = strtrim(r, "\r\n ;")
-	equivTipCache[equiv] = r
+	wipe(tiptemp)
 	return r
 end
-
+TMW:MakeSingleArgFunctionCached(IE, "Equiv_GenerateTips")
 
 
 ---------- Dropdowns ----------
