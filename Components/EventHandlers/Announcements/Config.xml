@@ -1,28 +1,7 @@
 ﻿<Ui>
-	<Button name="TellMeWhen_ChannelSelectButton" inherits="TellMeWhen_EventSubComponentSelectButton" virtual="true" >
-		<Scripts>
-			<OnClick>
-				if TMW.CI.ics then
-					TMW.EVENTS:GetEventSettings().Channel = self.channel
-					TMW.IE:ScheduleIconSetup()
-				end
-
-				TMW.EVENTS:LoadConfig()
-				
-				local Announcements = TMW.EVENTS:GetEventHandler("Announcements")
-				Announcements:SelectChannel(self.channel)
-			</OnClick>
-		</Scripts>
-	</Button>
  
  
 	<Frame name="$parentAnnouncements" inherits="TellMeWhen_EventContainer" parentKey="Announcements">
-		
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentChannelListHeader" inherits="GameFontNormalLarge" parentKey="ChannelListHeader" justifyH="LEFT" />
-			</Layer>
-		</Layers>
 		<Frames>
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
 				<Size y="20"/>
@@ -162,36 +141,28 @@
 			</EditBox>
 			
 			
-			<Frame name="$parentChannelList" parentKey="ChannelList">
+			<Frame name="$parentSubHandlerList" parentKey="SubHandlerList">
 				<Size x="150" y="10"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentEditBoxError" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
 					<Anchor point="BOTTOM" y="-0"/>
 				</Anchors>
-				<Frames>
-					<Button name="$parentNone" inherits="TellMeWhen_ChannelSelectButton" parentKey="None" id="1"/>
-				</Frames>
 				<Scripts>
 					<OnLoad>
-						local ChannelListHeader = self:GetParent().ChannelListHeader
-						
 						TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
-						
-						ChannelListHeader:SetText(TMW.L["ANN_CHANTOUSE"])
-						ChannelListHeader:SetPoint("BOTTOM", self.ScrollFrame, "TOP", 7, 1)
 					</OnLoad>
 				</Scripts>
 			</Frame>
 
 			<Frame name="$parentConfigFrames" parentKey="ConfigFrames">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentChannelListScrollFrame" relativePoint="TOPRIGHT" x="5" y="0"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOPRIGHT" x="5" y="0"/>
 					<Anchor point="BOTTOMRIGHT" x="-0" y="0"/>
 				</Anchors>
 				<Frames>
 					<Frame name="$parentLocation" inherits="TMW_DropDownMenuTemplate" parentKey="Location">
 						<Anchors>
-							<Anchor point="TOPLEFT" x="-0" y="-15"/>
+							<Anchor point="LEFT" x="-0" />
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -212,10 +183,11 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
+
 					<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
 						<Size x="135" y="15"/>
 						<Anchors>
-							<Anchor point="TOPLEFT"  x="30" y="-15"/>
+							<Anchor point="LEFT" x="30"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -301,42 +273,20 @@
 						</Scripts>
 					</EditBox>
 
-					<CheckButton name="$parentSticky" inherits="TellMeWhen_CheckTemplate" parentKey="Sticky">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentLocation" relativePoint="BOTTOMLEFT" x="15" y="-5"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANN_STICKY"])
-							</OnLoad>
-							<OnClick>
-								TMW.EVENTS:GetEventSettings().Sticky = not not self:GetChecked()
-							</OnClick>
-						</Scripts>
+					<CheckButton name="$parentSticky" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Sticky">
 					</CheckButton>
-					<CheckButton name="$parentShowIconTex" inherits="TellMeWhen_CheckTemplate" parentKey="ShowIconTex">
-						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentSticky" relativePoint="BOTTOM" y="4"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANN_SHOWICON"])
-								TMW:TT(self, "ANN_SHOWICON", "ANN_SHOWICON_DESC")
-							</OnLoad>
-							<OnClick>
-								TMW.EVENTS:GetEventSettings().ShowIconTex = not not self:GetChecked()
-								TMW.IE:ScheduleIconSetup()
-							</OnClick>
-						</Scripts>
+
+					<CheckButton name="$parentShowIconTex" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="ShowIconTex">
 					</CheckButton>
+
 					<Button name="$parentColor" parentKey="Color">
 						<Size x="20" y="20"/>
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentShowIconTex" relativePoint="BOTTOM"/>
+							<Anchor point="LEFT" x="15" />
 						</Anchors>
 						<Layers>
 							<Layer level="BACKGROUND">
-								<Texture>
+								<Texture parentKey="background">
 									<Size x="17.5" y="17.5"/>
 									<Anchors>
 										<Anchor point="CENTER"/>
@@ -386,65 +336,44 @@
 						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
 					</Button>
 
-					<Slider name="$parentSize" inherits="TellMeWhen_SliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
+					<Slider name="$parentSize" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
 						<Size x="150" y="17"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentColor" relativePoint="BOTTOMLEFT" y="-17"/>
+							<Anchor point="LEFT" x="10" />
 						</Anchors>
 						<Scripts>
-							<OnMinMaxChanged>
-								local minValue, maxValue = self:GetMinMaxValues()
-								self.Low:SetText(TMW.L["DEFAULT"])
-								self.High:SetText(maxValue)
-							</OnMinMaxChanged>
 							<OnValueChanged>
 								if TMW:Do504SliderBugFix(self) then return end
 								value = self:GetValue()
 
 								self.Mid:SetText(value == 0 and TMW.L["DEFAULT"] or value)
+
 								if TMW.CI.ics then
 									TMW.EVENTS:GetEventSettings().Size = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
-							<OnLoad>
-								self.text:SetText(TMW.L["FONTSIZE"])
-								self:EnableMouseWheel(true)
-							</OnLoad>
-							<OnMouseWheel>
-								self:SetValue(self:GetValue()+delta)
-							</OnMouseWheel>
 						</Scripts>
 					</Slider>
 
-					<Slider name="$Duration" inherits="TellMeWhen_SliderTemplate" parentKey="Duration" minvalue="0" maxvalue="38" valuestep="1">
+					<Slider name="$parentTextDuration" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" parentKey="TextDuration" minvalue="0" valuestep="0.5">
 						<Size x="150" y="17"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentSize" relativePoint="BOTTOMLEFT" y="-17"/>
+							<Anchor point="LEFT" x="10" />
 						</Anchors>
 						<Scripts>
-							<OnMinMaxChanged>
-								local minValue, maxValue = self:GetMinMaxValues()
-								self.Low:SetText(TMW.L["DEFAULT"])
-								self.High:SetText(maxValue)
-							</OnMinMaxChanged>
 							<OnValueChanged>
 								if TMW:Do504SliderBugFix(self) then return end
-								value = self:GetValue()
 
-								self.Mid:SetText(value == 0 and TMW.L["DEFAULT"] or value)
+								value = max(self:GetValue(), 0.1)
+
+								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
+								
 								if TMW.CI.ics then
 									TMW.EVENTS:GetEventSettings().TextDuration = value
 									TMW.IE:ScheduleIconSetup()
 								end
 							</OnValueChanged>
-							<OnLoad>
-								self.text:SetText(TMW.L["DURATION"])
-								self:EnableMouseWheel(true)
-							</OnLoad>
-							<OnMouseWheel>
-								self:SetValue(self:GetValue()+delta)
-							</OnMouseWheel>
 						</Scripts>
 					</Slider>
 
@@ -452,5 +381,23 @@
 				</Frames>
 			</Frame>
 		</Frames>
+
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentSubHandlerListHeader" inherits="GameFontNormalLarge" parentKey="SubHandlerListHeader" justifyH="LEFT" >
+					<Anchors>
+						<Anchor point="BOTTOM" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOP" y="1"/>
+					</Anchors>
+				</FontString>
+				
+				<FontString name="$parentSettingsHeader" inherits="GameFontNormalLarge" parentKey="SettingsHeader" justifyH="CENTER" text="">
+					<Anchors>
+						<Anchor point="BOTTOM" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOP" />
+						<Anchor point="LEFT" relativeTo="$parentConfigFrames"/>
+						<Anchor point="RIGHT" relativeTo="$parentConfigFrames"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 	</Frame>
 </Ui>

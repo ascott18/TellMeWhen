@@ -22,11 +22,6 @@ local get = TMW.get
 local EVENTS = TMW.EVENTS
 local IE = TMW.IE
 
-function TMW.Classes.EventHandler:TestEvent(eventID)
-	local eventSettings = EVENTS:GetEventSettings(eventID)
-
-	self:HandleEvent(TMW.CI.icon, eventSettings)
-end
 
 EVENTS.CONST = {
 	EVENT_INVALID_REASON_MISSINGHANDLER = 1,
@@ -184,7 +179,7 @@ function EVENTS:LoadConfig()
 	-- If an event handler's configuration was not loaded for an event,
 	-- hide all handler configuration panels
 	if not didLoad then
-		for _, EventHandler in ipairs(TMW.Classes.EventHandler.instances) do
+		for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 			EventHandler.ConfigContainer:Hide()
 		end
 		self.EventSettingsContainer:Hide()
@@ -199,7 +194,7 @@ function EVENTS:LoadEventID(eventID)
 	
 	EVENTS.currentEventID = eventID ~= 0 and eventID or nil
 
-	for _, EventHandler in ipairs(TMW.Classes.EventHandler.instances) do
+	for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 		EventHandler.ConfigContainer:Hide()
 	end
 	IE.Events.HelpText:Show()
@@ -533,7 +528,7 @@ function EVENTS.AddEvent_Dropdown(frame)
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for i, EventHandler in ipairs(TMW.Classes.EventHandler.instances) do
+		for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 			local info = UIDropDownMenu_CreateInfo()
 
 			info.text = EventHandler.handlerName
@@ -611,5 +606,221 @@ end
 
 
 
+local ColumnConfig = TMW.C.EventHandler_ColumnConfig
+
+function ColumnConfig:GetListItemFrame(frameID)
+	local SubHandlerList = self.ConfigContainer.SubHandlerList
+	
+	local frame = SubHandlerList[frameID]
+	if not frame then
+		frame = CreateFrame("Button", SubHandlerList:GetName().."Item"..frameID, SubHandlerList, "TellMeWhen_EventHandler_SubHandlerListButton", frameID)
+		SubHandlerList[frameID] = frame
+		frame.EventHandler = self
+
+		local previousFrame = frameID > 1 and SubHandlerList[frameID - 1] or nil
+		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
+		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
+	end
+	return frame
+end
 
 
+function ColumnConfig:GetSubHandler(eventID)
+	local subHandlerIdentifier = EVENTS:GetEventSettings(eventID)[self.identifierSetting]
+	local subHandlerData = self.AllSubHandlersByIdentifier[subHandlerIdentifier]
+
+	return subHandlerData, subHandlerIdentifier
+end
+
+local subHandlersToDisplay = {}
+function ColumnConfig:LoadSettingsForEventID(id)
+	local SubHandlerList = self.ConfigContainer.SubHandlerList
+		
+	wipe(subHandlersToDisplay)
+	
+	for i, subHandlerDataParent in ipairs(self.NonSpecificEventHandlerData) do
+		tinsert(subHandlersToDisplay, subHandlerDataParent)
+	end
+	
+	for i, GenericComponent in ipairs(TMW.CI.icon.Components) do
+		if GenericComponent.EventHandlerData then
+			for i, subHandlerDataParent in ipairs(GenericComponent.EventHandlerData) do
+				if subHandlerDataParent.eventHandler == self then
+					tinsert(subHandlersToDisplay, subHandlerDataParent)
+				end
+			end
+		end
+	end
+	
+	TMW:SortOrderedTables(subHandlersToDisplay)
+	
+	local frameID = 0
+	for _, subHandlerDataParent in ipairs(subHandlersToDisplay) do
+		frameID = frameID + 1
+		local frame = self:GetListItemFrame(frameID)
+		frame:Show()
+
+		local animationData = subHandlerDataParent.subHandlerData
+		frame.subHandlerData = animationData
+		frame.subHandlerIdentifier = animationData.subHandlerIdentifier
+
+		frame.Name:SetText(animationData.text)
+		TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
+	end
+	
+	for i = #subHandlersToDisplay + 1, #SubHandlerList do
+		SubHandlerList[i]:Hide()
+	end
+
+	if SubHandlerList[1] then
+		SubHandlerList[1]:SetPoint("TOPLEFT", SubHandlerList, "TOPLEFT", 0, 0)
+		SubHandlerList[1]:SetPoint("TOPRIGHT", SubHandlerList, "TOPRIGHT", 0, 0)
+		
+		SubHandlerList:Show()
+	else
+		SubHandlerList:Hide()
+	end
+	
+	
+	local EventSettings = EVENTS:GetEventSettings(id)
+	self:SelectSubHandler(EventSettings[self.identifierSetting])
+end
+
+function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
+	local subHandlerListButton
+	
+	for i=1, #self.ConfigContainer.SubHandlerList do
+		local f = self.ConfigContainer.SubHandlerList[i]
+		if f and f:IsShown() then
+			if f.subHandlerIdentifier == subHandlerIdentifier then
+				subHandlerListButton = f
+			end
+			f.selected = nil
+			f:UnlockHighlight()
+			f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+		end
+	end
+
+	local subHandlerData = self.AllSubHandlersByIdentifier[subHandlerIdentifier]
+	self.currentSubHandlerData = subHandlerData
+
+	self:SetupConfig(subHandlerData)
+
+	if subHandlerListButton then
+		subHandlerListButton:LockHighlight()
+		subHandlerListButton:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	end
+
+	self:SetupEventDisplay(self.currentEventID)
+end
+
+function ColumnConfig:RegisterConfigFrame(identifier, configFrameData)
+	configFrameData.identifier = identifier
+	TMW:ValidateType("identifier", "RegisterConfigFrame(identifier, configFrameData)", identifier, "string")
+	
+	TMW:ValidateType("configFrameData.frame", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.frame, "string;frame")
+	TMW:ValidateType("configFrameData.Load", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.Load, "function")
+	
+	TMW:ValidateType("configFrameData.topPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.topPadding, "number;nil")
+	TMW:ValidateType("configFrameData.bottomPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.bottomPadding, "number;nil")
+	
+	self.ConfigFrameData[identifier] = configFrameData
+end
+
+function ColumnConfig:SetSliderMinMax(Slider, level)
+	-- level is passed in only when the setting is changing or being loaded
+	if Slider.range then
+		local deviation = Slider.range/2
+		local val = level or Slider:GetValue()
+
+		local newmin = max(Slider.min or 0, val-deviation)
+		local newmax = max(deviation, val + deviation)
+
+		Slider:SetMinMaxValues(newmin, newmax)
+		Slider.Low:SetText(newmin)
+		Slider.High:SetText(newmax)
+	end
+
+	if level then
+		Slider:SetValue(level)
+	end
+end
+
+function ColumnConfig:SetupConfig(subHandlerData)
+	local desiredFrames = subHandlerData.ConfigFrames
+	local subHandlerIdentifier = subHandlerData.subHandlerIdentifier
+
+	local EventSettings = EVENTS:GetEventSettings()
+	local Frames = self.ConfigContainer.ConfigFrames
+
+	assert(Frames, self.className .. " doesn't have a ConfigFrames table!")
+	
+	for configFrameIdentifier, configFrameData in pairs(self.ConfigFrameData) do
+		
+		local frame = configFrameData.frame
+		if type(frame) == "string" then
+			frame = Frames[frame]
+		end
+		if frame then
+			frame:Hide()
+		end
+	end
+
+	if not desiredFrames then
+		return
+	end
+
+	local lastFrame, lastFrameBottomPadding
+	for i, configFrameIdentifier in ipairs(desiredFrames) do
+		local configFrameData = self.ConfigFrameData[configFrameIdentifier]
+		
+		if not configFrameData then
+			TMW:Error("Values in ConfigFrames for event handler %q must resolve to a table registered via EventHandler_ColumnConfig:RegisterConfigFrame()", subHandlerIdentifier)
+		else
+			local frame = configFrameData.frame
+			if type(frame) == "string" then
+				frame = Frames[frame]
+				if not frame then
+					TMW:Error("Couldn't find child of %s with key %q for event handler %q", Frames:GetName(), configFrameData.frame, subHandlerIdentifier)
+				end
+			end
+			
+			local yOffset = (configFrameData.topPadding or 0) + (lastFrameBottomPadding or 0)
+			
+			if lastFrame then
+				frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -yOffset)
+			else
+				frame:SetPoint("TOP", Frames, "TOP", 0, -yOffset - 5)
+			end
+			frame:Show()
+			lastFrame = frame
+			
+			TMW.safecall(configFrameData.Load, configFrameData, frame, EventSettings)
+			
+			lastFrameBottomPadding = configFrameData.bottomPadding
+		end
+	end	
+end
+
+
+function ColumnConfig.Load_Generic_Slider(configFrameData, frame, EventSettings)
+	ColumnConfig:SetSliderMinMax(frame, EventSettings[configFrameData.identifier])
+
+	if configFrameData.text then
+		frame.text:SetText(configFrameData.text)
+		TMW:TT(frame, configFrameData.text, configFrameData.desc, 1, 1)
+	end
+
+	frame:Enable()
+end
+
+function ColumnConfig.Load_Generic_Check(configFrameData, frame, EventSettings)
+	frame:SetChecked(EventSettings[configFrameData.identifier])
+
+	frame.setting = configFrameData.identifier
+
+	if configFrameData.text then
+		frame.text:SetText(configFrameData.text)
+		TMW:TT(frame, configFrameData.text, configFrameData.desc, 1, 1)
+	end
+end

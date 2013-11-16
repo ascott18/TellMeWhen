@@ -42,10 +42,11 @@ local DogTag = LibStub("LibDogTag-3.0")
 
 
 local EVENTS = TMW.EVENTS
-local Announcements = TMW.Classes.EventHandler:New("Announcements")
+local Announcements = TMW.Classes.EventHandler_ColumnConfig:New("Announcements")
+Announcements.identifierSetting = "Channel"
 
 Announcements.kwargs = {}
-Announcements.AllChannelsByChannel = {}
+Announcements.AllSubHandlersByIdentifier = {}
 Announcements.AllChannelsOrdered = {}
 
 Announcements:RegisterEventDefaults{
@@ -148,7 +149,7 @@ function Announcements:HandleEvent(icon, eventSettings)
 	local Channel = eventSettings.Channel
 	if Channel ~= "" then
 		local Text = eventSettings.Text
-		local chandata = self.AllChannelsByChannel[Channel]
+		local chandata = self.AllSubHandlersByIdentifier[Channel]
 
 		if not chandata or not Text then
 			return
@@ -190,15 +191,16 @@ function Announcements:OnRegisterEventHandlerDataTable(eventHandlerData, order, 
 	TMW:ValidateType("3 (channel)", '[RegisterEventHandlerData - Announcements](order, channel, channelData)', channel, "string")
 	TMW:ValidateType("4 (channelData)", '[RegisterEventHandlerData - Announcements](order, channel, channelData)', channelData, "table")
 	
-	assert(not Announcements.AllChannelsByChannel[channel], ("A channel %q is already registered!"):format(channel))
+	assert(not Announcements.AllSubHandlersByIdentifier[channel], ("A channel %q is already registered!"):format(channel))
 	
 	channelData.order = order
-	channelData.channel = channel
+	channelData.subHandlerIdentifier = channel
 	
-	eventHandlerData.channel = channel
-	eventHandlerData.channelData = channelData
+	eventHandlerData.order = order
+	eventHandlerData.subHandlerData = channelData
+	eventHandlerData.subHandlerIdentifier = channel
 	
-	Announcements.AllChannelsByChannel[channel] = channelData
+	Announcements.AllSubHandlersByIdentifier[channel] = channelData
 	
 	tinsert(Announcements.AllChannelsOrdered,channelData)
 	TMW:SortOrderedTables(Announcements.AllChannelsOrdered)
@@ -218,7 +220,10 @@ Announcements:RegisterEventHandlerDataNonSpecific(12, "YELL", {
 Announcements:RegisterEventHandlerDataNonSpecific(14, "WHISPER", {
 	text = WHISPER,
 	isBlizz = 1,
-	editbox = 1,
+
+	ConfigFrames = {
+		"WhisperTarget",
+	},
 })
 Announcements:RegisterEventHandlerDataNonSpecific(16, "PARTY", {
 	text = CHAT_MSG_PARTY,
@@ -289,6 +294,11 @@ Announcements:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 	text = L["CHAT_MSG_CHANNEL"],
 	desc = L["CHAT_MSG_CHANNEL_DESC"],
 	isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
+
+	ConfigFrames = {
+		"Location",
+	},
+
 	defaultlocation = function() return select(2, GetChannelList()) end,
 	dropdown = function()
 		for i = 1, huge, 2 do
@@ -342,8 +352,13 @@ Announcements:RegisterEventHandlerDataNonSpecific(60, "EMOTE", {
 Announcements:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 	-- GLOBALS: DEFAULT_CHAT_FRAME, FCF_GetChatWindowInfo
 	text = L["CHAT_FRAME"],
-	icon = 1,
-	color = 1,
+
+	ConfigFrames = {
+		"Location",
+		"ShowIconTex",
+		"Color",
+	},
+
 	defaultlocation = function() return DEFAULT_CHAT_FRAME.name end,
 	dropdown = function()
 		local i = 1
@@ -394,9 +409,13 @@ local bullshitTable = {}
 Announcements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 	text = L["RAID_WARNING_FAKE"],
 	desc = L["RAID_WARNING_FAKE_DESC"],
-	icon = 1,
-	color = 1,
-	duration = 1,
+
+	ConfigFrames = {
+		"ShowIconTex",
+		"Color",
+		"TextDuration",
+	},
+
 	handler = function(icon, data, Text)
 		local Location = data.Location
 
@@ -418,8 +437,12 @@ local bullshitTable = {}
 Announcements:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
 	text = L["ERRORS_FRAME"],
 	desc = L["ERRORS_FRAME_DESC"],
-	icon = 1,
-	color = 1,
+
+	ConfigFrames = {
+		"ShowIconTex",
+		"Color",
+	},
+
 	handler = function(icon, data, Text)
 		if data.ShowIconTex then
 			Text = "|T" .. (icon.attributes.texture or "") .. ":0|t " .. Text
@@ -435,9 +458,14 @@ Announcements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	-- GLOBALS: SCT
 	text = "Scrolling Combat Text",
 	hidden = function() return not (SCT and SCT:IsEnabled()) end,
-	sticky = 1,
-	icon = 1,
-	color = 1,
+
+	ConfigFrames = {
+		"Location",
+		"Sticky",
+		"ShowIconTex",
+		"Color",
+	},
+
 	defaultlocation = SCT and SCT.FRAME1,
 	frames = SCT and {
 		[SCT.FRAME1] = "Frame 1",
@@ -447,7 +475,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	},
 	dropdown = function()
 		if not SCT then return end
-		for id, name in pairs(Announcements.AllChannelsByChannel.SCT.frames) do
+		for id, name in pairs(Announcements.AllSubHandlersByIdentifier.SCT.frames) do
 			local info = UIDropDownMenu_CreateInfo()
 			info.func = Announcements.Location_DropDown_OnClick
 			info.text = name
@@ -459,7 +487,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	end,
 	ddtext = function(value)
 		if not SCT then return end
-		return Announcements.AllChannelsByChannel.SCT.frames[value]
+		return Announcements.AllSubHandlersByIdentifier.SCT.frames[value]
 	end,
 	handler = function(icon, data, Text)
 		if SCT then
@@ -473,10 +501,15 @@ Announcements:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 	-- GLOBALS: MikSBT
 	text = "MikSBT",
 	hidden = function() return not MikSBT end,
-	sticky = 1,
-	icon = 1,
-	color = 1,
-	size = 1,
+
+	ConfigFrames = {
+		"Location",
+		"Sticky",
+		"ShowIconTex",
+		"Color",
+		"Size",
+	},
+
 	defaultlocation = "Notification",
 	dropdown = function()
 		for scrollAreaKey, scrollAreaName in MikSBT:IterateScrollAreas() do
@@ -506,10 +539,15 @@ Announcements:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 	-- GLOBALS: Parrot
 	text = "Parrot",
 	hidden = function() return not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())) end,
-	sticky = 1,
-	icon = 1,
-	color = 1,
-	size = 1,
+
+	ConfigFrames = {
+		"Location",
+		"Sticky",
+		"ShowIconTex",
+		"Color",
+		"Size",
+	},
+
 	defaultlocation = "Notification",
 	dropdown = function()
 		local areas = Parrot.GetScrollAreasChoices and Parrot:GetScrollAreasChoices() or Parrot:GetScrollAreasValidate()
@@ -540,9 +578,13 @@ Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 	-- GLOBALS: CombatText_AddMessage, CombatText_StandardScroll, SHOW_COMBAT_TEXT
 	text = COMBAT_TEXT_LABEL,
 	desc = L["ANN_FCT_DESC"],
-	sticky = 1,
-	icon = 1,
-	color = 1,
+
+	ConfigFrames = {
+		"Sticky",
+		"ShowIconTex",
+		"Color",
+	},
+
 	handler = function(icon, data, Text)
 		if data.ShowIconTex then
 			Text = "|T" .. (icon.attributes.texture or "") .. ":20:20:-5|t " .. Text

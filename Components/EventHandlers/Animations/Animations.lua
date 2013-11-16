@@ -29,12 +29,13 @@ local InCombatLockdown =
 
 local ActiveAnimations = {}
 
-local EventHandler = TMW.Classes.EventHandler:New("Animations")
+local Animations = TMW.Classes.EventHandler_ColumnConfig:New("Animations")
+Animations.identifierSetting = "Animation"
 
-EventHandler.AllAnimationsByAnimation = {}
-EventHandler.AllAnimationsOrdered = {}
+Animations.AllSubHandlersByIdentifier = {}
+Animations.AllAnimationsOrdered = {}
 
-EventHandler:RegisterEventDefaults{
+Animations:RegisterEventDefaults{
 	Animation	  	= "",
 	Duration		= 0.8,
 	Magnitude	  	= 10,
@@ -54,12 +55,22 @@ EventHandler:RegisterEventDefaults{
 	AnchorTo		= "IconModule_SelfIcon",
 }
 
-function EventHandler:ProcessIconEventSettings(event, eventSettings)
+TMW:RegisterUpgrade(61224, {
+	iconEventHandler = function(self, eventSettings)
+		if eventSettings.Size_anim ~= 0 then
+			eventSettings.Size_anim = (eventSettings.Size_anim - 30)/2
+		end
+	end,
+})
+
+
+function Animations:ProcessIconEventSettings(event, eventSettings)
 	if eventSettings.Animation ~= "" then
 		return true
 	end
 end
-function EventHandler:HandleEvent(icon, eventSettings)
+
+function Animations:HandleEvent(icon, eventSettings)
 	local Animation = eventSettings.Animation
 	if Animation ~= "" then
 		
@@ -69,9 +80,9 @@ function EventHandler:HandleEvent(icon, eventSettings)
 		local NonSpecificEventHandlerData = self.NonSpecificEventHandlerData
 		for i = 1, #NonSpecificEventHandlerData do
 			local eventHandlerData = NonSpecificEventHandlerData[i]
-			if eventHandlerData.animation == Animation then
+			if eventHandlerData.subHandlerIdentifier == Animation then
 			
-				eventHandlerData.animationData.Play(icon, eventSettings)
+				eventHandlerData.subHandlerData.Play(icon, eventSettings)
 				return true
 				
 			end
@@ -84,32 +95,31 @@ function EventHandler:HandleEvent(icon, eventSettings)
 			local EventHandlerData = IconComponent.EventHandlerData
 			for e = 1, #EventHandlerData do
 				local eventHandlerData = EventHandlerData[e]
-				if eventHandlerData.eventHandlerName == self.eventHandlerName and eventHandlerData.animation == Animation then
+				if eventHandlerData.eventHandlerName == self.eventHandlerName and eventHandlerData.subHandlerIdentifier == Animation then
 		
-					eventHandlerData.animationData.Play(icon, eventSettings)
+					eventHandlerData.subHandlerData.Play(icon, eventSettings)
 					return true
 			
 				end				
 			end
 		end
 	end
-
 end
 
-function EventHandler:TMW_ONUPDATE_POST()
+function Animations:TMW_ONUPDATE_POST()
 	if ActiveAnimations then
 		for animatedObject, animations in next, ActiveAnimations do
 			for _, animationTable in next, animations do
 				if animationTable.HALTED then
 					animatedObject:Animations_Stop(animationTable)
 				else
-					EventHandler.AllAnimationsByAnimation[animationTable.Animation].OnUpdate(animatedObject, animationTable)
+					Animations.AllSubHandlersByIdentifier[animationTable.Animation].OnUpdate(animatedObject, animationTable)
 				end
 			end
 		end
 	end
 end
-TMW:RegisterCallback("TMW_ONUPDATE_POST", EventHandler)
+TMW:RegisterCallback("TMW_ONUPDATE_POST", Animations)
 
 local function GetAnchorOrWarn(icon, anchorTo)
 	local name = icon:GetName() .. anchorTo
@@ -123,21 +133,14 @@ local function GetAnchorOrWarn(icon, anchorTo)
 	return frame
 end
 
-TMW:RegisterUpgrade(61224, {
-	iconEventHandler = function(self, eventSettings)
-		if eventSettings.Size_anim ~= 0 then
-			eventSettings.Size_anim = (eventSettings.Size_anim - 30)/2
-		end
-	end,
-})
 
 
-function EventHandler:OnRegisterEventHandlerDataTable(eventHandlerData, order, animation, animationData)
+function Animations:OnRegisterEventHandlerDataTable(eventHandlerData, order, animation, animationData)
 	TMW:ValidateType("2 (order)", '[RegisterEventHandlerData - Animations](order, animation, animationData)', order, "number")
 	TMW:ValidateType("3 (animation)", '[RegisterEventHandlerData - Animations](order, animation, animationData)', animation, "string")
 	TMW:ValidateType("4 (animationData)", '[RegisterEventHandlerData - Animations](order, animation, animationData)', animationData, "table")
 	
-	assert(not EventHandler.AllAnimationsByAnimation[animation], ("An animation %q is already registered!"):format(animation))
+	assert(not Animations.AllSubHandlersByIdentifier[animation], ("An animation %q is already registered!"):format(animation))
 	
 	-- Validate the animationData table
 	TMW:ValidateType("text", "animationData", animationData.text, "string")
@@ -149,28 +152,29 @@ function EventHandler:OnRegisterEventHandlerDataTable(eventHandlerData, order, a
 	end
 	
 	animationData.order = order
-	animationData.animation = animation
+	animationData.subHandlerIdentifier = animation
 	
-	eventHandlerData.animation = animation
-	eventHandlerData.animationData = animationData
+	eventHandlerData.order = order
+	eventHandlerData.subHandlerData = animationData
+	eventHandlerData.subHandlerIdentifier = animation
 	
-	EventHandler.AllAnimationsByAnimation[animation] = animationData
+	Animations.AllSubHandlersByIdentifier[animation] = animationData
 	
-	tinsert(EventHandler.AllAnimationsOrdered, animationData)
-	TMW:SortOrderedTables(EventHandler.AllAnimationsOrdered)
+	tinsert(Animations.AllAnimationsOrdered, animationData)
+	TMW:SortOrderedTables(Animations.AllAnimationsOrdered)
 end
 
-EventHandler:RegisterEventHandlerDataNonSpecific(1, "", {
+Animations:RegisterEventHandlerDataNonSpecific(1, "", {
 	text = NONE,
 	ConfigFrames = {},
 	
 	Play = function()
-		-- Do nothing. This will never get called anyway because EventHandler:ProcessIconEventSettings declares this event handler as invalid,
+		-- Do nothing. This will never get called anyway because Animations:ProcessIconEventSettings declares this event handler as invalid,
 		-- but it must be declared to pass validation.
 	end,
 })
 
-EventHandler:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
+Animations:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 	-- GLOBALS: WorldFrame 
 	text = L["ANIM_SCREENSHAKE"],
 	desc = L["ANIM_SCREENSHAKE_DESC"],
@@ -227,7 +231,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 		end
 	end,
 })
-EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
+Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 	text = L["ANIM_SCREENFLASH"],
 	desc = L["ANIM_SCREENFLASH_DESC"],
 	ConfigFrames = {
@@ -238,8 +242,6 @@ EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 	},
 
 	Play = function(icon, eventSettings)
-		local AnimationData = EventHandler.AllAnimationsByAnimation[eventSettings.Animation]
-
 		local Duration = 0
 		local Period = eventSettings.Period
 		if Period == 0 then
@@ -313,7 +315,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 })
 
 
-EventHandler:RegisterEventHandlerDataNonSpecific(20, "ICONSHAKE", {
+Animations:RegisterEventHandlerDataNonSpecific(20, "ICONSHAKE", {
 	text = L["ANIM_ICONSHAKE"],
 	desc = L["ANIM_ICONSHAKE_DESC"],
 	ConfigFrames = {
@@ -352,7 +354,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(20, "ICONSHAKE", {
 		icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
 	end,
 })
-EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
+Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 	text = L["ANIM_ICONFLASH"],
 	desc = L["ANIM_ICONFLASH_DESC"],
 	ConfigFrames = {
@@ -438,7 +440,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 	end,
 })
 
-EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
+Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 	text = L["ANIM_ICONBORDER"],
 	desc = L["ANIM_ICONBORDER_DESC"],
 	ConfigFrames = {
@@ -555,7 +557,7 @@ EventHandler:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		icon.animation_border:Hide()
 	end,
 })
-EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
+Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 	text = L["ANIM_ICONOVERLAYIMG"],
 	desc = L["ANIM_ICONOVERLAYIMG_DESC"],
 	ConfigFrames = {
@@ -644,11 +646,8 @@ EventHandler:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 		icon.animation_overlay:Hide()
 	end,
 })
---[[EventHandler:RegisterEventHandlerDataNonSpecific(90, "", { --(spacer)
-		noclick = true,
-	},
-)]]
-EventHandler:RegisterEventHandlerDataNonSpecific(200, "ICONCLEAR", {
+
+Animations:RegisterEventHandlerDataNonSpecific(200, "ICONCLEAR", {
 	text = L["ANIM_ICONCLEAR"],
 	desc = L["ANIM_ICONCLEAR_DESC"],
 	ConfigFrames = {},
@@ -690,7 +689,7 @@ function AnimatedObject:Animations_OnUnused()
 end
 function AnimatedObject:Animations_Start(table)
 	local Animation = table.eventSettings.Animation
-	local AnimationData = Animation and EventHandler.AllAnimationsByAnimation[Animation]
+	local AnimationData = Animation and Animations.AllSubHandlersByIdentifier[Animation]
 
 	if AnimationData then
 		self:Animations_Get()[Animation] = table
@@ -722,7 +721,7 @@ function AnimatedObject:Animations_Stop(arg1)
 		Animation = arg1
 	end
 
-	local AnimationData = EventHandler.AllAnimationsByAnimation[Animation]
+	local AnimationData = Animations.AllSubHandlersByIdentifier[Animation]
 
 	if AnimationData then
 		animations[Animation] = nil

@@ -1,86 +1,13 @@
 ﻿<Ui>
-
-
-	<Slider name="TellMeWhen_AnimationSliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">
-		<Size y="17"/>
-		<Anchors>
-			<Anchor point="RIGHT" x="-20"/>
-		</Anchors>
-		<Scripts>
-			<OnMouseUp>
-				TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self)
-			</OnMouseUp>
-			<OnLoad>
-				local frameName = self:GetName():gsub(self:GetParent():GetName(), ""):upper()
-
-				self.text:SetText(TMW.L["ANIM_" .. frameName])
-				TMW:TT(self, "ANIM_" .. frameName, "ANIM_" .. frameName .. "_DESC")
-
-				self.step = self:GetValueStep() -- 0.1
-				self.step = floor((self.step*10^5) + .5) / 10^5 -- attempt to get a half decent number here instead of 0.1000000000000327826 -- seriously, wtf?
-				self.range = 10
-
-				--self:SetValueStep(self.step)
-				TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self)
-
-				self:EnableMouseWheel(true)
-				self.getvalue = self.GetValue
-				function self:GetValue()
-					local step = self.step or 1
-					local val = self:getvalue()
-					return floor(val * (1/step) + 0.5) / (1/step)
-				end
-
-				local color = 34/0xFF
-				self.Low:SetTextColor(color, color, color, 1)
-				self.High:SetTextColor(color, color, color, 1)
-			</OnLoad>
-			<OnMouseWheel>
-				if IsShiftKeyDown() then
-					delta = delta*10
-				end
-				if IsControlKeyDown() then
-					delta = delta*60 -- (60 seconds)
-				end
-				if delta == 1 or delta == -1 then
-					delta = delta*(self.step or 1)
-				end
-				TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self, self:GetValue()+delta)
-			</OnMouseWheel>
-			<OnEnable>
-				self:SetAlpha(1)
-			</OnEnable>
-			<OnDisable>
-				self:SetAlpha(0.4)
-			</OnDisable>
-		</Scripts>
-	</Slider>
-
-	<Button name="TellMeWhen_AnimationSelectButton" inherits="TellMeWhen_EventSubComponentSelectButton" virtual="true" >
-		<Scripts>
-			<OnClick>
-				if TMW.CI.ics then
-					TMW.EVENTS:GetEventSettings().Animation = self.animation
-					TMW.IE:ScheduleIconSetup()
-				end
-
-				TMW.EVENTS:LoadConfig()
-				TMW.EVENTS:GetEventHandler("Animations"):SelectAnimation(self.animation)
-			</OnClick>
-		</Scripts>
-	</Button>
 	
 	<Frame name="$parentAnimations" inherits="TellMeWhen_EventContainer" parentKey="Animations">
 		<Frames>
-			<Frame name="$parentAnimationList" parentKey="AnimationList">
+			<Frame name="$parentSubHandlerList" parentKey="SubHandlerList">
 				<Size x="150" y="10"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" />
 					<Anchor point="BOTTOM" y="-0"/>
 				</Anchors>
-				<Frames>
-					<Button name="$parentNone" inherits="TellMeWhen_AnimationSelectButton" parentKey="None" id="1"/>
-				</Frames>
 				<Scripts>
 					<OnLoad>
 						TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
@@ -90,15 +17,11 @@
 			
 			<Frame name="$parentConfigFrames" parentKey="ConfigFrames">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentAnimationListScrollFrame" relativePoint="TOPRIGHT" x="5" y="0"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOPRIGHT" x="5" y="0"/>
 					<Anchor point="BOTTOMRIGHT" x="-0" y="0"/>
 				</Anchors>
 				<Frames>
-					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
-						<Anchors>
-							<!-- <Anchor point="TOPLEFT" x="20" y="-20"/> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
 							<OnValueChanged>
 								if TMW:Do504SliderBugFix(self) then return end
@@ -115,16 +38,9 @@
 						</Scripts>
 					</Slider>
 
-					<CheckButton name="$parentInfinite" inherits="TellMeWhen_CheckTemplate" parentKey="Infinite">
-						<Anchors>
-							<!-- <Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-10"/> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+					<CheckButton name="$parentInfinite" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Infinite">
 						<Scripts>
 							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_INFINITE"])
-								TMW:TT(self, "ANIM_INFINITE", "ANIM_INFINITE_DESC")
-
 								hooksecurefunc(self, "SetChecked", function(self, value)
 									if value then
 										self:GetParent().Duration:Disable()
@@ -140,11 +56,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1">
-						<Anchors>
-							<!-- <Anchor point="TOPLEFT" relativeTo="$parentDuration" relativePoint="BOTTOMLEFT" y="-60"/> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1">
 						<Scripts>
 							<OnValueChanged>
 								if TMW:Do504SliderBugFix(self) then return end
@@ -160,12 +72,8 @@
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
-					<Slider name="$parentPeriod" parentKey="Period" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
-						<Size y="17"/>
-						<Anchors>
-							<!-- <Anchor point="TOPLEFT" relativeTo="$parentMagnitude" /> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+
+					<Slider name="$parentPeriod" parentKey="Period" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
 							<OnValueChanged>
 								if TMW:Do504SliderBugFix(self) then return end
@@ -253,7 +161,6 @@
 					</Button>
 
 
-
 					<EditBox name="$parentImage" inherits="TellMeWhen_InputBoxTemplate" parentKey="Image" autoFocus="false">
 						<Size y="15"/>
 						<Anchors>
@@ -283,34 +190,12 @@
 						</Scripts>
 					</EditBox>
 
-					<CheckButton name="$parentFade" inherits="TellMeWhen_CheckTemplate" parentKey="Fade">
-						<Anchors>
-							<!-- <Anchor point="TOP" relativeTo="$parentColor" relativePoint="BOTTOM" y="-5"/> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_FADE"])
-								TMW:TT(self, "ANIM_FADE", "ANIM_FADE_DESC")
-							</OnLoad>
-							<OnClick>
-								TMW.EVENTS:GetEventSettings().Fade = not not self:GetChecked()
-							</OnClick>
-						</Scripts>
+					<CheckButton name="$parentFade" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Fade">
 					</CheckButton>
 
-					<Slider name="$parentAlphaStandalone" parentKey="AlphaStandalone" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1" >
-						<Size y="17"/>
-						<Anchors>
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+					<Slider name="$parentAlphaStandalone" parentKey="AlphaStandalone" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
 						<Scripts>
 							<OnLoad>
-								local frameName = self:GetName():gsub(self:GetParent():GetName(), ""):upper()
-
-								self.text:SetText(TMW.L["ANIM_" .. frameName])
-								TMW:TT(self, "ANIM_" .. frameName, "ANIM_" .. frameName .. "_DESC")
-
 								self:SetMinMaxValues(0, 100)
 								self:SetValueStep(1)
 								self.step = 1
@@ -341,12 +226,7 @@
 					</Slider>
 					
 					
-					<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
-						<Size y="17"/>
-						<Anchors>
-							<!-- <Anchor point="TOPLEFT" relativeTo="$parentFade" relativePoint="BOTTOMLEFT" y="-18" /> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+					<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
 							<OnValueChanged>
 								if TMW:Do504SliderBugFix(self) then return end
@@ -362,12 +242,8 @@
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
-					<Slider name="$parentSize_anim" parentKey="Size_anim" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="0.1" >
-						<Size y="17"/>
-						<Anchors>
-							<!-- <Anchor point="TOPLEFT" relativeTo="$parentThickness" relativePoint="BOTTOMLEFT" y="-28" /> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+					
+					<Slider name="$parentSize_anim" parentKey="Size_anim" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
 							<OnValueChanged>
 								if TMW:Do504SliderBugFix(self) then return end
@@ -383,12 +259,8 @@
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
-					<Slider name="$parentSizeX" parentKey="SizeX" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1" >
-						<Size y="17"/>
-						<Anchors>
-							<!-- <Anchor point="TOPLEFT" relativeTo="$parentFade" relativePoint="BOTTOMLEFT" y="-18" /> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+
+					<Slider name="$parentSizeX" parentKey="SizeX" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
 						<Scripts>
 							<OnValueChanged>
 								if TMW:Do504SliderBugFix(self) then return end
@@ -405,12 +277,8 @@
 							</OnValueChanged>
 						</Scripts>
 					</Slider>
-					<Slider name="$parentSizeY" parentKey="SizeY" inherits="TellMeWhen_AnimationSliderTemplate" valuestep="1" >
-						<Size y="17"/>
-						<Anchors>
-							<!-- <Anchor point="TOPLEFT" relativeTo="$parentSizeX" relativePoint="BOTTOMLEFT" y="-28" /> -->
-							<Anchor point="LEFT" x="10" />
-						</Anchors>
+
+					<Slider name="$parentSizeY" parentKey="SizeY" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
 						<Scripts>
 							<OnValueChanged>
 								self.range = 100
@@ -462,13 +330,13 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentListHeader" inherits="GameFontNormalLarge" parentKey="ListHeader" justifyH="LEFT" text="">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeTo="$parentAnimationListScrollFrame" relativePoint="TOP" y="1"/>
+						<Anchor point="BOTTOM" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOP" y="1"/>
 					</Anchors>
 				</FontString>
 				
 				<FontString name="$parentSettingsHeader" inherits="GameFontNormalLarge" parentKey="SettingsHeader" justifyH="CENTER" text="">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeTo="$parentAnimationListScrollFrame" relativePoint="TOP" />
+						<Anchor point="BOTTOM" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOP" />
 						<Anchor point="LEFT" relativeTo="$parentConfigFrames"/>
 						<Anchor point="RIGHT" relativeTo="$parentConfigFrames"/>
 					</Anchors>

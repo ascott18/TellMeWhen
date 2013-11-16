@@ -173,6 +173,11 @@ function EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
 	TMW:ValidateType("eventHandlerData.eventHandlerName", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandlerName, "string")
 	
 	TMW.safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, unpack(eventHandlerData))
+
+	for i = 1, #eventHandlerData do
+		-- This stuff has been processed, so it is safe to get rid of it now.
+		eventHandlerData[i] = nil
+	end
 	
 	tinsert(self.AllEventHandlerData, eventHandlerData)
 end
@@ -216,6 +221,14 @@ function EventHandler:RegisterEventDefaults(defaults)
 	
 	-- Copy the defaults into the main defaults table.
 	TMW:MergeDefaultsTables(defaults, TMW.Icon_Defaults.Events["**"])
+end
+
+
+-- [INTERNAL]
+function EventHandler:TestEvent(eventID)
+	local eventSettings = EVENTS:GetEventSettings(eventID)
+
+	return self:HandleEvent(TMW.CI.icon, eventSettings)
 end
 
 	
@@ -263,3 +276,9 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function(event, time, Locked)
 	wipe(TMW.Classes.Icon.QueuedIcons)
 end)
 
+
+TMW:NewClass("EventHandler_ColumnConfig", "EventHandler"){
+	OnNewInstance_ColumnConfig = function(self)
+		self.ConfigFrameData = {}
+	end,
+}
