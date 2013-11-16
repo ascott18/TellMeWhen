@@ -656,16 +656,18 @@ function ColumnConfig:LoadSettingsForEventID(id)
 	
 	local frameID = 0
 	for _, subHandlerDataParent in ipairs(subHandlersToDisplay) do
-		frameID = frameID + 1
-		local frame = self:GetListItemFrame(frameID)
-		frame:Show()
+		if not get(subHandlerDataParent.subHandlerData.hidden) then
+			frameID = frameID + 1
+			local frame = self:GetListItemFrame(frameID)
+			frame:Show()
 
-		local animationData = subHandlerDataParent.subHandlerData
-		frame.subHandlerData = animationData
-		frame.subHandlerIdentifier = animationData.subHandlerIdentifier
+			local animationData = subHandlerDataParent.subHandlerData
+			frame.subHandlerData = animationData
+			frame.subHandlerIdentifier = animationData.subHandlerIdentifier
 
-		frame.Name:SetText(animationData.text)
-		TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
+			frame.Name:SetText(animationData.text)
+			TMW:TT(frame, animationData.text, animationData.desc, 1, 1)
+		end
 	end
 	
 	for i = #subHandlersToDisplay + 1, #SubHandlerList do

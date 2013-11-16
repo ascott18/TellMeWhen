@@ -102,7 +102,7 @@ Announcements:RegisterConfigFrame("Location", {
 	bottomPadding = 4,
 	
 	Load = function(self, frame, EventSettings)
-		local channelData = self.currentSubHandlerData
+		local channelData = Announcements.currentSubHandlerData
 
 		local defaultlocation = get(channelData.defaultlocation)
 		local location = EventSettings.Location

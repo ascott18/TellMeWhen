@@ -138,8 +138,8 @@ Animations:RegisterConfigFrame("AlphaStandalone", {
 	Load = function(self, frame, EventSettings)
 		Animations:SetSliderMinMax(frame, EventSettings.a_anim*100)
 
-		frame.text:SetText(configFrameData.text)
-		TMW:TT(frame, configFrameData.text, configFrameData.desc, 1, 1)
+		frame.text:SetText(self.text)
+		TMW:TT(frame, self.text, self.desc, 1, 1)
 
 		frame:Enable()
 	end,
