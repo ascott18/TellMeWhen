@@ -1802,7 +1802,7 @@ L["ANN_WHISPERTARGET_DESC"] = [[Input the name of the player that you would like
 
 Normal server/faction whisper requirements apply.]]
 L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
-L["ANN_FCT_DESC"] = "Outputs to Blizzard's Floating Combat Text feature. It MUST be enabled in your interface options for the text to be outputted."
+L["ANN_FCT_DESC"] = "Outputs to Blizzard's %s feature. It MUST be enabled in your interface options for the text to be outputted."
 L["CHAT_MSG_SMART"] = "Smart Channel"
 L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - whichever is appropriate."
 L["CHAT_MSG_CHANNEL"] = "Chat Channel"
