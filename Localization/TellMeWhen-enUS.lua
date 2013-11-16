@@ -1929,7 +1929,9 @@ L["CLEU_SPELL_CAST_SUCCESS_DESC"] = [[Occurs when an spell is successfully cast.
 L["CLEU_SPELL_DAMAGE"] = "Spell Damage"
 L["CLEU_SPELL_DAMAGE_DESC"] = [[Occurs when any spell does any damage.]]
 L["CLEU_SPELL_DAMAGE_CRIT"] = "Spell Crit"
-L["CLEU_SPELL_DAMAGE_CRIT_DESC"] = [[Occurs when any spell does critical damage. This may occur at the same time as the %q event.]]
+L["CLEU_SPELL_DAMAGE_CRIT_DESC"] = [[Occurs when any spell does critical damage. This will occur at the same time as the %q event.]]
+L["CLEU_SPELL_DAMAGE_NONCRIT"] = "Spell Non-Crit"
+L["CLEU_SPELL_DAMAGE_NONCRIT_DESC"] = [[Occurs when any spell does non-critical damage. This will occur at the same time as the %q event.]]
 L["CLEU_SPELL_DISPEL"] = "Dispel"
 L["CLEU_SPELL_DISPEL_DESC"] = [[Occurs when an aura is dispelled.
 

@@ -55,6 +55,7 @@ CONFIG.Events = {
 "CAT_SPELL",
 	"SPELL_DAMAGE", -- normal
 	"SPELL_DAMAGE_CRIT", -- normal
+	"SPELL_DAMAGE_NONCRIT", -- normal
 	"SPELL_MISSED", -- normal
 	"SPELL_REFLECT", -- normal
 "SPACE",

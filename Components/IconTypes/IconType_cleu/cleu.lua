@@ -134,6 +134,8 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			-- fake an event that fires if there was a crit
 			-- fire it in addition to, not in place of, SPELL_DAMAGE
 			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_CRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+		else
+			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_NONCRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 		end
 	elseif clientVersion == 50200 and (event == "SPELL_DISPEL" or event == "SPELL_DISPEL_FAILED" or event == "SPELL_STOLEN") then
 		arg1, arg2, arg4, arg5 = arg4, arg5, arg1, arg2
@@ -236,6 +238,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			--"RANGE_MISSED", -- normal
 			--"SPELL_DAMAGE", -- normal
 			--"SPELL_DAMAGE_CRIT", -- normal BUT NOT ACTUALLY AN EVENT
+			--"SPELL_DAMAGE_NONCRIT", -- normal BUT NOT ACTUALLY AN EVENT
 			--"SPELL_MISSED", -- normal
 			--"SPELL_REFLECT", -- normal BUT NOT ACTUALLY AN EVENT
 			--"SPELL_EXTRA_ATTACKS", -- normal
