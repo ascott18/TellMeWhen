@@ -95,10 +95,13 @@ function EVENTS:LoadConfig()
 			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
 			local p, t, r, x, y = frame.EventName:GetPoint(2)
 			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
+
 			local p, t, r, x, y = frame.DataText:GetPoint(1)
 			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
 			local p, t, r, x, y = frame.DataText:GetPoint(2)
 			frame.DataText:SetPoint(p, t, r, x, y + yAdjustText)
+
+			frame.DataText:SetWordWrap(false)
 		end
 		previousFrame = frame
 		frame:Show()

@@ -11,7 +11,7 @@
 						<Anchor point="RIGHT" x="-15"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" >
+				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" justifyV="TOP" wordwrap="false">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="15" y="4"/>
 						<Anchor point="RIGHT" x="-15"/>
