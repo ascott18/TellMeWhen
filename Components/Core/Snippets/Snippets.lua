@@ -60,11 +60,16 @@ end
 
 function SNIPPETS:RunSnippet(snippet)
 	local func, err = loadstring(snippet.Code, "TMW Snippet: " .. snippet.Name)
+	
+	SNIPPETS.currentSnippet = snippet
+	
 	if func then
 		func()
 	elseif err then
 		TMW:Error(err)
 	end
+
+	SNIPPETS.currentSnippet = nil
 	
 	RanSnippets[snippet] = true
 end
