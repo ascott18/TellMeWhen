@@ -3530,12 +3530,17 @@ function TMW:DoValidityCheck()
 		end
 		
 		if type(checker) == "table" then
+			local group
 			if checker.class == TMW.Classes.Icon then
 				checkerName = checker:GetIconName(true)
 
 				if not checker.Enabled then
 					shouldWarn = false
 				end
+				if not checker.group:ShouldUpdateIcons() then
+					shouldWarn = false
+				end
+
 			elseif checker.class == TMW.Classes.Group then
 				checkerName = checker:GetGroupName()
 
