@@ -122,6 +122,10 @@ TMW:RegisterUpgrade(70010, {
 	end,
 
 	profile = function(self, profile, profileName)
+		if not profile.TextLayouts then
+			return
+		end
+
 		local GUIDmap = {}
 
 		for GUID, layout in pairs(profile.TextLayouts) do
@@ -231,7 +235,7 @@ TMW:RegisterUpgrade(60338, {
 	textlayout = function(self, settings, GUID)
 		-- I decided to change [Stacks] to return numbers instead of strings
 		for i, displaySettings in ipairs(settings) do
-			displaySettings.DefaultText = displaySettings.DefaultText
+			displaySettings.DefaultText = displaySettings.DefaultText and displaySettings.DefaultText
 				:gsub("(Stacks[^:]-:Hide)%('0'%)", "%1(0)")
 				:gsub("(Stacks[^:]-:Hide)%('0', '1'%)", "%1(0, 1)")
 		end
