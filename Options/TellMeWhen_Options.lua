@@ -92,11 +92,16 @@ TMW.operators = {
 	{ tooltipText = L["CONDITIONPANEL_GREATEREQUAL"], 	value = ">=", 	text = ">=" },
 }
 
+TMW.EquivOriginalLookup = {}
 TMW.EquivFullIDLookup = {}
 TMW.EquivFullNameLookup = {}
 TMW.EquivFirstIDLookup = {}
 for category, b in pairs(TMW.OldBE) do
 	for equiv, str in pairs(b) do
+		TMW.EquivOriginalLookup[equiv] = str
+
+		-- remove underscores
+		str = gsub(str, "_", "")
 
 		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
 		TMW.EquivFirstIDLookup[equiv] = strsplit(";", str) -- this is used to display them in the list (tooltip, name, id display)
@@ -3131,9 +3136,10 @@ end
 ---------- Equivalancies ----------
 local equivTipCache = {}
 function IE:Equiv_GenerateTips(equiv)
-	local tbl = TMW:SplitNames(TMW.EquivFullIDLookup[equiv])
+	local IDs = TMW:SplitNames(TMW.EquivFullIDLookup[equiv])
+	local original = TMW:SplitNames(TMW.EquivOriginalLookup[equiv])
 
-	for k, v in pairs(tbl) do
+	for k, v in pairs(IDs) do
 		local name, _, texture = GetSpellInfo(v)
 		if not name then
 			if TMW.debug then
@@ -3143,6 +3149,12 @@ function IE:Equiv_GenerateTips(equiv)
 				name = v
 			end
 			texture = "Interface\\Icons\\INV_Misc_QuestionMark"
+		end
+
+		-- If this spell is tracked only by ID, add the ID in parenthesis
+		local originalSpell = tostring(original[k])
+		if originalSpell:sub(1, 1) ~= "_" then
+			name = format("%s |cff7f6600(%d)|r", name, originalSpell)
 		end
 
 		tiptemp[name] = tiptemp[name] or "|T" .. texture .. ":0|t" .. name
@@ -3222,7 +3234,7 @@ end
 
 ---------- Tooltips ----------
 --local cachednames = {}
-function IE:GetRealNames(Name, icon)
+function IE:GetRealNames(Name)
 	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
 	local text = TMW:CleanString(Name)
 	
@@ -3271,12 +3283,17 @@ function IE:GetRealNames(Name, icon)
 			end
 			
 			name = name or v or ""
+
 			texture = texture or SpellTextures[name]
+		end
+
+		if type(v) == "number" then
+			name = format("%s |cff7f6600(%d)|r", name, v)
 		end
 
 		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
 			numadded = numadded + 1
-			local dur = Types[CI.ics.Type].DurationSyntax and " ("..TMW:FormatSeconds(durations[k])..")" or ""
+			local dur = Types[CI.ics.Type].DurationSyntax and ": "..TMW:FormatSeconds(durations[k]).."" or ""
 			str = str ..
 			(texture and ("|T" .. texture .. ":0|t") or "") ..
 			name ..

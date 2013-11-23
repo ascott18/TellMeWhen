@@ -368,9 +368,6 @@ function TMW:ProcessEquivalencies()
 	
 	for category, b in pairs(TMW.OldBE) do
 		for equiv, str in pairs(b) do
-		
-			-- remove underscores from TMW.OldBE's entries
-			b[equiv] = gsub(str, "_", "")
 
 			-- turn all IDs prefixed with "_" into their localized name.
 			-- When defining equavalancies, dont put a _ on every single one,
@@ -3727,6 +3724,7 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	local m = (seconds % 31556926  % 86400  % 3600) / 60
 	local s = (seconds % 31556926  % 86400  % 3600  % 60)
 
+
 	local ns
 	if skipSmall then
 		ns = format("%d", s)
@@ -3738,6 +3736,10 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	end
 	if s < 10 and seconds >= 60 then
 		ns = "0" .. ns
+	end
+
+	if y >= 0x7FFFFFFE then
+		return format("OVERFLOW:%d:%02d:%02d:%s", d, h, m, ns)
 	end
 
 	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, ns) end
