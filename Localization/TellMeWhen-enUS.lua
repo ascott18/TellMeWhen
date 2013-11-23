@@ -2201,6 +2201,7 @@ L["ReducedHealing"] = "Reduced Healing"
 L["ReducedPhysicalDone"] = "Reduced Physical Damage Done"
 L["DefensiveBuffs"] = "Defensive Buffs"
 L["MiscHelpfulBuffs"] = "Misc. Helpful Buffs"
+L["SpeedBoosts"] = "Speed Boosts"
 L["DamageBuffs"] = "Damage Buffs"
 
 -- Deprecated

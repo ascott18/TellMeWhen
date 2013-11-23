@@ -253,6 +253,10 @@ function SUG:NameOnCursor(isClick)
 	end]]
 	-- always escape parentheses, brackets, percent signs, minus signs, plus signs
 	SUG.lastName = gsub(SUG.lastName, "([%(%)%%%[%]%-%+])", "%%%1")
+	
+	if TMW.debug then
+		SUG.lastName = SUG.lastName:trim("_") -- makes building equivalencies easier
+	end
 
 	--if TMW.db.profile.SUG_atBeginning then
 		SUG.atBeginning = "^" .. SUG.lastName
