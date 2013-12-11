@@ -83,6 +83,15 @@ TMW:RegisterCallback("TMW_ON_PROFILE", function(event, profileEvent, arg2, arg3)
 end)
 
 
+TMW:RegisterLuaImportDetector(function(table, id, parentTableName)
+	if (not parentTableName or parentTableName == "CodeSnippets")
+		and type(rawget(table, "Code")) == "string" and table.Code ~= "" then
+
+		return table.Code, L["fCODESNIPPET"]:format(table.Name or L["CODESNIPPETS_DEFAULTNAME"])
+	end
+end)
+
+
 
 
 

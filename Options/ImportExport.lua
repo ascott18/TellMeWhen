@@ -60,9 +60,11 @@ function Item:OnNewInstance(type, parent)
 	assert(type)
 
 	self.Type = type
-	self.parent = parent
-	self.Version = parent and parent.Version
 	self.extra = {}
+	
+	if parent then
+		self:SetParent(parent)
+	end
 end
 
 function Item:GetEditbox()
@@ -79,6 +81,7 @@ end
 function Item:SetParent(parent)
 	self.parent = parent
 	self.Version = self.Version or parent.Version
+	self.ImportSource = self.ImportSource or parent.ImportSource
 end
 
 
@@ -128,7 +131,14 @@ end
 function Item:Import(...)
 	self:AssertSelfIsInstance()
 	
-	TMW:Import(self, ...)
+	local results = TMW:DetectImportedLua(self.Settings)
+	local source = self.ImportSource.type
+
+	if source == "Profile" or source == "Backup" or not results then
+		TMW:Import(self, ...)
+	else
+		TMW:ImportPendingConfirmation(self, results, {TMW.Import, TMW, self, ...})
+	end
 end
 
 
@@ -875,6 +885,7 @@ Profile.displayText = L["IMPORT_FROMLOCAL"]
 
 function Profile:HandleTopLevelMenu()
 	local Item = Item:New("database")
+	Item.ImportSource = self
 
 	Item.Settings = TMW.db
 	Item.Version = TellMeWhenDB.Version
@@ -892,6 +903,7 @@ Backup.displayDescription = L["IMPORT_FROMBACKUP_DESC"]:format(TMW.BackupDate)
 
 function Backup:HandleTopLevelMenu()
 	local Item = Item:New("database")
+	Item.ImportSource = self
 
 	Item.Settings = TMW.Backupdb
 	Item.Version = TMW.Backupdb.Version
@@ -936,6 +948,7 @@ function String:HandleTopLevelMenu()
 			local type = SharableDataType.types[result.type]
 
 			local Item = Item:New(result.type)
+			Item.ImportSource = self
 
 			Item.Settings = result.data
 			Item.Version = result.version
@@ -988,6 +1001,7 @@ function Comm:HandleTopLevelMenu(editbox)
 		local type = SharableDataType.types[result.type]
 
 		local Item = Item:New(result.type)
+		Item.ImportSource = self
 
 		Item.Settings = result.data
 		Item.Version = result.version

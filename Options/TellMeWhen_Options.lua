@@ -3361,6 +3361,9 @@ function TMW:Import(SettingsItem, ...)
 	IE:NotifyChanges()
 end
 
+function TMW:ImportPendingConfirmation(SettingsItem, luaDetections, callArgsAfterSuccess)
+	TellMeWhen_ConfirmImportedLuaDialog:StartConfirmations(SettingsItem, luaDetections, callArgsAfterSuccess)
+end
 
 ---------- Serialization ----------
 function TMW:SerializeData(data, type, ...)

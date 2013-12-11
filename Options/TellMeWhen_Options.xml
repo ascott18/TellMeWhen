@@ -1687,6 +1687,165 @@
 	</Frame>
 
 
+	<Frame name="TellMeWhen_ConfirmImportedLuaDialog" inherits="TellMeWhen_SimpleDialog" toplevel="true" frameStrata="FULLSCREEN_DIALOG">
+		<Size x="500" y="500"/>
+
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent" />
+		</Anchors>
+
+		<Frames>
+			<Frame name="$parentScrollContainer" parentKey="ScrollContainer">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" y="-15"/>
+					<Anchor point="LEFT" x="20" />
+					<Anchor point="BOTTOMRIGHT" x="-30" y="40"/>
+				</Anchors>
+
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentCode" parentKey="Code" inherits="GameFontHighlight" justifyH="LEFT" justifyV="TOP" >
+							<Size x="1" y="0"/>
+							<Anchors>
+								<Anchor point="TOPLEFT"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+
+				<Scripts>
+					<OnLoad>
+						TMW:ConvertContainerToScrollFrame(self, true, 7, 10)
+						self.Code:SetWidth(self:GetWidth())
+						self.Code:SetNonSpaceWrap(1)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<!-- border dummy-->
+			<Frame>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentScrollContainerScrollFrame" x="-5" y="5"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parentScrollContainerScrollFrame" x="5" y="-5"/>
+				</Anchors>
+
+				<Scripts>
+					<OnLoad>
+						self:SetBackdrop({
+							edgeFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+							tile = true,
+							edgeSize = 3,
+						})
+						self:SetBackdropBorderColor(0, .82, 1, 1)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<Button name="$parentDeny" parentKey="Deny" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15" x="215"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="12" y="12"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:GetParent():Hide()
+						TMW:Print(TMW.L["IMPORT_FAILED"])
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<Button name="$parentConfirm" parentKey="Confirm" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15" x="215"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="-12" y="12"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:GetParent():LoadNext()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+
+		<Scripts>
+			<OnLoad>
+
+				self.ScrollContainer.Code:SetText(TMW:Serialize(TMW.db.profile))
+				self.title:SetText("TellMeWhen")
+
+				self.desc:SetText(TMW.L["IMPORT_LUA_DESC"])
+				self.desc:SetWidth(self:GetWidth() - 30)
+
+				self.Confirm:SetText(TMW.L["IMPORT_LUA_CONFIRM"])
+				self.Deny:SetText(TMW.L["IMPORT_LUA_DENY"])
+
+				self:SetScale(0.85)
+
+				local flags = {
+					"sendmail", "accepttrade", "guildcontrol", "guilddisband", "guildpromote",
+					"money", "gold", "trade", "mail", "guild", "bank", "withdraw", "deposit",
+				}
+
+				local currentItem, currentDetections, completionOperation
+
+				function self:StartConfirmations(settingsItem, luaDetections, callArgsAfterSuccess)
+					self:Show()
+					self.currentResult = 0
+					currentItem, currentDetections, completionOperation = settingsItem, luaDetections, callArgsAfterSuccess
+					self:LoadNext()
+				end
+
+				function self:LoadNext()
+					if #currentDetections > self.currentResult then
+						self.currentResult = self.currentResult + 1
+
+						local code = currentDetections[self.currentResult].code
+						local codeLower = code:lower()
+						local flagged
+
+						for k, flagWord in pairs(flags) do
+							local start = 0
+							repeat
+        						local replaced
+								local left, right = strfind(codeLower, flagWord, start)
+								if left then
+
+									code = code:sub(0, left-1) .. "|cffff0000" .. code:sub(left, right) .. "|r" .. code:sub(right+1)
+									codeLower = code:lower()
+									replaced = true
+									flagged = true
+									start = right + 12
+								end
+							until not replaced
+						end
+
+						self.ScrollContainer.Code:SetText(code)
+
+						local desc = TMW.L["IMPORT_LUA_DESC"]
+						if flagged then
+							desc = desc .. "\r\n\r\n|cFFFF5959" .. TMW.L["IMPORT_LUA_DESC2"] .. "|r"
+						end
+
+						desc = desc .. "\r\n\r\n" .. (currentDetections[self.currentResult].name or "")
+
+						if currentItem.ImportSource.type == "Comm" then
+							desc = desc .. " " .. FROM .. " " .. currentItem:GetExtra("SourcePlayer")
+						elseif currentItem.ImportSource.type == "String" then
+							desc = desc .. " " .. TMW.L["IMPORT_FROMSTRING"]
+						end
+
+						self.desc:SetText(desc)
+					else
+						self:Hide()
+						TMW.safecall(unpack(completionOperation))
+					end
+				end
+
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
 		<Size x="585" y="380"/>
 		<Anchors>

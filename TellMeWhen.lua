@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70030 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70031 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -1065,6 +1065,9 @@ local debugprofilestop = debugprofilestop_SAFE
 
 
 
+
+
+
 ---------------------------------
 -- Iterator Functions
 ---------------------------------
@@ -1528,6 +1531,7 @@ do -- Callback Lib
 		end
 	end
 end
+
 
 
 
@@ -4135,3 +4139,43 @@ if DogTag then
 	})
 end
 
+
+
+
+
+
+---------------------------------
+-- User-Defined Lua Import Detection
+---------------------------------
+
+local detectors = {}
+function TMW:RegisterLuaImportDetector(func)
+	detectors[func] = true
+end
+
+local function recursivelyDetectLua(results, table, ...)
+	if type(table) == "table" then
+		for func in pairs(detectors) do
+			local success, code, name = TMW.safecall(func, table, ...)
+
+			if success and code then
+				tinsert(results, {code = code, name = name})
+			end
+		end
+
+        for a, b in pairs(table) do
+            recursivelyDetectLua(results, b, a, ...)
+        end
+    end
+end
+function TMW:DetectImportedLua(table)
+	local results = {}
+
+	recursivelyDetectLua(results, table)
+
+	if #results == 0 then
+		return nil
+	end
+
+	return results
+end

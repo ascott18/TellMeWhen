@@ -46,6 +46,7 @@ L["CONFIGMODE"] = "TellMeWhen is in configuration mode. Icons will not be functi
 L["CONFIGMODE_EXIT"] = "Exit config mode"
 L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 L["IMPORT_SUCCESSFUL"] = "Import successful!"
+L["IMPORT_FAILED"] = "Import failed!"
 L["IMPORTERROR_INVALIDTYPE"] = "Attempted to import data of an unknown type. Check to see if you have the latest version of TellMeWhen installed."
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
 
@@ -1184,6 +1185,7 @@ L["EQUIPSETTOCHECK"] = "Equipment set to check (|cFFFF5959CASE SENSITIVE|r)"
 L["ONLYCHECKMINE"] = "Only Check Mine"
 L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for buffs/debuffs that you casted"
 L["LUACONDITION"] = "Lua (Advanced)"
+L["LUACONDITION2"] = "Lua Condition"
 L["LUACONDITION_DESC"] = [[This condition type allows you to evaluate Lua code to determine the state of a condition.
 
 The input is not an 'if .. then' statement, nor is it a function closure. It is a regular statement to be evaluated, e.g. 'a and b or c'.  If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally (perhaps using TMW's Lua snippets feature).
@@ -1882,6 +1884,7 @@ L["ANIM_ANCHOR_NOT_FOUND"] = "Couldn't find frame named %q to anchor an animatio
 
 
 L["EVENTHANDLER_LUA_TAB"] = "Lua (Advanced)"
+L["EVENTHANDLER_LUA_LUAEVENTf"] = "Lua Event: %s"
 L["EVENTHANDLER_LUA_LUA"] = "Lua"
 L["EVENTHANDLER_LUA_CODE"] = "Lua Code to Execute"
 L["EVENTHANDLER_LUA_CODE_DESC"] = "Type the Lua code that should be executed when the event is triggered here."
@@ -2162,6 +2165,17 @@ L["STRATA_DIALOG"] = "Dialog"
 L["STRATA_FULLSCREEN"] = "Fullscreen"
 L["STRATA_FULLSCREEN_DIALOG"] = "Fullscreen Dialog"
 L["STRATA_TOOLTIP"] = "Tooltip"
+
+
+L["IMPORT_LUA_DESC"] = [[The data you are importing contains the following Lua code that can be executed by TellMeWhen.
+
+You should be wary of importing any Lua code from untusted sources because it can be used for malicious purposes. Most of the time it is completely safe, but there are people out there who would use it to do you wrong.
+
+Review the code and confirm that it is either coming from a source that you trust or that it isn't doing things like sending mail or accepting trades on your behalf.]]
+L["IMPORT_LUA_DESC2"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t Be sure to review the parts of the code in red, which are common words/phrases that could indicate malicious activity. |TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t"
+L["IMPORT_LUA_CONFIRM"] = "Ok, import this."
+L["IMPORT_LUA_DENY"] = "Abort import operation."
+
 
 -- --------
 -- EQUIVS

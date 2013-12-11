@@ -59,3 +59,24 @@ end
 function Lua:OnRegisterEventHandlerDataTable()
 	error("The Lua event handler does not support registration of event handler data - everything is user-defined.", 3)
 end
+
+TMW:RegisterLuaImportDetector(function(table, id, parentTableName)
+	if parentTableName == "Events" and table.Type == "Lua" and type(table.Lua) == "string" then
+		
+		local code = table.Lua
+
+		code = code:trim(" \r\n\t")
+			
+		if code == "" then
+			return nil
+		else
+			code = code:match("^%-?%-?([^\r\n]*)"):trim()
+			
+			if code == "" then
+				code = "|cff808080<No Code/No Title>"
+			end
+
+			return table.Lua, L["EVENTHANDLER_LUA_LUAEVENTf"]:format(code)
+		end
+	end
+end)
