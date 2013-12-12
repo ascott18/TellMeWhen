@@ -1699,7 +1699,7 @@
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" y="-15"/>
 					<Anchor point="LEFT" x="20" />
-					<Anchor point="BOTTOMRIGHT" x="-30" y="40"/>
+					<Anchor point="BOTTOMRIGHT" x="-20" y="41"/>
 				</Anchors>
 
 				<Layers>
@@ -1715,8 +1715,8 @@
 
 				<Scripts>
 					<OnLoad>
-						TMW:ConvertContainerToScrollFrame(self, true, 7, 10)
-						self.Code:SetWidth(self:GetWidth())
+						TMW:ConvertContainerToScrollFrame(self, false, 0, 10)
+						self.Code:SetWidth(self:GetWidth()-15)
 						self.Code:SetNonSpaceWrap(1)
 					</OnLoad>
 				</Scripts>
@@ -1744,7 +1744,7 @@
 			<Button name="$parentDeny" parentKey="Deny" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15" x="215"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="12" y="12"/>
+					<Anchor point="BOTTOMLEFT" x="16" y="15"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -1757,7 +1757,7 @@
 			<Button name="$parentConfirm" parentKey="Confirm" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15" x="215"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-12" y="12"/>
+					<Anchor point="BOTTOMRIGHT" x="-16" y="15"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -1779,7 +1779,7 @@
 				self.Confirm:SetText(TMW.L["IMPORT_LUA_CONFIRM"])
 				self.Deny:SetText(TMW.L["IMPORT_LUA_DENY"])
 
-				self:SetScale(0.85)
+				self:SetScale(0.95)
 
 				local flags = {
 					"sendmail", "accepttrade", "guildcontrol", "guilddisband", "guildpromote",
@@ -1823,7 +1823,7 @@
 
 						local desc = TMW.L["IMPORT_LUA_DESC"]
 						if flagged then
-							desc = desc .. "\r\n\r\n|cFFFF5959" .. TMW.L["IMPORT_LUA_DESC2"] .. "|r"
+							desc = desc .. "\r\n\r\n|cFFFF3939" .. TMW.L["IMPORT_LUA_DESC2"] .. "|r"
 						end
 
 						desc = desc .. "\r\n\r\n" .. (currentDetections[self.currentResult].name or "")
