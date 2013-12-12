@@ -28,6 +28,7 @@
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
  ** Fixed an issue where strings imported from older version of TellMeWhen (roughly pre-v6.0.0) could have their StackMin/Max and DurationMin/Max settings as strings instead of numbers.
  ** The "Equipment set equipped" condition should properly update when saving the equipment set that is currently equipped.
+ ** Units tracked by name with spaces in them (E.g. Kor'kron Warbringer as a CLEU unit filter) will now be interpreted properly as input.
 
 ===v6.2.6===
  * Bug Fixes:

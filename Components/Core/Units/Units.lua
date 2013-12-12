@@ -287,7 +287,7 @@ function UNITS:GetUnitSet(unitSettings, SerializedConditions)
 
 	unitSettings = TMW:CleanString(unitSettings):
 	lower(): -- all units should be lowercase
-	gsub("[\r\n\t ]", ""):
+	gsub("[\r\n\t]", ""):
 	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
 	gsub("|r", ""):
 	gsub("#", "") -- strip the # from the dropdown
