@@ -10,6 +10,7 @@
  *** On Icon Show/On Icon Hide icon events
  *** Group anchoring to other groups
  ** The consequence of this is that you can now, for example, import/export meta icons and the icons checked by the meta icons separately and they will automatically find eachother once they are all imported (as long as these export strings were created with TMW v7.0.0+)
+ ** Existing DogTags that reference other icons/groups by ID cannot be updated automatically - you will need to change these yourself.
 
  * The duration of Diminishing Returns is now 17 seconds by default, down from 18 seconds, and this value is now customizable in TMW's main options.
  * You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.
@@ -22,7 +23,8 @@
  * Exporting groups and icons will also export the string(s) of their text layouts.
  * You can now use "thisobj" in Lua conditions as a reference to the icon or group that is checking the conditions.
  * Code snippets can now be disabled from autorunning at login.
- * Added Mesmerize and Quaking palm to the Incapacitated and CrowdControl debuff equivalencies.
+ * Various updates to many buff/debuff equivalencies.
+ * New buff equivalency: SpeedBoosts
  
  * Bug Fixes:
  ** Icons should now always have the correct size after their view changes or the size or ID of a group changes.
@@ -387,11 +389,11 @@
  * Bug Fixes:
  ** (r423) Events with conditions (Duration, Stacks changed) should now handle animations and sound properly.
 
- ===v4.8.2===
+===v4.8.2===
  * Bug Fixes:
  ** (r421) You should no longer lock up when using the GCD condition
 
- ===v4.8.1===
+===v4.8.1===
  * Bug Fixes:
  ** (r412) icd.lua:134 attempt to index field 'HELP' (a nil value)
  ** (r413) Meta icons that are sorted by high duration should now diplay the first icon shown if no icons have an active timer
@@ -846,7 +848,7 @@
  ** Fixed a bug with unit level conditions (attempt to compare number with string)
  ** Added better checking for invalid parenthesis in conditions.
 
- ===v4.1.1===
+===v4.1.1===
  * New Condition: Unit Class
  * Fixed frame level issues in the meta editor
 
@@ -870,7 +872,7 @@
  ** (r54) Meta icons should obey conditions
  ** (r55) Cooldowns on meta icons should properly set when the meta changes to from an icon with an active timer to one without, and then back to the first icon that has an active timer.
 
- ===v4.0.4===
+===v4.0.4===
  * Maybe fixed a really rare frame level bug with cooldowns?
  * Stance conditions work now.
  * Fixed debuff conditions.

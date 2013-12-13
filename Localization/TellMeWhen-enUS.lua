@@ -2173,8 +2173,8 @@ You should be wary of importing any Lua code from untusted sources because it ca
 
 Review the code and confirm that it is either coming from a source that you trust or that it isn't doing things like sending mail or accepting trades on your behalf.]]
 L["IMPORT_LUA_DESC2"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t Be sure to review the parts of the code in red, which are common words/phrases that could indicate malicious activity. |TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t"
-L["IMPORT_LUA_CONFIRM"] = "Ok, import this."
-L["IMPORT_LUA_DENY"] = "Abort import operation."
+L["IMPORT_LUA_CONFIRM"] = "Ok, import this"
+L["IMPORT_LUA_DENY"] = "Abort import operation"
 
 
 -- --------
