@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70033 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70034 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -36,6 +36,7 @@ TELLMEWHEN_MAXROWS = 20
 -- Put required libs here: (If they fail to load, they will make all of TMW fail to load)
 local AceDB = LibStub("AceDB-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
+local LibOO = LibStub("LibOO-1.0")
 
 _G.TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
 _G.TellMeWhen = _G.TMW
@@ -49,6 +50,19 @@ TMW.L = L
 -- Tables that will hold groups from each domain.
 TMW.global = {}
 TMW.profile = {}
+
+TMW.Classes = LibOO:GetNamespace("TellMeWhen")
+TMW.C = TMW.Classes
+function TMW:NewClass(...)
+	return TMW.Classes:NewClass(...)
+end
+TMW.Classes:RegisterCallback("OnNewClass", function(event, class)
+	return TMW:Fire("TMW_CLASS_NEW", class)
+end)
+TMW.Classes:RegisterCallback("OnNewInstance", function(event, class, instance)
+	return TMW:Fire("TMW_CLASS_" .. class.className .. "_INSTANCE_NEW", class, instance)
+end)
+
 
 -- GLOBALS: LibStub
 -- GLOBALS: TellMeWhenDB, TellMeWhen_Settings
@@ -902,7 +916,7 @@ function TMW:ValidateType(argN, methodName, var, reqType)
 					varType = reqType
 				end
 			end
-			if var.isTMWClassInstance and TMW.C[reqType] then
+			if var.isLibOOInstance and TMW.C[reqType] then
 				local reqClass = TMW.C[reqType]
 				if var.class == reqClass or var.class.inherits[reqClass] then
 					varType = reqType
@@ -928,7 +942,7 @@ function TMW:ValidateType(argN, methodName, var, reqType)
 	
 		local varTypeName = varType
 		if varType == "table" then
-			if var.isTMWClassInstance then
+			if var.isLibOOInstance then
 				varTypeName = "TMW.C." .. var.className
 			elseif type(var[0]) == "userdata" then
 				varTypeName = "frame (" .. var:GetObjectType() .. ")"
