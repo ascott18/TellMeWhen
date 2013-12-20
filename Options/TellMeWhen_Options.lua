@@ -581,7 +581,9 @@ TMW.GroupConfigTemplate = {
 	childGroups = "tab",
 	name = function(info)
 		local group = FindGroupFromInfo(info)
-		if group.Name ~= "" then
+		if not group then 
+			return ""
+		elseif group.Name ~= "" then
 			return group:GetGroupName(1)
 		else
 			return group:GetGroupName()
@@ -601,6 +603,13 @@ TMW.GroupConfigTemplate = {
 		local group = FindGroupFromInfo(info)
 
 		return group:GetSettings()[info[#info]]
+	end,
+	hidden = function(info)
+		local group = FindGroupFromInfo(info)
+
+		if not group then
+			return true
+		end
 	end,
 	args = {
 		main = {
