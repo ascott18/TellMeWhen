@@ -65,18 +65,30 @@ UNITS.Units = {
 
 
 local TEMP_conditionsSettingSource
+local TEMP_conditionsParents
 
 
 -- Public Methods/Stuff:
 function TMW:GetUnits(icon, setting, Conditions)
-	assert(setting, "Setting was nil for TMW:GetUnits(" .. (icon and icon:GetName() or "<icon>") .. ", setting)")
+	local iconName = (icon and icon:GetName() or "<icon>")
+	assert(setting, "Setting was nil for TMW:GetUnits(" .. iconName .. ", setting)")
 	
 	-- Dirty, dirty hack to make sure the function cacher generates new UnitSets for any changes in conditions
 	TEMP_conditionsSettingSource = Conditions
 	
-	local UnitSet = UNITS:GetUnitSet(setting, TMW:Serialize(Conditions))
+	local serializedConditions
+	if Conditions then
+		serializedConditions = TMW:Serialize(Conditions)
+		if serializedConditions:find("thisobj") then
+			serializedConditions = serializedConditions .. iconName
+			TEMP_conditionsParents = icon
+		end
+	end
+
+	local UnitSet = UNITS:GetUnitSet(setting, serializedConditions)
 	
 	TEMP_conditionsSettingSource = nil
+	TEMP_conditionsParents = nil
 	
 	if UnitSet.ConditionObjects then
 		for i, ConditionObject in ipairs(UnitSet.ConditionObjects) do
@@ -96,8 +108,9 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		return unitsWithExistsEvent[unit] or UnitExists(unit)
 	end,
 
-	OnNewInstance = function(self, unitSettings, Conditions)		
+	OnNewInstance = function(self, unitSettings, Conditions, parent)		
 		self.Conditions = Conditions
+		self.parent = parent
 		
 		self.unitSettings = unitSettings
 		self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
@@ -199,6 +212,9 @@ local UnitSet = TMW:NewClass("UnitSet"){
 			for k, unit in ipairs(self.originalUnits) do
 				-- Get a constructor to make the ConditionObject
 				local ConditionObjectConstructor = self:Conditions_GetConstructor(Conditions)
+
+				-- Override the parent used for the conditions (for Lua conditions mainly)
+				ConditionObjectConstructor.parent = parent or self
 				
 				-- Get a modifiable version
 				local ModifiableConditions = ConditionObjectConstructor:GetPostUserModifiableConditions()
@@ -292,7 +308,7 @@ function UNITS:GetUnitSet(unitSettings, SerializedConditions)
 	gsub("|r", ""):
 	gsub("#", "") -- strip the # from the dropdown
 	
-	return UnitSet:New(unitSettings, TEMP_conditionsSettingSource)
+	return UnitSet:New(unitSettings, TEMP_conditionsSettingSource, TEMP_conditionsParents)
 end
 TMW:MakeFunctionCached(UNITS, "GetUnitSet")
 

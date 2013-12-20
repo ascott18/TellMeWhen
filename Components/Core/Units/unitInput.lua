@@ -32,7 +32,7 @@ function UNITS:GetUnitInputDetailedTooltip(editbox)
 	local text = TMW:CleanString(editbox)
 	if cachedunits[text] then return cachedunits[text] end
 
-	local tbl = UNITS:GetUnitSet(text, nil).originalUnits
+	local tbl = UNITS:GetOriginalUnitTable(text)
 
 	local str = ""
 	local numadded = 0
