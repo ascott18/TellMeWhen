@@ -10,6 +10,9 @@
 
 <Script file="widget-importexport.lua"/>
 
+<Script file="CHANGELOG.lua"/>
+
+
 <Script file="TellMeWhen_Options.lua"/>
 <Script file="ImportExport.lua"/>
 

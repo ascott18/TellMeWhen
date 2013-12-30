@@ -56,3 +56,4 @@ ignore:
     - Scripts
     - Documentation
     - README.md
+    - CHANGELOG.txt
