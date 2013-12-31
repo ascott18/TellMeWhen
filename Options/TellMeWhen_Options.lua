@@ -1125,251 +1125,251 @@ for k, v in pairs(colorOrder) do
 end
 
 
-		TMW.OptionsTable = {
-			name = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL,
+TMW.OptionsTable = {
+	name = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL,
+	type = "group",
+	args = {
+		main = {
 			type = "group",
+			name = L["UIPANEL_MAINOPT"],
+			order = 1,
+			set = function(info, val)
+				TMW.db.profile[info[#info]] = val
+				TMW:ScheduleUpdate(0.4)
+			end,
+			get = function(info) return TMW.db.profile[info[#info]] end,
 			args = {
-				main = {
-					type = "group",
-					name = L["UIPANEL_MAINOPT"],
-					order = 1,
-					set = function(info, val)
-						TMW.db.profile[info[#info]] = val
-						TMW:ScheduleUpdate(0.4)
+				AllowCombatConfig = {
+					name = L["UIPANEL_COMBATCONFIG"],
+					desc = L["UIPANEL_COMBATCONFIG_DESC"],
+					type = "toggle",
+					order = 2.5,
+					confirm = function(info)
+						return not TMW.db.global[info[#info]]
 					end,
-					get = function(info) return TMW.db.profile[info[#info]] end,
+					set = function(info, val)
+						TMW.db.global[info[#info]] = val
+					end,
+					get = function(info) return TMW.db.global[info[#info]] end,
+				},
+				Locked = {
+					name = L["UIPANEL_LOCKUNLOCK"],
+					desc = L["UIPANEL_SUBTEXT2"],
+					type = "toggle",
+					order = 2,
+				},
+				TextureName = {
+					name = L["UIPANEL_BARTEXTURE"],
+					type = "select",
+					order = 3,
+					dialogControl = 'LSM30_Statusbar',
+					values = LSM:HashTable("statusbar"),
+				},
+				sliders = {
+					type = "group",
+					order = 9,
+					name = "",
+					guiInline = true,
+					dialogInline = true,
 					args = {
-						AllowCombatConfig = {
-							name = L["UIPANEL_COMBATCONFIG"],
-							desc = L["UIPANEL_COMBATCONFIG_DESC"],
+						Interval = {
+							name = L["UIPANEL_UPDATEINTERVAL"],
+							desc = L["UIPANEL_TOOLTIP_UPDATEINTERVAL"],
+							type = "range",
+							order = 9,
+							min = 0,
+							max = 0.5,
+							step = 0.01,
+							bigStep = 0.01,
+						},
+						EffThreshold = {
+							name = L["UIPANEL_EFFTHRESHOLD"],
+							desc = L["UIPANEL_EFFTHRESHOLD_DESC"],
+							type = "range",
+							order = 10,
+							min = 0,
+							max = 40,
+							step = 1,
+						},
+					},
+				},
+				checks = {
+					type = "group",
+					order = 21,
+					name = "",
+					guiInline = true,
+					dialogInline = true,
+					args = {
+						DEBUG_ForceAutoUpdate = {
+							name = "DEBUG: FORCE AUTO UPDATES",
+							desc = "TMW v5 introduced new code that manages updates much more efficiently, only updating icons when they need to be updated. Check this to disable this feature in order to compare between the old method and the new method to see if there are any discrepancies that may be indicative of a bug.",
 							type = "toggle",
-							order = 2.5,
-							confirm = function(info)
-								return not TMW.db.global[info[#info]]
-							end,
+							order = 1,
+							hidden = true,
+						},
+						--[[ColorNames = {
+							name = L["COLORNAMES"],
+							desc = L["COLORNAMES_DESC"],
+							type = "toggle",
+							order = 42,
+						},]]
+						--[[AlwaysSubLinks = {
+							-- unused
+							name = L["ALWAYSSUBLINKS"],
+							desc = L["ALWAYSSUBLINKS_DESC"],
+							type = "toggle",
+							order = 43,
+						},]]
+						--[[SUG_atBeginning = {
+							-- I really doubt that anyone uses this setting at all.
+							-- Going to hide it and see if anyone complains.
+							
+							name = L["SUG_ATBEGINING"],
+							desc = L["SUG_ATBEGINING_DESC"],
+							width = "double",
+							type = "toggle",
+							order = 44,
+						},]]
+						ReceiveComm = {
+							name = L["ALLOWCOMM"],
+							desc = L["ALLOWCOMM_DESC"],
+							type = "toggle",
+							order = 50,
+						},
+						WarnInvalids = {
+							name = L["UIPANEL_WARNINVALIDS"],
+							type = "toggle",
+							width = "double",
+							order = 51,
+						},
+						VersionWarning = {
+							name = L["ALLOWVERSIONWARN"],
+							type = "toggle",
+							order = 52,
 							set = function(info, val)
 								TMW.db.global[info[#info]] = val
 							end,
 							get = function(info) return TMW.db.global[info[#info]] end,
 						},
-						Locked = {
-							name = L["UIPANEL_LOCKUNLOCK"],
-							desc = L["UIPANEL_SUBTEXT2"],
+						ShowGUIDs = {
+							name = L["SHOWGUIDS_OPTION"],
+							desc = L["SHOWGUIDS_OPTION_DESC"],
 							type = "toggle",
-							order = 2,
-						},
-						TextureName = {
-							name = L["UIPANEL_BARTEXTURE"],
-							type = "select",
-							order = 3,
-							dialogControl = 'LSM30_Statusbar',
-							values = LSM:HashTable("statusbar"),
-						},
-						sliders = {
-							type = "group",
-							order = 9,
-							name = "",
-							guiInline = true,
-							dialogInline = true,
-							args = {
-								Interval = {
-									name = L["UIPANEL_UPDATEINTERVAL"],
-									desc = L["UIPANEL_TOOLTIP_UPDATEINTERVAL"],
-									type = "range",
-									order = 9,
-									min = 0,
-									max = 0.5,
-									step = 0.01,
-									bigStep = 0.01,
-								},
-								EffThreshold = {
-									name = L["UIPANEL_EFFTHRESHOLD"],
-									desc = L["UIPANEL_EFFTHRESHOLD_DESC"],
-									type = "range",
-									order = 10,
-									min = 0,
-									max = 40,
-									step = 1,
-								},
-							},
-						},
-						checks = {
-							type = "group",
-							order = 21,
-							name = "",
-							guiInline = true,
-							dialogInline = true,
-							args = {
-								DEBUG_ForceAutoUpdate = {
-									name = "DEBUG: FORCE AUTO UPDATES",
-									desc = "TMW v5 introduced new code that manages updates much more efficiently, only updating icons when they need to be updated. Check this to disable this feature in order to compare between the old method and the new method to see if there are any discrepancies that may be indicative of a bug.",
-									type = "toggle",
-									order = 1,
-									hidden = true,
-								},
-								--[[ColorNames = {
-									name = L["COLORNAMES"],
-									desc = L["COLORNAMES_DESC"],
-									type = "toggle",
-									order = 42,
-								},]]
-								--[[AlwaysSubLinks = {
-									-- unused
-									name = L["ALWAYSSUBLINKS"],
-									desc = L["ALWAYSSUBLINKS_DESC"],
-									type = "toggle",
-									order = 43,
-								},]]
-								--[[SUG_atBeginning = {
-									-- I really doubt that anyone uses this setting at all.
-									-- Going to hide it and see if anyone complains.
-									
-									name = L["SUG_ATBEGINING"],
-									desc = L["SUG_ATBEGINING_DESC"],
-									width = "double",
-									type = "toggle",
-									order = 44,
-								},]]
-								ReceiveComm = {
-									name = L["ALLOWCOMM"],
-									desc = L["ALLOWCOMM_DESC"],
-									type = "toggle",
-									order = 50,
-								},
-								WarnInvalids = {
-									name = L["UIPANEL_WARNINVALIDS"],
-									type = "toggle",
-									width = "double",
-									order = 51,
-								},
-								VersionWarning = {
-									name = L["ALLOWVERSIONWARN"],
-									type = "toggle",
-									order = 52,
-									set = function(info, val)
-										TMW.db.global[info[#info]] = val
-									end,
-									get = function(info) return TMW.db.global[info[#info]] end,
-								},
-								ShowGUIDs = {
-									name = L["SHOWGUIDS_OPTION"],
-									desc = L["SHOWGUIDS_OPTION_DESC"],
-									type = "toggle",
-									order = 52,
-									set = function(info, val)
-										TMW.db.global[info[#info]] = val
-									end,
-									get = function(info) return TMW.db.global[info[#info]] end,
-								},
-							},
-						},
-
-						SoundChannel = {
-							name = L["SOUND_CHANNEL"],
-							desc = L["SOUND_CHANNEL_DESC"],
-							type = "select",
-							values = {
-								-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME
-								SFX = SOUND_VOLUME,
-								Music = MUSIC_VOLUME,
-								Ambience = AMBIENCE_VOLUME,
-								Master = L["SOUND_CHANNEL_MASTER"],
-							},
-							order = 29,
-						},
-						CheckOrder = {
-							name = L["CHECKORDER"],
-							desc = L["CHECKORDER_GROUPDESC"],
-							type = "select",
-							values = checkorder,
-							style = "dropdown",
-							order = 30,
-						},
-						--[[resetall = {
-							name = L["UIPANEL_ALLRESET"],
-							desc = L["UIPANEL_TOOLTIP_ALLRESET"],
-							type = "execute",
-							order = 51,
-							confirm = true,
-							func = function() TMW.db:ResetProfile() end,
-						},]]
-						importexport = importExportBoxTemplate,
-
-						deleteNonCurrentLocaleData = {
-							name = ("Delete non-essential cached data for non-%s locales."):format(GetLocale()),
-							desc = "TellMeWhen_Options caches some data about WoW's spells for each locale that you play in. You can safely delete that data for other locales to free up space.",
-							type = "execute",
-							width = "full",
-							order = 1000,
-							func = function(info)
-								local currentLocale = GetLocale():lower()
-
-								for locale in pairs(TMW.IE.db.sv.locale) do
-									if locale ~= currentLocale then
-										TMW.IE.db.sv.locale[locale] = nil
-										TMW:Printf("Deleted cache for locale %s", locale)
-									end
-								end
+							order = 52,
+							set = function(info, val)
+								TMW.db.global[info[#info]] = val
 							end,
-							hidden = function(info)
-								local locale = TMW.IE.db.sv.locale
-								-- This evaluates to nil when there is only one locale in the table
-								return next(locale, next(locale)) == nil
-							end,
+							get = function(info) return TMW.db.global[info[#info]] end,
 						},
 					},
 				},
 
-				colors = {
-					type = "group",
-					name = L["UIPANEL_COLORS"],
-					desc = L["UIPANEL_COLORS_DESC"],
-					order = 10,
-					childGroups = "tree",
-					args = {},
+				SoundChannel = {
+					name = L["SOUND_CHANNEL"],
+					desc = L["SOUND_CHANNEL_DESC"],
+					type = "select",
+					values = {
+						-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME
+						SFX = SOUND_VOLUME,
+						Music = MUSIC_VOLUME,
+						Ambience = AMBIENCE_VOLUME,
+						Master = L["SOUND_CHANNEL_MASTER"],
+					},
+					order = 29,
 				},
-				
-				groups_global = {
-					type = "group",
-					name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_GLOBAL"],
-					desc = L["UIPANEL_GROUPS_GLOBAL_DESC"],
+				CheckOrder = {
+					name = L["CHECKORDER"],
+					desc = L["CHECKORDER_GROUPDESC"],
+					type = "select",
+					values = checkorder,
+					style = "dropdown",
 					order = 30,
-					args = {
-						addgroup = addGroupFunctionGroup,
-						importexport = importExportBoxTemplate,
-						addgroupgroup = {
-							type = "group",
-							name = L["UIPANEL_ADDGROUP"],
-							order = 2000,
-							args = {
-								addgroup = addGroupFunctionGroup,
-								importexport = importExportBoxTemplate,
-							},
-						},
-					},
 				},
-				
-				groups_profile = {
+				--[[resetall = {
+					name = L["UIPANEL_ALLRESET"],
+					desc = L["UIPANEL_TOOLTIP_ALLRESET"],
+					type = "execute",
+					order = 51,
+					confirm = true,
+					func = function() TMW.db:ResetProfile() end,
+				},]]
+				importexport = importExportBoxTemplate,
+
+				deleteNonCurrentLocaleData = {
+					name = ("Delete non-essential cached data for non-%s locales."):format(GetLocale()),
+					desc = "TellMeWhen_Options caches some data about WoW's spells for each locale that you play in. You can safely delete that data for other locales to free up space.",
+					type = "execute",
+					width = "full",
+					order = 1000,
+					func = function(info)
+						local currentLocale = GetLocale():lower()
+
+						for locale in pairs(TMW.IE.db.sv.locale) do
+							if locale ~= currentLocale then
+								TMW.IE.db.sv.locale[locale] = nil
+								TMW:Printf("Deleted cache for locale %s", locale)
+							end
+						end
+					end,
+					hidden = function(info)
+						local locale = TMW.IE.db.sv.locale
+						-- This evaluates to nil when there is only one locale in the table
+						return next(locale, next(locale)) == nil
+					end,
+				},
+			},
+		},
+
+		colors = {
+			type = "group",
+			name = L["UIPANEL_COLORS"],
+			desc = L["UIPANEL_COLORS_DESC"],
+			order = 10,
+			childGroups = "tree",
+			args = {},
+		},
+		
+		groups_global = {
+			type = "group",
+			name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_GLOBAL"],
+			desc = L["UIPANEL_GROUPS_GLOBAL_DESC"],
+			order = 30,
+			args = {
+				addgroup = addGroupFunctionGroup,
+				importexport = importExportBoxTemplate,
+				addgroupgroup = {
 					type = "group",
-					name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_PROFILE"],
-					desc = L["UIPANEL_GROUPS_DESC"],
-					order = 31,
+					name = L["UIPANEL_ADDGROUP"],
+					order = 2000,
 					args = {
 						addgroup = addGroupFunctionGroup,
 						importexport = importExportBoxTemplate,
-						addgroupgroup = {
-							type = "group",
-							name = L["UIPANEL_ADDGROUP"],
-							order = math.huge,
-							args = {
-								addgroup = addGroupFunctionGroup,
-								importexport = importExportBoxTemplate,
-							},
-						},
 					},
 				},
 			},
-		}
+		},
+		
+		groups_profile = {
+			type = "group",
+			name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_PROFILE"],
+			desc = L["UIPANEL_GROUPS_DESC"],
+			order = 31,
+			args = {
+				addgroup = addGroupFunctionGroup,
+				importexport = importExportBoxTemplate,
+				addgroupgroup = {
+					type = "group",
+					name = L["UIPANEL_ADDGROUP"],
+					order = math.huge,
+					args = {
+						addgroup = addGroupFunctionGroup,
+						importexport = importExportBoxTemplate,
+					},
+				},
+			},
+		},
+	},
+}
 
 ---------- Options Table Compilation ----------
 function TMW:CompileOptions()
