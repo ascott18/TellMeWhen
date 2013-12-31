@@ -1771,7 +1771,6 @@
 		<Scripts>
 			<OnLoad>
 
-				self.ScrollContainer.Code:SetText(TMW:Serialize(TMW.db.profile))
 				self.title:SetText("TellMeWhen")
 
 				self.desc:SetText(TMW.L["IMPORT_LUA_DESC"])
@@ -1807,7 +1806,7 @@
 						for k, flagWord in pairs(flags) do
 							local start = 0
 							repeat
-        						local replaced
+								local replaced
 								local left, right = strfind(codeLower, flagWord, start)
 								if left then
 
@@ -1846,6 +1845,126 @@
 		</Scripts>
 	</Frame>
 
+
+	<Frame name="TellMeWhen_ChangelogDialog" inherits="TellMeWhen_SimpleDialog" toplevel="true" frameStrata="FULLSCREEN_DIALOG">
+		<Size x="600" y="500"/>
+
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent" />
+		</Anchors>
+
+		<Frames>
+			<Frame name="$parentScrollContainer" parentKey="ScrollContainer">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" y="5"/>
+					<Anchor point="LEFT" x="15" />
+					<Anchor point="BOTTOMRIGHT" x="-12" y="34"/>
+				</Anchors>
+
+				<Scripts>
+					<OnLoad>
+						TMW:ConvertContainerToScrollFrame(self, false, 0, 10)
+
+						local s = ""
+
+						local CHANGELOGS = {}
+						for k, v in pairs(TMW.CHANGELOG) do
+							
+							v = v:trim()
+							
+							while v:find("^ *%*") do
+								v = v:gsub("%*", "   ", 1)
+							end
+							
+							v = v:gsub("IMPORTANT", "|cffff0000IMPORTANT|r")
+							
+							if v:match("===(v.*)===") then
+								tinsert(CHANGELOGS, s:trim("\r\n "))
+								s = ""
+								
+								v = "|cFFF6682FTellMeWhen " .. v:match("===(v.*)===") .. "|r:"
+							elseif v ~= "" then
+								v = v:gsub("^    ", "", 1)
+								
+								local _, spaceCount = v:find("^( *)")
+								local numIndents = ((spaceCount + 3) / 3) % 3
+								
+								local color, c2 = "", ""
+								if numIndents == 1 then
+									color, c2 = "4FD678", "acecbf"
+								elseif numIndents == 2 then
+									color, c2 = "4F69D6", "acb9ec"
+								elseif numIndents == 0 then
+									color, c2 = "D64FAD", "ecacd9"
+								end
+								
+								c2 = "ffffff"
+								v = v:gsub("^( *)(.*)", "%1 |cFF" .. color .. "> |cff" .. c2 .. "%2")
+								
+							end
+							
+							s = s .. v .. "\r\n"
+						end
+
+						-- Put the last one in
+						tinsert(CHANGELOGS, s:trim("\r\n "))
+
+						-- Send this out to the garbage collector
+						TMW.CHANGELOG = nil
+
+						for k, v in pairs(CHANGELOGS) do
+							local log = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+							
+							log:SetJustifyH("LEFT")
+							log:SetJustifyV("TOP")
+							log:SetSpacing(2)
+							log:SetText(v)
+
+							self[#self + 1] = log
+
+							if #self == 1 then
+								log:SetPoint("TOPLEFT", 0, 10)
+							else
+								log:SetPoint("TOPLEFT", self[#self - 1], "BOTTOMLEFT", 0, -15)
+							end
+
+							--log:SetSize(0, 1)
+							log:SetWidth(self:GetWidth()-15)
+							log:SetHeight(log:GetStringHeight())
+						end
+
+
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<Button name="$parentOkay" parentKey="Okay" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15" x="215"/>
+				<Anchors>
+					<Anchor point="BOTTOM" x="0" y="15"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:GetParent():Hide()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+
+		<Scripts>
+			<OnLoad>
+
+				self.title:SetText("TellMeWhen")
+
+				--self.desc:SetText(TMW.L["IMPORT_LUA_DESC"])
+				--self.desc:SetWidth(self:GetWidth() - 30)
+
+				self.Okay:SetText(OKAY)
+
+				self:SetScale(0.95)
+			</OnLoad>
+		</Scripts>
+	</Frame>
 
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
 		<Size x="585" y="380"/>
