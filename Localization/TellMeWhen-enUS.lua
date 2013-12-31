@@ -11,9 +11,11 @@ L["CMD_ENABLE"] = "enable"
 L["CMD_DISABLE"] = "disable"
 L["CMD_TOGGLE"] = "toggle"
 L["CMD_PROFILE"] = "profile"
+L["CMD_CHANGELOG"] = "changelog"
 
 L["CMD_PROFILE_INVALIDPROFILE"] = "No profile named %q exists!"
 L["CMD_PROFILE_INVALIDPROFILE_SPACES"] = "Tip: aIf the profile name contains spaces, put quotes around it."
+
 
 L["PROFILE_LOADED"] = "Loaded profile: %s"
 
@@ -49,6 +51,9 @@ L["IMPORT_SUCCESSFUL"] = "Import successful!"
 L["IMPORT_FAILED"] = "Import failed!"
 L["IMPORTERROR_INVALIDTYPE"] = "Attempted to import data of an unknown type. Check to see if you have the latest version of TellMeWhen installed."
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
+
+
+L["DIALOG_HEADER_CHANGELOG"] = "TellMeWhen Changelog"
 
 
 L["NOGROUPS_DIALOG_BODY"] = [[Your current TellMeWhen configuration and/or player specialization does not allow any TellMeWhen groups to be shown, so there is nothing to configure.
@@ -2145,6 +2150,15 @@ If you enable this setting but do not see any timer texts, please install the ad
 
 
 L["IMPORT_ICON_DISABLED_DESC"] = "You must be editing an icon to be able to import an icon."
+
+
+L["CHANGELOG_INFO"] = [[Welcome to TellMeWhen v%s!
+
+Take a moment to check out what has changed in this version.
+
+You can view this any time with the following command:
+
+/tmw changelog]]
 
 
 L["TOPLEFT"] = "Top Left"

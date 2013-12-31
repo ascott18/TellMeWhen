@@ -1679,6 +1679,7 @@ end
 
 IE.Defaults = {
 	global = {
+		LastChangelogVersion = 0,
 		EditorScale		= 0.9,
 		EditorHeight	= 600,
 		ConfigWarning	= true,
@@ -2403,6 +2404,13 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		else
 			IE:Show()
 		end
+	end
+
+	if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
+		TMW.HELP:NewCode("CHANGELOG_INFO", 100, false)
+		TMW.HELP:Show("CHANGELOG_INFO", nil, TellMeWhen_ChangelogDialog, 0, 0, L["CHANGELOG_INFO"], TELLMEWHEN_VERSION_FULL)
+		TellMeWhen_ChangelogDialog:Show()
+		IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
 	end
 	
 	if 0 > IE:GetBottom() then

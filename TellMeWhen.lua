@@ -24,7 +24,7 @@ if strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70037 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70038 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3350,6 +3350,8 @@ function TMW:SlashCommand(str)
 		cmd = "profile"
 	elseif cmd == L["CMD_OPTIONS"]:lower() then
 		cmd = "options"
+	elseif cmd == L["CMD_CHANGELOG"]:lower() then
+		cmd = "changelog"
 	end
 
 	if cmd == "options" then
@@ -3388,6 +3390,19 @@ function TMW:SlashCommand(str)
 			obj:Setup() -- obj is an icon or a group
 		end
 
+	elseif cmd == "changelog" then
+		if not TMW.IE then
+			if TMW:CheckCanDoLockedAction() then
+				TMW:LoadOptions()
+
+				if TMW:AssertOptionsInitialized() then
+					return
+				end
+			end
+		end
+		if TMW.IE then
+			TellMeWhen_ChangelogDialog:Show()
+		end
 	else
 		TMW:LockToggle()
 	end

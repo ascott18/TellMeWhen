@@ -1463,29 +1463,36 @@
 		<Anchors>
 			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
 		</Anchors>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-			<BackgroundInsets>
-				<AbsInset left="8" right="8" top="8" bottom="8"/>
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32"/>
-			</TileSize>
-			<EdgeSize>
-				<AbsValue val="32"/>
-			</EdgeSize>
-		</Backdrop>
-		<TitleRegion name="$parentTitleRegion" setAllPoints="true"/>
+
+		<!-- Enables the whole frame for dragging -->
+		<TitleRegion setAllPoints="true"/>
+
 		<Layers>
-			<Layer level="ARTWORK">
-				<Texture file="Interface\DialogFrame\UI-DialogBox-Header" parentKey="header">
-					<Size x="256" y="64"/>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="background">
+					<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
+				</Texture>
+				<Texture>
+					<Color r="0" g="0" b="0" a="1"/>
 					<Anchors>
-						<Anchor point="TOP" y="12"/>
+						<Anchor point="TOPLEFT" relativeKey="$parent.background" x="-1" y="1"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" x="1" y="-1"/>
 					</Anchors>
 				</Texture>
+			</Layer>
+
+			<Layer level="ARTWORK">
+				<Texture name="$parentHeaderBackground" parentKey="HeaderBackground">
+					<Color r="0.4" g="0.4" b="0.4" a="0.1"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" y="-4"/>
+						<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" y="-24"/>
+					</Anchors>
+				</Texture>
+
 				<FontString name="$parentTitle" parentKey="title" inherits="GameFontNormal" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="TOP" y="-2"/>
+						<Anchor point="CENTER" relativeKey="$parent.HeaderBackground" y="0"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentDesc" parentKey="desc" inherits="GameFontHighlight" justifyH="CENTER" justifyV="TOP">
@@ -1495,6 +1502,22 @@
 				</FontString>
 			</Layer>
 		</Layers>
+
+		<Frames>
+			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="CENTER" relativePoint="TOPRIGHT" x="-14" y="-14"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetFrameLevel() + 2)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():Hide()
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
 	</Frame>
 
 	
@@ -1503,9 +1526,9 @@
 	<Frame name="TellMeWhen_ConfigWarning" inherits="TellMeWhen_SimpleDialog" >
 		<Frames>
 			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
-				<Size x="150" y="15"/>
+				<Size x="155" y="15"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="13" y="13"/>
+					<Anchor point="BOTTOMLEFT" x="5" y="5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["CONFIGMODE_EXIT"]) </OnLoad>
@@ -1513,9 +1536,9 @@
 				</Scripts>
 			</Button>
 			<Button name="$parentNeverAgain" parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
-				<Size x="150" y="15"/>
+				<Size x="155" y="15"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-13" y="13"/>
+					<Anchor point="BOTTOMRIGHT" x="-5" y="5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1534,15 +1557,19 @@
 				self.desc:SetText(TMW.L["CONFIGMODE"])
 				self:SetScale(0.85)
 				self.desc:SetWidth(self:GetWidth() - 30)
-				self:SetHeight(self.desc:GetHeight() + 75)
+				self:SetHeight(self.desc:GetHeight() + 65)
 			</OnLoad>
 		</Scripts>
 	</Frame>
 
+
 	<Frame name="TellMeWhen_NoGroupsWarning" inherits="TellMeWhen_SimpleDialog" >
+		<Anchors>
+			<Anchor point="TOP" relativeTo="UIParent" y="-180"/>
+		</Anchors>
 		<Frames>
 			<Button name="$parentGroupOptions" inherits="TellMeWhen_ButtonTemplate">
-				<Size x="250" y="15"/>
+				<Size x="260" y="15"/>
 				<Anchors>
 					<Anchor point="BOTTOM" y="13"/>
 				</Anchors>
@@ -1562,10 +1589,12 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
+				self.CloseButton:Hide()
+
 				self.title:SetText("TellMeWhen")
 				self.desc:SetText(TMW.L["NOGROUPS_DIALOG_BODY"])
 				self:SetScale(0.85)
-				self.desc:SetWidth(self:GetWidth() - 30)
+				self.desc:SetWidth(self:GetWidth() - 20)
 				self:SetHeight(self.desc:GetHeight() + 80)
 			</OnLoad>
 		</Scripts>
@@ -1653,6 +1682,8 @@
 
 		<Scripts>
 			<OnLoad>
+				self.CloseButton:Hide()
+
 				local ignoredForSession = {}
 
 				function self:Ignore(GUID)
@@ -1673,7 +1704,7 @@
 				self.desc2:SetWidth(self:GetWidth() - 30)
 
 				self:SetScale(0.85)
-				self:SetHeight(self.desc:GetHeight() + self.desc2:GetHeight() + 145)
+				self:SetHeight(self.desc:GetHeight() + self.desc2:GetHeight() + 140)
 
 				TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(locked)
 					wipe(ignoredForSession)
@@ -1698,8 +1729,8 @@
 			<Frame name="$parentScrollContainer" parentKey="ScrollContainer">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" y="-15"/>
-					<Anchor point="LEFT" x="20" />
-					<Anchor point="BOTTOMRIGHT" x="-20" y="41"/>
+					<Anchor point="LEFT" x="15" />
+					<Anchor point="BOTTOMRIGHT" x="-15" y="36"/>
 				</Anchors>
 
 				<Layers>
@@ -1745,7 +1776,7 @@
 			<Button name="$parentDeny" parentKey="Deny" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15" x="215"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="16" y="15"/>
+					<Anchor point="BOTTOMLEFT" x="10" y="10"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -1758,7 +1789,7 @@
 			<Button name="$parentConfirm" parentKey="Confirm" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15" x="215"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-16" y="15"/>
+					<Anchor point="BOTTOMRIGHT" x="-10" y="10"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -1770,6 +1801,7 @@
 
 		<Scripts>
 			<OnLoad>
+				self.CloseButton:Hide()
 
 				self.title:SetText("TellMeWhen")
 
@@ -1854,11 +1886,27 @@
 		</Anchors>
 
 		<Frames>
+
+			<Button name="$parentOkay" parentKey="Okay" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15" x="1"/>
+				<Anchors>
+					<Anchor point="LEFT" x="5"/>
+					<Anchor point="RIGHT" x="-5"/>
+					<Anchor point="BOTTOM" y="5"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:GetParent():Hide()
+					</OnClick>
+				</Scripts>
+			</Button>
+
 			<Frame name="$parentScrollContainer" parentKey="ScrollContainer">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" y="5"/>
-					<Anchor point="LEFT" x="15" />
-					<Anchor point="BOTTOMRIGHT" x="-12" y="34"/>
+					<Anchor point="TOP" relativeTo="$parentHeaderBackground" relativePoint="BOTTOM" y="-5"/>
+					<Anchor point="BOTTOM" relativeTo="$parentOkay" relativePoint="TOP" y="5"/>
+					<Anchor point="LEFT" x="5" />
+					<Anchor point="RIGHT" x="-2" />
 				</Anchors>
 
 				<Scripts>
@@ -1923,61 +1971,47 @@
 							self[#self + 1] = log
 
 							if #self == 1 then
-								log:SetPoint("TOPLEFT", 0, 10)
+								log:SetPoint("TOPLEFT", 0, 15)
 							else
 								log:SetPoint("TOPLEFT", self[#self - 1], "BOTTOMLEFT", 0, -15)
 							end
 
 							--log:SetSize(0, 1)
 							log:SetWidth(self:GetWidth()-15)
-							log:SetHeight(log:GetStringHeight())
+							log:SetHeight(log:GetStringHeight() + 15)
 						end
 
 
 					</OnLoad>
 				</Scripts>
 			</Frame>
-
-			<Button name="$parentOkay" parentKey="Okay" inherits="TellMeWhen_ButtonTemplate">
-				<Size y="15" x="215"/>
-				<Anchors>
-					<Anchor point="BOTTOM" x="0" y="15"/>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						self:GetParent():Hide()
-					</OnClick>
-				</Scripts>
-			</Button>
 		</Frames>
 
 		<Scripts>
 			<OnLoad>
 
-				self.title:SetText("TellMeWhen")
-
-				--self.desc:SetText(TMW.L["IMPORT_LUA_DESC"])
-				--self.desc:SetWidth(self:GetWidth() - 30)
+				self.title:SetText(TMW.L["DIALOG_HEADER_CHANGELOG"])
 
 				self.Okay:SetText(OKAY)
 
-				self:SetScale(0.95)
+				self:SetScale(0.85)
 			</OnLoad>
+			<OnShow>
+			</OnShow>
+			<OnHide>
+				TMW.HELP:Hide("CHANGELOG_INFO")
+			</OnHide>
 		</Scripts>
 	</Frame>
 
-	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG">
+
+	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG" inherits="TellMeWhen_SimpleDialog">
 		<Size x="585" y="380"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
 		</Anchors>
 		
 		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" parentKey="Background">
-					<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
-				</Texture>
-			</Layer>
 			<Layer level="OVERLAY">
 				<Texture name="$parentIconTexture" parentKey="icontexture">
 					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
@@ -2391,19 +2425,6 @@
 				<DisabledTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled" alphaMode="ADD"/>
 			</Button>
 
-			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
-				<Anchors>
-					<Anchor point="CENTER" relativePoint="TOPRIGHT" x="-14" y="-14"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetFrameLevel(self:GetFrameLevel() + 2)
-					</OnLoad>
-					<OnClick>
-						self:GetParent():Hide()
-					</OnClick>
-				</Scripts>
-			</Button>
 
 			<EditBox name="$parentExportBox" inherits="TellMeWhen_ExportBoxTemplate" parentKey="ExportBox">
 				<Anchors>
@@ -2423,21 +2444,10 @@
 					</Anchors>
 				</FontString>
 			</Layer>
-
-			<Layer level="ARTWORK">
-				<Texture parentKey="HeaderBackground">
-					<Color r="0.4" g="0.4" b="0.4" a="0.1"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" y="-4"/> <!-- This gets changed dynamically in TellMeWhen_Options.lua -->
-						<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" y="-24"/>
-					</Anchors>
-				</Texture>
-			</Layer>
 		</Layers>
 		<Scripts>
 			<OnLoad>
 				self:SetFrameLevel(20)
-				self:RegisterForDrag("LeftButton")
 				
 				for k, v in pairs(self) do
 					TMW.IE[k] = v
