@@ -30,7 +30,7 @@ local clientVersion = select(4, GetBuildInfo())
 local DRData = LibStub("DRData-1.0")
 
 local DRSpells = DRData.spells
-local DRReset = 17
+local DRReset = 18
 local PvEDRs = {}
 for spellID, category in pairs(DRSpells) do
 	if DRData.pveDR[category] then
