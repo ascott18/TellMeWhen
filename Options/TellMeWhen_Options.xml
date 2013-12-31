@@ -1718,6 +1718,7 @@
 						TMW:ConvertContainerToScrollFrame(self, false, 0, 10)
 						self.Code:SetWidth(self:GetWidth()-15)
 						self.Code:SetNonSpaceWrap(1)
+						self.Code:SetSpacing(2)
 					</OnLoad>
 				</Scripts>
 			</Frame>
