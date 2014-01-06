@@ -746,6 +746,7 @@
 				<Scripts>
 					<OnLoad>
 						TMW:ConvertContainerToScrollFrame(self, false, -2)
+						self.ScrollFrame.scrollStep = 40
 						
 						TMW.CNDT:CreateGroups(1)
 						TMW.CNDT[1].AndOr:Hide()

@@ -556,6 +556,7 @@
 			<OnLoad>
 				self.edgeScrollMouseCursorRange = 5
 				self.edgeScrollScrollDistancePerSecond = 150
+				self.scrollPercentage = 1/2
 			</OnLoad>
 			<OnScrollRangeChanged>
 				if ( not yrange ) then
@@ -586,7 +587,7 @@
 				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(offset*self.percentage))
 			</OnVerticalScroll>
 			<OnMouseWheel>
-				local scrollStep = self.scrollStep or self:GetHeight() / 2
+				local scrollStep = self.scrollStep or self:GetHeight() * self.scrollPercentage
 				local newScroll
 				if ( delta > 0 ) then
 					newScroll = self:GetVerticalScroll() - scrollStep
@@ -1747,6 +1748,7 @@
 				<Scripts>
 					<OnLoad>
 						TMW:ConvertContainerToScrollFrame(self, false, 0, 10)
+						self.ScrollFrame.scrollStep = 25
 						self.Code:SetWidth(self:GetWidth()-15)
 						self.Code:SetNonSpaceWrap(1)
 						self.Code:SetSpacing(2)
@@ -1912,6 +1914,7 @@
 				<Scripts>
 					<OnLoad>
 						TMW:ConvertContainerToScrollFrame(self, false, 0, 10)
+						self.ScrollFrame.scrollStep = 25
 
 						local s = ""
 
@@ -2067,6 +2070,7 @@
 						<Scripts>
 							<OnLoad>
 								TMW:ConvertContainerToScrollFrame(self, true, 1, 5)
+								self.ScrollFrame.scrollPercentage = 1/3
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -2081,6 +2085,7 @@
 						<Scripts>
 							<OnLoad>
 								TMW:ConvertContainerToScrollFrame(self, true, 1, 5)
+								self.ScrollFrame.scrollPercentage = 1/3
 							</OnLoad>
 						</Scripts>
 					</Frame>

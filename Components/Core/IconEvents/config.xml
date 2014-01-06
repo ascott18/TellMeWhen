@@ -327,6 +327,7 @@
 						self.originalParent = self:GetParent()
 						
 						TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
+						self.ScrollFrame.scrollStep = 20
 						
 						self.ScrollFrame.edgeScrollScrollDistancePerSecond = 100
 						
