@@ -1978,7 +1978,7 @@
 
 							--log:SetSize(0, 1)
 							log:SetWidth(self:GetWidth()-15)
-							log:SetHeight(log:GetStringHeight() + 15)
+							log:SetHeight(log:GetStringHeight() + 20)
 						end
 
 

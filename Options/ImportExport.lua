@@ -941,6 +941,12 @@ String.displayDescription = L["IMPORT_FROMSTRING_DESC"]
 
 function String:HandleTopLevelMenu()
 	local t = strtrim(EDITBOX:GetText())
+
+	-- There is an escaped link. Unescape it.
+	if t:find("||H") then
+		t = t:gsub("||", "|")
+	end
+
 	local editboxResults = t ~= "" and TMW:DeserializeData(t)
 
 	if editboxResults then
@@ -1075,7 +1081,7 @@ String.Export_DescriptionPrepend = L["EXPORT_TOSTRING_DESC"]
 function String:Export(type, settings, defaults, ...)
 	local strings = TMW:GetSettingsStrings(nil, type, settings, defaults, ...)
 
-	local str = table.concat(strings, "\r\n\r\n")
+	local str = table.concat(strings, "\r\n\r\n"):gsub("|", "||")
 
 	str = TMW:MakeSerializedDataPretty(str)
 	TMW.LastExportedString = str
