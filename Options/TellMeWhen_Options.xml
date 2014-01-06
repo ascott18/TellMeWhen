@@ -1987,7 +1987,7 @@
 
 					</OnLoad>
 					<OnShow>
-						if not self.FixedWrapping then
+						if not self.FixedWrapping and not InCombatLockdown() then
 							for k, log in ipairs(self) do
 
 								-- Because of wrapping issues, we usually don't get the height that
