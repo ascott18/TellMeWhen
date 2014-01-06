@@ -1954,6 +1954,9 @@
 							s = s .. v .. "\r\n"
 						end
 
+						-- The first one is nothing. Get rid of it.
+						tremove(CHANGELOGS, 1)
+
 						-- Put the last one in
 						tinsert(CHANGELOGS, s:trim("\r\n "))
 
@@ -1971,7 +1974,7 @@
 							self[#self + 1] = log
 
 							if #self == 1 then
-								log:SetPoint("TOPLEFT", 0, 15)
+								log:SetPoint("TOPLEFT", 0, -5)
 							else
 								log:SetPoint("TOPLEFT", self[#self - 1], "BOTTOMLEFT", 0, -15)
 							end
@@ -1983,6 +1986,27 @@
 
 
 					</OnLoad>
+					<OnShow>
+						if not self.FixedWrapping then
+							for k, log in ipairs(self) do
+
+								-- Because of wrapping issues, we usually don't get the height that
+								-- we want the first time that we set the height (when we change the height,
+								-- the number of lines will probably change as more lines are given enough room to wrap).
+
+								-- To get around this, we keep trying until we get the right height,
+								-- or until we reach an arbitrary limit on the number of loops that
+								-- prevents unforseen errors in floating point equality tests.
+								local tries = 0
+								while 10 > tries and floor(log:GetHeight()) ~= floor(log:GetStringHeight()) + 20 do
+									--TMW.print(k, tries, log:GetHeight(), log:GetStringHeight() + 20)
+									tries = tries + 1
+									log:SetHeight(log:GetStringHeight() + 20)
+								end
+							end
+							self.FixedWrapping = true
+						end
+					</OnShow>
 				</Scripts>
 			</Frame>
 		</Frames>
