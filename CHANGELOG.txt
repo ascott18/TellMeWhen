@@ -53,7 +53,7 @@
  * Added Yu'lon's Barrier to the DamageShield equivalency.
 
  * Bug Fixes:
- ** IconModule_Alpha\Alpha.lua:84: attempt to index local "IconModule_Alpha" (a nil value)
+ ** IconModule_Alpha/Alpha.lua:84: attempt to index local "IconModule_Alpha" (a nil value)
  ** Rune icons will now behave properly when no runes are found that match the types configured for the icon.
  ** The Banish loss of control type was accidentally linked to the Fear loss of control type - this has been fixed.
  ** Unit cooldown icons should now attempt to show the first usable spell even if no units being checked have casted any spells yet.
@@ -124,8 +124,8 @@
  ** Replaced Blood Pact with Dark Intent for the IncreasedStamina equivalency.
  ** The "All Types" setting for Loss of Control icons should now work as intended.
  ** Attempted to fix the issue where the "You are not in a raid" message would be caused by TellMeWhen.
- ** Fixed: Components\IconModules\IconModule_Alpha\Alpha.lua:145 attempt to perform arithmetic on field "actualAlphaAtLastChange" (a nil value)
- ** Fixed: IconType_unitcooldown\unitcooldown.lua:270 attempt to index local "NameHash" (a boolean value)
+ ** Fixed: Components/IconModules/IconModule_Alpha/Alpha.lua:145 attempt to perform arithmetic on field "actualAlphaAtLastChange" (a nil value)
+ ** Fixed: IconType_unitcooldown/unitcooldown.lua:270 attempt to index local "NameHash" (a boolean value)
  ** Conditions that use the c.GCDReplacedNameFirst condition substitution will no longer fail to compile when the spell being subbed in contains a double quote.
 
 ===v6.1.5===
@@ -146,7 +146,7 @@
  
  * Bug Fixes:
  ** Text from the Text Displays module should now always appear above all other icon elements.
- ** Fixed: {{{Core\Conditions\Categories\PlayerAttributes.lua:60: attempt to call upvalue "GetInstanceDifficulty" (a nil value) }}}
+ ** Fixed: {{{Core/Conditions/Categories/PlayerAttributes.lua:60: attempt to call upvalue "GetInstanceDifficulty" (a nil value) }}}
  ** The ALPHA_STACKREQ and ALPHA_DURATIONREQ data processor hooks should now properly trigger the TMW_ICON_UPDATED event when their state changes, which will allow meta icons (that check icons that implement these hooks) to properly update as needed.
  ** The "Talent learned", "Glyph active", and "Tracking active" conditions should now always update properly when checked in a condition set where there are OnUpdate driven conditions in a higher position than these conditions.
  ** Editboxes will no longer have their text reset if they are focused and have unsaved changes when a non-editbox setting is changed.
@@ -174,7 +174,7 @@
  * Added a new text output handler for the Instance channel, and updated existing chat output methods for this channel.
 
  * Bug Fixes:
- ** Fixed error Interface\AddOns\TellMeWhen\TellMeWhen.lua:155: table index is nil
+ ** Fixed error Interface/AddOns/TellMeWhen/TellMeWhen.lua:155: table index is nil
  
 ===v6.1.0===
  * New icon display method: Bars.
@@ -195,7 +195,7 @@
  ** Attempted a fix for error <string>:"Condition_SPELLDMG":3: Usage: GetSpellBonusDamage(school)
  ** All slashes in custom texture paths will be converted to backslashes upon processing.
  ** The [Name] DogTag should now always update properly.
- ** Fixed the error stemming from Components\Core\Spells\ClassSpellCache.lua:215 ()? running while in combat.
+ ** Fixed the error stemming from Components/Core/Spells/ClassSpellCache.lua:215 ()? running while in combat.
  
 ===v6.0.4===
  * New icon event: On Condition Set Passing. Allows you to create an event handler that reacts to the state of a condition set.
@@ -228,11 +228,11 @@
  ** Fixed an incorrect spellID for Spirit Beast Blessing in the IncreasedMastery equivalency.
  ** Groups should now properly show/hide as needed when you change between primary/secondary talents specializations when both specializations are the same.
  ** Condition Object Constructors are now much more reliable (at the cost of some garbage churn when running TMW:Update())
- ** Fix attempted for GroupModule_GroupPosition\Config.lua line 47: attempt to index local 'Module' (a nil value)
+ ** Fix attempted for GroupModule_GroupPosition/Config.lua line 47: attempt to index local 'Module' (a nil value)
  ** IncreasedStats should now properly include Legacy of the Emperor
- ** Fixed Components\IconTypes\IconType_unitcooldown\unitcooldown.lua:317 attempt to index local 'NameHash' (a boolean value)
- ** Fixed Components\IconModules\IconModule_PowerBar\PowerBar.lua:128 attempt to index local 'colorinfo' (a nil value)
- ** Fixed Components\IconModules\IconModule_Alpha\Alpha.lua:96 attempt to compare nil with number
+ ** Fixed Components/IconTypes/IconType_unitcooldown/unitcooldown.lua:317 attempt to index local 'NameHash' (a boolean value)
+ ** Fixed Components/IconModules/IconModule_PowerBar/PowerBar.lua:128 attempt to index local 'colorinfo' (a nil value)
+ ** Fixed Components/IconModules/IconModule_Alpha/Alpha.lua:96 attempt to compare nil with number
  ** The "Show Timer Text" option now works with ElvUI
  ** Fixed TellMeWhen: Condition MELEEAP tried to write values to Env different than those that were already in it.
  ** Attempted some fixes at some obscure bugs that can happen with replacement spells (e.g. tracking Immolate in a debuff icon was getting force-changed to Corruption in Affliction spec.)
@@ -307,7 +307,7 @@
  ** The "Show Variable text" setting should no longer cause errors
  ** Fixed the GCD spell for warriors (again)
  ** Fixed an issue with static formats and ptBR, zhCN, and zhTW.
- ** \Core\Conditions\Categories\BuffsDebuffs.lua:56 attempt to index global 'strlowerCache' (a nil value)
+ ** /Core/Conditions/Categories/BuffsDebuffs.lua:56 attempt to index global 'strlowerCache' (a nil value)
  
 ===v6.0.1===
  * Bug fix: Fixed positioning issues when using Masque.
@@ -388,7 +388,7 @@
  ** (r453) Combat Event icons should no longer process any sound/text/animation events when their parent group is hidden.
  ** (r459) TellMeWhen-5.0.0.lua:4740: attempt to index field "OnDuration" (a boolean value)
  ** (r461) TellMeWhen.lua line 3105: attempt to index field '?' (a boolean value)
- ** (r462) AceDB-3.0-22.lua:104 in function <Ace3\AceDB-3.0\AceDB-3.0.lua:100 table index is NaN (MAYBE)
+ ** (r462) AceDB-3.0-22.lua:104 in function <Ace3/AceDB-3.0/AceDB-3.0.lua:100 table index is NaN (MAYBE)
  ** (r464) Fixed meta icons that check entire groups
  ** (r467) TellMeWhen-5.0.0.lua:3018: attempt to concatenate local "name" (a nil value)
  ** (r468) Meta icons that are checking conditions show now properly update themselves when the state of their conditions change
@@ -551,7 +551,7 @@
  ** (r272) Multi-state cooldowns will now reflect the spell being displayed in their %s variable (bindings/text output).
  ** (r273) The slot settings for Wild Mushroom icons and other totem icon variants can once again be configured without error.
  ** (r276) Fixed a breaking typo in the enUS locale file.
- ** (r281) TellMeWhen\Types\dr.lua:182 table index is nil
+ ** (r281) TellMeWhen/Types/dr.lua:182 table index is nil
  ** (r282) Pet talent tree localization was incorrect for some languages due to my crafty attempts to be crafty
  ** (r290) Blank icons will no longer be erroneously added to the copy dropdown.
 
@@ -577,7 +577,7 @@
  * Bug Fixes:
  ** (r252) Removed spam when pasting a corrupt string
  ** (r252) Importing very old strings should now work. (Very old means pre-v4.1.4)
- ** (r253) TellMeWhen_Options\TellMeWhen_Options.lua:2246: attempt to index global "current" (a nil value)
+ ** (r253) TellMeWhen_Options/TellMeWhen_Options.lua:2246: attempt to index global "current" (a nil value)
  ** (r254) Changes in haste percentage without changes in haste rating will now be properly reflected in conditions (Tickets 303, 304)
  ** (r255) Warnings should no longer incorrectly show for missing durations for icon types that do not require them
 
@@ -589,7 +589,7 @@
  * Spell Cast conditions can now match a name.
  * Chat channels are now a valid text output destination.
  * Bug Fixes:
- ** (r242) 1x AceConfigDialog-3.0\AceConfigDialog-3.0-54.lua:803: attempt to index field "rootframe" (a nil value)
+ ** (r242) 1x AceConfigDialog-3.0/AceConfigDialog-3.0-54.lua:803: attempt to index field "rootframe" (a nil value)
  ** (r245) Fixed an error 132 crash in 4.3 when using the "Finish Caching Now" button
  ** (r246) Fixed conditions for 4.3
  ** (r247) Temporary compatibility code to make the options function fully, with the exception of import/export functionality, until AceSerializer gets fixed.
@@ -703,7 +703,7 @@
  ** (r145) Totem icons now work for mushrooms/DK ghouls
  ** (r146) Unit cooldown icons now properly sort
  ** (r146) Fixed an extremely frustrating and elusive bug that was making it impossible to stop moving a group after you started dragging either a spell cooldown or reactive icon that was either checking an ability that was entered by spell name (IDs were fine) that the current character did not have in his/her spellbook, or checking nothing at all.
- ** (r149) TellMeWhen\TellMeWhen-r147.lua:1136: attempt to index local "icon" (a nil value)
+ ** (r149) TellMeWhen/TellMeWhen-r147.lua:1136: attempt to index local "icon" (a nil value)
 
 ===v4.4.3===
  * You can now specify a custom texture to be used for an icon.
