@@ -31,6 +31,7 @@ Hook:RegisterConfigPanel_XMLTemplate(229, "TellMeWhen_ConditionRequirements")
 
 local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_CONDITIONFAILED", "alpha_conditionFailed")
 Processor.dontInherit = true
+
 TMW.IconAlphaManager:AddHandler(10, "ALPHA_CONDITIONFAILED")
 
 -- This IconDataProcessorHook does not RegisterCompileFunctionSegmentHook(). 
@@ -45,17 +46,17 @@ TMW:RegisterCallback(TMW.Classes.IconDataProcessor.ProcessorsByName.CONDITION.ch
 end)
 
 
-Hook:ExtendMethod("OnImplementIntoIcon", function(self, icon)
+function Hook:OnImplementIntoIcon(icon)
 	if icon.attributes.conditionFailed then
 		icon:SetInfo("alpha_conditionFailed", icon.ConditionAlpha)
 	else
 		icon:SetInfo("alpha_conditionFailed", nil)
 	end
-end)
+end
 
-Hook:ExtendMethod("OnUnimplementFromIcon", function(self, icon)
+function Hook:OnUnimplementFromIcon(icon)
 	icon:SetInfo("alpha_conditionFailed", nil)
-end)
+end
 
 TMW:RegisterUpgrade(41005, {
 	icon = function(self, ics)

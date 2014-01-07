@@ -26,6 +26,43 @@ Processor:DeclareUpValue("OnGCD", TMW.OnGCD)
 TMW.Classes.Icon.attributes.start = 0
 TMW.Classes.Icon.attributes.duration = 0
 
+Processor:RegisterIconEvent(21, "OnStart", {
+	text = L["SOUND_EVENT_ONSTART"],
+	desc = L["SOUND_EVENT_ONSTART_DESC"],
+})
+
+Processor:RegisterIconEvent(22, "OnFinish", {
+	text = L["SOUND_EVENT_ONFINISH"],
+	desc = L["SOUND_EVENT_ONFINISH_DESC"],
+})
+
+Processor:RegisterIconEvent(23, "OnDuration", {
+	text = L["SOUND_EVENT_ONDURATION"],
+	desc = L["SOUND_EVENT_ONDURATION_DESC"],
+	settings = {
+		Operator = true,
+		Value = true,
+		CndtJustPassed = "FORCE",
+		PassingCndt = "FORCE",
+	},
+	blacklistedOperators = {
+		["~="] = true,
+		["=="] = true,
+	},
+	valueName = L["DURATION"],
+	conditionChecker = function(icon, eventSettings)
+		local attributes = icon.attributes
+		local d = attributes.duration - (TMW.time - attributes.start)
+		d = d > 0 and d or 0
+
+		return TMW.CompareFuncs[eventSettings.Operator](d, eventSettings.Value)
+	end,
+	applyDefaultsToSetting = function(EventSettings)
+		EventSettings.CndtJustPassed = true
+		EventSettings.PassingCndt = true
+	end,
+})
+
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: start, duration
 	t[#t+1] = [[
@@ -74,56 +111,77 @@ function Processor:CompileFunctionSegment(t)
 	--]]
 end
 
-Processor:RegisterIconEvent(21, "OnStart", {
-	text = L["SOUND_EVENT_ONSTART"],
-	desc = L["SOUND_EVENT_ONSTART_DESC"],
-})
 
-Processor:RegisterIconEvent(22, "OnFinish", {
-	text = L["SOUND_EVENT_ONFINISH"],
-	desc = L["SOUND_EVENT_ONFINISH_DESC"],
-})
-
-Processor:RegisterIconEvent(23, "OnDuration", {
-	text = L["SOUND_EVENT_ONDURATION"],
-	desc = L["SOUND_EVENT_ONDURATION_DESC"],
-	settings = {
-		Operator = true,
-		Value = true,
-		CndtJustPassed = "FORCE",
-		PassingCndt = "FORCE",
-	},
-	blacklistedOperators = {
-		["~="] = true,
-		["=="] = true,
-	},
-	valueName = L["DURATION"],
-	conditionChecker = function(icon, eventSettings)
-		local attributes = icon.attributes
-		local d = attributes.duration - (TMW.time - attributes.start)
-		d = d > 0 and d or 0
-
-		return TMW.CompareFuncs[eventSettings.Operator](d, eventSettings.Value)
-	end,
-	applyDefaultsToSetting = function(EventSettings)
-		EventSettings.CndtJustPassed = true
-		EventSettings.PassingCndt = true
-	end,
-})
-
-
-TMW:RegisterCallback("TMW_ICON_NEXTUPDATE_REQUESTDURATION", function(event, icon, currentIconDuration)
+function Processor:OnImplementIntoIcon(icon)
 	if icon.EventHandlersSet.OnDuration then
 		for _, EventSettings in TMW:InNLengthTable(icon.Events) do
 			if EventSettings.Event == "OnDuration" then
-				local Duration = EventSettings.Value
-				if Duration < currentIconDuration and icon.NextUpdate_Duration < Duration then
-					icon.NextUpdate_Duration = Duration
-				end
+				self:RegisterDurationTrigger(icon, EventSettings.Value)
 			end
 		end
 	end
+end
+
+
+
+
+
+---------------------------------
+-- Duration triggers
+---------------------------------
+
+-- Duration triggers. Register a duration trigger to cause a call to
+-- icon:SetInfo("start, duration", icon.attributes.start, icon.attributes.duration)
+-- when the icon reaches the specified duration.
+local DurationTriggers = {}
+Processor.DurationTriggers = DurationTriggers
+function Processor:RegisterDurationTrigger(icon, duration)
+	if not DurationTriggers[icon] then
+		DurationTriggers[icon] = {}
+	end
+
+	if not TMW.tContains(DurationTriggers[icon], duration) then
+		tinsert(DurationTriggers[icon], duration)
+	end
+end
+
+function Processor:OnUnimplementFromIcon(icon)
+	if DurationTriggers[icon] then
+		wipe(DurationTriggers[icon])
+	end
+end
+
+TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function(event, time, Locked)
+	for icon, durations in pairs(DurationTriggers) do
+		if #durations > 0 then
+			local lastCheckedDuration = durations.last or 0
+
+			local currentIconDuration = icon.attributes.duration - (time - icon.attributes.start)
+			if currentIconDuration < 0 then currentIconDuration = 0 end
+			
+			-- If the duration didn't change (i.e. it is 0) then don't even try.
+			if currentIconDuration == lastCheckedDuration then
+				break
+			end
+
+			for i = 1, #durations do
+				local durationToCheck = durations[i]
+				if currentIconDuration <= durationToCheck and -- Make sure we are at or have passed the duration we want to trigger at
+					(lastCheckedDuration > durationToCheck -- Make sure that we just reached this duration (so it doesn't continually fire)
+					or lastCheckedDuration < currentIconDuration -- or make sure that the duration increased since the last time we checked the triggers.
+				) then
+					icon:SetInfo("start, duration", icon.attributes.start, icon.attributes.duration)
+					break
+				end
+			end
+			durations.last = currentIconDuration
+		end
+	end
 end)
+
+
+
+
 
 
 local OnGCD = TMW.OnGCD
@@ -158,7 +216,6 @@ Processor:RegisterDogTag("TMW", "Duration", {
 })
 
 TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
-	icon.__realDuration = icon.__realDuration or 0
 	if not TMW.Locked then
 		icon:SetInfo("start, duration", 0, 0)
 	end

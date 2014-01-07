@@ -18,7 +18,9 @@ local L = TMW.L
 local print = TMW.print
 
 -- Create an IconDataProcessor that will store the result of the duration test
-TMW.Classes.IconDataProcessor:New("ALPHA_DURATIONFAILED", "alpha_durationFailed")
+local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_DURATIONFAILED", "alpha_durationFailed")
+Processor.dontInherit = true
+
 TMW.IconAlphaManager:AddHandler(20, "ALPHA_DURATIONFAILED")
 
 local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_DURATIONREQ", "DURATION")
@@ -53,26 +55,24 @@ Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 	--]]
 end)
 
-Hook:ExtendMethod("OnUnimplementFromIcon", function(self, icon)
+local DURATION = Processor.ProcessorsByName.DURATION
+
+function Hook:OnImplementIntoIcon(icon)
 	icon:SetInfo("alpha_durationFailed", nil)
-end)
 
-
-TMW:RegisterCallback("TMW_ICON_NEXTUPDATE_REQUESTDURATION", function(event, icon, currentIconDuration)
 	if icon.DurationMaxEnabled then
-		local DurationMax = icon.DurationMax
-		if DurationMax < currentIconDuration and icon.NextUpdate_Duration < DurationMax  then
-			icon.NextUpdate_Duration = DurationMax
-		end
+		DURATION:RegisterDurationTrigger(icon, icon.DurationMax)
 	end
 	
 	if icon.DurationMinEnabled then
-		local DurationMin = icon.DurationMin
-		if DurationMin < currentIconDuration and icon.NextUpdate_Duration < DurationMin then
-			icon.NextUpdate_Duration = DurationMin
-		end
+		DURATION:RegisterDurationTrigger(icon, icon.DurationMin)
 	end
-end)
+end
+
+function Hook:OnUnimplementFromIcon(icon)
+	icon:SetInfo("alpha_durationFailed", nil)
+end
+
 
 TMW:RegisterUpgrade(60010, {
 	icon = function(self, ics)

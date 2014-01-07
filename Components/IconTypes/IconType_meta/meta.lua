@@ -33,6 +33,7 @@ Type.NoColorSettings = true
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("alpha_metaChild")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
@@ -47,7 +48,6 @@ Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 Type:RegisterIconDefaults{
 	Sort						= false,
 	CheckNext					= false,
-	MetaInheritConditionAlpha	= false,
 	Icons						= {
 		[1]						= "",
 	},   
@@ -55,30 +55,16 @@ Type:RegisterIconDefaults{
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
-Type:RegisterConfigPanel_ConstructorFunc(160, "TellMeWhen_MetaIconInheritanceBehavior", function(self)
-	self.Header:SetText(TMW.L["ICONMENU_META_INHERITANCEBEHAVIOR"])
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		numPerRow = 1,
-		{
-			setting = "MetaInheritConditionAlpha",
-			title = L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA"],
-			tooltip = L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA_DESC"],
-			OnClick = function(self)
-				if TMW.CI.ics.Conditions.n > 0 then
-					if not self.hasRegisteredCode then
-						self.hasRegisteredCode = true
-						TMW.HELP:NewCode("META_INHERIT_CNDTALPHA", 100, true)
-					end
-				
-					TMW.HELP:Show("META_INHERIT_CNDTALPHA", TMW.CI.icon, self, 0, 0, L["ICONMENU_META_INHERITANCEBEHAVIOR_CNDTALPHA_HELP"])
-				end
-			end,
-		},
-	})
-end)
-
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_MetaSortSettings")
 
+
+TMW:RegisterUpgrade(70042, {
+	icon = function(self, ics)
+		-- Metas now always inherit whatever the alpha of their child is,
+		-- regardless of where it came from. This setting has been removed.
+		ics.MetaInheritConditionAlpha = nil
+	end,
+})
 
 TMW:RegisterUpgrade(24100, {
 	icon = function(self, ics)
@@ -92,7 +78,17 @@ TMW:RegisterUpgrade(24100, {
 	end,
 })
 
-do
+
+local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_METACHILD", "alpha_metaChild")
+Processor.dontInherit = true
+TMW.IconAlphaManager:AddHandler(50, "ALPHA_METACHILD", true)
+
+Processor:ExtendMethod("OnUnimplementFromIcon", function(self, icon)
+	icon:SetInfo("alpha_metaChild", nil)
+end)
+
+
+do	-- Check for recursive references
 	local CCI_icon
 	local function CheckCompiledIcons(icon)
 		CCI_icon = icon
@@ -142,7 +138,7 @@ local function Meta_OnUpdate(icon, time)
 		then
 			ic:Update()
 			
-			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from 2 lines ago)
+			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from the ic:Update() call)
 				if Sort then
 					local _d = attributes.duration - (time - attributes.start)
 					if _d < 0 then
@@ -163,39 +159,45 @@ local function Meta_OnUpdate(icon, time)
 	end
 
 	if icToUse then
-		while icToUse.Type == "meta" and icToUse.__currentIcon do
-			icToUse = icToUse.__currentIcon
+		local dataSource, moduleSource = icToUse, icToUse
+		while moduleSource.Type == "meta" and moduleSource.__metaModuleSource do
+			moduleSource = moduleSource.__metaModuleSource
 		end
 		
-		local force
+		if moduleSource ~= icon.__metaModuleSource then
+			
+			icon:SetModulesToEnabledStateOfIcon(moduleSource)
+			icon:SetupAllModulesForIcon(moduleSource)
+			
+			local force = 1
+
+			icon.__metaModuleSource = moduleSource
+		end
 		
-		if icToUse ~= icon.__currentIcon then
+		if dataSource ~= icon.__currentIcon then
 
-			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, icToUse)
+			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, dataSource)
 			
-			icon:SetModulesToEnabledStateOfIcon(icToUse)
-			icon:SetupAllModulesForIcon(icToUse)
-			
-			force = 1
+			local force = 1
 
-			icon.__currentIcon = icToUse
+			icon.__currentIcon = dataSource
 		end
 
-		icToUse.__lastMetaCheck = time
+		dataSource.__lastMetaCheck = time
+
 		if force or icon.metaUpdateQueued then
 			icon.metaUpdateQueued = nil
-			
-			if icon.MetaInheritConditionAlpha then
-				-- SetInfo_INTERNAL is OK here because we will call a normal SetInfo immediately after
-				-- (well, at least InheritDataFromIcon does fire TMW_ICON_UPDATED, which is what matters).
-				icon:SetInfo_INTERNAL("alpha_conditionFailed", icToUse.attributes.alpha_conditionFailed)
-			end
-			
-			icon:InheritDataFromIcon(icToUse)
+
+			-- Inherit the alpha of the icon. Don't SetInfo_INTERNAL here because the
+			-- call to :InheritDataFromIcon might not call TMW_ICON_UPDATED
+			icon:SetInfo("alpha_metaChild", dataSource.attributes.realAlpha)
+
+			icon:InheritDataFromIcon(dataSource)
 		end
+
 	elseif icon.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then
 		icon.metaUpdateQueued = nil
-		icon:SetInfo("alpha", 0)
+		icon:SetInfo("alpha; alpha_metaChild", 0, nil)
 	end
 end
 
@@ -310,6 +312,7 @@ end
 
 function Type:Setup(icon)
 	icon.__currentIcon = nil -- reset this
+	icon.__metaModuleSource = nil -- reset this
 	icon.metaUpdateQueued = true -- force this
 
 	-- validity check:

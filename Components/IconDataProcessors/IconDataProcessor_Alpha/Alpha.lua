@@ -19,6 +19,8 @@ local print = TMW.print
 
 
 local Processor = TMW.Classes.IconDataProcessor:New("ALPHA", "alpha")
+Processor.dontInherit = true
+
 TMW.IconAlphaManager:AddHandler(100, "ALPHA")
 -- Processor:CompileFunctionSegment(t) is default.
 

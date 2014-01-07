@@ -852,14 +852,13 @@ TMW.IconAlphaManager = {
 				handlerToUse = handler
 				break
 			elseif alpha ~= nil then
-				if handler.haltImmediatelyIfFound then
-					-- This is currently only used for ALPHAOVERRIDE
-					handlerToUse = handler
-					break
-				elseif not handlerToUse then
+				if not handlerToUse then
 					-- If we found an alpha value that isn't nil and we haven't figured out
 					-- an alpha value to use yet, use this one, but keep looking for 0 values.
 					handlerToUse = handler
+				end
+				if handler.haltImmediatelyIfFound then
+					break
 				end
 			end
 		end

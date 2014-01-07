@@ -13,7 +13,8 @@
  ** The consequence of this is that you can now, for example, import/export a meta icon separately from the icons it is checking and they will automatically find eachother once they are all imported (as long as these export strings were created with TMW v7.0.0+)
  ** IMPORTANT: Existing DogTags that reference other icons/groups by ID cannot be updated automatically - you will need to change these yourself.
 
-
+ * The meta icon setting "Inherit failed condition opacity" has been removed. Meta icons will now always inherit the exact opacity of the icons they are showing, though this can be overridden by the meta icon's opacity settings.
+ * Complex chains of meta icon inheritance should now be handled much better, especially when some of the icons have animations on them.
  * The duration of Diminishing Returns is now customizable in TMW's main options.
  * You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.
  * Added group settings that allow you to specify when a group should be shown based on the role that your current specialization fulfills.

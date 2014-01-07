@@ -20,7 +20,9 @@ local print = TMW.print
 local floor = floor
 
 -- Create an IconDataProcessor that will store the result of the stack test
-TMW.Classes.IconDataProcessor:New("ALPHA_STACKSFAILED", "alpha_stackFailed")
+local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_STACKSFAILED", "alpha_stackFailed")
+Processor.dontInherit = true
+
 TMW.IconAlphaManager:AddHandler(30, "ALPHA_STACKSFAILED")
 
 local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_STACKREQ", "STACK")
