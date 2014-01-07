@@ -164,12 +164,14 @@ local function Meta_OnUpdate(icon, time)
 			moduleSource = moduleSource.__metaModuleSource
 		end
 		
+		local force
+
 		if moduleSource ~= icon.__metaModuleSource then
 			
 			icon:SetModulesToEnabledStateOfIcon(moduleSource)
 			icon:SetupAllModulesForIcon(moduleSource)
 			
-			local force = 1
+			force = 1
 
 			icon.__metaModuleSource = moduleSource
 		end
@@ -178,7 +180,7 @@ local function Meta_OnUpdate(icon, time)
 
 			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, dataSource)
 			
-			local force = 1
+			force = 1
 
 			icon.__currentIcon = dataSource
 		end
