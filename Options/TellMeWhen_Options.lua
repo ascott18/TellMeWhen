@@ -2407,9 +2407,18 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	end
 
 	if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
-		TMW.HELP:NewCode("CHANGELOG_INFO", 100, false)
-		TMW.HELP:Show("CHANGELOG_INFO", nil, TellMeWhen_ChangelogDialog, 0, 0, L["CHANGELOG_INFO"], TELLMEWHEN_VERSION_FULL)
-		TellMeWhen_ChangelogDialog:Show()
+		if TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
+		or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
+		then
+			TMW.HELP:NewCode("CHANGELOG_INFO", 100, false)
+			TMW.HELP:Show("CHANGELOG_INFO", nil, TellMeWhen_ChangelogDialog, 0, 0, L["CHANGELOG_INFO"], TELLMEWHEN_VERSION_FULL)
+			
+			TellMeWhen_ChangelogDialog:Show()
+		
+		else
+			TMW:Printf(L["CHANGELOG_MSG"], TELLMEWHEN_VERSION_FULL)
+		end
+
 		IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
 	end
 	

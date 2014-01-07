@@ -19,12 +19,14 @@ TELLMEWHEN_VERSION = "7.0.0"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
-if strmatch(projectVersion, "%-%d+%-") then
-	TELLMEWHEN_VERSION_MINOR = (" r%d (%s)"):format(strmatch(projectVersion, "%-(%d+)%-(.*)"))
+if projectVersion == "@project-version@" then
+	TELLMEWHEN_VERSION_MINOR = "dev"
+elseif strmatch(projectVersion, "%-%d+%-") then
+	TELLMEWHEN_VERSION_MINOR = ("r%d (%s)"):format(strmatch(projectVersion, "%-(%d+)%-(.*)"))
 end
 
-TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70040 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
+TELLMEWHEN_VERSIONNUMBER = 70041 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3446,7 +3448,7 @@ end
 
 function TMW:PLAYER_ENTERING_WORLD()
 	-- Don't send version broadcast messages in developer mode.
-	if not TMW.debug then
+	if TELLMEWHEN_VERSION_MINOR ~= "dev" then
 		local versionCommString = "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^"
 		
 		if IsInGuild() then
@@ -3475,13 +3477,11 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 			not (revision and major and minor)
 			or revision <= TELLMEWHEN_VERSIONNUMBER
 			or revision == 414069
-			or (who == "Cybeloras" and not TMW.debug)
 			or minor ~= "" and TELLMEWHEN_VERSION_MINOR == ""
 		then
 			-- If some of the data is missing (i dont know why it would be),
 			-- or if the notified revision is less than the currently installed revision,
 			-- or if the notified revision is 414069 (the time I fucked up the version number),
-			-- or if the notification is from me (Cybeloras),
 			-- or if the notification is from an alpha version and the installed version is not an alpha version,
 			-- then don't notify.
 			return
