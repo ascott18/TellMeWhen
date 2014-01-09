@@ -44,6 +44,7 @@ TMW.CHANGELOG = {
 [==[** Icons should now always have the correct size after their view changes or the size or ID of a group changes.]==],
 [==[** Fixed an issue where strings imported from older version of TellMeWhen (roughly pre-v6.0.0) could have their StackMin/Max and DurationMin/Max settings as strings instead of numbers.]==],
 [==[** The "Equipment set equipped" condition should properly update when saving the equipment set that is currently equipped.]==],
+[==[** Fixed an issue when upgrading text layouts that could also cause them to not be upgraded at all: /Components/IconModules/IconModule_Texts/Texts.lua line 205: attempt to index field 'Anchors' (a nil value)]==],
 [==[]==],
 [==[===v6.2.6===]==],
 [==[* Bug Fixes:]==],
