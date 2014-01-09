@@ -15,8 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local _G = _G
-local bit_band =
-	  bit.band
+local bit_band, bit_bor =
+	  bit.band, bit.bor
 local UnitGUID, GetSpellTexture, GetItemIcon =
 	  UnitGUID, GetSpellTexture, GetItemIcon
 local print = TMW.print
@@ -141,13 +141,29 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
 
-		if sourceName and sourceFlags and icon.SourceFlags then
+		if icon.SourceFlags then
+			if not sourceName then
+				if destFlags then
+					sourceFlags = bit_bor(sourceFlags, COMBATLOG_OBJECT_NONE)
+				else
+					sourceFlags = COMBATLOG_OBJECT_NONE
+				end
+			end
+
 			if bit_band(icon.SourceFlags, sourceFlags) ~= sourceFlags then
 				return
 			end
 		end
 
-		if destName and destFlags and icon.DestFlags then
+		if icon.DestFlags then
+			if not destName then
+				if destFlags then
+					destFlags = bit_bor(destFlags, COMBATLOG_OBJECT_NONE)
+				else
+					destFlags = COMBATLOG_OBJECT_NONE
+				end
+			end
+
 			if bit_band(icon.DestFlags, destFlags) ~= destFlags then
 				return
 			end

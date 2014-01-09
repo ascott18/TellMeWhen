@@ -1990,7 +1990,7 @@ L["CLEU_CAT_MISC"] = "Miscellaneous"
 
 
 L["CLEU_COMBATLOG_OBJECT_NONE"] = "Miscellaneous: Unknown Unit"
-L["CLEU_COMBATLOG_OBJECT_NONE_DESC"] = "Check to exclude units that are completely unknown to the WoW client. This very rarely occurs, and can generally be left unchecked."
+L["CLEU_COMBATLOG_OBJECT_NONE_DESC"] = "Check to exclude units that are completely unknown to the WoW client, and to exclude events where a unit is not provided by the game client."
 L["CLEU_COMBATLOG_OBJECT_MAINASSIST"] = "Miscellaneous: Main Assist"
 L["CLEU_COMBATLOG_OBJECT_MAINASSIST_DESC"] = "Check to exclude units marked as main assists in your raid."
 L["CLEU_COMBATLOG_OBJECT_MAINTANK"] = "Miscellaneous: Main Tank"
