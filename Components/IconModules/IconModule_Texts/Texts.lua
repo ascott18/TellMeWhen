@@ -146,6 +146,9 @@ TMW:RegisterUpgrade(70010, {
 					layout.Name = layout.Name .. " (" .. FROM .. " " .. profileName .. ")"
 					TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
 
+					-- Make sure we upgrade the copy of the layout, not the old one that will be discarded
+					layout = TMW.db.global.TextLayouts[layout.GUID]
+
 					-- Upgrade the new layout manually. This is required because this possibly un-upgraded
 					-- layout will be getting mixed into layouts whose version is tracked by the global
 					-- version number. When we are upgrading a profile, global upgrades have already
