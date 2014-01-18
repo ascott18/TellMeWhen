@@ -248,10 +248,11 @@ function IconType:GetIconMenuText(ics)
 end
 
 -- [REQUIRED, FALLBACK]
---- Returns true if the duration provided is a global cooldown. This is a default method, and may be overridden if it does not provide the desired functionality for an IconType. To declare that an icon type does not handle global cooldowns, set {{{IconType.hasNoGCD = true}}}. In contexts where the icon type is static, you may use TMW.OnGCD(duration) to provide the same functionality.
+--- Returns true if the duration provided is a global cooldown. This is a default method, and may be overridden if it does not provide the desired functionality for an IconType. To declare that an icon type does not handle global cooldowns, set {{{IconType.hasNoGCD = true}}}. In contexts where the icon type is static, you may use TMW.OnGCD(duration) to provide the same functionality. {{{Icon:OnGCD(duration)}}} is a wrapper around this method.
+-- @param icon [TMW.Classes.Icon] The icon that the GCD is being checked for.
 -- @param duration [number] The duration to check. This should be the total duration of the cooldown (e.g. the second return from GetSpellCooldown()), not the remaining duration.
 -- @return [boolean] True if the duration passed in is a global cooldown, otherwise false.
-function IconType:OnGCD(duration)
+function IconType:OnGCD(icon, duration)
 	if self.hasNoGCD then
 		return false
 	end

@@ -373,6 +373,15 @@ function Icon.IsInRange(icon)
 	return icon:GetID() <= icon.group.Rows*icon.group.Columns
 end
 
+--- Wrapper around [[api/icon-type/api-documentation/|IconType]]{{{:OnGCD(icon, duration)}}}.
+-- @name Icon:OnGCD
+-- @paramsig duration
+-- @param duration [number] The duration to check. This should be the total duration of the cooldown (e.g. the second return from GetSpellCooldown()), not the remaining duration.
+-- @return [boolean] True if the duration passed in is a global cooldown, otherwise false.
+function Icon.OnGCD(icon, duration)
+	return icon.typeData:OnGCD(icon, duration)
+end
+
 --- Checks if the icon is a valid icon for being in things like the list of icons that can be checked in metas/conditions.
 -- @name Icon:IsValid
 -- @paramsig 

@@ -137,7 +137,7 @@ function TimerBar:SetCooldown(start, duration)
 	self.start = start
 	
 	if duration > 0 then
-		if not self.BarGCD and icon.typeData:OnGCD(duration) then
+		if not self.BarGCD and self.icon:OnGCD(duration) then
 			self.duration = 0
 		end
 

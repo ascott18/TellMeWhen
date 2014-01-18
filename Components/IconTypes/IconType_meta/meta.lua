@@ -311,12 +311,12 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 	return icon.CompiledIcons
 end
 
-function Type:OnGCD(duration)
+function Type:OnGCD(icon, duration)
 	if not icon.__metaModuleSource then
 		return false
 	end
-	
-	return icon.__metaModuleSource.typeData:OnGCD(duration)
+
+	return icon.__metaModuleSource:OnGCD(duration)
 end
 
 function Type:Setup(icon)

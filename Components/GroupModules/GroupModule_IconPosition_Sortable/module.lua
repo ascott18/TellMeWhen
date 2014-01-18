@@ -180,8 +180,8 @@ function IconPosition_Sortable.IconSorter(iconA, iconB)
 				local durationA = attributesA.duration
 				local durationB = attributesB.duration
 
-				durationA = iconA.typeData:OnGCD(durationA) and 0 or durationA - (time - attributesA.start)
-				durationB = iconB.typeData:OnGCD(durationB) and 0 or durationB - (time - attributesB.start)
+				durationA = iconA:OnGCD(durationA) and 0 or durationA - (time - attributesA.start)
+				durationB = iconB:OnGCD(durationB) and 0 or durationB - (time - attributesB.start)
 
 				if durationA ~= durationB then
 					return durationA*order < durationB*order
