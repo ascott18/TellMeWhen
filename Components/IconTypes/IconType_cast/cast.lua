@@ -30,6 +30,7 @@ Type.menuIcon = "Interface\\Icons\\Temp"
 Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.unitType = "unitid"
+Type.hasNoGCD = true
 
 Type:RegisterIconDefaults{
 	Unit					= "player", 

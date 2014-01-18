@@ -109,7 +109,6 @@ function TimerBar:UpdateValue(force)
 			end
 			
 			local pct = value / self.Max * 2
-			local mod = pct
 
 			if pct > 1 then
 				co = ha
@@ -133,12 +132,12 @@ function TimerBar:UpdateValue(force)
 	return ret
 end
 
-function TimerBar:SetCooldown(start, duration, isGCD)
+function TimerBar:SetCooldown(start, duration)
 	self.duration = duration
 	self.start = start
 	
 	if duration > 0 then
-		if isGCD and not self.BarGCD then
+		if not self.BarGCD and icon.typeData:OnGCD(duration) then
 			self.duration = 0
 		end
 
@@ -157,7 +156,7 @@ function TimerBar:SetColors(startColor, halfColor, completeColor)
 end
 
 function TimerBar:DURATION(icon, start, duration)
-	self:SetCooldown(start, duration, OnGCD(duration))
+	self:SetCooldown(start, duration)
 end
 TimerBar:SetDataListner("DURATION")
 

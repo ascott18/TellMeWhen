@@ -23,6 +23,7 @@ Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.menuIcon = "Interface\\Icons\\inv_misc_punchcards_yellow"
 Type.spacebefore = true
 Type.AllowNoName = true
+Type.hasNoGCD = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("alpha_conditionFailed")

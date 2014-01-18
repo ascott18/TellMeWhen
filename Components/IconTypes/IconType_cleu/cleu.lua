@@ -35,6 +35,7 @@ Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.spacebefore = true
 Type.unitType = "name"
+Type.hasNoGCD = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

@@ -33,6 +33,7 @@ local Type = TMW.Classes.IconType:New("swingtimer")
 Type.name = L["ICONMENU_SWINGTIMER"]
 Type.desc = L["ICONMENU_SWINGTIMER_DESC"]
 Type.menuIcon = "Interface\\Icons\\INV_Gauntlets_04"
+Type.hasNoGCD = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

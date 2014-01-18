@@ -26,6 +26,7 @@ local pairs, ipairs, setmetatable, rawget, date, tinsert, type
 local SpellTextures = TMW.SpellTextures
 local tContains = TMW.tContains
 local tDeleteItem = TMW.tDeleteItem
+local OnGCD = TMW.OnGCD
 
 local RelevantToAll = {
 	__index = {
@@ -244,6 +245,18 @@ function IconType:GetIconMenuText(ics)
 	local tooltip =	""
 
 	return text, tooltip
+end
+
+-- [REQUIRED, FALLBACK]
+--- Returns true if the duration provided is a global cooldown. This is a default method, and may be overridden if it does not provide the desired functionality for an IconType. To declare that an icon type does not handle global cooldowns, set {{{IconType.hasNoGCD = true}}}. In contexts where the icon type is static, you may use TMW.OnGCD(duration) to provide the same functionality.
+-- @param duration [number] The duration to check. This should be the total duration of the cooldown (e.g. the second return from GetSpellCooldown()), not the remaining duration.
+-- @return [boolean] True if the duration passed in is a global cooldown, otherwise false.
+function IconType:OnGCD(duration)
+	if self.hasNoGCD then
+		return false
+	end
+
+	return OnGCD(duration)
 end
 
 --- Register the IconType for use in TellMeWhen. IconTypes cannot be used or accessed until this method is called. Should be the very last line of code in the file that defines an IconType.

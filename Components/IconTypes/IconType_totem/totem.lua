@@ -44,6 +44,7 @@ end
 Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.hidden = pclass == "PRIEST" -- priest totems are lightwells, which is tracked with the "lightwell" icon type
+Type.hasNoGCD = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

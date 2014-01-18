@@ -18,7 +18,7 @@ local GetRuneType, GetRuneCooldown
 	= GetRuneType, GetRuneCooldown
 local bit, wipe, ipairs, ceil
 	= bit, wipe, ipairs, ceil
-local OnGCD = TMW.OnGCD
+	
 local print = TMW.print
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
@@ -32,6 +32,7 @@ Type.desc = L["ICONMENU_RUNES_DESC"]
 Type.menuIcon = "Interface\\Addons\\TellMeWhen\\Textures\\DeathPresence"
 Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
+Type.hasNoGCD = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

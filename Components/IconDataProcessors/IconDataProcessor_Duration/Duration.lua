@@ -87,7 +87,7 @@ function Processor:CompileFunctionSegment(t)
 
 	if attributes.start ~= start or attributes.duration ~= duration then
 
-		local realDuration = OnGCD(duration) and 0 or duration -- the duration of the cooldown, ignoring the GCD
+		local realDuration = icon.typeData:OnGCD(duration) and 0 or duration -- the duration of the cooldown, ignoring the GCD
 		if icon.__realDuration ~= realDuration then
 			-- detect events that occured, and handle them if they did
 			if realDuration == 0 then
@@ -194,7 +194,7 @@ Processor:RegisterDogTag("TMW", "Duration", {
 			local duration = attributes.duration
 			
 			local remaining = duration - (TMW.time - attributes.start)
-			if remaining <= 0 or (not gcd and OnGCD(duration)) then
+			if remaining <= 0 or (not gcd and icon.typeData:OnGCD(duration)) then
 				return 0
 			end
 

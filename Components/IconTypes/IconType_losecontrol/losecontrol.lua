@@ -33,6 +33,7 @@ Type.desc = L["LOSECONTROL_ICONTYPE_DESC"]
 Type.menuIcon = "Interface\\Icons\\Spell_Shadow_Possession"
 Type.AllowNoName = true
 Type.usePocketWatch = 1
+Type.hasNoGCD = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

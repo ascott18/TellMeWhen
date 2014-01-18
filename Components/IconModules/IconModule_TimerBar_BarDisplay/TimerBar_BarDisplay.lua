@@ -36,7 +36,12 @@ TimerBar_BarDisplay:RegisterConfigPanel_XMLTemplate(210, "TellMeWhen_BarDisplayB
 
 function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 	self.Invert = sourceIcon.BarDisplay_Invert
+	
 	self.BarGCD = sourceIcon.BarDisplay_BarGCD
+	if sourceIcon.typeData.hasNoGCD then
+		self.BarGCD = true
+	end
+
 	self.Offset = 0
 
 	if self.Invert or sourceIcon.BarDisplay_FakeMax == 0 then

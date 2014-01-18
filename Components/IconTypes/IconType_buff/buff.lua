@@ -36,6 +36,7 @@ Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
 Type.spacebefore = true
 Type.unitType = "unitid"
+Type.hasNoGCD = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

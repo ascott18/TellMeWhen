@@ -33,6 +33,7 @@ Type.desc = L["ICONMENU_BUFFCHECK_DESC"]
 Type.menuIcon = GetSpellTexture(21562)
 Type.usePocketWatch = 1
 Type.unitType = "unitid"
+Type.hasNoGCD = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

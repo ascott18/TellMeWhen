@@ -55,7 +55,12 @@ TMW:RegisterUpgrade(51022, {
 function TimerBar_Overlay:SetupForIcon(sourceIcon)
 	self.Invert = sourceIcon.InvertCBar
 	self.Offset = sourceIcon.CBarOffs or 0
+	
 	self.BarGCD = sourceIcon.Overlay_BarGCD
+	if sourceIcon.typeData.hasNoGCD then
+		self.BarGCD = true
+	end
+
 	if not sourceIcon.typeData then
 		error("sourceIcon.typeData was nil. Why did this happen? (Please tell Cybeloras)")
 	end

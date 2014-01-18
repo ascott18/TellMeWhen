@@ -28,6 +28,7 @@ Type.desc = L["ICONMENU_ICD_DESC"]
 Type.menuIcon = GetSpellTexture(28093)
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
+Type.hasNoGCD = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("start, duration")

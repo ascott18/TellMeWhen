@@ -155,7 +155,11 @@ function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
 	self.ShowTimerText = icon.ShowTimerText
 	self.ShowTimerTextnoOCC = icon.ShowTimerTextnoOCC
+	
 	self.ClockGCD = icon.ClockGCD
+	if icon.typeData.hasNoGCD then
+		self.ClockGCD = true
+	end
 	
 	
 	if tukui then

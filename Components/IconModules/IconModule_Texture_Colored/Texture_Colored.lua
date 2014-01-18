@@ -69,7 +69,7 @@ function Texture_Colored:UPDATE(icon)
 
 		local s
 
-		if not duration or duration == 0 or (ColorGCD and OnGCD(duration)) then
+		if not duration or duration == 0 or (ColorGCD and icon.typeData:OnGCD(duration)) then
 			s = "N" -- Not counting
 		else
 			s = "C" -- Counting

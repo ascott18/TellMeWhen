@@ -30,6 +30,7 @@ Type.name = L["ICONMENU_LIGHTWELL"]
 Type.desc = L["ICONMENU_LIGHTWELL_DESC"]
 Type.hidden = pclass ~= "PRIEST"
 Type.menuIcon = "Interface\\Icons\\Spell_Holy_SummonLightwell"
+Type.hasNoGCD = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
