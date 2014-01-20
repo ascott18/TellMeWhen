@@ -52,6 +52,12 @@ L["IMPORT_FAILED"] = "Import failed!"
 L["IMPORTERROR_INVALIDTYPE"] = "Attempted to import data of an unknown type. Check to see if you have the latest version of TellMeWhen installed."
 L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure that you copied the entire string from the source."
 
+L["DBRESTORED_INFO"] = [[TellMeWhen has detected that its database was either empty or corrupted. This can be caused by a number of issues, the most common of which is WoW not exiting properly.
+
+TellMeWhen_Options maintains a backup of your database in case this happens since it is very unlikely that both TellMeWhen's and TellMeWhen_Options's databases will become corrupted in this way at the same time.
+
+This backup, created from your session that began %s, has been restored.]]
+
 
 L["DIALOG_HEADER_CHANGELOG"] = "TellMeWhen Changelog"
 
@@ -211,6 +217,8 @@ L["STACKALPHA_DESC"] = "Set the opacity level that the icon should display at wh
 
 
 L["ICONMENU_TYPE"] = "Icon type"
+
+L["ICONMENU_TYPE_DISABLED_BY_VIEW"] = "This Icon Type is not available for the %q display method. Change this group's display method or create a new group to use this Icon Type."
 
 L["ICONMENU_SPELLCOOLDOWN"] = "Spell Cooldown"
 L["ICONMENU_SPELLCOOLDOWN_DESC"] = [[Tracks the cooldowns of spells from your spellbook.]]

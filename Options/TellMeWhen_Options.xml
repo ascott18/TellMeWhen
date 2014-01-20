@@ -1461,9 +1461,6 @@
 
 	<Frame name="TellMeWhen_SimpleDialog" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG" parent="UIParent" virtual="true">
 		<Size x="330"/>
-		<Anchors>
-			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
-		</Anchors>
 
 		<!-- Enables the whole frame for dragging -->
 		<TitleRegion setAllPoints="true"/>
@@ -1525,6 +1522,10 @@
 	<!-- END TEMPLATES -->
 
 	<Frame name="TellMeWhen_ConfigWarning" inherits="TellMeWhen_SimpleDialog" >
+		<Anchors>
+			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
+		</Anchors>
+
 		<Frames>
 			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="155" y="15"/>
@@ -1563,11 +1564,47 @@
 		</Scripts>
 	</Frame>
 
+	<Frame name="TellMeWhen_DBRestoredNofication" inherits="TellMeWhen_SimpleDialog" >
+		<Size x="400"/>
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent" y="50"/>
+		</Anchors>
+
+		<Frames>
+			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="5" y="5"/>
+					<Anchor point="BOTTOMRIGHT" x="-5" y="5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad> self:SetText(OKAY) </OnLoad>
+					<OnClick>self:GetParent():Hide() </OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				function self:SetTime(time)
+					self.desc:SetText(TMW.L["DBRESTORED_INFO"]:format(date("%B %d, %Y @ %I:%M %p", time)))
+					self.desc:SetWidth(self:GetWidth() - 30)
+					self:SetHeight(self.desc:GetHeight() + 65)
+				end
+
+				self.CloseButton:Hide()
+				local alert = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t"
+				self.title:SetText(alert .. "  TellMeWhen  " .. alert)
+				self:SetScale(0.95)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
 
 	<Frame name="TellMeWhen_NoGroupsWarning" inherits="TellMeWhen_SimpleDialog" >
 		<Anchors>
 			<Anchor point="TOP" relativeTo="UIParent" y="-180"/>
 		</Anchors>
+
 		<Frames>
 			<Button name="$parentGroupOptions" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="260" y="15"/>
@@ -1607,6 +1644,7 @@
 
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent" y="50"/>
+			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
 		</Anchors>
 
 		<Frames>
@@ -1724,6 +1762,7 @@
 
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent" />
+			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
 		</Anchors>
 
 		<Frames>
@@ -1885,6 +1924,7 @@
 
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent" />
+			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
 		</Anchors>
 
 		<Frames>
@@ -1919,6 +1959,11 @@
 						local s = ""
 
 						local CHANGELOGS = {}
+
+						if not TMW.CHANGELOG then
+							TMW:Print("There was an error loading TMW's changelog data.")
+						end
+
 						for k, v in pairs(TMW.CHANGELOG) do
 							
 							v = v:trim()
@@ -2036,6 +2081,7 @@
 		<Size x="585" y="380"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
+			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
 		</Anchors>
 		
 		<Layers>

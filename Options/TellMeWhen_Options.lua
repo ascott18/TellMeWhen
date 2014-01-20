@@ -1680,6 +1680,7 @@ end
 IE.Defaults = {
 	global = {
 		LastChangelogVersion = 0,
+		TellMeWhenDBBackupDate = 0,
 		EditorScale		= 0.9,
 		EditorHeight	= 600,
 		ConfigWarning	= true,
@@ -1915,7 +1916,26 @@ function IE:InitializeDatabase()
 	-- Handle normal upgrades after the database has been initialized.
 	IE:UpgradeGlobal()
 	IE:UpgradeProfile()
-	
+
+	if TMW.DBWasEmpty and IE.db.global.TellMeWhenDBBackup then
+		-- TellMeWhenDB was corrupted. Restore from the backup and notify user.
+		TellMeWhenDB = IE.db.global.TellMeWhenDBBackup
+
+		TMW:InitializeDatabase()
+		TMW.db.profile.Locked = false
+
+		TMW:ScheduleUpdate(1)
+
+		TellMeWhen_DBRestoredNofication:SetTime(IE.db.global.TellMeWhenDBBackupDate)
+		TellMeWhen_DBRestoredNofication:Show()
+
+	elseif not TMW.DBWasEmpty --[[and IE.db.global.TellMeWhenDBBackupDate + 86400 < time()]] then
+		-- TellMeWhenDB was not corrupt, so back it up.
+		-- I have opted against only creating the backup after the old one reaches a certain age.
+		IE.db.global.TellMeWhenDBBackupDate = time()
+		IE.db.global.TellMeWhenDBBackup = TellMeWhenDB
+	end
+
 	TMW:Fire("TMW_DB_INITIALIZED")
 	TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZED")
 end
@@ -3211,19 +3231,25 @@ function IE:Type_DropDown()
 			info.text = get(Type.name)
 			info.value = Type.type
 			
+			local allowed = Type:IsAllowedByView(CI.icon.viewData.view)
+			info.disabled = not allowed
+
 			local desc = get(Type.desc)
+				
+			if not allowed then
+				desc = (desc and desc .. "\r\n\r\n" or "") .. L["ICONMENU_TYPE_DISABLED_BY_VIEW"]:format(CI.icon.viewData.name)
+			end
+
 			if desc then
 				info.tooltipTitle = Type.tooltipTitle or info.text
 				info.tooltipText = desc
 				info.tooltipOnButton = true
+				info.tooltipWhileDisabled = true
 			end
 			
 			info.checked = (info.value == CI.ics.Type)
 			info.func = IE.Type_Dropdown_OnClick
 			info.arg1 = Type
-			
-			info.disabled = tempshow
-			info.tooltipWhileDisabled = true
 			
 			info.icon = get(Type.menuIcon)
 			info.tCoordLeft = 0.07

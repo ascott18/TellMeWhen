@@ -1656,7 +1656,7 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Class.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Conditions/Condition.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 		return
 
 	-- if the file is NOT required for gross functionality
@@ -1725,8 +1725,6 @@ end
 
 function TMW:InitializeDatabase()
 	
-	TMW.InitializeDatabase = nil
-	
 	TMW.InitializedDatabase = true
 	
 	TMW:Fire("TMW_DB_INITIALIZING")
@@ -1737,6 +1735,7 @@ function TMW:InitializeDatabase()
 		-- TellMeWhenDB might not exist if this is a fresh install
 		-- or if the user is upgrading from a really old version that uses TellMeWhen_Settings.
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
+		TMW.DBWasEmpty = true
 	end
 	
 
@@ -1772,7 +1771,15 @@ function TMW:InitializeDatabase()
 	TMW:UpgradeProfile()
 	
 	TMW:Fire("TMW_DB_INITIALIZED")
-	TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZED")
+
+	if not TMW.DBWasEmpty then
+		-- If the DB is empty, it might get re-initialized,
+		-- so only unregister these if it wasn't empty
+		TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZED")
+		TMW.InitializeDatabase = nil
+		TMW.RawUpgrade = nil
+		TMW.UpgradeGlobal = nil
+	end
 end
 
 function TMW:PLAYER_LOGIN()
@@ -2821,8 +2828,6 @@ end
 
 
 function TMW:RawUpgrade()
-
-	TMW.RawUpgrade = nil
 	
 	if TellMeWhenDB.Version == 414069 then
 		 -- Well, that was a mighty fine fail that this happened.
@@ -2900,9 +2905,6 @@ function TMW:UpgradeGlobal()
 	if TellMeWhenDB.Version < TELLMEWHEN_VERSIONNUMBER then
 		TMW:DoUpgrade("global", TellMeWhenDB.Version, TMW.db.global)
 	end
-
-	-- This isn't needed anymore
-	TMW.UpgradeGlobal = nil
 end
 
 function TMW:UpgradeProfile()
@@ -3420,7 +3422,13 @@ function TMW:LoadOptions(recursed)
 		TMW:Print(L["ERROR_NOTINITIALIZED_NO_LOAD"])
 		return 
 	end
+	if InCombatLockdown() then
+		TMW:Print("Error: Cannot load options while in combat lockdown. Preliminary safety checks were incomplete - this message is a last resort check.")
+		return;
+	end
+
 	TMW:Print(L["LOADINGOPT"])
+	
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
 	if not loaded then
 		if reason == "DISABLED" and not recursed then -- prevent accidental recursion
