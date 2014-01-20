@@ -16,6 +16,7 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+local get = TMW.get
 
 local CNDT = TMW.CNDT
 
@@ -51,6 +52,14 @@ end
 
 function Condition:GetCondition(identifier)
 	return CNDT.ConditionsByType[identifier]
+end
+
+function Condition:ShouldList()
+	return not self:ShouldHide() and not self:IsDeprecated()
+end
+
+function Condition:ShouldHide()
+	return get(self.hidden, self)
 end
 
 function Condition:IsDeprecated()

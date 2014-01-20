@@ -95,9 +95,13 @@ do
 			name = strlower(name)
 
 			local shouldAdd = true
-			for _, tbl in pairs(currencies) do
-				if TMW.tContains(tbl, id) or TMW.tContains(blacklist, id) then
-					shouldAdd = false
+			if TMW.tContains(blacklist, id) then
+				shouldAdd = false
+			else
+				for _, tbl in pairs(currencies) do
+					if TMW.tContains(tbl, id) then
+						shouldAdd = false
+					end
 				end
 			end
 
@@ -122,9 +126,14 @@ local eventsFunc = function(ConditionObject, c)
 	return
 		ConditionObject:GenerateNormalEventString("CURRENCY_DISPLAY_UPDATE")
 end
+local hiddenFunc = function(Condition)
+	local name, amount, texture, _, _, totalMax, hasSeen = GetCurrencyInfo(Condition.identifier:match("%d+"))
+	return not hasSeen
+end
 
 
 Env.GetCurrencyInfo = GetCurrencyInfo
+
 for i, currenciesSub in ipairs(currencies) do
 	local ConditionCategory = CNDT:GetCategory(currenciesSub.ID, currenciesSub.order, currenciesSub.name, false, false)
 	for i, id in ipairs(currenciesSub) do
@@ -137,7 +146,7 @@ for i, currenciesSub in ipairs(currencies) do
 				icon = texture,
 				range = 500,
 				unit = false,
-				hidden = not hasSeen,
+				hidden = hiddenFunc,
 				funcstr = [[select(2, GetCurrencyInfo(]] .. id .. [[)) c.Operator c.Level]],
 				tcoords = CNDT.COMMON.standardtcoords,
 				events = eventsFunc,

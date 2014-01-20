@@ -235,7 +235,7 @@ local commonConditions = {
 }
 
 local function AddConditionToDropDown(conditionData)
-	local append = TMW.debug and get(conditionData.hidden) and "(DBG)" or ""
+	local append = TMW.debug and not conditionData:ShouldList() and "(DBG)" or ""
 	
 	local info = UIDropDownMenu_CreateInfo()
 	
@@ -274,7 +274,7 @@ function CNDT:TypeMenu_DropDown()
 			local CurrentConditionSet = CNDT.CurrentConditionSet
 			
 			for k, conditionData in ipairs(categoryData.conditionData) do
-				local shouldAdd = not get(conditionData.hidden) and conditionData.funcstr ~= "DEPRECATED"
+				local shouldAdd = conditionData:ShouldList()
 				
 				if CurrentConditionSet.ConditionTypeFilter then
 					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
@@ -316,7 +316,7 @@ function CNDT:TypeMenu_DropDown()
 			if conditionData.IS_SPACER then
 				queueSpacer = true
 			else
-				local shouldAdd = not get(conditionData.hidden) and not conditionData:IsDeprecated() --or TMW.debug
+				local shouldAdd = conditionData:ShouldList() --or TMW.debug
 				
 				if shouldAdd and not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
 					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then

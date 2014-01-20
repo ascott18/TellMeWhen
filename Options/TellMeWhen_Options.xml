@@ -2061,7 +2061,8 @@
 
 		<Scripts>
 			<OnLoad>
-
+				-- Create better contrast with the icon editor, since this dialog will often be on top of the IE.
+				self.background:SetTexture(.08, .08, .08, 1)
 				self.title:SetText(TMW.L["DIALOG_HEADER_CHANGELOG"])
 
 				self.Okay:SetText(OKAY)
