@@ -166,6 +166,23 @@ function IconView:DoesImplementModule(moduleName)
 	return false
 end
 
+--- Sets whether the IconType will function when this IconView is used by the icon's group.
+-- @param viewName [string] A string that identifies the type.
+-- @param allow [boolean] True if the type should function when this IconView is used by the icon. Otherwise false. Cannot be nil.
+-- @usage View:SetTypeAllowance("cooldown", false)
+function IconView:SetTypeAllowance(typeName, allow)
+	local IconType = rawget(TMW.Types, typeName)
+	
+	if IconType and IconType.SetViewAllowance then
+		IconType:SetViewAllowance(self.view, allow)
+	elseif not IconType then
+		TMW:RegisterCallback("TMW_CLASS_IconType_INTANCE_NEW", function(event, instance)
+			if instance.type == typeName and instance.SetViewAllowance then
+				instance:SetViewAllowance(self.view, allow)
+			end
+		end)
+	end
+end
 
 
 ------------------------------------

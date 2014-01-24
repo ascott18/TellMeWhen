@@ -86,6 +86,9 @@ function IconType:OnNewInstance(type)
 	self.Icons = {}
 	self.UsedProcessors = {}
 	self.Colors = {}
+
+	self.ViewAllowances = {}
+	self.defaultAllowanceForViews = true
 	
 	self:InheritTable(self.class, "UsedAttributes")
 end
@@ -417,9 +420,59 @@ function IconType:SetModuleAllowance(moduleName, allow)
 		TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 			if class.className == moduleName and class.SetAllowanceForType then
 				local IconModule = class
-				IconModule:SetAllowanceForType(self.type, allow)
+				IconModule:SetAllowanceForType(self.type, allow) -- TODO: Change SetAllownaceForType name to SetTypeAllowance
 			end
 		end)
+	end
+end
+
+--- Sets whether the icon type will function when a certain IconView is used by the icon's group.
+-- @param viewName [string] A string that identifies the view.
+-- @param allow [boolean] True if the type should function when the IconView is used by the icon. Otherwise false. Cannot be nil.
+-- @usage Type:SetAllowanceForView("icon", false)
+function IconType:SetAllowanceForView(viewName, allow)
+	self:AssertSelfIsInstance()
+	
+	TMW:ValidateType(2, "IconType:SetAllowanceForView()", viewName, "string")
+	
+	-- allow cannot be nil
+	TMW:ValidateType(3, "IconType:SetAllowanceForView()", allow, "boolean")
+	
+	if self.ViewAllowances[viewName] == nil then
+		self.ViewAllowances[viewName] = allow
+	else
+		TMW:Error("An icon type's view allowance cannot be set once it has already been declared by either a view or an icon type.")
+	end
+end
+
+--- Sets the default allowance for implementing this [[api/icon-type/api-documentation/|IconType]]. Default value is {{{true}}}, meaning that types can be implemented unless it has been set otherwise by a call to {{{:SetViewAllowance(viewName, false)}}}. Set to {{{false}}} to prevent this [[api/icon-type/api-documentation/|IconType]] from functioning unless it has been explicitly allowed by a call to {{{:SetViewAllowance(viewName, true)}}}.
+-- @param allow [boolean] The default view allowance for this [[api/icon-type/api-documentation/|IconType]].
+-- @usage
+-- -- Example of usage by "resource", which should only be explicitly allowed by views that implement a
+-- -- descendant of IconModule_TimerBar that is the primary feature of the icon.
+-- 
+-- TMW.Types.resouce:SetDefaultAllowanceForTypes(false)
+-- 
+-- -- Icon views that wish to allow "resource" should call the following:
+-- View:SetTypeAllowance("resource", true)
+function IconType:SetDefaultAllowanceForViews(allow)
+	self:AssertSelfIsInstance()
+	
+	TMW:ValidateType(2, "IconType:SetDefaultAllowanceForViews()", allow, "boolean")
+	
+	self.defaultAllowanceForViews = allow
+end
+
+--- Checks whether this [[api/icon-type/api-documentation/|IconType]] will be allowed to function in icons that implement a specified [[api/icon-view/api-documentation/|IconView]].
+-- @param viewName [string] The identifier of a [[api/icon-view/api-documentation/|IconView]] instance as passed to the first param of [[api/icon-view/api-documentation/|IconView]]'s constructor.
+-- @return [boolean] True if this [[api/icon-type/api-documentation/|IconType]] will be allowed to implement alongside the specified [[api/icon-view/api-documentation/|IconView]].
+-- @usage isAllowed = TMW.Types.resource:IsAllowedByType("icon")
+function IconType:IsAllowedByView(viewName)
+	local viewAllowance = self.ViewAllowances[viewName]
+	if viewAllowance ~= nil then
+		return viewAllowance
+	else
+		return self.defaultAllowanceForViews
 	end
 end
 
