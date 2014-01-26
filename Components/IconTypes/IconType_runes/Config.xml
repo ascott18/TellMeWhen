@@ -2,6 +2,11 @@
 
 	<Button name="TellMeWhen_TypeCheckRuneTemplate" virtual="true">
 		<Size x="27.5" y="27.5"/>
+
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_Button_Rune"/>
+		</Attributes>
+
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture name="$parentCheck" parentKey="Check" file="">
@@ -25,7 +30,7 @@
 				self:SetChecked(not self:GetChecked())
 			</OnClick>
 			<OnLoad>
-				TMW.IE:CreateSettingFrameFromData(self, "SettingRuneButton", {
+				TMW:CInit(self, {
 					setting = "RuneSlots"
 				})
 			</OnLoad>
@@ -67,7 +72,7 @@
 			
 			<Button name="$parentBlood1Death" parentKey="7" inherits="TellMeWhen_TypeCheckRuneTemplate" id="7">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="LEFT"/>
+					<Anchor point="LEFT" x="7"/>
 					<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM" y="-4"/>
 				</Anchors>
 			</Button>

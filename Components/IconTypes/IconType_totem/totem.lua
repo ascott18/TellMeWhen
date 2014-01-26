@@ -70,7 +70,7 @@ end
 if pclass == "SHAMAN" then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Shaman", function(self)
 		self.Header:SetText(L["TOTEMS"])
-		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {
+		TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {
 			numPerRow = 4,
 			{
 				setting = "TotemSlots",
@@ -97,7 +97,7 @@ if pclass == "SHAMAN" then
 elseif pclass == "DRUID" then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Druid", function(self)
 		self.Header:SetText(L["MUSHROOMS"])
-		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {				
+		TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {				
 			{
 				setting = "TotemSlots",
 				value = 1,
@@ -118,7 +118,7 @@ elseif pclass == "DRUID" then
 elseif pclass == "MAGE" then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Mage", function(self)
 		self.Header:SetText(L["RUNESOFPOWER"])
-		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {				
+		TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {				
 			{
 				setting = "TotemSlots",
 				value = 1,
@@ -134,7 +134,7 @@ elseif pclass == "MAGE" then
 elseif pclass ~= "DEATHKNIGHT" then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Generic", function(self)
 		self.Header:SetText(L["TOTEMS"])
-		TMW.IE:BuildSimpleCheckSettingFrame(self, "SettingTotemButton", {				
+		TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {				
 			{
 				setting = "TotemSlots",
 				value = 1,

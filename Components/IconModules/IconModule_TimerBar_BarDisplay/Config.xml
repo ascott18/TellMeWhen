@@ -4,6 +4,11 @@
 
 	<Button name="TellMeWhen_BarDisplay_ColorButton" virtual="true">
 		<Size x="20" y="20"/>
+
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_ColorButton"/>
+		</Attributes>
+
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="background">
@@ -33,7 +38,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "BarDisplay_Invert",
 							title = TMW.L["ICONMENU_INVERTBARS"],
 							tooltip = TMW.L["ICONMENU_INVERTBARDISPLAYBAR_DESC"],
@@ -46,7 +51,7 @@
 				<!-- Anchoring is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "BarDisplay_BarGCD",
 							title = TMW.L["ICONMENU_ALLOWGCD"],
 							tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
@@ -62,7 +67,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "BarDisplay_EnableColors",
 							title = TMW.L["ICONMENU_ENABLECOLORS"],
 							tooltip = TMW.L["ICONMENU_ENABLECOLORS_DESC"],
@@ -91,7 +96,7 @@
 						
 						self:SetPoint("LEFT", self:GetParent().BarGCD, "LEFT", 8, 0)
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "BarDisplay_FakeMax",
 							title = TMW.L["ICONMENU_FAKEMAX"],
 							tooltip = TMW.L["ICONMENU_FAKEMAX_DESC"],
@@ -112,7 +117,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, "SettingTimerBar_BarDisplay_ColorButton", {
+						TMW:CInit(self, {
 							setting = "BarDisplay_StartColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_START"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_START_DESC"],
@@ -130,7 +135,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, "SettingTimerBar_BarDisplay_ColorButton", {
+						TMW:CInit(self, {
 							setting = "BarDisplay_MiddleColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_MIDDLE"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_MIDDLE_DESC"],
@@ -148,7 +153,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, "SettingTimerBar_BarDisplay_ColorButton", {
+						TMW:CInit(self, {
 							setting = "BarDisplay_CompleteColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_COMPLETE"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_COMPLETE_DESC"],

@@ -12,7 +12,7 @@
 					<OnLoad>
 						self.text:SetText(TMW.L["ICONMENU_ONSUCCEED"])
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "ConditionDur",
 							title = TMW.L["ICONMENU_ONSUCCEED"],
 							tooltip = TMW.L["CONDITION_TIMERS_SUCCEED_DESC"],
@@ -35,7 +35,7 @@
 					<OnLoad>
 						self.text:SetText(TMW.L["ICONMENU_ONFAIL"])
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "UnConditionDur",
 							title = MAXIMUM,
 							title = TMW.L["ICONMENU_ONFAIL"],
@@ -63,7 +63,7 @@
 						ConditionDur.text:SetPoint("LEFT", 2, 0)
 						ConditionDur.text:SetPoint("RIGHT", ConditionDur)
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "ConditionDurEnabled",
 							label = "",
 							title = ENABLE,
@@ -84,7 +84,7 @@
 						UnConditionDur.text:SetPoint("LEFT", 2, 0)
 						UnConditionDur.text:SetPoint("RIGHT", UnConditionDur)
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "UnConditionDurEnabled",
 							label = "",
 							title = ENABLE,
@@ -102,7 +102,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "OnlyIfCounting",
 							title = TMW.L["ICONMENU_ONLYIFCOUNTING"],
 							tooltip = TMW.L["ICONMENU_ONLYIFCOUNTING_DESC"],
@@ -126,7 +126,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "OnlyIfNotCounting",
 							title = TMW.L["ICONMENU_ONLYIFNOTCOUNTING"],
 							tooltip = TMW.L["ICONMENU_ONLYIFNOTCOUNTING_DESC"],

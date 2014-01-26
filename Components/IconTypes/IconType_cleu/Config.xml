@@ -44,7 +44,7 @@
 						self.text2:SetWidth(self:GetParent().CLEUEvents:GetWidth() - self:GetWidth() - 35)
 						self.setting = "CLEUDur"
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "CLEUDur",
 							title = TMW.L["CLEU_TIMER"],
 							tooltip = TMW.L["CLEU_TIMER_DESC"],
@@ -64,7 +64,7 @@
 					<OnLoad>
 						self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
 					
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "CLEUNoRefresh",
 							title = TMW.L["ICONMENU_CLEU_NOREFRESH"],
 							tooltip = TMW.L["ICONMENU_CLEU_NOREFRESH_DESC"],
@@ -86,7 +86,7 @@
 						self.label = TMW.L["CLEU_SOURCEUNITS"]
 						self.BackgroundText:SetWidth(self:GetWidth())
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "SourceUnit",
 							title = TMW.L["CLEU_SOURCEUNITS"],
 							tooltip = function()
@@ -138,7 +138,7 @@
 						self.label = TMW.L["CLEU_DESTUNITS"]
 						self.BackgroundText:SetWidth(self:GetWidth())
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "DestUnit",
 							title = TMW.L["CLEU_DESTUNITS"],
 							tooltip = function()

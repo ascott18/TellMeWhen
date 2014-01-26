@@ -10,7 +10,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "StackMinEnabled",
 							label = "",
 							title = ENABLE,
@@ -26,7 +26,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "StackMaxEnabled",
 							label = "",
 							title = ENABLE,
@@ -49,7 +49,7 @@
 						self.text:SetPoint("LEFT", 2, 0)
 						self.text:SetPoint("RIGHT", self)
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "StackMin",
 							title = MAXIMUM,
 							tooltip = TMW.L["ICONMENU_STACKS_MIN_DESC"],
@@ -75,7 +75,7 @@
 						self.text:SetPoint("LEFT", 2, 0)
 						self.text:SetPoint("RIGHT", self)
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "StackMax",
 							title = MAXIMUM,
 							tooltip = TMW.L["ICONMENU_STACKS_MAX_DESC"],
@@ -91,7 +91,7 @@
 
 			</EditBox>
 			
-			<Slider name="$parentStackAlpha" parentKey="StackAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+			<Slider name="$parentStackAlpha" parentKey="StackAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentStackMax" relativePoint="RIGHT" x="15" />
@@ -100,7 +100,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+						TMW:CInit(self, {
 							title = TMW.L["REQFAILED_ALPHA"],
 							tooltip = TMW.L["STACKALPHA_DESC"],
 							setting = "StackAlpha",

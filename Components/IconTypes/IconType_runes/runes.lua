@@ -49,14 +49,16 @@ Type:RegisterIconDefaults{
 	RunesAsCharges			= false,
 	
 	--[[ From the LSB, RuneSlots corresponds to:
-		[0x3]   blood runes 1&2
-		[0xC]   unholy runes 1&2
-		[0x30]  frost runes 1&2
-		[0xC0]  blood death runes 1&2
+		[0x003]   blood runes 1&2
+		[0x00C]   unholy runes 1&2
+		[0x030]  frost runes 1&2
+		[0x0C0]  blood death runes 1&2
 		[0x300] unholy death runes 1&2
 		[0xC00] frost death runes 1&2
 	]]
 }
+
+Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_Runes")
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_RuneSettings", function(self)
 	self.Header:SetText(Type.name)
@@ -75,7 +77,6 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	},
 })
 
-Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_Runes")
 
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 

@@ -9,7 +9,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "ShowCBar",
 							title = TMW.L["ICONMENU_ENABLE"],
 							tooltip = TMW.L["ICONMENU_SHOWCBAR_DESC"],
@@ -20,7 +20,7 @@
 			<CheckButton name="$parentInvertCBar" inherits="TellMeWhen_CheckTemplate" parentKey="InvertCBar">
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "InvertCBar",
 							title = TMW.L["ICONMENU_INVERTBARS"],
 							tooltip = TMW.L["ICONMENU_INVERTCBAR_DESC"],
@@ -45,7 +45,7 @@
 						self.text:ClearAllPoints()
 						self.text:SetPoint("LEFT", self, "RIGHT", 1, 0)
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "CBarOffs",
 							title = TMW.L["ICONMENU_OFFS"],
 							tooltip = TMW.L["ICONMENU_BAROFFS"],
@@ -66,7 +66,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "Overlay_BarGCD",
 							title = TMW.L["ICONMENU_ALLOWGCD"],
 							tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],

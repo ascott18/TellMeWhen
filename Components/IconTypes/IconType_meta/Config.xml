@@ -117,7 +117,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "CheckNext",
 							title = TMW.L["ICONMENU_CHECKNEXT"],
 							tooltip = TMW.L["ICONMENU_CHECKNEXT_DESC"],

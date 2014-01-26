@@ -397,6 +397,15 @@
 					<OnLoad>
 						self.EventName:SetText(TMW.L["EVENTS_HANDLERS_ADD"])
 						TMW:TT(self, "EVENTS_HANDLERS_ADD", "EVENTS_HANDLERS_ADD_DESC")
+
+						-- Fix text wrapping:
+						self.EventName:SetPoint("RIGHT", self, "RIGHT")
+						-- Have to do this or else the text won't multiline/wordwrap when it should.
+						-- 30 is just an arbitrarily large number.
+						self.EventName:SetHeight(30)
+						self.EventName:SetMaxLines(3)
+
+
 					</OnLoad>
 					<OnClick>
 						ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
@@ -457,6 +466,7 @@
 								self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"])
 								TMW:TT(self, "EVENTS_SETTINGS_PASSTHROUGH", "EVENTS_SETTINGS_PASSTHROUGH_DESC")
 								self.setting = "PassThrough"
+								TMW.C.SettingCheckButton.ConstrainLabel(self, self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -470,6 +480,7 @@
 								self.text:SetText(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"])
 								TMW:TT(self, "EVENTS_SETTINGS_ONLYSHOWN", "EVENTS_SETTINGS_ONLYSHOWN_DESC")
 								self.setting = "OnlyShown"
+								TMW.C.SettingCheckButton.ConstrainLabel(self, self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -483,6 +494,7 @@
 								self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSINGCNDT"])
 								TMW:TT(self, "EVENTS_SETTINGS_PASSINGCNDT", "EVENTS_SETTINGS_PASSINGCNDT_DESC")
 								self.setting = "PassingCndt"
+								TMW.C.SettingCheckButton.ConstrainLabel(self, self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -572,6 +584,7 @@
 								self.text:SetText(TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED"])
 								TMW:TT(self, "EVENTS_SETTINGS_CNDTJUSTPASSED", "EVENTS_SETTINGS_CNDTJUSTPASSED_DESC")
 								self.setting = "CndtJustPassed"
+								TMW.C.SettingCheckButton.ConstrainLabel(self, self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

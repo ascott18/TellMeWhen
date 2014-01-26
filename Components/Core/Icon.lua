@@ -117,8 +117,9 @@ do
 end
 
 -- [INTERNAL]
-function Icon.OnNewInstance(icon, ...)	
-	local _, name, group, _, iconID = ... -- the CreateFrame args
+function Icon.OnNewInstance(icon)
+	local group = icon:GetParent()
+	local iconID = icon:GetID()
 
 	icon.group = group
 	icon.ID = iconID

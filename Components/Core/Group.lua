@@ -110,10 +110,8 @@ do	-- TMW.CNDT implementation
 end
 
 -- [INTERNAL]
-function Group.OnNewInstance(group, ...)
-	local _, name, _, _, groupID = ... -- the CreateFrame args
-
-	group.ID = groupID
+function Group.OnNewInstance(group)
+	group.ID = group:GetID()
 end
 
 -- [INTERNAL]

@@ -67,7 +67,7 @@
 						self.BackgroundText:SetWidth(self:GetWidth())
 						
 						-- Turn it into a setting frame (automatically handles loading settings)
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "Name",
 							doCleanString = true,
 						})
@@ -249,7 +249,7 @@
 							self:GetScript("OnTextChanged")(self)
 						end
 
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "Unit",
 							title = TMW.L["ICONMENU_UNITSTOWATCH"],
 							tooltip = text,
@@ -465,6 +465,11 @@
 	
 	<Frame name="TellMeWhen_WhenCheckSet" virtual="true">
 		<Size y="40"/>
+
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_Frame_WhenChecks"/>
+		</Attributes>
+
 		<Frames>
 			<CheckButton name="$parentCheck" parentKey="Check" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
@@ -476,7 +481,7 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+			<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentCheck" relativePoint="RIGHT" x="5" />
@@ -510,7 +515,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, "SettingWhenCheckSet", {
+						TMW:CInit(self, {
 							alphaSettingName = "Alpha",
 							bit = 0x2,
 						})
@@ -525,7 +530,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, "SettingWhenCheckSet", {
+						TMW:CInit(self, {
 							alphaSettingName = "UnAlpha",
 							bit = 0x1,
 						})
@@ -786,7 +791,12 @@
 	</Texture>
 	<CheckButton name="TellMeWhen_CheckTemplate" virtual="true">
 		<Size x="30" y="30"/>
-		<Layers>
+		
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_CheckButton"/>
+		</Attributes>
+
+        <Layers>
 			<Layer level="ARTWORK">
 				<FontString parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
 					<Anchors>
@@ -870,6 +880,11 @@
 	</Texture>
 	<EditBox name="TellMeWhen_InputBoxTemplate" enableMouse="true" virtual="true" autoFocus="false">
 		<Size y="15"/>
+		
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_EditBox"/>
+		</Attributes>
+
 		<HitRectInsets left="-1" right="-1" top="-1" bottom="-1" />
 		<TextInsets>
 			<AbsInset left="2" right="2" top="2" bottom="2"/>
@@ -1029,6 +1044,10 @@
 	</EditBox>
 
 	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_Slider"/>
+		</Attributes>
+
 		<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
 			<EdgeSize>
 				<AbsValue val="8"/>
@@ -1070,6 +1089,12 @@
 		<ThumbTexture name="$parentThumb" file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
 			<Size x="32" y="32"/>
 		</ThumbTexture>
+	</Slider>
+
+	<Slider name="TellMeWhen_SliderTemplate_Alpha" inherits="TellMeWhen_SliderTemplate" virtual="true">
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_Slider_Alpha"/>
+		</Attributes>
 	</Slider>
 
 	<Button name="TellMeWhen_DropdownMenuButtonTemplate" motionScriptsWhileDisabled="true" virtual="true">
@@ -2175,7 +2200,7 @@
 							<OnLoad>
 								self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
 							
-								TMW.IE:CreateSettingFrameFromData(self, {
+								TMW:CInit(self, {
 									setting = "Enabled",
 									title = TMW.L["ICONMENU_ENABLE"],
 									tooltip = TMW.L["ICONMENU_ENABLE_DESC"],

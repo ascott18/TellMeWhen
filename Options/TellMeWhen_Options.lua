@@ -2588,9 +2588,67 @@ end
 
 ---------- Settings ----------
 
-TMW:NewClass("SettingFrameBase"){
-	IsEnabled = true,
+TMW:NewClass("Config_Frame", "Frame"){
+	-- Constructor
+	OnNewInstance_Frame = function(self, data)
+		-- Setup callbacks that will load the settings when needed.
+		TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", self, "ReloadSetting")
+		TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CREATED", self, "ReloadSetting")
+		TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", self, "ReloadSetting")
+
+		if data then
+			-- Set appearance and settings
+			self.data = data
+			self.setting = data.setting
+
+			self:SetTooltip(self.data.title, self.data.tooltip)
+		end
+	end,
 	
+
+	-- Script Handlers
+	OnEnable = function(self)
+		self:SetAlpha(1)
+		
+		if self.data.disabledtooltip then
+			self:SetTooltip(self.data.title, self.data.tooltip)
+		end
+	end,
+	
+	OnDisable = function(self)
+		self:SetAlpha(0.2)
+		
+		if self.data.disabledtooltip then
+			self:SetTooltip(self.data.title, self.data.disabledtooltip)
+		end
+	end,
+	
+
+	-- Methods
+	Enabled = true,
+	IsEnabled = function(self)
+		return self.Enabled
+	end,
+	SetEnabled = function(self, enabled)		
+		if self.Enabled ~= enabled then
+			self.Enabled = enabled
+			if enabled then
+				self:OnEnable()
+			else
+				self:OnDisable()
+			end
+		end
+	end,
+	Enable = function(self)
+		self:SetEnabled(true)
+	end,
+	Disable = function(self)
+		self:SetEnabled(false)
+	end,
+
+
+
+
 	CheckDisabled = function(self)
 		if get(self.data.disabled, self) then
 			self:Disable()
@@ -2612,22 +2670,6 @@ TMW:NewClass("SettingFrameBase"){
 		self:CheckHidden()
 	end,
 	
-	OnEnable = function(self)
-		self:SetAlpha(1)
-		
-		if self.data.disabledtooltip then
-			self:SetTooltip(self.data.title, self.data.tooltip)
-		end
-	end,
-	
-	OnDisable = function(self)
-		self:SetAlpha(0.2)
-		
-		if self.data.disabledtooltip then
-			self:SetTooltip(self.data.title, self.data.disabledtooltip)
-		end
-	end,
-	
 	SetTooltip = function(self, title, text)
 		TMW:TT(self, title, text, 1, 1, "IsEnabled")
 	end,
@@ -2642,20 +2684,33 @@ TMW:NewClass("SettingFrameBase"){
 		self.text:SetHeight(30)
 		self.text:SetMaxLines(3)
 	end,
-	
-	OnCreate_SettingFrameBase = function(self)
-		self:SetTooltip(self.data.title, self.data.tooltip)
+
+	GetSettingTable = function(self)
+		return CI.ics
 	end,
+
+	ReloadSetting = TMW.NULLFUNC
 }
-TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
+
+TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
+	-- Constructor
+	OnNewInstance_CheckButton = function(self, data)
+		self.text:SetText(get(self.data.label or self.data.title))
+		self:SetMotionScriptsWhileDisabled(true)
+	end,
+
+
+	-- Script Handlers
 	OnClick = function(self, button)
-		if CI.ics and self.setting then
+		local settings = self:GetSettingTable()
+
+		if settings and self.setting then
 			local checked = not not self:GetChecked()
 			
 			if self.data.value == nil then
-				CI.ics[self.setting] = checked
+				settings[self.setting] = checked
 			else --if checked then
-				CI.ics[self.setting] = self.data.value
+				settings[self.setting] = self.data.value
 				self:SetChecked(true)
 			end
 			IE:ScheduleIconSetup()
@@ -2667,53 +2722,54 @@ TMW:NewClass("SettingCheckButton", "CheckButton", "SettingFrameBase"){
 
 		self:OnState()
 	end,
-	OnCreate = function(self)
-		self.text:SetText(get(self.data.label or self.data.title))
-		self:SetMotionScriptsWhileDisabled(true)
-	end,
 
+
+	-- Methods
 	OnState = function(self)
 		-- Cheater! (We arent getting anything)
 		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
 		get(self.data.OnState, self) 
 	end,
 	
-	ConstrainLabel = function(self, anchorTo, anchorPoint, ...)
-		self.text:SetPoint("RIGHT", anchorTo, anchorPoint or "LEFT", ...)
-		
-		-- Have to do this or else the text won't multiline/wordwrap when it should.
-		-- 30 is just an arbitrarily large number.
-		self.text:SetHeight(30)
-		self.text:SetMaxLines(3)
-	end,
-	
 	ReloadSetting = function(self)
-		local icon = CI.icon
-		
-		if icon then
+		local settings = self:GetSettingTable()
+
+		if settings then
 			if self.data.value ~= nil then
-				self:SetChecked(icon:GetSettings()[self.setting] == self.data.value)
+				self:SetChecked(settings[self.setting] == self.data.value)
 			else
-				self:SetChecked(icon:GetSettings()[self.setting])
+				self:SetChecked(settings[self.setting])
 			end
 			self:CheckInteractionStates()
 			self:OnState()
 		end
 	end,
 }
-TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
-	-- This class may be incomplete for any implementations you might need.
-	-- Inherit from it and finish/override any methods that you need to.
-	
+
+TMW:NewClass("Config_Slider", "Slider", "Config_Frame"){
+	-- Constructor
+	OnNewInstance_Slider = function(self, data)
+		self:SetMinMaxValues(data.min, data.max)
+		self:SetValueStep(data.step or 1)
+		
+		self.text:SetText(data.label or data.title)
+		
+		self:EnableMouseWheel(true)
+	end,
+
+	-- Script Handlers
 	OnValueChanged = function(self)
 		if TMW:Do504SliderBugFix(self) then return end
 		value = self:GetValue()
 
-		if CI.ics and self.setting then
+
+		local settings = self:GetSettingTable()
+
+		if settings and self.setting then
 		
 			value = get(self.data.ModifySettingValue, self, value) or value
 			
-			CI.ics[self.setting] = value
+			settings[self.setting] = value
 			
 			IE:ScheduleIconSetup()
 		end
@@ -2722,33 +2778,119 @@ TMW:NewClass("SettingSlider", "Slider", "SettingFrameBase"){
 		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
 		get(self.data.OnValueChanged, self) 
 	end,
-	OnCreate = function(self)
-		self:SetMinMaxValues(self.data.min, self.data.max)
-		self:SetValueStep(self.data.step or 1)
-		
-		self.text:SetText(self.data.label or self.data.title)
-		
-		self:EnableMouseWheel(true)
-	end,
-	
-	ReloadSetting = function(self)
-		local icon = CI.icon
-		
-		if icon then
-			self:SetValue(icon:GetSettings()[self.setting])
-			
-			self:CheckInteractionStates()
-		end
-	end,
 	
 	OnMouseWheel = function(self, delta)
 		if self:IsEnabled() then
 			self:SetValue(self:GetValue() + delta)
 		end
 	end,
+
+	-- Methods
+	ReloadSetting = function(self)
+		local settings = self:GetSettingTable()
+
+		if settings then
+			self:SetValue(settings[self.setting])
+			
+			self:CheckInteractionStates()
+		end
+	end,
 }
 
-TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
+TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
+	
+	-- Constructor
+	OnNewInstance_EditBox = function(self, data)
+		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
+	end,
+	
+
+	-- Scripts
+	OnEditFocusLost = function(self, button)
+		local settings = self:GetSettingTable()
+
+		if settings and self.setting then
+			local value
+			if self.data.doCleanString then
+				value = TMW:CleanString(self)
+			else
+				value = self:GetText()
+			end
+			
+			value = get(self.data.ModifySettingValue, self, value) or value
+			
+			settings[self.setting] = value
+		
+			IE:ScheduleIconSetup()
+		end
+		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnEditFocusLost, self, button) 
+	end,
+
+	OnTextChanged = function(self, button)		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnTextChanged, self, button) 
+	end,
+
+	METHOD_EXTENSIONS = {
+		OnEnable = function(self)
+			self:EnableMouse(true)
+			self:EnableKeyboard(true)
+		end,
+
+		OnDisable = function(self)
+			self:ClearFocus()
+			self:EnableMouse(false)
+			self:EnableKeyboard(false)
+		end,
+	},
+	
+
+	-- Methods
+	ReloadSetting = function(self, eventMaybe)
+		local settings = self:GetSettingTable()
+
+		if settings then
+			if not (eventMaybe == "TMW_CONFIG_ICON_HISTORY_STATE_CREATED" and self:HasFocus()) and self.setting then
+				self:SetText(settings[self.setting])
+			end
+			self:CheckInteractionStates()
+			self:ClearFocus()
+		end
+	end,
+}
+
+
+
+TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
+	-- Constructor
+	OnNewInstance_Slider_Alpha = function(self, data)
+		self:SetMinMaxValues(0, 100)
+		self:SetValueStep(1)
+		
+		self.text:SetText(self.data.label or self.data.title)
+		
+		self:EnableMouseWheel(true)
+	end,
+
+
+	-- Script Handlers
+	OnMinMaxChanged = function(self)
+		local minValue, maxValue = self:GetMinMaxValues()
+		
+		self.Low:SetText(minValue .. "%")
+		self.High:SetText(maxValue .. "%")
+		
+		local color = 34/0xFF
+		self.Low:SetTextColor(color, color, color, 1)
+		self.High:SetTextColor(color, color, color, 1)
+		
+		self:UpdateValueText()
+	end,
+
 	METHOD_EXTENSIONS = {
 		OnEnable = function(self)
 			local icon = CI.icon
@@ -2764,32 +2906,27 @@ TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
 		end,
 	},
 	
-	FakeSetValue = function(self, value)
-		self.fakeNextSetValue = 1
-		self:SetValue(value)
-		self.fakeNextSetValue = nil
+	OnValueChanged = function(self, value)
+		if TMW:Do504SliderBugFix(self) then return end
+		value = self:GetValue()
+
+
+		local settings = self:GetSettingTable()
+
+		if settings and not self.fakeNextSetValue then
+			settings[self.setting] = value / 100
+			IE:ScheduleIconSetup()
+		end
 		
 		self:UpdateValueText()
 	end,
 	
-	OnCreate = function(self)
-		self:SetMinMaxValues(0, 100)
-		self:SetValueStep(1)
-		
-		self.text:SetText(self.data.label or self.data.title)
-		
-		self:EnableMouseWheel(true)
-	end,
-	
-	OnMinMaxChanged = function(self)
-		local minValue, maxValue = self:GetMinMaxValues()
-		
-		self.Low:SetText(minValue .. "%")
-		self.High:SetText(maxValue .. "%")
-		
-		local color = 34/0xFF
-		self.Low:SetTextColor(color, color, color, 1)
-		self.High:SetTextColor(color, color, color, 1)
+
+	-- Methods
+	FakeSetValue = function(self, value)
+		self.fakeNextSetValue = 1
+		self:SetValue(value)
+		self.fakeNextSetValue = nil
 		
 		self:UpdateValueText()
 	end,
@@ -2812,25 +2949,11 @@ TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
 		end
 	end,
 	
-	OnValueChanged = function(self, value)
-		if TMW:Do504SliderBugFix(self) then return end
-		value = self:GetValue()
-
-		local icon = CI.icon
-		
-		if icon and not self.fakeNextSetValue then
-			CI.ics[self.setting] = value / 100
-			IE:ScheduleIconSetup()
-		end
-		
-		self:UpdateValueText()
-	end,
-	
 	ReloadSetting = function(self)
-		local icon = CI.icon
+		local settings = self:GetSettingTable()
 		
-		if icon then
-			self:SetValue(icon:GetSettings()[self.setting]*100)
+		if settings then
+			self:SetValue(settings[self.setting]*100)
 		
 			self:UpdateValueText()			
 			self:CheckInteractionStates()
@@ -2840,10 +2963,21 @@ TMW:NewClass("SettingSlider_Alpha", "SettingSlider"){
 
 
 
-TMW:NewClass("BitflagSettingFrameBase"){
-	OnClick = function(self, button)		
-		if CI.ics and self.setting then
-			CI.ics[self.setting] = bit.bxor(CI.ics[self.setting], self.bit)
+TMW:NewClass("Config_BitflagBase"){
+	-- Constructor
+	OnNewInstance_BitflagBase = function(self, data)
+		if data.bit then
+			self.bit = data.bit
+		end
+	end,
+
+
+	-- Script Handlers
+	OnClick = function(self, button)	
+		local settings = self:GetSettingTable()
+
+		if settings and self.setting then
+			settings[self.setting] = bit.bxor(settings[self.setting], self.bit)
 			
 			IE:ScheduleIconSetup()
 		end
@@ -2853,122 +2987,34 @@ TMW:NewClass("BitflagSettingFrameBase"){
 		get(self.data.OnClick, self, button) 
 	end,
 	
-	OnCreate_BitflagSettingFrameBase = function(self)
-		if self.data.bit then
-			self.bit = self.data.bit
-		else
-			local bitID = self.data.value or self:GetID()
-			assert(bitID, "Couldn't figure out what bit frame " .. self:GetName() .. " is supposed to operate on!")
-			
-			self.bit = bit.lshift(1, (self.data.value or self:GetID()) - 1)
-		end
-	end,
-	
+
+	-- Methods
 	ReloadSetting = function(self)
-		local icon = CI.icon
-		if icon then
-			self:SetChecked(bit.band(icon:GetSettings()[self.setting], self.bit) == self.bit)
+		local settings = self:GetSettingTable()
+
+		if not self.bit then
+			error("Couldn't figure out what bit " .. self:GetName() .. " is supposed to operate on!")
+		end
+
+		if settings then
+			self:SetChecked(bit.band(settings[self.setting], self.bit) == self.bit)
 		end
 		
 		self:CheckInteractionStates()
 	end,
 }
 
-TMW:NewClass("SettingTotemButton", "BitflagSettingFrameBase", "SettingCheckButton"){
-	OnCreate = TMW.Classes.SettingCheckButton.OnCreate,
-}
+TMW:NewClass("Config_CheckButton_BitToggle", "Config_BitflagBase", "Config_CheckButton")
 
-TMW:NewClass("SettingRuneButton", "Button", "SettingFrameBase", "BitflagSettingFrameBase"){
-	GetChecked = function(self)
-		return self.checked
-	end,
-	SetChecked = function(self, checked)
-		self.checked = checked
-		if checked then
-			self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-		else
-			self.Check:SetTexture(nil)
-		end
-	end,
-	OnCreate = function(self)
-		-- detect what texture should be used
-		local runeName = gsub(self:GetName(), self:GetParent():GetName(), "")
-		local runeType, death = runeName:match("(.*)%d(.*)")
-		
-		if death and death ~= "" then
-			self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeType)
-		else
-			self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
-		end
-		
-	end,
-}
-
-TMW:NewClass("SettingEditBox", "EditBox", "SettingFrameBase"){
-	METHOD_EXTENSIONS = {
-		OnEnable = function(self)
-			self:EnableMouse(true)
-			self:EnableKeyboard(true)
-		end,
-		OnDisable = function(self)
-			self:ClearFocus()
-			self:EnableMouse(false)
-			self:EnableKeyboard(false)
-		end,
-	},
-	
-	OnCreate_EditboxBase = function(self)
-		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
-	end,
-	
-	OnEditFocusLost = function(self, button)
-		if CI.ics and self.setting then
-			local value
-			if self.data.doCleanString then
-				value = TMW:CleanString(self)
-			else
-				value = self:GetText()
-			end
-			
-			value = get(self.data.ModifySettingValue, self, value) or value
-			
-			CI.ics[self.setting] = value
-		
-			IE:ScheduleIconSetup()
-		end
-		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnEditFocusLost, self, button) 
-	end,
-	OnTextChanged = function(self, button)		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnTextChanged, self, button) 
-	end,
-	
-	ReloadSetting = function(self, eventMaybe)
-		local icon = CI.icon
-		if icon then
-			if not (eventMaybe == "TMW_CONFIG_ICON_HISTORY_STATE_CREATED" and self:HasFocus()) and self.setting then
-				self:SetText(icon:GetSettings()[self.setting])
-			end
-			self:CheckInteractionStates()
-			self:ClearFocus()
-		end
-	end,
-}
-
-TMW:NewClass("SettingWhenCheckSet", "Frame", "SettingFrameBase"){
-	OnCreate = function(self)
-		assert(self.Alpha and self.Check, "Couldn't find the children that are supposed to exist. Are you sure that the frame you are making into a SettingWhenCheckSet inherits from TellMeWhen_WhenCheckSet?")
-		
+TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
+	OnNewInstance_Frame_WhenChecks = function(self, data)
 		local data = self.data
 		
 		-- ShowWhen toggle
 		assert(data.bit, "SettingWhenCheckSet's data table must declare a bit flag to be toggled in ics.ShowWhen! (data.bit)")
 		
-		IE:CreateSettingFrameFromData(self.Check, "SettingTotemButton", {
+		self.Check:SetAttribute("tmw-class", "Config_CheckButton_BitToggle")
+		TMW:CInit(self.Check, {
 			setting = "ShowWhen",
 			bit = data.bit,
 		})
@@ -2977,7 +3023,7 @@ TMW:NewClass("SettingWhenCheckSet", "Frame", "SettingFrameBase"){
 		-- Alpha slider
 		assert(data.alphaSettingName, "SettingWhenCheckSet's data table must declare an alpha setting to be used! (data.alphaSettingName)")
 		
-		IE:CreateSettingFrameFromData(self.Alpha, "SettingSlider_Alpha", {
+		TMW:CInit(self.Alpha, {
 			setting = data.alphaSettingName,
 			setOrangeAtValue = data.setOrangeAtValue or 0,
 			disabled = function(self)
@@ -2991,52 +3037,33 @@ TMW:NewClass("SettingWhenCheckSet", "Frame", "SettingFrameBase"){
 		-- Reparent the label text on the slider so that it will be at full opacity even while disabled.
 		self.Alpha.text:SetParent(self)
 
-		local parent = self:GetParent()
-		TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
-			if frame == parent then
-				local supplementalData = panelInfo.supplementalData
-				
-				assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_WhenChecks!")
-				
-				-- Set the title for the frame
-				parent.Header:SetText(supplementalData.text)
-				
-				-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
-				local supplementalDataForBit = supplementalData[data.bit]
-				if supplementalDataForBit then
-					self.Check:SetTooltip(
-						L["ICONMENU_SHOWWHEN_SHOWWHEN_WRAP"]:format(supplementalDataForBit.text),
-						supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_SHOW_GENERIC_DESC"]
-					)
-					
-					self.Alpha.text:SetText(supplementalDataForBit.text)
-					self.Alpha:SetTooltip(
-						L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(supplementalDataForBit.text),
-						supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
-					)
-				end
-			end
-		end)
+		TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", self)
 	end,
-	
-	IsEnabled = function(self)
-		return self.Enabled
-	end,
-	SetEnabled = function(self, enabled)		
-		if self.Enabled ~= enabled then
-			self.Enabled = enabled
-			if enabled then
-				self:OnEnable()
-			else
-				self:OnDisable()
+
+	TMW_CONFIG_PANEL_SETUP = function(self, event, frame, panelInfo)
+		if frame == self:GetParent() then
+			local supplementalData = panelInfo.supplementalData
+			
+			assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_WhenChecks!")
+			
+			-- Set the title for the frame
+			frame.Header:SetText(supplementalData.text)
+			
+			-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
+			local supplementalDataForBit = supplementalData[self.data.bit]
+			if supplementalDataForBit then
+				self.Check:SetTooltip(
+					L["ICONMENU_SHOWWHEN_SHOWWHEN_WRAP"]:format(supplementalDataForBit.text),
+					supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_SHOW_GENERIC_DESC"]
+				)
+				
+				self.Alpha.text:SetText(supplementalDataForBit.text)
+				self.Alpha:SetTooltip(
+					L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(supplementalDataForBit.text),
+					supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
+				)
 			end
 		end
-	end,
-	Enable = function(self)
-		self:SetEnabled(true)
-	end,
-	Disable = function(self)
-		self:SetEnabled(false)
 	end,
 	
 	OnEnable = function(self)
@@ -3052,9 +3079,123 @@ TMW:NewClass("SettingWhenCheckSet", "Frame", "SettingFrameBase"){
 	ReloadSetting = function(self)
 		-- Bad Things happen if this isn't defined
 	end,
-	
-	OnCreate_SettingFrameBase = function() end, -- this is the default function that sets the toltip on the frame. We don't want a tooltip on the whole thing.
 }
+
+
+TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
+	
+	OnNewInstance_ColorButton = function(self, data)
+		assert(self.background and self.text and self:GetNormalTexture(), 
+			"This setting frame doesn't inherit from the thing that it should have inherited from")
+
+		self.text:SetText(get(data.label or data.title))
+	end,
+	
+	OnClick = function(self, button)
+		local settings = self:GetSettingTable()
+
+		local prevColor = settings[self.setting]
+		self.prevColor = prevColor
+
+		self:GenerateMethods()
+
+		ColorPickerFrame.func = self.colorFunc
+		ColorPickerFrame.opacityFunc = self.colorFunc
+		ColorPickerFrame.cancelFunc = self.cancelFunc
+
+		ColorPickerFrame:SetColorRGB(prevColor.r, prevColor.g, prevColor.b)
+		ColorPickerFrame.hasOpacity = true
+		ColorPickerFrame.opacity = 1 - prevColor.a
+
+		ColorPickerFrame:Show()
+	end,
+
+	-- We have to do this for these to have access to self.
+	GenerateMethods = function(self)
+		self.colorFunc = function()
+			local r, g, b = ColorPickerFrame:GetColorRGB()
+			local a = 1 - OpacitySliderFrame:GetValue()
+
+			local settings = self:GetSettingTable()
+
+			settings[self.setting] = {r=r, g=g, b=b, a=a}
+
+			self:ReloadSetting()
+
+			TMW.IE:ScheduleIconSetup()
+		end
+
+		self.cancelFunc = function()
+			local settings = self:GetSettingTable()
+
+			settings[self.setting] = self.prevColor
+
+			self:ReloadSetting()
+
+			TMW.IE:ScheduleIconSetup()
+		end
+
+		self.GenerateMethods = TMW.NULLFUNC
+	end,
+
+	ReloadSetting = function(self)
+		local settings = self:GetSettingTable()
+
+		if settings then
+			local c = settings[self.setting]
+
+			self:GetNormalTexture():SetVertexColor(c.r, c.g, c.b, 1)
+			self.background:SetAlpha(c.a)
+
+			self:CheckInteractionStates()
+		end
+	end,
+}
+
+TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
+	-- Constructor
+	Runes = {
+		"Blood",
+		"Unholy",
+		"Frost",
+	},
+
+	OnNewInstance_Button_Rune = function(self, data)
+		self.runeNumber = self.data.value or self:GetID()
+
+		-- detect what texture should be used
+		local runeType = ((self.runeNumber-1)%6)+1 -- gives 1, 2, 3, 4, 5, 6
+		local runeName = self.Runes[ceil(runeType/2)] -- Gives "Blood", "Unholy", "Frost"
+		
+		if self.runeNumber > 6 then
+			self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeName)
+		else
+			self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeName)
+		end
+
+		self.bit = bit.lshift(1, self.runeNumber - 1)
+	end,
+
+
+	-- Methods
+	checked = false,
+	GetChecked = function(self)
+		return self.checked
+	end,
+
+	SetChecked = function(self, checked)
+		self.checked = checked
+		if checked then
+			self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+		else
+			self.Check:SetTexture(nil)
+		end
+	end,
+}
+-- TODO: TEMP STUBS
+TMW:NewClass("SettingFrameBase", "Config_Frame")
+TMW:NewClass("SettingCheckButton", "Config_CheckButton")
+
 
 
 function IE:CreateSettingFrameFromData(frame, arg2, arg3)
@@ -3076,16 +3217,9 @@ function IE:CreateSettingFrameFromData(frame, arg2, arg3)
 	assert(type(data) == "table", "Usage: IE:CreateSettingFrameFromData(frame, [, className], data)")
 	
 	-- Embed the class into the frame.
-	class:NewFromExisting(frame)
-	
-	-- Setup callbacks that will load the settings when needed.
-	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", frame, "ReloadSetting")
-	TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CREATED", frame, "ReloadSetting")
-	TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", frame, "ReloadSetting")
-
-	-- set appearance and settings
 	frame.data = data
-	frame.setting = data.setting
+	class:NewFromExisting(frame, data)
+
 	frame:Show()
 	
 	frame:CallFunc("OnCreate")

@@ -14,7 +14,7 @@
 						self.BackgroundText:SetWidth(self:GetWidth())
 						self.label = TMW.L["ICONMENU_CUSTOMTEX"]
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "CustomTex",
 							title = TMW.L["ICONMENU_CUSTOMTEX"],
 							tooltip = TMW.L["ICONMENU_CUSTOMTEX_DESC"],

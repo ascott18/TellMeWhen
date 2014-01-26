@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70048 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70045 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -46,7 +46,15 @@ local TMW = _G.TMW
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
---L = setmetatable({}, {__index = function() return ("| ! "):rep(12) end}) -- stress testing for text widths
+if false then
+	 -- stress testing for text widths
+	local s = ""
+	for i = 1, 20 do
+		s = s .. i .. ", "
+	end
+	L = setmetatable({}, {__index = function() return s end})
+end
+
 TMW.L = L
 
 -- Tables that will hold groups from each domain.
@@ -57,6 +65,19 @@ TMW.Classes = LibOO:GetNamespace("TellMeWhen")
 TMW.C = TMW.Classes
 function TMW:NewClass(...)
 	return TMW.Classes:NewClass(...)
+end
+function TMW:CInit(self, ...)
+	local className = self:GetAttribute("tmw-class")
+	if not className then
+		error("tmw-class attribute not defined for " .. self:GetName() or "<unnamed>.")
+	end
+
+	local class = TMW.Classes[className]
+	if not class then
+		error("No class found named " .. className)
+	end
+
+	class:NewFromExisting(self, ...)
 end
 TMW.Classes:RegisterCallback("OnNewClass", function(event, class)
 	return TMW:Fire("TMW_CLASS_NEW", class)

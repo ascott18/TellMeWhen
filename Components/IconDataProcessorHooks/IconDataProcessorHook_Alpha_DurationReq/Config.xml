@@ -10,7 +10,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "DurationMinEnabled",
 							label = "",
 							title = ENABLE,
@@ -27,7 +27,7 @@
 				<Scripts>
 					<OnLoad>
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "DurationMaxEnabled",
 							label = "",
 							title = ENABLE,
@@ -49,7 +49,7 @@
 						self.text:SetPoint("LEFT", 2, 0)
 						self.text:SetPoint("RIGHT", self)
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "DurationMin",
 							title = MINIMUM,
 							tooltip = TMW.L["ICONMENU_DURATION_MIN_DESC"],
@@ -75,7 +75,7 @@
 						self.text:SetPoint("LEFT", 2, 0)
 						self.text:SetPoint("RIGHT", self)
 						
-						TMW.IE:CreateSettingFrameFromData(self, {
+						TMW:CInit(self, {
 							setting = "DurationMax",
 							title = MAXIMUM,
 							tooltip = TMW.L["ICONMENU_DURATION_MIN_DESC"],
@@ -91,7 +91,7 @@
 
 			</EditBox>
 			
-			<Slider name="$parentDurationAlpha" parentKey="DurationAlpha" inherits="TellMeWhen_SliderTemplate" valuestep="1">
+			<Slider name="$parentDurationAlpha" parentKey="DurationAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentDurationMax" relativePoint="RIGHT" x="15" />
@@ -102,7 +102,7 @@
 					<OnLoad>
 						self.text:SetWidth(self:GetWidth())
 						
-						TMW.IE:CreateSettingFrameFromData(self, "SettingSlider_Alpha", {
+						TMW:CInit(self, {
 							title = TMW.L["REQFAILED_ALPHA"],
 							tooltip = TMW.L["DURATIONALPHA_DESC"],
 							setting = "DurationAlpha",
