@@ -14,7 +14,7 @@ L["CMD_PROFILE"] = "profile"
 L["CMD_CHANGELOG"] = "changelog"
 
 L["CMD_PROFILE_INVALIDPROFILE"] = "No profile named %q exists!"
-L["CMD_PROFILE_INVALIDPROFILE_SPACES"] = "Tip: aIf the profile name contains spaces, put quotes around it."
+L["CMD_PROFILE_INVALIDPROFILE_SPACES"] = "Tip: If the profile name contains spaces, put quotes around it."
 
 
 L["PROFILE_LOADED"] = "Loaded profile: %s"
