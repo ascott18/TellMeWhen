@@ -55,7 +55,7 @@ local ClassSpellLookup = ClassSpellCache:GetSpellLookup()
 
 ---------- Initialization/Database/Spell Caching ----------
 function SUG:OnInitialize()
-	-- Nothing at the moment...
+	TellMeWhen_IconEditor:HookScript("OnHide", function() SUG.Suggest:Hide() end)
 end
 
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon)
