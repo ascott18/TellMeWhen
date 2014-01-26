@@ -3312,6 +3312,9 @@ end
 
 function IE:SaveSettings()	
 	TMW:Fire("TMW_CONFIG_SAVE_SETTINGS")
+	if CI.icon then
+		CI.icon:Setup()
+	end
 end
 
 
