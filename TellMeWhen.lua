@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70052 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70053 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3362,7 +3362,7 @@ function TMW:SlashCommand(str)
 		return
 	end
 	
-	local cmd, arg2, arg3 = TMW:GetArgs(str, 3)
+	local cmd, arg2, arg3, arg4 = TMW:GetArgs(str, 4)
 	cmd = strlower(cmd or "")
 
 	if cmd == L["CMD_ENABLE"]:lower() then
@@ -3400,8 +3400,14 @@ function TMW:SlashCommand(str)
 		end
 	elseif cmd == "enable" or cmd == "disable" or cmd == "toggle" then
 		local groupID, iconID = tonumber(arg2), tonumber(arg3)
+		local domain = "profile"
 
-		local group = groupID and groupID <= TMW.db.profile.NumGroups and TMW.profile[groupID]
+		if not groupID and (arg2:lower() == "global" or arg2:lower() == "profile") then
+			domain = arg2:lower()
+			groupID, iconID = tonumber(arg3), tonumber(arg4)
+		end
+
+		local group = groupID and groupID <= TMW.db[domain].NumGroups and TMW[domain][groupID]
 		local icon = iconID and group and group[iconID]
 		local obj = icon or group
 		if obj then
@@ -3413,6 +3419,8 @@ function TMW:SlashCommand(str)
 				obj:GetSettings().Enabled = not obj:GetSettings().Enabled
 			end
 			obj:Setup() -- obj is an icon or a group
+		else
+			TMW:Print("Bad syntax. Usage: /tmw [enable||disable||toggle] [profile||global] groupID iconID")
 		end
 
 	elseif cmd == "changelog" then

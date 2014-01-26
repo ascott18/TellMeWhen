@@ -55,6 +55,9 @@
 							setting = "BarDisplay_BarGCD",
 							title = TMW.L["ICONMENU_ALLOWGCD"],
 							tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
+							hidden = function(self)
+								return TMW.CI.icon.typeData.hasNoGCD
+							end,
 						})
 					</OnLoad>
 				</Scripts>

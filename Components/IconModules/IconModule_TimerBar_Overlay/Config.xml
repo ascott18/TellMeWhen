@@ -73,8 +73,17 @@
 							disabled = function(self)
 								return not TMW.CI.ics.ShowCBar
 							end,
+							hidden = function(self)
+								return TMW.CI.icon.typeData.hasNoGCD
+							end,
 						})
 					</OnLoad>
+					<OnHide>
+						self:GetParent():SetHeight(30)
+					</OnHide>
+					<OnShow>
+						self:GetParent():SetHeight(60)
+					</OnShow>
 				</Scripts>
 			</CheckButton>
 		</Frames>

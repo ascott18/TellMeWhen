@@ -61,6 +61,9 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			disabled = function(self)
 				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText and not TMW.CI.ics.ShowTimerTextnoOCC
 			end,
+			hidden = function(self)
+				return TMW.CI.icon.typeData.hasNoGCD
+			end,
 		},
 		{
 			setting = "ShowTimerTextnoOCC",
@@ -74,6 +77,19 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			end,
 		},
 	})
+
+	local function CheckHidden()
+		if not self.ClockGCD:IsShown() and not self.ShowTimerTextnoOCC:IsShown() then
+			self:SetHeight(30)
+		else
+			self:SetHeight(60)
+		end
+	end
+
+	self.ClockGCD:HookScript("OnShow", CheckHidden)
+	self.ClockGCD:HookScript("OnHide", CheckHidden)
+	self.ShowTimerTextnoOCC:HookScript("OnShow", CheckHidden)
+	self.ShowTimerTextnoOCC:HookScript("OnHide", CheckHidden)
 end)
 
 

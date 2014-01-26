@@ -2588,6 +2588,10 @@ end
 
 ---------- Settings ----------
 
+TMW:NewClass("Config_Panel", "Frame"){
+
+}
+
 TMW:NewClass("Config_Frame", "Frame"){
 	-- Constructor
 	OnNewInstance_Frame = function(self, data)
@@ -2645,9 +2649,6 @@ TMW:NewClass("Config_Frame", "Frame"){
 	Disable = function(self)
 		self:SetEnabled(false)
 	end,
-
-
-
 
 	CheckDisabled = function(self)
 		if get(self.data.disabled, self) then
@@ -2971,6 +2972,15 @@ TMW:NewClass("Config_BitflagBase"){
 		if data.bit then
 			self.bit = data.bit
 		end
+
+		if data.bit then
+			self.bit = data.bit
+		else
+			local bitID = data.value or self:GetID()
+			assert(bitID, "Couldn't figure out what bit " .. self:GetName() .. " is supposed to operate on!")
+			
+			self.bit = bit.lshift(1, (data.value or self:GetID()) - 1)
+		end
 	end,
 
 
@@ -2994,10 +3004,6 @@ TMW:NewClass("Config_BitflagBase"){
 	ReloadSetting = function(self)
 		local settings = self:GetSettingTable()
 
-		if not self.bit then
-			error("Couldn't figure out what bit " .. self:GetName() .. " is supposed to operate on!")
-		end
-
 		if settings then
 			self:SetChecked(bit.band(settings[self.setting], self.bit) == self.bit)
 		end
@@ -3009,6 +3015,7 @@ TMW:NewClass("Config_BitflagBase"){
 TMW:NewClass("Config_CheckButton_BitToggle", "Config_BitflagBase", "Config_CheckButton")
 
 TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
+	-- Constructor
 	OnNewInstance_Frame_WhenChecks = function(self, data)
 		local data = self.data
 		
@@ -3041,7 +3048,21 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 
 		TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", self)
 	end,
+	
 
+	-- Script Handlers
+	OnEnable = function(self)
+		self.Check:CheckInteractionStates()
+		self.Alpha:CheckInteractionStates()
+	end,
+	
+	OnDisable = function(self)
+		self.Check:Disable()
+		self.Alpha:Disable()
+	end,
+	
+
+	-- Methods
 	TMW_CONFIG_PANEL_SETUP = function(self, event, frame, panelInfo)
 		if frame == self:GetParent() then
 			local supplementalData = panelInfo.supplementalData
@@ -3067,17 +3088,7 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 			end
 		end
 	end,
-	
-	OnEnable = function(self)
-		self.Check:CheckInteractionStates()
-		self.Alpha:CheckInteractionStates()
-	end,
-	
-	OnDisable = function(self)
-		self.Check:Disable()
-		self.Alpha:Disable()
-	end,
-	
+
 	ReloadSetting = function(self)
 		-- Bad Things happen if this isn't defined
 	end,
@@ -3163,7 +3174,7 @@ TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame
 	},
 
 	OnNewInstance_Button_Rune = function(self, data)
-		self.runeNumber = self.data.value or self:GetID()
+		self.runeNumber = data.value or self:GetID()
 
 		-- detect what texture should be used
 		local runeType = ((self.runeNumber-1)%6)+1 -- gives 1, 2, 3, 4, 5, 6

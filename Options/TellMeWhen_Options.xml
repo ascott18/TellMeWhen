@@ -6,6 +6,12 @@
 		<Color r="1.0" g="0.82" b="0" a="0.4"/>
 	</Texture>
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true">
+
+
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_Panel"/>
+		</Attributes>
+
 		<Anchors>
 			<Anchor point="LEFT" x="0"/>
 			<Anchor point="RIGHT" />
