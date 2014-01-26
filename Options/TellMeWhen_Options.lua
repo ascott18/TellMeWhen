@@ -2749,7 +2749,9 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 TMW:NewClass("Config_Slider", "Slider", "Config_Frame"){
 	-- Constructor
 	OnNewInstance_Slider = function(self, data)
-		self:SetMinMaxValues(data.min, data.max)
+		if data.min and data.max then
+			self:SetMinMaxValues(data.min, data.max)
+		end
 		self:SetValueStep(data.step or 1)
 		
 		self.text:SetText(data.label or data.title)
