@@ -3205,38 +3205,8 @@ TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame
 		end
 	end,
 }
--- TODO: TEMP STUBS
-TMW:NewClass("SettingFrameBase", "Config_Frame")
-TMW:NewClass("SettingCheckButton", "Config_CheckButton")
 
 
-
-function IE:CreateSettingFrameFromData(frame, arg2, arg3)
-	local objectType = frame:GetObjectType()
-	
-	local className, data
-	if arg3 ~= nil then
-		data = arg3
-		className = arg2
-	else
-		data = arg2
-		className = "Setting" .. objectType
-	end
-	
-	local class = TMW.Classes[className]
-	
-	assert(class, "Couldn't find class named " .. className .. " to use for " .. objectType .. (frame:GetName() or "<unnamed>") .. ".")
-	assert(type(className) == "string", "Usage: IE:CreateSettingFrameFromData(frame, [, className], data)")
-	assert(type(data) == "table", "Usage: IE:CreateSettingFrameFromData(frame, [, className], data)")
-	
-	-- Embed the class into the frame.
-	frame.data = data
-	class:NewFromExisting(frame, data)
-
-	frame:Show()
-	
-	frame:CallFunc("OnCreate")
-end
 
 function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 	local className, allData, objectType
@@ -3245,7 +3215,7 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 		className = arg2
 	else
 		allData = arg2
-		className = "SettingCheckButton"
+		className = "Config_CheckButton"
 	end
 	local class = TMW.Classes[className]
 	local objectType = class.isFrameObject
@@ -3272,10 +3242,9 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 			
 			local f = parent[identifier]
 			if not f then
-				f = CreateFrame(objectType, parent:GetName() .. identifier, parent, "TellMeWhen_CheckTemplate")
+				f = class:New(objectType, parent:GetName() .. identifier, parent, "TellMeWhen_CheckTemplate", nil, data)
 				parent[identifier] = f
 				parent[i] = f
-				IE:CreateSettingFrameFromData(f, className, data)
 			end
 			
 			if lastCheckButton then

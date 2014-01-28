@@ -198,15 +198,10 @@
 	
 	<CheckButton name="TellMeWhen_EventSettings_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
 		<Size x="26" y="26"/>
-		<Scripts>
-			<OnClick>
-				if TMW.CI.ics then
-					TMW.EVENTS:GetEventSettings()[self.setting] = not not self:GetChecked()
-					TMW.IE:ScheduleIconSetup()
-				end
-				TMW.EVENTS:LoadEventSettings()
-			</OnClick>
-		</Scripts>
+
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_CheckButton_Event"/>
+		</Attributes>
 	</CheckButton>
 
 	<CheckButton name="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
@@ -463,10 +458,13 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"])
-								TMW:TT(self, "EVENTS_SETTINGS_PASSTHROUGH", "EVENTS_SETTINGS_PASSTHROUGH_DESC")
-								self.setting = "PassThrough"
-								TMW.C.SettingCheckButton.ConstrainLabel(self, self:GetParent(), "RIGHT")
+								TMW:CInit(self, {
+									setting = "PassThrough",
+									title = TMW.L["EVENTS_SETTINGS_PASSTHROUGH"],
+									tooltip = TMW.L["EVENTS_SETTINGS_PASSTHROUGH_DESC"],
+								})
+
+								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -477,10 +475,13 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.text:SetText(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"])
-								TMW:TT(self, "EVENTS_SETTINGS_ONLYSHOWN", "EVENTS_SETTINGS_ONLYSHOWN_DESC")
-								self.setting = "OnlyShown"
-								TMW.C.SettingCheckButton.ConstrainLabel(self, self:GetParent(), "RIGHT")
+								TMW:CInit(self, {
+									setting = "OnlyShown",
+									title = TMW.L["EVENTS_SETTINGS_ONLYSHOWN"],
+									tooltip = TMW.L["EVENTS_SETTINGS_ONLYSHOWN_DESC"],
+								})
+								
+								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -491,10 +492,13 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.text:SetText(TMW.L["EVENTS_SETTINGS_PASSINGCNDT"])
-								TMW:TT(self, "EVENTS_SETTINGS_PASSINGCNDT", "EVENTS_SETTINGS_PASSINGCNDT_DESC")
-								self.setting = "PassingCndt"
-								TMW.C.SettingCheckButton.ConstrainLabel(self, self:GetParent(), "RIGHT")
+								TMW:CInit(self, {
+									setting = "PassingCndt",
+									title = TMW.L["EVENTS_SETTINGS_PASSINGCNDT"],
+									tooltip = TMW.L["EVENTS_SETTINGS_PASSINGCNDT_DESC"],
+								})
+								
+								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -581,10 +585,13 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.text:SetText(TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED"])
-								TMW:TT(self, "EVENTS_SETTINGS_CNDTJUSTPASSED", "EVENTS_SETTINGS_CNDTJUSTPASSED_DESC")
-								self.setting = "CndtJustPassed"
-								TMW.C.SettingCheckButton.ConstrainLabel(self, self:GetParent(), "RIGHT")
+								TMW:CInit(self, {
+									setting = "CndtJustPassed",
+									title = TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED"],
+									tooltip = TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"],
+								})
+								
+								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

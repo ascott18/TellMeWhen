@@ -57,6 +57,26 @@ TMW.IconDragger:RegisterIconDragHandler(120, -- Copy Event Handlers
 	end
 )
 
+TMW:NewClass("Config_Base_Event"){
+	OnNewInstance_Base_Event = function(self, data)
+		TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", self, "ReloadSetting")
+	end,
+
+	GetSettingTable = function(self)
+		return TMW.CI.ics and EVENTS:GetEventSettings()
+	end,
+}
+
+TMW:NewClass("Config_CheckButton_Event", "Config_Base_Event", "Config_CheckButton"){
+
+	METHOD_EXTENSIONS = {
+		OnClick = function(self, button)
+			TMW.EVENTS:LoadEventSettings()
+		end,
+	},
+
+	CheckInteractionStates = TMW.NULLFUNC,
+}
 
 function EVENTS:LoadConfig()
 	local EventHandlerFrames = self.EventHandlerFrames
@@ -239,12 +259,11 @@ function EVENTS:LoadEventSettings()
 	end
 	EventSettingsContainer:Show()
 
-	local eventData = self.EventHandlerFrames[EVENTS.currentEventID].eventData
+	local settings = self:GetEventSettings()
+	local eventData = self:GetEventData()
 
 	IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
 
-	local Settings = self:GetEventSettings()
-	local settingsUsedByEvent = eventData.settings
 	
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
 
@@ -255,14 +274,12 @@ function EVENTS:LoadEventSettings()
 	EventSettingsContainer.PassingCndt	 		:Hide()
 	EventSettingsContainer.Icon			 		:Hide()
 
-	--set settings
-	EventSettingsContainer.PassThrough	 		:SetChecked(Settings.PassThrough)
-	EventSettingsContainer.OnlyShown	 		:SetChecked(Settings.OnlyShown)
-	EventSettingsContainer.CndtJustPassed 		:SetChecked(Settings.CndtJustPassed)
-	EventSettingsContainer.PassingCndt	 		:SetChecked(Settings.PassingCndt)
-	EventSettingsContainer.Value		 	 	:SetText(Settings.Value)
+	--load settings
+	EventSettingsContainer.Value		 	 	:SetText(settings.Value)
+	EventSettingsContainer.Icon:SetGUID(settings.Icon)
+	
 
-	EventSettingsContainer.Icon:SetGUID(Settings.Icon)
+	local settingsUsedByEvent = eventData.settings
 
 	--show settings as needed
 	for setting, frame in pairs(EventSettingsContainer) do
@@ -304,7 +321,7 @@ function EVENTS:LoadEventSettings()
 	EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
 	EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
 
-	local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, Settings.Operator, TMW.operators)
+	local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, settings.Operator, TMW.operators)
 	if v then
 		TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
 	end
@@ -368,6 +385,14 @@ end
 function EVENTS:GetEventSettings(eventID)
 
 	return TMW.CI.ics.Events[eventID or EVENTS.currentEventID]
+end
+
+function EVENTS:GetEventData(event)
+	if not event then
+		event = EVENTS:GetEventSettings().Event
+	end
+
+	return TMW.EventList[event]
 end
 
 function EVENTS:GetNumUsedEvents()
