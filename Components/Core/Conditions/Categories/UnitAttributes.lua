@@ -264,7 +264,7 @@ ConditionCategory:RegisterCondition(9.5, "NPCID", {
 	Env = {
 		UnitGUID = UnitGUID,
 	},
-	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[tonumber((UnitGUID(c.Unit) or "0x00000000000000000"):sub(-12, -9), 16)]) and 1)]],
+	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[tonumber((UnitGUID(c.Unit) or "0x00000000000000000"):sub(6, 10), 16)]) and 1)]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
