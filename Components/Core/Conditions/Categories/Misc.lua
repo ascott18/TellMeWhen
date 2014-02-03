@@ -300,14 +300,16 @@ ConditionCategory:RegisterCondition(31,	 "LUA", {
 		setmetatable(CNDT.Env, CNDT.EnvMeta)
 
 		local lua = c.Name
-		if parent.GetName and parent:GetName() then
-			if _G[parent:GetName()] == parent then
-				lua = lua:gsub("thisobj", parent:GetName())
+		if lua:find("thisobj") then
+			if parent.GetName and parent:GetName() then
+				if _G[parent:GetName()] == parent then
+					lua = lua:gsub("thisobj", parent:GetName())
+				else
+					error("Error with thisobj substitution: _G[thisobj:GetName()] ~= thisobj for " .. parent:GetName())
+				end
 			else
-				error("Error with thisobj substitution: _G[thisobj:GetName()] ~= thisobj for " .. parent:GetName())
+				error("Attempted use of thisobj in conditions that don't support it.")
 			end
-		else
-			error("Attempted use of thisobj in conditions that don't support it.")
 		end
 		
 		return lua ~= "" and lua or "true"

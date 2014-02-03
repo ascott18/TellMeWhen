@@ -274,17 +274,19 @@ function CNDT:TypeMenu_DropDown()
 			local CurrentConditionSet = CNDT.CurrentConditionSet
 			
 			for k, conditionData in ipairs(categoryData.conditionData) do
-				local shouldAdd = conditionData:ShouldList()
-				
-				if CurrentConditionSet.ConditionTypeFilter then
-					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
-						shouldAdd = false
+				if not conditionData.IS_SPACER then
+					local shouldAdd = conditionData:ShouldList()
+					
+					if CurrentConditionSet.ConditionTypeFilter then
+						if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
+							shouldAdd = false
+						end
 					end
-				end
-				
-				if not conditionData.IS_SPACER and shouldAdd then
-					shouldAddCategory = true
-					break
+					
+					if shouldAdd then
+						shouldAddCategory = true
+						break
+					end
 				end
 			end
 			
