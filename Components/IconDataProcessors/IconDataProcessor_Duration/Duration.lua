@@ -160,18 +160,21 @@ TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function(event, time, L
 			if currentIconDuration < 0 then currentIconDuration = 0 end
 			
 			-- If the duration didn't change (i.e. it is 0) then don't even try.
-			if currentIconDuration == lastCheckedDuration then
-				break
-			end
+			if currentIconDuration ~= lastCheckedDuration then
 
-			for i = 1, #durations do
-				local durationToCheck = durations[i]
-				if currentIconDuration <= durationToCheck and -- Make sure we are at or have passed the duration we want to trigger at
-					(lastCheckedDuration > durationToCheck -- Make sure that we just reached this duration (so it doesn't continually fire)
-					or lastCheckedDuration < currentIconDuration -- or make sure that the duration increased since the last time we checked the triggers.
-				) then
-					icon:SetInfo("start, duration", icon.attributes.start, icon.attributes.duration)
-					break
+				for i = 1, #durations do
+					local durationToCheck = durations[i]
+				--	print(icon, currentIconDuration, lastCheckedDuration, durationToCheck)
+					if currentIconDuration <= durationToCheck and -- Make sure we are at or have passed the duration we want to trigger at
+						(lastCheckedDuration > durationToCheck -- Make sure that we just reached this duration (so it doesn't continually fire)
+						or lastCheckedDuration < currentIconDuration -- or make sure that the duration increased since the last time we checked the triggers.
+					) then
+						icon.NextUpdateTime = 0
+					--	print(icon, "TRIGGER")
+						--icon:Update()
+						--icon:SetInfo("start, duration", icon.attributes.start, icon.attributes.duration)
+						break
+					end
 				end
 			end
 			durations.last = currentIconDuration
