@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70057 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70058 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3989,7 +3989,7 @@ function TMW:GetSpellNames_static(doLower, setting, keepDurations)
 		end
 	end
 
-	-- Remove invalid SpellIDs.
+	-- Remove invalid SpellIDs and entries that the user has chosed to omit by using a "-" prefix.
 	local k = #buffNames
 	while k > 0 do
 		local v = buffNames[k]
@@ -3997,6 +3997,31 @@ function TMW:GetSpellNames_static(doLower, setting, keepDurations)
 			-- Invalid spellID. Remove it to prevent integer overflow errors.
 			tremove(buffNames, k)
 			TMW.Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
+		elseif type(v) == "string" and v:match("^%-") then
+			tremove(buffNames, k)
+
+			local thingToRemove = v:match("^%-%s*(.*)"):lower()
+
+			local i = 1
+			local removed
+			while buffNames[i] do
+				local name = buffNames[i]
+				
+				if type(name) == "string" then
+					name = name:lower()
+				end
+
+				if thingToRemove == name then
+					tremove(buffNames, i)
+					removed = true
+				else
+					i = i + 1
+				end
+			end
+
+			if not removed then
+				TMW:Printf(L["SPELL_EQUIV_REMOVE_FAILED"], thingToRemove, table.concat(buffNames, "; "))
+			end
 		else
 			-- The entry was valid, so move backwards towards the beginning.
 			k = k - 1

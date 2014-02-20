@@ -188,7 +188,9 @@ L["ICONMENU_ENABLE_DESC"] = "Icons will only function when they are enabled."
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
-|cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
+You can omit a spell from an equivalency that you used by prefixing it with a dash, e.g. "Slowed; -Dazed".
+
+You can |cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellIDs."
 L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 
@@ -196,6 +198,9 @@ L["CHOOSEICON"] = "Choose an icon to check"
 L["CHOOSEICON_DESC"] = [=[|cff7fffffClick|r to choose an icon/group.
 |cff7fffffLeft-Click and drag|r to rearrange.
 |cff7fffffRight-Click and drag|r to swap.]=]
+
+L["SPELL_EQUIV_REMOVE_FAILED"] = "Warning: Tried to remove %q from the spell list %q, but it was not found."
+
 
 L["UNKNOWN_ICON"] = "<Unknown/Unavailable Icon>"
 L["UNKNOWN_GROUP"] = "<Unknown/Unavailable Group>"
@@ -725,7 +730,7 @@ L["UIPANEL_CLOCKIGNOREGCD_DESC"] = "If checked, timers and the cooldown clock wi
 L["UIPANEL_UPDATEINTERVAL"] = "Update Interval"
 L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = [[Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc.
 
-Zero is as fast as possible. Lower values can have a significant impact on framerate for low-end computers.]]
+Zero is as fast as possible. Lower values may have a slight impact on framerate for low-end computers.]]
 L["UIPANEL_EFFTHRESHOLD"] = "Buff Efficiency Threshold"
 L["UIPANEL_EFFTHRESHOLD_DESC"] = "Sets the minimum number of buffs/debuffs to switch to a more efficient mode of checking them when there are a high number. Note that once the number of auras being checked exceeds this number, older auras will be prioritized instead of priority based on the order in which they were entered."
 L["UIPANEL_ICONSPACINGX"] = "Horizontal Icon Spacing"
