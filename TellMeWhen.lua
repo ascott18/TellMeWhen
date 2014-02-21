@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70063 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70064 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -1581,7 +1581,7 @@ local function TTOnEnter(self)
 	if  (not self.__ttshowchecker or TMW.get(self[self.__ttshowchecker], self))
 	and (self.__title or self.__text)
 	then
-		GameTooltip_SetDefaultAnchor(GameTooltip, self)
+		TMW:TT_Anchor(self)
 		GameTooltip:AddLine(TMW.get(self.__title, self), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 		GameTooltip:AddLine(TMW.get(self.__text, self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
 		GameTooltip:Show()
@@ -1589,6 +1589,11 @@ local function TTOnEnter(self)
 end
 local function TTOnLeave(self)
 	GameTooltip:Hide()
+end
+
+function TMW:TT_Anchor(f)
+	GameTooltip:SetOwner(f, "ANCHOR_NONE")
+	GameTooltip:SetPoint("TOPLEFT", f, "BOTTOMRIGHT", 0, 0)
 end
 
 function TMW:TT(f, title, text, actualtitle, actualtext, showchecker)

@@ -14,7 +14,7 @@
 				TMW.SUG.CurrentModule:Entry_OnClick(self, button)
 			</OnClick>
 			<OnEnter>
-				GameTooltip_SetDefaultAnchor(GameTooltip, self)
+				TMW:TT_Anchor(self)
 				if self.tooltiptitle then
 					GameTooltip:AddLine(self.tooltiptitle, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)

@@ -66,7 +66,7 @@ end
 
 Module:SetScriptHandler("OnEnter", function(Module, icon)
 	if not TMW.Locked then
-		GameTooltip_SetDefaultAnchor(GameTooltip, icon)
+		TMW:TT_Anchor(icon)
 		GameTooltip:AddLine(TMW.get(Module.title, icon), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 		GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
 		

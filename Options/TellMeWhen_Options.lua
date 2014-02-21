@@ -27,7 +27,7 @@ local AceDB = LibStub("AceDB-3.0")
 -- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetText, UIDropDownMenu_GetSelectedValue, UIDropDownMenu_Initialize, UIDropDownMenu_JustifyText, UIDropDownMenu_SetAnchor, UIDropDownMenu_StartCounting
 -- GLOBALS: CloseDropDownMenus, ToggleDropDownMenu, DropDownList1
 -- GLOBALS: NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR, INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED, SPELL_RECAST_TIME_MIN, SPELL_RECAST_TIME_SEC, NONE, SPELL_CAST_CHANNELED, NUM_BAG_SLOTS, CANCEL
--- GLOBALS: GameTooltip, GameTooltip_SetDefaultAnchor
+-- GLOBALS: GameTooltip
 -- GLOBALS: UIParent, WorldFrame, TellMeWhen_IconEditor, GameFontDisable, GameFontHighlight, CreateFrame, collectgarbage 
 -- GLOBALS: PanelTemplates_TabResize, PanelTemplates_Tab_OnClick
 
@@ -2177,6 +2177,7 @@ function IE:OnUpdate()
 	end
 end
 
+
 function IE:BAR_HIDEGRID()
 	IE.DraggingInfo = nil
 end
@@ -2193,6 +2194,16 @@ function IE:TMW_ONUPDATE_POST(...)
 	-- IMPORTANT: do this after running icon updates <because of an old antiquated reason which no longer applies, but if it ain't broke, don't fix it>
 	IE:AttemptBackup(TMW.CI.icon)
 end
+
+TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, tab)
+	IE:UndoRedoChanged()
+
+	if tab.doesIcon then
+		IE.ResetButton:Enable()
+	else
+		IE.ResetButton:Disable()
+	end
+end)
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	-- GLOBALS: TellMeWhen_ConfigWarning
@@ -3859,23 +3870,26 @@ end
 
 ---------- Interface ----------
 function IE:UndoRedoChanged()
+	if not IE.CurrentTab.doesIcon then
+		IE.UndoButton:Disable()
+		IE.RedoButton:Disable()
+
+		return
+	end
+
 	local icon = CI.icon
-	
+
 	if icon then
 		if not icon.historyState or icon.historyState - 1 < 1 then
 			IE.UndoButton:Disable()
-			IE.CanUndo = false
 		else
 			IE.UndoButton:Enable()
-			IE.CanUndo = true
 		end
 
 		if not icon.historyState or icon.historyState + 1 > #icon.history then
 			IE.RedoButton:Disable()
-			IE.CanRedo = false
 		else
 			IE.RedoButton:Enable()
-			IE.CanRedo = true
 		end
 	end
 end

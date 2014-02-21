@@ -169,7 +169,7 @@
 
 						GameTooltip:Hide()
 
-						GameTooltip_SetDefaultAnchor(GameTooltip, self)
+						TMW:TT_Anchor(self)
 						GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
 						if IsModifierKeyDown() then
 							GameTooltip:AddLine(TMW.IE:GetRealNames(self:GetText()), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
@@ -2385,6 +2385,8 @@
 				<Scripts>
 					<OnLoad>
 						self:SetText(TMW.L["RESET_ICON"])
+						TMW:TT(self, "RESET_ICON", "RESET_ICON_DESC")
+
 						self:SetWidth(self:GetTextWidth()+15)
 
 						self:SetFrameLevel(self:GetFrameLevel()+2)

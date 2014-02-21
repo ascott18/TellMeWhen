@@ -892,6 +892,7 @@ L["CASTERFORM"] = "Caster Form"
 L["ALPHA"] = "Alpha"
 
 L["RESET_ICON"] = "Reset"
+L["RESET_ICON_DESC"] = "Resets all of this icon's settings to default values."
 L["UNDO_ICON"] = "Undo"
 L["UNDO_ICON_DESC"] = "Undo the last change made to this icon's settings."
 L["REDO_ICON"] = "Redo"

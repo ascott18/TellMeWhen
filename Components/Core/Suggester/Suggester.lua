@@ -366,7 +366,7 @@ end
 
 ---------- Miscellaneous ----------
 function SUG:ColorHelp(frame)
-	GameTooltip_SetDefaultAnchor(GameTooltip, frame)
+	TMW:TT_Anchor(frame)
 	GameTooltip:AddLine(SUG.CurrentModule.helpText, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	if SUG.CurrentModule.showColorHelp then
 		GameTooltip:AddLine(L["SUG_DISPELTYPES"], 1, .49, .04, 1)
