@@ -2134,6 +2134,12 @@ L["HELP_MS_NOFOUND"] = [[The ability %q could not be found on your action bars.
 
 Ensure that the ability is on your action bars, in its default state, and that it is not only a macro that is putting the spell on your action bars. Otherwise, this icon will not function properly.]]
 
+L["HELP_BUFF_NOSOURCERPPM"] = [[It looks like you are trying to track %s, which is a buff that uses the RPPM system.
+
+Due to a Blizzard bug, this buff can't be tracked if you have the %q setting enabled.
+
+Please disable this setting if you want this buff to be tracked properly.]]
+
 L["HELP_IMPORT_CURRENTPROFILE"] = [[Trying to move or copy an icon from this profile to another icon slot?
 
 You can do so easily by |cff7fffffRight-clicking and dragging|r the icon (hold down the mouse button) to another slot. When you release the mouse button, a menu will appear with many options.

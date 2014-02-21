@@ -38,6 +38,7 @@ Type.spacebefore = true
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 
+
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
@@ -333,6 +334,15 @@ local function Buff_OnUpdate(icon, time)
 	end
 end
 
+local aurasWithNoSourceReported = {
+	GetSpellInfo(104993),	-- Jade Spirit
+	GetSpellInfo(116660),	-- River's Song
+	GetSpellInfo(120032),	-- Dancing Steel
+	GetSpellInfo(116631),	-- Colossus
+	GetSpellInfo(104423),	-- Windsong
+	nil,	-- Terminate with nil to prevent all Windsong's return values from filling the table
+}
+
 
 function Type:Setup(icon)
 	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
@@ -348,6 +358,25 @@ function Type:Setup(icon)
 	if icon.OnlyMine then
 		icon.Filter = icon.Filter .. "|PLAYER"
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
+	end
+
+	if icon:IsBeingEdited() == "MAIN" then
+		if not TMW.HELP:IsCodeRegistered("ICONTYPE_BUFF_NOSOURCERPPM") then
+			TMW.HELP:NewCode("ICONTYPE_BUFF_NOSOURCERPPM", 2, false)
+		end
+
+		TMW.HELP:Hide("ICONTYPE_BUFF_NOSOURCERPPM")
+
+		if icon.OnlyMine then
+			for k, spell in pairs(icon.NameNameArray) do
+				for _, badSpell in pairs(aurasWithNoSourceReported) do
+					if type(badSpell) == "string" and badSpell:lower() == spell then
+						TMW.HELP:Show("ICONTYPE_BUFF_NOSOURCERPPM", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.NameArray[k]))
+						break
+					end
+				end
+			end
+		end
 	end
 
 	icon.FirstTexture = SpellTextures[icon.NameFirst]
