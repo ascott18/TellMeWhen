@@ -98,5 +98,7 @@ TMW:NewClass("GroupModule_Resizer_ScaleY_SizeX", "GroupModule_Resizer"){
 			
 			group:Setup(true)
 		end
+
+		self:HideTexture()
 	end,
 }

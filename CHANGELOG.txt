@@ -13,6 +13,8 @@
  ** IMPORTANT: Existing DogTags that reference other icons/groups by ID cannot be updated automatically - you will need to change these yourself.
 
  * TellMeWhen_Options now maintains a backup of TellMeWhen's SavedVariables that will be restored if TellMeWhen's SVs become corrupted.
+ 
+ * IMPORTANT: TellMeWhen no longer includes the massively incomplete localizations for itIT, ptBR, frFR, deDE, koKR, and esMX (esMX now uses esES). If you would like to contribute to localization, go to http://wow.curseforge.com/addons/tellmewhen/localization/
 
  * Global Cooldowns are now only filtered for icon types that can track things on the global cooldown.
  * The Combat Event icon unit exclusion "Miscellaneous: Unknown Unit" will now also cause events that were fired without a unit to be excluded.

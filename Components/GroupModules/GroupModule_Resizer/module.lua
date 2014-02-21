@@ -52,6 +52,7 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 	
 	OnEnable = function(self)
 		self:Show()
+		self:ShowTexture()
 	end,
 	
 	OnDisable = function(self)
@@ -62,7 +63,7 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 			self:Hide()
 		end
 	end,
-	
+
 	StopSizing = function(resizeButton)
 		local self = resizeButton.module
 		local group = self.group

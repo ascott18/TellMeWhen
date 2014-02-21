@@ -57,6 +57,12 @@ Module:SetScriptHandler("OnDragStart", function(Module, icon, button)
 	if button == "LeftButton" then
 		local group = icon:GetParent()
 		if not TMW.Locked and not group.Locked then
+
+			local GroupModule_Resizer = group:GetModuleOrModuleChild("GroupModule_Resizer")
+			if GroupModule_Resizer then
+				GroupModule_Resizer:Hide()
+			end
+
 			group:StartMoving()
 			isMoving = group
 		end

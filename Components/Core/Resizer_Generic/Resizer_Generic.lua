@@ -34,7 +34,7 @@ TMW:NewClass("Resizer_Generic"){
 		self.resizeButton.module = self
 		
 		self.resizeButton:SetScript("OnMouseDown", self.StartSizing)
-		self.resizeButton:SetScript("OnMouseUp", self.StopSizing)
+		self.resizeButton:SetScript("OnMouseUp", self.OnMouseUp)
 		
 		-- A new function is requied for each resizeButton/parent combo because it has to be able to reference both.
 		parent:HookScript("OnSizeChanged", function(parent)
@@ -50,6 +50,21 @@ TMW:NewClass("Resizer_Generic"){
 	Hide = function(self)
 		self.resizeButton:Hide()
 	end,
+	
+	ShowTexture = function(self)
+		self.resizeButton.texture:Show()
+	end,
+	HideTexture = function(self)
+		self.resizeButton.texture:Hide()
+	end,
+
+	OnMouseUp = function(resizeButton)
+		local self = resizeButton.module
+
+		self.StopSizing(resizeButton)
+		self:ShowTexture()
+	end,
+
 	
 	GetStandardizedCoordinates = function(self)
 		local parent = self.parent
@@ -95,9 +110,14 @@ TMW:NewClass("Resizer_Generic"){
 		else
 			resizeButton:SetScript("OnUpdate", self.SizeUpdate)
 		end
+
+		self:HideTexture()
 	end,
 	
 	StopSizing = function(resizeButton)
 		resizeButton:SetScript("OnUpdate", nil)
+
+		local self = resizeButton.module
+		self:ShowTexture()
 	end,
 }

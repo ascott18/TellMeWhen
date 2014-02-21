@@ -75,10 +75,17 @@ function TMW_CursorAnchor:Initialize()
 	-- Initial positioning
 	self:SetPoint("CENTER")
 
-	self.icon = self:CreateTexture(nil, "OVERLAY", nil, 7)
+	-- Text
+	self.icon = self:CreateTexture(nil, "ARTWORK", nil, 7)
 	self.icon:SetAllPoints()
 	self.icon:SetTexture("Interface/CURSOR/Point")
 	self.icon:SetVertexColor(1, .1, .6)
+
+	self.fs = TMW_CursorAnchor:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
+	self.fs:SetPoint("TOP", self, "BOTTOM", 0, 13)
+	self.fs:SetText("TMW")
+	self.fs:SetFont(self.fs:GetFont(), 8, "THINOUTLINE")
+
 
 	self:SetMovable(true)
 	self:RegisterForDrag("LeftButton")
@@ -104,6 +111,7 @@ function TMW_CursorAnchor:CheckState()
 
 	if TMW.Locked then
 		self.icon:Hide()
+		self.fs:Hide()
 
 		if self.Started then
 			self:SetScript("OnUpdate", self.OnUpdate)
@@ -114,6 +122,7 @@ function TMW_CursorAnchor:CheckState()
 
 	else
 		self.icon:Show()
+		self.fs:Show()
 		self:SetScript("OnUpdate", nil)
 
 		self:EnableMouse(true)
