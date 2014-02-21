@@ -69,11 +69,8 @@ end
 TMW_CursorAnchor = CreateFrame("Frame", "TMW_CursorAnchor", UIParent)
 function TMW_CursorAnchor:Initialize()
 	self:SetSize(24, 24)
-	self:SetFrameStrata("TOOLTIP")
+	self:SetFrameStrata("HIGH")
 	self:SetFrameLevel(100)
-
-	-- Initial positioning
-	self:SetPoint("CENTER")
 
 	-- Text
 	self.icon = self:CreateTexture(nil, "ARTWORK", nil, 7)
@@ -128,7 +125,7 @@ function TMW_CursorAnchor:CheckState()
 		self:EnableMouse(true)
 		TMW:TT(self, "ANCHOR_CURSOR_DUMMY", "ANCHOR_CURSOR_DUMMY_DESC")
 
-		self:SetPoint("CENTER")
+		self:SetPoint("CENTER", 0, 100)
 	end
 end
 
