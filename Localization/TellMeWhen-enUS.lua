@@ -435,8 +435,8 @@ L["ICONMENU_CASTSHOWWHEN"] = "Show when a cast is"
 L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
 L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts that are interruptible"
 
-L["ICONMENU_ONLYMINE"] = "Casted by me"
-L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for buffs/debuffs that you casted"
+L["ICONMENU_ONLYMINE"] = "Cast by me"
+L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for buffs/debuffs that you cast"
 L["ICONMENU_SHOWTIMER"] = "Show timer"
 L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
@@ -1198,8 +1198,8 @@ L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC"] = [[Enter the name of the Blizzard 
 
 Only one equipment set may be entered, and it is |cFFFF5959CASE SENSITIVE|r]]
 L["EQUIPSETTOCHECK"] = "Equipment set to check (|cFFFF5959CASE SENSITIVE|r)"
-L["ONLYCHECKMINE"] = "Casted By Me"
-L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for buffs/debuffs that you casted"
+L["ONLYCHECKMINE"] = "Cast By Me"
+L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for buffs/debuffs that you cast"
 L["LUACONDITION"] = "Lua (Advanced)"
 L["LUACONDITION2"] = "Lua Condition"
 L["LUACONDITION_DESC"] = [[This condition type allows you to evaluate Lua code to determine the state of a condition.
