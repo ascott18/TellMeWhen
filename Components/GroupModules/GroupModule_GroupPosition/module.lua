@@ -17,6 +17,27 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+
+local GroupPosition = TMW:NewClass("GroupModule_GroupPosition", "GroupModule")
+
+GroupPosition:RegisterGroupDefaults{
+	Point = {
+		point 		  = "CENTER",
+		relativeTo 	  = "UIParent",
+		relativePoint = "CENTER",
+		x 			  = 0,
+		y 			  = 0,
+	},
+}
+
+TMW:RegisterUpgrade(41402, {
+	group = function(self, gs)
+		gs.Point.defined = nil
+	end,
+})
+
+
+
 local Ruler = CreateFrame("Frame")
 local function GetAnchoredPoints(group)
 	local gs = group:GetSettings()
@@ -45,30 +66,75 @@ local function GetAnchoredPoints(group)
 	end
 end
 
+TMW_CursorAnchor = CreateFrame("Frame", "TMW_CursorAnchor", UIParent)
+function TMW_CursorAnchor:Initialize()
+	self:SetSize(24, 24)
+	self:SetFrameStrata("TOOLTIP")
+	self:SetFrameLevel(100)
 
+	-- Initial positioning
+	self:SetPoint("CENTER")
 
-local GroupPosition = TMW:NewClass("GroupModule_GroupPosition", "GroupModule")
+	self.icon = self:CreateTexture(nil, "OVERLAY", nil, 7)
+	self.icon:SetAllPoints()
+	self.icon:SetTexture("Interface/CURSOR/Point")
+	self.icon:SetVertexColor(1, .1, .6)
 
+	self:SetMovable(true)
+	self:RegisterForDrag("LeftButton")
+	self:SetScript("OnDragStart", self.StartMoving)
+	self:SetScript("OnDragStop", self.StopMovingOrSizing)
+	self:SetScript("OnSizeChanged", self.CheckState)
 
-GroupPosition:RegisterGroupDefaults{
-	Point = {
-		point 		  = "CENTER",
-		relativeTo 	  = "UIParent",
-		relativePoint = "CENTER",
-		x 			  = 0,
-		y 			  = 0,
-	},
-}
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", self, "CheckState")
 
-TMW:RegisterUpgrade(41402, {
-	group = function(self, gs)
-		gs.Point.defined = nil
-	end,
-})
+	self:CheckState()
+
+	self.Initialize = TMW.NULLFUNC
+end
+
+function TMW_CursorAnchor:Start()
+	self.Started = true
+end
+
+function TMW_CursorAnchor:CheckState()
+	self:ClearAllPoints()
+
+	self:SetScale(1/UIParent:GetScale())
+
+	if TMW.Locked then
+		self.icon:Hide()
+
+		if self.Started then
+			self:SetScript("OnUpdate", self.OnUpdate)
+		end
+
+		self:EnableMouse(false)
+		TMW:TT(self, nil, nil)
+
+	else
+		self.icon:Show()
+		self:SetScript("OnUpdate", nil)
+
+		self:EnableMouse(true)
+		TMW:TT(self, "ANCHOR_CURSOR_DUMMY", "ANCHOR_CURSOR_DUMMY_DESC")
+
+		self:SetPoint("CENTER")
+	end
+end
+
+function TMW_CursorAnchor:OnUpdate()
+	local x, y = GetCursorPosition()
+	local scale = self:GetEffectiveScale()
+
+	self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x/scale, y/scale)
+end
+TMW_CursorAnchor:Initialize()
+
 
 
 function GroupPosition:OnEnable()
-	self:SetPos()	
+	self:SetPos()
 end
 
 function GroupPosition:OnDisable()
@@ -113,13 +179,23 @@ function GroupPosition:SetPos()
 		p.relativeTo = "UIParent"
 	end
 	
-	local relativeTo = TMW.GUIDToOwner[p.relativeTo] or _G[p.relativeTo]
+	local relativeTo = p.relativeTo
+
+	if relativeTo:lower() == "cursor" then
+		relativeTo = "TMW_CursorAnchor"
+	end
+
+	relativeTo = TMW.GUIDToOwner[relativeTo] or _G[relativeTo]
 	
 	if not relativeTo then
 		self.frameToFind = p.relativeTo
 		TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", self, "DetectFrame")
 		group:SetPoint("CENTER", UIParent)
 	else
+		if relativeTo == TMW_CursorAnchor then
+			TMW_CursorAnchor:Start()
+		end
+
 		local success, err = pcall(group.SetPoint, group, p.point, relativeTo, p.relativePoint, p.x, p.y)
 		if not success then
 			TMW:Error(err)
@@ -149,6 +225,7 @@ function GroupPosition:SetPos()
 			return self:SetPos()
 		end
 	end
+	
 	
 	group:SetFrameStrata(gs.Strata)
 	group:SetFrameLevel(gs.Level)

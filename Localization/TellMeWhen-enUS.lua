@@ -106,6 +106,17 @@ L["ERROR_MISSINGFILE_OPT_NOREQ"] = [[A complete restart of WoW may be required t
 Would you like to restart WoW now?]]
 
 
+L["ANCHOR_CURSOR_DUMMY"] = "TellMeWhen Cursor Anchor Dummy"
+L["ANCHOR_CURSOR_DUMMY_DESC"] = [[This is a dummy cursor to help you position your icons that are anchored to the cursor.
+
+Anchoring groups to the cursor is useful for icons that are checking the 'mouseover' unit.
+
+You can |cff7fffffRight-Click-and-drag|r an icon to this dummy to anchor that icon's group to the cursor.
+
+Due to a Blizzard bug, the cooldown sweep animation will bug out when it moves around, so you probably should disable it for cursor-anchored icons.
+
+|cff7fffffLeft-Click and drag|r to move this dummy.]]
+
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 L["ERROR_ANCHOR_CYCLICALDEPS"] = "%s was trying to anchor to %s, but the position of %s depends on the position of %s, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 

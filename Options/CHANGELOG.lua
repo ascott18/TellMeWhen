@@ -27,6 +27,7 @@ TMW.CHANGELOG = {
 [==[* You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.]==],
 [==[* Added group settings that allow you to specify when a group should be shown based on the role that your current specialization fulfills.]==],
 [==[* You can now enter "none" or "blank" as a custom texture for an icon to force it to display no texture.]==],
+[==[* You can now enter a spell prefixed by a dash to omit that spell from any equivalencies entered, E.g. "Slowed; -Dazed" would check all slowed effects except daze.]==],
 [==[* New Condition: Specialization Role]==],
 [==[* The Buff/Debuff - "Number of" conditions now accept semicolon-delimited lists of multiple auras that should be counted.]==],
 [==[]==],
