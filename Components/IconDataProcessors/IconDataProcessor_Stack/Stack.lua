@@ -52,8 +52,8 @@ Processor:RegisterIconEvent(51, "OnStack", {
 	},
 	valueName = L["STACKS"],
 	conditionChecker = function(icon, eventSettings)
-		local count = icon.attributes.stack
-		return count and TMW.CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
+		local count = icon.attributes.stack or 0
+		return TMW.CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
 	end,
 })
 	
