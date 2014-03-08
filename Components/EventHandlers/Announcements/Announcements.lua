@@ -43,7 +43,8 @@ local DogTag = LibStub("LibDogTag-3.0")
 
 local EVENTS = TMW.EVENTS
 local Announcements = TMW.Classes.EventHandler_ColumnConfig:New("Announcements")
-Announcements.identifierSetting = "Channel"
+Announcements.subHandlerDataIdentifier = "Announcements"
+Announcements.subHandlerSettingKey = "Channel"
 
 Announcements.kwargs = {}
 Announcements.AllSubHandlersByIdentifier = {}

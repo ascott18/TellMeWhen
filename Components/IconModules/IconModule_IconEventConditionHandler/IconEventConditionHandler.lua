@@ -89,51 +89,17 @@ function Module:OnDisable()
 	end
 end
 
+
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED)
+end)
+
+
+
+
 do
 	local CNDT = TMW.CNDT
 	
-	local InIconEventSettings
-	do -- InIconEventSettings
-		local states = {}
-		local function getstate()
-			local state = wipe(tremove(states) or {})
-
-			state.currentEventID = 0
-			
-			state.extIter, state.extIterState = TMW:InIconSettings()
-
-			return state
-		end
-
-		local function iter(state)
-			state.currentEventID = state.currentEventID + 1
-
-			if not state.currentEvents or state.currentEventID > (state.currentEvents.n or #state.currentEvents) then
-				local ics = state.extIter(state.extIterState)
-				
-				if not ics then
-					tinsert(states, state)
-					return
-				end
-				state.currentEvents = ics.Events
-				state.currentEventID = 0
-				
-				return iter(state)
-			end
-			
-			local eventSettings = rawget(state.currentEvents, state.currentEventID)
-			
-			if not eventSettings then
-				return iter(state)
-			end
-			
-			return eventSettings
-		end
-
-		InIconEventSettings = function()
-			return iter, getstate()
-		end
-	end
 	
 	local ConditionSet = {
 		parentSettingType = "iconEventHandler",
@@ -147,12 +113,12 @@ do
 			end
 		end,
 		
-		iterFunc = InIconEventSettings,
-		iterArgs = {},
+		iterFunc = TMW.EVENTS.InIconEventSettings,
+		iterArgs = {TMW.EVENTS},
 
 		useDynamicTab = true,
 		ShouldShowTab = function(self)
-			local button = TellMeWhen_IconEditorEventsEventSettingsContainerIconEventOnCondition
+			local button = TellMeWhen_IconEditor.Events.EventSettingsContainer.IconEventOnCondition
 			
 			return button and button:IsShown()
 		end,
@@ -162,20 +128,6 @@ do
 	}
 	CNDT:RegisterConditionSet("IconEventOnCondition", ConditionSet)
 	
-
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-		
-		--[[for ConditionObject, matches in pairs(MapConditionObjectToEventSettings) do
-			for eventSettings, icon in pairs(matches) do
-				ConditionObject:RequestAutoUpdates(eventSettings, false)
-				matches[eventSettings] = nil
-			end
-			assert(not next(matches))
-		end]]
-		
-		TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED)
-	end)
 end
-
 
 

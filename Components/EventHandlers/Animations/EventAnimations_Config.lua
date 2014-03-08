@@ -26,7 +26,7 @@ local pairs, ipairs, max =
 
 local EVENTS = TMW.EVENTS
 local Animations = TMW.EVENTS:GetEventHandler("Animations")
-Animations.handlerName = L["ANIM_TAB"]
+Animations.handlerName = L["ANIM_TAB_EVENT"]
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
 	TMW:ConvertContainerToScrollFrame(Animations.ConfigContainer.ConfigFrames)
@@ -50,9 +50,9 @@ function Animations:SetupEventDisplay(eventID)
 			text = "|cff808080" .. text
 		end
 
-		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r " .. text)
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. L["ANIM_TAB"] .. ":|r " .. text)
 	else
-		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r UNKNOWN: " .. (subHandlerIdentifier or "?"))
+		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. L["ANIM_TAB"] .. ":|r UNKNOWN: " .. (subHandlerIdentifier or "?"))
 	end
 end
 

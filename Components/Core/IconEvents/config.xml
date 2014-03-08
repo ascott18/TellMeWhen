@@ -125,7 +125,9 @@
 			
 			<OnMouseUp>
 				-- This is handled in OnMouseUp so that it will still fire when the button is disabled.
-				if button == "RightButton" then
+
+				local EventHandler = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
+				if button == "RightButton" and EventHandler.isTriggeredByEvents then
 					ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 				end
 			</OnMouseUp>
@@ -178,7 +180,7 @@
 		<Scripts>
 			<OnClick>
 				if TMW.CI.ics then
-					TMW.EVENTS:GetEventSettings()[self.EventHandler.identifierSetting] = self.subHandlerIdentifier
+					TMW.EVENTS:GetEventSettings()[self.EventHandler.subHandlerSettingKey] = self.subHandlerIdentifier
 					TMW.IE:ScheduleIconSetup()
 				end
 
@@ -235,6 +237,8 @@
 				self.range = 10
 
 				--self:SetValueStep(self.step)
+
+				--TODO: this sucks (using animation config for ennouncements)
 				TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self)
 
 				self:EnableMouseWheel(true)

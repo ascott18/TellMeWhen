@@ -1458,6 +1458,10 @@ L["EVENTCONDITIONS"] = "Event Conditions"
 L["EVENTCONDITIONS_DESC"] = "Click to configure a set of conditions that will trigger this event when they begin passing."
 L["EVENTCONDITIONS_TAB_DESC"] = "Configure a set of conditions that will trigger an event when they begin passing."
 
+L["EVENT_WHILECONDITIONS"] = "Notification Conditions"
+L["EVENT_WHILECONDITIONS_DESC"] = "Click to configure a set of conditions that will cause this animation to play while they are passing."
+L["EVENT_WHILECONDITIONS_TAB_DESC"] = "Configure a set of conditions that will cause an animation to play while they are passing."
+
 L["UNITCONDITIONS"] = "Unit Conditions"
 L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."
 L["UNITCONDITIONS_TAB_DESC"] = "Configure conditions that each unit will have to pass in order to be checked."
@@ -1718,12 +1722,16 @@ This may also be thought of as a "soft reset" of the icon.
 This event may be useful in creating a default animation state for the icon.]]
 
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
+L["SOUND_EVENT_NOEVENT"] = "Unconfigured Event"
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
 L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"] = [[This event is not available for the current icon configuration.
 
 This is probably due to this event not being available for the current icon type (%s).
 
 |cff7fffffRight-click|r to change event.]]
+
+
+L["SOUND_EVENT_WHILECONDITION"] = "While Condition Set Passing"
 
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
@@ -1837,6 +1845,8 @@ L["ERRORS_FRAME_DESC"] = "Outputs the text to the standard errors frame that nor
 
 
 L["ANIM_TAB"] = "Animation"
+L["ANIM_TAB_EVENT"] = "Animation (Event Triggered)"
+L["ANIM_TAB_STATEFUL"] = "Animation (While Condition Set Passing)"
 L["ANIM_ANIMTOUSE"] = "Animation To Use"
 L["ANIM_ANIMSETTINGS"] = "Settings"
 

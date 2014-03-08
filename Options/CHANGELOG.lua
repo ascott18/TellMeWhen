@@ -20,6 +20,8 @@ TMW.CHANGELOG = {
 [==[]==],
 [==[* IMPORTANT: TellMeWhen no longer includes the massively incomplete localizations for itIT, ptBR, frFR, deDE, koKR, and esMX (esMX now uses esES). If you would like to contribute to localization, go to http://wow.curseforge.com/addons/tellmewhen/localization/]==],
 [==[]==],
+[==[* You can now add an event handler that will cause an animation to play continually while a set of conditions evaluate to true.]==],
+[==[]==],
 [==[* Global Cooldowns are now only filtered for icon types that can track things on the global cooldown.]==],
 [==[* The Combat Event icon unit exclusion "Miscellaneous: Unknown Unit" will now also cause events that were fired without a unit to be excluded.]==],
 [==[* The meta icon setting "Inherit failed condition opacity" has been removed. Meta icons will now always inherit the exact opacity of the icons they are showing, though this can be overridden by the meta icon's opacity settings.]==],

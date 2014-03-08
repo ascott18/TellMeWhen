@@ -27,6 +27,7 @@ EVENTS.CONST = {
 	EVENT_INVALID_REASON_MISSINGHANDLER = 1,
 	EVENT_INVALID_REASON_MISSINGCOMPONENT = 2,
 	EVENT_INVALID_REASON_MISSINGEVENT = 3,
+	EVENT_INVALID_REASON_NOEVENT = 4,
 }
 
 local EventsTab = TMW.Classes.IconEditorTab:NewTab("ICONEVENTS", 10, "Events")
@@ -129,8 +130,10 @@ function EVENTS:LoadConfig()
 
 		-- Check if this eventID is valid, and load it if it is.
 		local isValid, reason = EVENTS:IsEventIDValid(eventID)
-		local eventSettings = TMW.CI.ics.Events[eventID]
+		local eventSettings = self:GetEventSettings(eventID)
+		local EventHandler = self:GetEventHandlerForEventSettings(eventSettings)
 		local eventData = TMW.EventList[eventSettings.Event]
+
 		
 		-- If we have the event's data, set the event name of the frame to the localized name of the event.
 		-- If we don't have the event's data, set the event name of the raw identifier of the event.
@@ -146,11 +149,13 @@ function EVENTS:LoadConfig()
 
 			frame:Enable()
 
-			frame.event = eventData.event
-			frame.eventData = eventData
+			if EventHandler.isTriggeredByEvents then
+				frame.event = eventData.event
+				frame.eventData = eventData
 
-			frame.normalDesc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
-			TMW:TT(frame, eventData.text, frame.normalDesc, 1, 1)
+				local desc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
+				TMW:TT(frame, eventData.text, desc, 1, 1)
+			end
 
 			-- This delegates the setup of frame.DataText to the event handler
 			-- so that it can put useful information about the user's settings
@@ -168,13 +173,22 @@ function EVENTS:LoadConfig()
 
 		else
 			frame:Disable()
+			TMW:TT(frame, nil, nil)
 
 			if reason == EVENTS.CONST.EVENT_INVALID_REASON_MISSINGHANDLER then
 				-- The handler (E.g. Sound, Animation, etc.) of the event settings was not found.
 				frame.DataText:SetText("|cFFFF5050UNKNOWN HANDLER:|r " .. tostring(EVENTS:GetEventSettings(eventID).Type))
+
 			elseif reason == EVENTS.CONST.EVENT_INVALID_REASON_MISSINGEVENT then
 				-- The event (E.g. "OnSomethingHappened") was not found
 				frame.DataText:SetText("|cFFFF5050UNKNOWN EVENT|r")
+
+			elseif reason == EVENTS.CONST.EVENT_INVALID_REASON_NOEVENT then
+				-- The handler is unconfigured
+				-- This is a non-critical error, so we format the error message nicely for the user.
+				frame.DataText:SetText(L["SOUND_EVENT_NOEVENT"])
+				frame:Enable()
+
 			elseif reason == EVENTS.CONST.EVENT_INVALID_REASON_MISSINGCOMPONENT then
 				-- The event was found, but it is not available for the current icon's configuration.
 				-- This is a non-critical error, so we format the error message nicely for the user.
@@ -257,73 +271,84 @@ function EVENTS:LoadEventSettings()
 		EventSettingsContainer:Hide()
 		return
 	end
+
+	local eventSettings = self:GetEventSettings()
+	local EventHandler = self:GetEventHandlerForEventSettings(eventSettings)
+
 	EventSettingsContainer:Show()
 
-	local settings = self:GetEventSettings()
-	local eventData = self:GetEventData()
+	--hide settings
+	EventSettingsContainer.PassThrough		:Hide()
+	EventSettingsContainer.OnlyShown		:Hide()
+	EventSettingsContainer.Operator			:Hide()
+	EventSettingsContainer.Value			:Hide()
+	EventSettingsContainer.CndtJustPassed	:Hide()
+	EventSettingsContainer.PassingCndt		:Hide()
+	EventSettingsContainer.Icon				:Hide()
 
-	IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
-
-	
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
 
-	--hide settings
-	EventSettingsContainer.Operator	 	 		:Hide()
-	EventSettingsContainer.Value		 	 	:Hide()
-	EventSettingsContainer.CndtJustPassed 		:Hide()
-	EventSettingsContainer.PassingCndt	 		:Hide()
-	EventSettingsContainer.Icon			 		:Hide()
+	if EventHandler.isTriggeredByEvents then
 
-	--load settings
-	EventSettingsContainer.Value		 	 	:SetText(settings.Value)
-	EventSettingsContainer.Icon:SetGUID(settings.Icon)
-	
+		local eventData = self:GetEventData()
 
-	local settingsUsedByEvent = eventData.settings
+		IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
 
-	--show settings as needed
-	for setting, frame in pairs(EventSettingsContainer) do
-		if type(frame) == "table" then
-			local state = settingsUsedByEvent and settingsUsedByEvent[setting]
+		EventSettingsContainer.PassThrough:Show()
+		EventSettingsContainer.OnlyShown:Show()
 
-			if state == "FORCE" then
-				frame:Disable()
-				frame:SetAlpha(1)
-			elseif state == "FORCEDISABLED" then
-				frame:Disable()
-				frame:SetAlpha(0.4)
-			else
-				frame:SetAlpha(1)
-				if frame.Enable then
-					frame:Enable()
+		--load settings
+		EventSettingsContainer.Value:SetText(eventSettings.Value)
+		EventSettingsContainer.Icon:SetGUID(eventSettings.Icon)
+		
+
+		local settingsUsedByEvent = eventData.settings
+
+		--show settings as needed
+		for setting, frame in pairs(EventSettingsContainer) do
+			if type(frame) == "table" then
+				local state = settingsUsedByEvent and settingsUsedByEvent[setting]
+
+				if state == "FORCE" then
+					frame:Disable()
+					frame:SetAlpha(1)
+				elseif state == "FORCEDISABLED" then
+					frame:Disable()
+					frame:SetAlpha(0.4)
+				else
+					frame:SetAlpha(1)
+					if frame.Enable then
+						frame:Enable()
+					end
+				end
+				if state then
+					frame:Show()
 				end
 			end
-			if state then
-				frame:Show()
+		end
+
+		if EventSettingsContainer.PassingCndt				:GetChecked() then
+			EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
+			EventSettingsContainer.Operator					:Enable()
+			EventSettingsContainer.Value					:Enable()
+			if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
+				EventSettingsContainer.CndtJustPassed		:Enable()
 			end
+		else
+			EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontDisable)
+			EventSettingsContainer.Operator					:Disable()
+			EventSettingsContainer.Value					:Disable()
+			EventSettingsContainer.CndtJustPassed			:Disable()
 		end
-	end
 
-	if EventSettingsContainer.PassingCndt				:GetChecked() then
-		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
-		EventSettingsContainer.Operator					:Enable()
-		EventSettingsContainer.Value					:Enable()
-		if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
-			EventSettingsContainer.CndtJustPassed		:Enable()
+		EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
+		EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
+
+		local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, eventSettings.Operator, TMW.operators)
+		if v then
+			TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
 		end
-	else
-		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontDisable)
-		EventSettingsContainer.Operator					:Disable()
-		EventSettingsContainer.Value					:Disable()
-		EventSettingsContainer.CndtJustPassed			:Disable()
-	end
 
-	EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
-	EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
-
-	local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, settings.Operator, TMW.operators)
-	if v then
-		TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
 	end
 	
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_POST")
@@ -361,14 +386,24 @@ function EVENTS:IsEventIDValid(id)
 	local validEvents = EVENTS:GetValidEvents()
 	
 	local eventSettings = EVENTS:GetEventSettings(id)
-	
-	if not TMW.EventList[eventSettings.Event] then
-		-- The event does not exist
-		return false, EVENTS.CONST.EVENT_INVALID_REASON_MISSINGEVENT
-		
-	elseif validEvents[eventSettings.Event] then
-		local Module = EVENTS:GetEventHandlerForEventSettings(eventSettings)
-		if Module then
+
+	local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventSettings)
+	local isTriggeredByEvents = EventHandler and EventHandler.isTriggeredByEvents
+
+	if isTriggeredByEvents then
+		if eventSettings.Event == "" then
+			-- The event is not set
+			return false, EVENTS.CONST.EVENT_INVALID_REASON_NOEVENT
+
+		elseif not TMW.EventList[eventSettings.Event] then
+			-- The event does not exist
+			return false, EVENTS.CONST.EVENT_INVALID_REASON_MISSINGEVENT
+			
+		end
+	end
+
+	if validEvents[eventSettings.Event] or not isTriggeredByEvents then
+		if EventHandler then
 			-- This event is valid and can be loaded
 			return true, 0
 		else
@@ -538,7 +573,7 @@ function EVENTS.IconMenu_DropDown_OnClick(button, frame)
 end
 
 function EVENTS.AddEvent_Dropdown(frame)
-	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
 		for _, eventData in ipairs(EVENTS:GetValidEvents()) do
 			local info = UIDropDownMenu_CreateInfo()
 
@@ -549,22 +584,32 @@ function EVENTS.AddEvent_Dropdown(frame)
 			info.tooltipOnButton = true
 
 			info.value = eventData.event
-			info.hasArrow = true
+			info.func = EVENTS.AddEvent_Dropdown_OnClick
+			info.arg1 = eventData.event
+			info.arg2 = UIDROPDOWNMENU_MENU_VALUE
+
 			info.notCheckable = true
-			info.keepShownOnClick = true
 
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 		end
-	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
+	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
 		for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 			local info = UIDropDownMenu_CreateInfo()
 
 			info.text = EventHandler.handlerName
 
-			info.value = EventHandler.eventHandlerName
-			info.func = EVENTS.AddEvent_Dropdown_OnClick
-			info.arg1 = UIDROPDOWNMENU_MENU_VALUE
-			info.arg2 = EventHandler.eventHandlerName
+			info.value = EventHandler.identifier
+
+
+			if EventHandler.isTriggeredByEvents then
+				info.hasArrow = true
+				info.keepShownOnClick = true
+			else
+				info.func = EVENTS.AddEvent_Dropdown_OnClick
+				info.arg1 = ""
+				info.arg2 = EventHandler.identifier
+			end
+
 			info.notCheckable = true
 
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
@@ -643,18 +688,20 @@ function ColumnConfig:GetListItemFrame(frameID)
 	if not frame then
 		frame = CreateFrame("Button", SubHandlerList:GetName().."Item"..frameID, SubHandlerList, "TellMeWhen_EventHandler_SubHandlerListButton", frameID)
 		SubHandlerList[frameID] = frame
-		frame.EventHandler = self
 
 		local previousFrame = frameID > 1 and SubHandlerList[frameID - 1] or nil
 		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
 		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
 	end
+
+	frame.EventHandler = self
+
 	return frame
 end
 
 
 function ColumnConfig:GetSubHandler(eventID)
-	local subHandlerIdentifier = EVENTS:GetEventSettings(eventID)[self.identifierSetting]
+	local subHandlerIdentifier = EVENTS:GetEventSettings(eventID)[self.subHandlerSettingKey]
 	local subHandlerData = self.AllSubHandlersByIdentifier[subHandlerIdentifier]
 
 	return subHandlerData, subHandlerIdentifier
@@ -673,7 +720,7 @@ function ColumnConfig:LoadSettingsForEventID(id)
 	for i, GenericComponent in ipairs(TMW.CI.icon.Components) do
 		if GenericComponent.EventHandlerData then
 			for i, subHandlerDataParent in ipairs(GenericComponent.EventHandlerData) do
-				if subHandlerDataParent.eventHandler == self then
+				if subHandlerDataParent.identifier == self.subHandlerDataIdentifier then
 					tinsert(subHandlersToDisplay, subHandlerDataParent)
 				end
 			end
@@ -713,7 +760,7 @@ function ColumnConfig:LoadSettingsForEventID(id)
 	
 	
 	local EventSettings = EVENTS:GetEventSettings(id)
-	self:SelectSubHandler(EventSettings[self.identifierSetting])
+	self:SelectSubHandler(EventSettings[self.subHandlerSettingKey])
 end
 
 function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
@@ -776,6 +823,11 @@ function ColumnConfig:SetSliderMinMax(Slider, level)
 	end
 end
 
+-- Override this method for handlers that need to blacklist a setting.
+function ColumnConfig:IsFrameBlacklisted(frameName)
+	return false
+end
+
 function ColumnConfig:SetupConfig(subHandlerData)
 	local desiredFrames = subHandlerData.ConfigFrames
 	local subHandlerIdentifier = subHandlerData.subHandlerIdentifier
@@ -802,32 +854,34 @@ function ColumnConfig:SetupConfig(subHandlerData)
 
 	local lastFrame, lastFrameBottomPadding
 	for i, configFrameIdentifier in ipairs(desiredFrames) do
-		local configFrameData = self.ConfigFrameData[configFrameIdentifier]
-		
-		if not configFrameData then
-			TMW:Error("Values in ConfigFrames for event handler %q must resolve to a table registered via EventHandler_ColumnConfig:RegisterConfigFrame()", subHandlerIdentifier)
-		else
-			local frame = configFrameData.frame
-			if type(frame) == "string" then
-				frame = Frames[frame]
-				if not frame then
-					TMW:Error("Couldn't find child of %s with key %q for event handler %q", Frames:GetName(), configFrameData.frame, subHandlerIdentifier)
-				end
-			end
+		if not self:IsFrameBlacklisted(configFrameIdentifier) then
+			local configFrameData = self.ConfigFrameData[configFrameIdentifier]
 			
-			local yOffset = (configFrameData.topPadding or 0) + (lastFrameBottomPadding or 0)
-			
-			if lastFrame then
-				frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -yOffset)
+			if not configFrameData then
+				TMW:Error("Values in ConfigFrames for event handler %q must resolve to a table registered via EventHandler_ColumnConfig:RegisterConfigFrame()", subHandlerIdentifier)
 			else
-				frame:SetPoint("TOP", Frames, "TOP", 0, -yOffset - 5)
+				local frame = configFrameData.frame
+				if type(frame) == "string" then
+					frame = Frames[frame]
+					if not frame then
+						TMW:Error("Couldn't find child of %s with key %q for event handler %q", Frames:GetName(), configFrameData.frame, subHandlerIdentifier)
+					end
+				end
+				
+				local yOffset = (configFrameData.topPadding or 0) + (lastFrameBottomPadding or 0)
+				
+				if lastFrame then
+					frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -yOffset)
+				else
+					frame:SetPoint("TOP", Frames, "TOP", 0, -yOffset - 5)
+				end
+				frame:Show()
+				lastFrame = frame
+				
+				TMW.safecall(configFrameData.Load, configFrameData, frame, EventSettings)
+				
+				lastFrameBottomPadding = configFrameData.bottomPadding
 			end
-			frame:Show()
-			lastFrame = frame
-			
-			TMW.safecall(configFrameData.Load, configFrameData, frame, EventSettings)
-			
-			lastFrameBottomPadding = configFrameData.bottomPadding
 		end
 	end	
 end

@@ -1,6 +1,7 @@
 ﻿<Ui>
 
-<Script file="Config.lua"/>
+<Script file="EventAnimations_Config.lua"/>
+<Script file="StatefulAnimations_Config.lua"/>
  
 <Include file="Config.xml"/>
  

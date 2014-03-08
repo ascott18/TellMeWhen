@@ -14,7 +14,7 @@
 				
 				TMW:TT(self, "EVENTCONDITIONS", "EVENTCONDITIONS_DESC")
 				
-				TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", function(event)
+				TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", function()
 					self:Hide()
 				end)
 			</OnLoad>

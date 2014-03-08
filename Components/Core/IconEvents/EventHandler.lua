@@ -44,7 +44,7 @@ TMW:RegisterUpgrade(50020, {
 		for event, eventSettings in pairs(CopyTable(Events)) do -- dont use InNLengthTable here
 			if type(event) == "string" and event ~= "n" then
 				local addedAnEvent
-				for eventHandlerName, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
+				for identifier, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 					local hasHandlerOfType = EventHandler:ProcessIconEventSettings(event, eventSettings)
 					if type(rawget(Events, "n") or 0) == "table" then
 						Events.n = 0
@@ -52,7 +52,7 @@ TMW:RegisterUpgrade(50020, {
 					if hasHandlerOfType then
 						Events.n = (rawget(Events, "n") or 0) + 1
 						Events[Events.n] = CopyTable(eventSettings)
-						Events[Events.n].Type = eventHandlerName
+						Events[Events.n].Type = identifier
 						Events[Events.n].Event = event
 						Events[Events.n].PassThrough = true
 
@@ -129,34 +129,78 @@ end)
 
 
 local EventHandler = TMW:NewClass("EventHandler")
+EventHandler.isTriggeredByEvents = true
 EventHandler.instancesByName = {}
 
 --- Gets an EventHandler instance by name
--- You may also use {{{TMW.EVENTS:GetEventHandler(eventHandlerName)}}} to accomplish the same thing.
--- @param eventHandlerName [string] The identifier of the event handler being requested.
+-- You may also use {{{TMW.EVENTS:GetEventHandler(identifier)}}} to accomplish the same thing.
+-- @param identifier [string] The identifier of the event handler being requested.
 -- @return [EventHandler|nil] The requested EventHandler instance, or nil if it was not found.
-function EventHandler:GetEventHandler(eventHandlerName)
+function EventHandler:GetEventHandler(identifier)
 	self:AssertSelfIsClass()
 	
-	return EventHandler.instancesByName[eventHandlerName]
+	return EventHandler.instancesByName[identifier]
 end
 
 
-function EVENTS:GetEventHandler(eventHandlerName)
-	return EventHandler:GetEventHandler(eventHandlerName)
+function EVENTS:GetEventHandler(identifier)
+	return EventHandler:GetEventHandler(identifier)
+end
+
+
+do	-- EVENTS:InIconEventSettings
+	local states = {}
+	local function getstate()
+		local state = wipe(tremove(states) or {})
+
+		state.currentEventID = 0
+		
+		state.extIter, state.extIterState = TMW:InIconSettings()
+
+		return state
+	end
+
+	local function iter(state)
+		state.currentEventID = state.currentEventID + 1
+
+		if not state.currentEvents or state.currentEventID > (state.currentEvents.n or #state.currentEvents) then
+			local ics = state.extIter(state.extIterState)
+			
+			if not ics then
+				tinsert(states, state)
+				return
+			end
+			state.currentEvents = ics.Events
+			state.currentEventID = 0
+			
+			return iter(state)
+		end
+		
+		local eventSettings = rawget(state.currentEvents, state.currentEventID)
+		
+		if not eventSettings then
+			return iter(state)
+		end
+		
+		return eventSettings
+	end
+
+	function EVENTS:InIconEventSettings()
+		return iter, getstate()
+	end
 end
 
 
 
 --- Creates a new EventHandler.
 -- @name EventHandler:New
--- @param eventHandlerName [string] An identifier for the event handler.
-function EventHandler:OnNewInstance_EventHandler(eventHandlerName)
-	self.eventHandlerName = eventHandlerName
+-- @param identifier [string] An identifier for the event handler.
+function EventHandler:OnNewInstance_EventHandler(identifier)
+	self.identifier = identifier
 	self.AllEventHandlerData = {}
 	self.NonSpecificEventHandlerData = {}
 	
-	EventHandler.instancesByName[eventHandlerName] = self
+	EventHandler.instancesByName[identifier] = self
 end
 
 -- [INTERNAL]
@@ -170,7 +214,7 @@ function EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
 	self:AssertSelfIsInstance()
 	
 	TMW:ValidateType("eventHandlerData.eventHandler", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandler, "table")
-	TMW:ValidateType("eventHandlerData.eventHandlerName", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandlerName, "string")
+	TMW:ValidateType("eventHandlerData.identifier", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.identifier, "string")
 	
 	TMW.safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, unpack(eventHandlerData))
 
@@ -189,7 +233,7 @@ function EventHandler:RegisterEventHandlerDataNonSpecific(...)
 	
 	local eventHandlerData = {
 		eventHandler = self,
-		eventHandlerName = self.eventHandlerName,
+		identifier = self.identifier,
 		...,
 	}
 	

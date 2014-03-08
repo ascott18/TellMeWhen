@@ -57,7 +57,7 @@ function IconComponent:OnNewInstance_IconComponent()
 end
 
 --- Register some icon event handler data with a {{{TMW.Classes.EventHandler}}}. This event handler data will only be avaialable to a {{{TMW.Classes.EventHandler}}} when the [[api/icon/api-documentation/|Icon]] for which an event is being handled implements this [[api/base-classes/icon-component/|IconComponent]].
--- @param eventHandlerName [string] name of an instance of {{{TMW.Classes.EventHandler}}} that the data should be registered and validated with. The instance does not have to exist before this method is called.
+-- @param identifier [string] name of an instance of {{{TMW.Classes.EventHandler}}} that the data should be registered and validated with. The instance does not have to exist before this method is called.
 -- @param ... [...] Data as required by the {{{TMW.Classes.EventHandler}}} that it is being registered with. See the documentation of the {{{OnRegisterEventHandlerDataTable}}} method of individual {{{TMW.Classes.EventHandler}}} instances for more information.
 -- @usage
 --  IconComponent:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
@@ -80,12 +80,12 @@ end
 --      -- ... function body withheld for brevity.
 --    end
 --  })
-function IconComponent:RegisterEventHandlerData(eventHandlerName, ...)
-	local EventHandler = TMW.EVENTS:GetEventHandler(eventHandlerName)
+function IconComponent:RegisterEventHandlerData(identifier, ...)
+	local EventHandler = TMW.EVENTS:GetEventHandler(identifier)
 	
 	local eventHandlerData = {
 		eventHandler = EventHandler,
-		eventHandlerName = eventHandlerName,
+		identifier = identifier,
 		...,
 	}
 	
@@ -95,7 +95,7 @@ function IconComponent:RegisterEventHandlerData(eventHandlerName, ...)
 		tinsert(self.EventHandlerData, eventHandlerData)
 	else
 		TMW:RegisterCallback("TMW_CLASS_EventHandler_INSTANCE_NEW", function(event, class, EventHandler)
-			if EventHandler.eventHandlerName == eventHandlerName then
+			if EventHandler.identifier == identifier then
 				eventHandlerData.eventHandler = EventHandler
 	
 				EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
