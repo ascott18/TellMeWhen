@@ -31,6 +31,7 @@ TMW.Icon_Defaults.Events = {
 		CndtJustPassed 	= false,
 		PassingCndt		= false,
 		PassThrough		= true,
+		Frequency		= 0,
 		Event			= "", -- the event being handled (e.g "OnDurationChanged")
 		Type			= "", -- the event handler handling the event (e.g. "Sound")
 	},
@@ -289,8 +290,10 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 			if thisHasEventHandlers then
 				TMW:Fire("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", icon, event, eventSettings)
 				
-				icon.EventHandlersSet[event] = true
-				icon.EventsToFire = icon.EventsToFire or {}
+				if Handler.isTriggeredByEvents then
+					icon.EventHandlersSet[event] = true
+					icon.EventsToFire = icon.EventsToFire or {}
+				end
 			end
 		end
 	end
@@ -326,3 +329,123 @@ TMW:NewClass("EventHandler_ColumnConfig", "EventHandler"){
 		self.ConfigFrameData = {}
 	end,
 }
+
+TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
+	isTriggeredByEvents = false,
+
+	OnNewInstance_WhileConditions = function(self)
+		self.MapConditionObjectToEventSettings = {}
+
+		TMW:RegisterCallback("TMW_ICON_DISABLE", self)
+		TMW:RegisterCallback("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", self)
+	end,
+
+
+	TMW_ICON_DISABLE = function(self, _, icon, soft)
+		for ConditionObject, matches in pairs(self.MapConditionObjectToEventSettings) do
+			for eventSettings, ic in pairs(matches) do
+				if ic == icon then
+					ConditionObject:RequestAutoUpdates(eventSettings, false)
+					matches[eventSettings] = nil
+				end
+			end
+		end
+	end,
+
+	TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE = function(self, _, icon, iconEvent, eventSettings)
+		local ConditionObjectConstructor = icon:Conditions_GetConstructor(eventSettings.OnConditionConditions)
+		local ConditionObject = ConditionObjectConstructor:Construct()
+
+		if ConditionObject then
+			ConditionObject:RequestAutoUpdates(eventSettings, true)
+			
+			local matches = self.MapConditionObjectToEventSettings[ConditionObject]
+			if not matches then
+				matches = {}
+				self.MapConditionObjectToEventSettings[ConditionObject] = matches
+			end
+			matches[eventSettings] = icon
+			
+			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", self)
+
+			-- Do this right now so the animation is always up-to-date with the state
+			self:TMW_CNDT_OBJ_PASSING_CHANGED(nil, ConditionObject, ConditionObject.Failed)
+		end
+	end,
+
+	TMW_CNDT_OBJ_PASSING_CHANGED = function(self, _, ConditionObject, failed)
+		local matches = self.MapConditionObjectToEventSettings[ConditionObject]
+
+		if TMW.Locked and matches then
+			self:HandleConditionStateChange(matches, failed)
+		end
+	end,
+}
+
+TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileConditions"){
+	frequencyMinimum = 0.2,
+
+	OnNewInstance_WhileConditions_Repetitive = function(self)
+		self.RunningTimers = {}
+
+		TMW:RegisterCallback("TMW_ONUPDATE_POST", self)
+	end,
+
+	TMW_ONUPDATE_POST = function(self, event, time, Locked)
+		if Locked then
+			for eventSettings, lastRun in pairs(self.RunningTimers) do
+				local nextRun = lastRun + eventSettings.Frequency
+				if nextRun < time then
+					self:HandleEvent(icon, eventSettings)
+					self.RunningTimers[eventSettings] = time
+				end
+			end
+		end
+	end,
+
+	HandleConditionStateChange = function(self, eventSettingsList, failed)
+		local newVal
+		if not failed then
+			newVal = 0
+		end
+
+		for eventSettings, icon in pairs(eventSettingsList) do
+			self.RunningTimers[eventSettings] = newVal
+		end
+	end,
+}
+
+
+do
+	local CNDT = TMW.CNDT
+	
+	
+	local ConditionSet = {
+		parentSettingType = "iconEventHandler",
+		parentDefaults = TMW.Icon_Defaults.Events["**"],
+		
+		-- This uses the same settings as the On Condition Set Passing event to prevent clutter.
+		settingKey = "OnConditionConditions",
+		GetSettings = function(self)
+			local currentEventID = TMW.EVENTS.currentEventID
+			if currentEventID then
+				return TMW.CI.ics.Events[currentEventID].OnConditionConditions
+			end
+		end,
+		
+		iterFunc = TMW.EVENTS.InIconEventSettings,
+		iterArgs = {TMW.EVENTS},
+
+		useDynamicTab = true,
+		ShouldShowTab = function(self)
+			local button = TellMeWhen_IconEditor.Events.EventSettingsContainer.IconEventWhileCondition
+			
+			return button and button:IsShown()
+		end,
+		tabText = L["EVENT_WHILECONDITIONS"],
+		tabTooltip = L["EVENT_WHILECONDITIONS_TAB_DESC"],
+		
+	}
+	CNDT:RegisterConditionSet("IconEventWhileCondition", ConditionSet)
+	
+end

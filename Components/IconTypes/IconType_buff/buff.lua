@@ -360,7 +360,7 @@ function Type:Setup(icon)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 
-	if icon:IsBeingEdited() == "MAIN" then
+	if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
 		if not TMW.HELP:IsCodeRegistered("ICONTYPE_BUFF_NOSOURCERPPM") then
 			TMW.HELP:NewCode("ICONTYPE_BUFF_NOSOURCERPPM", 2, false)
 		end

@@ -589,8 +589,8 @@ Advanced anchor settings are available in the group options.]]
 L["ICONMENU_SPLIT"] = "Split into new group"
 L["ICONMENU_SPLIT_GLOBAL"] = "Split into new |cff00c300global|r group"
 L["ICONMENU_SPLIT_DESC"] = "Create a new group and move this icon into it. Many group settings will carry over to the new group."
-L["ICONMENU_COPYEVENTHANDLERS"] = "Copy %d |4Event Handler:Event Handlers;"
-L["ICONMENU_COPYEVENTHANDLERS_DESC"] = "Copy %s's %d |4Event Handler:Event Handlers; to %s."
+L["ICONMENU_COPYEVENTHANDLERS"] = "Copy %d |4Notification:Notifications;"
+L["ICONMENU_COPYEVENTHANDLERS_DESC"] = "Copy %s's %d |4Notification:Notifications; to %s."
 L["ICONMENU_COPYCONDITIONS"] = "Copy %d |4Condition:Conditions;"
 L["ICONMENU_COPYCONDITIONS_GROUP"] = "Copy %d Group |4Condition:Conditions;"
 L["ICONMENU_COPYCONDITIONS_DESC"] = "Copy %s's %d |4Condition:Conditions; to %s."
@@ -1459,8 +1459,10 @@ L["EVENTCONDITIONS_DESC"] = "Click to configure a set of conditions that will tr
 L["EVENTCONDITIONS_TAB_DESC"] = "Configure a set of conditions that will trigger an event when they begin passing."
 
 L["EVENT_WHILECONDITIONS"] = "Notification Conditions"
-L["EVENT_WHILECONDITIONS_DESC"] = "Click to configure a set of conditions that will cause this animation to play while they are passing."
-L["EVENT_WHILECONDITIONS_TAB_DESC"] = "Configure a set of conditions that will cause an animation to play while they are passing."
+L["EVENT_WHILECONDITIONS_DESC"] = "Click to configure a set of conditions that will cause this notification to play while they are passing."
+L["EVENT_WHILECONDITIONS_TAB_DESC"] = "Configure a set of conditions that will cause a notification to play while they are passing."
+
+L["EVENT_FREQUENCY"] = "Trigger Frequency"
 
 L["UNITCONDITIONS"] = "Unit Conditions"
 L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."
@@ -1746,38 +1748,40 @@ L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are s
 NOTE: WoW must be restarted before it will recognize files that did not exist when it was started up.]]
 L["SOUND_TAB"] = "Sound"
 
-L["EVENTS_TAB"] = "Events"
+L["EVENTS_TAB"] = "Notifications"
 L["EVENTS_TAB_DESC"] = "Configure triggers for sounds, text ouput, and animations."
-L["EVENTS_HANDLERS_HEADER"] = "Icon Event Handlers"
-L["EVENTS_HANDLERS_ADD"] = "Add Event Handler..."
-L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose an event handler to add to this icon."
-L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for event handler options
-|cff7fffffRight-click|r to change event
+L["EVENTS_HANDLERS_HEADER"] = "Notification Handlers"
+L["EVENTS_HANDLERS_ADD"] = "Add Notification..."
+L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose a notification to add to this icon."
+L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for notification options
+|cff7fffffRight-click|r to change event (if applicable)
 |cff7fffffClick-and-drag|r to rearrange]]
-L["EVENTS_HANDLERS_PLAY"] = "Test Event"
-L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the event handler"
+L["EVENTS_HANDLERS_PLAY"] = "Test Notification"
+L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the notification"
 
-L["EVENTS_SETTINGS_HEADER"] = "Event Settings"
+L["EVENTS_SETTINGS_HEADER"] = "Trigger Settings"
 
-L["EVENTS_INSTRUCTIONS"] = [[In this tab, you can configure extra functionality for this icon with effects like sounds, animations, and text outputs.
+L["EVENTS_INSTRUCTIONS"] = [[In this tab, you can configure extra functionality for this icon with notifications that include sounds, animations, and text outputs.
 
-All these effects are triggered by an event of your choosing. Most events are triggered in response to a change in the icon's status, but there are other events too.
+These effects are triggered by an event of your choosing. Most events are triggered in response to a change in the icon's status, but there are other events too.
 
-To get started configuring these effects, click the button to the left and chose the combination of event and effect that you would like.
+There are also notifications that will persist while a condition set evalutes to true.
 
-The settings for the event and the effect will then appear, and you can configure them as desired.]]
+To get started configuring these notifications, click the button to the left and chose the combination of trigger and effect that you would like.
+
+The settings for the trigger and the effect will then appear, and you can configure them as desired.]]
 
 L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
-L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Prevents the event from being handled if the icon is not shown."
+L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Prevents the notification from being handled if the icon is not shown."
 
 L["EVENTS_SETTINGS_PASSINGCNDT"] = "Only handle if condition is passing:"
-L["EVENTS_SETTINGS_PASSINGCNDT_DESC"] = "Prevents the event from being handled unless the condition configured below succeeds."
+L["EVENTS_SETTINGS_PASSINGCNDT_DESC"] = "Prevents the notification from being handled unless the condition configured below succeeds."
 
 L["EVENTS_SETTINGS_CNDTJUSTPASSED"] = "And it just began passing"
-L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"] = "Prevents the event from being handled unless the condition configured above has just begun succeeding."
+L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"] = "Prevents the notification from being handled unless the condition configured above has just begun succeeding."
 
 L["EVENTS_SETTINGS_PASSTHROUGH"] = "Continue to lower events"
-L["EVENTS_SETTINGS_PASSTHROUGH_DESC"] = [[Check to allow another event to be handled after this one.
+L["EVENTS_SETTINGS_PASSTHROUGH_DESC"] = [[Check to allow another event-triggered notification to be handled after this one.
 If left unchecked, the icon will not process any more events after this event if it successfully processes and outputs/displays something.
 
 Exeptions may apply, see individual event descriptions for details.]]
@@ -1818,7 +1822,7 @@ L["ANN_NOTEXT"] = "<No Text>"
 L["ANN_CHANTOUSE"] = "Channel to Use"
 L["ANN_EDITBOX"] = "Text to be outputted"
 L["ANN_EDITBOX_WARN"] = "Type the text you wish to be outputted here"
-L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the event triggers.]]
+L["ANN_EDITBOX_DESC"] = [[Type the text that you wish to be outputted when the notification triggers.]]
 L["MOUSEOVER_TOKEN_NOT_FOUND"] = "<no mouseover>"
 L["ANN_STICKY"] = "Sticky"
 L["ANN_SHOWICON"] = "Show icon texture"
@@ -1828,7 +1832,7 @@ L["ANN_WHISPERTARGET"] = "Whisper target"
 L["ANN_WHISPERTARGET_DESC"] = [[Input the name of the player that you would like to whisper.
 
 Normal server/faction whisper requirements apply.]]
-L["ANN_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has text to output, no events below that event will output any text."
+
 L["ANN_FCT_DESC"] = "Outputs to Blizzard's %s feature. It MUST be enabled in your interface options for the text to be outputted."
 L["CHAT_MSG_SMART"] = "Smart Channel"
 L["CHAT_MSG_SMART_DESC"] = "Will output to Battleground, Raid, Party, or Say - whichever is appropriate."
@@ -1846,7 +1850,7 @@ L["ERRORS_FRAME_DESC"] = "Outputs the text to the standard errors frame that nor
 
 L["ANIM_TAB"] = "Animation"
 L["ANIM_TAB_EVENT"] = "Animation (Event Triggered)"
-L["ANIM_TAB_STATEFUL"] = "Animation (While Condition Set Passing)"
+L["ANIM_TAB_STATEFUL"] = "Animation (Condition Set Triggered)"
 L["ANIM_ANIMTOUSE"] = "Animation To Use"
 L["ANIM_ANIMSETTINGS"] = "Settings"
 

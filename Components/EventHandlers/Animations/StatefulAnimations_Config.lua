@@ -61,20 +61,3 @@ function StatefulAnimations:SetupEventDisplay(eventID)
 	end
 end
 
-TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", function()
-	local button = TMW.IE.Events.EventSettingsContainer.IconEventWhileCondition
-
-	button:Hide()
-
-	local EventHandler = EVENTS:GetEventHandlerForEventSettings()
-
-	if EventHandler == StatefulAnimations then
-		button:Show()
-	end
-
-
-
-	TMW.IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. L["SOUND_EVENT_WHILECONDITION"])
-
-end)
-

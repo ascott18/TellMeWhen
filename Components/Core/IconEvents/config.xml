@@ -238,8 +238,7 @@
 
 				--self:SetValueStep(self.step)
 
-				--TODO: this sucks (using animation config for ennouncements)
-				TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self)
+				TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self)
 
 				self:EnableMouseWheel(true)
 				self.getvalue = self.GetValue
@@ -506,6 +505,7 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
+
 					<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" x="105" y="3"/>
@@ -617,6 +617,101 @@
 						</Scripts>
 					</Frame>
 
+
+					<Button name="$parentIconEventWhileCondition" parentKey="IconEventWhileCondition" inherits="TellMeWhen_ButtonTemplate">
+						<Size x="175" y="16"/>
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP" y="-15"/>
+							<Anchor point="LEFT" />
+							<Anchor point="RIGHT" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetFrameLevel(self:GetParent():GetFrameLevel()+2)
+								self.Background:SetAlpha(0.7)
+								
+								TMW:TT(self, "EVENT_WHILECONDITIONS", "EVENT_WHILECONDITIONS_DESC")
+								
+							</OnLoad>
+							<OnUpdate>
+								local text = TMW.CNDT:GetTabText("IconEventWhileCondition")
+								
+								self:SetText(text)
+								self:SetWidth(self:GetTextWidth()+10)
+							</OnUpdate>
+							<OnClick>
+								TMW.CNDT:LoadConfig("IconEventWhileCondition")
+							</OnClick>
+						</Scripts>
+					</Button>
+
+
+					<Slider name="$parentFrequency" parentKey="Frequency" inherits="TellMeWhen_SliderTemplate" valuestep="0.1" >
+						<Size x="170" y="17"/>
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parentIconEventWhileCondition" relativePoint="BOTTOM" y="-18"/>
+						</Anchors>
+						<Scripts>
+							<OnMouseUp>
+								TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self)
+							</OnMouseUp>
+							<OnLoad>
+								self.step = self:GetValueStep() -- 0.1
+								self.step = floor((self.step*10^5) + .5) / 10^5
+								self.range = 2
+
+								--self:SetValueStep(self.step)
+
+								TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self)
+
+								self.text:SetText(TMW.L["EVENT_FREQUENCY"])
+
+								self:EnableMouseWheel(true)
+								self.getvalue = self.GetValue
+								function self:GetValue()
+									local step = self.step or 1
+									local val = self:getvalue()
+									return floor(val * (1/step) + 0.5) / (1/step)
+								end
+
+								local color = 34/0xFF
+								self.Low:SetTextColor(color, color, color, 1)
+								self.High:SetTextColor(color, color, color, 1)
+							</OnLoad>
+							<OnMouseWheel>
+								if IsShiftKeyDown() then
+									delta = delta*10
+								end
+								if IsControlKeyDown() then
+									delta = delta*60 -- (60 seconds)
+								end
+								if delta == 1 or delta == -1 then
+									delta = delta*(self.step or 1)
+								end
+								TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self, self:GetValue()+delta)
+							</OnMouseWheel>
+							<OnEnable>
+								self:SetAlpha(1)
+							</OnEnable>
+							<OnDisable>
+								self:SetAlpha(0.4)
+							</OnDisable>
+
+							<OnValueChanged>
+								if TMW:Do504SliderBugFix(self) then return end
+
+								value = max(self:GetValue(), 0.1)
+
+								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
+
+								if TMW.CI.ics then
+									TMW.EVENTS:GetEventSettings().Frequency = value
+									TMW.IE:ScheduleIconSetup()
+								end
+							</OnValueChanged>
+						</Scripts>
+					</Slider>
+
 					
 				</Frames>
 				<Scripts>
@@ -650,7 +745,7 @@
 				</FontString>
 				<FontString inherits="GameFontDisableSmall" hidden="true" parentKey="EventSettingsContainerEventName" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="TOP" relativeKey="$parent.EventSettingsContainerHeader" relativePoint="BOTTOM" y="0"/>
+						<Anchor point="TOP" relativeKey="$parent.EventSettingsContainerHeader" relativePoint="BOTTOM" y="-3"/>
 					</Anchors>
 				</FontString>
 			</Layer>

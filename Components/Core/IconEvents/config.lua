@@ -356,6 +356,38 @@ end
 
 
 
+TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", function()
+	local button = TMW.IE.Events.EventSettingsContainer.IconEventWhileCondition
+
+	button:Hide()
+
+	local EventHandler = EVENTS:GetEventHandlerForEventSettings()
+
+	if EventHandler.class.inherits[TMW.C.EventHandler_WhileConditions] then
+		button:Show()
+		
+		TMW.IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. L["SOUND_EVENT_WHILECONDITION"])
+	end
+
+
+	local Frequency = TMW.IE.Events.EventSettingsContainer.Frequency
+	Frequency:Hide()
+
+	if EventHandler.class.inherits[TMW.C.EventHandler_WhileConditions_Repetitive] then
+		Frequency:Show()
+
+		Frequency.range = 2
+		Frequency.min = EventHandler.frequencyMinimum
+
+		TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(Frequency, TMW.EVENTS:GetEventSettings().Frequency)
+
+
+
+	end
+
+end)
+
+
 function EVENTS:AdjustScrollFrame()
 	local ScrollFrame = IE.Events.ScrollFrame
 	local eventFrame = self.EventHandlerFrames[self.currentEventID]

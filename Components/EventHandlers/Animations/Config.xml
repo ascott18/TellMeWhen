@@ -345,31 +345,4 @@
 		</Layers>
 	</Frame>
 
-	<Button name="$parentIconEventWhileCondition" parentKey="IconEventWhileCondition" parent="TellMeWhen_IconEditorEventsEventSettingsContainer" inherits="TellMeWhen_ButtonTemplate">
-		<Size x="180" y="16"/>
-		<Anchors>
-			<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP" y="-15"/>
-			<Anchor point="LEFT" />
-			<Anchor point="RIGHT" />
-		</Anchors>
-		<Scripts>
-			<OnLoad>
-				self:SetFrameLevel(self:GetParent():GetFrameLevel()+2)
-				self.Background:SetAlpha(0.7)
-				
-				TMW:TT(self, "EVENT_WHILECONDITIONS", "EVENT_WHILECONDITIONS_DESC")
-				
-			</OnLoad>
-			<OnUpdate>
-				local text = TMW.CNDT:GetTabText("IconEventWhileCondition")
-				
-				self:SetText(text)
-				self:SetWidth(self:GetTextWidth()+20)
-			</OnUpdate>
-			<OnClick>
-				TMW.CNDT:LoadConfig("IconEventWhileCondition")
-			</OnClick>
-		</Scripts>
-	</Button>
-
 </Ui>

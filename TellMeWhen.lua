@@ -752,10 +752,12 @@ function TMW.tRemoveDuplicates(table)
 end
 
 function TMW.OrderSort(a, b)
-	if a.Order then
-		return a.Order < b.Order
+	a = a.Order or a.order
+	b = b.Order or b.order
+	if a and b then
+		return a < b
 	else
-		return a.order < b.order
+		error("Missing 'order' or 'Order' key for values of OrderedTable")
 	end
 end
 function TMW:SortOrderedTables(parentTable)
