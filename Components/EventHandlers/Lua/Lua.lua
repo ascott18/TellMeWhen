@@ -98,5 +98,5 @@ local EventLua = LuaBase:New("Lua")
 -- StatefulLua
 -------------------
 
-local StatefulLua = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", LuaBase):New("Lua2")
+local StatefulLua = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", "EventHandler_LuaBase"):New("Lua2")
 StatefulLua.frequencyMinimum = 0

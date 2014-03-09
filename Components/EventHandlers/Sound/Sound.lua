@@ -26,9 +26,9 @@ local PlaySoundFile =
 local LSM = LibStub("LibSharedMedia-3.0")
 
 
-local Sound = TMW.Classes.EventHandler:New("Sound")
+local SoundBase = TMW:NewClass("EventHandler_SoundBase", "EventHandler")
 
-Sound:RegisterEventDefaults{
+SoundBase:RegisterEventDefaults{
 	Sound = "None",
 }
 
@@ -62,7 +62,7 @@ TMW:RegisterUpgrade(42102, {
 
 
 -- Helper methods
-function Sound:GetSoundFile(sound)
+function SoundBase:GetSoundFile(sound)
 	if sound == "" or sound == "Interface\\Quiet.ogg" or sound == "None" then
 		return nil
 	elseif strfind(sound, "%.[^\\]+$") then
@@ -81,12 +81,12 @@ end
 
 
 -- Required methods
-function Sound:ProcessIconEventSettings(event, eventSettings)
+function SoundBase:ProcessIconEventSettings(event, eventSettings)
 	return not not self:GetSoundFile(eventSettings.Sound)
 end
 
-function Sound:HandleEvent(icon, eventSettings)
-	local Sound = Sound:GetSoundFile(eventSettings.Sound)
+function SoundBase:HandleEvent(icon, eventSettings)
+	local Sound = self:GetSoundFile(eventSettings.Sound)
 	
 	if Sound then
 		PlaySoundFile(Sound, TMW.db.profile.SoundChannel)
@@ -95,7 +95,7 @@ function Sound:HandleEvent(icon, eventSettings)
 	end
 end
 
-function Sound:OnRegisterEventHandlerDataTable()
+function SoundBase:OnRegisterEventHandlerDataTable()
 	error("Do not register event handler data for the Sound event handler. Use LibStub('LibSharedMedia-3.0'):Register('sound', name, path) instead.", 3)
 end
 
@@ -133,3 +133,24 @@ do	-- LSM sound registration
 	LSM:Register("sound", "TMW - Ding 8",  [[Interface\Addons\TellMeWhen\Sounds\Ding8.ogg]])
 	LSM:Register("sound", "TMW - Ding 9",  [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
 end
+
+
+
+
+
+-------------------
+-- EventSound
+-------------------
+
+local EventSound = TMW.Classes.EventHandler_SoundBase:New("Sound")
+
+
+
+
+
+-------------------
+-- StatefulSound
+-------------------
+
+local StatefulSound = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", "EventHandler_SoundBase"):New("Sound2")
+StatefulSound.frequencyMinimum = 0.2
