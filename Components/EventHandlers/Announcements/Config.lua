@@ -27,16 +27,8 @@ local CI = TMW.CI
 
 
 local EVENTS = TMW.EVENTS
-local Announcements = EVENTS:GetEventHandler("Announcements")
+local Announcements = TMW.C.EventHandler_AnnouncementsBase
 Announcements.handlerName = L["ANN_TAB"]
-
-TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
-	TMW:ConvertContainerToScrollFrame(Announcements.ConfigContainer.ConfigFrames)
-
-	Announcements.ConfigContainer.SubHandlerListHeader:SetText(TMW.L["ANN_CHANTOUSE"])
-	Announcements.ConfigContainer.SettingsHeader:SetText(L["ANIM_ANIMSETTINGS"])
-
-end)
 
 
 
@@ -96,7 +88,10 @@ local Load_Generic_Slider = Announcements.Load_Generic_Slider
 local Load_Generic_Check = Announcements.Load_Generic_Check
 
 
-Announcements:RegisterConfigFrame("Location", {
+local EventAnnouncements = EVENTS:GetEventHandler("Announcements")
+
+
+EventAnnouncements:RegisterConfigFrame("Location", {
 	frame = "Location",
 	topPadding = 14,
 	bottomPadding = 4,
@@ -119,7 +114,7 @@ Announcements:RegisterConfigFrame("Location", {
 	end,
 })
 
-Announcements:RegisterConfigFrame("WhisperTarget", {
+EventAnnouncements:RegisterConfigFrame("WhisperTarget", {
 	frame = "WhisperTarget",
 	topPadding = 14,
 	bottomPadding = 4,
@@ -129,7 +124,7 @@ Announcements:RegisterConfigFrame("WhisperTarget", {
 	end,
 })
 
-Announcements:RegisterConfigFrame("Sticky", {
+EventAnnouncements:RegisterConfigFrame("Sticky", {
 	frame = "Sticky",
 	--topPadding = 13,
 	--bottomPadding = 13,
@@ -139,7 +134,7 @@ Announcements:RegisterConfigFrame("Sticky", {
 	Load = Load_Generic_Check,
 })
 
-Announcements:RegisterConfigFrame("ShowIconTex", {
+EventAnnouncements:RegisterConfigFrame("ShowIconTex", {
 	frame = "ShowIconTex",
 	--topPadding = 13,
 	--bottomPadding = 13,
@@ -150,7 +145,7 @@ Announcements:RegisterConfigFrame("ShowIconTex", {
 	Load = Load_Generic_Check,
 })
 
-Announcements:RegisterConfigFrame("Color", {
+EventAnnouncements:RegisterConfigFrame("Color", {
 	frame = "Color",
 	topPadding = 4,
 	bottomPadding = 4,
@@ -162,7 +157,7 @@ Announcements:RegisterConfigFrame("Color", {
 })
 
 TMW.IE:RegisterRapidSetting("Size")
-Announcements:RegisterConfigFrame("Size", {
+EventAnnouncements:RegisterConfigFrame("Size", {
 	frame = "Size",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -173,7 +168,7 @@ Announcements:RegisterConfigFrame("Size", {
 })
 
 TMW.IE:RegisterRapidSetting("TextDuration")
-Announcements:RegisterConfigFrame("TextDuration", {
+EventAnnouncements:RegisterConfigFrame("TextDuration", {
 	frame = "TextDuration",
 	topPadding = 13,
 	bottomPadding = 13,
@@ -182,3 +177,36 @@ Announcements:RegisterConfigFrame("TextDuration", {
 	
 	Load = Load_Generic_Slider,
 })
+
+
+
+
+
+
+
+
+
+
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)
+	TMW:ConvertContainerToScrollFrame(EventAnnouncements.ConfigContainer.ConfigFrames)
+
+	EventAnnouncements.ConfigContainer.SubHandlerListHeader:SetText(TMW.L["ANN_CHANTOUSE"])
+	EventAnnouncements.ConfigContainer.SettingsHeader:SetText(L["ANIM_ANIMSETTINGS"])
+
+end)
+
+
+local StatefulAnnouncements = EVENTS:GetEventHandler("Announcements2")
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+	StatefulAnnouncements.ConfigContainer = EventAnnouncements.ConfigContainer
+end)
+
+function StatefulAnnouncements:SetupEventDisplay(eventID)
+	if not eventID then return end
+
+	TMW.EVENTS.EventHandlerFrames[eventID].EventName:SetText(eventID .. ") " .. L["SOUND_EVENT_WHILECONDITION"])
+
+
+	EventAnnouncements:SetupEventDisplay(eventID)
+end
+

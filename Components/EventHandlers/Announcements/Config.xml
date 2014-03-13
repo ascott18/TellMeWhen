@@ -336,23 +336,25 @@
 						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
 					</Button>
 
-					<Slider name="$parentSize" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" parentKey="Size" minvalue="0" maxvalue="38" valuestep="1">
+					<Slider name="$parentSize" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" parentKey="Size" valuestep="1">
 						<Size x="150" y="17"/>
 						<Anchors>
 							<Anchor point="LEFT" x="10" />
 						</Anchors>
 						<Scripts>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
-								value = self:GetValue()
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Size",
 
-								self.Mid:SetText(value == 0 and TMW.L["DEFAULT"] or value)
+									OnValueChanged = function(self)
+										local value = self:GetValue()
+										self.Mid:SetText(value == 0 and TMW.L["DEFAULT"] or value)
+									end,
+								})
+								
+								self:SetMinMaxValues(0, 38)
 
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Size = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+							</OnLoad>
 						</Scripts>
 					</Slider>
 
@@ -362,18 +364,21 @@
 							<Anchor point="LEFT" x="10" />
 						</Anchors>
 						<Scripts>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "TextDuration",
 
-								value = max(self:GetValue(), 0.1)
-
-								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
+									OnValueChanged = function(self)
+										local value = self:GetValue()
+										self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
+									end,
+								})
 								
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().TextDuration = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(0, math.huge)
+								self:SetRange(10)
+
+							</OnLoad>
 						</Scripts>
 					</Slider>
 
