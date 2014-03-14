@@ -120,11 +120,7 @@ Animations:RegisterConfigFrame("Size_anim", {
 	text = L["ANIM_SIZE_ANIM"],
 	desc = L["ANIM_SIZE_ANIM_DESC"],
 	
-	Load = function(self, frame, EventSettings)
-		frame.min = -math.huge
-		
-		Load_Generic_Slider(self, frame, EventSettings)
-	end,
+	Load = Load_Generic_Slider,
 })
 
 Animations:RegisterConfigFrame("AlphaStandalone", {
@@ -135,14 +131,7 @@ Animations:RegisterConfigFrame("AlphaStandalone", {
 	text = L["ANIM_ALPHASTANDALONE"],
 	desc = L["ANIM_ALPHASTANDALONE_DESC"],
 	
-	Load = function(self, frame, EventSettings)
-		Animations:SetSliderMinMax(frame, EventSettings.a_anim*100)
-
-		frame.text:SetText(self.text)
-		TMW:TT(frame, self.text, self.desc, 1, 1)
-
-		frame:Enable()
-	end,
+	Load = Load_Generic_Slider,
 })
 
 TMW.IE:RegisterRapidSetting("SizeX")

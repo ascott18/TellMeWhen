@@ -32,14 +32,8 @@ The funcstr field is the only one that is required. Errors may happen with the o
 * texttable 
 ** [Function>|Table>|String] Maps numeric slider values with the text that should be displayed for it.
 
-* mint
-** [String] Set to override the label shown on the slider for its lowest value. Default label is the value of texttable at that value.
-
 * midt
 ** [String] Set to a label that will be displayed in the middle of the slider. By default, no middle label is used unless this field is set.
-
-* maxt
-** [String] Set to override the label shown on the slider for its highest value. Default label is the value of texttable at that value.
 
 
 == Slider & Value - Behavior & Range

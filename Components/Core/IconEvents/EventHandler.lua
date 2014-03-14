@@ -393,25 +393,31 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 
 	TMW_ONUPDATE_POST = function(self, event, time, Locked)
 		if Locked then
-			for eventSettings, lastRun in pairs(self.RunningTimers) do
-				local nextRun = lastRun + eventSettings.Frequency
-				if nextRun < time then
-					self:HandleEvent(icon, eventSettings)
-					self.RunningTimers[eventSettings] = time
+			for eventSettings, data in pairs(self.RunningTimers) do
+				if data.nextRun < time then
+					while data.nextRun < time do
+						data.nextRun = data.nextRun + eventSettings.Frequency
+					end
+
+					self:HandleEvent(data.icon, eventSettings)
 				end
 			end
 		end
 	end,
 
 	HandleConditionStateChange = function(self, eventSettingsList, failed)
-		local newVal
 		if not failed then
-			newVal = 0
+			for eventSettings, icon in pairs(eventSettingsList) do
+				self.RunningTimers[eventSettings] = {icon = icon, nextRun = TMW.time, }
+			end
+		else
+			for eventSettings, icon in pairs(eventSettingsList) do
+				self.RunningTimers[eventSettings] = nil
+			end
 		end
 
-		for eventSettings, icon in pairs(eventSettingsList) do
-			self.RunningTimers[eventSettings] = newVal
-		end
+		--TODO: not getting cleared out properly when an icon's handler is removed
+
 	end,
 }
 

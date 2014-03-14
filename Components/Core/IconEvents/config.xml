@@ -222,54 +222,23 @@
 	</CheckButton>
 
 	<Slider name="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">
+
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_Slider_Event"/>
+		</Attributes>
+
 		<Size y="17"/>
 		<Anchors>
 			<Anchor point="LEFT" x="10" />
 			<Anchor point="RIGHT" x="-20"/>
 		</Anchors>
 		<Scripts>
-			<OnMouseUp>
-				TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self)
-			</OnMouseUp>
 			<OnLoad>
-				self.step = self:GetValueStep() -- 0.1
-				self.step = floor((self.step*10^5) + .5) / 10^5 -- attempt to get a half decent number here instead of 0.1000000000000327826 -- fucking float errors.
-				self.range = 10
+				TMW:CInit(self, {})
 
-				--self:SetValueStep(self.step)
-
-				TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self)
-
-				self:EnableMouseWheel(true)
-				self.getvalue = self.GetValue
-				function self:GetValue()
-					local step = self.step or 1
-					local val = self:getvalue()
-					return floor(val * (1/step) + 0.5) / (1/step)
-				end
-
-				local color = 34/0xFF
-				self.Low:SetTextColor(color, color, color, 1)
-				self.High:SetTextColor(color, color, color, 1)
+				self:SetMode(self.MODE_ADJUSTING)
+				self:SetRange(10)
 			</OnLoad>
-			<OnMouseWheel>
-				if IsShiftKeyDown() then
-					delta = delta*10
-				end
-				if IsControlKeyDown() then
-					delta = delta*60 -- (60 seconds)
-				end
-				if delta == 1 or delta == -1 then
-					delta = delta*(self.step or 1)
-				end
-				TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self, self:GetValue()+delta)
-			</OnMouseWheel>
-			<OnEnable>
-				self:SetAlpha(1)
-			</OnEnable>
-			<OnDisable>
-				self:SetAlpha(0.4)
-			</OnDisable>
 		</Scripts>
 	</Slider>
 
@@ -647,68 +616,28 @@
 
 
 					<Slider name="$parentFrequency" parentKey="Frequency" inherits="TellMeWhen_SliderTemplate" valuestep="0.1" >
+
+						<Attributes>
+							<Attribute name="tmw-class" type="string" value="Config_Slider_Event"/>
+						</Attributes>
+
 						<Size x="170" y="17"/>
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentIconEventWhileCondition" relativePoint="BOTTOM" y="-18"/>
 						</Anchors>
 						<Scripts>
-							<OnMouseUp>
-								TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self)
-							</OnMouseUp>
 							<OnLoad>
-								self.step = self:GetValueStep() -- 0.1
-								self.step = floor((self.step*10^5) + .5) / 10^5
-								self.range = 2
+								TMW:CInit(self, {
+									setting = "Frequency",
+									title = TMW.L["EVENT_FREQUENCY"],
+								})
+								
+								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(0.1, math.huge)
+								self:SetRange(2)
 
-								--self:SetValueStep(self.step)
-
-								TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self)
-
-								self.text:SetText(TMW.L["EVENT_FREQUENCY"])
-
-								self:EnableMouseWheel(true)
-								self.getvalue = self.GetValue
-								function self:GetValue()
-									local step = self.step or 1
-									local val = self:getvalue()
-									return floor(val * (1/step) + 0.5) / (1/step)
-								end
-
-								local color = 34/0xFF
-								self.Low:SetTextColor(color, color, color, 1)
-								self.High:SetTextColor(color, color, color, 1)
 							</OnLoad>
-							<OnMouseWheel>
-								if IsShiftKeyDown() then
-									delta = delta*10
-								end
-								if IsControlKeyDown() then
-									delta = delta*60 -- (60 seconds)
-								end
-								if delta == 1 or delta == -1 then
-									delta = delta*(self.step or 1)
-								end
-								TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(self, self:GetValue()+delta)
-							</OnMouseWheel>
-							<OnEnable>
-								self:SetAlpha(1)
-							</OnEnable>
-							<OnDisable>
-								self:SetAlpha(0.4)
-							</OnDisable>
-
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
-
-								value = max(self:GetValue(), 0.1)
-
-								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Frequency = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
 						</Scripts>
 					</Slider>
 

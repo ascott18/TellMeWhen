@@ -213,8 +213,12 @@ ConditionCategory:RegisterCondition(13.1, "ECLIPSE", {
 	tooltip = L["CONDITIONPANEL_ECLIPSE_DESC"],
 	min = -100,
 	max = 100,
-	mint = "-100 (" .. L["MOON"] .. ")",
-	maxt = "100 (" .. L["SUN"] .. ")",
+	midt = true,
+	texttable = setmetatable({
+		[-100] = "-100 (" .. L["MOON"] .. ")",
+		[100] = "100 (" .. L["SUN"] .. ")",
+	}, {__index = function(tbl, k) return k end}),
+
 	unit = PLAYER,
 	icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
 	tcoords = {0.65625000, 0.74609375, 0.37500000, 0.55468750},
@@ -394,6 +398,7 @@ ConditionCategory:RegisterSpacer(40)
 ConditionCategory:RegisterCondition(41,	 "HEALTH_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. HEALTH,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 1000000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -408,6 +413,7 @@ ConditionCategory:RegisterCondition(42,	 "DEFAULT_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_POWER"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 40000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -422,6 +428,7 @@ ConditionCategory:RegisterCondition(42,	 "DEFAULT_ABS", {
 ConditionCategory:RegisterCondition(43,	 "MANA_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. MANA,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 40000,
 	icon = "Interface\\Icons\\inv_potion_126",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -435,6 +442,7 @@ ConditionCategory:RegisterCondition(43,	 "MANA_ABS", {
 ConditionCategory:RegisterCondition(44,	 "ENERGY_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. ENERGY,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_125",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -448,6 +456,7 @@ ConditionCategory:RegisterCondition(44,	 "ENERGY_ABS", {
 ConditionCategory:RegisterCondition(45,	 "RAGE_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RAGE,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_120",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -461,6 +470,7 @@ ConditionCategory:RegisterCondition(45,	 "RAGE_ABS", {
 ConditionCategory:RegisterCondition(46,	 "FOCUS_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. FOCUS,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_124",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -474,6 +484,7 @@ ConditionCategory:RegisterCondition(46,	 "FOCUS_ABS", {
 ConditionCategory:RegisterCondition(47,	 "RUNIC_POWER_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RUNIC_POWER,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_128",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -488,6 +499,7 @@ ConditionCategory:RegisterCondition(48,	 "ALTPOWER_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\spell_shadow_mindflay",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -506,6 +518,7 @@ ConditionCategory:RegisterSpacer(60)
 ConditionCategory:RegisterCondition(61,	 "HEALTH_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. HEALTH,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 1000000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -520,6 +533,7 @@ ConditionCategory:RegisterCondition(62,	 "DEFAULT_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_POWER"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 40000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -534,6 +548,7 @@ ConditionCategory:RegisterCondition(62,	 "DEFAULT_MAX", {
 ConditionCategory:RegisterCondition(63,	 "MANA_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. MANA,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 40000,
 	icon = "Interface\\Icons\\inv_potion_126",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -547,6 +562,7 @@ ConditionCategory:RegisterCondition(63,	 "MANA_MAX", {
 ConditionCategory:RegisterCondition(64,	 "ENERGY_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. ENERGY,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_125",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -560,6 +576,7 @@ ConditionCategory:RegisterCondition(64,	 "ENERGY_MAX", {
 ConditionCategory:RegisterCondition(65,	 "RAGE_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. RAGE,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_120",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -573,6 +590,7 @@ ConditionCategory:RegisterCondition(65,	 "RAGE_MAX", {
 ConditionCategory:RegisterCondition(66,	 "FOCUS_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. FOCUS,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_124",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -586,6 +604,7 @@ ConditionCategory:RegisterCondition(66,	 "FOCUS_MAX", {
 ConditionCategory:RegisterCondition(67,	 "RUNIC_POWER_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. RUNIC_POWER,
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_128",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -600,6 +619,7 @@ ConditionCategory:RegisterCondition(68,	 "ALTPOWER_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
 	texttable = CNDT.COMMON.commanumber,
+	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\spell_shadow_mindflay",
 	tcoords = CNDT.COMMON.standardtcoords,

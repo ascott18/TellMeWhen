@@ -74,6 +74,7 @@ local ConditionCategory = CNDT:GetCategory("SPELLSABILITIES", 4, L["CNDTCAT_SPEL
 
 ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	text = L["SPELLCOOLDOWN"],
+	min = 0,
 	range = 30,
 	step = 0.1,
 	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
@@ -131,6 +132,7 @@ ConditionCategory:RegisterSpacer(2.4)
 ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 	text = L["SPELLCHARGES"],
 	tooltip = L["SPELLCHARGES_DESC"],
+	min = 0,
 	range = 5,
 	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
 	useSUG = "spell",
@@ -152,6 +154,7 @@ ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
 	text = L["SPELLCHARGETIME"],
 	tooltip = L["SPELLCHARGETIME_DESC"],
+	min = 0,
 	range = 30,
 	step = 0.1,
 	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
@@ -385,6 +388,7 @@ ConditionCategory:RegisterSpacer(18)
 
 ConditionCategory:RegisterCondition(19,	 "MHSWING", {
 	text = L["SWINGTIMER"] .. " - " .. INVTYPE_WEAPONMAINHAND,
+	min = 0,
 	range = 3,
 	step = 0.1,
 	unit = PLAYER,
@@ -407,6 +411,7 @@ ConditionCategory:RegisterCondition(19,	 "MHSWING", {
 })
 ConditionCategory:RegisterCondition(19.5,	 "OHSWING", {
 	text = L["SWINGTIMER"] .. " - " .. INVTYPE_WEAPONOFFHAND,
+	min = 0,
 	range = 3,
 	step = 0.1,
 	unit = PLAYER,
@@ -474,6 +479,7 @@ function Env.TotemHelper(slot, nameString)
 end
 ConditionCategory:RegisterCondition(21,	 "TOTEM1", {
 	text = totems[1],
+	min = 0,
 	range = 60,
 	unit = false,
 	name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
@@ -494,6 +500,7 @@ ConditionCategory:RegisterCondition(21,	 "TOTEM1", {
 })
 ConditionCategory:RegisterCondition(22,	 "TOTEM2", {
 	text = totems[2],
+	min = 0,
 	range = 60,
 	unit = false,
 	name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
@@ -514,6 +521,7 @@ ConditionCategory:RegisterCondition(22,	 "TOTEM2", {
 })
 ConditionCategory:RegisterCondition(23,	 "TOTEM3", {
 	text = totems[3],
+	min = 0,
 	range = 60,
 	unit = false,
 	name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
@@ -534,6 +542,7 @@ ConditionCategory:RegisterCondition(23,	 "TOTEM3", {
 })
 ConditionCategory:RegisterCondition(24,	 "TOTEM4", {
 	text = totems[4],
+	min = 0,
 	range = 60,
 	unit = false,
 	name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,

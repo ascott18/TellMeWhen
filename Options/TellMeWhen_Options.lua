@@ -2599,8 +2599,8 @@ end
 
 ---------- Settings ----------
 
-TMW:NewClass("Config_Panel", "Frame"){
 
+TMW:NewClass("Config_Panel", "Frame"){
 }
 
 TMW:NewClass("Config_Frame", "Frame"){
@@ -2758,52 +2758,218 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	end,
 }
 
-TMW:NewClass("Config_Slider", "Slider", "Config_Frame"){
+TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
+{
+	-- Saving base methods.
+	-- This is done in a separate call to make sure it happens before 
+	-- new ones overwrite the base methods.
+
+	SetValue_base = TMW.C.Config_Slider.SetValue,
+	GetValue_base = TMW.C.Config_Slider.GetValue,
+	GetValueStep_base = TMW.C.Config_Slider.GetValueStep,
+	GetMinMaxValues_base = TMW.C.Config_Slider.GetMinMaxValues,
+	SetMinMaxValues_base = TMW.C.Config_Slider.SetMinMaxValues,
+}{
 	-- Constructor
+
+	MODE_STATIC = 1,
+	MODE_ADJUSTING = 2,
+
+	range = 10,
+
+	formatter = TMW.C.Formatter.PASS,
+	extremesFormatter = TMW.C.Formatter.PASS,
+
 	OnNewInstance_Slider = function(self, data)
+		self:SetMode(self.MODE_STATIC)
+
+		self.min, self.max = self:GetMinMaxValues()
+
 		if data.min and data.max then
 			self:SetMinMaxValues(data.min, data.max)
 		end
-		self:SetValueStep(data.step or 1)
+		self:SetValueStep(data.step or self:GetValueStep() or 1)
 		
 		self.text:SetText(data.label or data.title)
 		
 		self:EnableMouseWheel(true)
 	end,
 
+	-- Blizzard Overrides
+	GetValue = function(self)
+		return self:CalculateValueRoundedToStep(self:GetValue_base())
+	end,
+	SetValue = function(self, value)
+		self:UpdateRange(value)
+		self:SetValue_base(value)
+	end,
+
+	GetMinMaxValues = function(self)
+		local min, max = self:GetMinMaxValues_base()
+
+		min = self:CalculateValueRoundedToStep(min)
+		max = self:CalculateValueRoundedToStep(max)
+
+		return min, max
+	end,
+	SetMinMaxValues = function(self, min, max)
+		min = min or -math.huge
+		max = max or math.huge
+
+		self.min = min
+		self.max = max
+
+		if self.mode == self.MODE_STATIC then
+			print(self:GetName(), min, max)
+			self:SetMinMaxValues_base(min, max)
+		else
+			self:UpdateRange()
+		end
+	end,
+
+	GetValueStep = function(self)
+		local step = self:GetValueStep_base()
+		return floor((step*10^5) + .5) / 10^5
+	end,
+
 	-- Script Handlers
+	OnMinMaxChanged = function(self)
+		self:UpdateTexts()
+	end,
+
 	OnValueChanged = function(self)
-		if TMW:Do504SliderBugFix(self) then return end
-		value = self:GetValue()
+		if not self.__fixingValueStep then
+			self.__fixingValueStep = true
+			self:SetValue_base(self:GetValue())
+			self.__fixingValueStep = nil
+		else
+			return
+		end
+
+		self:UpdateTexts()
+		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnValueChanged, self) 
+
+	end,
+
+	OnMouseUp = function(self)
+		if self.mode == self.MODE_ADJUSTING then
+			self:UpdateRange()
+		end
+		
+		self:SaveSetting()
+	end,
+	
+	OnMouseWheel = function(self, delta)
+		if self:IsEnabled() then
+			if IsShiftKeyDown() then
+				delta = delta*10
+			end
+			if IsControlKeyDown() then
+				delta = delta*60
+			end
+			if delta == 1 or delta == -1 then
+				delta = delta*(self:GetValueStep() or 1)
+			end
+
+			local level = self:GetValue() + delta
+
+			self:SetValue(level)
+
+			self:SaveSetting()
+		end
+	end,
+
+	-- Methods
+	SetRange = function(self, range)
+		self.range = range
+		self:UpdateRange()
+	end,
+	GetRange = function(self)
+		return self.range
+	end,
+
+	CalculateValueRoundedToStep = function(self, value)
+		local step = self:GetValueStep()
+
+		return floor(value * (1/step) + 0.5) / (1/step)
+	end,
+
+	SetMode = function(self, mode)
+		self.mode = mode
+
+		self:UpdateRange()
+	end,
+	GetMode = function(self)
+		return self.mode
+	end,
 
 
+	SetTextFormatter = function(self, formatter, extremesFormatter)
+		TMW:ValidateType("2 (formatter)", (self:GetName() or "<unnamed>") .. ":SetTextFormatter(formatter)", formatter, "Formatter;nil")
+		TMW:ValidateType("3 (extremesFormatter)", (self:GetName() or "<unnamed>") .. ":SetTextFormatter(formatter [,extremesFormatter])", extremesFormatter, "Formatter;nil")
+
+		self.formatter = formatter or TMW.C.Formatter.PASS
+		self.extremesFormatter = extremesFormatter or formatter or TMW.C.Formatter.PASS
+
+		self:UpdateTexts()
+
+	end,
+
+	SetStaticMidText = function(self, text)
+		self.staticMidText = text
+
+		self:UpdateTexts()
+	end,
+
+	UpdateTexts = function(self)
+		if self.staticMidText then
+			self.Mid:SetText(self.staticMidText)
+		else
+			self.formatter:SetFormattedText(self.Mid, self:GetValue())
+		end
+
+		local minValue, maxValue = self:GetMinMaxValues()
+		
+		self.extremesFormatter:SetFormattedText(self.Low, minValue)
+		self.extremesFormatter:SetFormattedText(self.High, maxValue)
+				
+	end,
+
+
+	UpdateRange = function(self, value)
+		if self.mode == self.MODE_ADJUSTING then
+			local deviation = self.range/2
+			local val = value or self:GetValue()
+
+			local newmin = max(self.min, val - deviation)
+			local newmax = min(self.max, val + deviation)
+			--newmax = min(newmax, self.max)
+
+			self:SetMinMaxValues_base(newmin, newmax)
+		end
+	end,
+
+	SaveSetting = function(self)
 		local settings = self:GetSettingTable()
 
 		if settings and self.setting then
 		
+			local value = self:GetValue()
 			value = get(self.data.ModifySettingValue, self, value) or value
 			
 			settings[self.setting] = value
 			
 			IE:ScheduleIconSetup()
 		end
-		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnValueChanged, self) 
-	end,
-	
-	OnMouseWheel = function(self, delta)
-		if self:IsEnabled() then
-			self:SetValue(self:GetValue() + delta)
-		end
 	end,
 
-	-- Methods
 	ReloadSetting = function(self)
 		local settings = self:GetSettingTable()
 
-		if settings then
+		if settings and self.setting then
 			self:SetValue(settings[self.setting])
 			
 			self:CheckInteractionStates()
@@ -2882,12 +3048,12 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	-- Constructor
 	OnNewInstance_Slider_Alpha = function(self, data)
-		self:SetMinMaxValues(0, 100)
-		self:SetValueStep(1)
+		self:SetMinMaxValues(0, 1)
+		self:SetValueStep(0.01)
 		
-		self.text:SetText(self.data.label or self.data.title)
-		
-		self:EnableMouseWheel(true)
+		local color = 34/0xFF
+		self.Low:SetTextColor(color, color, color, 1)
+		self.High:SetTextColor(color, color, color, 1)
 	end,
 
 
@@ -2895,82 +3061,36 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	OnMinMaxChanged = function(self)
 		local minValue, maxValue = self:GetMinMaxValues()
 		
-		self.Low:SetText(minValue .. "%")
-		self.High:SetText(maxValue .. "%")
+		self.Low:SetText(minValue * 100 .. "%")
+		self.High:SetText(maxValue * 100 .. "%")
 		
-		local color = 34/0xFF
-		self.Low:SetTextColor(color, color, color, 1)
-		self.High:SetTextColor(color, color, color, 1)
-		
-		self:UpdateValueText()
+		self:UpdateTexts()
 	end,
 
 	METHOD_EXTENSIONS = {
-		OnEnable = function(self)
-			local icon = CI.icon
-			
-			if icon then
-				self:SetValue(icon:GetSettings()[self.setting]*100)
-		
-				self:UpdateValueText()
-			end
-		end,
 		OnDisable = function(self)
-			self:FakeSetValue(0)
+			self:SetValue(0)
+			self:UpdateTexts() -- For the initial disable, so text doesn't go orange
 		end,
 	},
-	
-	OnValueChanged = function(self, value)
-		if TMW:Do504SliderBugFix(self) then return end
-		value = self:GetValue()
-
-
-		local settings = self:GetSettingTable()
-
-		if settings and not self.fakeNextSetValue then
-			settings[self.setting] = value / 100
-			IE:ScheduleIconSetup()
-		end
-		
-		self:UpdateValueText()
-	end,
 	
 
 	-- Methods
 	FakeSetValue = function(self, value)
-		self.fakeNextSetValue = 1
 		self:SetValue(value)
-		self.fakeNextSetValue = nil
-		
-		self:UpdateValueText()
 	end,
 	
-	UpdateValueText = function(self)
+	UpdateTexts = function(self)
 		local value = self:GetValue()
-		
-		if type(value) ~= "number" then
-			return
-		end
-		
-		if self:IsEnabled() then
-			if value/100 == self.data.setOrangeAtValue then
-				self.Mid:SetText("|cffff7400" .. value .. "%")
+				
+		if value and self:IsEnabled() then
+			if value == self.data.setOrangeAtValue then
+				self.Mid:SetText("|cffff7400" .. value * 100 .. "%")
 			else
-				self.Mid:SetText(value .. "%")
+				self.Mid:SetText(value * 100 .. "%")
 			end
 		else
-			self.Mid:SetText(value .. "%")
-		end
-	end,
-	
-	ReloadSetting = function(self)
-		local settings = self:GetSettingTable()
-		
-		if settings then
-			self:SetValue(settings[self.setting]*100)
-		
-			self:UpdateValueText()			
-			self:CheckInteractionStates()
+			self.Mid:SetText(value * 100 .. "%")
 		end
 	end,
 }
@@ -3788,7 +3908,7 @@ function IE:GetCompareResultsPath(match, ...)
 		if i == 1 then
 			setting = v
 		end
-		path = path .. v .. "\001"
+		path = path .. v .. "."
 	end
 	return path, setting
 end
@@ -3824,7 +3944,7 @@ function IE:AttemptBackup(icon)
 			-- if the last setting that was changed is the same as the most recent setting that was changed,
 			-- and if the setting is one that can be changed very rapidly,
 			-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
-			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] then
+			if icon.lastChangePath == result and IE.RapidSettings[changedSetting] and icon.historyState > 1 then
 				icon.history[#icon.history] = nil
 				icon.historyState = #icon.history
 			end

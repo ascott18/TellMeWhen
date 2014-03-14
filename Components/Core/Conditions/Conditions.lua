@@ -66,6 +66,9 @@ function CNDT.COMMON.formatSeconds(seconds, alsoMightBeSeconds)
 	if type(seconds) == "table" then -- if i set this function directly as a metamethod
 		seconds = alsoMightBeSeconds
 	end
+	if abs(seconds) == math.huge then
+		return tostring(seconds)
+	end
 	
 	local y =  seconds / 31556925.9936
 	local d = (seconds % 31556925.9936) / 86400

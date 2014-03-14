@@ -265,6 +265,11 @@ end
 
 
 
+
+
+
+
+
 local EventSound = EVENTS:GetEventHandler("Sound")
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()	
 	local Sounds = EventSound.ConfigContainer.SoundList

@@ -3797,12 +3797,15 @@ function TMW:IsStringInSemicolonList(list, strtofind)
 end
 
 function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
+	if abs(seconds) == math.huge then
+		return tostring(seconds)
+	end
+	
 	local y =  seconds / 31556926
 	local d = (seconds % 31556926) / 86400
 	local h = (seconds % 31556926  % 86400) / 3600
 	local m = (seconds % 31556926  % 86400  % 3600) / 60
 	local s = (seconds % 31556926  % 86400  % 3600  % 60)
-
 
 	local ns
 	if skipSmall then

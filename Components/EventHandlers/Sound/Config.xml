@@ -92,7 +92,7 @@
 								self:SetValueStep(1)
 							</OnLoad>
 							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
+								--if TMW:Do504SliderBugFix(self) then return end
 								value = self:GetValue()
 
 

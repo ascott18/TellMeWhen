@@ -79,6 +79,16 @@ TMW:NewClass("Config_CheckButton_Event", "Config_Base_Event", "Config_CheckButto
 	CheckInteractionStates = TMW.NULLFUNC,
 }
 
+TMW:NewClass("Config_Slider_Event", "Config_Base_Event", "Config_Slider"){
+	OnNewInstance_Slider_Event = function(self)
+		local color = 34/0xFF
+		self.Low:SetTextColor(color, color, color, 1)
+		self.High:SetTextColor(color, color, color, 1)
+	end,
+
+	CheckInteractionStates = TMW.NULLFUNC,
+}
+
 function EVENTS:LoadConfig()
 	local EventHandlerFrames = self.EventHandlerFrames
 	local previousFrame
@@ -376,12 +386,8 @@ TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", function()
 	if EventHandler.class.inherits[TMW.C.EventHandler_WhileConditions_Repetitive] then
 		Frequency:Show()
 
-		Frequency.range = 2
-		Frequency.min = EventHandler.frequencyMinimum
-
-		TMW.C.EventHandler_ColumnConfig:SetSliderMinMax(Frequency, TMW.EVENTS:GetEventSettings().Frequency)
-
-
+		Frequency:SetMinMaxValues(EventHandler.frequencyMinimum, math.huge)
+		Frequency:ReloadSetting()
 
 	end
 
@@ -836,25 +842,6 @@ function ColumnConfig:RegisterConfigFrame(identifier, configFrameData)
 	self.ConfigFrameData[identifier] = configFrameData
 end
 
-function ColumnConfig:SetSliderMinMax(Slider, level)
-	-- level is passed in only when the setting is changing or being loaded
-	if Slider.range then
-		local deviation = Slider.range/2
-		local val = level or Slider:GetValue()
-
-		local newmin = max(Slider.min or 0, val-deviation)
-		local newmax = max(deviation, val + deviation)
-
-		Slider:SetMinMaxValues(newmin, newmax)
-		Slider.Low:SetText(newmin)
-		Slider.High:SetText(newmax)
-	end
-
-	if level then
-		Slider:SetValue(level)
-	end
-end
-
 -- Override this method for handlers that need to blacklist a setting.
 function ColumnConfig:IsFrameBlacklisted(frameName)
 	return false
@@ -920,7 +907,7 @@ end
 
 
 function ColumnConfig.Load_Generic_Slider(configFrameData, frame, EventSettings)
-	ColumnConfig:SetSliderMinMax(frame, EventSettings[configFrameData.identifier])
+	frame:ReloadSetting()
 
 	if configFrameData.text then
 		frame.text:SetText(configFrameData.text)

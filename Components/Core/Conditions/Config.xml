@@ -246,10 +246,6 @@
 						
 						local CndtGroup = self:GetParent()
 						
-						if not CndtGroup.GetConditionData then
-							return
-						end
-						
 						local conditionData = CndtGroup:GetConditionData()
 
 						local value = self:GetValue()
@@ -263,39 +259,30 @@
 							self:GetParent():LoadAndDraw()
 						end
 					</OnMouseDown>
-					<OnMouseUp>
-						local CndtGroup = self:GetParent()
-						local condition = CndtGroup:GetConditionSettings()
-						condition.Level = TMW.CNDT:ValidateLevelForCondition(self:GetValue(), condition.Type)
-						CndtGroup:LoadAndDraw()
-					</OnMouseUp>
 					<OnShow>
 						if self:GetParent().SliderInputBox then
 							self:GetParent().SliderInputBox:Hide()
 						end
 					</OnShow>
 					<OnLoad>
-						self:EnableMouseWheel(true)
 						self.__noWrapTooltipText = true
+
+						TMW:CInit(self, {
+							setting = "Level"
+						})
+
+						self.GetSettingTable = function(self)
+							return self:GetParent():GetConditionSettings()
+						end
+
+						self:ExtendMethod("SaveSetting", function(self)
+
+							local CndtGroup = self:GetParent()
+							CndtGroup:LoadAndDraw()
+						end)
+
+
 					</OnLoad>
-					<OnMouseWheel>
-						if IsShiftKeyDown() then
-							delta = delta*10
-						end
-						if IsControlKeyDown() then
-							delta = delta*60 -- (60 seconds)
-						end
-						
-						local CndtGroup = self:GetParent()
-						
-						if delta == 1 or delta == -1 then
-							delta = delta*(CndtGroup:GetConditionData().step or 1)
-						end
-						
-						local condition = CndtGroup:GetConditionSettings()
-						condition.Level = TMW.CNDT:ValidateLevelForCondition(self:GetValue()+delta, condition.Type)
-						CndtGroup:LoadAndDraw()
-					</OnMouseWheel>
 				</Scripts>
 			</Slider>
 			<EditBox name="$parentSliderInputBox" inherits="TellMeWhen_InputBoxTemplate" hidden="true" parentKey="SliderInputBox" autoFocus="false">

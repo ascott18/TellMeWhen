@@ -193,6 +193,14 @@ function CNDT:SetTabText(conditionSetName)
 end
 
 
+TMW:NewClass("Config_Slider_Condition", "Config_Slider")
+{
+	GetSettingTable = function(self)
+		return self:GetParent():GetConditionSettings()
+	end,
+
+
+}
 
 function CNDT:ValidateLevelForCondition(level, conditionType)
 	local conditionData = CNDT.ConditionsByType[conditionType]
@@ -353,7 +361,6 @@ function CNDT:TypeMenu_DropDown_OnClick(data)
 	condition.Type = self.value
 	
 	group:LoadAndDraw()
-	group:SetSliderMinMax()
 	
 	CloseDropDownMenus()
 end
@@ -859,6 +866,34 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				-- Switch back to the slider.
 				CndtGroup.Slider:Show()
 			end
+
+
+			--TODO: this is horribly inefficient. Fix this to not create a new one each time.
+			CndtGroup.Slider:SetTextFormatter(TMW.C.Formatter:New(conditionData.texttable))
+			if conditionData.midt then
+				local Min, Max = CndtGroup.Slider:GetMinMaxValues()
+				local Mid = ((Max-Min)/2)+Min
+				if conditionData.midt == true then
+					Mid = get(conditionData.texttable, Mid) or Mid
+				else
+					Mid = get(conditionData.midt, Mid)
+				end
+
+				CndtGroup.Slider:SetStaticMidText(Mid)
+			else
+				CndtGroup.Slider:SetStaticMidText("")
+			end
+
+			CndtGroup.Slider:SetValueStep(get(conditionData.step) or 1)
+			CndtGroup.Slider:SetMinMaxValues(get(conditionData.min) or 0, get(conditionData.max))
+
+
+			if get(conditionData.range) then
+				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_ADJUSTING)
+				CndtGroup.Slider:SetRange(get(conditionData.range))
+			else
+				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_STATIC)
+			end
 			
 			TMW:TT_Update(CndtGroup.Slider)
 			TMW:TT_Update(CndtGroup.SliderInputBox)
@@ -954,7 +989,7 @@ function CndtGroup:SetSliderMinMax(level)
 
 	local Min, Max = Slider:GetMinMaxValues()
 	local Mid
-	if data.Mid == true then
+	if data.midt == true then
 		Mid = get(data.texttable, ((Max-Min)/2)+Min) or ((Max-Min)/2)+Min
 	else
 		Mid = get(data.midt, ((Max-Min)/2)+Min)

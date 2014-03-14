@@ -23,18 +23,18 @@
 				<Frames>
 					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Duration",
+								})
+								
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(0.1, math.huge)
+								self:SetRange(10)
+								self:SetValueStep(0.1)
+								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
 
-								value = max(self:GetValue(), 0.1)
-
-								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Duration = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+							</OnLoad>
 						</Scripts>
 					</Slider>
 
@@ -58,35 +58,31 @@
 
 					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1">
 						<Scripts>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
-								value = self:GetValue()
-
-
-								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Magnitude = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Magnitude",
+								})
+								
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(0, math.huge)
+								self:SetRange(10)
+								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
+							</OnLoad>
 						</Scripts>
 					</Slider>
 
 					<Slider name="$parentPeriod" parentKey="Period" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
-
-								value = max(self:GetValue(), 0) -- whatever... just do it
-
-								self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Period = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Period",
+								})
+								
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(0, math.huge)
+								self:SetRange(10)
+								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
+							</OnLoad>
 						</Scripts>
 					</Slider>
 					
@@ -196,101 +192,79 @@
 					<Slider name="$parentAlphaStandalone" parentKey="AlphaStandalone" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
 						<Scripts>
 							<OnLoad>
+								TMW:CInit(self, {
+									setting = "a_anim",
+								})
+								
 								self:SetMinMaxValues(0, 100)
-								self:SetValueStep(1)
-								self.step = 1
-								self.Low:SetText("0%")
-								self.High:SetText("100%")
+								self:SetTextFormatter(TMW.C.Formatter.PERCENT)
 
-								TMW.EVENTS:GetEventHandler("Animations"):SetSliderMinMax(self)
-
-								self:EnableMouseWheel(true)
-
-								local color = 34/0xFF
-								self.Low:SetTextColor(color, color, color, 1)
-								self.High:SetTextColor(color, color, color, 1)
 							</OnLoad>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
-								value = self:GetValue()
-
-
-								self.Mid:SetText(value)
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().a_anim = value/100
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
 						</Scripts>
 					</Slider>
 					
 					
 					<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Thickness",
+								})
+								
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(0.1, math.huge)
+								self:SetRange(10)
+								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_1)
 
-								value = max(self:GetValue(), 0.1)
-
-								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Thickness = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+							</OnLoad>
 						</Scripts>
 					</Slider>
 					
 					<Slider name="$parentSize_anim" parentKey="Size_anim" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Size_anim",
+								})
+								
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(-math.huge, math.huge)
+								self:SetRange(10)
+								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_1)
 
-								value = max(self:GetValue(), -math.huge) -- this works to remove floating point error (idk why)
-
-								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Size_anim = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+							</OnLoad>
 						</Scripts>
 					</Slider>
 
 					<Slider name="$parentSizeX" parentKey="SizeX" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
 						<Scripts>
-							<OnValueChanged>
-								if TMW:Do504SliderBugFix(self) then return end
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "SizeX",
+								})
+								
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(1, math.huge)
+								self:SetRange(100)
+								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
 
-								self.range = 100
-								value = max(self:GetValue(), 1)
-
-								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().SizeX = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+							</OnLoad>
 						</Scripts>
 					</Slider>
 
 					<Slider name="$parentSizeY" parentKey="SizeY" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
 						<Scripts>
-							<OnValueChanged>
-								self.range = 100
-								value = max(self:GetValue(), 1)
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "SizeY",
+								})
+								
+								self:SetMode(self.MODE_ADJUSTING)
+								self:SetMinMaxValues(1, math.huge)
+								self:SetRange(100)
+								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
 
-								self.Mid:SetFormattedText(TMW.L["ANIM_PIXELS"], value)
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().SizeY = value
-									TMW.IE:ScheduleIconSetup()
-								end
-							</OnValueChanged>
+							</OnLoad>
 						</Scripts>
 					</Slider>
 

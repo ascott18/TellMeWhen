@@ -367,13 +367,9 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "TextDuration",
-
-									OnValueChanged = function(self)
-										local value = self:GetValue()
-										self.Mid:SetFormattedText(TMW.L["ANIM_SECONDS"], TMW:FormatSeconds(value, nil, true))
-									end,
 								})
 								
+								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0, math.huge)
 								self:SetRange(10)

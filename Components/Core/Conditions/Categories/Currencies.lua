@@ -144,6 +144,7 @@ for i, currenciesSub in ipairs(currencies) do
 			ConditionCategory:RegisterCondition(i, "CURRENCY" .. id, {
 				text = name,
 				icon = texture,
+				min = 0,
 				range = 500,
 				unit = false,
 				hidden = hiddenFunc,
