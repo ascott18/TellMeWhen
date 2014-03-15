@@ -30,6 +30,8 @@
 						local Events = TMW.CI.ics.Events
 						tremove(Events, self:GetParent():GetID())
 						Events.n = Events.n - 1
+						
+						TMW.IE:ScheduleIconSetup()
 
 						TMW.EVENTS:LoadConfig()
 					</OnClick>
@@ -630,6 +632,7 @@
 								TMW:CInit(self, {
 									setting = "Frequency",
 									title = TMW.L["EVENT_FREQUENCY"],
+									tooltip = TMW.L["EVENT_FREQUENCY_DESC"],
 								})
 								
 								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)

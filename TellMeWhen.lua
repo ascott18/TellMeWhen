@@ -1605,17 +1605,8 @@ function TMW:TT(f, title, text, actualtitle, actualtext, showchecker)
 	
 	TMW:ValidateType(2, "TMW:TT()", f, "frame")
 	
-	if title then
-		f.__title = (actualtitle and title) or _G[title] or L[title]
-	else
-		f.__title = title
-	end
-
-	if text then
-		f.__text = (actualtext and text) or _G[text] or L[text]
-	else
-		f.__text = text
-	end
+	f.__title = TMW:TT_Parse(title, actualtitle)
+	f.__text = TMW:TT_Parse(text, actualtext)
 	
 	f.__ttshowchecker = showchecker
 
@@ -1631,6 +1622,18 @@ function TMW:TT(f, title, text, actualtitle, actualtext, showchecker)
 			f:HookScript("OnLeave", TTOnLeave)
 		end
 	end
+end
+
+function TMW:TT_Parse(text, literal)
+	if text then
+		return (literal and text) or _G[text] or L[text]
+	else
+		return text
+	end
+end
+
+function TMW:TT_Copy(src, dest)
+	TMW:TT(dest, src.__title, src.__text, 1, 1, src.__ttshowchecker)
 end
 
 function TMW:TT_Update(f)
@@ -1671,7 +1674,7 @@ end
 -- ADDON ENTRY POINT: EVERYTHING STARTS FROM HERE!
 function TMW:OnInitialize()
 	-- if the file IS required for gross functionality
-	if not TMW.Classes or not TMW.Classes.Condition then
+	if not TMW.Classes or not TMW.Classes.Formatter then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1684,7 +1687,7 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Conditions/Condition.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Utils.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 		return
 
 	-- if the file is NOT required for gross functionality
@@ -2975,9 +2978,9 @@ do	-- TMW:OnUpdate()
 
 	local function checkYield()
 		if inCombatLockdown and debugprofilestop() - start > CoroutineLimit then
-			coroutine.yield()
-
 			TMW:Debug("OnUpdate yielded early at %s", time)
+			
+			coroutine.yield()
 		end
 	end
 
@@ -3800,7 +3803,7 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	if abs(seconds) == math.huge then
 		return tostring(seconds)
 	end
-	
+
 	local y =  seconds / 31556926
 	local d = (seconds % 31556926) / 86400
 	local h = (seconds % 31556926  % 86400) / 3600

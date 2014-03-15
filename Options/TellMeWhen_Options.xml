@@ -1050,6 +1050,8 @@
 	</EditBox>
 
 	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
+		<Size y="17"/>
+
 		<Attributes>
 			<Attribute name="tmw-class" type="string" value="Config_Slider"/>
 		</Attributes>

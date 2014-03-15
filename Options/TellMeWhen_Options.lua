@@ -397,7 +397,7 @@ do
 
 	-- Tests a dogtag string. Returns a string if there is an error.
 	function TMW:TestDogTagString(icon, text, ns, kwargs)
-		icon:Setup()
+		--icon:Setup()
 		
 		ns = ns or "TMW;Unit;Stats"
 		kwargs = kwargs or {
@@ -2758,28 +2758,157 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	end,
 }
 
+TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
+	
+	-- Constructor
+	OnNewInstance_EditBox = function(self, data)
+		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
+	end,
+	
+
+	-- Scripts
+	OnEditFocusLost = function(self, button)
+		self:SaveSetting()
+		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnEditFocusLost, self, button) 
+	end,
+
+	OnTextChanged = function(self, button)		
+		-- Cheater! (We arent getting anything)
+		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+		get(self.data.OnTextChanged, self, button) 
+	end,
+
+	METHOD_EXTENSIONS = {
+		OnEnable = function(self)
+			self:EnableMouse(true)
+			self:EnableKeyboard(true)
+		end,
+
+		OnDisable = function(self)
+			self:ClearFocus()
+			self:EnableMouse(false)
+			self:EnableKeyboard(false)
+		end,
+	},
+	
+
+	-- Methods
+	SaveSetting = function(self)
+		local settings = self:GetSettingTable()
+
+		if settings and self.setting then
+			local value
+			if self.data.doCleanString then
+				value = TMW:CleanString(self)
+			else
+				value = self:GetText()
+			end
+			
+			value = get(self.data.ModifySettingValue, self, value) or value
+			
+			settings[self.setting] = value
+		
+			IE:ScheduleIconSetup()
+		end
+	end,
+
+	ReloadSetting = function(self, eventMaybe)
+		local settings = self:GetSettingTable()
+
+		if settings then
+			if not (eventMaybe == "TMW_CONFIG_ICON_HISTORY_STATE_CREATED" and self:HasFocus()) and self.setting then
+				self:SetText(settings[self.setting])
+			end
+			self:CheckInteractionStates()
+			self:ClearFocus()
+		end
+	end,
+}
+
 TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 {
 	-- Saving base methods.
 	-- This is done in a separate call to make sure it happens before 
 	-- new ones overwrite the base methods.
 
+	Show_base = TMW.C.Config_Slider.Show,
+	Hide_base = TMW.C.Config_Slider.Hide,
+
 	SetValue_base = TMW.C.Config_Slider.SetValue,
 	GetValue_base = TMW.C.Config_Slider.GetValue,
+
 	GetValueStep_base = TMW.C.Config_Slider.GetValueStep,
+
 	GetMinMaxValues_base = TMW.C.Config_Slider.GetMinMaxValues,
 	SetMinMaxValues_base = TMW.C.Config_Slider.SetMinMaxValues,
 }{
-	-- Constructor
+
+	Config_EditBox_Slider = TMW:NewClass("Config_EditBox_Slider", "Config_EditBox"){
+		
+		-- Constructor
+		OnNewInstance_EditBox_Slider = function(self, data)
+			self:EnableMouseWheel(true)
+		end,
+		
+
+		-- Scripts
+		OnEditFocusLost = function(self, button)
+			local text = tonumber(self:GetText())
+			if text then
+				self.Slider:SetValue(text)
+				self.Slider:SaveSetting()
+			end
+
+			self:SetText(self.Slider:GetValue())
+		end,
+
+
+		OnMouseDown = function(self, button)
+			if button == "RightButton" and not self.Slider:ShouldForceEditBox() then
+				self.Slider:UseSlider()
+			end
+		end,
+
+		OnMouseWheel = function(self, ...)
+			self.Slider:GetScript("OnMouseWheel")(self.Slider, ...)
+		end,
+
+		METHOD_EXTENSIONS = {
+			OnEnable = function(self)
+				self:EnableMouse(true)
+				self:EnableKeyboard(true)
+			end,
+
+			OnDisable = function(self)
+				self:ClearFocus()
+				self:EnableMouse(false)
+				self:EnableKeyboard(false)
+			end,
+		},
+		
+
+		-- Methods
+		ReloadSetting = function(self)
+			self:SetText(self.Slider:GetValue())
+		end,
+	},
+
+	EditBoxShowing = false,
 
 	MODE_STATIC = 1,
 	MODE_ADJUSTING = 2,
+
+	FORCE_EDITBOX_THRESHOLD = 10e5,
 
 	range = 10,
 
 	formatter = TMW.C.Formatter.PASS,
 	extremesFormatter = TMW.C.Formatter.PASS,
 
+	-- Constructor
 	OnNewInstance_Slider = function(self, data)
 		self:SetMode(self.MODE_STATIC)
 
@@ -2797,11 +2926,29 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 	-- Blizzard Overrides
 	GetValue = function(self)
+		if self.EditBoxShowing then
+			local text = self.EditBox:GetText()
+			text = tonumber(text)
+			if text then
+				return self:CalculateValueRoundedToStep(text)
+			end
+		end
+
 		return self:CalculateValueRoundedToStep(self:GetValue_base())
 	end,
 	SetValue = function(self, value)
+		if value < self.min then
+			value = self.min
+		elseif value > self.max then
+			value = self.max
+		end
+		value = self:CalculateValueRoundedToStep(value)
+
 		self:UpdateRange(value)
 		self:SetValue_base(value)
+		if self.EditBoxShowing then
+			self.EditBox:SetText(value)
+		end
 	end,
 
 	GetMinMaxValues = function(self)
@@ -2820,9 +2967,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		self.max = max
 
 		if self.mode == self.MODE_STATIC then
-			print(self:GetName(), min, max)
 			self:SetMinMaxValues_base(min, max)
-		else
+		elseif not self.EditBoxShowing then
 			self:UpdateRange()
 		end
 	end,
@@ -2830,6 +2976,21 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	GetValueStep = function(self)
 		local step = self:GetValueStep_base()
 		return floor((step*10^5) + .5) / 10^5
+	end,
+
+
+	Show = function(self)
+		if self.EditBoxShowing then
+			self.EditBox:Show()
+		else
+			self:Show_base()
+		end
+	end,
+	Hide = function(self)
+		self:Hide_base()
+		if self.EditBoxShowing then
+			self.EditBox:Hide()
+		end
 	end,
 
 	-- Script Handlers
@@ -2846,12 +3007,26 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			return
 		end
 
+		if self.EditBox then
+			self.EditBox:SetText(self:GetValue())
+		end
+
+		if self:ShouldForceEditBox() then
+			self:UseEditBox()
+		end
+
 		self:UpdateTexts()
 		
 		-- Cheater! (We arent getting anything)
 		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
 		get(self.data.OnValueChanged, self) 
+	end,
 
+	OnMouseDown = function(self, button)
+		if button == "RightButton" then
+			self:UseEditBox()
+			self:ReloadSetting()
+		end
 	end,
 
 	OnMouseUp = function(self)
@@ -2900,10 +3075,70 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	SetMode = function(self, mode)
 		self.mode = mode
 
+		if mode == self.MODE_STATIC then
+			self:UseSlider()
+		end
+
 		self:UpdateRange()
 	end,
 	GetMode = function(self)
 		return self.mode
+	end,
+
+
+	ShouldForceEditBox = function(self)
+		if self:GetMode() == self.MODE_STATIC then
+			return false
+		elseif self:GetValue() > self.FORCE_EDITBOX_THRESHOLD then
+			return true
+		end
+	end,
+
+	UseEditBox = function(self)
+		if self:GetMode() == self.MODE_STATIC then
+			return
+		end
+
+		if not self.EditBox then
+			self.EditBox = self.Config_EditBox_Slider:New("EditBox", self:GetName() .. "Box", self:GetParent(), "TellMeWhen_InputBoxTemplate", nil, {})
+			self.EditBox.Slider = self
+
+			self.EditBox:SetPoint("TOP", self, "TOP", 0, -4)
+			self.EditBox:SetPoint("LEFT", self, "LEFT", 2, 0)
+			self.EditBox:SetPoint("RIGHT", self)
+
+			self.EditBox:SetText(self:GetValue())
+
+			if self.ttData then
+				self:SetTooltip(unpack(self.ttData))
+			end
+		end
+
+		if not self.EditBoxShowing then
+			self.EditBoxShowing = true
+			
+			if self.text:GetParent() == self then
+				self.text:SetParent(self.EditBox)
+			end
+
+			self.EditBox:Show()
+			self:Hide_base()
+		end
+	end,
+	UseSlider = function(self)
+		if self.EditBoxShowing then
+			self.EditBoxShowing = false
+
+			if self.text:GetParent() == self.EditBox then
+				self.text:SetParent(self)
+			end
+
+			if self.EditBox:IsShown() then
+				self:Show_base()
+			end
+			self.EditBox:Hide()
+			self:UpdateRange()
+		end
 	end,
 
 
@@ -2915,13 +3150,49 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		self.extremesFormatter = extremesFormatter or formatter or TMW.C.Formatter.PASS
 
 		self:UpdateTexts()
-
 	end,
 
 	SetStaticMidText = function(self, text)
 		self.staticMidText = text
 
 		self:UpdateTexts()
+	end,
+
+	TT_textFunc = function(self)
+		local text = self.ttData[2]
+
+		if not text then
+			text = ""
+		else
+			text = text .. "\r\n\r\n"
+		end
+
+		if self:GetObjectType() == "Slider" then
+			if self:GetMode() == self.MODE_ADJUSTING then
+				text = text .. L["CNDT_SLIDER_DESC_CLICKSWAP_TOMANUAL"]
+			else
+				return self.ttData[2]
+			end
+		else -- EditBox
+			if self.Slider:ShouldForceEditBox() then
+				text = text .. L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"]:format(self.Slider.FORCE_EDITBOX_THRESHOLD)
+			else
+				text = text .. L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER"]
+			end
+		end
+
+		return text
+	end,
+
+	SetTooltip = function(self, title, text)
+		self.ttData = {title, text}
+
+		TMW:TT(self, title, self.TT_textFunc, 1, 1)
+
+		if self.EditBox then
+			TMW:TT(self.EditBox, title, self.TT_textFunc, 1, 1)
+			self.EditBox.ttData = self.ttData
+		end
 	end,
 
 	UpdateTexts = function(self)
@@ -2935,7 +3206,6 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		
 		self.extremesFormatter:SetFormattedText(self.Low, minValue)
 		self.extremesFormatter:SetFormattedText(self.High, maxValue)
-				
 	end,
 
 
@@ -2951,6 +3221,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			self:SetMinMaxValues_base(newmin, newmax)
 		end
 	end,
+
 
 	SaveSetting = function(self)
 		local settings = self:GetSettingTable()
@@ -2976,74 +3247,6 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		end
 	end,
 }
-
-TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
-	
-	-- Constructor
-	OnNewInstance_EditBox = function(self, data)
-		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
-	end,
-	
-
-	-- Scripts
-	OnEditFocusLost = function(self, button)
-		local settings = self:GetSettingTable()
-
-		if settings and self.setting then
-			local value
-			if self.data.doCleanString then
-				value = TMW:CleanString(self)
-			else
-				value = self:GetText()
-			end
-			
-			value = get(self.data.ModifySettingValue, self, value) or value
-			
-			settings[self.setting] = value
-		
-			IE:ScheduleIconSetup()
-		end
-		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnEditFocusLost, self, button) 
-	end,
-
-	OnTextChanged = function(self, button)		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnTextChanged, self, button) 
-	end,
-
-	METHOD_EXTENSIONS = {
-		OnEnable = function(self)
-			self:EnableMouse(true)
-			self:EnableKeyboard(true)
-		end,
-
-		OnDisable = function(self)
-			self:ClearFocus()
-			self:EnableMouse(false)
-			self:EnableKeyboard(false)
-		end,
-	},
-	
-
-	-- Methods
-	ReloadSetting = function(self, eventMaybe)
-		local settings = self:GetSettingTable()
-
-		if settings then
-			if not (eventMaybe == "TMW_CONFIG_ICON_HISTORY_STATE_CREATED" and self:HasFocus()) and self.setting then
-				self:SetText(settings[self.setting])
-			end
-			self:CheckInteractionStates()
-			self:ClearFocus()
-		end
-	end,
-}
-
-
 
 TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	-- Constructor

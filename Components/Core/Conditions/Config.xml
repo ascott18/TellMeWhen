@@ -253,17 +253,6 @@
 
 						CndtGroup.ValText:SetText(TMW.get(conditionData.texttable, value) or value)
 					</OnUpdate>
-					<OnMouseDown>
-						if button == "RightButton" and self:GetParent():GetSliderEditBoxAllowance() then
-							self:GetParent().SliderInputBox:Show()
-							self:GetParent():LoadAndDraw()
-						end
-					</OnMouseDown>
-					<OnShow>
-						if self:GetParent().SliderInputBox then
-							self:GetParent().SliderInputBox:Hide()
-						end
-					</OnShow>
 					<OnLoad>
 						self.__noWrapTooltipText = true
 
@@ -274,64 +263,13 @@
 						self.GetSettingTable = function(self)
 							return self:GetParent():GetConditionSettings()
 						end
-
-						self:ExtendMethod("SaveSetting", function(self)
-
-							local CndtGroup = self:GetParent()
-							CndtGroup:LoadAndDraw()
-						end)
+						self.CheckInteractionStates = TMW.NULLFUNC
+						
 
 
 					</OnLoad>
 				</Scripts>
 			</Slider>
-			<EditBox name="$parentSliderInputBox" inherits="TellMeWhen_InputBoxTemplate" hidden="true" parentKey="SliderInputBox" autoFocus="false">
-				<Size x="302" y="15"/>
-				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentType" relativePoint="BOTTOM" y="2"/>
-					<Anchor point="LEFT" relativeTo="$parentSlider" x="0"/>
-					<Anchor point="RIGHT" relativeTo="$parentSlider" x="0"/>
-				</Anchors>
-				<Scripts>
-					<OnEditFocusLost>
-						EditBox_ClearHighlight(self)
-						TMW:CleanString(self)
-						
-						local CndtGroup = self:GetParent()
-						local condition = CndtGroup:GetConditionSettings()
-						condition.Level = TMW.CNDT:ValidateLevelForCondition(self:GetText(), condition.Type)
-						CndtGroup:LoadAndDraw()
-					</OnEditFocusLost>
-					<OnShow>
-						self:GetParent().Slider:Hide()
-					</OnShow>
-					<OnMouseDown>
-						if button == "RightButton" and self:GetParent():GetSliderAllowance() then
-							self:GetParent().Slider:Show()
-						end
-					</OnMouseDown>
-					<OnMouseWheel>
-						if IsShiftKeyDown() then
-							delta = delta*10
-						end
-						if IsControlKeyDown() then
-							delta = delta*60 -- (60 seconds)
-						end
-						
-						local step = self:GetParent():GetConditionData().step
-						if delta == 1 or delta == -1 then
-							delta = delta*(step or 1)
-						end
-						self:GetParent():SetSliderMinMax(self:GetText()+delta)
-						
-						local CndtGroup = self:GetParent()
-						local condition = CndtGroup:GetConditionSettings()
-						condition.Level = TMW.CNDT:ValidateLevelForCondition(self:GetText(), condition.Type)
-						CndtGroup:LoadAndDraw()
-					</OnMouseWheel>
-				</Scripts>
-				
-			</EditBox>
 			
 			
 			

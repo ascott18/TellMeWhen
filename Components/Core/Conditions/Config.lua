@@ -26,10 +26,6 @@ local pairs, ipairs, wipe, tinsert, tremove, rawget, tonumber, tostring, type =
 local strtrim, gsub, min, max = 
 	  strtrim, gsub, min, max
 
-local SLIDER_INPUTBOX_ENABLEALL = false -- toggle for allowing the right-click slider input box for all conditions, or just those with a range (and no max value)
-local AUTO_LOAD_SLIDERINPUTBOX_THRESHOLD = 10e5
-L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"] = L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"]:format(BreakUpLargeNumbers(AUTO_LOAD_SLIDERINPUTBOX_THRESHOLD))
-
 -- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE, UIDROPDOWNMENU_OPEN_MENU
 -- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetText, UIDropDownMenu_GetSelectedValue
 -- GLOBALS: CloseDropDownMenus
@@ -825,7 +821,6 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 		if conditionData.noslide then
 			CndtGroup.Slider:Hide()
-			CndtGroup.SliderInputBox:Hide()
 			
 			CndtGroup.TextValue:SetText(nil)
 			CndtGroup.ValText:Hide()
@@ -833,43 +828,35 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			CndtGroup.TextValue:SetText(L["CONDITIONPANEL_VALUEN"])
 			
 			
-			CndtGroup:SetSliderMinMax(conditionSettings.Level or 0)
-			
-			local val = conditionSettings.Level
-			
-			CndtGroup.ValText:SetText(get(conditionData.texttable, val) or val)
-			CndtGroup.ValText:Show()
-			
-			-- If neither the slider or input box are already shown, show the slider
-			-- (don't show the slider unconditionally because otherwise every time :LoadAndDraw() is called the editbox will be hidden)
-			if not CndtGroup.Slider:IsShown() and not CndtGroup.SliderInputBox:IsShown() then
-				CndtGroup.Slider:Show()
-			end
 			
 			
-			TMW:TT(CndtGroup.SliderInputBox, nil, "CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER")
-			CndtGroup.SliderInputBox.__noWrapTooltipText = true
 			
-			if CndtGroup:GetSliderEditBoxAllowance() then
-				-- Show the tooltip hinting about toggling if toggling is possible.
-				TMW:TT(CndtGroup.Slider, nil, "CNDT_SLIDER_DESC_CLICKSWAP_TOMANUAL")
-				
-				if not CndtGroup:GetSliderAllowance() then
-					TMW:TT(CndtGroup.SliderInputBox, nil, "CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED")
-					CndtGroup.SliderInputBox.__noWrapTooltipText = nil
-					CndtGroup.SliderInputBox:Show()
-				end
+
+
+			-- Don't try and format text while changing parameters because we might get some errors trying
+			-- to format unexpected values
+			CndtGroup.Slider:SetTextFormatter(nil)
+
+			CndtGroup.Slider:SetValueStep(get(conditionData.step) or 1)
+			CndtGroup.Slider:SetMinMaxValues(get(conditionData.min) or 0, get(conditionData.max))
+
+			if get(conditionData.range) then
+				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_ADJUSTING)
+				CndtGroup.Slider:SetRange(get(conditionData.range))
 			else
-				-- Otherwise, don't include the part about toggling
-				TMW:TT(CndtGroup.Slider, nil, nil)
-				
-				-- Switch back to the slider.
-				CndtGroup.Slider:Show()
+				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_STATIC)
 			end
+			CndtGroup.Slider:Show()
+			CndtGroup.Slider:ReloadSetting()
+			CndtGroup.Slider:SaveSetting()
+
+			TMW:TT_Update(CndtGroup.Slider)
 
 
 			--TODO: this is horribly inefficient. Fix this to not create a new one each time.
-			CndtGroup.Slider:SetTextFormatter(TMW.C.Formatter:New(conditionData.texttable))
+			local formatter = TMW.C.Formatter:New(conditionData.texttable)
+			CndtGroup.Slider:SetTextFormatter(formatter)
+
 			if conditionData.midt then
 				local Min, Max = CndtGroup.Slider:GetMinMaxValues()
 				local Mid = ((Max-Min)/2)+Min
@@ -883,20 +870,11 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			else
 				CndtGroup.Slider:SetStaticMidText("")
 			end
-
-			CndtGroup.Slider:SetValueStep(get(conditionData.step) or 1)
-			CndtGroup.Slider:SetMinMaxValues(get(conditionData.min) or 0, get(conditionData.max))
-
-
-			if get(conditionData.range) then
-				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_ADJUSTING)
-				CndtGroup.Slider:SetRange(get(conditionData.range))
-			else
-				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_STATIC)
-			end
 			
-			TMW:TT_Update(CndtGroup.Slider)
-			TMW:TT_Update(CndtGroup.SliderInputBox)
+			local val = CndtGroup.Slider:GetValue()
+			formatter:SetFormattedText(CndtGroup.ValText, val)
+			CndtGroup.ValText:Show()
+			
 
 		end
 	else
@@ -906,7 +884,6 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		CndtGroup.Check2:Hide()
 		CndtGroup.EditBox2:Hide()
 		CndtGroup.Slider:Hide()
-		CndtGroup.SliderInputBox:Hide()
 		CndtGroup.ValText:Hide()
 	end
 
@@ -956,68 +933,6 @@ function CndtGroup:DeleteHandler()
 	CNDT:DeleteCondition(CNDT.settings, self:GetID())
 	CNDT:LoadConfig()
 end
-
-function CndtGroup:SetSliderMinMax(level)
-	-- level is passed in only when the setting is changing or being loaded
-	
-	local data = self:GetConditionData()
-	if not data then return end
-	
-	level = level and CNDT:ValidateLevelForCondition(level, data.identifier)
-	
-	local Slider = self.Slider
-	local SliderInputBox = self.SliderInputBox
-	
-	
-	if data.range then
-		local deviation = get(data.range)/2
-		local val = level or Slider:GetValue()
-
-		local newmin = max(0, val-deviation)
-		local newmax = max(deviation, val + deviation)
-
-		Slider:SetMinMaxValues(newmin, newmax)
-		Slider.Low:SetText(get(data.texttable, newmin) or newmin)
-		Slider.High:SetText(get(data.texttable, newmax) or newmax)
-	else
-		local vmin = get(data.min)
-		local vmax = get(data.max)
-		Slider:SetMinMaxValues(vmin or 0, vmax or 1)
-		Slider.Low:SetText(get(data.texttable, vmin) or data.mint or vmin or 0)
-		Slider.High:SetText(get(data.texttable, vmax) or data.maxt or vmax or 1)
-	end
-
-	local Min, Max = Slider:GetMinMaxValues()
-	local Mid
-	if data.midt == true then
-		Mid = get(data.texttable, ((Max-Min)/2)+Min) or ((Max-Min)/2)+Min
-	else
-		Mid = get(data.midt, ((Max-Min)/2)+Min)
-	end
-	Slider.Mid:SetText(Mid)
-
-	Slider:SetValueStep(get(data.step) or 1)
-	
-	if level then
-		Slider:SetValue(level)
-		SliderInputBox:SetText(level)
-		
-		self:GetConditionSettings().Level = level
-	end
-	
-	return level
-end
-
-function CndtGroup:GetSliderEditBoxAllowance()
-	local conditionData = self:GetConditionData()
-	return conditionData.range or SLIDER_INPUTBOX_ENABLEALL
-end
-
-function CndtGroup:GetSliderAllowance()
-	local conditionSettings = self:GetConditionSettings()
-	return not self:GetSliderEditBoxAllowance() or conditionSettings.Level <= AUTO_LOAD_SLIDERINPUTBOX_THRESHOLD
-end
-
 
 function CndtGroup:GetConditionSettings()
 	if CNDT.settings then

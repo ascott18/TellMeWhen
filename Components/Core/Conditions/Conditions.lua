@@ -81,6 +81,10 @@ function CNDT.COMMON.formatSeconds(seconds, alsoMightBeSeconds)
 		s = "0" .. s
 	end
 
+	if y >= 0x7FFFFFFE then
+		return format("OVERFLOW:%d:%02d:%02d:%s", d, h, m, s)
+	end
+
 	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, s) end
 	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
 	if h >= 1 then return format("%d:%02d:%s", h, m, s) end

@@ -12,7 +12,11 @@
 
 
 if not TMW then return end
+
+local TMW = TMW
 local L = TMW.L
+local print = TMW.print
+
 
 
 local Formatter = TMW:NewClass("Formatter"){
@@ -29,6 +33,8 @@ local Formatter = TMW:NewClass("Formatter"){
 			return self.fmt[value]
 		elseif type == "function" then
 			return self.fmt(value)
+		else
+			return value
 		end
 	end,
 
@@ -46,6 +52,9 @@ Formatter{
 	F_2 = Formatter:New("%.2f"),
 
 	PERCENT = Formatter:New("%s%%"),
+	PERCENT100 = Formatter:New(function(value)
+		return ("%s%%"):format(value*100)
+	end),
 
 	PLUSPERCENT = Formatter:New("+%s%%"),
 

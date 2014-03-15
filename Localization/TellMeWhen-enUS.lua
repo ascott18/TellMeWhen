@@ -1463,6 +1463,7 @@ L["EVENT_WHILECONDITIONS_DESC"] = "Click to configure a set of conditions that w
 L["EVENT_WHILECONDITIONS_TAB_DESC"] = "Configure a set of conditions that will cause a notification to play while they are passing."
 
 L["EVENT_FREQUENCY"] = "Trigger Frequency"
+L["EVENT_FREQUENCY_DESC"] = "Set how often, in seconds, that the handlier will be triggered when the condition set is passing."
 
 L["UNITCONDITIONS"] = "Unit Conditions"
 L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."

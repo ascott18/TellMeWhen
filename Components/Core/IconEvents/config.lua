@@ -911,7 +911,7 @@ function ColumnConfig.Load_Generic_Slider(configFrameData, frame, EventSettings)
 
 	if configFrameData.text then
 		frame.text:SetText(configFrameData.text)
-		TMW:TT(frame, configFrameData.text, configFrameData.desc, 1, 1)
+		frame:SetTooltip(configFrameData.text, configFrameData.desc)
 	end
 
 	frame:Enable()

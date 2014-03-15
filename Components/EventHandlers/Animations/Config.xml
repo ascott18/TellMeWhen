@@ -189,22 +189,23 @@
 					<CheckButton name="$parentFade" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Fade">
 					</CheckButton>
 
-					<Slider name="$parentAlphaStandalone" parentKey="AlphaStandalone" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
+					<Slider name="$parentAlphaStandalone" parentKey="AlphaStandalone" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "a_anim",
 								})
 								
-								self:SetMinMaxValues(0, 100)
-								self:SetTextFormatter(TMW.C.Formatter.PERCENT)
+								self:SetMinMaxValues(0, 1)
+								self:SetValueStep(0.01)
+								self:SetTextFormatter(TMW.C.Formatter.PERCENT100)
 
 							</OnLoad>
 						</Scripts>
 					</Slider>
 					
 					
-					<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
+					<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self, {
@@ -213,6 +214,7 @@
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0.1, math.huge)
+								self:SetValueStep(0.1)
 								self:SetRange(10)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_1)
 
@@ -220,7 +222,7 @@
 						</Scripts>
 					</Slider>
 					
-					<Slider name="$parentSize_anim" parentKey="Size_anim" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
+					<Slider name="$parentSize_anim" parentKey="Size_anim" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self, {
@@ -229,6 +231,7 @@
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(-math.huge, math.huge)
+								self:SetValueStep(0.1)
 								self:SetRange(10)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_1)
 
@@ -236,7 +239,7 @@
 						</Scripts>
 					</Slider>
 
-					<Slider name="$parentSizeX" parentKey="SizeX" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
+					<Slider name="$parentSizeX" parentKey="SizeX" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self, {
@@ -245,6 +248,7 @@
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(1, math.huge)
+								self:SetValueStep(1)
 								self:SetRange(100)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
 
@@ -252,7 +256,7 @@
 						</Scripts>
 					</Slider>
 
-					<Slider name="$parentSizeY" parentKey="SizeY" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1" >
+					<Slider name="$parentSizeY" parentKey="SizeY" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self, {
@@ -261,6 +265,7 @@
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(1, math.huge)
+								self:SetValueStep(1)
 								self:SetRange(100)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
 
