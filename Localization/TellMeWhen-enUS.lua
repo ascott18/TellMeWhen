@@ -243,7 +243,7 @@ L["ICONMENU_SWINGTIMER"] = "Swing Timer"
 L["ICONMENU_SWINGTIMER_SWINGING"] = "Swinging"
 L["ICONMENU_SWINGTIMER_NOTSWINGING"] = "Not Swinging"
 L["ICONMENU_SWINGTIMER_DESC"] = [[Tracks the swing timers of your main hand and off hand weapons.]]
-L["ICONTYPE_SWINGTIMER_TIP"] = [[Looking to track the timer of your %s? The %q icon type has the functionality that you desire. Simply set a %s to track %q (spellID %d)!
+L["ICONTYPE_SWINGTIMER_TIP"] = [[Looking to track the timer of your %s? The %s icon type has the functionality that you desire. Simply set a %s icon to track %q (spellID %d)!
 
 You may also click the button below to automatically apply the proper settings.]]
 L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"] = "Apply %s Settings"
