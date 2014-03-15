@@ -112,7 +112,7 @@ The funcstr field is the only one that is required. Errors may happen with the o
 ** [Boolean] Set true to show the icon selection dropdown.
 ** The dropdown defaults to being hidden if this value is undefined/nil.
 
-== Editbox Suggestion List Interaction
+== EditBox Suggestion List Interaction
 * useSUG
 ** [String] Name of a suggestion list module that should be used for the input editboxes that are controlled by the {{{name}}} and {{{name2}}} fields.
 

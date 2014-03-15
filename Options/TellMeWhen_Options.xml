@@ -222,7 +222,7 @@
 	
 	<Frame name="TellMeWhen_Unit" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Frames>
-			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditbox" parentKey="Unit">
+			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditBox" parentKey="Unit">
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="LEFT" x="9" />

@@ -291,8 +291,8 @@ end
 
 
 
----------- Editbox Hooking ----------
-local EditboxHooks = {
+---------- EditBox Hooking ----------
+local EditBoxHooks = {
 	OnEditFocusLost = function(self)
 		if self.SUG_Enabled then
 			SUG.Suggest:Hide()
@@ -306,7 +306,7 @@ local EditboxHooks = {
 			if not newModule then
 				SUG:DisableEditBox(self)
 				error(
-					("Editbox %q is supposed to implement SUG module %q, but the module doesn't seem to exist..."):
+					("EditBox %q is supposed to implement SUG module %q, but the module doesn't seem to exist..."):
 					format(tostring(self:GetName() or self), tostring(self.SUG_type or "<??>"))
 				)
 			end
@@ -348,14 +348,14 @@ function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 	editbox.SUG_onlyOneEntry = onlyOneEntry
 
 	if not editbox.SUG_hooked then
-		for k, v in pairs(EditboxHooks) do
+		for k, v in pairs(EditBoxHooks) do
 			editbox:HookScript(k, v)
 		end
 		editbox.SUG_hooked = 1
 	end
 
 	if editbox:HasFocus() then
-		EditboxHooks.OnEditFocusGained(editbox) -- force this to rerun becase we may be calling from within the editbox's script
+		EditBoxHooks.OnEditFocusGained(editbox) -- force this to rerun becase we may be calling from within the editbox's script
 	end
 end
 

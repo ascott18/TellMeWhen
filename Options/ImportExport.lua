@@ -67,7 +67,7 @@ function Item:OnNewInstance(type, parent)
 	end
 end
 
-function Item:GetEditbox()
+function Item:GetEditBox()
 	return EDITBOX
 end
 
@@ -1174,7 +1174,7 @@ local CurrentHandler
 function TMW.IE:ImportExport_DropDown(...)
 	local DROPDOWN = self
 	EDITBOX = DROPDOWN:GetParent()
-	TMW.IE.ImportExport_Editbox = EDITBOX
+	TMW.IE.ImportExport_EditBox = EDITBOX
 
 	local VALUE = UIDROPDOWNMENU_MENU_VALUE
 

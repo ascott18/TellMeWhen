@@ -215,7 +215,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 
 TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(Item_group)
 	local gs = Item_group.Settings
-	local IMPORTS, EXPORTS = Item_group:GetEditbox():GetAvailableImportExportTypes()
+	local IMPORTS, EXPORTS = Item_group:GetEditBox():GetAvailableImportExportTypes()
 
 	-- copy group position
 	local info = UIDropDownMenu_CreateInfo()

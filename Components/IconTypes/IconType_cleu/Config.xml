@@ -73,7 +73,7 @@
 				</Scripts>
 			</CheckButton>
 			
-			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditbox" parentKey="SourceUnit">
+			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditBox" parentKey="SourceUnit">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentCLEUDur" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
 					<Anchor point="RIGHT" x="-125"/>
@@ -124,7 +124,7 @@
 				</Scripts>
 			</Frame>
 
-			<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditbox" parentKey="DestUnit">
+			<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditBox" parentKey="DestUnit">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentSourceUnit" relativePoint="BOTTOM" y="-10"/>
 					<Anchor point="LEFT" relativeTo="$parentSourceUnit"/>

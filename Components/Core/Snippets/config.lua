@@ -332,7 +332,7 @@ end)
 
 -- Import Snippet
 codesnippet:RegisterMenuBuilder(1, function(Item_codesnippet)	
-	local IMPORTS, EXPORTS = Item_codesnippet:GetEditbox():GetAvailableImportExportTypes()
+	local IMPORTS, EXPORTS = Item_codesnippet:GetEditBox():GetAvailableImportExportTypes()
 	
 	-- Import as global snippet
 	if IMPORTS.codesnippet_global then
