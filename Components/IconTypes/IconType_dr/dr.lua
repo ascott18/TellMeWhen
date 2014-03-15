@@ -134,6 +134,10 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 			ctrlroot		= "DR-ControlledRoot", 
 			shortroot		= "DR-RandomRoot",
 		}
+
+		local ignored = {
+			knockback = true,
+		}
 		
 		TMW.BE.dr = {}
 		local dr = TMW.BE.dr
@@ -142,7 +146,7 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 
 			if k then
 				dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
-			elseif TMW.debug then
+			elseif TMW.debug and not ignored[category] then
 				TMW:Error("The DR category %q is undefined!", category)
 			end
 		end

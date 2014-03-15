@@ -1709,8 +1709,6 @@ function TMW:OnInitialize()
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
 	TMW:RegisterEvent("PLAYER_LOGIN")
-
-	TMW:ProcessEquivalencies()
 	
 	TMW.OnInitialize = nil
 end
@@ -1821,6 +1819,8 @@ function TMW:PLAYER_LOGIN()
 	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
+
+	TMW:ProcessEquivalencies()
 	
 	-- This should be done twice to get everything aware of everything else's GUID.
 	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
