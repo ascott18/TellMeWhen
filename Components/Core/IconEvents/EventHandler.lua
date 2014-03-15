@@ -353,6 +353,10 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 	end,
 
 	TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE = function(self, _, icon, iconEvent, eventSettings)
+		if eventSettings.Type ~= self.identifier then
+			return
+		end
+
 		local ConditionObjectConstructor = icon:Conditions_GetConstructor(eventSettings.OnConditionConditions)
 		local ConditionObject = ConditionObjectConstructor:Construct()
 
@@ -389,17 +393,29 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 		self.RunningTimers = {}
 
 		TMW:RegisterCallback("TMW_ONUPDATE_POST", self)
+		TMW:RegisterCallback("TMW_ICON_DISABLE", self, "TMW_ICON_DISABLE_2")
+	end,
+
+	TMW_ICON_DISABLE_2 = function(self, _, icon, soft)
+		for eventSettings, timerTable in pairs(self.RunningTimers) do
+			if timerTable.icon == icon then
+				timerTable.halted = true
+			end
+		end
 	end,
 
 	TMW_ONUPDATE_POST = function(self, event, time, Locked)
 		if Locked then
-			for eventSettings, data in pairs(self.RunningTimers) do
-				if data.nextRun < time then
-					while data.nextRun < time do
-						data.nextRun = data.nextRun + eventSettings.Frequency
+			for eventSettings, timerTable in pairs(self.RunningTimers) do
+				if not timerTable.halted and timerTable.nextRun < time then
+					if eventSettings.Frequency > 0 then
+						-- Test if Frequency > 0 before starting loop because otherwise it will be infinite.
+						while timerTable.nextRun < time do
+							timerTable.nextRun = timerTable.nextRun + eventSettings.Frequency
+						end
 					end
 
-					self:HandleEvent(data.icon, eventSettings)
+					self:HandleEvent(timerTable.icon, eventSettings)
 				end
 			end
 		end
@@ -408,11 +424,23 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 	HandleConditionStateChange = function(self, eventSettingsList, failed)
 		if not failed then
 			for eventSettings, icon in pairs(eventSettingsList) do
-				self.RunningTimers[eventSettings] = {icon = icon, nextRun = TMW.time, }
+				local timerTable = self.RunningTimers[eventSettings]
+				if not timerTable then
+					self.RunningTimers[eventSettings] = {icon = icon, nextRun = TMW.time}
+				else
+					local Frequency = eventSettings.Frequency
+
+					timerTable.halted = false
+					if timerTable.nextRun < TMW.time then
+						timerTable.nextRun = TMW.time
+					end
+				end
 			end
 		else
 			for eventSettings, icon in pairs(eventSettingsList) do
-				self.RunningTimers[eventSettings] = nil
+				if self.RunningTimers[eventSettings] then
+					self.RunningTimers[eventSettings].halted = true
+				end
 			end
 		end
 
