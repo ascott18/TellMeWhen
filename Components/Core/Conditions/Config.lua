@@ -365,7 +365,7 @@ end
 function CNDT:IconMenu_DropDown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
 		for icon in UIDROPDOWNMENU_MENU_VALUE:InIcons() do
-			if icon:IsValid() and CI.icon ~= icon then
+			if icon:IsValid() --[[and CI.icon ~= icon]] then
 				local info = UIDropDownMenu_CreateInfo()
 
 				local text, textshort, tooltip = icon:GetIconMenuText()
@@ -870,7 +870,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			else
 				CndtGroup.Slider:SetStaticMidText("")
 			end
-			
+
 			local val = CndtGroup.Slider:GetValue()
 			formatter:SetFormattedText(CndtGroup.ValText, val)
 			CndtGroup.ValText:Show()

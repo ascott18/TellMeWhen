@@ -59,7 +59,7 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c, icon)
 		if c.Icon == "" or c.Icon == icon:GetGUID() then
-			return [[true]]
+			--return [[true]]
 		end
 
 		TMW:QueueValidityCheck(icon, c.Icon, L["VALIDITY_CONDITION_DESC"])
