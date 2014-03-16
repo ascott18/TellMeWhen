@@ -26,9 +26,10 @@ local PlaySoundFile =
 local LSM = LibStub("LibSharedMedia-3.0")
 
 
-local SoundBase = TMW:NewClass("EventHandler_SoundBase", "EventHandler")
+local Sound = TMW.C.EventHandler_WhileConditions_Repetitive:New("Sound", true)
+Sound.frequencyMinimum = 0.2
 
-SoundBase:RegisterEventDefaults{
+Sound:RegisterEventDefaults{
 	Sound = "None",
 }
 
@@ -62,7 +63,7 @@ TMW:RegisterUpgrade(42102, {
 
 
 -- Helper methods
-function SoundBase:GetSoundFile(sound)
+function Sound:GetSoundFile(sound)
 	if sound == "" or sound == "Interface\\Quiet.ogg" or sound == "None" then
 		return nil
 	elseif strfind(sound, "%.[^\\]+$") then
@@ -81,11 +82,11 @@ end
 
 
 -- Required methods
-function SoundBase:ProcessIconEventSettings(event, eventSettings)
+function Sound:ProcessIconEventSettings(event, eventSettings)
 	return not not self:GetSoundFile(eventSettings.Sound)
 end
 
-function SoundBase:HandleEvent(icon, eventSettings)
+function Sound:HandleEvent(icon, eventSettings)
 	local Sound = self:GetSoundFile(eventSettings.Sound)
 	
 	if Sound then
@@ -95,7 +96,7 @@ function SoundBase:HandleEvent(icon, eventSettings)
 	end
 end
 
-function SoundBase:OnRegisterEventHandlerDataTable()
+function Sound:OnRegisterEventHandlerDataTable()
 	error("Do not register event handler data for the Sound event handler. Use LibStub('LibSharedMedia-3.0'):Register('sound', name, path) instead.", 3)
 end
 
@@ -134,23 +135,3 @@ do	-- LSM sound registration
 	LSM:Register("sound", "TMW - Ding 9",  [[Interface\Addons\TellMeWhen\Sounds\Ding9.ogg]])
 end
 
-
-
-
-
--------------------
--- EventSound
--------------------
-
-local EventSound = TMW.Classes.EventHandler_SoundBase:New("Sound")
-
-
-
-
-
--------------------
--- StatefulSound
--------------------
-
-local StatefulSound = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", "EventHandler_SoundBase"):New("Sound2")
-StatefulSound.frequencyMinimum = 0.2

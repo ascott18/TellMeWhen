@@ -29,15 +29,19 @@ local CI = TMW.CI
 
 
 local EVENTS = TMW.EVENTS
-local LuaBase = TMW.C.EventHandler_LuaBase
+local Lua = EVENTS:GetEventHandler("Lua")
 
-LuaBase.handlerName = L["EVENTHANDLER_LUA_TAB"]
-LuaBase.handlerNameShort = L["EVENTHANDLER_LUA_TAB"]
+Lua.handlerName = L["EVENTHANDLER_LUA_TAB"]
+Lua.handlerNameShort = L["EVENTHANDLER_LUA_TAB"]
 
+
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+	Lua.ConfigContainer.Error:SetWidth(Lua.ConfigContainer:GetWidth() - 20)
+end)
 
 
 -- Overrides TestEvent inherited from TMW.Classes.EventHandler
-function LuaBase:TestEvent(eventID)
+function Lua:TestEvent(eventID)
 	local eventSettings = EVENTS:GetEventSettings(eventID)
 
 	local code = eventSettings.Lua
@@ -54,11 +58,11 @@ function LuaBase:TestEvent(eventID)
 end
 
 ---------- Events ----------
-function LuaBase:LoadSettingsForEventID(id)
+function Lua:LoadSettingsForEventID(id)
 	self:LoadCode(EVENTS:GetEventSettings(id).Lua)
 end
 
-function LuaBase:LoadCode(code)
+function Lua:LoadCode(code)
 	self.ConfigContainer.Code:SetText(code)
 	
 	local func, err = self:GetCompiledFunction(code)
@@ -66,7 +70,7 @@ function LuaBase:LoadCode(code)
 	self:SetError(code, "COMPILE", err)
 end
 
-function LuaBase:SetError(code, kind, err)
+function Lua:SetError(code, kind, err)
 	local Error = self.ConfigContainer.Error
 	
 	if not err or err == "" then
@@ -92,10 +96,12 @@ function LuaBase:SetError(code, kind, err)
 	Error:SetText(err)
 end
 
-function LuaBase:SetupEventDisplay(eventID)
+function Lua:SetupEventDisplay(eventID)
 	if not eventID then return end
 
-	local code = EVENTS:GetEventSettings(eventID).Lua
+	local eventSettings = EVENTS:GetEventSettings(eventID)
+
+	local code = eventSettings.Lua
 
 	code = code:trim(" \r\n\t")
 		
@@ -114,25 +120,3 @@ function LuaBase:SetupEventDisplay(eventID)
 end
 
 
-
-
-
-local EventLua = EVENTS:GetEventHandler("Lua")
-TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	EventLua.ConfigContainer.Error:SetWidth(EventLua.ConfigContainer:GetWidth() - 20)
-end)
-
-
-local StatefulLua = EVENTS:GetEventHandler("Lua2")
-TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	StatefulLua.ConfigContainer = EventLua.ConfigContainer
-end)
-
-function StatefulLua:SetupEventDisplay(eventID)
-	if not eventID then return end
-
-	TMW.EVENTS.EventHandlerFrames[eventID].EventName:SetText(eventID .. ") " .. L["SOUND_EVENT_WHILECONDITION"])
-
-
-	EventLua:SetupEventDisplay(eventID)
-end

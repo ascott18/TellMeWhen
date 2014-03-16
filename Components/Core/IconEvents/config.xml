@@ -129,7 +129,7 @@
 				-- This is handled in OnMouseUp so that it will still fire when the button is disabled.
 
 				local EventHandler = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
-				if button == "RightButton" and EventHandler.isTriggeredByEvents then
+				if button == "RightButton" --[[and EventHandler.isTriggeredByEvents]] then
 					ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 				end
 			</OnMouseUp>
@@ -443,6 +443,23 @@
 						</Scripts>
 					</CheckButton>
 
+					<CheckButton name="$parentSimplyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="SimplyShown" motionScriptsWhileDisabled="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" y="-3"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "OnlyShown",
+									title = TMW.L["EVENTS_SETTINGS_SIMPLYSHOWN"],
+									tooltip = TMW.L["EVENTS_SETTINGS_SIMPLYSHOWN_DESC"],
+								})
+								
+								self:ConstrainLabel(self:GetParent(), "RIGHT")
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 					<CheckButton name="$parentOnlyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="OnlyShown" motionScriptsWhileDisabled="true">
 						<Anchors>
 							<Anchor point="TOP" relativeTo="$parentPassThrough" relativePoint="BOTTOM" y="4"/>
@@ -592,7 +609,7 @@
 					<Button name="$parentIconEventWhileCondition" parentKey="IconEventWhileCondition" inherits="TellMeWhen_ButtonTemplate">
 						<Size x="175" y="16"/>
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP" y="-15"/>
+							<Anchor point="TOP" relativeTo="$parentSimplyShown" relativePoint="BOTTOM" y="-7"/>
 							<Anchor point="LEFT" />
 							<Anchor point="RIGHT" />
 						</Anchors>
@@ -600,6 +617,7 @@
 							<OnLoad>
 								self:SetFrameLevel(self:GetParent():GetFrameLevel()+2)
 								self.Background:SetAlpha(0.7)
+								self:SetScale(0.9)
 								
 								TMW:TT(self, "EVENT_WHILECONDITIONS", "EVENT_WHILECONDITIONS_DESC")
 								

@@ -196,8 +196,9 @@ end
 --- Creates a new EventHandler.
 -- @name EventHandler:New
 -- @param identifier [string] An identifier for the event handler.
-function EventHandler:OnNewInstance_EventHandler(identifier)
+function EventHandler:OnNewInstance_EventHandler(identifier, supportWCSP)
 	self.identifier = identifier
+	self.supportWCSP = supportWCSP
 	self.AllEventHandlerData = {}
 	self.NonSpecificEventHandlerData = {}
 	
@@ -290,7 +291,7 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 			if thisHasEventHandlers then
 				TMW:Fire("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", icon, event, eventSettings)
 				
-				if Handler.isTriggeredByEvents then
+				if event ~= "WCSP" then
 					icon.EventHandlersSet[event] = true
 					icon.EventsToFire = icon.EventsToFire or {}
 				end
@@ -330,6 +331,27 @@ TMW:NewClass("EventHandler_ColumnConfig", "EventHandler"){
 	end,
 }
 
+
+
+
+if TMW.C.IconType then
+	error("Bad load order! TMW.C.IconType shouldn't exist at this point!")
+end
+TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
+	if class.className == "IconType" then
+		class:RegisterIconEvent(0, "WCSP", {
+			text = L["SOUND_EVENT_WHILECONDITION"],
+			desc = L["SOUND_EVENT_WHILECONDITION_DESC"],
+			settings = {
+				IconEventWhileCondition = true,
+			}
+		})
+
+		TMW:UnregisterThisCallback()
+	end
+end)
+
+
 TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 	isTriggeredByEvents = false,
 
@@ -353,11 +375,19 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 	end,
 
 	TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE = function(self, _, icon, iconEvent, eventSettings)
-		if eventSettings.Type ~= self.identifier then
+		if eventSettings.Type ~= self.identifier or eventSettings.Event ~= "WCSP" then
 			return
 		end
 
 		local ConditionObjectConstructor = icon:Conditions_GetConstructor(eventSettings.OnConditionConditions)
+
+		if eventSettings.OnlyShown then
+			local condition = ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
+
+			condition.Type = "ICON"
+			condition.Icon = icon:GetGUID()
+		end
+
 		local ConditionObject = ConditionObjectConstructor:Construct()
 
 		if ConditionObject then
@@ -443,9 +473,6 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 				end
 			end
 		end
-
-		--TODO: not getting cleared out properly when an icon's handler is removed
-
 	end,
 }
 

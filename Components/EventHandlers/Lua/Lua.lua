@@ -21,16 +21,16 @@ local loadstring =
 	  loadstring
 
 
-local LuaBase = TMW:NewClass("EventHandler_LuaBase", "EventHandler")
+local Lua = TMW.C.EventHandler_WhileConditions_Repetitive:New("Lua", true)
+Lua.frequencyMinimum = 0
 
-
-LuaBase:RegisterEventDefaults{
+Lua:RegisterEventDefaults{
 	Lua = "-- <Untitled Lua Code>\n\nlocal icon = ...\n\n--Your code goes here:\n\n\n\n",
 }
 
 local Functions = {}
 
-function LuaBase:GetCompiledFunction(luaCode)
+function Lua:GetCompiledFunction(luaCode)
 	if Functions[luaCode] then
 		return Functions[luaCode]
 	end
@@ -45,11 +45,11 @@ function LuaBase:GetCompiledFunction(luaCode)
 end
 
 -- Required methods
-function LuaBase:ProcessIconEventSettings(event, eventSettings)
+function Lua:ProcessIconEventSettings(event, eventSettings)
 	return eventSettings.Lua ~= TMW.Icon_Defaults.Events["**"].Lua and type(self:GetCompiledFunction(eventSettings.Lua)) == "function"
 end
 
-function LuaBase:HandleEvent(icon, eventSettings)
+function Lua:HandleEvent(icon, eventSettings)
 	local func = self:GetCompiledFunction(eventSettings.Lua)
 	
 	if func then
@@ -57,7 +57,7 @@ function LuaBase:HandleEvent(icon, eventSettings)
 	end
 end
 
-function LuaBase:OnRegisterEventHandlerDataTable()
+function Lua:OnRegisterEventHandlerDataTable()
 	error("The Lua event handler does not support registration of event handler data - everything is user-defined.", 3)
 end
 
@@ -81,22 +81,3 @@ TMW:RegisterLuaImportDetector(function(table, id, parentTableName)
 		end
 	end
 end)
-
-
-
--------------------
--- EventLua
--------------------
-
-local EventLua = LuaBase:New("Lua")
-
-
-
-
-
--------------------
--- StatefulLua
--------------------
-
-local StatefulLua = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", "EventHandler_LuaBase"):New("Lua2")
-StatefulLua.frequencyMinimum = 0

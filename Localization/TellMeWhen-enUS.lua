@@ -1735,6 +1735,7 @@ This is probably due to this event not being available for the current icon type
 
 
 L["SOUND_EVENT_WHILECONDITION"] = "While Condition Set Passing"
+L["SOUND_EVENT_WHILECONDITION_DESC"] = "This notification will trigger for as long as a set of conditions that you configure are passing."
 
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
@@ -1755,7 +1756,7 @@ L["EVENTS_HANDLERS_HEADER"] = "Notification Handlers"
 L["EVENTS_HANDLERS_ADD"] = "Add Notification..."
 L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose a notification to add to this icon."
 L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for notification options
-|cff7fffffRight-click|r to change event (if applicable)
+|cff7fffffRight-click|r to change trigger
 |cff7fffffClick-and-drag|r to rearrange]]
 L["EVENTS_HANDLERS_PLAY"] = "Test Notification"
 L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the notification"
@@ -1774,6 +1775,13 @@ The settings for the trigger and the effect will then appear, and you can config
 
 L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
 L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Prevents the notification from being handled if the icon is not shown."
+
+L["EVENTS_SETTINGS_SIMPLYSHOWN"] = "Only trigger if icon is shown"
+L["EVENTS_SETTINGS_SIMPLYSHOWN_DESC"] = [[Causes the notification to only trigger while the icon is shown.
+
+You may enable this setting and leave the condition set empty in order to have a notification with no other extra conditions.
+
+Or, you may combine this setting with additional conditions.]]
 
 L["EVENTS_SETTINGS_PASSINGCNDT"] = "Only handle if condition is passing:"
 L["EVENTS_SETTINGS_PASSINGCNDT_DESC"] = "Prevents the notification from being handled unless the condition configured below succeeds."

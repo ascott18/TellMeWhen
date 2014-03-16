@@ -975,6 +975,11 @@
 	
 	<Button name="TellMeWhen_ButtonTemplate" virtual="true">
 		<Size x="144" y="15"/>
+		
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_Button"/>
+		</Attributes>
+
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
 		<DisabledFont style="GameFontDisable"/>

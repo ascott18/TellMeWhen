@@ -30,8 +30,8 @@
 						self:GetParent():LockHighlight()
 					</OnEnter>
 					<OnLeave>
-						local SoundBase = TMW.C.EventHandler_SoundBase
-						if SoundBase.selectedListID ~= self:GetParent().listID then
+						local Sound = TMW.EVENTS:GetEventHandler("Sound")
+						if Sound.selectedListID ~= self:GetParent().listID then
 							self:GetParent():UnlockHighlight()
 						end
 					</OnLeave>
@@ -122,7 +122,6 @@
 				</Layers>
 				<Scripts>
 					<OnSizeChanged>
-						local SoundBase = TMW.C.EventHandler_SoundBase
 						local Sound = TMW.EVENTS:GetEventHandler("Sound")
 						Sound:SetSoundsOffset(Sound.offs)
 					</OnSizeChanged>

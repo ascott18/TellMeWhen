@@ -42,8 +42,9 @@ local DogTag = LibStub("LibDogTag-3.0")
 
 
 local EVENTS = TMW.EVENTS
-local AnnouncementsBase = TMW:NewClass("EventHandler_AnnouncementsBase", "EventHandler_ColumnConfig")
-local Announcements = AnnouncementsBase
+
+local Announcements = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", "EventHandler_ColumnConfig"):New("Announcements", true)
+Announcements.frequencyMinimum = 0.5
 
 Announcements.subHandlerDataIdentifier = "Announcements"
 Announcements.subHandlerSettingKey = "Channel"
@@ -210,20 +211,19 @@ function Announcements:OnRegisterEventHandlerDataTable(eventHandlerData, order, 
 end
 
 
-local EventAnnouncements = AnnouncementsBase:New("Announcements")
 
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(0, "", {
+Announcements:RegisterEventHandlerDataNonSpecific(0, "", {
 	text = NONE,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(10, "SAY", {
+Announcements:RegisterEventHandlerDataNonSpecific(10, "SAY", {
 	text = CHAT_MSG_SAY,
 	isBlizz = 1,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(12, "YELL", {
+Announcements:RegisterEventHandlerDataNonSpecific(12, "YELL", {
 	text = CHAT_MSG_YELL,
 	isBlizz = 1,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(14, "WHISPER", {
+Announcements:RegisterEventHandlerDataNonSpecific(14, "WHISPER", {
 	text = WHISPER,
 	isBlizz = 1,
 
@@ -231,19 +231,19 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(14, "WHISPER", {
 		"WhisperTarget",
 	},
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(16, "PARTY", {
+Announcements:RegisterEventHandlerDataNonSpecific(16, "PARTY", {
 	text = CHAT_MSG_PARTY,
 	isBlizz = 1,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(20, "RAID", {
+Announcements:RegisterEventHandlerDataNonSpecific(20, "RAID", {
 	text = CHAT_MSG_RAID,
 	isBlizz = 1,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(22, "RAID_WARNING", {
+Announcements:RegisterEventHandlerDataNonSpecific(22, "RAID_WARNING", {
 	text = CHAT_MSG_RAID_WARNING,
 	isBlizz = 1,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
+Announcements:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
 	text = CHAT_MSG_BATTLEGROUND,
 	isBlizz = 1,
 	handler =
@@ -255,7 +255,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
 		end
 	or nil,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(25, "INSTANCE_CHAT", {
+Announcements:RegisterEventHandlerDataNonSpecific(25, "INSTANCE_CHAT", {
 	text = INSTANCE_CHAT,
 	isBlizz = 1,
 	hidden = not wow_501,
@@ -265,7 +265,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(25, "INSTANCE_CHAT", {
 		end
 	end,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(30, "SMART", {
+Announcements:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 	text = L["CHAT_MSG_SMART"],
 	desc = L["CHAT_MSG_SMART_DESC"],
 	isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
@@ -296,7 +296,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 		end
 	,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
+Announcements:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 	text = L["CHAT_MSG_CHANNEL"],
 	desc = L["CHAT_MSG_CHANNEL_DESC"],
 	isBlizz = 1, -- flagged to not use override %t and %f substitutions, and also not to try and color any names
@@ -342,20 +342,20 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(40, "CHANNEL", {
 		end
 	end,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(50, "GUILD", {
+Announcements:RegisterEventHandlerDataNonSpecific(50, "GUILD", {
 	text = CHAT_MSG_GUILD,
 	isBlizz = 1,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(52, "OFFICER", {
+Announcements:RegisterEventHandlerDataNonSpecific(52, "OFFICER", {
 	text = CHAT_MSG_OFFICER,
 	isBlizz = 1,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(60, "EMOTE", {
+Announcements:RegisterEventHandlerDataNonSpecific(60, "EMOTE", {
 	text = CHAT_MSG_EMOTE,
 	isBlizz = 1,
 })
 
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
+Announcements:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 	-- GLOBALS: DEFAULT_CHAT_FRAME, FCF_GetChatWindowInfo
 	text = L["CHAT_FRAME"],
 
@@ -412,7 +412,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 })
 
 local bullshitTable = {}
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
+Announcements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 	text = L["RAID_WARNING_FAKE"],
 	desc = L["RAID_WARNING_FAKE_DESC"],
 
@@ -439,7 +439,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", 
 	end,
 })
 
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
+Announcements:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
 	text = L["ERRORS_FRAME"],
 	desc = L["ERRORS_FRAME_DESC"],
 
@@ -459,7 +459,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
 })
 
 local sctcolor = {r=1, b=1, g=1}
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
+Announcements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	-- GLOBALS: SCT
 	text = "Scrolling Combat Text",
 	hidden = function() return not (SCT and SCT:IsEnabled()) end,
@@ -502,7 +502,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	end,
 })
 
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
+Announcements:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 	-- GLOBALS: MikSBT
 	text = "MikSBT",
 	hidden = function() return not MikSBT end,
@@ -540,7 +540,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 		end
 	end,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
+Announcements:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 	-- GLOBALS: Parrot
 	text = "Parrot",
 	hidden = function() return not (Parrot and ((Parrot.IsEnabled and Parrot:IsEnabled()) or Parrot:IsActive())) end,
@@ -579,7 +579,7 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 		end
 	end,
 })
-EventAnnouncements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
+Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 	-- GLOBALS: CombatText_AddMessage, CombatText_StandardScroll, SHOW_COMBAT_TEXT
 	text = COMBAT_TEXT_LABEL,
 	desc = L["ANN_FCT_DESC"],
@@ -607,11 +607,3 @@ EventAnnouncements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 
 
 
-
-local StatefulAnnouncements = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", "EventHandler_AnnouncementsBase"):New("Announcements2")
-StatefulAnnouncements.frequencyMinimum = 0.5
-
-
-StatefulAnnouncements.AllEventHandlerData = EventAnnouncements.AllEventHandlerData
-StatefulAnnouncements.NonSpecificEventHandlerData = EventAnnouncements.NonSpecificEventHandlerData
-StatefulAnnouncements.ConfigFrameData = EventAnnouncements.ConfigFrameData

@@ -5,9 +5,6 @@
  -->
  
 
-<Script file="AnimationsBase.lua"/>
-
-<Script file="EventAnimations.lua"/>
-<Script file="StatefulAnimations.lua"/>
+<Script file="Animations.lua"/>
 
 </Ui>

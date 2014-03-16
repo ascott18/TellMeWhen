@@ -159,13 +159,13 @@ function EVENTS:LoadConfig()
 
 			frame:Enable()
 
-			if EventHandler.isTriggeredByEvents then
-				frame.event = eventData.event
-				frame.eventData = eventData
+			--if EventHandler.isTriggeredByEvents then
+			frame.event = eventData.event
+			frame.eventData = eventData
 
-				local desc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
-				TMW:TT(frame, eventData.text, desc, 1, 1)
-			end
+			local desc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
+			TMW:TT(frame, eventData.text, desc, 1, 1)
+			--end
 
 			-- This delegates the setup of frame.DataText to the event handler
 			-- so that it can put useful information about the user's settings
@@ -288,110 +288,92 @@ function EVENTS:LoadEventSettings()
 	EventSettingsContainer:Show()
 
 	--hide settings
-	EventSettingsContainer.PassThrough		:Hide()
-	EventSettingsContainer.OnlyShown		:Hide()
-	EventSettingsContainer.Operator			:Hide()
-	EventSettingsContainer.Value			:Hide()
-	EventSettingsContainer.CndtJustPassed	:Hide()
-	EventSettingsContainer.PassingCndt		:Hide()
-	EventSettingsContainer.Icon				:Hide()
+	EventSettingsContainer.PassThrough				:Hide()
+	EventSettingsContainer.OnlyShown				:Hide()
+	EventSettingsContainer.Operator					:Hide()
+	EventSettingsContainer.Value					:Hide()
+	EventSettingsContainer.CndtJustPassed			:Hide()
+	EventSettingsContainer.PassingCndt				:Hide()
+	EventSettingsContainer.Icon						:Hide()
+	EventSettingsContainer.Frequency				:Hide()
+	EventSettingsContainer.IconEventWhileCondition	:Hide()
 
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
 
-	if EventHandler.isTriggeredByEvents then
 
-		local eventData = self:GetEventData()
+	local eventData = self:GetEventData()
 
-		IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
+	IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
+
+	if eventSettings.Event == "WCSP" then
+		if EventHandler.frequencyMinimum then
+			EventSettingsContainer.Frequency:Show()
+
+			EventSettingsContainer.Frequency:SetMinMaxValues(EventHandler.frequencyMinimum, math.huge)
+			EventSettingsContainer.Frequency:ReloadSetting()
+		end
+	else
 
 		EventSettingsContainer.PassThrough:Show()
 		EventSettingsContainer.OnlyShown:Show()
-
-		--load settings
-		EventSettingsContainer.Value:SetText(eventSettings.Value)
-		EventSettingsContainer.Icon:SetGUID(eventSettings.Icon)
-		
-
-		local settingsUsedByEvent = eventData.settings
-
-		--show settings as needed
-		for setting, frame in pairs(EventSettingsContainer) do
-			if type(frame) == "table" then
-				local state = settingsUsedByEvent and settingsUsedByEvent[setting]
-
-				if state == "FORCE" then
-					frame:Disable()
-					frame:SetAlpha(1)
-				elseif state == "FORCEDISABLED" then
-					frame:Disable()
-					frame:SetAlpha(0.4)
-				else
-					frame:SetAlpha(1)
-					if frame.Enable then
-						frame:Enable()
-					end
-				end
-				if state then
-					frame:Show()
-				end
-			end
-		end
-
-		if EventSettingsContainer.PassingCndt				:GetChecked() then
-			EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
-			EventSettingsContainer.Operator					:Enable()
-			EventSettingsContainer.Value					:Enable()
-			if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
-				EventSettingsContainer.CndtJustPassed		:Enable()
-			end
-		else
-			EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontDisable)
-			EventSettingsContainer.Operator					:Disable()
-			EventSettingsContainer.Value					:Disable()
-			EventSettingsContainer.CndtJustPassed			:Disable()
-		end
-
-		EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
-		EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
-
-		local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, eventSettings.Operator, TMW.operators)
-		if v then
-			TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
-		end
-
 	end
+
+	--load settings
+	EventSettingsContainer.Value:SetText(eventSettings.Value)
+	EventSettingsContainer.Icon:SetGUID(eventSettings.Icon)
+	
+
+	local settingsUsedByEvent = eventData.settings
+
+	--show settings as needed
+	for setting, frame in pairs(EventSettingsContainer) do
+		if type(frame) == "table" then
+			local state = settingsUsedByEvent and settingsUsedByEvent[setting]
+
+			if state == "FORCE" then
+				frame:Disable()
+				frame:SetAlpha(1)
+			elseif state == "FORCEDISABLED" then
+				frame:Disable()
+				frame:SetAlpha(0.4)
+			else
+				frame:SetAlpha(1)
+				if frame.Enable then
+					frame:Enable()
+				end
+			end
+			if state then
+				frame:Show()
+			end
+		end
+	end
+
+	if EventSettingsContainer.PassingCndt				:GetChecked() then
+		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
+		EventSettingsContainer.Operator					:Enable()
+		EventSettingsContainer.Value					:Enable()
+		if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
+			EventSettingsContainer.CndtJustPassed		:Enable()
+		end
+	else
+		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontDisable)
+		EventSettingsContainer.Operator					:Disable()
+		EventSettingsContainer.Value					:Disable()
+		EventSettingsContainer.CndtJustPassed			:Disable()
+	end
+
+	EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
+	EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
+
+	local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, eventSettings.Operator, TMW.operators)
+	if v then
+		TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
+	end
+
 	
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_POST")
 end
 
-
-
-TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", function()
-	local button = TMW.IE.Events.EventSettingsContainer.IconEventWhileCondition
-
-	button:Hide()
-
-	local EventHandler = EVENTS:GetEventHandlerForEventSettings()
-
-	if EventHandler.class.inherits[TMW.C.EventHandler_WhileConditions] then
-		button:Show()
-		
-		TMW.IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. L["SOUND_EVENT_WHILECONDITION"])
-	end
-
-
-	local Frequency = TMW.IE.Events.EventSettingsContainer.Frequency
-	Frequency:Hide()
-
-	if EventHandler.class.inherits[TMW.C.EventHandler_WhileConditions_Repetitive] then
-		Frequency:Show()
-
-		Frequency:SetMinMaxValues(EventHandler.frequencyMinimum, math.huge)
-		Frequency:ReloadSetting()
-
-	end
-
-end)
 
 
 function EVENTS:AdjustScrollFrame()
@@ -426,21 +408,18 @@ function EVENTS:IsEventIDValid(id)
 	local eventSettings = EVENTS:GetEventSettings(id)
 
 	local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventSettings)
-	local isTriggeredByEvents = EventHandler and EventHandler.isTriggeredByEvents
 
-	if isTriggeredByEvents then
-		if eventSettings.Event == "" then
-			-- The event is not set
-			return false, EVENTS.CONST.EVENT_INVALID_REASON_NOEVENT
+	if eventSettings.Event == "" then
+		-- The event is not set
+		return false, EVENTS.CONST.EVENT_INVALID_REASON_NOEVENT
 
-		elseif not TMW.EventList[eventSettings.Event] then
-			-- The event does not exist
-			return false, EVENTS.CONST.EVENT_INVALID_REASON_MISSINGEVENT
-			
-		end
+	elseif not TMW.EventList[eventSettings.Event] then
+		-- The event does not exist
+		return false, EVENTS.CONST.EVENT_INVALID_REASON_MISSINGEVENT
+		
 	end
 
-	if validEvents[eventSettings.Event] or not isTriggeredByEvents then
+	if validEvents[eventSettings.Event] then
 		if EventHandler then
 			-- This event is valid and can be loaded
 			return true, 0
@@ -639,14 +618,14 @@ function EVENTS.AddEvent_Dropdown(frame)
 			info.value = EventHandler.identifier
 
 
-			if EventHandler.isTriggeredByEvents then
+			--if EventHandler.isTriggeredByEvents then
 				info.hasArrow = true
 				info.keepShownOnClick = true
-			else
-				info.func = EVENTS.AddEvent_Dropdown_OnClick
-				info.arg1 = ""
-				info.arg2 = EventHandler.identifier
-			end
+			--else
+			--	info.func = EVENTS.AddEvent_Dropdown_OnClick
+			--	info.arg1 = ""
+			--	info.arg2 = EventHandler.identifier
+			--end
 
 			info.notCheckable = true
 

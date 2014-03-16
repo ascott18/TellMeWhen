@@ -31,13 +31,32 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 
 local EVENTS = TMW.EVENTS
-local SoundBase = TMW.C.EventHandler_SoundBase
-local Sound = SoundBase
+local Sound = TMW.EVENTS:GetEventHandler("Sound")
 
 Sound.handlerName = L["SOUND_TAB"]
 Sound.LSM = LSM
 
 TMW.HELP:NewCode("SND_INVALID_CUSTOM")
+
+
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()	
+	local Sounds = Sound.ConfigContainer.SoundList
+	
+	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
+	
+	Sounds.None:SetPoint("TOP")
+	Sounds.None.Name:SetText(NONE)
+	Sounds.None.Play:Hide()
+	Sounds.None.soundfile = ""
+	Sounds.None.soundname = "None"
+	
+	-- This must be done explicityly because otherwise, frame #1 would try to anchor to Sounds[0], which is the frame's userdata.
+	Sound:GetFrame(1):SetPoint("TOP", Sounds.None, "BOTTOM", 0, 0)
+	
+	Sound:SetSoundsOffset(0)
+
+	Sounds.ScrollBar:SetValue(0)
+end)
 
 
 function Sound:GetNumFramesNeeded()
@@ -79,16 +98,16 @@ end
 
 ---------- Sounds ----------
 function Sound:CompileSoundList()
-	if not SoundBase.List or #LSM:List("sound")-1 ~= #SoundBase.List then
-		SoundBase.List = CopyTable(LSM:List("sound"))
+	if not Sound.List or #LSM:List("sound")-1 ~= #Sound.List then
+		Sound.List = CopyTable(LSM:List("sound"))
 
-		for k, v in pairs(SoundBase.List) do
+		for k, v in pairs(Sound.List) do
 			if v == "None" then
-				tremove(SoundBase.List, k)
+				tremove(Sound.List, k)
 				break
 			end
 		end
-		sort(SoundBase.List, function(a, b)
+		sort(Sound.List, function(a, b)
 			local TMWa = strsub(a, 1, 3) == "TMW"
 			local TMWb = strsub(b, 1, 3) == "TMW"
 			if TMWa or TMWb then
@@ -108,21 +127,21 @@ end
 function Sound:SetSoundsOffset(offs)
 	self:CompileSoundList()
 	
-	SoundBase.offs = offs
+	Sound.offs = offs
 
-	local numFramesNeeded = min(#SoundBase.List, self:GetNumFramesNeeded())
+	local numFramesNeeded = min(#Sound.List, self:GetNumFramesNeeded())
 
 	for i = 1, numFramesNeeded do
 		local f = self:GetFrame(i)
 		if f then
 			local n = i + offs
-			local name = SoundBase.List[n]
+			local name = Sound.List[n]
 			if name then
 				f.soundname = name
 				f.Name:SetText(name)
 				f.soundfile = LSM:Fetch("sound", name)
 				f:Show()
-				if n == SoundBase.selectedListID then
+				if n == Sound.selectedListID then
 					f:LockHighlight()
 					f:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 				else
@@ -144,8 +163,8 @@ function Sound:SetSoundsOffset(offs)
 		self.ConfigContainer.SoundList[i]:Hide()
 	end
 
-	self.ConfigContainer.SoundList.ScrollBar:SetMinMaxValues(0, max(0, #SoundBase.List - self:GetNumFramesNeeded()))
-	if max(0, #SoundBase.List - self:GetNumFramesNeeded()) == 0 then
+	self.ConfigContainer.SoundList.ScrollBar:SetMinMaxValues(0, max(0, #Sound.List - self:GetNumFramesNeeded()))
+	if max(0, #Sound.List - self:GetNumFramesNeeded()) == 0 then
 		self.ConfigContainer.SoundList.ScrollBar:Hide()
 	else
 		self.ConfigContainer.SoundList.ScrollBar:Show()
@@ -156,18 +175,18 @@ function Sound:SelectSound(name)
 	if not name then return end
 	local soundFrame, listID
 
-	for k, listname in ipairs(SoundBase.List) do
+	for k, listname in ipairs(Sound.List) do
 		if listname == name then
 			listID = k
 			break
 		end
 	end
 
-	local numFramesNeeded = min(#SoundBase.List, self:GetNumFramesNeeded())
+	local numFramesNeeded = min(#Sound.List, self:GetNumFramesNeeded())
 	
-	self:SetSoundsOffset(SoundBase.offs)
+	self:SetSoundsOffset(Sound.offs)
 	if listID then
-		local newOffs = SoundBase.offs
+		local newOffs = Sound.offs
 		if listID > self.ConfigContainer.SoundList[numFramesNeeded].listID then
 			newOffs = newOffs + (listID - self.ConfigContainer.SoundList[numFramesNeeded].listID)
 		elseif listID < self.ConfigContainer.SoundList[1].listID then
@@ -186,7 +205,7 @@ function Sound:SelectSound(name)
 		frame:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 	end
 
-	SoundBase.selectedListID = 0
+	Sound.selectedListID = 0
 	self.ConfigContainer.Custom.selected = nil
 	self.ConfigContainer.Custom.Background:Hide()
 	self.ConfigContainer.Custom.Background:SetVertexColor(1, 1, 1, 1)
@@ -195,11 +214,11 @@ function Sound:SelectSound(name)
 	self.ConfigContainer.SoundList.None:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
 
 	if name == "None" then
-		SoundBase.selectedListID = -1 -- lame
+		Sound.selectedListID = -1 -- lame
 		self.ConfigContainer.SoundList.None:LockHighlight()
 		self.ConfigContainer.SoundList.None:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	elseif soundFrame then
-		SoundBase.selectedListID = soundFrame.listID
+		Sound.selectedListID = soundFrame.listID
 		soundFrame:LockHighlight()
 		soundFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	elseif strfind(name, "%.[^\\]+$") then
@@ -264,44 +283,4 @@ function Sound:TestSound(button, soundFile)
 end
 
 
-
-
-
-
-
-
-local EventSound = EVENTS:GetEventHandler("Sound")
-TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()	
-	local Sounds = EventSound.ConfigContainer.SoundList
-	
-	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
-	
-	Sounds.None:SetPoint("TOP")
-	Sounds.None.Name:SetText(NONE)
-	Sounds.None.Play:Hide()
-	Sounds.None.soundfile = ""
-	Sounds.None.soundname = "None"
-	
-	-- This must be done explicityly because otherwise, frame #1 would try to anchor to Sounds[0], which is the frame's userdata.
-	EventSound:GetFrame(1):SetPoint("TOP", Sounds.None, "BOTTOM", 0, 0)
-	
-	EventSound:SetSoundsOffset(0)
-
-	Sounds.ScrollBar:SetValue(0)
-end)
-
-
-local StatefulSound = EVENTS:GetEventHandler("Sound2")
-TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	StatefulSound.ConfigContainer = EventSound.ConfigContainer
-end)
-
-function StatefulSound:SetupEventDisplay(eventID)
-	if not eventID then return end
-
-	TMW.EVENTS.EventHandlerFrames[eventID].EventName:SetText(eventID .. ") " .. L["SOUND_EVENT_WHILECONDITION"])
-
-
-	EventSound:SetupEventDisplay(eventID)
-end
 
