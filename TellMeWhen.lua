@@ -1417,36 +1417,58 @@ do -- Callback Lib
 		table.n = #table
 	end
 	
+	local function DetermineFuncAndArg(event, func, arg1)
+		
+		if not event:find("^TMW_") then
+			-- All TMW events must begin with TMW_
+			error("TMW events must begin with 'TMW_'", 3)
+		end
+
+		if type(func) == "table" then
+			local object = func
+			func = object[arg1 or event]
+			arg1 = object
+		end
+		
+		if type(func) ~= "function" then
+			error("Couldn't find the function to register as a callback.", 3)
+		end
+
+		return func, arg1
+	end
+
+	--- Register a callback that will automatically unregister itself after it runs.
+	function TMW:RegisterRunonceCallback(event, func, arg1)
+		TMW:ValidateType("2 (event)", "TMW:RegisterRunonceCallback(event, func, arg1)", event, "string")
+		TMW:ValidateType("3 (func)", "TMW:RegisterRunonceCallback(event, func, arg1)", func, "function;table")
+		TMW:ValidateType("4 (arg1)", "TMW:RegisterRunonceCallback(event, func, arg1)", arg1, "!boolean")
+
+		func, arg1 = DetermineFuncAndArg(event, func, arg1)	
+
+		local function RunonceWrapper(...)
+			safecall(func, ...)
+			TMW:UnregisterCallback(event, RunonceWrapper, arg1)
+		end
+
+		TMW:RegisterCallback(event, RunonceWrapper, arg1)
+	end
+
 	function TMW:RegisterCallback(event, func, arg1)
 		TMW:ValidateType("2 (event)", "TMW:RegisterCallback(event, func, arg1)", event, "string")
 		TMW:ValidateType("3 (func)", "TMW:RegisterCallback(event, func, arg1)", func, "function;table")
 		TMW:ValidateType("4 (arg1)", "TMW:RegisterCallback(event, func, arg1)", arg1, "!boolean")
 		
-		if not event:find("^TMW_") then
-			-- All TMW events must begin with TMW_
-			error("TMW events must begin with 'TMW_'", 2)
-		end
-		
-		
+
+		func, arg1 = DetermineFuncAndArg(event, func, arg1)
+		arg1 = arg1 or true
+
 		local funcsForEvent
 		if callbackregistry[event] then
 			funcsForEvent = callbackregistry[event]
 		else
 			funcsForEvent = {}
 			callbackregistry[event] = funcsForEvent
-		end
-		
-		if type(func) == "table" then
-			local object = func
-			func = object[arg1 or event]
-			arg1 = object
-		end
-		arg1 = arg1 or true
-		
-		if type(func) ~= "function" then
-			error("Couldn't find the function to register as a callback.", 2)
-		end
-		
+		end	
 
 		local args
 		for i = 1, #funcsForEvent do
