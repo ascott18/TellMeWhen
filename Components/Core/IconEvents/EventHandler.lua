@@ -132,6 +132,7 @@ end)
 local EventHandler = TMW:NewClass("EventHandler")
 EventHandler.isTriggeredByEvents = true
 EventHandler.instancesByName = {}
+EventHandler.orderedInstances = {}
 
 --- Gets an EventHandler instance by name
 -- You may also use {{{TMW.EVENTS:GetEventHandler(identifier)}}} to accomplish the same thing.
@@ -196,13 +197,16 @@ end
 --- Creates a new EventHandler.
 -- @name EventHandler:New
 -- @param identifier [string] An identifier for the event handler.
-function EventHandler:OnNewInstance_EventHandler(identifier, supportWCSP)
+function EventHandler:OnNewInstance_EventHandler(identifier, order)
 	self.identifier = identifier
-	self.supportWCSP = supportWCSP
+	self.order = order
 	self.AllEventHandlerData = {}
 	self.NonSpecificEventHandlerData = {}
 	
 	EventHandler.instancesByName[identifier] = self
+
+	tinsert(EventHandler.orderedInstances, self)
+	TMW:SortOrderedTables(EventHandler.orderedInstances)
 end
 
 -- [INTERNAL]
@@ -343,6 +347,7 @@ TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 			text = L["SOUND_EVENT_WHILECONDITION"],
 			desc = L["SOUND_EVENT_WHILECONDITION_DESC"],
 			settings = {
+				SimplyShown = true,
 				IconEventWhileCondition = true,
 			}
 		})
@@ -354,6 +359,7 @@ end)
 
 TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 	isTriggeredByEvents = false,
+	supportWCSP = true,
 
 	OnNewInstance_WhileConditions = function(self)
 		self.MapConditionObjectToEventSettings = {}

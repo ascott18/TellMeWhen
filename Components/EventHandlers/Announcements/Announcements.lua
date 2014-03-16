@@ -43,7 +43,7 @@ local DogTag = LibStub("LibDogTag-3.0")
 
 local EVENTS = TMW.EVENTS
 
-local Announcements = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", "EventHandler_ColumnConfig"):New("Announcements", true)
+local Announcements = TMW:NewClass(nil, "EventHandler_WhileConditions_Repetitive", "EventHandler_ColumnConfig"):New("Announcements", 20)
 Announcements.frequencyMinimum = 0.5
 
 Announcements.subHandlerDataIdentifier = "Announcements"

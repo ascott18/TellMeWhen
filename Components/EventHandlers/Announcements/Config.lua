@@ -28,7 +28,9 @@ local CI = TMW.CI
 
 local EVENTS = TMW.EVENTS
 local Announcements = EVENTS:GetEventHandler("Announcements")
+
 Announcements.handlerName = L["ANN_TAB"]
+Announcements.handlerDesc = L["ANN_TAB_DESC"]
 
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function(event)

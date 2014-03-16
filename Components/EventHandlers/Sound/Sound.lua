@@ -26,7 +26,7 @@ local PlaySoundFile =
 local LSM = LibStub("LibSharedMedia-3.0")
 
 
-local Sound = TMW.C.EventHandler_WhileConditions_Repetitive:New("Sound", true)
+local Sound = TMW.C.EventHandler_WhileConditions_Repetitive:New("Sound", 10)
 Sound.frequencyMinimum = 0.2
 
 Sound:RegisterEventDefaults{

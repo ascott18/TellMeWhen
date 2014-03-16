@@ -164,7 +164,85 @@
 				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
 			</Anchors>
 		</HighlightTexture>
+	</Button>
 
+
+	<Button name="TellMeWhen_HandlerPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+		<Size y="70"/>
+		<Anchors>
+			<Anchor point="LEFT" x="2" y="0"/>
+			<Anchor point="RIGHT" x="-2" y="0"/>
+		</Anchors>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentTitle" parentKey="Title" inherits="GameFontNormalLarge" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="7" y="-5"/>
+						<Anchor point="RIGHT" x="-7"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentDesc" parentKey="Desc" wordwrap="true" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="CENTER" >
+					<Size x="1" y="1"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTitle" relativePoint="BOTTOMLEFT" x="0" y="-0"/>
+						<Anchor point="BOTTOMRIGHT" x="-7" y="3"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		
+		<HighlightTexture alphaMode="ADD" alpha="0.1">
+			<Color r="1" g="1" b="1"/>
+			<Anchors>
+				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
+				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
+			</Anchors>
+		</HighlightTexture>
+
+		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			</OnLoad>
+			<OnClick>
+				TMW.EVENTS.pickedHandler = self.handlerIdentifier
+				TMW.EVENTS:ShowEventPickerButtons()
+			</OnClick>
+		</Scripts>
+	</Button>
+
+	<Button name="TellMeWhen_EventPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+		<Size y="20"/>
+		<Anchors>
+			<Anchor point="LEFT" x="2" y="0"/>
+			<Anchor point="RIGHT" x="-2" y="0"/>
+		</Anchors>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentTitle" parentKey="Title" inherits="GameFontHighlight" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="7" y="-5"/>
+						<Anchor point="RIGHT" x="-7"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		
+		<HighlightTexture alphaMode="ADD" alpha="0.1">
+			<Color r="1" g="1" b="1"/>
+			<Anchors>
+				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
+				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
+			</Anchors>
+		</HighlightTexture>
+
+		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			</OnLoad>
+			<OnClick>
+				TMW.EVENTS:PickEvent(self.event)
+			</OnClick>
+		</Scripts>
 	</Button>
 
 	<Button name="TellMeWhen_EventHandler_SubHandlerListButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
@@ -301,10 +379,7 @@
 						self.ScrollFrame.edgeScrollScrollDistancePerSecond = 100
 						
 						self.ScrollFrame:HookScript("OnScrollRangeChanged", function(self)
-							if self.adjustmentQueued then
-								TMW.EVENTS:AdjustScrollFrame()
-								self.adjustmentQueued = nil
-							end
+							TMW.EVENTS:AdjustScrollFrame()
 						end)
 					</OnLoad>
 					<OnUpdate>
@@ -352,20 +427,15 @@
 						</FontString>
 					</Layer>
 				</Layers>
-				<Frames>
-					<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
-						<Scripts>
-							<OnLoad>
-								self.wrapTooltips = 1
-								self.initialize = TMW.EVENTS.AddEvent_Dropdown
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
+
 				<Scripts>
 					<OnLoad>
 						self.EventName:SetText(TMW.L["EVENTS_HANDLERS_ADD"])
-						TMW:TT(self, "EVENTS_HANDLERS_ADD", "EVENTS_HANDLERS_ADD_DESC")
+						TMW:TT(self, "EVENTS_HANDLERS_ADD", "EVENTS_HANDLERS_ADD_DESC", nil, nil, "ShouldShowTooltip")
+
+						function self:ShouldShowTooltip()
+							return not self:GetParent().HandlerPickers:IsShown()
+						end
 
 						-- Fix text wrapping:
 						self.EventName:SetPoint("RIGHT", self, "RIGHT")
@@ -377,7 +447,8 @@
 
 					</OnLoad>
 					<OnClick>
-						ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
+						TMW.EVENTS:ShowHandlerPickerButtons()
+						TMW:TT_Update(self)
 					</OnClick>
 				</Scripts>
 				<HighlightTexture alphaMode="ADD" alpha="0.1">
@@ -389,10 +460,10 @@
 				</HighlightTexture>
 			</Button>
 
-			<Frame name="$parentHelpText" inherits="TellMeWhen_BorderedFrame" hidden="true" parentKey="HelpText">
+			<!-- <Frame name="$parentHelpText" inherits="TellMeWhen_BorderedFrame" hidden="true" parentKey="HelpText">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
-					<Anchor point="RIGHT" x="-15"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="BOTTOMLEFT" y="-15"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parentAddEvent" relativePoint="BOTTOMRIGHT" y="-15"/>
 				</Anchors>
 				<Size y="50"/>
 				<Layers>
@@ -414,6 +485,76 @@
 					<OnSizeChanged>
 						self:SetHeight(self.text:GetStringHeight() + 22)
 					</OnSizeChanged>
+				</Scripts>
+			</Frame> -->
+
+			<Frame name="$parentHandlerPickers" hidden="true" parentKey="HandlerPickers">
+				<Size y="50"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
+					<Anchor point="RIGHT" x="-15"/>
+					<Anchor point="BOTTOM" y="0"/>
+				</Anchors>
+
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString inherits="GameFontNormalLarge" parentKey="Header" justifyH="CENTER" hidden="true" text=""/>
+					</Layer>
+				</Layers>
+
+				<Scripts>
+					<OnLoad>
+						self.originalParent = self:GetParent()
+						
+						TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
+						self.ScrollFrame.scrollStep = 20
+
+						self.Header:SetParent(self.ScrollFrame)
+						self.Header:SetText(TMW.L["EVENTS_CHOOSE_HANDLER"])
+						self.Header:SetPoint("BOTTOM", self.ScrollFrame, "TOP", 0, 1)
+
+					</OnLoad>
+					<OnShow>
+						self.Header:Show()
+					</OnShow>
+					<OnHide>
+						self.Header:Hide()
+					</OnHide>
+				</Scripts>
+			</Frame>
+
+			<Frame name="$parentEventPickers" hidden="true" parentKey="EventPickers">
+				<Size y="50"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
+					<Anchor point="RIGHT" x="-15"/>
+					<Anchor point="BOTTOM" y="0"/>
+				</Anchors>
+
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString inherits="GameFontNormalLarge" parentKey="Header" justifyH="CENTER" hidden="true" text=""/>
+					</Layer>
+				</Layers>
+
+				<Scripts>
+					<OnLoad>
+						self.originalParent = self:GetParent()
+						
+						TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
+						self.ScrollFrame.scrollStep = 20
+
+						self.Header:SetParent(self.ScrollFrame)
+						self.Header:SetText(TMW.L["EVENTS_CHOOSE_EVENT"])
+						self.Header:SetPoint("BOTTOM", self.ScrollFrame, "TOP", 0, 1)
+
+					</OnLoad>
+					<OnShow>
+						self.Header:Show()
+					</OnShow>
+					<OnHide>
+						self.Header:Hide()
+					</OnHide>
 				</Scripts>
 			</Frame>
 

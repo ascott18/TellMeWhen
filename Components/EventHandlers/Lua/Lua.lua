@@ -21,7 +21,7 @@ local loadstring =
 	  loadstring
 
 
-local Lua = TMW.C.EventHandler_WhileConditions_Repetitive:New("Lua", true)
+local Lua = TMW.C.EventHandler_WhileConditions_Repetitive:New("Lua", 100)
 Lua.frequencyMinimum = 0
 
 Lua:RegisterEventDefaults{

@@ -32,7 +32,7 @@ local EVENTS = TMW.EVENTS
 local Lua = EVENTS:GetEventHandler("Lua")
 
 Lua.handlerName = L["EVENTHANDLER_LUA_TAB"]
-Lua.handlerNameShort = L["EVENTHANDLER_LUA_TAB"]
+Lua.handlerDesc = L["EVENTHANDLER_LUA_TAB_DESC"]
 
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()

@@ -34,6 +34,7 @@ local EVENTS = TMW.EVENTS
 local Sound = TMW.EVENTS:GetEventHandler("Sound")
 
 Sound.handlerName = L["SOUND_TAB"]
+Sound.handlerDesc = L["SOUND_TAB_DESC"]
 Sound.LSM = LSM
 
 TMW.HELP:NewCode("SND_INVALID_CUSTOM")

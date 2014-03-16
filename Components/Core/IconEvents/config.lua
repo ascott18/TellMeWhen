@@ -119,8 +119,8 @@ function EVENTS:LoadConfig()
 			frame = CreateFrame("Button", EventHandlerFrames:GetName().."Event"..eventID, EventHandlerFrames, "TellMeWhen_Event", eventID)
 			EventHandlerFrames[eventID] = frame
 
-			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT")
-			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT")
+			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, -0.5)
+			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, -0.5)
 
 			local p, t, r, x, y = frame.EventName:GetPoint(1)
 			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
@@ -226,30 +226,46 @@ function EVENTS:LoadConfig()
 	-- If an event handler's configuration was not loaded for an event,
 	-- hide all handler configuration panels
 	if not didLoad then
-		for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
-			EventHandler.ConfigContainer:Hide()
-		end
-		self.EventSettingsContainer:Hide()
-		IE.Events.HelpText:Show()
+		EVENTS:ShowHandlerPickerButtons()
+		--IE.Events.HelpText:Show()
 	end
+
+	EVENTS:SetTabText()
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", EVENTS, "LoadConfig")
 
 function EVENTS:LoadEventID(eventID)
 	-- Loads the configuration for the specified e
-	local eventFrame = self.EventHandlerFrames[eventID]
+	local eventFrame = eventID and self.EventHandlerFrames[eventID]
 	
 	EVENTS.currentEventID = eventID ~= 0 and eventID or nil
+
+	for i, frame in ipairs(self.EventHandlerFrames) do
+		frame.selected = nil
+		frame:UnlockHighlight()
+		frame:GetHighlightTexture():SetAlpha(0.1)
+	end
+
 
 	for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 		EventHandler.ConfigContainer:Hide()
 	end
-	IE.Events.HelpText:Show()
+	self.EventSettingsContainer:Hide()
+	--IE.Events.HelpText:Show()
+
+
+	if not eventFrame or eventID == 0 or not eventFrame:IsShown() then
+		return
+	end
+
+	EVENTS:HidePickerButtons()
 	
 	local EventHandler = self:GetEventHandlerForEventSettings(eventID)
 	if EventHandler then
+		self.EventSettingsContainer:Show()
 		EventHandler.ConfigContainer:Show()
-		IE.Events.HelpText:Hide()
+		--IE.Events.HelpText:Hide()
+		IE.Events.HandlerPickers:Hide()
 		
 		EVENTS.currentEventHandler = EventHandler
 		
@@ -257,21 +273,10 @@ function EVENTS:LoadEventID(eventID)
 		EVENTS:LoadEventSettings()
 	end
 
-	IE.Events.ScrollFrame.adjustmentQueued = true
 
-	if not eventFrame or eventID == 0 or not eventFrame:IsShown() then
-		return
-	end
-
-	for i, frame in ipairs(self.EventHandlerFrames) do
-		frame.selected = nil
-		frame:UnlockHighlight()
-		frame:GetHighlightTexture():SetAlpha(0.1)
-	end
 	eventFrame.selected = 1
 	eventFrame:LockHighlight()
 	eventFrame:GetHighlightTexture():SetAlpha(0.2)
-	
 end
 
 function EVENTS:LoadEventSettings()
@@ -289,6 +294,7 @@ function EVENTS:LoadEventSettings()
 
 	--hide settings
 	EventSettingsContainer.PassThrough				:Hide()
+	EventSettingsContainer.SimplyShown				:Hide()
 	EventSettingsContainer.OnlyShown				:Hide()
 	EventSettingsContainer.Operator					:Hide()
 	EventSettingsContainer.Value					:Hide()
@@ -303,71 +309,72 @@ function EVENTS:LoadEventSettings()
 
 	local eventData = self:GetEventData()
 
-	IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
+	if eventData then
+		IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
 
-	if eventSettings.Event == "WCSP" then
-		if EventHandler.frequencyMinimum then
-			EventSettingsContainer.Frequency:Show()
+		if eventSettings.Event == "WCSP" then
+			if EventHandler.frequencyMinimum then
+				EventSettingsContainer.Frequency:Show()
 
-			EventSettingsContainer.Frequency:SetMinMaxValues(EventHandler.frequencyMinimum, math.huge)
-			EventSettingsContainer.Frequency:ReloadSetting()
+				EventSettingsContainer.Frequency:SetMinMaxValues(EventHandler.frequencyMinimum, math.huge)
+				EventSettingsContainer.Frequency:ReloadSetting()
+			end
+		else
+			EventSettingsContainer.PassThrough:Show()
+			EventSettingsContainer.OnlyShown:Show()
 		end
-	else
 
-		EventSettingsContainer.PassThrough:Show()
-		EventSettingsContainer.OnlyShown:Show()
-	end
+		--load settings
+		EventSettingsContainer.Value:SetText(eventSettings.Value)
+		EventSettingsContainer.Icon:SetGUID(eventSettings.Icon)
+		
 
-	--load settings
-	EventSettingsContainer.Value:SetText(eventSettings.Value)
-	EventSettingsContainer.Icon:SetGUID(eventSettings.Icon)
-	
+		local settingsUsedByEvent = eventData.settings
 
-	local settingsUsedByEvent = eventData.settings
+		--show settings as needed
+		for setting, frame in pairs(EventSettingsContainer) do
+			if type(frame) == "table" then
+				local state = settingsUsedByEvent and settingsUsedByEvent[setting]
 
-	--show settings as needed
-	for setting, frame in pairs(EventSettingsContainer) do
-		if type(frame) == "table" then
-			local state = settingsUsedByEvent and settingsUsedByEvent[setting]
-
-			if state == "FORCE" then
-				frame:Disable()
-				frame:SetAlpha(1)
-			elseif state == "FORCEDISABLED" then
-				frame:Disable()
-				frame:SetAlpha(0.4)
-			else
-				frame:SetAlpha(1)
-				if frame.Enable then
-					frame:Enable()
+				if state == "FORCE" then
+					frame:Disable()
+					frame:SetAlpha(1)
+				elseif state == "FORCEDISABLED" then
+					frame:Disable()
+					frame:SetAlpha(0.4)
+				else
+					frame:SetAlpha(1)
+					if frame.Enable then
+						frame:Enable()
+					end
+				end
+				if state then
+					frame:Show()
 				end
 			end
-			if state then
-				frame:Show()
+		end
+
+		if EventSettingsContainer.PassingCndt				:GetChecked() then
+			EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
+			EventSettingsContainer.Operator					:Enable()
+			EventSettingsContainer.Value					:Enable()
+			if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
+				EventSettingsContainer.CndtJustPassed		:Enable()
 			end
+		else
+			EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontDisable)
+			EventSettingsContainer.Operator					:Disable()
+			EventSettingsContainer.Value					:Disable()
+			EventSettingsContainer.CndtJustPassed			:Disable()
 		end
-	end
 
-	if EventSettingsContainer.PassingCndt				:GetChecked() then
-		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
-		EventSettingsContainer.Operator					:Enable()
-		EventSettingsContainer.Value					:Enable()
-		if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
-			EventSettingsContainer.CndtJustPassed		:Enable()
+		EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
+		EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
+
+		local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, eventSettings.Operator, TMW.operators)
+		if v then
+			TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
 		end
-	else
-		EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontDisable)
-		EventSettingsContainer.Operator					:Disable()
-		EventSettingsContainer.Value					:Disable()
-		EventSettingsContainer.CndtJustPassed			:Disable()
-	end
-
-	EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
-	EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
-
-	local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, eventSettings.Operator, TMW.operators)
-	if v then
-		TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
 	end
 
 	
@@ -375,17 +382,117 @@ function EVENTS:LoadEventSettings()
 end
 
 
+function EVENTS:LoadPickerButtons()
+	local previousFrame
+
+	local HandlerPickers = IE.Events.HandlerPickers
+	for i, EventHandler in ipairs(TMW.Classes.EventHandler.orderedInstances) do
+
+		local frame = HandlerPickers[i]
+		if not frame then
+			-- If the frame doesn't exist, then create it.
+			frame = CreateFrame("Button", HandlerPickers:GetName().."Picker"..i, HandlerPickers, "TellMeWhen_HandlerPicker", i)
+			HandlerPickers[i] = frame
+
+			if i == 1 then
+				frame:SetPoint("TOP")
+			else
+				frame:SetPoint("TOP", previousFrame, "BOTTOM", 0, -10)
+			end
+		end
+
+		frame.handlerIdentifier = EventHandler.identifier
+		frame.Title:SetText(EventHandler.handlerName)
+		frame.Desc:SetText(EventHandler.handlerDesc or "<No Description>")
+
+		TMW:TT(frame, EventHandler.handlerName, "EVENTS_HANDLER_ADD_DESC", 1, nil)
+
+		previousFrame = frame
+	end
+
+	local EventPickers = IE.Events.EventPickers
+	for i, eventData in ipairs(EVENTS:GetValidEvents()) do
+
+		local frame = EventPickers[i]
+		if not frame then
+			-- If the frame doesn't exist, then create it.
+			frame = CreateFrame("Button", EventPickers:GetName().."Picker"..i, EventPickers, "TellMeWhen_EventPicker", i)
+			EventPickers[i] = frame
+
+			if i == 1 then
+				frame:SetPoint("TOP")
+			else
+				frame:SetPoint("TOP", previousFrame, "BOTTOM", 0, -0.5)
+			end
+		end
+
+		frame.event = eventData.event
+		frame.Title:SetText(get(eventData.text))
+		TMW:TT(frame, eventData.text, eventData.desc, 1, 1)
+
+		previousFrame = frame
+	end
+end
+
+function EVENTS:ShowHandlerPickerButtons()
+	EVENTS:LoadPickerButtons()
+	EVENTS:LoadEventID(nil)
+
+	IE.Events.AddEvent:LockHighlight()
+	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.2)
+
+	IE.Events.HandlerPickers:Show()
+	IE.Events.EventPickers:Hide()
+end
+
+function EVENTS:ShowEventPickerButtons()
+	IE.Events.HandlerPickers:Hide()
+	IE.Events.EventPickers:Show()
+end 
+
+function EVENTS:HidePickerButtons()
+	IE.Events.AddEvent:UnlockHighlight()
+	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.1)
+
+	IE.Events.HandlerPickers:Hide()
+	IE.Events.EventPickers:Hide()
+end
+
+function EVENTS:PickEvent(event)
+	local handlerIdentifier = self.pickedHandler
+
+	TMW.CI.ics.Events.n = TMW.CI.ics.Events.n + 1
+
+	local eventID = TMW.CI.ics.Events.n
+	local eventSettings = EVENTS:GetEventSettings(eventID)
+
+	eventSettings.Event = event
+	eventSettings.Type = handlerIdentifier
+
+	local eventData = TMW.EventList[event]
+	if eventData and eventData.applyDefaultsToSetting then
+		eventData.applyDefaultsToSetting(eventSettings)
+	end
+
+	EVENTS:LoadConfig()
+
+	EVENTS:LoadEventID(eventID)
+
+	CloseDropDownMenus()
+end
+
+
 
 function EVENTS:AdjustScrollFrame()
-	local ScrollFrame = IE.Events.ScrollFrame
+	local ScrollFrame = self.EventHandlerFrames.ScrollFrame
 	local eventFrame = self.EventHandlerFrames[self.currentEventID]
 
 	if not eventFrame then return end
 
 	if eventFrame:GetBottom() and eventFrame:GetBottom() < ScrollFrame:GetBottom() then
-		ScrollFrame.ScrollBar:SetValue(ScrollFrame.ScrollBar:GetValue() + (ScrollFrame:GetBottom() - eventFrame:GetBottom()))
+		ScrollFrame:SetVerticalScroll(ScrollFrame:GetVerticalScroll() + (ScrollFrame:GetBottom() - eventFrame:GetBottom()))
 	elseif eventFrame:GetTop() and eventFrame:GetTop() > ScrollFrame:GetTop() then
-		ScrollFrame.ScrollBar:SetValue(ScrollFrame.ScrollBar:GetValue() - (eventFrame:GetTop() - ScrollFrame:GetTop()))
+		ScrollFrame:SetVerticalScroll(ScrollFrame:GetVerticalScroll() - (eventFrame:GetTop() - ScrollFrame:GetTop()))
 	end
 end
 
@@ -589,70 +696,6 @@ function EVENTS.IconMenu_DropDown_OnClick(button, frame)
 	EVENTS:GetEventSettings().Icon = GUID
 end
 
-function EVENTS.AddEvent_Dropdown(frame)
-	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for _, eventData in ipairs(EVENTS:GetValidEvents()) do
-			local info = UIDropDownMenu_CreateInfo()
-
-			info.text = get(eventData.text)
-			info.tooltipTitle = get(eventData.text)
-			info.tooltipText = get(eventData.desc)
-			
-			info.tooltipOnButton = true
-
-			info.value = eventData.event
-			info.func = EVENTS.AddEvent_Dropdown_OnClick
-			info.arg1 = eventData.event
-			info.arg2 = UIDROPDOWNMENU_MENU_VALUE
-
-			info.notCheckable = true
-
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
-	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
-			local info = UIDropDownMenu_CreateInfo()
-
-			info.text = EventHandler.handlerName
-
-			info.value = EventHandler.identifier
-
-
-			--if EventHandler.isTriggeredByEvents then
-				info.hasArrow = true
-				info.keepShownOnClick = true
-			--else
-			--	info.func = EVENTS.AddEvent_Dropdown_OnClick
-			--	info.arg1 = ""
-			--	info.arg2 = EventHandler.identifier
-			--end
-
-			info.notCheckable = true
-
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-		end
-	end
-end
-function EVENTS.AddEvent_Dropdown_OnClick(button, event, type)
-	TMW.CI.ics.Events.n = TMW.CI.ics.Events.n + 1
-
-	local eventID = TMW.CI.ics.Events.n
-	local eventSettings = EVENTS:GetEventSettings(eventID)
-
-	eventSettings.Event = event
-	eventSettings.Type = type
-
-	local eventData = TMW.EventList[event]
-	if eventData and eventData.applyDefaultsToSetting then
-		eventData.applyDefaultsToSetting(eventSettings)
-	end
-
-	EVENTS:LoadConfig()
-
-	EVENTS:LoadEventID(eventID)
-
-	CloseDropDownMenus()
-end
 
 function EVENTS:ChangeEvent_Dropdown()
 	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
