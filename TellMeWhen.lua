@@ -1540,6 +1540,7 @@ do -- Callback Lib
 		end
 	end
 	
+	local curEvent, curFunc, curArg1
 	function TMW:Fire(event, ...)
 		local funcs = callbackregistry[event]
 
@@ -1558,13 +1559,18 @@ do -- Callback Lib
 					for index = 1, tbl.n do
 						local arg1 = tbl[index]
 						
+						curEvent, curFunc = event, method
+
 						if arg1 == nil then
 							tblNeedsFix = true
 						elseif arg1 ~= true then
+							curArg1 = arg1
 							safecall(method, arg1, event, ...)
 						else
 							safecall(method, event, ...)
 						end
+
+						curEvent, curFunc, curArg1 = nil
 					end
 					
 					if tblNeedsFix then
@@ -1590,6 +1596,11 @@ do -- Callback Lib
 			
 			firingsInProgress = oldFiringsInProgress
 		end
+	end
+
+	--- Unregisters the currently firing callback
+	function TMW:UnregisterThisCallback()
+		TMW:UnregisterCallback(curEvent, curFunc, curArg1)
 	end
 end
 
