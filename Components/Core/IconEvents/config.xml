@@ -129,7 +129,7 @@
 				-- This is handled in OnMouseUp so that it will still fire when the button is disabled.
 
 				local EventHandler = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
-				if button == "RightButton" --[[and EventHandler.isTriggeredByEvents]] then
+				if button == "RightButton" then
 					ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 				end
 			</OnMouseUp>

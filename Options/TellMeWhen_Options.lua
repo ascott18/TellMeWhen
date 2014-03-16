@@ -4196,7 +4196,7 @@ end
 
 ---------- Interface ----------
 function IE:UndoRedoChanged()
-	if not IE.CurrentTab.doesIcon then
+	if not IE.CurrentTab or not IE.CurrentTab.doesIcon then
 		IE.UndoButton:Disable()
 		IE.RedoButton:Disable()
 

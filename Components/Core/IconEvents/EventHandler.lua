@@ -130,7 +130,6 @@ end)
 
 
 local EventHandler = TMW:NewClass("EventHandler")
-EventHandler.isTriggeredByEvents = true
 EventHandler.instancesByName = {}
 EventHandler.orderedInstances = {}
 
@@ -358,7 +357,6 @@ end)
 
 
 TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
-	isTriggeredByEvents = false,
 	supportWCSP = true,
 
 	OnNewInstance_WhileConditions = function(self)

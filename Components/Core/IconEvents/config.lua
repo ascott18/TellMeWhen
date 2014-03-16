@@ -159,13 +159,13 @@ function EVENTS:LoadConfig()
 
 			frame:Enable()
 
-			--if EventHandler.isTriggeredByEvents then
+
 			frame.event = eventData.event
 			frame.eventData = eventData
 
 			local desc = eventData.desc .. "\r\n\r\n" .. L["EVENTS_HANDLERS_GLOBAL_DESC"]
 			TMW:TT(frame, eventData.text, desc, 1, 1)
-			--end
+
 
 			-- This delegates the setup of frame.DataText to the event handler
 			-- so that it can put useful information about the user's settings
