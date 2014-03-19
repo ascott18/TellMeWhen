@@ -1559,7 +1559,9 @@ do -- Callback Lib
 					for index = 1, tbl.n do
 						local arg1 = tbl[index]
 						
-						curEvent, curFunc = event, method
+						local old_curEvent, old_curFunc, old_curArg1 = curEvent, curFunc, curArg1
+
+						curEvent, curFunc, curArg1 = event, method, nil
 
 						if arg1 == nil then
 							tblNeedsFix = true
@@ -1570,7 +1572,8 @@ do -- Callback Lib
 							safecall(method, event, ...)
 						end
 
-						curEvent, curFunc, curArg1 = nil
+						-- Restore previous values so that UnregisterThisCallback still works after a nested callback call
+						curEvent, curFunc, curArg1 = old_curEvent, old_curFunc, old_curArg1
 					end
 					
 					if tblNeedsFix then
