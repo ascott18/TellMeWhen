@@ -63,6 +63,8 @@ Module:SetScriptHandler("OnDragStart", function(Module, icon, button)
 				GroupModule_Resizer:Hide()
 			end
 
+			GameTooltip:Hide()
+
 			group:StartMoving()
 			isMoving = group
 		end
