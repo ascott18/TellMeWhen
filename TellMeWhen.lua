@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70068 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70069 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3452,9 +3452,20 @@ function TMW:SlashCommand(str)
 			groupID, iconID = tonumber(arg3), tonumber(arg4)
 		end
 
-		local group = groupID and groupID <= TMW.db[domain].NumGroups and TMW[domain][groupID]
-		local icon = iconID and group and group[iconID]
-		local obj = icon or group
+		if groupID and (groupID > TMW.db[domain].NumGroups or not TMW[domain][groupID]) then
+			TMW:Printf("groupID out of range: %d", groupID)
+			return
+		end
+
+		local obj = groupID and TMW[domain][groupID]
+		if iconID then
+			if iconID > #obj then
+				TMW:Printf("iconID out of range: %d", iconID)
+				return
+			end
+			obj = iconID and obj and obj[iconID]
+		end
+
 		if obj then
 			if cmd == "enable" then
 				obj:GetSettings().Enabled = true
