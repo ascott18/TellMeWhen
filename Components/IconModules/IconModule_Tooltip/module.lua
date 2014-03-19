@@ -75,7 +75,7 @@ Module:SetScriptHandler("OnEnter", function(Module, icon)
 		end
 
 		if TMW.db.global.ShowGUIDs then
-			GameTooltip:AddLine("")
+			GameTooltip:AddLine(" ")
 			if not icon.TempGUID then
 				GameTooltip:AddLine(icon:GetGUID(), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 			end

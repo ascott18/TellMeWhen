@@ -78,10 +78,8 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 	end,
 	OnStop = function(icon, table)
 		local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true)
-
-		if IconModule_IconContainer then
-			ActionButton_HideOverlayGlow(IconModule_IconContainer.container)
-		end
+		
+		ActionButton_HideOverlayGlow(IconModule_IconContainer.container)
 	end,
 })
 
