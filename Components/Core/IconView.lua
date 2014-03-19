@@ -175,10 +175,13 @@ function IconView:SetTypeAllowance(typeName, allow)
 	
 	if IconType and IconType.SetViewAllowance then
 		IconType:SetViewAllowance(self.view, allow)
+		
 	elseif not IconType then
 		TMW:RegisterCallback("TMW_CLASS_IconType_INTANCE_NEW", function(event, instance)
 			if instance.type == typeName and instance.SetViewAllowance then
 				instance:SetViewAllowance(self.view, allow)
+
+				TMW:UnregisterThisCallback()
 			end
 		end)
 	end

@@ -2002,6 +2002,8 @@
 							TMW:Print("There was an error loading TMW's changelog data.")
 						end
 
+
+						-- Turns wikicreole bulletpoints (asterisks) into prettyness
 						for k, v in pairs(TMW.CHANGELOG) do
 							
 							v = v:trim()
@@ -2067,7 +2069,9 @@
 
 							--log:SetSize(0, 1)
 							log:SetWidth(self:GetWidth()-15)
-							log:SetHeight(log:GetStringHeight() + 20)
+
+							-- Don't set the height here. It will be set in the OnShow script.
+							--log:SetHeight(log:GetStringHeight() + 20)
 						end
 
 
@@ -2080,15 +2084,18 @@
 								-- we want the first time that we set the height (when we change the height,
 								-- the number of lines will probably change as more lines are given enough room to wrap).
 
-								-- To get around this, we keep trying until we get the right height,
-								-- or until we reach an arbitrary limit on the number of loops that
-								-- prevents unforseen errors in floating point equality tests.
-								local tries = 0
-								while 10 > tries and floor(log:GetHeight()) ~= floor(log:GetStringHeight()) + 20 do
-									--TMW.print(k, tries, log:GetHeight(), log:GetStringHeight() + 20)
-									tries = tries + 1
-									log:SetHeight(log:GetStringHeight() + 20)
-								end
+								-- To get around this, we might keep trying until we get the right height.
+								-- Unforunately, this is horribly slow (this used to be the way this was done)
+								-- because log:GetHeight() and log:GetStringHeight() are stupidly slow.
+
+								-- Fortunately, the stupid solution is also stupid fast: Make the FontString super tall
+								-- and then shrink it down to the correct size. log:SetHeight() is stupidly fast, even though
+								-- it has to actually re-render things. I don't really understand why it is so fast compared to
+								-- :GetStringHeight() and :GetHeight(), but i'll take it.
+								
+								log:SetHeight(100000)
+								log:SetHeight(log:GetStringHeight() + 20)
+									
 							end
 							self.FixedWrapping = true
 						end

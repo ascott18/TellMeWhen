@@ -101,6 +101,9 @@ function IconComponent:RegisterEventHandlerData(identifier, ...)
 				EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
 				
 				tinsert(self.EventHandlerData, eventHandlerData)
+
+
+				TMW:UnregisterThisCallback()
 			end
 		end)
 	end
