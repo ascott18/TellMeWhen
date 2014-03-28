@@ -48,16 +48,16 @@ Lib\LibSpellRange-1.0\lib.xml
 #@end-no-lib-strip@
 
 Localization\TellMeWhen-enUS.lua
-Localization\TellMeWhen-deDE.lua
+#Localization\TellMeWhen-deDE.lua
 Localization\TellMeWhen-esES.lua
-Localization\TellMeWhen-esMX.lua
-Localization\TellMeWhen-frFR.lua
-Localization\TellMeWhen-koKR.lua
+#Localization\TellMeWhen-esMX.lua
+#Localization\TellMeWhen-frFR.lua
+#Localization\TellMeWhen-koKR.lua
 Localization\TellMeWhen-ruRU.lua
 Localization\TellMeWhen-zhCN.lua
 Localization\TellMeWhen-zhTW.lua
-Localization\TellMeWhen-ptBR.lua
-Localization\TellMeWhen-itIT.lua
+#Localization\TellMeWhen-ptBR.lua
+#Localization\TellMeWhen-itIT.lua
 Localization\StaticFormats.lua
 
 
