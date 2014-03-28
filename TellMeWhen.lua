@@ -3463,7 +3463,7 @@ function TMW:SlashCommand(str)
 		local obj = groupID and TMW[domain][groupID]
 		if iconID then
 			if #obj == 0 then
-				TMW:Printf("Specified group has not created its icon yet.", iconID)
+				TMW:Printf("Specified group has not created its icons yet.", iconID)
 				return
 			elseif iconID > #obj then
 				TMW:Printf("iconID out of range: %d", iconID)
