@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70069 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70070 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3450,7 +3450,7 @@ function TMW:SlashCommand(str)
 		local groupID, iconID = tonumber(arg2), tonumber(arg3)
 		local domain = "profile"
 
-		if not groupID and (arg2:lower() == "global" or arg2:lower() == "profile") then
+		if not groupID and arg2 and (arg2:lower() == "global" or arg2:lower() == "profile") then
 			domain = arg2:lower()
 			groupID, iconID = tonumber(arg3), tonumber(arg4)
 		end
