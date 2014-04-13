@@ -86,9 +86,15 @@ function TMW_CursorAnchor:Initialize()
 
 	self:SetMovable(true)
 	self:RegisterForDrag("LeftButton")
-	self:SetScript("OnDragStart", self.StartMoving)
-	self:SetScript("OnDragStop", self.StopMovingOrSizing)
 	self:SetScript("OnSizeChanged", self.CheckState)
+
+	self:SetScript("OnDragStart", self.StartMoving)
+	self:SetScript("OnDragStop", function(self)
+		self:StopMovingOrSizing()
+
+		TMW.IE.db.profile.CursorAnchorPoint = {self:GetPoint()}
+		TMW.IE.db.profile.CursorAnchorPoint[2] = nil -- don't store the parent. Its always UIParent.
+	end)
 
 	TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", self, "CheckState")
 
@@ -96,6 +102,17 @@ function TMW_CursorAnchor:Initialize()
 
 	self.Initialize = TMW.NULLFUNC
 end
+
+
+TMW:RegisterCallback("TMW_OPTIONS_LOADING", function()
+	TMW.IE:RegisterDatabaseDefaults({
+		profile = {
+			CursorAnchorPoint = {
+				"CENTER", nil, "CENTER", 0, 100,
+			}
+		}
+	})
+end)
 
 function TMW_CursorAnchor:Start()
 	self.Started = true
@@ -107,6 +124,7 @@ function TMW_CursorAnchor:CheckState()
 	self:SetScale(1/UIParent:GetScale())
 
 	if TMW.Locked then
+		self:SetClampedToScreen(false)
 		self.icon:Hide()
 		self.fs:Hide()
 
@@ -118,6 +136,7 @@ function TMW_CursorAnchor:CheckState()
 		TMW:TT(self, nil, nil)
 
 	else
+		self:SetClampedToScreen(true)
 		self.icon:Show()
 		self.fs:Show()
 		self:SetScript("OnUpdate", nil)
@@ -125,7 +144,11 @@ function TMW_CursorAnchor:CheckState()
 		self:EnableMouse(true)
 		TMW:TT(self, "ANCHOR_CURSOR_DUMMY", "ANCHOR_CURSOR_DUMMY_DESC")
 
-		self:SetPoint("CENTER", 0, 100)
+		if TMW.IE then
+			self:SetPoint(unpack(TMW.IE.db.profile.CursorAnchorPoint))
+		else
+			self:SetPoint("CENTER", 0, 100)
+		end
 	end
 end
 

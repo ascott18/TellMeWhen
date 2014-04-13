@@ -109,9 +109,9 @@ Would you like to restart WoW now?]]
 L["ANCHOR_CURSOR_DUMMY"] = "TellMeWhen Cursor Anchor Dummy"
 L["ANCHOR_CURSOR_DUMMY_DESC"] = [[This is a dummy cursor to help you position your icons that are anchored to the cursor.
 
-Anchoring groups to the cursor is useful for icons that are checking the 'mouseover' unit.
+Anchoring groups to the cursor can be useful for icons that are checking the 'mouseover' unit.
 
-You can |cff7fffffRight-Click-and-drag|r an icon to this dummy to anchor that icon's group to the cursor.
+To anchor a group to the cursor, |cff7fffffRight-Click-and-drag|r an icon to this dummy.
 
 Due to a Blizzard bug, the cooldown sweep animation will bug out when it moves around, so you probably should disable it for cursor-anchored icons.
 
@@ -120,8 +120,8 @@ Due to a Blizzard bug, the cooldown sweep animation will bug out when it moves a
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 L["ERROR_ANCHOR_CYCLICALDEPS"] = "%s was trying to anchor to %s, but the position of %s depends on the position of %s, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
 
-L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options')."
-L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options')."
+L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options' to access this option)."
+L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options' to access this option)."
 
 L["ERROR_NOTLOADED_ERROR"] = "TellMeWhen has failed to load! Are you missing a required library?"
 L["ERROR_NOTINITIALIZED_NO_LOAD"] = "TellMeWhen_Options cannot be loaded if TellMeWhen failed to initialize!"
