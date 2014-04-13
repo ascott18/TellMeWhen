@@ -56,6 +56,7 @@ L["DBRESTORED_INFO"] = [[TellMeWhen has detected that its database was either em
 
 TellMeWhen_Options maintains a backup of your database in case this happens since it is very unlikely that both TellMeWhen's and TellMeWhen_Options's databases will become corrupted in this way at the same time.
 
+
 This backup, created from your session that began %s, has been restored.]]
 
 
