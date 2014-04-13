@@ -131,7 +131,8 @@ local function Meta_OnUpdate(icon, time)
 		local attributes = ic and ic.attributes
 
 		if	ic
-			and ic.UpdateFunction
+			-- and ic.Enabled
+			and ic.UpdateFunction -- Only exists if ic.Enabled == true
 			and attributes.shown
 			and not (CheckNext and ic.__lastMetaCheck == time)
 			and ic.viewData == icon.viewData
@@ -262,9 +263,9 @@ function InsertIcon(icon, GUID, ics)
 		if ics.Type ~= "meta" or not icon.CheckNext then
 			alreadyinserted[GUID] = true
 
-			if ics.Enabled then
+			--if ics.Enabled then
 				tinsert(icon.CompiledIcons, GUID)
-			end
+			--end
 		elseif icon.CheckNext then
 			GetFullIconTable(icon, ics.Icons)
 		end
@@ -343,6 +344,8 @@ function Type:Setup(icon)
 		icon.IconsLookup[GUID] = icon.IconsLookup[GUID] or true
 	end
 
+	--[[
+	-- This breaks dynamic enabling/disabling of icons, so don't do it.
 	local dontUpdate = true
 	for _, GUID in pairs(icon.CompiledIcons) do
 		local ics = TMW:GetSettingsFromGUID(GUID)
@@ -350,7 +353,7 @@ function Type:Setup(icon)
 			dontUpdate = nil
 			break
 		end
-	end
+	end]]
 
 	icon:SetInfo("texture", "Interface\\Icons\\LevelUpIcon-LFD")
 	
@@ -362,10 +365,10 @@ function Type:Setup(icon)
 	
 	icon:SetInfo("alpha", 0)
 		
-	if not dontUpdate then
+	--if not dontUpdate then
 		icon:SetUpdateFunction(Meta_OnUpdate)
 		TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
-	end
+	--end
 	icon.metaUpdateQueued = true
 end
 
