@@ -14,7 +14,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local EFF_THR, DS
+local EFF_THRESHOLD, DS
 local tonumber =
 	  tonumber
 local UnitAura, UnitExists =
@@ -128,10 +128,17 @@ Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettingsWithStacks")
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	EFF_THR = TMW.db.profile.EffThreshold
+	EFF_THRESHOLD = TMW.db.profile.EffThreshold
 	DS = TMW.DS
 	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
 end)
+
+
+local NOT_ACTUALLY_SPELLSTEALABLE = {
+	[43438] = true,	-- Ice Block
+	[642] = true,	-- Divine Shield
+}
+
 
 local function Buff_OnEvent(icon, event, arg1)
 	if event == "UNIT_AURA" then
@@ -149,137 +156,124 @@ end
 
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
-	-- WARNING: THIS CODE IS HORRIFYING. ENTER AT YOUR OWN RISK!
 	
-	
-	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, Sort, StackSort
+	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, DurationSort, StackSort
 	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
 	local NotStealable = not icon.Stealable
 	local NAL = #icon.NameArray
 
 	local buffName, _, iconTexture, dispelType, duration, expirationTime, count, canSteal, id, v1, v2, v3, v4
 	local useUnit
-	local d = Sort == -1 and huge or 0
+
+	local doesSort = DurationSort or StackSort
+	local d = DurationSort == -1 and huge or 0
 	local s = StackSort == -1 and huge or -1
 	
 	for u = 1, #Units do
 		local unit = Units[u]
 		if icon.UnitSet:UnitExists(unit) then
-			if Sort or NAL > EFF_THR then
-				for z=1, huge do
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filter)
-					_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
+
+			if icon.buffdebuff_iterateByAuraIndex then
+				-- If we are sorting, or if the icon's number of auras checked exceeds EFF_THRESHOLD, or if we are checking dispel types
+				-- then check every aura on the unit instead of checking the unit for every aura we are checking.
+				
+
+				local index, stage = 1, 1
+				local filter = Filter
+
+				while true do
+					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, index, filter)
+					index = index + 1
+					
+					-- Bugfix: Enraged is an empty string.
+					if _dispelType == "" then
+						_dispelType = "Enraged"
+					end
+
 					if not _buffName then
-						break
-					elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
-						if Sort then
+						if stage == 1 and Filterh and (doesSort or not buffName) then
+							index, stage = 1, 2
+							filter = Filterh
+						else
+							break
+						end
+
+					elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[_id])) then
+						if DurationSort then
 							local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 
-							if not buffName or d*Sort < _d*Sort then
-								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, d =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _d
+							if not buffName or d*DurationSort < _d*DurationSort then
+								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+								 buffName,  iconTexture,  count,  duration,  expirationTime,  id,  v1,  v2,  v3,  v4, useUnit, d =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit,   _d
 							end
 						elseif StackSort then
 							local _s = _count or 0
 
 							if not buffName or s*StackSort < _s*StackSort then
-								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, s =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _s
+								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+								 buffName,  iconTexture,  count,  duration,  expirationTime,  id,  v1,  v2,  v3,  v4, useUnit, s =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit,   _s
 							end
 						else
-							buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit =
+							-- We aren't sorting, and we haven't found anything yet, so record this
+							 buffName,  iconTexture,  count,  duration,  expirationTime,  id,  v1,  v2,  v3,  v4, useUnit =
 							_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit
+
+							-- We don't need to look for anything else. Stop looking.
 							break
 						end
 					end
 				end
-				if Filterh and not buffName then
-					for z=1, huge do
-						local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, z, Filterh)
-						_dispelType = _dispelType == "" and "Enraged" or _dispelType -- Bug: Enraged is an empty string
-						if not _buffName then
-							break
-						elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or canSteal) then
-							if Sort then
-								local _d = (_expirationTime == 0 and huge) or _expirationTime - time
 
-								if not buffName or d*Sort < _d*Sort then
-									buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, d =
-									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _d
-								end
-							elseif StackSort then
-								local _s = _count or 1
 
-								if not buffName or s*StackSort < _s*StackSort then
-									buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit, s =
-									_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit, _s
-								end
-							else
-								buffName, iconTexture, count, duration, expirationTime, id, v1, v2, v3, v4, useUnit =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit
-								break
-							end
-						end
-					end
-				end
-				if buffName and not Sort then
+				if buffName and not doesSort then
 					break --  break unit loop
 				end
 			else
+
 				for i = 1, NAL do
-					--local iName = strlowerCache[NameArray[i]] -- STRLOWERING IT BREAKS DISPEL TYPES! it should already be strlowered, except dispel types
 					local iName = NameArray[i]
-					if DS[iName] then --Handle dispel types.
-						for z=1, huge do
-							buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filter)
-							dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
-							if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
-								break
-							end
-						end
-						if Filterh and not buffName then
-							for z=1, huge do
-								buffName, _, iconTexture, count, dispelType, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filterh)
-								dispelType = dispelType == "" and "Enraged" or dispelType -- Bug: Enraged is an empty string
-								if (not buffName) or (dispelType == iName and (NotStealable or canSteal)) then
+
+					buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
+					if Filterh and not buffName then
+						buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
+					end
+
+					if buffName and id ~= iName and isNumber[iName] then
+						-- We got a match by name, but we were checking by ID and the match doesn't match by ID,
+						-- so iterate over the unit's auras and find a matching ID.
+
+						local index, stage = 1, 1
+						local filter = Filter
+
+						while true do
+							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, Filter)
+							index = index + 1
+
+							if not id then
+								if stage == 1 and Filterh then
+									index, stage = 1, 2
+									filter = Filterh
+								else
 									break
 								end
-							end
-						end
-					else
-						-- stealable checks here are done before breaking the loop
-						buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
-						if Filterh and not buffName then
-							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
-						end
-					end
-					if buffName and id ~= iName and isNumber[iName] then
-						for z=1, huge do
-							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filter)
-							if not id or id == iName then -- and (NotStealable or canSteal) then
+							elseif id == iName then -- and (NotStealable or canSteal) then
 									-- No reason to check stealable here.
 									-- It will be checked right before breaking the loop.
 									-- Once it finds an ID match, any spell of that ID will have the same stealable status as any other,
-									-- so just match ID and dont check for stealable here. Wow, that was repetetive.
+									-- so just match ID and dont check for stealable here.
 								break
 							end
 						end
-						if Filterh and not id then
-							for z=1, huge do
-								buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, Filterh)
-								if not id or id == iName then -- and (NotStealable or canSteal) then
-									-- No reason to check stealable here. See above.
-									break
-								end
-							end
-						end
 					end
-					if buffName and (NotStealable or canSteal) then
+
+					if buffName and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id])) then
 						useUnit = unit
 						break -- break spell loop
 					end
 				end
-				if buffName and (NotStealable or canSteal) then
+				if buffName and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id])) then
 					break --  break unit loop
 				end
 			end
@@ -313,6 +307,7 @@ local function Buff_OnUpdate(icon, time)
 			id,
 			useUnit, nil
 		)
+
 	elseif not Units[1] and icon.HideIfNoUnits then
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			0,
@@ -322,6 +317,7 @@ local function Buff_OnUpdate(icon, time)
 			icon.NameFirst,
 			nil, nil
 		)
+
 	else
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			icon.UnAlpha,
@@ -360,22 +356,33 @@ function Type:Setup(icon)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 
+	local isEditing
 	if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
 		if not TMW.HELP:IsCodeRegistered("ICONTYPE_BUFF_NOSOURCERPPM") then
 			TMW.HELP:NewCode("ICONTYPE_BUFF_NOSOURCERPPM", 2, false)
 		end
 
 		TMW.HELP:Hide("ICONTYPE_BUFF_NOSOURCERPPM")
+		isEditing = true
+	end
 
-		if icon.OnlyMine then
-			for k, spell in pairs(icon.NameNameArray) do
-				for _, badSpell in pairs(aurasWithNoSourceReported) do
-					if type(badSpell) == "string" and badSpell:lower() == spell then
-						TMW.HELP:Show("ICONTYPE_BUFF_NOSOURCERPPM", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.NameArray[k]))
-						break
-					end
+	icon.buffdebuff_iterateByAuraIndex = false
+	if doesSort or #icon.NameArray > EFF_THRESHOLD then
+		icon.buffdebuff_iterateByAuraIndex = true
+	end
+
+	for k, spell in pairs(icon.NameNameArray) do
+		if icon.OnlyMine and isEditing then
+			for _, badSpell in pairs(aurasWithNoSourceReported) do
+				if type(badSpell) == "string" and badSpell:lower() == spell then
+					TMW.HELP:Show("ICONTYPE_BUFF_NOSOURCERPPM", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.NameArray[k]))
+					break
 				end
 			end
+		end
+
+		if TMW.DS[spell] then
+			icon.buffdebuff_iterateByAuraIndex = true
 		end
 	end
 

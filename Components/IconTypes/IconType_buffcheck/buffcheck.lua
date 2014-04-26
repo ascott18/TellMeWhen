@@ -14,7 +14,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local EFF_THR
+local EFF_THRESHOLD
 local tonumber =
 	  tonumber
 local UnitAura, UnitExists, UnitIsDeadOrGhost =
@@ -102,7 +102,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	EFF_THR = TMW.db.profile.EffThreshold
+	EFF_THRESHOLD = TMW.db.profile.EffThreshold
 end)
 
 local function Buff_OnEvent(icon, event, arg1)
@@ -137,7 +137,7 @@ local function BuffCheck_OnUpdate(icon, time)
 			
 			local _iconTexture, _id, _count, _duration, _expirationTime
 			
-			if NAL > EFF_THR then
+			if NAL > EFF_THRESHOLD then
 				for z = 1, huge do
 					-- Check by aura index
 					_, _, _iconTexture, _count, _, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, z, Filter)
