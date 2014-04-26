@@ -898,7 +898,7 @@ L["FONTSIZE"] = "Font Size"
 L["DEFAULT"] = "Default"
 L["NONE"] = "None of these"
 L["CASTERFORM"] = "Caster Form"
-L["ALPHA"] = "Alpha"
+L["ALPHA"] = "Opacity"
 
 L["RESET_ICON"] = "Reset"
 L["RESET_ICON_DESC"] = "Resets all of this icon's settings to default values."
@@ -1676,12 +1676,12 @@ L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes 
 L["SOUND_EVENT_ONFINISH"] = "On Finish"
 L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.]]
 
-L["SOUND_EVENT_ONALPHAINC"] = "On Alpha Increase"
+L["SOUND_EVENT_ONALPHAINC"] = "On Opacity Increase"
 L["SOUND_EVENT_ONALPHAINC_DESC"] = [[This event triggers when the opacity of an icon increases.
 
 NOTE: This event will not trigger when increasing from 0% opacity (On Show).]]
 
-L["SOUND_EVENT_ONALPHADEC"] = "On Alpha Decrease"
+L["SOUND_EVENT_ONALPHADEC"] = "On Opacity Decrease"
 L["SOUND_EVENT_ONALPHADEC_DESC"] = [[This event triggers when the opacity of an icon decreases.
 
 NOTE: This event will not trigger when decreasing to 0% opacity (On Hide).]]
@@ -1892,8 +1892,8 @@ L["ANIM_THICKNESS"] = "Border Thickness"
 L["ANIM_THICKNESS_DESC"] = "Set how thick the border should be."
 L["ANIM_SIZE_ANIM"] = "Border Outset Amount"
 L["ANIM_SIZE_ANIM_DESC"] = "Set how big the entire border should be."
-L["ANIM_ALPHASTANDALONE"] = "Alpha"
-L["ANIM_ALPHASTANDALONE_DESC"] = "Set the maximum opacity of the animation."
+L["ANIM_ALPHASTANDALONE"] = "Opacity"
+L["ANIM_ALPHASTANDALONE_DESC"] = "Set the opacity of the animation."
 L["ANIM_SIZEX"] = "Image Width"
 L["ANIM_SIZEX_DESC"] = "Set how wide the image should be."
 L["ANIM_SIZEY"] = "Image Height"
@@ -1923,7 +1923,9 @@ L["ANIM_ACTVTNGLOW_DESC"] = "Displays the Blizzard spell activation border on th
 L["ANIM_ICONFLASH"] = "Icon: Color Flash"
 L["ANIM_ICONFLASH_DESC"] = "Flashes a colored overlay across the icon."
 L["ANIM_ICONALPHAFLASH"] = "Icon: Alpha Flash"
-L["ANIM_ICONALPHAFLASH_DESC"] = "Flashes the icon itself by changing its opacity."
+L["ANIM_ICONALPHAFLASH_DESC"] = [[Flashes the icon itself by changing its opacity.
+
+The opacity will alternate between the normal opacity of the icon and the opacity configured for the animation.]]
 L["ANIM_SCREENFLASH"] = "Screen: Flash"
 L["ANIM_SCREENFLASH_DESC"] = "Flashes a colored overlay across the screen."
 L["ANIM_ICONFADE"] = "Icon: Fade In/Out"

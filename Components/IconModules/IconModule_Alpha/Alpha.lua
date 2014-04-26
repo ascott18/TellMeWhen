@@ -39,6 +39,14 @@ Alpha:RegisterConfigPanel_ConstructorFunc(195, "TellMeWhen_AlphaModuleSettings",
 	})
 end)
 
+TMW:RegisterUpgrade(70075, {
+	iconEventHandler = function(self, eventSettings)
+		if eventSettings.Animation == "ICONALPHAFLASH" then
+			eventSettings.a_anim = 0
+		end
+	end,
+})
+
 Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 	text = L["ANIM_ICONALPHAFLASH"],
 	desc = L["ANIM_ICONALPHAFLASH_DESC"],
@@ -47,7 +55,12 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 		"Infinite",
 		"Period",
 		"Fade",
+		"AlphaStandalone",
 	},
+
+	applyDefaultsToSetting = function(eventSettings)
+		eventSettings.a_anim = 0
+	end,
 
 	Play = function(icon, eventSettings)
 		local Duration = 0
@@ -71,12 +84,14 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
+			Alpha = eventSettings.a_anim,
 		}
 	end,
 
 	OnUpdate = function(icon, table)
 		local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 		local FlashPeriod = table.Period
+		local otherAlpha = table.Alpha
 
 		local timePassed = TMW.time - table.Start
 		local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 1
@@ -85,12 +100,12 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 			if table.Fade and FlashPeriod ~= 0 then
 				local remainingFlash = timePassed % FlashPeriod
 				if not fadingIn then
-					icon:SetAlpha(icon.attributes.realAlpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+					icon:SetAlpha(abs((icon.attributes.realAlpha - otherAlpha)*((FlashPeriod-remainingFlash)/FlashPeriod) + otherAlpha))
 				else
-					icon:SetAlpha(icon.attributes.realAlpha*(remainingFlash/FlashPeriod))
+					icon:SetAlpha(abs((icon.attributes.realAlpha - otherAlpha)*(remainingFlash/FlashPeriod) + otherAlpha))
 				end
 			else
-				icon:SetAlpha(fadingIn and icon.attributes.realAlpha or 0)
+				icon:SetAlpha(fadingIn and icon.attributes.realAlpha or otherAlpha)
 			end
 		end
 

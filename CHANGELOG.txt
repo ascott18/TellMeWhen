@@ -31,6 +31,7 @@
  * You can now enter a spell prefixed by a dash to omit that spell from any equivalencies entered, E.g. "Slowed; -Dazed" would check all slowed effects except daze.
  * New Condition: Specialization Role
  * The Buff/Debuff - "Number of" conditions now accept semicolon-delimited lists of multiple auras that should be counted.
+ * You can now adjust the target opacity of the Alpha Flash animation
 
  * Exporting a meta icon will also export the string(s) of its component icons.
  * Exporting groups and icons will also export the string(s) of their text layouts.

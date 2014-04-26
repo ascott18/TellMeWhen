@@ -259,14 +259,7 @@
 		</Layers>
 		<Scripts>
 			<OnClick>
-				if TMW.CI.ics then
-					TMW.EVENTS:GetEventSettings()[self.EventHandler.subHandlerSettingKey] = self.subHandlerIdentifier
-					TMW.IE:ScheduleIconSetup()
-				end
-
-				TMW.EVENTS:LoadConfig()
-
-				self.EventHandler:SelectSubHandler(self.subHandlerIdentifier)
+				self.EventHandler:SetSubHandler(self.subHandlerIdentifier)
 			</OnClick>
 		</Scripts>
 		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">

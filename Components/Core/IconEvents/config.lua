@@ -823,6 +823,29 @@ function ColumnConfig:LoadSettingsForEventID(id)
 	self:SelectSubHandler(EventSettings[self.subHandlerSettingKey])
 end
 
+function ColumnConfig:SetSubHandler(subHandlerIdentifier)
+	local subHandlerData = self.AllSubHandlersByIdentifier[subHandlerIdentifier]
+
+	if TMW.CI.ics then
+		local old = TMW.EVENTS:GetEventSettings()[self.subHandlerSettingKey]
+		if old ~= subHandlerIdentifier then
+
+			TMW.EVENTS:GetEventSettings()[self.subHandlerSettingKey] = subHandlerIdentifier
+			TMW.IE:ScheduleIconSetup()
+
+
+			TMW.EVENTS:LoadConfig()
+			local eventSettings = EVENTS:GetEventSettings()
+			if subHandlerData.applyDefaultsToSetting then
+				subHandlerData.applyDefaultsToSetting(eventSettings)
+			end
+
+
+			self:SelectSubHandler(subHandlerIdentifier)
+		end
+	end
+end
+
 function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
 	local subHandlerListButton
 	
