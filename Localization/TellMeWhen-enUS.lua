@@ -438,18 +438,26 @@ L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts 
 
 L["ICONMENU_ONLYMINE"] = "Only cast by me"
 L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for buffs/debuffs that you cast"
+
+
+
 L["ICONMENU_SHOWTIMER"] = "Show timer"
 L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
 L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
 
 This is only applicable if OmniCC (or similar) is installed.]]
+L["ICONMENU_INVERTTIMER"] = "Invert shading"
+L["ICONMENU_INVERTTIMER_DESC"] = "Check this option to invert the shading effect of the timer."
 L["ICONMENU_SHOWTIMERTEXT_NOOCC"] = "Show ElvUI timer text"
 L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"] = [[Check this option to display ElvUI's textual display of the remaining cooldown/duration on the icon.
 
 This setting only affects ElvUI's timer. If you have another addon that provides timers (like OmniCC), you can control those timers with the %q setting. It is not recommended to have both of these settings enabled.]]
+
+
 L["ICONMENU_ALLOWGCD"] = "Allow Global Cooldown"
 L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the global cooldown instead of simply ignoring it.]]
+
 
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
 L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom half of the icon that will indicate the cooldown/duration remaining (or the time that has passed if 'Fill bars up' is checked)"

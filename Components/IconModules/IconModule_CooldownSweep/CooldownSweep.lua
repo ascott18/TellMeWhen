@@ -25,6 +25,7 @@ CooldownSweep:RegisterIconDefaults{
 	ShowTimer = false,
 	ShowTimerText = false,
 	ShowTimerTextnoOCC = false,
+	InvertTimer = false,
 	ClockGCD = false,
 }
 
@@ -55,6 +56,14 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			end,
 		},
 		{
+			setting = "InvertTimer",
+			title = L["ICONMENU_INVERTTIMER"],
+			tooltip = L["ICONMENU_INVERTTIMER_DESC"],
+			disabled = function(self)
+				return not TMW.CI.ics.ShowTimer
+			end,
+		},
+		{
 			setting = "ClockGCD",
 			title = L["ICONMENU_ALLOWGCD"],
 			tooltip = L["ICONMENU_ALLOWGCD_DESC"],
@@ -79,15 +88,13 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 	})
 
 	local function CheckHidden()
-		if not self.ClockGCD:IsShown() and not self.ShowTimerTextnoOCC:IsShown() then
-			self:SetHeight(30)
-		else
+		if not self.ShowTimerTextnoOCC:IsShown() then
 			self:SetHeight(60)
+		else
+			self:SetHeight(90)
 		end
 	end
 
-	self.ClockGCD:HookScript("OnShow", CheckHidden)
-	self.ClockGCD:HookScript("OnHide", CheckHidden)
 	self.ShowTimerTextnoOCC:HookScript("OnShow", CheckHidden)
 	self.ShowTimerTextnoOCC:HookScript("OnHide", CheckHidden)
 end)
@@ -171,6 +178,7 @@ function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
 	self.ShowTimerText = icon.ShowTimerText
 	self.ShowTimerTextnoOCC = icon.ShowTimerTextnoOCC
+	self.InvertTimer = icon.InvertTimer
 	
 	self.ClockGCD = icon.ClockGCD
 	if icon.typeData.hasNoGCD then
@@ -251,6 +259,10 @@ end
 CooldownSweep:SetDataListner("SPELLCHARGES")
 
 function CooldownSweep:REVERSE(icon, reverse)
+	if self.InvertTimer then
+		reverse = not reverse
+	end
+
 	self.cooldown:SetReverse(reverse)
 end
 CooldownSweep:SetDataListner("REVERSE")
