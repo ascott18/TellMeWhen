@@ -27,6 +27,7 @@ TMW.CHANGELOG = {
 [==[* The meta icon setting "Inherit failed condition opacity" has been removed. Meta icons will now always inherit the exact opacity of the icons they are showing, though this can be overridden by the meta icon's opacity settings.]==],
 [==[* Complex chains of meta icon inheritance should now be handled much better, especially when some of the icons have animations on them.]==],
 [==[]==],
+[==[* New Conditions added that offer integration with Big Wigs and Deadly Boss Mods]==],
 [==[* You can now anchor groups to the cursor.]==],
 [==[* The duration of Diminishing Returns is now customizable in TMW's main options.]==],
 [==[* You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.]==],

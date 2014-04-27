@@ -12,6 +12,7 @@
 
 <Script file="Currencies.lua"/>
 
+<Script file="BossMods.lua"/>
 <Script file="Misc.lua"/>
 
 </Ui>

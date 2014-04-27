@@ -253,6 +253,8 @@ local function AddConditionToDropDown(conditionData)
 	info.value = conditionData.identifier
 	info.arg1 = conditionData
 	info.icon = get(conditionData.icon)
+
+	info.disabled = get(conditionData.disabled)
 	
 	if conditionData.tcoords then
 		info.tCoordLeft = conditionData.tcoords[1]
@@ -853,9 +855,8 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			TMW:TT_Update(CndtGroup.Slider)
 
 
-			--TODO: this is horribly inefficient. Fix this to not create a new one each time.
-			local formatter = TMW.C.Formatter:New(conditionData.texttable)
-			CndtGroup.Slider:SetTextFormatter(formatter)
+			conditionData.formatter = conditionData.formatter or TMW.C.Formatter:New(conditionData.texttable)
+			CndtGroup.Slider:SetTextFormatter(conditionData.formatter)
 
 			if conditionData.midt then
 				local Min, Max = CndtGroup.Slider:GetMinMaxValues()
@@ -872,7 +873,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			end
 
 			local val = CndtGroup.Slider:GetValue()
-			formatter:SetFormattedText(CndtGroup.ValText, val)
+			conditionData.formatter:SetFormattedText(CndtGroup.ValText, val)
 			CndtGroup.ValText:Show()
 			
 

@@ -23,7 +23,7 @@ local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
 
-local ConditionCategory = CNDT:GetCategory("MISC", 10, L["CNDTCAT_MISC"], true, false)
+local ConditionCategory = CNDT:GetCategory("MISC", 10, L["CNDTCAT_MISC"], false, false)
 
 ConditionCategory:RegisterCondition(0,	 "", {
 	text = L["CONDITIONPANEL_DEFAULT"],

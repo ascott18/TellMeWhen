@@ -212,6 +212,7 @@ ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 })
 ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	text = L["CONDITIONPANEL_MANAUSABLE"],
+	tooltip = L["CONDITIONPANEL_MANAUSABLE_DESC"],
 	min = 0,
 	max = 1,
 	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_MANAUSABLE", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,

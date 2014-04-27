@@ -1194,6 +1194,9 @@ L["CONDITIONPANEL_SWIMMING"] = "Swimming"
 L["CONDITIONPANEL_RESTING"] = "Resting"
 L["CONDITIONPANEL_INPETBATTLE"] = "In pet battle"
 L["CONDITIONPANEL_MANAUSABLE"] = "Spell Usable (Mana/Energy/etc.)"
+L["CONDITIONPANEL_MANAUSABLE_DESC"] = [[Checks if a spell is usable base on how much primary resource (mana/energy/rage/focus/runic power/etc.) you have.
+
+Does not check usability based on secondary resources (runes/holy power/chi/etc.)]]
 L["CONDITIONPANEL_SPELLRANGE"] = "Spell in range of unit"
 L["CONDITIONPANEL_ITEMRANGE"] = "Item in range of unit"
 L["CONDITIONPANEL_AUTOCAST"] = "Pet spell autocasting"
@@ -1255,6 +1258,34 @@ L["STANCE_LABEL"] = "Stance(s)"
 L["STANCE_DESC"] = [[You can enter multiple stances to be matched by separating each one with a semicolon (;).
 
 The condition will pass if any stances are matched.]]
+
+
+
+
+L["CNDTCAT_BOSSMODS"] = "Boss Mods"
+L["CONDITIONPANEL_BIGWIGS_TIMER"] = "Big Wigs - Timer"
+L["CONDITIONPANEL_BIGWIGS_TIMER_DESC"] = [[Checks the duration of a Big Wigs boss mod timer.
+
+Enter all or part of the name of the timer into "Timer to check".]] 
+L["CONDITIONPANEL_BIGWIGS_ENGAGED"] = "Big Wigs - Boss Engaged"
+L["CONDITIONPANEL_BIGWIGS_ENGAGED_DESC"] = [[Checks if a boss is engaged according to Big Wigs.
+
+Enter all or part of the name of the encounter into "Encounter to check".]] 
+L["CONDITIONPANEL_DBM_TIMER"] = "Deadly Boss Mods - Timer"
+L["CONDITIONPANEL_DBM_TIMER_DESC"] = [[Checks the duration of a Deadly Boss Mods timer.
+
+Enter all or part of the name of the timer into "Timer to check".]] 
+L["CONDITIONPANEL_DBM_ENGAGED"] = "Deadly Boss Mods - Boss Engaged"
+L["CONDITIONPANEL_DBM_ENGAGED_DESC"] = [[Checks if a boss is engaged according to Deadly Boss Mods.
+
+Enter all or part of the name of the encounter into "Encounter to check".]] 
+L["MODTIMERTOCHECK"] = "Timer to check"
+L["MODTIMERTOCHECK_DESC"] = "Enter all or part of the name of the timer as it appears on the boss mod's timer bars."
+L["ENCOUNTERTOCHECK"] = "Encounter to check"
+L["ENCOUNTERTOCHECK_DESC_BIGWIGS"] = "Enter all or part of the name of the encounter. This is displayed in BigWig's configuration, and also in the Encounter Journal."
+L["ENCOUNTERTOCHECK_DESC_DBM"] = "Enter all or part of the name of the encounter. This is displayed in chat on pull/wipe/kill, and also in the Encounter Journal."
+
+
 
 L["AURA"] = "Aura"
 L["SEAL"] = "Seal"
