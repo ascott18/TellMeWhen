@@ -30,37 +30,113 @@ local ConditionCategory = CNDT:GetCategory("BOSSMODS", 9.5, L["CNDTCAT_BOSSMODS"
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	local SUG = TMW.SUG
 
+	local Encounters = {}
+
+	local function scan()
+		for t = 1, EJ_GetNumTiers() do
+			EJ_SelectTier(t)
+			local tierName = EJ_GetTierInfo(t)
+			for raid = 0, 1 do
+				local index = 1
+				
+				repeat
+					local instanceID, instanceName = EJ_GetInstanceByIndex(index, raid == 1)
+					if not instanceID then break end
+					
+					EJ_SelectInstance(instanceID)
+					
+					local eindex = 1
+					
+					repeat
+						local name, description, encounterID = EJ_GetEncounterInfoByIndex(eindex)
+						if not name then break end
+
+						local _, _, _, _, bossImage = EJ_GetCreatureInfo(1, encounterID)
+						
+						tinsert(Encounters, {tier = tierName, instance = instanceName, name = name, index = eindex, tex = bossImage})
+
+						eindex = eindex + 1
+					until not name
+					
+					index = index + 1
+				until not instanceID
+			end
+		end
+	end
+
+	local function doScan()
+		if EncounterJournal then
+			
+			local oldTier = EJ_GetCurrentTier()
+			local oldInstance = EncounterJournal.instanceID
+			local oldEncounter = EncounterJournal.encounterID
+			local oldDifficulty = EJ_GetDifficulty()
+			
+			EncounterJournal:SetScript("OnEvent", nil)
+			
+			scan()
+			
+			EJ_SelectTier(oldTier)
+			if oldInstance then
+				EJ_SelectInstance(oldInstance)
+			end
+			if oldEncounter then
+				EJ_SelectEncounter(oldEncounter)
+			end
+			if oldDifficulty then
+				EJ_SetDifficulty(oldDifficulty)
+			end
+			
+			EncounterJournal:SetScript("OnEvent", EncounterJournal_OnEvent)
+		else
+			scan()
+		end
+
+		doScan = nil
+		scan = nil
+	end
+
+
 	local Module = SUG:NewModule("bossfights", SUG:GetModule("default"))
 	Module.noMin = true
-	Module.noTexture = true
-	function Module:Table_GetSorter()
-		return nil
+	function Module:Table_Get()
+		if doScan then
+			doScan()
+		end
+
+		return Encounters
 	end
-	function Module:Entry_AddToList_1(f, name)
-		f.Name:SetText(name)
 
-		f.tooltiptitle = name
+	function Module.Sorter(a, b)
+		return a.name < b.name
+	end
+	function Module:Table_GetSorter()
+		return self.Sorter
+	end
+	function Module:Entry_AddToList_1(f, encounter)
+		f.Name:SetText(encounter.name)
 
-		f.insert = name
+		f.tooltiptitle = encounter.name
+		f.tooltiptext = ENCOUNTER_JOURNAL_ENCOUNTER .. " #" .. encounter.index .. "\r\n" .. 
+			encounter.instance .. "\r\n" .. 
+			encounter.tier .. "\r\n\r\n" ..
+			"|T" .. encounter.tex .. ":64:128:0:0|t"
+
+
+		f.Icon:SetTexture(encounter.tex)
+		f.Icon:SetTexCoord(32/128, (128-32)/128, 0, 1)
+
+		f.insert = encounter.name
 	end
 	function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		local lastName = SUG.lastName
 
-		local i = 1
-		local failed = 0
-		while failed < 300 do
-		    local name = EJ_GetEncounterInfo(i)
-		    i = i + 1
-		    if name then
-		    	if strfind(name:lower(), lastName) then
-					suggestions[#suggestions + 1] = name
-				end
+		for index, encounter in pairs(tbl) do
+			if strfind(encounter.name:lower(), lastName) or strfind(encounter.instance:lower(), lastName) then
+				suggestions[#suggestions + 1] = encounter
+			end
+		end
 
-		        failed = 0
-		    else
-		        failed = failed + 1
-		    end
-		end 
 	end
 end)
 
@@ -438,12 +514,6 @@ ConditionCategory:RegisterCondition(11,	 "DBM_ENGAGED", {
 	end,
 	funcstr = function(c)
 		if DBM_engaged_init then DBM_engaged_init() end
-
-		if DBM_engaged_init then
-			-- Init failed.
-			return "false"
-		end
-
 
 		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
 		return [[DBM_IsBossEngaged(]] .. name .. [[) == c.1nil]]

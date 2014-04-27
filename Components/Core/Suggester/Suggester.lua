@@ -156,6 +156,7 @@ function SUG:SuggestingComplete(doSort)
 		f.overrideInsertID = nil
 		f.overrideInsertName = nil
 		f.Background:SetVertexColor(0, 0, 0, 0)
+		f.Icon:SetTexCoord(0, 1, 0, 1)
 
 		if SUG.CurrentModule.noTexture then
 			f.Icon:SetWidth(0.00001)
