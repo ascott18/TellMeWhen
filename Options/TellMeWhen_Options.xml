@@ -2047,6 +2047,7 @@
 
 						-- Put the last one in
 						tinsert(CHANGELOGS, s:trim("\r\n "))
+						tinsert(CHANGELOGS, "\r\n\r\nTo see the changelog for older versions, open CHANGELOG.txt in Interface/AddOns/TellMeWhen or visit TellMeWhen's AddOn page on Curse.com")
 
 						-- Send this out to the garbage collector
 						TMW.CHANGELOG = nil
