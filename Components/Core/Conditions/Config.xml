@@ -236,28 +236,21 @@
 					<Anchor point="TOPRIGHT" x="-5" y="-39"/>
 				</Anchors>
 				<Scripts>
-					<OnUpdate>
-						-- This code handles changing the value text when the slider is adjusted using click-and-drag.
-						-- CndtGroup:LoadAndDraw() can't be used because it forces an update using the current Level setting,
-						-- which either results in a completely locked slider if Level isn't set here before calling :LoadAndDraw,
-						-- or it results in a hypersensitive slider that updates its range every single frame.
-						-- Therefore, we just extract the text updating code and let it stand alone
-						-- without actually modifying any settings in this script handler.
-						
-						local CndtGroup = self:GetParent()
-						
-						local conditionData = CndtGroup:GetConditionData()
-
-						local value = self:GetValue()
-						value = TMW.CNDT:ValidateLevelForCondition(value, conditionData.identifier)
-
-						CndtGroup.ValText:SetText(TMW.get(conditionData.texttable, value) or value)
-					</OnUpdate>
 					<OnLoad>
 						self.__noWrapTooltipText = true
 
 						TMW:CInit(self, {
-							setting = "Level"
+							setting = "Level",
+							OnValueChanged = function(self)
+								local CndtGroup = self:GetParent()
+								
+								local conditionData = CndtGroup:GetConditionData()
+
+								local value = self:GetValue()
+								value = TMW.CNDT:ValidateLevelForCondition(value, conditionData.identifier)
+
+								CndtGroup.ValText:SetText(TMW.get(conditionData.texttable, value) or value)
+							end,
 						})
 
 						self.GetSettingTable = function(self)

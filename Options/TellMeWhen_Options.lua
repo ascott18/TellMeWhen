@@ -3029,6 +3029,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	OnMouseDown = function(self, button)
 		if button == "RightButton" then
 			self:UseEditBox()
+
+			self:ReloadSetting()
 		end
 	end,
 

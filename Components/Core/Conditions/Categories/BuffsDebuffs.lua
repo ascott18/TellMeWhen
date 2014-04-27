@@ -276,6 +276,7 @@ ConditionCategory:RegisterCondition(9,	 "ABSORBAMT", {
 	tooltip = L["ABSORBAMT_DESC"],
 	range = 50000,
 	icon = "Interface\\Icons\\spell_holy_powerwordshield",
+	texttable = CNDT.COMMON.commanumber,
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		UnitGetTotalAbsorbs = UnitGetTotalAbsorbs,
