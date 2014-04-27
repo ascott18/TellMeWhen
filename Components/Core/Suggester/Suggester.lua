@@ -295,9 +295,9 @@ end
 ---------- EditBox Hooking ----------
 local EditBoxHooks = {
 	OnEditFocusLost = function(self)
-		if self.SUG_Enabled then
+		--if self.SUG_Enabled then
 			SUG.Suggest:Hide()
-		end
+		--end
 	end,
 	OnEditFocusGained = function(self)
 		if self.SUG_Enabled then
@@ -362,6 +362,10 @@ end
 
 function SUG:DisableEditBox(editbox)
 	editbox.SUG_Enabled = nil
+
+	if SUG.Box == editbox then
+		SUG.Suggest:Hide()
+	end
 end
 
 
