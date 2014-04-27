@@ -2910,9 +2910,9 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 	-- Constructor
 	OnNewInstance_Slider = function(self, data)
-		self:SetMode(self.MODE_STATIC)
-
 		self.min, self.max = self:GetMinMaxValues()
+
+		self:SetMode(self.MODE_STATIC)
 
 		if data.min and data.max then
 			self:SetMinMaxValues(data.min, data.max)
@@ -2962,6 +2962,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	SetMinMaxValues = function(self, min, max)
 		min = min or -math.huge
 		max = max or math.huge
+
+		if min > max then
+			error("min can't be bigger than max")
+		end
 
 		self.min = min
 		self.max = max
@@ -3217,11 +3221,13 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			local deviation = self.range/2
 			local val = value or self:GetValue()
 
-			local newmin = max(self.min, val - deviation)
-			local newmax = min(self.max, val + deviation)
+			local newmin = min(max(self.min, val - deviation), self.max)
+			local newmax = max(min(self.max, val + deviation), self.min)
 			--newmax = min(newmax, self.max)
 
 			self:SetMinMaxValues_base(newmin, newmax)
+		else
+			self:SetMinMaxValues_base(self.min, self.max)
 		end
 	end,
 
