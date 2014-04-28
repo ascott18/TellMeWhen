@@ -722,23 +722,6 @@
 						</Scripts>
 					</CheckButton>
 
-					<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentOnlyShown" relativePoint="BOTTOMLEFT" x="7"/>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self.SetGUID = TMW.SetUIDropdownGUID
-								self.SetIcon = TMW.SetUIDropdownIcon
-
-								self.wrapTooltips = 1
-								self:Hide()
-								UIDropDownMenu_SetWidth(self, 151)
-								self.initialize = TMW.EVENTS.IconMenu_DropDown
-							</OnLoad>
-						</Scripts>
-					</Frame>
-
 
 					<Button name="$parentIconEventWhileCondition" parentKey="IconEventWhileCondition" inherits="TellMeWhen_ButtonTemplate">
 						<Size x="175" y="16"/>

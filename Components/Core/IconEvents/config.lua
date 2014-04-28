@@ -173,6 +173,12 @@ function EVENTS:LoadConfig()
 			local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
 			EventHandler:SetupEventDisplay(eventID)
 
+			if EventHandler.testable then
+				frame.Play:Enable()
+			else
+				frame.Play:Disable()
+			end
+
 			-- If we have not yet loaded an event for this configuration load,
 			-- then load this event. The proper event settings and event handler
 			-- configuration will be shown and setup with stored settings.
@@ -300,7 +306,6 @@ function EVENTS:LoadEventSettings()
 	EventSettingsContainer.Value					:Hide()
 	EventSettingsContainer.CndtJustPassed			:Hide()
 	EventSettingsContainer.PassingCndt				:Hide()
-	EventSettingsContainer.Icon						:Hide()
 	EventSettingsContainer.Frequency				:Hide()
 	EventSettingsContainer.IconEventWhileCondition	:Hide()
 
@@ -326,7 +331,6 @@ function EVENTS:LoadEventSettings()
 
 		--load settings
 		EventSettingsContainer.Value:SetText(eventSettings.Value)
-		EventSettingsContainer.Icon:SetGUID(eventSettings.Icon)
 		
 
 		local settingsUsedByEvent = eventData.settings
@@ -382,9 +386,11 @@ function EVENTS:LoadEventSettings()
 end
 
 
+
 function EVENTS:LoadPickerButtons()
 	local previousFrame
 
+	-- Handler pickers
 	local HandlerPickers = IE.Events.HandlerPickers
 	for i, EventHandler in ipairs(TMW.Classes.EventHandler.orderedInstances) do
 
@@ -409,8 +415,14 @@ function EVENTS:LoadPickerButtons()
 
 		previousFrame = frame
 	end
+	previousFrame = nil
 
+	-- Event (Trigger) pickers
 	local EventPickers = IE.Events.EventPickers
+	for i, frame in ipairs(EventPickers) do
+		frame:Hide()
+	end
+
 	for i, eventData in ipairs(EVENTS:GetValidEvents()) do
 
 		local frame = EventPickers[i]
@@ -418,14 +430,15 @@ function EVENTS:LoadPickerButtons()
 			-- If the frame doesn't exist, then create it.
 			frame = CreateFrame("Button", EventPickers:GetName().."Picker"..i, EventPickers, "TellMeWhen_EventPicker", i)
 			EventPickers[i] = frame
-
-			if i == 1 then
-				frame:SetPoint("TOP")
-			else
-				frame:SetPoint("TOP", previousFrame, "BOTTOM", 0, -0.5)
-			end
 		end
 
+		if i == 1 then
+			frame:SetPoint("TOP")
+		else
+			frame:SetPoint("TOP", previousFrame, "BOTTOM", 0, -1)
+		end
+
+		frame:Show()
 		frame.event = eventData.event
 		frame.Title:SetText(get(eventData.text))
 		TMW:TT(frame, eventData.text, eventData.desc, 1, 1)
@@ -480,6 +493,7 @@ function EVENTS:PickEvent(event)
 
 	CloseDropDownMenus()
 end
+
 
 
 
@@ -643,57 +657,6 @@ function EVENTS.OperatorMenu_DropDown_OnClick(button, frame)
 
 	EVENTS:GetEventSettings().Operator = button.value
 	TMW:TT(frame, button.tooltipTitle, nil, 1)
-end
-
-function EVENTS.IconMenu_DropDown(frame)
-	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon in UIDROPDOWNMENU_MENU_VALUE:InIcons() do
-			if icon:IsValid() and TMW.CI.icon ~= icon then
-				local info = UIDropDownMenu_CreateInfo()
-
-				local text, textshort, tooltip = icon:GetIconMenuText()
-				info.text = textshort
-				info.tooltipTitle = text
-				info.tooltipText = tooltip
-				info.tooltipOnButton = true
-
-				info.value = icon
-				info.arg1 = frame
-				info.func = EVENTS.IconMenu_DropDown_OnClick
-				info.checked = EVENTS:GetEventSettings().Icon == icon:GetGUID()
-
-				info.tCoordLeft = 0.07
-				info.tCoordRight = 0.93
-				info.tCoordTop = 0.07
-				info.tCoordBottom = 0.93
-				info.icon = icon.attributes.texture
-
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end
-	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		for group in TMW:InGroups() do
-			if group:ShouldUpdateIcons() then
-				local info = UIDropDownMenu_CreateInfo()
-				info.text = group:GetGroupName()
-				info.hasArrow = true
-				info.notCheckable = true
-				info.value = group
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
-			end
-		end
-	end
-end
-function EVENTS.IconMenu_DropDown_OnClick(button, frame)
-	CloseDropDownMenus()
-
-
-	local icon = button.value
-	local GUID = icon:GetGUID(true)
-
-	frame:SetIcon(icon)
-
-	EVENTS:GetEventSettings().Icon = GUID
 end
 
 

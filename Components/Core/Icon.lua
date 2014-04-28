@@ -52,7 +52,7 @@ local Icon = TMW:NewClass("Icon", "Button", "UpdateTableManager", "GenericModule
 Icon:UpdateTable_Set(TMW.IconsToUpdate)
 Icon.IsIcon = true
 Icon.attributes = {}
-Icon.runEvents = 1
+Icon.runEvents = true
 Icon.QueuedIcons = {}
 Icon.NextUpdateTime = math.huge
 local QueuedIcons = Icon.QueuedIcons
@@ -358,7 +358,7 @@ end
 
 -- [INTERNAL] (no documentation needed)
 function Icon.RestoreEvents(icon)
-	icon.runEvents = 1
+	icon.runEvents = runEvents
 	icon.runEventsTimerHandler = nil
 	if icon.EventHandlersSet.OnEventsRestored and TMW.Locked then
 		icon:QueueEvent("OnEventsRestored")

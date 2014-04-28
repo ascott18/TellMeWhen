@@ -2,7 +2,10 @@
  * You can now create groups that exist for all characters on your account. These groups can be enabled and disabled on a per-profile basis. Changes made to these groups will be reflected for any character that they are enabled for.
  * Text Layouts are now defined on an account-wide basis instead of being defined for individual profiles.
 
- * Events have been re-branded to Notifications, and you can now add notifications that will trigger continually while a set of conditions evaluate to true.
+ * Events/Notifications
+ ** Events have been re-branded to Notifications, and you can now add notifications that will trigger continually while a set of conditions evaluate to true.
+ ** The On Other Icon Show/Hide events have been removed. Their functionality can be obtained using an On Condition Set Passing trigger.
+ ** The On Icon Setup event is no longer available. If you would like persistent animations, you should use the While Condition Set Passing trigger.
 
  * All references from one icon or group to another in TellMeWhen are now tracked by a unique ID. This ID will persist no matter where it is moved or exported to.
  ** This includes:

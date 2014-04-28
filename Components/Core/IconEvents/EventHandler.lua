@@ -38,6 +38,35 @@ TMW.Icon_Defaults.Events = {
 }
 
 
+TMW:RegisterUpgrade(70077, {
+	-- OnIconShow and OnIconShow were removed in favor of using OnCondition
+	iconEventHandler = function(self, eventSettings)
+		local conditions = eventSettings.OnConditionConditions
+
+		if eventSettings.Event == "OnIconShow" then
+			eventSettings.Event = "OnCondition"
+			-- Reset conditions just in case
+			wipe(conditions)
+			conditions.n = 1
+
+			local condition = conditions[1]
+			condition.Type = "ICON"
+			condition.Icon = eventSettings.Icon or ""
+			condition.Level = 0
+		elseif eventSettings.Event == "OnIconHide" then
+			eventSettings.Event = "OnCondition"
+			-- Reset conditions just in case
+			wipe(conditions)
+			conditions.n = 1
+
+			local condition = conditions[1]
+			condition.Type = "ICON"
+			condition.Icon = eventSettings.Icon or ""
+			condition.Level = 1
+		end
+		eventSettings.Icon = nil
+	end,
+})
 TMW:RegisterUpgrade(50020, {
 	-- Upgrade from the old event system that only allowed one event of each type per icon.
 	icon = function(self, ics)
@@ -130,6 +159,7 @@ end)
 
 
 local EventHandler = TMW:NewClass("EventHandler")
+EventHandler.testable = true
 EventHandler.instancesByName = {}
 EventHandler.orderedInstances = {}
 
@@ -275,6 +305,10 @@ end
 
 -- [INTERNAL]
 function EventHandler:TestEvent(eventID)
+	if not self.testable then
+		return
+	end
+	
 	local eventSettings = EVENTS:GetEventSettings(eventID)
 
 	return self:HandleEvent(TMW.CI.icon, eventSettings)
@@ -303,7 +337,8 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 	end
 	
 	-- make sure events dont fire while, or shortly after, we are setting up
-	icon.runEvents = nil
+	-- Don't set nil because that will make it fall back on the class-defined value
+	icon.runEvents = false
 	
 	EVENTS:CancelTimer(icon.runEventsTimerHandler, 1)
 	icon.runEventsTimerHandler = EVENTS.ScheduleTimer(icon, "RestoreEvents", TMW.UPD_INTV*2.1)
@@ -342,7 +377,7 @@ if TMW.C.IconType then
 end
 TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 	if class.className == "IconType" then
-		class:RegisterIconEvent(0, "WCSP", {
+		class:RegisterIconEvent(1000, "WCSP", {
 			text = L["SOUND_EVENT_WHILECONDITION"],
 			desc = L["SOUND_EVENT_WHILECONDITION_DESC"],
 			settings = {
