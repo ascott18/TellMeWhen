@@ -48,10 +48,8 @@ local operations = {
 function Counter:LoadSettingsForEventID(eventID)
 	local eventSettings = EVENTS:GetEventSettings(eventID)
 
-	local v = TMW:SetUIDropdownText(self.ConfigContainer.Operation, eventSettings.CounterOperation, operations)
-	if v then
-		TMW:TT(self.ConfigContainer.Operation, v.tooltipText, nil, 1)
-	end
+	TMW:SetUIDropdownText(self.ConfigContainer.Operation, eventSettings.CounterOperation, operations)
+	
 
 	self.ConfigContainer.Counter:SetText(eventSettings.Counter)
 	self.ConfigContainer.Amt:SetText(eventSettings.CounterAmt)
@@ -73,7 +71,7 @@ function Counter:SetupEventDisplay(eventID)
 	elseif CounterOperation == "=" then
 		str = str .. "= " .. CounterAmt
 	else
-		str = str .. CounterOperation .. "= " .. CounterAmt
+		str = str .. CounterOperation .. CounterAmt
 	end
 	
 	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. L["EVENTHANDLER_COUNTER_TAB"] .. ":|r " .. str)
@@ -86,7 +84,6 @@ function Counter:OperationMenu_DropDown()
 		info.func = Counter.OperationMenu_DropDown_OnClick
 		info.text = v.text
 		info.value = v.value
-		info.tooltipTitle = v.tooltipText
 		info.tooltipOnButton = true
 		info.arg1 = self
 		UIDropDownMenu_AddButton(info)
@@ -94,8 +91,7 @@ function Counter:OperationMenu_DropDown()
 end
 
 function Counter:OperationMenu_DropDown_OnClick(frame)
-	TMW:SetUIDropdownText(frame, self.text)
-	TMW:TT(frame, self.tooltipTitle, nil, 1)
+	TMW:SetUIDropdownText(frame, self.value, operations)
 	
 	local eventSettings = EVENTS:GetEventSettings()
 	eventSettings.CounterOperation = self.value

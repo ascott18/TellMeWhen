@@ -72,7 +72,7 @@ TMW:NewClass("Config_CheckButton_Event", "Config_Base_Event", "Config_CheckButto
 
 	METHOD_EXTENSIONS = {
 		OnClick = function(self, button)
-			TMW.EVENTS:LoadEventSettings()
+			EVENTS:LoadEventSettings()
 		end,
 	},
 
@@ -88,6 +88,15 @@ TMW:NewClass("Config_Slider_Event", "Config_Base_Event", "Config_Slider"){
 
 	CheckInteractionStates = TMW.NULLFUNC,
 }
+
+TMW:NewClass("Config_EditBox_Event", "Config_Base_Event", "Config_EditBox"){
+	METHOD_EXTENSIONS = {
+		SaveSetting = function(self, button)
+			EVENTS:LoadConfig()
+		end,
+	},
+}
+
 
 function EVENTS:LoadConfig()
 	local EventHandlerFrames = self.EventHandlerFrames

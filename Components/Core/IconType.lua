@@ -480,7 +480,7 @@ function IconType:IsAllowedByView(viewName)
 	end
 end
 
-IconType:RegisterIconEvent(111, "OnEventsRestored", {
+IconType:RegisterIconEvent(100, "OnEventsRestored", {
 	text = L["SOUND_EVENT_ONEVENTSRESTORED"],
 	desc = L["SOUND_EVENT_ONEVENTSRESTORED_DESC"],
 })

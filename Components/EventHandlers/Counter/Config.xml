@@ -4,53 +4,105 @@
 		<Frames>
 			
 			<EditBox name="$parentCounter" inherits="TellMeWhen_InputBoxTemplate" parentKey="Counter" autoFocus="false">
-				<Size x="120" y="15"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="15" y="-15"/>
-				</Anchors>
-				
-				<Scripts>
-					<OnEditFocusLost>
-						EditBox_ClearHighlight(self)
-						self:SetText(self:GetText():trim():lower():gsub("[ \t]", ""))
+				<Size x="130" y="15"/>
+				<Attributes>
+  					<Attribute name="tmw-class" type="string" value="Config_EditBox_Event"/>
+ 				</Attributes>
 
-						if TMW.CI.ics then
-							TMW.EVENTS:GetEventSettings().Counter = self:GetText()
-						end
-					</OnEditFocusLost>
+  				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="10" y="-15"/>
+				</Anchors>
+
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentTitle" parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" y="2"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+
+				<Scripts>
+					<OnLoad>
+						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_NAME"])
+
+						TMW:CInit(self, {
+							setting = "Counter",
+							title = TMW.L["EVENTS_SETTINGS_COUNTER_NAME"],
+							tooltip = TMW.L["EVENTS_SETTINGS_COUNTER_NAME_DESC"],
+							ModifySettingValue = function(self, value)
+								local Counter = TMW.EVENTS:GetEventHandler("Counter")
+								return Counter:SanitizeCounterName(value)
+							end,
+						})
+					</OnLoad>
 				</Scripts>
 			</EditBox>
 			<Frame name="$parentOperation" parentKey="Operation" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentCounter" relativePoint="RIGHT" x="-11" y="-3"/>
 				</Anchors>
+
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentTitle" parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="20" y="-0.5"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+
 				<Scripts>
 					<OnLoad>
+						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_OP"])
+						TMW:TT(self, "EVENTS_SETTINGS_COUNTER_OP", "EVENTS_SETTINGS_COUNTER_OP_DESC")
+
 						local Counter = TMW.EVENTS:GetEventHandler("Counter")
 
 						self.wrapTooltips = 1
-						self.Text:SetFontObject(GameFontHighlightLarge)
-						UIDropDownMenu_SetWidth(self, 50)
+						UIDropDownMenu_SetWidth(self, 80)
 						self.initialize = Counter.OperationMenu_DropDown
 					</OnLoad>
 				</Scripts>
 			</Frame>
 
 			<EditBox name="$parentAmt" inherits="TellMeWhen_InputBoxTemplate" parentKey="Amt" autoFocus="false">
-				<Size x="120" y="15"/>
+				<Size x="55" y="15"/>
+
+				<Attributes>
+  					<Attribute name="tmw-class" type="string" value="Config_EditBox_Event"/>
+ 				</Attributes>
+
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="15" y="-55"/>
+					<Anchor point="LEFT" relativeTo="$parentOperation" relativePoint="RIGHT" x="-9" y="3"/>
 				</Anchors>
+
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentTitle" parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" y="2"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
 				
 				<Scripts>
-					<OnEditFocusLost>
-						EditBox_ClearHighlight(self)
-						self:SetText(tonumber(self:GetText():trim()) or 0)
+					<OnLoad>
+						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT"])
 
-						if TMW.CI.ics then
-							TMW.EVENTS:GetEventSettings().CounterAmt = tonumber(self:GetText())
-						end
-					</OnEditFocusLost>
+						TMW:CInit(self, {
+							setting = "CounterAmt",
+							title = TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT"],
+							tooltip = TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT_DESC"],
+							ModifySettingValue = function(self, value)
+								local Counter = TMW.EVENTS:GetEventHandler("Counter")
+								return tonumber(self:GetText():trim()) or 0
+							end,
+						})
+					</OnLoad>
 				</Scripts>
 			</EditBox>
 		</Frames>

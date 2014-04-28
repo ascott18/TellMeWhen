@@ -1990,9 +1990,17 @@ L["OPERATION_DIVIDE"] = "Divide"
 L["EVENTHANDLER_COUNTER_TAB"] = "Counter"
 L["EVENTHANDLER_COUNTER_TAB_DESC"] = "Configure a counter to be modified or set. This counter can be checked in Conditions and displayed as text with DogTags."
 
-L["EVENTHANDLER_COUNTER_COUNTER"] = "Counter"
-L["EVENTHANDLER_COUNTER_OPERATION"] = "Operation"
-L["EVENTHANDLER_COUNTER_AMOUNT"] = "Value"
+
+L["EVENTS_SETTINGS_COUNTER_NAME"] = "Counter Name"
+L["EVENTS_SETTINGS_COUNTER_NAME_DESC"] = [[Enter the name of the counter to be modified. If the counter doesn't exist the first time it is modified, it's intial value is 0.
+
+Counter names must be lower-case with no spaces.
+
+Use this counter name in other places where you would like to check this counter (Conditions and Text Displays via the [Counter] DogTag)]]
+L["EVENTS_SETTINGS_COUNTER_OP"] = "Operation"
+L["EVENTS_SETTINGS_COUNTER_OP_DESC"] = "Choose the operation that you would like to perform on the counter"
+L["EVENTS_SETTINGS_COUNTER_AMOUNT"] = "Value"
+L["EVENTS_SETTINGS_COUNTER_AMOUNT_DESC"] = "Enter the amount that you want the counter to be set to or be modified by."
 
 
 L["CLEU_"] = "Any event" -- match any event

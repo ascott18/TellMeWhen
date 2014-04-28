@@ -444,6 +444,8 @@ do
 end
 
 ---------- Misc Utilities ----------
+local ScrollContainerHook_Hide = function(c) c.ScrollFrame:Hide() end
+local ScrollContainerHook_Show = function(c) c.ScrollFrame:Show() end
 function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX)
     
     
@@ -472,6 +474,9 @@ function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition,
     
     container.ScrollFrame = ScrollFrame
     ScrollFrame.container = container
+
+    hooksecurefunc(container, "Hide", ScrollContainerHook_Hide)
+   	hooksecurefunc(container, "Show", ScrollContainerHook_Show)
     
 end
 
@@ -2808,7 +2813,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 			end
 			
 			value = get(self.data.ModifySettingValue, self, value) or value
-			
+
 			settings[self.setting] = value
 		
 			IE:ScheduleIconSetup()
