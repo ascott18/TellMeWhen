@@ -82,8 +82,9 @@ ConditionCategory:RegisterCondition(0.5,	"COUNTER", {
 	step = 1,
 
 	unit = false,
-	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
+	icon = "Interface\\Icons\\spell_chargepositive",
 	name = function(editbox) TMW:TT(editbox, "CONDITION_COUNTER", "CONDITION_COUNTER_EB_DESC") editbox.label = L["CONDITION_COUNTER"] end,
+	useSUG = "counterName",
 	tcoords = TMW.CNDT.COMMON.standardtcoords,
 	Env = {
 		COUNTERS = COUNTERS,
@@ -91,7 +92,6 @@ ConditionCategory:RegisterCondition(0.5,	"COUNTER", {
 	funcstr = function(c, icon)
 		local counter = format("%q", Counter:SanitizeCounterName(c.Name))
 
-		
 		return "COUNTERS[" .. counter .. "] c.Operator c.Level"
 	end,
 	events = function(ConditionObject, c)

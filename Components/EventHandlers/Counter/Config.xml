@@ -36,6 +36,9 @@
 								return Counter:SanitizeCounterName(value)
 							end,
 						})
+
+						TMW.SUG:EnableEditBox(self, "counterName", true)
+
 					</OnLoad>
 				</Scripts>
 			</EditBox>

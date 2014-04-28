@@ -97,3 +97,29 @@ function Counter:OperationMenu_DropDown_OnClick(frame)
 	eventSettings.CounterOperation = self.value
 end
 
+
+local SUG = TMW.SUG
+local Module = SUG:NewModule("counterName", SUG:GetModule("default"))
+Module.noMin = true
+Module.noTexture = true
+
+function Module:Table_GetSorter()
+	return nil
+end
+function Module:Entry_AddToList_1(f, name)
+	f.Name:SetText(name)
+
+	f.tooltiptitle = name
+
+	f.insert = name
+end
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	local lastName = SUG.lastName
+
+
+	for eventSettings in EVENTS:InIconEventSettings() do
+		if eventSettings.Counter ~= "" and strfind(eventSettings.Counter, lastName) then
+			suggestions[#suggestions + 1] = eventSettings.Counter
+		end
+	end
+end
