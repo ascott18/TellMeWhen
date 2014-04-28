@@ -379,9 +379,7 @@ function ConditionObject:GenerateNormalEventString(event, ...)
 			str = str .. " == "
 			
 			if arg_type == "string" then
-				str = str .. "'"
-				str = str .. arg
-				str = str .. "'"
+				str = str .. format("%q", arg)
 			else -- number, boolean
 				str = str .. tostring(arg)
 			end

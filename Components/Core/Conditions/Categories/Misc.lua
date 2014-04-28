@@ -72,6 +72,13 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 		end
 		return str
 	end,
+	--[[events = function(ConditionObject, c)
+		local event = TMW.Classes.IconDataProcessor.ProcessorsByName.REALALPHA.changedEvent
+		ConditionObject:RequestEvent(event)
+		ConditionObject:SetNumEventArgs(1)
+		return
+			"event == '" .. event .. "' and arg1:GetGUID() == " .. format("%q", c.Icon)
+	end,]]
 })
 
 local function RegisterShownHiddenTimerCallback()

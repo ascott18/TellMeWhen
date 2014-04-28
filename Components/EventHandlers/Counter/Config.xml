@@ -1,0 +1,59 @@
+﻿<Ui>
+	
+	<Frame name="$parentCounter" inherits="TellMeWhen_EventContainer" parentKey="Counter">
+		<Frames>
+			
+			<EditBox name="$parentCounter" inherits="TellMeWhen_InputBoxTemplate" parentKey="Counter" autoFocus="false">
+				<Size x="120" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="15" y="-15"/>
+				</Anchors>
+				
+				<Scripts>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						self:SetText(self:GetText():trim():lower():gsub("[ \t]", ""))
+
+						if TMW.CI.ics then
+							TMW.EVENTS:GetEventSettings().Counter = self:GetText()
+						end
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+			<Frame name="$parentOperation" parentKey="Operation" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentCounter" relativePoint="RIGHT" x="-11" y="-3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						local Counter = TMW.EVENTS:GetEventHandler("Counter")
+
+						self.wrapTooltips = 1
+						self.Text:SetFontObject(GameFontHighlightLarge)
+						UIDropDownMenu_SetWidth(self, 50)
+						self.initialize = Counter.OperationMenu_DropDown
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<EditBox name="$parentAmt" inherits="TellMeWhen_InputBoxTemplate" parentKey="Amt" autoFocus="false">
+				<Size x="120" y="15"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="15" y="-55"/>
+				</Anchors>
+				
+				<Scripts>
+					<OnEditFocusLost>
+						EditBox_ClearHighlight(self)
+						self:SetText(tonumber(self:GetText():trim()) or 0)
+
+						if TMW.CI.ics then
+							TMW.EVENTS:GetEventSettings().CounterAmt = tonumber(self:GetText())
+						end
+					</OnEditFocusLost>
+				</Scripts>
+			</EditBox>
+		</Frames>
+	</Frame>
+	
+</Ui>

@@ -1527,6 +1527,7 @@ L["NOTYPE"] = "<No Icon Type>"
 
 L["MISCELLANEOUS"] = "Miscellaneous"
 L["TEXTMANIP"] = "Text manipulation"
+L["DT_DOC_Counter"] = "Returns the value of a TellMeWhen Counter. Counters are created and modified with Icon Notifications."
 L["DT_DOC_TMWFormatDuration"] = "Returns a string formatted by TellMeWhen's time format. Alternative to [FormatDuration]."
 L["DT_DOC_gsub"] = "Gives access to Lua's string.gsub function for DogTags for powerful string manipulation capabilities."
 L["DT_DOC_strfind"] = "Gives access to Lua's string.find function for DogTags for powerful string manipulation capabilities."
@@ -1978,6 +1979,20 @@ L["EVENTHANDLER_LUA_LUA"] = "Lua"
 L["EVENTHANDLER_LUA_CODE"] = "Lua Code to Execute"
 L["EVENTHANDLER_LUA_CODE_DESC"] = "Type the Lua code that should be executed when the event is triggered here."
 
+L["CONDITIONPANEL_COUNTER_DESC"] = "Check the value of a counter that has been established and modified by the \"Counter\" Notification handler"
+L["CONDITION_COUNTER"] = "Counter to check"
+L["CONDITION_COUNTER_EB_DESC"] = "Enter the name of the counter that you would like to check."
+L["OPERATION_SET"] = "Set"
+L["OPERATION_PLUS"] = "Add"
+L["OPERATION_MINUS"] = "Subtract"
+L["OPERATION_MULTIPLY"] = "Multiply"
+L["OPERATION_DIVIDE"] = "Divide"
+L["EVENTHANDLER_COUNTER_TAB"] = "Counter"
+L["EVENTHANDLER_COUNTER_TAB_DESC"] = "Configure a counter to be modified or set. This counter can be checked in Conditions and displayed as text with DogTags."
+
+L["EVENTHANDLER_COUNTER_COUNTER"] = "Counter"
+L["EVENTHANDLER_COUNTER_OPERATION"] = "Operation"
+L["EVENTHANDLER_COUNTER_AMOUNT"] = "Value"
 
 
 L["CLEU_"] = "Any event" -- match any event
