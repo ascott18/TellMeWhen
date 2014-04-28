@@ -366,6 +366,80 @@ function Icon.RestoreEvents(icon)
 	end
 end
 
+local EventSettingsWasPassingConditionMap = {}
+--- Triggers processing of all icon events that have been queued through {{{icon:QueueEvent()}}}.
+-- 
+-- Icon events will only be fired if their conditions pass (if they have any) and if limitations like the "Continue to lower events" user setting don't prevent more than one event from being fired.
+-- Events are fired in the order that they are configured by the user, not in the order that they are queued.
+-- 
+-- This method is automatically called at the end of a TMW update cycle for all icons that have queued an event,
+-- so it should only be called after an event is queued outside of normal icon updating (like in an OnEvent handler or in a script handler).
+-- 
+-- Search TellMeWhen's source for calls of this method and of {{{icon:QueueEvent()}}} for examples of proper usage.
+-- @name Icon:ProcessQueuedEvents
+-- @paramsig 
+function Icon.ProcessQueuedEvents(icon)
+	local EventsToFire = icon.EventsToFire
+	if EventsToFire and icon.eventIsQueued then
+		local handledOne
+		for i = 1, (icon.Events.n or 0) do
+			-- settings to check for in EventsToFire
+			local EventSettingsFromIconSettings = icon.Events[i]
+			local event = EventSettingsFromIconSettings.Event
+			
+			local EventSettings
+			if EventsToFire[EventSettingsFromIconSettings] or EventsToFire[event] then
+				-- we should process EventSettingsFromIconSettings
+				EventSettings = EventSettingsFromIconSettings
+			end
+			local eventData = TMW.EventList[event]
+			if eventData and EventSettings then
+				local shouldProcess = true
+				if EventSettings.OnlyShown and icon.attributes.realAlpha <= 0 then
+					shouldProcess = false
+
+				elseif EventSettings.PassingCndt then
+					local conditionChecker = eventData.conditionChecker
+					local conditionResult = true
+					
+					if conditionChecker then
+						conditionResult = conditionChecker(icon, EventSettings)
+						
+						if EventSettings.CndtJustPassed then
+							if conditionResult ~= EventSettingsWasPassingConditionMap[EventSettings] then
+								EventSettingsWasPassingConditionMap[EventSettings] = conditionResult
+							else
+								conditionResult = false
+							end
+						end
+					end
+					
+					shouldProcess = conditionResult
+				end
+
+				if shouldProcess and icon.runEvents and icon.attributes.shown then
+					local EventHandler = TMW.EVENTS:GetEventHandler(EventSettings.Type)
+					if EventHandler then
+						local handled = EventHandler:HandleEvent(icon, EventSettings)
+						if handled then
+							if not EventSettings.PassThrough then
+								break
+							end
+							handledOne = true
+						end
+					end
+				end
+			end
+		end
+
+		wipe(EventsToFire)
+		icon.eventIsQueued = nil
+		if handledOne then
+			TMW:Fire("TMW_ICON_UPDATED", icon)
+		end
+	end
+end
+
 --- Checks if the icon is within the maximum number of icons that will be shown by its parent group.
 -- @name Icon:IsInRange
 -- @paramsig 
@@ -563,80 +637,6 @@ function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObject, failed)
 		icon.NextUpdateTime = 0
 		
 		icon:SetInfo("conditionFailed", failed)
-	end
-end
-
-local EventSettingsWasPassingConditionMap = {}
---- Triggers processing of all icon events that have been queued through {{{icon:QueueEvent()}}}.
--- 
--- Icon events will only be fired if their conditions pass (if they have any) and if limitations like the "Continue to lower events" user setting don't prevent more than one event from being fired.
--- Events are fired in the order that they are configured by the user, not in the order that they are queued.
--- 
--- This method is automatically called at the end of a TMW update cycle for all icons that have queued an event,
--- so it should only be called after an event is queued outside of normal icon updating (like in an OnEvent handler or in a script handler).
--- 
--- Search TellMeWhen's source for calls of this method and of {{{icon:QueueEvent()}}} for examples of proper usage.
--- @name Icon:ProcessQueuedEvents
--- @paramsig 
-function Icon.ProcessQueuedEvents(icon)
-	local EventsToFire = icon.EventsToFire
-	if EventsToFire and icon.eventIsQueued then
-		local handledOne
-		for i = 1, (icon.Events.n or 0) do
-			-- settings to check for in EventsToFire
-			local EventSettingsFromIconSettings = icon.Events[i]
-			local event = EventSettingsFromIconSettings.Event
-			
-			local EventSettings
-			if EventsToFire[EventSettingsFromIconSettings] or EventsToFire[event] then
-				-- we should process EventSettingsFromIconSettings
-				EventSettings = EventSettingsFromIconSettings
-			end
-			local eventData = TMW.EventList[event]
-			if eventData and EventSettings then
-				local shouldProcess = true
-				if EventSettings.OnlyShown and icon.attributes.realAlpha <= 0 then
-					shouldProcess = false
-
-				elseif EventSettings.PassingCndt then
-					local conditionChecker = eventData.conditionChecker
-					local conditionResult = true
-					
-					if conditionChecker then
-						conditionResult = conditionChecker(icon, EventSettings)
-						
-						if EventSettings.CndtJustPassed then
-							if conditionResult ~= EventSettingsWasPassingConditionMap[EventSettings] then
-								EventSettingsWasPassingConditionMap[EventSettings] = conditionResult
-							else
-								conditionResult = false
-							end
-						end
-					end
-					
-					shouldProcess = conditionResult
-				end
-
-				if shouldProcess and icon.runEvents and icon.attributes.shown then
-					local EventHandler = TMW.EVENTS:GetEventHandler(EventSettings.Type)
-					if EventHandler then
-						local handled = EventHandler:HandleEvent(icon, EventSettings)
-						if handled then
-							if not EventSettings.PassThrough then
-								break
-							end
-							handledOne = true
-						end
-					end
-				end
-			end
-		end
-
-		wipe(EventsToFire)
-		icon.eventIsQueued = nil
-		if handledOne then
-			TMW:Fire("TMW_ICON_UPDATED", icon)
-		end
 	end
 end
 
