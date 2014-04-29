@@ -238,8 +238,7 @@ ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 	nooperator = true,
 	name = function(editbox) TMW:TT(editbox, "CONDITION_QUESTCOMPLETE", "CONDITION_QUESTCOMPLETE_EB_DESC") editbox.label = L["QUESTIDTOCHECK"] end,
 	unit = false,
-	icon = "Interface\\Icons\\inv_misc_punchcards_yellow",
-	tcoords = CNDT.COMMON.standardtcoords,
+	icon = "Interface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon",
 	Env = {
 		IsQuestFlaggedCompleted = IsQuestFlaggedCompleted,
 		GetQuestResetTime = GetQuestResetTime,

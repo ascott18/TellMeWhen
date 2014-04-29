@@ -68,10 +68,8 @@ function Counter:SetupEventDisplay(eventID)
 	local str = Counter .. " "
 	if Counter == "" then
 		str = "|cff808080<No Counter>"
-	elseif CounterOperation == "=" then
-		str = str .. "= " .. CounterAmt
 	else
-		str = str .. CounterOperation .. CounterAmt
+		str = str .. CounterOperation .. " " .. CounterAmt
 	end
 	
 	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. L["EVENTHANDLER_COUNTER_TAB"] .. ":|r " .. str)

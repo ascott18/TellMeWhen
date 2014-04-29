@@ -1838,6 +1838,7 @@ L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"] = "Prevents the notification from being
 
 L["EVENTS_SETTINGS_PASSTHROUGH"] = "Continue to lower events"
 L["EVENTS_SETTINGS_PASSTHROUGH_DESC"] = [[Check to allow another event-triggered notification to be handled after this one.
+
 If left unchecked, the icon will not process any more events after this event if it successfully processes and outputs/displays something.
 
 Exeptions may apply, see individual event descriptions for details.]]
@@ -1996,7 +1997,9 @@ L["EVENTS_SETTINGS_COUNTER_NAME_DESC"] = [[Enter the name of the counter to be m
 
 Counter names must be lower-case with no spaces.
 
-Use this counter name in other places where you would like to check this counter (Conditions and Text Displays via the [Counter] DogTag)]]
+Use this counter name in other places where you would like to check this counter (Conditions and Text Displays via the [Counter] DogTag)
+
+Advanced: Counters are stored in TMW.COUNTERS[counterName] = value. Call TMW:Fire("TMW_COUNTER_MODIFIED", counterName) if you change a counter in a custom Lua script.]]
 L["EVENTS_SETTINGS_COUNTER_OP"] = "Operation"
 L["EVENTS_SETTINGS_COUNTER_OP_DESC"] = "Choose the operation that you would like to perform on the counter"
 L["EVENTS_SETTINGS_COUNTER_AMOUNT"] = "Value"
