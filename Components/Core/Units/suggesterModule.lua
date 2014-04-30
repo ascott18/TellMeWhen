@@ -30,6 +30,8 @@ local Module = SUG:NewModule("units", SUG:GetModule("default"))
 Module.noMin = true
 Module.noTexture = true
 Module.table = TMW.UNITS.Units
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 function Module:Table_Get()
 	return self.table

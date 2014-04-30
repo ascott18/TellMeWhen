@@ -23,6 +23,8 @@ local Module = SUG:NewModule("creaturetype", SUG:GetModule("default"))
 Module.noMin = true
 Module.noTexture = true
 Module.NUM_CREATURE_TYPES = 14
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 function Module:Entry_AddToList_1(f, index)
 	local creaturetypeLocalized = L["CREATURETYPE_" .. index]

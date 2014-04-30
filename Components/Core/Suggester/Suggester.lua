@@ -372,7 +372,9 @@ end
 ---------- Miscellaneous ----------
 function SUG:ColorHelp(frame)
 	TMW:TT_Anchor(frame)
+	GameTooltip:AddLine(SUG.CurrentModule.headerText, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 	GameTooltip:AddLine(SUG.CurrentModule.helpText, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+	
 	if SUG.CurrentModule.showColorHelp then
 		GameTooltip:AddLine(L["SUG_DISPELTYPES"], 1, .49, .04, 1)
 		GameTooltip:AddLine(L["SUG_BUFFEQUIVS"], .2, .9, .2, 1)
@@ -385,6 +387,7 @@ function SUG:ColorHelp(frame)
 		GameTooltip:AddLine(L["SUG_NPCAURAS"], .78, .61, .43, 1)
 		GameTooltip:AddLine(L["SUG_MISC"], .58, .51, .79, 1)
 	end
+
 	GameTooltip:Show()
 end
 
@@ -562,6 +565,8 @@ end
 
 
 local Module = SUG:NewModule("item", SUG:GetModule("default"), "AceEvent-3.0")
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 function Module:GET_ITEM_INFO_RECEIVED()
 	if SUG.CurrentModule and SUG.CurrentModule.moduleName:find("item") then
 		SUG:SuggestingComplete()

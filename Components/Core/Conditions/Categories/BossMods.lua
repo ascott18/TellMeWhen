@@ -99,6 +99,9 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
 	local Module = SUG:NewModule("bossfights", SUG:GetModule("default"))
 	Module.noMin = true
+	Module.showColorHelp = false
+	Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+	
 	function Module:Table_Get()
 		if doScan then
 			doScan()

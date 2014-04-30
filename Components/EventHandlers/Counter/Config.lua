@@ -33,7 +33,7 @@ local Counter = EVENTS:GetEventHandler("Counter")
 
 Counter.handlerName = L["EVENTHANDLER_COUNTER_TAB"]
 Counter.handlerDesc = L["EVENTHANDLER_COUNTER_TAB_DESC"]
-Counter.testable = false
+--Counter.testable = false
 
 local operations = {
 	{ text = L["OPERATION_SET"], 		value = "=", },
@@ -50,6 +50,7 @@ function Counter:LoadSettingsForEventID(eventID)
 
 	TMW:SetUIDropdownText(self.ConfigContainer.Operation, eventSettings.CounterOperation, operations)
 	
+	self.ConfigContainer.Header:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_HEADER"])
 
 	self.ConfigContainer.Counter:SetText(eventSettings.Counter)
 	self.ConfigContainer.Amt:SetText(eventSettings.CounterAmt)
@@ -96,15 +97,43 @@ function Counter:OperationMenu_DropDown_OnClick(frame)
 end
 
 
+
+
 local SUG = TMW.SUG
 local Module = SUG:NewModule("counterName", SUG:GetModule("default"))
 Module.noMin = true
 Module.noTexture = true
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+
+function Module.Sorter_Counter(a, b)
+	--sort by name
+	
+	local special_a, special_b = strsub(a, 1, 1), strsub(b, 1, 1)
+	--local prefix_a, prefix_b = strsub(a, 1, 2), strsub(b, 1, 2)
+	
+	local haveA, haveB = special_a ~= "%", special_b ~= "%"
+	if (haveA ~= haveB) then
+		return haveA
+	end
+	
+	--[[local haveA, haveB = prefix_a == "%A", prefix_b == "%A"
+	if (haveA ~= haveB) then
+		return haveA
+	end]]
+	
+	--sort by index/alphabetical/whatever
+	return a < b
+end
 
 function Module:Table_GetSorter()
-	return nil
+	return self.Sorter_Counter
 end
 function Module:Entry_AddToList_1(f, name)
+	if name == "%A" then
+		name = SUG.lastName_unmodified
+	end
+
 	f.Name:SetText(name)
 
 	f.tooltiptitle = name
@@ -116,8 +145,14 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 
 
 	for eventSettings in EVENTS:InIconEventSettings() do
-		if eventSettings.Counter ~= "" and strfind(eventSettings.Counter, lastName) then
+		if eventSettings.Counter ~= "" and strfind(eventSettings.Counter, lastName) and not TMW.tContains(suggestions, eventSettings.Counter) then
 			suggestions[#suggestions + 1] = eventSettings.Counter
 		end
+	end
+end
+
+function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+	if #SUG.lastName > 0 then
+		suggestions[#suggestions + 1] = "%A"
 	end
 end

@@ -25,7 +25,10 @@ local _, pclass = UnitClass("Player")
 
 local Module = SUG:NewModule("glyphs", SUG:GetModule("default"))
 Module.noMin = true
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 Module.table = {}
+
 function Module:OnInitialize()
 	for i = 1, GetNumGlyphs() do
 		local type, _, _, _, glyphID, link = GetGlyphInfo(i)
@@ -115,6 +118,9 @@ end
 
 local Module = SUG:NewModule("stances", SUG:GetModule("spell"))
 Module.noMin = true
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+
 Module.stances = {
 	WARRIOR = {
 		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
@@ -211,7 +217,10 @@ end
 
 local Module = SUG:NewModule("talents", SUG:GetModule("spell"))
 Module.noMin = true
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 Module.table = {}
+
 function Module:OnInitialize()
 	for talent = 1, MAX_NUM_TALENTS do
 		local name = GetTalentInfo(talent)
@@ -254,6 +263,9 @@ end
 
 local Module = SUG:NewModule("tracking", SUG:GetModule("default"))
 Module.noMin = true
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+
 local TrackingCache = {}
 function Module:Table_Get()
 	for i = 1, GetNumTrackingTypes() do
@@ -283,6 +295,9 @@ end
 
 local Module = SUG:NewModule("blizzequipset", SUG:GetModule("default"))
 Module.noMin = true
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+
 local EquipSetCache = {}
 function Module:Table_Get()
 	for i = 1, GetNumEquipmentSets() do

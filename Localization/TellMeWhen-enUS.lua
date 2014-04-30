@@ -1503,7 +1503,7 @@ L["EVENT_WHILECONDITIONS_DESC"] = "Click to configure a set of conditions that w
 L["EVENT_WHILECONDITIONS_TAB_DESC"] = "Configure a set of conditions that will cause a notification to play while they are passing."
 
 L["EVENT_FREQUENCY"] = "Trigger Frequency"
-L["EVENT_FREQUENCY_DESC"] = "Set how often, in seconds, that the handlier will be triggered when the condition set is passing."
+L["EVENT_FREQUENCY_DESC"] = "Set how often, in seconds, that the handler will be triggered when the condition set is passing."
 
 L["UNITCONDITIONS"] = "Unit Conditions"
 L["UNITCONDITIONS_DESC"] = "Click to configure a set of conditions that each unit will have to pass in order to be checked."
@@ -1621,6 +1621,11 @@ You do not have to wait for this process to complete in order to use TellMeWhen.
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
 L["SUGGESTIONS_DOGTAGS"] = "DogTags:"
+L["SUG_TOOLTIPTITLE_GENERIC"] = [[As you type, TellMeWhen will try to determine the input that you were looking for.
+
+This list is not always exhaustive - in some cases, there may be valid input that doesn't appear. You also don't have to use the entries in the suggestion list - as long as you type the correct text into the editbox, TellMeWhen will accept it without issue.
+
+Clicking on an entry will insert it into the editbox.]]
 L["SUG_TOOLTIPTITLE"] = [[As you type, TellMeWhen will look through its cache and determine the spells that you were most likely looking for.
 
 Spells are categorized and colored as per the list below. Note that the categories that begin with the word "Known" will not have spells put into them until they have been seen as you play or log onto different Classes.
@@ -1991,6 +1996,7 @@ L["OPERATION_DIVIDE"] = "Divide"
 L["EVENTHANDLER_COUNTER_TAB"] = "Counter"
 L["EVENTHANDLER_COUNTER_TAB_DESC"] = "Configure a counter to be modified or set. This counter can be checked in Conditions and displayed as text with DogTags."
 
+L["EVENTS_SETTINGS_COUNTER_HEADER"] = "Counter Settings"
 
 L["EVENTS_SETTINGS_COUNTER_NAME"] = "Counter Name"
 L["EVENTS_SETTINGS_COUNTER_NAME_DESC"] = [[Enter the name of the counter to be modified. If the counter doesn't exist the first time it is modified, it's intial value is 0.

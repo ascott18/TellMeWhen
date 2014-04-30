@@ -65,6 +65,8 @@ function Counter:HandleEvent(icon, eventSettings)
 	end
 	
 	TMW:Fire("TMW_COUNTER_MODIFIED", Counter)
+
+	return true
 end
 
 function Counter:OnRegisterEventHandlerDataTable()

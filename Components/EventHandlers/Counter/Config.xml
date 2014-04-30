@@ -1,6 +1,16 @@
 ﻿<Ui>
 	
 	<Frame name="$parentCounter" inherits="TellMeWhen_EventContainer" parentKey="Counter">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+
 		<Frames>
 			
 			<EditBox name="$parentCounter" inherits="TellMeWhen_InputBoxTemplate" parentKey="Counter" autoFocus="false">
@@ -10,7 +20,7 @@
  				</Attributes>
 
   				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="10" y="-15"/>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="10" y="-22"/>
 				</Anchors>
 
 				<Layers>
@@ -109,6 +119,7 @@
 				</Scripts>
 			</EditBox>
 		</Frames>
+
 	</Frame>
 	
 </Ui>

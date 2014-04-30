@@ -51,6 +51,7 @@ end
 
 local Module = SUG:NewModule("wpnenchant", SUG:GetModule("default"), "AceEvent-3.0")
 Module.noMin = true
+Module.showColorHelp = false
 
 Module.ItemIDs = {
 	-- item enhancements
