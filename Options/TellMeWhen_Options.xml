@@ -1505,10 +1505,10 @@
 
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="background">
+				<Texture parentKey="background" texturesublevel="2">
 					<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
 				</Texture>
-				<Texture>
+				<Texture parentKey="border" texturesublevel="4">
 					<Color r="0" g="0" b="0" a="1"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeKey="$parent.background" x="-1" y="1"/>
@@ -2014,7 +2014,10 @@
 							
 							v = v:gsub("IMPORTANT", "|cffff0000IMPORTANT|r")
 							
-							if v:match("===(v.*)===") then
+							if v:match("====(.*)====") then
+								v = v:gsub("====(.*)====", "|cff00d1ff%1|r")
+
+							elseif v:match("===(v.*)===") then
 								tinsert(CHANGELOGS, s:trim("\r\n "))
 								s = ""
 								
@@ -2112,6 +2115,10 @@
 				self.title:SetText(TMW.L["DIALOG_HEADER_CHANGELOG"])
 
 				self.Okay:SetText(OKAY)
+
+				-- Red has to be > 0 for the whole dialog to not turn bright green.
+				-- Don't ask me why. GG, Blizzard.
+				self.border:SetTexture(0, 0.7, 0, 1)
 
 				self:SetScale(0.85)
 			</OnLoad>

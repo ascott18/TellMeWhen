@@ -1800,7 +1800,7 @@ function TMW:InitializeDatabase()
 		-- TellMeWhenDB might not exist if this is a fresh install
 		-- or if the user is upgrading from a really old version that uses TellMeWhen_Settings.
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
-		TMW.DBWasEmpty = true
+		--TMW.DBWasEmpty = true
 	end
 	
 
@@ -1853,7 +1853,12 @@ function TMW:PLAYER_LOGIN()
 	
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+
+	-- TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+	-- Don't register PLAYER_TALENT_UPDATE. As far as I can tell, there is nothing that it fires for
+	-- that PLAYER_SPECIALIZATION_CHANGED won't also fire for. See ticket 949 for details on why
+	-- registering PLAYER_TALENT_UPDATE is bad now.
+
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 
 	TMW:ProcessEquivalencies()
@@ -1861,7 +1866,7 @@ function TMW:PLAYER_LOGIN()
 	-- This should be done twice to get everything aware of everything else's GUID.
 	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
 	TMW:Update()
-	TMW:Update()
+	--TMW:Update()
 end
 
 
@@ -3316,7 +3321,7 @@ function TMW:ScheduleUpdate(delay)
 	updateHandler = TMW:ScheduleTimer("ScheduledUpdateHandler", delay or 1)
 end
 
-function TMW:PLAYER_SPECIALIZATION_CHANGED()
+function TMW:PLAYER_SPECIALIZATION_CHANGED(...)
 	TMW:ScheduleUpdate(.2)
 	--TMW:Update()
 	
@@ -4234,13 +4239,16 @@ local DogTagEventHandler = function(event, icon)
 end
 
 function TMW:CreateDogTagEventString(...)
-	local eventString = ""
+	local eventString = "TMW_GLOBAL_UPDATE_POST"
+
 	for i, dataProcessorName in TMW:Vararg(...) do
 		local Processor = TMW.Classes.IconDataProcessor.ProcessorsByName[dataProcessorName]
 		TMW:RegisterCallback(Processor.changedEvent, DogTagEventHandler)
-		if i > 1 then
+		
+		--if i > 1 then
 			eventString = eventString .. ";"
-		end
+		--end
+
 		eventString = eventString .. Processor.changedEvent .. "#$icon"
 	end
 	return eventString
@@ -4250,6 +4258,8 @@ if not DogTag then
 end
 
 if DogTag then
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", DogTag.FireEvent, DogTag)
+
 	DogTag:AddTag("TMW", "TMWFormatDuration", {
 		code = TMW:MakeSingleArgFunctionCached(function(seconds)
 			return TMW:FormatSeconds(seconds, seconds == 0 or seconds > 10, true)

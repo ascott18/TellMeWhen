@@ -280,7 +280,8 @@ ConditionCategory:RegisterCondition(7,	 "SPEC", {
 	funcstr = [[c.Level == GetActiveSpecGroup()]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			--ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			--ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED"),
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end,
 })
@@ -386,7 +387,7 @@ ConditionCategory:RegisterCondition(10,	 "PTSINTAL", {
 	max = 5,
 	hidden = true,
 	funcstr = function(c)
-		-- Brilliant hack that will automatically upgrade to the MOP version of the condition when it is processed.
+		-- Hack that will automatically upgrade to the MOP version of the condition when it is processed.
 		-- This upgrade is kinda bad because we went from a number comparison to a boolean check, but we should at least put the level down to a valid value.
 		-- Users are going to need to redo their conditions anyway for gameplay reasons, so I'm not to worried about a poor upgrade here.
 		
