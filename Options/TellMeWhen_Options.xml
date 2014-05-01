@@ -2116,10 +2116,6 @@
 
 				self.Okay:SetText(OKAY)
 
-				-- Red has to be > 0 for the whole dialog to not turn bright green.
-				-- Don't ask me why. GG, Blizzard.
-				self.border:SetTexture(0, 0.7, 0, 1)
-
 				self:SetScale(0.85)
 			</OnLoad>
 			<OnShow>
