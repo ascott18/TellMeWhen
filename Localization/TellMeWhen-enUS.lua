@@ -1281,6 +1281,14 @@ L["CONDITIONPANEL_DBM_ENGAGED_DESC"] = [[Checks if a boss is engaged according t
 Enter all or part of the name of the encounter into "Encounter to check".]] 
 L["MODTIMERTOCHECK"] = "Timer to check"
 L["MODTIMERTOCHECK_DESC"] = "Enter all or part of the name of the timer as it appears on the boss mod's timer bars."
+L["MODTIMER_PATTERN"] = "Allow Lua pattern matching"
+L["MODTIMER_PATTERN_DESC"] = [[By default, this condition will match any timers whose name contains the text you entered, case-insensitive.
+
+If you enable this setting, the input will be used as a Lua-style strmatch pattern.
+
+To force an exact match of a timer name, enter ^timer name$. This MUST match the timer name as lowercase, as TMW stores the timer names as lowercase.
+
+For information, see http://wowpedia.org/Pattern_matching]]
 L["ENCOUNTERTOCHECK"] = "Encounter to check"
 L["ENCOUNTERTOCHECK_DESC_BIGWIGS"] = "Enter all or part of the name of the encounter. This is displayed in BigWig's configuration, and also in the Encounter Journal."
 L["ENCOUNTERTOCHECK_DESC_DBM"] = "Enter all or part of the name of the encounter. This is displayed in chat on pull/wipe/kill, and also in the Encounter Journal."

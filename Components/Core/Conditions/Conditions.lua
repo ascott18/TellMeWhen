@@ -548,8 +548,8 @@ CNDT.Env = {
 
 			local o = ";" .. strlowerCache[i] .. ";"
 			
-			-- escape ()[]-+*. since the purpose of this is to be the 2nd arg to strfind
-			o = o:gsub("([%(%)%%%[%]%-%+%*%.])", "%%%1")
+			-- escape ()[]-+*^$. since the purpose of this is to be the 2nd arg to strfind
+			o = o:gsub("([%(%)%%%[%]%-%+%*%.%^%$])", "%%%1")
 			
 			t[i] = o
 			return o

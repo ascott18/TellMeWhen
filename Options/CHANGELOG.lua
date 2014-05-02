@@ -74,6 +74,7 @@ TMW.CHANGELOG = {
 [==[* Currency conditions should once again be listed in the condition type selection menu.]==],
 [==[* The NPC ID condition should now work correctly with npcIDs that are greater than 65535 (0xFFFF).]==],
 [==[* Meta icons should reflect changes in the icons that they are checking that are caused by using slash commands to enable/disable icons while TMW is locked.]==],
+[==[* TellMeWhen no longer registers PLAYER_TALENT_UPDATE - there is a Blizzard big causing this to fire at random for warlocks, and possibly other classes as well, which triggers a TMW:Update() which can cause a sudden framerate drop. PLAYER_SPECIALIZATION_CHANGED still fires for everything that we cared about.]==],
 [==[]==],
 [==[===v6.2.6===]==],
 [==[====Bug Fixes====]==],

@@ -227,6 +227,7 @@ ConditionCategory:RegisterCondition(1,	 "BIGWIGS_TIMER", {
 	step = 0.1,
 	unit = false,
 	name = function(editbox) TMW:TT(editbox, "MODTIMERTOCHECK", "MODTIMERTOCHECK_DESC") editbox.label = L["MODTIMERTOCHECK"] end,
+	check = function(check) TMW:TT(check, "MODTIMER_PATTERN", "MODTIMER_PATTERN_DESC") end,
 	texttable = CNDT.COMMON.absentseconds,
 	icon = function()
 		if not BigWigsLoader then
@@ -242,7 +243,13 @@ ConditionCategory:RegisterCondition(1,	 "BIGWIGS_TIMER", {
 	funcstr = function(c)
 		if BigWigs_timer_init then BigWigs_timer_init() end
 
-		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
+		local name 
+		if c.Checked then
+			name = format("%q", c.Name)
+		else
+			name = format("%q", c.Name:gsub("([%(%)%%%[%]%-%+%*%.%^%$])", "%%%1"):lower())
+		end
+
 		return [[BigWigs_GetTimeRemaining(]] .. name .. [[) c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
@@ -250,7 +257,13 @@ ConditionCategory:RegisterCondition(1,	 "BIGWIGS_TIMER", {
 			ConditionObject:GenerateNormalEventString("TMW_CNDT_BOSSMODS_BIGWIGS_TIMER_CHANGED")
 	end,
 	anticipate = function(c)
-		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
+		local name 
+		if c.Checked then
+			name = format("%q", c.Name)
+		else
+			name = format("%q", c.Name:gsub("([%(%)%%%[%]%-%+%*%.%^%$])", "%%%1"):lower())
+		end
+
 		return [[local dur, expirationTime = BigWigs_GetTimeRemaining(]] .. name .. [[)
 
 		local VALUE
@@ -410,6 +423,7 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 	step = 0.1,
 	unit = false,
 	name = function(editbox) TMW:TT(editbox, "MODTIMERTOCHECK", "MODTIMERTOCHECK_DESC") editbox.label = L["MODTIMERTOCHECK"] end,
+	check = function(check) TMW:TT(check, "MODTIMER_PATTERN", "MODTIMER_PATTERN_DESC") end,
 	texttable = CNDT.COMMON.absentseconds,
 	icon = function()
 		if not DBM then
@@ -425,7 +439,13 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 	funcstr = function(c)
 		if DBM_timer_init then DBM_timer_init() end
 
-		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
+		local name 
+		if c.Checked then
+			name = format("%q", c.Name)
+		else
+			name = format("%q", c.Name:gsub("([%(%)%%%[%]%-%+%*%.%^%$])", "%%%1"):lower())
+		end
+
 		return [[DBM_GetTimeRemaining(]] .. name .. [[) c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
@@ -433,7 +453,13 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 			ConditionObject:GenerateNormalEventString("TMW_CNDT_BOSSMODS_DBM_TIMER_CHANGED")
 	end,
 	anticipate = function(c)
-		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
+		local name 
+		if c.Checked then
+			name = format("%q", c.Name)
+		else
+			name = format("%q", c.Name:gsub("([%(%)%%%[%]%-%+%*%.%^%$])", "%%%1"):lower())
+		end
+
 		return [[local dur, expirationTime = DBM_GetTimeRemaining(]] .. name .. [[)
 
 		local VALUE
