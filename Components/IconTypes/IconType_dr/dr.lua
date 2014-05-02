@@ -315,7 +315,14 @@ do	-- CheckCategories
 
 		if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
 			if result.doWarn then
-				TMW.HELP:Show("ICON_DR_MISMATCH", icon, TellMeWhen_ChooseName, 0, 0, L["WARN_DRMISMATCH"] .. result.append)
+				TMW.HELP:Show{
+					code = "ICON_DR_MISMATCH",
+					icon = icon,
+					relativeTo = TellMeWhen_ChooseName,
+					x = 0,
+					y = 0,
+					text = format(L["WARN_DRMISMATCH"] .. result.append)
+				}
 			else
 				TMW.HELP:Hide("ICON_DR_MISMATCH")
 			end

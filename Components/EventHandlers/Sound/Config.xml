@@ -205,7 +205,14 @@
 
 						self:SetText(t)
 						if wt then
-							TMW.HELP:Show("SND_INVALID_CUSTOM", nil, self, 0, 0, wt)
+							TMW.HELP:Show{
+								code = "SND_INVALID_CUSTOM",
+								icon = nil,
+								relativeTo = self,
+								x = 0,
+								y = 0,
+								text = format(wt)
+							}
 						else
 							TMW.HELP:Hide("SND_INVALID_CUSTOM")
 						end

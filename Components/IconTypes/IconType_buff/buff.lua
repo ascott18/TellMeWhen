@@ -375,7 +375,14 @@ function Type:Setup(icon)
 		if icon.OnlyMine and isEditing then
 			for _, badSpell in pairs(aurasWithNoSourceReported) do
 				if type(badSpell) == "string" and badSpell:lower() == spell then
-					TMW.HELP:Show("ICONTYPE_BUFF_NOSOURCERPPM", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.NameArray[k]))
+					TMW.HELP:Show{
+						code = "ICONTYPE_BUFF_NOSOURCERPPM",
+						icon = icon,
+						relativeTo = TellMeWhen_ChooseName,
+						x = 0,
+						y = 0,
+						text = format(L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.NameArray[k]))
+					}
 					break
 				end
 			end

@@ -76,7 +76,14 @@
 							tooltip = TMW.L["ICONMENU_ENABLECOLORS_DESC"],
 							OnState = function(self)
 								if self:GetChecked() then
-									TMW.HELP:Show("COLOR_COPY_DRAG", nil, self, 0, 0, TMW.L["ICONMENU_ENABLECOLORS_HELP"])
+									TMW.HELP:Show{
+										code = "COLOR_COPY_DRAG",
+										icon = nil,
+										relativeTo = self,
+										x = 0,
+										y = 0,
+										text = format(TMW.L["ICONMENU_ENABLECOLORS_HELP"])
+									}
 								end
 							end,
 						})

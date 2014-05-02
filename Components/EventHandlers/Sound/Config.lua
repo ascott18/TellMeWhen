@@ -279,7 +279,14 @@ function Sound:TestSound(button, soundFile)
 	end
 
 	if error then
-		TMW.HELP:Show("SOUND_TEST_ERROR", TMW.CI.icon, button, 0, 0, error)
+		TMW.HELP:Show{
+			code = "SOUND_TEST_ERROR",
+			icon = TMW.CI.icon,
+			relativeTo = button,
+			x = 0,
+			y = 0,
+			text = format(error)
+		}
 	end	
 end
 

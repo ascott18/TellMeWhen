@@ -34,7 +34,14 @@ local function showGUIDConflictHelp(editbox, ...)
 	if not TMW.HELP:IsCodeRegistered("IMPORT_NEWGUIDS") then
 		TMW.HELP:NewCode("IMPORT_NEWGUIDS", 1, false)
 	end
-	TMW.HELP:Show("IMPORT_NEWGUIDS", nil, editbox, 0, 0, ...)
+	TMW.HELP:Show{
+		code = "IMPORT_NEWGUIDS",
+		icon = nil,
+		relativeTo = editbox,
+		x = 0,
+		y = 0,
+		text = format(...)
+	}
 end
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
@@ -771,7 +778,14 @@ function icon:Import_CreateMenuEntry(info, Item)
 
 	info.func = function()
 		if ic and ic:IsVisible() then
-			TMW.HELP:Show("ICON_IMPORT_CURRENTPROFILE", nil, EDITBOX, 0, 0, L["HELP_IMPORT_CURRENTPROFILE"])
+			TMW.HELP:Show{
+				code = "ICON_IMPORT_CURRENTPROFILE",
+				icon = nil,
+				relativeTo = EDITBOX,
+				x = 0,
+				y = 0,
+				text = format(L["HELP_IMPORT_CURRENTPROFILE"])
+			}
 			IMPORTS.icon:SetInfo("texture", tex)
 		else
 			IMPORTS.icon:SetInfo("texture", nil)
@@ -1094,10 +1108,24 @@ function String:Export(type, settings, defaults, ...)
 
 	TMW.HELP:Hide("ICON_EXPORT_MULTIPLE")
 	if #strings > 1 then
-		TMW.HELP:Show("ICON_EXPORT_MULTIPLE", nil, EDITBOX, 0, 0, L["HELP_EXPORT_MULTIPLE_STRING"])
+		TMW.HELP:Show{
+			code = "ICON_EXPORT_MULTIPLE",
+			icon = nil,
+			relativeTo = EDITBOX,
+			x = 0,
+			y = 0,
+			text = format(L["HELP_EXPORT_MULTIPLE_STRING"])
+		}
 	end
 
-	TMW.HELP:Show("ICON_EXPORT_DOCOPY", nil, EDITBOX, 0, 0, L["HELP_EXPORT_DOCOPY_" .. (IsMacClient() and "MAC" or "WIN")])
+	TMW.HELP:Show{
+		code = "ICON_EXPORT_DOCOPY",
+		icon = nil,
+		relativeTo = EDITBOX,
+		x = 0,
+		y = 0,
+		text = format(L["HELP_EXPORT_DOCOPY_" .. (IsMacClient() and "MAC" or "WIN")])
+	}
 end
 
 function String:SetButtonAttributes(editbox, info)
@@ -1121,7 +1149,14 @@ function Comm:Export(type, settings, defaults, ...)
 
 		TMW.HELP:Hide("ICON_EXPORT_MULTIPLE")
 		if #strings > 1 then
-			TMW.HELP:Show("ICON_EXPORT_MULTIPLE", nil, EDITBOX, 0, 0, L["HELP_EXPORT_MULTIPLE_COMM"])
+			TMW.HELP:Show{
+				code = "ICON_EXPORT_MULTIPLE",
+				icon = nil,
+				relativeTo = EDITBOX,
+				x = 0,
+				y = 0,
+				text = format(L["HELP_EXPORT_MULTIPLE_COMM"])
+			}
 		end
 
 		for n, str in pairs(strings) do

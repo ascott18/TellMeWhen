@@ -62,7 +62,7 @@
 			</OnHide>
 		</Scripts>
 
-	</Frame>
+	</Frame><!-- 
 
 	<Frame name="TellMeWhen_HelpFrame" parent="TellMeWhen_IconEditor" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
 		<Size x="250"/>
@@ -76,6 +76,6 @@
 				</FontString>
 			</Layer>
 		</Layers>
-	</Frame>
+	</Frame> -->
 			
 </Ui>

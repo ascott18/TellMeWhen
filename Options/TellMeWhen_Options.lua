@@ -446,19 +446,23 @@ end
 ---------- Misc Utilities ----------
 local ScrollContainerHook_Hide = function(c) c.ScrollFrame:Hide() end
 local ScrollContainerHook_Show = function(c) c.ScrollFrame:Show() end
+local ScrollContainerHook_OnSizeChanged = function(c) c.ScrollFrame:Show() end
 function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX)
     
     
     local ScrollFrame = CreateFrame("ScrollFrame", container:GetName() .. "ScrollFrame", container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
     
+    -- Make the ScrollFrame clone the container's position and size
     local x, y = container:GetSize()
     ScrollFrame:SetSize(x, y)
     for i = 1, container:GetNumPoints() do
         ScrollFrame:SetPoint(container:GetPoint(i))
     end
     
+
+    -- Make the container be the ScrollFrame's ScrollChild.
+    -- Fix its size to take the full width.
     container:ClearAllPoints()
-    
     ScrollFrame:SetScrollChild(container)
     container:SetSize(x, 1)
 	
@@ -1662,10 +1666,16 @@ function IE:OnInitialize()
 
 	IE:CreateTabs()
 	
-	if TMW.Classes.IconEditor_Resizer_ScaleX_SizeY then
-		self.resizer = TMW.Classes.IconEditor_Resizer_ScaleX_SizeY:New(self)
-		self.resizer:OnEnable()
-		self.resizer.resizeButton:SetScale(2)
+	-- Create resizer
+	self.resizer = TMW.Classes.Resizer_Generic:New(self)
+	self.resizer:Show()
+	self.resizer.scale_min = 0.4
+	self.resizer.y_min = 400
+	self.resizer.y_max = 1200
+	self.resizer:SetModes(self.resizer.MODE_SCALE, self.resizer.MODE_SIZE)
+	function self.resizer:SizeUpdated()
+		TMW.IE.db.global.EditorHeight = IE:GetHeight()
+		TMW.IE.db.global.EditorScale = IE:GetScale()
 	end
 
 	IE.Initialized = true
@@ -2037,8 +2047,9 @@ TMW:NewClass("IconEditorTab", "Button"){
 		if frame then
 			frame:Show()
 		end
+
 		-- show the icon editor
-		IE:Show()
+		--IE:Show()
 		
 		TMW:Fire("TMW_CONFIG_TAB_CLICKED", IE.CurrentTab, oldTab)
 	end,
@@ -2434,28 +2445,47 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", CI.icon, ic_old)
 	end
 
-	if not IE:IsShown() then
-		if isRefresh then
-			return
-		else
-			IE:Show()
-		end
+	local shouldShow = true
+	if TellMeWhen_ChangelogDialog.showIEOnClose then
+		-- Wait for the changelog to hide before attemping to load again
+		return
 	end
 
 	if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
 		if TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
 		or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
-		then
-			TMW.HELP:NewCode("CHANGELOG_INFO", 100, false)
-			TMW.HELP:Show("CHANGELOG_INFO", nil, TellMeWhen_ChangelogDialog, 0, TellMeWhen_ChangelogDialog:GetHeight()/2 - 50, L["CHANGELOG_INFO"], TELLMEWHEN_VERSION_FULL)
-			
+		then			
+			TellMeWhen_ChangelogDialog.showIEOnClose = true
 			TellMeWhen_ChangelogDialog:Show()
+			shouldShow = false
+
+			TMW.HELP:Show{
+				code = "CHANGELOG_INFO",
+				codeOrder = 100,
+				codeOnlyOnce = false,
+
+				icon = nil,
+				parent = TellMeWhen_ChangelogDialog,
+				x = 0,
+				y = -40,
+				relativeTo = TellMeWhen_ChangelogDialog,
+				relativePoint = "TOPLEFT",
+				text = format(L["CHANGELOG_INFO"], TELLMEWHEN_VERSION_FULL)
+			}
 		
 		else
 			TMW:Printf(L["CHANGELOG_MSG"], TELLMEWHEN_VERSION_FULL)
 		end
 
 		IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
+	end
+
+	if not IE:IsShown() then
+		if isRefresh then
+			return
+		elseif shouldShow then
+			IE:Show()
+		end
 	end
 	
 	if 0 > IE:GetBottom() then

@@ -52,49 +52,44 @@ end
 
 
 ---------- External Usage ----------
-function HELP:Show(code, icon, frame, x, y, text, ...)
+function HELP:Show(help)
 	-- handle the code, determine the ID of the code.
-	TMW:ValidateType(2, "TMW.HELP:Show()", code, "string")
-	TMW:ValidateType(3, "TMW.HELP:Show()", icon, "frame;nil")
-	TMW:ValidateType(4, "TMW.HELP:Show()", frame, "frame")
-	TMW:ValidateType(5, "TMW.HELP:Show()", x, "number;nil")
-	TMW:ValidateType(6, "TMW.HELP:Show()", y, "number;nil")
-	TMW:ValidateType(7, "TMW.HELP:Show()", text, "string")
+	TMW:ValidateType(1, 					"TMW.HELP:Show(help)", help, "table")
+	TMW:ValidateType("help.code", 			"TMW.HELP:Show(help)", help.code, "string")
+	TMW:ValidateType("help.icon", 			"TMW.HELP:Show(help)", help.icon, "frame;nil")
+	TMW:ValidateType("help.text", 			"TMW.HELP:Show(help)", help.text, "string")
+
+	TMW:ValidateType("help.parent", 		"TMW.HELP:Show(help)", help.parent, "frame;nil")
+	TMW:ValidateType("help.relativeTo", 	"TMW.HELP:Show(help)", help.relativeTo, "frame")
+	TMW:ValidateType("help.relativePoint", 	"TMW.HELP:Show(help)", help.relativePoint, "string;nil")
+	TMW:ValidateType("help.x", 				"TMW.HELP:Show(help)", help.x, "number;nil")
+	TMW:ValidateType("help.y", 				"TMW.HELP:Show(help)", help.y, "number;nil")
 	
-	local codeID
-	for i, c in pairs(self.Codes) do
-		if c == code then
-			codeID = i
-			break
+	local code = help.code
+
+	if not HELP:IsCodeRegistered(code) then
+		if not help.codeOrder then
+			TMW:Error("Code %q was not defined before calling HELP:Show(), and help.codeOrder was not set for auto-registration.", help.code)
+			return
+		else
+			TMW:ValidateType("help.codeOrder", "TMW.HELP:Show(help)", help.codeOrder, "number")
+			TMW:ValidateType("help.codeOnlyOnce", "TMW.HELP:Show(help)", help.codeOnlyOnce, "boolean;nil")
+			HELP:NewCode(code, help.codeOrder, help.codeOnlyOnce)
 		end
 	end
-	assert(codeID, format("Code %q is not defined", code))
-	-- we can now safely proceded to process and queue the help
 
 	-- retrieve or create the data table
-	local help = wipe(self.Queued[code] or {})
+	self.Queued[code] = nil
 
-	-- add the text format args to the data
-	for i = 1, select('#', ...) do
-		help[i] = select(i, ...)
-	end
-	-- add other data
-	help.code = code
-	help.codeID = codeID
-	help.icon = icon
-	help.frame = frame
-	help.x = x
-	help.y = y
-	help.text = text
 	-- if the frame has the CreateTexture method, then it can be made the parent.
 	-- Otherwise, the frame is actually a texture/font/etc object, so set its parent as the parent.
-	help.parent = help.frame.CreateTexture and help.frame or help.frame:GetParent()
+	help.parent = help.parent or TMW.IE
 
 	-- determine if the code has a setting associated to only show it once.
-	help.setting = self.OnlyOnce[code] and code
+	help.onlyOnceSetting = self.OnlyOnce[code] and code
 
 	-- if it does and it has already been set true, then we dont need to show anything, so quit.
-	if help.setting and TMW.db.global.HelpSettings[help.setting] then
+	if help.onlyOnceSetting and TMW.db.global.HelpSettings[help.onlyOnceSetting] then
 		self.Queued[code] = nil
 		help = nil
 		return
@@ -164,7 +159,7 @@ end
 function HELP:ShouldShowHelp(help)
 	if help.icon and not help.icon:IsBeingEdited() then
 		return false
-	elseif not help.parent:IsVisible() then
+	elseif not (help.relativeTo.CreateTexture and help.relativeTo or help.relativeTo:GetParent()):IsVisible() then
 		return false
 	end
 	return true
@@ -205,12 +200,11 @@ function HELP:ShowNext()
 		return
 	end
 
-	-- show the frame with the data
-	local text = format(help.text, unpack(help))
 
+	HELP.Arrow:SetParent(help.parent)
 	HELP.Arrow:ClearAllPoints()
-	HELP.Arrow:SetPoint("RIGHT", help.frame, "LEFT", (help.x or 0) - 0, (help.y or 0) + 0)
-	HELP.Frame.text:SetText(text)
+	HELP.Arrow:SetPoint("RIGHT", help.relativeTo, help.relativePoint or "LEFT", (help.x or 0) - 0, (help.y or 0) + 0)
+	HELP.Frame.text:SetText(help.text)
 	HELP.Frame:SetHeight(HELP.Frame.text:GetHeight() + 38)
 	HELP.Frame:SetWidth(min(280, HELP.Frame.text:GetStringWidth() + 30))
 
@@ -218,8 +212,8 @@ function HELP:ShowNext()
 
 
 	-- if the help had a setting associated, set it now
-	if help.setting then
-		TMW.db.global.HelpSettings[help.setting] = true
+	if help.onlyOnceSetting then
+		TMW.db.global.HelpSettings[help.onlyOnceSetting] = true
 	end
 
 	-- remove the help from the queue and set it as the current help

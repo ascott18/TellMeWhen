@@ -171,7 +171,14 @@ function Type:Setup(icon)
 	if icon:IsBeingEdited() == "MAIN" then
 		-- icon.Slot was just obtained by the OnEvent method call
 		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" and TellMeWhen_ChooseName then
-			TMW.HELP:Show("ICON_MS_NOTFOUND", icon, TellMeWhen_ChooseName, 0, 0, L["HELP_MS_NOFOUND"], TMW:RestoreCase(originalNameFirst))
+			TMW.HELP:Show{
+				code = "ICON_MS_NOTFOUND",
+				icon = icon,
+				relativeTo = TellMeWhen_ChooseName,
+				x = 0,
+				y = 0,
+				text = format(L["HELP_MS_NOFOUND"], TMW:RestoreCase(originalNameFirst))
+			}
 		else
 			TMW.HELP:Hide("ICON_MS_NOTFOUND")
 		end

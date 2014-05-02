@@ -50,7 +50,14 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 					and	not IsAddOnLoaded("tullaCC")
 					and	not LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true)
 					then
-					 TMW.HELP:Show("IE_TIMERTEXTHANDLER_MISSING", nil, self, 0, 0, L["HELP_IE_TIMERTEXTHANDLER_MISSING"])
+					 TMW.HELP:Show{
+					 	code = "IE_TIMERTEXTHANDLER_MISSING",
+					 	icon = nil,
+					 	relativeTo = self,
+					 	x = 0,
+					 	y = 0,
+					 	text = format(L["HELP_IE_TIMERTEXTHANDLER_MISSING"])
+					 }
 					end
 				end			
 			end,

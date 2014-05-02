@@ -143,7 +143,14 @@
 						TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 							-- Warnings for missing durations and first-time instructions for duration syntax
 							if icon.typeData.DurationSyntax and icon:IsBeingEdited() == "MAIN" then
-								TMW.HELP:Show("ICON_DURS_FIRSTSEE", nil, TMW.IE.Main.Type, 20, 0, TMW.L["HELP_FIRSTUCD"])
+								TMW.HELP:Show{
+									code = "ICON_DURS_FIRSTSEE",
+									icon = nil,
+									relativeTo = TMW.IE.Main.Type,
+									x = 20,
+									y = 0,
+									text = format(TMW.L["HELP_FIRSTUCD"])
+								}
 
 								local s = ""
 								local array = TMW:GetSpellNames(self:GetText())
@@ -153,7 +160,14 @@
 									end
 								end
 								if s ~= "" then
-									TMW.HELP:Show("ICON_DURS_MISSING", icon, self, 0, 0, TMW.L["HELP_MISSINGDURS"], s)
+									TMW.HELP:Show{
+										code = "ICON_DURS_MISSING",
+										icon = icon,
+										relativeTo = self,
+										x = 0,
+										y = 0,
+										text = format(TMW.L["HELP_MISSINGDURS"], s)
+									}
 								else
 									TMW.HELP:Hide("ICON_DURS_MISSING")
 								end
@@ -300,7 +314,14 @@
 								TMW.HELP:Hide("ICON_UNIT_MISSING")
 							else
 								self.BackgroundText:SetText("|cFFFF5050" .. self.label)
-								TMW.HELP:Show("ICON_UNIT_MISSING", TMW.CI.icon, self, 0, 0, TMW.L["HELP_NOUNITS"])
+								TMW.HELP:Show{
+									code = "ICON_UNIT_MISSING",
+									icon = TMW.CI.icon,
+									relativeTo = self,
+									x = 0,
+									y = 0,
+									text = format(TMW.L["HELP_NOUNITS"])
+								}
 							end
 						else
 							self.BackgroundText:SetText(nil)
@@ -596,6 +617,7 @@
 		  
 			<OnVerticalScroll>			
 				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(offset*self.percentage))
+
 			</OnVerticalScroll>
 			<OnMouseWheel>
 				local scrollStep = self.scrollStep or self:GetHeight() * self.scrollPercentage
@@ -648,6 +670,10 @@
 					end
 				end
 			</OnUpdate>
+			<OnSizeChanged>
+				-- container's width doesn't get adjusted as we resize. Fix this.
+			    self.container:SetWidth(self:GetWidth())
+			</OnSizeChanged>
 		</Scripts>
 		<Frames>
 			<Frame name="$parentScrollBar" parentKey="ScrollBar" hidden="true">
@@ -1518,8 +1544,8 @@
 			</Layer>
 
 			<Layer level="ARTWORK">
-				<Texture name="$parentHeaderBackground" parentKey="HeaderBackground">
-					<Color r="0.4" g="0.4" b="0.4" a="0.1"/>
+				<Texture parentKey="HeaderBackground">
+					<Color r="0.4" g="0.4" b="0.4" a="0.2"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" y="-4"/>
 						<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" y="-24"/>
@@ -1958,7 +1984,7 @@
 
 
 	<Frame name="TellMeWhen_ChangelogDialog" inherits="TellMeWhen_SimpleDialog" toplevel="true" frameStrata="FULLSCREEN_DIALOG">
-		<Size x="600" y="500"/>
+		<Size x="600" y="700"/>
 
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent" />
@@ -1983,10 +2009,10 @@
 
 			<Frame name="$parentScrollContainer" parentKey="ScrollContainer">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentHeaderBackground" relativePoint="BOTTOM" y="-5"/>
+					<Anchor point="TOP" relativeKey="$parent.HeaderBackground" relativePoint="BOTTOM" y="-5"/>
 					<Anchor point="BOTTOM" relativeTo="$parentOkay" relativePoint="TOP" y="5"/>
-					<Anchor point="LEFT" x="5" />
-					<Anchor point="RIGHT" x="-2" />
+					<Anchor point="LEFT" x="8" />
+					<Anchor point="RIGHT" x="-5" />
 				</Anchors>
 
 				<Scripts>
@@ -2104,24 +2130,68 @@
 							self.FixedWrapping = true
 						end
 					</OnShow>
+					<OnSizeChanged>
+						for k, log in ipairs(self) do
+
+							-- Because of wrapping issues, we usually don't get the height that
+							-- we want the first time that we set the height (when we change the height,
+							-- the number of lines will probably change as more lines are given enough room to wrap).
+
+							-- To get around this, we might keep trying until we get the right height.
+							-- Unforunately, this is horribly slow (this used to be the way this was done)
+							-- because log:GetHeight() and log:GetStringHeight() are stupidly slow.
+
+							-- Fortunately, the stupid solution is also stupid fast: Make the FontString super tall
+							-- and then shrink it down to the correct size. log:SetHeight() is stupidly fast, even though
+							-- it has to actually re-render things. I don't really understand why it is so fast compared to
+							-- :GetStringHeight() and :GetHeight(), but i'll take it.
+
+							log:SetWidth(self:GetWidth()-15)
+							log:SetHeight(100000)
+							log:SetHeight(log:GetStringHeight() + 20)
+								
+						end
+					</OnSizeChanged>
 				</Scripts>
 			</Frame>
 		</Frames>
 
 		<Scripts>
+
 			<OnLoad>
-				-- Create better contrast with the icon editor, since this dialog will often be on top of the IE.
-				self.background:SetTexture(.08, .08, .08, 1)
 				self.title:SetText(TMW.L["DIALOG_HEADER_CHANGELOG"])
 
-				self.Okay:SetText(OKAY)
+				self:SetScale(0.9)
 
-				self:SetScale(0.85)
+				TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+					self.resizer = TMW.Classes.Resizer_Generic:New(self)
+					self.resizer:Show()
+
+					self.resizer:SetModes(self.resizer.MODE_SCALE, self.resizer.MODE_SIZE)
+					self.resizer.scale_min = 0.4
+					self.resizer.x_min = 200
+					self.resizer.y_min = 200
+					self.resizer.y_max = 1400
+				end)
+
+
+				tinsert(UISpecialFrames, self:GetName())
+
 			</OnLoad>
 			<OnShow>
+				if self.showIEOnClose then
+					self.Okay:SetText(TMW.L["CHANGELOG_OKAY_OPENIE"])
+				else
+					self.Okay:SetText(OKAY)
+				end
 			</OnShow>
 			<OnHide>
 				TMW.HELP:Hide("CHANGELOG_INFO")
+
+				if self.showIEOnClose then
+					self.showIEOnClose = false
+					TMW.IE:Load()
+				end
 			</OnHide>
 		</Scripts>
 	</Frame>
@@ -2580,10 +2650,11 @@
 					TMW.IE[k] = v
 				end
 				
-				tinsert(UISpecialFrames, self:GetName())
+				-- Needs to go before TellMeWhen_ChangelogDialog or else it will get hidden immediately after the changelog hides.
+				tinsert(UISpecialFrames, 1, self:GetName())
 			</OnLoad>
 			<OnSizeChanged>
-				self.Help:SetHeight(self.Help.text:GetHeight() + 38)
+				--self.Help:SetHeight(self.Help.text:GetHeight() + 38)
 			</OnSizeChanged>
 			<OnDragStart>
 				TMW.IE:StartMoving()

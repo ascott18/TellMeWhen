@@ -2282,6 +2282,7 @@ You can view this any time with the following command:
 
 /tmw changelog]]
 L["CHANGELOG_MSG"] = "Thanks for helping to test TellMeWhen %s! Type /tmw changelog to see what has changed."
+L["CHANGELOG_OKAY_OPENIE"] = "Okay, now open the Icon Editor"
 
 
 L["TOPLEFT"] = "Top Left"

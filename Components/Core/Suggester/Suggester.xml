@@ -299,7 +299,14 @@
 				firstItem.SetSize = TMW.NULLFUNC
 
 				TMW.SUG[1]:HookScript("OnShow", function(self)
-					TMW.HELP:Show("SUG_FIRSTHELP", nil, self, 3, 0, TMW.L["SUG_FIRSTHELP_DESC"])
+					TMW.HELP:Show{
+						code = "SUG_FIRSTHELP",
+						icon = nil,
+						relativeTo = self,
+						x = 3,
+						y = 0,
+						text = format(TMW.L["SUG_FIRSTHELP_DESC"])
+					}
 				end)
 				
 				-- Tukui_Skins tries to reposition this frame, but it totally ruins the resizability of it,

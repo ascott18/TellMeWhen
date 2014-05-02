@@ -166,7 +166,14 @@ function CNDT:GetTabText(conditionSetName)
 	if parenthesesAreValid then
 		TMW.HELP:Hide("CNDT_PARENTHESES_ERROR")
 	else
-		TMW.HELP:Show("CNDT_PARENTHESES_ERROR", nil, TellMeWhen_IconEditor.Conditions, 0, 0, errorMessage)
+		TMW.HELP:Show{
+			code = "CNDT_PARENTHESES_ERROR",
+			icon = nil,
+			relativeTo = TellMeWhen_IconEditor.Conditions,
+			x = 0,
+			y = 0,
+			text = format(errorMessage)
+		}
 	end
 	
 	local n = Conditions.n
@@ -724,7 +731,14 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	end
 	
 	if CndtGroup:GetID() == 3 and CndtGroup:IsVisible() then
-		TMW.HELP:Show("CNDT_PARENTHESES_FIRSTSEE", nil, CNDT[1].OpenParenthesis, 0, 0, TMW.L["HELP_CNDT_PARENTHESES_FIRSTSEE"])
+		TMW.HELP:Show{
+			code = "CNDT_PARENTHESES_FIRSTSEE",
+			icon = nil,
+			relativeTo = CNDT[1].OpenParenthesis,
+			x = 0,
+			y = 0,
+			text = format(TMW.L["HELP_CNDT_PARENTHESES_FIRSTSEE"])
+		}
 	end
 end)
 TMW.HELP:NewCode("CNDT_PARENTHESES_FIRSTSEE", 101, true)
@@ -753,7 +767,14 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	CndtGroup.AndOr:SetValue(conditionSettings.AndOr)
 	
 	if CndtGroup:GetID() == 2 and CndtGroup:IsVisible() then
-		TMW.HELP:Show("CNDT_ANDOR_FIRSTSEE", nil, CndtGroup.AndOr, 0, 0, TMW.L["HELP_CNDT_ANDOR_FIRSTSEE"])
+		TMW.HELP:Show{
+			code = "CNDT_ANDOR_FIRSTSEE",
+			icon = nil,
+			relativeTo = CndtGroup.AndOr,
+			x = 0,
+			y = 0,
+			text = format(TMW.L["HELP_CNDT_ANDOR_FIRSTSEE"])
+		}
 	end
 end)
 TMW.HELP:NewCode("CNDT_ANDOR_FIRSTSEE", 100, true)

@@ -19,12 +19,26 @@ local print = TMW.print
 	
 
 TMW:NewClass("Resizer_Generic"){
+	tooltipTitle = L["RESIZE"],
+	tooltipText = L["RESIZE_TOOLTIP"],
+
+	MODE_SIZE = 1,
+	MODE_SCALE = 2,
+
+	-- Configuration. Set these on created instances.
+	scale_min = 0.4,
+	scale_max = math.huge,
+	x_min = 0,
+	x_max = math.huge,
+	y_min = 0,
+	y_max = math.huge,
 	
 	OnNewInstance_Resizer = function(self, parent)
 		self.parent = parent
 		
-		assert(self.SizeUpdate, ("%q cannot be instantiated. You must derive a class from it so that you can define a SizeUpdate method."):format(self.className))
-		
+		self.mode_x = self.MODE_SIZE
+		self.mode_y = self.MODE_SIZE
+
 		self.resizeButton = CreateFrame("Button", nil, parent, "TellMeWhen_ResizeButton")
 		
 		-- Default module state is disabled, but default frame state is shown,
@@ -42,6 +56,23 @@ TMW:NewClass("Resizer_Generic"){
 			scale = max(scale, 0.6)
 			self.resizeButton:SetScale(scale)
 		end)
+
+		-- Initial value. Should be good enough.
+		self.resizeButton:SetScale(2)
+
+		self.resizeButton:HookScript("OnShow", function(self)
+			self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
+		end)
+
+		TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText, 1, 1)
+	end,
+
+	-- These are here so this class can be inherited with a TMW.C.ObjectModule
+	OnEnable = function(self)
+		self:Show()
+	end,
+	OnDisable = function(self)
+		self:Hide()
 	end,
 
 	Show = function(self)
@@ -63,6 +94,11 @@ TMW:NewClass("Resizer_Generic"){
 
 		self.StopSizing(resizeButton)
 		self:ShowTexture()
+	end,
+
+	SetModes = function(self, x, y)
+		self.mode_x = x
+		self.mode_y = y
 	end,
 
 	
@@ -113,11 +149,107 @@ TMW:NewClass("Resizer_Generic"){
 
 		self:HideTexture()
 	end,
-	
+
 	StopSizing = function(resizeButton)
 		resizeButton:SetScript("OnUpdate", nil)
 
 		local self = resizeButton.module
 		self:ShowTexture()
 	end,
+
+	SizeUpdate = function(resizeButton)
+		--[[ Notes:
+		--	arg1 (self) is resizeButton
+			
+		--	The 'std_' that prefixes a lot of variables means that it is comparable with all other 'std_' variables.
+			More specifically, it means that it does not depend on the scale of either the group nor UIParent.
+		]]
+		local self = resizeButton.module
+		
+		local parent = self.parent
+		
+		local std_cursorX, std_cursorY = self:GetStandardizedCursorCoordinates()
+		
+
+		-- Calculate new scale:
+		--[[
+			Holy shit. Look at this wicked sick dimensional analysis:
+			
+			std_newHeight	oldScale
+			------------- X	-------- = newScale
+			std_oldHeight	    1
+
+			'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
+			I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
+			(which is why I am rewriting it right now)
+		]]
+		local std_newWidth = std_cursorX - self.std_oldLeft
+		local ratio_SizeChangeX = std_newWidth/self.std_oldWidth
+		local newScaleX = ratio_SizeChangeX*self.oldScale
+		
+		local std_newHeight = self.std_oldTop - std_cursorY
+		local ratio_SizeChangeY = std_newHeight/self.std_oldHeight
+		local newScaleY = ratio_SizeChangeY*self.oldScale
+
+		local newScale = self.oldScale
+
+
+		-- Mode-dependent calculation
+		if self.mode_x == self.MODE_SCALE and self.mode_y == self.MODE_SCALE then
+			if IsControlKeyDown() then
+				-- Uses the smaller of the two scales.
+				newScale = min(newScaleX, newScaleY)
+			else
+				-- Uses the larger of the two scales.
+				newScale = max(newScaleX, newScaleY)
+			end
+
+		elseif self.mode_y == self.MODE_SCALE then
+			newScale = newScaleY
+		elseif self.mode_x == self.MODE_SCALE then
+			newScale = newScaleX
+		end
+
+		newScale = max(self.scale_min, newScale)
+		newScale = min(self.scale_max, newScale)
+
+		parent:SetScale(newScale)
+
+		if self.mode_x == self.MODE_SIZE then
+			-- Calculate new width
+			local std_newFrameWidth = std_cursorX - self.std_oldLeft
+			local newWidth = std_newFrameWidth/parent:GetEffectiveScale()
+			newWidth = max(self.x_min, newWidth)
+			newWidth = min(self.x_max, newWidth)
+
+			parent:SetWidth(newWidth)
+		end
+		if self.mode_y == self.MODE_SIZE then
+			-- Calculate new height
+			local std_newFrameHeight = abs(std_cursorY - self.std_oldTop)
+			local newHeight = std_newFrameHeight/parent:GetEffectiveScale()
+			newHeight = max(self.y_min, newHeight)
+			newHeight = min(self.y_max, newHeight)
+			
+			parent:SetHeight(newHeight)
+		end
+
+		-- We have all the data needed to find the new position of the parent.
+		-- It must be recalculated because otherwise it will scale relative to where it is anchored to,
+		-- instead of being relative to the parent's top left corner, which is what it is supposed to be.
+		-- I don't remember why this calculation here works, so lets just leave it alone.
+		-- Note that it will be re-re-calculated once we are done resizing.
+		local newX = self.oldX * self.oldScale / newScale
+		local newY = self.oldY * self.oldScale / newScale
+		parent:ClearAllPoints()
+		parent:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+
+		self:SizeUpdated()
+
+	end,
+
+	-- Override this to set settings, do updates, etc.
+	SizeUpdated = TMW.NULLFUNC,
+
+
 }

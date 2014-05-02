@@ -18,8 +18,6 @@
  
  * IMPORTANT: TellMeWhen no longer includes the massively incomplete localizations for itIT, ptBR, frFR, deDE, koKR, and esMX (esMX now uses esES). If you would like to contribute to localization, go to http://wow.curseforge.com/addons/tellmewhen/localization/
 
- * In the wake of the recent distribution of malicious scripts to WeakAuras users, TellMeWhen now warns you about importing executable Lua code.
-
 ====Events/Notifications====
  * Events have been re-branded to Notifications, and you can now add notifications that will trigger continually while a set of conditions evaluate to true.
  * New Notification: Counter. Configure a counter that can be checked in conditions and displayed with DogTags.
@@ -58,6 +56,8 @@
  * Code snippets can now be disabled from autorunning at login.
  * Dramatically decreased memory usage for icons that have no icon type assigned.
  * You can now use "thisobj" in Lua conditions as a reference to the icon or group that is checking the conditions.
+
+ * In the wake of the recent distribution of malicious scripts to WeakAuras users, TellMeWhen now warns you about importing executable Lua code.
  
 ====Bug Fixes====
  * Units tracked by name with spaces in them (E.g. Kor'kron Warbringer as a CLEU unit filter) will now be interpreted properly as input.
@@ -69,7 +69,7 @@
  * Fixed an issue when upgrading text layouts that could also cause them to not be upgraded at all: /Components/IconModules/IconModule_Texts/Texts.lua line 205: attempt to index field 'Anchors' (a nil value)
  * Currency conditions should once again be listed in the condition type selection menu.
  * The NPC ID condition should now work correctly with npcIDs that are greater than 65535 (0xFFFF).
- * Meta icons should reflect changes in the icons that they are checking that are caused by using slash commands to enable/disable icons while TMw is locked.
+ * Meta icons should reflect changes in the icons that they are checking that are caused by using slash commands to enable/disable icons while TMW is locked.
 
 ===v6.2.6===
 ====Bug Fixes====
@@ -358,9 +358,9 @@
  * Spell Crit is now an event that can be tracked by Combat Event icons.
  
 ====New Conditions====
- ** Added a condition to check if you have your mouse over a frame (group or icon).
- ** Added conditions to check if you have a certain glyph active.
- ** Added a condition to check the creature type (Undead, Humanoid, Demon, etc.) of a unit.
+ * Added a condition to check if you have your mouse over a frame (group or icon).
+ * Added conditions to check if you have a certain glyph active.
+ * Added a condition to check the creature type (Undead, Humanoid, Demon, etc.) of a unit.
  
  * There are many, many more changes not listed here. I recommend that you just start configuring TellMeWhen to see what all has changed.
 

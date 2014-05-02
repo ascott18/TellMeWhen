@@ -35,7 +35,7 @@ Env.GetMasteryEffect = GetMasteryEffect
 Env.GetSpellBonusDamage = GetSpellBonusDamage
 Env.GetSpellBonusHealing = GetSpellBonusHealing
 	
-local ConditionCategory = CNDT:GetCategory("STATS", 6, L["CNDTCAT_STATS"], true, false)
+local ConditionCategory = CNDT:GetCategory("STATS", 6, L["CNDTCAT_STATS"], true, true)
 
 ConditionCategory:RegisterCondition(1,	 "STRENGTH", {
 	text = _G["SPELL_STAT1_NAME"],

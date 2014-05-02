@@ -208,10 +208,25 @@
 
 						local unitTable = TMW.UNITS:GetOriginalUnitTable(unit)
 						if #unitTable > 1 then
-							TMW.HELP:Show("CNDT_UNIT_ONLYONE", TMW.CI.icon, self, 0, 0, TMW.L["HELP_ONLYONEUNIT"], #unitTable)
+							TMW.HELP:Show{
+								code = "CNDT_UNIT_ONLYONE",
+								icon = TMW.CI.icon,
+								relativeTo = self,
+								x = 0,
+								y = 0,
+								text = format(TMW.L["HELP_ONLYONEUNIT"], #unitTable)
+							}
 						end
+						
 						if self:GetText() == "" then
-							TMW.HELP:Show("CNDT_UNIT_MISSING", TMW.CI.icon, self, 0, 0, TMW.L["HELP_NOUNIT"])
+							TMW.HELP:Show{
+								code = "CNDT_UNIT_MISSING",
+								icon = TMW.CI.icon,
+								relativeTo = self,
+								x = 0,
+								y = 0,
+								text = format(TMW.L["HELP_NOUNIT"])
+							}
 						end
 					</OnEditFocusLost>
 				</Scripts>
