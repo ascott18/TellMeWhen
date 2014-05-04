@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70079 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 70080 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -3115,10 +3115,6 @@ function TMW:UpdateNormally()
 		return
 	end
 	
-	if not TMW:CheckCanDoLockedAction() then
-		return
-	end
-	
 	time = GetTime()
 	TMW.time = time
 	LastUpdate = 0
@@ -3218,9 +3214,9 @@ local function OnUpdateDuringCoroutine(self)
 	
 	CoroutineStartTime = debugprofilestop()
 	
-	if not IsAddOnLoaded("TellMeWhen_Options") then
-		error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
-	end
+	--if not IsAddOnLoaded("TellMeWhen_Options") then
+	--	error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
+	--end
 	
 	if NumCoroutinesQueued == 0 then
 		TMW.safecall = safecall_safe
@@ -3271,16 +3267,9 @@ function TMW:UpdateViaCoroutine()
 	NumCoroutinesQueued = NumCoroutinesQueued + 1
 end
 
-TMW:RegisterEvent("PLAYER_REGEN_ENABLED", function()
-	if TMW.InitializedFully then
-		TMW.Update = TMW.UpdateNormally
-	end
-end)
 TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 	if TMW.InitializedFully then
-		if TMW.ALLOW_LOCKDOWN_CONFIG then
-			TMW.Update = TMW.UpdateViaCoroutine
-		elseif not TMW.Locked then
+		if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.Locked then
 			TMW:LockToggle()
 		end
 	end
@@ -3288,13 +3277,9 @@ end)
 
 do
 	-- Auto-loads options if AllowCombatConfig is enabled.
-	local hasRan
 	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-		if hasRan then
-			return
-		end
-		hasRan = true
 		if TMW.db.global.AllowCombatConfig then
+			TMW:UnregisterThisCallback()
 			TMW.ALLOW_LOCKDOWN_CONFIG = true
 			TMW:LoadOptions()
 		end
@@ -3303,7 +3288,14 @@ end
 end
 
 -- TMW:Update() sets up all groups, icons, and anything else.
-TMW.Update = TMW.UpdateNormally
+function TMW:Update()
+	local lockChanged = TMW.Locked ~= Locked
+	if (Locked ~= nil and not lockChanged) or InCombatLockdown() then
+		TMW:UpdateViaCoroutine()
+	else
+		TMW:UpdateNormally()
+	end
+end
 
 
 local updateHandler
