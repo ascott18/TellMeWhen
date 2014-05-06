@@ -212,10 +212,12 @@ end
 -- [SCRIPT HANDLER] (no documentation needed)
 function Icon.OnShow(icon)
 	icon:SetInfo("shown", true)
+	icon.NextUpdateTime = 0
 end
 -- [SCRIPT HANDLER] (no documentation needed)
 function Icon.OnHide(icon)
 	icon:SetInfo("shown", false)
+	icon.NextUpdateTime = 0
 end
 
 --- Returns the settings table that holds the settings for the icon.
@@ -604,6 +606,8 @@ end
 function Icon.Update(icon, force)
 	local attributes = icon.attributes
 	local time = TMW.time
+	
+	force = force or not TMW.Locked
 	
 	if attributes.shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time

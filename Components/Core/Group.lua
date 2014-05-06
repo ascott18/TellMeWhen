@@ -479,6 +479,10 @@ function Group.Setup(group, noIconSetup)
 	if viewData then
 		viewData:Group_Setup(group)
 	end
+
+	-- Must be before we update icons
+	group:Setup_Conditions()
+	group:Update()
 		
 	if group:ShouldUpdateIcons() then
 		if not noIconSetup then
@@ -503,8 +507,6 @@ function Group.Setup(group, noIconSetup)
 			icon:DisableIcon()
 		end
 	end
-
-	group:Setup_Conditions()
 	
 	if group.OnlyInCombat then
 		group:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -514,7 +516,6 @@ function Group.Setup(group, noIconSetup)
 		group:SetScript("OnEvent", nil)
 	end
 
-	group:Update()
 	
 	TMW:Fire("TMW_GROUP_SETUP_POST", group)
 end

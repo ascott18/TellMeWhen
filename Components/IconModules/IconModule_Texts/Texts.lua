@@ -641,6 +641,9 @@ function Texts:CreateFontString(id)
 	local fontString = container:CreateFontString(self:GetChildNameBase() .. id, "ARTWORK", "NumberFontNormalSmall")
 	
 	self.fontStrings[id] = fontString
+
+	-- Remove this event if you are reading this comment in the year 2015 or later
+	TMW:Fire("TMW_DEBUG_FS_CREATED", self.icon, fontString, id)
 	
 	return fontString
 end
