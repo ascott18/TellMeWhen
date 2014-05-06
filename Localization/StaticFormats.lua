@@ -94,6 +94,7 @@ L["SOUND_CHANNEL_DESC"] 				= L["SOUND_CHANNEL_DESC"] 					:format(L["SOUND_CHAN
 
 L["ANIM_INFINITE_DESC"] 				= L["ANIM_INFINITE_DESC"] 					:format(L["ANIM_ICONCLEAR"])
 
+L["DT_DOC_AuraSource"] 				  	= L["DT_DOC_AuraSource"] 					:format(L["ICONMENU_BUFFDEBUFF"])
 L["DT_DOC_Source"] 					  	= L["DT_DOC_Source"] 						:format(L["ICONMENU_CLEU"])
 L["DT_DOC_Destination"] 			  	= L["DT_DOC_Destination"] 					:format(L["ICONMENU_CLEU"])
 L["DT_DOC_Extra"] 					  	= L["DT_DOC_Extra"]	 						:format(L["ICONMENU_CLEU"])

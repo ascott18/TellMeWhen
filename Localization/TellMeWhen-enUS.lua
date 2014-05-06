@@ -1541,6 +1541,8 @@ L["DT_DOC_gsub"] = "Gives access to Lua's string.gsub function for DogTags for p
 L["DT_DOC_strfind"] = "Gives access to Lua's string.find function for DogTags for powerful string manipulation capabilities."
 L["DT_DOC_Name"] = "Returns the name of the unit. This is an improved version of the default [Name] tag provided by DogTag."
 
+L["DT_DOC_AuraSource"] = "Returns the source unit of the buff/debuff that the icon is checking. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
+
 L["DT_DOC_Source"] = "Returns the source unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
 L["DT_DOC_Destination"] = "Returns the destination unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
 L["DT_DOC_Extra"] = "Returns the extra spell from the last Combat Event that the icon processed. (This tag should only be used with %s type icons)."

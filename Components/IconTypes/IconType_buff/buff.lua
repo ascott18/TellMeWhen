@@ -47,6 +47,7 @@ Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
+Type:UsesAttributes("auraSourceUnit, auraSourceGUID")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
@@ -162,7 +163,7 @@ local function Buff_OnUpdate(icon, time)
 	local NotStealable = not icon.Stealable
 	local NAL = #icon.NameArray
 
-	local buffName, _, iconTexture, dispelType, duration, expirationTime, count, canSteal, id, v1, v2, v3, v4
+	local buffName, _, iconTexture, dispelType, duration, expirationTime, caster, count, canSteal, id, v1, v2, v3, v4
 	local useUnit
 
 	local doesSort = DurationSort or StackSort
@@ -182,7 +183,7 @@ local function Buff_OnUpdate(icon, time)
 				local filter = Filter
 
 				while true do
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, index, filter)
+					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, index, filter)
 					index = index + 1
 					
 					-- Bugfix: Enraged is an empty string.
@@ -204,8 +205,8 @@ local function Buff_OnUpdate(icon, time)
 
 							if not buffName or d*DurationSort < _d*DurationSort then
 								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-								 buffName,  iconTexture,  count,  duration,  expirationTime,  id,  v1,  v2,  v3,  v4, useUnit, d =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit,   _d
+								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, d =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,   _d
 							end
 						elseif StackSort then
 							local _s = _count or 0
@@ -235,9 +236,9 @@ local function Buff_OnUpdate(icon, time)
 				for i = 1, NAL do
 					local iName = NameArray[i]
 
-					buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
+					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
 					if Filterh and not buffName then
-						buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
+						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
 					end
 
 					if buffName and id ~= iName and isNumber[iName] then
@@ -248,7 +249,7 @@ local function Buff_OnUpdate(icon, time)
 						local filter = Filter
 
 						while true do
-							buffName, _, iconTexture, count, _, duration, expirationTime, _, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, Filter)
+							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, Filter)
 							index = index + 1
 
 							if not id then
@@ -299,33 +300,36 @@ local function Buff_OnUpdate(icon, time)
 				end
 		end
 
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			icon.Alpha,
 			iconTexture,
 			expirationTime - duration, duration,
 			count, count,
 			id,
-			useUnit, nil
+			useUnit, nil,
+			caster, nil
 		)
 
 	elseif not Units[1] and icon.HideIfNoUnits then
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			0,
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
 			icon.NameFirst,
+			nil, nil,
 			nil, nil
 		)
 
 	else
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
+		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			icon.UnAlpha,
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
 			icon.NameFirst,
-			Units[1], nil
+			Units[1], nil,
+			nil, nil
 		)
 	end
 end
@@ -338,6 +342,48 @@ local aurasWithNoSourceReported = {
 	GetSpellInfo(104423),	-- Windsong
 	nil,	-- Terminate with nil to prevent all Windsong's return values from filling the table
 }
+
+
+local Processor = TMW.Classes.IconDataProcessor:New("BUFF_SOURCEUNIT", "auraSourceUnit, auraSourceGUID")
+function Processor:CompileFunctionSegment(t)
+	-- GLOBALS: auraSourceUnit, auraSourceGUID
+	t[#t+1] = [[
+	
+	auraSourceGUID = auraSourceGUID or (unit and (unit == "player" and playerGUID or UnitGUID(unit)))
+	
+	if attributes.auraSourceUnit ~= auraSourceUnit or attributes.auraSourceGUID ~= auraSourceGUID then
+		attributes.auraSourceUnit = auraSourceUnit
+		attributes.auraSourceGUID = auraSourceGUID
+		
+		TMW:Fire(BUFF_SOURCEUNIT.changedEvent, icon, auraSourceUnit, auraSourceGUID)
+		doFireIconUpdated = true
+	end
+	--]]
+end
+Processor:RegisterDogTag("TMW", "AuraSource", {
+	code = function(icon)
+		icon = TMW.GUIDToOwner[icon]
+		
+		if icon then
+			if icon.Type ~= "buff" then
+				return ""
+			else
+				return icon.attributes.auraSourceUnit or ""
+			end
+		else
+			return ""
+		end
+	end,
+	arg = {
+		'icon', 'string', '@req',
+	},
+	events = TMW:CreateDogTagEventString("BUFF_SOURCEUNIT"),
+	ret = "string",
+	doc = L["DT_DOC_AuraSource"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+	example = ('[Source] => "target"; [Source:Name] => "Kobold"; [Source(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Source(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
+	category = L["ICON"],
+})
+
 
 
 function Type:Setup(icon)
@@ -358,10 +404,6 @@ function Type:Setup(icon)
 
 	local isEditing
 	if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
-		if not TMW.HELP:IsCodeRegistered("ICONTYPE_BUFF_NOSOURCERPPM") then
-			TMW.HELP:NewCode("ICONTYPE_BUFF_NOSOURCERPPM", 2, false)
-		end
-
 		TMW.HELP:Hide("ICONTYPE_BUFF_NOSOURCERPPM")
 		isEditing = true
 	end
@@ -377,6 +419,7 @@ function Type:Setup(icon)
 				if type(badSpell) == "string" and badSpell:lower() == spell then
 					TMW.HELP:Show{
 						code = "ICONTYPE_BUFF_NOSOURCERPPM",
+						codeOrder = 2,
 						icon = icon,
 						relativeTo = TellMeWhen_ChooseName,
 						x = 0,

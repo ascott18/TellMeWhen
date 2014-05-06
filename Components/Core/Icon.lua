@@ -605,9 +605,7 @@ end
 -- This should only be used in exceptional circumstances, like when the source of an icon's attributes and its {{{icon:SetInfo}}} calls are from an event (see the Combat Log icon type for an example of this).
 function Icon.Update(icon, force)
 	local attributes = icon.attributes
-	local time = TMW.time
-	
-	force = force or not TMW.Locked
+	local time = TMW.time 
 	
 	if attributes.shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time
@@ -771,7 +769,8 @@ function Icon.Setup(icon)
 		viewData:ImplementIntoIcon(icon)
 		viewData:Icon_Setup_Post(icon)
 		
-		
+		icon.LastUpdate = 0
+		icon.NextUpdateTime = 0
 		TMW.safecall(typeData.Setup, typeData, icon)
 	else
 		icon:DisableIcon()

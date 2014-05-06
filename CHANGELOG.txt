@@ -31,6 +31,7 @@
  * Meta Icon: Complex chains of meta icon inheritance should now be handled much better, especially when some of the icons have animations on them.
  * Diminishing Returns: The duration of Diminishing Returns is now customizable in TMW's main options.
  * Buff/Debuff: Ice Block and Divine Shield are now treated as being as non-stealable (Blizzard flags them incorrectly)
+ * Buff/Debuff: Added an [AuraSource] DogTag to obtain the unit that applied a buff/debuff, if available.
 
 ====Conditions====
  * New Conditions added that offer integration with Big Wigs and Deadly Boss Mods.
