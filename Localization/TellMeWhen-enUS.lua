@@ -2015,7 +2015,8 @@ Counter names must be lower-case with no spaces.
 
 Use this counter name in other places where you would like to check this counter (Conditions and Text Displays via the [Counter] DogTag)
 
-Advanced: Counters are stored in TMW.COUNTERS[counterName] = value. Call TMW:Fire("TMW_COUNTER_MODIFIED", counterName) if you change a counter in a custom Lua script.]]
+
+Advanced Users: Counters are stored in TMW.COUNTERS[counterName] = value.   Call TMW:Fire( "TMW_COUNTER_MODIFIED", counterName ) if you change a counter in a custom Lua script.]]
 L["EVENTS_SETTINGS_COUNTER_OP"] = "Operation"
 L["EVENTS_SETTINGS_COUNTER_OP_DESC"] = "Choose the operation that you would like to perform on the counter"
 L["EVENTS_SETTINGS_COUNTER_AMOUNT"] = "Value"
