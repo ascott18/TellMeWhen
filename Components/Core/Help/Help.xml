@@ -31,6 +31,12 @@
 						</Scripts>
 					</Button>
 				</Frames>
+				<Scripts>
+					<OnSizeChanged>
+						self:SetHeight(self.text:GetHeight() + 38)
+						self:SetWidth(min(280, self.text:GetStringWidth() + 30))
+					</OnSizeChanged>
+				</Scripts>
 			</Frame>
 		</Frames>
 		
