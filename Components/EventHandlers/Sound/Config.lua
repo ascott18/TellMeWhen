@@ -62,7 +62,7 @@ end)
 
 function Sound:GetNumFramesNeeded()
 	local Sounds = self.ConfigContainer.SoundList
-	return floor(Sounds:GetHeight()/Sounds.None:GetHeight()) - 1
+	return floor((Sounds:GetHeight()-5)/(Sounds.None:GetHeight())) - 1
 end
 
 function Sound:GetFrame(id)

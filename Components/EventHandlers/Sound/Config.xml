@@ -1,6 +1,6 @@
 ﻿<Ui>
 	<Button name="TellMeWhen_SoundSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
-		<Size y="12"/>
+		<Size y="13"/>
 		<Anchors>
 			<Anchor point="LEFT"/>
 			<Anchor point="RIGHT"/>
@@ -42,7 +42,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-			--	self.Background:SetVertexColor(0, 1, 0)
+				self.Background:SetTexture(1, 1, 1)
 			</OnLoad>
 			<OnClick>
 				local name = self.soundname
@@ -83,7 +83,7 @@
 						<Size x="17"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-17"/>
-							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="1" y="17"/>
+							<!-- Other anchor handled in Custom's OnLoad -->
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -92,7 +92,6 @@
 								self:SetValueStep(1)
 							</OnLoad>
 							<OnValueChanged>
-								--if TMW:Do504SliderBugFix(self) then return end
 								value = self:GetValue()
 
 
@@ -168,6 +167,8 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
+						self:GetParent().SoundList.ScrollBar:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 1, 22)
+
 						TMW:TT(self, "SOUND_CUSTOM", "SOUND_CUSTOM_DESC")
 						self.label = TMW.L["SOUND_CUSTOM"]
 						
