@@ -23,5 +23,5 @@ Processor.dontInherit = true
 
 -- Processor:CompileFunctionSegment(t) is default.
 
--- The default state is shown, so reflect this.
-TMW.Classes.Icon.attributes.shown = 1
+-- The default state is hidden, so reflect this.
+TMW.Classes.Icon.attributes.shown = false
