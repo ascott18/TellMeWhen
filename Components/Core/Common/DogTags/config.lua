@@ -19,7 +19,7 @@ local print = TMW.print
 
 local DogTag = LibStub("LibDogTag-3.0")
 
-local DOGTAGS = TMW:GetModule("DogTags")
+local DOGTAG = TMW.DOGTAG
 
 
 
@@ -172,7 +172,7 @@ local extendedTags = {
 local function prepareEditBox(box)
 	if not box.PreparedForDogTagInsertion then
 		box:HookScript("OnEditFocusLost", function()
-			DOGTAGS.AcceptingIcon = nil
+			DOGTAG.AcceptingIcon = nil
 		end)
 
 		TMW.Classes.ChatEdit_InsertLink_Hook:New(box, function(self, text, linkType, linkData)
@@ -193,7 +193,7 @@ local function prepareEditBox(box)
 		box.PreparedForDogTagInsertion = true
 	end
 
-	DOGTAGS.AcceptingIcon = box
+	DOGTAG.AcceptingIcon = box
 end
 
 -- Finds the tag that the cursor is currently in, or at the end of.
@@ -262,7 +262,9 @@ end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local currentTag = getCurrentTag(SUG.Box)
 
-	for namespaceName, namespace in pairs(DogTag.Tags) do
+	for _, namespaceName in pairs(DogTag.unpackNamespaceList[DOGTAG.nsList]) do
+		local namespace = DogTag.Tags[namespaceName]
+
 		if currentTag or namespaceName == "TMW" then
 			for tagName, tagData in pairs(namespace) do
 				if not tagData.noDoc and (not currentTag or tagName:lower():find(SUG.lastName)) then
@@ -298,7 +300,7 @@ function Module:Entry_Insert(insert)
 
 			SUG.Box:SetCursorPosition(#(firsthalf .. insert))
 		else
-			insert = "[" .. insert .. "] "
+			insert = "[" .. insert .. "]"
 			SUG.Box:Insert(insert)
 		end
 
@@ -406,27 +408,9 @@ function GameTooltip:TMW_SetDogTag(tagName)
 	for i, tag in TMW:Vararg(strsplit(":", tagName)) do
 		tag = tag:gsub("%(.*%)", "") -- "Hide(0)" to "Hide"
 	
-		local tagData = DogTag.Tags.TMW[tag]
-		local ns = "TMW"
-		local doc
-		
-		if not tagData then
-			for namespaceName, namespace in pairs(DogTag.Tags) do
-				for tagName, _tagData in pairs(namespace) do
-					if not _tagData.noDoc and tag == tagName then
-						tagData = _tagData
-						doc = tagData.doc
-						ns = namespaceName
-						break
-					end
-				end
-				if doc then
-					break
-				end
-			end
-		else
-			doc = tagData.doc
-		end
+		local tagData, ns = DogTag.getTagData(tag, DOGTAG.nsList)
+		local doc = tagData.doc
+
 		if not tagData then
 			TMW:Debug("NO TAG DATA FOR TAG %s", tag)
 		else

@@ -1731,7 +1731,7 @@ function TMW:OnInitialize()
 		return
 
 	-- if the file is NOT required for gross functionality
-	elseif not TMW.DOGTAGS then
+	elseif not TMW.DOGTAG then
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
 			text = L["ERROR_MISSINGFILE_NOREQ"], 
 			button1 = EXIT_GAME,

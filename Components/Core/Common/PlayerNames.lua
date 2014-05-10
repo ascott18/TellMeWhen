@@ -228,6 +228,10 @@ NAMES:UpdateClassColors()
 -- This tag is registered with LibDogTag-Unit-3.0's namespace instead of TMW's namespace because it requires the event processing that is provided by the Unit namespace
 DogTag:AddTag("Unit", "TMWName", {
 	code = function(unit, color)
+		if NAMES.dogTag_forceUncolored then
+			color = false
+		end
+		
 		return NAMES:TryToAcquireName(unit, color)
 	end,
 	arg = {

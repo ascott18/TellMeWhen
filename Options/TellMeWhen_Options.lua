@@ -1532,7 +1532,7 @@ function IE:OnInitialize()
 		return
 
 	-- if the file is NOT required for gross functionality
-	elseif not TMW.DOGTAGS then
+	elseif not TMW.DOGTAG then
 		StaticPopupDialogs["TMWOPT_RESTARTNEEDED"] = {
 			text = L["ERROR_MISSINGFILE_OPT_NOREQ"], 
 			button1 = EXIT_GAME,
