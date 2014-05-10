@@ -211,19 +211,6 @@ end
 -- GENERAL CONFIG FUNCTIONS
 -- ----------------------
 
-function TMW.approachTable(t, ...)
-	for i=1, select("#", ...) do
-		local k = select(i, ...)
-		if type(k) == "function" then
-			t = k(t)
-		else
-			t = t[k]
-		end
-		if not t then return end
-	end
-	return t
-end
-
 ---------- Icon Utilities ----------
 function TMW:GetIconMenuText(ics)
 	local Type = ics.Type or ""

@@ -1,5 +1,5 @@
 ﻿<Ui>
-<!--
-<Script file="SwingTimerMonitor.lua"/>
--->
+
+<Script file="DogTags.lua"/>
+
 </Ui>

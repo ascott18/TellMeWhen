@@ -19,6 +19,19 @@ local print = TMW.print
 
 
 
+function TMW.approachTable(t, ...)
+	for i=1, select("#", ...) do
+		local k = select(i, ...)
+		if type(k) == "function" then
+			t = k(t)
+		else
+			t = t[k]
+		end
+		if not t then return end
+	end
+	return t
+end
+
 local Formatter = TMW:NewClass("Formatter"){
 	OnNewInstance = function(self, fmt)
 		self.fmt = fmt

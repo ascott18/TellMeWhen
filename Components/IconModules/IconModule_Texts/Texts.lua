@@ -639,7 +639,11 @@ function Texts:CreateFontString(id)
 	local container = self.container
 	
 	local fontString = container:CreateFontString(self:GetChildNameBase() .. id, "ARTWORK", "NumberFontNormalSmall")
-	
+
+	-- LDT-Unit has a script running on a timer that automatically cancels all queued updates for icons with kwargs.unit == "mouseover"
+	-- This doesn't make any fucking sense to me at all, so I added a flag to LDT-Unit-3.0 that lets me disable this behavior on a per-fontstring basis.
+	fontString.__DT_dontcancelupdatesforMO = true
+
 	self.fontStrings[id] = fontString
 
 	-- Remove this event if you are reading this comment in the year 2015 or later
