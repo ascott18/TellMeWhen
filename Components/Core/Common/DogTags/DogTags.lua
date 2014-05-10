@@ -24,6 +24,81 @@ TMW.DOGTAGS = DOGTAGS
 
 
 
+
+---------------------------------
+-- DogTag Helpers & Global Tags
+---------------------------------
+
+local DogTagEventHandler = function(event, icon)
+    DogTag:FireEvent(event, icon:GetGUID())
+end
+
+function TMW:CreateDogTagEventString(...)
+    local eventString = "TMW_GLOBAL_UPDATE_POST"
+
+    for i, dataProcessorName in TMW:Vararg(...) do
+        local Processor = TMW.Classes.IconDataProcessor.ProcessorsByName[dataProcessorName]
+        TMW:RegisterCallback(Processor.changedEvent, DogTagEventHandler)
+        
+        --if i > 1 then
+            eventString = eventString .. ";"
+        --end
+
+        eventString = eventString .. Processor.changedEvent .. "#$icon"
+    end
+    return eventString
+end
+
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", DogTag.FireEvent, DogTag)
+
+DogTag:AddTag("TMW", "TMWFormatDuration", {
+    code = TMW:MakeSingleArgFunctionCached(function(seconds)
+        return TMW:FormatSeconds(seconds, seconds == 0 or seconds > 10, true)
+    end),
+    arg = {
+        'seconds', 'number', '@req',
+    },
+    ret = "string",
+    static = true,
+    doc = L["DT_DOC_TMWFormatDuration"],
+    example = '[0.54:TMWFormatDuration] => "0.5"; [20:TMWFormatDuration] => "20"; [80:TMWFormatDuration] => "1:20"; [10000:TMWFormatDuration] => "2:46:40"',
+    category = L["TEXTMANIP"]
+})
+
+DogTag:AddTag("TMW", "gsub", {
+    code = gsub,
+    arg = {
+        'value', 'string', '@req',
+        'pattern', 'string', '@req',
+        'replacement', 'string', '@req',
+        'num', 'number;nil', 'nil',
+    },
+    ret = "string;nil",
+    static = true,
+    doc = L["DT_DOC_gsub"],
+    example = '["Cybeloras - Aerie Peak":gsub(" ?%-.*", "")] => "Cybeloras"',
+    category = L["TEXTMANIP"],
+})
+
+DogTag:AddTag("TMW", "strfind", {
+    code = strfind,
+    arg = {
+        'value', 'string', '@req',
+        'pattern', 'string', '@req',
+        'init', 'number', 0,
+        'plain', 'boolean', false,
+    },
+    ret = "number;nil",
+    static = true,
+    doc = L["DT_DOC_strfind"],
+    example = '["Cybeloras - Aerie Peak":strfind("%-")] => "11"',
+    category = L["TEXTMANIP"],
+})
+
+
+
+
+
 -- The purpose of this is to remove the code from a function that prevents it from updating its text
 -- if the unit kwarg doesn't exist. This happens all the time in TMW, but it doesn't mean we should
 -- send the rest of the text to the abyss. I tried making this change to LDT-Unit-3.0, a long time

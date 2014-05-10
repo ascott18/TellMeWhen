@@ -214,25 +214,7 @@ function SUG:NameOnCursor(isClick)
 	SUG.oldLastName = SUG.lastName
 	local text = SUG.Box:GetText()
 
-	SUG.startpos = 0
-	for i = SUG.Box:GetCursorPosition(), 0, -1 do
-		if strsub(text, i, i) == ";" then
-			SUG.startpos = i+1
-			break
-		end
-	end
-
-	if isClick then
-		SUG.endpos = #text
-		for i = SUG.startpos, #text do
-			if strsub(text, i, i) == ";" then
-				SUG.endpos = i-1
-				break
-			end
-		end
-	else
-		SUG.endpos = SUG.Box:GetCursorPosition()
-	end
+	SUG.CurrentModule:GetStartEndPositions()
 
 
 	SUG.lastName = strlower(TMW:CleanString(strsub(text, SUG.startpos, SUG.endpos)))
@@ -420,6 +402,27 @@ Module.helpText = L["SUG_TOOLTIPTITLE"]
 Module.showColorHelp = true
 function Module:GetShouldSuggest()
 	return true
+end
+function Module:GetStartEndPositions()
+	SUG.startpos = 0
+	for i = SUG.Box:GetCursorPosition(), 0, -1 do
+		if strsub(text, i, i) == ";" then
+			SUG.startpos = i+1
+			break
+		end
+	end
+
+	if isClick then
+		SUG.endpos = #text
+		for i = SUG.startpos, #text do
+			if strsub(text, i, i) == ";" then
+				SUG.endpos = i-1
+				break
+			end
+		end
+	else
+		SUG.endpos = SUG.Box:GetCursorPosition()
+	end
 end
 function Module:Table_Get()
 	return SpellCache:GetCache()

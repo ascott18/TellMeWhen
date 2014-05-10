@@ -141,9 +141,9 @@
 
 						TMW.EVENTS:LoadConfig()
 					</OnEditFocusLost>
-					<OnTabPressed>
+					<!-- <OnTabPressed>
 						self:Insert(strrep(" ", 4))
-					</OnTabPressed>
+					</OnTabPressed> -->
 				</Scripts>
 			</EditBox>
 			

@@ -361,75 +361,6 @@ function TMW.SetUIDropdownIcon(self, icon)
 end
 
 
----------- DogTag Utilities ----------
-do
-	local DogTag = LibStub("LibDogTag-3.0")
-	local EvaluateError
-
-	local function test(success, ...)
-		if success then
-			local arg1, arg2 = ...
-			local numArgs = select("#", ...)
-			if numArgs == 2 and arg2 == nil and type(arg1) == "string" then
-				return arg1
-			end
-		end
-	end
-
-	if DogTag and DogTag.tagError then
-		hooksecurefunc(DogTag, "tagError", function(_, _, text)
-			EvaluateError = text
-		end)
-	end
-
-	-- Tests a dogtag string. Returns a string if there is an error.
-	function TMW:TestDogTagString(icon, text, ns, kwargs)
-		--icon:Setup()
-		
-		ns = ns or "TMW;Unit;Stats"
-		kwargs = kwargs or {
-			icon = icon.ID,
-			group = icon.group.ID,
-			unit = icon.attributes.dogTagUnit,
-		}
-
-		-- Test the string and its tags & syntax
-
-		-- These operations are required when passing true as the 4th param (notDebug)
-		-- notDebug has to be true because otherwise DogTag will throw errors if the
-		-- user's input contains newlines. 
-		local kwargTypes = DogTag.kwargsToKwargTypes[kwargs]
-		ns = DogTag.fixNamespaceList[ns]
-
-		local funcString = DogTag:CreateFunctionFromCode(text, ns, kwargs, true)
-		local func = loadstring(funcString)
-		local success, newfunc = pcall(func)
-
-		if not success then
-			return "CRITICAL ERROR: " .. newfunc
-		end
-
-		func = func and success and newfunc
-
-		if not func then
-			return
-		end
-
-		local tagError = test(pcall(func, kwargs))
-
-		if tagError then
-			return "ERROR: " .. tagError
-		else
-			EvaluateError = nil
-			DogTag:Evaluate(text, ns, kwargs)
-
-			if EvaluateError then
-				return "CRITICAL ERROR: " .. EvaluateError
-			end
-		end
-	end
-end
-
 ---------- Misc Utilities ----------
 local ScrollContainerHook_Hide = function(c) c.ScrollFrame:Hide() end
 local ScrollContainerHook_Show = function(c) c.ScrollFrame:Show() end
@@ -528,9 +459,11 @@ end
 
 
 
--- --------------
+
+
+-- ------------------------------------------
 -- MAIN OPTIONS
--- --------------
+-- ------------------------------------------
 
 ---------- Data/Templates ----------
 local function FindGroupFromInfo(info)
@@ -1486,6 +1419,8 @@ function TMW:CompileOptions()
 		end
 	end
 end
+
+
 
 
 
