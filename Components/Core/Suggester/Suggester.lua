@@ -214,7 +214,7 @@ function SUG:NameOnCursor(isClick)
 	SUG.oldLastName = SUG.lastName
 	local text = SUG.Box:GetText()
 
-	SUG.CurrentModule:GetStartEndPositions()
+	SUG.CurrentModule:GetStartEndPositions(isClick)
 
 
 	SUG.lastName = strlower(TMW:CleanString(strsub(text, SUG.startpos, SUG.endpos)))
@@ -403,7 +403,9 @@ Module.showColorHelp = true
 function Module:GetShouldSuggest()
 	return true
 end
-function Module:GetStartEndPositions()
+function Module:GetStartEndPositions(isClick)
+	local text = SUG.Box:GetText()
+	
 	SUG.startpos = 0
 	for i = SUG.Box:GetCursorPosition(), 0, -1 do
 		if strsub(text, i, i) == ";" then

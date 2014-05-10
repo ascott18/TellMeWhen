@@ -135,7 +135,7 @@ function Module:OnSuggest()
 	prepareEditBox(SUG.Box)
 end
 
-function Module:GetStartEndPositions()
+function Module:GetStartEndPositions(isClick)
 	local currentTag, startPos, endPos = getCurrentTag(SUG.Box)
 
 	if currentTag then
@@ -322,12 +322,14 @@ function GameTooltip:TMW_SetDogTag(tagName)
 			local tag_colorized = generateArgFormattedTagString(tag, tagData)
 		
 			if tag_colorized then
-				GameTooltip:AddLine(tag_colorized .. " (" .. ns .. ")", HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+				GameTooltip:AddLine(tag_colorized .. " |cff888888- " .. ns .. "", HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 				GameTooltip:AddLine(doc or "<???>", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
 
 				for i, v in TMW:Vararg((";"):split(tagData.example)) do
 					local tag, result = v:trim():match("^(.*) => \"(.*)\"$")
-					local example = "    • " .. DogTag:ColorizeCode(tag) .. " => \"|cffffffff" .. result .. "\""
+					result = "\"|cffffffff" .. result .. "\""
+
+					local example = "   • " .. DogTag:ColorizeCode(tag) .. " => " .. result
 					GameTooltip:AddLine(example, 1, 1, 1, false)
 				end
 			end
@@ -343,7 +345,6 @@ end
 
 ---------- TMW:TestDogTagString ----------
 do
-	local DogTag = LibStub("LibDogTag-3.0")
 	local EvaluateError
 
 	local function test(success, ...)
