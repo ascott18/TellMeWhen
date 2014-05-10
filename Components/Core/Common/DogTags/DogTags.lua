@@ -22,6 +22,7 @@ local DogTag = LibStub("LibDogTag-3.0")
 local DOGTAGS = TMW:NewModule("DogTags")
 TMW.DOGTAGS = DOGTAGS
 
+TMW.DOGTAG.nsList = "Base;TMW;Unit;Stats"
 
 
 

@@ -168,7 +168,7 @@ function Announcements:HandleEvent(icon, eventSettings)
 		if chandata.isBlizz then
 			Text = Text:gsub("Name([^F])", "NameForceUncolored%1")
 		end
-		Text = DogTag:Evaluate(Text, "TMW;Unit;Stats", Announcements.kwargs)
+		Text = DogTag:Evaluate(Text, TMW.DOGTAG.nsList, Announcements.kwargs)
 		
 		-- DogTag returns nil if the result is an empty string, so make sure Text is non-nil
 		if Text then
@@ -178,7 +178,7 @@ function Announcements:HandleEvent(icon, eventSettings)
 				local Location = eventSettings.Location
 				if Channel == "WHISPER" then
 					Announcements.kwargs.link = false
-					Location = DogTag:Evaluate(Location, "TMW;Unit", Announcements.kwargs)
+					Location = DogTag:Evaluate(Location, TMW.DOGTAG.nsList, Announcements.kwargs)
 					Location = Location:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") -- strip color codes
 				end
 				SendChatMessage(Text, Channel, nil, Location)

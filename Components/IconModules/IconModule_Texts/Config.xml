@@ -86,6 +86,10 @@
 				Set the text for this text display
 			-->
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
+				<Attributes>
+					<Attribute name="tmw-class" type="string" value="Config_EditBox_DogTags"/>
+				</Attributes>
+
 				<Size y="15"/>
 				<Anchors>
 					<Anchor point="TOP" y="-2"/>
@@ -94,84 +98,20 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.BackgroundText:SetWidth(self:GetWidth())
-						TMW.SUG:EnableEditBox(self, "dogtags")
-					
-						TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
+						TMW:CInit(self, {
+							setting = self:GetParent():GetID(),
+							OnTextChanged = function(self)
+								TMW.TEXT:SetTextDisplayContainerHeight(self:GetParent())
+							end,
+							OnEditFocusLost = function(self)
+								TMW.TEXT:LoadConfig()
+							end,
+						})
+
+						function self:GetSettingTable()
+							return TMW.CI.icon:GetSettingsPerView().Texts
+						end
 					</OnLoad>
-					<OnTextChanged>
-						local text = self:GetText()
-						if text == "" then
-							self.BackgroundText:SetText(self.label)
-						else
-							self.BackgroundText:SetText(nil)
-						end
-						
-						if not (userInput and (GetLocale() == "zhCN" or GetLocale() == "zhTW")) then
-							-- It seems that bad things happen here while typing chinese characters
-							-- See http://wow.curseforge.com/addons/tellmewhen/tickets/641-typing-chinese-error/
-						
-							local DogTag = LibStub("LibDogTag-3.0")
-							local colorText = self:GetText()
-							if self.lastText ~= colorText then
-								local text = colorText:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-								
-								self.lastText = DogTag:ColorizeCode(text):gsub("|r", "")
-								local position = self:GetCursorPosition()
-								local skip = 0
-								for i = 1, position do
-									if colorText:byte(i) == ("|"):byte() then
-										if colorText:byte(i+1) == ("c"):byte() then
-											skip = skip + 10
-										elseif colorText:byte(i+1) == ("r"):byte() then
-											skip = skip + 2
-										end
-									end
-								end
-								position = position - skip
-								self:SetText(self.lastText)
-								
-								local betterPosition = 0
-								for i = 1, position do
-									betterPosition = betterPosition + 1
-									while self.lastText:byte(betterPosition) == ("|"):byte() do
-										if self.lastText:byte(betterPosition+1) == ("c"):byte() then
-											betterPosition = betterPosition + 10
-										elseif self.lastText:byte(betterPosition+1) == ("r"):byte() then
-											betterPosition = betterPosition + 2
-										else
-											break
-										end
-									end
-								end
-								
-								self:SetCursorPosition(betterPosition)
-							end
-						end
-						
-						TMW.TEXT:SetTextDisplayContainerHeight(self:GetParent())
-					</OnTextChanged>
-					<OnEditFocusLost>
-						EditBox_ClearHighlight(self)
-						
-						local DogTag = LibStub("LibDogTag-3.0")
-						self:SetText(DogTag:CleanCode(self:GetText()))
-						self:SetText(DogTag:ColorizeCode(self:GetText()))
-						
-						local text = self:GetText():trim("; \t\r\n")
-						
-						if TMW.CI.icon then
-							text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-							TMW.CI.icon:GetSettingsPerView().Texts[self:GetParent():GetID()] = text
-						end
-						
-						TMW.IE:ScheduleIconSetup()
-						self:GetScript("OnTextChanged")(self)
-						TMW.TEXT:LoadConfig()
-					</OnEditFocusLost>
-					<!-- <OnTabPressed>
-						self:Insert(strrep(" ", 4))
-					</OnTabPressed> -->
 				</Scripts>
 			</EditBox>
 

@@ -23,6 +23,117 @@ local DOGTAGS = TMW:GetModule("DogTags")
 
 
 
+TMW:NewClass("Config_EditBox_DogTags", "Config_EditBox"){
+	OnNewInstance_EditBox_DogTags = function(self, data)
+		data.ModifySettingValue = self.ModifySettingValue
+
+		self.BackgroundText:SetWidth(self:GetWidth())
+		TMW.SUG:EnableEditBox(self, "dogtags")
+	end,
+
+	ModifySettingValue = function(self, text)
+		return text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+	end,
+
+	ChatEdit_InsertLink_Hook = function(self, text, linkType, linkData)
+		-- The ability to yell out clickable links is cool.
+		-- However, with DogTag, we need some slight modifications to get colors to work.
+		
+		local color, link = text:match("|cff(%x%x%x%x%x%x)(|H.*|h)")
+		
+		if not color or not link then
+			return false
+		end
+		
+		text = '["' .. link .. '":Color("' .. color .. '")]'
+		
+		self.editbox:Insert(text)
+		
+		TMW.HELP:Show{
+			code = "ANN_LINK_INSERTED",
+			codeOrder = 1,
+			icon = TMW.CI.icon,
+			relativeTo = self.editbox,
+			x = 0,
+			y = 0,
+			text = format(TMW.L["HELP_ANN_LINK_INSERTED"])
+		}
+
+		-- notify success
+		return true
+	end,
+	EnableLinkInsertion = function(self)
+		TMW.Classes.ChatEdit_InsertLink_Hook:New(self, self.ChatEdit_InsertLink_Hook)
+		self.EnableLinkInsertion = TMW.NULLFUNC
+	end,
+
+	METHOD_EXTENSIONS_PRE = {
+		OnTextChanged = function(self, userInput)
+			local text = self:GetText()
+			if text == "" then
+				self.BackgroundText:SetText(self.label)
+			else
+				self.BackgroundText:SetText(nil)
+			end
+			
+			if userInput and (GetLocale() == "zhCN" or GetLocale() == "zhTW") then
+				-- It seems that bad things happen here while typing chinese characters
+				-- See http://wow.curseforge.com/addons/tellmewhen/tickets/641-typing-chinese-error/
+				return
+			end 
+			
+			local DogTag = LibStub("LibDogTag-3.0")
+			local colorText = self:GetText()
+			if self.lastText ~= colorText then
+				local text = colorText:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+				
+				self.lastText = DogTag:ColorizeCode(text):gsub("|r", "")
+				local position = self:GetCursorPosition()
+				local skip = 0
+				for i = 1, position do
+					if colorText:byte(i) == ("|"):byte() then
+						if colorText:byte(i+1) == ("c"):byte() then
+							skip = skip + 10
+						elseif colorText:byte(i+1) == ("r"):byte() then
+							skip = skip + 2
+						end
+					end
+				end
+				position = position - skip
+				self:SetText(self.lastText)
+				
+				local betterPosition = 0
+				for i = 1, position do
+					betterPosition = betterPosition + 1
+					while self.lastText:byte(betterPosition) == ("|"):byte() do
+						if self.lastText:byte(betterPosition+1) == ("c"):byte() then
+							betterPosition = betterPosition + 10
+						elseif self.lastText:byte(betterPosition+1) == ("r"):byte() then
+							betterPosition = betterPosition + 2
+						else
+							break
+						end
+					end
+				end
+				
+				self:SetCursorPosition(betterPosition)
+			end
+		end,
+
+		OnEditFocusLost = function(self)
+			EditBox_ClearHighlight(self)
+			
+			local DogTag = LibStub("LibDogTag-3.0")
+			local text = self:GetText()
+			text = DogTag:CleanCode(text)
+			text = DogTag:ColorizeCode(text)
+			text = text:gsub("\\124([Hh])", "|%1") -- DogTag screws with hyperlinks. This fixes them.
+			text = text:trim("; \t\r\n")
+			
+			self:SetText(text)
+		end,
+	}
+}
 
 local SUG = TMW.SUG
 
@@ -367,7 +478,7 @@ do
 	function TMW:TestDogTagString(icon, text, ns, kwargs)
 		--icon:Setup()
 		
-		ns = ns or "TMW;Unit;Stats"
+		ns = ns or TMW.DOGTAG.nsList
 		kwargs = kwargs or {
 			icon = icon.ID,
 			group = icon.group.ID,

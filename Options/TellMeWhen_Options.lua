@@ -2720,6 +2720,11 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 	-- Constructor
 	OnNewInstance_EditBox = function(self, data)
 		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
+
+		self.BackgroundText:SetWidth(self:GetWidth())
+		if data and data.label then
+			self.label = data.label
+		end
 	end,
 	
 
