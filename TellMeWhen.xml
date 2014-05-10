@@ -53,7 +53,7 @@
 		</Scripts>
 	</Frame>
 
-	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true">
+	<Button name="TellMeWhen_IconTemplate" virtual="true" enableMouse="true" hidden="true">
 		<Size x="30" y="30"/>
 	</Button>
 
