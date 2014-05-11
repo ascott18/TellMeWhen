@@ -111,6 +111,9 @@
 						function self:GetSettingTable()
 							return TMW.CI.icon:GetSettingsPerView().Texts
 						end
+						function self:ReloadSetting()
+							-- loading of settings is handled manually.
+						end
 					</OnLoad>
 				</Scripts>
 			</EditBox>

@@ -2782,7 +2782,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 
 		if settings then
 			if not (eventMaybe == "TMW_CONFIG_ICON_HISTORY_STATE_CREATED" and self:HasFocus()) and self.setting then
-				self:SetText(settings[self.setting])
+				self:SetText(settings[self.setting] or "")
 			end
 			self:CheckInteractionStates()
 			self:ClearFocus()
