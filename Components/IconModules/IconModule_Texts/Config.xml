@@ -98,6 +98,13 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						-- This is handled manually.
+						-- Set to nullfunc before calling CInit - it won't get overridden,
+						-- but we need to make it nullfunc before initializing because otherwise
+						-- the original ReloadSetting will be immediately registered.
+						self.ReloadSetting = TMW.NULLFUNC
+
+
 						TMW:CInit(self, {
 							setting = self:GetParent():GetID(),
 							OnTextChanged = function(self)
@@ -110,9 +117,6 @@
 
 						function self:GetSettingTable()
 							return TMW.CI.icon:GetSettingsPerView().Texts
-						end
-						function self:ReloadSetting()
-							-- loading of settings is handled manually.
 						end
 					</OnLoad>
 				</Scripts>
