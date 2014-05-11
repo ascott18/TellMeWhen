@@ -31,7 +31,7 @@ Module:RegisterIconEvent(92, "OnRightClick", {
 	desc = L["SOUND_EVENT_ONRIGHTCLICK_DESC"],
 })
 
-Module:ExtendMethod("OnImplementIntoIcon", function(self, icon)
+Module:PostHookMethod("OnImplementIntoIcon", function(self, icon)
 	local EventHandlersSet = icon.EventHandlersSet
 	
 	if EventHandlersSet.OnLeftClick or EventHandlersSet.OnRightClick then

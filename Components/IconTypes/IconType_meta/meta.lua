@@ -83,7 +83,7 @@ local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_METACHILD", "alpha_me
 Processor.dontInherit = true
 TMW.IconAlphaManager:AddHandler(50, "ALPHA_METACHILD", true)
 
-Processor:ExtendMethod("OnUnimplementFromIcon", function(self, icon)
+Processor:PostHookMethod("OnUnimplementFromIcon", function(self, icon)
 	icon:SetInfo("alpha_metaChild", nil)
 end)
 

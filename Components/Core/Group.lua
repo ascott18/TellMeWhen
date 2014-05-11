@@ -72,7 +72,7 @@ do	-- TMW.CNDT implementation
 		tab = TMW.Classes.IconEditorTab:NewTab("CNDTGROUP", 15, "Conditions")
 		tab:SetTitleComponents(nil, 1)
 		
-		tab:ExtendMethod("ClickHandler", function()
+		tab:PostHookMethod("ClickHandler", function()
 			TMW.CNDT:LoadConfig("Group")
 		end)
 

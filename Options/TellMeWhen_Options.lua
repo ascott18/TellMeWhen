@@ -2020,7 +2020,7 @@ function IE:CreateTabs()
 	IE.MainOptionsTab:SetText(TMW.L["GROUPADDONSETTINGS"])
 	TMW:TT(IE.MainOptionsTab, "GROUPADDONSETTINGS", "GROUPADDONSETTINGS_DESC")
 	
-	IE.MainOptionsTab:ExtendMethod("ClickHandler", function()
+	IE.MainOptionsTab:PostHookMethod("ClickHandler", function()
 		TMW:CompileOptions()
 
 		if CI.group then

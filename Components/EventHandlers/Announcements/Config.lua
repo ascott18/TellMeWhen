@@ -64,7 +64,7 @@ function Announcements:SetupEventDisplay(eventID)
 	end
 end
 
-Announcements:ExtendMethod("LoadSettingsForEventID", function(self, id)
+Announcements:PostHookMethod("LoadSettingsForEventID", function(self, id)
 	local EventSettings = EVENTS:GetEventSettings(id)
 	
 	self.ConfigContainer.EditBox:SetText(EventSettings.Text)

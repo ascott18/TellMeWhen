@@ -32,7 +32,7 @@ Module:RegisterIconEvent(101, "OnCondition", {
 	},
 })
 
-Module:ExtendMethod("OnImplementIntoIcon", function(self, icon)
+Module:PostHookMethod("OnImplementIntoIcon", function(self, icon)
 	local EventHandlersSet = icon.EventHandlersSet
 	
 	if EventHandlersSet.OnCondition then

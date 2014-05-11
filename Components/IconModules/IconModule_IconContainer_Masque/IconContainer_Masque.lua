@@ -52,7 +52,7 @@ function IconContainer_Masque:SetupForIcon(icon)
 	end
 end
 
-IconContainer_Masque:ExtendMethod("OnEnable", function(self)
+IconContainer_Masque:PostHookMethod("OnEnable", function(self)
 	local icon = self.icon
 	local container = self.container
 	
@@ -83,7 +83,7 @@ IconContainer_Masque:ExtendMethod("OnEnable", function(self)
 	end
 end)
 
-IconContainer_Masque:ExtendMethod("OnDisable", function(self)
+IconContainer_Masque:PostHookMethod("OnDisable", function(self)
 	self.lmbGroup:RemoveButton(self.container, true)
 	
 	self.isDefaultSkin = 1

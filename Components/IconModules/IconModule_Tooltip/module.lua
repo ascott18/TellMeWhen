@@ -34,7 +34,7 @@ Module.title = title_default
 local text_default = L["ICON_TOOLTIP2NEW"]
 Module.text = text_default
 
-Module:ExtendMethod("OnUnimplementFromIcon", function(self)
+Module:PostHookMethod("OnUnimplementFromIcon", function(self)
 	self:SetTooltipTitle(title_default, true)
 	self:SetTooltipText(text_default, true)
 end)
