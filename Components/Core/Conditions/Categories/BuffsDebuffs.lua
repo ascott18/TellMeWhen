@@ -142,7 +142,7 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
-	texttable = CNDT.COMMON.absentseconds,
+	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
@@ -171,7 +171,7 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	icon = "Interface\\Icons\\spell_holy_circleofrenewal",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
@@ -276,7 +276,7 @@ ConditionCategory:RegisterCondition(9,	 "ABSORBAMT", {
 	tooltip = L["ABSORBAMT_DESC"],
 	range = 50000,
 	icon = "Interface\\Icons\\spell_holy_powerwordshield",
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		UnitGetTotalAbsorbs = UnitGetTotalAbsorbs,
@@ -300,7 +300,7 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
-	texttable = CNDT.COMMON.absentseconds,
+	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
@@ -329,7 +329,7 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
 	useSUG = true,
 	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	icon = "Interface\\Icons\\spell_priest_voidshift",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
@@ -435,7 +435,7 @@ ConditionCategory:RegisterCondition(21,	 "MAINHAND", {
 	text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONMAINHAND,
 	range = 120,
 	unit = false,
-	texttable = CNDT.COMMON.absentseconds,
+	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("MainHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_14" end,
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[(select(2, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
@@ -450,7 +450,7 @@ ConditionCategory:RegisterCondition(22,	 "OFFHAND", {
 	text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONOFFHAND,
 	range = 120,
 	unit = false,
-	texttable = CNDT.COMMON.absentseconds,
+	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("SecondaryHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_15" end,
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[(select(5, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],

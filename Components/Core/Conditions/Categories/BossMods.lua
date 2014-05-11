@@ -228,7 +228,7 @@ ConditionCategory:RegisterCondition(1,	 "BIGWIGS_TIMER", {
 	unit = false,
 	name = function(editbox) TMW:TT(editbox, "MODTIMERTOCHECK", "MODTIMERTOCHECK_DESC") editbox.label = L["MODTIMERTOCHECK"] end,
 	check = function(check) TMW:TT(check, "MODTIMER_PATTERN", "MODTIMER_PATTERN_DESC") end,
-	texttable = CNDT.COMMON.absentseconds,
+	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = function()
 		if not BigWigsLoader then
 			return "Interface\\Icons\\INV_Misc_QuestionMark"
@@ -329,7 +329,7 @@ ConditionCategory:RegisterCondition(2,	 "BIGWIGS_ENGAGED", {
 
 	min = 0,
 	max = 1,
-	texttable = CNDT.COMMON.bool,
+	formatter = TMW.C.Formatter.BOOL,
 	nooperator = true,
 	unit = false,
 
@@ -424,7 +424,7 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 	unit = false,
 	name = function(editbox) TMW:TT(editbox, "MODTIMERTOCHECK", "MODTIMERTOCHECK_DESC") editbox.label = L["MODTIMERTOCHECK"] end,
 	check = function(check) TMW:TT(check, "MODTIMER_PATTERN", "MODTIMER_PATTERN_DESC") end,
-	texttable = CNDT.COMMON.absentseconds,
+	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = function()
 		if not DBM then
 			return "Interface\\Icons\\INV_Misc_QuestionMark"
@@ -524,7 +524,7 @@ ConditionCategory:RegisterCondition(11,	 "DBM_ENGAGED", {
 
 	min = 0,
 	max = 1,
-	texttable = CNDT.COMMON.bool,
+	formatter = TMW.C.Formatter.BOOL,
 	nooperator = true,
 	unit = false,
 

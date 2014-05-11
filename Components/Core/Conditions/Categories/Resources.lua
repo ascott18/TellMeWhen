@@ -43,7 +43,7 @@ local ConditionCategory = CNDT:GetCategory("RESOURCES", 1, L["CNDTCAT_RESOURCES"
 ConditionCategory:RegisterCondition(1,	 "HEALTH", {
 	text = L["CONDITIONPANEL_PERCENT"] .. " " .. HEALTH,
 	percent = true,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_05",
@@ -60,7 +60,7 @@ ConditionCategory:RegisterCondition(2,	 "DEFAULT", {
 	text = L["CONDITIONPANEL_PERCENT"] .. " " .. L["CONDITIONPANEL_POWER"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
 	percent = true,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
@@ -77,7 +77,7 @@ ConditionCategory:RegisterCondition(2,	 "DEFAULT", {
 ConditionCategory:RegisterCondition(3,	 "MANA", {
 	text = L["CONDITIONPANEL_PERCENT"] .. " " .. MANA,
 	percent = true,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_126",
@@ -93,7 +93,7 @@ ConditionCategory:RegisterCondition(3,	 "MANA", {
 ConditionCategory:RegisterCondition(4,	 "ENERGY", {
 	text = L["CONDITIONPANEL_PERCENT"] .. " " .. ENERGY,
 	percent = true,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_125",
@@ -109,7 +109,7 @@ ConditionCategory:RegisterCondition(4,	 "ENERGY", {
 ConditionCategory:RegisterCondition(5,	 "RAGE", {
 	text = L["CONDITIONPANEL_PERCENT"] .. " " .. RAGE,
 	percent = true,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_120",
@@ -125,7 +125,7 @@ ConditionCategory:RegisterCondition(5,	 "RAGE", {
 ConditionCategory:RegisterCondition(6,	 "FOCUS", {
 	text = L["CONDITIONPANEL_PERCENT"] .. " " .. FOCUS,
 	percent = true,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_124",
@@ -141,7 +141,7 @@ ConditionCategory:RegisterCondition(6,	 "FOCUS", {
 ConditionCategory:RegisterCondition(7,	 "RUNIC_POWER", {
 	text = L["CONDITIONPANEL_PERCENT"] .. " " .. RUNIC_POWER,
 	percent = true,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_128",
@@ -158,7 +158,7 @@ ConditionCategory:RegisterCondition(8,	 "ALTPOWER", {
 	text = L["CONDITIONPANEL_PERCENT"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
 	percent = true,
-	texttable = CNDT.COMMON.percent,
+	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\spell_shadow_mindflay",
@@ -397,7 +397,7 @@ ConditionCategory:RegisterSpacer(40)
 
 ConditionCategory:RegisterCondition(41,	 "HEALTH_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. HEALTH,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 1000000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_05",
@@ -412,7 +412,7 @@ ConditionCategory:RegisterCondition(41,	 "HEALTH_ABS", {
 ConditionCategory:RegisterCondition(42,	 "DEFAULT_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_POWER"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 40000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
@@ -427,7 +427,7 @@ ConditionCategory:RegisterCondition(42,	 "DEFAULT_ABS", {
 })
 ConditionCategory:RegisterCondition(43,	 "MANA_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. MANA,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 40000,
 	icon = "Interface\\Icons\\inv_potion_126",
@@ -441,7 +441,7 @@ ConditionCategory:RegisterCondition(43,	 "MANA_ABS", {
 })
 ConditionCategory:RegisterCondition(44,	 "ENERGY_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. ENERGY,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_125",
@@ -455,7 +455,7 @@ ConditionCategory:RegisterCondition(44,	 "ENERGY_ABS", {
 })
 ConditionCategory:RegisterCondition(45,	 "RAGE_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RAGE,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_120",
@@ -469,7 +469,7 @@ ConditionCategory:RegisterCondition(45,	 "RAGE_ABS", {
 })
 ConditionCategory:RegisterCondition(46,	 "FOCUS_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. FOCUS,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_124",
@@ -483,7 +483,7 @@ ConditionCategory:RegisterCondition(46,	 "FOCUS_ABS", {
 })
 ConditionCategory:RegisterCondition(47,	 "RUNIC_POWER_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RUNIC_POWER,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_128",
@@ -498,7 +498,7 @@ ConditionCategory:RegisterCondition(47,	 "RUNIC_POWER_ABS", {
 ConditionCategory:RegisterCondition(48,	 "ALTPOWER_ABS", {
 	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\spell_shadow_mindflay",
@@ -517,7 +517,7 @@ ConditionCategory:RegisterSpacer(60)
 
 ConditionCategory:RegisterCondition(61,	 "HEALTH_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. HEALTH,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 1000000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_05",
@@ -532,7 +532,7 @@ ConditionCategory:RegisterCondition(61,	 "HEALTH_MAX", {
 ConditionCategory:RegisterCondition(62,	 "DEFAULT_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_POWER"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 40000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
@@ -547,7 +547,7 @@ ConditionCategory:RegisterCondition(62,	 "DEFAULT_MAX", {
 })
 ConditionCategory:RegisterCondition(63,	 "MANA_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. MANA,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 40000,
 	icon = "Interface\\Icons\\inv_potion_126",
@@ -561,7 +561,7 @@ ConditionCategory:RegisterCondition(63,	 "MANA_MAX", {
 })
 ConditionCategory:RegisterCondition(64,	 "ENERGY_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. ENERGY,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_125",
@@ -575,7 +575,7 @@ ConditionCategory:RegisterCondition(64,	 "ENERGY_MAX", {
 })
 ConditionCategory:RegisterCondition(65,	 "RAGE_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. RAGE,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_120",
@@ -589,7 +589,7 @@ ConditionCategory:RegisterCondition(65,	 "RAGE_MAX", {
 })
 ConditionCategory:RegisterCondition(66,	 "FOCUS_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. FOCUS,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_124",
@@ -603,7 +603,7 @@ ConditionCategory:RegisterCondition(66,	 "FOCUS_MAX", {
 })
 ConditionCategory:RegisterCondition(67,	 "RUNIC_POWER_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. RUNIC_POWER,
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_128",
@@ -618,7 +618,7 @@ ConditionCategory:RegisterCondition(67,	 "RUNIC_POWER_MAX", {
 ConditionCategory:RegisterCondition(68,	 "ALTPOWER_MAX", {
 	text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
-	texttable = CNDT.COMMON.commanumber,
+	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
 	icon = "Interface\\Icons\\spell_shadow_mindflay",

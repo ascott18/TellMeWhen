@@ -62,53 +62,6 @@ CNDT.SpecialUnitsUsed = {}
 ----------------------------------------------
 
 CNDT.COMMON = {}
-function CNDT.COMMON.formatSeconds(seconds, alsoMightBeSeconds)
-	if type(seconds) == "table" then -- if i set this function directly as a metamethod
-		seconds = alsoMightBeSeconds
-	end
-	if abs(seconds) == math.huge then
-		return tostring(seconds)
-	end
-	
-	local y =  seconds / 31556925.9936
-	local d = (seconds % 31556925.9936) / 86400
-	local h = (seconds % 31556925.9936 % 86400) / 3600
-	local m = (seconds % 31556925.9936 % 86400  % 3600) / 60
-	local s = (seconds % 31556925.9936 % 86400  % 3600  % 60)
-
-	s = tonumber(format("%.1f", s))
-	if s < 10 then
-		s = "0" .. s
-	end
-
-	if y >= 0x7FFFFFFE then
-		return format("OVERFLOW:%d:%02d:%02d:%s", d, h, m, s)
-	end
-
-	if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, s) end
-	if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
-	if h >= 1 then return format("%d:%02d:%s", h, m, s) end
-	return format("%d:%s", m, s)
-end
-local formatSeconds = CNDT.COMMON.formatSeconds
-
--- preset text tables that are frequently used
-CNDT.COMMON.commanumber = function(k)
-	k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
-	local found
-	repeat
-		k, found = gsub(k, "(%d)(%d%d%d),", "%1,%2,", 1)
-	until found == 0
-
-	return k
-end
-CNDT.COMMON.percent = function(k) return k.."%" end
-CNDT.COMMON.pluspercent = function(k) return "+"..k.."%" end
-CNDT.COMMON.bool = {[0] = L["TRUE"],[1] = L["FALSE"],}
-CNDT.COMMON.usableunusable = {[0] = L["ICONMENU_USABLE"],[1] = L["ICONMENU_UNUSABLE"],}
-CNDT.COMMON.presentabsent = {[0] = L["ICONMENU_PRESENT"],[1] = L["ICONMENU_ABSENT"],}
-CNDT.COMMON.absentseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = formatSeconds})
-CNDT.COMMON.usableseconds = setmetatable({[0] = formatSeconds(0).." ("..L["ICONMENU_USABLE"]..")"}, {__index = formatSeconds})
 CNDT.COMMON.standardtcoords = {0.07, 0.93, 0.07, 0.93}
 
 

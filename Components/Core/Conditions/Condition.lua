@@ -47,6 +47,13 @@ function Condition:OnNewInstance(category, order, identifier)
 	self.identifier = identifier
 	self.order = order
 
+	if self.texttable and not self.formatter then
+		self.formatter = TMW.C.Formatter:New(self.texttable)
+		self.texttable = nil
+	elseif not self.formatter then
+		self.formatter = TMW.C.Formatter.COMMANUMBER
+	end
+
 	CNDT.ConditionsByType[identifier] = self
 end
 

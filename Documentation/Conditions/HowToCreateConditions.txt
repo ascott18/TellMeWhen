@@ -187,7 +187,7 @@ ConditionCategory:RegisterCondition(1,   "BUFFDUR", {
   name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
   useSUG = true,
   check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
-  texttable = CNDT.COMMON.absentseconds,
+  formatter = TMW.C.Formatter.TIME_0ABSENT,
   icon = "Interface\\Icons\\spell_nature_rejuvenation",
   tcoords = CNDT.COMMON.standardtcoords,
   funcstr = function(c)

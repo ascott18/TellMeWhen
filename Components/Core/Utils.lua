@@ -141,27 +141,31 @@ Formatter{
 			str = str .. format("%dy", y)
 		end
 		if d >= 1 then 
-			local DAY_ONELETTER_ABBR = DAY_ONELETTER_ABBR:gsub(" ", "")
-			str = str .. " " .. format(DAY_ONELETTER_ABBR, d)
+			local fmt = DAY_ONELETTER_ABBR:gsub(" ", "")
+			str = str .. " " .. format(fmt, d)
 		end
 		if h >= 1 then 
-			local HOUR_ONELETTER_ABBR = HOUR_ONELETTER_ABBR:gsub(" ", "")
-			str = str .. " " .. format(HOUR_ONELETTER_ABBR, h)
+			local fmt = HOUR_ONELETTER_ABBR:gsub(" ", "")
+			str = str .. " " .. format(fmt, h)
 		end
 		if m >= 1 then 
-			local MINUTE_ONELETTER_ABBR = MINUTE_ONELETTER_ABBR:gsub(" ", "")
-			str = str .. " " .. format(MINUTE_ONELETTER_ABBR, m)
+			local fmt = MINUTE_ONELETTER_ABBR:gsub(" ", "")
+			str = str .. " " .. format(fmt, m)
 		end
-		if s >= 1 then 
-			if tonumber(format("%.1f", s)) == s then
-				s = tostring(s)
-			else
-				s = format("%0.1f", s)
-			end
-			
-			local SECOND_ONELETTER_ABBR = SECOND_ONELETTER_ABBR:gsub("%%d ", "%%s")
-			str = str .. " " .. format(SECOND_ONELETTER_ABBR, s)
+
+		if tonumber(format("%.1f", s)) == s then
+			s = tostring(s)
+		else
+			s = format("%0.1f", s)
 		end
+		
+		local fmt
+		if str == "" then
+			fmt = SECONDS_ABBR:gsub("%%d", "%%s"):lower()
+		else
+			fmt = SECOND_ONELETTER_ABBR:gsub("%%d ", "%%s"):lower()
+		end
+		str = str .. " " .. format(fmt, s)
 		
 		return str:trim()
 	end),
@@ -181,7 +185,7 @@ Formatter{
 		return s
 	end),
 
-	BOOL_USABLEUNUSABLE = Formatter:New{[0]=L["TRUE"], [1]=L["FALSE"]},
+	BOOL = Formatter:New{[0]=L["TRUE"], [1]=L["FALSE"]},
 	BOOL_USABLEUNUSABLE = Formatter:New{[0]=L["ICONMENU_USABLE"], [1]=L["ICONMENU_UNUSABLE"]},
 	BOOL_PRESENTABSENT = Formatter:New{[0]=L["ICONMENU_PRESENT"], [1]=L["ICONMENU_ABSENT"]},
 }

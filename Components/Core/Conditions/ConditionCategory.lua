@@ -65,7 +65,7 @@ end
 --    name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
 --    useSUG = "spellWithGCD",
 --    unit = PLAYER,
---    texttable = CNDT.COMMON.usableseconds,
+--    formatter = TMW.C.Formatter.TIME_0USABLE,
 --    icon = "Interface\\Icons\\spell_holy_divineintervention",
 --    tcoords = CNDT.COMMON.standardtcoords,
 --    funcstr = [[CooldownDuration(c.NameFirst) c.Operator c.Level]],

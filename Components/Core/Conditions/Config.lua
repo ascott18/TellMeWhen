@@ -876,14 +876,13 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			TMW:TT_Update(CndtGroup.Slider)
 
 
-			conditionData.formatter = conditionData.formatter or TMW.C.Formatter:New(conditionData.texttable)
 			CndtGroup.Slider:SetTextFormatter(conditionData.formatter)
 
 			if conditionData.midt then
-				local Min, Max = CndtGroup.Slider:GetMinMaxValues()
-				local Mid = ((Max-Min)/2)+Min
+				local min, max = CndtGroup.Slider:GetMinMaxValues()
+				local mid = ((max-min)/2)+min
 				if conditionData.midt == true then
-					Mid = get(conditionData.texttable, Mid) or Mid
+					Mid = conditionData.formatter:Format(Mid)
 				else
 					Mid = get(conditionData.midt, Mid)
 				end
