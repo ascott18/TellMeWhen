@@ -57,6 +57,7 @@ local Formatter = TMW:NewClass("Formatter"){
 }
 Formatter:MakeInstancesWeak()
 
+-- Some commonly used formatters.
 Formatter{
 	PASS = Formatter:New(tostring),
 
@@ -76,10 +77,6 @@ Formatter{
 
 	PIXELS = Formatter:New(L["ANIM_PIXELS"]),
 
-	SECONDS = Formatter:New(function(value)
-		return TMW:FormatSeconds(value, nil, 1)
-	end),
-
 	COMMANUMBER = Formatter:New(function(k)
 		k = gsub(k, "(%d)(%d%d%d)$", "%1,%2", 1)
 		local found
@@ -89,4 +86,102 @@ Formatter{
 
 		return k
 	end),
+
+
+	TIME_COLONS = Formatter:New(function(value)
+		return TMW:FormatSeconds(value, nil, 1)
+	end),
+
+	TIME_COLONS_FORCEMINS = Formatter:New(function(seconds)
+		if abs(seconds) == math.huge then
+			return tostring(seconds)
+		end
+		
+		local y =  seconds / 31556925
+		local d = (seconds % 31556925) / 86400
+		local h = (seconds % 31556925  % 86400) / 3600
+		local m = (seconds % 31556925  % 86400  % 3600) / 60
+		local s = (seconds % 31556925  % 86400  % 3600  % 60)
+
+		if y >= 0x7FFFFFFE then
+			return "OVERFLOW"
+		end
+
+		s = tonumber(format("%.1f", s))
+		if s < 10 then
+			s = "0" .. s
+		end
+
+
+		if y >= 1 then return format("%d:%d:%02d:%02d:%s", y, d, h, m, s) end
+		if d >= 1 then return format("%d:%02d:%02d:%s", d, h, m, s) end
+		if h >= 1 then return format("%d:%02d:%s", h, m, s) end
+		return format("%d:%s", m, s)
+	end),
+
+	TIME_YDHMS = Formatter:New(function(seconds)
+		if abs(seconds) == math.huge then
+			return tostring(seconds)
+		end
+		
+		local y =  seconds / 31556926
+		local d = (seconds % 31556926) / 86400
+		local h = (seconds % 31556926  % 86400) / 3600
+		local m = (seconds % 31556926  % 86400  % 3600) / 60
+		local s = (seconds % 31556926  % 86400  % 3600  % 60)
+		
+		if y >= 0x7FFFFFFE then
+			return "OVERFLOW"
+		end
+		
+		
+		local str = ""
+		
+		if y >= 1 then 
+			str = str .. format("%dy", y)
+		end
+		if d >= 1 then 
+			local DAY_ONELETTER_ABBR = DAY_ONELETTER_ABBR:gsub(" ", "")
+			str = str .. " " .. format(DAY_ONELETTER_ABBR, d)
+		end
+		if h >= 1 then 
+			local HOUR_ONELETTER_ABBR = HOUR_ONELETTER_ABBR:gsub(" ", "")
+			str = str .. " " .. format(HOUR_ONELETTER_ABBR, h)
+		end
+		if m >= 1 then 
+			local MINUTE_ONELETTER_ABBR = MINUTE_ONELETTER_ABBR:gsub(" ", "")
+			str = str .. " " .. format(MINUTE_ONELETTER_ABBR, m)
+		end
+		if s >= 1 then 
+			if tonumber(format("%.1f", s)) == s then
+				s = tostring(s)
+			else
+				s = format("%0.1f", s)
+			end
+			
+			local SECOND_ONELETTER_ABBR = SECOND_ONELETTER_ABBR:gsub("%%d ", "%%s")
+			str = str .. " " .. format(SECOND_ONELETTER_ABBR, s)
+		end
+		
+		return str:trim()
+	end),
+
+	TIME_0ABSENT = Formatter:New(function(value)
+		local s = Formatter.TIME_YDHMS:Format(value)
+		if value == 0 then
+			s = s .. " ("..L["ICONMENU_ABSENT"]..")"
+		end
+		return s
+	end),
+	TIME_0USABLE = Formatter:New(function(value)
+		local s = Formatter.TIME_YDHMS:Format(value)
+		if value == 0 then
+			s = s .. " ("..L["ICONMENU_USABLE"]..")"
+		end
+		return s
+	end),
+
+	BOOL_USABLEUNUSABLE = Formatter:New{[0]=L["TRUE"], [1]=L["FALSE"]},
+	BOOL_USABLEUNUSABLE = Formatter:New{[0]=L["ICONMENU_USABLE"], [1]=L["ICONMENU_UNUSABLE"]},
+	BOOL_PRESENTABSENT = Formatter:New{[0]=L["ICONMENU_PRESENT"], [1]=L["ICONMENU_ABSENT"]},
 }
