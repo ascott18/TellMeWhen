@@ -1647,16 +1647,6 @@
 		</Anchors>
 
 		<Frames>
-			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
-				<Size x="155" y="15"/>
-				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="5" y="5"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad> self:SetText(TMW.L["CONFIGMODE_EXIT"]) </OnLoad>
-					<OnClick>TMW:LockToggle() </OnClick>
-				</Scripts>
-			</Button>
 			<Button name="$parentNeverAgain" parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="155" y="15"/>
 				<Anchors>
@@ -1667,9 +1657,26 @@
 						self:SetText(TMW.L["CONFIGMODE_NEVERSHOW"])
 					</OnLoad>
 					<OnClick>
-						TMW.db.global.ConfigWarning = false
+						TMW.IE.db.global.ConfigWarning = false
 						self:GetParent():Hide()
 					</OnClick>
+					<OnShow>
+						self:SetWidth(155)
+					</OnShow>
+					<OnHide>
+						self:SetWidth(-10)
+					</OnHide>
+				</Scripts>
+			</Button>
+			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="5" y="5"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.NeverAgain" relativePoint="BOTTOMLEFT" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad> self:SetText(TMW.L["CONFIGMODE_EXIT"]) </OnLoad>
+					<OnClick>TMW:LockToggle() </OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -1681,6 +1688,14 @@
 				self.desc:SetWidth(self:GetWidth() - 30)
 				self:SetHeight(self.desc:GetHeight() + 65)
 			</OnLoad>
+			<OnShow>
+				TMW.IE.db.global.ConfigWarningN = TMW.IE.db.global.ConfigWarningN + 1
+				if TMW.IE.db.global.ConfigWarningN > 3 then
+					self.NeverAgain:Show()
+				else
+					self.NeverAgain:Hide()
+				end
+			</OnShow>
 		</Scripts>
 	</Frame>
 

@@ -1621,6 +1621,7 @@ IE.Defaults = {
 		EditorScale		= 0.9,
 		EditorHeight	= 600,
 		ConfigWarning	= true,
+		ConfigWarningN	= 0,
 	},
 }
 
@@ -2146,7 +2147,7 @@ end)
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	-- GLOBALS: TellMeWhen_ConfigWarning
 	if not TMW.Locked then
-		if TMW.db.global.ConfigWarning then
+		if IE.db.global.ConfigWarning then
 			TellMeWhen_ConfigWarning:Show()
 		else
 			TellMeWhen_ConfigWarning:Hide()
