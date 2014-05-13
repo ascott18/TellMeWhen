@@ -254,34 +254,85 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		local originalUnits, exposedUnits = self.originalUnits, self.exposedUnits
 		local hasTankAndAssistRefs = self.hasTankAndAssistRefs
 		local mightHaveWackyUnitRefs = self.mightHaveWackyUnitRefs
-		for k = 1, #exposedUnits do
-			exposedUnits[k] = nil
-		end
 
 		local ConditionObjects = self.ConditionObjects
-		
+
+
+		local old_len = #exposedUnits
+		local exposed_len = 0
+		local changed = false
+
 		for k = 1, #originalUnits do
 			local unit = originalUnits[k]
+
 			local tankOrAssistWasSubbed, wackyUnitWasSubbed
+
+			-- Handles maintank and mainassist units.
 			if hasTankAndAssistRefs then
-				tankOrAssistWasSubbed = UNITS:SubstituteTankAndAssistUnit(unit, exposedUnits, #exposedUnits+1)
+				local old = exposedUnits[exposed_len+1]
+
+				-- Try to sub it out for a real unitID.
+				tankOrAssistWasSubbed = UNITS:SubstituteTankAndAssistUnit(unit, exposedUnits, exposed_len+1)
+
+				if tankOrAssistWasSubbed then
+					changed = changed or old ~= exposedUnits[exposed_len+1]
+					exposed_len = exposed_len + 1
+				end
 			end
+
+			-- Wacky units are the ones that we don't know anything about.
+			-- These include player names and anything else that has no known base unit.
 			if mightHaveWackyUnitRefs then
-				wackyUnitWasSubbed = UNITS:SubstituteGroupedUnit(unit, exposedUnits, #exposedUnits+1)
+				local old = exposedUnits[exposed_len+1]
+
+				-- Try to sub a player name with a unitID.
+				wackyUnitWasSubbed = UNITS:SubstituteGroupedUnit(unit, exposedUnits, exposed_len+1)
+
+				if wackyUnitWasSubbed then
+					changed = changed or old ~= exposedUnits[exposed_len+1]
+					exposed_len = exposed_len + 1
+				end
 			end
+
+
+
 			local hasExistsEvent = UNITS.unitsWithExistsEvent[unit]
 			local baseUnit = UNITS.unitsWithBaseExistsEvent[unit]
 
-			if tankOrAssistWasSubbed == nil
-			and wackyUnitWasSubbed == nil
-			and (not ConditionObjects or not ConditionObjects[k] or not ConditionObjects[k].Failed)
-			and ((baseUnit and UnitExists(baseUnit)) or (not baseUnit and (not hasExistsEvent or UnitExists(unit))))
+			if
+					-- Don't expose the unit if it was already handled above
+					tankOrAssistWasSubbed == nil
+				and wackyUnitWasSubbed == nil
+
+					-- Don't expose the unit if it has conditions and those conditions failed
+				and (not ConditionObjects or not ConditionObjects[k] or not ConditionObjects[k].Failed)
+
+					-- Don't expose the unit if it (doesnt exist and has events that fire when it starts to exist)
+					-- or if (it has a base unit and its base unit doesn't exist -- all base units have exists events)
+				and ((baseUnit and UnitExists(baseUnit)) or (not baseUnit and (not hasExistsEvent or UnitExists(unit))))
+
 			then
-				exposedUnits[#exposedUnits+1] = unit
+				if exposedUnits[exposed_len+1] ~= unit then
+					exposedUnits[exposed_len+1] = unit
+					changed = true
+				end
+				exposed_len = exposed_len + 1
 			end
 		end
+
+		-- Clear out the rest of the table.
+		for k = exposed_len+1, #exposedUnits do
+			exposedUnits[k] = nil
+		end
+
+		-- This should only happen if exposed_len < old_len, i.e. we are now exposing less units
+		if old_len ~= exposed_len then
+			changed = true
+		end
 		
-		TMW:Fire("TMW_UNITSET_UPDATED", self)
+		if changed then
+			TMW:Fire("TMW_UNITSET_UPDATED", self)
+		end
 	end,
 }
 
@@ -482,7 +533,10 @@ function UNITS:SubstituteTankAndAssistUnit(oldunit, table, key, putInvalidUnitsB
 		elseif putInvalidUnitsBack then
 			table[key] = oldunit
 		end
-		return false -- placement of this inside the if block is crucial
+
+		-- signal that the unit was valid but doesn't exist
+		-- placement of this inside the if block is crucial
+		return false 
 	elseif strfind(oldunit, "^mainassist") then
 		local newunit = gsub(oldunit, "mainassist", "raid")
 		local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
@@ -493,8 +547,14 @@ function UNITS:SubstituteTankAndAssistUnit(oldunit, table, key, putInvalidUnitsB
 		elseif putInvalidUnitsBack then
 			table[key] = oldunit
 		end
-		return false -- placement of this inside the if block is crucial
+
+		-- signal that the unit was valid but doesn't exist
+		-- placement of this inside the if block is crucial
+		return false
 	end
+
+	-- nil is returned if the unit was not in the form maintank# or mainassist#
+	return nil
 end
 
 function UNITS:SubstituteGroupedUnit(oldunit, table, key)
@@ -505,6 +565,9 @@ function UNITS:SubstituteGroupedUnit(oldunit, table, key)
 			return true
 		end
 	end
+
+	-- nil is returned if oldunit was not a grouped unit
+	return nil
 end
 
 
