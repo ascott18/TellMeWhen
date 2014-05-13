@@ -604,10 +604,9 @@ end
 -- @param force [boolean|nil] True to force an immediate update of the icon, disregarding both the Update Interval user-setting (and the related once-per-frame constraint) and the value of {{{icon.NextUpdateTime}}}.
 -- This should only be used in exceptional circumstances, like when the source of an icon's attributes and its {{{icon:SetInfo}}} calls are from an event (see the Combat Log icon type for an example of this).
 function Icon.Update(icon, force)
-	local attributes = icon.attributes
 	local time = TMW.time 
 	
-	if attributes.shown and (force or icon.LastUpdate <= time - UPD_INTV) then
+	if icon.attributes.shown and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time
 		
 		local Update_Method = icon.Update_Method
