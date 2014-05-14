@@ -62,6 +62,7 @@
 								TMW:CInit(self, {
 									func = TMW.TEXT.CopyString_DropDown,
 								})
+								self.wrapTooltips = false
 							</OnLoad>
 						</Scripts>
 					</Frame>
