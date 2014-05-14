@@ -2397,6 +2397,7 @@ function IE:CheckLoadedIconIsValid()
 	elseif
 		not CI.group:IsValid()
 		or not CI.icon:IsInRange()
+		or CI.icon:IsNonController()
 	then
 		TMW.IE:Load(nil, false)
 	end
