@@ -221,7 +221,7 @@ local function Buff_OnUpdate(icon, time)
 							 buffName,  iconTexture,  count,  duration,  expirationTime,  id,  v1,  v2,  v3,  v4, useUnit =
 							_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit
 
-							if not print(coroutine.yield(_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit)) then
+							if not icon:YieldInfo(1, _buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit) then
 								return
 							end
 
@@ -274,7 +274,7 @@ local function Buff_OnUpdate(icon, time)
 					end
 
 					if buffName and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id])) then
-						if not print(coroutine.yield(1, buffName,  iconTexture,  count,  duration,  expirationTime, caster, id,  v1,  v2,  v3,  v4, unit)) then
+						if not icon:YieldInfo(1, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit) then
 							return
 						end
 					end
@@ -284,108 +284,59 @@ local function Buff_OnUpdate(icon, time)
 	end
 end
 
-local function OnUpdateMiddle(icon, time)
-	while true do
-		Buff_OnUpdate(icon, time)
-		coroutine.yield(0)
-	end
-end
 
-local function OnUpdateWrapper(icon, time)
-
-	if not icon.Coroutine or coroutine.status(icon.Coroutine) == "dead" then
-		if icon.Coroutine then
-			TMW:Debug("Rebirthed OnUpdate coroutine at %s", time)
-		end
-
-		icon.Coroutine = coroutine.create(OnUpdateMiddle)
-	end
-
-	local hadOne = false
-
-	local lastIconID, broke
-	for ID, iconToSet in ipairs(icon.group) do
-		local result, location, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit = assert(coroutine.resume(icon.Coroutine, icon, time))
-		
-		print(location, buffName, iconToSet)
-
-		if location == 1 then
-			hadOne = true
-		elseif location == 0 and hadOne then
-			broke = 1
-			break
-		end
-
-		lastIconID = ID
-
-		local Units = icon.Units
-		local count
-		if buffName then
-			if icon.ShowTTText then
-				if v1 and v1 > 0 then
-					count = v1
-				elseif v2 and v2 > 0 then
-					count = v2
-				elseif v3 and v3 > 0 then
-					count = v3
-				elseif v4 and v4 > 0 then
-					count = v4
-				else
-					count = 0
-				end
+function Type:HandleData(icon, iconToSet, location, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
+	local Units = icon.Units
+	if buffName then
+		if icon.ShowTTText then
+			if v1 and v1 > 0 then
+				count = v1
+			elseif v2 and v2 > 0 then
+				count = v2
+			elseif v3 and v3 > 0 then
+				count = v3
+			elseif v4 and v4 > 0 then
+				count = v4
+			else
+				count = 0
 			end
-
-			iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-				icon.Alpha,
-				iconTexture,
-				expirationTime - duration, duration,
-				count, count,
-				id,
-				unit, nil,
-				caster, nil
-			)
-
-		elseif not Units[1] and icon.HideIfNoUnits then
-			iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-				0,
-				icon.FirstTexture,
-				0, 0,
-				nil, nil,
-				icon.NameFirst,
-				nil, nil,
-				nil, nil
-			)
-
-		else
-			iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-				icon.UnAlpha,
-				icon.FirstTexture,
-				0, 0,
-				nil, nil,
-				icon.NameFirst,
-				Units[1], nil,
-				nil, nil
-			)
 		end
 
-		if location == 0 then
-			broke = 1
-			break
-		end
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			icon.Alpha,
+			iconTexture,
+			expirationTime - duration, duration,
+			count, count,
+			id,
+			unit, nil,
+			caster, nil
+		)
+
+	elseif not Units[1] and icon.HideIfNoUnits then
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			0,
+			icon.FirstTexture,
+			0, 0,
+			nil, nil,
+			icon.NameFirst,
+			nil, nil,
+			nil, nil
+		)
+
+	else
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			icon.UnAlpha,
+			icon.FirstTexture,
+			0, 0,
+			nil, nil,
+			icon.NameFirst,
+			Units[1], nil,
+			nil, nil
+		)
 	end
-
-	for ID = lastIconID+1, #icon.group do
-		icon.group[ID]:SetInfo("alpha", 0)
-	end
-	if broke then
-		return
-	end
-
-
-	coroutine.resume(icon.Coroutine, nil) -- signal the end
-
-
 end
+
+
 
 
 local aurasWithNoSourceReported = {
@@ -466,7 +417,7 @@ function Type:Setup(icon)
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Buff_OnEvent, icon)
 	end
 
-	icon:SetUpdateFunction(OnUpdateWrapper)
+	icon:SetUpdateFunction(Buff_OnUpdate)
 	icon:Update()
 end
 

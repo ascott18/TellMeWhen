@@ -227,7 +227,11 @@ end
 -- @usage local ics = icon:GetSettings()
 -- print(icon:GetName() .. "'s enabled setting is set to " .. ics.Enabled)
 function Icon.GetSettings(icon)
-	return icon.group:GetSettings().Icons[icon:GetID()]
+	if icon.group.Controlled and icon.group.Controller ~= icon then
+		return icon.group.Controller:GetSettings()
+	else
+		return icon.group:GetSettings().Icons[icon:GetID()]
+	end
 end
 
 --- Gets the GUID of the icon. This may be a session-temporary GUID or a permanant GUID.
@@ -623,13 +627,69 @@ function Icon.Update(icon, force)
 		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
 
 		if iconUpdateNeeded then
-			icon:UpdateFunction(time)
+
+			icon.HANDLED_ONE = false
+			if not icon:IsGroupController() then
+				icon:UpdateFunction(time)
+			else
+				icon.CONTROL_ICON_INDEX = 0
+				icon:UpdateFunction(time)
+
+				for i = icon.CONTROL_ICON_INDEX+1, icon.group.numIcons do
+					icon.group[i]:SetInfo("alpha", 0)
+				end
+			end
+			icon:YieldInfo(0)
+
 			if Update_Method == "manual" then
 				icon:ScheduleNextUpdate()
 			end
 		end
 	end
 end
+
+
+function Icon.YieldInfo(icon, location, ...)
+	if not icon.typeData then
+		error("yielded with no icon type to handle it")
+	end
+
+	if location == 1 then
+		icon.HANDLED_ONE = true
+	elseif location == 0 and icon.HANDLED_ONE then
+		return nil
+	end
+
+	if not icon:IsGroupController() then
+		if icon.typeData.HandleData then -- TODO: create a baseline method that does nothing.
+			print("H1", icon, location, ...)
+			icon.typeData:HandleData(icon, icon, location, ...)
+		end
+		return nil
+	else
+		local nextIconIndex = (icon.CONTROL_ICON_INDEX or 0) + 1
+		if nextIconIndex > icon.group.numIcons then
+			return nil
+		end
+
+		
+		icon.CONTROL_ICON_INDEX = nextIconIndex
+		local destIcon = icon.group[nextIconIndex]
+
+		icon.HANDLED_ONE = true
+		print("H2", icon, location, ...)
+		icon.typeData:HandleData(icon, destIcon, location, ...)
+
+		if location == 0 or not TMW.Locked then
+			return nil
+		end
+
+		return true
+	end
+end
+
+
+
 
 -- [EVENT HANDLER] (no documentation needed)
 function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObject, failed)
@@ -641,6 +701,9 @@ function Icon.TMW_CNDT_OBJ_PASSING_CHANGED(icon, event, ConditionObject, failed)
 	end
 end
 
+function Icon.IsGroupController(icon)
+	return icon.group.Controlled and icon.group.Controller == icon
+end
 
 --- Completely disables and resets an icon to a near-default state.
 -- 
@@ -745,17 +808,6 @@ function Icon.Setup(icon)
 	-- actually run the icon's update function
 	if icon.Enabled or not TMW.Locked then
 	
-		------------ Conditions ------------
-		if icon.typeData.type ~= "" then
-			local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
-			icon.ConditionObject = ConditionObjectConstructor:Construct()
-			
-			if icon.ConditionObject then
-				TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
-				icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
-			end
-		end
-
 		------------ Icon Type ------------
 		typeData:ImplementIntoIcon(icon)
 		
@@ -767,15 +819,31 @@ function Icon.Setup(icon)
 		viewData:Icon_Setup(icon)
 		viewData:ImplementIntoIcon(icon)
 		viewData:Icon_Setup_Post(icon)
-		
-		icon.LastUpdate = 0
-		icon.NextUpdateTime = 0
-		TMW.safecall(typeData.Setup, typeData, icon)
+
+
+		if not icon.group.Controlled or icon:IsGroupController() then
+			------------ Conditions ------------
+			if icon.typeData.type ~= "" then
+				local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
+				icon.ConditionObject = ConditionObjectConstructor:Construct()
+				
+				if icon.ConditionObject then
+					TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+					icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
+				end
+			end
+			
+			icon.LastUpdate = 0
+			icon.NextUpdateTime = 0
+			TMW.safecall(typeData.Setup, typeData, icon)
+		end
 	else
 		icon:DisableIcon()
 	end
 
+
 	icon.NextUpdateTime = 0
+
 
 	if TMW.Locked then	
 		icon:SetInfo("alphaOverride", nil)
@@ -801,13 +869,37 @@ function Icon.Setup(icon)
 
 		icon:EnableMouse(1)
 	end
+
+
+	if icon.group.Controlled and not icon:IsGroupController() then
+		if TMW.Locked then
+			--icon:InheritDataFromIcon(icon.group.Controller)
+		else
+			icon:EnableMouse(0)
+		end
+	end
 	
+
 	icon:CheckUpdateTableRegistration()
 
 	TMW:Fire("TMW_ICON_SETUP_POST", icon)
 	
 	icon.IsSettingUp = nil
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 -- [INTERNAL] (no documentation needed)
 function Icon.SetupAllModulesForIcon(icon, sourceIcon)
