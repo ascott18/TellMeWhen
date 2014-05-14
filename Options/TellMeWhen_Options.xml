@@ -137,8 +137,8 @@
 								local title, text
 								
 								if supplementalData then
-									title = supplementalData.title or TMW.L["ICONMENU_CHOOSENAME2"]
-									text = supplementalData.text or TMW.L["CHOOSENAME_DIALOG"]
+									title = TMW.get(supplementalData.title, self:GetParent()) or TMW.L["ICONMENU_CHOOSENAME2"]
+									text = TMW.get(supplementalData.text, self:GetParent()) or TMW.L["CHOOSENAME_DIALOG"]
 									
 									TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "spell")
 								else
