@@ -213,13 +213,13 @@ local function Buff_OnUpdate(icon, time)
 
 							if not buffName or s*StackSort < _s*StackSort then
 								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-								 buffName,  iconTexture,  count,  duration,  expirationTime,  id,  v1,  v2,  v3,  v4, useUnit, s =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit,   _s
+								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, s =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,   _s
 							end
 						else
 							-- We aren't sorting, and we haven't found anything yet, so record this
-							 buffName,  iconTexture,  count,  duration,  expirationTime,  id,  v1,  v2,  v3,  v4, useUnit =
-							_buffName, _iconTexture, _count, _duration, _expirationTime, _id, _v1, _v2, _v3, _v4, unit
+							 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit =
+							_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit
 
 							-- We don't need to look for anything else. Stop looking.
 							break
