@@ -59,7 +59,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true">
+	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true" hidden="true">
 		<Attributes>
 			<Attribute name="tmw-class" type="string" value="Config_Panel"/>
 		</Attributes>
@@ -109,18 +109,7 @@
 					</Layer>
 				</Layers>
 				<Scripts>
-					<OnLoad>
-						local supplementalData
-						
-						function self:SetLabels(title, text)
-							self.label = title
-							self.__title = title
-							self.__text = text
-							self:GetParent().Header:SetText(title)
-							
-							self:GetScript("OnTextChanged")(self)
-						end
-						
+					<OnLoad>						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.BackgroundText:SetWidth(self:GetWidth())
 						
@@ -129,28 +118,6 @@
 							setting = "Name",
 							doCleanString = true,
 						})
-						
-						TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
-							if frame == self:GetParent() then
-								supplementalData = panelInfo.supplementalData
-								
-								local title, text
-								
-								if supplementalData then
-									title = TMW.get(supplementalData.title, self:GetParent()) or TMW.L["ICONMENU_CHOOSENAME2"]
-									text = TMW.get(supplementalData.text, self:GetParent()) or TMW.L["CHOOSENAME_DIALOG"]
-									
-									TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "spell")
-								else
-									title = TMW.L["ICONMENU_CHOOSENAME2"]
-									text  = TMW.L["CHOOSENAME_DIALOG"]
-									
-									TMW.SUG:EnableEditBox(self, "spell")
-								end
-
-								self:SetLabels(title, text)
-							end
-						end)
 						
 						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
 							if TMW.Types[TMW.CI.ics.Type].checksItems and linkType ~= "item" then
@@ -281,6 +248,28 @@
 				function self:AdjustHeight()
 					--self:SetHeight(11 + self.Name:GetHeight())
 					TMW:AnimateHeightChange(self, 11 + self.Name:GetHeight(), 0.1)
+				end
+						
+				function self:SetLabels(title, text)
+					title = title or TMW.L["ICONMENU_CHOOSENAME2"]
+					text = text or TMW.L["CHOOSENAME_DIALOG"]
+
+					self.Name.label = title
+					self.Name.__title = title
+					self.Name.__text = text
+					self:SetTitle(title)
+					
+					self.Name:GetScript("OnTextChanged")(self.Name)
+				end
+
+				function self:OnSetup(panelInfo, supplementalData)
+					if supplementalData then
+						self:SetLabels(supplementalData.title, supplementalData.text)
+
+						TMW.SUG:EnableEditBox(self.Name, supplementalData.SUGType or "spell")
+					else									
+						TMW.SUG:EnableEditBox(self.Name, "spell")
+					end
 				end
 			</OnLoad>
 		</Scripts>

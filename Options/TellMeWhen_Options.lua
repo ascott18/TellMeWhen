@@ -2176,17 +2176,16 @@ function IE:PositionPanels()
 			frame = IE.AllDisplayPanels[panelInfo.xmlTemplateName]
 			
 			if not frame then
-				local _
-				_, frame = TMW.safecall(CreateFrame, "Frame", panelInfo.xmlTemplateName, parent, panelInfo.xmlTemplateName)
-				--frame:SetScale(0.9)
+				frame = TMW.C.Config_Panel:New("Frame", panelInfo.xmlTemplateName, parent, panelInfo.xmlTemplateName)
+
 				IE.AllDisplayPanels[panelInfo.xmlTemplateName] = frame
 			end
 		elseif panelInfo.panelType == "ConstructorFunc" then
 			frame = IE.AllDisplayPanels[panelInfo] 
 			
 			if not frame then
-				frame = CreateFrame("Frame", panelInfo.frameName, parent, "TellMeWhen_OptionsModuleContainer")
-				--frame:SetScale(0.9)
+				frame = TMW.C.Config_Panel:New("Frame", panelInfo.frameName, parent, "TellMeWhen_OptionsModuleContainer")
+
 				IE.AllDisplayPanels[panelInfo] = frame
 				TMW.safecall(panelInfo.func, frame)
 			end
@@ -2200,12 +2199,10 @@ function IE:PositionPanels()
 			end
 			parent[#parent + 1] = frame
 			
-			local hue = 1/1.5
-			
-			frame.Background:SetTexture(hue, hue, hue) -- HUEHUEHUE
-			frame.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
 			
 			frame:Show()
+
+			frame:Setup(panelInfo)
 			
 			TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
 		end	
@@ -2487,8 +2484,6 @@ end
 ---------- Settings ----------
 
 
-TMW:NewClass("Config_Panel", "Frame"){
-}
 
 TMW:NewClass("Config_Frame", "Frame"){
 	-- Constructor
@@ -2591,6 +2586,58 @@ TMW:NewClass("Config_Frame", "Frame"){
 	ReloadSetting = TMW.NULLFUNC
 }
 
+TMW:NewClass("Config_Panel", "Config_Frame"){
+	SetHeight_base = TMW.C.Config_Panel.SetHeight,
+}{
+	OnNewInstance_Frame = TMW.NULLFUNC,
+	CheckDisabled = TMW.NULLFUNC,
+
+	OnNewInstance_Panel = function(self)
+		local hue = 2/3
+		
+		self.Background:SetTexture(hue, hue, hue) -- HUEHUEHUE
+		self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
+
+		self.height = self:GetHeight()
+	end,
+
+	SetTitle = function(self, text)
+		self.Header:SetText(text)
+	end,
+
+	Setup = function(self, panelInfo)
+		self.panelInfo = panelInfo
+		if panelInfo then
+			self.supplementalData = panelInfo.supplementalData
+		end
+
+
+		get(self.OnSetup, self, panelInfo, self.supplementalData) 
+
+		if type(self.supplementalData) == "table" then
+			self.data = self.supplementalData
+			self:CheckInteractionStates()
+
+			-- Cheater! (We arent getting anything)
+			-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+			get(self.supplementalData.OnSetup, self, panelInfo, self.supplementalData) 
+		end
+	end,
+
+	OnHide = function(self)
+		self:SetHeight_base(-11)
+	end,
+	OnShow = function(self)
+		self:SetHeight_base(self.height)
+	end,
+
+	SetHeight = function(self, height)
+		self.height = height
+		if self:IsShown() then
+			self:SetHeight_base(height)
+		end
+	end,
+}
 
 TMW:NewClass("Config_DropDownMenu", "Config_Frame"){
 	noResize = 1,
