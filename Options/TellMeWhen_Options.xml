@@ -1404,6 +1404,7 @@
 						TMW:CInit(self, {
 							func = TMW.IE.ImportExport_DropDown,
 						})
+						self:Hide()
 					</OnLoad>
 					<OnKeyDown>
 						if key == "C" and (IsControlKeyDown()) then
