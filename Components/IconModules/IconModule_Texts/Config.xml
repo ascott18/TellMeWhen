@@ -59,9 +59,9 @@
 					<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
 						<Scripts>
 							<OnLoad>
-								self.wrapTooltips = 1
-								
-								self.initialize = TMW.TEXT.CopyString_DropDown
+								TMW:CInit(self, {
+									func = TMW.TEXT.CopyString_DropDown,
+								})
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -238,20 +238,21 @@
 					-->
 					<Frame name="$parentPickLayout" inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
 						<Anchors>
-							<Anchor point="TOPLEFT" x="-8" y="1"/>
-							<Anchor point="RIGHT" relativeTo="$parentLayoutSettings"  relativePoint="LEFT" x="10" />
+							<Anchor point="TOPLEFT" x="9" y="1"/>
+							<Anchor point="RIGHT" relativeTo="$parentLayoutSettings"  relativePoint="LEFT" x="-7" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								UIDropDownMenu_SetText(self, TMW.L["TEXTLAYOUTS_CHOOSELAYOUT"])
-								self.initialize = TMW.TEXT.Layout_DropDown
-								
+								TMW:CInit(self, {
+									title = TMW.L["TEXTLAYOUTS_CHOOSELAYOUT"],
+									tooltip = TMW.L["TEXTLAYOUTS_CHOOSELAYOUT_DESC"],
+									func = TMW.TEXT.Layout_DropDown,
+								})
+
 								-- Save settings before changing the layout (most notably, save the text for the text displays)
 								self.Button:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
 								end)
-
-								TMW:TT(self, "TEXTLAYOUTS_CHOOSELAYOUT", "TEXTLAYOUTS_CHOOSELAYOUT_DESC")
 							</OnLoad>
 						</Scripts>
 					</Frame>

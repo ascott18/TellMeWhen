@@ -4,23 +4,21 @@
 		<Size y="30"/>
 		<Frames>
 			<Frame name="$parentIcon" parentKey="icon" inherits="TMW_IconDropDownMenuTemplate">
-				<Size y="30"/>
 				<Anchors>
-					<Anchor point="LEFT" x="13"/>
+					<Anchor point="LEFT" x="7"/>
+					<Anchor point="RIGHT" x="-29"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self:RegisterForDrag("LeftButton", "RightButton")
-						
-						self.SetGUID = TMW.SetUIDropdownGUID
-						self.SetIcon = TMW.SetUIDropdownIcon
-				
-						self.wrapTooltips = 1
-						self.initialize = TMW.ME.IconMenu
-						self.Button:SetFrameLevel(self:GetFrameLevel()+1)
-						self.previewSize = 21
-						UIDropDownMenu_SetWidth(self, self:GetParent():GetParent():GetWidth() - 25, 0)
-						TMW:TT(self, "CHOOSEICON", "CHOOSEICON_DESC")
+
+						TMW:CInit(self, {
+							title = TMW.L["CHOOSEICON"],
+							tooltip = TMW.L["CHOOSEICON_DESC"],
+							func = TMW.ME.IconMenu,
+						})
+
+						self:SetPreviewSize(21)
 					</OnLoad>
 					<OnDragStart>
 						TMW.ME.draggingFrame = self
@@ -65,7 +63,7 @@
 			
 			<Button name="$parentDelete" parentKey="delete" inherits="UIPanelCloseButton">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-16" y="2"/>
+					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-1" y="2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>

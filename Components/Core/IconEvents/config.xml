@@ -88,8 +88,9 @@
 			<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
 				<Scripts>
 					<OnLoad>
-						self.wrapTooltips = 1
-						self.initialize = TMW.EVENTS.ChangeEvent_Dropdown
+						TMW:CInit(self, {
+							func = TMW.EVENTS.ChangeEvent_Dropdown,
+						})
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -636,27 +637,21 @@
 							<Layer level="OVERLAY">
 								<FontString name="$parentValueLabel" inherits="GameFontHighlight" parentKey="ValueLabel" justifyH="RIGHT">
 									<Anchors>
-										<Anchor point="RIGHT" relativePoint="LEFT" x="12" y="3"/>
+										<Anchor point="RIGHT" relativePoint="LEFT" x="-5" y="3"/>
 									</Anchors>
 								</FontString>
 							</Layer>
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								self.wrapTooltips = 1
-								self.Button:SetMotionScriptsWhileDisabled(false)
-								UIDropDownMenu_SetWidth(self, 47)
-								self.Text:SetFontObject(GameFontHighlightLarge)
-								self.initialize = TMW.EVENTS.OperatorMenu_DropDown
+								TMW:CInit(self, {
+									--title = TMW.L[""],
+									--tooltip = TMW.L[""],
+									func = TMW.EVENTS.OperatorMenu_DropDown,
+								})
 
-								function self:Disable()
-									self.Button:Disable()
-									self:SetAlpha(0.4)
-								end
-								function self:Enable()
-									self.Button:Enable()
-									self:SetAlpha(1)
-								end
+								self:SetWidth(63)
+								self.Text:SetFontObject(GameFontHighlightLarge)
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -664,7 +659,7 @@
 					<EditBox name="$parentValue" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="Value" autoFocus="false">
 						<Size x="45" y="18"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentOperator" relativePoint="RIGHT" x="-5" y="4"/>
+							<Anchor point="LEFT" relativeTo="$parentOperator" relativePoint="RIGHT" x="12" y="4"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">

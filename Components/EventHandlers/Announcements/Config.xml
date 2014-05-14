@@ -72,7 +72,8 @@
 				<Frames>
 					<Frame name="$parentLocation" inherits="TMW_DropDownMenuTemplate" parentKey="Location">
 						<Anchors>
-							<Anchor point="LEFT" x="-0" />
+							<Anchor point="LEFT" x="13" />
+							<Anchor point="RIGHT" x="-17" />
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -85,11 +86,13 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
+								TMW:CInit(self, {
+									title = TMW.L["ANN_SUB_CHANNEL"],
+									--tooltip = TMW.L[""],
+									func = TMW.EVENTS:GetEventHandler("Announcements").Location_DropDown,
+								})
+
 								self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
-								UIDropDownMenu_SetWidth(self, 135)
-								
-								local Announcements = TMW.EVENTS:GetEventHandler("Announcements")
-								self.initialize = Announcements.Location_DropDown
 							</OnLoad>
 						</Scripts>
 					</Frame>

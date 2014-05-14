@@ -1244,21 +1244,28 @@
 		</HighlightTexture>
 	</Button>
 	<Frame name="TMW_DropDownMenuTemplate" enableMouse="true" virtual="true">
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_DropDownMenu"/>
+		</Attributes>
+
 		<Size x="40" y="32"/>
-		<HitRectInsets left="15" right="15" top="1" bottom="7" />
+
+		<HitRectInsets left="0" right="0" top="1" bottom="7" />
+
 		<Layers>
 			<Layer level="ARTWORK">
 				<Texture name="$parentLeft" parentKey="Left" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
 					<Size x="25" y="61.5"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" y="17"/>
+						<Anchor point="TOP" y="17"/>
+						<Anchor point="LEFT" x="-17" />
 					</Anchors>
 					<TexCoords left="0" right="0.1953125" top="0" bottom="1"/>
 				</Texture>
 				<Texture name="$parentRight" parentKey="Right" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
 					<Size x="25" y="61.5"/>
 					<Anchors>
-						<Anchor point="TOPRIGHT" y="17"/>
+						<Anchor point="TOPRIGHT" x="17" y="17"/>
 					</Anchors>
 					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
 				</Texture>
@@ -1315,11 +1322,16 @@
 		</Scripts>
 	</Frame>
 	<Frame name="TMW_IconDropDownMenuTemplate" inherits="TMW_DropDownMenuTemplate" virtual="true">
+
+		<Attributes>
+			<Attribute name="tmw-class" type="string" value="Config_DropDownMenu_Icon"/>
+		</Attributes>
+
 		<Frames>
 			<Button parentKey="IconPreview" enableMouse="true">
 				<Size x="18" y="18"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parent" relativePoint="LEFT" x="16.5" y="3"/>
+					<Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT" x="0" y="3"/>
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
@@ -1329,13 +1341,6 @@
 					</Layer>
 				</Layers>
 				<Scripts>
-					<OnLoad>
-						self.SetIcon = TMW.SetIconPreviewIcon
-					</OnLoad>
-					<OnShow>
-						local previewSize = self:GetParent().previewSize or 18
-						self:SetSize(previewSize, previewSize)
-					</OnShow>
 					<OnMouseUp>
 						if TMW.IE then
 							if button == "RightButton" then
@@ -1351,12 +1356,6 @@
 				<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 			</Button>
 		</Frames>
-		<Scripts>
-			<OnLoad>
-				self.SetGUID = TMW.SetUIDropdownGUID
-				self.SetIcon = TMW.SetUIDropdownIcon
-			</OnLoad>
-		</Scripts>
 	</Frame>
 
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
@@ -1402,11 +1401,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.wrapTooltips = 1
-						self:Hide()
-						UIDropDownMenu_SetWidth(self, 1)
-						self.initialize = TMW.IE.ImportExport_DropDown
-						--self.displayMode = "MENU"
+						TMW:CInit(self, {
+							func = TMW.IE.ImportExport_DropDown,
+						})
 					</OnLoad>
 					<OnKeyDown>
 						if key == "C" and (IsControlKeyDown()) then
@@ -2336,37 +2333,32 @@
 				
 					<Frame name="$parentType" inherits="TMW_DropDownMenuTemplate" parentKey="Type">
 						<Anchors>
-							<Anchor point="TOP" y="-4"/>
-							<Anchor point="LEFT" relativeTo="$parentPanelsLeft" x="-10" />
-							<Anchor point="RIGHT" relativeTo="$parentPanelsLeft" x="10" />
+							<Anchor point="TOP" y="-6"/>
+							<Anchor point="LEFT" relativeTo="$parentPanelsLeft" x="7" />
+							<Anchor point="RIGHT" relativeTo="$parentPanelsLeft" x="-7" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.wrapTooltips = 1
-								self.initialize = TMW.IE.Type_DropDown
-								
-								UIDropDownMenu_SetWidth(self, 190)
-								UIDropDownMenu_SetText(self, TMW.L["ICONMENU_TYPE"])
+								TMW:CInit(self, {
+									title = function()
+										return TMW.Types[TMW.CI.ics.Type].name
+									end,
+									tooltip = function()
+										return TMW.Types[TMW.CI.ics.Type].desc
+									end,
+									func = TMW.IE.Type_DropDown,
+								})
 
 								self.Button:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
 								end)
-
-								local title = function()
-									return TMW.Types[TMW.CI.ics.Type].name
-								end
-								local text = function()
-									return TMW.Types[TMW.CI.ics.Type].desc
-								end
-
-								TMW:TT(self, title, text, 1, 1)
 							</OnLoad>
 						</Scripts>
 					</Frame>
 					
 					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="2" y="2"/>
+							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="19" y="3"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>

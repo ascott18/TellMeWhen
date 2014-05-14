@@ -163,36 +163,39 @@
 		<Frames>
 			<Frame name="$parentType" parentKey="Type" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="9" y="-14.5"/>
+					<Anchor point="TOPLEFT" x="26" y="-14.5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 160)
-						self.initialize = TMW.CNDT.TypeMenu_DropDown
+						TMW:CInit(self, {
+							--title = TMW.L[""],
+							--tooltip = TMW.L[""],
+							func = TMW.CNDT.TypeMenu_DropDown,
+						})
+
+						self:SetWidth(176)
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
+			<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate" hidden="true">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-10"/>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="6"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.SetGUID = TMW.SetUIDropdownGUID
-						self.SetIcon = TMW.SetUIDropdownIcon
+						TMW:CInit(self, {
+							title = TMW.L["CHOOSEICON"],
+							func = TMW.CNDT.IconMenu_DropDown,
+						})
 
-						self.wrapTooltips = 1
-						self:Hide()
-						UIDropDownMenu_SetWidth(self, 152)
-						self.initialize = TMW.CNDT.IconMenu_DropDown
+						-- Width is set in the TMW_CNDT_GROUP_DRAWGROUP handler for this frame.
 					</OnLoad>
 				</Scripts>
 			</Frame>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 				<Size x="120" y="15"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-5" y="3"/>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="12" y="3"/>
 				</Anchors>
 				
 				<Scripts>
@@ -233,14 +236,18 @@
 			</EditBox>
 			<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="-11" y="-3"/>
+					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="6" y="-3"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.wrapTooltips = 1
+						TMW:CInit(self, {
+							--title = TMW.L[""],
+							--tooltip = TMW.L[""],
+							func = TMW.CNDT.OperatorMenu_DropDown,
+						})
+
 						self.Text:SetFontObject(GameFontHighlightLarge)
-						UIDropDownMenu_SetWidth(self, 50)
-						self.initialize = TMW.CNDT.OperatorMenu_DropDown
+						self:SetWidth(66)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -282,7 +289,7 @@
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="23" y="2"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="6" y="2"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -349,7 +356,7 @@
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
 				<Size x="1" y="1"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="-9" y="8"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="8" y="8"/>
 				</Anchors>
 				<Frames>
 					<Button name="$parentBlood1" parentKey="blood1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
@@ -628,12 +635,12 @@
 				</FontString>
 				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="-8" y="-0.5"/>
+						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="9" y="-0.5"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="-10" y="3"/>
+						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="7" y="3"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextUnitDef" parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
@@ -656,7 +663,7 @@
 				</FontString>
 				<FontString name="$parentUnknown" parentKey="Unknown" inherits="GameFontNormal" >
 					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="-5"/>
+						<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="12"/>
 						<Anchor point="RIGHT" x="-5" />
 						<Anchor point="TOP" y="-5"/>
 						<Anchor point="BOTTOM" y="5"/>

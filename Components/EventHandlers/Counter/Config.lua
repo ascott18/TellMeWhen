@@ -48,7 +48,7 @@ local operations = {
 function Counter:LoadSettingsForEventID(eventID)
 	local eventSettings = EVENTS:GetEventSettings(eventID)
 
-	TMW:SetUIDropdownText(self.ConfigContainer.Operation, eventSettings.CounterOperation, operations)
+	self.ConfigContainer.Operation:SetUIDropdownText(eventSettings.CounterOperation, operations)
 	
 	self.ConfigContainer.Header:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_HEADER"])
 
@@ -90,7 +90,7 @@ function Counter:OperationMenu_DropDown()
 end
 
 function Counter:OperationMenu_DropDown_OnClick(frame)
-	TMW:SetUIDropdownText(frame, self.value, operations)
+	frame:SetUIDropdownText(self.value, operations)
 	
 	local eventSettings = EVENTS:GetEventSettings()
 	eventSettings.CounterOperation = self.value

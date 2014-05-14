@@ -384,7 +384,7 @@ function EVENTS:LoadEventSettings()
 		EventSettingsContainer.Operator.ValueLabel:SetText(eventData.valueName)
 		EventSettingsContainer.Value.ValueLabel:SetText(eventData.valueSuffix)
 
-		local v = TMW:SetUIDropdownText(EventSettingsContainer.Operator, eventSettings.Operator, TMW.operators)
+		local v = EventSettingsContainer.Operator:SetUIDropdownText(eventSettings.Operator, TMW.operators)
 		if v then
 			TMW:TT(EventSettingsContainer.Operator, v.tooltipText, nil, 1)
 		end
@@ -662,7 +662,7 @@ function EVENTS.OperatorMenu_DropDown(frame)
 	end
 end
 function EVENTS.OperatorMenu_DropDown_OnClick(button, frame)
-	TMW:SetUIDropdownText(frame, button.value)
+	frame:SetUIDropdownText(button.value)
 
 	EVENTS:GetEventSettings().Operator = button.value
 	TMW:TT(frame, button.tooltipTitle, nil, 1)

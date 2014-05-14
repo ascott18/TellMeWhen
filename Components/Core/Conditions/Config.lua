@@ -441,7 +441,7 @@ function CNDT:OperatorMenu_DropDown()
 end
 
 function CNDT:OperatorMenu_DropDown_OnClick(frame)
-	TMW:SetUIDropdownText(frame, self.value)
+	frame:SetUIDropdownText(self.value)
 	TMW:TT(frame, self.tooltipTitle, nil, 1)
 	
 	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
@@ -684,7 +684,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		CndtGroup.TextOperator:SetText(L["CONDITIONPANEL_OPERATOR"])
 		CndtGroup.Operator:Show()
 
-		local v = TMW:SetUIDropdownText(CndtGroup.Operator, conditionSettings.Operator, TMW.operators)
+		local v = CndtGroup.Operator:SetUIDropdownText(conditionSettings.Operator, TMW.operators)
 		if v then
 			TMW:TT(CndtGroup.Operator, v.tooltipText, nil, 1)
 		end
@@ -693,9 +693,22 @@ end)
 
 -- Icon
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
-	local GUID = conditionSettings.Icon
 
-	CndtGroup.Icon:SetGUID(GUID)
+	if conditionData and conditionData.isicon then
+		local GUID = conditionSettings.Icon
+		CndtGroup.Icon:SetGUID(GUID)
+
+		CndtGroup.TextIcon:SetText(L["ICONTOCHECK"])
+		CndtGroup.Icon:Show()
+		if conditionData.nooperator then
+			CndtGroup.Icon:SetWidth(196)
+		else
+			CndtGroup.Icon:SetWidth(134)
+		end
+	else
+		CndtGroup.TextIcon:SetText(nil)
+		CndtGroup.Icon:Hide()
+	end
 end)
 
 -- Runes

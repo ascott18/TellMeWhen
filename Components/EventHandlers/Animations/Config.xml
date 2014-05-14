@@ -275,7 +275,8 @@
 
 					<Frame name="$parentAnchorTo" parentKey="AnchorTo" inherits="TMW_DropDownMenuTemplate">
 						<Anchors>
-							<Anchor point="LEFT" x="-8" />
+							<Anchor point="LEFT" x="9" />
+							<Anchor point="RIGHT" x="-9" />
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -290,14 +291,13 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
+								TMW:CInit(self, {
+									title = TMW.L["ANCHORTO"],
+									--tooltip = TMW.L[""],
+									func = TMW.EVENTS:GetEventHandler("Animations").AnchorTo_Dropdown,
+								})
 								self.text:SetText(TMW.L["ANCHORTO"])
 							
-								self.wrapTooltips = 1
-								self:Hide()
-								
-								UIDropDownMenu_SetWidth(self, 151)
-								
-								self.initialize = TMW.EVENTS:GetEventHandler("Animations").AnchorTo_Dropdown
 							</OnLoad>
 						</Scripts>
 					</Frame>

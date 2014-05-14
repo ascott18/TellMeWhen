@@ -54,7 +54,7 @@
 			</EditBox>
 			<Frame name="$parentOperation" parentKey="Operation" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentCounter" relativePoint="RIGHT" x="-11" y="-3"/>
+					<Anchor point="LEFT" relativeTo="$parentCounter" relativePoint="RIGHT" x="6" y="-3"/>
 				</Anchors>
 
 				<Layers>
@@ -69,14 +69,16 @@
 
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self, {
+							title = TMW.L["EVENTS_SETTINGS_COUNTER_OP"],
+							tooltip = TMW.L["EVENTS_SETTINGS_COUNTER_OP_DESC"],
+							
+							func = TMW.EVENTS:GetEventHandler("Counter").OperationMenu_DropDown,
+						})
+
 						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_OP"])
-						TMW:TT(self, "EVENTS_SETTINGS_COUNTER_OP", "EVENTS_SETTINGS_COUNTER_OP_DESC")
 
-						local Counter = TMW.EVENTS:GetEventHandler("Counter")
-
-						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 80)
-						self.initialize = Counter.OperationMenu_DropDown
+						self:SetWidth(96)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -89,7 +91,7 @@
  				</Attributes>
 
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentOperation" relativePoint="RIGHT" x="-9" y="3"/>
+					<Anchor point="LEFT" relativeTo="$parentOperation" relativePoint="RIGHT" x="8" y="3"/>
 				</Anchors>
 
 				<Layers>

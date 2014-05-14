@@ -25,8 +25,9 @@
 			<Frame name="$parentDropdown" inherits="TMW_DropDownMenuTemplate" parentKey="Dropdown">
 				<Scripts>
 					<OnLoad>
-						self.wrapTooltips = 1
-						self.initialize = TMW.IconDragger.DropDownFunc
+						TMW:CInit(self, {
+							func = TMW.IconDragger.DropDownFunc,
+						})
 					</OnLoad>
 				</Scripts>
 			</Frame>

@@ -6,27 +6,27 @@
 		
 			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="-10" y="-3"/>
+					<Anchor point="TOPLEFT" x="5" y="-3"/>
+					<Anchor point="RIGHT" x="-5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 249)
-						self.initialize = TMW.Types.cleu.CONFIG.EventMenu
-						UIDropDownMenu_SetText(self, TMW.L["CLEU_EVENTS"])
+						TMW:CInit(self, {
+							title = TMW.L["CLEU_EVENTS"],
+							tooltip = TMW.L["CLEU_EVENTS_DESC"],
+							func = TMW.Types.cleu.CONFIG.EventMenu,
+						})
+
 						self.Button:HookScript("OnClick", function(self)
 							TMW.IE:SaveSettings()
 						end)
-
-						TMW:TT(self, "CLEU_EVENTS", "CLEU_EVENTS_DESC")
 					</OnLoad>
 				</Scripts>
 			</Frame>
 			
 			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentCLEUEvents" relativePoint="BOTTOM" y="3"/>
-					<Anchor point="LEFT" x="5" />
+					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" y="3"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -106,20 +106,21 @@
 			</EditBox>
 			<Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMRIGHT" x="-15" y="-11"/>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMRIGHT" x="2" y="-11"/>
+					<Anchor point="RIGHT" x="-5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 100)
-						self.initialize = TMW.Types.cleu.CONFIG.FlagsMenu
+						TMW:CInit(self, {
+							title = TMW.L["CLEU_FLAGS_SOURCE"],
+							tooltip = TMW.L["CLEU_FLAGS_DESC"],
+							func = TMW.Types.cleu.CONFIG.FlagsMenu,
+						})
+
 						self.flagSet = "SourceFlags" -- the setting name, basically
-						UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS_SOURCE"])
 						self.Button:HookScript("OnClick", function(self)
 							TMW.IE:SaveSettings()
 						end)
-
-						TMW:TT(self, "CLEU_FLAGS_SOURCE", "CLEU_FLAGS_DESC")
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -158,20 +159,21 @@
 			</EditBox>
 			<Frame name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate" parentKey="DestFlags">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentDestUnit" relativePoint="BOTTOMRIGHT" x="-15" y="-11"/>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentDestUnit" relativePoint="BOTTOMRIGHT" x="2" y="-11"/>
+					<Anchor point="RIGHT" x="-5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.wrapTooltips = 1
-						UIDropDownMenu_SetWidth(self, 100)
-						self.initialize = TMW.Types.cleu.CONFIG.FlagsMenu
+						TMW:CInit(self, {
+							title = TMW.L["CLEU_FLAGS_DEST"],
+							tooltip = TMW.L["CLEU_FLAGS_DESC"],
+							func = TMW.Types.cleu.CONFIG.FlagsMenu,
+						})
+
 						self.flagSet = "DestFlags" -- the setting name, basically
-						UIDropDownMenu_SetText(self, TMW.L["CLEU_FLAGS_DEST"])
 						self.Button:HookScript("OnClick", function(self)
 							TMW.IE:SaveSettings()
 						end)
-
-						TMW:TT(self, "CLEU_FLAGS_DEST", "CLEU_FLAGS_DESC")
 					</OnLoad>
 				</Scripts>
 			</Frame>
