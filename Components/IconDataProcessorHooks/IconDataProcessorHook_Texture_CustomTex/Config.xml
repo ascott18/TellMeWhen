@@ -14,6 +14,7 @@
 						self.BackgroundText:SetWidth(self:GetWidth())
 						self.label = TMW.L["ICONMENU_CUSTOMTEX"]
 						
+						self.__ttMinWidth = 300
 						TMW:CInit(self, {
 							setting = "CustomTex",
 							title = TMW.L["ICONMENU_CUSTOMTEX"],

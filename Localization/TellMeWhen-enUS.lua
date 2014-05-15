@@ -381,17 +381,25 @@ L["ICONMENU_CASTS"] = "Spell Casts"
 L["ICONMENU_DRS"] = "Diminishing Returns"
 
 L["ICONMENU_CUSTOMTEX"] = "Custom Texture"
-L["ICONMENU_CUSTOMTEX_DESC"] = [[If you want to override the texture shown by this icon, enter the Name or ID of the spell that has the texture that you want to use.
+L["ICONMENU_CUSTOMTEX_DESC"] = [[You may override the texture shown by this icon on the following ways:
 
+|cff00d1ffSpell Texture|r
+Enter the Name or ID of the spell that has the texture that you want to use.
+
+|cff00d1ffOther Blizzard Textures|r
 You may also enter a texture path, such as 'Interface/Icons/spell_nature_healingtouch', or just 'spell_nature_healingtouch' if the path is 'Interface/Icons'
 
+|cff00d1ffBlank|r
 Entering "none" or "blank" will cause the icon to show no texture.
 
-You can view a list of dynamic textures by typing "$" (dollar sign; ALT-36) in this box.
+|cff00d1ffItem Slot|r
+You can view a list of dynamic textures by typing "$" (dollar sign; ALT-036) in this box.
 
-You can use your own textures too as long as they are placed in WoW's directory (set this field to the path to the texture relative to WoW's root folder), are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, 128, etc)]]
+|cff00d1ffCustom|r
+You can use your own textures too as long as they are placed in WoW's directory, are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, etc). Set this field to the path to the texture relative to WoW's root folder.]]
 
-L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"] = [[If this texture is showing as solid green, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist.]]
+L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"] = [[|cff00d1ffTroubleshooting|r
+|TNULL:0|t If this icon's texture is showing as solid green, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist.]]
 
 
 L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"

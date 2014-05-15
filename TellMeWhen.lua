@@ -1625,6 +1625,9 @@ local function TTOnEnter(self)
 	and (self.__title or self.__text)
 	then
 		TMW:TT_Anchor(self)
+		if self.__ttMinWidth then
+			GameTooltip:SetMinimumWidth(self.__ttMinWidth)
+		end
 		GameTooltip:AddLine(TMW.get(self.__title, self), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 		GameTooltip:AddLine(TMW.get(self.__text, self), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
 		GameTooltip:Show()
