@@ -103,7 +103,7 @@ function IconDragger:CompleteDrag(script, icon)
 
 	if IconDragger.IsDragging then
 
-		if type(icon) == "table" and icon.IsIcon then -- if the frame that got the drag is an icon, set the destination stuff.
+		if type(icon) == "table" and icon.IsIcon and not icon:IsControlled() then -- if the frame that got the drag is an icon, set the destination stuff.
 
 			IconDragger.desticon = icon
 			IconDragger.destFrame = nil

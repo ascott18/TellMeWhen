@@ -2377,7 +2377,7 @@
 										return TMW.CI.icon.ID ~= 1
 									end,
 									OnClick = function(self)
-										TMW:Update()
+										TMW.CI.group:Setup()
 										TMW.IE:Load(1)
 									end,
 								})
