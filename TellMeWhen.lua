@@ -3293,8 +3293,7 @@ end
 
 -- TMW:Update() sets up all groups, icons, and anything else.
 function TMW:Update()
-	local lockChanged = TMW.Locked ~= Locked
-	if (Locked ~= nil and not lockChanged) or InCombatLockdown() then
+	if InCombatLockdown() then
 		TMW:UpdateViaCoroutine()
 	else
 		TMW:UpdateNormally()
