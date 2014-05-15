@@ -41,6 +41,7 @@ Type.menuIcon = GetSpellTexture(19263)
 Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.unitType = "unitid"
+Type.canControlGroup = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
@@ -81,7 +82,11 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings",
 	})
 end)
 
-Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings", {
+	hidden = function(self)
+		return TMW.CI.icon:IsGroupController()
+	end,
+})
 
 local ManualIcons = {}
 local ManualIconsManager = TMW.Classes.UpdateTableManager:New()
@@ -462,6 +467,77 @@ local function UnitCooldown_OnUpdate(icon, time)
 	end
 end
 
+local function UnitCooldown_OnUpdate_Controller(icon, time)
+	local Alpha, UnAlpha, NameArray, OnlySeen, Durations, Units =
+	icon.Alpha, icon.UnAlpha, icon.NameArray, icon.OnlySeen, icon.Durations, icon.Units
+	
+	local NAL = #NameArray
+	
+	for u = 1, #Units do
+		local unit = Units[u]
+		local GUID = UnitGUID(unit)
+		local cooldowns = GUID and rawget(Cooldowns, GUID)
+
+		if u == 1 and GUID and not cooldowns and not OnlySeen then
+			-- If this is the first unit, use a blank cooldowns table for it if it doesn't exist
+			-- so that we can still find the first usable spell.
+			cooldowns = BLANKTABLE
+		end
+
+		if cooldowns then
+			for i = 1, NAL do
+				local iName = NameArray[i]
+				if not isNumber[iName] then
+					-- spell name keys have values that are the spellid of the name,
+					-- we need the spellid for the texture (thats why i did it like this)
+					iName = cooldowns[iName] or iName
+				end
+				local start
+				if OnlySeen then
+					start = cooldowns[iName]
+				else
+					start = cooldowns[iName] or 0
+				end
+
+				if start then
+					local duration = Durations[i]
+					local tms = time - start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
+					local d = (tms > duration) and 0 or duration - tms -- real duration remaining on the cooldown
+
+
+					if d ~= 0 then
+						if UnAlpha > 0 and not icon:YieldInfo(true, iName, start, duration, unit, GUID, UnAlpha) then
+							return
+						end
+
+					else
+						if Alpha > 0 and not icon:YieldInfo(true, iName, 0, 0, unit, GUID, Alpha) then
+							return
+						end
+					end
+				end
+			end
+		end
+	end
+
+	icon:YieldInfo(false)
+end
+function Type:HandleInfo(icon, iconToSet, name, start, duration, unit, GUID, alpha)
+	print("H", name, start, duration, unit, GUID, alpha)
+	if name then
+		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
+			alpha,
+			SpellTextures[name] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			start, duration,
+			name,
+			unit, GUID
+		)
+	else
+		iconToSet:SetInfo("alpha", 0)
+	end
+
+end
+
 
 function Type:Setup(icon)
 	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
@@ -486,7 +562,13 @@ function Type:Setup(icon)
 
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
-	icon:SetUpdateFunction(UnitCooldown_OnUpdate)
+
+	if icon:IsGroupController() then
+		icon:SetUpdateFunction(UnitCooldown_OnUpdate_Controller)
+	else
+		icon:SetUpdateFunction(UnitCooldown_OnUpdate)
+	end
+
 	icon:Update()
 end
 
