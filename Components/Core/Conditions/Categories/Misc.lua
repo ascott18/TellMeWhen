@@ -64,7 +64,7 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 
 		TMW:QueueValidityCheck(icon, c.Icon, L["VALIDITY_CONDITION_DESC"])
 
-		local str = [[( c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update())]]
+		local str = [[( c.Icon and c.Icon.attributes.shown and not c.Icon:Update())]]
 		if c.Level == 0 then
 			str = str .. [[and c.Icon.attributes.realAlpha > 0]]
 		else
@@ -114,7 +114,7 @@ ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {
 
 		RegisterShownHiddenTimerCallback()
 		
-		local str = [[c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update() and c.Icon.attributes.realAlpha > 0 and time - (c.Icon.__CNDT__ICONSHOWNTME or 0) c.Operator c.Level]]
+		local str = [[c.Icon and c.Icon.attributes.shown and not c.Icon:Update() and c.Icon.attributes.realAlpha > 0 and time - (c.Icon.__CNDT__ICONSHOWNTME or 0) c.Operator c.Level]]
 		return str
 	end,
 })
@@ -137,7 +137,7 @@ ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
 
 		RegisterShownHiddenTimerCallback()
 		
-		local str = [[c.Icon and c.Icon.attributes.shown and c.Icon.UpdateFunction and not c.Icon:Update() and c.Icon.attributes.realAlpha == 0 and time - (c.Icon.__CNDT__ICONHIDDENTME or 0) c.Operator c.Level]]
+		local str = [[c.Icon and c.Icon.attributes.shown and not c.Icon:Update() and c.Icon.attributes.realAlpha == 0 and time - (c.Icon.__CNDT__ICONHIDDENTME or 0) c.Operator c.Level]]
 		return str
 	end,
 })
