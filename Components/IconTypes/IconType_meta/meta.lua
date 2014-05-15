@@ -56,7 +56,11 @@ Type:RegisterIconDefaults{
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
-Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_MetaSortSettings")
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_MetaSortSettings", {
+	hidden = function(self)
+		return TMW.CI.icon:IsGroupController()
+	end,
+})
 
 
 TMW:RegisterUpgrade(70042, {
