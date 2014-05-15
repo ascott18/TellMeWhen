@@ -132,14 +132,12 @@ local function Meta_OnUpdate(icon, time)
 		local attributes = ic and ic.attributes
 
 		if	ic
-			-- and ic.Enabled
-			and ic.UpdateFunction -- Only exists if ic.Enabled == true
+			and ic.Enabled
 			and attributes.shown
 			and not (CheckNext and ic.__lastMetaCheck == time)
 			and ic.viewData == icon.viewData
 		then
 			ic:Update()
-			
 			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from the ic:Update() call)
 				if Sort then
 					local _d = attributes.duration - (time - attributes.start)
@@ -303,10 +301,10 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 				if group and group:ShouldUpdateIcons() and gs.View == thisIconsView then
 
 					for ics, _, _, _, icID in group:InIconSettings() do
-						if ics.Enabled and icID <= gs.Rows*gs.Columns then
+						if icID <= gs.Rows*gs.Columns then
 							local ic = group[icID]
 							
-							if ic then
+							if ic and ic.Enabled then
 								local GUID = ic:GetGUID()
 								if not alreadyinserted[GUID] then
 									InsertIcon(icon, GUID, ics)

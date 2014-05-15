@@ -620,7 +620,7 @@ end
 function Icon.Update(icon, force)
 	local time = TMW.time 
 	
-	if icon.attributes.shown and (force or icon.LastUpdate <= time - UPD_INTV) then
+	if icon.attributes.shown and icon.UpdateFunction and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time
 		
 		local Update_Method = icon.Update_Method
