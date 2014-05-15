@@ -698,11 +698,11 @@ function Icon.YieldInfo(icon, location, ...)
 end
 
 function Icon.IsGroupController(icon)
-	return icon.group.Controller == icon
+	return icon.group.Controller ~= nil and icon.group.Controller == icon
 end
 
 function Icon.IsControlled(icon)
-	return icon.group.Controller and icon.group.Controller ~= icon
+	return icon.group.Controller ~= nil and icon.group.Controller ~= icon
 end
 
 function Icon.IsGroupControlled(icon)
@@ -777,6 +777,24 @@ function Icon.Setup(icon)
 	local typeData = TMW.Types[ics.Type]
 	local viewData = group.viewData
 	local iconGUID = icon:GetGUID()
+
+	if icon.ID == 1 then
+		local newController
+
+		if group:GetSettings().Controlled and typeData.canControlGroup then
+			newController = icon
+		else
+			group:GetSettings().Controlled = false
+			newController = nil
+		end
+
+		if newController ~= group.Controller then
+			group.Controller = newController
+			group:Setup() -- Don't tail call here, because if something goes wrong then we WANT to stack overflow.
+			return
+		end
+	end
+
 	
 	if not group:ShouldUpdateIcons() then return end
 	

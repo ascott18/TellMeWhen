@@ -70,7 +70,7 @@ Module:SetScriptHandler("OnEnter", function(Module, icon)
 		GameTooltip:AddLine(TMW.get(Module.title, icon), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 		
 		if icon:IsControlled() then
-			GameTooltip:AddLine(L["ICON_TOOLTIP_CONTROLLED"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+			GameTooltip:AddLine(L["ICON_TOOLTIP_CONTROLLED"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
 		else
 			GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
 		end

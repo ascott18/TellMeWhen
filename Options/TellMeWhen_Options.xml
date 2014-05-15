@@ -2362,7 +2362,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentGroupControlled" inherits="TellMeWhen_CheckTemplate" parentKey="GroupControlled">
+					<CheckButton name="$parentGroupController" inherits="TellMeWhen_CheckTemplate" parentKey="GroupController">
 						<Anchors>
 							<Anchor point="TOP" relativeKey="$parent.Enabled" relativePoint="TOP"/>
 							<Anchor point="LEFT" relativeKey="$parent.PanelsRight" relativePoint="CENTER" x="-15" />
@@ -2373,6 +2373,10 @@
 									setting = "Controlled",
 									title = TMW.L["ICONMENU_CTRLGROUP"],
 									tooltip = TMW.L["ICONMENU_CTRLGROUP_DESC"],
+									disabledtooltip = TMW.L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"],
+									disabled = function(self)
+										return not TMW.CI.icon.typeData.canControlGroup
+									end,
 									hidden = function(self)
 										return TMW.CI.icon.ID ~= 1
 									end,

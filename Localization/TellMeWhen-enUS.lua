@@ -85,13 +85,14 @@ L["SHOWGUIDS_OPTION_DESC"] = "Enable this setting to see the GUID (globally-uniq
 
 
 L["ICON_TOOLTIP_CONTROLLER"] = [[This icon is a group controller.]]
-L["ICON_TOOLTIP_CONTROLLED"] = [[This icon is controlled by the first icon in this group.]]
+L["ICON_TOOLTIP_CONTROLLED"] = [[This icon is controlled by the first icon in this group. You cannot edit it individually.]]
 L["ICONMENU_CTRLGROUP"] = [[Group Controller]]
 L["ICONMENU_CTRLGROUP_DESC"] = [[Enable this setting to cause this icon to control the entire group.
 
 If enabled, the data harvested by this icon will fill up the group.
 
 All other icons in the group will be made unavailable for individual configuration.]]
+L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"] = [[The current icon type does not have the ability to control an entire group.]]
 
 
 

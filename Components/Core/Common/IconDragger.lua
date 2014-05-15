@@ -294,7 +294,7 @@ local function Split(IconDragger, domain)
 	
 	p.relativeTo = "UIParent"
 	
-	group:Setup()
+	--group:Setup()
 
 	-- move the actual icon settings
 	gs.Icons[1] = IconDragger.srcicon.group.Icons[IconDragger.srcicon:GetID()]
