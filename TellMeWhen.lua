@@ -1871,7 +1871,7 @@ function TMW:PLAYER_LOGIN()
 	-- This should be done twice to get everything aware of everything else's GUID.
 	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
 	TMW:Update()
-	--TMW:Update()
+	TMW:Update()
 end
 
 
