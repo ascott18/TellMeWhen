@@ -645,10 +645,12 @@ function Icon.Update(icon, force)
 				icon.CONTROL_ICON_INDEX = 0
 				icon:UpdateFunction(time)
 
-				for i = icon.CONTROL_ICON_INDEX+1, icon.group.numIcons do
-					local ic = icon.group[i]
-					if ic then
-						ic:Hide()
+				if Locked then
+					for i = icon.CONTROL_ICON_INDEX+1, icon.group.numIcons do
+						local ic = icon.group[i]
+						if ic then
+							ic:Hide()
+						end
 					end
 				end
 			end
