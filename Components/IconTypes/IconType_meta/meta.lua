@@ -218,7 +218,6 @@ end
 local function TMW_ICON_UPDATED(icon, event, ic)
 	local GUID = ic:GetGUID()
 	if ic == icon or (GUID and icon.IconsLookup[GUID]) or icon.IconsLookup[ic] then
-		print(icon, "queued")
 		icon.metaUpdateQueued = true
 	end
 end
@@ -378,6 +377,10 @@ function Type:Setup(icon)
 
 	if icon:IsGroupController() then
 		icon.Sort = false
+		for ic in icon.group:InIcons() do
+			ic.__currentIcon = nil -- reset this
+			ic.__metaModuleSource = nil -- reset this
+		end
 	end
 		
 	icon:SetUpdateFunction(Meta_OnUpdate)
