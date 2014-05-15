@@ -487,6 +487,14 @@ function IconType:IsAllowedByView(viewName)
 	end
 end
 
+--- Processes data passed from icon:YieldInfo(hasInfo, ...) and sets it on iconToSet. You must override this method if your icon type's methods call icon:YieldInfo().
+-- @param icon [TMW.Classes.Icon] The icon that yielded the info.
+-- @param iconToSet  [TMW.Classes.Icon] The icon that should recieve the yielded info.
+-- @param ... [vararg] The parameters passed info icon:YieldInfo(hasInfo, ...).
+function IconType:HandleInfo(icon, iconToSet, ...)
+	TMW:Error("If your icon type %q calls icon:YieldInfo(hasInfo, ...), you must define an IconType:HandleInfo(icon, iconToSet, ...) method.", self.type)
+end
+
 IconType:RegisterIconEvent(100, "OnEventsRestored", {
 	text = L["SOUND_EVENT_ONEVENTSRESTORED"],
 	desc = L["SOUND_EVENT_ONEVENTSRESTORED_DESC"],

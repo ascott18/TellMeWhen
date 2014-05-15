@@ -295,57 +295,7 @@ local function Buff_OnUpdate(icon, time)
 		end
 	end
 	
-	if buffName then
-		if icon.ShowTTText then
-			--if wow_501 then
-				-- WoW 5.1 moved the stupid boolean return value that used to be at the end
-				-- to before the variable returns where it belongs,
-				-- so we can simplify our checking a bit (no need to check variable types anymore; just check if they are non-nil).
-				if v1 and v1 > 0 then
-					count = v1
-				elseif v2 and v2 > 0 then
-					count = v2
-				elseif v3 and v3 > 0 then
-					count = v3
-				elseif v4 and v4 > 0 then
-					count = v4
-				else
-					count = 0
-				end
-		end
-
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-			icon.Alpha,
-			iconTexture,
-			expirationTime - duration, duration,
-			count, count,
-			id,
-			useUnit, nil,
-			caster, nil
-		)
-
-	elseif not Units[1] and icon.HideIfNoUnits then
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-			0,
-			icon.FirstTexture,
-			0, 0,
-			nil, nil,
-			icon.NameFirst,
-			nil, nil,
-			nil, nil
-		)
-
-	else
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-			icon.UnAlpha,
-			icon.FirstTexture,
-			0, 0,
-			nil, nil,
-			icon.NameFirst,
-			Units[1], nil,
-			nil, nil
-		)
-	end
+	icon:YieldInfo(true, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, useUnit)
 end
 
 local function Buff_OnUpdate_Controller(icon, time)
@@ -382,15 +332,17 @@ local function Buff_OnUpdate_Controller(icon, time)
 					and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id]))
 				then
 					
-					if not icon:YieldInfo(1, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit) then
+					if not icon:YieldInfo(true, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit) then
 						return
 					end
 				end
 			end
 		end
 	end
+
+	icon:YieldInfo(false)
 end
-function Type:HandleData(icon, iconToSet, location, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
+function Type:HandleInfo(icon, iconToSet, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
 	local Units = icon.Units
 	if buffName then
 		if icon.ShowTTText then

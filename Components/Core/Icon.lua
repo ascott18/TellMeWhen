@@ -647,10 +647,11 @@ function Icon.Update(icon, force)
 
 				for i = icon.CONTROL_ICON_INDEX+1, icon.group.numIcons do
 					local ic = icon.group[i]
-					if ic then ic:SetInfo("alpha", 0) end
+					if ic then
+						ic:Hide()
+					end
 				end
 			end
-			icon:YieldInfo(0)
 
 			if Update_Method == "manual" then
 				icon:ScheduleNextUpdate()
@@ -660,21 +661,14 @@ function Icon.Update(icon, force)
 end
 
 
-function Icon.YieldInfo(icon, location, ...)
-	if not icon.typeData then
-		error("yielded with no icon type to handle it")
-	end
-
-	if location == 1 then
-		icon.HANDLED_ONE = true
-	elseif location == 0 and icon.HANDLED_ONE then
+function Icon.YieldInfo(icon, hasInfo, ...)
+	if not hasInfo and icon.HANDLED_ONE then
 		return nil
 	end
+	icon.HANDLED_ONE = true
 
 	if not icon:IsGroupController() then
-		if icon.typeData.HandleData then -- TODO: create a baseline method that does nothing.
-			icon.typeData:HandleData(icon, icon, location, ...)
-		end
+		icon.typeData:HandleInfo(icon, icon, ...)
 		return nil
 	else
 		local nextIconIndex = (icon.CONTROL_ICON_INDEX or 0) + 1
@@ -685,11 +679,11 @@ function Icon.YieldInfo(icon, location, ...)
 		
 		icon.CONTROL_ICON_INDEX = nextIconIndex
 		local destIcon = icon.group[nextIconIndex]
+		destIcon:Show()
 
-		icon.HANDLED_ONE = true
-		icon.typeData:HandleData(icon, destIcon, location, ...)
+		icon.typeData:HandleInfo(icon, destIcon, ...)
 
-		if location == 0 or not TMW.Locked then
+		if not hasInfo or not TMW.Locked then
 			return nil
 		end
 
