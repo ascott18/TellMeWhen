@@ -37,27 +37,28 @@ local DD = TMW.C.Config_DropDownMenu:New("Frame", nil, UIParent, "TMW_DropDownMe
 		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
 		for i, icon in pairs(icons) do
-			
-			local info = UIDropDownMenu_CreateInfo()
-			info.text = icon:GetIconName()
-			
-			local text, textshort, tooltip = icon:GetIconMenuText()
-			info.tooltipTitle = text
-			info.tooltipText = tooltip
-			info.tooltipOnButton = true
+			if not icon:IsControlled() then
+				local info = UIDropDownMenu_CreateInfo()
+				info.text = icon:GetIconName()
+				
+				local text, textshort, tooltip = icon:GetIconMenuText()
+				info.tooltipTitle = text
+				info.tooltipText = tooltip
+				info.tooltipOnButton = true
 
-			info.icon = icon.attributes.texture
-			info.tCoordLeft = 0.07
-			info.tCoordRight = 0.93
-			info.tCoordTop = 0.07
-			info.tCoordBottom = 0.93
-			
-			info.func = self.data.OnClick
-			info.arg1 = self
-			info.arg2 = icon
-			info.notCheckable = true
-			
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				info.icon = icon.attributes.texture
+				info.tCoordLeft = 0.07
+				info.tCoordRight = 0.93
+				info.tCoordTop = 0.07
+				info.tCoordBottom = 0.93
+				
+				info.func = self.data.OnClick
+				info.arg1 = self
+				info.arg2 = icon
+				info.notCheckable = true
+				
+				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			end
 		end
 	end,
 })
@@ -73,7 +74,9 @@ Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 	if not TMW.Locked then
 		if button == "RightButton" then
 			if #icons == 1 then
-				TMW.IE:Load(nil, icon)
+				if not icon:IsControlled() then
+					TMW.IE:Load(nil, icon)
+				end
 			elseif #icons > 1 then
 				GameTooltip:Hide() -- hide the tooltip over an icon so we can see the menu
 				CloseDropDownMenus()

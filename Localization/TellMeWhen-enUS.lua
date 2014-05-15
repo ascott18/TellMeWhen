@@ -84,6 +84,18 @@ L["SHOWGUIDS_OPTION_DESC"] = "Enable this setting to see the GUID (globally-uniq
 
 
 
+L["ICON_TOOLTIP_CONTROLLER"] = [[This icon is a group controller.]]
+L["ICON_TOOLTIP_CONTROLLED"] = [[This icon is controlled by the first icon in this group.]]
+L["ICONMENU_CTRLGROUP"] = [[Group Controller]]
+L["ICONMENU_CTRLGROUP_DESC"] = [[Enable this setting to cause this icon to control the entire group.
+
+If enabled, the data harvested by this icon will fill up the group.
+
+All other icons in the group will be made unavailable for individual configuration.]]
+
+
+
+
 L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:
 

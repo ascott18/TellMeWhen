@@ -484,13 +484,27 @@ function Group.Setup(group, noIconSetup)
 	group:Setup_Conditions()
 	group:Update()
 		
+	if not group.Controlled then
+		group.Controller = nil
+	end
+
 	if group:ShouldUpdateIcons() then
 		if not noIconSetup then
+			group.Controller = nil
 			-- Setup icons
 			for iconID = 1, group.numIcons do
 				local icon = group[iconID]
 				if not icon then
 					icon = TMW.Classes.Icon:New("Button", group:GetName() .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
+				end
+
+				if iconID == 1 and group.Controlled then
+					local ics = icon:GetSettings()
+					if TMW.Types[ics.Type].canControlGroup then
+						group.Controller = icon
+					else
+						group.Controlled = false
+					end
 				end
 
 				TMW.safecall(icon.Setup, icon)
@@ -502,6 +516,8 @@ function Group.Setup(group, noIconSetup)
 			end
 		end
 	else
+		group.Controller = nil
+		group.Controlled = false
 		for iconID = 1, #group do
 			local icon = group[iconID]
 			icon:DisableIcon()

@@ -2053,7 +2053,11 @@ end
 function IE:TMW_ONUPDATE_POST(...)
 	-- run updates for any icons that are queued
 	for i, icon in ipairs(IE.iconsToUpdate) do
-		TMW.safecall(icon.Setup, icon)
+		if icon:IsGroupController() then
+			TMW.safecall(icon.group.Setup, icon.group)
+		else
+			TMW.safecall(icon.Setup, icon)
+		end
 	end
 	wipe(IE.iconsToUpdate)
 
@@ -2394,7 +2398,7 @@ function IE:CheckLoadedIconIsValid()
 	elseif
 		not CI.group:IsValid()
 		or not CI.icon:IsInRange()
-		or CI.icon:IsNonController()
+		or CI.icon:IsControlled()
 	then
 		TMW.IE:Load(nil, false)
 	end

@@ -2348,17 +2348,44 @@
 					
 					<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="19" y="3"/>
+							<Anchor point="TOP" relativeKey="$parent.$parent.HeaderBackground" relativePoint="BOTTOM" x="0" y="-3"/>
+							<Anchor point="LEFT" relativeKey="$parent.PanelsRight" relativePoint="LEFT" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
-							
 								TMW:CInit(self, {
 									setting = "Enabled",
 									title = TMW.L["ICONMENU_ENABLE"],
 									tooltip = TMW.L["ICONMENU_ENABLE_DESC"],
 								})
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentGroupControlled" inherits="TellMeWhen_CheckTemplate" parentKey="GroupControlled">
+						<Anchors>
+							<Anchor point="TOP" relativeKey="$parent.Enabled" relativePoint="TOP"/>
+							<Anchor point="LEFT" relativeKey="$parent.PanelsRight" relativePoint="CENTER" x="-15" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Controlled",
+									title = TMW.L["ICONMENU_CTRLGROUP"],
+									tooltip = TMW.L["ICONMENU_CTRLGROUP_DESC"],
+									hidden = function(self)
+										return TMW.CI.icon.ID ~= 1
+									end,
+									OnClick = function(self)
+										TMW:Update()
+										TMW.IE:Load(1)
+									end,
+								})
+								function self:GetSettingTable()
+									return TMW.CI.group:GetSettings()
+								end
+
+								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

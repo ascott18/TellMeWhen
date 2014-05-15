@@ -30,6 +30,7 @@ local clientVersion = select(4, GetBuildInfo())
 local wow_501 = clientVersion >= 50100
 
 local Type = TMW.Classes.IconType:New("buff")
+Type.canControlGroup = true
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.menuIcon = GetSpellTexture(774)
@@ -37,6 +38,7 @@ Type.usePocketWatch = 1
 Type.spacebefore = true
 Type.unitType = "unitid"
 Type.hasNoGCD = true
+Type.canControlGroup = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -64,6 +66,15 @@ Type:RegisterIconDefaults{
 }
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
+	OnSetup = function(self, panelInfo, supplementalData)
+	print(1, TMW.CI.icon:IsGroupController() )
+		if TMW.CI.icon:IsGroupController() then
+			self:SetLabels(L["ICONMENU_CHOOSENAME2"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"], nil)
+		else
+			self:SetLabels(L["ICONMENU_CHOOSENAME2"], nil)
+		end
+	end,
+
 	SUGType = "buff",
 })
 
@@ -121,11 +132,15 @@ end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
+	[ 0x2 ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
+	[ 0x1 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
 })
 
-Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettingsWithStacks")
+Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettingsWithStacks", {
+	hidden = function(self)
+		return TMW.CI.icon:IsGroupController()
+	end,
+})
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
@@ -334,6 +349,99 @@ local function Buff_OnUpdate(icon, time)
 	end
 end
 
+local function Buff_OnUpdate_Controller(icon, time)
+	
+	local Units, NameHash, Filter, Filterh
+	= icon.Units, icon.NameHash, icon.Filter, icon.Filterh
+	local NotStealable = not icon.Stealable
+	
+	for u = 1, #Units do
+		local unit = Units[u]
+		if icon.UnitSet:UnitExists(unit) then
+
+			local index, stage = 1, 1
+			local filter = Filter
+
+			while true do
+				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, filter)
+				index = index + 1
+				
+				-- Bugfix: Enraged is an empty string.
+				if dispelType == "" then
+					dispelType = "Enraged"
+				end
+
+				if not buffName then
+					if stage == 1 and Filterh and not buffName then
+						index, stage = 1, 2
+						filter = Filterh
+					else
+						break
+					end
+
+				elseif  (icon.NameFirst == '' or NameHash[id] or NameHash[dispelType] or NameHash[strlowerCache[buffName]])
+					and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id]))
+				then
+					
+					if not icon:YieldInfo(1, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit) then
+						return
+					end
+				end
+			end
+		end
+	end
+end
+function Type:HandleData(icon, iconToSet, location, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
+	local Units = icon.Units
+	if buffName then
+		if icon.ShowTTText then
+			if v1 and v1 > 0 then
+				count = v1
+			elseif v2 and v2 > 0 then
+				count = v2
+			elseif v3 and v3 > 0 then
+				count = v3
+			elseif v4 and v4 > 0 then
+				count = v4
+			else
+				count = 0
+			end
+		end
+
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			icon.Alpha,
+			iconTexture,
+			expirationTime - duration, duration,
+			count, count,
+			id,
+			unit, nil,
+			caster, nil
+		)
+
+	elseif not Units[1] and icon.HideIfNoUnits then
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			0,
+			icon.FirstTexture,
+			0, 0,
+			nil, nil,
+			icon.NameFirst,
+			nil, nil,
+			nil, nil
+		)
+
+	else
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			icon.UnAlpha,
+			icon.FirstTexture,
+			0, 0,
+			nil, nil,
+			icon.NameFirst,
+			Units[1], nil,
+			nil, nil
+		)
+	end
+end
+
 local aurasWithNoSourceReported = {
 	GetSpellInfo(104993),	-- Jade Spirit
 	GetSpellInfo(116660),	-- River's Song
@@ -453,7 +561,12 @@ function Type:Setup(icon)
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Buff_OnEvent, icon)
 	end
 
-	icon:SetUpdateFunction(Buff_OnUpdate)
+	if icon:IsGroupController() then
+		icon:SetUpdateFunction(Buff_OnUpdate_Controller)
+	else
+		icon:SetUpdateFunction(Buff_OnUpdate)
+	end
+
 	icon:Update()
 end
 

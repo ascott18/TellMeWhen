@@ -227,7 +227,7 @@ end
 -- @usage local ics = icon:GetSettings()
 -- print(icon:GetName() .. "'s enabled setting is set to " .. ics.Enabled)
 function Icon.GetSettings(icon)
-	if icon:IsNonController() then
+	if icon:IsControlled() then
 		return icon.group.Controller:GetSettings()
 	else
 		return icon:GetRealSettings()
@@ -698,15 +698,15 @@ function Icon.YieldInfo(icon, location, ...)
 end
 
 function Icon.IsGroupController(icon)
-	return icon.group.Controlled and icon.group.Controller == icon
+	return icon.group.Controller == icon
 end
 
-function Icon.IsNonController(icon)
-	return icon.group.Controlled and icon.group.Controller ~= icon
+function Icon.IsControlled(icon)
+	return icon.group.Controller and icon.group.Controller ~= icon
 end
 
 function Icon.IsGroupControlled(icon)
-	return icon.group.Controlled
+	return icon.group.Controller ~= nil
 end
 
 
@@ -849,7 +849,7 @@ function Icon.Setup(icon)
 			end
 		end
 			
-		if not icon:IsNonController() then -- true for controllers and non-controlled groups
+		if not icon:IsControlled() then -- true for controllers and non-controlled groups
 			icon.LastUpdate = 0
 			icon.NextUpdateTime = 0
 			TMW.safecall(typeData.Setup, typeData, icon)
@@ -888,11 +888,10 @@ function Icon.Setup(icon)
 	end
 
 
-	if icon:IsNonController() then
+	if icon:IsControlled() then
 		if TMW.Locked then
 			icon:InheritDataFromIcon(icon.group.Controller)
 		else
-			icon:EnableMouse(0)
 			icon:SetInfo("texture", "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
 	end

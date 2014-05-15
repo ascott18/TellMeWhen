@@ -228,6 +228,7 @@ TMW.Defaults = {
 		Groups 		= 	{
 			["**"] = {
 				GUID			= "",
+				Controlled		= false,
 				Enabled			= true,
 				EnabledProfiles	= {
 					 -- Only used by global groups

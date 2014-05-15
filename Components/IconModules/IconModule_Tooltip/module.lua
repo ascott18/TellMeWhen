@@ -68,10 +68,20 @@ Module:SetScriptHandler("OnEnter", function(Module, icon)
 	if not TMW.Locked then
 		TMW:TT_Anchor(icon)
 		GameTooltip:AddLine(TMW.get(Module.title, icon), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
-		GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
 		
+		if icon:IsControlled() then
+			GameTooltip:AddLine(L["ICON_TOOLTIP_CONTROLLED"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+		else
+			GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+		end
+
 		if TMW.DOGTAG.AcceptingIcon then
 			GameTooltip:AddLine(L["DT_INSERTGUID_TOOLTIP"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+		end
+
+		if icon:IsGroupController() then
+			GameTooltip:AddLine(" ")
+			GameTooltip:AddLine(L["ICON_TOOLTIP_CONTROLLER"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
 		end
 
 		if TMW.db.global.ShowGUIDs then
