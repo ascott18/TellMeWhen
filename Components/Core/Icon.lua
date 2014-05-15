@@ -645,7 +645,7 @@ function Icon.Update(icon, force)
 				icon.CONTROL_ICON_INDEX = 0
 				icon:UpdateFunction(time)
 
-				if Locked then
+				if TMW.Locked then
 					for i = icon.CONTROL_ICON_INDEX+1, icon.group.numIcons do
 						local ic = icon.group[i]
 						if ic then
