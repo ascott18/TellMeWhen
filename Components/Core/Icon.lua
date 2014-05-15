@@ -511,32 +511,41 @@ end
 
 -- [INTERNAL] (no documentation needed)
 function Icon.ScheduleNextUpdate(icon)
-	local attributes = icon.attributes
 	local time = TMW.time
 	
-	local currentIconDuration = attributes.duration - (time - attributes.start)
-	if currentIconDuration < 0 then currentIconDuration = 0 end
+	local duration
+	if icon:IsGroupController() then
+		duration = math.huge
 
-	if currentIconDuration == 0 then
-		icon.NextUpdateTime = nil
-		return
+		for icon in icon.group:InIcons() do
+			local attributes = icon.attributes
+			
+			if not attributes.shown then
+				break
+			end
+
+			local d = attributes.duration - (time - attributes.start)
+
+			if d > 0 and d < duration then
+				duration = d
+			end
+		end
+
+		if duration == math.huge then
+			duration = 0
+		end
+	else
+		local attributes = icon.attributes
+
+		duration = attributes.duration - (time - attributes.start)
+		if duration < 0 then duration = 0 end
 	end
 
-	icon.NextUpdate_Duration = 0
-	
-	--[[
-		Fire an event that requests whatever is listening to it to add in its
-		two cents about when the next update should be.
-		Callback handlers for this event should set icon.NextUpdate_Duration to the duration remaining
-		on the icon at which an update is needed.
-	]]
-	TMW:Fire("TMW_ICON_NEXTUPDATE_REQUESTDURATION", icon, currentIconDuration)
-
-	local nextUpdateTime = time + (currentIconDuration - icon.NextUpdate_Duration)
-	if nextUpdateTime == time then
-		nextUpdateTime = nil
+	if duration == 0 then
+		icon.NextUpdateTime = math.huge
+	else
+		icon.NextUpdateTime = time + duration
 	end
-	icon.NextUpdateTime = nextUpdateTime
 end
 
 
@@ -626,12 +635,10 @@ function Icon.Update(icon, force)
 		local Update_Method = icon.Update_Method
 
 		local ConditionObject = icon.ConditionObject
-		if ConditionObject then
+		if ConditionObject and (ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time) then
 			-- The condition check needs to come before we determine iconUpdateNeeded because
 			-- checking a condition may set NextUpdateTime to 0 if the condition passing state changes.
-			if ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time then
-				ConditionObject:Check()
-			end
+			ConditionObject:Check()
 		end
 
 		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
@@ -681,6 +688,9 @@ function Icon.YieldInfo(icon, hasInfo, ...)
 		
 		icon.CONTROL_ICON_INDEX = nextIconIndex
 		local destIcon = icon.group[nextIconIndex]
+		if not destIcon then
+			return
+		end
 		destIcon:Show()
 
 		icon.typeData:HandleInfo(icon, destIcon, ...)

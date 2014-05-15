@@ -93,7 +93,7 @@ If enabled, the data harvested by this icon will fill up the group.
 
 All other icons in the group will be made unavailable for individual configuration.
 
-You may wish to customize the group's layout direction and/or sorting options if you decide to use it as a controlled group]]
+You may wish to customize the group's layout direction and/or sorting options if you decide to use it as a controlled group.]]
 L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"] = [[The current icon type does not have the ability to control an entire group.]]
 
 
