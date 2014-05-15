@@ -2570,7 +2570,11 @@ TMW:NewClass("Config_Frame", "Frame"){
 	end,
 	
 	SetTooltip = function(self, title, text)
-		TMW:TT(self, title, text, 1, 1, "IsEnabled")
+		if self.SetMotionScriptsWhileDisabled then
+			TMW:TT(self, title, text, 1, 1, nil)
+		else
+			TMW:TT(self, title, text, 1, 1, "IsEnabled")
+		end
 	end,
 	
 	ConstrainLabel = function(self, anchorTo, anchorPoint, ...)

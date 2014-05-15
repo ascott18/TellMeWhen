@@ -882,7 +882,9 @@
 						self:SetAllPoints(self.parent.text)
 					</OnLoad>
 					<OnEnter>
-						if not self.parent:IsEnabled() then return end
+						if not self.parent:IsEnabled() and not self.parent:GetMotionScriptsWhileDisabled() then
+							return
+						end
 						
 						self.parent:LockHighlight()
 						
@@ -914,6 +916,12 @@
 			<OnDisable>
 				self:SetAlpha(0.4)
 			</OnDisable>
+			<OnEnter>
+				self:LockHighlight()
+			</OnEnter>
+			<OnLeave>
+				self:UnlockHighlight()
+			</OnLeave>
 		</Scripts>
 		<NormalTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Up"/>
 		<PushedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Down"/>
