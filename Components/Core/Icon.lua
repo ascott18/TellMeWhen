@@ -906,7 +906,10 @@ function Icon.Setup(icon)
 		if TMW.Locked then
 			icon:InheritDataFromIcon(icon.group.Controller)
 		else
-			icon:SetInfo("texture", "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
+			icon:SetInfo("texture; alphaOverride",
+				"Interface\\AddOns\\TellMeWhen\\Textures\\Controlled",
+				icon.Enabled and 0.95 or 0.5
+			)
 		end
 	end
 	
