@@ -28,6 +28,7 @@ Type.desc = L["ICONMENU_META_DESC"]
 Type.menuIcon = "Interface\\Icons\\LevelUpIcon-LFD"
 Type.AllowNoName = true
 Type.NoColorSettings = true
+Type.canControlGroup = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("alpha")
@@ -150,8 +151,9 @@ local function Meta_OnUpdate(icon, time)
 						d = _d
 					end
 				else
-					icToUse = ic
-					break
+					if not icon:YieldInfo(true, ic) then
+						break
+					end
 				end
 			else
 				ic.__lastMetaCheck = time
@@ -160,47 +162,55 @@ local function Meta_OnUpdate(icon, time)
 	end
 
 	if icToUse then
+		icon:YieldInfo(true, icToUse)
+	else
+		icon:YieldInfo(false)
+	end
+
+	icon.metaUpdateQueued = nil
+end
+
+function Type:HandleInfo(icon, iconToSet, icToUse)
+	if icToUse then
 		local dataSource, moduleSource = icToUse, icToUse
 		while moduleSource.Type == "meta" and moduleSource.__metaModuleSource do
 			moduleSource = moduleSource.__metaModuleSource
 		end
-		
+
 		local force
 
-		if moduleSource ~= icon.__metaModuleSource then
+		if moduleSource ~= iconToSet.__metaModuleSource then
 			
-			icon:SetModulesToEnabledStateOfIcon(moduleSource)
-			icon:SetupAllModulesForIcon(moduleSource)
+			iconToSet:SetModulesToEnabledStateOfIcon(moduleSource)
+			iconToSet:SetupAllModulesForIcon(moduleSource)
 			
 			force = 1
 
-			icon.__metaModuleSource = moduleSource
+			iconToSet.__metaModuleSource = moduleSource
 		end
 		
-		if dataSource ~= icon.__currentIcon then
+		if dataSource ~= iconToSet.__currentIcon then
 
-			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", icon, dataSource)
+			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", iconToSet, dataSource)
 			
 			force = 1
 
-			icon.__currentIcon = dataSource
+			iconToSet.__currentIcon = dataSource
 		end
 
 		dataSource.__lastMetaCheck = time
 
 		if force or icon.metaUpdateQueued then
-			icon.metaUpdateQueued = nil
 
 			-- Inherit the alpha of the icon. Don't SetInfo_INTERNAL here because the
 			-- call to :InheritDataFromIcon might not call TMW_ICON_UPDATED
-			icon:SetInfo("alpha_metaChild", dataSource.attributes.realAlpha)
+			iconToSet:SetInfo("alpha_metaChild", dataSource.attributes.realAlpha)
 
-			icon:InheritDataFromIcon(dataSource)
+			iconToSet:InheritDataFromIcon(dataSource)
 		end
 
-	elseif icon.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then
-		icon.metaUpdateQueued = nil
-		icon:SetInfo("alpha; alpha_metaChild", 0, nil)
+	elseif iconToSet.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then
+		iconToSet:SetInfo("alpha; alpha_metaChild", 0, nil)
 	end
 end
 
@@ -208,6 +218,7 @@ end
 local function TMW_ICON_UPDATED(icon, event, ic)
 	local GUID = ic:GetGUID()
 	if ic == icon or (GUID and icon.IconsLookup[GUID]) or icon.IconsLookup[ic] then
+		print(icon, "queued")
 		icon.metaUpdateQueued = true
 	end
 end
@@ -364,11 +375,14 @@ function Type:Setup(icon)
 	-- icon:SetUpdateMethod("manual") 
 	
 	icon:SetInfo("alpha", 0)
+
+	if icon:IsGroupController() then
+		icon.Sort = false
+	end
 		
-	--if not dontUpdate then
-		icon:SetUpdateFunction(Meta_OnUpdate)
-		TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
-	--end
+	icon:SetUpdateFunction(Meta_OnUpdate)
+	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
+
 	icon.metaUpdateQueued = true
 end
 
