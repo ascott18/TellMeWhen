@@ -236,11 +236,14 @@ end
 
 
 function Module:OnSuggest()
-	local frame = _G["LibDogTag-3.0_HelpFrame"]
-	local wasShown = frame and frame:IsShown()
-	DogTag:OpenHelp()
-	if not wasShown then
-		_G["LibDogTag-3.0_HelpFrame"]:Hide()
+	if not InCombatLockdown() then
+		-- I honestly can't remember why i did this.
+		local frame = _G["LibDogTag-3.0_HelpFrame"]
+		local wasShown = frame and frame:IsShown()
+		DogTag:OpenHelp()
+		if not wasShown then
+			_G["LibDogTag-3.0_HelpFrame"]:Hide()
+		end
 	end
 
 	prepareEditBox(SUG.Box)
