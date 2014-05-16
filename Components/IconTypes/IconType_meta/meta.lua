@@ -134,7 +134,7 @@ local function Meta_OnUpdate(icon, time)
 		local ic = TMW.GUIDToOwner[GUID]
 		
 		local attributes = ic and ic.attributes
-
+		
 		if	ic
 			and ic.Enabled
 			and attributes.shown
@@ -142,6 +142,7 @@ local function Meta_OnUpdate(icon, time)
 			and ic.viewData == icon.viewData
 		then
 			ic:Update()
+
 			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from the ic:Update() call)
 				if Sort then
 					local _d = attributes.duration - (time - attributes.start)
@@ -200,7 +201,7 @@ function Type:HandleInfo(icon, iconToSet, icToUse)
 			iconToSet.__currentIcon = dataSource
 		end
 
-		dataSource.__lastMetaCheck = time
+		dataSource.__lastMetaCheck = TMW.time
 
 		if force or icon.metaUpdateQueued then
 
