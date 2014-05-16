@@ -670,8 +670,8 @@ function Icon.Update(icon, force)
 end
 
 
-function Icon.YieldInfo(icon, hasInfo, ...)
-	if not hasInfo and icon.HANDLED_ONE then
+function Icon.YieldInfo(icon, isNotDone, ...)
+	if not isNotDone and icon.HANDLED_ONE then
 		return nil
 	end
 	icon.HANDLED_ONE = true
@@ -695,7 +695,7 @@ function Icon.YieldInfo(icon, hasInfo, ...)
 
 		icon.typeData:HandleInfo(icon, destIcon, ...)
 
-		if not hasInfo or not TMW.Locked then
+		if not isNotDone or not TMW.Locked then
 			return nil
 		end
 
