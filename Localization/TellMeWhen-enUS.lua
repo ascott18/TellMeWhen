@@ -251,6 +251,7 @@ L["STACKALPHA_DESC"] = "Set the opacity level that the icon should display at wh
 L["ICONMENU_TYPE"] = "Icon type"
 
 L["ICONMENU_TYPE_DISABLED_BY_VIEW"] = "This Icon Type is not available for the %q display method. Change this group's display method or create a new group to use this Icon Type."
+L["ICONMENU_TYPE_CANCONTROL"] = "This Icon Type can control an entire group if set on the group's first icon."
 
 L["ICONMENU_SPELLCOOLDOWN"] = "Spell Cooldown"
 L["ICONMENU_SPELLCOOLDOWN_DESC"] = [[Tracks the cooldowns of spells from your spellbook.]]

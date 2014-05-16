@@ -3719,7 +3719,6 @@ end
 
 
 ---------- Equivalancies ----------
-local equivTipCache = {}
 function IE:Equiv_GenerateTips(equiv)
 	local IDs = TMW:SplitNames(TMW.EquivFullIDLookup[equiv])
 	local original = TMW:SplitNames(TMW.EquivOriginalLookup[equiv])
@@ -3759,28 +3758,32 @@ TMW:MakeSingleArgFunctionCached(IE, "Equiv_GenerateTips")
 
 ---------- Dropdowns ----------
 function IE:Type_DropDown()
-	for _, Type in ipairs(TMW.OrderedTypes) do -- order in the order in which they are loaded in the .toc file
-		if CI.ics.Type == Type.type or not get(Type.hidden) then
-			if Type.spacebefore then
+	for _, typeData in ipairs(TMW.OrderedTypes) do
+		if CI.ics.Type == typeData.type or not get(typeData.hidden) then
+			if typeData.spacebefore then
 				TMW.AddDropdownSpacer()
 			end
 
 			local info = UIDropDownMenu_CreateInfo()
 			
-			info.text = get(Type.name)
-			info.value = Type.type
+			info.text = get(typeData.name)
+			info.value = typeData.type
 			
-			local allowed = Type:IsAllowedByView(CI.icon.viewData.view)
+			local allowed = typeData:IsAllowedByView(CI.icon.viewData.view)
 			info.disabled = not allowed
 
-			local desc = get(Type.desc)
+			local desc = get(typeData.desc)
 				
 			if not allowed then
 				desc = (desc and desc .. "\r\n\r\n" or "") .. L["ICONMENU_TYPE_DISABLED_BY_VIEW"]:format(CI.icon.viewData.name)
 			end
 
+			if typeData.canControlGroup then
+				desc = (desc and desc .. "\r\n\r\n" or "") .. L["ICONMENU_TYPE_CANCONTROL"]
+			end
+
 			if desc then
-				info.tooltipTitle = Type.tooltipTitle or info.text
+				info.tooltipTitle = typeData.tooltipTitle or info.text
 				info.tooltipText = desc
 				info.tooltipOnButton = true
 				info.tooltipWhileDisabled = true
@@ -3788,9 +3791,9 @@ function IE:Type_DropDown()
 			
 			info.checked = (info.value == CI.ics.Type)
 			info.func = IE.Type_Dropdown_OnClick
-			info.arg1 = Type
+			info.arg1 = typeData
 			
-			info.icon = get(Type.menuIcon)
+			info.icon = get(typeData.menuIcon)
 			info.tCoordLeft = 0.07
 			info.tCoordRight = 0.93
 			info.tCoordTop = 0.07
@@ -3798,7 +3801,7 @@ function IE:Type_DropDown()
 				
 			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
 
-			if Type.spaceafter then
+			if typeData.spaceafter then
 				TMW.AddDropdownSpacer()
 			end
 		end
