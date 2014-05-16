@@ -34,6 +34,7 @@ Type.menuIcon = "Interface\\Icons\\Spell_Shadow_Possession"
 Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.hasNoGCD = true
+Type.canControlGroup = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -89,25 +90,32 @@ local function LoseControl_OnUpdate(icon, time)
 				end
 			end
 		end
-		
-		if isValidType then
-			icon:SetInfo("alpha; texture; start, duration; spell; locCategory",
-				icon.Alpha,
-				texture,
-				start, duration,
-				spellID,
-				text
-			)
+		if isValidType and not icon:YieldInfo(true, text, texture, start, duration, spellID) then
 			return
 		end
 	end
 	
-	icon:SetInfo("alpha; start, duration; spell; locCategory",
-		icon.UnAlpha,
-		0, 0,
-		nil,
-		nil
-	)
+	icon:YieldInfo(false)
+end
+
+
+function Type:HandleInfo(icon, iconToSet, category, texture, start, duration, spell)
+	if category then
+		iconToSet:SetInfo("alpha; texture; start, duration; spell; locCategory",
+			icon.Alpha,
+			texture,
+			start, duration,
+			spellID,
+			category
+		)
+	else
+		iconToSet:SetInfo("alpha; start, duration; spell; locCategory",
+			icon.UnAlpha,
+			0, 0,
+			nil,
+			nil
+		)
+	end
 end
 
 
