@@ -52,7 +52,7 @@ Type:RegisterIconDefaults{
 	Unit					= "player", 
 	BuffOrDebuff			= "HELPFUL", 
 	OnlyMine				= false,
-	HideIfNoUnits			= false,
+	-- HideIfNoUnits			= false,
 }
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
@@ -88,11 +88,11 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffCheckSettings", fu
 			title = L["ICONMENU_ONLYMINE"],
 			tooltip = L["ICONMENU_ONLYMINE_DESC"],
 		},
-		{
-			setting = "HideIfNoUnits",
-			title = L["ICONMENU_HIDENOUNITS"],
-			tooltip = L["ICONMENU_HIDENOUNITS_DESC"],
-		},
+		-- {
+		-- 	setting = "HideIfNoUnits",
+		-- 	title = L["ICONMENU_HIDENOUNITS"],
+		-- 	tooltip = L["ICONMENU_HIDENOUNITS_DESC"],
+		-- },
 	})
 end)
 
@@ -187,14 +187,14 @@ end
 
 function Type:HandleInfo(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, id)
 	print(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, id)
-	if not icon.Units[1] and icon.HideIfNoUnits then
+	if not unit then
 		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			0,
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
 			icon.NameFirst,
-			unit, nil
+			nil, nil
 		)
 	elseif not id then
 		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
