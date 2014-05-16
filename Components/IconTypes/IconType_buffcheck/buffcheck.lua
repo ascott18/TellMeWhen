@@ -34,6 +34,7 @@ Type.menuIcon = GetSpellTexture(21562)
 Type.usePocketWatch = 1
 Type.unitType = "unitid"
 Type.hasNoGCD = true
+Type.canControlGroup = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
@@ -128,23 +129,22 @@ local function BuffCheck_OnUpdate(icon, time)
 	local NAL = #icon.NameArray
 
 	local _, iconTexture, id, count, duration, expirationTime
-	local useUnit, absentUnit
+	local useUnit
 	
 	for u = 1, #Units do
 		local unit = Units[u]
 		if icon.UnitSet:UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
-			local unitHas = false
 			
-			local _iconTexture, _id, _count, _duration, _expirationTime
+			local _iconTexture, _id, _count, _duration, _expirationTime, _buffName
 			
 			if NAL > EFF_THRESHOLD then
 				for z = 1, huge do
 					-- Check by aura index
-					_, _, _iconTexture, _count, _, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, z, Filter)
+					_buffName, _, _iconTexture, _count, _, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, z, Filter)
 					
 					if not _id then
 						break
-					elseif (NameHash[_id] or NameHash[strlowerCache[_id]]) then
+					elseif (NameHash[_id] or NameHash[strlowerCache[_buffName]]) then
 						break
 					end
 				end
@@ -154,7 +154,7 @@ local function BuffCheck_OnUpdate(icon, time)
 					local iName = NameArray[i]
 					
 					-- Check by name
-					_, _, _iconTexture, _count, _, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, NameNameArray[i], nil, Filter)
+					_buffName, _, _iconTexture, _count, _, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, NameNameArray[i], nil, Filter)
 					
 					-- If the name was found but the ID didnt match, check by ID.
 					if _id and _id ~= iName and isNumber[iName] then
@@ -175,44 +175,44 @@ local function BuffCheck_OnUpdate(icon, time)
 			if _id and not useUnit then
 				iconTexture, id, count, duration, expirationTime, useUnit =
 				_iconTexture, _id, _count, _duration, _expirationTime, unit
-			end
-			
-			if not _id and not absentUnit then
-				absentUnit = unit
-				
-				if icon.Alpha > 0 then
-					break
-				end
+
+			elseif not _id and icon.Alpha > 0 and not icon:YieldInfo(true, unit) then
+				return
 			end
 		end
 	end
-	
-	if not Units[1] and icon.HideIfNoUnits then
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
+
+	icon:YieldInfo(false, useUnit, iconTexture, count, duration, expirationTime, id)
+end
+
+function Type:HandleInfo(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, id)
+	print(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, id)
+	if not icon.Units[1] and icon.HideIfNoUnits then
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			0,
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
 			icon.NameFirst,
-			nil, nil
+			unit, nil
 		)
-	elseif absentUnit then
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
+	elseif not id then
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			icon.Alpha,
-			iconTexture or icon.FirstTexture,
+			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			id or icon.NameFirst,
-			absentUnit, nil
+			icon.NameFirst,
+			unit, nil
 		)
-	elseif useUnit then
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
+	elseif id then
+		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			icon.UnAlpha,
 			iconTexture,
 			expirationTime - duration, duration,
 			count, count,
 			id,
-			useUnit, nil
+			unit, nil
 		)
 	end
 end
@@ -255,6 +255,7 @@ function Type:Setup(icon)
 	end
 
 	icon:SetUpdateFunction(BuffCheck_OnUpdate)
+
 	icon:Update()
 end
 
