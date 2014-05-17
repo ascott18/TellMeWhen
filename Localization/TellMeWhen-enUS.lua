@@ -2319,7 +2319,9 @@ Take a moment to check out what has changed in this version.
 
 You can view this any time with the following command:
 
-/tmw changelog]]
+/tmw changelog
+
+Close this window when you are ready to edit your icon.]]
 L["CHANGELOG_MSG"] = "Thanks for helping to test TellMeWhen %s! Type /tmw changelog to see what has changed."
 L["CHANGELOG_OKAY_OPENIE"] = "Okay, now open the Icon Editor"
 
