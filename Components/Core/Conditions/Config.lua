@@ -895,12 +895,12 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				local min, max = CndtGroup.Slider:GetMinMaxValues()
 				local mid = ((max-min)/2)+min
 				if conditionData.midt == true then
-					Mid = conditionData.formatter:Format(Mid)
+					mid = conditionData.formatter:Format(mid)
 				else
-					Mid = get(conditionData.midt, Mid)
+					mid = get(conditionData.midt, mid)
 				end
 
-				CndtGroup.Slider:SetStaticMidText(Mid)
+				CndtGroup.Slider:SetStaticMidText(mid)
 			else
 				CndtGroup.Slider:SetStaticMidText("")
 			end

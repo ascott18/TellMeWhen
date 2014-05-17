@@ -186,7 +186,6 @@ local function BuffCheck_OnUpdate(icon, time)
 end
 
 function Type:HandleInfo(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, id)
-	print(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, id)
 	if not unit then
 		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID",
 			0,
