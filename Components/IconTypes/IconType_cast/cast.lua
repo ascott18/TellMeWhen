@@ -31,6 +31,7 @@ Type.AllowNoName = true
 Type.usePocketWatch = 1
 Type.unitType = "unitid"
 Type.hasNoGCD = true
+Type.canControlGroup = true
 
 Type:RegisterIconDefaults{
 	Unit					= "player", 
@@ -125,28 +126,36 @@ local function Cast_OnUpdate(icon, time)
 				start, endTime = start/1000, endTime/1000
 				local duration = endTime - start
 
-				icon:SetInfo(
-					"alpha; texture; start, duration; reverse; spell; unit, GUID",
-					icon.Alpha,
-					iconTexture,
-					start, duration,
-					reverse,
-					name,
-					unit, nil
-				)
-
-				return
+				if not icon:YieldInfo(true, name, unit, iconTexture, start, duration, reverse) then
+					return
+				end
 			end
 		end
 	end
 
-	icon:SetInfo(
-		"alpha; start, duration; spell; unit, GUID",
-		icon.UnAlpha,
-		0, 0,
-		NameFirst,
-		Units[1], nil
-	)
+	icon:YieldInfo(false)
+end
+
+function Type:HandleInfo(icon, iconToSet, spell, unit, texture, start, duration, reverse)
+	if spell then
+		iconToSet:SetInfo(
+			"alpha; texture; start, duration; reverse; spell; unit, GUID",
+			icon.Alpha,
+			texture,
+			start, duration,
+			reverse,
+			spell,
+			unit, nil
+		)
+	else
+		iconToSet:SetInfo(
+			"alpha; start, duration; spell; unit, GUID",
+			icon.UnAlpha,
+			0, 0,
+			icon.NameFirst,
+			icon.Units[1], nil
+		)
+	end
 end
 
 
