@@ -148,6 +148,10 @@ function Group.GetGroupName(group, short)
 	return name .. " (" .. prepend .. format(L["fGROUP"], groupID) .. ")"
 end
 
+--- Alias for group:GetGroupName(). Exists so that groups and icons both have a obj:GetFullName() method.
+-- @name Group:GetFullName
+-- @paramsig 
+-- @return [string] This group's human-readable name.
 function Group.GetFullName(group)
 	return group:GetGroupName()
 end

@@ -487,6 +487,7 @@ function IconType:IsAllowedByView(viewName)
 	end
 end
 
+-- [REQUIRED IF USED, FALLBACK]
 --- Processes data passed from icon:YieldInfo(hasInfo, ...) and sets it on iconToSet. You must override this method if your icon type's methods call icon:YieldInfo().
 -- @param icon [TMW.Classes.Icon] The icon that yielded the info.
 -- @param iconToSet  [TMW.Classes.Icon] The icon that should recieve the yielded info.

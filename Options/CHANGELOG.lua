@@ -8,6 +8,8 @@ TMW.CHANGELOG = {
 [==[* You can now create global groups that exist for all characters on your account. These groups can be enabled and disabled on a per-profile basis. Changes made to these groups will be reflected for any character that they are enabled for.]==],
 [==[* Text Layouts are now defined on an account-wide basis instead of being defined for individual profiles.]==],
 [==[]==],
+[==[* Select icon types, when set on the first icon in a group, are now able to control an entire group with the data that they harvest.]==],
+[==[]==],
 [==[* All references from one icon or group to another in TellMeWhen are now tracked by a unique ID. This ID will persist no matter where it is moved or exported to.]==],
 [==[** This includes:]==],
 [==[*** DogTags]==],

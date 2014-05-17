@@ -220,7 +220,7 @@ function Icon.OnHide(icon)
 	icon.NextUpdateTime = 0
 end
 
---- Returns the settings table that holds the settings for the icon.
+--- Returns the settings table that holds the settings for the icon. If the icon is controlled, will return the settings of its controller.
 -- @name Icon:GetSettings
 -- @paramsig
 -- @return [{{{TMW.Icon_Defaults}}}] The settings table that holds the settings for the icon.
@@ -234,12 +234,10 @@ function Icon.GetSettings(icon)
 	end
 end
 
---- Returns the settings table that holds the settings for the icon, ignoring any overrides that result from the icon's group being a controleld group.
+--- Returns the settings table that holds the settings for the icon, ignoring any overrides that result from the icon's group being a controlled group.
 -- @name Icon:GetRealSettings
 -- @paramsig
 -- @return [{{{TMW.Icon_Defaults}}}] The settings table that holds the settings for the icon.
--- @usage local ics = icon:GetSettings()
--- print(icon:GetName() .. "'s enabled setting is set to " .. ics.Enabled)
 function Icon.GetRealSettings(icon)
 	return icon.group:GetSettings().Icons[icon:GetID()]
 end
@@ -321,6 +319,10 @@ function Icon.GetIconName(icon, texture)
 	end
 end
 
+--- Alias for icon:GetIconName(1). Exists so that groups and icons both have a obj:GetFullName() method.
+-- @name Icon:GetFullName
+-- @paramsig 
+-- @return [string] The string containing the texture of the icon plus the name of the group and the ID of the icon.
 function Icon.GetFullName(icon)
 	return icon:GetIconName(1)
 end
@@ -645,15 +647,15 @@ function Icon.Update(icon, force)
 
 		if iconUpdateNeeded then
 
-			icon.HANDLED_ONE = false
+			icon.__yieldHandledOnce = false
 			if not icon:IsGroupController() then
 				icon:UpdateFunction(time)
 			else
-				icon.CONTROL_ICON_INDEX = 0
+				icon.__controlledIconIndex = 0
 				icon:UpdateFunction(time)
 
 				if TMW.Locked then
-					for i = icon.CONTROL_ICON_INDEX+1, icon.group.numIcons do
+					for i = icon.__controlledIconIndex+1, icon.group.numIcons do
 						local ic = icon.group[i]
 						if ic then
 							ic:Hide()
@@ -670,23 +672,29 @@ function Icon.Update(icon, force)
 end
 
 
+--- Yields info harvested from an icon's UpdateFunction. This info will be passed to the icon type's Type:HandeInfo(icon, iconToSet, ...) method if appropriate.
+-- More specifically, the info passed to icon:YieldInfo() will be passed on to Type:HandeInfo if either the icon is not a group controller (i.e. it is a normal icon), or if there are mor icons in the group that may be filled with the attributes harvested by the icon type. A call to icon:YieldInfo(false, ...) will only pass its parameters to Type:HandeInfo() if no calls to icon:YieldInfo(true, ...) have been made during this run of the icon's UpdateFunction. Behavior is unpredictable if there are no call to icon:YieldInfo() before an UpdateFunction returns. Therefore, an UpdateFunction should always conclude with a call to icon:YieldInfo(false, ...)
+-- @name Icon:YieldInfo
+-- @paramsig isNotDone, ...
+-- @param isNotDone [boolean] true if there might be more calls to Icon:YieldInfo(true, ...) before the UpdateFunction is finished. false if this call is the last one before the UpdateFunction returns. 
+-- @param ... [vararg] The parameters to be passed to the call to Type:HandeInfo(icon, iconToSet, ...) if it is appropriate to do so. This can be empty if isNotDone is false. It should never be empty if isNotDone is true.
 function Icon.YieldInfo(icon, isNotDone, ...)
-	if not isNotDone and icon.HANDLED_ONE then
+	if not isNotDone and icon.__yieldHandledOnce then
 		return nil
 	end
-	icon.HANDLED_ONE = true
+	icon.__yieldHandledOnce = true
 
 	if not icon:IsGroupController() then
 		icon.typeData:HandleInfo(icon, icon, ...)
 		return nil
 	else
-		local nextIconIndex = (icon.CONTROL_ICON_INDEX or 0) + 1
+		local nextIconIndex = (icon.__controlledIconIndex or 0) + 1
 		if nextIconIndex > icon.group.numIcons then
 			return nil
 		end
 
 		
-		icon.CONTROL_ICON_INDEX = nextIconIndex
+		icon.__controlledIconIndex = nextIconIndex
 		local destIcon = icon.group[nextIconIndex]
 		if not destIcon then
 			return
@@ -703,19 +711,21 @@ function Icon.YieldInfo(icon, isNotDone, ...)
 	end
 end
 
+--- Returns whether or not an icon is controlling an entire group.
+-- @name Icon:IsGroupController
+-- @paramsig
+-- @return isController [boolean] True if this icon is controlling its group, otherwise false.
 function Icon.IsGroupController(icon)
 	return icon.group.Controller ~= nil and icon.group.Controller == icon
 end
 
+--- Returns whether or not an icon is controlled by the first icon in its group.
+-- @name Icon:IsControlled
+-- @paramsig
+-- @return isController [boolean] True if this icon is controlled by its group's first icon, otherwise false.
 function Icon.IsControlled(icon)
 	return icon.group.Controller ~= nil and icon.group.Controller ~= icon
 end
-
-function Icon.IsGroupControlled(icon)
-	return icon.group.Controller ~= nil
-end
-
-
 
 
 -- [EVENT HANDLER] (no documentation needed)
