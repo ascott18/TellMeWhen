@@ -216,6 +216,12 @@ if DogTag and DogTag.tagError then
 	end)
 end
 
+local function ttText(self)
+	GameTooltip:AddLine(L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"]:format(""), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+	GameTooltip:AddLine(self.DefaultText, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+	return nil
+end
+
 function TEXT:LoadConfig()
 	if not TellMeWhen_TextDisplayOptions then return end
 	
@@ -255,7 +261,8 @@ function TEXT:LoadConfig()
 			else
 				DefaultText = ("%q"):format(DogTag:ColorizeCode(DefaultText))
 			end
-			TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"]:format(DefaultText), nil, 1)
+			frame.Default.DefaultText = DefaultText
+			TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", ttText, nil, 1)
 			
 			-- Ttest the string and its tags & syntax
 			frame.Error:SetText(TMW:TestDogTagString(CI.icon, text))
