@@ -98,6 +98,8 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 		if newColumns ~= group.Columns or newRows ~= group.Rows then
 			local gs = group:GetSettings()
 
+			local ics_old = TMW.CI.ics
+
 			local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 			GroupModule_GroupPosition:UpdatePositionAfterMovement()
 
@@ -111,6 +113,9 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 	
 			group:Setup()
 
+			if TMW.CI.ics ~= ics_old then
+				TMW.IE:Load(1, false)
+			end
 		end
 	end,
 }
