@@ -62,6 +62,7 @@ local DD = TMW.C.Config_DropDownMenu:New("Frame", nil, UIParent, "TMW_DropDownMe
 		end
 	end,
 })
+DD:Hide()
 
 
 Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
