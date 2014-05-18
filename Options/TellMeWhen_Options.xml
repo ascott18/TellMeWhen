@@ -2394,7 +2394,7 @@
 									end,
 								})
 								function self:GetSettingTable()
-									return TMW.CI.group:GetSettings()
+									return TMW.CI.group and TMW.CI.group:GetSettings()
 								end
 
 								self:ConstrainLabel(self:GetParent(), "RIGHT")

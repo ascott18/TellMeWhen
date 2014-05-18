@@ -566,7 +566,7 @@ end
 
 function EVENTS:GetEventSettings(eventID)
 
-	return TMW.CI.ics.Events[eventID or EVENTS.currentEventID]
+	return TMW.CI.ics and TMW.CI.ics.Events[eventID or EVENTS.currentEventID]
 end
 
 function EVENTS:GetEventData(event)

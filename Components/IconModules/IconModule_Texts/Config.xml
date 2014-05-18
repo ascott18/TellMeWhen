@@ -117,7 +117,7 @@
 						})
 
 						function self:GetSettingTable()
-							return TMW.CI.icon:GetSettingsPerView().Texts
+							return TMW.CI.icon and TMW.CI.icon:GetSettingsPerView().Texts
 						end
 					</OnLoad>
 				</Scripts>
