@@ -201,6 +201,101 @@ function IconPosition_Sortable:PositionIcons()
 	end
 end
 
+function IconPosition_Sortable:AdjustIconsForModNumRowsCols(deltaRows, deltaCols)
+	-- do nothing for rows
+
+	local group = self.group
+	local LayoutDirection = group.LayoutDirection
+
+	if not group.__iconPosClobbered then
+		group.__iconPosClobbered = setmetatable({}, {__index = function(t, k)
+            t[k] = {}
+            return t[k]
+		end})
+	end
+
+	if deltaRows ~= 0 and LayoutDirection >= 5 then
+
+		local rows_old = group.Rows
+		local rows_new = group.Rows + deltaRows
+
+		
+		local iconsCopy = TMW.UTIL.shallowCopy(group:GetSettings().Icons)
+		wipe(group:GetSettings().Icons)
+
+		for iconID, ics in pairs(iconsCopy) do
+			local row_old = (iconID - 1) % rows_old + 1
+			local column_old = ceil(iconID / rows_old)
+
+			local row_new = (iconID - 1) % rows_new + 1
+			local column_new = ceil(iconID / rows_new)
+
+
+			local newIconID = iconID + (column_old-1)*deltaRows
+
+
+		    if row_old > rows_new then
+		    	if self:ClobberCheck(ics) then
+		    	    group.__iconPosClobbered[row_old][column_old] = ics
+			    end
+		    else
+		    	group:GetSettings().Icons[newIconID] = ics
+
+		    	if row_old == rows_old then
+		    		for i = rows_old + 1, rows_new do
+		    			local newIconID = newIconID + i - rows_old
+		    			local column_new = ceil(newIconID / rows_new)
+
+		    			group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[i][column_new]
+		    		end
+		    	end
+		    end
+		end
+
+		-- Causes a whole lot of warnings that are wrong if we don't do this.
+		wipe(TMW.ValidityCheckQueue)
+
+	elseif deltaCols ~= 0 and LayoutDirection <= 4 then
+		local columns_old = group.Columns
+		local columns_new = group.Columns + deltaCols
+
+		
+		local iconsCopy = TMW.UTIL.shallowCopy(group:GetSettings().Icons)
+		wipe(group:GetSettings().Icons)
+
+		for iconID, ics in pairs(iconsCopy) do
+			local row_old = ceil(iconID / columns_old)
+			local column_old = (iconID - 1) % columns_old + 1
+
+			local row_new = ceil(iconID / columns_new)
+			local column_new = (iconID - 1) % columns_new + 1
+
+			local newIconID = iconID + (row_old-1)*deltaCols
+
+
+		    if column_old > columns_new then
+		    	if self:ClobberCheck(ics) then
+			        group.__iconPosClobbered[column_old][row_old] = ics
+			    end
+		    else
+		    	group:GetSettings().Icons[newIconID] = ics
+
+		    	if column_old == columns_old then
+		    		for i = columns_old + 1, columns_new do
+		    			local newIconID = newIconID + i - columns_old
+		    			local row_new = ceil(newIconID / columns_new)
+
+		    			group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[i][row_new]
+		    		end
+		    	end
+		    end
+		end
+
+		-- Causes a whole lot of warnings that are wrong if we don't do this.
+		wipe(TMW.ValidityCheckQueue)
+	end
+end
+
 
 function IconPosition_Sortable:TMW_ONUPDATE_TIMECONSTRAINED_POST(event, time, Locked)
 	if self.iconSortNeeded then

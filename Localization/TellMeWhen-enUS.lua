@@ -182,6 +182,8 @@ L["RESIZE_TOOLTIP_SCALEXY"] = [[|cff7fffffClick-and-drag|r to scale
 L["RESIZE_TOOLTIP_SCALEY_SIZEX"] = [[|cff7fffffClick-and-drag|r to scale]]
 L["RESIZE_TOOLTIP_CHANGEDIMS"] = [[|cff7fffffRight-Click-and-drag|r to change number of groups and columns]]
 
+L["RESIZE_GROUP_CLOBBERWARN"] = [[When shrinking a group using |cff7fffffRight-Click-and-drag|r, you may clobber some icons. These icons have been saved temporarily and will be restored if you increase the size again via |cff7fffffRight-Click-and-drag|r, but will be lost forever if you log out or reload your UI. ]]
+
 L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
 L["CONDITIONORMETA_CHECKINGINVALID_GROUP"] = "Warning! Group %d is checking an invalid icon (Group %d, Icon %d)"
 L["WARN_DRMISMATCH"] = [[Warning! You are checking the diminishing returns on spells from two different known categories.

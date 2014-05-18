@@ -101,6 +101,11 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 			local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 			GroupModule_GroupPosition:UpdatePositionAfterMovement()
 
+
+			local GroupModule_IconPosition = group:GetModuleOrModuleChild("GroupModule_IconPosition")
+			GroupModule_IconPosition:AdjustIconsForModNumRowsCols(newRows - group.Rows, newColumns - group.Columns)
+
+
 			gs.Rows = newRows
 			gs.Columns = newColumns
 	

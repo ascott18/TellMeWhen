@@ -45,7 +45,7 @@ TMW.CHANGELOG = {
 [==[]==],
 [==[====Group Modules====]==],
 [==[* You can now anchor groups to the cursor.]==],
-[==[* You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group.]==],
+[==[* You can now right-click-and-drag the group resize handle to easily change the number of rows and columns of a group, and doing so with this method will preserve the relative positions of icons within a group.]==],
 [==[* Added group settings that allow you to specify when a group should be shown based on the role that your current specialization fulfills.]==],
 [==[]==],
 [==[====Icon Modules====]==],

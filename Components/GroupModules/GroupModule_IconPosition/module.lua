@@ -83,6 +83,72 @@ function IconPosition:PositionIcons()
 	end
 end
 
+local clobberWarned = false
+function IconPosition:ClobberCheck(ics)
+	if not TMW:DeepCompare(TMW.DEFAULT_ICON_SETTINGS, ics) then
+		if not clobberWarned then
+			TMW:Print(TMW.L["RESIZE_GROUP_CLOBBERWARN"])
+			clobberWarned = true
+		end
+		return true
+	end
+
+	return false -- signal that we don't care about these icon settings.
+end
+
+function IconPosition:AdjustIconsForModNumRowsCols(deltaRows, deltaCols)
+	-- do nothing for rows
+
+	local group = self.group
+
+	if deltaCols ~= 0 then
+		if not group.__iconPosClobbered then
+			group.__iconPosClobbered = setmetatable({}, {__index = function(t, k)
+	            t[k] = {}
+	            return t[k]
+			end})
+		end
+
+		local columns_old = group.Columns
+		local columns_new = group.Columns + deltaCols
+
+		
+		local iconsCopy = TMW.UTIL.shallowCopy(group:GetSettings().Icons)
+		wipe(group:GetSettings().Icons)
+
+		for iconID, ics in pairs(iconsCopy) do
+			local row_old = ceil(iconID / columns_old)
+			local column_old = (iconID - 1) % columns_old + 1
+
+			local row_new = ceil(iconID / columns_new)
+			local column_new = (iconID - 1) % columns_new + 1
+
+			local newIconID = iconID + (row_old-1)*deltaCols
+
+
+		    if column_old > columns_new then
+		    	if self:ClobberCheck(ics) then
+			        group.__iconPosClobbered[row_old][column_old] = ics
+			    end
+		    else
+		    	group:GetSettings().Icons[newIconID] = ics
+
+		    	if column_old == columns_old then
+		    		for i = columns_old + 1, columns_new do
+		    			local newIconID = newIconID + i - columns_old
+		    			local row_new = ceil(newIconID / columns_new)
+
+		    			group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[row_new][i]
+		    		end
+		    	end
+		    end
+		end
+
+		-- Causes a whole lot of warnings that are wrong if we don't do this.
+		wipe(TMW.ValidityCheckQueue)
+	end
+end
+
 
 function IconPosition:TMW_GROUP_SETUP_POST(event, group)
 	if self.group == group then

@@ -17,7 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-
+local UTIL = {}
+TMW.UTIL = UTIL
 
 function TMW.approachTable(t, ...)
 	for i=1, select("#", ...) do
@@ -31,6 +32,18 @@ function TMW.approachTable(t, ...)
 	end
 	return t
 end
+
+function UTIL.shallowCopy(t)
+	local new = {}
+	for k, v in pairs(t) do
+		new[k] = v
+	end
+	return new
+end
+
+
+
+
 
 local Formatter = TMW:NewClass("Formatter"){
 	OnNewInstance = function(self, fmt)
