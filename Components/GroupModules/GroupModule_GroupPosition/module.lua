@@ -21,6 +21,9 @@ local print = TMW.print
 local GroupPosition = TMW:NewClass("GroupModule_GroupPosition", "GroupModule")
 
 GroupPosition:RegisterGroupDefaults{
+	Scale			= 2.0,
+	Level			= 10,
+
 	Point = {
 		point 		  = "CENTER",
 		relativeTo 	  = "UIParent",
@@ -255,7 +258,9 @@ function GroupPosition:SetPos()
 		end
 	end
 	
-	
+	-- For some reason this was 1 on one of my groups, which caused some issues with animations
+	gs.Level = max(gs.Level, 5)
+
 	group:SetFrameStrata(gs.Strata)
 	group:SetFrameLevel(gs.Level)
 	group:SetScale(gs.Scale)
