@@ -2993,7 +2993,12 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		if data.min and data.max then
 			self:SetMinMaxValues(data.min, data.max)
 		end
+		if data.range then
+			self:SetRange(data.range)
+		end
+		
 		self:SetValueStep(data.step or self:GetValueStep() or 1)
+		self:SetWheelStep(data.wheelStep)
 		
 		self.text:SetText(data.label or data.title)
 		
@@ -3056,6 +3061,13 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	GetValueStep = function(self)
 		local step = self:GetValueStep_base()
 		return floor((step*10^5) + .5) / 10^5
+	end,
+
+	SetWheelStep = function(self, wheelStep)
+		self.wheelStep = wheelStep
+	end,
+	GetWheelStep = function(self)
+		return self.wheelStep or self:GetValueStep()
 	end,
 
 
@@ -3127,7 +3139,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 				delta = delta*60
 			end
 			if delta == 1 or delta == -1 then
-				delta = delta*(self:GetValueStep() or 1)
+				delta = delta*(self:GetWheelStep() or 1)
 			end
 
 			local level = self:GetValue() + delta
@@ -3181,7 +3193,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		end
 
 		if not self.EditBox then
-			self.EditBox = self.Config_EditBox_Slider:New("EditBox", self:GetName() .. "Box", self:GetParent(), "TellMeWhen_InputBoxTemplate", nil, {})
+			local name = self:GetName() and self:GetName() .. "Box" or nil
+			self.EditBox = self.Config_EditBox_Slider:New("EditBox", name, self:GetParent(), "TellMeWhen_InputBoxTemplate", nil, {})
 			self.EditBox.Slider = self
 
 			self.EditBox:SetPoint("TOP", self, "TOP", 0, -4)
