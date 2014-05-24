@@ -632,9 +632,7 @@
 				self.scrollPercentage = 1/2
 			</OnLoad>
 			<OnScrollRangeChanged>
-				if ( not yrange ) then
-					yrange = self:GetVerticalScrollRange();
-				end
+				local yrange = self:GetVerticalScrollRange()
 
 				if ( floor(yrange) == 0 ) then
 					self.ScrollBar:Hide()
@@ -801,6 +799,7 @@
 								self:RegisterForDrag("LeftButton")
 							</OnLoad>
 							<OnDragStart>
+								local _
 								self.IsScrolling = true
 								_, self.startY = GetCursorPosition()
 								self.startHeight = select(5, self:GetPoint(1))
