@@ -951,16 +951,23 @@ L["OUTLINE_NO"] = "No Outline"
 L["OUTLINE_THIN"] = "Thin Outline"
 L["OUTLINE_THICK"] = "Thick Outline"
 L["OUTLINE_MONOCHORME"] = "Monochrome"
-L["UIPANEL_FONT_CONSTRAINWIDTH"] = "Constrain Width"
-L["UIPANEL_FONT_CONSTRAINWIDTH_DESC"] = [[Check this to force the text to fit within the width of the icon if positioned appropriately.
 
-Uncheck to allow text to extend wider than the icon.]]
+
+L["UIPANEL_FONT_WIDTH"] = "Width"
+L["UIPANEL_FONT_WIDTH_DESC"] = [[Set the maximum width of the text display. If set to 0, it will extend as wide as possible.
+
+ If this text display is anchored on both its left and right sides, this setting will have no effect.]]
+L["UIPANEL_FONT_HEIGHT"] = "Height"
+L["UIPANEL_FONT_HEIGHT_DESC"] = [[Set the maximum height of the text display. If set to 0, it will extend as tall as possible.
+
+ If this text display is anchored on both its top and bottom sides, this setting will have no effect.]]
+
 L["UIPANEL_FONT_XOFFS"] = "X Offset"
 L["UIPANEL_FONT_XOFFS_DESC"] = "The x-axis offset of the anchor"
 L["UIPANEL_FONT_YOFFS"] = "Y Offset"
 L["UIPANEL_FONT_YOFFS_DESC"] = "The y-axis offset of the anchor"
-L["UIPANEL_FONT_JUSTIFY"] = "Justification"
-L["UIPANEL_FONT_JUSTIFY_DESC"] = "Set the justification (Left/Center/Right) for this text display."
+L["UIPANEL_FONT_JUSTIFY"] = "Horizontal Justification"
+L["UIPANEL_FONT_JUSTIFY_DESC"] = "Set the horizontal justification (Left/Center/Right) for this text display."
 L["UIPANEL_FONT_JUSTIFYV"] = "Vertical Justification"
 L["UIPANEL_FONT_JUSTIFYV_DESC"] = "Set the vertical justification (Top/Center/Bottom) for this text display."
 L["UIPANEL_POSITION"] = "Position"

@@ -533,6 +533,7 @@ local textLayoutTemplate = {
 	disabled = function(info)
 		local layout = findlayout(info)
 		local stringSetting = info[textLayoutInfo.stringSetting]
+
 		return stringSetting and TEXT:GetTextLayoutSettings(layout).NoEdit
 	end,
 	hidden = function(info)
@@ -697,7 +698,10 @@ local anchorSet = {
 	name = function(info, val)
 		return L["UIPANEL_ANCHORNUM"]:format(info[textLayoutInfo.stringSetting + 1])
 	end,
-	order = 30,
+	order = function(info)
+		local anchorNum = tonumber(info[textLayoutInfo.stringSetting + 1])
+		return anchorNum + 30
+	end,
 	type = "group",
 	guiInline = true,
 	dialogInline = true,			
@@ -853,7 +857,7 @@ textFontStringTemplate = {
 	set = function(info, val)
 		local layout = findlayout(info)
 		local display = tonumber(info[textLayoutInfo.display])
-		local setting = info[textLayoutInfo.stringSetting]
+		local setting = info[#info]
 
 		TEXT:GetTextLayoutSettings(layout)[display][setting] = val
 
@@ -863,7 +867,7 @@ textFontStringTemplate = {
 	get = function(info)
 		local layout = findlayout(info)
 		local display = tonumber(info[textLayoutInfo.display])
-		local setting = info[textLayoutInfo.stringSetting]
+		local setting = info[#info]
 
 		return TEXT:GetTextLayoutSettings(layout)[display][setting]
 	end,
@@ -890,7 +894,7 @@ textFontStringTemplate = {
 			set = function(info, val)
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
-				local setting = info[textLayoutInfo.stringSetting]
+				local setting = info[#info]
 
 				assert(setting == "SkinAs")
 
@@ -928,7 +932,8 @@ textFontStringTemplate = {
 			set = function(info, val)
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
-				local setting = info[textLayoutInfo.stringSetting + 1]
+				local setting = info[#info]
+
 				TEXT:GetTextLayoutSettings(layout)[display][setting] = val
 
 				UpdateIconsUsingTextLayout(layout)
@@ -937,7 +942,7 @@ textFontStringTemplate = {
 			get = function(info)
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
-				local setting = info[textLayoutInfo.stringSetting + 1]
+				local setting = info[#info]
 
 				return TEXT:GetTextLayoutSettings(layout)[display][setting]
 			end,
@@ -1007,7 +1012,7 @@ textFontStringTemplate = {
 			set = function(info, val)
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
-				local setting = info[textLayoutInfo.stringSetting + 1]
+				local setting = info[#info]
 
 				TEXT:GetTextLayoutSettings(layout)[display][setting] = val
 
@@ -1017,7 +1022,7 @@ textFontStringTemplate = {
 			get = function(info)
 				local layout = findlayout(info)
 				local display = tonumber(info[textLayoutInfo.display])
-				local setting = info[textLayoutInfo.stringSetting + 1]
+				local setting = info[#info]
 
 				return TEXT:GetTextLayoutSettings(layout)[display][setting]
 			end,
@@ -1036,7 +1041,7 @@ textFontStringTemplate = {
 					type = "select",
 					values = TMW.justifyPoints,
 					style = "dropdown",
-					order = 1,
+					order = 2,
 					disabled = function(info)
 						local layout = findlayout(info)
 						return TEXT:GetTextLayoutSettings(layout).NoEdit
@@ -1048,7 +1053,7 @@ textFontStringTemplate = {
 					type = "select",
 					values = TMW.justifyVPoints,
 					style = "dropdown",
-					order = 1,
+					order = 3,
 					disabled = function(info)
 						local layout = findlayout(info)
 						return TEXT:GetTextLayoutSettings(layout).NoEdit
@@ -1058,7 +1063,7 @@ textFontStringTemplate = {
 					name = L["TEXTLAYOUTS_ADDANCHOR"],
 					desc = L["TEXTLAYOUTS_ADDANCHOR_DESC"],
 					type = "execute",
-					order = 2,
+					order = 4,
 					func = function(info)
 						local layout = findlayout(info)
 						local display = tonumber(info[textLayoutInfo.display])
@@ -1070,10 +1075,37 @@ textFontStringTemplate = {
 						UpdateIconsUsingTextLayout(layout)
 						TEXT:LoadConfig()
 					end,
-					disabled = function(info)
-						local layout = findlayout(info)
-						return TEXT:GetTextLayoutSettings(layout).NoEdit
-					end,
+				},
+
+
+				size = {
+					name = "",
+					order = 1,
+					type = "group",
+					guiInline = true,
+					dialogInline = true,
+					args = {
+						Width = {
+							name = L["UIPANEL_FONT_WIDTH"],
+							desc = L["UIPANEL_FONT_WIDTH_DESC"],
+							type = "range",
+							order = 1,
+							min = 0,
+							softMax = 60,
+							step = 1,
+							bigStep = 1,
+						},
+						Height = {
+							name = L["UIPANEL_FONT_HEIGHT"],
+							desc = L["UIPANEL_FONT_HEIGHT_DESC"],
+							type = "range",
+							order = 2,
+							min = 0,
+							softMax = 60,
+							step = 1,
+							bigStep = 1,
+						},
+					},
 				},
 			},
 		},

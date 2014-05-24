@@ -60,6 +60,9 @@ TMW:RegisterDatabaseDefaults{
 					JustifyV	 	= "CENTER",     -- 
 					Outline 	  	= "THICKOUTLINE",   -- Font outline
 					Shadow			= 0,
+
+					Height			= 0, -- If we set a fontString's dimensions to 0,
+					Width			= 0, -- it will auto adjust, which is default behavior.
 					
 					Anchors = {
 						n = 1,
@@ -730,6 +733,9 @@ function Texts:SetupForIcon(sourceIcon)
 					
 					func(fontString, anchorSettings.point, relativeTo, anchorSettings.relativePoint, anchorSettings.x, anchorSettings.y)
 				end
+
+				fontString:SetWidth(fontStringSettings.Width)
+				fontString:SetHeight(fontStringSettings.Height)
 			end
 		end
 	end
