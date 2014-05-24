@@ -689,6 +689,7 @@ function Texts:SetupForIcon(sourceIcon)
 				fontString:SetFont(LSM:Fetch("font", fontStringSettings.Name), fontStringSettings.Size, fontStringSettings.Outline)
 				
 				fontString:SetJustifyH(fontStringSettings.Justify)
+				fontString:SetJustifyV(fontStringSettings.JustifyV)
 			end
 		end
 		
