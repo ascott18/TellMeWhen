@@ -642,6 +642,9 @@ local textLayoutTemplate = {
 				local Item = TMW.Classes.SettingsItem:New("textlayout")
 				Item.Settings = TEXT:GetTextLayoutSettings(layout)
 				Item.Version = TELLMEWHEN_VERSIONNUMBER
+				Item.Version = TELLMEWHEN_VERSIONNUMBER
+				Item.ImportSource = TMW.C.ImportSource.types.Profile
+
 				Item:SetExtra("GUID", GUID)
 
 				Item:Import(GUID)
@@ -1032,6 +1035,18 @@ textFontStringTemplate = {
 					desc = L["UIPANEL_FONT_JUSTIFY_DESC"],
 					type = "select",
 					values = TMW.justifyPoints,
+					style = "dropdown",
+					order = 1,
+					disabled = function(info)
+						local layout = findlayout(info)
+						return TEXT:GetTextLayoutSettings(layout).NoEdit
+					end,
+				},
+				JustifyV = {
+					name = L["UIPANEL_FONT_JUSTIFYV"],
+					desc = L["UIPANEL_FONT_JUSTIFYV_DESC"],
+					type = "select",
+					values = TMW.justifyVPoints,
 					style = "dropdown",
 					order = 1,
 					disabled = function(info)

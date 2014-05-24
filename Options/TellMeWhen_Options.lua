@@ -82,6 +82,11 @@ TMW.justifyPoints = {
 	CENTER = L["CENTER"],
 	RIGHT = L["RIGHT"],
 }
+TMW.justifyVPoints = {
+	TOP = L["TOP"],
+	CENTER = L["CENTER"],
+	BOTTOM = L["BOTTOM"],
+}
 
 TMW.operators = {
 	{ tooltipText = L["CONDITIONPANEL_EQUALS"], 		value = "==", 	text = "==" },
@@ -2996,7 +3001,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		if data.range then
 			self:SetRange(data.range)
 		end
-		
+
 		self:SetValueStep(data.step or self:GetValueStep() or 1)
 		self:SetWheelStep(data.wheelStep)
 		
