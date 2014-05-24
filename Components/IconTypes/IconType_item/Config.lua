@@ -79,6 +79,7 @@ function Module:Entry_AddToList_2(f, id)
 	end
 end
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+
 	local atBeginning = SUG.atBeginning
 
 	for i = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED do
@@ -89,6 +90,11 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	if SUG.inputType == "number" then
 		local len = #SUG.lastName - 1
 		local match = tonumber(SUG.lastName)
+
+		if GetItemInfo(match) then
+			suggestions[#suggestions + 1] = match
+		end
+	
 		for id in pairs(self.Slots) do
 			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
 		--	if strfind(id, atBeginning) then

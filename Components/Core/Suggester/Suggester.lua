@@ -86,6 +86,10 @@ TMW:RegisterCallback("TMW_SPELLCACHE_COMPLETED", SUG)
 
 ---------- Suggesting ----------
 function SUG:DoSuggest()
+	if not SUG.Suggest:IsShown() then
+		return
+	end
+
 	wipe(SUGpreTable)
 
 	local tbl = SUG.CurrentModule:Table_Get()
@@ -574,12 +578,20 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 function Module:GET_ITEM_INFO_RECEIVED()
 	if SUG.CurrentModule and SUG.CurrentModule.moduleName:find("item") then
-		SUG:SuggestingComplete()
+		SUG:CancelTimer(SUG.itemDoSuggestTimer, 1)
+		SUG.itemDoSuggestTimer = SUG:ScheduleTimer("DoSuggest", 0.1)
 	end
 end
 Module:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 function Module:Table_Get()
 	return TMW:GetModule("ItemCache"):GetCache()
+end
+function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+	local id = tonumber(SUG.lastName)
+
+	if GetItemInfo(id) then
+		suggestions[#suggestions + 1] = id
+	end
 end
 function Module:Entry_AddToList_1(f, id)
 	if id > INVSLOT_LAST_EQUIPPED then
