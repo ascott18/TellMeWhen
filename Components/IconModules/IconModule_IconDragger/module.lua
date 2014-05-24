@@ -42,7 +42,7 @@ end)
 
 
 local icons = {}
-local DD = TMW.C.Config_DropDownMenu:New("Frame", nil, UIParent, "TMW_DropDownMenuTemplate", nil, {
+local DD = TMW.C.Config_DropDownMenu:New("Frame", "TMW_ID_DD", UIParent, "TMW_DropDownMenuTemplate", nil, {
 	OnClick = function(button, self, icon)
 		icon.group:Raise()
 

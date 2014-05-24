@@ -23,7 +23,7 @@ local Module = TMW:NewClass("IconModule_IconEditorLoader", "IconModule")
 
 
 local icons = {}
-local DD = TMW.C.Config_DropDownMenu:New("Frame", nil, UIParent, "TMW_DropDownMenuTemplate", nil, {
+local DD = TMW.C.Config_DropDownMenu:New("Frame", "TMW_IELoaderDD", UIParent, "TMW_DropDownMenuTemplate", nil, {
 	OnClick = function(button, self, icon)
 		icon.group:Raise()
 		TMW.IE:Load(nil, icon)
