@@ -843,6 +843,7 @@
 						self:GetParent():GetScript("OnMouseWheel")(self:GetParent(), delta)
 					</OnMouseWheel>
 					<OnMouseDown>
+						local delta
 						local _, y = GetCursorPosition()
 						if self.Thumb:GetBottom()*self:GetEffectiveScale() > y then
 							delta = -1
