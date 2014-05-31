@@ -1817,7 +1817,7 @@ This mainly happens when you leave configuration mode, but it also happens when 
 
 This may also be thought of as a "soft reset" of the icon.
 
-This event may be useful in creating a default animation state for the icon.]]
+This event may be useful in creating a default state for the icon.]]
 
 L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_NOEVENT"] = "Unconfigured Event"

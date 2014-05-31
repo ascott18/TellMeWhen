@@ -439,7 +439,7 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 	events = TMW:CreateDogTagEventString("BUFF_SOURCEUNIT"),
 	ret = "string",
 	doc = L["DT_DOC_AuraSource"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
-	example = ('[Source] => "target"; [Source:Name] => "Kobold"; [Source(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Source(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
+	example = ('[AuraSource] => "target"; [AuraSource:Name] => "Kobold"; [AuraSource(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [AuraSource(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
 	category = L["ICON"],
 })
 

@@ -163,6 +163,7 @@ local colors = {
 local extendedTags = {
 	Duration = "Duration:TMWFormatDuration",
 	Source = "Source:Name",
+	AuraSource = "AuraSource:Name",
 	Destination = "Destination:Name",
 	Unit = "Unit:Name",
 	PreviousUnit = "PreviousUnit:Name",
