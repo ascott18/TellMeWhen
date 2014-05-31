@@ -84,7 +84,7 @@ TMW.justifyPoints = {
 }
 TMW.justifyVPoints = {
 	TOP = L["TOP"],
-	CENTER = L["CENTER"],
+	MIDDLE = L["CENTER"],
 	BOTTOM = L["BOTTOM"],
 }
 
