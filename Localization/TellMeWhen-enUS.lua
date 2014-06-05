@@ -1579,6 +1579,7 @@ L["DT_DOC_strfind"] = [[Gives access to Lua's string.find function for DogTags f
 
 Returns the position of the first occurrence of pattern within value, starting at the init'th character.]]
 L["DT_DOC_Name"] = "Returns the name of the unit. This is an improved version of the default [Name] tag provided by DogTag."
+L["DT_DOC_StripServer"] = "Removes the server from a unit name. This is considered to be everything after the last dash in the name."
 
 L["DT_DOC_AuraSource"] = "Returns the source unit of the buff/debuff that the icon is checking. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
 

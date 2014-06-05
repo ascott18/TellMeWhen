@@ -171,13 +171,10 @@ function NAMES:TryToAcquireUnit(input, isName)
 	end
 end]]
 
-function NAMES:TryToAcquireName(input, shouldColor, isName)
+function NAMES:TryToAcquireName(input, shouldColor)
 	if not input then return end
 
-	local name, server
-	if not isName then
-		name, server = UnitName(input or "")
-	end
+	local name, server = UnitName(input or "")
 
 	if name then	-- input was a unitID if name was obtained.
 		if server and server ~= "" then
@@ -254,6 +251,19 @@ DogTag:AddTag("TMW", "Name", {
 		format(NAMES:TryToAcquireName("player", true), NAMES:TryToAcquireName("player", false), NAMES.ClassColors.DRUID .. "Randomdruid|r")
 	,
 	category = L["MISCELLANEOUS"],
+})
+
+DogTag:AddTag("TMW", "StripServer", {
+	alias = "gsub(name, '(.*)%-[^|]*(.*)', '%1%2')",
+	arg = {
+		'name', 'string', '@req',
+	},
+	ret = "string",
+	doc = L["DT_DOC_StripServer"],
+	example = ('["%s-%s":StripServer] => %q; [Name:StripServer] => %q'):
+		format(UnitFullName("player"), select(2, UnitFullName("player")), UnitFullName("player"), NAMES:TryToAcquireName("player", true))
+	,
+	category = L["TEXTMANIP"],
 })
 
 -- This tag is registered with LibDogTag-Unit-3.0's namespace instead of TMW's namespace because it requires the event processing that is provided by the Unit namespace
