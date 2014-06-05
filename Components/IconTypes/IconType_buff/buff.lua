@@ -342,7 +342,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 
 	icon:YieldInfo(false)
 end
-function Type:HandleInfo(icon, iconToSet, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
+function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
 	local Units = icon.Units
 	if buffName then
 		if icon.ShowTTText then

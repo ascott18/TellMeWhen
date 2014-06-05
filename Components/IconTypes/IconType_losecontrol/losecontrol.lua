@@ -99,7 +99,7 @@ local function LoseControl_OnUpdate(icon, time)
 end
 
 
-function Type:HandleInfo(icon, iconToSet, category, texture, start, duration, spell)
+function Type:HandleYieldedInfo(icon, iconToSet, category, texture, start, duration, spell)
 	if category then
 		iconToSet:SetInfo("alpha; texture; start, duration; spell; locCategory",
 			icon.Alpha,

@@ -173,7 +173,7 @@ local function Meta_OnUpdate(icon, time)
 	icon.metaUpdateQueued = nil
 end
 
-function Type:HandleInfo(icon, iconToSet, icToUse)
+function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 	if icToUse then
 		local dataSource, moduleSource = icToUse, icToUse
 		while moduleSource.Type == "meta" and moduleSource.__metaModuleSource do

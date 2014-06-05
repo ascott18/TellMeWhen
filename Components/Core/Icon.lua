@@ -685,7 +685,7 @@ function Icon.YieldInfo(icon, isNotDone, ...)
 	icon.__yieldHandledOnce = true
 
 	if not icon:IsGroupController() then
-		icon.typeData:HandleInfo(icon, icon, ...)
+		icon.typeData:HandleYieldedInfo(icon, icon, ...)
 		return nil
 	else
 		local nextIconIndex = (icon.__controlledIconIndex or 0) + 1
@@ -701,7 +701,7 @@ function Icon.YieldInfo(icon, isNotDone, ...)
 		end
 		destIcon:Show()
 
-		icon.typeData:HandleInfo(icon, destIcon, ...)
+		icon.typeData:HandleYieldedInfo(icon, destIcon, ...)
 
 		if not isNotDone or not TMW.Locked then
 			return nil

@@ -522,7 +522,7 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 
 	icon:YieldInfo(false)
 end
-function Type:HandleInfo(icon, iconToSet, name, start, duration, unit, GUID, alpha)
+function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GUID, alpha)
 	if name then
 		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			alpha,

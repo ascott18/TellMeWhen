@@ -136,7 +136,7 @@ local function Cast_OnUpdate(icon, time)
 	icon:YieldInfo(false)
 end
 
-function Type:HandleInfo(icon, iconToSet, spell, unit, texture, start, duration, reverse)
+function Type:HandleYieldedInfo(icon, iconToSet, spell, unit, texture, start, duration, reverse)
 	if spell then
 		iconToSet:SetInfo(
 			"alpha; texture; start, duration; reverse; spell; unit, GUID",

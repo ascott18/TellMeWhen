@@ -492,8 +492,8 @@ end
 -- @param icon [TMW.Classes.Icon] The icon that yielded the info.
 -- @param iconToSet  [TMW.Classes.Icon] The icon that should recieve the yielded info.
 -- @param ... [vararg] The parameters passed info icon:YieldInfo(hasInfo, ...).
-function IconType:HandleInfo(icon, iconToSet, ...)
-	TMW:Error("If your icon type %q calls icon:YieldInfo(hasInfo, ...), you must define an IconType:HandleInfo(icon, iconToSet, ...) method.", self.type)
+function IconType:HandleYieldedInfo(icon, iconToSet, ...)
+	TMW:Error("If your icon type %q calls icon:YieldInfo(hasInfo, ...), you must define an IconType:HandleYieldedInfo(icon, iconToSet, ...) method.", self.type)
 end
 
 IconType:RegisterIconEvent(100, "OnEventsRestored", {
