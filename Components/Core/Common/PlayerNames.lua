@@ -171,13 +171,13 @@ function NAMES:TryToAcquireUnit(input, isName)
 	end
 end]]
 
-function NAMES:TryToAcquireName(input, shouldColor)
+function NAMES:TryToAcquireName(input, shouldColor, noServer)
 	if not input then return end
 
 	local name, server = UnitName(input or "")
 
 	if name then	-- input was a unitID if name was obtained.
-		if server and server ~= "" then
+		if server and server ~= "" and not noServer then
 			name = name .. "-" .. server
 		end
 		if shouldColor then
@@ -210,7 +210,7 @@ function NAMES:TryToAcquireName(input, shouldColor)
 				name = nameColored
 			else
 				name, server = UnitName(unit)
-				if server and server ~= "" then
+				if server and server ~= "" and not noServer then
 					name = name .. "-" .. server
 				end
 			end
@@ -224,31 +224,33 @@ NAMES:UpdateClassColors()
 
 -- This tag is registered with LibDogTag-Unit-3.0's namespace instead of TMW's namespace because it requires the event processing that is provided by the Unit namespace
 DogTag:AddTag("Unit", "TMWName", {
-	code = function(unit, color)
+	code = function(unit, color, server)
 		if NAMES.dogTag_forceUncolored then
 			color = false
 		end
 		
-		return NAMES:TryToAcquireName(unit, color)
+		return NAMES:TryToAcquireName(unit, color, not server)
 	end,
 	arg = {
 		'unit', 'string;undef', 'player',
 		'color', 'boolean', true,
+		'server', 'boolean', true,
 	},
 	ret = "string",
 	events = "UNIT_NAME_UPDATE#$unit",
 	noDoc = true,
 })
 DogTag:AddTag("TMW", "Name", {
-	alias = "TMWName(unit=unit, color=color)",
+	alias = "TMWName(unit=unit, color=color, server=server)",
 	arg = {
 		'unit', 'string;undef', 'player',
-		'color', 'string;undef', 'true'
+		'color', 'string;undef', 'true',
+		'server', 'string;undef', 'true',
 	},
 	ret = "string",
 	doc = L["DT_DOC_Name"],
-	example = ('[Name] => %q; [Name(color=false)] => %q; [Name(unit="Randomdruid")] => %q'):
-		format(NAMES:TryToAcquireName("player", true), NAMES:TryToAcquireName("player", false), NAMES.ClassColors.DRUID .. "Randomdruid|r")
+	example = ('[Name] => %q; [Name(color=false)] => %q; [Name(unit="Randomdruid")] => %q; [Name(unit="Randomdruid", server=false)] => %q'):
+		format(NAMES:TryToAcquireName("player", true), NAMES:TryToAcquireName("player", false), NAMES.ClassColors.DRUID .. "Randomdruid-AeriePeak|r", NAMES.ClassColors.DRUID .. "Randomdruid|r")
 	,
 	category = L["MISCELLANEOUS"],
 })
@@ -261,27 +263,7 @@ DogTag:AddTag("TMW", "StripServer", {
 	ret = "string",
 	doc = L["DT_DOC_StripServer"],
 	example = ('["%s-%s":StripServer] => %q; [Name:StripServer] => %q'):
-		format(UnitFullName("player"), select(2, UnitFullName("player")), UnitFullName("player"), NAMES:TryToAcquireName("player", true))
+		format(UnitFullName("player"), GetRealmName():gsub(" ", ""), UnitFullName("player"), NAMES:TryToAcquireName("player", true))
 	,
 	category = L["TEXTMANIP"],
-})
-
--- This tag is registered with LibDogTag-Unit-3.0's namespace instead of TMW's namespace because it requires the event processing that is provided by the Unit namespace
-DogTag:AddTag("Unit", "TMWNameForceUncolored", {
-	code = function(unit)
-		return NAMES:TryToAcquireName(unit, false)
-	end,
-	arg = {
-		'unit', 'string;undef', 'player',
-	},
-	ret = "string",
-	noDoc = true,
-})
-DogTag:AddTag("TMW", "NameForceUncolored", {
-	alias = "TMWNameForceUncolored(unit=unit)",
-	arg = {
-		'unit', 'string;undef', 'player',
-	},
-	ret = "string",
-	noDoc = true,
 })
