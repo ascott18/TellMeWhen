@@ -484,11 +484,11 @@ end
 CNDT.colors = setmetatable(
 	{ -- hardcode the first few colors to make sure they look good
 		"|cff00ff00",
-		"|cff0026ff",
+		--"|cff0026ff",
 		"|cffff004d",
 		"|cff009bff",
 		"|cffe9ff00",
-		"|cff00ff7c",
+		--"|cff00ff7c",
 		"|cffff6700",
 		"|cffaf79ff",
 		"|cffff00c2",
@@ -605,7 +605,7 @@ function CndtGroup:OnNewInstance()
 	
 	CNDT[ID] = self
 
-	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -14.5)
+	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -16.5)
 
 	--[[local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
 	self.AddDelete:ClearAllPoints()

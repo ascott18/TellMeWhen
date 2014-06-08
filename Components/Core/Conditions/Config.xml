@@ -77,6 +77,8 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
+				self.text:SetFont(self.text:GetFont(), 14, "THINOUTLINE")
+
 				if strfind(self:GetParent():GetName(), "Close") then
 					self.type = ")"
 				else
@@ -145,7 +147,7 @@
 				TMW.CNDT:ColorizeParentheses()
 			</OnClick>
 			<OnEnter>
-				self.text:SetText(gsub(self.text:GetText(), "|cff222222", "|cffffffff"))
+				self.text:SetText(gsub(self.text:GetText(), "|cff%x%x%x%x%x%x", "|cffffffff"))
 			</OnEnter>
 			<OnLeave>
 				TMW.CNDT:ColorizeParentheses()
@@ -452,7 +454,7 @@
 			<Button name="$parentAndOr" parentKey="AndOr">
 				<Size x="40" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOM" relativePoint="TOP" x="1" y="-3"/>
+					<Anchor point="BOTTOM" relativePoint="TOP" x="1" y="-2"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -531,7 +533,7 @@
 				<Size x="100" y="20"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeTo="$parentAndOr" relativePoint="LEFT" x="-5" y="0"/>
-					<Anchor point="TOP" relativeTo="$parent" relativePoint="BOTTOM" x="0" y="3"/>
+					<Anchor point="TOP" relativeTo="$parent" relativePoint="BOTTOM" x="0" y="2"/>
 				</Anchors>
 				<Frames>
 					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
