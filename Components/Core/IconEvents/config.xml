@@ -27,6 +27,8 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						local Events = TMW.CI.ics.Events
 						tremove(Events, self:GetParent():GetID())
 						Events.n = Events.n - 1
@@ -54,6 +56,8 @@
 						TMW:TT(self, "EVENTS_HANDLERS_PLAY", "EVENTS_HANDLERS_PLAY_DESC")
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						local ID = self:GetParent():GetID()
 						local Module = TMW.EVENTS:GetEventHandlerForEventSettings(ID)
 						if Module then
@@ -131,11 +135,14 @@
 
 				local EventHandler = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
 				if button == "RightButton" then
+					PlaySound("igMainMenuOptionCheckBoxOn")
 					ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 				end
 			</OnMouseUp>
 			<OnClick>
 				if button ~= "RightButton" then
+					PlaySound("igMainMenuOptionCheckBoxOn")
+
 					TMW.IE:SaveSettings()
 					
 					TMW.EVENTS:LoadEventID(self:GetID())
@@ -205,6 +212,8 @@
 				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			</OnLoad>
 			<OnClick>
+				PlaySound("igMainMenuOptionCheckBoxOn")
+
 				TMW.EVENTS.pickedHandler = self.handlerIdentifier
 				TMW.EVENTS:ShowEventPickerButtons()
 			</OnClick>
@@ -241,6 +250,8 @@
 				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			</OnLoad>
 			<OnClick>
+				PlaySound("igMainMenuOptionCheckBoxOn")
+
 				TMW.EVENTS:PickEvent(self.event)
 			</OnClick>
 		</Scripts>
@@ -260,6 +271,8 @@
 		</Layers>
 		<Scripts>
 			<OnClick>
+				PlaySound("igMainMenuOptionCheckBoxOn")
+
 				self.EventHandler:SetSubHandler(self.subHandlerIdentifier)
 			</OnClick>
 		</Scripts>
@@ -286,6 +299,8 @@
 		</Anchors>
 		<Scripts>
 			<OnClick>
+				PlaySound("igMainMenuOptionCheckBoxOn")
+
 				if TMW.CI.ics then
 					TMW.EVENTS:GetEventSettings()[self.setting] = not not self:GetChecked()
 					TMW.IE:ScheduleIconSetup()
@@ -441,6 +456,8 @@
 
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						TMW.EVENTS:ShowHandlerPickerButtons()
 						TMW:TT_Update(self)
 					</OnClick>

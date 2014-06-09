@@ -70,6 +70,8 @@
 						TMW:TT(self, "METAPANEL_REMOVE", "METAPANEL_REMOVE_DESC")
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						TMW.ME:Delete(self)
 					</OnClick>
 				</Scripts>
@@ -102,6 +104,8 @@
 						self.Background:SetAlpha(0.7)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+						
 						tinsert(TMW.CI.ics.Icons, "")
 						TMW.ME:LoadConfig()
 					</OnClick>

@@ -22,6 +22,8 @@
 		</Layers>
 		<Scripts>
 			<OnClick>
+				PlaySound("igMainMenuOptionCheckBoxOn")
+
 				if self.checked then
 					self.checked = false
 					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
@@ -123,6 +125,8 @@
 				self:GetParent()[self:GetID()] = self
 			</OnLoad>
 			<OnClick>
+				PlaySound("igMainMenuOptionCheckBoxOn")
+
 				TMW.HELP:Hide("CNDT_PARENTHESES_FIRSTSEE")
 			
 				self:SetChecked(not self.checked)
@@ -331,6 +335,8 @@
 						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						local CndtGroup = self:GetParent()
 						CndtGroup:GetConditionSettings().Checked = not not self:GetChecked()
 						CndtGroup:LoadAndDraw()
@@ -348,6 +354,8 @@
 						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						local CndtGroup = self:GetParent()
 						CndtGroup:GetConditionSettings().Checked2 = not not self:GetChecked()
 						CndtGroup:LoadAndDraw()
@@ -444,6 +452,8 @@
 						TMW:TT(self, "CONDITIONPANEL_RUNES_CHECK", "CONDITIONPANEL_RUNES_CHECK_DESC")
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						local CndtGroup = self:GetParent()
 						CndtGroup:GetConditionSettings().Checked = not not self:GetChecked()
 						CndtGroup:LoadAndDraw()
@@ -495,6 +505,8 @@
 						self:SetValue("AND")
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						TMW.HELP:Hide("CNDT_ANDOR_FIRSTSEE")
 						
 						if self.value == "AND" then
@@ -561,6 +573,8 @@
 						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						self:GetParent():UpOrDown(-1)
 					</OnClick>
 				</Scripts>
@@ -584,6 +598,8 @@
 						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						self:GetParent():UpOrDown(1)
 					</OnClick>
 				</Scripts>
@@ -605,6 +621,8 @@
 						TMW:TT(self, "CONDITIONPANEL_REMOVE")
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						self:GetParent():DeleteHandler()
 					</OnClick>
 				</Scripts>
@@ -722,6 +740,8 @@
 								self.Plus2:SetPoint("LEFT", self.text, "RIGHT", 10, 0)
 							</OnLoad>
 							<OnClick>
+								PlaySound("igMainMenuOptionCheckBoxOn")
+								
 								TMW.CNDT:AddCondition(TMW.CNDT.settings)
 								TMW.CNDT:LoadConfig()
 							</OnClick>

@@ -1813,13 +1813,19 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	OnClick = function(self, button)
 		local settings = self:GetSettingTable()
 
-		if settings and self.setting then
-			local checked = not not self:GetChecked()
+		local checked = not not self:GetChecked()
 
-			if self.data.invert then
-				checked = not checked
-			end
-			
+		if self.data.invert then
+			checked = not checked
+		end
+
+		if checked then
+			PlaySound("igMainMenuOptionCheckBoxOn")
+		else
+			PlaySound("igMainMenuOptionCheckBoxOff")
+		end
+
+		if settings and self.setting then
 			if self.data.value == nil then
 				settings[self.setting] = checked
 			else --if checked then
@@ -2243,6 +2249,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		end
 
 		if not self.EditBoxShowing then
+			PlaySound("igMainMenuOptionCheckBoxOn")
+			
 			self.EditBoxShowing = true
 			
 			if self.text:GetParent() == self then
@@ -2257,6 +2265,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	end,
 	UseSlider = function(self)
 		if self.EditBoxShowing then
+			PlaySound("igMainMenuOptionCheckBoxOn")
+
 			self.EditBoxShowing = false
 
 			if self.text:GetParent() == self.EditBox then

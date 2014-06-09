@@ -27,6 +27,8 @@
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+						
 						if TMW.CI.icon then
 							local id = self:GetParent():GetID()
 							
@@ -73,6 +75,8 @@
 						TMW:TT(self, "TEXTLAYOUTS_STRING_COPYMENU", "TEXTLAYOUTS_STRING_COPYMENU_DESC")
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
 					</OnClick>
 				</Scripts>
@@ -184,6 +188,8 @@
 							</OnLoad>
 							<OnClick>							
 								if TMW.CI.icon then
+									PlaySound("igMainMenuOptionCheckBoxOn")
+
 									wipe(TMW.CI.icon:GetSettingsPerView().Texts)
 								end
 							

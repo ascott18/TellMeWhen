@@ -1388,6 +1388,8 @@
 						self:SetFrameLevel(self:GetFrameLevel() + 2)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						ToggleDropDownMenu(nil, nil, self:GetParent().DD, self, 0, 0)
 					</OnClick>
 				</Scripts>
@@ -1626,6 +1628,8 @@
 						self:SetFrameLevel(self:GetFrameLevel() + 2)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						self:GetParent():Hide()
 					</OnClick>
 				</Scripts>
@@ -2596,6 +2600,8 @@
 						self:SetWidth(self:GetTextWidth()+15)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						self:GetParent():Hide()
 					</OnClick>
 				</Scripts>
@@ -2616,6 +2622,8 @@
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						TMW.IE:Reset()
 					</OnClick>
 				</Scripts>
@@ -2643,6 +2651,8 @@
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						TMW.IE:DoUndoRedo(-1)
 					</OnClick>
 				</Scripts>
@@ -2670,6 +2680,8 @@
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						TMW.IE:DoUndoRedo(1)
 					</OnClick>
 				</Scripts>
@@ -2699,6 +2711,8 @@
 						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						TMW.IE:DoBackForwards(-1)
 						TMW:TT_Update(self)
 					</OnClick>
@@ -2740,6 +2754,8 @@
 						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
 						TMW.IE:DoBackForwards(1)
 						TMW:TT_Update(self)
 					</OnClick>

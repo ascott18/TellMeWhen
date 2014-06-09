@@ -45,6 +45,8 @@
 				self.Background:SetTexture(1, 1, 1)
 			</OnLoad>
 			<OnClick>
+				PlaySound("igMainMenuOptionCheckBoxOn")
+				
 				local name = self.soundname
 				if TMW.CI.ics then
 					TMW.EVENTS:GetEventSettings().Sound = name
