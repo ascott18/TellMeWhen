@@ -48,6 +48,8 @@
  * New text layout settings: Width, Height, & JustifyV.
 
 ====Miscellaneous====
+ * The group settings tab in the Icon Editor now only displays the group options for the currently loaded icon's group by default. This can be changed back to the old behavior with a checkbox in the top-left corner of the tab in the Icon Editor.
+ 
  * Exporting a meta icon will also export the string(s) of its component icons.
  * Exporting groups and icons will also export the string(s) of their text layouts.
 
