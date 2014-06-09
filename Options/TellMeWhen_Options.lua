@@ -1571,18 +1571,22 @@ TMW:NewClass("Config_Frame", "Frame"){
 	end,
 
 	CheckDisabled = function(self)
-		if get(self.data.disabled, self) then
-			self:Disable()
-		else
-			self:Enable()
+		if self.data.disabled ~= nil then
+			if get(self.data.disabled, self) then
+				self:Disable()
+			else
+				self:Enable()
+			end
 		end
 	end,
 	
 	CheckHidden = function(self)
-		if get(self.data.hidden, self) then
-			self:Hide()
-		else
-			self:Show()
+		if self.data.hidden ~= nil then
+			if get(self.data.hidden, self) then
+				self:Hide()
+			else
+				self:Show()
+			end
 		end
 	end,
 	

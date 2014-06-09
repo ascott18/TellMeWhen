@@ -2327,6 +2327,7 @@ L["HELP_IE_TIMERTEXTHANDLER_MISSING"] = [[TellMeWhen cannot find any installed a
 
 If you enable this setting but do not see any timer texts, please install the addon "OmniCC" from Curse.com or WoWInterface.com.]]
 
+L["HELP_SIMPLEGSTAB"] = "Click to toggle between group-only options and full main options."
 
 L["IMPORT_ICON_DISABLED_DESC"] = "You must be editing an icon to be able to import an icon."
 

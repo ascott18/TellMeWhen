@@ -118,7 +118,7 @@ function ACEOPTIONS:NotifyChanges()
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMWStandalone")
 
 	-- Notify the group settings tab in the icon editor of any changes
-	if IE.MainOptionsWidget and TMW.IE.MainOptionsWidget:GetUserDataTable().appName then
+	if IE.MainOptionsWidget and TMW.IE.MainOptionsWidget:GetUserDataTable().appName and IE.MainOptions:IsShown() then
 		-- :Open() is used instead of :NotifyChanges because :NotifyChanges() only works for standalone ACD windows.
 		LibStub("AceConfigDialog-3.0"):Open(IE.MainOptionsWidget:GetUserDataTable().appName, IE.MainOptionsWidget)
 	end

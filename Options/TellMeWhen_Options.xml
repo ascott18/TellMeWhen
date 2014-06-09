@@ -2481,7 +2481,7 @@
 							<Anchor point="BOTTOMRIGHT" x="-6" y="34"/>
 						</Anchors>
 					</Frame>
-					<CheckButton parentKey="SimpleGSTab" inherits="TellMeWhen_CheckTemplate" parent="TellMeWhen_IconEditor">
+					<CheckButton parentKey="SimpleGSTab" inherits="TellMeWhen_CheckTemplate" parent="TellMeWhen_IconEditor" hidden="true">
 						<!-- parented to the icon editor so that the scale of this frame doesn't screw it up. -->
 						<Anchors>
 							<Anchor point="TOPLEFT" x="0"/>
@@ -2494,6 +2494,7 @@
 									title = TMW.L["IE_SIMPLEGS"],
 									tooltip = TMW.L["IE_SIMPLEGS_DESC"],
 									OnClick = function()
+										TMW.HELP:Hide("SIMPLEGSTAB")
 										TMW.IE.MainOptionsTab:ClickHandler()
 									end,
 								})
@@ -2502,8 +2503,21 @@
 									return TMW.IE.db.global
 								end
 							</OnLoad>
-							<OnClick>
-							</OnClick>
+							<OnShow>
+								TMW.HELP:Show{
+									code = "SIMPLEGSTAB",
+									codeOrder = 1,
+									codeOnlyOnce = true,
+									icon = nil,
+									relativeTo = self,
+									x = 0,
+									y = 0,
+									text = format(TMW.L["HELP_SIMPLEGSTAB"])
+								}
+							</OnShow>
+							<OnHide>
+								TMW.HELP:Hide("SIMPLEGSTAB")
+							</OnHide>
 						</Scripts>
 					</CheckButton>
 				</Frames>
