@@ -672,7 +672,7 @@ function group:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local group = EXPORTS[self.type]
 	
-	local text = L["fGROUP"]:format(group:GetGroupName(1):gsub("|r", "|cff00ffff"))
+	local text = L["fGROUP"]:format(group:GetGroupName())
 	info.text = text
 	info.tooltipTitle = text
 end

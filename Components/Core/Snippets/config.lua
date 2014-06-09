@@ -162,9 +162,9 @@ local snippetTemplate = {
 				
 				SNIPPETS:DeleteSnippet(scope, id)
 				
-				TMW.IE:NotifyChanges("snippets", scope) -- might need to happen before we delete the snippet?
+				TMW.ACEOPTIONS:LoadConfigPath(info, "snippets", scope) -- might need to happen before we delete the snippet?
 				
-				TMW:CompileOptions()
+				TMW.ACEOPTIONS:CompileOptions()
 				TMW:Update()
 			end,
 			confirm = function(info)
@@ -194,9 +194,9 @@ local addSnippetButton = {
 		
 		SNIPPETS:AddSnippet(scope)
 		
-		TMW.IE:NotifyChanges("snippets", scope) -- might need to happen before we add the snippet?
+		TMW.ACEOPTIONS:LoadConfigPath(info, "snippets", scope) -- might need to happen before we add the snippet?
 		
-		TMW:CompileOptions()
+		TMW.ACEOPTIONS:CompileOptions()
 		TMW:Update()
 	end,
 }

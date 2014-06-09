@@ -1750,7 +1750,7 @@
 							return
 						end
 
-						LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+						LibStub("AceConfigDialog-3.0"):Open("TMWStandalone")
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -2481,13 +2481,36 @@
 							<Anchor point="BOTTOMRIGHT" x="-6" y="34"/>
 						</Anchors>
 					</Frame>
+					<CheckButton parentKey="SimpleGSTab" inherits="TellMeWhen_CheckTemplate" parent="TellMeWhen_IconEditor">
+						<!-- parented to the icon editor so that the scale of this frame doesn't screw it up. -->
+						<Anchors>
+							<Anchor point="TOPLEFT" x="0"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "SimpleGSTab",
+									invert = true,
+									title = TMW.L["IE_SIMPLEGS"],
+									tooltip = TMW.L["IE_SIMPLEGS_DESC"],
+									OnClick = function()
+										TMW.IE.MainOptionsTab:ClickHandler()
+									end,
+								})
+
+								function self:GetSettingTable()
+									return TMW.IE.db.global
+								end
+							</OnLoad>
+							<OnClick>
+							</OnClick>
+						</Scripts>
+					</CheckButton>
 				</Frames>
 				<Scripts>
 					<OnLoad>
-						self:SetScale(0.75)
-
 						local AceGUI = LibStub("AceGUI-3.0", true)
-						local Type, Version = "TMWGroupOptions", 1
+						local Type, Version = "TMWIEGroupOptions", 1
 
 						local widget = {
 							localstatus = {},
@@ -2535,7 +2558,7 @@
 					</OnLoad>
 					<OnShow>
 						if not TMW.IE.MainOptionsWidget then
-							LibStub("AceGUI-3.0", true):Create("TMWGroupOptions")
+							LibStub("AceGUI-3.0", true):Create("TMWIEGroupOptions")
 						end
 					</OnShow>
 					<OnHide>

@@ -499,6 +499,8 @@ local function AddTextLayout()
 	until not found
 	
 	newLayout.Name = Name
+
+	return newLayout
 end
 local function UpdateIconsUsingTextLayout(layoutID)
 	for group in TMW:InGroups() do
@@ -571,8 +573,8 @@ local textLayoutTemplate = {
 				local layout = findlayout(info)
 				TEXT:GetTextLayoutSettings(layout).n = TEXT:GetTextLayoutSettings(layout).n + 1
 
-				IE:NotifyChanges()
-				TMW:CompileOptions()
+				TMW.ACEOPTIONS:NotifyChanges()
+				TMW.ACEOPTIONS:CompileOptions()
 				TMW:Update()
 				TEXT:LoadConfig()
 			end,
@@ -589,10 +591,10 @@ local textLayoutTemplate = {
 			func = function(info)
 				local layout = findlayout(info)
 				
-				IE:NotifyChanges("textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT (idk why. just do it, asshole)
+				TMW.ACEOPTIONS:LoadConfigPath(info, "textlayouts") -- MUST HAPPEN BEFORE WE NIL THE LAYOUT
 				
 				TMW.db.global.TextLayouts[layout] = nil
-				TMW:CompileOptions()
+				TMW.ACEOPTIONS:CompileOptions()
 				TMW:Update()
 				TEXT:LoadConfig()
 			end,
@@ -822,7 +824,7 @@ local anchorSet = {
 				tremove(Anchors, anchorNum)
 				Anchors.n = Anchors.n - 1
 				
-				TMW:CompileOptions()
+				TMW.ACEOPTIONS:CompileOptions()
 				UpdateIconsUsingTextLayout(layout)
 				TEXT:LoadConfig()
 			end,
@@ -1071,7 +1073,7 @@ textFontStringTemplate = {
 
 						Anchors.n = Anchors.n + 1
 
-						TMW:CompileOptions()
+						TMW.ACEOPTIONS:CompileOptions()
 						UpdateIconsUsingTextLayout(layout)
 						TEXT:LoadConfig()
 					end,
@@ -1121,9 +1123,9 @@ textFontStringTemplate = {
 				
 				-- MUST HAPPEN BEFORE WE REMOVE THE DISPLAY
 				if TEXT:GetTextLayoutSettings(layout).n == display then
-					IE:NotifyChanges("textlayouts", rawLayoutKey, display - 1)
+					TMW.ACEOPTIONS:LoadConfigPath(info, "textlayouts", rawLayoutKey, display - 1)
 				else
-					IE:NotifyChanges("textlayouts", rawLayoutKey, display)
+					TMW.ACEOPTIONS:LoadConfigPath(info, "textlayouts", rawLayoutKey, display)
 				end
 				
 				for i, fontStringSettings in TMW:InNLengthTable(TEXT:GetTextLayoutSettings(layout)) do
@@ -1143,8 +1145,8 @@ textFontStringTemplate = {
 				tremove(TEXT:GetTextLayoutSettings(layout), display)
 				TEXT:GetTextLayoutSettings(layout).n = TEXT:GetTextLayoutSettings(layout).n - 1
 				
-				TMW:CompileOptions()
-				IE:NotifyChanges()
+				TMW.ACEOPTIONS:CompileOptions()
+				TMW.ACEOPTIONS:NotifyChanges()
 				TMW:Update()
 				TEXT:LoadConfig()
 			end,
@@ -1189,6 +1191,7 @@ local textlayouts_toplevel = {
 		TMW:Update()
 	end,
 	get = function(info) return TMW.db.profile[info[#info]] end,]=]
+
 	args = {
 		addlayout = {
 			name = L["TEXTLAYOUTS_ADDLAYOUT"],
@@ -1196,13 +1199,14 @@ local textlayouts_toplevel = {
 			type = "execute",
 			width = "double",
 			order = 1,
-			func = function()
-				AddTextLayout()
+			func = function(info)
+				local layout = AddTextLayout()
 
-				IE:NotifyChanges()
-				TMW:CompileOptions()
+				TMW.ACEOPTIONS:CompileOptions()
 				TMW:Update()
 				TEXT:LoadConfig()
+
+				TMW.ACEOPTIONS:LoadConfigPath(info, "textlayouts", "#TextLayout " .. layout.GUID)
 			end,
 		},
 		importExportBox = TMW.importExportBoxTemplate,

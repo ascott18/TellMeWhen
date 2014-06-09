@@ -221,9 +221,9 @@
 								
 								TMW.IE.MainOptionsTab:ClickHandler()
 								
-								TMW:CompileOptions()
-								TMW.IE:NotifyChanges("textlayouts", "#TextLayout " .. GUID)
-								LibStub("AceConfigDialog-3.0"):Open("TMW IEOptions", TMW.IE.MainOptionsWidget)
+								TMW.ACEOPTIONS:CompileOptions()
+								TMW.ACEOPTIONS:LoadConfigPath("TMWIEMain", "textlayouts", "#TextLayout " .. GUID)
+								LibStub("AceConfigDialog-3.0"):Open("TMWIEMain", TMW.IE.MainOptionsWidget)
 								
 							</OnClick>
 						</Scripts>

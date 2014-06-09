@@ -205,7 +205,7 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 		gs.Scale = 1
 		gs.Locked = false
 		
-		TMW.IE:NotifyChanges()
+		TMW.ACEOPTIONS:NotifyChanges()
 		group:Setup()
 	end,
 })

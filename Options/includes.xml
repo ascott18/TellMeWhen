@@ -15,6 +15,7 @@
 
 <Script file="TellMeWhen_Options.lua"/>
 <Script file="ImportExport.lua"/>
+<Script file="AceOptions.lua"/>
 
 <Include file="TellMeWhen_Options.xml"/>
 <Include file="Bindings.xml"/>

@@ -29,7 +29,7 @@ local function stopMoving(group)
 	
 	group:Setup()
 	
-	TMW.IE:NotifyChanges()
+	TMW.ACEOPTIONS:NotifyChanges()
 end
 
 	

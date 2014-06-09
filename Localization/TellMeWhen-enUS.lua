@@ -1499,7 +1499,7 @@ L["fGROUP"] = "Group: %s"
 L["fICON"] = "Icon: %s"
 L["ICON"] = "Icon"
 L["DISABLED"] = "Disabled"
-L["COPYPOSSCALE"] = "Copy position/scale"
+L["COPYPOSSCALE"] = "Copy position/scale only"
 L["COPYGROUP"] = "Copy Group"
 L["OVERWRITEGROUP"] = "|cFFFF5959Overwrite|r Group: %s"
 L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
@@ -1530,8 +1530,14 @@ L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar (Bar display)"
 L["IconModule_SelfIcon"] = "Icon"
 
 
+L["IE_SIMPLEGS"] = "Full Options"
+L["IE_SIMPLEGS_DESC"] = [[Check to display TMW's full main options in this tab.
+
+Uncheck to only display the options of the group of the currently loaded icon in this tab.]]
+
 L["GROUPADDONSETTINGS"] = "Group Settings"
 L["GROUPADDONSETTINGS_DESC"] = [[Configure settings for this group, other groups, and all other general addon settings.]]
+L["GROUPSETTINGS_DESC"] = [[Configure settings for this group.]]
 L["CONDITIONS"] = "Conditions"
 L["ICONCONDITIONS_DESC"] = "Configure conditions that allow you to fine-tune when this icon is shown."
 L["GROUPCONDITIONS"] = "Group Conditions"

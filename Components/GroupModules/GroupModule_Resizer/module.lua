@@ -75,7 +75,7 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 		
 		group:Setup()
 		
-		TMW.IE:NotifyChanges()
+		TMW.ACEOPTIONS:NotifyChanges()
 	end,
 
 	SizeUpdate_RightButton = function(resizeButton)

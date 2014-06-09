@@ -38,7 +38,7 @@ dataobj.OnClick = function(self, button)
 				return
 			end
 			
-			LibStub("AceConfigDialog-3.0"):Open("TMW Options")
+			LibStub("AceConfigDialog-3.0"):Open("TMWStandalone")
 		end
 	else
 		TMW:LockToggle()
