@@ -2258,7 +2258,7 @@
 					self.resizer.y_max = function() return UIParent:GetHeight()*0.9 end
 				end)
 
-				self.background:SetAlpha(0.9)
+				self.background:SetAlpha(0.95)
 
 
 				tinsert(UISpecialFrames, self:GetName())
