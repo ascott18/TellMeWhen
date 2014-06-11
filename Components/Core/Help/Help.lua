@@ -44,10 +44,14 @@ HELP.OnlyOnce = {
 	ICON_EXPORT_DOCOPY = true,
 }
 
+HELP.Queued = {}
+
 function HELP:OnInitialize()
 	self.Arrow = TellMeWhen_HelpFrame
 	self.Frame = TellMeWhen_HelpFrame.body
-	self.Queued = {}
+
+	-- try to show any helps that got queued before OnInitialize() was called.
+	HELP:ShowNext()
 end
 
 
@@ -166,6 +170,11 @@ function HELP:ShouldShowHelp(help)
 end
 
 function HELP:ShowNext()
+	if not HELP.Arrow then
+		-- we haven't initialized yet
+		return
+	end
+
 	-- if there nothing currently being displayed, hide the frame.
 	if not HELP.showingHelp then
 		HELP.Arrow:Hide()

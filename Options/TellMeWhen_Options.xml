@@ -1595,7 +1595,7 @@
 
 			<Layer level="ARTWORK">
 				<Texture parentKey="HeaderBackground">
-					<Color r="0.4" g="0.4" b="0.4" a="0.2"/>
+					<Color r="0.13" g="0.13" b="0.13" a="1"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" y="-4"/>
 						<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" y="-24"/>
@@ -1675,7 +1675,10 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad> self:SetText(TMW.L["CONFIGMODE_EXIT"]) </OnLoad>
-					<OnClick>TMW:LockToggle() </OnClick>
+					<OnClick>
+						TMW:LockToggle()
+						TMW:Print(TMW.L["CONFIGMODE_EXITED"])
+					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -2060,8 +2063,8 @@
 	</Frame>
 
 
-	<Frame name="TellMeWhen_ChangelogDialog" inherits="TellMeWhen_SimpleDialog" toplevel="true" frameStrata="FULLSCREEN_DIALOG">
-		<Size x="600" y="700"/>
+	<Frame name="TellMeWhen_ChangelogDialog" inherits="TellMeWhen_SimpleDialog" toplevel="true" frameStrata="FULLSCREEN_DIALOG" hidden="true">
+		<Size x="600" y="650"/>
 
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent" />
@@ -2165,6 +2168,9 @@
 							log:SetJustifyV("TOP")
 							log:SetSpacing(2)
 							log:SetText(v)
+							
+							--local font, size = log:GetFont()
+							--log:SetFont(font, size, "THINOUTLINE")
 
 							self[#self + 1] = log
 
@@ -2238,18 +2244,21 @@
 			<OnLoad>
 				self.title:SetText(TMW.L["DIALOG_HEADER_CHANGELOG"])
 
-				self:SetScale(0.9)
+				self:SetScale(1)
 
 				TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					self.resizer = TMW.Classes.Resizer_Generic:New(self)
 					self.resizer:Show()
 
-					self.resizer:SetModes(self.resizer.MODE_SCALE, self.resizer.MODE_SIZE)
+					self.resizer:SetModes(self.resizer.MODE_SIZE, self.resizer.MODE_SIZE)
 					self.resizer.scale_min = 0.4
-					self.resizer.x_min = 200
+					self.resizer.x_min = 280
+					self.resizer.x_max = function() return UIParent:GetWidth()*0.8 end
 					self.resizer.y_min = 200
-					self.resizer.y_max = 1400
+					self.resizer.y_max = function() return UIParent:GetHeight()*0.9 end
 				end)
+
+				self.background:SetAlpha(0.9)
 
 
 				tinsert(UISpecialFrames, self:GetName())
@@ -2500,6 +2509,7 @@
 									OnClick = function()
 										TMW.HELP:Hide("SIMPLEGSTAB")
 										TMW.IE.MainOptionsTab:ClickHandler()
+										TMW.IE.MainOptionsTab:OnClick()
 									end,
 								})
 

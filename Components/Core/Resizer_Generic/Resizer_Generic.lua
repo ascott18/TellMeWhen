@@ -16,7 +16,9 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
-	
+
+local get = TMW.get
+
 
 TMW:NewClass("Resizer_Generic"){
 	tooltipTitle = L["RESIZE"],
@@ -210,8 +212,8 @@ TMW:NewClass("Resizer_Generic"){
 			newScale = newScaleX
 		end
 
-		newScale = max(self.scale_min, newScale)
-		newScale = min(self.scale_max, newScale)
+		newScale = max(get(self.scale_min, self), newScale)
+		newScale = min(get(self.scale_max, self), newScale)
 
 		parent:SetScale(newScale)
 
@@ -219,8 +221,8 @@ TMW:NewClass("Resizer_Generic"){
 			-- Calculate new width
 			local std_newFrameWidth = std_cursorX - self.std_oldLeft
 			local newWidth = std_newFrameWidth/parent:GetEffectiveScale()
-			newWidth = max(self.x_min, newWidth)
-			newWidth = min(self.x_max, newWidth)
+			newWidth = max(get(self.x_min, self), newWidth)
+			newWidth = min(get(self.x_max, self), newWidth)
 
 			parent:SetWidth(newWidth)
 		end
@@ -228,8 +230,8 @@ TMW:NewClass("Resizer_Generic"){
 			-- Calculate new height
 			local std_newFrameHeight = abs(std_cursorY - self.std_oldTop)
 			local newHeight = std_newFrameHeight/parent:GetEffectiveScale()
-			newHeight = max(self.y_min, newHeight)
-			newHeight = min(self.y_max, newHeight)
+			newHeight = max(get(self.y_min, self), newHeight)
+			newHeight = min(get(self.y_max, self), newHeight)
 			
 			parent:SetHeight(newHeight)
 		end

@@ -562,8 +562,12 @@ function IE:OnInitialize()
 	IE.history = {}
 	IE.historyState = 0
 
-	IE:CreateTabs()
+
+	IE.MainTab = TMW.Classes.IconEditorTab:NewTab("MAIN", 1, "Main")
+	IE.MainTab:SetText(TMW.L["MAIN"])
+	TMW:TT(IE.MainTab, "MAIN", "MAIN_DESC")
 	
+
 	-- Create resizer
 	self.resizer = TMW.Classes.Resizer_Generic:New(self)
 	self.resizer:Show()
@@ -859,12 +863,12 @@ function IE:OnProfile(event, arg2, arg3)
 
 	if IE.Initialized then
 		TMW.ACEOPTIONS:CompileOptions() -- redo groups in the options
-	end
 
-	-- Reload the icon editor.
-	IE:Load(1)
+		-- Reload the icon editor.
+		IE:Load(1)
 	
-	TMW:Fire("TMW_IE_ON_PROFILE", event, arg2, arg3)
+		TMW:Fire("TMW_IE_ON_PROFILE", event, arg2, arg3)
+	end
 end
 
 TMW:RegisterCallback("TMW_ON_PROFILE", function(event, arg2, arg3)
@@ -1055,25 +1059,17 @@ TMW:NewClass("IconEditorTab", "Button"){
 	}
 }
 
-function IE:CreateTabs()
-	IE.CreateTabs = TMW.NULLFUNC
-	IE.MainTab = TMW.Classes.IconEditorTab:NewTab("MAIN", 1, "Main")
-	IE.MainTab:SetText(TMW.L["MAIN"])
-	TMW:TT(IE.MainTab, "MAIN", "MAIN_DESC")
-end
 
 function IE:OnUpdate()
 	local icon = CI.icon
 
 	-- update the top of the icon editor with the information of the current icon.
 	-- this is done in an OnUpdate because it is just too hard to track when the texture changes sometimes.
-	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes
-	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
-	
+	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes	
 	local tab = IE.CurrentTab
-
-	tab:SetupHeader()
-
+	if tab then
+		tab:SetupHeader()
+	end
 	
 	
 	if IE.isMoving then
@@ -1348,32 +1344,36 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		return
 	end
 
-	if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
-		if TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
-		or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
-		then			
-			TellMeWhen_ChangelogDialog.showIEOnClose = true
-			TellMeWhen_ChangelogDialog:Show()
-			shouldShow = false
+	if IE.db.global.LastChangelogVersion > 0 then
+		if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
+			if TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
+			or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
+			then
+				TellMeWhen_ChangelogDialog.showIEOnClose = true
+				TellMeWhen_ChangelogDialog:Show()
+				shouldShow = false
 
-			TMW.HELP:Show{
-				code = "CHANGELOG_INFO",
-				codeOrder = 100,
-				codeOnlyOnce = false,
+				TMW.HELP:Show{
+					code = "CHANGELOG_INFO",
+					codeOrder = 100,
+					codeOnlyOnce = false,
 
-				icon = nil,
-				parent = TellMeWhen_ChangelogDialog,
-				x = 0,
-				y = -40,
-				relativeTo = TellMeWhen_ChangelogDialog,
-				relativePoint = "TOPLEFT",
-				text = format(L["CHANGELOG_INFO"], TELLMEWHEN_VERSION_FULL)
-			}
-		
-		else
-			TMW:Printf(L["CHANGELOG_MSG"], TELLMEWHEN_VERSION_FULL)
+					icon = nil,
+					parent = TellMeWhen_ChangelogDialog,
+					x = 0,
+					y = -40,
+					relativeTo = TellMeWhen_ChangelogDialog,
+					relativePoint = "TOPLEFT",
+					text = format(L["CHANGELOG_INFO"], TELLMEWHEN_VERSION_FULL)
+				}
+			
+			else
+				TMW:Printf(L["CHANGELOG_MSG"], TELLMEWHEN_VERSION_FULL)
+			end
+
+			IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
 		end
-
+	else
 		IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
 	end
 

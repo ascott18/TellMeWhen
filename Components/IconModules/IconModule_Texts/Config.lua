@@ -223,7 +223,9 @@ local function ttText(self)
 end
 
 function TEXT:LoadConfig()
-	if not TellMeWhen_TextDisplayOptions then return end
+	if not TellMeWhen_TextDisplayOptions or not CI.icon then
+		return
+	end
 	
 	local Texts = CI.icon:GetSettingsPerView().Texts
 	local GUID, layoutSettings, isFallback = TEXT:GetTextLayoutForIcon(CI.icon)

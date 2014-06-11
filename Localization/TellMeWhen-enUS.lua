@@ -29,7 +29,7 @@ L["IE_NOLOADED"] = [[There isn't an icon currently loaded into the Icon Editor.
 
 To load an icon, right-click on it.
 
-If there are no icons visible on your screen, click the %q tab below or type '/tmw options' to view the settings of your groups.
+If there are no icons visible on your screen, type '/tmw options' to view the settings of your groups.
 
 From there, you can add a new group or configure an existing group to be available to your character's current class specialization.
 
@@ -46,6 +46,7 @@ L["LOADINGOPT"] = "Loading TellMeWhen_Options."
 L["ENABLINGOPT"] = "TellMeWhen_Options is disabled. Enabling..."
 L["CONFIGMODE"] = "TellMeWhen is in configuration mode. Icons will not be functional until you leave configuration mode. Type '/tellmewhen' or '/tmw' to toggle configuration mode on and off."
 L["CONFIGMODE_EXIT"] = "Exit config mode"
+L["CONFIGMODE_EXITED"] = "TMW is now locked. Type /tmw to enter config mode again."
 L["CONFIGMODE_NEVERSHOW"] = "Don't show again"
 L["IMPORT_SUCCESSFUL"] = "Import successful!"
 L["IMPORT_FAILED"] = "Import failed!"

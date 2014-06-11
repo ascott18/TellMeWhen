@@ -38,7 +38,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	tab:SetText(TMW.L["GROUPADDONSETTINGS"])
 	TMW:TT(tab, "GROUPADDONSETTINGS", "GROUPADDONSETTINGS_DESC")
 	
-	tab:PostHookMethod("ClickHandler", function()
+	tab:PostHookMethod("ClickHandler", function(self)
 		TMW.ACEOPTIONS:CompileOptions()
 
 		local app = "TMWIEMain"
@@ -51,6 +51,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		if TMW.CI.group then
 			ACEOPTIONS:LoadConfigGroup(app, TMW.CI.group)
 		end
+
+		self:OnUpdate()
 	end)
 		
 	tab:PostHookMethod("SetupHeader", function(self)
@@ -58,8 +60,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 			IE.Header:SetPoint("LEFT", IE.SimpleGSTab.text, "RIGHT", 4, 0)
 		end
 	end)
-
-	tab:HookScript("OnUpdate", function(self)
+	
+	function tab:OnUpdate()
 		if IE.CurrentTab == self then
 			IE.SimpleGSTab:Show()
 		else
@@ -89,7 +91,9 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 			-- We haven't visited the tab yet.
 			TMW:TT(tab, "GROUPADDONSETTINGS", "GROUPSETTINGS_DESC")
 		end
-	end)
+	end
+
+	tab:HookScript("OnUpdate", tab.OnUpdate)
 end)
 
 function ACEOPTIONS:LoadConfigGroup(info, group)
