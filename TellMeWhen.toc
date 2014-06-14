@@ -45,6 +45,7 @@ Lib\LibDogTag-3.0\lib.xml
 Lib\LibDogTag-Unit-3.0\lib.xml
 Lib\LibDogTag-Stats-3.0\lib.xml
 Lib\LibSpellRange-1.0\lib.xml
+Lib\LibRangeCheck-2.0\LibRangeCheck-2.0.lua
 #@end-no-lib-strip@
 
 Localization\TellMeWhen-enUS.lua

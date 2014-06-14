@@ -363,6 +363,9 @@ function CNDT:TypeMenu_DropDown_OnClick(data)
 	if data.defaultUnit and condition.Unit == "player" then
 		condition.Unit = data.defaultUnit
 	end
+
+	get(data.applyDefaults, data, condition)
+
 	condition.Type = self.value
 	
 	group:LoadAndDraw()
@@ -428,15 +431,19 @@ end
 
 
 function CNDT:OperatorMenu_DropDown()
+	local conditionData = self:GetParent():GetConditionData()
+
 	for k, v in pairs(TMW.operators) do
-		local info = UIDropDownMenu_CreateInfo()
-		info.func = CNDT.OperatorMenu_DropDown_OnClick
-		info.text = v.text
-		info.value = v.value
-		info.tooltipTitle = v.tooltipText
-		info.tooltipOnButton = true
-		info.arg1 = self
-		UIDropDownMenu_AddButton(info)
+		if (not conditionData.specificOperators or conditionData.specificOperators[v.value]) then
+			local info = UIDropDownMenu_CreateInfo()
+			info.func = CNDT.OperatorMenu_DropDown_OnClick
+			info.text = v.text
+			info.value = v.value
+			info.tooltipTitle = v.tooltipText
+			info.tooltipOnButton = true
+			info.arg1 = self
+			UIDropDownMenu_AddButton(info)
+		end
 	end
 end
 

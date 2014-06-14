@@ -230,7 +230,71 @@ ConditionCategory:RegisterCondition(8,	 "RUNSPEED", {
 })
 
 
-ConditionCategory:RegisterSpacer(8.5)
+ConditionCategory:RegisterSpacer(8.1)
+
+
+ConditionCategory:RegisterCondition(8.5, "LIBRANGECHECK", {
+	text = L["CNDT_RANGE"],
+	tooltip = L["CNDT_RANGE_DESC"],
+	min = 0,
+	max = 100,
+	formatter = TMW.C.Formatter:New(function(val)
+		local LRC = LibStub("LibRangeCheck-2.0")
+		if not LRC then
+			return val
+		end
+
+		if val == 0 then
+			return L["CNDT_RANGE_PRECISE"]:format(val)
+		end
+
+		for range in LRC:GetHarmCheckers() do
+			if range == val then
+				return L["CNDT_RANGE_PRECISE"]:format(val)
+			end
+		end
+		for range in LRC:GetFriendCheckers() do
+			if range == val then
+				return L["CNDT_RANGE_PRECISE"]:format(val)
+			end
+		end
+
+		return L["CNDT_RANGE_IMPRECISE"]:format(val)
+	end),
+
+	icon = "Interface\\Icons\\ability_hunter_snipershot",
+	tcoords = CNDT.COMMON.standardtcoords,
+
+	specificOperators = {["<="] = true, [">="] = true},
+
+	applyDefaults = function(conditionData, conditionSettings)
+		local op = conditionSettings.Operator
+
+		if not conditionData.specificOperators[op] then
+			conditionSettings.Operator = "<="
+		end
+	end,
+
+	funcstr = function(c, parent)
+		Env.LibRangeCheck = LibStub("LibRangeCheck-2.0")
+		if not Env.LibRangeCheck then
+			TMW:Error("The %s condition requires LibRangeCheck-2.0")
+			return "false"
+		end
+
+		if c.Operator == "<=" then
+			return [[(select(2, LibRangeCheck:GetRange(c.Unit)) or huge) c.Operator c.Level]]
+		elseif c.Operator == ">=" then
+			return [[(LibRangeCheck:GetRange(c.Unit) or 0) c.Operator c.Level]]
+		else
+			TMW:Error("Bad operator %q for range check condition of %s", c.Operator, tostring(parent))
+		end
+	end,
+	-- events = absolutely no events
+})
+
+
+ConditionCategory:RegisterSpacer(8.9)
 
 
 ConditionCategory:RegisterCondition(9,	 "NAME", {

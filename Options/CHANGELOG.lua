@@ -38,6 +38,7 @@ TMW.CHANGELOG = {
 [==[====Conditions====]==],
 [==[* New Conditions added that offer integration with Big Wigs and Deadly Boss Mods.]==],
 [==[* New Condition: Specialization Role]==],
+[==[* New Condition: Unit Range (uses LibRangeCheck-2.0 to check the unit's approximate range)]==],
 [==[* The Buff/Debuff - "Number of" conditions now accept semicolon-delimited lists of multiple auras that should be counted.]==],
 [==[]==],
 [==[====Group Modules====]==],

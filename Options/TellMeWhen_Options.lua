@@ -2772,7 +2772,7 @@ end
 function IE:SaveSettings()	
 	TMW:Fire("TMW_CONFIG_SAVE_SETTINGS")
 	if CI.icon then
-		CI.icon:Setup()
+		TMW.safecall(CI.icon.Setup, CI.icon)
 	end
 end
 
