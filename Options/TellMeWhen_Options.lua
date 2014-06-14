@@ -299,23 +299,23 @@ local ScrollContainerHook_Hide = function(c) c.ScrollFrame:Hide() end
 local ScrollContainerHook_Show = function(c) c.ScrollFrame:Show() end
 local ScrollContainerHook_OnSizeChanged = function(c) c.ScrollFrame:Show() end
 function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX)
-    
-    
-    local ScrollFrame = CreateFrame("ScrollFrame", container:GetName() .. "ScrollFrame", container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
-    
-    -- Make the ScrollFrame clone the container's position and size
-    local x, y = container:GetSize()
-    ScrollFrame:SetSize(x, y)
-    for i = 1, container:GetNumPoints() do
-        ScrollFrame:SetPoint(container:GetPoint(i))
-    end
-    
+	
+	
+	local ScrollFrame = CreateFrame("ScrollFrame", container:GetName() .. "ScrollFrame", container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
+	
+	-- Make the ScrollFrame clone the container's position and size
+	local x, y = container:GetSize()
+	ScrollFrame:SetSize(x, y)
+	for i = 1, container:GetNumPoints() do
+		ScrollFrame:SetPoint(container:GetPoint(i))
+	end
+	
 
-    -- Make the container be the ScrollFrame's ScrollChild.
-    -- Fix its size to take the full width.
-    container:ClearAllPoints()
-    ScrollFrame:SetScrollChild(container)
-    container:SetSize(x, 1)
+	-- Make the container be the ScrollFrame's ScrollChild.
+	-- Fix its size to take the full width.
+	container:ClearAllPoints()
+	ScrollFrame:SetScrollChild(container)
+	container:SetSize(x, 1)
 	
 	if exteriorScrollBarPosition then
 		ScrollFrame.ScrollBar:SetPoint("LEFT", ScrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
@@ -326,13 +326,13 @@ function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition,
 	if scrollBarSizeX then
 		ScrollFrame.ScrollBar:SetWidth(scrollBarSizeX)
 	end
-    
-    container.ScrollFrame = ScrollFrame
-    ScrollFrame.container = container
+	
+	container.ScrollFrame = ScrollFrame
+	ScrollFrame.container = container
 
-    hooksecurefunc(container, "Hide", ScrollContainerHook_Hide)
-   	hooksecurefunc(container, "Show", ScrollContainerHook_Show)
-    
+	hooksecurefunc(container, "Hide", ScrollContainerHook_Hide)
+	hooksecurefunc(container, "Show", ScrollContainerHook_Show)
+	
 end
 
 function TMW:AnimateHeightChange(f, endHeight, duration)
@@ -445,18 +445,18 @@ end
 
 function TMW:Group_Swap(domain, groupID1, groupID2)
 	local Groups = TMW.db[domain].Groups
-    
-    -- The point of this is to keep the icon editor's
-    -- current icon the same before and after the swap.
-    local iconID, groupGUID
-    if CI.icon then
-    	iconID = CI.icon.ID
-    	groupGUID = CI.group:GetGUID()
-    end
+	
+	-- The point of this is to keep the icon editor's
+	-- current icon the same before and after the swap.
+	local iconID, groupGUID
+	if CI.icon then
+		iconID = CI.icon.ID
+		groupGUID = CI.group:GetGUID()
+	end
 
 	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
 
-    TMW:Update()
+	TMW:Update()
 
 	IE:Load(1, groupGUID and TMW:GetDataOwner(groupGUID)[iconID])
 end
@@ -1525,7 +1525,9 @@ TMW:NewClass("Config_Frame", "Frame"){
 			self.data = data
 			self.setting = data.setting
 
-			self:SetTooltip(self.data.title, self.data.tooltip)
+			if self.data.title or self.data.tooltip then
+				self:SetTooltip(self.data.title, self.data.tooltip)
+			end
 		end
 	end,
 	
@@ -2886,7 +2888,10 @@ end
 ---------- Tooltips ----------
 --local cachednames = {}
 function IE:GetRealNames(Name)
-	-- gets a string to set as a tooltip of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
+	-- gets a table of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
+
+	local outTable = {}
+
 	local text = TMW:CleanString(Name)
 	
 	local CI_typeData = Types[CI.ics.Type]
@@ -2902,11 +2907,6 @@ function IE:GetRealNames(Name)
 		tbl = TMW:GetSpellNames(text, 1)
 	end
 	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(text)
-
-	local str = ""
-	local numadded = 0
-	local numlines = 50
-	local numperline = ceil(#tbl/numlines)
 
 	local Cache = TMW:GetModule("SpellCache"):GetCache()
 	
@@ -2942,22 +2942,61 @@ function IE:GetRealNames(Name)
 			name = format("%s |cff7f6600(%d)|r", name, v)
 		end
 
-		if not tiptemp[name] then --prevents display of the same name twice when there are multiple spellIDs.
-			numadded = numadded + 1
+		if not tiptemp[name] then --prevents duplicates.
+
 			local dur = Types[CI.ics.Type].DurationSyntax and ": "..TMW:FormatSeconds(durations[k]).."" or ""
-			str = str ..
-			(texture and ("|T" .. texture .. ":0|t") or "") ..
-			name ..
-			dur ..
-			"; " ..
-			(floor(numadded/numperline) == numadded/numperline and "\r\n" or "")
+
+			local str = (texture and ("|T" .. texture .. ":0|t") or "") .. name .. dur
+			tinsert(outTable,  str)
 		end
+
 		tiptemp[name] = true
 	end
 	wipe(tiptemp)
-	str = strtrim(str, "\r\n ;")
-	--cachednames[CI.ics.Type .. SoI .. text] = str
-	return str
+
+	return outTable
+end
+
+function GameTooltip:TMW_AddSpellBreakdown(tbl)
+	if #tbl <= 1 then
+		return
+	end
+
+	GameTooltip:AddLine(" ")
+
+	local numLines = GameTooltip:NumLines()
+	
+	-- Need to do this so that we can get the widths of the lines.
+	GameTooltip:Show()
+	
+	
+	local longest = 100
+	for i = 1, numLines do
+		longest = max(longest, _G["GameTooltipTextLeft" .. i]:GetWidth())
+	end
+
+
+	-- Completely unscientific adjustment to prevent extremely tall tooltips:
+	longest = max(longest, #tbl*3)
+
+	
+	local numLines = numLines + 1
+	
+	local i = 1
+	
+	while i <= #tbl do
+		while _G["GameTooltipTextLeft" .. numLines]:GetStringWidth() < longest and i <= #tbl do
+			local fs = _G["GameTooltipTextLeft" .. numLines]
+			local s = tostring(tbl[i]):trim(" ")
+			if fs:GetText() == nil then
+				GameTooltip:AddLine(s, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
+			else
+				fs:SetText(fs:GetText() .. "; " .. s)
+			end
+			i = i + 1
+		end
+		numLines = numLines + 1
+	end
 end
 
 

@@ -2051,7 +2051,7 @@ L["OPERATION_MINUS"] = "Subtract"
 L["OPERATION_MULTIPLY"] = "Multiply"
 L["OPERATION_DIVIDE"] = "Divide"
 L["EVENTHANDLER_COUNTER_TAB"] = "Counter"
-L["EVENTHANDLER_COUNTER_TAB_DESC"] = "Configure a counter to be modified or set. This counter can be checked in Conditions and displayed as text with DogTags."
+L["EVENTHANDLER_COUNTER_TAB_DESC"] = "Configure a numerical counter to be modified or set. This counter can be checked in Conditions and displayed as text with DogTags."
 
 L["EVENTS_SETTINGS_COUNTER_HEADER"] = "Counter Settings"
 

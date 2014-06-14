@@ -1647,7 +1647,7 @@ function TMW:TT(f, title, text, actualtitle, actualtext, showchecker)
 	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
 	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
 	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
-	
+
 	TMW:ValidateType(2, "TMW:TT()", f, "frame")
 	
 	f.__title = TMW:TT_Parse(title, actualtitle)
@@ -1682,7 +1682,7 @@ function TMW:TT_Copy(src, dest)
 end
 
 function TMW:TT_Update(f)
-	if f:IsMouseOver() and f:IsVisible() then
+	if GetMouseFocus() == f and f:IsMouseOver() and f:IsVisible() then
 		f:GetScript("OnLeave")(f)
 		if not f.IsEnabled or f:IsEnabled() or f:GetMotionScriptsWhileDisabled() then
 			f:GetScript("OnEnter")(f)

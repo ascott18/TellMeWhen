@@ -110,7 +110,6 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 						self.BackgroundText:SetWidth(self:GetWidth())
 						
 						-- Turn it into a setting frame (automatically handles loading settings)
@@ -194,31 +193,21 @@
 						end)
 
 					</OnLoad>
+					<OnEnter>
+						TMW:TT_Anchor(self)
+						GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+						GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+
+						GameTooltip:TMW_AddSpellBreakdown(TMW.IE:GetRealNames(self:GetText()))
+
+						GameTooltip:Show()
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide()
+					</OnLeave>
 					<OnEditFocusGained>
 						self.BackgroundText:SetText(nil)
 					</OnEditFocusGained>
-					<OnEvent>
-						if not self.isOver then return end
-
-						GameTooltip:Hide()
-
-						TMW:TT_Anchor(self)
-						GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
-						if IsModifierKeyDown() then
-							GameTooltip:AddLine(TMW.IE:GetRealNames(self:GetText()), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
-						else
-							GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-						end
-						GameTooltip:Show()
-					</OnEvent>
-					<OnEnter>
-						self.isOver = true
-						self:GetScript("OnEvent")(self)
-					</OnEnter>
-					<OnLeave>
-						self.isOver = false
-						GameTooltip:Hide()
-					</OnLeave>
 					<OnReceiveDrag>
 						TMW.IE:SpellItemToIcon(TMW.CI.icon)
 					</OnReceiveDrag>
@@ -239,6 +228,10 @@
 						end
 						
 						self:GetParent():AdjustHeight()
+
+
+						TMW:CancelTimer(self.ttUpdateHandler, 1)
+						self.ttUpdateHandler = TMW:ScheduleTimer("TT_Update", 1, self)
 					</OnTextChanged>
 				</Scripts>
 			</EditBox>
