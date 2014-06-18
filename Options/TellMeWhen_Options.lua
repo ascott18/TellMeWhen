@@ -2043,6 +2043,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		self:SetWheelStep(data.wheelStep)
 		
 		self.text:SetText(data.label or data.title)
+
+
+		self:SetTooltip(data.title, data.tooltip)
+
 		
 		self:EnableMouseWheel(true)
 	end,
@@ -2319,7 +2323,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			end
 		else -- EditBox
 			if self.Slider:ShouldForceEditBox() then
-				text = text .. L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"]:format(self.Slider.FORCE_EDITBOX_THRESHOLD)
+				text = text .. L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"]:format(TMW.C.Formatter.COMMANUMBER:Format(self.Slider.FORCE_EDITBOX_THRESHOLD))
 			else
 				text = text .. L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER"]
 			end
@@ -2374,6 +2378,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 		if settings and self.setting then
 		
+			TMW:TT_Update(self.EditBoxShowing and self.EditBox or self)
+
 			local value = self:GetValue()
 			value = get(self.data.ModifySettingValue, self, value) or value
 			
