@@ -2150,6 +2150,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		end
 
 		if self:ShouldForceEditBox() then
+			self:SaveSetting()
 			self:UseEditBox()
 		end
 
