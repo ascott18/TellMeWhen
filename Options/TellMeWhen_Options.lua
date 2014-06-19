@@ -2064,6 +2064,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		return self:CalculateValueRoundedToStep(self:GetValue_base())
 	end,
 	SetValue = function(self, value)
+		self.scriptFiredOnValueChanged = nil
+
 		if value < self.min then
 			value = self.min
 		elseif value > self.max then
@@ -2075,6 +2077,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		self:SetValue_base(value)
 		if self.EditBoxShowing then
 			self.EditBox:SetText(value)
+		end
+
+		if not self.scriptFiredOnValueChanged and value ~= self:GetValue_base() then
+			self:OnValueChanged()
 		end
 	end,
 
@@ -2145,11 +2151,13 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			return
 		end
 
+		self.scriptFiredOnValueChanged = true
+
 		if self.EditBox then
 			self.EditBox:SetText(self:GetValue())
 		end
 
-		if self:ShouldForceEditBox() then
+		if self:ShouldForceEditBox() and not self.EditBoxShowing then
 			self:SaveSetting()
 			self:UseEditBox()
 		end
