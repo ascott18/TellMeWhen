@@ -1,6 +1,8 @@
 ===v7.0.1===
  * Numbered units entered with a space in the middle (e.g. "arena 1") will once again be corrected by TellMeWhen. It is still bad practice to enter units like that, though.
 
+====Bug Fixes====
+ ** Fixed a typo that was preventing Loss of Control icons from reporting their spell.
 
 ===v7.0.0===
 
