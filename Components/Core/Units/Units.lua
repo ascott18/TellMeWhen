@@ -375,6 +375,7 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 
 
 	--SUBSTITUTE "party" with "party1-4", etc
+	--also handles conversion of "party 1" into "party1"
 	local unitSettings_new = ""
 	for _, wholething in TMW:Vararg(strsplit(";", unitSettings)) do
 		local added = false
@@ -389,10 +390,18 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 		end
 
 		if not added then
+			
+			-- This handles the conversion from "party 1" into "party1"
+			-- we only do this if the unit has digits at the end because otherwise 
+			-- it could break valid units that have spaces in them (i.e. checking by name).
+			unit = unit:gsub(" +(%d+)$", "%1")
+
 			unitSettings_new = unitSettings_new .. "; " .. unit
 		end
 	end
 	unitSettings = TMW:CleanString(unitSettings_new)
+
+
 
 	--SUBSTITUTE RAID1-10 WITH RAID1;RAID2;RAID3;...RAID10
 	for wholething, unit, firstnum, lastnum, append in gmatch(unitSettings, "(([%a%d]+) ?(%d+) ?%- ?(%d+) ?([%a%d]*)) ?;?") do

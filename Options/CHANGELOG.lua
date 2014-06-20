@@ -2,6 +2,10 @@ if not TMW then return end
 
 TMW.CHANGELOG = {
 
+[==[===v7.0.1===]==],
+[==[* Numbered units entered with a space in the middle (e.g. "arena 1") will once again be corrected by TellMeWhen. It is still bad practice to enter units like that, though.]==],
+[==[]==],
+[==[]==],
 [==[===v7.0.0===]==],
 [==[]==],
 [==[====Core Systems====]==],
