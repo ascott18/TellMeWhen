@@ -147,7 +147,7 @@ TMW:RegisterUpgrade(70010, {
 				if not rawget(TMW.db.global.TextLayouts, layout.GUID) then
 					-- The layout doesn't already exist, so just put it straight in.
 
-					layout.Name = layout.Name .. " (" .. FROM .. " " .. profileName .. ")"
+					layout.Name = (layout.Name or L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"]) .. " (" .. FROM .. " " .. profileName .. ")"
 					TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
 
 					-- Make sure we upgrade the copy of the layout, not the old one that will be discarded
@@ -164,7 +164,7 @@ TMW:RegisterUpgrade(70010, {
 
 					local existingName = TMW.db.global.TextLayouts[layout.GUID].Name
 					TMW.db.global.TextLayouts[layout.GUID].Name = ""
-					local layoutName = layout.Name
+					local layoutName = layout.Name or L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"]
 					layout.Name = ""
 
 					-- Check to see if it is exactly the same as the existing layout.
