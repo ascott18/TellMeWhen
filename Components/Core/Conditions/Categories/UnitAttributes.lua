@@ -1,4 +1,4 @@
-﻿-- --------------------
+-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -339,7 +339,12 @@ ConditionCategory:RegisterCondition(10,	 "LEVEL", {
 	text = L["CONDITIONPANEL_LEVEL"],
 	min = -1,
 	max = GetMaxPlayerLevel() + 3,
-	texttable = {[-1] = BOSS},
+	texttable = function(i)
+		if i == -1 then
+			return BOSS
+		end
+		return i
+	end,
 	icon = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull",
 	tcoords = {0.05, 0.95, 0.03, 0.97},
 	Env = {
