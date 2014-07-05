@@ -481,9 +481,12 @@ do
 		local kwargTypes = DogTag.kwargsToKwargTypes[kwargs]
 		ns = DogTag.fixNamespaceList[ns]
 
-		local funcString = DogTag:CreateFunctionFromCode(text, ns, kwargs, true)
+		local funcString, functions = DogTag:CreateFunctionFromCode(text, ns, kwargs, true)
 		local func = loadstring(funcString)
+
+		DogTag.__functions = functions
 		local success, newfunc = pcall(func)
+		DogTag.__functions = nil
 
 		if not success then
 			return "CRITICAL ERROR: " .. newfunc
