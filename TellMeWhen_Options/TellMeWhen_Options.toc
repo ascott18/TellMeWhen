@@ -8,4 +8,8 @@
 ## SavedVariables: TMWOptDB
 ## X-Category: Combat
 
+# All files for TellMeWhen_Options are now stored in the main addon.
+# However, they still are not loaded until TellMeWhen_Options, so there is no difference in performance or anything.
+# This makes the structure for modules and components that need their own config files much neater and nicer.
+
 ..\TellMeWhen\Options\includes.xml
