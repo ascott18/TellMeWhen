@@ -1,3 +1,7 @@
+===v7.0.3===
+====Bug Fixes====
+ * TellMeWhen now duplicates Blizzard's code for the spell activation overlay (and has some additional code to get this to play nicely with Masque) so that it should hopefully no longer get blamed for tainting your action bars.
+
 ===v7.0.2===
 ====Bug Fixes====
  * Fixed the missing slider value text for the Unit Level condition.

@@ -179,10 +179,14 @@ function Announcements:HandleEvent(icon, eventSettings)
 				if Channel == "WHISPER" then
 					Announcements.kwargs.link = false
 					Location = DogTag:Evaluate(Location, TMW.DOGTAG.nsList, Announcements.kwargs)
-					Location = Location:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") -- strip color codes
-					Location = Location:trim()
+					if Location then
+						Location = Location:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") -- strip color codes
+						Location = Location:trim()
+					end
 				end
-				SendChatMessage(Text, Channel, nil, Location)
+				if Location then
+					SendChatMessage(Text, Channel, nil, Location)
+				end
 			end
 		end
 
