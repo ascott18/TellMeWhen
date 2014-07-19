@@ -369,9 +369,16 @@ function CNDT:TypeMenu_DropDown_OnClick(data)
 
 	get(data.applyDefaults, data, condition)
 
-	condition.Type = self.value
+	if condition.Type ~= self.value then
+		condition.Type = self.value
+
+		-- wipe this, since flags mean totally different things for different conditions.
+		-- and having some flags set that a condition doesn't know about could screw things up.
+		condition.BitFlags = 0
+	end
 	
 	group:LoadAndDraw()
+	TMW.IE:ScheduleIconSetup()
 	
 	TMW.DD:CloseDropDownMenus()
 end
@@ -429,6 +436,9 @@ function CNDT:IconMenu_DropDown_OnClick(frame)
 	local group = TMW.DD.OPEN_MENU:GetParent()
 	local condition = group:GetConditionSettings()
 	condition.Icon = GUID
+
+	group:LoadAndDraw()
+	TMW.IE:ScheduleIconSetup()
 end
 
 
@@ -458,6 +468,9 @@ function CNDT:OperatorMenu_DropDown_OnClick(frame)
 	local group = TMW.DD.OPEN_MENU:GetParent()
 	local condition = group:GetConditionSettings()
 	condition.Operator = self.value
+
+	group:LoadAndDraw()
+	TMW.IE:ScheduleIconSetup()
 end
 
 

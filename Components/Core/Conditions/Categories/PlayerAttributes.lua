@@ -138,36 +138,36 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 			end
 			
 			if z == "pvp" then
-				-- Battleground (1)
-				return 1
-			elseif z == "arena" then
-				-- Arena (2)
+				-- Battleground (2)
 				return 2
+			elseif z == "arena" then
+				-- Arena (3)
+				return 3
 			elseif instanceDifficulty == 0 then
-				-- None (0)
-				return 0
+				-- None (1)
+				return 1
 			else
-				-- 5 man normal (3)
-				-- 5 man heroic (4)
-				-- 10 man normal (5)
-				-- 25 man normal (6)
-				-- 10 man heroic (7)
-				-- 25 man heroic (8)
-				-- LFR (9)
-				-- Challenge Mode (10)
-				-- 40 man (11)
+				-- 5 man normal (4)
+				-- 5 man heroic (5)
+				-- 10 man normal (6)
+				-- 25 man normal (7)
+				-- 10 man heroic (8)
+				-- 25 man heroic (9)
+				-- LFR (10)
+				-- Challenge Mode (11)
+				-- 40 man (12)
 				if instanceDifficulty <= 9 then
-					return 2 + instanceDifficulty -- 3-11
+					return 3 + instanceDifficulty -- 4-12
 				end
 
-				-- heroic scenario (12)
-				-- scenario (13)
+				-- heroic scenario (13)
+				-- scenario (14)
 				if instanceDifficulty <= 12 then
-					return 1 + instanceDifficulty --12-13
+					return 2 + instanceDifficulty --13-14
 				end
 
-				-- Flex (14)
-				return instanceDifficulty
+				-- Flex (15)
+				return 1 + instanceDifficulty
 			end
 		end,
 	},

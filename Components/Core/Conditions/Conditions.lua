@@ -610,9 +610,9 @@ CNDT.Substitutions = {
 },{	src = "BitFlagsMapAndCheck(%b())",
 	rep = function(conditionData, conditionSettings, name, name2)
 		if conditionSettings.Checked then
-			return [[bit_band(bit_lshift(1, %1 or 0), c.BitFlags) == 0]]
+			return [[bit_band(bit_lshift(1, (%1 or 1) - 1), c.BitFlags) == 0]]
 		else
-			return [[bit_bor(bit_lshift(1, %1 or 0), c.BitFlags) == c.BitFlags]]
+			return [[bit_bor(bit_lshift(1, (%1 or 1) - 1), c.BitFlags) == c.BitFlags]]
 		end
 	end,
 },{	src = "c.BitFlags",
