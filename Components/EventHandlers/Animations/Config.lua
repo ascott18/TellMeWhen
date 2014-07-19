@@ -226,19 +226,18 @@ function Animations:AnchorTo_Dropdown()
 			if type(localizedName) == "string" then
 				local completeIdentifier = IconModule.className .. identifier
 				
-				local info = UIDropDownMenu_CreateInfo()
+				local info = TMW.DD:CreateInfo()
 
 				info.text = localizedName
 			--[[	info.tooltipTitle = get(eventData.text)
-				info.tooltipText = get(eventData.desc)
-				info.tooltipOnButton = true]]
+				info.tooltipText = get(eventData.desc)]]
 
 				info.value = completeIdentifier
 				info.func = Animations.AnchorTo_Dropdown_OnClick
 				
 				info.checked = EVENTS:GetEventSettings().AnchorTo == completeIdentifier
 
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				TMW.DD:AddButton(info)
 				
 			end
 		end
@@ -253,14 +252,14 @@ function Animations:AnchorTo_Dropdown_SetText(setting)
 			local completeIdentifier = IconModule.className .. identifier
 			if completeIdentifier == setting and type(localizedName) == "string" then
 				
-				UIDropDownMenu_SetText(frame, localizedName)
+				frame:SetText(localizedName)
 				return
 				
 			end
 		end
 	end
 	
-	UIDropDownMenu_SetText(frame, "????")
+	frame:SetText("????")
 end
 function Animations:AnchorTo_Dropdown_OnClick(event, value)
 	EVENTS:GetEventSettings().AnchorTo = self.value

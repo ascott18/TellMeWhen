@@ -325,7 +325,7 @@ SharableDataType_profile:RegisterMenuBuilder(19, function(Item_profile)
 		end
 
 		if SettingsBundle:CreateParentedMenuEntry(L["CODESNIPPETS"]) then
-			TMW.AddDropdownSpacer()
+			TMW.DD:AddSpacer()
 		end
 	end
 end)
@@ -336,32 +336,30 @@ codesnippet:RegisterMenuBuilder(1, function(Item_codesnippet)
 	
 	-- Import as global snippet
 	if IMPORTS.codesnippet_global then
-		local info = UIDropDownMenu_CreateInfo()
+		local info = TMW.DD:CreateInfo()
 		info.text = L["CODESNIPPETS_IMPORT_GLOBAL"]
 		info.tooltipTitle = info.text
 		info.tooltipText = L["CODESNIPPETS_IMPORT_GLOBAL_DESC"]
-		info.tooltipOnButton = true
 		info.notCheckable = true
 		
 		info.func = function()
 			Item_codesnippet:Import("global")
 		end
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		TMW.DD:AddButton(info)
 	end
 	
 	-- Import as profile snippet
 	if IMPORTS.codesnippet_profile then
-		local info = UIDropDownMenu_CreateInfo()
+		local info = TMW.DD:CreateInfo()
 		info.text = L["CODESNIPPETS_IMPORT_PROFILE"]
 		info.tooltipTitle = info.text
 		info.tooltipText = L["CODESNIPPETS_IMPORT_PROFILE_DESC"]
-		info.tooltipOnButton = true
 		info.notCheckable = true
 		
 		info.func = function()
 			Item_codesnippet:Import("profile")
 		end
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		TMW.DD:AddButton(info)
 	end
 end)
 

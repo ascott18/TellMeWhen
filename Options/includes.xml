@@ -8,6 +8,8 @@
 <Include file="..\Lib\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
 <!--@end-no-lib-strip@-->
 
+
+
 <Script file="widget-importexport.lua"/>
 
 <Script file="CHANGELOG.lua"/>
@@ -16,6 +18,9 @@
 <Script file="TellMeWhen_Options.lua"/>
 <Script file="ImportExport.lua"/>
 <Script file="AceOptions.lua"/>
+
+<Script file="TMWUIDropDownMenu.lua"/>
+<Include file="TMWUIDropDownMenuTemplates.xml"/>
 
 <Include file="TellMeWhen_Options.xml"/>
 <Include file="Bindings.xml"/>

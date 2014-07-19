@@ -23,7 +23,7 @@ local ipairs =
 	  
 local CI = TMW.CI
 
--- GLOBALS: CreateFrame, NONE, NORMAL_FONT_COLOR, UIDropDownMenu_SetText
+-- GLOBALS: CreateFrame, NONE, NORMAL_FONT_COLOR
 
 
 local EVENTS = TMW.EVENTS
@@ -88,7 +88,7 @@ function Announcements:Location_DropDown_OnClick(text)
 	local ConfigFrames = Announcements.ConfigContainer.ConfigFrames
 	
 	ConfigFrames.Location.selectedValue = dropdown.value
-	UIDropDownMenu_SetText(ConfigFrames.Location, text)	
+	ConfigFrames.Location:SetText(text)	
 	
 	EVENTS:GetEventSettings().Location = dropdown.value
 end
@@ -119,7 +119,7 @@ Announcements:RegisterConfigFrame("Location", {
 		local loc = channelData.ddtext(location)
 		
 		frame.selectedValue = location
-		UIDropDownMenu_SetText(frame, loc)
+		frame:SetText(loc)
 			
 	end,
 })

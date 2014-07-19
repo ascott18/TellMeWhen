@@ -18,8 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 
--- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE, UIDROPDOWNMENU_OPEN_MENU
--- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, CloseDropDownMenus, UIDropDownMenu_SetText
+-- GLOBALS: TMW.DD.CloseDropDownMenus
 -- GLOBALS: TellMeWhen_CLEUOptions
 
 local Type = TMW.Types.cleu
@@ -28,16 +27,6 @@ local CONFIG = Type.CONFIG
 
 TMW.HELP:NewCode("CLEU_WHOLECATEGORYEXCLUDED", 2, false)
 
-hooksecurefunc("UIDropDownMenu_StartCounting", function(frame)
-	if TellMeWhen_CLEUOptions then
-		if	UIDROPDOWNMENU_OPEN_MENU == TellMeWhen_CLEUOptions.CLEUEvents
-		or	UIDROPDOWNMENU_OPEN_MENU == TellMeWhen_CLEUOptions.SourceFlags
-		or	UIDROPDOWNMENU_OPEN_MENU == TellMeWhen_CLEUOptions.DestFlags
-		then
-			frame.showTimer = 0.5 -- i want the dropdown to hide much quicker (default is 2) after the cursor leaves it
-		end
-	end
-end)
 
 CONFIG.Events = {
 	"",
@@ -235,7 +224,7 @@ function CONFIG:Menus_SetTexts()
 	else
 		n = " (|cff59ff59" .. n .. "|r)"
 	end
-	UIDropDownMenu_SetText(TellMeWhen_CLEUOptions.CLEUEvents, L["CLEU_EVENTS"] .. n)
+	TellMeWhen_CLEUOptions.CLEUEvents:SetText(L["CLEU_EVENTS"] .. n)
 
 	local n = CONFIG:CountDisabledBits(TMW.CI.ics.SourceFlags)
 	if n ~= 0 then
@@ -243,7 +232,7 @@ function CONFIG:Menus_SetTexts()
 	else
 		n = "(" .. n .. ") "
 	end
-	UIDropDownMenu_SetText(TellMeWhen_CLEUOptions.SourceFlags, n .. L["CLEU_FLAGS_SOURCE"])
+	TellMeWhen_CLEUOptions.SourceFlags:SetText(n .. L["CLEU_FLAGS_SOURCE"])
 
 	local n = CONFIG:CountDisabledBits(TMW.CI.ics.DestFlags)
 	if n ~= 0 then
@@ -251,7 +240,7 @@ function CONFIG:Menus_SetTexts()
 	else
 		n = "(" .. n .. ") "
 	end
-	UIDropDownMenu_SetText(TellMeWhen_CLEUOptions.DestFlags, n .. L["CLEU_FLAGS_DEST"])
+	TellMeWhen_CLEUOptions.DestFlags:SetText(n .. L["CLEU_FLAGS_DEST"])
 end
 
 
@@ -259,22 +248,22 @@ function CONFIG:EventMenu()
 	local currentCategory
 	for _, event in ipairs(CONFIG.Events) do
 		if event:find("^CAT_") then --and event ~= currentCategory then
-			if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-				local info = UIDropDownMenu_CreateInfo()
+			if TMW.DD.MENU_LEVEL == 1 then
+				local info = TMW.DD:CreateInfo()
 				info.text = L["CLEU_" .. event]
 				info.value = event
 				info.notCheckable = true
 				info.hasArrow = true
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				TMW.DD:AddButton(info)
 			end
 			currentCategory = event
 
-		elseif (UIDROPDOWNMENU_MENU_LEVEL == 1 and not currentCategory) or (UIDROPDOWNMENU_MENU_LEVEL == 2 and UIDROPDOWNMENU_MENU_VALUE == currentCategory) then
+		elseif (TMW.DD.MENU_LEVEL == 1 and not currentCategory) or (TMW.DD.MENU_LEVEL == 2 and TMW.DD.MENU_VALUE == currentCategory) then
 			if event == "SPACE" then
 
-				TMW.AddDropdownSpacer()
+				TMW.DD:AddSpacer()
 			else
-				local info = UIDropDownMenu_CreateInfo()
+				local info = TMW.DD:CreateInfo()
 
 				info.text = L["CLEU_" .. event]
 
@@ -282,7 +271,6 @@ function CONFIG:EventMenu()
 				if tooltipText then
 					info.tooltipTitle = info.text
 					info.tooltipText = tooltipText
-					info.tooltipOnButton = true
 				end
 
 				info.value = event
@@ -292,7 +280,7 @@ function CONFIG:EventMenu()
 				info.func = CONFIG.EventMenu_OnClick
 				info.arg1 = self
 
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				TMW.DD:AddButton(info)
 			end
 		end
 	end
@@ -301,10 +289,10 @@ end
 function CONFIG:EventMenu_OnClick(frame)
 	if self.value == "" and not TMW.CI.ics.CLEUEvents[""] then -- if we are checking "Any Event" then uncheck all others
 		wipe(TMW.CI.ics.CLEUEvents)
-		CloseDropDownMenus()
+		TMW.DD:CloseDropDownMenus()
 	elseif self.value ~= "" and TMW.CI.ics.CLEUEvents[""] then -- if we are checking a specific event then uncheck "Any Event"
 		TMW.CI.ics.CLEUEvents[""] = false
-		CloseDropDownMenus()
+		TMW.DD:CloseDropDownMenus()
 	end
 
 	TMW.CI.ics.CLEUEvents[self.value] = not TMW.CI.ics.CLEUEvents[self.value]
@@ -319,15 +307,14 @@ function CONFIG:FlagsMenu()
 
 	for _, flag in ipairs(CONFIG.Flags) do
 		if flag == "SPACE" then
-			TMW.AddDropdownSpacer()
+			TMW.DD:AddSpacer()
 		else
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 
 			info.text = L["CLEU_" .. flag]
 
 			info.tooltipTitle = L["CLEU_" .. flag]
 			info.tooltipText = L["CLEU_" .. flag .. "_DESC"]
-			info.tooltipOnButton = true
 
 			info.value = flag
 			info.checked = bit.band(TMW.CI.ics[self.flagSet], _G[flag]) ~= _G[flag]
@@ -336,7 +323,7 @@ function CONFIG:FlagsMenu()
 			info.func = CONFIG.FlagsMenu_OnClick
 			info.arg1 = self
 
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			TMW.DD:AddButton(info)
 		end
 	end
 end

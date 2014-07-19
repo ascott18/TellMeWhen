@@ -17,7 +17,7 @@
 							func = TMW.Types.losecontrol.CONFIG.DropdownMenu_SelectTypes,
 						})
 
-						UIDropDownMenu_SetText(self, TMW.L["LOSECONTROL_DROPDOWNLABEL"])
+						self:SetText(TMW.L["LOSECONTROL_DROPDOWNLABEL"])
 						self.Button:HookScript("OnClick", function(self)
 							TMW.IE:SaveSettings()
 						end)

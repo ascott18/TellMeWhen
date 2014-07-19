@@ -136,7 +136,7 @@
 				local EventHandler = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
 				if button == "RightButton" then
 					PlaySound("igMainMenuOptionCheckBoxOn")
-					ToggleDropDownMenu(1, nil, self.DD, self, 0, 0)
+					self.DD:Toggle(1, nil, self, 0, 0)
 				end
 			</OnMouseUp>
 			<OnClick>

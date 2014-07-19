@@ -16,6 +16,7 @@
 							tooltip = TMW.L["CLEU_EVENTS_DESC"],
 							func = TMW.Types.cleu.CONFIG.EventMenu,
 						})
+						self.SHOW_TIME = 0.5
 
 						self.Button:HookScript("OnClick", function(self)
 							TMW.IE:SaveSettings()
@@ -116,6 +117,7 @@
 							tooltip = TMW.L["CLEU_FLAGS_DESC"],
 							func = TMW.Types.cleu.CONFIG.FlagsMenu,
 						})
+						self.SHOW_TIME = 0.5
 
 						self.flagSet = "SourceFlags" -- the setting name, basically
 						self.Button:HookScript("OnClick", function(self)
@@ -169,6 +171,7 @@
 							tooltip = TMW.L["CLEU_FLAGS_DESC"],
 							func = TMW.Types.cleu.CONFIG.FlagsMenu,
 						})
+						self.SHOW_TIME = 0.5
 
 						self.flagSet = "DestFlags" -- the setting name, basically
 						self.Button:HookScript("OnClick", function(self)

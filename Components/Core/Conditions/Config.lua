@@ -26,9 +26,6 @@ local pairs, ipairs, wipe, tinsert, tremove, rawget, tonumber, tostring, type =
 local strtrim, gsub, min, max = 
 	  strtrim, gsub, min, max
 
--- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE, UIDROPDOWNMENU_OPEN_MENU
--- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetText, UIDropDownMenu_GetSelectedValue
--- GLOBALS: CloseDropDownMenus
 
 
 TMW.HELP:NewCode("CNDT_UNIT_MISSING", 10, false)
@@ -248,14 +245,13 @@ local commonConditions = {
 local function AddConditionToDropDown(conditionData)
 	local append = TMW.debug and not conditionData:ShouldList() and "(DBG)" or ""
 	
-	local info = UIDropDownMenu_CreateInfo()
+	local info = TMW.DD:CreateInfo()
 	
 	info.func = CNDT.TypeMenu_DropDown_OnClick
 	info.text = (conditionData.text or "??") .. append
 	
 	info.tooltipTitle = conditionData.text
 	info.tooltipText = conditionData.tooltip
-	info.tooltipOnButton = true
 	
 	info.value = conditionData.identifier
 	info.arg1 = conditionData
@@ -270,17 +266,17 @@ local function AddConditionToDropDown(conditionData)
 		info.tCoordBottom = conditionData.tcoords[4]
 	end
 	
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	TMW.DD:AddButton(info)
 end
 
 
 function CNDT:TypeMenu_DropDown()	
-	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+	if TMW.DD.MENU_LEVEL == 1 then
 		local canAddSpacer
 		for k, categoryData in ipairs(CNDT.Categories) do
 			
 			if categoryData.spaceBefore and canAddSpacer then
-				TMW.AddDropdownSpacer()
+				TMW.DD:AddSpacer()
 			end
 
 			local shouldAddCategory
@@ -303,23 +299,23 @@ function CNDT:TypeMenu_DropDown()
 				end
 			end
 			
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 			info.text = categoryData.name
 			info.value = categoryData.identifier
 			info.notCheckable = true
 			info.hasArrow = shouldAddCategory
 			info.disabled = not shouldAddCategory
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			TMW.DD:AddButton(info)
 			canAddSpacer = true
 			
 			if categoryData.spaceAfter and canAddSpacer then
-				TMW.AddDropdownSpacer()
+				TMW.DD:AddSpacer()
 				canAddSpacer = false
 			end
 		end
 		
-	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		local categoryData = CNDT.CategoriesByID[UIDROPDOWNMENU_MENU_VALUE]
+	elseif TMW.DD.MENU_LEVEL == 2 then
+		local categoryData = CNDT.CategoriesByID[TMW.DD.MENU_VALUE]
 		
 		local queueSpacer
 		local hasAddedOneCondition
@@ -341,7 +337,7 @@ function CNDT:TypeMenu_DropDown()
 				
 				if shouldAdd then
 					if hasAddedOneCondition and queueSpacer then
-						TMW.AddDropdownSpacer()
+						TMW.DD:AddSpacer()
 						queueSpacer = false
 					end
 					
@@ -354,10 +350,10 @@ function CNDT:TypeMenu_DropDown()
 end
 
 function CNDT:TypeMenu_DropDown_OnClick(data)
-	UIDROPDOWNMENU_OPEN_MENU.selectedValue = self.value
-	UIDropDownMenu_SetText(UIDROPDOWNMENU_OPEN_MENU, data.text)
+	TMW.DD.OPEN_MENU.selectedValue = self.value
+	TMW.DD.OPEN_MENU:SetText(data.text)
 	
-	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
+	local group = TMW.DD.OPEN_MENU:GetParent()
 	
 	local condition = group:GetConditionSettings()
 	if data.defaultUnit and condition.Unit == "player" then
@@ -370,21 +366,20 @@ function CNDT:TypeMenu_DropDown_OnClick(data)
 	
 	group:LoadAndDraw()
 	
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 end
 
 
 function CNDT:IconMenu_DropDown()
-	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon in UIDROPDOWNMENU_MENU_VALUE:InIcons() do
+	if TMW.DD.MENU_LEVEL == 2 then
+		for icon in TMW.DD.MENU_VALUE:InIcons() do
 			if icon:IsValid() and CI.icon ~= icon and not icon:IsControlled() then
-				local info = UIDropDownMenu_CreateInfo()
+				local info = TMW.DD:CreateInfo()
 
 				local text, textshort, tooltip = icon:GetIconMenuText()
 				info.text = textshort
 				info.tooltipTitle = text
 				info.tooltipText = tooltip
-				info.tooltipOnButton = true
 
 				info.arg1 = self
 				info.value = icon
@@ -399,32 +394,32 @@ function CNDT:IconMenu_DropDown()
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
 				info.icon = icon.attributes.texture
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				TMW.DD:AddButton(info)
 			end
 		end
-	elseif UIDROPDOWNMENU_MENU_LEVEL == 1 then
+	elseif TMW.DD.MENU_LEVEL == 1 then
 		for group in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
-				local info = UIDropDownMenu_CreateInfo()
+				local info = TMW.DD:CreateInfo()
 				info.text = group:GetGroupName()
 				info.hasArrow = true
 				info.notCheckable = true
 				info.value = group
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				TMW.DD:AddButton(info)
 			end
 		end
 	end
 end
 
 function CNDT:IconMenu_DropDown_OnClick(frame)
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 	
 	local icon = self.value
 	local GUID = icon:GetGUID(true)
 	
 	frame:SetIcon(icon)
 
-	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
+	local group = TMW.DD.OPEN_MENU:GetParent()
 	local condition = group:GetConditionSettings()
 	condition.Icon = GUID
 end
@@ -435,14 +430,13 @@ function CNDT:OperatorMenu_DropDown()
 
 	for k, v in pairs(TMW.operators) do
 		if (not conditionData.specificOperators or conditionData.specificOperators[v.value]) then
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 			info.func = CNDT.OperatorMenu_DropDown_OnClick
 			info.text = v.text
 			info.value = v.value
 			info.tooltipTitle = v.tooltipText
-			info.tooltipOnButton = true
 			info.arg1 = self
-			UIDropDownMenu_AddButton(info)
+			TMW.DD:AddButton(info)
 		end
 	end
 end
@@ -451,7 +445,7 @@ function CNDT:OperatorMenu_DropDown_OnClick(frame)
 	frame:SetUIDropdownText(self.value)
 	TMW:TT(frame, self.tooltipTitle, nil, 1)
 	
-	local group = UIDROPDOWNMENU_OPEN_MENU:GetParent()
+	local group = TMW.DD.OPEN_MENU:GetParent()
 	local condition = group:GetConditionSettings()
 	condition.Operator = self.value
 end
@@ -679,7 +673,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	CndtGroup.TextType:SetText(L["CONDITIONPANEL_TYPE"])
 
 	CndtGroup.Type.selectedValue = conditionSettings.Type
-	UIDropDownMenu_SetText(CndtGroup.Type, conditionData and conditionData.text or conditionSettings.Type)
+	CndtGroup.Type:SetText(conditionData and conditionData.text or conditionSettings.Type)
 end)
 
 -- Operator

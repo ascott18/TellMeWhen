@@ -79,13 +79,12 @@ end
 
 function Counter:OperationMenu_DropDown()
 	for k, v in pairs(operations) do
-		local info = UIDropDownMenu_CreateInfo()
+		local info = TMW.DD:CreateInfo()
 		info.func = Counter.OperationMenu_DropDown_OnClick
 		info.text = v.text
 		info.value = v.value
-		info.tooltipOnButton = true
 		info.arg1 = self
-		UIDropDownMenu_AddButton(info)
+		TMW.DD:AddButton(info)
 	end
 end
 

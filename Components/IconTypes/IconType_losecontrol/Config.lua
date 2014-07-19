@@ -168,7 +168,7 @@ function CONFIG.DropdownMenu_OnClick_All(dropDownButton, LoseContolTypes)
 	
 	LoseContolTypes[dropDownButton.value] = not LoseContolTypes[dropDownButton.value]
 	
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 	
 	CONFIG:DropdownMenu_SetText()
 end
@@ -182,14 +182,13 @@ end
 function CONFIG.DropdownMenu_SelectTypes()
 	local LoseContolTypes = TMW.CI.ics.LoseContolTypes
 	
-	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
-		local info = UIDropDownMenu_CreateInfo()
+	if TMW.DD.MENU_LEVEL == 1 then
+		local info = TMW.DD:CreateInfo()
 
 		info.text = L["LOSECONTROL_TYPE_ALL"]
 		
 		info.tooltipTitle = L["LOSECONTROL_TYPE_ALL"]
 		info.tooltipText = L["LOSECONTROL_TYPE_ALL_DESC"]
-		info.tooltipOnButton = true
 			
 		info.value = ""
 		info.arg1 = LoseContolTypes
@@ -198,18 +197,17 @@ function CONFIG.DropdownMenu_SelectTypes()
 		info.checked = LoseContolTypes[info.value]
 		info.func = CONFIG.DropdownMenu_OnClick_All
 		
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		TMW.DD:AddButton(info)
 		
-		TMW.AddDropdownSpacer()
+		TMW.DD:AddSpacer()
 		
 		for text, data in TMW:OrderedPairs(CONFIG.Types) do
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 
 			info.text = get(text)
 			
 			info.tooltipTitle = get(text)
 			info.tooltipText = (TMW.debug and (data.value and data.value .. "\r\n") or "") .. (get(data.desc) or "")
-			info.tooltipOnButton = true
 			
 			info.value = data.value
 			info.arg1 = LoseContolTypes
@@ -224,26 +222,26 @@ function CONFIG.DropdownMenu_SelectTypes()
 				info.func = CONFIG.DropdownMenu_OnClick_Normal
 			end
 			
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			TMW.DD:AddButton(info)
 		end
 		
-	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		if UIDROPDOWNMENU_MENU_VALUE == "SCHOOL_INTERRUPT" then
+	elseif TMW.DD.MENU_LEVEL == 2 then
+		if TMW.DD.MENU_VALUE == "SCHOOL_INTERRUPT" then
 			for bitFlag, name in TMW:OrderedPairs(CONFIG.schools) do
-				local info = UIDropDownMenu_CreateInfo()
+				local info = TMW.DD:CreateInfo()
 			
 				info.text = LOSS_OF_CONTROL_DISPLAY_INTERRUPT_SCHOOL:format(name .. "|r")
 				
-				info.value = UIDROPDOWNMENU_MENU_VALUE
+				info.value = TMW.DD.MENU_VALUE
 				info.keepShownOnClick = true
 				
 				info.arg1 = LoseContolTypes
 				info.arg2 = bitFlag
-				info.checked = LoseContolTypes[""] or bit.band(LoseContolTypes[UIDROPDOWNMENU_MENU_VALUE], bitFlag) == bitFlag
+				info.checked = LoseContolTypes[""] or bit.band(LoseContolTypes[TMW.DD.MENU_VALUE], bitFlag) == bitFlag
 				info.disabled = LoseContolTypes[""]
 				info.func = CONFIG.DropdownMenu_OnClick_SchoolInterrupt
 			
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				TMW.DD:AddButton(info)
 			end
 		end
 	end
@@ -272,7 +270,7 @@ function CONFIG:DropdownMenu_SetText()
 	else
 		n = " (|cff59ff59" .. n .. "|r)"
 	end
-	UIDropDownMenu_SetText(TellMeWhen_LoseControlTypes.LocTypes, L["LOSECONTROL_DROPDOWNLABEL"] .. n)
+	TellMeWhen_LoseControlTypes.LocTypes:SetText(L["LOSECONTROL_DROPDOWNLABEL"] .. n)
 end
 
 

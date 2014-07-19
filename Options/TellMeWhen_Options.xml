@@ -1186,167 +1186,6 @@
 		</Attributes>
 	</Slider>
 
-	<Button name="TellMeWhen_DropdownMenuButtonTemplate" motionScriptsWhileDisabled="true" virtual="true">
-		<Size x="22" y="22"/>
-		<Scripts>
-			<OnEnter>
-				local parent = self:GetParent();
-				local myscript = parent:GetScript("OnEnter");
-				if(myscript ~= nil) then
-					myscript(parent);
-				end
-			</OnEnter>
-			<OnLeave>
-				local parent = self:GetParent();
-				local myscript = parent:GetScript("OnLeave");
-				if(myscript ~= nil) then
-					myscript(parent);
-				end
-			</OnLeave>
-			<OnClick>
-				ToggleDropDownMenu(nil, nil, self:GetParent());
-				PlaySound("igMainMenuOptionCheckBoxOn");
-			</OnClick>
-		</Scripts>
-		<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
-			<Size x="24" y="24"/>
-			<Anchors>
-				<Anchor point="RIGHT"/>
-			</Anchors>
-		</NormalTexture>
-		<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
-			<Size x="24" y="24"/>
-			<Anchors>
-				<Anchor point="RIGHT"/>
-			</Anchors>
-		</PushedTexture>
-		<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
-			<Size x="24" y="24"/>
-			<Anchors>
-				<Anchor point="RIGHT"/>
-			</Anchors>
-		</DisabledTexture>
-		<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
-			<Size x="24" y="24"/>
-			<Anchors>
-				<Anchor point="RIGHT"/>
-			</Anchors>
-		</HighlightTexture>
-	</Button>
-	<Frame name="TMW_DropDownMenuTemplate" enableMouse="true" virtual="true">
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_DropDownMenu"/>
-		</Attributes>
-
-		<Size x="40" y="32"/>
-
-		<HitRectInsets left="0" right="0" top="1" bottom="7" />
-
-		<Layers>
-			<Layer level="ARTWORK">
-				<Texture name="$parentLeft" parentKey="Left" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Size x="25" y="61.5"/>
-					<Anchors>
-						<Anchor point="TOP" y="17"/>
-						<Anchor point="LEFT" x="-17" />
-					</Anchors>
-					<TexCoords left="0" right="0.1953125" top="0" bottom="1"/>
-				</Texture>
-				<Texture name="$parentRight" parentKey="Right" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Size x="25" y="61.5"/>
-					<Anchors>
-						<Anchor point="TOPRIGHT" x="17" y="17"/>
-					</Anchors>
-					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
-				</Texture>
-				<Texture name="$parentMiddle" parentKey="Middle" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Size y="61.5"/>
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
-						<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
-					</Anchors>
-					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
-				</Texture>
-			</Layer>
-			<Layer level="OVERLAY">
-				<Texture name="$parentIcon" hidden="true">
-					<Size x="16" y="16"/>
-					<Anchors>
-						<Anchor point="LEFT" x="30" y="2"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
-		<Frames>
-			<Button name="$parentButton" parentKey="Button" inherits="TellMeWhen_DropdownMenuButtonTemplate" >
-				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentRight" x="-16.5" y="1"/>
-				</Anchors>
-			</Button>
-		</Frames>
-		
-		<Layers>
-			<Layer level="ARTWORK">
-				<FontString name="$parentText" parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
-					<Size y="10"/>
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentLeft" x="27" y="1"/>
-						<Anchor point="RIGHT" relativeTo="$parentButton" relativePoint="LEFT" x="0" />
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnEnter>
-				self.Button:LockHighlight()
-			</OnEnter>
-			<OnLeave>
-				self.Button:UnlockHighlight()
-			</OnLeave>
-			<OnHide>
-				CloseDropDownMenus()
-			</OnHide>
-			<OnMouseUp>				
-				self.Button:Click()
-			</OnMouseUp>
-		</Scripts>
-	</Frame>
-	<Frame name="TMW_IconDropDownMenuTemplate" inherits="TMW_DropDownMenuTemplate" virtual="true">
-
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_DropDownMenu_Icon"/>
-		</Attributes>
-
-		<Frames>
-			<Button parentKey="IconPreview" enableMouse="true">
-				<Size x="18" y="18"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT" x="0" y="3"/>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark" setAllPoints="true">
-							<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnMouseUp>
-						if TMW.IE then
-							if button == "RightButton" then
-								TMW.IE:Load(nil, self.icon)
-							end
-							TMW.IE:ScheduleIconSetup(self.icon)
-						end
-					</OnMouseUp>
-				</Scripts>
-
-				<NormalTexture />
-				<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
-				<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
-			</Button>
-		</Frames>
-	</Frame>
 
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size y="15"/>
@@ -1383,7 +1222,7 @@
 					<OnClick>
 						PlaySound("igMainMenuOptionCheckBoxOn")
 
-						ToggleDropDownMenu(nil, nil, self:GetParent().DD, self, 0, 0)
+						self:GetParent().DD:Toggle(nil, nil, self, 0, 0)
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -1549,7 +1388,7 @@
 			</OnEditFocusLost>
 			<OnEnterPressed>
 				self:ClearFocus()
-				ToggleDropDownMenu(1, nil, self.DD)
+				self.DD:Toggle(1)
 			</OnEnterPressed>
 			<OnTextChanged>
 				local text = self:GetText()
@@ -1559,7 +1398,7 @@
 					self.BackgroundText:SetText(nil)
 				end
 				if userInput then
-					CloseDropDownMenus()
+					TMW.DD:CloseDropDownMenus()
 
 					local editboxResults = TMW.LastExportedString ~= text and TMW:DeserializeData(text)
 					if editboxResults then

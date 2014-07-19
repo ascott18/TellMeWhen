@@ -29,7 +29,6 @@ local Type = rawget(TMW.Types, "meta")
 if not Type then return end
 
 
--- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE, UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, CloseDropDownMenus
 -- GLOBALS: TellMeWhen_MetaIconOptions
 -- GLOBALS: CreateFrame
 
@@ -128,12 +127,12 @@ end
 ---------- Dropdown ----------
 local addedGroups = {}
 function ME:IconMenu()
-	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+	if TMW.DD.MENU_LEVEL == 1 then
 		local currentGroupView = TMW.CI.gs.View
 		
 		for group in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then
-				local info = UIDropDownMenu_CreateInfo()
+				local info = TMW.DD:CreateInfo()
 
 				info.text = group:GetGroupName()
 
@@ -146,7 +145,6 @@ function ME:IconMenu()
 					info.tooltipTitle = info.text
 					info.tooltipText = L["META_GROUP_INVALID_VIEW_DIFFERENT"]
 						:format(TMW.Views[currentGroupView].name, TMW.Views[group:GetSettings().View].name)
-					info.tooltipOnButton = true
 					info.hasArrow = false
 				else
 					info.hasArrow = true
@@ -156,18 +154,17 @@ function ME:IconMenu()
 				info.arg1 = self
 				info.checked = CI.ics.Icons[self:GetParent():GetID()] == group:GetGUID()
 
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				TMW.DD:AddButton(info)
 			end
 		end
-	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
-		for icon in UIDROPDOWNMENU_MENU_VALUE:InIcons() do
+	elseif TMW.DD.MENU_LEVEL == 2 then
+		for icon in TMW.DD.MENU_VALUE:InIcons() do
 			if icon:IsValid() and CI.icon ~= icon and not icon:IsControlled() then
-				local info = UIDropDownMenu_CreateInfo()
+				local info = TMW.DD:CreateInfo()
 
 				local text, textshort, tooltip = icon:GetIconMenuText()
 				info.text = textshort
 				info.tooltipTitle = text
-				info.tooltipOnButton = true
 				info.tooltipText = tooltip
 
 				info.value = icon
@@ -180,7 +177,7 @@ function ME:IconMenu()
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
 				info.icon = icon.attributes.texture
-				UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+				TMW.DD:AddButton(info)
 			end
 		end
 	end
@@ -194,6 +191,6 @@ function ME:IconMenuOnClick(frame)
 	CI.ics.Icons[frame:GetParent():GetID()] = GUID
 
 	ME:LoadConfig()
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 end
 

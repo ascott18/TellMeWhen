@@ -22,9 +22,6 @@ local AceDB = LibStub("AceDB-3.0")
 -- GLOBALS: LibStub
 -- GLOBALS: TMWOptDB
 -- GLOBALS: TELLMEWHEN_VERSION, TELLMEWHEN_VERSION_MINOR, TELLMEWHEN_VERSION_FULL, TELLMEWHEN_VERSIONNUMBER, TELLMEWHEN_MAXROWS
--- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDROPDOWNMENU_MENU_VALUE, UIDROPDOWNMENU_OPEN_MENU
--- GLOBALS: UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetText, UIDropDownMenu_GetSelectedValue, UIDropDownMenu_Initialize, UIDropDownMenu_JustifyText, UIDropDownMenu_SetAnchor, UIDropDownMenu_StartCounting
--- GLOBALS: CloseDropDownMenus, ToggleDropDownMenu, DropDownList1
 -- GLOBALS: NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR, INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED, SPELL_RECAST_TIME_MIN, SPELL_RECAST_TIME_SEC, NONE, SPELL_CAST_CHANNELED, NUM_BAG_SLOTS, CANCEL
 -- GLOBALS: GameTooltip
 -- GLOBALS: UIParent, WorldFrame, TellMeWhen_IconEditor, GameFontDisable, GameFontHighlight, CreateFrame, collectgarbage 
@@ -150,22 +147,6 @@ end}) local CI = TMW.CI		--current icon
 -- WOW API HOOKS
 -- ----------------------
 
--- Dropdown tooltip wrapping.
-GameTooltip.TMW_OldAddLine = GameTooltip.AddLine
-function GameTooltip:AddLine(text, r, g, b, wrap, ...)
-	-- this fixes the problem where tooltips in blizz dropdowns dont wrap, nor do they have a setting to do it.
-	-- Pretty hackey fix, but it works
-	-- Only force the wrap option if the current dropdown has wrapTooltips set true, the dropdown is shown, and the mouse is over the dropdown menu (not DDL.isCounting)
-	for i = 1, UIDROPDOWNMENU_MENU_LEVEL do
-		local DDL = _G["DropDownList" .. i]
-		if DDL and DDL:IsMouseOver() and DDL.dropdown and DDL.dropdown.wrapTooltips and DDL:IsShown() then
-			wrap = 1
-			break
-		end
-	end
-	self:TMW_OldAddLine(text, r, g, b, wrap, ...)
-end
-
 function GameTooltip:TMW_SetEquiv(equiv)
 	GameTooltip:AddLine(L[equiv], HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, 1)
 	GameTooltip:AddLine(IE:Equiv_GenerateTips(equiv), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
@@ -279,17 +260,6 @@ function TMW.IconsSort(a, b)
 	else
 		return icon1:GetID() < icon2:GetID()
 	end
-end
-
-
----------- Dropdown Utilities ----------
-local spacerInfo = {
-	text = "",
-	isTitle = true,
-	notCheckable = true,
-}
-function TMW.AddDropdownSpacer()
-	UIDropDownMenu_AddButton(spacerInfo, UIDROPDOWNMENU_MENU_LEVEL)
 end
 
 
@@ -1402,13 +1372,13 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		IE:PositionPanels()
 		
 		if CI.ics.Type == "" then
-			UIDropDownMenu_SetText(IE.Main.Type, L["ICONMENU_TYPE"])
+			IE.Main.Type:SetText(L["ICONMENU_TYPE"])
 		else
 			local Type = rawget(TMW.Types, CI.ics.Type)
 			if Type then
-				UIDropDownMenu_SetText(IE.Main.Type, Type.name)
+				IE.Main.Type:SetText(Type.name)
 			else
-				UIDropDownMenu_SetText(IE.Main.Type, CI.ics.Type .. ": UNKNOWN TYPE")
+				IE.Main.Type:SetText(CI.ics.Type .. ": UNKNOWN TYPE")
 			end
 		end
 
@@ -1674,132 +1644,6 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			self:SetHeight_base(height)
 		end
 	end,
-}
-
-TMW:NewClass("Config_DropDownMenu", "Config_Frame"){
-	noResize = 1,
-
-	OnNewInstance_DropDownMenu = function(self, data)
-		self.Button:SetMotionScriptsWhileDisabled(false)
-		self.wrapTooltips = true
-
-		if data.func then
-			self:SetFunction(data.func)
-		end
-		if data.title then
-			UIDropDownMenu_SetText(self, data.title)
-		end
-	end,
-
-	SetUIDropdownText = function(self, value, tbl, text)
-		self.selectedValue = value
-
-		if tbl then
-			for k, v in pairs(tbl) do
-				if v.value == value then
-					UIDropDownMenu_SetText(self, v.text)
-					return v
-				end
-			end
-		end
-		UIDropDownMenu_SetText(self, text or value)
-	end,
-
-	SetFunction = function(self, func)
-		self.initialize = func
-	end,
-
-	METHOD_EXTENSIONS = {
-		OnEnable = function(self)
-			self.Button:Enable()
-		end,
-		OnDisable = function(self)
-			self.Button:Disable()
-		end,
-	}
-}
-
-TMW:NewClass("Config_DropDownMenu_Icon", "Config_DropDownMenu"){
-	previewSize = 18,
-
-	OnNewInstance_DropDownMenu_Icon = function(self, data)
-		self:SetPreviewSize(self.previewSize)
-	end,
-
-	SetPreviewSize = function(self, size)
-		self.previewSize = size
-		self.IconPreview:SetSize(size, size)
-		self.Left:SetPoint("LEFT", -17 + size, 0)
-	end,
-
-
-	SetUIDropdownGUIDText = function(self, GUID, text)
-		self.selectedValue = GUID
-
-		local owner = TMW.GUIDToOwner[GUID]
-		local type = TMW:ParseGUID(GUID)
-
-		if owner then
-			if type == "icon" then
-				local icon = owner
-
-				UIDropDownMenu_SetText(self, icon:GetIconMenuText())
-
-				return icon
-
-			elseif type == "group" then
-				local group = owner
-
-				UIDropDownMenu_SetText(self, group:GetGroupName())
-
-				return group
-			end
-
-		elseif GUID and GUID ~= "" then
-			if type == "icon" then
-				text = L["UNKNOWN_ICON"]
-			elseif type == "group" then
-				text = L["UNKNOWN_GROUP"]
-			else
-				text = L["UNKNOWN_UNKNOWN"]
-			end
-		end
-		
-		UIDropDownMenu_SetText(self, text)
-	end,
-
-	SetIconPreviewIcon = function(self, icon)
-		if not icon or not icon.IsIcon then
-			self.IconPreview:Hide()
-			return
-		end
-
-		local desc = L["ICON_TOOLTIP2NEWSHORT"]
-
-		if TMW.db.global.ShowGUIDs then
-			desc = desc .. "\r\n\r\n|cffffffff" .. (not icon.TempGUID and (icon:GetGUID() .. "\r\n") or "") .. icon.group:GetGUID()
-		end
-
-		TMW:TT(self.IconPreview, icon:GetIconName(), desc, 1, 1)
-		self.IconPreview.icon = icon
-		self.IconPreview.texture:SetTexture(icon and icon.attributes.texture)
-		self.IconPreview:Show()
-	end,
-
-	SetGUID = function(self, GUID)
-		local icon = TMW.GUIDToOwner[GUID]
-
-		self:SetUIDropdownGUIDText(GUID, L["CHOOSEICON"])
-		self:SetIconPreviewIcon(icon)
-	end,
-
-	SetIcon = function(self, icon)
-		local GUID = icon:GetGUID()
-
-		self:SetUIDropdownGUIDText(GUID, L["CHOOSEICON"])
-		self:SetIconPreviewIcon(icon)
-	end,
-
 }
 
 
@@ -2835,10 +2679,10 @@ function IE:Type_DropDown()
 	for _, typeData in ipairs(TMW.OrderedTypes) do
 		if CI.ics.Type == typeData.type or not get(typeData.hidden) then
 			if typeData.spacebefore then
-				TMW.AddDropdownSpacer()
+				TMW.DD:AddSpacer()
 			end
 
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 			
 			info.text = get(typeData.name)
 			info.value = typeData.type
@@ -2859,7 +2703,6 @@ function IE:Type_DropDown()
 			if desc then
 				info.tooltipTitle = typeData.tooltipTitle or info.text
 				info.tooltipText = desc
-				info.tooltipOnButton = true
 				info.tooltipWhileDisabled = true
 			end
 			
@@ -2873,10 +2716,10 @@ function IE:Type_DropDown()
 			info.tCoordTop = 0.07
 			info.tCoordBottom = 0.93
 				
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			TMW.DD:AddButton(info)
 
 			if typeData.spaceafter then
-				TMW.AddDropdownSpacer()
+				TMW.DD:AddSpacer()
 			end
 		end
 	end
@@ -3044,7 +2887,7 @@ function TMW:Import(SettingsItem, ...)
 	assert(version, "Missing version of settings")
 	assert(type, "No settings type specified!")
 
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 
 	TMW:Fire("TMW_IMPORT_PRE", SettingsItem, ...)
 	
@@ -3384,7 +3227,7 @@ function IE:DoUndoRedo(direction)
 	
 	TMW:Fire("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", icon)
 
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 	IE:Load(1)
 	
 	IE:UndoRedoChanged()
@@ -3424,7 +3267,7 @@ function IE:DoBackForwards(direction)
 
 	IE.historyState = IE.historyState + direction
 
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 	IE:Load(nil, IE.history[IE.historyState], true)
 
 	IE:BackFowardsChanged()

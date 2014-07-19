@@ -1,6 +1,8 @@
 ===v7.0.3===
 ====Bug Fixes====
+ * Fixed an error that would be thrown if the whisper target ended up evaluating to nil.
  * TellMeWhen now duplicates Blizzard's code for the spell activation overlay (and has some additional code to get this to play nicely with Masque) so that it should hopefully no longer get blamed for tainting your action bars.
+ * TellMeWhen also now duplicates Blizzard's code for dropdown menus, and improves upon it slightly. This should also help with taint issues.
 
 ===v7.0.2===
 ====Bug Fixes====

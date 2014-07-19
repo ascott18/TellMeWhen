@@ -22,7 +22,6 @@ local tonumber, tostring, type, pairs, tremove, wipe, next, setmetatable, pcall,
 local strmatch, strtrim, max =
 	  strmatch, strtrim, max
 
--- GLOBALS: UIDROPDOWNMENU_MENU_LEVEL, UIDropDownMenu_AddButton, UIDropDownMenu_CreateInfo, UIDropDownMenu_SetText
 -- GLOBALS: TellMeWhen_TextDisplayOptions, TELLMEWHEN_VERSIONNUMBER
 -- GLOBALS: CreateFrame, IsControlKeyDown
 
@@ -138,7 +137,7 @@ end
 function TEXT:Layout_DropDown()
 	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, TEXT.Layout_DropDown_Sort) do
 		if GUID ~= "" then
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 			
 			info.text = TEXT:GetLayoutName(settings, GUID)
 			info.value = GUID
@@ -150,11 +149,10 @@ function TEXT:Layout_DropDown()
 			end
 			info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
 			info.tooltipText = L["TEXTLAYOUTS_LAYOUTDISPLAYS"]:format(displays)
-			info.tooltipOnButton = true
 			
 			info.func = TEXT.Layout_DropDown_OnClick
 			
-			UIDropDownMenu_AddButton(info)
+			TMW.DD:AddButton(info)
 		end
 	end
 end
@@ -170,7 +168,7 @@ function TEXT:CopyString_DropDown()
 	TEXT:CacheUsedStrings()
 	
 	for text, num in TMW:OrderedPairs(TEXT.usedStrings, "values", true) do
-		local info = UIDropDownMenu_CreateInfo()
+		local info = TMW.DD:CreateInfo()
 		
 		if #text > 50 then
 			info.text = DogTag:ColorizeCode(text:sub(1, 40)) .. "..."
@@ -182,13 +180,12 @@ function TEXT:CopyString_DropDown()
 		
 		info.tooltipTitle = L["TEXTLAYOUTS_STRINGUSEDBY"]:format(num)
 		info.tooltipText = DogTag:ColorizeCode(text)
-		info.tooltipOnButton = true
 		info.notCheckable = true
 		
 		info.arg1 = self
 		info.func = TEXT.CopyString_DropDown_OnClick
 		
-		UIDropDownMenu_AddButton(info)
+		TMW.DD:AddButton(info)
 	end
 end
 
@@ -289,7 +286,7 @@ function TEXT:LoadConfig()
 		TEXT[1]:SetPoint("TOP", TellMeWhen_TextDisplayOptions.FontStrings)
 	end
 	
-	UIDropDownMenu_SetText(TellMeWhen_TextDisplayOptions.Layout.PickLayout, "|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
+	TellMeWhen_TextDisplayOptions.Layout.PickLayout:SetText("|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
 	
 	TellMeWhen_TextDisplayOptions.Layout.Error:SetText(isFallback and L["TEXTLAYOUTS_ERROR_FALLBACK"] or nil)
 	
@@ -1326,7 +1323,7 @@ SharableDataType_profile:RegisterMenuBuilder(20, function(Item_profile)
 		end
 
 		if SettingsBundle:CreateParentedMenuEntry(L["TEXTLAYOUTS"]) then
-			TMW.AddDropdownSpacer()
+			TMW.DD:AddSpacer()
 		end
 	end
 end)
@@ -1342,45 +1339,42 @@ textlayout:RegisterMenuBuilder(1, function(Item_textlayout)
 	
 	if layoutSettings then
 		-- overwrite existing
-		local info = UIDropDownMenu_CreateInfo()
+		local info = TMW.DD:CreateInfo()
 		info.disabled = layoutSettings.NoEdit
 		info.text = L["TEXTLAYOUTS_IMPORT"] .. " - " .. L["TEXTLAYOUTS_IMPORT_OVERWRITE"]
 		info.tooltipTitle = info.text
 		info.tooltipText = info.disabled and L["TEXTLAYOUTS_IMPORT_OVERWRITE_DISABLED_DESC"] or L["TEXTLAYOUTS_IMPORT_OVERWRITE_DESC"]
-		info.tooltipOnButton = true
 		info.tooltipWhileDisabled = true
 		info.notCheckable = true
 		
 		info.func = function()
 			Item_textlayout:Import(GUID)
 		end
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		TMW.DD:AddButton(info)
 		
 		-- create new
-		local info = UIDropDownMenu_CreateInfo()
+		local info = TMW.DD:CreateInfo()
 		info.text = L["TEXTLAYOUTS_IMPORT"] .. " - " .. L["TEXTLAYOUTS_IMPORT_CREATENEW"]
 		info.tooltipTitle = info.text
 		info.tooltipText = L["TEXTLAYOUTS_IMPORT_CREATENEW_DESC"]
-		info.tooltipOnButton = true
 		info.notCheckable = true
 		
 		info.func = function()
 			Item_textlayout:Import(TMW:GenerateGUID("textlayout", TMW.CONST.GUID_SIZE))
 		end
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		TMW.DD:AddButton(info)
 	else
 		-- import normally - the layout doesnt already exist
-		local info = UIDropDownMenu_CreateInfo()
+		local info = TMW.DD:CreateInfo()
 		info.text = L["TEXTLAYOUTS_IMPORT"]
 		info.tooltipTitle = info.text
 		info.tooltipText = L["TEXTLAYOUTS_IMPORT_NORMAL_DESC"]
-		info.tooltipOnButton = true
 		info.notCheckable = true
 		
 		info.func = function()
 			Item_textlayout:Import(GUID)
 		end
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		TMW.DD:AddButton(info)
 	
 	end
 end)

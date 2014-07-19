@@ -218,10 +218,10 @@ TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(Item_g
 	local IMPORTS, EXPORTS = Item_group:GetEditBox():GetAvailableImportExportTypes()
 
 	-- copy group position
-	local info = UIDropDownMenu_CreateInfo()
+	local info = TMW.DD:CreateInfo()
 	info.text = L["COPYGROUP"] .. " - " .. L["COPYPOSSCALE"]
 	info.func = function()
-		CloseDropDownMenus()
+		TMW.DD:CloseDropDownMenus()
 		local destgroup = IMPORTS.group_overwrite
 		local destgs = destgroup:GetSettings()
 		
@@ -239,6 +239,6 @@ TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(Item_g
 	end
 	info.notCheckable = true
 	info.disabled = not IMPORTS.group_overwrite
-	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+	TMW.DD:AddButton(info)
 end)
 

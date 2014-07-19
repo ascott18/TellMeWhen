@@ -54,21 +54,20 @@ local DD = TMW.C.Config_DropDownMenu:New("Frame", "TMW_ID_DD", UIParent, "TMW_Dr
 	end,
 
 	func = function(self)
-		local info = UIDropDownMenu_CreateInfo()
+		local info = TMW.DD:CreateInfo()
 		info.text = L["ICONMENU_CHOSEICONTODRAGTO"]
 		info.isTitle = true
 		info.notCheckable = true
-		UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+		TMW.DD:AddButton(info)
 
 		for i, icon in pairs(icons) do
 				
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 			info.text = icon:GetIconName()
 			
 			local text, textshort, tooltip = icon:GetIconMenuText()
 			info.tooltipTitle = text
 			info.tooltipText = tooltip
-			info.tooltipOnButton = true
 
 			info.icon = icon.attributes.texture
 			info.tCoordLeft = 0.07
@@ -81,7 +80,7 @@ local DD = TMW.C.Config_DropDownMenu:New("Frame", "TMW_ID_DD", UIParent, "TMW_Dr
 			info.arg2 = icon
 			info.notCheckable = true
 			
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			TMW.DD:AddButton(info)
 		end
 	end,
 })
@@ -103,8 +102,8 @@ Module:SetScriptHandler("OnReceiveDrag", function(Module, icon)
 			TMW.IconDragger:CompleteDrag("OnReceiveDrag", icons[1])
 		elseif #icons > 1 then
 			GameTooltip:Hide() -- hide the tooltip over an icon so we can see the menu
-			CloseDropDownMenus()
-			ToggleDropDownMenu(1, nil, DD, icon, 0, 0)
+			TMW.DD:CloseDropDownMenus()
+			DD:Toggle(1, nil, icon, 0, 0)
 		end
 	end
 end)

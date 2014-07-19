@@ -500,7 +500,7 @@ function EVENTS:PickEvent(event)
 
 	EVENTS:LoadEventID(eventID)
 
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 end
 
 
@@ -650,14 +650,13 @@ function EVENTS.OperatorMenu_DropDown(frame)
 
 	for k, v in pairs(TMW.operators) do
 		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 			info.func = EVENTS.OperatorMenu_DropDown_OnClick
 			info.text = v.text
 			info.value = v.value
 			info.tooltipTitle = v.tooltipText
-			info.tooltipOnButton = true
 			info.arg1 = frame
-			UIDropDownMenu_AddButton(info)
+			TMW.DD:AddButton(info)
 		end
 	end
 end
@@ -670,17 +669,16 @@ end
 
 
 function EVENTS:ChangeEvent_Dropdown()
-	if UIDROPDOWNMENU_MENU_LEVEL == 1 then
+	if TMW.DD.MENU_LEVEL == 1 then
 		local eventButton = self:GetParent()
 		
 		for _, eventData in ipairs(EVENTS:GetValidEvents()) do
-			local info = UIDropDownMenu_CreateInfo()
+			local info = TMW.DD:CreateInfo()
 
 			info.text = get(eventData.text)
 			info.tooltipTitle = get(eventData.text)
 			info.tooltipText = get(eventData.desc)
 			
-			info.tooltipOnButton = true
 
 			info.value = eventData.event
 			info.checked = eventData.event == eventButton.event
@@ -689,7 +687,7 @@ function EVENTS:ChangeEvent_Dropdown()
 			info.arg1 = eventButton
 			info.arg2 = eventData.event
 
-			UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL)
+			TMW.DD:AddButton(info)
 		end
 	end
 end
@@ -706,7 +704,7 @@ function EVENTS:ChangeEvent_Dropdown_OnClick(eventButton, event)
 
 	EVENTS:LoadConfig()
 
-	CloseDropDownMenus()
+	TMW.DD:CloseDropDownMenus()
 end
 
 
