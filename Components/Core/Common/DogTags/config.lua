@@ -126,9 +126,16 @@ TMW:NewClass("Config_EditBox_DogTags", "Config_EditBox"){
 			local DogTag = LibStub("LibDogTag-3.0")
 			local text = self:GetText()
 			text = DogTag:CleanCode(text)
+
+			-- Correct a single open bracket to an escaped version
+			if text == "[" then
+				text = "[\"[\"]"
+			end
+
 			text = DogTag:ColorizeCode(text)
 			text = text:gsub("\\124([Hh])", "|%1") -- DogTag screws with hyperlinks. This fixes them.
 			text = text:trim("; \t\r\n")
+
 			
 			self:SetText(text)
 		end,
