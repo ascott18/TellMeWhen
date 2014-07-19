@@ -461,6 +461,43 @@
 				</Scripts>
 			</CheckButton>
 			
+
+			<Frame name="$parentBitFlags" parentKey="BitFlags" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="15" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self, {
+							--title = TMW.L[""],
+							--tooltip = TMW.L[""],
+							func = TMW.CNDT.BitFlags_DropDown,
+						})
+
+						self:SetWidth(190)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="BitFlagsCheck">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.BitFlags" relativePoint="RIGHT" x="5" y="2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["CONDITIONPANEL_BITFLAGS_CHECK"])
+						
+						TMW:TT(self, "CONDITIONPANEL_BITFLAGS_CHECK", "CONDITIONPANEL_BITFLAGS_CHECK_DESC")
+					</OnLoad>
+					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
+						local CndtGroup = self:GetParent()
+						CndtGroup:GetConditionSettings().Checked = not not self:GetChecked()
+						CndtGroup:LoadAndDraw()
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
 			<Button name="$parentAndOr" parentKey="AndOr">
 				<Size x="40" y="20"/>
 				<Anchors>
@@ -687,6 +724,14 @@
 						<Anchor point="RIGHT" x="-5" />
 						<Anchor point="TOP" y="-5"/>
 						<Anchor point="BOTTOM" y="5"/>
+					</Anchors>
+				</FontString>
+
+				<FontString parentKey="BitFlagsSelectedText" inherits="GameFontNormal" hidden="true" justifyH="LEFT" justifyV="TOP">
+					<Size x="400" y="30"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="0" y="4"/>
+						<Anchor point="BOTTOMRIGHT" x="-30" y="0"/>
 					</Anchors>
 				</FontString>
 			</Layer>

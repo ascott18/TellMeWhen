@@ -89,6 +89,7 @@ CNDT.Condition_Defaults = {
 		Checked			= false,
 		Checked2   		= false,
 		Runes 	   		= {},
+		BitFlags		= 0x0,
 	},
 }
 setmetatable(CNDT.Condition_Defaults["**"], {
@@ -490,6 +491,12 @@ CNDT.Env = {
 	huge = math.huge,
 	epsilon = 1e-255,
 
+	bit = bit,
+	bit_band = bit.band,
+	bit_bor = bit.bor,
+	bit_lshift = bit.lshift,
+
+
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
 	GUIDToOwner = TMW.GUIDToOwner,
@@ -599,6 +606,18 @@ CNDT.Substitutions = {
 {	src = "c.Level",
 	rep = function(conditionData, conditionSettings, name, name2)
 		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
+	end,
+},{	src = "BitFlagsMapAndCheck(%b())",
+	rep = function(conditionData, conditionSettings, name, name2)
+		if conditionSettings.Checked then
+			return [[bit_band(bit_lshift(1, %1 or 0), c.BitFlags) == 0]]
+		else
+			return [[bit_bor(bit_lshift(1, %1 or 0), c.BitFlags) == c.BitFlags]]
+		end
+	end,
+},{	src = "c.BitFlags",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return conditionSettings.BitFlags
 	end,
 },{
 	src = "c.Checked",
@@ -730,7 +749,7 @@ CNDT.Substitutions = {
 },
 
 {
-	src = "LOWER%((.-)%)",
+	src = "LOWER(%b())",
 	rep = function() return strlower end,
 },}
 

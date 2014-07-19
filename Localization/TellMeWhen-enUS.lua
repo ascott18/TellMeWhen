@@ -1225,6 +1225,7 @@ Players and other units without an NPC ID will be treated as having an ID of 0 i
 L["CONDITIONPANEL_NPCIDTOMATCH"] = "ID to Match"
 L["CONDITIONPANEL_NPCIDTOOLTIP"] = "You can enter multiple NPC IDs to be matched by separating each one with a semicolon (;). The condition will pass if any IDs are matched."
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
+L["CONDITIONPANEL_INSTANCETYPE_NONE"] = "Outside"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
 L["CONDITIONPANEL_SWIMMING"] = "Swimming"
 L["CONDITIONPANEL_RESTING"] = "Resting"
@@ -1258,6 +1259,23 @@ The input is not an 'if .. then' statement, nor is it a function closure. It is 
 To get a reference to this icon/group, use "thisobj". To insert a reference to another icon by GUID, shift click that icon while this editbox has focus.
 
 If more help is needed (but not help about how to write Lua code), open a ticket on CurseForge. For help on how to write Lua, go to the internet.]]
+
+
+L["CONDITIONPANEL_OLD"] = "<|cffff1300OLD|r>"
+L["CONDITIONPANEL_OLD_DESC"] = "<|cffff1300OLD|r> - There is a newer version of this condition available."
+L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"] = "Choose %ss..."
+L["CONDITIONPANEL_BITFLAGS_SELECTED"] = "|cff7fffffSelected|r:"
+L["CONDITIONPANEL_BITFLAGS_NOT"] = "Not"
+L["CONDITIONPANEL_BITFLAGS_ALWAYS"] = "Always True"
+L["CONDITIONPANEL_BITFLAGS_NEVER"] = "None - Never True"
+L["CONDITIONPANEL_BITFLAGS_CHECK"] = "Negate selected"
+L["CONDITIONPANEL_BITFLAGS_CHECK_DESC"] = [[Check this setting in order to invert the logic used to check this condition.
+
+By default, this condition will pass if any of the options selected are true.
+
+If you check this setting, the condition will pass if all of the options selected are false.]]
+
+
 L["MACROCONDITION"] = "Macro Conditional"
 L["MACROCONDITION_DESC"] = [[This condition will evaluate a macro conditional, and will pass if it passes. All macro conditionals can be prepended with "no" to reverse what they check.
 

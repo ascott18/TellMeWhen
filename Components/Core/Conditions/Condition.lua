@@ -54,6 +54,22 @@ function Condition:OnNewInstance(category, order, identifier)
 		self.formatter = TMW.C.Formatter.COMMANUMBER
 	end
 
+	if self.old then
+		self.text = L["CONDITIONPANEL_OLD"] .. " " .. self.text
+		if self.tooltip then
+			self.tooltip = self.tooltip .. "\r\n\r\n" .. L["CONDITIONPANEL_OLD_DESC"]
+		else
+			self.tooltip = L["CONDITIONPANEL_OLD_DESC"]
+		end
+		self.hidden = true
+	end
+
+	if self.bitFlags then
+		self.unit = false
+		self.nooperator = true
+		self.noslide = true
+	end
+
 	CNDT.ConditionsByType[identifier] = self
 end
 
@@ -80,7 +96,7 @@ function Condition:PrepareEnv()
 		for k, v in pairs(self.Env) do
 			local existingValue = rawget(CNDT.Env, k)
 			if existingValue ~= nil and existingValue ~= v then
-				TMW:Error("Condition " .. Type .. " tried to write values to Env different than those that were already in it.")
+				TMW:Error("Condition " .. (self.identifier or "??") .. " tried to write values to Env different than those that were already in it.")
 			else
 				CNDT.Env[k] = v
 			end

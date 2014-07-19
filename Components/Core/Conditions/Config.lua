@@ -258,6 +258,10 @@ local function AddConditionToDropDown(conditionData)
 	info.icon = get(conditionData.icon)
 
 	info.disabled = get(conditionData.disabled)
+
+	local group = TMW.DD:GetCurrentDropDown():GetParent()
+	local conditionSettings = group:GetConditionSettings()
+	info.checked = conditionData.identifier == conditionSettings.Type
 	
 	if conditionData.tcoords then
 		info.tCoordLeft = conditionData.tcoords[1]
@@ -320,6 +324,9 @@ function CNDT:TypeMenu_DropDown()
 		local queueSpacer
 		local hasAddedOneCondition
 		local lastButtonWasSpacer
+
+		local group = TMW.DD:GetCurrentDropDown():GetParent()
+		local conditionSettings = group:GetConditionSettings()
 		
 		local CurrentConditionSet = CNDT.CurrentConditionSet
 		
@@ -327,7 +334,8 @@ function CNDT:TypeMenu_DropDown()
 			if conditionData.IS_SPACER then
 				queueSpacer = true
 			else
-				local shouldAdd = conditionData:ShouldList() --or TMW.debug
+				local selected = conditionData.identifier == conditionSettings.Type
+				local shouldAdd = selected or conditionData:ShouldList() --or TMW.debug
 				
 				if shouldAdd and not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
 					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
@@ -350,7 +358,6 @@ function CNDT:TypeMenu_DropDown()
 end
 
 function CNDT:TypeMenu_DropDown_OnClick(data)
-	TMW.DD.OPEN_MENU.selectedValue = self.value
 	TMW.DD.OPEN_MENU:SetText(data.text)
 	
 	local group = TMW.DD.OPEN_MENU:GetParent()
@@ -426,7 +433,9 @@ end
 
 
 function CNDT:OperatorMenu_DropDown()
-	local conditionData = self:GetParent():GetConditionData()
+	local group = self:GetParent()
+	local conditionData = group:GetConditionData()
+	local conditionSettings = group:GetConditionSettings()
 
 	for k, v in pairs(TMW.operators) do
 		if (not conditionData.specificOperators or conditionData.specificOperators[v.value]) then
@@ -434,6 +443,7 @@ function CNDT:OperatorMenu_DropDown()
 			info.func = CNDT.OperatorMenu_DropDown_OnClick
 			info.text = v.text
 			info.value = v.value
+			info.checked = conditionSettings.Operator == v.value
 			info.tooltipTitle = v.tooltipText
 			info.arg1 = self
 			TMW.DD:AddButton(info)
@@ -449,6 +459,43 @@ function CNDT:OperatorMenu_DropDown_OnClick(frame)
 	local condition = group:GetConditionSettings()
 	condition.Operator = self.value
 end
+
+
+function CNDT:BitFlags_DropDown()
+	local group = self:GetParent()
+	local conditionData = group:GetConditionData()
+	local conditionSettings = group:GetConditionSettings()
+
+	for index, name in pairs(conditionData.bitFlags) do
+		local flag = bit.lshift(1, index-1)
+		local info = TMW.DD:CreateInfo()
+
+		info.text = name
+
+		--info.tooltipTitle = name
+		--info.tooltipText = 
+
+		info.value = flag
+		info.checked = bit.band(conditionSettings.BitFlags, flag) == flag
+		info.keepShownOnClick = true
+		info.isNotRadio = true
+		info.func = CNDT.BitFlags_DropDown_OnClick
+		info.arg1 = self
+
+		TMW.DD:AddButton(info)
+	end
+end
+
+function CNDT:BitFlags_DropDown_OnClick(frame)	
+	local group = frame:GetParent()
+	local conditionSettings = group:GetConditionSettings()
+
+	conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, self.value)
+	TMW.IE:ScheduleIconSetup()
+	group:LoadAndDraw()
+end
+
+
 
 
 ---------- Runes ----------
@@ -672,8 +719,12 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	CndtGroup.Type:Show()
 	CndtGroup.TextType:SetText(L["CONDITIONPANEL_TYPE"])
 
-	CndtGroup.Type.selectedValue = conditionSettings.Type
-	CndtGroup.Type:SetText(conditionData and conditionData.text or conditionSettings.Type)
+
+	local text = conditionData and conditionData.text or conditionSettings.Type
+	CndtGroup.Type:SetText(text)
+
+	TMW:TT(CndtGroup.Type, conditionData.text, conditionData.tooltip, 1, 1)
+
 end)
 
 -- Operator
@@ -920,6 +971,58 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		CndtGroup.EditBox2:Hide()
 		CndtGroup.Slider:Hide()
 		CndtGroup.ValText:Hide()
+	end
+end)
+
+-- BitFlags dropdown
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+
+	if conditionData.bitFlags then
+		CndtGroup.BitFlags:Show()
+		CndtGroup.BitFlagsCheck:Show()
+		CndtGroup.BitFlagsCheck:SetChecked(conditionSettings.Checked)
+		CndtGroup.BitFlagsSelectedText:Show()
+		CndtGroup.BitFlags:SetText(conditionData.bitFlagTitle)
+
+		local text = ""
+		for index, name in pairs(conditionData.bitFlags) do
+			local flag = bit.lshift(1, index-1)
+
+			if bit.band(conditionSettings.BitFlags, flag) == flag then
+				if conditionSettings.Checked then
+					local Not = L["CONDITIONPANEL_BITFLAGS_NOT"]
+					if text ~= "" then
+						Not = Not:lower()
+					end
+
+					name = Not .. " " .. name
+				end
+
+				if text == "" then
+					text = name
+				else
+					text = text .. ", " .. name
+				end
+			end
+		end
+
+		local operator = conditionSettings.Checked and L["CONDITIONPANEL_AND"] or L["CONDITIONPANEL_OR"]
+		text = text:gsub(", ([^,]*)$", ", " .. operator:lower() .. " %1")
+
+		if text == "" then
+			if conditionSettings.Checked then
+				text = L["CONDITIONPANEL_BITFLAGS_ALWAYS"]
+			else
+				text = L["CONDITIONPANEL_BITFLAGS_NEVER"]
+			end
+			text = "<|cffaaaaaa" .. text .. "|r>"
+		end
+		CndtGroup.BitFlagsSelectedText:SetText(L["CONDITIONPANEL_BITFLAGS_SELECTED"] .. " " .. text)
+
+	else
+		CndtGroup.BitFlags:Hide()
+		CndtGroup.BitFlagsCheck:Hide()
+		CndtGroup.BitFlagsSelectedText:Hide()
 	end
 
 end)

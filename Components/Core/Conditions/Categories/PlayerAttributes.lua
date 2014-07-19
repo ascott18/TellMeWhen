@@ -36,8 +36,11 @@ local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo =
 	  
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], true, false)
 
-ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
+ConditionCategory:RegisterCondition(1,	 "INSTANCE", {	-- old
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
+
+	old = true,
+
 	min = 0,
 	max = 11,
 	unit = false,
@@ -98,8 +101,89 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {
 			ConditionObject:GenerateNormalEventString("PLAYER_DIFFICULTY_CHANGED")
 	end,
 })
-ConditionCategory:RegisterCondition(2,	 "GROUP", {
+ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
+	text = L["CONDITIONPANEL_INSTANCETYPE"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_INSTANCETYPE"]),
+	bitFlags = {
+		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
+		L["CONDITIONPANEL_INSTANCETYPE_NONE"],	--[ 1,  0x0    ]
+		BATTLEGROUND,							--[ 2,  0x1    ]
+		ARENA,									--[ 3,  0x2    ]
+		DUNGEON_DIFFICULTY_5PLAYER,				--[ 4,  0x4    ]
+		DUNGEON_DIFFICULTY_5PLAYER_HEROIC,		--[ 5,  0x8    ]
+		RAID_DIFFICULTY_10PLAYER,				--[ 6,  0x10   ]
+		RAID_DIFFICULTY_25PLAYER,				--[ 7,  0x20   ]
+		RAID_DIFFICULTY_10PLAYER_HEROIC,		--[ 8,  0x40   ]
+		RAID_DIFFICULTY_25PLAYER_HEROIC,		--[ 9,  0x80   ]
+		RAID_FINDER,							--[ 10, 0x100  ]
+		CHALLENGE_MODE,							--[ 11, 0x200  ]
+		RAID_DIFFICULTY_40PLAYER,				--[ 12, 0x400  ]
+		HEROIC_SCENARIO,						--[ 13, 0x800  ]
+		GUILD_CHALLENGE_TYPE4 ,					--[ 14, 0x1000 ] (regular scenario)
+		FLEX_RAID,								--[ 15, 0x2000 ]
+	},
+
+	icon = "Interface\\Icons\\Spell_Frost_Stun",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetZoneType2 = function()
+			local _, z = IsInInstance()
+			local instanceDifficulty
+			
+			if wow_502 then
+				_, _, instanceDifficulty = GetInstanceInfo()
+			else
+				instanceDifficulty = GetInstanceDifficulty() - 1
+			end
+			
+			if z == "pvp" then
+				-- Battleground (1)
+				return 1
+			elseif z == "arena" then
+				-- Arena (2)
+				return 2
+			elseif instanceDifficulty == 0 then
+				-- None (0)
+				return 0
+			else
+				-- 5 man normal (3)
+				-- 5 man heroic (4)
+				-- 10 man normal (5)
+				-- 25 man normal (6)
+				-- 10 man heroic (7)
+				-- 25 man heroic (8)
+				-- LFR (9)
+				-- Challenge Mode (10)
+				-- 40 man (11)
+				if instanceDifficulty <= 9 then
+					return 2 + instanceDifficulty -- 3-11
+				end
+
+				-- heroic scenario (12)
+				-- scenario (13)
+				if instanceDifficulty <= 12 then
+					return 1 + instanceDifficulty --12-13
+				end
+
+				-- Flex (14)
+				return instanceDifficulty
+			end
+		end,
+	},
+	funcstr = [[BitFlagsMapAndCheck(GetZoneType2())]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("ZONE_CHANGED_NEW_AREA"),
+			ConditionObject:GenerateNormalEventString("PLAYER_DIFFICULTY_CHANGED")
+	end,
+})
+
+
+ConditionCategory:RegisterCondition(2,	 "GROUP", {		-- old
 	text = L["CONDITIONPANEL_GROUPTYPE"],
+	old = true,
+
 	min = 0,
 	max = 2,
 	midt = true,
@@ -112,6 +196,29 @@ ConditionCategory:RegisterCondition(2,	 "GROUP", {
 		IsInGroup = IsInGroup,
 	},
 	funcstr = [[((IsInRaid() and 2) or (IsInGroup() and 1) or 0) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
+	end,
+})
+ConditionCategory:RegisterCondition(2,	 "GROUP2", {
+	text = L["CONDITIONPANEL_GROUPTYPE"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_GROUPTYPE"]),
+	bitFlags = {
+		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
+		SOLO,			--[ 1,  0x0    ]
+		PARTY,			--[ 2,  0x1    ]
+		RAID,			--[ 3,  0x2    ]
+	},
+
+	icon = "Interface\\Calendar\\MeetingIcon",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		IsInRaid = IsInRaid,
+		IsInGroup = IsInGroup,
+	},
+	funcstr = [[BitFlagsMapAndCheck( ((IsInRaid() and 3) or (IsInGroup() and 2) or 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
