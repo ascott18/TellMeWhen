@@ -53,7 +53,7 @@ end
 Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
 	-- This only runs if the module is enabled and we actually need click interation on the icon so that it can handle the events as needed.
 	
-	icon:EnableMouse(1)
+	icon:EnableMouse(true)
 end)
 
 Module:SetScriptHandler("OnClick", function(Module, icon, button)

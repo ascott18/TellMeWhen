@@ -901,7 +901,7 @@ function Icon.Setup(icon)
 		if icon.attributes.texture == "Interface\\Buttons\\UI-EmptySlot-Disabled" then
 			icon:SetInfo("texture", "")
 		end
-		icon:EnableMouse(0)
+		icon:EnableMouse(false)
 	else
 		icon:Show()
 		ClearScripts(icon)
@@ -918,7 +918,7 @@ function Icon.Setup(icon)
 			icon:SetInfo("texture", "Interface\\Buttons\\UI-EmptySlot-Disabled")
 		end
 
-		icon:EnableMouse(1)
+		icon:EnableMouse(true)
 	end
 
 
