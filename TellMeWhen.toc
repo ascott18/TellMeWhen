@@ -2,13 +2,13 @@
 # Major Updates by Oozebull of Twisting Nether, Xenyr of Aszune, and Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 50400
+## Interface: 60000
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 50400
-## X-Compatible-With: 50400
+## X-Interface: 60000
+## X-Compatible-With: 60000
 ## Title: TellMeWhen
 
-## Version: 7.0.3
+## Version: 7.1.0
 ## Author: Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
