@@ -898,7 +898,7 @@ function Icon.Setup(icon)
 
 	if TMW.Locked then	
 		icon:SetInfo("alphaOverride", nil)
-		if icon.attributes.texture == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
+		if icon.attributes.texture == "Interface\\Buttons\\UI-EmptySlot-Disabled" then
 			icon:SetInfo("texture", "")
 		end
 		icon:EnableMouse(0)
@@ -915,7 +915,7 @@ function Icon.Setup(icon)
 		)
 		
 		if icon.attributes.texture == "" then
-			icon:SetInfo("texture", "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
+			icon:SetInfo("texture", "Interface\\Buttons\\UI-EmptySlot-Disabled")
 		end
 
 		icon:EnableMouse(1)
@@ -1230,7 +1230,7 @@ end})
 -- @paramsig signature, ...
 -- @param signature [string] A semicolon-delimited string of attribute strings as passed to the constructor of a [[api/icon-data-processor/api-documentation/|IconDataProcessor]].
 -- @param ... [...] Any number of params that will match up one-for-one with the signature passed in.
--- @usage icon:SetInfo("texture", "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
+-- @usage icon:SetInfo("texture", "Interface\\Buttons\\UI-EmptySlot-Disabled")
 --  
 --  -- From IconTypes/IconType_wpnenchant:
 --  icon:SetInfo("alpha; start, duration; spell",

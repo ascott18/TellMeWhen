@@ -2,6 +2,11 @@ if not TMW then return end
 
 TMW.CHANGELOG = {
 
+[==[===v7.1.0===]==],
+[==[!! IMPORTANT: TELLMEWHEN FOR WARLORDS OF DRAENOR BETA!!]==],
+[==[* IMPORTANT: TEMPORARY CHANGES:]==],
+[==[** Non-blizzard resources (art, sounds, etc) currently can't be loaded. I replaced a few textures temporarily so you aren't blinded by the green]==],
+[==[]==],
 [==[===v7.0.3===]==],
 [==[* Re-worked the Instance Type condition to make it more extensible in the future, and also added a few missing instance types to it.]==],
 [==[]==],

@@ -308,7 +308,7 @@
 
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture parentKey="Left" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
+				<Texture parentKey="Left" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
 					<Size x="25" y="61.5"/>
 					<Anchors>
 						<Anchor point="TOP" y="17"/>
@@ -316,14 +316,14 @@
 					</Anchors>
 					<TexCoords left="0" right="0.1953125" top="0" bottom="1"/>
 				</Texture>
-				<Texture parentKey="Right" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
+				<Texture parentKey="Right" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
 					<Size x="25" y="61.5"/>
 					<Anchors>
 						<Anchor point="TOPRIGHT" x="17" y="17"/>
 					</Anchors>
 					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
 				</Texture>
-				<Texture parentKey="Middle" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
+				<Texture parentKey="Middle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
 					<Size y="61.5"/>
 					<Anchors>
 						<Anchor point="LEFT" relativeKey="$parent.Left" relativePoint="RIGHT"/>
