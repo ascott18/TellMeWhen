@@ -163,10 +163,17 @@ CooldownSweep:RegisterAnchorableFrame("Cooldown")
 
 function CooldownSweep:OnNewInstance(icon)
 	self.cooldown = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown", icon, "CooldownFrameTemplate")
+	self.cooldown.module = self
+
+	self.cooldown:SetScript("OnShow", self.Cooldown_OnShow)
 	
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
 end
 
+
+function CooldownSweep:Cooldown_OnShow()
+	self.module:UpdateCooldown()
+end
 
 
 function CooldownSweep:OnDisable()
