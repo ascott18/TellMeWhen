@@ -449,7 +449,6 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE", {
 
 ConditionCategory:RegisterSpacer(8.9)
 
---TODO: update this to work with talent IDs
 CNDT.Env.TalentMap = {}
 function CNDT:PLAYER_TALENT_UPDATE()
 	for tier = 1, MAX_TALENT_TIERS do
@@ -458,6 +457,7 @@ function CNDT:PLAYER_TALENT_UPDATE()
 			local lower = name and strlowerCache[name]
 			if lower then
 				Env.TalentMap[lower] = selected and 1 or nil
+				Env.TalentMap[id] = selected and 1 or nil
 			end
 		end
 	end
@@ -480,7 +480,7 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
 		CNDT:PLAYER_TALENT_UPDATE()
 	
-		return [[TalentMap[LOWER(c.NameName)] == c.1nil]]
+		return [[TalentMap[LOWER(c.NameFirst)] == c.1nil]]
 	end,
 	events = function(ConditionObject, c)
 		return

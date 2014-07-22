@@ -234,7 +234,7 @@ function Module:Table_Get()
 				
 				local lower = name and strlowerCache[name]
 				if lower then
-					self.table[lower] = id
+					self.table[id] = lower
 				end
 			end
 		end
@@ -245,28 +245,19 @@ end
 function Module:Table_GetSorter()
 	return nil
 end
-function Module:Entry_AddToList_1(f, name)
-	local id = self.table[name]
-
+function Module:Entry_AddToList_1(f, id)
 	local id, name, iconTexture = GetTalentInfoByID(id) -- restore case
 
 	f.Name:SetText(name)
+	f.ID:SetText(id)
 
 	f.tooltipmethod = "SetHyperlink"
 	f.tooltiparg = GetTalentLink(id)
 
 	f.insert = name
+	f.insert2 = id
 
 	f.Icon:SetTexture(iconTexture)
-end
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
-	local atBeginning = SUG.atBeginning
-
-	for name in pairs(tbl) do
-		if strfind(name, atBeginning) then
-			suggestions[#suggestions + 1] = name
-		end
-	end
 end
 
 
