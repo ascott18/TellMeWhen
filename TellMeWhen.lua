@@ -3327,12 +3327,16 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED(...)
 	--TMW:Update()
 	
 	if not TMW.AddedTalentsToTextures then
-		for talent = 1, MAX_NUM_TALENTS do
-			local name, tex = GetTalentInfo(talent)
-			local lower = name and strlowerCache[name]
-			
-			if lower then
-				SpellTexturesMetaIndex[lower] = tex
+
+		for tier = 1, MAX_TALENT_TIERS do
+			for column = 1, NUM_TALENT_COLUMNS do
+				local id, name, tex = GetTalentInfo(tier, column, GetActiveSpecGroup())
+
+				local lower = name and strlowerCache[name]
+				
+				if lower then
+					SpellTexturesMetaIndex[lower] = tex
+				end
 			end
 		end
 		

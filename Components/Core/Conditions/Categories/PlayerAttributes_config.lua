@@ -222,32 +222,42 @@ Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 Module.table = {}
 
 function Module:OnInitialize()
-	for talent = 1, MAX_NUM_TALENTS do
-		local name = GetTalentInfo(talent)
-		local lower = name and strlowerCache[name]
-		if lower then
-			self.table[lower] = talent
-		end
-	end
+	-- nothing
 end
 function Module:Table_Get()
+	wipe(self.table)
+
+	for spec = 1, MAX_TALENT_GROUPS do
+		for tier = 1, MAX_TALENT_TIERS do
+			for column = 1, NUM_TALENT_COLUMNS do
+				local id, name = GetTalentInfo(tier, column, spec)
+				
+				local lower = name and strlowerCache[name]
+				if lower then
+					self.table[lower] = id
+				end
+			end
+		end
+	end
+
 	return self.table
 end
 function Module:Table_GetSorter()
 	return nil
 end
 function Module:Entry_AddToList_1(f, name)
-	local talent = self.table[name]
-	local name, tex = GetTalentInfo(talent) -- restore case
+	local id = self.table[name]
+
+	local id, name, iconTexture = GetTalentInfoByID(id) -- restore case
 
 	f.Name:SetText(name)
 
 	f.tooltipmethod = "SetHyperlink"
-	f.tooltiparg = GetTalentLink(talent)
+	f.tooltiparg = GetTalentLink(id)
 
 	f.insert = name
 
-	f.Icon:SetTexture(tex)
+	f.Icon:SetTexture(iconTexture)
 end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning

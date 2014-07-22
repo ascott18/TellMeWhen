@@ -449,14 +449,16 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE", {
 
 ConditionCategory:RegisterSpacer(8.9)
 
-
+--TODO: update this to work with talent IDs
 CNDT.Env.TalentMap = {}
 function CNDT:PLAYER_TALENT_UPDATE()
-	for talent = 1, MAX_NUM_TALENTS do
-		local name, _, _, _, selected = GetTalentInfo(talent)
-		local lower = name and strlowerCache[name]
-		if lower then
-			Env.TalentMap[lower] = selected and 1 or nil
+	for tier = 1, MAX_TALENT_TIERS do
+		for column = 1, NUM_TALENT_COLUMNS do
+			local id, name, _, selected = GetTalentInfo(tier, column, GetActiveSpecGroup())
+			local lower = name and strlowerCache[name]
+			if lower then
+				Env.TalentMap[lower] = selected and 1 or nil
+			end
 		end
 	end
 end
@@ -469,7 +471,7 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 	unit = PLAYER,
 	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
 	useSUG = "talents",
-	icon = function() return select(2, GetTalentInfo(1)) end,
+	icon = function() return select(2, GetTalentInfo(1, 1, 1)) end,
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(ConditionObject, c)
 		-- this is handled externally because TalentMap is so extensive a process,
