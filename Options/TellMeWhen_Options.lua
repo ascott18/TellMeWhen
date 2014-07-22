@@ -1316,7 +1316,8 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 
 	if IE.db.global.LastChangelogVersion > 0 then
 		if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
-			if TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
+			if IE.db.global.LastChangelogVersion < TELLMEWHEN_FORCECHANGELOG -- forced
+			or TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
 			or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
 			then
 				TellMeWhen_ChangelogDialog.showIEOnClose = true
