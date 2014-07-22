@@ -151,6 +151,33 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 			min = 0.6,
 			softMax = 10,
 			bigStep = 0.01,
+
+
+			set = function(info, val)
+				local group = FindGroupFromInfo(info)
+
+
+				local oldScale = group:GetScale()
+				local newScale = val
+				local newX = group:GetLeft() * oldScale / newScale
+				local newY = group:GetTop() * oldScale / newScale
+
+
+				group:ClearAllPoints()
+				group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+
+				group:GetSettings().Scale = val
+				group:SetScale(val)
+
+				local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+				GroupModule_GroupPosition:UpdatePositionAfterMovement()
+				
+				if GroupModule_GroupPosition then
+					GroupModule_GroupPosition:SetPos()
+				end
+			end,
+
+
 		},
 		Level = {
 			name = L["UIPANEL_LEVEL"],
