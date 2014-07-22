@@ -224,7 +224,7 @@ function CooldownSweep:UpdateCooldown()
 	local duration = cd.duration
 	
 	
-	if duration > 0 then
+	if duration > 0 and self.icon:GetAlpha() > 0 then
 		if ElvUI and not self.noOCC then
 			local E = ElvUI[1]
 			if E and E.OnSetCooldown and E.private.cooldown.enable then

@@ -93,6 +93,7 @@ end
 function PowerBar:SetSpell(spell)
 	local bar = self.bar
 	self.spell = spell
+	self.spellLink = GetSpellLink(spell)
 	
 	if spell then
 		self:UpdateCost()
@@ -111,29 +112,138 @@ function PowerBar:SetSpell(spell)
 	end
 end
 
+
+
+
+
+local costs = {
+    [SPELL_POWER_MANA] = {
+        MANA_COST_LARGE:gsub("%%s", "(.-)"), -- = "%s Mana";
+        MANA_COST_LARGE_PER_TIME:gsub("%%s", "(.-)"), -- = "%s Mana, plus %s per sec";
+        MANA_COST_LARGE_PER_TIME_NO_BASE:gsub("%%s", "(.-)"), -- = "%s Mana per sec";
+        nil,
+    },
+    [SPELL_POWER_RAGE] = {
+        RAGE_COST:gsub("%%d", "(%%d+)"), -- = "%d Rage";
+        RAGE_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Rage, plus %d per sec";
+        RAGE_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Rage per sec";
+        nil,
+    },
+    [SPELL_POWER_FOCUS] = {
+        FOCUS_COST:gsub("%%d", "(%%d+)"), -- = "%d Focus";
+        FOCUS_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Focus, plus %d per sec";
+        FOCUS_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Focus per sec";
+        nil,
+    },
+    [SPELL_POWER_ENERGY] = {
+        ENERGY_COST:gsub("%%d", "(%%d+)"), -- = "%d Energy";
+        ENERGY_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Energy, plus %d per sec";
+        ENERGY_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Energy per sec";
+        nil,
+    },
+    [SPELL_POWER_RUNIC_POWER] = {
+        RUNIC_POWER_COST:gsub("%%d", "(%%d+)"), -- = "%d Runic Power";
+        RUNIC_POWER_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Runic Power, plus %d per sec";
+        RUNIC_POWER_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Runic Power per sec";
+        nil,
+    },
+    [SPELL_POWER_SOUL_SHARDS] = {
+        SOUL_SHARDS_COST:gsub("%%d", "(%%d+)"), -- = "%d Soul |4Shard:Shards;";
+        SOUL_SHARDS_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Soul Shards, plus %d per sec";
+        SOUL_SHARDS_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Soul Shards per sec";
+        nil,
+    },
+    [SPELL_POWER_HOLY_POWER] = {
+        HOLY_POWER_COST:gsub("%%d", "(%%d+)"), -- = "%d Holy Power";
+        nil,
+    },
+    [SPELL_POWER_CHI] = {
+        CHI_COST:gsub("%%d", "(%%d+)"), -- = "%d Chi";
+        CHI_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Chi, plus %d per sec";
+        CHI_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Chi per sec";
+        nil,
+    },
+    [SPELL_POWER_SHADOW_ORBS] = {
+        SHADOW_ORBS_COST, -- = "All Shadow Orbs";
+        SHADOW_ORBS_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Shadow Orbs, plus %d per sec";
+        SHADOW_ORBS_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Shadow Orbs per sec";
+        nil,
+    },
+    [SPELL_POWER_BURNING_EMBERS] = {
+        BURNING_EMBERS_COST:gsub("%%d", "(%%d+)"), -- = "%d Burning |4Ember:Embers;";
+        BURNING_EMBERS_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Burning Ember, plus%d per sec";
+        BURNING_EMBERS_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Burning Ember per sec";
+        nil,
+    },
+    [SPELL_POWER_DEMONIC_FURY] = {
+        DEMONIC_FURY_COST:gsub("%%d", "(%%d+)"), -- = "%d Demonic Fury";
+        DEMONIC_FURY_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Demonic Fury, plus %d per sec";
+        DEMONIC_FURY_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Demonic Fury per sec";
+        nil,
+    },
+}
+
+
+
+local Parser, LT1, LT2 = TMW:GetParser()
+
+function PowerBar:ScanForCost(spellLink)
+	if not spellLink then
+		return nil
+	end
+
+	Parser:SetOwner(UIParent, "ANCHOR_NONE")
+	Parser:SetHyperlink(spellLink)
+
+	local costString = LT2:GetText()
+
+	for powerType, strings in pairs(costs) do
+	    for _, string in pairs(strings) do
+	        local amount = costString:match("^" .. string .. "$")
+
+	        if amount then 
+	            amount = amount:gsub("[^0-9]", "")
+	            amount = tonumber(amount)
+
+	            return amount, powerType
+	        end
+	    end
+	end
+end
+
+
+
+
+
+
+
 function PowerBar:UpdateCost()
 	local bar = self.bar
 	local spell = self.spell
 	
 	if spell then
-		local _, _, _, cost, _, powerType = TMW_GetSpellInfo(spell)
+		local cost, powerType = self:ScanForCost(self.spellLink)
+		print(cost, powerType)
+		if cost then
 		
-		cost = powerType == 9 and 3 or cost or 0 -- holy power hack: always use a max of 3
-		self.Max = cost
-		bar:SetMinMaxValues(0, cost)
-		self.__value = nil -- the displayed value might change when we change the max, so force an update
-		
-		powerType = powerType or defaultPowerType
-		if powerType ~= self.powerType then
-			local colorinfo = PowerBarColor[powerType] or PowerBarColor[defaultPowerType]
+			cost = powerType == SPELL_POWER_HOLY_POWER and 3 or cost or 0 -- holy power hack: always use a max of 3
+			self.Max = cost
+			bar:SetMinMaxValues(0, cost)
+			self.__value = nil -- the displayed value might change when we change the max, so force an update
 			
-			bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
-			self.powerType = powerType
+			powerType = powerType or defaultPowerType
+			if powerType ~= self.powerType then
+				local colorinfo = PowerBarColor[powerType] or PowerBarColor[defaultPowerType]
+				
+				bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
+				self.powerType = powerType
+			end
 		end
 	end
 end
 
 function PowerBar:Update(power, powerTypeNum)
+
 	local bar = self.bar
 	if not powerTypeNum then
 		powerTypeNum = self.powerType

@@ -337,28 +337,6 @@ function TMW:AnimateHeightChange(f, endHeight, duration)
 	f.__animateHeight_duration = duration
 end
 
-do	-- TMW:GetParser()
-	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
-	function TMW:GetParser()
-		if not Parser then
-			Parser = CreateFrame("GameTooltip")
-
-			LT1 = Parser:CreateFontString()
-			RT1 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT1, RT1)
-
-			LT2 = Parser:CreateFontString()
-			RT2 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT2, RT2)
-
-			LT3 = Parser:CreateFontString()
-			RT3 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT3, RT3)
-		end
-		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
-	end
-end
-
 
 
 
