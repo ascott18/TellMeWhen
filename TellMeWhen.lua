@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 71007 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 71008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 71003 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -3779,21 +3779,28 @@ end
 ---------------------------------
 
 do	-- TMW.SpellHasNoMana(spell)
-	local jab = TMW_GetSpellInfo(100780)
-	function TMW.SpellHasNoMana(spell)
-		local name, _, _, cost, _, powerType = TMW_GetSpellInfo(spell)
+	-- local jab = TMW_GetSpellInfo(100780)
+	-- function TMW.SpellHasNoMana(spell)
+	-- 	local name, _, _, cost, _, powerType = TMW_GetSpellInfo(spell)
 		
-		if name == jab then
-			-- Jab is broken and doesnt report having a cost while in tiger stance 
-			-- (and maybe other stances) (see ticket #730)
-			local _, nomana = IsUsableSpell(spell)
-			return nomana
-		elseif powerType then
-			local power = UnitPower("player", powerType)
-			if power < cost then
-				return 1
-			end
-		end
+	-- 	if name == jab then
+	-- 		-- Jab is broken and doesnt report having a cost while in tiger stance 
+	-- 		-- (and maybe other stances) (see ticket #730)
+	-- 		local _, nomana = IsUsableSpell(spell)
+	-- 		return nomana
+	-- 	elseif powerType then
+	-- 		local power = UnitPower("player", powerType)
+	-- 		if power < cost then
+	-- 			return 1
+	-- 		end
+	-- 	end
+	-- end
+
+	-- TODO: in warlords, you can't determine spell costs anymore. Thanks, blizzard!
+
+	function TMW.SpellHasNoMana(spell)
+		local _, nomana = IsUsableSpell(spell)
+		return nomana
 	end
 end
 
