@@ -1478,7 +1478,7 @@
 		</Anchors>
 
 		<Frames>
-			<Button name="$parentNeverAgain" parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="155" y="15"/>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" x="-5" y="5"/>
@@ -1491,15 +1491,9 @@
 						TMW.IE.db.global.ConfigWarning = false
 						self:GetParent():Hide()
 					</OnClick>
-					<OnShow>
-						self:SetWidth(155)
-					</OnShow>
-					<OnHide>
-						self:SetWidth(-10)
-					</OnHide>
 				</Scripts>
 			</Button>
-			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="5" y="5"/>
@@ -1526,8 +1520,10 @@
 				TMW.IE.db.global.ConfigWarningN = TMW.IE.db.global.ConfigWarningN + 1
 				if TMW.IE.db.global.ConfigWarningN > 3 then
 					self.NeverAgain:Show()
+					self.Exit:SetPoint("BOTTOMRIGHT", self.NeverAgain, "BOTTOMLEFT", -10, 0)
 				else
 					self.NeverAgain:Hide()
+					self.Exit:SetPoint("BOTTOMRIGHT", -5, 5)
 				end
 			</OnShow>
 		</Scripts>
