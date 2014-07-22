@@ -28,7 +28,7 @@ local print = TMW.print
 local isString = TMW.isString
 local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
-local mindfreeze = strlower(GetSpellInfo(47528))
+local mindfreeze = strlower(TMW_GetSpellInfo(47528))
 
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 
@@ -243,7 +243,7 @@ function Type:Setup(icon)
 		icon.IgnoreRunes =  nil
 	end
 	
-	if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
+	if icon.NameName == strlower(TMW_GetSpellInfo(75)) and not icon.NameArray[2] then
 		icon:SetInfo("texture", GetSpellTexture(75))
 		icon.asStart = icon.asStart or 0
 		icon.asDuration = icon.asDuration or 0

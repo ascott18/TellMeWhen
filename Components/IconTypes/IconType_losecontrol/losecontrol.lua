@@ -18,8 +18,8 @@ if not _G.C_LossOfControl then
 	return
 end
 
-local GetSpellTexture, GetSpellLink, GetSpellInfo =
-	  GetSpellTexture, GetSpellLink, GetSpellInfo
+local GetSpellTexture, GetSpellLink, TMW_GetSpellInfo =
+	  GetSpellTexture, GetSpellLink, TMW_GetSpellInfo
 local GetEventInfo = C_LossOfControl.GetEventInfo
 local GetNumEvents = C_LossOfControl.GetNumEvents
 

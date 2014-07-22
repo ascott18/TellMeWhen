@@ -29,7 +29,7 @@ local IsCaching
 
 SpellCache.CONST = {
 	-- A rough estimate of the highest spellID in the game. Doesn't have to be accurate at all - visual only.
-	MAX_SPELLID_GUESS = 150000,
+	MAX_SPELLID_GUESS = 180000,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
 	MAX_FAILED_SPELLS = 2000,
@@ -77,7 +77,7 @@ TMW.IE:RegisterDatabaseDefaults{
 	},
 }
 
-TMW.IE:RegisterUpgrade(62217, {
+TMW.IE:RegisterUpgrade(71004, {
 	global = function(self)
 		TMW.IE.db.global.SpellCache = nil
 		TMW.IE.db.global.CacheLength = nil
@@ -180,7 +180,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
 			while spellsFailed < CONST.MAX_FAILED_SPELLS do
 			
-				local name, rank, icon = GetSpellInfo(index)
+				local name, rank, icon = TMW_GetSpellInfo(index)
 				if name then
 					name = strlower(name)
 

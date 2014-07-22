@@ -498,6 +498,6 @@ Processor:RegisterDogTag("TMW", "Extra", {
 	events = TMW:CreateDogTagEventString("CLEU_EXTRASPELL"),
 	ret = "string",
 	doc = L["DT_DOC_Extra"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
-	example = ('[Extra] => %q; [Extra(link=true)] => %q; [Extra(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Extra(icon="TMW:icon:1I7MnrXDCz8T", link=true)] => %q'):format(GetSpellInfo(5782), GetSpellLink(5782), GetSpellInfo(5308), GetSpellLink(5308)),
+	example = ('[Extra] => %q; [Extra(link=true)] => %q; [Extra(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Extra(icon="TMW:icon:1I7MnrXDCz8T", link=true)] => %q'):format(TMW_GetSpellInfo(5782), GetSpellLink(5782), TMW_GetSpellInfo(5308), GetSpellLink(5308)),
 	category = L["ICON"],
 })

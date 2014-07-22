@@ -16,8 +16,8 @@ local L = TMW.L
 
 local _, pclass = UnitClass("Player")
 
-local GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo =
-	  GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo
+local GetTotemInfo, GetSpellTexture, GetSpellLink, TMW_GetSpellInfo =
+	  GetTotemInfo, GetSpellTexture, GetSpellLink, TMW_GetSpellInfo
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
@@ -32,7 +32,7 @@ elseif pclass == "DEATHKNIGHT" then
 	Type.desc = L["ICONMENU_GHOUL_DESC"]
 	Type.menuIcon = GetSpellTexture(91800)
 elseif pclass == "MAGE" then
-	Type.name = GetSpellInfo(116011)
+	Type.name = TMW_GetSpellInfo(116011)
 	Type.desc = L["ICONMENU_RUNEOFPOWER_DESC"]
 	Type.menuIcon = GetSpellTexture(116011)
 else
@@ -221,7 +221,7 @@ function Type:Setup(icon)
 	icon.FirstTexture = nil
 	if pclass == "DEATHKNIGHT" then
 		icon.NameFirst = ""
-		icon.NameName = GetSpellInfo(46584)
+		icon.NameName = TMW_GetSpellInfo(46584)
 		icon.FirstTexture = GetSpellTexture(46584)
 		icon.Slots[1] = true -- there is only one slot for DKs, and they dont have options to check certain slots
 		icon.Slots[2] = nil
@@ -229,13 +229,13 @@ function Type:Setup(icon)
 		icon.Slots[4] = nil
 	elseif pclass == "MAGE" then
 		icon.NameFirst = ""
-		icon.NameName = GetSpellInfo(116011)
+		icon.NameName = TMW_GetSpellInfo(116011)
 		icon.FirstTexture = GetSpellTexture(116011)
 		icon.Slots[3] = nil -- there is no rune 3
 		icon.Slots[4] = nil -- there is no rune 4
 	elseif pclass == "DRUID" then
 		icon.NameFirst = ""
-		icon.NameName = GetSpellInfo(88747)
+		icon.NameName = TMW_GetSpellInfo(88747)
 		icon.FirstTexture = GetSpellTexture(88747)
 		icon.Slots[4] = nil -- there is no mushroom 4
 	elseif pclass ~= "SHAMAN" then --enable all totems for people that dont have totem slot options (future-proof it)
@@ -270,7 +270,7 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 		if doInsertLink then
 			name = GetSpellLink(data)
 		else
-			name = GetSpellInfo(data)
+			name = TMW_GetSpellInfo(data)
 		end
 		if name then
 			return name

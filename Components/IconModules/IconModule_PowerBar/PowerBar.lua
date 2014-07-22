@@ -17,8 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local _, pclass = UnitClass("Player")
-local GetSpellInfo, UnitPower =
-	  GetSpellInfo, UnitPower
+local TMW_GetSpellInfo, UnitPower =
+	  TMW_GetSpellInfo, UnitPower
 local pairs, wipe, _G =
 	  pairs, wipe, _G
 local PowerBarColor = PowerBarColor
@@ -116,7 +116,7 @@ function PowerBar:UpdateCost()
 	local spell = self.spell
 	
 	if spell then
-		local _, _, _, cost, _, powerType = GetSpellInfo(spell)
+		local _, _, _, cost, _, powerType = TMW_GetSpellInfo(spell)
 		
 		cost = powerType == 9 and 3 or cost or 0 -- holy power hack: always use a max of 3
 		self.Max = cost

@@ -14,8 +14,8 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount =
-	  GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount
+local GetSpellCooldown, IsUsableSpell, TMW_GetSpellInfo, GetSpellCharges, GetSpellCount =
+	  GetSpellCooldown, IsUsableSpell, TMW_GetSpellInfo, GetSpellCharges, GetSpellCount
 local SpellHasNoMana = TMW.SpellHasNoMana
 local OnGCD = TMW.OnGCD
 local print = TMW.print
@@ -23,7 +23,7 @@ local isString = TMW.isString
 local _, pclass = UnitClass("player")
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
-local mindfreeze = strlower(GetSpellInfo(47528))
+local mindfreeze = strlower(TMW_GetSpellInfo(47528))
 
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 
@@ -107,7 +107,7 @@ end)
 
 local function Reactive_OnEvent(icon, event, arg1)
 	if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
-		if icon.NameFirst == arg1 or strlowerCache[GetSpellInfo(arg1)] == icon.NameName then
+		if icon.NameFirst == arg1 or strlowerCache[TMW_GetSpellInfo(arg1)] == icon.NameName then
 			icon.forceUsable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
 			icon.NextUpdateTime = 0
 		end

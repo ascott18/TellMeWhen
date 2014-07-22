@@ -34,7 +34,7 @@ function Module:Entry_AddToList_2(f, id)
 	if id == "GCD" then
 		local spellID = TMW.GCDSpell
 
-		local name = GetSpellInfo(spellID)
+		local name = TMW_GetSpellInfo(spellID)
 
 		f.Name:SetText(L["GCD"])
 		f.ID:SetText(nil)

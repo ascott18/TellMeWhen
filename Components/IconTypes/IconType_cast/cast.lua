@@ -16,8 +16,8 @@ local L = TMW.L
 
 local ipairs =
 	  ipairs
-local GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
-	  GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
+local GetSpellLink, TMW_GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
+	  GetSpellLink, TMW_GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 local unitsWithExistsEvent
@@ -187,7 +187,7 @@ function Type:Setup(icon)
 end
 
 function Type:FormatSpellForOutput(icon, data, doInsertLink)
-	return data and ((doInsertLink and GetSpellLink(data)) or GetSpellInfo(data)) or data, 1
+	return data and ((doInsertLink and GetSpellLink(data)) or TMW_GetSpellInfo(data)) or data, 1
 end
 
 function Type:GuessIconTexture(ics)

@@ -30,8 +30,8 @@ local AceDB = LibStub("AceDB-3.0")
 ---------- Upvalues ----------
 local TMW = TMW
 local L = TMW.L
-local GetSpellInfo =
-	  GetSpellInfo
+local TMW_GetSpellInfo =
+	  TMW_GetSpellInfo
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, pcall, assert, rawget, rawset, unpack, select =
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, pcall, assert, rawget, rawset, unpack, select
 local strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
@@ -110,7 +110,7 @@ for category, b in pairs(TMW.OldBE) do
 		TMW.EquivFullIDLookup[equiv] = ";" .. str
 		local tbl = TMW:SplitNames(str)
 		for k, v in pairs(tbl) do
-			tbl[k] = GetSpellInfo(v) or v
+			tbl[k] = TMW_GetSpellInfo(v) or v
 		end
 		TMW.EquivFullNameLookup[equiv] = ";" .. table.concat(tbl, ";")
 	end
@@ -2643,7 +2643,7 @@ function IE:Equiv_GenerateTips(equiv)
 	local original = TMW:SplitNames(TMW.EquivOriginalLookup[equiv])
 
 	for k, v in pairs(IDs) do
-		local name, _, texture = GetSpellInfo(v)
+		local name, _, texture = TMW_GetSpellInfo(v)
 		if not name then
 			if TMW.debug then
 				TMW:Error("INVALID ID FOUND: %s:%s", equiv, v)
@@ -2775,14 +2775,14 @@ function IE:GetRealNames(Name)
 			name = v:GetName() or v.what or ""
 			texture = v:GetIcon()
 		else
-			name, _, texture = GetSpellInfo(v)
+			name, _, texture = TMW_GetSpellInfo(v)
 			texture = texture or SpellTextures[name or v]
 			
 			if not name and Cache then
 				local lowerv = strlower(v)
 				for id, lowername in pairs(Cache) do
 					if lowername == lowerv then
-						local newname, _, newtex = GetSpellInfo(id)
+						local newname, _, newtex = TMW_GetSpellInfo(id)
 						name = newname
 						if not texture then
 							texture = newtex

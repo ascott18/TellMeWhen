@@ -677,7 +677,7 @@ function Module:Table_GetSorter()
 end
 function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check
-		local name = GetSpellInfo(id)
+		local name = TMW_GetSpellInfo(id)
 
 		f.Name:SetText(name)
 		f.ID:SetText(id)
@@ -726,7 +726,7 @@ end
 local Module = SUG:NewModule("texture", SUG:GetModule("spell"))
 function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check
-		local name = GetSpellInfo(id)
+		local name = TMW_GetSpellInfo(id)
 
 		f.Name:SetText(name)
 		f.ID:SetText(id)
@@ -822,7 +822,7 @@ function Module:Entry_AddToList_2(f, id)
 	local idType, id = self:Etc_GetID(id)
 	
 	if idType == "s" and id then
-		local name = GetSpellInfo(id)
+		local name = TMW_GetSpellInfo(id)
 
 		f.Name:SetText(name)
 		f.ID:SetText(id)
@@ -1063,7 +1063,7 @@ function Module:Entry_IsValid(id)
 		return true
 	end
 
-	local _, _, _, _, _, _, castTime = GetSpellInfo(id)
+	local _, _, _, _, _, _, castTime = TMW_GetSpellInfo(id)
 	if not castTime then
 		return false
 	elseif castTime > 0 then

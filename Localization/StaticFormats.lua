@@ -5,7 +5,7 @@ local pname = UnitName("player")
 local spellFmt = "|T%s:0|t%s"
 local function Spell(id)
 	local name, _, tex = GetSpellInfo(id)
-	if not name or not tex then
+	if not name or name == "" or not tex then
 		return "?????"
 	end
 	if id == 42292 then
