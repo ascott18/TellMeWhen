@@ -223,7 +223,7 @@ function PowerBar:UpdateCost()
 	
 	if spell then
 		local cost, powerType = self:ScanForCost(self.spellLink)
-		print(cost, powerType)
+		
 		if cost then
 		
 			cost = powerType == SPELL_POWER_HOLY_POWER and 3 or cost or 0 -- holy power hack: always use a max of 3

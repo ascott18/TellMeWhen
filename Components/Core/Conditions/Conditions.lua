@@ -504,7 +504,7 @@ CNDT.Env = {
 	SemicolonConcatCache = setmetatable(
 	{}, {
 		__index = function(t, i)
-			if not i then return end
+			if not i then return ";;" end
 
 			local o = ";" .. strlowerCache[i] .. ";"
 			

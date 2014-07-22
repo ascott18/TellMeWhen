@@ -16,8 +16,8 @@ local L = TMW.L
 
 local ipairs =
 	  ipairs
-local GetSpellLink, TMW_GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID =
-	  GetSpellLink, TMW_GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists, UnitGUID
+local GetSpellLink, TMW_GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists =
+	  GetSpellLink, TMW_GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 local unitsWithExistsEvent
