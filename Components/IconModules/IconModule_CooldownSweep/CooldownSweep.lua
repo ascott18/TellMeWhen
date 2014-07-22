@@ -223,24 +223,21 @@ function CooldownSweep:UpdateCooldown()
 	local cd = self.cooldown
 	local duration = cd.duration
 	
-	cd:SetCooldown(cd.start, duration, cd.charges, cd.maxCharges)
-
-	if ElvUI and not self.noOCC then
-		local E = ElvUI[1]
-		if E and E.OnSetCooldown and E.private.cooldown.enable then
-			E.OnSetCooldown(cd, cd.start, duration, cd.charges, cd.maxCharges)
-		end
-	end
 	
 	if duration > 0 then
+		if ElvUI and not self.noOCC then
+			local E = ElvUI[1]
+			if E and E.OnSetCooldown and E.private.cooldown.enable then
+				E.OnSetCooldown(cd, cd.start, duration, cd.charges, cd.maxCharges)
+			end
+		end
+
+		cd:SetCooldown(cd.start, duration, cd.charges, cd.maxCharges)
+
 		cd:Show()
 		cd:SetAlpha(self.ShowTimer and 1 or 0)
 	else
 		cd:Hide()
-	end
-
-	if not self.ShowTimer then
-		cd:SetAlpha(0)
 	end
 end
 
@@ -281,4 +278,14 @@ function CooldownSweep:REVERSE(icon, reverse)
 end
 CooldownSweep:SetDataListner("REVERSE")
 
+
+function CooldownSweep:REALALPHA(icon, alpha)
+	local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 	
+	if alpha == 0 or icon:GetModuleOrModuleChild("IconModule_Alpha").FakeHidden then
+		self.cooldown:Hide()
+	else
+		self:UpdateCooldown()
+	end
+end
+CooldownSweep:SetDataListner("REALALPHA")
