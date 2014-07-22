@@ -1063,7 +1063,7 @@ function Module:Entry_IsValid(id)
 		return true
 	end
 
-	local _, _, _, _, _, _, castTime = TMW_GetSpellInfo(id)
+	local _, _, _, castTime = TMW_GetSpellInfo(id)
 	if not castTime then
 		return false
 	elseif castTime > 0 then
