@@ -41,8 +41,8 @@ TMW:RegisterUpgrade(41402, {
 
 
 
-local Ruler = CreateFrame("Frame")
 local function GetAnchoredPoints(group)
+	local _
 	local gs = group:GetSettings()
 	local p = gs.Point
 
@@ -51,21 +51,56 @@ local function GetAnchoredPoints(group)
 
 	if relframe == UIParent then
 		-- use the smart anchor points provided by UIParent anchoring if it is being used
-		local _
 		point, _, relativePoint = group:GetPoint(1)
 	end
 
-	Ruler:ClearAllPoints()
-	Ruler:SetPoint("TOPLEFT", group, point)
-	Ruler:SetPoint("BOTTOMRIGHT", relframe, relativePoint)
 
-	local X = Ruler:GetWidth()/UIParent:GetScale()/group:GetScale()
-	local Y = Ruler:GetHeight()/UIParent:GetScale()/group:GetScale()
+	local x1, x2, y1, y2
+	if point:find("LEFT") then
+		x1 = group:GetLeft()
+	elseif point:find("RIGHT") then
+		x1 = group:GetRight()
+	else
+		x1 = group:GetCenter()
+	end
+	if point:find("TOP") then
+		y1 = group:GetTop()
+	elseif point:find("BOTTOM") then
+		y1 = group:GetBottom()
+	else
+		_, y1 = group:GetCenter()
+	end
+
+
+	if relativePoint:find("LEFT") then
+		x2 = relframe:GetLeft()
+	elseif relativePoint:find("RIGHT") then
+		x2 = relframe:GetRight()
+	else
+		x2 = relframe:GetCenter()
+	end
+	if relativePoint:find("TOP") then
+		y2 = relframe:GetTop()
+	elseif relativePoint:find("BOTTOM") then
+		y2 = relframe:GetBottom()
+	else
+		_, y2 = relframe:GetCenter()
+	end
+
+
+
+	x1 = x1*group:GetEffectiveScale()
+	y1 = y1*group:GetEffectiveScale()
+	x2 = x2*relframe:GetEffectiveScale()
+	y2 = y2*relframe:GetEffectiveScale()
+
+
+	local factor = group:GetEffectiveScale()
 	
 	if TMW:ParseGUID(p.relativeTo) then
-		return point, p.relativeTo, relativePoint, -X, Y
+		return point, p.relativeTo, relativePoint, (x1-x2)/factor, (y1-y2)/factor
 	else
-		return point, relframe:GetName(), relativePoint, -X, Y
+		return point, relframe:GetName(), relativePoint, (x1-x2)/factor, (y1-y2)/factor
 	end
 end
 
