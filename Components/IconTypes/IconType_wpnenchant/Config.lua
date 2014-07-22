@@ -127,57 +127,15 @@ Module.ItemIDs = {
 	-- sharpening stone: ???
 	--25679,	--Comfortable Insoles
 }
-Module.SpellIDs = {
-	-- Shaman Enchants
-	8024,	--Flametongue Weapon
-	8033,	--Frostbrand Weapon
-	8232,	--Windfury Weapon
-	51730,	--Earthliving Weapon
-	8017,	--Rockbiter Weapon
-}
 
 local CurrentItems
 function Module:OnInitialize()
 	self.Items = {}
-	self.Spells = {}
 	self.Table = {}
 	self.SpellLookup = {}
 
 
 	self:Etc_DoItemLookups()
-
-	for _, id in pairs(self.SpellIDs) do
-		local name = TMW_GetSpellInfo(id)
-		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
-			local dobreak
-			enchant = name:match(enchant)
-			if enchant then
-				for ench in pairs(TMW.db.locale.WpnEnchDurs) do
-					if ench:lower():find(enchant:gsub("([%%%[%]%-%+])", "%%%1"):lower()) then
-						-- the enchant was found in the list of known enchants, so add it
-						self.Spells[ench] = id
-						dobreak = 1
-						break
-					end
-				end
-				if dobreak then
-					break
-				elseif GetLocale() ~= "ruRU" or (GetLocale() == "koKR" and id ~= 51730) then
-					-- the enchant was not found in the list of known enchants, so take a guess and add it (but not for ruRU because it is just screwed up
-					-- koKR is screwed up for earthliving, so dont try it either
-					self.Spells[enchant] = id
-				end
-			end
-		end
-	end
-
-	for k, v in pairs(self.Spells) do
-		if self.Table[k] then
-			TMW:Error("Attempted to add spellID %d, but an item already has that id.", k)
-		else
-			self.Table[k] = v
-		end
-	end
 
 	for k, v in pairs(TMW.db.locale.WpnEnchDurs) do
 		if not self.Table[k] then
@@ -220,16 +178,7 @@ function Module:Table_Get()
 	return self.Table
 end
 function Module:Entry_AddToList_1(f, name)
-	if self.Spells[name] then
-		local id = self.Spells[name]
-		f.Name:SetText(name)
-		f.ID:SetText(nil)
-
-		f.tooltipmethod = "SetSpellByID"
-		f.tooltiparg = id
-
-		f.insert = name
-	elseif self.Items[name] then
+	if self.Items[name] then
 		local id = CurrentItems[strlowerCache[name]] or self.Items[name]
 		local name, link = GetItemInfo(id)
 
@@ -253,9 +202,7 @@ function Module:Entry_AddToList_1(f, name)
 end
 function Module:Etc_GetTexture(name)
 	local tex
-	if self.Spells[name] then
-		tex = SpellTextures[self.Spells[name]]
-	elseif self.Items[name] then
+	if self.Items[name] then
 		tex = GetItemIcon(self.Items[name])
 	else
 		if name:match(L["SUG_PATTERNMATCH_FISHINGLURE"]) then
