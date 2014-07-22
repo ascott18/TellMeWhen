@@ -26,7 +26,7 @@ local Type = TMW.Classes.IconType:New("totem")
 if pclass == "DRUID" then
 	Type.name = L["ICONMENU_MUSHROOMS"]
 	Type.desc = L["ICONMENU_MUSHROOMS_DESC"]
-	Type.menuIcon = GetSpellTexture(88751)
+	Type.menuIcon = "Interface\\ICONS\\druid_ability_wildmushroom_b"
 elseif pclass == "DEATHKNIGHT" then
 	Type.name = L["ICONMENU_GHOUL"]
 	Type.desc = L["ICONMENU_GHOUL_DESC"]
@@ -38,7 +38,7 @@ elseif pclass == "MAGE" then
 else
 	Type.name = L["ICONMENU_TOTEM"]
 	Type.desc = L["ICONMENU_TOTEM_DESC"]
-	Type.menuIcon = GetSpellTexture(120668)
+	Type.menuIcon = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
 end
 
 Type.AllowNoName = true
