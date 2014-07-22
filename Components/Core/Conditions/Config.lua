@@ -736,8 +736,9 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	local text = conditionData and conditionData.text or conditionSettings.Type
 	CndtGroup.Type:SetText(text)
 
-	TMW:TT(CndtGroup.Type, conditionData.text, conditionData.tooltip, 1, 1)
-
+	if conditionData then
+		TMW:TT(CndtGroup.Type, conditionData.text, conditionData.tooltip, 1, 1)
+	end
 end)
 
 -- Operator
@@ -990,7 +991,7 @@ end)
 -- BitFlags dropdown
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 
-	if conditionData.bitFlags then
+	if conditionData and conditionData.bitFlags then
 		CndtGroup.BitFlags:Show()
 		CndtGroup.BitFlagsCheck:Show()
 		CndtGroup.BitFlagsCheck:SetChecked(conditionSettings.Checked)
