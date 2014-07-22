@@ -51,13 +51,14 @@ end
 
 --Overlay stuff, copied from Blizz code.
 -- We use our own instance of the code to prevent taint.
-IconContainer.unusedOverlayGlows = {};
-IconContainer.numOverlays = 0;
+local unusedOverlayGlows = {}
+local numOverlays = 0
+
 local function OverlayGlowAnimOutFinished(animGroup)
 	local overlay = animGroup:GetParent();
 	local actionButton = overlay:GetParent();
 	overlay:Hide();
-	tinsert(IconContainer.unusedOverlayGlows, overlay);
+	tinsert(unusedOverlayGlows, overlay);
 	actionButton.overlay = nil;
 end
 local function OverlayOnHide(overlay)
@@ -68,10 +69,10 @@ local function OverlayOnHide(overlay)
 end
 
 function IconContainer:GetOverlayGlow()
-	local overlay = tremove(self.unusedOverlayGlows);
+	local overlay = tremove(unusedOverlayGlows);
 	if ( not overlay ) then
-		self.numOverlays = self.numOverlays + 1;
-		overlay = CreateFrame("Frame", "TMW_ActionButtonOverlay"..self.numOverlays, UIParent, "ActionBarButtonSpellActivationAlert");
+		numOverlays = numOverlays + 1;
+		overlay = CreateFrame("Frame", "TMW_ActionButtonOverlay" .. numOverlays, UIParent, "ActionBarButtonSpellActivationAlert");
 
 
 		-- Override scripts from the blizzard template:
