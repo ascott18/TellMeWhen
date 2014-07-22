@@ -3093,8 +3093,8 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	if editbox.IsImportExportWidget then
 		local info = editbox.obj.userdata
 		
-		import.group_overwrite = FindGroupFromInfo(info)
-		export.group = FindGroupFromInfo(info)
+		import.group_overwrite = TMW.FindGroupFromInfo(info)
+		export.group = TMW.FindGroupFromInfo(info)
 	end
 end)
 
