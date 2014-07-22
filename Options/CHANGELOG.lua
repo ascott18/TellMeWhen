@@ -3,7 +3,7 @@ if not TMW then return end
 TMW.CHANGELOG = {
 
 [==[===v7.1.0===]==],
-[==[!! IMPORTANT: TELLMEWHEN FOR WARLORDS OF DRAENOR BETA!!]==],
+[==[IMPORTANT: TELLMEWHEN FOR WARLORDS OF DRAENOR BETA]==],
 [==[* IMPORTANT: TEMPORARY CHANGES:]==],
 [==[** Non-blizzard resources (art, sounds, etc) currently can't be loaded. I replaced a few textures temporarily so you aren't blinded by the green]==],
 [==[]==],
