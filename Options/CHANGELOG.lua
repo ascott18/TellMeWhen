@@ -11,6 +11,7 @@ TMW.CHANGELOG = {
 [==[** Non-blizzard resources (art, sounds, etc) currently can't be loaded. I replaced a few textures temporarily so you aren't blinded by the green]==],
 [==[]==],
 [==[* The suggestion list now defers its sorting so that input is more responsive.]==],
+[==[* The "Highlight timer edge" setting is back.]==],
 [==[]==],
 [==[===v7.0.3===]==],
 [==[* Re-worked the Instance Type condition to make it more extensible in the future, and also added a few missing instance types to it.]==],

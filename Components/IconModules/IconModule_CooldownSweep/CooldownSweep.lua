@@ -29,6 +29,12 @@ CooldownSweep:RegisterIconDefaults{
 	ClockGCD = false,
 }
 
+TMW:RegisterDatabaseDefaults{
+	profile = {
+		DrawEdge = false,
+	},
+}
+
 CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
 	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
 	TMW.HELP:NewCode("IE_TIMERTEXTHANDLER_MISSING", nil, true)
@@ -51,12 +57,12 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 					and	not LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true)
 					then
 					 TMW.HELP:Show{
-					 	code = "IE_TIMERTEXTHANDLER_MISSING",
-					 	icon = nil,
-					 	relativeTo = self,
-					 	x = 0,
-					 	y = 0,
-					 	text = format(L["HELP_IE_TIMERTEXTHANDLER_MISSING"])
+						code = "IE_TIMERTEXTHANDLER_MISSING",
+						icon = nil,
+						relativeTo = self,
+						x = 0,
+						y = 0,
+						text = format(L["HELP_IE_TIMERTEXTHANDLER_MISSING"])
 					 }
 					end
 				end			
@@ -106,6 +112,14 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 	self.ShowTimerTextnoOCC:HookScript("OnHide", CheckHidden)
 end)
 
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+	TMW.OptionsTable.args.main.args.checks.args.DrawEdge = {
+		name = TMW.L["UIPANEL_DRAWEDGE"],
+		desc = TMW.L["UIPANEL_DRAWEDGE_DESC"],
+		type = "toggle",
+		order = 60,
+	}
+end)
 
 TMW:RegisterUpgrade(60436, {
 	icon = function(self, ics)
@@ -232,7 +246,14 @@ function CooldownSweep:UpdateCooldown()
 			end
 		end
 
-		cd:SetCooldown(cd.start, duration, cd.charges, cd.maxCharges)
+		local drawEdge = false
+		if ( duration > 2 and cd.charges and cd.maxCharges and cd.charges ~= 0) then
+			drawEdge = true
+		end
+		cd:SetDrawEdge(TMW.db.profile.DrawEdge or drawEdge);
+		cd:SetDrawSwipe(not drawEdge);
+
+		cd:SetCooldown(cd.start, duration)
 
 		cd:Show()
 		cd:SetAlpha(self.ShowTimer and 1 or 0)
