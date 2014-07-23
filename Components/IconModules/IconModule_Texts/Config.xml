@@ -91,9 +91,9 @@
 				Set the text for this text display
 			-->
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
-				<Attributes>
-					<Attribute name="tmw-class" type="string" value="Config_EditBox_DogTags"/>
-				</Attributes>
+				<KeyValues>
+					<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
+				</KeyValues>
 
 				<Size y="15"/>
 				<Anchors>

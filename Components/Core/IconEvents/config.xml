@@ -288,9 +288,9 @@
 	<CheckButton name="TellMeWhen_EventSettings_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
 		<Size x="26" y="26"/>
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_CheckButton_Event"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_CheckButton_Event"/>
+		</KeyValues>
 	</CheckButton>
 
 	<CheckButton name="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
@@ -312,9 +312,9 @@
 
 	<Slider name="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Slider_Event"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Slider_Event"/>
+		</KeyValues>
 
 		<Size y="17"/>
 		<Anchors>
@@ -766,9 +766,9 @@
 
 					<Slider name="$parentFrequency" parentKey="Frequency" inherits="TellMeWhen_SliderTemplate" valuestep="0.1" >
 
-						<Attributes>
-							<Attribute name="tmw-class" type="string" value="Config_Slider_Event"/>
-						</Attributes>
+						<KeyValues>
+							<KeyValue key="tmwClass" type="string" value="Config_Slider_Event"/>
+						</KeyValues>
 
 						<Size x="170" y="17"/>
 						<Anchors>

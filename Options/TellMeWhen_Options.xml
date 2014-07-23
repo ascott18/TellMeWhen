@@ -60,9 +60,9 @@
 	</Frame>
 
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true" hidden="true">
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Panel"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Panel"/>
+		</KeyValues>
 
 		<Anchors>
 			<Anchor point="LEFT" x="0"/>
@@ -527,9 +527,9 @@
 	<Frame name="TellMeWhen_WhenCheckSet" virtual="true">
 		<Size y="40"/>
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Frame_WhenChecks"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Frame_WhenChecks"/>
+		</KeyValues>
 
 		<Frames>
 			<CheckButton name="$parentCheck" parentKey="Check" inherits="TellMeWhen_CheckTemplate">
@@ -854,9 +854,9 @@
 	<CheckButton name="TellMeWhen_CheckTemplate" virtual="true">
 		<Size x="30" y="30"/>
 		
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_CheckButton"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_CheckButton"/>
+		</KeyValues>
 
         <Layers>
 			<Layer level="ARTWORK">
@@ -951,9 +951,9 @@
 	<EditBox name="TellMeWhen_InputBoxTemplate" enableMouse="true" virtual="true" autoFocus="false">
 		<Size y="15"/>
 		
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_EditBox"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_EditBox"/>
+		</KeyValues>
 
 		<HitRectInsets left="-1" right="-1" top="-1" bottom="-1" />
 		<TextInsets>
@@ -1052,9 +1052,9 @@
 	<Button name="TellMeWhen_ButtonTemplate" virtual="true">
 		<Size x="144" y="15"/>
 		
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Button"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Button"/>
+		</KeyValues>
 
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
@@ -1133,9 +1133,9 @@
 	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
 		<Size y="17"/>
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Slider"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Slider"/>
+		</KeyValues>
 
 		<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
 			<EdgeSize>
@@ -1181,9 +1181,9 @@
 	</Slider>
 
 	<Slider name="TellMeWhen_SliderTemplate_Alpha" inherits="TellMeWhen_SliderTemplate" virtual="true">
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Slider_Alpha"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Slider_Alpha"/>
+		</KeyValues>
 	</Slider>
 
 

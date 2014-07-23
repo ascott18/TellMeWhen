@@ -2339,7 +2339,7 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 		-- ShowWhen toggle
 		assert(data.bit, "SettingWhenCheckSet's data table must declare a bit flag to be toggled in ics.ShowWhen! (data.bit)")
 		
-		self.Check:SetAttribute("tmw-class", "Config_CheckButton_BitToggle")
+		self.Check.tmwClass = "Config_CheckButton_BitToggle"
 		TMW:CInit(self.Check, {
 			setting = "ShowWhen",
 			bit = data.bit,

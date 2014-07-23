@@ -69,9 +69,9 @@ function TMW:NewClass(...)
 	return TMW.Classes:NewClass(...)
 end
 function TMW:CInit(self, ...)
-	local className = self:GetAttribute("tmw-class")
+	local className = self.tmwClass
 	if not className then
-		error("tmw-class attribute not defined for " .. self:GetName() or "<unnamed>.")
+		error("tmwClass value not defined for " .. self:GetName() or "<unnamed>.")
 	end
 
 	local class = TMW.Classes[className]

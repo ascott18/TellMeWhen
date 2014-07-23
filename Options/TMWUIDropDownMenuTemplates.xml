@@ -298,9 +298,9 @@
 	
 
 	<Frame name="TMW_DropDownMenuTemplate" enableMouse="true" virtual="true">
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_DropDownMenu"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_DropDownMenu"/>
+		</KeyValues>
 
 		<Size x="40" y="32"/>
 
@@ -423,9 +423,9 @@
 	
 	<Frame name="TMW_IconDropDownMenuTemplate" inherits="TMW_DropDownMenuTemplate" virtual="true">
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_DropDownMenu_Icon"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_DropDownMenu_Icon"/>
+		</KeyValues>
 
 		<Frames>
 			<Button parentKey="IconPreview" enableMouse="true">

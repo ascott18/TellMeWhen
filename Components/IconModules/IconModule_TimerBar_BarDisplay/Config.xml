@@ -5,9 +5,9 @@
 	<Button name="TellMeWhen_BarDisplay_ColorButton" virtual="true">
 		<Size x="20" y="20"/>
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_ColorButton"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_ColorButton"/>
+		</KeyValues>
 
 		<Layers>
 			<Layer level="BACKGROUND">
