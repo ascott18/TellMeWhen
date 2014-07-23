@@ -60,11 +60,11 @@ Type:UsesAttributes("texture")
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 
-TMW:MergeDefaultsTables({
+TMW:RegisterDatabaseDefaults{
 	global = {
 		DRDuration = 17
 	},
-}, TMW.Defaults)
+}
 
 Type:RegisterIconDefaults{
 	Unit					= "player", 
