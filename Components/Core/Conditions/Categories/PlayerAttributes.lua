@@ -107,21 +107,24 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_INSTANCETYPE"]),
 	bitFlags = {
 		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
-		L["CONDITIONPANEL_INSTANCETYPE_NONE"],	--[ 1,  0x0    ]
-		BATTLEGROUND,							--[ 2,  0x1    ]
-		ARENA,									--[ 3,  0x2    ]
-		DUNGEON_DIFFICULTY_5PLAYER,				--[ 4,  0x4    ]
-		DUNGEON_DIFFICULTY_5PLAYER_HEROIC,		--[ 5,  0x8    ]
-		RAID_DIFFICULTY_10PLAYER,				--[ 6,  0x10   ]
-		RAID_DIFFICULTY_25PLAYER,				--[ 7,  0x20   ]
-		RAID_DIFFICULTY_10PLAYER_HEROIC,		--[ 8,  0x40   ]
-		RAID_DIFFICULTY_25PLAYER_HEROIC,		--[ 9,  0x80   ]
-		RAID_FINDER,							--[ 10, 0x100  ]
-		CHALLENGE_MODE,							--[ 11, 0x200  ]
-		RAID_DIFFICULTY_40PLAYER,				--[ 12, 0x400  ]
-		HEROIC_SCENARIO,						--[ 13, 0x800  ]
-		GUILD_CHALLENGE_TYPE4 ,					--[ 14, 0x1000 ] (regular scenario)
-		FLEX_RAID,								--[ 15, 0x2000 ]
+		L["CONDITIONPANEL_INSTANCETYPE_NONE"],												--[ 1,  0x0     ]
+		BATTLEGROUND,																		--[ 2,  0x1     ]
+		ARENA,																				--[ 3,  0x2     ]
+		DUNGEON_DIFFICULTY_5PLAYER,															--[ 4,  0x4     ]
+		DUNGEON_DIFFICULTY_5PLAYER_HEROIC,													--[ 5,  0x8     ]
+		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER),			--[ 6,  0x10    ]
+		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER),			--[ 7,  0x20    ]
+		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER_HEROIC),	--[ 8,  0x40    ]
+		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER_HEROIC),	--[ 9,  0x80    ]
+		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_FINDER),						--[ 10, 0x100   ]
+		CHALLENGE_MODE,																		--[ 11, 0x200   ]
+		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_40PLAYER),			--[ 12, 0x400   ]
+		HEROIC_SCENARIO,																	--[ 13, 0x800   ]
+		GUILD_CHALLENGE_TYPE4,																--[ 14, 0x1000  ] (regular scenario)
+		format("%s (%s)", PLAYER_DIFFICULTY1, FLEX_RAID),									--[ 15, 0x2000  ] (Warlords Normal Flex)
+		format("%s (%s)", PLAYER_DIFFICULTY2, FLEX_RAID),									--[ 16, 0x4000  ] (Warlords Heroic Flex)
+		PLAYER_DIFFICULTY6,																	--[ 17, 0x8000  ] (Warlords Mythic)
+		format("%s (%s)", PLAYER_DIFFICULTY3, FLEX_RAID),									--[ 18, 0x10000 ] (Warlords LFR Flex)
 	},
 
 	icon = "Interface\\Icons\\Spell_Frost_Stun",
@@ -166,7 +169,10 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 					return 2 + instanceDifficulty --13-14
 				end
 
-				-- Flex (15)
+				-- Normal Flex (15)
+				-- Heroic Flex (16)
+				-- Mythic (17)
+				-- LFR Flex (18)
 				return 1 + instanceDifficulty
 			end
 		end,
