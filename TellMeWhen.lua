@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 71008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 71009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 71003 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1742,8 +1742,24 @@ end
 
 -- ADDON ENTRY POINT: EVERYTHING STARTS FROM HERE!
 function TMW:OnInitialize()
-	-- if the file IS required for gross functionality
-	if not TMW.Classes or not TMW.Classes.Formatter then
+	-- Check for wrong WoW version
+	if select(4, GetBuildInfo()) < 60000 then
+		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
+		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
+		local version = GetBuildInfo()
+		StaticPopupDialogs["TMW_BADWOWVERSION"] = {
+			text = "TellMeWhen %s is not compatible with WoW %s. Please update TellMeWhen.", 
+			button1 = OKAY,
+			timeout = 0,
+			showAlert = true,
+			whileDead = true,
+			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+		}
+		StaticPopup_Show("TMW_BADWOWVERSION", TELLMEWHEN_VERSION_FULL, version)
+		return
+
+	-- if the file is NOT required for gross functionality
+	elseif not TMW.Classes or not TMW.Classes.Formatter then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
