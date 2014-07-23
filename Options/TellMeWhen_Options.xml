@@ -532,7 +532,7 @@
 		</KeyValues>
 
 		<Frames>
-			<CheckButton name="$parentCheck" parentKey="Check" inherits="TellMeWhen_CheckTemplate">
+			<CheckButton parentKey="Check" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="5"/>
 				</Anchors>
@@ -542,10 +542,10 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
+			<Slider parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentCheck" relativePoint="RIGHT" x="5" />
+					<Anchor point="LEFT" relativeKey="$parent.Check" relativePoint="RIGHT" x="5" />
 					<Anchor point="RIGHT" x="-11" />
 				</Anchors>
 				<Scripts>

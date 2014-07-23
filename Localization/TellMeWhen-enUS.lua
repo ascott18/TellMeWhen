@@ -1693,6 +1693,7 @@ L["CACHING"] = [[TellMeWhen is caching and filtering all spells in the game. Thi
 You do not have to wait for this process to complete in order to use TellMeWhen. Only the suggestion list is dependent on the completion of the spell cache.]]
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
+L["SUGGESTIONS_SORTING"] = "Sorting..."
 L["SUGGESTIONS_DOGTAGS"] = "DogTags:"
 L["SUG_TOOLTIPTITLE_GENERIC"] = [[As you type, TellMeWhen will try to determine the input that you were looking for.
 

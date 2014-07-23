@@ -3,9 +3,14 @@ if not TMW then return end
 TMW.CHANGELOG = {
 
 [==[===v7.1.0===]==],
-[==[IMPORTANT: TELLMEWHEN FOR WARLORDS OF DRAENOR BETA]==],
+[==[]==],
+[==[IMPORTANT: LIKE, SUPER IMPORTANT, PLEASE READ - KNOWN ISSUE:]==],
+[==[* If some of your icons are disappearing every time you log in/reload, and those icons have an iconID greater than 22, then go through that group and enable all the blank icons in that group. There is an issue with Blizzard's SavedVariables serializer that is causing all numbers to get serialized incorrectly. This issue will affect other things too that use numbers greater than 22, so I suggest that you don't get too attached to your icons right now - you will want to re-import your setup from live once the issue is fixed. Read more here: http://www.wowinterface.com/forums/showthread.php?p=294284]==],
+[==[]==],
 [==[* IMPORTANT: TEMPORARY CHANGES:]==],
 [==[** Non-blizzard resources (art, sounds, etc) currently can't be loaded. I replaced a few textures temporarily so you aren't blinded by the green]==],
+[==[]==],
+[==[* The suggestion list now defers its sorting so that input is more responsive.]==],
 [==[]==],
 [==[===v7.0.3===]==],
 [==[* Re-worked the Instance Type condition to make it more extensible in the future, and also added a few missing instance types to it.]==],

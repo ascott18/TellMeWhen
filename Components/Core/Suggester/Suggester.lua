@@ -102,11 +102,20 @@ function SUG:DoSuggest()
 	SUG:SuggestingComplete(1)
 end
 
+local function progressCallback(countdown)
+	SUG.Suggest.Header:SetText(L["SUGGESTIONS_SORTING"] .. " " .. countdown)
+end
+
 function SUG:SuggestingComplete(doSort)
 	local numFramesNeeded = TMW.SUG:GetNumFramesNeeded()
 
+	SUG.Suggest.blocker:Hide()
+	SUG.Suggest.Header:SetText(SUG.CurrentModule.headerText)
 	if doSort and not SUG.CurrentModule.dontSort then
-		sort(SUGpreTable, SUG.CurrentModule:Table_GetSorter())
+		SUG.Suggest.blocker:Show()
+		SUG.Suggest.Header:SetText(L["SUGGESTIONS_SORTING"])
+		TMW.shellsortDeferred(SUGpreTable, SUG.CurrentModule:Table_GetSorter(), nil, SUG.SuggestingComplete, SUG, progressCallback)
+		return
 	end
 
 	local i = 1
@@ -317,7 +326,7 @@ local EditBoxHooks = {
 		end
 	end,
 	OnTabPressed = function(self)
-		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() and not SUG.CurrentModule.noTab then
+		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() and not SUG.CurrentModule.noTab and not SUG.Suggest.blocker:IsShown() then
 			SUG[1]:Click("LeftButton")
 			TMW.HELP:Hide("SUG_FIRSTHELP")
 		end
