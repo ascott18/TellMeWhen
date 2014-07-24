@@ -250,13 +250,18 @@ function CooldownSweep:UpdateCooldown()
 		if ( duration > 2 and cd.charges and cd.maxCharges and cd.charges ~= 0) then
 			drawEdge = true
 		end
-		cd:SetDrawEdge(TMW.db.profile.DrawEdge or drawEdge);
-		cd:SetDrawSwipe(not drawEdge);
+
+
+		if self.ShowTimer then
+			cd:SetDrawEdge(TMW.db.profile.DrawEdge or drawEdge)
+			cd:SetDrawSwipe(not drawEdge)
+		else
+			cd:SetDrawEdge(false)
+			cd:SetDrawSwipe(false)
+		end
 
 		cd:SetCooldown(cd.start, duration)
-
 		cd:Show()
-		cd:SetAlpha(self.ShowTimer and 1 or 0)
 	else
 		cd:Hide()
 	end
