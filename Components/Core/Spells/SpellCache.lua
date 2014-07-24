@@ -77,17 +77,14 @@ TMW.IE:RegisterDatabaseDefaults{
 	},
 }
 
-TMW.IE:RegisterUpgrade(71015, {
+TMW.IE:RegisterUpgrade(71016, {
 	global = function(self)
 		TMW.IE.db.global.SpellCache = nil
 		TMW.IE.db.global.CacheLength = nil
 		TMW.IE.db.global.IncompleteCache = nil
 		TMW.IE.db.global.WoWVersion = nil
-		
-		TMW.IE.db.locale.SpellCache = nil
-		TMW.IE.db.locale.CacheLength = nil
-		TMW.IE.db.locale.IncompleteCache = nil
-		TMW.IE.db.locale.WoWVersion = nil
+
+		TMW.IE.db.locale.SpellCacheWoWVersion = 0
 	end,
 })
 
