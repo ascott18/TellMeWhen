@@ -1214,15 +1214,6 @@ function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
 	
 	local parentWidth = parent:GetWidth()
 
-	if parentWidth <= 0 then
-		local p = parent
-		TMW:Print("--DEBUG: Width messed up--", numPerRow, (...):GetName())
-		repeat
-			TMW:Print(p:GetName(), p:GetWidth())
-			p = p:GetParent()
-		until not p:GetParent() 
-	end
-
 	local paddingPerSide = 5 -- constant
 	local parentWidth_padded = parentWidth - paddingPerSide*2
 	
@@ -1617,20 +1608,6 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			-- Cheater! (We arent getting anything)
 			-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
 			get(self.supplementalData.OnSetup, self, panelInfo, self.supplementalData) 
-		end
-	end,
-
-	OnHide = function(self)
-		self:SetHeight_base(-11)
-	end,
-	OnShow = function(self)
-		self:SetHeight_base(self.height)
-	end,
-
-	SetHeight = function(self, height)
-		self.height = height
-		if self:IsShown() then
-			self:SetHeight_base(height)
 		end
 	end,
 }
