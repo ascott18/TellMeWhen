@@ -1213,6 +1213,16 @@ function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
 	local numChildFrames = select("#", ...)
 	
 	local parentWidth = parent:GetWidth()
+
+	if parentWidth <= 0 then
+		local p = parent
+		TMW:Print("--DEBUG: Width messed up--", numPerRow, (...):GetName())
+		repeat
+			TMW:Print(p:GetName(), p:GetWidth())
+			p = p:GetParent()
+		until not p:GetParent() 
+	end
+
 	local paddingPerSide = 5 -- constant
 	local parentWidth_padded = parentWidth - paddingPerSide*2
 	
