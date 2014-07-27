@@ -276,7 +276,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	for _, namespaceName in pairs(DogTag.unpackNamespaceList[DOGTAG.nsList]) do
 		local namespace = DogTag.Tags[namespaceName]
 
-		if currentTag or namespaceName == "TMW" then
+		if namespace and (currentTag or namespaceName == "TMW") then
 			for tagName, tagData in pairs(namespace) do
 				if not tagData.noDoc and (not currentTag or tagName:lower():find(SUG.lastName)) then
 					suggestions[#suggestions + 1] = tagName
