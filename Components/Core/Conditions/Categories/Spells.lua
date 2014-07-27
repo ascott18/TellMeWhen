@@ -367,7 +367,11 @@ ConditionCategory:RegisterCondition(14,	 "ITEMINBAGS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE"),
-			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
+			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player"),
+
+			-- apparently, using a charge of a healthstone doesn't fire either of the other two events.
+			-- BAG_UPDATE_COOLDOWN fires way too often for my liking, but I guess we don't have a choice.
+			ConditionObject:GenerateNormalEventString("BAG_UPDATE_COOLDOWN") 
 	end,
 })
 ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
