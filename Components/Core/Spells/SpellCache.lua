@@ -18,6 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 local clientVersion = select(4, GetBuildInfo())
+local clientBuild = select(2, GetBuildInfo())
 
 local SpellCache = TMW:NewModule("SpellCache", "AceEvent-3.0", "AceTimer-3.0")
 
@@ -141,7 +142,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	Cache = TMW.IE.db.locale.SpellCache
 
 	if TMW.IE.db.locale.IncompleteSpellCache
-	or TMW.IE.db.locale.SpellCacheWoWVersion < clientVersion
+	or TMW.IE.db.locale.SpellCacheWoWVersion ~= clientBuild
 	then
 		TMW.IE.db.locale.IncompleteSpellCache = true
 		
@@ -162,7 +163,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
 		TMW:Fire("TMW_SPELLCACHE_EXPECTEDCACHELENGTH_UPDATED", TMW.IE.db.locale.SpellCacheLength)
 
-		if TMW.IE.db.locale.SpellCacheWoWVersion < clientVersion then
+		if TMW.IE.db.locale.SpellCacheWoWVersion ~= clientBuild then
 			wipe(Cache)
 		elseif TMW.IE.db.locale.IncompleteSpellCache then
 			for id in pairs(Cache) do
@@ -170,7 +171,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 			end
 		end
 
-		TMW.IE.db.locale.SpellCacheWoWVersion = clientVersion
+		TMW.IE.db.locale.SpellCacheWoWVersion = clientBuild
 
 		local Parser, LT1 = TMW:GetParser()
 
