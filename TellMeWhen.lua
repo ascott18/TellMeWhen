@@ -1899,14 +1899,19 @@ end
 function TMW:PLAYER_LOGIN()
 	TMW:UnregisterEvent("PLAYER_LOGIN")
 	TMW.PLAYER_LOGIN = nil
+
+	TMW:UpdateTalentTextureCache()
 	
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 
-	-- TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 	-- Don't register PLAYER_TALENT_UPDATE. As far as I can tell, there is nothing that it fires for
 	-- that PLAYER_SPECIALIZATION_CHANGED won't also fire for. See ticket 949 for details on why
 	-- registering PLAYER_TALENT_UPDATE is bad now.
+	-- Addendum for Warlords: We're back to registering this again. Lets hope they've fixed the issue.
+	-- PLAYER_SPECIALIZATION_CHANGED doesn't fire nearly as much as it used to, which is why we need to keep PLAYER_TALENT_UPDATE
+
 
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 
@@ -3361,12 +3366,8 @@ function TMW:ScheduleUpdate(delay)
 	updateHandler = TMW:ScheduleTimer("ScheduledUpdateHandler", delay or 1)
 end
 
-function TMW:PLAYER_SPECIALIZATION_CHANGED(...)
-	TMW:ScheduleUpdate(.2)
-	--TMW:Update()
-	
-	if not TMW.AddedTalentsToTextures then
-
+function TMW:UpdateTalentTextureCache()
+	for spec = 1, MAX_TALENT_GROUPS do
 		for tier = 1, MAX_TALENT_TIERS do
 			for column = 1, NUM_TALENT_COLUMNS do
 				local id, name, tex = GetTalentInfo(tier, column, GetActiveSpecGroup())
@@ -3378,9 +3379,14 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED(...)
 				end
 			end
 		end
-		
-		TMW.AddedTalentsToTextures = 1
 	end
+end
+
+function TMW:PLAYER_SPECIALIZATION_CHANGED(...)
+	TMW:ScheduleUpdate(.2)
+	--TMW:Update()
+
+	TMW:UpdateTalentTextureCache()
 end
 
 function TMW:OnProfile(event, arg2, arg3)
