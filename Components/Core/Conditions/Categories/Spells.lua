@@ -210,7 +210,7 @@ ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
 	icon = "Interface\\Icons\\ability_warrior_revenge",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[c.1nil == ReactiveHelper(c.NameFirst, c.Checked)]],
+	funcstr = [[c.True == ReactiveHelper(c.NameFirst, c.Checked)]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
@@ -228,7 +228,7 @@ ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
 	icon = "Interface\\Icons\\inv_potion_137",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[c.nil1 == SpellHasNoMana(c.NameFirst)]],
+	funcstr = [[c.False == SpellHasNoMana(c.NameFirst)]],
 	Env = {
 		SpellHasNoMana = TMW.SpellHasNoMana
 	},
@@ -381,7 +381,7 @@ ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 	unit = false,
 	icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[c.1nil == c.Item:GetEquipped()]],
+	funcstr = [[c.True == c.Item:GetEquipped()]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE"),

@@ -291,7 +291,7 @@ local function BigWigs_engaged_init()
 		TMW.Warn("BigWigsLoader wasn't loaded when BigWigs engaged conditions tried to initialize.")
 
 		function Env.BigWigs_IsBossEngaged()
-			return nil
+			return false
 		end
 
 		return
@@ -315,11 +315,11 @@ local function BigWigs_engaged_init()
 		for module in pairs(EngagedBosses) do
 
 			if module.displayName:lower():match(bossName) or module.moduleName:lower():match(bossName) then
-				return module.isEngaged and 1 or nil
+				return module.isEngaged and true or false
 			end
 		end
 		
-		return nil
+		return false
 	end
 end
 
@@ -350,7 +350,7 @@ ConditionCategory:RegisterCondition(2,	 "BIGWIGS_ENGAGED", {
 		if BigWigs_engaged_init then BigWigs_engaged_init() end
 
 		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
-		return [[BigWigs_IsBossEngaged(]] .. name .. [[) == c.1nil]]
+		return [[BigWigs_IsBossEngaged(]] .. name .. [[) == c.True]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -486,7 +486,7 @@ local function DBM_engaged_init()
 		TMW.Warn("DBM wasn't loaded when DBM engaged conditions tried to initialize.")
 		
 		function Env.DBM_IsBossEngaged()
-			return nil
+			return false
 		end
 
 		return
@@ -510,11 +510,11 @@ local function DBM_engaged_init()
 		for mod in pairs(EngagedBosses) do
 
 			if mod.localization.general.name:lower():match(bossName) or mod.id:lower():match(bossName) then
-				return mod.inCombat and 1 or nil
+				return mod.inCombat and true or false
 			end
 		end
 		
-		return nil
+		return false
 	end
 end
 
@@ -545,7 +545,7 @@ ConditionCategory:RegisterCondition(11,	 "DBM_ENGAGED", {
 		if DBM_engaged_init then DBM_engaged_init() end
 
 		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
-		return [[DBM_IsBossEngaged(]] .. name .. [[) == c.1nil]]
+		return [[DBM_IsBossEngaged(]] .. name .. [[) == c.False]]
 	end,
 	events = function(ConditionObject, c)
 		return

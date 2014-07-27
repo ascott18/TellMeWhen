@@ -245,7 +245,7 @@ ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
 	Env = {
 		IsMounted = IsMounted,
 	},
-	funcstr = [[c.1nil == IsMounted()]],
+	funcstr = [[c.True == IsMounted()]],
 })
 ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
 	text = L["CONDITIONPANEL_SWIMMING"],
@@ -259,7 +259,7 @@ ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
 	Env = {
 		IsSwimming = IsSwimming,
 	},
-	funcstr = [[c.1nil == IsSwimming()]],
+	funcstr = [[c.True == IsSwimming()]],
 	--events = absolutely no events (SPELL_UPDATE_USABLE is close, but not close enough)
 })
 ConditionCategory:RegisterCondition(5,	 "RESTING", {
@@ -274,7 +274,7 @@ ConditionCategory:RegisterCondition(5,	 "RESTING", {
 	Env = {
 		IsResting = IsResting,
 	},
-	funcstr = [[c.1nil == IsResting()]],
+	funcstr = [[c.True == IsResting()]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
@@ -586,7 +586,7 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	Env = {
 		GetSpellAutocast = GetSpellAutocast,
 	},
-	funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.1nil]],
+	funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.True]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PET_BAR_UPDATE")
@@ -683,9 +683,10 @@ ConditionCategory:RegisterSpacer(15.5)
 
 Env.Tracking = {}
 function CNDT:MINIMAP_UPDATE_TRACKING()
+	wipe(Env.Tracking)
 	for i = 1, GetNumTrackingTypes() do
 		local name, _, active = GetTrackingInfo(i)
-		Env.Tracking[strlower(name)] = active
+		Env.Tracking[strlower(name)] = active and 1 or nil
 	end
 end
 ConditionCategory:RegisterCondition(16,	 "TRACKING", {

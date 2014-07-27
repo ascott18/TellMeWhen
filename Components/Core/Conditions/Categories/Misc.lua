@@ -245,7 +245,7 @@ ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 	},
 	funcstr = function(c)
 		if c.Name ~= "" then
-			return [[IsQuestFlaggedCompleted(c.NameFirst) == c.1nil]]
+			return [[IsQuestFlaggedCompleted(c.NameFirst) == c.True]]
 		else
 			return [[false]]
 		end

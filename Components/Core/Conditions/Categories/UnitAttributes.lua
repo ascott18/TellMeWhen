@@ -41,7 +41,7 @@ ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 		if c.Unit == "player" then
 			return [[true]]
 		else
-			return [[c.1nil == UnitExists(c.Unit)]]
+			return [[c.True == UnitExists(c.Unit)]]
 		end
 	end,
 	events = function(ConditionObject, c)
@@ -67,7 +67,7 @@ ConditionCategory:RegisterCondition(2,	 "ALIVE", {
 	Env = {
 		UnitIsDeadOrGhost = UnitIsDeadOrGhost,
 	},
-	funcstr = [[c.nil1 == UnitIsDeadOrGhost(c.Unit)]], -- note usage of nil1, not 1nil
+	funcstr = [[c.False == UnitIsDeadOrGhost(c.Unit)]], -- note usage of c.False, not c.True
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -85,7 +85,7 @@ ConditionCategory:RegisterCondition(3,	 "COMBAT", {
 	Env = {
 		UnitAffectingCombat = UnitAffectingCombat,
 	},
-	funcstr = [[c.1nil == UnitAffectingCombat(c.Unit)]],
+	funcstr = [[c.True == UnitAffectingCombat(c.Unit)]],
 	events = function(ConditionObject, c)
 		if c.Unit == "player" then
 			return
@@ -129,7 +129,7 @@ ConditionCategory:RegisterCondition(5,	 "PVPFLAG", {
 	Env = {
 		UnitIsPVP = UnitIsPVP,
 	},
-	funcstr = [[c.1nil == UnitIsPVP(c.Unit)]],
+	funcstr = [[c.True == UnitIsPVP(c.Unit)]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -169,7 +169,7 @@ ConditionCategory:RegisterCondition(6.2, "ISPLAYER", {
 	Env = {
 		UnitIsPlayer = UnitIsPlayer,
 	},
-	funcstr = [[UnitIsPlayer(c.Unit) == c.1nil]],
+	funcstr = [[UnitIsPlayer(c.Unit) == c.True]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -515,7 +515,7 @@ ConditionCategory:RegisterCondition(16,	 "UNITISUNIT", {
 	Env = {
 		UnitIsUnit = UnitIsUnit,
 	},
-	funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]],
+	funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.True]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),

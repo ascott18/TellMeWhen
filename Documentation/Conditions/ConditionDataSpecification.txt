@@ -139,7 +139,7 @@ The funcstr field is the only one that is required. Errors may happen with the o
 ** [Function>|String] A string, or a function that returns a string when called with the parameters {{{(conditionSettings, parent)}}} (parent represents the group or icon that is requesting the condition), that represents a single Lua expression that will be evaluated to determine the state of the condition.
 ** There are many substitutions that are automatically performed on {{{funcstr}}} to insert settings. For more information about the implementation of these, look at CNDT:DoConditionSubstitutions() in Conditions.lua. All available substitutions are listed below.
 ** Some examples of funcstrs:
-*** <<code lua>> [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]] <</code>>
+*** <<code lua>> [[UnitIsUnit(c.Unit, c.Unit2) == c.True]] <</code>>
 *** <<code lua>> [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]] <</code>>
 *** <<code lua>> funcstr = function(c)
 		return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -206,7 +206,7 @@ end<</code>>
 ** Substitutes true when the slider is set to 1, otherwise substitutes false.
 * "c.1nil"
 ** Substitutes 1 when the slider is set to 0, otherwise substitutes nil.
-* "c.1nil"
+* "c.nil1"
 ** Substitutes 1 when the slider is set to 1, otherwise substitutes nil.
 
 * "c.Operator"
