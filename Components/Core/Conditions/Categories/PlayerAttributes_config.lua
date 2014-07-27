@@ -126,16 +126,15 @@ Module.stances = {
 		[2457] = 	TMW_GetSpellInfo(2457), 	-- Battle Stance
 		[71] = 		TMW_GetSpellInfo(71),		-- Defensive Stance
 		[2458] = 	TMW_GetSpellInfo(2458), 	-- Berserker Stance
+		[156291] = 	TMW_GetSpellInfo(156291), 	-- Gladiator Stance
 	},
 	DRUID = {
 		[5487] = 	TMW_GetSpellInfo(5487), 	-- Bear Form
 		[768] = 	TMW_GetSpellInfo(768),		-- Cat Form
-		[1066] = 	TMW_GetSpellInfo(1066), 	-- Aquatic Form
 		[783] = 	TMW_GetSpellInfo(783),		-- Travel Form
 		[24858] = 	TMW_GetSpellInfo(24858), 	-- Moonkin Form
-		[33891] = 	TMW_GetSpellInfo(33891), 	-- Tree of Life
-		[33943] = 	TMW_GetSpellInfo(33943), 	-- Flight Form
-		[40120] = 	TMW_GetSpellInfo(40120), 	-- Swift Flight Form	
+		[33891] = 	TMW_GetSpellInfo(33891), 	-- Incarnation: Tree of Life
+		[171745] = 	TMW_GetSpellInfo(171745), 	-- Claws of Shirvallah	
 	},
 	PRIEST = {
 		[15473] = 	TMW_GetSpellInfo(15473), 	-- Shadowform	
@@ -144,8 +143,7 @@ Module.stances = {
 		[1784] = 	TMW_GetSpellInfo(1784), 	-- Stealth	
 	},
 	HUNTER = {
-		[13165] = 	TMW_GetSpellInfo(13165), 	-- Aspect of the Hawk
-		[109260] = 	TMW_GetSpellInfo(109260), 	-- Aspect of the Iron Hawk
+		[172106] = 	TMW_GetSpellInfo(172106), 	-- Aspect of the Fox
 		[5118] = 	TMW_GetSpellInfo(5118), 	-- Aspect of the Cheetah
 		[13159] = 	TMW_GetSpellInfo(13159), 	-- Aspect of the Pack
 	},
@@ -163,7 +161,6 @@ Module.stances = {
 	},
 	WARLOCK = {
 		[103958] = 	TMW_GetSpellInfo(103958),	-- Metamorphosis
-		[114168] = 	TMW_GetSpellInfo(114168),	-- Dark Apotheosis
 	},
 	MONK = {
 		[115069] = 	TMW_GetSpellInfo(115069),	-- Sturdy Ox
