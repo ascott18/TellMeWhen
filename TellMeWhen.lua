@@ -1849,7 +1849,7 @@ function TMW:InitializeDatabase()
 		-- TellMeWhenDB might not exist if this is a fresh install
 		-- or if the user is upgrading from a really old version that uses TellMeWhen_Settings.
 		TellMeWhenDB = {Version = TELLMEWHEN_VERSIONNUMBER}
-		--TMW.DBWasEmpty = true
+		TMW.DBWasEmpty = true
 	end
 	
 
