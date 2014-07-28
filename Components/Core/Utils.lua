@@ -228,8 +228,7 @@ Formatter{
 
 
 
-do
-	-- TMW.shellsortDeferred
+do	-- TMW.shellsortDeferred
 	-- From http://lua-users.org/wiki/LuaSorting - shellsort
 	-- Written by Rici Lake. The author disclaims all copyright and offers no warranty.
 	--
@@ -248,90 +247,90 @@ do
 	-- For convenience, shellsort returns its first argument.
 
 	-- A036569
-    local incs = { 8382192, 3402672, 1391376,
-        463792, 198768, 86961, 33936,
-        13776, 4592, 1968, 861, 336, 
-    112, 48, 21, 7, 3, 1 }
+	local incs = { 8382192, 3402672, 1391376,
+		463792, 198768, 86961, 33936,
+		13776, 4592, 1968, 861, 336, 
+	112, 48, 21, 7, 3, 1 }
 
-    local execCap = 20
-    local start = 0
-    
-    local function ssup(v, testval)
-        return v > testval
-    end
-    
-    local function ssdown(v, testval)
-        return v > testval
-    end
-    
-    local function ssgeneral(t, n, before, progressCallback, progressCallbackArg)
-        for idx, h in ipairs(incs) do
-            for i = h + 1, n do
-                local v = t[i]
-                for j = i - h, 1, -h do
-                    local testval = t[j]
-                    if not before(v, testval) then break end
-                    t[i] = testval; i = j
-                end
-                t[i] = v
+	local execCap = 30
+	local start = 0
+	
+	local function ssup(v, testval)
+		return v > testval
+	end
+	
+	local function ssdown(v, testval)
+		return v > testval
+	end
+	
+	local function ssgeneral(t, n, before, progressCallback, progressCallbackArg)
+		for idx, h in ipairs(incs) do
+			for i = h + 1, n do
+				local v = t[i]
+				for j = i - h, 1, -h do
+					local testval = t[j]
+					if not before(v, testval) then break end
+					t[i] = testval; i = j
+				end
+				t[i] = v
 
-                if debugprofilestop() - start > execCap then
+				if debugprofilestop() - start > execCap then
 
-                	if progressCallback then
-                		if progressCallbackArg then
-        					progressCallback(progressCallbackArg, #incs - idx + 1)
-                		else
-        					progressCallback(#incs - idx + 1)
-                		end
-                	end
+					if progressCallback then
+						if progressCallbackArg then
+							progressCallback(progressCallbackArg, #incs - idx + 1)
+						else
+							progressCallback(#incs - idx + 1)
+						end
+					end
 
-                	coroutine.yield()
-                end
-            end
-        end
-        return t
-    end
-    
-    local function shellsort(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
-        n = n or #t
-        if not before or before == "<" then
-        	ssgeneral(t, n, ssup, progressCallback, progressCallbackArg)
-        elseif before == ">" then
-        	ssgeneral(t, n, ssdown, progressCallback, progressCallbackArg)
-        else
-        	ssgeneral(t, n, before, progressCallback, progressCallbackArg)
-        end
+					coroutine.yield()
+				end
+			end
+		end
+		return t
+	end
+	
+	local function shellsort(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
+		n = n or #t
+		if not before or before == "<" then
+			ssgeneral(t, n, ssup, progressCallback, progressCallbackArg)
+		elseif before == ">" then
+			ssgeneral(t, n, ssdown, progressCallback, progressCallbackArg)
+		else
+			ssgeneral(t, n, before, progressCallback, progressCallbackArg)
+		end
 
-        if callbackArg ~= nil then
-        	callback(callbackArg)
-        else
-       		callback()
-        end
-    end
-    
-    local coroutines = {}
-    local f = CreateFrame("Frame")
-    function f:OnUpdate()
+		if callbackArg ~= nil then
+			callback(callbackArg)
+		else
+			callback()
+		end
+	end
+	
+	local coroutines = {}
+	local f = CreateFrame("Frame")
+	function f:OnUpdate()
 
-    	local table, co = next(coroutines)
-    	if table then
-    		start = debugprofilestop()
-    		if not coroutine.resume(co) then
-    			coroutines[table] = nil
-    		end
-    	end
+		local table, co = next(coroutines)
+		if table then
+			start = debugprofilestop()
+			if not coroutine.resume(co) then
+				coroutines[table] = nil
+			end
+		end
 
 		if not next(coroutines) then
 			f:SetScript("OnUpdate", nil)
 		end
-    end
+	end
 
 
-    function TMW.shellsortDeferred(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
-        local co = coroutine.create(shellsort)
-        coroutines[t] = co
-    	start = debugprofilestop()
-    	f:SetScript("OnUpdate", f.OnUpdate)
-        coroutine.resume(co, t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
-    end
+	function TMW.shellsortDeferred(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
+		local co = coroutine.create(shellsort)
+		coroutines[t] = co
+		start = debugprofilestop()
+		f:SetScript("OnUpdate", f.OnUpdate)
+		coroutine.resume(co, t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
+	end
 end
