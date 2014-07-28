@@ -6,6 +6,8 @@
  * IMPORTANT: TEMPORARY CHANGES:
  ** Non-blizzard resources (art, sounds, etc) currently can't be loaded. I replaced a few textures temporarily so you aren't blinded by the green
 
+ * Buff/Debuff equivalencies have been updated (with the exception of diminishing returns). Please open a ticket if you notice anything missing or mis-categorized.
+
  * The suggestion list now defers its sorting so that input is more responsive.
  * The "Highlight timer edge" setting is back.
 
