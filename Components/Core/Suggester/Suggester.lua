@@ -598,7 +598,7 @@ end
 function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	local id = tonumber(SUG.lastName)
 
-	if GetItemInfo(id) then
+	if GetItemInfo(id) and not TMW.tContains(suggestions, id) then
 		suggestions[#suggestions + 1] = id
 	end
 end

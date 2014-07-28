@@ -91,7 +91,7 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 		local len = #SUG.lastName - 1
 		local match = tonumber(SUG.lastName)
 
-		if GetItemInfo(match) then
+		if GetItemInfo(match) and not TMW.tContains(suggestions, match) then
 			suggestions[#suggestions + 1] = match
 		end
 	
