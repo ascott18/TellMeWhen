@@ -350,7 +350,7 @@ ConditionCategory:RegisterCondition(2,	 "BIGWIGS_ENGAGED", {
 		if BigWigs_engaged_init then BigWigs_engaged_init() end
 
 		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
-		return [[BigWigs_IsBossEngaged(]] .. name .. [[) == c.True]]
+		return [[BOOLCHECK( BigWigs_IsBossEngaged(]] .. name .. [[) )]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -545,7 +545,7 @@ ConditionCategory:RegisterCondition(11,	 "DBM_ENGAGED", {
 		if DBM_engaged_init then DBM_engaged_init() end
 
 		local name = format("%q", c.Name:gsub("%%", "%%%%"):lower())
-		return [[DBM_IsBossEngaged(]] .. name .. [[) == c.False]]
+		return [[BOOLCHECK( DBM_IsBossEngaged(]] .. name .. [[) )]]
 	end,
 	events = function(ConditionObject, c)
 		return

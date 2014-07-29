@@ -139,7 +139,7 @@ The funcstr field is the only one that is required. Errors may happen with the o
 ** [Function>|String] A string, or a function that returns a string when called with the parameters {{{(conditionSettings, parent)}}} (parent represents the group or icon that is requesting the condition), that represents a single Lua expression that will be evaluated to determine the state of the condition.
 ** There are many substitutions that are automatically performed on {{{funcstr}}} to insert settings. For more information about the implementation of these, look at CNDT:DoConditionSubstitutions() in Conditions.lua. All available substitutions are listed below.
 ** Some examples of funcstrs:
-*** <<code lua>> [[UnitIsUnit(c.Unit, c.Unit2) == c.True]] <</code>>
+*** <<code lua>> [[BOOLCHECK( UnitIsUnit(c.Unit, c.Unit2) )]] <</code>>
 *** <<code lua>> [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]] <</code>>
 *** <<code lua>> funcstr = function(c)
 		return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -200,14 +200,14 @@ end<</code>>
 * "c.Level"
 ** Represents the raw numeric value of the slider. The substituted value will have been divided by 100 if the {{{percent}}} field is set to true.
 
-* "c.True"
-** Substitutes true when the slider is set to 0, otherwise substitutes false.
-* "c.False"
-** Substitutes true when the slider is set to 1, otherwise substitutes false.
-* "c.1nil"
-** Substitutes 1 when the slider is set to 0, otherwise substitutes nil.
-* "c.nil1"
-** Substitutes 1 when the slider is set to 1, otherwise substitutes nil.
+* "c.True" (Depricated)
+** Substitutes true when the slider is set to 0, otherwise substitutes false. Depricated - use BOOLCHECK(...)" instead.
+* "c.False" (Depricated)
+** Substitutes true when the slider is set to 1, otherwise substitutes false. Depricated - use "not BOOLCHECK(...)" instead.
+* "c.1nil" (Depricated)
+** Substitutes 1 when the slider is set to 0, otherwise substitutes nil. Depricated - use BOOLCHECK(...)" instead.
+* "c.nil1" (Depricated)
+** Substitutes 1 when the slider is set to 1, otherwise substitutes nil. Depricated - use "not BOOLCHECK(...)" instead.
 
 * "c.Operator"
 ** Substitutes a valid Lua operator (<, >, <=, >=, ~=, ==).
@@ -237,6 +237,9 @@ end<</code>>
 ** Substitutes the boolean that represents the checked states of the first and second editboxes' check boxes, respectively.
 
 * "LOWER(...)"
-** A preprocessor function that will strlower anything in the vararg (strings or anything else). May not behave if the vararg contains any parentheses, so take caution.
+** A preprocessor function that will strlower anything in the vararg (strings or anything else).
+
+* "BOOLCHECK(...)"
+** A preprocessor function that will check that the vararg evaulates to true if c.Level == 0, or false if c.Level == 1.
 
 	

@@ -603,11 +603,8 @@ end
 
 
 CNDT.Substitutions = {
-{	src = "c.Level",
-	rep = function(conditionData, conditionSettings, name, name2)
-		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
-	end,
-},{	src = "BITFLAGSMAPANDCHECK(%b())",
+
+{	src = "BITFLAGSMAPANDCHECK(%b())",
 	rep = function(conditionData, conditionSettings, name, name2)
 		if conditionSettings.Checked then
 			return [[bit_band(bit_lshift(1, (%1 or 1) - 1), c.BitFlags) == 0]]
@@ -618,6 +615,22 @@ CNDT.Substitutions = {
 },{	src = "c.BitFlags",
 	rep = function(conditionData, conditionSettings, name, name2)
 		return conditionSettings.BitFlags
+	end,
+},
+
+{	src = "BOOLCHECK(%b())",
+	rep = function(conditionData, conditionSettings, name, name2)
+		if conditionSettings.Level == 0 then
+			return [[%1]]
+		else
+			return [[not %1]]
+		end
+	end,
+},
+
+{	src = "c.Level",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
 	end,
 },{
 	src = "c.Checked",

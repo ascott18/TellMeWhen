@@ -41,7 +41,7 @@ ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 		if c.Unit == "player" then
 			return [[true]]
 		else
-			return [[c.True == UnitExists(c.Unit)]]
+			return [[BOOLCHECK( UnitExists(c.Unit) )]]
 		end
 	end,
 	events = function(ConditionObject, c)
@@ -67,7 +67,7 @@ ConditionCategory:RegisterCondition(2,	 "ALIVE", {
 	Env = {
 		UnitIsDeadOrGhost = UnitIsDeadOrGhost,
 	},
-	funcstr = [[c.False == UnitIsDeadOrGhost(c.Unit)]], -- note usage of c.False, not c.True
+	funcstr = [[not BOOLCHECK( UnitIsDeadOrGhost(c.Unit) )]], 
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -85,7 +85,7 @@ ConditionCategory:RegisterCondition(3,	 "COMBAT", {
 	Env = {
 		UnitAffectingCombat = UnitAffectingCombat,
 	},
-	funcstr = [[c.True == UnitAffectingCombat(c.Unit)]],
+	funcstr = [[BOOLCHECK( UnitAffectingCombat(c.Unit) )]],
 	events = function(ConditionObject, c)
 		if c.Unit == "player" then
 			return
@@ -109,7 +109,7 @@ ConditionCategory:RegisterCondition(4,	 "VEHICLE", {
 	Env = {
 		UnitHasVehicleUI = UnitHasVehicleUI,
 	},
-	funcstr = [[c.True == UnitHasVehicleUI(c.Unit)]],
+	funcstr = [[BOOLCHECK( UnitHasVehicleUI(c.Unit) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -129,7 +129,7 @@ ConditionCategory:RegisterCondition(5,	 "PVPFLAG", {
 	Env = {
 		UnitIsPVP = UnitIsPVP,
 	},
-	funcstr = [[c.True == UnitIsPVP(c.Unit)]],
+	funcstr = [[BOOLCHECK( UnitIsPVP(c.Unit) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -169,7 +169,7 @@ ConditionCategory:RegisterCondition(6.2, "ISPLAYER", {
 	Env = {
 		UnitIsPlayer = UnitIsPlayer,
 	},
-	funcstr = [[UnitIsPlayer(c.Unit) == c.True]],
+	funcstr = [[BOOLCHECK( UnitIsPlayer(c.Unit) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -309,7 +309,7 @@ ConditionCategory:RegisterCondition(9,	 "NAME", {
 	Env = {
 		UnitName = UnitName,
 	},
-	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[UnitName(c.Unit) or ""]) and 1)]],
+	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[UnitName(c.Unit) or ""]) and 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -329,7 +329,7 @@ ConditionCategory:RegisterCondition(9.5, "NPCID", {
 	Env = {
 		UnitGUID = UnitGUID,
 	},
-	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[ tonumber((UnitGUID(c.Unit) or ""):match(".-:%d+:%d+:%d+:%d+:(%d+)")) ]) and 1)]],
+	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[ tonumber((UnitGUID(c.Unit) or ""):match(".-:%d+:%d+:%d+:%d+:(%d+)")) ]) and 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -444,7 +444,7 @@ ConditionCategory:RegisterCondition(13,	 "CREATURETYPE", {
 	Env = {
 		UnitCreatureType = UnitCreatureType,
 	},
-	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[UnitCreatureType(c.Unit) or ""]) and 1)]],
+	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[UnitCreatureType(c.Unit) or ""]) and 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -515,7 +515,7 @@ ConditionCategory:RegisterCondition(16,	 "UNITISUNIT", {
 	Env = {
 		UnitIsUnit = UnitIsUnit,
 	},
-	funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.True]],
+	funcstr = [[BOOLCHECK( UnitIsUnit(c.Unit, c.Unit2) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),

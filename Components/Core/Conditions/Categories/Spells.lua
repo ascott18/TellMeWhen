@@ -210,7 +210,7 @@ ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
 	icon = "Interface\\Icons\\ability_warrior_revenge",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[c.True == ReactiveHelper(c.NameFirst, c.Checked)]],
+	funcstr = [[BOOLCHECK( ReactiveHelper(c.NameFirst, c.Checked) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
@@ -228,7 +228,7 @@ ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
 	icon = "Interface\\Icons\\inv_potion_137",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[c.False == SpellHasNoMana(c.NameFirst)]],
+	funcstr = [[not BOOLCHECK( SpellHasNoMana(c.NameFirst) )]],
 	Env = {
 		SpellHasNoMana = TMW.SpellHasNoMana
 	},
@@ -264,7 +264,7 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\Icons\\ability_hunter_steadyshot",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[(TMW.GCD > 0 and TMW.GCD < 1.7) == c.True]],
+	funcstr = [[BOOLCHECK( (TMW.GCD > 0 and TMW.GCD < 1.7) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
@@ -385,7 +385,7 @@ ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 	unit = false,
 	icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[c.True == c.Item:GetEquipped()]],
+	funcstr = [[BOOLCHECK( c.Item:GetEquipped() )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE"),

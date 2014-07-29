@@ -245,7 +245,7 @@ ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
 	Env = {
 		IsMounted = IsMounted,
 	},
-	funcstr = [[c.True == IsMounted()]],
+	funcstr = [[BOOLCHECK( IsMounted() )]],
 })
 ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
 	text = L["CONDITIONPANEL_SWIMMING"],
@@ -259,7 +259,7 @@ ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
 	Env = {
 		IsSwimming = IsSwimming,
 	},
-	funcstr = [[c.True == IsSwimming()]],
+	funcstr = [[BOOLCHECK( IsSwimming() )]],
 	--events = absolutely no events (SPELL_UPDATE_USABLE is close, but not close enough)
 })
 ConditionCategory:RegisterCondition(5,	 "RESTING", {
@@ -274,7 +274,7 @@ ConditionCategory:RegisterCondition(5,	 "RESTING", {
 	Env = {
 		IsResting = IsResting,
 	},
-	funcstr = [[c.True == IsResting()]],
+	funcstr = [[BOOLCHECK( IsResting() )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_UPDATE_RESTING"),
@@ -293,7 +293,7 @@ ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
 	Env = {
 		IsInBattle = C_PetBattles.IsInBattle,
 	},
-	funcstr = [[c.True == IsInBattle()]],
+	funcstr = [[BOOLCHECK( IsInBattle() )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PET_BATTLE_OPENING_START"),
@@ -363,7 +363,7 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 			end
 		end
 	},
-	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[GetShapeshiftForm() or ""]) and 1)]],
+	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[GetShapeshiftForm() or ""]) and 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")
@@ -486,7 +486,7 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
 		CNDT:PLAYER_TALENT_UPDATE()
 	
-		return [[TalentMap[LOWER(c.NameFirst)] == c.1nil]]
+		return [[BOOLCHECK( TalentMap[LOWER(c.NameFirst)] )]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -555,7 +555,7 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 		CNDT:RegisterEvent("GLYPH_UPDATED",  "GLYPH_UPDATED")
 		CNDT:GLYPH_UPDATED()
 	
-		return [[GlyphLookup[c.NameFirst] == c.1nil]]
+		return [[BOOLCHECK( GlyphLookup[c.NameFirst] )]]
 	end,
 	Env = {
 		GlyphLookup = {},
@@ -586,7 +586,7 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	Env = {
 		GetSpellAutocast = GetSpellAutocast,
 	},
-	funcstr = [[select(2, GetSpellAutocast(c.NameName)) == c.True]],
+	funcstr = [[BOOLCHECK( select(2, GetSpellAutocast(c.NameName)) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PET_BAR_UPDATE")
@@ -705,7 +705,7 @@ ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 		CNDT:RegisterEvent("MINIMAP_UPDATE_TRACKING")
 		CNDT:MINIMAP_UPDATE_TRACKING()
 	
-		return [[Tracking[c.NameName] == c.1nil]]
+		return [[BOOLCHECK( Tracking[c.NameName] )]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -733,7 +733,7 @@ ConditionCategory:RegisterCondition(18,	 "BLIZZEQUIPSET", {
 	Env = {
 		GetEquipmentSetInfoByName = GetEquipmentSetInfoByName,
 	},
-	funcstr = [[select(3, GetEquipmentSetInfoByName(c.NameRaw)) == c.True]],
+	funcstr = [[BOOLCHECK( select(3, GetEquipmentSetInfoByName(c.NameRaw)) )]],
 	events = function(ConditionObject, c)
 		return
 			--ConditionObject:GenerateNormalEventString("EQUIPMENT_SWAP_FINISHED") -- this doesn't fire late enough to get updated returns from GetEquipmentSetInfoByName
