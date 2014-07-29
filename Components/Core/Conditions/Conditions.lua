@@ -607,7 +607,7 @@ CNDT.Substitutions = {
 	rep = function(conditionData, conditionSettings, name, name2)
 		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
 	end,
-},{	src = "BitFlagsMapAndCheck(%b())",
+},{	src = "BITFLAGSMAPANDCHECK(%b())",
 	rep = function(conditionData, conditionSettings, name, name2)
 		if conditionSettings.Checked then
 			return [[bit_band(bit_lshift(1, (%1 or 1) - 1), c.BitFlags) == 0]]

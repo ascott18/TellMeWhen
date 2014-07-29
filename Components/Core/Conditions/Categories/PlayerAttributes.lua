@@ -177,7 +177,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 			end
 		end,
 	},
-	funcstr = [[BitFlagsMapAndCheck(GetZoneType2())]],
+	funcstr = [[BITFLAGSMAPANDCHECK(GetZoneType2())]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("ZONE_CHANGED_NEW_AREA"),
@@ -224,7 +224,7 @@ ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 		IsInRaid = IsInRaid,
 		IsInGroup = IsInGroup,
 	},
-	funcstr = [[BitFlagsMapAndCheck( ((IsInRaid() and 3) or (IsInGroup() and 2) or 1) )]],
+	funcstr = [[BITFLAGSMAPANDCHECK( ((IsInRaid() and 3) or (IsInGroup() and 2) or 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
