@@ -103,6 +103,9 @@ function SUG:DoSuggest()
 end
 
 local function progressCallback(countdown)
+	SUG:SuggestingComplete()
+
+	SUG.Suggest.blocker:Show()
 	SUG.Suggest.Header:SetText(L["SUGGESTIONS_SORTING"] .. " " .. countdown)
 end
 

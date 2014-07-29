@@ -252,7 +252,7 @@ do	-- TMW.shellsortDeferred
 		13776, 4592, 1968, 861, 336, 
 	112, 48, 21, 7, 3, 1 }
 
-	local execCap = 30
+	local execCap = 17
 	local start = 0
 	
 	local function ssup(v, testval)
@@ -264,7 +264,10 @@ do	-- TMW.shellsortDeferred
 	end
 	
 	local function ssgeneral(t, n, before, progressCallback, progressCallbackArg)
+		local lastProgress = 100
+
 		for idx, h in ipairs(incs) do
+			local count = 1
 			for i = h + 1, n do
 				local v = t[i]
 				for j = i - h, 1, -h do
@@ -274,16 +277,20 @@ do	-- TMW.shellsortDeferred
 				end
 				t[i] = v
 
-				if debugprofilestop() - start > execCap then
+				count = count + 1
 
-					if progressCallback then
+				if (count % 200 == 0) and debugprofilestop() - start > execCap then
+					local progress = #incs - idx + 1
+
+					if progressCallback and progress ~= lastProgress then
 						if progressCallbackArg then
-							progressCallback(progressCallbackArg, #incs - idx + 1)
+							progressCallback(progressCallbackArg, progress)
 						else
-							progressCallback(#incs - idx + 1)
+							progressCallback(progress)
 						end
+						lastProgress = progress
 					end
-
+					
 					coroutine.yield()
 				end
 			end
@@ -314,6 +321,13 @@ do	-- TMW.shellsortDeferred
 
 		local table, co = next(coroutines)
 		if table then
+
+			-- dynamic execution cap based on framerate.
+			-- this will keep us from dropping the user's framerate too much
+			-- without doing so little sorting that the process goes super slowly.
+			-- subtract a little bit to account for CPU usage for other things, like the game itself.
+			execCap = 1000/max(20, GetFramerate()) - 5
+
 			start = debugprofilestop()
 			if not coroutine.resume(co) then
 				coroutines[table] = nil
