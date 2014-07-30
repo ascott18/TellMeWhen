@@ -76,6 +76,7 @@ DD.MAXBUTTONS = 0;
 DD.MAXLEVELS = 0;
 DD.BUTTON_HEIGHT = 16;
 DD.BORDER_HEIGHT = 15;
+DD.MAX_HEIGHT = 300;
 -- The current open menu
 DD.OPEN_MENU = nil;
 -- The current menu being initialized
@@ -229,14 +230,20 @@ function DD:CreateFrames(level, index)
 		newList:SetWidth(180)
 		newList:SetHeight(10)
 		for i=DD.MINBUTTONS+1, DD.MAXBUTTONS do
-			CreateFrame("Button", nil, newList, "TMW_UIDropDownMenuButtonTemplate", i);
+			newList[i] = CreateFrame("Button", nil, newList.Buttons, "TMW_UIDropDownMenuButtonTemplate", i);
+			newList[i].listFrame = newList
 		end
 	end
 
 	while ( index > DD.MAXBUTTONS ) do
 		DD.MAXBUTTONS = DD.MAXBUTTONS + 1;
 		for i=1, DD.MAXLEVELS do
-			CreateFrame("Button", nil, DD.LISTS[i], "TMW_UIDropDownMenuButtonTemplate", DD.MAXBUTTONS);
+			local listFrame = DD.LISTS[i]
+
+			local button = CreateFrame("Button", nil, listFrame.Buttons, "TMW_UIDropDownMenuButtonTemplate", DD.MAXBUTTONS);
+			button.listFrame = listFrame
+
+			listFrame[DD.MAXBUTTONS] = button
 		end
 	end
 end
@@ -419,7 +426,7 @@ function DD:AddButton(info, level)
 	
 	-- If not checkable move everything over to the left to fill in the gap where the check would be
 	local xPos = 5;
-	local yPos = -((button:GetID() - 1) * DD.BUTTON_HEIGHT) - DD.BORDER_HEIGHT;
+	local yPos = -((button:GetID() - 1) * DD.BUTTON_HEIGHT) -- - DD.BORDER_HEIGHT;
 	local displayInfo = normalText;
 	if (info.iconOnly) then
 		displayInfo = icon;
@@ -499,8 +506,14 @@ function DD:AddButton(info, level)
 		colorSwatch:Hide();
 	end
 
-	-- Set the height of the listframe
-	listFrame:SetHeight((index * DD.BUTTON_HEIGHT) + (DD.BORDER_HEIGHT * 2));
+	local height = (index * DD.BUTTON_HEIGHT) + (DD.BORDER_HEIGHT * 2)
+	if height > (frame.maxHeight or DD.MAX_HEIGHT) and frame:GetScrollable() then
+		height = DD.MAX_HEIGHT
+		listFrame.shouldScroll = true
+	else
+		listFrame.shouldScroll = false
+	end
+	listFrame:SetHeight(height);
 
 	button:Show();
 end
@@ -585,16 +598,11 @@ function DD:Refresh(useValue, dropdownLevel)
 			end
 		end
 	end
+
 	if(somethingChecked == nil) then
-		DD.SetText(self, VIDEO_QUALITY_LABEL6);
+		self:SetText(VIDEO_QUALITY_LABEL6);
 	end
-	if (not self.noResize) then
-		for i=1, DD.MAXBUTTONS do
-			button = listFrame[i];
-			button:SetWidth(maxWidth);
-		end
-		listFrame:SetWidth(maxWidth+15);
-	end
+
 end
 
 function DD:RefreshAll(useValue)
@@ -649,7 +657,7 @@ function DD.Button_OnClick(self)
 			end
 		end
 	else
-		self:GetParent():Hide();
+		self.listFrame:Hide();
 	end
 
 	if ( type (self.checked) ~= "function" ) then 
@@ -989,6 +997,15 @@ function DD:OnEnable()
 	self.Text:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
 	self.Button:Enable();
 	self.Enabled = true;
+end
+
+function DD:SetScrollable(scrollable, maxHeight)
+	self.scrollable = scrollable
+	self.maxHeight = maxHeight
+end
+
+function DD:GetScrollable()
+	return self.scrollable
 end
 
 

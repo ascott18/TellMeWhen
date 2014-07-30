@@ -76,13 +76,17 @@
 						OpenColorPicker(button); --remains shared through color picker frame
 					</OnClick>
 					<OnEnter>
-						TMW.DD:CloseDropDownMenus(self:GetParent():GetParent():GetID() + 1);
+						local button = self:GetParent();
+
+						TMW.DD:CloseDropDownMenus(button.listFrame:GetID() + 1);
 						self.SwatchBg:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
-						TMW.DD.StopCounting(self:GetParent():GetParent());
+						TMW.DD.StopCounting(button.listFrame);
 					</OnEnter>
 					<OnLeave>
+						local button = self:GetParent();
+
 						self.SwatchBg:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
-						TMW.DD.StartCounting(self:GetParent():GetParent());
+						TMW.DD.StartCounting(button.listFrame);
 					</OnLeave>
 				</Scripts>
 				<NormalTexture file="Interface\ChatFrame\ChatFrameColorSwatch"/>
@@ -100,18 +104,24 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						TMW.DD.Toggle(nil, self:GetParent():GetParent():GetID() + 1, self:GetParent().value, nil, nil, nil, self:GetParent().menuList, self);
+						local button = self:GetParent();
+
+						TMW.DD.Toggle(nil, button.listFrame:GetID() + 1, button.value, nil, nil, nil, button.menuList, self);
 					</OnClick>
 					<OnEnter>
-						local level =  self:GetParent():GetParent():GetID() + 1;
+						local button = self:GetParent();
+
+						local level =  button.listFrame:GetID() + 1;
 						local listFrame = TMW.DD.LISTS[level]
 						if ( not listFrame or not listFrame:IsShown() or select(2, listFrame:GetPoint()) ~= self ) then
-							TMW.DD.Toggle(nil, level, self:GetParent().value, nil, nil, nil, self:GetParent().menuList, self);
+							TMW.DD.Toggle(nil, level, button.value, nil, nil, nil, button.menuList, self);
 						end
-						TMW.DD.StopCounting(self:GetParent():GetParent());
+						TMW.DD.StopCounting(button.listFrame);
 					</OnEnter>
 					<OnLeave>
-						TMW.DD.StartCounting(self:GetParent():GetParent());
+						local button = self:GetParent();
+
+						TMW.DD.StartCounting(button.listFrame);
 					</OnLeave>
 				</Scripts>
 				<NormalTexture file="Interface\ChatFrame\ChatFrameExpandArrow"/>
@@ -128,27 +138,28 @@
 				</Anchors>
 				<Scripts>
 					<OnEnter>
-						TMW.DD.StopCounting(self:GetParent():GetParent());
-						TMW.DD:CloseDropDownMenus(self:GetParent():GetParent():GetID() + 1);
-						local parent = self:GetParent();
-						if ( parent.tooltipTitle and parent.tooltipWhileDisabled) then
-							GameTooltip:SetOwner(parent, "ANCHOR_RIGHT");
-							GameTooltip:AddLine(parent.tooltipTitle, 1.0, 1.0, 1.0);
+						local button = self:GetParent();
 
-							local wrap = parent.tooltipWrap
+						TMW.DD.StopCounting(button.listFrame);
+						TMW.DD:CloseDropDownMenus(button.listFrame:GetID() + 1);
+						if ( button.tooltipTitle and button.tooltipWhileDisabled) then
+							GameTooltip:SetOwner(button, "ANCHOR_RIGHT");
+							GameTooltip:AddLine(button.tooltipTitle, 1.0, 1.0, 1.0);
+
+							local wrap = button.tooltipWrap
 							if wrap == nil then
-								wrap = parent:GetParent().dropdown.wrapTooltips
+								wrap = button.listFrame.dropdown.wrapTooltips
 							end
 							if wrap == nil then
 								wrap = 1
 							end
 
-							GameTooltip:AddLine(parent.tooltipText, nil, nil, nil, wrap);
+							GameTooltip:AddLine(button.tooltipText, nil, nil, nil, wrap);
 							GameTooltip:Show();
 						end
 					</OnEnter>
 					<OnLeave>
-						TMW.DD.StartCounting(self:GetParent():GetParent());
+						TMW.DD.StartCounting(self:GetParent().listFrame);
 						GameTooltip:Hide();
 					</OnLeave>
 				</Scripts>
@@ -157,26 +168,24 @@
 		<Scripts>
 			<OnLoad>				
 				self:SetFrameLevel(self:GetParent():GetFrameLevel()+2);
-				self:GetParent()[self:GetID()] = self
 			</OnLoad>
 			<OnClick>
 				TMW.DD.Button_OnClick(self, button, down);
 			</OnClick>
 			<OnEnter>
-				if ( self.hasArrow ) then
-					local level =  self:GetParent():GetID() + 1;
-					local listFrame = TMW.DD.LISTS[level];
+				local listFrame = self.listFrame
 
+				if ( self.hasArrow ) then
 					if ( not listFrame or not listFrame:IsShown() or select(2, listFrame:GetPoint()) ~= self ) then
-						TMW.DD.Toggle(nil, self:GetParent():GetID() + 1, self.value, nil, nil, nil, self.menuList, self);
+						TMW.DD.Toggle(nil, listFrame:GetID() + 1, self.value, nil, nil, nil, self.menuList, self.ExpandArrow);
 					end
 				else
-					TMW.DD:CloseDropDownMenus(self:GetParent():GetID() + 1);
+					TMW.DD:CloseDropDownMenus(listFrame:GetID() + 1);
 				end
 
 				self.Highlight:Show();
 
-				TMW.DD.StopCounting(self:GetParent());
+				TMW.DD.StopCounting(listFrame);
 
 				if ( self.tooltipTitle ) then
 					GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
@@ -184,7 +193,7 @@
 
 					local wrap = self.tooltipWrap
 					if wrap == nil then
-						wrap = self:GetParent().dropdown.wrapTooltips
+						wrap = listFrame.dropdown.wrapTooltips
 					end
 					if wrap == nil then
 						wrap = 1
@@ -196,7 +205,7 @@
 			</OnEnter>
 			<OnLeave>
 				self.Highlight:Hide();
-				TMW.DD.StartCounting(self:GetParent());
+				TMW.DD.StartCounting(self.listFrame);
 				GameTooltip:Hide();
 			</OnLeave>
 		</Scripts>
@@ -246,6 +255,39 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
+
+			<Frame parentKey="Buttons">
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-15"/>
+					<Anchor point="BOTTOMRIGHT" y="15"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.parent = self:GetParent()
+						TMW:ConvertContainerToScrollFrame(self, false, 12, 10, true)
+
+						self.ScrollFrame.ScrollBar:HookScript("OnEnter", function()
+							TMW.DD.StopCounting(self, motion);
+						end)
+						self.ScrollFrame.ScrollBar:HookScript("OnLeave", function()
+							TMW.DD.StartCounting(self, motion);
+						end)
+						self.ScrollFrame.ScrollBar.Thumb:HookScript("OnEnter", function()
+							TMW.DD.StopCounting(self, motion);
+						end)
+						self.ScrollFrame.ScrollBar.Thumb:HookScript("OnLeave", function()
+							TMW.DD.StartCounting(self, motion);
+						end)
+					</OnLoad>
+					<OnEnter>
+						TMW.DD.StopCounting(self, motion);
+					</OnEnter>
+					<OnLeave>
+						TMW.DD.StartCounting(self, motion);
+					</OnLeave>
+				</Scripts>
+			</Frame>
+
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -273,13 +315,19 @@
 			</OnUpdate>
 			<OnShow>
 				for i=1, TMW.DD.MAXBUTTONS do
-					if (not self.noResize) then
-						self[i]:SetWidth(self.maxWidth);
-					end
+					self[i]:SetWidth(self.maxWidth);
 				end
-				if (not self.noResize) then
-					self:SetWidth(self.maxWidth+25);
+
+				local addWidth = 25
+				if self.shouldScroll then
+					addWidth = addWidth + 15
+					self.ScrollFrame:SetPoint("TOPLEFT", 10, -15)
+				else
+					self.ScrollFrame:SetPoint("TOPLEFT", 0, -15)
 				end
+
+				self:SetWidth(self.maxWidth + addWidth);
+
 				self.showTimer = nil;
 				if ( self:GetID() > 1 ) then
 					self.parent = TMW.DD.LISTS[self:GetID() - 1];

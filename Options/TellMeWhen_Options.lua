@@ -268,10 +268,10 @@ end
 local ScrollContainerHook_Hide = function(c) c.ScrollFrame:Hide() end
 local ScrollContainerHook_Show = function(c) c.ScrollFrame:Show() end
 local ScrollContainerHook_OnSizeChanged = function(c) c.ScrollFrame:Show() end
-function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX)
+function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX, leftSide)
 	
-	
-	local ScrollFrame = CreateFrame("ScrollFrame", container:GetName() .. "ScrollFrame", container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
+	local name = container:GetName() and container:GetName() .. "ScrollFrame"
+	local ScrollFrame = CreateFrame("ScrollFrame", name, container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
 	
 	-- Make the ScrollFrame clone the container's position and size
 	local x, y = container:GetSize()
@@ -287,10 +287,11 @@ function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition,
 	ScrollFrame:SetScrollChild(container)
 	container:SetSize(x, 1)
 	
+	local relPoint = leftSide and "LEFT" or "RIGHT"
 	if exteriorScrollBarPosition then
-		ScrollFrame.ScrollBar:SetPoint("LEFT", ScrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
+		ScrollFrame.ScrollBar:SetPoint("LEFT", ScrollFrame, relPoint, scrollBarXOffs or 0, 0)
 	else
-		ScrollFrame.ScrollBar:SetPoint("RIGHT", ScrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
+		ScrollFrame.ScrollBar:SetPoint("RIGHT", ScrollFrame, relPoint, scrollBarXOffs or 0, 0)
 	end
 	
 	if scrollBarSizeX then
