@@ -64,6 +64,8 @@
 								TMW:CInit(self, {
 									func = TMW.TEXT.CopyString_DropDown,
 								})
+								
+								self:SetScrollable(true)
 								self.wrapTooltips = false
 							</OnLoad>
 						</Scripts>
@@ -255,6 +257,8 @@
 									tooltip = TMW.L["TEXTLAYOUTS_CHOOSELAYOUT_DESC"],
 									func = TMW.TEXT.Layout_DropDown,
 								})
+
+								self:SetScrollable(true)
 
 								-- Save settings before changing the layout (most notably, save the text for the text displays)
 								self.Button:HookScript("OnClick", function(self)

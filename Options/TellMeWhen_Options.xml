@@ -1237,6 +1237,8 @@
 						TMW:CInit(self, {
 							func = TMW.IE.ImportExport_DropDown,
 						})
+						
+						self:SetScrollable(true)
 						self:Hide()
 					</OnLoad>
 					<OnKeyDown>

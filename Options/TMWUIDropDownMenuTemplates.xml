@@ -478,6 +478,7 @@
 
 		<KeyValues>
 			<KeyValue key="tmwClass" type="string" value="Config_DropDownMenu_Icon"/>
+			<KeyValue key="scrollable" type="boolean" value="true"/>
 		</KeyValues>
 
 		<Frames>

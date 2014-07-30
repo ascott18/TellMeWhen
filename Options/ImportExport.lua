@@ -183,7 +183,8 @@ end
 function Bundle:Evaluate()
 	local numPerGroup = SharableDataType.types[self.Type].numPerGroup
 
-	if #self.Items > numPerGroup then
+	-- Not needed now that we have scrollable dropdowns.
+	--[[if #self.Items > numPerGroup then
 		local Bundle = Bundle:New(self.Type)
 
 		for n, Item in self:InItems() do
@@ -195,23 +196,26 @@ function Bundle:Evaluate()
 			Bundle:Add(Item)
 		end
 		Bundle:CreateGroupedMenuEntry()
-	else
-		if self.Header then
-			local info = TMW.DD:CreateInfo()
-			info.text = self.Header
-			info.isTitle = true
-			info.notCheckable = true
-			TMW.DD:AddButton(info)
+	else]]
 
-			TMW.DD:AddSpacer()
-		end
+	if self.Header then
+		local info = TMW.DD:CreateInfo()
+		info.text = self.Header
+		info.isTitle = true
+		info.notCheckable = true
+		TMW.DD:AddButton(info)
 
-		for n, Item in self:InItems() do
-			Item:CreateMenuEntry()
-		end
+		TMW.DD:AddSpacer()
 	end
+
+	for n, Item in self:InItems() do
+		Item:CreateMenuEntry()
+	end
+
+	--end
 end
 
+--[[
 function Bundle:CreateGroupedMenuEntry()
 	local info = TMW.DD:CreateInfo()
 	info.notCheckable = true
@@ -222,7 +226,7 @@ function Bundle:CreateGroupedMenuEntry()
 	self.Header = info.text
 
 	TMW.DD:AddButton(info)
-end
+end]]
 
 function Bundle:CreateParentedMenuEntry(text)
 	if self:GetLength() > 0 then
