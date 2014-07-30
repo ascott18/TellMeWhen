@@ -91,7 +91,12 @@ DD.SHOW_TIME = 2;
 DD.LISTS = CreateFrame("Frame", "TMWDropDowns")
 
 
-
+local function fixself(self)
+	if self == DD then
+		self = self:GetCurrentDropDown()
+	end
+	return self
+end
 
 function DD:InitializeHelper()
 	-- This deals with the always tainted stuff!
@@ -157,7 +162,7 @@ function DD.StartCounting(self)
 	if ( self.parent ) then
 		DD.StartCounting(self.parent);
 	else
-		self.showTimer = self.dropdown.SHOW_TIME or DD.SHOW_TIME;
+		self.showTimer = self.dropdown.SHOW_TIME
 		self.isCounting = 1;
 	end
 end
@@ -249,23 +254,24 @@ function DD:CreateFrames(level, index)
 end
 
 function DD:AddButton(info, level)
+	self = fixself(self)
 	--[[
 	Might to uncomment this if there are performance issues 
-	if ( not DD.OPEN_MENU ) then
+	if ( not self.OPEN_MENU ) then
 		return;
 	end
 	]]
 	if ( not level ) then
-		level = DD.MENU_LEVEL;
+		level = self.MENU_LEVEL;
 	end
 	
-	local listFrame = DD.LISTS[level]
+	local listFrame = self.LISTS[level]
 	local index = listFrame and (listFrame.numButtons + 1) or 1;
 	local width;
 
-	DD:CreateFrames(level, index);
+	self:CreateFrames(level, index);
 	
-	listFrame = listFrame or DD.LISTS[level]
+	listFrame = listFrame or self.LISTS[level]
 	
 	-- Set the number of buttons in the listframe
 	listFrame.numButtons = index;
@@ -370,7 +376,7 @@ function DD:AddButton(info, level)
 		button.icon = info.icon;
 		button.iconInfo = info.iconInfo;
 
-		DD:SetIconImage(icon, info.icon, info.iconInfo);
+		self:SetIconImage(icon, info.icon, info.iconInfo);
 		icon:ClearAllPoints();
 		icon:SetPoint("LEFT");
 
@@ -447,16 +453,12 @@ function DD:AddButton(info, level)
 	end
 
 	-- Adjust offset if displayMode is menu
-	local frame = DD.OPEN_MENU;
-	if ( frame and frame.displayMode == "MENU" ) then
+	if ( self and self.displayMode == "MENU" ) then
 		if ( not info.notCheckable ) then
 			xPos = xPos - 6;
 		end
 	end
 	
-	-- If no open frame then set the frame to the currently initialized frame
-	frame = frame or DD.INIT_MENU;
-
 	if ( info.leftPadding ) then
 		xPos = xPos + info.leftPadding;
 	end
@@ -506,9 +508,9 @@ function DD:AddButton(info, level)
 		colorSwatch:Hide();
 	end
 
-	local height = (index * DD.BUTTON_HEIGHT) + (DD.BORDER_HEIGHT * 2)
-	if height > (frame.maxHeight or DD.MAX_HEIGHT) and frame:GetScrollable() then
-		height = DD.MAX_HEIGHT
+	local height = (index * self.BUTTON_HEIGHT) + (self.BORDER_HEIGHT * 2)
+	if height > self.MAX_HEIGHT and self:GetScrollable() then
+		height = self.MAX_HEIGHT
 		listFrame.shouldScroll = true
 	else
 		listFrame.shouldScroll = false
@@ -518,14 +520,13 @@ function DD:AddButton(info, level)
 	button:Show();
 end
 
----------- Dropdown Utilities ----------
 local spacerInfo = {
 	text = "",
 	isTitle = true,
 	notCheckable = true,
 }
 function DD:AddSpacer()
-	DD:AddButton(spacerInfo)
+	self:AddButton(spacerInfo)
 end
 
 
@@ -1000,11 +1001,15 @@ function DD:OnEnable()
 end
 
 function DD:SetScrollable(scrollable, maxHeight)
+	self = fixself(self)
+
 	self.scrollable = scrollable
-	self.maxHeight = maxHeight
+	self.MAX_HEIGHT = maxHeight
 end
 
 function DD:GetScrollable()
+	self = fixself(self)
+	
 	return self.scrollable
 end
 

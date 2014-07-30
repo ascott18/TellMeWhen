@@ -266,6 +266,8 @@
 						self.parent = self:GetParent()
 						TMW:ConvertContainerToScrollFrame(self, false, 12, 10, true)
 
+						self.ScrollFrame.scrollStep = TMW.DD.BUTTON_HEIGHT * 5
+
 						self.ScrollFrame.ScrollBar:HookScript("OnEnter", function()
 							TMW.DD.StopCounting(self, motion);
 						end)
@@ -277,6 +279,9 @@
 						end)
 						self.ScrollFrame.ScrollBar.Thumb:HookScript("OnLeave", function()
 							TMW.DD.StartCounting(self, motion);
+						end)
+						self.ScrollFrame.ScrollBar.Thumb:HookScript("OnDragStart", function()
+							TMW.DD:CloseDropDownMenus(self.parent:GetID() + 1);
 						end)
 					</OnLoad>
 					<OnEnter>

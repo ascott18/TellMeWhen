@@ -620,9 +620,11 @@
 	<ScrollFrame name="TellMeWhen_ScrollFrameTemplate" parentKey="ScrollFrame" virtual="true">
 		<Scripts>
 			<OnLoad>
+				self.AllowEdgeScrolling = false
 				self.edgeScrollMouseCursorRange = 5
 				self.edgeScrollScrollDistancePerSecond = 150
 				self.scrollPercentage = 1/2
+				self.scrollStep = nil
 			</OnLoad>
 			<OnScrollRangeChanged>
 				local yrange = self:GetVerticalScrollRange()
