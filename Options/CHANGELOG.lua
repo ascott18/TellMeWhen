@@ -12,6 +12,7 @@ TMW.CHANGELOG = {
 [==[]==],
 [==[* Buff/Debuff equivalencies have been updated (with the exception of diminishing returns). Please open a ticket if you notice anything missing or mis-categorized.]==],
 [==[]==],
+[==[* New condition: Instance Size]==],
 [==[* The suggestion list now defers its sorting so that input is more responsive.]==],
 [==[* The "Highlight timer edge" setting is back.]==],
 [==[]==],

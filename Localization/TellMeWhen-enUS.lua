@@ -1228,6 +1228,10 @@ L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
 L["CONDITIONPANEL_INSTANCETYPE_NONE"] = "Outside"
 L["CONDITIONPANEL_INSTANCETYPE_LEGACY"] = "%s (Legacy)"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
+L["CONDITIONPANEL_GROUPSIZE"] = "Instance Size"
+L["CONDITIONPANEL_GROUPSIZE_DESC"] = [[Checks against the number of players that the current instance is tuned for.
+
+This includes the current flex raid tuning.]]
 L["CONDITIONPANEL_SWIMMING"] = "Swimming"
 L["CONDITIONPANEL_RESTING"] = "Resting"
 L["CONDITIONPANEL_INPETBATTLE"] = "In pet battle"

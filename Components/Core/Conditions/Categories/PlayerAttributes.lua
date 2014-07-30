@@ -231,6 +231,24 @@ ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 	end,
 })
 
+ConditionCategory:RegisterCondition(2.1, "GROUPSIZE", {
+	text = L["CONDITIONPANEL_GROUPSIZE"],
+	tooltip = L["CONDITIONPANEL_GROUPSIZE_DESC"],
+	min = 0,
+	max = 40,
+	icon = "Interface\\Icons\\spell_deathknight_armyofthedead",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetInstanceInfo = GetInstanceInfo,
+	},
+	funcstr = [[select(9, GetInstanceInfo()) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("INSTANCE_GROUP_SIZE_CHANGED"),
+			ConditionObject:GenerateNormalEventString("UPDATE_INSTANCE_INFO")
+	end,
+})
+
 ConditionCategory:RegisterSpacer(2.5)
 
 ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
