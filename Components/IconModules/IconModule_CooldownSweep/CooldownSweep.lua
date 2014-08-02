@@ -244,8 +244,13 @@ function CooldownSweep:UpdateCooldown()
 			if E and E.OnSetCooldown then
 				if not self.noOCC and E.private.cooldown.enable then
 					E.OnSetCooldown(cd, cd.start, duration, cd.charges, cd.maxCharges)
-				else
-					E.OnSetCooldown(cd, 0, 0, 0, 0)
+				elseif cd.timer then
+					-- Hey guys! Look at this inconsistent syntax for calling that is used! Isn't that fun?!?!? Colon on one, dot on the other!!
+					-- cd.timer is ElvUI's timer text overlay. We pass it in to this method instead of the cooldown sweep itself because... ...  ...
+					-- ...
+					-- ...
+					-- Consistency!
+					E:Cooldown_StopTimer(cd.timer)
 				end
 			end
 		end
