@@ -239,10 +239,14 @@ function CooldownSweep:UpdateCooldown()
 	
 	
 	if duration > 0 and self.icon:GetEffectiveAlpha() > 0 then
-		if ElvUI and not self.noOCC then
+		if ElvUI then
 			local E = ElvUI[1]
-			if E and E.OnSetCooldown and E.private.cooldown.enable then
-				E.OnSetCooldown(cd, cd.start, duration, cd.charges, cd.maxCharges)
+			if E and E.OnSetCooldown then
+				if not self.noOCC and E.private.cooldown.enable then
+					E.OnSetCooldown(cd, cd.start, duration, cd.charges, cd.maxCharges)
+				else
+					E.OnSetCooldown(cd, 0, 0, 0, 0)
+				end
 			end
 		end
 
