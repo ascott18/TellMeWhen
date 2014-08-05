@@ -474,6 +474,7 @@
 							func = TMW.CNDT.BitFlags_DropDown,
 						})
 
+						self:SetScrollable(true)
 						self:SetWidth(190)
 					</OnLoad>
 				</Scripts>

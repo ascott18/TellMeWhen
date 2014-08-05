@@ -479,7 +479,7 @@ function CNDT:BitFlags_DropDown()
 	local conditionData = group:GetConditionData()
 	local conditionSettings = group:GetConditionSettings()
 
-	for index, name in pairs(conditionData.bitFlags) do
+	for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
 		local flag = bit.lshift(1, index-1)
 		local info = TMW.DD:CreateInfo()
 
@@ -511,7 +511,7 @@ function CNDT:BitFlags_DropDown_OnClick(frame)
 	local flag = bit.lshift(1, index-1)
 
 	if type(conditionSettings.BitFlags) == "table" then
-		conditionSettings.BitFlags[index] = conditionSettings.BitFlags[index] and true or nil
+		conditionSettings.BitFlags[index] = (not conditionSettings.BitFlags[index]) and true or nil
 	else
 		conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, flag)
 	end
@@ -1043,7 +1043,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		end
 
 		local text = ""
-		for index, name in pairs(conditionData.bitFlags) do
+		for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
 			local flag = bit.lshift(1, index-1)
 
 			local flagSet

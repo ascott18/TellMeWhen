@@ -358,6 +358,7 @@ ConditionCategory:RegisterCondition(10,	 "LEVEL", {
 	end,
 })
 
+
 local Classes = {
 	"DEATHKNIGHT",
 	"DRUID",
@@ -398,30 +399,38 @@ ConditionCategory:RegisterCondition(11,	 "CLASS", {	-- OLD
 	end,
 })
 
-local function GetClassText(class)
+
+local function GetClassText(classID)
+	local name, token, classID = GetClassInfoByID(classID)
+	if not name then
+		return nil
+	end
+
 	return "|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:0:0:0:0:256:256:" ..
-		(CLASS_ICON_TCOORDS[class][1]+.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[class][2]-.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[class][3]+.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[class][4]-.02)*256 .. "|t " .. LOCALIZED_CLASS_NAMES_MALE[class]
+		(CLASS_ICON_TCOORDS[token][1]+.02)*256 .. ":" .. 
+		(CLASS_ICON_TCOORDS[token][2]-.02)*256 .. ":" .. 
+		(CLASS_ICON_TCOORDS[token][3]+.02)*256 .. ":" .. 
+		(CLASS_ICON_TCOORDS[token][4]-.02)*256 .. "|t " ..
+		PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name)
 end
 ConditionCategory:RegisterCondition(11,	 "CLASS2", {
 	text = L["CONDITIONPANEL_CLASS"],
 
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"],
 	bitFlags = {
-		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
-		GetClassText("DEATHKNIGHT"),	--[ 1,  0x0     ]
-		GetClassText("DRUID"),			--[ 2,  0x1     ]
-		GetClassText("HUNTER"),			--[ 3,  0x2     ]
-		GetClassText("MAGE"),			--[ 4,  0x4     ]
-		GetClassText("PRIEST"),			--[ 5,  0x8     ]
-		GetClassText("PALADIN"),		--[ 6,  0x10    ]
-		GetClassText("ROGUE"),			--[ 7,  0x20    ]
-		GetClassText("SHAMAN"),			--[ 8,  0x40    ]
-		GetClassText("WARLOCK"),		--[ 9,  0x80    ]
-		GetClassText("WARRIOR"),		--[ 10, 0x100   ]
-		GetClassText("MONK"),			--[ 11, 0x200   ]
+		[ 1  ] = GetClassText(1),	--WARRIOR
+		[ 2  ] = GetClassText(2),	--PALADIN
+		[ 3  ] = GetClassText(3),	--HUNTER
+		[ 4  ] = GetClassText(4),	--ROGUE
+		[ 5  ] = GetClassText(5),	--PRIEST
+		[ 6  ] = GetClassText(6), 	--DEATHKNIGHT
+		[ 7  ] = GetClassText(7),	--SHAMAN
+		[ 8  ] = GetClassText(8),	--MAGE
+		[ 9  ] = GetClassText(9),	--WARLOCK
+		[ 10 ] = GetClassText(10),	--MONK
+		[ 11 ] = GetClassText(11),	--DRUID
+		[ 12 ] = GetClassText(12), 	-- These are harmless and will automatically support new classes.
+		[ 13 ] = GetClassText(13),	-- If there are no new classes to fill them, they will just be nil
 	},
 
 	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
@@ -434,28 +443,153 @@ ConditionCategory:RegisterCondition(11,	 "CLASS2", {
 
 	Env = {
 		UnitClass = UnitClass,
-		ClassNumMap = {
-			DEATHKNIGHT = 1,
-			DRUID = 2,
-			HUNTER = 3,
-			MAGE = 4,
-			PRIEST = 5,
-			PALADIN = 6,
-			ROGUE = 7,
-			SHAMAN = 8,
-			WARLOCK = 9,
-			WARRIOR = 10,
-			MONK = 11,
-		}
 	},
 	funcstr = function(c)
-		return [[ BITFLAGSMAPANDCHECK( ClassNumMap[select(2, UnitClass(c.Unit))] ) ]]
+		return [[ BITFLAGSMAPANDCHECK( select(3, UnitClass(c.Unit)) ) ]]
 	end,
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)) -- classes cant change, so this is all we should need
 	end,
 })
+
+
+
+local function GetSpecText(specID)
+	local id, name, description, icon, background, role, class = GetSpecializationInfoByID(specID)
+
+	return 
+	--"|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:0:0:0:0:256:256:" ..
+	--	(CLASS_ICON_TCOORDS[class][1]+.02)*256 .. ":" .. 
+	--	(CLASS_ICON_TCOORDS[class][2]-.02)*256 .. ":" .. 
+	--	(CLASS_ICON_TCOORDS[class][3]+.02)*256 .. ":" .. 
+	--	(CLASS_ICON_TCOORDS[class][4]-.02)*256 .. "|t " .. 
+		"|T" .. icon .. ":0:0:0:0:32:32:2.24:29.76:2.24:29.76|t " .. PLAYER_CLASS:format(RAID_CLASS_COLORS[class].colorStr, name, LOCALIZED_CLASS_NAMES_MALE[class])	
+end
+local specNameToRole = {}
+function CNDT:UpdateUnitSpecs()
+	local _, z = IsInInstance()
+
+	wipe(Env.UnitSpecs)
+
+	if z == "arena" then
+		for i = 1, GetNumArenaOpponents() do
+			local unit = "arena" .. i
+
+			local name, server = UnitName(unit)
+			if name and server then
+				local specID = GetArenaOpponentSpec(i)
+				name = name .. "-" .. server
+				Env.UnitSpecs[name] = specID
+			end
+		end
+
+	elseif z == "pvp" then
+		for i = 1, GetNumBattlefieldScores() do
+			name, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
+			local specID = specNameToRole[classToken][talentSpec]
+			Env.UnitSpecs[name] = specID
+		end
+	end
+
+	TMW:Fire("TMW_UNITSPEC_UPDATE")
+end
+function CNDT:PrepareUnitSpecEvents()
+	for i = 1, GetNumClasses() do
+		local _, class, classID = GetClassInfo(i)
+		specNameToRole[class] = {}
+		for j = 1, GetNumSpecializationsForClassID(classID) do
+			local specID, spec = GetSpecializationInfoForClassID(classID, j)
+			specNameToRole[class][spec] = specID
+		end
+	end
+
+	CNDT:RegisterEvent("UPDATE_WORLD_STATES",   "UpdateUnitSpecs")
+	CNDT:RegisterEvent("ARENA_OPPONENT_UPDATE", "UpdateUnitSpecs")
+	CNDT:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateUnitSpecs")
+	CNDT.PrepareUnitSpecEvents = TMW.NULLFUNC
+end
+ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
+	text = L["CONDITIONPANEL_UNITSPEC"],
+	tooltip = L["CONDITIONPANEL_UNITSPEC_DESC"],
+
+	-- TODO: CONDITIONPANEL_BITFLAGS_CHOOSEMENU is a horrible idea for localization. Get rid of it.
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(SPECIALIZATION),
+	bitFlags = {
+	    [ 62  ] = GetSpecText(62),  	-- Mage: Arcane
+	    [ 63  ] = GetSpecText(63),  	-- Mage: Fire
+	    [ 64  ] = GetSpecText(64),  	-- Mage: Frost
+	    [ 65  ] = GetSpecText(65), 		-- Paladin: Holy
+	    [ 66  ] = GetSpecText(66), 		-- Paladin: Protection
+	    [ 70  ] = GetSpecText(70), 		-- Paladin: Retribution
+	    [ 71  ] = GetSpecText(71), 		-- Warrior: Arms
+	    [ 72  ] = GetSpecText(72), 		-- Warrior: Fury
+	    [ 73  ] = GetSpecText(73), 		-- Warrior: Protection
+	    [ 102 ] = GetSpecText(102), 	-- Druid: Balance
+	    [ 103 ] = GetSpecText(103), 	-- Druid: Feral
+	    [ 104 ] = GetSpecText(104), 	-- Druid: Guardian
+	    [ 105 ] = GetSpecText(105), 	-- Druid: Restoration
+	    [ 250 ] = GetSpecText(250), 	-- Death Knight: Blood
+	    [ 251 ] = GetSpecText(251), 	-- Death Knight: Frost
+	    [ 252 ] = GetSpecText(252), 	-- Death Knight: Unholy
+	    [ 253 ] = GetSpecText(253), 	-- Hunter: Beast Mastery
+	    [ 254 ] = GetSpecText(254), 	-- Hunter: Marksmanship
+	    [ 255 ] = GetSpecText(255), 	-- Hunter: Survival
+	    [ 256 ] = GetSpecText(256), 	-- Priest: Discipline
+	    [ 257 ] = GetSpecText(257), 	-- Priest: Holy
+	    [ 258 ] = GetSpecText(258), 	-- Priest: Shadow
+	    [ 259 ] = GetSpecText(259), 	-- Rogue: Assassination
+	    [ 260 ] = GetSpecText(260), 	-- Rogue: Combat
+	    [ 261 ] = GetSpecText(261), 	-- Rogue: Subtlety
+	    [ 262 ] = GetSpecText(262), 	-- Shaman: Elemental
+	    [ 263 ] = GetSpecText(263), 	-- Shaman: Enhancement
+	    [ 264 ] = GetSpecText(264), 	-- Shaman: Restoration
+	    [ 265 ] = GetSpecText(265), 	-- Warlock: Affliction
+	    [ 266 ] = GetSpecText(266), 	-- Warlock: Demonology
+	    [ 267 ] = GetSpecText(267), 	-- Warlock: Destruction
+	    [ 268 ] = GetSpecText(268), 	-- Monk: Brewmaster
+	    [ 269 ] = GetSpecText(269), 	-- Monk: Windwalker
+	    [ 270 ] = GetSpecText(270), 	-- Monk: Mistweaver
+	},
+
+	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+	tcoords = {
+		CLASS_ICON_TCOORDS[pclass][1]+.02,
+		CLASS_ICON_TCOORDS[pclass][2]-.02,
+		CLASS_ICON_TCOORDS[pclass][3]+.02,
+		CLASS_ICON_TCOORDS[pclass][4]-.02,
+	},
+
+	Env = {
+		UnitSpecs = {},
+		UnitSpec = function(unit)
+			if unit == "player" then
+				return GetSpecializationInfo(GetSpecialization())
+			else
+				local name, server = UnitName(unit)
+				if name and server then
+					name = name .. "-" .. server
+					return Env.UnitSpecs[name] or 0
+				end
+			end
+
+			return 0
+		end,
+	},
+	funcstr = function(c)
+		return [[ BITFLAGSMAPANDCHECK( UnitSpec(c.Unit) ) ]]
+	end,
+	events = function(ConditionObject, c)
+		CNDT:PrepareUnitSpecEvents()
+
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("TMW_UNITSPEC_UPDATE")
+	end,
+})
+
+
+
 
 local unitClassifications = {
 	"normal",
@@ -486,6 +620,9 @@ ConditionCategory:RegisterCondition(12,	 "CLASSIFICATION", {
 			ConditionObject:GenerateNormalEventString("UNIT_CLASSIFICATION_CHANGED", CNDT:GetUnit(c.Unit))
 	end,
 })
+
+
+
 
 ConditionCategory:RegisterCondition(13,	 "CREATURETYPE", {
 	text = L["CONDITIONPANEL_CREATURETYPE"],

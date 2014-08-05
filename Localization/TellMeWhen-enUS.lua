@@ -1189,6 +1189,8 @@ Enable this option to force the runes in the top row to only match non-death run
 L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
+L["CONDITIONPANEL_UNITSPEC"] = "Unit Specialization"
+L["CONDITIONPANEL_UNITSPEC_DESC"] = "This condition ONLY works for BATTLEGROUND and ARENA ENEMIES, as well as yourself."
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
 L["CONDITIONPANEL_ROLE"] = "Unit Group Role"
 L["CONDITIONPANEL_RAIDICON"] = "Unit Raid Icon"
