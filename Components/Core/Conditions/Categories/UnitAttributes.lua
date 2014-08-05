@@ -467,7 +467,10 @@ local function GetSpecText(specID)
 		"|T" .. icon .. ":0:0:0:0:32:32:2.24:29.76:2.24:29.76|t " .. PLAYER_CLASS:format(RAID_CLASS_COLORS[class].colorStr, name, LOCALIZED_CLASS_NAMES_MALE[class])	
 end
 local specNameToRole = {}
-function CNDT:UpdateUnitSpecs()
+local SPECS = CNDT:NewModule("Specs", "AceEvent-3.0")
+function SPECS:UpdateUnitSpecs()
+	RequestBattlefieldScoreData()
+
 	local _, z = IsInInstance()
 
 	wipe(Env.UnitSpecs)
@@ -484,17 +487,20 @@ function CNDT:UpdateUnitSpecs()
 			end
 		end
 
+		TMW:Fire("TMW_UNITSPEC_UPDATE")
+
 	elseif z == "pvp" then
 		for i = 1, GetNumBattlefieldScores() do
 			name, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
 			local specID = specNameToRole[classToken][talentSpec]
 			Env.UnitSpecs[name] = specID
 		end
+		
+		TMW:Fire("TMW_UNITSPEC_UPDATE")
 	end
 
-	TMW:Fire("TMW_UNITSPEC_UPDATE")
 end
-function CNDT:PrepareUnitSpecEvents()
+function SPECS:PrepareUnitSpecEvents()
 	for i = 1, GetNumClasses() do
 		local _, class, classID = GetClassInfo(i)
 		specNameToRole[class] = {}
@@ -504,10 +510,11 @@ function CNDT:PrepareUnitSpecEvents()
 		end
 	end
 
-	CNDT:RegisterEvent("UPDATE_WORLD_STATES",   "UpdateUnitSpecs")
-	CNDT:RegisterEvent("ARENA_OPPONENT_UPDATE", "UpdateUnitSpecs")
-	CNDT:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateUnitSpecs")
-	CNDT.PrepareUnitSpecEvents = TMW.NULLFUNC
+	SPECS:RegisterEvent("UPDATE_WORLD_STATES",   "UpdateUnitSpecs")
+	SPECS:RegisterEvent("ARENA_OPPONENT_UPDATE", "UpdateUnitSpecs")
+	SPECS:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdateUnitSpecs")
+	SPECS:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateUnitSpecs")
+	SPECS.PrepareUnitSpecEvents = TMW.NULLFUNC
 end
 ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
 	text = L["CONDITIONPANEL_UNITSPEC"],
@@ -552,18 +559,13 @@ ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
 	    [ 270 ] = GetSpecText(270), 	-- Monk: Mistweaver
 	},
 
-	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
-	tcoords = {
-		CLASS_ICON_TCOORDS[pclass][1]+.02,
-		CLASS_ICON_TCOORDS[pclass][2]-.02,
-		CLASS_ICON_TCOORDS[pclass][3]+.02,
-		CLASS_ICON_TCOORDS[pclass][4]-.02,
-	},
+	icon = function() return select(4, GetSpecializationInfo(1)) end,
+	tcoords = CNDT.COMMON.standardtcoords,
 
 	Env = {
 		UnitSpecs = {},
 		UnitSpec = function(unit)
-			if unit == "player" then
+			if UnitIsUnit(unit, "player") then
 				return GetSpecializationInfo(GetSpecialization())
 			else
 				local name, server = UnitName(unit)
@@ -580,7 +582,8 @@ ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
 		return [[ BITFLAGSMAPANDCHECK( UnitSpec(c.Unit) ) ]]
 	end,
 	events = function(ConditionObject, c)
-		CNDT:PrepareUnitSpecEvents()
+		SPECS:PrepareUnitSpecEvents()
+		SPECS:UpdateUnitSpecs()
 
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),

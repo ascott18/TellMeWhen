@@ -18,6 +18,7 @@ TMW.CHANGELOG = {
 [==[]==],
 [==[===v7.0.3===]==],
 [==[* Re-worked the Instance Type condition to make it more extensible in the future, and also added a few missing instance types to it.]==],
+[==[* Added a Unit Specialization condition that can check the specs of enemies in arenas, and all units in battlegrounds.]==],
 [==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed an error that would be thrown if the whisper target ended up evaluating to nil.]==],
