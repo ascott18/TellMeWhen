@@ -104,6 +104,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE", {	-- old
 ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
 
+	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_INSTANCETYPE"]),
 	bitFlags = {
 		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
@@ -210,6 +211,7 @@ ConditionCategory:RegisterCondition(2,	 "GROUP", {		-- old
 ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 	text = L["CONDITIONPANEL_GROUPTYPE"],
 
+	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_GROUPTYPE"]),
 	bitFlags = {
 		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
