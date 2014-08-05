@@ -1866,6 +1866,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	GetValue = function(self)
 		if self.EditBoxShowing then
 			local text = self.EditBox:GetText()
+			if text == "" then
+				text = 0
+			end
+			
 			text = tonumber(text)
 			if text then
 				return self:CalculateValueRoundedToStep(text)
