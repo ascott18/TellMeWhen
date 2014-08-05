@@ -185,6 +185,35 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	end,
 })
 
+ConditionCategory:RegisterCondition(1.5, "ZONEPVP", {
+	text = L["CONDITIONPANEL_ZONEPVP"],
+
+	unit = false,
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_INSTANCETYPE"]),
+	bitFlags = {
+	    arena = rawget(L, "CONDITIONPANEL_ZONEPVP_FFA") or FREE_FOR_ALL_TERRITORY:trim("()（）"), -- Only use the TMW translation if it exists.
+	    combat = COMBAT_ZONE:trim("()（）"),
+	    contested = CONTESTED_TERRITORY:trim("()（）"),
+	    friendly = FACTION_CONTROLLED_TERRITORY:format(FRIENDLY):trim("()（）"),
+	    hostile = FACTION_CONTROLLED_TERRITORY:format(HOSTILE):trim("()（）"),
+	    sanctuary = SANCTUARY_TERRITORY:trim("()（）"),
+	    none = NONE,
+	},
+
+	icon = "Interface\\Icons\\inv_bannerpvp_01",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetZonePVPInfo = GetZonePVPInfo,
+	},
+	funcstr = [[BITFLAGSMAPANDCHECK( GetZonePVPInfo() or "none" )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("ZONE_CHANGED_NEW_AREA"),
+			ConditionObject:GenerateNormalEventString("ZONE_CHANGED_INDOORS"),
+			ConditionObject:GenerateNormalEventString("ZONE_CHANGED")
+	end,
+})
+
 
 ConditionCategory:RegisterCondition(2,	 "GROUP", {		-- old
 	text = L["CONDITIONPANEL_GROUPTYPE"],

@@ -1226,6 +1226,8 @@ The NPC ID is the number found in the URL when looking at an NPC's Wowhead page 
 Players and other units without an NPC ID will be treated as having an ID of 0 in this condition.]]
 L["CONDITIONPANEL_NPCIDTOMATCH"] = "ID to Match"
 L["CONDITIONPANEL_NPCIDTOOLTIP"] = "You can enter multiple NPC IDs to be matched by separating each one with a semicolon (;). The condition will pass if any IDs are matched."
+L["CONDITIONPANEL_ZONEPVP"] = "Zone PvP Type"
+L["CONDITIONPANEL_ZONEPVP_FFA"] = "Free-For-All PvP"
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
 L["CONDITIONPANEL_INSTANCETYPE_NONE"] = "Outside"
 L["CONDITIONPANEL_INSTANCETYPE_LEGACY"] = "%s (Legacy)"
