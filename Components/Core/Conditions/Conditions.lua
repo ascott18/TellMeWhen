@@ -612,7 +612,7 @@ function CNDT:GetTableSubstitution(tbl)
 		error("not a table")
 	end
 
-	local address = tostring(table)
+	local address = tostring(tbl)
 	if not address:match("^table: [0-9A-F]*$") then
 		error("can't substitute tables with __tostring metamethods")
 	end
