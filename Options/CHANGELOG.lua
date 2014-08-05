@@ -4,12 +4,6 @@ TMW.CHANGELOG = {
 
 [==[===v7.1.0===]==],
 [==[]==],
-[==[IMPORTANT: LIKE, SUPER IMPORTANT, PLEASE READ - KNOWN ISSUE:]==],
-[==[* If some of your icons are disappearing every time you log in/reload, and those icons have an iconID greater than 22, then go through that group and enable all the blank icons in that group. There is an issue with Blizzard's SavedVariables serializer that is causing all numbers to get serialized incorrectly. This issue will affect other things too that use numbers greater than 22, so I suggest that you don't get too attached to your icons right now - you will want to re-import your setup from live once the issue is fixed. Read more here: http://www.wowinterface.com/forums/showthread.php?p=294284]==],
-[==[]==],
-[==[* IMPORTANT: TEMPORARY CHANGES:]==],
-[==[** Non-blizzard resources (art, sounds, etc) currently can't be loaded. I replaced a few textures temporarily so you aren't blinded by the green]==],
-[==[]==],
 [==[* Buff/Debuff equivalencies have been updated (with the exception of diminishing returns). Please open a ticket if you notice anything missing or mis-categorized.]==],
 [==[]==],
 [==[* New condition: Instance Size]==],
