@@ -208,10 +208,9 @@ ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_GROUPTYPE"]),
 	bitFlags = {
-		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
-		SOLO,			--[ 1,  0x0    ]
-		PARTY,			--[ 2,  0x1    ]
-		RAID,			--[ 3,  0x2    ]
+		[1] = SOLO,
+		[2] = PARTY,
+		[3] = RAID,
 	},
 
 	icon = "Interface\\Calendar\\MeetingIcon",
