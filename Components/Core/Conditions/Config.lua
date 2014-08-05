@@ -488,8 +488,12 @@ function CNDT:BitFlags_DropDown()
 		--info.tooltipTitle = name
 		--info.tooltipText = 
 
-		info.value = flag
-		info.checked = bit.band(conditionSettings.BitFlags, flag) == flag
+		info.value = index
+		if type(conditionSettings.BitFlags) == "table" then
+			info.checked = conditionSettings.BitFlags[index]
+		else
+			info.checked = bit.band(conditionSettings.BitFlags, flag) == flag
+		end
 		info.keepShownOnClick = true
 		info.isNotRadio = true
 		info.func = CNDT.BitFlags_DropDown_OnClick
@@ -503,7 +507,15 @@ function CNDT:BitFlags_DropDown_OnClick(frame)
 	local group = frame:GetParent()
 	local conditionSettings = group:GetConditionSettings()
 
-	conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, self.value)
+	local index = self.value
+	local flag = bit.lshift(1, index-1)
+
+	if type(conditionSettings.BitFlags) == "table" then
+		conditionSettings.BitFlags[index] = conditionSettings.BitFlags[index] and true or nil
+	else
+		conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, flag)
+	end
+
 	TMW.IE:ScheduleIconSetup()
 	group:LoadAndDraw()
 end
@@ -997,11 +1009,38 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		CndtGroup.BitFlagsSelectedText:Show()
 		CndtGroup.BitFlags:SetText(conditionData.bitFlagTitle)
 
+		-- Auto switch to a table if there are too many options for numeric bit flags.
+		if type(conditionSettings.BitFlags) == "number" then
+			local maxIndex = 0
+			for index, name in pairs(conditionData.bitFlags) do
+				maxIndex = max(index, maxIndex)
+			end
+			if maxIndex >= 32 then
+				local flagsOld = conditionSettings.BitFlags
+				conditionSettings.BitFlags = {}
+
+				for index, name in pairs(conditionData.bitFlags) do
+					if index < 32 then
+						local flag = bit.lshift(1, index-1)
+						local flagSet = bit.band(flagsOld, flag) == flag
+						conditionSettings.BitFlags[index] = flagSet and true or nil
+					end
+				end
+			end
+		end
+
 		local text = ""
 		for index, name in pairs(conditionData.bitFlags) do
 			local flag = bit.lshift(1, index-1)
 
-			if bit.band(conditionSettings.BitFlags, flag) == flag then
+			local flagSet
+			if type(conditionSettings.BitFlags) == "table" then
+				flagSet = conditionSettings.BitFlags[index]
+			else
+				flagSet = bit.band(conditionSettings.BitFlags, flag) == flag
+			end
+
+			if flagSet then
 				if conditionSettings.Checked then
 					local Not = L["CONDITIONPANEL_BITFLAGS_NOT"]
 					if text ~= "" then
