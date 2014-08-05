@@ -1869,7 +1869,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			if text == "" then
 				text = 0
 			end
-			
+
 			text = tonumber(text)
 			if text then
 				return self:CalculateValueRoundedToStep(text)
@@ -2030,6 +2030,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	end,
 
 	CalculateValueRoundedToStep = function(self, value)
+		if value == math.huge or value == -math.huge then
+			return value
+		end
+		
 		local step = self:GetValueStep()
 
 		return floor(value * (1/step) + 0.5) / (1/step)
