@@ -105,7 +105,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
 
 	unit = false,
-	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_INSTANCETYPE"]),
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 		[ 1  ] = L["CONDITIONPANEL_INSTANCETYPE_NONE"],											
 		[ 2  ] = BATTLEGROUND,																	
@@ -189,7 +189,7 @@ ConditionCategory:RegisterCondition(1.5, "ZONEPVP", {
 	text = L["CONDITIONPANEL_ZONEPVP"],
 
 	unit = false,
-	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_INSTANCETYPE"]),
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 	    arena = rawget(L, "CONDITIONPANEL_ZONEPVP_FFA") or FREE_FOR_ALL_TERRITORY:trim("()（）"), -- Only use the TMW translation if it exists.
 	    combat = COMBAT_ZONE:trim("()（）"),
@@ -240,7 +240,7 @@ ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 	text = L["CONDITIONPANEL_GROUPTYPE"],
 
 	unit = false,
-	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_GROUPTYPE"]),
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 		[1] = SOLO,
 		[2] = PARTY,

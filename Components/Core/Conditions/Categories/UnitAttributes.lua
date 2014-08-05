@@ -520,8 +520,7 @@ ConditionCategory:RegisterCondition(11.1, "UNITSPEC", {
 	text = L["CONDITIONPANEL_UNITSPEC"],
 	tooltip = L["CONDITIONPANEL_UNITSPEC_DESC"],
 
-	-- TODO: CONDITIONPANEL_BITFLAGS_CHOOSEMENU is a horrible idea for localization. Get rid of it.
-	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(SPECIALIZATION),
+	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
 	bitFlags = {
 	    [ 62  ] = GetSpecText(62),  	-- Mage: Arcane
 	    [ 63  ] = GetSpecText(63),  	-- Mage: Fire
