@@ -478,13 +478,15 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="BitFlagsCheck">
+			<CheckButton parentKey="BitFlagsCheck" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.BitFlags" relativePoint="RIGHT" x="5" y="2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.text:SetText(TMW.L["CONDITIONPANEL_BITFLAGS_CHECK"])
+						self.text:SetPoint("RIGHT", self:GetParent(), "RIGHT")
+						self.text:SetHeight(self.text:GetHeight()*2 + 3)
 						
 						TMW:TT(self, "CONDITIONPANEL_BITFLAGS_CHECK", "CONDITIONPANEL_BITFLAGS_CHECK_DESC")
 					</OnLoad>

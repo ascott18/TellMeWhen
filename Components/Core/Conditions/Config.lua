@@ -708,6 +708,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			-- Normal unit input and configuration
 			CndtGroup.Unit:Show()
 			CndtGroup.Unit:SetText(conditionSettings.Unit)
+			CndtGroup.Unit:SetWidth(120)
 			
 			CndtGroup.TextUnitDef:SetText(nil)
 			CndtGroup.TextUnit:SetText(L["CONDITIONPANEL_UNIT"])
@@ -1005,9 +1006,20 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	if conditionData.bitFlags then
 		CndtGroup.BitFlags:Show()
 		CndtGroup.BitFlagsCheck:Show()
-		CndtGroup.BitFlagsCheck:SetChecked(conditionSettings.Checked)
 		CndtGroup.BitFlagsSelectedText:Show()
+
+		CndtGroup.BitFlagsCheck:SetChecked(conditionSettings.Checked)
 		CndtGroup.BitFlags:SetText(conditionData.bitFlagTitle)
+
+		CndtGroup.BitFlags:ClearAllPoints()
+		if CndtGroup.Unit:IsShown() then
+			CndtGroup.BitFlags:SetPoint("LEFT", CndtGroup.Unit, "RIGHT", 8, -3)
+			CndtGroup.BitFlags:SetWidth(150)
+			CndtGroup.Unit:SetWidth(90)
+		else
+			CndtGroup.BitFlags:SetPoint("TOPLEFT", CndtGroup.Type, "TOPRIGHT", 15, 0)
+			CndtGroup.BitFlags:SetWidth(190)
+		end
 
 		-- Auto switch to a table if there are too many options for numeric bit flags.
 		if type(conditionSettings.BitFlags) == "number" then

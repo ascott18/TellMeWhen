@@ -1264,6 +1264,7 @@ If more help is needed (but not help about how to write Lua code), open a ticket
 L["CONDITIONPANEL_OLD"] = "<|cffff1300OLD|r>"
 L["CONDITIONPANEL_OLD_DESC"] = "<|cffff1300OLD|r> - There is a newer version of this condition available."
 L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"] = "Choose %ss..."
+L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
 L["CONDITIONPANEL_BITFLAGS_SELECTED"] = "|cff7fffffSelected|r:"
 L["CONDITIONPANEL_BITFLAGS_NOT"] = "Not"
 L["CONDITIONPANEL_BITFLAGS_ALWAYS"] = "Always True"

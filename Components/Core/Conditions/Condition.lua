@@ -65,7 +65,6 @@ function Condition:OnNewInstance(category, order, identifier)
 	end
 
 	if self.bitFlags then
-		self.unit = false
 		self.nooperator = true
 		self.noslide = true
 	end

@@ -180,7 +180,7 @@ ConditionCategory:RegisterCondition(6.2, "ISPLAYER", {
 ConditionCategory:RegisterSpacer(6.5)
 
 
-ConditionCategory:RegisterCondition(6.7,	 "INCHEALS", {
+ConditionCategory:RegisterCondition(6.7, "INCHEALS", {
 	text = L["INCHEALS"],
 	tooltip = L["INCHEALS_DESC"],
 	range = 50000,
@@ -371,7 +371,9 @@ local Classes = {
 	"WARRIOR",
 	"MONK",
 }
-ConditionCategory:RegisterCondition(11,	 "CLASS", {
+ConditionCategory:RegisterCondition(11,	 "CLASS", {	-- OLD
+	old = true,
+
 	text = L["CONDITIONPANEL_CLASS"],
 	min = 1,
 	max = #Classes,
@@ -389,6 +391,65 @@ ConditionCategory:RegisterCondition(11,	 "CLASS", {
 	},
 	funcstr = function(c)
 		return [[select(2, UnitClass(c.Unit)) == "]] .. (Classes[c.Level] or "whoops") .. "\""
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)) -- classes cant change, so this is all we should need
+	end,
+})
+
+local function GetClassText(class)
+	return "|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:0:0:0:0:256:256:" ..
+		(CLASS_ICON_TCOORDS[class][1]+.02)*256 .. ":" .. 
+		(CLASS_ICON_TCOORDS[class][2]-.02)*256 .. ":" .. 
+		(CLASS_ICON_TCOORDS[class][3]+.02)*256 .. ":" .. 
+		(CLASS_ICON_TCOORDS[class][4]-.02)*256 .. "|t " .. LOCALIZED_CLASS_NAMES_MALE[class]
+end
+ConditionCategory:RegisterCondition(11,	 "CLASS2", {
+	text = L["CONDITIONPANEL_CLASS"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"],
+	bitFlags = {
+		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
+		GetClassText("DEATHKNIGHT"),	--[ 1,  0x0     ]
+		GetClassText("DRUID"),			--[ 2,  0x1     ]
+		GetClassText("HUNTER"),			--[ 3,  0x2     ]
+		GetClassText("MAGE"),			--[ 4,  0x4     ]
+		GetClassText("PRIEST"),			--[ 5,  0x8     ]
+		GetClassText("PALADIN"),		--[ 6,  0x10    ]
+		GetClassText("ROGUE"),			--[ 7,  0x20    ]
+		GetClassText("SHAMAN"),			--[ 8,  0x40    ]
+		GetClassText("WARLOCK"),		--[ 9,  0x80    ]
+		GetClassText("WARRIOR"),		--[ 10, 0x100   ]
+		GetClassText("MONK"),			--[ 11, 0x200   ]
+	},
+
+	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+	tcoords = {
+		CLASS_ICON_TCOORDS[pclass][1]+.02,
+		CLASS_ICON_TCOORDS[pclass][2]-.02,
+		CLASS_ICON_TCOORDS[pclass][3]+.02,
+		CLASS_ICON_TCOORDS[pclass][4]-.02,
+	},
+
+	Env = {
+		UnitClass = UnitClass,
+		ClassNumMap = {
+			DEATHKNIGHT = 1,
+			DRUID = 2,
+			HUNTER = 3,
+			MAGE = 4,
+			PRIEST = 5,
+			PALADIN = 6,
+			ROGUE = 7,
+			SHAMAN = 8,
+			WARLOCK = 9,
+			WARRIOR = 10,
+			MONK = 11,
+		}
+	},
+	funcstr = function(c)
+		return [[ BITFLAGSMAPANDCHECK( ClassNumMap[select(2, UnitClass(c.Unit))] ) ]]
 	end,
 	events = function(ConditionObject, c)
 		return
