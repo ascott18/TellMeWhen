@@ -516,7 +516,7 @@ function SPECS:PrepareUnitSpecEvents()
 	SPECS:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateUnitSpecs")
 	SPECS.PrepareUnitSpecEvents = TMW.NULLFUNC
 end
-ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
+ConditionCategory:RegisterCondition(11.1, "UNITSPEC", {
 	text = L["CONDITIONPANEL_UNITSPEC"],
 	tooltip = L["CONDITIONPANEL_UNITSPEC_DESC"],
 
