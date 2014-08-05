@@ -587,7 +587,8 @@ ConditionCategory:RegisterCondition(11.1, "UNITSPEC", {
 
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("TMW_UNITSPEC_UPDATE")
+			ConditionObject:GenerateNormalEventString("TMW_UNITSPEC_UPDATE"),
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE")
 	end,
 })
 
