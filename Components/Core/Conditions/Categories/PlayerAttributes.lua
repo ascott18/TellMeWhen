@@ -107,25 +107,24 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_INSTANCETYPE"]),
 	bitFlags = {
-		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
-		L["CONDITIONPANEL_INSTANCETYPE_NONE"],												--[ 1,  0x0     ]
-		BATTLEGROUND,																		--[ 2,  0x1     ]
-		ARENA,																				--[ 3,  0x2     ]
-		DUNGEON_DIFFICULTY_5PLAYER,															--[ 4,  0x4     ]
-		DUNGEON_DIFFICULTY_5PLAYER_HEROIC,													--[ 5,  0x8     ]
-		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER),			--[ 6,  0x10    ]
-		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER),			--[ 7,  0x20    ]
-		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER_HEROIC),	--[ 8,  0x40    ]
-		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER_HEROIC),	--[ 9,  0x80    ]
-		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_FINDER),						--[ 10, 0x100   ]
-		CHALLENGE_MODE,																		--[ 11, 0x200   ]
-		L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_40PLAYER),			--[ 12, 0x400   ]
-		HEROIC_SCENARIO,																	--[ 13, 0x800   ]
-		GUILD_CHALLENGE_TYPE4,																--[ 14, 0x1000  ] (regular scenario)
-		format("%s (%s)", PLAYER_DIFFICULTY1, FLEX_RAID),									--[ 15, 0x2000  ] (Warlords Normal Flex)
-		format("%s (%s)", PLAYER_DIFFICULTY2, FLEX_RAID),									--[ 16, 0x4000  ] (Warlords Heroic Flex)
-		PLAYER_DIFFICULTY6,																	--[ 17, 0x8000  ] (Warlords Mythic)
-		format("%s (%s)", PLAYER_DIFFICULTY3, FLEX_RAID),									--[ 18, 0x10000 ] (Warlords LFR Flex)
+		[ 1  ] = L["CONDITIONPANEL_INSTANCETYPE_NONE"],											
+		[ 2  ] = BATTLEGROUND,																	
+		[ 3  ] = ARENA,																			
+		[ 4  ] = DUNGEON_DIFFICULTY_5PLAYER,														
+		[ 5  ] = DUNGEON_DIFFICULTY_5PLAYER_HEROIC,												
+		[ 6  ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER),		
+		[ 7  ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER),		
+		[ 8  ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER_HEROIC),	
+		[ 9  ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER_HEROIC),	
+		[ 10 ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_FINDER),						
+		[ 11 ] = CHALLENGE_MODE,																	
+		[ 12 ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_40PLAYER),		
+		[ 13 ] = HEROIC_SCENARIO,																	
+		[ 14 ] = GUILD_CHALLENGE_TYPE4,								-- (regular scenario)
+		[ 15 ] = format("%s (%s)", PLAYER_DIFFICULTY1, FLEX_RAID),	-- (Warlords Normal Flex)
+		[ 16 ] = format("%s (%s)", PLAYER_DIFFICULTY2, FLEX_RAID),	-- (Warlords Heroic Flex)
+		[ 17 ] = PLAYER_DIFFICULTY6,								-- (Warlords Mythic)
+		[ 18 ] = format("%s (%s)", PLAYER_DIFFICULTY3, FLEX_RAID),	-- (Warlords LFR Flex)
 	},
 
 	icon = "Interface\\Icons\\Spell_Frost_Stun",
@@ -214,10 +213,9 @@ ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(L["CONDITIONPANEL_GROUPTYPE"]),
 	bitFlags = {
-		------ DON'T REMOVE ANYTHING WITHOUT REPLACING IT WITH AN EXPLICIT NIL! ------
-		SOLO,			--[ 1,  0x0    ]
-		PARTY,			--[ 2,  0x1    ]
-		RAID,			--[ 3,  0x2    ]
+		[1] = SOLO,
+		[2] = PARTY,
+		[3] = RAID,
 	},
 
 	icon = "Interface\\Calendar\\MeetingIcon",
