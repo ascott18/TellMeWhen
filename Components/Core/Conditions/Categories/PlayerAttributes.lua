@@ -333,17 +333,16 @@ local FirstStances = {
 	DRUID = 5487, 		-- Bear Form
 	PRIEST = 15473, 	-- Shadowform
 	ROGUE = 1784, 		-- Stealth
-	HUNTER = 13165, 	-- Aspect of the Fox
 	DEATHKNIGHT = 48263,-- Blood Presence
 	PALADIN = 105361, 	-- Seal of Command
 	WARLOCK = 103958, 	-- Metamorphosis
 	MONK = 103985, 		-- Fierce Tiger
 }
 ConditionCategory:RegisterCondition(6,	 "STANCE", {
-	text = 	pclass == "HUNTER" and L["ASPECT"] or
-			pclass == "PALADIN" and L["SEAL"] or
+	text = 	pclass == "PALADIN" and L["SEAL"] or
 			pclass == "DEATHKNIGHT" and L["PRESENCE"] or
 			pclass == "DRUID" and L["SHAPESHIFT"] or
+			-- pclass == "HUNTER" and L["ASPECT"] or -- aspects aren't stances anymore.
 			--pclass == "WARRIOR" and L["STANCE"] or
 			--pclass == "MONK" and L["STANCE"] or
 			L["STANCE"],
