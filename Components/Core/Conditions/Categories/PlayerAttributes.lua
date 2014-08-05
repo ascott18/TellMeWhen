@@ -523,7 +523,7 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 	unit = PLAYER,
 	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
 	useSUG = "talents",
-	icon = function() return select(2, GetTalentInfo(1, 1, 1)) end,
+	icon = function() return select(3, GetTalentInfo(1, 1, 1)) end,
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(ConditionObject, c)
 		-- this is handled externally because TalentMap is so extensive a process,
@@ -540,24 +540,9 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end,
 })
-ConditionCategory:RegisterCondition(10,	 "PTSINTAL", {
-	-- THIS CONDITION IS OUTDATED, BUT DON'T DELETE IT!
-	-- IT HANDLES UPGRADES TO THE MOP VERSION OF IT!
+ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	text = L["UIPANEL_PTSINTAL"],
-	min = 0,
-	max = 5,
-	hidden = true,
-	funcstr = function(c)
-		-- Hack that will automatically upgrade to the MOP version of the condition when it is processed.
-		-- This upgrade is kinda bad because we went from a number comparison to a boolean check, but we should at least put the level down to a valid value.
-		-- Users are going to need to redo their conditions anyway for gameplay reasons, so I'm not to worried about a poor upgrade here.
-		
-		c.Type = "TALENTLEARNED"
-		if c.Level > 1 then
-			c.Level = 0
-		end
-		return CNDT.ConditionsByType.TALENTLEARNED.funcstr
-	end,
+	funcstr = "DEPRECATED",
 })
 
 

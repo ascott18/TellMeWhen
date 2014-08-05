@@ -153,16 +153,7 @@ ConditionCategory:RegisterCondition(8,	 "MASTERY", {
 })
 ConditionCategory:RegisterCondition(9,	 "EXPERTISE", {		-- DEPRECATED
 	text = _G["COMBAT_RATING_NAME"..CR_EXPERTISE],
-	min = 0,
-	max = 100,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\ability_rogue_shadowstrikes",
-	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = "DEPRECATED",
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("COMBAT_RATING_UPDATE")
-	end,
 })
 
 
