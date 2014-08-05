@@ -4,6 +4,8 @@ TMW.CHANGELOG = {
 
 [==[===v7.1.0===]==],
 [==[]==],
+[==[* IMPORTANT: The issue with Blizzard's SavedVariables serializer has been resolved in beta build 18663. You may still have a great deal of corrupt data, so I recommend re-importing your profiles from live servers if you notice anything that is unexplainably broken.]==],
+[==[]==],
 [==[* Buff/Debuff equivalencies have been updated (with the exception of diminishing returns). Please open a ticket if you notice anything missing or mis-categorized.]==],
 [==[]==],
 [==[* New condition: Instance Size]==],
