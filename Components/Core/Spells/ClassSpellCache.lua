@@ -29,11 +29,10 @@ TMW:RegisterDatabaseDefaults{
 	},
 }
 
-TMW:RegisterUpgrade(61210, {
+TMW:RegisterUpgrade(71025, {
 	global = function()
-		-- For some reason, the cache was getting filled with {[spellID] = class} pairs, which is totally wrong.
-		-- I changed the comm slug to prevent sharing the corrupt data,
-		-- but we still should wipe the existing DB if these bad values exist.
+		-- This wipe includes any previous reasons for wiping, as well as for when
+		-- the SV serializer in the warlords beta got screwed up.
 		wipe(TMW.db.global.ClassSpellCache)
 	end,
 })
@@ -205,7 +204,7 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 	
 	local success, sourceVersion, msgType, dataTable, sourcePclass = self:Deserialize(text)
 	
-	if success then
+	if success and sourceVersion >= TELLMEWHEN_VERSIONNUMBER then
 		if msgType == "RCSL" and not RequestedFrom[who] then
 			-- Request Class Spell Length
 			-- Only respond if the source player has not requested yet this session.
