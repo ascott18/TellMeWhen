@@ -89,7 +89,9 @@ CNDT.Condition_Defaults = {
 		Checked			= false,
 		Checked2   		= false,
 		Runes 	   		= {},
-		BitFlags		= 0x0,
+
+		-- IMPORTANT: This setting can be a number OR a table.
+		BitFlags		= 0x0, -- may also be a table.
 	},
 }
 setmetatable(CNDT.Condition_Defaults["**"], {
@@ -515,6 +517,9 @@ CNDT.Env = {
 			return o
 		end,
 	}),
+
+	-- Stores references to BitFlags settings tables.
+	TABLES = setmetatable({}, {__mode='kv'}),
 	
 	-- These are here as a primitive security measure to prevent some of the most basic forms of malicious Lua conditions.
 	-- This list isn't even exhaustive, and it is in no way cracker-proof, but its a start.
@@ -602,19 +607,47 @@ function CNDT:GROUP_ROSTER_UPDATE()
 end
 
 
+function CNDT:GetTableSubstitution(tbl)
+	if type(tbl) ~= "table" then
+		error("not a table")
+	end
+
+	local address = tostring(table)
+	if not address:match("^table: [0-9A-F]*$") then
+		error("can't substitute tables with __tostring metamethods")
+	end
+
+	local var = address:gsub(": ", "_")
+	CNDT.Env.TABLES[var] = tbl
+
+	return "TABLES." .. var
+end
+
 CNDT.Substitutions = {
 
 {	src = "BITFLAGSMAPANDCHECK(%b())",
 	rep = function(conditionData, conditionSettings, name, name2)
-		if conditionSettings.Checked then
-			return [[bit_band(bit_lshift(1, (%1 or 1) - 1), c.BitFlags) == 0]]
+		if type(conditionSettings.BitFlags) == "table" then
+			if conditionSettings.Checked then
+				return [[ not c.BitFlags[%1] ]]
+			else
+				return [[ c.BitFlags[%1] ]]
+			end
 		else
-			return [[bit_bor(bit_lshift(1, (%1 or 1) - 1), c.BitFlags) == c.BitFlags]]
+			if conditionSettings.Checked then
+				return [[bit_band(bit_lshift(1, (%1 or 1) - 1), c.BitFlags) == 0]]
+			else
+				return [[bit_bor(bit_lshift(1, (%1 or 1) - 1), c.BitFlags) == c.BitFlags]]
+			end
 		end
 	end,
 },{	src = "c.BitFlags",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return conditionSettings.BitFlags
+		if type(conditionSettings.BitFlags) == "table" then
+			return CNDT:GetTableSubstitution(conditionSettings.BitFlags)
+		else
+			return conditionSettings.BitFlags
+		end
 	end,
 },
 
