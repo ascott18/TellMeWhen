@@ -238,7 +238,7 @@ function CooldownSweep:UpdateCooldown()
 	local duration = cd.duration
 	
 	local alpha = self.icon:GetEffectiveAlpha()
-	if duration > 0 and alpha then
+	if duration > 0 and alpha > 0 then
 		if ElvUI then
 			local E = ElvUI[1]
 			if E and E.OnSetCooldown then
