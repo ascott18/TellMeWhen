@@ -228,7 +228,7 @@ function DD:CreateFrames(level, index)
 
 	while ( level > DD.MAXLEVELS ) do
 		DD.MAXLEVELS = DD.MAXLEVELS + 1;
-		local newList = CreateFrame("Button", nil, DD.LISTS, "TMW_UIDropDownListTemplate", DD.MAXLEVELS);
+		local newList = CreateFrame("Button", "$parentList" .. DD.MAXLEVELS, DD.LISTS, "TMW_UIDropDownListTemplate", DD.MAXLEVELS);
 		newList:SetFrameStrata("FULLSCREEN_DIALOG");
 		newList:SetToplevel(1);
 		newList:Hide();
