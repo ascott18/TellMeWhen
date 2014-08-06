@@ -237,8 +237,8 @@ function CooldownSweep:UpdateCooldown()
 	local cd = self.cooldown
 	local duration = cd.duration
 	
-	
-	if duration > 0 and self.icon:GetEffectiveAlpha() > 0 then
+	local alpha = self.icon:GetEffectiveAlpha()
+	if duration > 0 and alpha then
 		if ElvUI then
 			local E = ElvUI[1]
 			if E and E.OnSetCooldown then
@@ -270,6 +270,7 @@ function CooldownSweep:UpdateCooldown()
 		end
 
 		cd:SetCooldown(cd.start, duration)
+		cd:SetSwipeColor(0, 0, 0, min(0.8, alpha))
 		cd:Show()
 	else
 		cd:Hide()
@@ -317,7 +318,7 @@ CooldownSweep:SetDataListner("REVERSE")
 function CooldownSweep:REALALPHA(icon, alpha)
 	local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
 	
-	if alpha == 0 or icon:GetModuleOrModuleChild("IconModule_Alpha").FakeHidden then
+	if alpha == 0 or IconModule_Alpha.FakeHidden then
 		self.cooldown:Hide()
 	else
 		self:UpdateCooldown()
