@@ -203,8 +203,10 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 	end
 	
 	local success, sourceVersion, msgType, dataTable, sourcePclass = self:Deserialize(text)
-	
-	if success and sourceVersion >= TELLMEWHEN_VERSIONNUMBER then
+
+	-- We check that msgType isn't nil here because this code was broken for a very long time.
+	-- The RCSL messages were formed totally wrong, so this entire part of the code did absolutely nothing.
+	if success and msgType and tonumber(sourceVersion or 0) >= TELLMEWHEN_VERSIONNUMBER then
 		if msgType == "RCSL" and not RequestedFrom[who] then
 			-- Request Class Spell Length
 			-- Only respond if the source player has not requested yet this session.
@@ -267,12 +269,12 @@ end)
 
 function ClassSpellCache:PLAYER_ENTERING_WORLD()
 	if IsInRaid(LE_PARTY_CATEGORY_HOME) then
-		self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "RAID")
+		self:SendCommMessage(self.CONST.COMM_SLUG, self:MakePacket("RCSL", nil), "RAID")
 	end
 	if IsInGroup() then
-		self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), "PARTY")
+		self:SendCommMessage(self.CONST.COMM_SLUG, self:MakePacket("RCSL", nil), "PARTY")
 	end
-	self:SendCommMessage(self.CONST.COMM_SLUG, self:Serialize("RCSL"), TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+	self:SendCommMessage(self.CONST.COMM_SLUG, self:MakePacket("RCSL", nil), TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
 end
 
 
