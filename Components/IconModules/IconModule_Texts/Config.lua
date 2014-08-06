@@ -238,7 +238,7 @@ function TEXT:LoadConfig()
 			local text = TEXT:GetTextFromSettingsAndLayout(Texts, layoutSettings, i)
 			
 			if not frame then
-				frame = CreateFrame("Frame", TellMeWhen_TextDisplayOptions.FontStrings:GetName().."String"..i, TellMeWhen_TextDisplayOptions.FontStrings, "TellMeWhen_TextDisplayGroup", i)
+				frame = CreateFrame("Frame", "$parentString"..i, TellMeWhen_TextDisplayOptions, "TellMeWhen_TextDisplayGroup", i)
 				TEXT[i] = frame
 				frame:SetPoint("TOP", previousFrame, "BOTTOM")
 			end
@@ -283,7 +283,7 @@ function TEXT:LoadConfig()
 	end
 
 	if TEXT[1] then
-		TEXT[1]:SetPoint("TOP", TellMeWhen_TextDisplayOptions.FontStrings)
+		TEXT[1]:SetPoint("TOPLEFT", TellMeWhen_TextDisplayOptions.Layout, "BOTTOMLEFT", 0, 16)
 	end
 	
 	TellMeWhen_TextDisplayOptions.Layout.PickLayout:SetText("|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)

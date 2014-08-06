@@ -286,16 +286,6 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			
-			<!--
-				Container that holds instances of TellMeWhen_TextDisplayGroup, arranged vertically.
-			-->
-			<Frame name="$parentFontStrings" parentKey="FontStrings" >
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentLayout" relativePoint="BOTTOMLEFT" x="0" y="16"/>
-					<Anchor point="BOTTOMRIGHT" y="36"/>
-				</Anchors>
-			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad>
