@@ -469,8 +469,6 @@ end
 local specNameToRole = {}
 local SPECS = CNDT:NewModule("Specs", "AceEvent-3.0")
 function SPECS:UpdateUnitSpecs()
-	RequestBattlefieldScoreData()
-
 	local _, z = IsInInstance()
 
 	wipe(Env.UnitSpecs)
@@ -490,6 +488,8 @@ function SPECS:UpdateUnitSpecs()
 		TMW:Fire("TMW_UNITSPEC_UPDATE")
 
 	elseif z == "pvp" then
+		RequestBattlefieldScoreData()
+
 		for i = 1, GetNumBattlefieldScores() do
 			name, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
 			local specID = specNameToRole[classToken][talentSpec]
