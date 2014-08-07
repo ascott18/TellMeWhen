@@ -188,6 +188,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					name = strlower(name)
 
 					local fail =
+					clientBuild == "18689" or -- TODO: remove this line.
 					CONST.INVALID_TEXTURES[icon] or
 					findword(name, "dnd") or
 					findword(name, "test") or
