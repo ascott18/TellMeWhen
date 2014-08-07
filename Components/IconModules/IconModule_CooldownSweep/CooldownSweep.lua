@@ -31,13 +31,13 @@ CooldownSweep:RegisterIconDefaults{
 
 TMW:RegisterDatabaseDefaults{
 	profile = {
+		ForceNoBlizzCC = false,
 		DrawEdge = false,
 	},
 }
 
 CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
 	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
-	TMW.HELP:NewCode("IE_TIMERTEXTHANDLER_MISSING", nil, true)
 	
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
@@ -50,23 +50,6 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			setting = "ShowTimerText",
 			title = L["ICONMENU_SHOWTIMERTEXT"],
 			tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
-			OnState = function(self)
-				if TMW.CI.ics.ShowTimerText then
-					if	not (OmniCC or IsAddOnLoaded("OmniCC")) -- Tukui is handled by OmniCC == true
-					and	not IsAddOnLoaded("tullaCC")
-					and	not LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true)
-					then
-					 TMW.HELP:Show{
-						code = "IE_TIMERTEXTHANDLER_MISSING",
-						icon = nil,
-						relativeTo = self,
-						x = 0,
-						y = 0,
-						text = format(L["HELP_IE_TIMERTEXTHANDLER_MISSING"])
-					 }
-					end
-				end			
-			end,
 		},
 		{
 			setting = "InvertTimer",
@@ -119,6 +102,14 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		type = "toggle",
 		order = 60,
 	}
+
+	TMW.OptionsTable.args.main.args.checks.args.ForceNoBlizzCC = {
+		name = TMW.L["UIPANEL_FORCEDISABLEBLIZZ"],
+		desc = TMW.L["UIPANEL_FORCEDISABLEBLIZZ_DESC"],
+		width = "double",
+		type = "toggle",
+		order = 61,
+	}
 end)
 
 TMW:RegisterUpgrade(60436, {
@@ -150,7 +141,7 @@ TMW:RegisterUpgrade(45608, {
 	end,
 })
 
-TMW:RegisterCallback("TMW_DB_PRE_DEFAULT_UPGRADES", function()
+TMW:RegisterCallback("TMW_DB_PRE_DEFAULT_UPGRADES", function() -- 45607
 	-- The default for ShowTimerText changed from true to false in v45607
 	-- So, if the user is upgrading to this version, and ShowTimerText is nil,
 	-- then it must have previously been set to true, causing Ace3DB not to store it,
@@ -199,8 +190,10 @@ function CooldownSweep:OnDisable()
 	self:UpdateCooldown()
 end
 
-local tukui = IsAddOnLoaded("Tukui")
-local elvui = IsAddOnLoaded("ElvUI")
+local tukui_loaded = IsAddOnLoaded("Tukui")
+local elvui_loaded = IsAddOnLoaded("ElvUI")
+local omnicc_loaded = IsAddOnLoaded("OmniCC")
+local tullacc_loaded = IsAddOnLoaded("tullaCC")
 
 function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
@@ -214,15 +207,26 @@ function CooldownSweep:SetupForIcon(icon)
 	end
 	
 	
-	if tukui then
+	if tukui_loaded then
 		-- Tukui forcibly disables its own timers if OmniCC is installed, so no worry about overlap.
 		self.cooldown.noCooldownCount = not icon.ShowTimerText
 		self.cooldown.noOCC = not icon.ShowTimerText
-	elseif elvui then
+	elseif elvui_loaded then
 		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
 	else
 		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
+	end
+
+	if omnicc_loaded
+	or tullacc_loaded
+	or tukui_loaded
+	or TMW.db.profile.ForceNoBlizzCC
+	or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true)
+	then
+		self.cooldown:SetHideCountdownNumbers(true)
+	else
+		self.cooldown:SetHideCountdownNumbers(not self.ShowTimerText)
 	end
 	
 	local attributes = icon.attributes

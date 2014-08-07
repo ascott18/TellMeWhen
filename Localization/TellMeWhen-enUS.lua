@@ -471,9 +471,7 @@ L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only chec
 L["ICONMENU_SHOWTIMER"] = "Show timer"
 L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
-L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
-
-This is only applicable if OmniCC (or similar) is installed.]]
+L["ICONMENU_SHOWTIMERTEXT_DESC"] = "Check this option to display a textual display of the remaining cooldown/duration on the icon."
 L["ICONMENU_INVERTTIMER"] = "Invert shading"
 L["ICONMENU_INVERTTIMER_DESC"] = "Check this option to invert the shading effect of the timer."
 L["ICONMENU_SHOWTIMERTEXT_NOOCC"] = "Show ElvUI timer text"
@@ -800,6 +798,8 @@ L["UIPANEL_TOOLTIP_PRIMARYSPEC"] = "Check to show this group while your primary 
 L["UIPANEL_TOOLTIP_SECONDARYSPEC"] = "Check to show this group while your secondary spec is active"
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"
+L["UIPANEL_FORCEDISABLEBLIZZ"] = "Disable Blizzard cooldown text"
+L["UIPANEL_FORCEDISABLEBLIZZ_DESC"] = "Forces Blizzard's built in cooldown timer text to be disabled. It will automatically be disabled if you have an addon installed that is known to be capable of providing this text."
 L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
 
 L["UIPANEL_DRDURATION"] = "DR Duration"
@@ -2351,9 +2351,6 @@ L["HELP_CNDT_PARENTHESES_FIRSTSEE"] = [[You can group sets of conditions togethe
 L["HELP_CNDT_ANDOR_FIRSTSEE"] = [[You can choose whether both conditions are required to succeed or if only one needs to succeed.
 
 |cff7fffffClick|r this setting between your conditions to change this behavior if you wish to do so.]]
-L["HELP_IE_TIMERTEXTHANDLER_MISSING"] = [[TellMeWhen cannot find any installed addon that it knows to be capable of handling this setting.
-
-If you enable this setting but do not see any timer texts, please install the addon "OmniCC" from Curse.com or WoWInterface.com.]]
 
 L["HELP_SIMPLEGSTAB"] = "Click to toggle between group-only options and full main options."
 
