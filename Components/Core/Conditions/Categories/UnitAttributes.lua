@@ -565,7 +565,8 @@ ConditionCategory:RegisterCondition(11.1, "UNITSPEC", {
 		UnitSpecs = {},
 		UnitSpec = function(unit)
 			if UnitIsUnit(unit, "player") then
-				return GetSpecializationInfo(GetSpecialization())
+				local spec = GetSpecialization()
+				return spec and GetSpecializationInfo(spec) or 0
 			else
 				local name, server = UnitName(unit)
 				if name and server then
