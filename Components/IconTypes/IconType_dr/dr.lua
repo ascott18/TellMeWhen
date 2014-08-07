@@ -72,6 +72,25 @@ Type:RegisterIconDefaults{
 	ShowWhenNone			= false,
 }
 
+
+TMW:RegisterUpgrade(71029, {
+	icon = function(self, ics)
+		-- DR categories that no longer exist (or never really existed):
+
+		ics.Name = ics.Name:
+			gsub("DR-Fear", "DR-Incapacitate"):
+			gsub("DR-MindControl", "DR-Incapacitate"):
+			gsub("DR-Horrify", "DR-Incapacitate"):
+			gsub("DR-RandomRoot", "DR-Root"):
+			gsub("DR-ShortDisorient", "DR-Disorient"):
+			gsub("DR-Fear", "DR-Disorient"):
+			gsub("DR-Cyclone", "DR-Disorient"):
+			gsub("DR-ControlledStun", "DR-Stun"):
+			gsub("DR-RandomStun", "DR-Stun"):
+			gsub("DR-ControlledRoot", "DR-Root")
+	end,
+})
+
 TMW:RegisterUpgrade(70014, {
 	icon = function(self, ics)
 		-- DR categories that no longer exist (or never really existed):
@@ -85,7 +104,9 @@ TMW:RegisterUpgrade(70014, {
 			gsub("DR-Banish", "DR-Disorient"):
 			gsub("DR-Entrapment", "DR-RandomRoot")
 	end,
-	})
+})
+
+
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "dr",
 })
@@ -120,22 +141,23 @@ end)
 TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	if DRData then
 		local myCategories = {
-			ctrlstun		= "DR-ControlledStun",
-			fear 			= "DR-Fear",
-			rndstun			= "DR-RandomStun",
+			ctrlstun		= "DR-Stun",
 			silence			= "DR-Silence",
-			mc 				= "DR-MindControl",
-			taunt 			= "DR-Taunt",
-			disarm			= "DR-Disarm",
-			horror			= "DR-Horrify",
-			cyclone			= "DR-Cyclone",
 			disorient		= "DR-Disorient",
-			shortdisorient	= "DR-ShortDisorient",
-			ctrlroot		= "DR-ControlledRoot", 
-			shortroot		= "DR-RandomRoot",
+			ctrlroot		= "DR-Root", 
+			incapacitate	= "DR-Incapacitate",
+			taunt 			= "DR-Taunt",
 		}
 
 		local ignored = {
+			rndstun = true,
+			fear = true,
+			mc = true,
+			cyclone = true,
+			shortdisorient = true,
+			horror = true,
+			disarm = true,
+			shortroot = true,
 			knockback = true,
 		}
 		
