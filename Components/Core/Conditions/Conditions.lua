@@ -519,7 +519,7 @@ CNDT.Env = {
 	}),
 
 	-- Stores references to BitFlags settings tables.
-	TABLES = setmetatable({}, {__mode='kv'}),
+	TABLES = {},
 	
 	-- These are here as a primitive security measure to prevent some of the most basic forms of malicious Lua conditions.
 	-- This list isn't even exhaustive, and it is in no way cracker-proof, but its a start.
@@ -1007,8 +1007,7 @@ function CNDT:GetConditionObject(parent, conditionSettings)
 	
 	if conditionString and conditionString ~= "" then
 		local instances = TMW.Classes.ConditionObject.instances
-		for i = 1, #instances do
-			local instance = instances[i]
+		for i, instance in pairs(instances) do
 			if instance.conditionString == conditionString then
 				return instance
 			end

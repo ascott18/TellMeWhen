@@ -42,6 +42,8 @@ local huge = math.huge
 local ConditionObject = TMW:NewClass("ConditionObject")
 ConditionObject.numArgsForEventString = 1
 
+ConditionObject:MakeInstancesWeak()
+
 -- [INTERNAL] because condition objects should not be directly instantiated by their implementor.
 function ConditionObject:OnNewInstance(Conditions, conditionString)
 	self.conditionString = conditionString
