@@ -763,7 +763,10 @@ function Icon.DisableIcon(icon, soft)
 	TMW:Fire("TMW_ICON_DISABLE", icon, soft)
 
 	-- Reset condition stuff
-	icon.ConditionObject = nil
+	if icon.ConditionObject then
+		icon.ConditionObject:DeclareExternalUpdater(icon, false)
+		icon.ConditionObject = nil
+	end
 	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
 	icon:SetInfo("conditionFailed", nil)
 
@@ -878,6 +881,7 @@ function Icon.Setup(icon)
 			icon.ConditionObject = ConditionObjectConstructor:Construct()
 			
 			if icon.ConditionObject then
+				icon.ConditionObject:DeclareExternalUpdater(icon, true)
 				TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
 				icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
 			end

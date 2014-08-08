@@ -49,6 +49,7 @@ function ConditionObject:OnNewInstance(Conditions, conditionString)
 	self.conditionString = conditionString
 
 	self.AutoUpdateRequesters = {}
+	self.ExternalUpdaters = {}
 	self.RequestedEvents = {}
 	
 	self.UpdateNeeded = true
@@ -73,7 +74,6 @@ function ConditionObject:OnNewInstance(Conditions, conditionString)
 	end
 	
 	self:CompileUpdateFunction(Conditions)
-	self:Check()
 end
 
 local argCheckerStringsReusable = {}
@@ -230,22 +230,22 @@ end
 
 -- [INTERNAL] Registers the ConditionObject with the update engine.
 function ConditionObject:RegisterForUpdating()
-	CNDT.UpdateEngine:RegisterObject(self)
+	if not self.registeredForUpdating then
+		self.registeredForUpdating = true
+
+		CNDT.UpdateEngine:RegisterObject(self)
+	end
+
+	self:Check()
 end
 
 -- [INTERNAL] Unregisters the ConditionObject from the update engine.
 function ConditionObject:UnregisterForUpdating()
-	-- Do not unregister for updating. If the condition is event driven,
-	-- then it will unregister all of its events, which will prevent it
-	-- from working properly even with normal updating.
-	
-	-- It doesn't hurt anything anyway because it is a rare circumstance that
-	-- A ConditionObject will become abandoned
-	-- (really only happens while the user is configuring their conditions).
-	
-	error("You should never unregister a condition object from updating because it will break normal event-based updating.")
-	
-	CNDT.UpdateEngine:UnregisterObject(self)
+	if self.registeredForUpdating then
+		CNDT.UpdateEngine:UnregisterObject(self)
+
+		self.registeredForUpdating = false
+	end
 end
 
 
@@ -265,7 +265,10 @@ end
 -- You may also wish to call ConditionObject:RequestAutoUpdates() if you don't want to have to worry about manually updating the ConditionObjects that you are interested in.
 function ConditionObject:Check()
 	if self.CheckFunction then
-		
+		if not self.registeredForUpdating then
+			TMW:Debug("condition was checked, but nobody said they would be checking it!")
+		end
+
 		local failed = not self:CheckFunction()
 		if self.Failed ~= failed then
 			self.Failed = failed
@@ -292,12 +295,8 @@ end
 function ConditionObject:RequestAutoUpdates(requester, doRequest)
 	if doRequest then
 	
-		-- If auto updating has not been requested by anything for this ConditionObject,
-		-- then register it with the update engine.
-		if not next(self.AutoUpdateRequesters) then
-			self.doesAutoUpdate = true
-			self:RegisterForUpdating()
-		end
+		self.doesAutoUpdate = true
+		self:RegisterForUpdating()
 		
 		self.AutoUpdateRequesters[requester] = true
 	else
@@ -305,9 +304,34 @@ function ConditionObject:RequestAutoUpdates(requester, doRequest)
 		
 		if not next(self.AutoUpdateRequesters) then
 			self.doesAutoUpdate = false
-			
-			-- See UnregisterForUpdating's comments for why this is commented out.
-			--self:UnregisterForUpdating()
+		end
+
+		if not self.getsExternallyUpdated and not self.doesAutoUpdate then
+			self:UnregisterForUpdating()
+		end
+	end
+end
+
+
+--- Declares that the requester will update the condition object as needed.
+-- @param requester [table] Something that will uniquely identify what it is that is requesting auto updates. This is used to keep track of how many requesters are currently updating the condition so that events can be unregistered when there are zero updaters.
+-- @param doRequest [boolean] True if {{{requester}}} will update the condition. False/nil if {{{requester}}} is notifying the ConditionObject that it no longer cares about the condition.
+function ConditionObject:DeclareExternalUpdater(requester, doRequest)
+	if doRequest then
+	
+		self.getsExternallyUpdated = true
+		self:RegisterForUpdating()
+		
+		self.ExternalUpdaters[requester] = true
+	else
+		self.ExternalUpdaters[requester] = nil
+		
+		if not next(self.ExternalUpdaters) then
+			self.getsExternallyUpdated = false
+		end
+
+		if not self.getsExternallyUpdated and not self.doesAutoUpdate then
+			self:UnregisterForUpdating()
 		end
 	end
 end
