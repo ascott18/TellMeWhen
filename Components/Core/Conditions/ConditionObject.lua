@@ -225,27 +225,23 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 	self.UpdateFunction = func
 
 	-- Register the events and the object with the UpdateEngine
-	self:RegisterForUpdating()
+	-- self:RegisterForUpdating()
 end
 
 -- [INTERNAL] Registers the ConditionObject with the update engine.
 function ConditionObject:RegisterForUpdating()
-	if not self.registeredForUpdating then
-		self.registeredForUpdating = true
+	self.registeredForUpdating = true
 
-		CNDT.UpdateEngine:RegisterObject(self)
-	end
+	CNDT.UpdateEngine:RegisterObject(self)
 
 	self:Check()
 end
 
 -- [INTERNAL] Unregisters the ConditionObject from the update engine.
 function ConditionObject:UnregisterForUpdating()
-	if self.registeredForUpdating then
-		CNDT.UpdateEngine:UnregisterObject(self)
+	CNDT.UpdateEngine:UnregisterObject(self)
 
-		self.registeredForUpdating = false
-	end
+	self.registeredForUpdating = false
 end
 
 

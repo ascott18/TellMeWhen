@@ -180,7 +180,7 @@ end)
 
 -- Top level methods for auto-updating, still private(ish) because they are called by ConditionObject
 function UpdateEngine:RegisterObject(ConditionObject)
-	if ConditionObject.UpdateMethod == "OnUpdate" then
+	if ConditionObject.UpdateMethod == "OnUpdate" and ConditionObject.doesAutoUpdate then
 		self:RegisterObjForOnUpdate(ConditionObject)
 		
 	elseif ConditionObject.UpdateMethod == "OnEvent" then
