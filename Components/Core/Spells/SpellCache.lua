@@ -220,6 +220,10 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
 				if index % (isInCombatLockdown and 1 or NumCachePerFrame) == 0 then
 					TMW:Fire("TMW_SPELLCACHE_NUMCACHED_CHANGED", index)
+					if index > TMW.IE.db.locale.SpellCacheLength then
+						TMW.IE.db.locale.SpellCacheLength = TMW.IE.db.locale.SpellCacheLength + 2000
+						TMW:Fire("TMW_SPELLCACHE_EXPECTEDCACHELENGTH_UPDATED", TMW.IE.db.locale.SpellCacheLength)
+					end
 					yield()
 				end
 			end
