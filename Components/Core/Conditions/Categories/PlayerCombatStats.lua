@@ -160,7 +160,7 @@ ConditionCategory:RegisterCondition(9,	 "EXPERTISE", {		-- DEPRECATED
 ConditionCategory:RegisterSpacer(10)
 
 
-ConditionCategory:RegisterCondition(11,	 "SPIRIT", {
+ConditionCategory:RegisterCondition(11,	"SPIRIT", {
 	text = _G["SPELL_STAT5_NAME"],
 	range = 2000,
 	unit = PLAYER,
@@ -212,19 +212,20 @@ ConditionCategory:RegisterCondition(14, "LIFESTEAL", {
 ConditionCategory:RegisterCondition(15, "VERSATILITY", {
 	text = STAT_VERSATILITY,
 	min = 0,
-	range = 1000, -- TODO: currentl GetVersatility returns just a rating. Maybe we should make this condition check percentage?
-	--step = 0.1,
-	--formatter = TMW.C.Formatter.PERCENT,
+	range = 50,
+	step = 0.1,
+	formatter = TMW.C.Formatter.PERCENT,
 	unit = PLAYER,
 	icon = "Interface\\Icons\\achievement_dungeon_icecrown_frostmourne",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GetVersatility() c.Operator c.Level]],
+	funcstr = [[GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_DONE) + GetVersatilityBonus(CR_VERSATILITY_DAMAGE_DONE) c.Operator c.Level]],
 	Env = {
-		GetVersatility = GetVersatility,
+		CR_VERSATILITY_DAMAGE_DONE = CR_VERSATILITY_DAMAGE_DONE,
+		GetCombatRatingBonus = GetCombatRatingBonus,
 	},
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("COMBAT_RATING_UPDATE") -- TODO: check for a unique event for this stat.
+			ConditionObject:GenerateNormalEventString("COMBAT_RATING_UPDATE")
 	end,
 })
 ConditionCategory:RegisterCondition(16, "AVOIDANCE", {
