@@ -53,31 +53,27 @@ local SUGpreTable = {}
 
 local ClassSpellLookup = ClassSpellCache:GetSpellLookup()
 
----------- Initialization/Database/Spell Caching ----------
-function SUG:OnInitialize()
-	TellMeWhen_IconEditor:HookScript("OnHide", function() SUG.Suggest:Hide() end)
-end
-
+---------- Initialization/Spell Caching ----------
 TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon)
 	if icon == TMW.CI.icon then
 		SUG.redoIfSame = 1
-		SUG.Suggest:Hide()
+		SUG.SuggestionList:Hide()
 	end
 end)
 
 function SUG:TMW_SPELLCACHE_STARTED()
-	SUG.Suggest.Status:Show()
-	SUG.Suggest.Speed:Show()
-	SUG.Suggest.Finish:Show()
+	SUG.SuggestionList.Status:Show()
+	SUG.SuggestionList.Speed:Show()
+	SUG.SuggestionList.Finish:Show()
 end
 TMW:RegisterCallback("TMW_SPELLCACHE_STARTED", SUG)
 
 function SUG:TMW_SPELLCACHE_COMPLETED()
-	SUG.Suggest.Speed:Hide()
-	SUG.Suggest.Status:Hide()
-	SUG.Suggest.Finish:Hide()
+	SUG.SuggestionList.Speed:Hide()
+	SUG.SuggestionList.Status:Hide()
+	SUG.SuggestionList.Finish:Hide()
 	
-	if SUG.onCompleteCache and SUG.Suggest:IsShown() and SUG.Suggest:IsVisible() then
+	if SUG.onCompleteCache and SUG.SuggestionList:IsVisible() then
 		SUG.redoIfSame = 1
 		SUG:NameOnCursor()
 	end
@@ -86,7 +82,7 @@ TMW:RegisterCallback("TMW_SPELLCACHE_COMPLETED", SUG)
 
 ---------- Suggesting ----------
 function SUG:DoSuggest()
-	if not SUG.Suggest:IsShown() then
+	if not SUG.SuggestionList:IsVisible() then
 		return
 	end
 
@@ -111,47 +107,49 @@ function SUG:DoSuggest()
 end
 
 local function progressCallback(countdown)
+	-- This is called for each step of TMW.shellSortDeferred.
 	SUG:SuggestingComplete()
 
-	SUG.Suggest.blocker:Show()
-	SUG.Suggest.Header:SetText(L["SUGGESTIONS_SORTING"] .. " " .. countdown)
+	SUG.SuggestionList.blocker:Show()
+	SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"] .. " " .. countdown)
 end
 
 function SUG:SuggestingComplete(doSort)
 	local numFramesNeeded = TMW.SUG:GetNumFramesNeeded()
 
-	SUG.Suggest.blocker:Hide()
-	SUG.Suggest.Header:SetText(SUG.CurrentModule.headerText)
+	SUG.SuggestionList.blocker:Hide()
+	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
 	if doSort and not SUG.CurrentModule.dontSort then
-		SUG.Suggest.blocker:Show()
-		SUG.Suggest.Header:SetText(L["SUGGESTIONS_SORTING"])
+		SUG.SuggestionList.blocker:Show()
+		SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"])
 		TMW.shellsortDeferred(SUGpreTable, SUG.CurrentModule:Table_GetSorter(), nil, SUG.SuggestingComplete, SUG, progressCallback)
 		return
 	end
 
-	local i = 1
+	-- Each module should maintain a cached list of invalid entries
+	-- We rawget here beccause we don't want to get a parent module's
+	-- list of invalid entries - we wan't to get the module's own list.
 	local InvalidEntries = rawget(SUG.CurrentModule, "InvalidEntries")
 	if not InvalidEntries then
 		SUG.CurrentModule.InvalidEntries = {}
 		InvalidEntries = SUG.CurrentModule.InvalidEntries
 	end
 
+	-- SUG:GetFrame() creates a frame if it doesn't exist.
 	for id = 1, numFramesNeeded do
 		SUG:GetFrame(id)
 	end
 	
-	while SUG[i] do
+	for frameID = 1, #SUG do
 		local id
 		while true do
 		
 			-- Here is how this horrifying line of code works:
-			-- numSuggestionsWithoutFrames = #SUGpreTable - numFramesNeeded
-			-- numSuggestionsWithoutFramesPlusOneBlankAtEnd = numSuggestionsWithoutFrames + 1
-			-- numSuggestionsWithoutFramesPlusOneBlankAtEnd shouldn't be less than zero
-			-- the offset can't be more than the numSuggestionsWithoutFramesPlusOneBlankAtEnd
+			-- This makes sure that the offset can't be more than the number of suggestions plus 1
+			-- The plus 1 is so that there will be one blank frame at the end to show the user that they're at the end.
 			SUG.offset = min(SUG.offset, max(0, #SUGpreTable-numFramesNeeded+1))
 			
-			local key = i + SUG.offset
+			local key = frameID + SUG.offset
 			id = SUGpreTable[key]
 			
 			if not id then
@@ -167,8 +165,9 @@ function SUG:SuggestingComplete(doSort)
 			end
 		end
 
-		local f = SUG[i]
+		local f = SUG:GetFrame(frameID)
 
+		-- Reset everything about the frame.
 		f.Name:SetText(nil)
 		f.ID:SetText(nil)
 		f.insert = nil
@@ -188,7 +187,8 @@ function SUG:SuggestingComplete(doSort)
 			f.Icon:SetWidth(f.Icon:GetHeight())
 		end
 
-		if id and i <= numFramesNeeded then
+		if id and frameID <= numFramesNeeded then
+			-- Call Entry_AddToList_# methods until there aren't anymore.
 			for addFunc = 1, math.huge do
 				local Entry_AddToList = SUG.CurrentModule["Entry_AddToList_" .. addFunc]
 				if not Entry_AddToList then
@@ -202,6 +202,7 @@ function SUG:SuggestingComplete(doSort)
 				end
 			end
 
+			-- Call Entry_Colorize_# methods until there aren't anymore.
 			for colorizeFunc = 1, math.huge do
 				local Entry_Colorize = SUG.CurrentModule["Entry_Colorize_" .. colorizeFunc]
 				if not Entry_Colorize then
@@ -215,20 +216,34 @@ function SUG:SuggestingComplete(doSort)
 		else
 			f:Hide()
 		end
-		i=i+1
 	end
 
+	-- If there is a frame that we are mousing over, update its tooltip
 	if SUG.mousedOver then
-		SUG.mousedOver:GetScript("OnEnter")(SUG.mousedOver)
+		TMW:TT_Update(SUG.mousedOver)
 	end
 end
 
 function SUG:NameOnCursor(isClick)
 	if SpellCache:IsCaching() then
+		-- Wait for the spell cache to complete.
+		-- SUG.onCompleteCache will cause this method to be called when the cache completes.
 		SUG.onCompleteCache = 1
-		SUG.Suggest:Show()
+		SUG.SuggestionList:Show()
 		return
 	end
+
+	-- This method gets a whole shitload of info about the words around the cursor in the editbox.
+	-- Here are what's currently published by this method:
+	--	SUG.oldLastName 		-- SUG.lastName from the previous time this method was called
+	--	SUG.startpos 			-- starting position in the editbox of what we're suggestion. Provided by SUG.CurrentModule:GetStartEndPositions()
+	--	SUG.endpos 				-- ending position in the editbox of what we're suggestion. Provided by SUG.CurrentModule:GetStartEndPositions()
+	--	SUG.lastName_unmodified	-- the text between SUG.startpos and SUG.endpos, cleaned and strlowered.
+	--	SUG.lastName 			-- SUG.lastName_unmodified with any duration syntax stripped out, and any special chars for strmatch() escaped.
+	--	SUG.duration 			-- the duration if the duration syntax (Spell: duration) was used.
+	-- 	SUG.atBeginning 		-- "^" .. SUG.lastName; for ease of use with strmatch.
+	-- 	SUG.inputType 			-- "number" or "string", depending on what is being suggested.
+
 	SUG.oldLastName = SUG.lastName
 	local text = SUG.Box:GetText()
 
@@ -248,18 +263,18 @@ function SUG:NameOnCursor(isClick)
 		SUG.duration = nil
 	end
 
-	--[[if not TMW.debug then
-		-- do not escape the almighty wildcards if testing
-		SUG.lastName = gsub(SUG.lastName, "([%*%.])", "%%%1")
-	end]]
 	-- always escape parentheses, brackets, percent signs, minus signs, plus signs
+	-- but don't escape wildcards (* and .)
 	SUG.lastName = gsub(SUG.lastName, "([%(%)%%%[%]%-%+])", "%%%1")
 	
 	if TMW.debug then
-		SUG.lastName = SUG.lastName:trim("_") -- makes building equivalencies easier
+		-- Makes building equivalencies easier - I can copy the equiv string straight into the IE
+		-- to easily see what spellIDs are still valid.
+		SUG.lastName = SUG.lastName:trim("_")
 	end
 
 	--if TMW.db.profile.SUG_atBeginning then
+	-- TMW.db.profile.SUG_atBeginning was removed as an option.
 		SUG.atBeginning = "^" .. SUG.lastName
 	--else
 	--	SUG.atBeginning = SUG.lastName
@@ -271,10 +286,10 @@ function SUG:NameOnCursor(isClick)
 	SUGIsNumberInput = SUG.inputType == "number"
 	
 	if (not SUG.CurrentModule:GetShouldSuggest()) or (not SUG.CurrentModule.noMin and (SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]"))) then
-		SUG.Suggest:Hide()
+		SUG.SuggestionList:Hide()
 		return
 	else
-		SUG.Suggest:Show()
+		SUG.SuggestionList:Show()
 	end
 	
 	if SUG.CurrentModule.OnSuggest then
@@ -296,7 +311,7 @@ end
 local EditBoxHooks = {
 	OnEditFocusLost = function(self)
 		--if self.SUG_Enabled then
-			SUG.Suggest:Hide()
+			SUG.SuggestionList:Hide()
 		--end
 	end,
 	OnEditFocusGained = function(self)
@@ -315,7 +330,7 @@ local EditBoxHooks = {
 			SUG.redoIfSame = SUG.CurrentModule ~= newModule
 			SUG.Box = self
 			SUG.CurrentModule = newModule
-			SUG.Suggest.Header:SetText(SUG.CurrentModule.headerText)
+			SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
 			SUG:NameOnCursor()
 		end
 	end,
@@ -331,12 +346,14 @@ local EditBoxHooks = {
 		end
 	end,
 	OnTabPressed = function(self)
-		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() and not SUG.CurrentModule.noTab and not SUG.Suggest.blocker:IsShown() then
+		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() and not SUG.CurrentModule.noTab and not SUG.SuggestionList.blocker:IsShown() then
 			SUG[1]:Click("LeftButton")
 			TMW.HELP:Hide("SUG_FIRSTHELP")
 		end
 	end,
 }
+
+--- Enable the suggestion list on an editbox.
 function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 	editbox.SUG_Enabled = 1
 
@@ -360,11 +377,12 @@ function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 	end
 end
 
+--- Disable the suggestion list on an editbox.
 function SUG:DisableEditBox(editbox)
 	editbox.SUG_Enabled = nil
 
 	if SUG.Box == editbox then
-		SUG.Suggest:Hide()
+		SUG.SuggestionList:Hide()
 	end
 end
 
@@ -392,11 +410,11 @@ function SUG:ColorHelp(frame)
 end
 
 function SUG:GetNumFramesNeeded()
-	return floor((TMW.SUG.Suggest:GetHeight() + 5)/TMW.SUG[1]:GetHeight()) - 2
+	return floor((TMW.SUG.SuggestionList:GetHeight() + 5)/TMW.SUG[1]:GetHeight()) - 2
 end
 
 function SUG:GetFrame(id)
-	local Suggest = TMW.SUG.Suggest
+	local Suggest = TMW.SUG.SuggestionList
 	if TMW.SUG[id] then
 		return TMW.SUG[id]
 	end

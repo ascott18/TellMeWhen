@@ -300,7 +300,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				TMW.SUG.Suggest = self
+				TMW.SUG.SuggestionList = self
 				self.Header:SetText(TMW.L["SUGGESTIONS"])
 				self.InfoText:SetText(TMW.L["CACHING"])
 
