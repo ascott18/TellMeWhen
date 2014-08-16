@@ -55,11 +55,11 @@ Module.showColorHelp = false
 
 Module.ItemIDs = {
 	-- item enhancements
-	43233,	--Deadly Poison
-	3775,	--Crippling Poison
-	5237,	--Mind-Numbing Poison
-	43235,	--Wound Poison
-	43231,	--Instant Poison
+	--43233,	--Deadly Poison
+	--3775,	--Crippling Poison
+	--5237,	--Mind-Numbing Poison
+	--43235,	--Wound Poison
+	--43231,	--Instant Poison
 
 	31535,	--Bloodboil Poison
 
