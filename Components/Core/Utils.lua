@@ -298,6 +298,7 @@ do	-- TMW.shellsortDeferred
 		return t
 	end
 	
+	local coroutines = {}
 	local function shellsort(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
 		n = n or #t
 		if not before or before == "<" then
@@ -313,15 +314,17 @@ do	-- TMW.shellsortDeferred
 		else
 			callback()
 		end
+		coroutines[t] = nil
 	end
 	
-	local coroutines = {}
 	local f = CreateFrame("Frame")
 	function f:OnUpdate()
-
 		local table, co = next(coroutines)
 		if table then
-
+			if coroutine.status(co) == "dead" then
+				coroutines[table] = nil
+				return
+			end
 			-- dynamic execution cap based on framerate.
 			-- this will keep us from dropping the user's framerate too much
 			-- without doing so little sorting that the process goes super slowly.
@@ -329,9 +332,7 @@ do	-- TMW.shellsortDeferred
 			execCap = 1000/max(20, GetFramerate()) - 5
 
 			start = debugprofilestop()
-			if not coroutine.resume(co) then
-				coroutines[table] = nil
-			end
+			assert(coroutine.resume(co))
 		end
 
 		if not next(coroutines) then
@@ -345,6 +346,6 @@ do	-- TMW.shellsortDeferred
 		coroutines[t] = co
 		start = debugprofilestop()
 		f:SetScript("OnUpdate", f.OnUpdate)
-		coroutine.resume(co, t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
+		assert(coroutine.resume(co, t, before, n, callback, callbackArg, progressCallback, progressCallbackArg))
 	end
 end
