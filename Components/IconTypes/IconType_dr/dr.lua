@@ -73,7 +73,7 @@ Type:RegisterIconDefaults{
 }
 
 
-TMW:RegisterUpgrade(71029, {
+TMW:RegisterUpgrade(71031, {
 	icon = function(self, ics)
 		-- DR categories that no longer exist (or never really existed):
 
