@@ -97,7 +97,15 @@ function SUG:DoSuggest()
 
 	SUG.CurrentModule:Table_GetNormalSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
 	SUG.CurrentModule:Table_GetEquivSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
-	SUG.CurrentModule:Table_GetSpecialSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
+
+	for specFunc = 1, math.huge do
+		local Table_GetSpecialSuggestions = SUG.CurrentModule["Table_GetSpecialSuggestions_" .. specFunc]
+		if not Table_GetSpecialSuggestions then
+			break
+		end
+
+		Table_GetSpecialSuggestions(SUG.CurrentModule, SUGpreTable, SUG.CurrentModule:Table_Get())
+	end
 
 	SUG:SuggestingComplete(1)
 end
@@ -181,8 +189,7 @@ function SUG:SuggestingComplete(doSort)
 		end
 
 		if id and i <= numFramesNeeded then
-			local addFunc = 1
-			while true do
+			for addFunc = 1, math.huge do
 				local Entry_AddToList = SUG.CurrentModule["Entry_AddToList_" .. addFunc]
 				if not Entry_AddToList then
 					break
@@ -193,20 +200,15 @@ function SUG:SuggestingComplete(doSort)
 				if f.insert then
 					break
 				end
-
-				addFunc = addFunc + 1
 			end
 
-			local colorizeFunc = 1
-			while true do
+			for colorizeFunc = 1, math.huge do
 				local Entry_Colorize = SUG.CurrentModule["Entry_Colorize_" .. colorizeFunc]
 				if not Entry_Colorize then
 					break
 				end
 
 				Entry_Colorize(SUG.CurrentModule, f, id)
-
-				colorizeFunc = colorizeFunc + 1
 			end
 
 			f:Show()
@@ -507,7 +509,7 @@ function Module:Table_GetEquivSuggestions(suggestions, tbl, ...)
 		end
 	end
 end
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
 
 end
 function Module:Entry_OnClick(frame, button)
@@ -598,7 +600,7 @@ Module:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 function Module:Table_Get()
 	return TMW:GetModule("ItemCache"):GetCache()
 end
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
 	local id = tonumber(SUG.lastName)
 
 	if GetItemInfo(id) and not TMW.tContains(suggestions, id) then
@@ -1137,7 +1139,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(SpellTextures[firstid])
 	end
 end
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 
 	for dispeltype in pairs(TMW.DS) do
@@ -1148,5 +1150,5 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 end
 
 local Module = SUG:NewModule("buffNoDS", SUG:GetModule("buff"))
-Module.Table_GetSpecialSuggestions = TMW.NULLFUNC
+Module.Table_GetSpecialSuggestions_1 = TMW.NULLFUNC
 

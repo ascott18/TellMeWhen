@@ -351,5 +351,6 @@ function Module:Entry_Colorize_3(f, id)
 		f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
 	end
 end
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
-end
+
+-- No specials. Override the inherited function.
+Module.Table_GetSpecialSuggestions_1 = TMW.NULLFUNC

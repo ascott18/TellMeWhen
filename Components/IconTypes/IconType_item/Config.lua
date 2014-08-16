@@ -78,7 +78,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(GetItemIcon(itemID))
 	end
 end
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_2(suggestions, tbl, ...)
 
 	local atBeginning = SUG.atBeginning
 
@@ -90,10 +90,6 @@ function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
 	if SUG.inputType == "number" then
 		local len = #SUG.lastName - 1
 		local match = tonumber(SUG.lastName)
-
-		if GetItemInfo(match) and not TMW.tContains(suggestions, match) then
-			suggestions[#suggestions + 1] = match
-		end
 	
 		for id in pairs(self.Slots) do
 			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
