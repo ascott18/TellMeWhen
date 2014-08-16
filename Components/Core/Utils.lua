@@ -256,7 +256,7 @@ do	-- TMW.shellsortDeferred
 	local start = 0
 	
 	local function ssup(v, testval)
-		return v > testval
+		return v < testval
 	end
 	
 	local function ssdown(v, testval)
@@ -314,14 +314,17 @@ do	-- TMW.shellsortDeferred
 		else
 			callback()
 		end
+
 		coroutines[t] = nil
 	end
 	
 	local f = CreateFrame("Frame")
 	function f:OnUpdate()
 		local table, co = next(coroutines)
+
 		if table then
 			if coroutine.status(co) == "dead" then
+				-- This might happen if there was an error thrown before the coroutine could finish.
 				coroutines[table] = nil
 				return
 			end
@@ -341,6 +344,8 @@ do	-- TMW.shellsortDeferred
 	end
 
 
+	-- The purpose of shellSortDeferred is to have a sort that won't
+	-- lock up the game when we sort huge things.
 	function TMW.shellsortDeferred(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
 		local co = coroutine.create(shellsort)
 		coroutines[t] = co
