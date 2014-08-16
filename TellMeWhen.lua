@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 71030 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 71031 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 71030 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -206,11 +206,6 @@ TMW.Defaults = {
 
 		NumGroups			=	0,
 		-- Groups = {} -- this will be set to the profile group defaults in a second.
-	},
-	locale = {
-		WpnEnchDurs	= {
-			["*"] = 0,
-		},
 	},
 	profile = {
 	--	Version			= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
@@ -2222,16 +2217,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				end
 			end
 		},
-		[62216] = {
-			global = function(self)
-				if type(TMW.db.global.WpnEnchDurs) == "table" then
-					for k, v in pairs(TMW.db.global.WpnEnchDurs) do
-						TMW.db.locale.WpnEnchDurs[k] = max(TMW.db.locale.WpnEnchDurs[k] or 0, v)
-					end
-					TMW.db.global.WpnEnchDurs = nil
-				end
-			end
-		},
 		[60027] = {
 			icon = function(self, ics)
 				ics.Name = ics.Name:gsub("IncreasedSPsix", "IncreasedSP")
@@ -2399,8 +2384,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		},
 		[44009] = {
 			profile = function(self)
-				TMW.db.profile.WpnEnchDurs = nil
-
 				TMW.db.profile.HasImported = nil
 			end,
 		},

@@ -45,6 +45,41 @@ Type:RegisterIconDefaults{
 	WpnEnchantType			= "MainHandSlot",
 }
 
+TMW:RegisterDatabaseDefaults{
+	locale = {
+		WpnEnchDurs	= {
+			["*"] = 0,
+		},
+	},
+}
+
+
+TMW:RegisterUpgrade(71031, {
+	global = function(self)
+		for _, locale in pairs(TMW.db.sv.locale) do 
+			wipe(locale.WpnEnchDurs)
+		end
+	end
+})
+TMW:RegisterUpgrade(62216, {
+	global = function(self)
+		if type(TMW.db.global.WpnEnchDurs) == "table" then
+			for k, v in pairs(TMW.db.global.WpnEnchDurs) do
+				TMW.db.locale.WpnEnchDurs[k] = max(TMW.db.locale.WpnEnchDurs[k] or 0, v)
+			end
+			TMW.db.global.WpnEnchDurs = nil
+		end
+	end
+})
+TMW:RegisterUpgrade(62008, {
+	icon = function(self, ics)
+		if ics.WpnEnchantType == "RangedSlot" then
+			ics.WpnEnchantType = "MainHandSlot"
+		end
+	end,
+})
+
+
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME_WPNENCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	text = L["ICONMENU_CHOOSENAME_WPNENCH_DESC"],
@@ -84,13 +119,6 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_WpnEnchantSettings", f
 	})
 end)
 
-TMW:RegisterUpgrade(62008, {
-	icon = function(self, ics)
-		if ics.WpnEnchantType == "RangedSlot" then
-			ics.WpnEnchantType = "MainHandSlot"
-		end
-	end,
-})
 
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
