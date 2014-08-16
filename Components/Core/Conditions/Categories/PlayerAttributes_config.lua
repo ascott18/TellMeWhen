@@ -142,11 +142,6 @@ Module.stances = {
 	ROGUE = {
 		[1784] = 	TMW_GetSpellInfo(1784), 	-- Stealth	
 	},
-	HUNTER = {
-		[172106] = 	TMW_GetSpellInfo(172106), 	-- Aspect of the Fox
-		[5118] = 	TMW_GetSpellInfo(5118), 	-- Aspect of the Cheetah
-		[13159] = 	TMW_GetSpellInfo(13159), 	-- Aspect of the Pack
-	},
 	DEATHKNIGHT = {
 		[48263] = 	TMW_GetSpellInfo(48263), 	-- Blood Presence
 		[48266] = 	TMW_GetSpellInfo(48266), 	-- Frost Presence
