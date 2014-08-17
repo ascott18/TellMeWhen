@@ -56,8 +56,12 @@ TMW:RegisterDatabaseDefaults{
 
 TMW:RegisterUpgrade(71031, {
 	global = function(self)
-		for _, locale in pairs(TMW.db.sv.locale) do 
-			wipe(locale.WpnEnchDurs)
+		if TMW.db.sv.locale then
+			for _, locale in pairs(TMW.db.sv.locale) do 
+				if locale.WpnEnchDurs then
+					wipe(locale.WpnEnchDurs)
+				end
+			end
 		end
 	end
 })
