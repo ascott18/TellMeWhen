@@ -84,6 +84,10 @@ TMW:RegisterUpgrade(24100, {
 })
 
 
+
+
+
+
 local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_METACHILD", "alpha_metaChild")
 Processor.dontInherit = true
 TMW.IconAlphaManager:AddHandler(50, "ALPHA_METACHILD", true)
@@ -93,34 +97,116 @@ Processor:PostHookMethod("OnUnimplementFromIcon", function(self, icon)
 end)
 
 
-do	-- Check for recursive references
-	local CCI_icon
-	local function CheckCompiledIcons(icon)
-		CCI_icon = icon
-		for _, iconGUID in pairs(icon.CompiledIcons) do
-			local ic = TMW.GUIDToOwner[iconGUID]
-			if ic and ic.CompiledIcons and ic.Type == "meta" and ic.Enabled then
-				CheckCompiledIcons(ic)
-			end
+
+
+
+
+------- Recursive Icon Ref Detector -------
+
+local CCI_icon
+local function CheckCompiledIcons(icon)
+	CCI_icon = icon
+	for _, iconGUID in pairs(icon.CompiledIcons) do
+		local ic = TMW.GUIDToOwner[iconGUID]
+		if ic and ic.CompiledIcons and ic.Type == "meta" and ic.Enabled then
+			CheckCompiledIcons(ic)
 		end
 	end
+end
 
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
-		for _, icon in pairs(Type.Icons) do
-			icon.metaUpdateQueued = true
-			
-			local success, err = pcall(CheckCompiledIcons, icon)
-			if err and err:find("stack overflow") then
-				local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
-				TMW:Error(err)
-				TMW.Warn(err)
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+	for _, icon in pairs(Type.Icons) do
+		icon.metaUpdateQueued = true
+		
+		local success, err = pcall(CheckCompiledIcons, icon)
+		if err and err:find("stack overflow") then
+			local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
+			TMW:Error(err)
+			TMW.Warn(err)
+		end
+	end
+end)
+
+
+
+
+
+
+------- Helper Callback Handlers -------
+
+-- Handle copying of animations when they are triggered
+if TMW.EVENTS:GetEventHandler("Animations") then
+	TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", function(event, icon, icToUse)
+		if icon:Animations_Has() then
+			for k, v in next, icon:Animations_Get() do
+				if v.originIcon ~= icon then
+					icon:Animations_Stop(v)
+				end
+			end
+		end
+		if icToUse:Animations_Has() then
+			for k, v in next, icToUse:Animations_Get() do
+				icon:Animations_Start(v)
+			end
+		end
+	end)
+	
+	TMW:RegisterCallback("TMW_ICON_ANIMATION_START", function(event, icon, table)
+		-- Inherit animations
+		local Icons = Type.Icons
+		for i = 1, #Icons do
+			local icon_meta = Icons[i]
+			if icon_meta.__currentIcon == icon then
+				icon_meta:Animations_Start(table)
 			end
 		end
 	end)
 end
 
+-- Queues meta icons for updates when an icon they're checking is updated.
+TMW:RegisterCallback("TMW_ICON_UPDATED", function(event, icon)
+	local GUID = icon:GetGUID()
+
+	local Icons = Type.Icons
+	for i = 1, #Icons do
+		local icon_meta = Icons[i]
+
+		if icon_meta == icon or icon_meta.IconsLookup[GUID] then
+			icon_meta.metaUpdateQueued = true
+		end
+	end
+end)
+
+-- Performs a type setup on a meta icon when an icon it's checking is setup.
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
+	local Icons = Type.Icons
+	for i = 1, #Icons do
+		local icon_meta = Icons[i]
+
+		if icon_meta.IconsLookup[icon:GetGUID()] then
+			Type:Setup(icon_meta)
+		end
+	end
+end)
+
+-- Performs a type setup on a meta icon when an group it's checking is setup.
+TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
+	local Icons = Type.Icons
+	for i = 1, #Icons do
+		local icon_meta = Icons[i]
+
+		if icon_meta.IconsLookup[group:GetGUID()] then
+			Type:Setup(icon_meta)
+		end
+	end
+end)
 
 
+
+
+
+
+------- Update Functions -------
 
 local huge = math.huge
 local function Meta_OnUpdate(icon, time)
@@ -218,44 +304,11 @@ function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 end
 
 
-local function TMW_ICON_UPDATED(icon, event, ic)
-	local GUID = ic:GetGUID()
-	if ic == icon or (GUID and icon.IconsLookup[GUID]) or icon.IconsLookup[ic] then
-		icon.metaUpdateQueued = true
-	end
-end
 
 
-if TMW.EVENTS:GetEventHandler("Animations") then
 
-	TMW:RegisterCallback("TMW_ICON_META_INHERITED_ICON_CHANGED", function(event, icon, icToUse)
-		if icon:Animations_Has() then
-			for k, v in next, icon:Animations_Get() do
-				if v.originIcon ~= icon then
-					icon:Animations_Stop(v)
-				end
-			end
-		end
-		if icToUse:Animations_Has() then
-			for k, v in next, icToUse:Animations_Get() do
-				icon:Animations_Start(v)
-			end
-		end
-	end)
-	
-	TMW:RegisterCallback("TMW_ICON_ANIMATION_START", function(event, icon, table)
-		-- Inherit animations
-		local Icons = Type.Icons
-		for i = 1, #Icons do
-			local icon_meta = Icons[i]
-			if icon_meta.__currentIcon == icon then
-				icon_meta:Animations_Start(table)
-			end
-		end
-	end)
-	
-end
 
+------- Icon Table Management -------
 
 local InsertIcon, GetFullIconTable -- both need access to eachother, so scope them above their definitions
 
@@ -325,13 +378,12 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 	return icon.CompiledIcons
 end
 
-function Type:OnGCD(icon, duration)
-	if not icon.__metaModuleSource then
-		return false
-	end
 
-	return icon.__metaModuleSource:OnGCD(duration)
-end
+
+
+
+
+------- Required IconType methods -------
 
 function Type:Setup(icon)
 	icon.__currentIcon = nil -- reset this
@@ -387,38 +439,17 @@ function Type:Setup(icon)
 	end
 		
 	icon:SetUpdateFunction(Meta_OnUpdate)
-	TMW:RegisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
 
 	icon.metaUpdateQueued = true
 end
 
-
-function Type:TMW_ICON_TYPE_CHANGED(event, icon, typeData, typeData_old)
-	if self == typeData_old then
-		TMW:UnregisterCallback("TMW_ICON_UPDATED", TMW_ICON_UPDATED, icon)
+function Type:OnGCD(icon, duration)
+	if not icon.__metaModuleSource then
+		return false
 	end
+
+	return icon.__metaModuleSource:OnGCD(duration)
 end
-TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", Type)
-
-function Type:TMW_GLOBAL_UPDATE()
-	Locked = TMW.Locked
-end
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
-
-
-TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, type, settings)
-	if type == "icon" and settings.Type == "meta" then
-		for k, GUID in pairs(settings.Icons) do
-			if GUID ~= settings.GUID then
-				local type = TMW:ParseGUID(GUID)
-				local settings = TMW:GetSettingsFromGUID(GUID)
-				if type == "icon" and settings then
-					TMW:GetSettingsStrings(strings, type, settings, TMW.Icon_Defaults)
-				end
-			end
-		end
-	end
-end)
 
 
 Type:Register(310)
