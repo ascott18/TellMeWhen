@@ -688,7 +688,7 @@ CNDT.Substitutions = {
 		return strWrap(TMW:GetSpellNames(name2, nil, 1))
 	end,
 },{
-	src = "c.NameName2",
+	src = "c.NameString2",
 	rep = function(conditionData, conditionSettings, name, name2)
 		return strWrap(TMW:GetSpellNames(name2, nil, 1, 1))
 	end,
@@ -713,7 +713,7 @@ CNDT.Substitutions = {
 		return strWrap(TMW:GetSpellNames(name, nil, 1))
 	end,
 },{
-	src = "c.NameName",
+	src = "c.NameString",
 	rep = function(conditionData, conditionSettings, name, name2)
 		return strWrap(TMW:GetSpellNames(name, nil, 1, 1))
 	end,

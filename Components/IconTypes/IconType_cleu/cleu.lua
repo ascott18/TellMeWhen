@@ -289,7 +289,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			]]
 		end
 
-		local NameHash = icon.NameHash
+		local NameHash = icon.Names.Hash
 		local duration
 		if NameHash and not EventsWithoutSpells[event] then
 			local key = (NameHash[spellID] or NameHash[strlowerCache[spellName]])
@@ -357,7 +357,7 @@ local function CLEU_OnUpdate(icon, time)
 end
 
 function Type:Setup(icon)
-	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
 	icon.Durations = TMW:GetSpellDurations(icon.Name)
 
 	-- only define units if there are any units. we dont want to waste time iterating an empty table.
@@ -374,7 +374,7 @@ function Type:Setup(icon)
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
 	-- safety mechanism
-	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then
+	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and icon.Name == "" and not icon.SourceFlags and not icon.DestFlags then
 		if TMW.Locked and icon.Enabled then
 			TMW.Warn(L["CLEU_NOFILTERS"]:format(icon:GetIconName(true)))
 		end

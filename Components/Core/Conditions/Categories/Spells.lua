@@ -626,7 +626,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_CASTTOMATCH", "CONDITIONPANEL_CASTTOMATCH_DESC") editbox.label = L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
 	useSUG = true,
-	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameName))]], -- LOWER is some gsub magic
+	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameString))]], -- LOWER is some gsub magic
 	events = function(ConditionObject, c)
 		-- holy shit... need i say more?
 		return

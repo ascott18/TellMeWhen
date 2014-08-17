@@ -123,10 +123,10 @@ end
 local huge = math.huge
 local function BuffCheck_OnUpdate(icon, time)
 
-	local Units, NameArray, NameNameArray, NameHash, Filter
-	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter
+	local Units, NameArray, NameStringArray, NameHash, Filter
+	= icon.Units, icon.Names.Array, icon.Names.StringArray, icon.Names.Hash, icon.Filter
 	
-	local NAL = #icon.NameArray
+	local NAL = #icon.Names.Array
 
 	local _, iconTexture, id, count, duration, expirationTime
 	local useUnit
@@ -154,7 +154,7 @@ local function BuffCheck_OnUpdate(icon, time)
 					local iName = NameArray[i]
 					
 					-- Check by name
-					_buffName, _, _iconTexture, _count, _, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, NameNameArray[i], nil, Filter)
+					_buffName, _, _iconTexture, _count, _, _duration, _expirationTime, _, _, _, _id = UnitAura(unit, NameStringArray[i], nil, Filter)
 					
 					-- If the name was found but the ID didnt match, check by ID.
 					if _id and _id ~= iName and isNumber[iName] then
@@ -192,7 +192,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.NameFirst,
+			icon.Names.First,
 			nil, nil
 		)
 	elseif not id then
@@ -201,7 +201,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.NameFirst,
+			icon.Names.First,
 			unit, nil
 		)
 	elseif id then
@@ -218,11 +218,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
-	--icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
-	icon.NameNameArray = TMW:GetSpellNames(icon.Name, 1, nil, 1)
-	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
@@ -236,7 +232,7 @@ function Type:Setup(icon)
 		icon.Filter = icon.Filter .. "|PLAYER"
 	end
 
-	icon.FirstTexture = SpellTextures[icon.NameFirst]
+	icon.FirstTexture = SpellTextures[icon.Names.First]
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 	

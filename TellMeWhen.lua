@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 71031 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 71032 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 71030 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -4058,6 +4058,68 @@ function TMW:EquivToTable(name)
 end
 TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 
+
+
+local  __index_old
+local tableArgs = {
+	First		= { 1, 1 },
+	FirstString		= { 1, 1, 1 },
+	Array		= { 1 },
+	StringArray	= { 1, nil, 1 },
+	Hash		= { 1, nil, nil, 1 },
+	StringHash	= { 1, nil, 1, 1 },
+}
+TMW:NewClass("SpellNameProxy"){
+	
+	OnFirstInstance = function(self)
+		self:MakeInstancesWeak()
+
+		 __index_old = self.instancemeta.__index
+		local meta = {}
+		for k, v in pairs(self.instancemeta) do
+			meta[k] = v
+		end
+		meta.__index = self.__index
+		
+		self.betterMeta = meta
+	end,
+
+	OnNewInstance = function(self, name, allowRenaming)
+		self.Name = name
+		self.AllowRenaming = allowRenaming
+		
+		setmetatable(self, self.betterMeta)
+	end,
+
+	__index = function(self, k)
+		local v = __index_old[k]
+		if v then
+			return v
+		end
+		
+		if tableArgs[k] then
+			self[k] = TMW:GetSpellNames(self.Name, tableArgs[k][1], tableArgs[k][2], tableArgs[k][3], tableArgs[k][4], self.AllowRenaming)
+			return self[k]
+		end
+	end,
+
+	Wipe = function(self)
+		for k, v in pairs(self) do
+			if k ~= "Name" then
+				self[k] = nil
+			end
+		end
+	end,
+}
+function TMW:GetSpellNamesProxy(name, alowRenaming)
+	for _, instance in pairs(TMW.C.SpellNameProxy.instances) do
+		if instance.Name == name and instance.AllowRenaming == alowRenaming then
+			return instance
+		end
+	end
+	return TMW.C.SpellNameProxy:New(name, alowRenaming)
+end
+
 function TMW:GetSpellNames_static(doLower, setting, keepDurations)
 
 	local buffNames = TMW:SplitNames(setting) -- Get a table of everything
@@ -4207,6 +4269,9 @@ do    -- TMW:GetSpellNames() cache management
 	local _, cache = TMW:MakeFunctionCached(TMW, "GetSpellNames")
 	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 		wipe(cache)
+		for _, instance in pairs(TMW.C.SpellNameProxy.instances) do
+			instance:Wipe()
+		end
 	end)
 end
 

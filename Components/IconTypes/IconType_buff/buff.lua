@@ -172,10 +172,10 @@ end
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
 	
-	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, DurationSort, StackSort
-	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
+	local Units, NameArray, NameStringArray, NameHash, Filter, Filterh, DurationSort, StackSort
+	= icon.Units, icon.Names.Array, icon.Names.StringArray, icon.Names.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
 	local NotStealable = not icon.Stealable
-	local NAL = #icon.NameArray
+	local NAL = #icon.Names.Array
 
 	local buffName, _, iconTexture, dispelType, duration, expirationTime, caster, count, canSteal, id, v1, v2, v3, v4
 	local useUnit
@@ -250,9 +250,9 @@ local function Buff_OnUpdate(icon, time)
 				for i = 1, NAL do
 					local iName = NameArray[i]
 
-					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
+					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameStringArray[i], nil, Filter)
 					if Filterh and not buffName then
-						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
+						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameStringArray[i], nil, Filterh)
 					end
 
 					if buffName and id ~= iName and isNumber[iName] then
@@ -301,7 +301,7 @@ end
 local function Buff_OnUpdate_Controller(icon, time)
 	
 	local Units, NameHash, Filter, Filterh
-	= icon.Units, icon.NameHash, icon.Filter, icon.Filterh
+	= icon.Units, icon.Names.Hash, icon.Filter, icon.Filterh
 	local NotStealable = not icon.Stealable
 	
 	for u = 1, #Units do
@@ -328,7 +328,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 						break
 					end
 
-				elseif  (icon.NameFirst == '' or NameHash[id] or NameHash[dispelType] or NameHash[strlowerCache[buffName]])
+				elseif  (icon.Names.First == '' or NameHash[id] or NameHash[dispelType] or NameHash[strlowerCache[buffName]])
 					and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id]))
 				then
 					
@@ -375,7 +375,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.NameFirst,
+			icon.Names.First,
 			nil, nil,
 			nil, nil
 		)
@@ -386,7 +386,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.NameFirst,
+			icon.Names.First,
 			Units[1], nil,
 			nil, nil
 		)
@@ -446,11 +446,7 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 
 
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
-	--icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
-	icon.NameNameArray = TMW:GetSpellNames(icon.Name, 1, nil, 1)
-	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
@@ -468,11 +464,11 @@ function Type:Setup(icon)
 	end
 
 	icon.buffdebuff_iterateByAuraIndex = false
-	if doesSort or #icon.NameArray > EFF_THRESHOLD then
+	if doesSort or #icon.Names.Array > EFF_THRESHOLD then
 		icon.buffdebuff_iterateByAuraIndex = true
 	end
 
-	for k, spell in pairs(icon.NameNameArray) do
+	for k, spell in pairs(icon.Names.StringArray) do
 		if icon.OnlyMine and isEditing then
 			for _, badSpell in pairs(aurasWithNoSourceReported) do
 				if type(badSpell) == "string" and badSpell:lower() == spell then
@@ -483,7 +479,7 @@ function Type:Setup(icon)
 						relativeTo = TellMeWhen_ChooseName,
 						x = 0,
 						y = 0,
-						text = format(L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.NameArray[k]))
+						text = format(L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.Names.Array[k]))
 					}
 					break
 				end
@@ -495,7 +491,7 @@ function Type:Setup(icon)
 		end
 	end
 
-	icon.FirstTexture = SpellTextures[icon.NameFirst]
+	icon.FirstTexture = SpellTextures[icon.Names.First]
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 	

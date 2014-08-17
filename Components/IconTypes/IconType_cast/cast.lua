@@ -110,7 +110,7 @@ local function Cast_OnEvent(icon, event, arg1)
 end
 
 local function Cast_OnUpdate(icon, time)
-	local NameFirst, NameNameHash, Units, Interruptible = icon.NameFirst, icon.NameNameHash, icon.Units, icon.Interruptible
+	local NameFirst, NameStringHash, Units, Interruptible = icon.Names.First, icon.Names.StringHash, icon.Units, icon.Interruptible
 
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -122,7 +122,7 @@ local function Cast_OnUpdate(icon, time)
 				reverse = true
 			end
 
-			if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameNameHash[strlowerCache[name]]) then
+			if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
 				start, endTime = start/1000, endTime/1000
 				local duration = endTime - start
 
@@ -152,7 +152,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, spell, unit, texture, start, du
 			"alpha; start, duration; spell; unit, GUID",
 			icon.UnAlpha,
 			0, 0,
-			icon.NameFirst,
+			icon.Names.First,
 			icon.Units[1], nil
 		)
 	end
@@ -160,9 +160,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
---	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
-	icon.NameNameHash = TMW:GetSpellNames(icon.Name, 1, nil, 1, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
 
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	

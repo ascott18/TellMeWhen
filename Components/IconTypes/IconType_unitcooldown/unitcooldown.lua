@@ -275,7 +275,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 		
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
-			local NameHash = icon.NameHash
+			local NameHash = icon.Names.Hash
 			if NameHash and NameHash[spellID] or NameHash[spellName] then
 				icon.NextUpdateTime = 0
 			end
@@ -307,7 +307,7 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 		
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
-			local NameHash = icon.NameHash
+			local NameHash = icon.Names.Hash
 			if NameHash and NameHash[spellID] or NameHash[spellName] then
 				icon.NextUpdateTime = 0
 			end
@@ -369,7 +369,7 @@ local BLANKTABLE = {}
 local function UnitCooldown_OnUpdate(icon, time)
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
 	local Alpha, NameArray, OnlySeen, Sort, Durations, Units =
-	icon.Alpha, icon.NameArray, icon.OnlySeen, icon.Sort, icon.Durations, icon.Units
+	icon.Alpha, icon.Names.Array, icon.OnlySeen, icon.Sort, icon.Durations, icon.Units
 	local NAL = #NameArray
 	local d = Sort == -1 and huge or 0
 	
@@ -469,7 +469,7 @@ end
 
 local function UnitCooldown_OnUpdate_Controller(icon, time)
 	local Alpha, UnAlpha, NameArray, OnlySeen, Durations, Units =
-	icon.Alpha, icon.UnAlpha, icon.NameArray, icon.OnlySeen, icon.Durations, icon.Units
+	icon.Alpha, icon.UnAlpha, icon.Names.Array, icon.OnlySeen, icon.Durations, icon.Units
 	
 	local NAL = #NameArray
 	
@@ -539,8 +539,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
-	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
 	icon.Durations = TMW:GetSpellDurations(icon.Name)
 
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)

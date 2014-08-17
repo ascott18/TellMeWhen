@@ -177,14 +177,14 @@ TMW:RegisterUpgrade(48017, {
 
 local function Totem_OnUpdate(icon, time)
 
-	local Slots, NameNameHash, NameFirst = icon.Slots, icon.NameNameHash, icon.NameFirst
+	local Slots, NameStringHash, NameFirst = icon.Slots, icon.Names.StringHash, icon.Names.First
 	
 	-- Be careful here. Slots that are explicitly disabled by the user are set false.
 	-- Slots that are disabled internally are set nil (which could change table length).
 	for iSlot = 1, #Slots do
 		if Slots[iSlot] then
 			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
-			if start ~= 0 and totemName and ((NameFirst == "") or NameNameHash[strlowerCache[totemName]]) then
+			if start ~= 0 and totemName and ((NameFirst == "") or NameStringHash[strlowerCache[totemName]]) then
 				icon:SetInfo("alpha; texture; start, duration; spell",
 					icon.Alpha,
 					totemIcon,
@@ -206,11 +206,6 @@ end
 
 
 function Type:Setup(icon)
-	if icon.Name then
-		icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
-		icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1, nil, 1)
-		icon.NameNameHash = TMW:GetSpellNames(icon.Name, 1, nil, 1, 1, 1)
-	end
 
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 4 do
@@ -219,24 +214,19 @@ function Type:Setup(icon)
 	end
 
 	icon.FirstTexture = nil
+	local name = icon.Name
 	if pclass == "DEATHKNIGHT" then
-		icon.NameFirst = ""
-		icon.NameName = TMW_GetSpellInfo(46584)
-		icon.FirstTexture = GetSpellTexture(46584)
+		name = 46584
 		icon.Slots[1] = true -- there is only one slot for DKs, and they dont have options to check certain slots
 		icon.Slots[2] = nil
 		icon.Slots[3] = nil
 		icon.Slots[4] = nil
 	elseif pclass == "MAGE" then
-		icon.NameFirst = ""
-		icon.NameName = TMW_GetSpellInfo(116011)
-		icon.FirstTexture = GetSpellTexture(116011)
+		name = 116011
 		icon.Slots[3] = nil -- there is no rune 3
 		icon.Slots[4] = nil -- there is no rune 4
 	elseif pclass == "DRUID" then
-		icon.NameFirst = ""
-		icon.NameName = TMW_GetSpellInfo(88747)
-		icon.FirstTexture = GetSpellTexture(88747)
+		name = 88747
 		icon.Slots[4] = nil -- there is no mushroom 4
 	elseif pclass ~= "SHAMAN" then --enable all totems for people that dont have totem slot options (future-proof it)
 		icon.Slots[1] = true
@@ -245,14 +235,13 @@ function Type:Setup(icon)
 		icon.Slots[4] = true
 	end
 
-	icon:SetInfo("reverse", true)
+	icon.Names = TMW:GetSpellNamesProxy(name, true)
 
-	if icon.FirstTexture then
-		icon:SetInfo("texture", icon.FirstTexture)
-	else
-		icon.FirstTexture = icon.NameName and TMW.SpellTextures[icon.NameName]
-		icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
-	end
+	icon.FirstTexture = icon.Names.FirstString and TMW.SpellTextures[icon.Names.FirstString]
+	icon:SetInfo("reverse; texture",
+		true,
+		Type:GetConfigIconTexture(icon)
+	)
 
 	icon:SetUpdateMethod("manual")
 	
@@ -263,7 +252,7 @@ function Type:Setup(icon)
 end
 
 function Type:FormatSpellForOutput(icon, data, doInsertLink)
-	data = data or icon.NameFirst
+	data = data or icon.Names.First
 	
 	if data then
 		local name

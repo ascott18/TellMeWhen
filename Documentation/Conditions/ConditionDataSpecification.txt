@@ -18,7 +18,7 @@ The funcstr field is the only one that is required. Errors may happen with the o
 ** [String] Localized description of the condition.
 
 * icon 
-** [Function>|Table>|String] Icon texture that will be shown in the condition type selection dropdown menu for this condition.
+** [Function>|String] Icon texture that will be shown in the condition type selection dropdown menu for this condition.
 
 * tcoords 
 ** [Table] Array-style table that defines the tex coords that will be set for the icon in the dropdown.
@@ -30,7 +30,7 @@ The funcstr field is the only one that is required. Errors may happen with the o
 
 == Slider & Value - Text
 * formatter 
-** [Function>|Table>|String] Maps numeric slider values with the text that should be displayed for it.
+** [TMW.C.Formatter] Maps numeric slider values with the text that should be displayed for it.
 * texttable 
 ** [Function>|Table>|String] Older method to map numeric slider values with the text that should be displayed for it. Will be wrapped with a formatter. You should not define both a formatter and a texttable.
 
@@ -142,7 +142,7 @@ The funcstr field is the only one that is required. Errors may happen with the o
 *** <<code lua>> [[BOOLCHECK( UnitIsUnit(c.Unit, c.Unit2) )]] <</code>>
 *** <<code lua>> [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]] <</code>>
 *** <<code lua>> funcstr = function(c)
-		return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraStacks(c.Unit, c.NameFirst, c.NameString, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end, <</code>>
 
 
@@ -184,7 +184,7 @@ end <</code>>
 *** <<code lua>>anticipate = [[local _, dur = GetWeaponEnchantInfo()
   local VALUE = time + ((dur or 0)/1000) - c.Level]] <</code>>
 *** <<code lua>>anticipate = function(c)
-  return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+  return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameString, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
   local VALUE
   if dur and dur > 0 then
     VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
@@ -227,7 +227,7 @@ end<</code>>
 ** Substitues the value from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted.
 * "c.GCDReplacedNameFirst" & "c.GCDReplacedNameFirst2"
 ** Behaves exactly like "c.NameFirst" except that if the value of the setting is equal to "gcd", TMW.GCDSpell will be substituted instead.
-* "c.NameName" & "c.NameName2"
+* "c.NameString" & "c.NameString2"
 ** Substitues the spell name from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted. If the value inputted into these textboxes is not a valid spell, the raw value from the textbox will be used.
 
 * "c.Item" & "c.Item2"

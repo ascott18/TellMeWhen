@@ -115,7 +115,7 @@ local function ICD_OnEvent(icon, event, ...)
 	end
 
 	if valid then
-		local NameHash = icon.NameHash
+		local NameHash = icon.Names.Hash
 		local Key = NameHash[i] or NameHash[strlowerCache[n]]
 		if Key and not (icon.DontRefresh and (TMW.time - icon.ICDStartTime) < icon.Durations[Key]) then
 
@@ -149,7 +149,7 @@ local function ICD_OnUpdate(icon, time)
 end
 
 function Type:Setup(icon)
-	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
 	icon.Durations = TMW:GetSpellDurations(icon.Name)
 
 	icon.ICDStartTime = icon.ICDStartTime or 0

@@ -140,8 +140,6 @@ end
 
 
 function Type:Setup(icon)
-	icon.NameFirst = CONST_SPELLID_LIGHTWELL_SUMMONSPELL
-
 	icon:SetInfo("texture; spell; reverse",
 		SpellTextures[CONST_SPELLID_LIGHTWELL_SUMMONSPELL],
 		CONST_SPELLID_LIGHTWELL_SUMMONSPELL,

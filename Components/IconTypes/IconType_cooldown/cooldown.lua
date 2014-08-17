@@ -102,18 +102,18 @@ end
 
 local function AutoShot_OnUpdate(icon, time)
 
-	local NameName = icon.NameName
+	local NameString = icon.Names.FirstString
 	local asDuration = icon.asDuration
 
 	local ready = time - icon.asStart > asDuration
-	local inrange = icon.RangeCheck and IsSpellInRange(NameName, "target") or 1
+	local inrange = icon.RangeCheck and IsSpellInRange(NameString, "target") or 1
 
 	if ready and inrange == 1 then
 		icon:SetInfo(
 			"alpha; start, duration; spell; inRange",
 			icon.Alpha,
 			0, 0,
-			NameName,
+			NameString,
 			inrange
 		)
 	else
@@ -121,7 +121,7 @@ local function AutoShot_OnUpdate(icon, time)
 			"alpha; start, duration; spell; inRange",
 			icon.UnAlpha,
 			icon.asStart, asDuration,
-			NameName,
+			NameString,
 			inrange
 		)
 	end
@@ -131,8 +131,8 @@ end
 local usableData = {}
 local unusableData = {}
 local function SpellCooldown_OnUpdate(icon, time)    
-	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameNameArray =
-	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameArray, icon.NameNameArray
+	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameStringArray =
+	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.Names.Array, icon.Names.StringArray
 
 	local usableFound, unusableFound
 
@@ -141,7 +141,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 		
 		local start, duration, stack
 		
-		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameNameArray[i])
+		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameStringArray[i])
 		if charges then
 			if charges < maxCharges then
 				start, duration = start_charge, duration_charge
@@ -155,7 +155,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 		end
 		
 		if duration then
-			if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+			if IgnoreRunes and duration == 10 and NameStringArray[i] ~= mindfreeze then
 				start, duration = 0, 0
 			end
 			local inrange, nomana = 1
@@ -234,16 +234,13 @@ end
 
 
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
-	icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1, nil, 1)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1, nil, nil, nil, 1)
-	icon.NameNameArray = TMW:GetSpellNames(icon.Name, 1, nil, 1, nil, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, true)
 	
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes =  nil
 	end
 	
-	if icon.NameName == strlower(TMW_GetSpellInfo(75)) and not icon.NameArray[2] then
+	if icon.Names.FirstString == strlower(TMW_GetSpellInfo(75)) and not icon.Names.Array[2] then
 		icon:SetInfo("texture", GetSpellTexture(75))
 		icon.asStart = icon.asStart or 0
 		icon.asDuration = icon.asDuration or 0
@@ -257,7 +254,7 @@ function Type:Setup(icon)
 		
 		icon:SetUpdateFunction(AutoShot_OnUpdate)
 	else
-		icon.FirstTexture = SpellTextures[icon.NameFirst]
+		icon.FirstTexture = SpellTextures[icon.Names.First]
 		
 		icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), false)
 		

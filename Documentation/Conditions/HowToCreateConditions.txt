@@ -191,7 +191,7 @@ ConditionCategory:RegisterCondition(1,   "BUFFDUR", {
   icon = "Interface\\Icons\\spell_nature_rejuvenation",
   tcoords = CNDT.COMMON.standardtcoords,
   funcstr = function(c)
-    return [[AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time) c.Operator c.Level]]
+    return [[AuraDur(c.Unit, c.NameFirst, c.NameString, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time) c.Operator c.Level]]
   end,
   events = function(ConditionObject, c)
     return
@@ -199,7 +199,7 @@ ConditionCategory:RegisterCondition(1,   "BUFFDUR", {
       ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
   end,
   anticipate = function(c)
-    return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
+    return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameString, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", time)
     local VALUE
     if dur and dur > 0 then
       VALUE = expirationTime and expirationTime - c.Level or 0

@@ -107,7 +107,7 @@ end)
 
 local function Reactive_OnEvent(icon, event, arg1)
 	if event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
-		if icon.NameFirst == arg1 or strlowerCache[TMW_GetSpellInfo(arg1)] == icon.NameName then
+		if icon.Names.First == arg1 or strlowerCache[TMW_GetSpellInfo(arg1)] == icon.Names.FirstString then
 			icon.forceUsable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
 			icon.NextUpdateTime = 0
 		end
@@ -119,8 +119,8 @@ end
 local function Reactive_OnUpdate(icon, time)
 
 	local n, inrange, nomana, start, duration, CD, usable, charges, maxCharges, stack, start_charge, duration_charge = 1
-	local NameArray, NameNameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, forceUsable, IgnoreNomana =
-	 icon.NameArray, icon.NameNameArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.forceUsable, icon.IgnoreNomana
+	local NameArray, NameStringArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, forceUsable, IgnoreNomana =
+	 icon.Names.Array, icon.Names.StringArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.forceUsable, icon.IgnoreNomana
 
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
@@ -152,7 +152,7 @@ local function Reactive_OnUpdate(icon, time)
 				nomana = nil
 			end
 			if CooldownCheck then
-				if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+				if IgnoreRunes and duration == 10 and NameStringArray[i] ~= mindfreeze then
 					start, duration = 0, 0
 				end
 				CD = not (duration == 0 or OnGCD(duration))
@@ -174,7 +174,7 @@ local function Reactive_OnUpdate(icon, time)
 		end
 	end
 
-	local NameFirst = icon.NameFirst
+	local NameFirst = icon.Names.First
 	if n > 1 then -- if more than 1 spell was checked, we need to get these again for the first spell, otherwise reuse the values obtained above since they are just for the first one
 		
 		charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameFirst)
@@ -190,7 +190,7 @@ local function Reactive_OnUpdate(icon, time)
 			stack = GetSpellCount(NameFirst)
 		end
 		
-		if IgnoreRunes and duration == 10 and icon.NameName ~= mindfreeze then
+		if IgnoreRunes and duration == 10 and icon.Names.FirstString ~= mindfreeze then
 			start, duration = 0, 0
 		end
 		inrange, nomana = 1
@@ -220,13 +220,10 @@ end
 
 
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
-	icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1, nil, 1)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1, nil, nil, nil, 1)
-	icon.NameNameArray = TMW:GetSpellNames(icon.Name, 1, nil, 1, nil, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, true)
 	icon.forceUsable = nil
 
-	icon.FirstTexture = SpellTextures[icon.NameFirst]
+	icon.FirstTexture = SpellTextures[icon.Names.First]
 
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	

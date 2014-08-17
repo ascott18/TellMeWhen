@@ -178,7 +178,7 @@ end)
 local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
-			local NameHash = icon.NameHash
+			local NameHash = icon.Names.Hash
 			if NameHash[spellID] or NameHash[strlowerCache[spellName]] then
 				if PvEDRs[spellID] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
 					local dr = icon.DRInfo[destGUID]
@@ -332,7 +332,7 @@ do	-- CheckCategories
 	end)
 
 	CheckCategories = function(icon)
-		local result = func(icon.NameArray)
+		local result = func(icon.Names.Array)
 		icon:SetInfo("spell", result.firstCategory)
 
 		if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
@@ -354,9 +354,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
-	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
 	
 	-- This looks really stupid, but it works exactly how it should.
 	local oldDRName = icon.Name
@@ -371,7 +369,7 @@ function Type:Setup(icon)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	
-	icon.FirstTexture = SpellTextures[icon.NameFirst]
+	icon.FirstTexture = SpellTextures[icon.Names.First]
 
 	-- Do the Right Thing and tell people if their DRs mismatch
 	CheckCategories(icon)
