@@ -352,12 +352,10 @@ end
 function Type:Setup(icon)
 	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
 	
-	-- This looks really stupid, but it works exactly how it should.
-	local oldDRName = icon.Name
 	if not icon.oldDRName then
 		icon.DRInfo = icon.DRInfo or {}
 		icon.oldDRName = icon.Name
-	elseif icon.DRInfo and oldDRName ~= icon.Name then
+	elseif icon.oldDRName and icon.oldDRName ~= icon.Name then
 		wipe(icon.DRInfo)
 	end
 	
