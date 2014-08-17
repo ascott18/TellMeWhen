@@ -334,6 +334,36 @@ SharableDataType_profile:RegisterMenuBuilder(19, function(Item_profile)
 	end
 end)
 
+-- Global Snippets
+local SharableDataType_database = TMW.Classes.SharableDataType.types.database
+SharableDataType_database:RegisterMenuBuilder(16, function(Item_database)
+	local db = Item_database.Settings
+
+	if db.global.CodeSnippets then
+		local SettingsBundle = TMW.Classes.SettingsBundle:New("codesnippet")
+
+		for n, snippet in TMW:InNLengthTable(db.global.CodeSnippets) do
+			if snippet then
+
+				local Item = TMW.Classes.SettingsItem:New("codesnippet")
+
+				Item:SetParent(Item_database)
+				Item.Settings = snippet
+
+				SettingsBundle:Add(Item)
+
+			end
+		end
+
+		if SettingsBundle:CreateParentedMenuEntry(L["CODESNIPPETS"]) then
+			TMW.DD:AddSpacer()
+		end
+	end
+end)
+
+
+
+
 -- Import Snippet
 codesnippet:RegisterMenuBuilder(1, function(Item_codesnippet)	
 	local IMPORTS, EXPORTS = Item_codesnippet:GetEditBox():GetAvailableImportExportTypes()
