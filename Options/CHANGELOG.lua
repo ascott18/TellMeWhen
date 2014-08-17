@@ -17,6 +17,8 @@ TMW.CHANGELOG = {
 [==[]==],
 [==[* The suggestion list now defers its sorting so that input is more responsive.]==],
 [==[* The "Highlight timer edge" setting is back.]==],
+[==[* You can now export all your global groups at once.]==],
+[==[]==],
 [==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed yet another issue with ElvUI's timer texts (they weren't going away when they should have been).]==],
