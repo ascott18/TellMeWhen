@@ -90,6 +90,52 @@ function TEXT:GetLayoutName(settings, GUID, noDefaultWrapper)
 end
 
 
+
+
+local function layoutSort(GUID_a, GUID_b)
+	local layoutSettings_a, layoutSettings_b = TEXT:GetTextLayoutSettings(GUID_a), TEXT:GetTextLayoutSettings(GUID_b)
+	local NoEdit_a, NoEdit_b = layoutSettings_a.NoEdit, layoutSettings_b.NoEdit
+	
+	if NoEdit_a == NoEdit_b then
+		-- Simple string comparison for alphabetical sorting
+		return TEXT:GetLayoutName(layoutSettings_a, GUID_a) < TEXT:GetLayoutName(layoutSettings_b, GUID_b)
+	else
+		return NoEdit_a
+	end
+end
+
+function TEXT:Layout_DropDown()
+	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, layoutSort) do
+		if GUID ~= "" then
+			local info = TMW.DD:CreateInfo()
+			
+			info.text = TEXT:GetLayoutName(settings, GUID)
+			info.value = GUID
+			info.checked = GUID == TEXT:GetTextLayoutForIcon(CI.icon)
+			
+			local displays = ""
+			for i, fontStringSettings in TMW:InNLengthTable(settings) do
+				displays = displays .. "\r\n" .. TEXT:GetStringName(fontStringSettings, i)
+			end
+			info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
+			info.tooltipText = L["TEXTLAYOUTS_LAYOUTDISPLAYS"]:format(displays)
+			
+			info.func = TEXT.Layout_DropDown_OnClick
+			
+			TMW.DD:AddButton(info)
+		end
+	end
+end
+
+function TEXT:Layout_DropDown_OnClick()
+	CI.icon:GetSettingsPerView().TextLayout = self.value
+	TEXT:LoadConfig()
+	IE:ScheduleIconSetup()
+end
+
+
+
+
 function TEXT:CacheUsedStrings()
 	for text in pairs(TEXT.usedStrings) do
 		TEXT.usedStrings[text] = 0 -- set to 0, not nil, and dont wipe the table either
@@ -120,49 +166,6 @@ function TEXT:CacheUsedStrings()
 	
 	TEXT.usedStrings[""] = nil
 end
-
-
-function TEXT.Layout_DropDown_Sort(GUID_a, GUID_b)
-	local layoutSettings_a, layoutSettings_b = TEXT:GetTextLayoutSettings(GUID_a), TEXT:GetTextLayoutSettings(GUID_b)
-	local NoEdit_a, NoEdit_b = layoutSettings_a.NoEdit, layoutSettings_b.NoEdit
-	
-	if NoEdit_a == NoEdit_b then
-		-- Simple string comparison for alphabetical sorting
-		return TEXT:GetLayoutName(layoutSettings_a, GUID_a) < TEXT:GetLayoutName(layoutSettings_b, GUID_b)
-	else
-		return NoEdit_a
-	end
-end
-
-function TEXT:Layout_DropDown()
-	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, TEXT.Layout_DropDown_Sort) do
-		if GUID ~= "" then
-			local info = TMW.DD:CreateInfo()
-			
-			info.text = TEXT:GetLayoutName(settings, GUID)
-			info.value = GUID
-			info.checked = GUID == TEXT:GetTextLayoutForIcon(CI.icon)
-			
-			local displays = ""
-			for i, fontStringSettings in TMW:InNLengthTable(settings) do
-				displays = displays .. "\r\n" .. TEXT:GetStringName(fontStringSettings, i)
-			end
-			info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
-			info.tooltipText = L["TEXTLAYOUTS_LAYOUTDISPLAYS"]:format(displays)
-			
-			info.func = TEXT.Layout_DropDown_OnClick
-			
-			TMW.DD:AddButton(info)
-		end
-	end
-end
-
-function TEXT:Layout_DropDown_OnClick()
-	CI.icon:GetSettingsPerView().TextLayout = self.value
-	TEXT:LoadConfig()
-	IE:ScheduleIconSetup()
-end
-
 
 function TEXT:CopyString_DropDown()
 	TEXT:CacheUsedStrings()
@@ -197,21 +200,8 @@ function TEXT:CopyString_DropDown_OnClick(frame)
 	IE:ScheduleIconSetup()
 end
 
-function TEXT:TestDogTagFunc(success, ...)
-	if success then
-		local arg1, arg2 = ...
-		local numArgs = select("#", ...)
-		if numArgs == 2 and arg2 == nil and type(arg1) == "string" then
-			return arg1
-		end
-	end
-end
 
-if DogTag and DogTag.tagError then
-	hooksecurefunc(DogTag, "tagError", function(_, _, text)
-		TEXT.EvaluateError = text
-	end)
-end
+
 
 local function ttText(self)
 	GameTooltip:AddLine(L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"]:format(""), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
@@ -227,6 +217,8 @@ function TEXT:LoadConfig()
 	local Texts = CI.icon:GetSettingsPerView().Texts
 	local GUID, layoutSettings, isFallback = TEXT:GetTextLayoutForIcon(CI.icon)
 	
+	-- Run this every time that we load the config so that it will cache
+	-- strings that might not be used anymore (acts as sort of a backup mechanism)
 	TEXT:CacheUsedStrings()
 	
 	local layoutName
@@ -240,56 +232,67 @@ function TEXT:LoadConfig()
 			if not frame then
 				frame = CreateFrame("Frame", "$parentString"..i, TellMeWhen_TextDisplayOptions, "TellMeWhen_TextDisplayGroup", i)
 				TEXT[i] = frame
-				frame:SetPoint("TOP", previousFrame, "BOTTOM")
+
+				if i == 1 then
+					frame:SetPoint("TOPLEFT", TellMeWhen_TextDisplayOptions.Layout, "BOTTOMLEFT", 0, 16)
+				else
+					frame:SetPoint("TOP", previousFrame, "BOTTOM")
+				end
+
+				-- Setup the tooltip for the reset button.
+				TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", ttText, nil, 1)
 			end
 			
 			frame:Show()
 
 			frame.stringSettings = stringSettings
 
+			-- display_N_stringName looks something like "Display 1: Binding/Label"
 			local display_N_stringName = L["TEXTLAYOUTS_fSTRING2"]:format(i, TEXT:GetStringName(stringSettings, i, true))
-			TMW:TT(frame.EditBox, display_N_stringName, "TEXTLAYOUTS_SETTEXT_DESC", 1)
+
+			-- Set it as the tooltip title and the label text on the editbox.
+			TMW:TT(frame.EditBox, display_N_stringName, "TEXTLAYOUTS_SETTEXT_DESC", 1, nil)
 			frame.EditBox.label = display_N_stringName
 
 			frame.EditBox:SetText(text)
-			frame.EditBox:GetScript("OnTextChanged")(frame.EditBox)
 			
+			-- DefaultText is the text that the string will be reverted to if the user pressed the rest button.
 			local DefaultText = stringSettings.DefaultText
 			if DefaultText == "" then
 				DefaultText = L["TEXTLAYOUTS_BLANK"]
 			else
-				DefaultText = ("%q"):format(DogTag:ColorizeCode(DefaultText))
+				DefaultText = DogTag:ColorizeCode(DefaultText)
 			end
 			frame.Default.DefaultText = DefaultText
-			TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", ttText, nil, 1)
 			
-			-- Ttest the string and its tags & syntax
+			-- Test the string and its tags & syntax
 			frame.Error:SetText(TMW:TestDogTagString(CI.icon, text))
 			
 			previousFrame = frame
 			
-			TEXT:SetTextDisplayContainerHeight(frame)
+			-- Update the height of the text display so that there is room for errors to be displayed.
+			TEXT:ResizeTextDisplayFrame(frame)
 		end
 		
 		for i = max(layoutSettings.n + 1, 1), #TEXT do
 			TEXT[i]:Hide()
 		end
 		
-		TEXT:ResizeParentFrame()
-		
 		layoutName = TEXT:GetLayoutName(layoutSettings, GUID, true)
 	else
 		layoutName = "UNKNOWN LAYOUT: " .. (GUID or "<?>")
 	end
 
-	if TEXT[1] then
-		TEXT[1]:SetPoint("TOPLEFT", TellMeWhen_TextDisplayOptions.Layout, "BOTTOMLEFT", 0, 16)
-	end
-	
+	-- Set the text of the dropdown to pick the text layout.
 	TellMeWhen_TextDisplayOptions.Layout.PickLayout:SetText("|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
 	
+	-- Set the error text for the entire layout (show if we are using a fallback layout)
 	TellMeWhen_TextDisplayOptions.Layout.Error:SetText(isFallback and L["TEXTLAYOUTS_ERROR_FALLBACK"] or nil)
+
+	-- After we have updated the height of all the child frames, update the height of the parent frame.
+	TEXT:ResizeParentFrame()
 	
+	-- Set the tooltip of the button that opens the layout settings for the currently used text layout
 	TMW:TT(TellMeWhen_TextDisplayOptions.Layout.LayoutSettings, "TEXTLAYOUTS_LAYOUTSETTINGS", L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"]:format(layoutName), nil, 1)
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", TEXT, "LoadConfig")
@@ -311,7 +314,7 @@ function TEXT:ResizeParentFrame()
 	TMW:AnimateHeightChange(TellMeWhen_TextDisplayOptions, height, 0.1)
 end
 
-function TEXT:SetTextDisplayContainerHeight(frame)
+function TEXT:ResizeTextDisplayFrame(frame)
 	local height = 1
 	
 	height = height + frame.EditBox:GetHeight()

@@ -115,7 +115,7 @@
 						TMW:CInit(self, {
 							setting = self:GetParent():GetID(),
 							OnTextChanged = function(self)
-								TMW.TEXT:SetTextDisplayContainerHeight(self:GetParent())
+								TMW.TEXT:ResizeTextDisplayFrame(self:GetParent())
 							end,
 							OnEditFocusLost = function(self)
 								TMW.TEXT:LoadConfig()
@@ -279,9 +279,6 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						hooksecurefunc(self.Error, "SetText", function(self, text)
-							TMW.TEXT:ResizeParentFrame()
-						end)
 						self.Error:SetWidth(self:GetWidth() - 20)
 					</OnLoad>
 				</Scripts>
