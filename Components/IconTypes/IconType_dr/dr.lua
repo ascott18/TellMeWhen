@@ -286,64 +286,60 @@ end
 
 local CheckCategories
 do	-- CheckCategories
-	local func = TMW:MakeSingleArgFunctionCached(function(NameArray)
-		local categoryTEMP = setmetatable({}, {
-			__index = function(t, k)
-				-- a ghetto sort mechanism
-				local len = 1
-				for k, v in pairs(t) do
-					len = len + 1
-				end
-				local str = format("%3.0f\001", len)
-				t[k] = str
-				return str
-			end
-		})
+	local length = 0
+	local categories = setmetatable({}, {
+		__index = function(t, k)
+			local tbl = {
+				order = length,
+				str = "",
+			}
+			length = length + 1
+			t[k] = tbl
+			return tbl
+		end
+	})
 
-		local firstCategory, doWarn
+	local func = function(NameArray)
+		local firstCategory
 		local append = ""
 
 		for i, IDorName in ipairs(NameArray) do
 			for category, str in pairs(TMW.BE.dr) do
 				if TMW:IsStringInSemicolonList(str, IDorName) or TMW:GetSpellNames(str, 1, nil, 1, 1)[IDorName] then
-					if not firstCategory then
-						firstCategory = category
-					end
-					categoryTEMP[category] = categoryTEMP[category] .. ";" .. TMW:RestoreCase(IDorName)
-					if firstCategory ~= category then
-						doWarn = true
-					end
+					
+					firstCategory = firstCategory or category
+
+					categories[category].str = categories[category].str .. ";" .. TMW:RestoreCase(IDorName)
 				end
 			end
 		end
 
-		if next(categoryTEMP) then
-			for category, string in TMW:OrderedPairs(categoryTEMP, "values") do
-				string = strmatch(string, ".*\001(.*)")
-				append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(string))
-			end
+		local doWarn = length > 1
+
+		for category, data in TMW:OrderedPairs(categories, TMW.OrderSort, true) do
+			append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(data.str))
 		end
+
+		wipe(categories)
+		length = 0
 		
-		return {
-			append = append,
-			doWarn = doWarn,
-			firstCategory = firstCategory,
-		}
-	end)
+		return append, doWarn, firstCategory
+	end
 
 	CheckCategories = function(icon)
-		local result = func(icon.Names.Array)
-		icon:SetInfo("spell", result.firstCategory)
+		local append, doWarn, firstCategory = func(icon.Names.Array)
+
+		icon:SetInfo("spell", firstCategory)
 
 		if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
-			if result.doWarn then
+			if doWarn then
 				TMW.HELP:Show{
 					code = "ICON_DR_MISMATCH",
 					icon = icon,
 					relativeTo = TellMeWhen_ChooseName,
 					x = 0,
 					y = 0,
-					text = format(L["WARN_DRMISMATCH"] .. result.append)
+					text = format(L["WARN_DRMISMATCH"] .. append)
 				}
 			else
 				TMW.HELP:Hide("ICON_DR_MISMATCH")
