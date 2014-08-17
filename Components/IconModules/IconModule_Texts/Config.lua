@@ -37,6 +37,8 @@ if not TEXT then return end
 
 LibStub("AceHook-3.0"):Embed(TEXT)
 
+
+
 local DEFAULT_LAYOUT_SETTINGS = TMW.db.global.TextLayouts["\000"]
 TMW.db.global.TextLayouts["\000"] = nil
 
@@ -44,7 +46,11 @@ local DEFAULT_DISPLAY_SETTINGS = DEFAULT_LAYOUT_SETTINGS[1]
 DEFAULT_LAYOUT_SETTINGS[1] = nil
 
 
+
+
 TEXT.usedStrings = {}
+
+
 
 function TEXT:GetTextLayoutSettings(GUID)
 	return GUID and rawget(TMW.db.global.TextLayouts, GUID) or nil
@@ -209,7 +215,6 @@ local function ttText(self)
 	return nil
 end
 
-
 function TEXT:LoadConfig()
 	if not TellMeWhen_TextDisplayOptions or not CI.icon then
 		return
@@ -331,7 +336,9 @@ end
 
 
 
-
+-- Explicitly sets the text layouts used by an icon on that icon's settings
+-- in case that icon is only inheriting from its group.
+-- This makes sure that the layout is the same in the destination as it was in the source.
 TMW:RegisterCallback("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", function(event, ics, gs)
 	if not ics.SettingsPerView then
 		return
@@ -352,7 +359,15 @@ end)
 
 
 
+
+
+-- -------------------------
+-- ACE3 CONFIG TEMPLATES
+-- -------------------------
+
 local function deepRecScanTableForLayout(profile, GUID, table, ...)
+	-- The vararg here acts like a stack, containing the key of
+	-- everything we've scanned to get to this depth.
 	local n = 0
 
 	for k, v in pairs(table) do
@@ -380,6 +395,9 @@ local function deepRecScanTableForLayout(profile, GUID, table, ...)
 	return n
 end
 function TEXT:GetNumTimesUsed(layoutGUID)
+	-- This function returns a string that lists all of the profiles that use the given text layout
+	-- along with how many times it is used in each profile.
+
 	TEXT.TextLayout_NumTimesUsedTemp = wipe(TEXT.TextLayout_NumTimesUsedTemp or {})
 	
 	local result = ""
@@ -406,24 +424,6 @@ function TEXT:Display_IsDefault(displaySettings)
 	return not not TMW:DeepCompare(DEFAULT_DISPLAY_SETTINGS, displaySettings)
 end
 
-function TEXT:Layout_IsDefault(layoutSettings)
-	-- Remove the GUID from the layoutSettings, because otherwise it will always be non-default.
-	local GUID = layoutSettings.GUID
-	layoutSettings.GUID = ""
-	
-	-- safecall to avoid any disasters because layoutSettings is modified and is awaiting the restoration of its original state.
-	local isDefault = TMW.safecall(TMW.DeepCompare, TMW, DEFAULT_LAYOUT_SETTINGS, layoutSettings)
-	
-	-- Put the GUID back in.
-	layoutSettings.GUID = GUID
-	
-	return isDefault
-end
-
-
--- -------------------
--- ACE3 CONFIG TEMPLATES
--- -------------------
 	
 TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 	name = L["TEXTLAYOUTS_SETGROUPLAYOUT"],
@@ -1255,13 +1255,13 @@ end)
 
 
 
+
 -- -------------------
 -- IMPORT/EXPORT
 -- -------------------
 
 local textlayout = TMW.Classes.SharableDataType:New("textlayout", 15)
 textlayout.extrasMap = {"GUID"}
-
 function textlayout:Import_ImportData(Item, GUID)
 	assert(type(GUID) == "string")
 	
@@ -1300,7 +1300,6 @@ function textlayout:Import_ImportData(Item, GUID)
 	-- Run an update incase any icons should be using the new layout.
 	TMW:Update()
 end
-
 function textlayout:Import_CreateMenuEntry(info, Item, doLabel)
 	info.text = TMW.TEXT:GetLayoutName(Item.Settings, Item:GetExtra("GUID"))
 
@@ -1310,7 +1309,7 @@ function textlayout:Import_CreateMenuEntry(info, Item, doLabel)
 end
 
 
--- Build a menu for global text layouts
+-- Build a menu for text layouts
 TMW.C.SharableDataType.types.database:RegisterMenuBuilder(17, function(Item_database)
 	local db = Item_database.Settings
 
@@ -1343,7 +1342,7 @@ TMW.C.SharableDataType.types.database:RegisterMenuBuilder(17, function(Item_data
 	end
 end)
 
--- Build a menu for the profile's text layouts (this handles layouts that are still attached to a profile.)
+-- Build a menu for profile text layouts (layouts that are still attached to a profile, should only be from an import string.)
 TMW.C.SharableDataType.types.profile:RegisterMenuBuilder(20, function(Item_profile)
 
 	if Item_profile.Settings.TextLayouts then
@@ -1430,7 +1429,6 @@ end)
 
 
 textlayout.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.0+")
-
 function textlayout:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local GUID = EXPORTS[self.type]
@@ -1439,7 +1437,6 @@ function textlayout:Export_SetButtonAttributes(editbox, info)
 	info.text = text
 	info.tooltipTitle = text
 end
-
 function textlayout:Export_GetArgs(editbox)
 	-- settings, defaults, ...
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
@@ -1449,6 +1446,9 @@ function textlayout:Export_GetArgs(editbox)
 	
 	return settings, TMW.Defaults.global.TextLayouts["**"], GUID
 end
+
+
+
 
 
 -- Determine if the requesting editbox can import or export a text layout.

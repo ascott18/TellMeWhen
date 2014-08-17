@@ -41,6 +41,13 @@ TEXT.MasqueSkinnableTexts = {
 }
 
 
+
+
+
+-- -------------------
+-- DEFAULTS
+-- -------------------
+
 TMW:RegisterDatabaseDefaults{
 	global = {
 		TextLayouts = {
@@ -108,6 +115,9 @@ TMW:MergeDefaultsTables({
 		},
 	},
 }, TMW.Icon_Defaults)
+
+
+
 
 
 -- -------------------
@@ -531,6 +541,13 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...
 	end
 end)
 
+
+
+
+
+-- -------------------
+-- UTILITY FUNCTIONS
+-- -------------------
 
 function TEXT:GetTextLayoutForIconSettings(gs, ics, view)
 	-- arg3, view, is optional. Defaults to the current view
