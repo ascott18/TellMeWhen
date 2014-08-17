@@ -1367,7 +1367,7 @@ do -- ordered pairs
 		--return compare(a, b)
 	end
 
-	local function next(t, state)
+	local function orderedNext(t, state)
 		local orderedIndex = tables[t]
 		
 		if state == nil then
@@ -1392,8 +1392,11 @@ do -- ordered pairs
 		return
 	end
 
-	--function TMW:OrderedPairs(t, func, rev)
 	function TMW:OrderedPairs(t, compare, byValues, rev)
+		if not next(t) then
+			return TMW.NULLFUNC
+		end
+
 		local orderedIndex = tremove(unused) or {}
 		local type_comparand = nil
 		for key, value in pairs(t) do
@@ -1426,7 +1429,7 @@ do -- ordered pairs
 		sort(orderedIndex, sorter)
 		tables[t] = orderedIndex
 
-		return next, t
+		return orderedNext, t
 	end
 end
 
