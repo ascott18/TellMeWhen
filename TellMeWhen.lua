@@ -1320,14 +1320,9 @@ do -- ordered pairs
 	local tables = {}
 	local unused = {}
 
-	local sortByValues, reverse
-	local function sorter(a, b)
-		if sortByValues then
-			local val_a, val_b = sortByValues[a], sortByValues[b]
-			if val_a ~= val_b then
-				a, b = val_a, val_b
-			end
-		end
+	local sortByValues, compareFunc, reverse
+
+	local function betterCompare(a, b)
 		local ta, tb = type(a), type(b)
 		if ta ~= tb then
 			if reverse then
@@ -1350,6 +1345,26 @@ do -- ordered pairs
 			end
 			return tostring(a) < tostring(b)
 		end
+	end
+
+	local function sorter(a, b)
+		if sortByValues then
+			local val_a, val_b = sortByValues[a], sortByValues[b]
+			if val_a ~= val_b then
+				a, b = val_a, val_b
+			end
+		end
+
+		if compareFunc then
+			return compareFunc(a, b)
+		end
+
+		if reverse then
+			return a > b
+		end
+		return a < b
+
+		--return compare(a, b)
 	end
 
 	local function next(t, state)
@@ -1377,19 +1392,38 @@ do -- ordered pairs
 		return
 	end
 
-	function TMW:OrderedPairs(t, func, rev)
+	--function TMW:OrderedPairs(t, func, rev)
+	function TMW:OrderedPairs(t, compare, byValues, rev)
 		local orderedIndex = tremove(unused) or {}
-		for key in pairs(t) do
+		local type_comparand = nil
+		for key, value in pairs(t) do
 			orderedIndex[#orderedIndex + 1] = key
+
+			-- Determine the types of what we're comparing by.
+			-- If we find more than one type, use betterCompare since it handles type mismatches.
+			if compare == nil then
+				local oldType = type_comparand
+				if byValues then
+					type_comparand = type(value)
+				else
+					type_comparand = type(key)
+				end
+				if oldType ~= type_comparand then
+					compare = compare or betterCompare
+				end
+			end
 		end
+
 		reverse = rev
-		if func == "values" then
-			func = sorter
+		compareFunc = compare
+
+		if byValues then
 			sortByValues = t
 		else
 			sortByValues = nil
 		end
-		sort(orderedIndex, func or sorter)
+
+		sort(orderedIndex, sorter)
 		tables[t] = orderedIndex
 
 		return next, t

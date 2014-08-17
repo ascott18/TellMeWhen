@@ -167,7 +167,7 @@ end
 function TEXT:CopyString_DropDown()
 	TEXT:CacheUsedStrings()
 	
-	for text, num in TMW:OrderedPairs(TEXT.usedStrings, "values", true) do
+	for text, num in TMW:OrderedPairs(TEXT.usedStrings, nil, true, true) do
 		local info = TMW.DD:CreateInfo()
 		
 		if #text > 50 then

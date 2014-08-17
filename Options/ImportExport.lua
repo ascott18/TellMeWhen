@@ -1042,9 +1042,6 @@ end
 -- EXPORT DESTINATIONS
 -- -----------------------
 
-local function DestinationsOrderedSort(a, b)
-	return SharableDataType.instances[a].order < SharableDataType.instances[b].order
-end
 
 local ExportDestination = TMW:NewClass("ExportDestination")
 ExportDestination.types = {}
@@ -1057,7 +1054,7 @@ end
 function ExportDestination:HandleTopLevelMenu()
 	local IMPORTS, EXPORTS = EDITBOX:GetAvailableImportExportTypes()
 	
-	for k, dataType in TMW:OrderedPairs(SharableDataType.instances, DestinationsOrderedSort) do
+	for k, dataType in TMW:OrderedPairs(SharableDataType.instances, TMW.OrderSort, true) do
 		if EXPORTS[dataType.type] then
 			local info = TMW.DD:CreateInfo()
 
