@@ -1146,6 +1146,8 @@ do -- InNLengthTable
 		return state.k, state.t[state.k]
 	end
 
+	--- Iterates over an array-style table that has a key "n" to indicate the length of the table.
+	-- Returns (key, value) pairs for each iteration.
 	function TMW:InNLengthTable(arg)
 		if arg then
 			return iter, getstate(0, arg)
@@ -1204,9 +1206,11 @@ do -- InIconSettings
 		return gs.Icons[iconID], gs, state.domain, state.groupID, iconID -- ics, gs, domain, groupID, iconID
 	end
 
+	--- Iterates over icon settings in the current profile
+	-- @param domain [string|nil] If groupID is also defined, it will restrict this iteration to a single group.
+	-- @param groupID [number|nil] If domain is also defined, it will restrict this iteration to a single group.
+	-- @return Iterator that will return (iconSettings, groupSettings, domain, groupID, iconID) for each iteration.
 	function TMW:InIconSettings(domain, groupID)
-		-- current icon (the second param here) is incremented at the beginning of the iterator call,
-		-- so it should be passed in as 0, not 1
 		return iter, getstate(domain, groupID)
 	end
 end
@@ -1242,6 +1246,8 @@ do -- InGroupSettings
 		return TMW.db[state.domain].Groups[state.cg], state.domain, state.cg -- group settings, domain, groupID
 	end
 
+	--- Iterates over group settings in the current profile
+	-- @return Iterator that will return (groupSettings, domain, groupID) for each iteration.
 	function TMW:InGroupSettings()
 		return iter, getstate()
 	end
@@ -1278,6 +1284,8 @@ do -- InGroups
 		return TMW[state.domain][state.cg], state.domain, state.cg -- group, domain, groupID
 	end
 
+	--- Iterates over all groups that have been created by TellMeWhen.
+	-- @return Iterator that will return (group, domain, groupID) for each iteration.
 	function TMW:InGroups()
 		return iter, getstate()
 	end
@@ -1310,6 +1318,8 @@ do -- vararg
 		return i, state[i], state.l
 	end
 
+	--- Iterates over each variable in a vararg.
+	-- @return Iterator that will return (i, var, totalNumVars) for each iteration.
 	function TMW:Vararg(...)
 		return iter, getstate(...)
 	end
@@ -1322,6 +1332,7 @@ do -- ordered pairs
 
 	local sortByValues, compareFunc, reverse
 
+	-- An alternative comparison function that can handle mismatched types.
 	local function betterCompare(a, b)
 		local ta, tb = type(a), type(b)
 		if ta ~= tb then
@@ -1392,6 +1403,12 @@ do -- ordered pairs
 		return
 	end
 
+	--- Iterates over the table in an ordered fashion, without modifying the table.
+	-- @param t [table] The table to iterate over
+	-- @param compare [function|nil] The comparison function that will be used for sorting the keys or values of the table. Defaults to regular ascending order.
+	-- @param byValues [boolean|nil] True to have the iteration order based on values (values will be passed to the compare function if defined), false/nil to sort by keys.
+	-- @param rev [boolean|nil] True to reverse the sorted order of the iteration.
+	-- @return Iterator that will return (key, value) for each iteration.
 	function TMW:OrderedPairs(t, compare, byValues, rev)
 		if not next(t) then
 			return TMW.NULLFUNC
@@ -1503,6 +1520,12 @@ do -- Callback Lib
 		TMW:RegisterCallback(event, RunonceWrapper, arg1)
 	end
 
+	--- Register a callback with TMW.
+	-- Possible call signatures are:
+	-- - TMW:RegisterCallback("TMW_EVENT", function() ... end) - Will call function(...)
+	-- - TMW:RegisterCallback("TMW_EVENT", function(arg) ... end, arg) - Will call function(arg, ...)
+	-- - TMW:RegisterCallback("TMW_EVENT", table) - Will call table:TMW_EVENT(...)
+	-- - TMW:RegisterCallback("TMW_EVENT", table, funcName) - Will call table[funcName](table, ...)
 	function TMW:RegisterCallback(event, func, arg1)
 		TMW:ValidateType("2 (event)", "TMW:RegisterCallback(event, func, arg1)", event, "string")
 		TMW:ValidateType("3 (func)", "TMW:RegisterCallback(event, func, arg1)", func, "function;table")
@@ -1545,12 +1568,15 @@ do -- Callback Lib
 		end
 	end
 
+	--- Unregister a callback from TMW.
+	-- Call signature should be the same as how TMW:RegisterCallback() was called to register the callback. 
 	function TMW:UnregisterCallback(event, func, arg1)
-		if type(func) == "table" then
-			local object = func
-			func = object[arg1 or event]
-			arg1 = object
-		end
+		TMW:ValidateType("2 (event)", "TMW:RegisterCallback(event, func, arg1)", event, "string")
+		TMW:ValidateType("3 (func)", "TMW:RegisterCallback(event, func, arg1)", func, "function;table")
+		TMW:ValidateType("4 (arg1)", "TMW:RegisterCallback(event, func, arg1)", arg1, "!boolean")
+		
+
+		func, arg1 = DetermineFuncAndArg(event, func, arg1)
 		arg1 = arg1 or true
 
 		local funcs = callbackregistry[event]
@@ -1578,6 +1604,8 @@ do -- Callback Lib
 		end
 	end
 	
+	--- Unregisters all callbacks for a given event.
+	-- @param event [string] The event to unregister all callbacks from.
 	function TMW:UnregisterAllCallbacks(event)
 		
 		local funcs = callbackregistry[event]
@@ -1591,6 +1619,9 @@ do -- Callback Lib
 	end
 	
 	local curEvent, curFunc, curArg1
+	--- Fires an event, calling all relevant callbacks
+	-- @param event [string] A string, beginning with "TMW_", that represents the event.
+	-- @param ... [...] The parameters to be passed to the callbacks.
 	function TMW:Fire(event, ...)
 		local funcs = callbackregistry[event]
 
@@ -1651,7 +1682,7 @@ do -- Callback Lib
 		end
 	end
 
-	--- Unregisters the currently firing callback
+	--- Unregisters the currently firing callback. Works with nested callbacks.
 	function TMW:UnregisterThisCallback()
 		TMW:UnregisterCallback(curEvent, curFunc, curArg1)
 	end
@@ -1816,6 +1847,7 @@ function TMW:OnInitialize()
 	--------------- Events/OnUpdate ---------------
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
+	-- TMW:PLAYER_LOGIN() handles the next stage of initialization.
 	TMW:RegisterEvent("PLAYER_LOGIN")
 	
 	TMW.OnInitialize = nil
@@ -1831,7 +1863,7 @@ function TMW:Initialize()
 	-- if upgrades and database initialization are done before those addons have a chance to load.
 	
 	
-	TMW.Initialize = TMW.NULLFUNC
+	TMW.Initialize = nil
 	TMW.Initialized = true
 	
 	TMW:InitializeDatabase()
@@ -1939,11 +1971,13 @@ function TMW:PLAYER_LOGIN()
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 
 	TMW:ProcessEquivalencies()
+
+	TMW:Initialize()
 	
 	-- This should be done twice to get everything aware of everything else's GUID.
 	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
 	TMW:Update()
-	TMW:Update()
+	--TMW:Update()
 end
 
 
@@ -3180,9 +3214,7 @@ do	-- TMW:OnUpdate()
 end
 
 
-function TMW:UpdateNormally()
-	TMW:Initialize()
-	
+function TMW:UpdateNormally()	
 	if not TMW.InitializedFully then
 		return
 	end
@@ -3257,106 +3289,106 @@ end
 
 do -- TMW:UpdateViaCoroutine()
 
--- Blizzard's execution cap in combat is 200ms.
--- We will be extra safe and go for 100ms.
--- But actually, we will use 50ms, because somehow we are still getting extremely rare 'script ran too long' errors
-local COROUTINE_MAX_TIME_PER_FRAME = 50
+	-- Blizzard's execution cap in combat is 200ms.
+	-- We will be extra safe and go for 100ms.
+	-- But actually, we will use 50ms, because somehow we are still getting extremely rare 'script ran too long' errors
+	local COROUTINE_MAX_TIME_PER_FRAME = 50
 
-local NumCoroutinesQueued = 0
-local CoroutineStartTime
-local UpdateCoroutine
+	local NumCoroutinesQueued = 0
+	local CoroutineStartTime
+	local UpdateCoroutine
 
-local safecall_safe = TMW.safecall
+	local safecall_safe = TMW.safecall
 
-local function safecall_coroutine(func, ...)
-	return true, func(...)
-end
-
-local function CheckCoroutineTermination()
-	if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
-		coroutine.yield(UpdateCoroutine)
+	local function safecall_coroutine(func, ...)
+		return true, func(...)
 	end
-end
 
-local function OnUpdateDuringCoroutine(self)
-	-- This is an OnUpdate script, but don't be too concerned with performance because it is only used
-	-- when lock toggling in combat. Safety of the code (don't let it error!) is far more important than performance here.
-	time = GetTime()
-	TMW.time = time
-	
-	CoroutineStartTime = debugprofilestop()
-	
-	--if not IsAddOnLoaded("TellMeWhen_Options") then
-	--	error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
-	--end
-	
-	if NumCoroutinesQueued == 0 then
-		TMW.safecall = safecall_safe
-		safecall = safecall_safe
-		
-		--TMW:Print(L["SAFESETUP_COMPLETE"])
-		TMW:Fire("TMW_SAFESETUP_COMPLETE")
-		
-		TMW:SetScript("OnUpdate", TMW.OnUpdate)
-	else
-		-- Yielding a coroutine inside a pcall/xpcall isn't permitted,
-		-- so we will just have to temporarily throw all error protection out the window.
-		TMW.safecall = safecall_coroutine
-		safecall = safecall_coroutine
-		
-		if not UpdateCoroutine then
-			UpdateCoroutine = coroutine.create(TMW.UpdateNormally)
-			CheckCoroutineTermination() -- Make sure we haven't already exceeded this frame's threshold (from loading options, creating the coroutine, etc.)
+	local function CheckCoroutineTermination()
+		if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
+			coroutine.yield(UpdateCoroutine)
 		end
-		
-		TMW:RegisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
-		TMW:RegisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+	end
 
+	local function OnUpdateDuringCoroutine(self)
+		-- This is an OnUpdate script, but don't be too concerned with performance because it is only used
+		-- when lock toggling in combat. Safety of the code (don't let it error!) is far more important than performance here.
+		time = GetTime()
+		TMW.time = time
 		
-		if coroutine.status(UpdateCoroutine) == "dead" then
-			UpdateCoroutine = nil
-			NumCoroutinesQueued = NumCoroutinesQueued - 1
+		CoroutineStartTime = debugprofilestop()
+		
+		--if not IsAddOnLoaded("TellMeWhen_Options") then
+		--	error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
+		--end
+		
+		if NumCoroutinesQueued == 0 then
+			TMW.safecall = safecall_safe
+			safecall = safecall_safe
+			
+			--TMW:Print(L["SAFESETUP_COMPLETE"])
+			TMW:Fire("TMW_SAFESETUP_COMPLETE")
+			
+			TMW:SetScript("OnUpdate", TMW.OnUpdate)
 		else
-			local success, err = coroutine.resume(UpdateCoroutine)
-			if not success then
-				--TMW:Printf(L["SAFESETUP_FAILED"], err)
-				TMW:Fire("TMW_SAFESETUP_COMPLETE")
-				TMW:Error(err)
+			-- Yielding a coroutine inside a pcall/xpcall isn't permitted,
+			-- so we will just have to temporarily throw all error protection out the window.
+			TMW.safecall = safecall_coroutine
+			safecall = safecall_coroutine
+			
+			if not UpdateCoroutine then
+				UpdateCoroutine = coroutine.create(TMW.UpdateNormally)
+				CheckCoroutineTermination() -- Make sure we haven't already exceeded this frame's threshold (from loading options, creating the coroutine, etc.)
+			end
+			
+			TMW:RegisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
+			TMW:RegisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+
+			
+			if coroutine.status(UpdateCoroutine) == "dead" then
+				UpdateCoroutine = nil
+				NumCoroutinesQueued = NumCoroutinesQueued - 1
+			else
+				local success, err = coroutine.resume(UpdateCoroutine)
+				if not success then
+					--TMW:Printf(L["SAFESETUP_FAILED"], err)
+					TMW:Fire("TMW_SAFESETUP_COMPLETE")
+					TMW:Error(err)
+				end
+			end
+			
+			TMW:UnregisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
+			TMW:UnregisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+		end
+	end
+
+	function TMW:UpdateViaCoroutine()
+		if NumCoroutinesQueued == 0 then
+			--TMW:Print(L["SAFESETUP_TRIGGERED"])
+			TMW:Fire("TMW_SAFESETUP_TRIGGERED")
+			TMW:SetScript("OnUpdate", OnUpdateDuringCoroutine)
+		end
+		NumCoroutinesQueued = NumCoroutinesQueued + 1
+	end
+
+	TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+		if TMW.InitializedFully then
+			if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.Locked then
+				TMW:LockToggle()
 			end
 		end
-		
-		TMW:UnregisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
-		TMW:UnregisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
-	end
-end
-
-function TMW:UpdateViaCoroutine()
-	if NumCoroutinesQueued == 0 then
-		--TMW:Print(L["SAFESETUP_TRIGGERED"])
-		TMW:Fire("TMW_SAFESETUP_TRIGGERED")
-		TMW:SetScript("OnUpdate", OnUpdateDuringCoroutine)
-	end
-	NumCoroutinesQueued = NumCoroutinesQueued + 1
-end
-
-TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
-	if TMW.InitializedFully then
-		if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.Locked then
-			TMW:LockToggle()
-		end
-	end
-end)
-
-do
-	-- Auto-loads options if AllowCombatConfig is enabled.
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-		if TMW.db.global.AllowCombatConfig then
-			TMW:UnregisterThisCallback()
-			TMW.ALLOW_LOCKDOWN_CONFIG = true
-			TMW:LoadOptions()
-		end
 	end)
-end
+
+	do
+		-- Auto-loads options if AllowCombatConfig is enabled.
+		TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+			if TMW.db.global.AllowCombatConfig then
+				TMW:UnregisterThisCallback()
+				TMW.ALLOW_LOCKDOWN_CONFIG = true
+				TMW:LoadOptions()
+			end
+		end)
+	end
 end
 
 -- TMW:Update() sets up all groups, icons, and anything else.
