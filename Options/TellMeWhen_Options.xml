@@ -239,8 +239,7 @@
 		<Scripts>
 			<OnLoad>				
 				function self:AdjustHeight()
-					--self:SetHeight(11 + self.Name:GetHeight())
-					TMW:AnimateHeightChange(self, 11 + self.Name:GetHeight(), 0.1)
+					self:SetHeight(11 + self.Name:GetHeight())
 				end
 						
 				function self:SetLabels(title, text)
@@ -426,8 +425,7 @@
 				self.Header:SetText(TMW.L["ICONMENU_UNITSTOWATCH"])
 				
 				function self:AdjustHeight()
-					--self:SetHeight(15 + self.UnitConditions:GetHeight()+self.Unit:GetHeight())
-					TMW:AnimateHeightChange(self, 15 + self.UnitConditions:GetHeight()+self.Unit:GetHeight(), 0.1)
+					self:SetHeight(15 + self.UnitConditions:GetHeight()+self.Unit:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>

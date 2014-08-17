@@ -310,8 +310,7 @@ function TEXT:ResizeParentFrame()
 		end
 	end
 	
-	--TellMeWhen_TextDisplayOptions:SetHeight(height)
-	TMW:AnimateHeightChange(TellMeWhen_TextDisplayOptions, height, 0.1)
+	TellMeWhen_TextDisplayOptions:SetHeight(height)
 end
 
 function TEXT:ResizeTextDisplayFrame(frame)

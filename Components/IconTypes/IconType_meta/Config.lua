@@ -105,7 +105,7 @@ function ME:LoadConfig()
 		mg.icon:SetGUID(GUID)
 	end
 
-	TMW:AnimateHeightChange(TellMeWhen_MetaIconOptions, (#settings * ME[1]:GetHeight()) + 35, 0.1)
+	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 35)
 	
 	for f=#settings+1, #ME do
 		ME[f]:Hide()

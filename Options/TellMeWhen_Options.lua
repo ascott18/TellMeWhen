@@ -306,37 +306,6 @@ function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition,
 	
 end
 
-function TMW:AnimateHeightChange(f, endHeight, duration)
-	
-	-- This function currently disabled because of frame level issues.
-	-- Top frames need to be above lower frames, but editboxes seem to go underneath everything for some reason.
-	-- It doesn't look awful, but I'm going to leave it disabled till I decide otherwise.
-	f:SetHeight(endHeight)
-	do return end
-	
-	if not f.__animateHeightHooked then
-		f.__animateHeightHooked = true
-		f:HookScript("OnUpdate", function(f)
-				if f.__animateHeight_duration then
-					if TMW.time - f.__animateHeight_startTime > f.__animateHeight_duration then
-						f.__animateHeight_duration = nil
-						f:SetHeight(f.__animateHeight_end)
-						return  
-					end
-					
-					local pct = (TMW.time - f.__animateHeight_startTime)/f.__animateHeight_duration
-					
-					f:SetHeight((pct*f.__animateHeight_delta)+f.__animateHeight_start)
-				end
-		end)    
-	end
-	
-	f.__animateHeight_start = f:GetHeight()
-	f.__animateHeight_end = endHeight
-	f.__animateHeight_delta = f.__animateHeight_end - f.__animateHeight_start
-	f.__animateHeight_startTime = TMW.time
-	f.__animateHeight_duration = duration
-end
 
 
 
@@ -1581,6 +1550,9 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 	CheckDisabled = TMW.NULLFUNC,
 
 	OnNewInstance_Panel = function(self)
+		if self:GetHeight() <= 0 then
+			self:SetHeight_base(1)
+		end
 		local hue = 2/3
 		
 		self.Background:SetTexture(hue, hue, hue) -- HUEHUEHUE
@@ -1611,6 +1583,36 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			get(self.supplementalData.OnSetup, self, panelInfo, self.supplementalData) 
 		end
 	end,
+
+	--[[
+	SetHeight = function(self, endHeight)
+		-- This function currently disabled because of frame level issues.
+		-- Top frames need to be above lower frames, but editboxes seem to go underneath everything for some reason.
+		-- It doesn't look awful, but I'm going to leave it disabled till I decide otherwise.
+		
+		if not self.__animateHeightHooked then
+			self.__animateHeightHooked = true
+			self:HookScript("OnUpdate", function()
+				if self.__animateHeight_duration then
+					if TMW.time - self.__animateHeight_startTime > self.__animateHeight_duration then
+						self.__animateHeight_duration = nil
+						self:SetHeight_base(self.__animateHeight_end)
+						return  
+					end
+					
+					local pct = (TMW.time - self.__animateHeight_startTime)/self.__animateHeight_duration
+					
+					self:SetHeight_base((pct*self.__animateHeight_delta)+self.__animateHeight_start)
+				end
+			end)    
+		end
+		
+		self.__animateHeight_start = self:GetHeight()
+		self.__animateHeight_end = endHeight
+		self.__animateHeight_delta = self.__animateHeight_end - self.__animateHeight_start
+		self.__animateHeight_startTime = TMW.time
+		self.__animateHeight_duration = 0.1
+	end,]]
 }
 
 

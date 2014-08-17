@@ -92,8 +92,7 @@
 				self.Header:SetText(TMW.L["ICONMENU_CUSTOMTEX"])
 				
 				function self:AdjustHeight()
-				--	self:SetHeight(11 + self.CustomTex:GetHeight())
-					TMW:AnimateHeightChange(self, 11 + self.CustomTex:GetHeight(), 0.1)
+					self:SetHeight(11 + self.CustomTex:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>
