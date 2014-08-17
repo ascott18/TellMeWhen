@@ -64,7 +64,7 @@ TMW:RegisterDatabaseDefaults{
 					Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting, but it dates back to antiquity)
 					Size 		  	= 12,               -- Font size
 					Justify	 		= "CENTER",         -- 
-					JustifyV	 	= "CENTER",     -- 
+					JustifyV	 	= "MIDDLE",    		-- 
 					Outline 	  	= "THICKOUTLINE",   -- Font outline
 					Shadow			= 0,
 
