@@ -209,6 +209,7 @@ local function ttText(self)
 	return nil
 end
 
+
 function TEXT:LoadConfig()
 	if not TellMeWhen_TextDisplayOptions or not CI.icon then
 		return
@@ -297,6 +298,8 @@ function TEXT:LoadConfig()
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", TEXT, "LoadConfig")
 
+
+
 function TEXT:ResizeParentFrame()
 	local layoutHeight = 45 + TellMeWhen_TextDisplayOptions.Layout.Error:GetHeight()
 	
@@ -326,7 +329,10 @@ function TEXT:ResizeTextDisplayFrame(frame)
 	TEXT:ResizeParentFrame()
 end
 
-function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
+
+
+
+TMW:RegisterCallback("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", function(event, ics, gs)
 	if not ics.SettingsPerView then
 		return
 	end
@@ -341,8 +347,8 @@ function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
 		end
 		settingsPerView.TextLayout = GUID
 	end
-end
-TMW:RegisterCallback("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", TEXT)
+end)
+
 
 
 
@@ -373,7 +379,6 @@ local function deepRecScanTableForLayout(profile, GUID, table, ...)
 
 	return n
 end
-
 function TEXT:GetNumTimesUsed(layoutGUID)
 	TEXT.TextLayout_NumTimesUsedTemp = wipe(TEXT.TextLayout_NumTimesUsedTemp or {})
 	
@@ -396,6 +401,7 @@ function TEXT:GetNumTimesUsed(layoutGUID)
 	return result:trim("\r\n")
 end
 
+
 function TEXT:Display_IsDefault(displaySettings)
 	return not not TMW:DeepCompare(DEFAULT_DISPLAY_SETTINGS, displaySettings)
 end
@@ -414,6 +420,11 @@ function TEXT:Layout_IsDefault(layoutSettings)
 	return isDefault
 end
 
+
+-- -------------------
+-- ACE3 CONFIG TEMPLATES
+-- -------------------
+	
 TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 	name = L["TEXTLAYOUTS_SETGROUPLAYOUT"],
 	desc = L["TEXTLAYOUTS_SETGROUPLAYOUT_DESC"],
@@ -839,7 +850,7 @@ local anchorSet = {
 		},
 	},
 }
-		
+
 local textFontStringTemplate
 textFontStringTemplate = {
 	type = "group",
@@ -1187,11 +1198,6 @@ local textlayouts_toplevel = {
 	type = "group",
 	name = L["TEXTLAYOUTS"],
 	order = 20,
---[=[	set = function(info, val)
-		TMW.db.profile[info[#info]] = val
-		TMW:Update()
-	end,
-	get = function(info) return TMW.db.profile[info[#info]] end,]=]
 
 	args = {
 		addlayout = {
@@ -1215,7 +1221,7 @@ local textlayouts_toplevel = {
 }
 
 
-
+-- Handles the implementation of all the templates that are used for text layout config.
 TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsTable)
 	OptionsTable.args.textlayouts = textlayouts_toplevel
 	
@@ -1264,10 +1270,12 @@ function textlayout:Import_ImportData(Item, GUID)
 	TMW:CopyTableInPlaceWithMeta(Item.Settings, textlayout, true)
 	textlayout.GUID = GUID
 
+	-- We might have imported a default layout. Set it to be editable.
 	if textlayout.NoEdit then
 		textlayout.NoEdit = false -- must be false, not nil
 	end
 	
+	-- Calculate a new name for the layout if the name is used by another layout.
 	repeat
 		local found
 		for k, layoutSettings in pairs(TMW.db.global.TextLayouts) do
@@ -1279,6 +1287,7 @@ function textlayout:Import_ImportData(Item, GUID)
 		end
 	until not found
 	
+	-- Handle upgrades for the new layout.
 	local version = Item.Version
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
@@ -1287,6 +1296,8 @@ function textlayout:Import_ImportData(Item, GUID)
 			TMW:DoUpgrade("textlayout", version, textlayout, GUID)
 		end
 	end
+
+	-- Run an update incase any icons should be using the new layout.
 	TMW:Update()
 end
 
@@ -1299,9 +1310,41 @@ function textlayout:Import_CreateMenuEntry(info, Item, doLabel)
 end
 
 
--- Profile's text layouts
-local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
-SharableDataType_profile:RegisterMenuBuilder(20, function(Item_profile)
+-- Build a menu for global text layouts
+TMW.C.SharableDataType.types.database:RegisterMenuBuilder(17, function(Item_database)
+	local db = Item_database.Settings
+
+	if db.global.TextLayouts then
+		local isGood = false
+		for GUID, settings in pairs(db.global.TextLayouts) do
+			if GUID ~= "" and settings.GUID then
+				isGood = true
+				break
+			end
+		end
+
+		if not isGood then return end
+
+
+		local SettingsBundle = TMW.Classes.SettingsBundle:New("textlayout")
+
+		for GUID, layout in pairs(db.global.TextLayouts) do
+			local Item = TMW.Classes.SettingsItem:New("textlayout")
+
+			Item:SetParent(Item_database)
+			Item.Settings = layout
+			Item:SetExtra("GUID", GUID)
+
+			SettingsBundle:Add(Item)
+
+		end
+
+		SettingsBundle:CreateParentedMenuEntry(L["TEXTLAYOUTS"])
+	end
+end)
+
+-- Build a menu for the profile's text layouts (this handles layouts that are still attached to a profile.)
+TMW.C.SharableDataType.types.profile:RegisterMenuBuilder(20, function(Item_profile)
 
 	if Item_profile.Settings.TextLayouts then
 		local isGood = false
@@ -1408,16 +1451,20 @@ function textlayout:Export_GetArgs(editbox)
 end
 
 
+-- Determine if the requesting editbox can import or export a text layout.
 TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
 	
 	import.textlayout_new = true
 	
 	if editbox == TMW.IE.ExportBox and CI.icon then
+		-- The main export box in the Icon Editor. Work with the current icon's layout.
 		local GUID = TEXT:GetTextLayoutForIcon(CI.icon)
 		
 		import.textlayout_overwrite = GUID
 		export.textlayout = GUID
+
 	elseif editbox.IsImportExportWidget then
+		-- A widget in the icon editor. Allow exports and import overwrites if it is on a text layout's options page.
 		local info = editbox.obj.userdata		
 		import.textlayout_overwrite = findlayout(info)
 		export.textlayout = findlayout(info)
@@ -1451,5 +1498,4 @@ local function GetTextLayouts(event, strings, type, settings)
 		end
 	end
 end
-
 TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", GetTextLayouts)

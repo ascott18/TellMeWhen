@@ -393,6 +393,8 @@ database:RegisterMenuBuilder(20, function(Item_database)
 		end
 	end
 
+	TMW.DD:AddSpacer()
+	
 	Bundle:Evaluate()
 end)
 
@@ -641,8 +643,6 @@ database:RegisterMenuBuilder(15, function(Item_database)
 		end
 
 		Bundle:CreateParentedMenuEntry(L["UIPANEL_GROUPS_GLOBAL"])
-
-		TMW.DD:AddSpacer()
 	end
 end)
 

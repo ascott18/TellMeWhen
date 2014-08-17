@@ -355,9 +355,7 @@ SharableDataType_database:RegisterMenuBuilder(16, function(Item_database)
 			end
 		end
 
-		if SettingsBundle:CreateParentedMenuEntry(L["CODESNIPPETS"]) then
-			TMW.DD:AddSpacer()
-		end
+		SettingsBundle:CreateParentedMenuEntry(L["CODESNIPPETS"])
 	end
 end)
 
