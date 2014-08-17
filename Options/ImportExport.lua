@@ -90,13 +90,18 @@ function Item:SetParent(parent)
 end
 
 
-function Item:CreateMenuEntry()
+function Item:CreateMenuEntry(doLabel)
 	local info = TMW.DD:CreateInfo()
 	info.value = self
 	info.hasArrow = true
 	info.notCheckable = true
 
-	SharableDataType.types[self.Type]:Import_CreateMenuEntry(info, self)
+	SharableDataType.types[self.Type]:Import_CreateMenuEntry(info, self, doLabel)
+
+	if doLabel then
+		-- Color everything before the first colon a light blue (highlights the type of data being exported, for clarity)
+		info.text = info.text:gsub("^(.-):", "|cff00ffff%1|r:")
+	end
 
 	if self:GetExtra("SourcePlayer") then
 		local fromLine = FROM .. " " .. self:GetExtra("SourcePlayer")
@@ -328,8 +333,12 @@ function profile:Import_ImportData(Item, profileName)
 	end
 end
 
-function profile:Import_CreateMenuEntry(info, Item)
+function profile:Import_CreateMenuEntry(info, Item, doLabel)
 	info.text = Item:GetExtra("Name")
+
+	if doLabel then
+		info.text = L["fPROFILE"]:format(info.text)
+	end
 end
 
 function profile:Import_GetGroupedBundleEntryText(Bundle)
@@ -447,6 +456,47 @@ end
 
 
 
+---------- Gloabl Groups ----------
+local globalgroups = SharableDataType:New("globalgroups", 11)
+
+globalgroups.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("7.0.0+")
+function globalgroups:Export_SetButtonAttributes(editbox, info)
+	local text = L["fGROUPS"]:format(L["EXPORT_ALLGLOBALGROUPS"])
+	info.text = text
+	info.tooltipTitle = text
+	info.func = function(button, ExportDestination)
+		-- type, settings, defaults, ...
+		self.doHideWarning = true
+
+		ExportDestination:Export(self.type, {}, {})
+
+		if self.doHideWarning then
+			TMW.HELP:Hide("ICON_EXPORT_MULTIPLE")
+		end
+	end
+end
+TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, type, settings)
+	if type == "globalgroups" then
+		tremove(strings, 1)
+		local num = 0
+		for gs, domain, groupID in TMW:InGroupSettings() do
+			if domain == "global" then
+				num = num + 1
+				TMW:GetSettingsStrings(strings, "group", gs, TMW.Group_Defaults, groupID)
+			end
+		end
+
+		if num ~= #strings then
+			globalgroups.doHideWarning = false
+		end
+	end
+end)
+
+
+
+
+
+
 
 
 ---------- Group ----------
@@ -546,7 +596,7 @@ function group:Import_ImportData(Item_group, domain, createNewGroup, oldgroupID,
 	end
 end
 
-function group:Import_CreateMenuEntry(info, Item)
+function group:Import_CreateMenuEntry(info, Item, doLabel)
 	local gs = Item.Settings
 	local groupID = Item:GetExtra("groupID")
 
@@ -555,6 +605,10 @@ function group:Import_CreateMenuEntry(info, Item)
 	info.tooltipText = 	(L["UIPANEL_ROWS"] .. ": " .. (gs.Rows or 1) .. "\r\n") ..
 					L["UIPANEL_COLUMNS"] .. ": " .. (gs.Columns or 4) ..
 					((gs.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
+
+	if doLabel then
+		info.text = L["fGROUP"]:format(info.text)
+	end
 end
 
 function group:Import_GetGroupedBundleEntryText(Bundle)
@@ -740,7 +794,7 @@ function icon:Import_ImportData(Item)
 	end
 end
 
-function icon:Import_CreateMenuEntry(info, Item)
+function icon:Import_CreateMenuEntry(info, Item, doLabel)
 	local ics = Item.Settings
 	local iconID = Item:GetExtra("iconID")
 
@@ -795,6 +849,10 @@ function icon:Import_CreateMenuEntry(info, Item)
 		end
 		
 		Item:Import()
+	end
+
+	if doLabel then
+		info.text = L["fICON"]:format(info.text)
 	end
 end
 
@@ -973,7 +1031,7 @@ function String:HandleTopLevelMenu()
 			Item.Version = result.version
 			type:AddExtras(Item, unpack(result))
 
-			Item:CreateMenuEntry()
+			Item:CreateMenuEntry(true)
 		end
 	end
 end
@@ -1027,7 +1085,7 @@ function Comm:HandleTopLevelMenu(editbox)
 		Item:SetExtra("SourcePlayer", result.who)
 		type:AddExtras(Item, unpack(result))
 
-		Item:CreateMenuEntry()
+		Item:CreateMenuEntry(true)
 	end
 end
 
@@ -1069,8 +1127,9 @@ function ExportDestination:HandleTopLevelMenu()
 			
 			-- Color everything before the first colon a light blue (highlights the type of data being exported, for clarity)
 			info.text = info.text:gsub("^(.-):", "|cff00ffff%1|r:")
-			
-			info.func = function()
+
+			info.arg1 = self
+			info.func = info.func or function(button, self)
 				-- type, settings, defaults, ...
 				self:Export(dataType.type, dataType:Export_GetArgs(EDITBOX))
 			end

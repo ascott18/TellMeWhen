@@ -1364,6 +1364,7 @@
 					import.profile_new = true
 					import.profile_overwrite = true
 					export.profile = true
+					export.globalgroups = true
 					
 					import.group_new = true
 					-- callbacks will insert into tables as desired

@@ -299,8 +299,12 @@ function codesnippet:Import_ImportData(Item, domain)
 	TMW:Update()
 end
 
-function codesnippet:Import_CreateMenuEntry(info, Item)
+function codesnippet:Import_CreateMenuEntry(info, Item, doLabel)
 	info.text = Item.Settings.Name or L["CODESNIPPETS_DEFAULTNAME"]
+
+	if doLabel then
+		info.text = L["fCODESNIPPET"]:format(info.text)
+	end
 end
 
 

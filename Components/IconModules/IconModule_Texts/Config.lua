@@ -1288,8 +1288,12 @@ function textlayout:Import_ImportData(Item, GUID)
 	TMW:Update()
 end
 
-function textlayout:Import_CreateMenuEntry(info, Item)
+function textlayout:Import_CreateMenuEntry(info, Item, doLabel)
 	info.text = TMW.TEXT:GetLayoutName(Item.Settings, Item:GetExtra("GUID"))
+
+	if doLabel then
+		info.text = L["fTEXTLAYOUT"]:format(info.text)
+	end
 end
 
 
