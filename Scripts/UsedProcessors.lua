@@ -1,4 +1,6 @@
-﻿
+
+local BASEPATH = [[B:\Games\World Of Warcraft Beta\Interface\AddOns\TellMeWhen\Components\IconTypes\]]
+
 function processFile(filePath)
 
 local file = io.open(filePath, "r")
@@ -7,10 +9,12 @@ file:close()
 
 --print(contents)
 local t = {}
-for str in string.gmatch(contents, [[icon:SetInfo%(.-"(.-)",]]) do
-	local temp = {string.split(";", str)}
-	for i, attributes in pairs(temp) do
-		t[attributes:trim()] = true
+for str in string.gmatch(contents, [[:SetInfo%(.-"(.-)",]]) do
+	for attributes in string.gmatch(str, "([^;]*)") do
+		attributes = attributes:gsub("^ ", ""):gsub(" $", "")
+		if attributes ~= "" then
+			t[attributes] = true
+		end
 	end
 end
 
@@ -19,6 +23,7 @@ for attributes in pairs(t) do
 	attributesString = attributesString .. [[Type:UsesAttributes("]] .. attributes .. [[")
 ]]
 end
+print(attributesString)
 assert(contents:find([[
 -- AUTOMATICALLY GENERATED: UsesAttributes
 .*
@@ -42,12 +47,12 @@ end
 end
 
 
-for line in io.open([[C:\Program Files\World Of Warcraft\Interface\AddOns\TellMeWhen\Components\IconTypes\includes.core.xml]], "r"):lines() do
+for line in io.open(BASEPATH .. [[includes.core.xml]], "r"):lines() do
 	local type = line:match([[<Include file="IconType_(.*)\includes.core.xml"/>]])
 	if type then
 		local path = "IconType_" .. type .. "\\" .. type .. ".lua"
 		if path then
-			local success, err = pcall(processFile, [[C:\Program Files\World Of Warcraft\Interface\AddOns\TellMeWhen\Components\IconTypes\]] .. path)
+			local success, err = pcall(processFile, BASEPATH .. path)
 			if not success then
 				print(path, err)
 			else

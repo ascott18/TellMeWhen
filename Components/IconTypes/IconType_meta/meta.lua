@@ -31,6 +31,7 @@ Type.NoColorSettings = true
 Type.canControlGroup = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("alpha_metaChild")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes

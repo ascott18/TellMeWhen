@@ -42,14 +42,14 @@ Type.canControlGroup = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
-Type:UsesAttributes("reverse")
+Type:UsesAttributes("spell")
 Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("reverse")
+Type:UsesAttributes("auraSourceUnit, auraSourceGUID")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
-Type:UsesAttributes("auraSourceUnit, auraSourceGUID")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
