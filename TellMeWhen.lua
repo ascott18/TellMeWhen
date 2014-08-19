@@ -131,29 +131,6 @@ local _, pclass = UnitClass("Player")
 
 
 
----------- WARLORDS COMPATIBILITY ----------
--- Hopefully Blizzard will fix their issues so I don't have to do this.
--- TODO: see if we need any of these still.
--- This hack here is because GetSpellInfo() is returning blank spells for spells that don't exist.
-local function gsi_inner(...)
-	if ... == "" then
-		return nil
-	else
-		return ...
-	end
-end
-function TMW_GetSpellInfo(...)
-	return gsi_inner(GetSpellInfo(...))
-end
-
-
-
-
-
-
-
-
-
 
 ---------------------------------
 -- Important Tables
@@ -426,7 +403,7 @@ function TMW:ProcessEquivalencies()
 				local idWithoutUnderscore = tonumber(strmatch(str, "_(%d+)"))
 				
 				if idWithUnderscore then
-					local name, _, tex = TMW_GetSpellInfo(idWithoutUnderscore)
+					local name, _, tex = GetSpellInfo(idWithoutUnderscore)
 					
 					-- name will be nil if the ID isn't a valid spell (possibly the spell was removed in a patch).
 					if name then
@@ -454,7 +431,7 @@ function TMW:ProcessEquivalencies()
 			end
 			local t = TMW:SplitNames(str)
 			for _, spell in pairs(t) do
-				if type(spell) == "number" and not TMW_GetSpellInfo(spell) then
+				if type(spell) == "number" and not GetSpellInfo(spell) then
 					TMW:Debug("Invalid spellID found: %s (%s - %s)!",
 						spell, category, equiv)
 				end
@@ -541,7 +518,7 @@ TMW.SpellTexturesMetaIndex = {}
 TMW.SpellTexturesBase = {
 	--hack for pvp tinkets
 	[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
-	[strlowerCache[TMW_GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
+	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
 }
 local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
 TMW.SpellTextures = setmetatable(
@@ -2362,7 +2339,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		},
 		[48025] = {
 			icon = function(self, ics)
-				ics.Name = gsub(ics.Name, "(CrowdControl)", "%1; " .. TMW_GetSpellInfo(339))
+				ics.Name = gsub(ics.Name, "(CrowdControl)", "%1; " .. GetSpellInfo(339))
 			end,
 		},
 		[47002] = {
@@ -2574,7 +2551,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 
 				for _, stanceData in ipairs(self.stances) do
 					if stanceData.class == pclass then
-						local stanceName = TMW_GetSpellInfo(stanceData.id)
+						local stanceName = GetSpellInfo(stanceData.id)
 						tinsert(self.CSN, stanceName)
 					end
 				end
@@ -2761,7 +2738,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 
 				for _, stanceData in ipairs(self.stances) do
 					if stanceData.class == pclass then
-						local stanceName = TMW_GetSpellInfo(stanceData.id)
+						local stanceName = GetSpellInfo(stanceData.id)
 						tinsert(self.CSN, stanceName)
 					end
 				end
@@ -3851,9 +3828,9 @@ end
 ---------------------------------
 
 do	-- TMW.SpellHasNoMana(spell)
-	-- local jab = TMW_GetSpellInfo(100780)
+	-- local jab = GetSpellInfo(100780)
 	-- function TMW.SpellHasNoMana(spell)
-	-- 	local name, _, _, cost, _, powerType = TMW_GetSpellInfo(spell)
+	-- 	local name, _, _, cost, _, powerType = GetSpellInfo(spell)
 		
 	-- 	if name == jab then
 	-- 		-- Jab is broken and doesnt report having a cost while in tiger stance 
@@ -4281,7 +4258,7 @@ function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenam
 		local hash = {}
 		for k, v in ipairs(buffNames) do
 			if toname and (allowRenaming or tonumber(v)) then
-				v = TMW_GetSpellInfo(v or "") or v -- Turn the value into a name if needed
+				v = GetSpellInfo(v or "") or v -- Turn the value into a name if needed
 			end
 
 			v = TMW:LowerNames(v)
@@ -4298,7 +4275,7 @@ function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenam
 			-- Turn the first value into a name and return it
 			local ret = buffNames[1] or ""
 			if (allowRenaming or tonumber(ret)) then
-				ret = TMW_GetSpellInfo(ret) or ret 
+				ret = GetSpellInfo(ret) or ret 
 			end
 
 			if doLower then
@@ -4310,7 +4287,7 @@ function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenam
 			-- Convert everything to a name
 			for k, v in ipairs(buffNames) do
 				if (allowRenaming or tonumber(v)) then
-					buffNames[k] = TMW_GetSpellInfo(v or "") or v 
+					buffNames[k] = GetSpellInfo(v or "") or v 
 				end
 			end
 

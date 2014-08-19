@@ -17,8 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local _, pclass = UnitClass("Player")
-local TMW_GetSpellInfo, UnitPower =
-	  TMW_GetSpellInfo, UnitPower
+local GetSpellInfo, UnitPower =
+	  GetSpellInfo, UnitPower
 local pairs, wipe, _G =
 	  pairs, wipe, _G
 local PowerBarColor = PowerBarColor

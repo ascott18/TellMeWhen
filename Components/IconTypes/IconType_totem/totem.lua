@@ -16,8 +16,8 @@ local L = TMW.L
 
 local _, pclass = UnitClass("Player")
 
-local GetTotemInfo, GetSpellTexture, GetSpellLink, TMW_GetSpellInfo =
-	  GetTotemInfo, GetSpellTexture, GetSpellLink, TMW_GetSpellInfo
+local GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo =
+	  GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
@@ -32,7 +32,7 @@ elseif pclass == "DEATHKNIGHT" then
 	Type.desc = L["ICONMENU_GHOUL_DESC"]
 	Type.menuIcon = GetSpellTexture(91800)
 elseif pclass == "MAGE" then
-	Type.name = TMW_GetSpellInfo(116011)
+	Type.name = GetSpellInfo(116011)
 	Type.desc = L["ICONMENU_RUNEOFPOWER_DESC"]
 	Type.menuIcon = GetSpellTexture(116011)
 else
@@ -259,7 +259,7 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 		if doInsertLink then
 			name = GetSpellLink(data)
 		else
-			name = TMW_GetSpellInfo(data)
+			name = GetSpellInfo(data)
 		end
 		if name then
 			return name

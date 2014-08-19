@@ -54,7 +54,7 @@ function Type:DragReceived(icon, t, data, subType)
 		if data == 0 and type(param4) == "number" then
 			-- I don't remember the purpose of this anymore.
 			-- It handles some special sort of spell, though, and is required.
-			input = TMW_GetSpellInfo(param4)
+			input = GetSpellInfo(param4)
 		else
 			local type, baseSpellID = GetSpellBookItemInfo(data, subType)
 			
@@ -64,7 +64,7 @@ function Type:DragReceived(icon, t, data, subType)
 			
 			
 			local currentSpellName = GetSpellBookItemName(data, subType)		
-			local baseSpellName = TMW_GetSpellInfo(baseSpellID)
+			local baseSpellName = GetSpellInfo(baseSpellID)
 			
 			input = baseSpellName or currentSpellName
 		end

@@ -183,7 +183,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
 			while spellsFailed < CONST.MAX_FAILED_SPELLS do
 			
-				local name, rank, icon = TMW_GetSpellInfo(index)
+				local name, rank, icon = GetSpellInfo(index)
 				if name then
 					name = strlower(name)
 

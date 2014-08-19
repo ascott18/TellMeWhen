@@ -28,8 +28,8 @@ local wow_502 = clientVersion >= 50200
 
 local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
-local GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, TMW_GetSpellInfo = 
-	  GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, TMW_GetSpellInfo
+local GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo = 
+	  GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo
 local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo = 
 	  GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo
 	  
@@ -558,7 +558,7 @@ function CNDT:GLYPH_UPDATED()
 		if glyphID then
 			GlyphLookup[glyphID] = 1
 			
-			local name = TMW_GetSpellInfo(spellID)
+			local name = GetSpellInfo(spellID)
 			name = strlowerCache[name]
 			GlyphLookup[name] = 1
 		end

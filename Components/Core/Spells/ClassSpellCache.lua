@@ -130,7 +130,7 @@ function ClassSpellCache:TMW_DB_INITIALIZED()
 	-- so that we can get textures by spell name much more frequently,
 	-- reducing the usage of question mark and pocketwatch icons.
 	local function AddID(id)
-		local name, _, tex = TMW_GetSpellInfo(id)
+		local name, _, tex = GetSpellInfo(id)
 		name = TMW.strlowerCache[name]
 		if name and not TMW.SpellTexturesMetaIndex[name] then
 			TMW.SpellTexturesMetaIndex[name] = tex
@@ -278,7 +278,7 @@ function ClassSpellCache:PLAYER_ENTERING_WORLD()
 end
 
 
-local _, RACIAL = TMW_GetSpellInfo(20572) -- blood fury, we need the localized "Racial" string
+local _, RACIAL = GetSpellInfo(20572) -- blood fury, we need the localized "Racial" string
 	
 function ClassSpellCache:PLAYER_TALENT_UPDATE()	
 	local  _, _, _, endgeneral = GetSpellTabInfo(1)
@@ -288,7 +288,7 @@ function ClassSpellCache:PLAYER_TALENT_UPDATE()
 	for i = 1, offs + numspells do
 		local type, id = GetSpellBookItemInfo(i, "player")
 		if id and (type == "SPELL" or type == "FUTURESPELL") then
-			local name, rank = TMW_GetSpellInfo(id)
+			local name, rank = GetSpellInfo(id)
 			if rank == RACIAL then
 				Cache.RACIAL[id] = race
 			elseif i > endgeneral then

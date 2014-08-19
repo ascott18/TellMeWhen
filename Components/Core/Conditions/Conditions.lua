@@ -181,7 +181,7 @@ TMW:RegisterUpgrade(60026, {
 
 		for _, stanceData in ipairs(self.stances) do
 			if stanceData.class == pclass then
-				local stanceName = TMW_GetSpellInfo(stanceData.id)
+				local stanceName = GetSpellInfo(stanceData.id)
 				tinsert(self.CSN, stanceName)
 			end
 		end

@@ -123,44 +123,44 @@ Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 Module.stances = {
 	WARRIOR = {
-		[2457] = 	TMW_GetSpellInfo(2457), 	-- Battle Stance
-		[71] = 		TMW_GetSpellInfo(71),		-- Defensive Stance
-		[2458] = 	TMW_GetSpellInfo(2458), 	-- Berserker Stance
-		[156291] = 	TMW_GetSpellInfo(156291), 	-- Gladiator Stance
+		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
+		[71] = 		GetSpellInfo(71),		-- Defensive Stance
+		[2458] = 	GetSpellInfo(2458), 	-- Berserker Stance
+		[156291] = 	GetSpellInfo(156291), 	-- Gladiator Stance
 	},
 	DRUID = {
-		[5487] = 	TMW_GetSpellInfo(5487), 	-- Bear Form
-		[768] = 	TMW_GetSpellInfo(768),		-- Cat Form
-		[783] = 	TMW_GetSpellInfo(783),		-- Travel Form
-		[24858] = 	TMW_GetSpellInfo(24858), 	-- Moonkin Form
-		[33891] = 	TMW_GetSpellInfo(33891), 	-- Incarnation: Tree of Life
-		[171745] = 	TMW_GetSpellInfo(171745), 	-- Claws of Shirvallah	
+		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
+		[768] = 	GetSpellInfo(768),		-- Cat Form
+		[783] = 	GetSpellInfo(783),		-- Travel Form
+		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
+		[33891] = 	GetSpellInfo(33891), 	-- Incarnation: Tree of Life
+		[171745] = 	GetSpellInfo(171745), 	-- Claws of Shirvallah	
 	},
 	PRIEST = {
-		[15473] = 	TMW_GetSpellInfo(15473), 	-- Shadowform	
+		[15473] = 	GetSpellInfo(15473), 	-- Shadowform	
 	},
 	ROGUE = {
-		[1784] = 	TMW_GetSpellInfo(1784), 	-- Stealth	
+		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
 	},
 	DEATHKNIGHT = {
-		[48263] = 	TMW_GetSpellInfo(48263), 	-- Blood Presence
-		[48266] = 	TMW_GetSpellInfo(48266), 	-- Frost Presence
-		[48265] = 	TMW_GetSpellInfo(48265), 	-- Unholy Presence	
+		[48263] = 	GetSpellInfo(48263), 	-- Blood Presence
+		[48266] = 	GetSpellInfo(48266), 	-- Frost Presence
+		[48265] = 	GetSpellInfo(48265), 	-- Unholy Presence	
 	},
 	PALADIN = {
-		[105361] = 	TMW_GetSpellInfo(105361), 	-- Seal of Command
-		[20165] = 	TMW_GetSpellInfo(20165), 	-- Seal of Insight
-		[20164] = 	TMW_GetSpellInfo(20164),	-- Seal of Justice
-		[20154] = 	TMW_GetSpellInfo(20154), 	-- Seal of Righteousness
-		[31801] = 	TMW_GetSpellInfo(31801),	-- Seal of Truth
+		[105361] = 	GetSpellInfo(105361), 	-- Seal of Command
+		[20165] = 	GetSpellInfo(20165), 	-- Seal of Insight
+		[20164] = 	GetSpellInfo(20164),	-- Seal of Justice
+		[20154] = 	GetSpellInfo(20154), 	-- Seal of Righteousness
+		[31801] = 	GetSpellInfo(31801),	-- Seal of Truth
 	},
 	WARLOCK = {
-		[103958] = 	TMW_GetSpellInfo(103958),	-- Metamorphosis
+		[103958] = 	GetSpellInfo(103958),	-- Metamorphosis
 	},
 	MONK = {
-		[115069] = 	TMW_GetSpellInfo(115069),	-- Sturdy Ox
-		[115070] = 	TMW_GetSpellInfo(115070),	-- Wise Serpent
-		[103985] = 	TMW_GetSpellInfo(103985),	-- Fierce Tiger
+		[115069] = 	GetSpellInfo(115069),	-- Sturdy Ox
+		[115070] = 	GetSpellInfo(115070),	-- Wise Serpent
+		[103985] = 	GetSpellInfo(103985),	-- Fierce Tiger
 	},
 }
 function Module:Table_Get()
@@ -176,7 +176,7 @@ function Module:Entry_AddToList_1(f, spellID)
 
 		f.Icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 	else
-		local name, _, tex = TMW_GetSpellInfo(spellID)
+		local name, _, tex = GetSpellInfo(spellID)
 
 		f.Name:SetText(name)
 

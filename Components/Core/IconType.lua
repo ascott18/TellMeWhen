@@ -17,8 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local TMW_GetSpellInfo, GetSpellLink, GetSpellBookItemInfo, GetSpellBookItemName
-	= TMW_GetSpellInfo, GetSpellLink, GetSpellBookItemInfo, GetSpellBookItemName
+local GetSpellInfo, GetSpellLink, GetSpellBookItemInfo, GetSpellBookItemName
+	= GetSpellInfo, GetSpellLink, GetSpellBookItemInfo, GetSpellBookItemName
 local pairs, ipairs, setmetatable, rawget, date, tinsert, type
 	= pairs, ipairs, setmetatable, rawget, date, tinsert, type
 	
@@ -137,7 +137,7 @@ function IconType:FormatSpellForOutput(icon, data, doInsertLink)
 		if doInsertLink then
 			name = GetSpellLink(data)
 		else
-			name = TMW_GetSpellInfo(data)
+			name = GetSpellInfo(data)
 		end
 		if name then
 			return name
@@ -225,7 +225,7 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 	if data == 0 and type(param4) == "number" then
 		-- I don't remember the purpose of this anymore.
 		-- It handles some special sort of spell, though, and is required.
-		input = TMW_GetSpellInfo(param4)
+		input = GetSpellInfo(param4)
 	else
 		local type, baseSpellID = GetSpellBookItemInfo(data, subType)
 		
@@ -235,7 +235,7 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 		
 		
 		local currentSpellName = GetSpellBookItemName(data, subType)		
-		local baseSpellName = TMW_GetSpellInfo(baseSpellID)
+		local baseSpellName = GetSpellInfo(baseSpellID)
 		
 		input = baseSpellName or currentSpellName
 	end

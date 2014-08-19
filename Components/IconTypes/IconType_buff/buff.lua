@@ -394,11 +394,11 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 end
 
 local aurasWithNoSourceReported = {
-	TMW_GetSpellInfo(104993),	-- Jade Spirit
-	TMW_GetSpellInfo(116660),	-- River's Song
-	TMW_GetSpellInfo(120032),	-- Dancing Steel
-	TMW_GetSpellInfo(116631),	-- Colossus
-	TMW_GetSpellInfo(104423),	-- Windsong
+	GetSpellInfo(104993),	-- Jade Spirit
+	GetSpellInfo(116660),	-- River's Song
+	GetSpellInfo(120032),	-- Dancing Steel
+	GetSpellInfo(116631),	-- Colossus
+	GetSpellInfo(104423),	-- Windsong
 	nil,	-- Terminate with nil to prevent all Windsong's return values from filling the table
 }
 
