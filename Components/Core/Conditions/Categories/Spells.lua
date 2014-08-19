@@ -473,13 +473,6 @@ elseif pclass == "DRUID" then
 		GetSpellTexture(88747),
 		GetSpellTexture(88747),
 	}
-elseif pclass == "DEATHKNIGHT" then
-	totems = {
-		L["ICONMENU_GHOUL"]
-	}
-	totemtex = {
-		GetSpellTexture(46584),
-	}
 end
 function Env.TotemHelper(slot, nameString)
 	local have, name, start, duration = GetTotemInfo(slot)

@@ -27,10 +27,6 @@ if pclass == "DRUID" then
 	Type.name = L["ICONMENU_MUSHROOMS"]
 	Type.desc = L["ICONMENU_MUSHROOMS_DESC"]
 	Type.menuIcon = "Interface\\ICONS\\druid_ability_wildmushroom_b"
-elseif pclass == "DEATHKNIGHT" then
-	Type.name = L["ICONMENU_GHOUL"]
-	Type.desc = L["ICONMENU_GHOUL_DESC"]
-	Type.menuIcon = GetSpellTexture(91800)
 elseif pclass == "MAGE" then
 	Type.name = GetSpellInfo(116011)
 	Type.desc = L["ICONMENU_RUNEOFPOWER_DESC"]
