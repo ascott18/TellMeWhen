@@ -209,6 +209,8 @@ function PowerBar:ScanForCost(spellLink)
 	        end
 	    end
 	end
+
+	return 0, 0
 end
 
 
