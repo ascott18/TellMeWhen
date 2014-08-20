@@ -73,36 +73,28 @@ Type:RegisterIconDefaults{
 }
 
 
-TMW:RegisterUpgrade(71031, {
+TMW:RegisterUpgrade(71035, {
 	icon = function(self, ics)
 		-- DR categories that no longer exist (or never really existed):
 
 		ics.Name = ics.Name:
-			gsub("DR-Fear", "DR-Incapacitate"):
-			gsub("DR-MindControl", "DR-Incapacitate"):
-			gsub("DR-Horrify", "DR-Incapacitate"):
-			gsub("DR-RandomRoot", "DR-Root"):
-			gsub("DR-ShortDisorient", "DR-Disorient"):
-			gsub("DR-Fear", "DR-Disorient"):
-			gsub("DR-Cyclone", "DR-Disorient"):
-			gsub("DR-ControlledStun", "DR-Stun"):
-			gsub("DR-RandomStun", "DR-Stun"):
-			gsub("DR-ControlledRoot", "DR-Root")
-	end,
-})
-
-TMW:RegisterUpgrade(70014, {
-	icon = function(self, ics)
-		-- DR categories that no longer exist (or never really existed):
-
-		ics.Name = ics.Name:
-			gsub("DR-DragonsBreath", "DR-ShortDisorient"):
-			gsub("DR-BindElemental", "DR-Disorient"):
-			gsub("DR-Charge", "DR-RandomStun"):
-			gsub("DR-IceWard", "DR-RandomRoot"):
-			gsub("DR-Scatter", "DR-ShortDisorient"):
-			gsub("DR-Banish", "DR-Disorient"):
-			gsub("DR-Entrapment", "DR-RandomRoot")
+			gsub("DR%-DragonsBreath", "DR-ShortDisorient"):
+			gsub("DR%-BindElemental", "DR-Disorient"):
+			gsub("DR%-Charge", "DR-RandomStun"):
+			gsub("DR%-IceWard", "DR-RandomRoot"):
+			gsub("DR%-Scatter", "DR-ShortDisorient"):
+			gsub("DR%-Banish", "DR-Disorient"):
+			gsub("DR%-Entrapment", "DR-RandomRoot"):
+			gsub("DR%-Fear", "DR-Incapacitate"):
+			gsub("DR%-MindControl", "DR-Incapacitate"):
+			gsub("DR%-Horrify", "DR-Incapacitate"):
+			gsub("DR%-RandomRoot", "DR-Root"):
+			gsub("DR%-ShortDisorient", "DR-Disorient"):
+			gsub("DR%-Fear", "DR-Disorient"):
+			gsub("DR%-Cyclone", "DR-Disorient"):
+			gsub("DR%-ControlledStun", "DR-Stun"):
+			gsub("DR%-RandomStun", "DR-Stun"):
+			gsub("DR%-ControlledRoot", "DR-Root")
 	end,
 })
 
