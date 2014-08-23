@@ -278,7 +278,7 @@ ConditionCategory:RegisterCondition(8.5, "LIBRANGECHECK", {
 	funcstr = function(c, parent)
 		Env.LibRangeCheck = LibStub("LibRangeCheck-2.0")
 		if not Env.LibRangeCheck then
-			TMW:Error("The %s condition requires LibRangeCheck-2.0")
+			TMW:Error("The %s condition requires LibRangeCheck-2.0", L["CNDT_RANGE"])
 			return "false"
 		end
 
