@@ -253,8 +253,6 @@ function ClassSpellCache:OnCommReceived(prefix, text, channel, who)
 			
 			self:BuildClassSpellLookup()
 		end
-	elseif TMW.debug then
-		TMW:Error(msgType)
 	end
 end
 
