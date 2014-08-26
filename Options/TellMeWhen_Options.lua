@@ -2189,7 +2189,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 	UpdateRange = function(self, value)
 		if self.mode == self.MODE_ADJUSTING then
-			local deviation = self.range/2
+			local deviation = ceil(self.range/2)
 			local val = value or self:GetValue()
 
 			local newmin = min(max(self.min, val - deviation), self.max)
