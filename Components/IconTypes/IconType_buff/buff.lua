@@ -26,7 +26,7 @@ local _, pclass = UnitClass("Player")
 local isNumber = TMW.isNumber
 local unitsWithExistsEvent
 
--- GLOBALS: TellMeWhen_ChooseName, doesSort, pairs, type, format
+-- GLOBALS: TellMeWhen_ChooseName, pairs, type, format
 
 
 local clientVersion = select(4, GetBuildInfo())
@@ -493,7 +493,8 @@ function Type:Setup(icon)
 	end
 
 	icon.buffdebuff_iterateByAuraIndex = false
-	if doesSort or #icon.Names.Array > EFF_THRESHOLD then
+
+	if icon.DurationSort or icon.StackSort or #icon.Names.Array > EFF_THRESHOLD then
 		icon.buffdebuff_iterateByAuraIndex = true
 	end
 
