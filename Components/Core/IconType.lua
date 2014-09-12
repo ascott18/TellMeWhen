@@ -69,6 +69,7 @@ local RelevantToAll = {
 -- @field menuSpaceAfter [boolean|nil] True if there should be an empty row displayed after this IconType in the type selection menu.
 -- @field hidden [function->|boolean|nil] True if the IconType should not be displayed in the type selection menu.
 -- @field hasNoGCD [boolean|nil] True if timers/durations reported by the IconType are able to be on the global cooldown, otherwise nil. Default is nil.
+-- @field canControlGroup [boolean|nil] True if the icon type is capable of being a group controller. You must implement IconType:HandleYieldedInfo() if true, and use icon:YieldInfo() in your type's update methods instead of icon:SetInfo().
 -- 
 -- @field Icons [table] [READ-ONLY] Array of icons that use this IconType. Automatically updated, and should not be modified.
 -- @field type [string] [READ-ONLY] A short string that will identify the IconType across the addon. Set through the constructor, and should not be modified.
