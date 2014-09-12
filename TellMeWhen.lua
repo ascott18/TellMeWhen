@@ -63,8 +63,13 @@ TMW.L = L
 TMW.global = {}
 TMW.profile = {}
 
+
+-- Setup LibOO.
 TMW.Classes = LibOO:GetNamespace("TellMeWhen")
-TMW.C = TMW.Classes
+TMW.C = TMW.Classes -- shortcut
+
+-- These two methods are to replace the methods that used to be defined
+-- directly back when LibOO was written exclusively for TMW.
 function TMW:NewClass(...)
 	return TMW.Classes:NewClass(...)
 end
@@ -81,12 +86,17 @@ function TMW:CInit(self, ...)
 
 	class:NewFromExisting(self, ...)
 end
+
+-- Callbacks to replicate the functionality of the old events
+-- that were fired by LibOO when it was written exclusively for TMW.
 TMW.Classes:RegisterCallback("OnNewClass", function(event, class)
 	return TMW:Fire("TMW_CLASS_NEW", class)
 end)
 TMW.Classes:RegisterCallback("OnNewInstance", function(event, class, instance)
 	return TMW:Fire("TMW_CLASS_" .. class.className .. "_INSTANCE_NEW", class, instance)
 end)
+
+
 
 
 -- GLOBALS: LibStub
@@ -3852,9 +3862,6 @@ do	-- TMW.SpellHasNoMana(spell)
 		return nomana
 	end
 end
-
--- Override for easy backwards/forwards compatibility
-TMW.UnitAura = _G.UnitAura
 
 
 

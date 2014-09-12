@@ -18,7 +18,7 @@ local EFF_THRESHOLD
 local tonumber =
 	  tonumber
 local UnitAura, UnitExists, UnitIsDeadOrGhost =
-	  TMW.UnitAura, UnitExists, UnitIsDeadOrGhost
+	  UnitAura, UnitExists, UnitIsDeadOrGhost
 local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache

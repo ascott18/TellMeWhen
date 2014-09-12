@@ -14,19 +14,22 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local EFF_THRESHOLD, DS
-local tonumber =
-	  tonumber
-local UnitAura, UnitExists =
-	  TMW.UnitAura, UnitExists
 local print = TMW.print
+local tonumber, pairs, type, format =
+	  tonumber, pairs, type, format
+local UnitAura, UnitExists =
+	  UnitAura, UnitExists
+
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
-local _, pclass = UnitClass("Player")
 local isNumber = TMW.isNumber
+
+local _, pclass = UnitClass("Player")
+
+local EFF_THRESHOLD, DS
 local unitsWithExistsEvent
 
--- GLOBALS: TellMeWhen_ChooseName, pairs, type, format
+-- GLOBALS: TellMeWhen_ChooseName
 
 
 local clientVersion = select(4, GetBuildInfo())

@@ -22,7 +22,7 @@ local Env = CNDT.Env
 local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 
-local UnitAura = TMW.UnitAura
+local UnitAura = UnitAura
 
 function Env.AuraStacks(unit, name, nameString, filter)
 	local isID = isNumber[name]
