@@ -2655,7 +2655,7 @@ TMW:MakeSingleArgFunctionCached(IE, "Equiv_GenerateTips")
 function IE:Type_DropDown()
 	for _, typeData in ipairs(TMW.OrderedTypes) do
 		if CI.ics.Type == typeData.type or not get(typeData.hidden) then
-			if typeData.spacebefore then
+			if typeData.menuSpaceBefore then
 				TMW.DD:AddSpacer()
 			end
 
@@ -2695,7 +2695,7 @@ function IE:Type_DropDown()
 				
 			TMW.DD:AddButton(info)
 
-			if typeData.spaceafter then
+			if typeData.menuSpaceAfter then
 				TMW.DD:AddSpacer()
 			end
 		end

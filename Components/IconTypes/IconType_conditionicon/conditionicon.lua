@@ -21,7 +21,7 @@ local Type = TMW.Classes.IconType:New("conditionicon")
 Type.name = L["ICONMENU_CNDTIC"]
 Type.desc = L["ICONMENU_CNDTIC_DESC"]
 Type.menuIcon = "Interface\\Icons\\inv_misc_punchcards_yellow"
-Type.spacebefore = true
+Type.menuSpaceBefore = true
 Type.AllowNoName = true
 Type.hasNoGCD = true
 

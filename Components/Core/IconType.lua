@@ -65,8 +65,8 @@ local RelevantToAll = {
 -- @field desc [function->|string|nil] A localized string that describes the IconType.
 -- @field tooltipTitle [function->|string|nil] A localized string that will be used as the title of the description tooltip for the IconType. Defaults to {{{IconType.name}}}.
 -- @field menuIcon [function->|string|nil] Path to the texture that will be displayed in the type selection menu.
--- @field spacebefore [boolean|nil] True if there should be an empty row displayed before this IconType in the type selection menu.
--- @field spaceafter [boolean|nil] True if there should be an empty row displayed after this IconType in the type selection menu.
+-- @field menuSpaceBefore [boolean|nil] True if there should be an empty row displayed before this IconType in the type selection menu.
+-- @field menuSpaceAfter [boolean|nil] True if there should be an empty row displayed after this IconType in the type selection menu.
 -- @field hidden [function->|boolean|nil] True if the IconType should not be displayed in the type selection menu.
 -- @field hasNoGCD [boolean|nil] True if timers/durations reported by the IconType are able to be on the global cooldown, otherwise nil. Default is nil.
 -- 
@@ -282,9 +282,9 @@ function IconType:Register(order)
 	TMW:ValidateType("IconType.desc", "IconType:Register(order)", self.desc, "function;string;nil")
 	TMW:ValidateType("IconType.tooltipTitle", "IconType:Register(order)", self.tooltipTitle, "function;string;nil")
 	TMW:ValidateType("IconType.menuIcon", "IconType:Register(order)", self.menuIcon, "function;string;nil")
-	TMW:ValidateType("IconType.spacebefore", "IconType:Register(order)", self.spacebefore, "boolean;nil")
-	TMW:ValidateType("IconType.spaceafter", "IconType:Register(order)", self.spaceafter, "boolean;nil")
-	TMW:ValidateType("IconType.hidden", "IconType:Register(order)", self.spaceafter, "function;boolean;nil")
+	TMW:ValidateType("IconType.menuSpaceBefore", "IconType:Register(order)", self.menuSpaceBefore, "boolean;nil")
+	TMW:ValidateType("IconType.menuSpaceAfter", "IconType:Register(order)", self.menuSpaceAfter, "boolean;nil")
+	TMW:ValidateType("IconType.hidden", "IconType:Register(order)", self.menuSpaceAfter, "function;boolean;nil")
 	
 	TMW:ValidateType("2 (order)", "IconType:Register(order)", order, "number")
 	

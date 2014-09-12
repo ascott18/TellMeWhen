@@ -30,7 +30,7 @@ Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.menuIcon = "Interface\\Icons\\inv_fishingpole_02"
 Type.AllowNoName = true
-Type.spaceafter = true
+Type.menuSpaceAfter = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

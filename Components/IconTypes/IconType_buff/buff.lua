@@ -35,7 +35,7 @@ Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
-Type.spacebefore = true
+Type.menuSpaceBefore = true
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 

@@ -27,7 +27,7 @@ ITs require that you declare at least their .name and .desc fields before they c
 Type.name = "Test Type"
 Type.desc = "An Icon Type created to demonstrate the TMW IconType API"
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
-Type.spacebefore = true
+Type.menuSpaceBefore = true
 <</code>>
 
 === Declaring Attributes Used
@@ -214,7 +214,7 @@ local Type = TMW.Classes.IconType:New("test")
 Type.name = "Test Type"
 Type.desc = "An Icon Type created to demonstrate the TMW IconType API"
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
-Type.spacebefore = true
+Type.menuSpaceBefore = true
 
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("start, duration")

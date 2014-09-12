@@ -33,7 +33,7 @@ Type.desc = L["ICONMENU_CLEU_DESC"]
 Type.menuIcon = GetSpellTexture(20066)
 Type.usePocketWatch = 1
 Type.AllowNoName = true
-Type.spacebefore = true
+Type.menuSpaceBefore = true
 Type.unitType = "name"
 Type.hasNoGCD = true
 
