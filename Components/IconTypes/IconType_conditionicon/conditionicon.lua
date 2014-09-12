@@ -15,7 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-
+local GetSpellBookItemInfo, GetItemIcon = 
+	  GetSpellBookItemInfo, GetItemIcon
 
 local Type = TMW.Classes.IconType:New("conditionicon")
 Type.name = L["ICONMENU_CNDTIC"]
@@ -25,6 +26,7 @@ Type.menuSpaceBefore = true
 Type.AllowNoName = true
 Type.hasNoGCD = true
 
+
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("alpha_conditionFailed")
 Type:UsesAttributes("start, duration")
@@ -32,20 +34,36 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+-- Not automatically generated, but still needed.
 Type:UsesAttributes("conditionFailed", false)
 
+
+
 Type:RegisterIconDefaults{
+	-- Duration of a timer to set on the icon when the conditions start to succeed
 	ConditionDur			= 0,
+
+	-- Duration of a timer to set on the icon when the conditions start to fail
 	UnConditionDur			= 0,
+
+	-- True if there should be a timer set on the icon when the conditions start to succeed
 	ConditionDurEnabled		= false,
+
+	-- True if there should be a timer set on the icon when the conditions start to fail
 	UnConditionDurEnabled  	= false,
+
+	-- True if the icon should only show when the timer on it is running. Mutually exclusive with OnlyIfNotCounting.
 	OnlyIfCounting			= false,
+
+	-- True if the icon should only show when the timer on it is not running. Mutually exclusive with OnlyIfCounting.
 	OnlyIfNotCounting		= false,
 }
 
 TMW:RegisterUpgrade(47204, {
 	icon = function(self, ics)
-		if ics.Type == "conditionicon"  then
+		-- Condition icons no longer have ChooseName to be able to set their own texture.
+		-- Custom Texture is now the only texture setting for the icon.
+		if ics.Type == "conditionicon" then
 			ics.CustomTex = ics.Name or ""
 			ics.Name = ""
 		end
@@ -62,6 +80,7 @@ TMW:RegisterUpgrade(45013, {
 	end,
 })
 
+
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED2"],			},
@@ -69,6 +88,8 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")
+
+
 
 local function ConditionIcon_OnUpdate(icon, time)
 	local ConditionObject = icon.ConditionObject
@@ -80,10 +101,12 @@ local function ConditionIcon_OnUpdate(icon, time)
 		local d, start, duration
 
 		if succeeded and not icon.__succeeded and icon.ConditionDurEnabled then
+			-- Start the timer on the icon if the conditions just began succeeding.
 			d = icon.ConditionDur
 			start, duration = time, d
 
 		elseif not succeeded and icon.__succeeded and icon.UnConditionDurEnabled then
+			-- Start the timer on the icon if the conditions just began failing.
 			d = icon.UnConditionDur
 			start, duration = time, d
 
@@ -92,18 +115,26 @@ local function ConditionIcon_OnUpdate(icon, time)
 			d = attributes.duration - (time - attributes.start)
 			d = d > 0 and d or 0
 			if d > 0 then
+				-- Need these so that the timer doesn't get reset when we call icon:SetInfo()
 				start, duration = attributes.start, attributes.duration
 			else
+				-- Reset the timer to 0 if the timer is expired.
 				start, duration = 0, 0
 			end
 		end
 
 		if icon.OnlyIfCounting and d <= 0 then
+			-- Set the alpha of the icon to 0 if the timer is not running
+			-- and the icon is configured to only show while it is running.
 			alpha = 0
 		elseif icon.OnlyIfNotCounting and d > 0 then
+			-- Set the alpha of the icon to 0 if the timer is running
+			-- and the icon is configured to only show while it isn't running.
 			alpha = 0
 		end
 		
+		-- We set alpha_conditionFailed to override the automatic alpha handling of ConditionObjects.
+		-- We want to set the alpha on our own.
 		icon:SetInfo(
 			"alpha_conditionFailed; alpha; start, duration",
 			nil,
@@ -111,6 +142,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 			start, duration
 		)
 
+		-- Record the passing state of the icon's condition object so we can detect when it changes.
 		icon.__succeeded = succeeded
 	else
 		icon:SetInfo("alpha_conditionFailed; alpha", nil, 1)
@@ -125,13 +157,20 @@ end
 function Type:Setup(icon)
 	icon:SetInfo("texture", "Interface\\Icons\\INV_Misc_QuestionMark")
 
+	-- Icon updates will automatically get scheduled by the icon update engine
+	-- when the icon's condition object changes and schedules an icon update.
+	-- So we don't need to register any events at all, and we can update manually!
+
 	icon:SetUpdateMethod("manual")
 	
 	icon:SetUpdateFunction(ConditionIcon_OnUpdate)
 	--icon:Update() -- dont do this!
 end
 
-function Type:DragReceived(icon, t, data, subType)	
+function Type:DragReceived(icon, t, data, subType)
+	-- Since the icon type itself can't declare its texture, 
+	-- redirect icon drag data to icon.CustomTex. This couples separate modules more than I would like,
+	-- but oh well. None of this will ever change.
 	local ics = icon:GetSettings()
 
 	local _, input
