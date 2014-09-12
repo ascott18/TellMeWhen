@@ -20,7 +20,6 @@ local GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists =
 	  GetSpellLink, GetSpellInfo, UnitCastingInfo, UnitChannelInfo, UnitExists
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
-local unitsWithExistsEvent
 
 local Type = TMW.Classes.IconType:New("cast")
 LibStub("AceEvent-3.0"):Embed(Type)
@@ -89,9 +88,6 @@ local events = {
 	UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
 }
 
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
-end)
 
 local function Cast_OnEvent(icon, event, arg1)
 	if events[event] then -- a unit cast event

@@ -17,8 +17,8 @@ local L = TMW.L
 local print = TMW.print
 local tonumber, pairs, type, format =
 	  tonumber, pairs, type, format
-local UnitAura, UnitExists =
-	  UnitAura, UnitExists
+local UnitAura =
+	  UnitAura
 
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
@@ -26,14 +26,8 @@ local isNumber = TMW.isNumber
 
 local _, pclass = UnitClass("Player")
 
-local EFF_THRESHOLD, DS
-local unitsWithExistsEvent
-
 -- GLOBALS: TellMeWhen_ChooseName
 
-
-local clientVersion = select(4, GetBuildInfo())
-local wow_501 = clientVersion >= 50100
 
 local Type = TMW.Classes.IconType:New("buff")
 Type.canControlGroup = true
@@ -44,7 +38,6 @@ Type.usePocketWatch = 1
 Type.spacebefore = true
 Type.unitType = "unitid"
 Type.hasNoGCD = true
-Type.canControlGroup = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -165,13 +158,6 @@ Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettingsWithStacks", {
 		return TMW.CI.icon:IsGroupController()
 	end,
 })
-
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	EFF_THRESHOLD = TMW.db.profile.EffThreshold
-	DS = TMW.DS
-	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
-end)
 
 
 local NOT_ACTUALLY_SPELLSTEALABLE = {
@@ -497,7 +483,7 @@ function Type:Setup(icon)
 
 	icon.buffdebuff_iterateByAuraIndex = false
 
-	if icon.DurationSort or icon.StackSort or #icon.Names.Array > EFF_THRESHOLD then
+	if icon.DurationSort or icon.StackSort or #icon.Names.Array > TMW.db.profile.EffThreshold then
 		icon.buffdebuff_iterateByAuraIndex = true
 	end
 
