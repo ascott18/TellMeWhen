@@ -26,6 +26,9 @@ local _, pclass = UnitClass("Player")
 local isNumber = TMW.isNumber
 local unitsWithExistsEvent
 
+-- GLOBALS: TellMeWhen_ChooseName, doesSort, pairs, type, format
+
+
 local clientVersion = select(4, GetBuildInfo())
 local wow_501 = clientVersion >= 50100
 
@@ -55,13 +58,32 @@ Type:UsesAttributes("texture")
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 Type:RegisterIconDefaults{
+	-- Sort the auras found by duration
 	Sort					= false,
+
+	-- Sort the aruas found by stacks
 	StackSort				= false,
+
+	-- The unit to check for auras
 	Unit					= "player", 
+
+	-- What type of aura to check for. Values are "HELPFUL", "HARMFUL", or "EITHER".
+	-- EITHER is handled specially by TMW by having looping a second time for a second filter (FilterH in the code).
 	BuffOrDebuff			= "HELPFUL", 
-	Stealable				= false,     
-	ShowTTText				= false,     
+
+	-- Only check stealable auras. This DOES function for non-mages.
+	Stealable				= false,
+
+	-- Show variable text. This is the extra return values at the end of UnitAura.
+	-- It includes things like the strength of a shield spell. 
+	-- The first non-zero value from those variables will be reported as the icon's stack count.
+	ShowTTText				= false,
+
+	-- Only check auras casted by the player. Appends "|PLAYER" to the UnitAura filter.
 	OnlyMine				= false,
+
+	-- Hide the icon if TMW's unit system left icon.Units empty.
+	-- This can happen, for example, if checking only raid units while not in a raid.
 	HideIfNoUnits			= false,
 }
 
@@ -288,7 +310,7 @@ local function Buff_OnUpdate(icon, time)
 						break -- break spell loop
 					end
 				end
-				if buffName and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id])) then
+				if useUnit then
 					break --  break unit loop
 				end
 			end
@@ -344,7 +366,14 @@ local function Buff_OnUpdate_Controller(icon, time)
 end
 function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
 	local Units = icon.Units
-	if buffName then
+
+	-- Check that unit is defined here in order to determine if we found something.
+	-- If icon.buffdebuff_iterateByAuraIndex == false, the code there might return a buffName
+	-- that shouldn't actually be used because it didn't pass checks for stealable.
+	-- Unit is only defined there (as useUnit) once something is found that definitely matches.
+	-- It is a bit bad that the code works this way, but it is nicer than manually nilling out all of the yielded info
+	-- after determining that no matching auras were found.
+	if unit then
 		if icon.ShowTTText then
 			if v1 and v1 > 0 then
 				count = v1
