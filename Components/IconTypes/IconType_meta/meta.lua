@@ -13,13 +13,12 @@
 local TMW = TMW
 if not TMW then return end
 local L = TMW.L
-local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
-local _G, strmatch, tonumber, ipairs, pairs, next =
-	  _G, strmatch, tonumber, ipairs, pairs, next
 local print = TMW.print
-local Locked
+local _G, strmatch, tonumber, ipairs, pairs, next, type, tinsert, pcall, format, error, wipe =
+	  _G, strmatch, tonumber, ipairs, pairs, next, type, tinsert, pcall, format, error, wipe
 
+local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 
 local Type = TMW.Classes.IconType:New("meta")
@@ -35,21 +34,35 @@ Type:UsesAttributes("alpha_metaChild")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("alpha_metaChild")
+
+
+-- Not automatically generated. We need these declared so that the meta icon will
+-- still have things like stack and duration min/max settings.
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("stack, stackText")
 
+
+-- Disallow these modules. Their appearance and settings are inherited from the icon that the meta icon is displaying.
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
 Type:SetModuleAllowance("IconModule_Texts", false)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 
+
+
+
 Type:RegisterIconDefaults{
+	-- Sort meta icons found by their duration
 	Sort						= false,
+
+	-- Check sub-metas. Causes the meta icon to expand any meta icons it is checking into that meta icon's component icons.
+	-- Also prevents any other meta icon with this setting enabled from showing the icon that this meta icon is showing.
 	CheckNext					= false,
+
+	-- List of icons and groups that the meta icon is checking.
 	Icons						= {
 		[1]						= "",
 	},   
@@ -88,7 +101,7 @@ TMW:RegisterUpgrade(24100, {
 
 
 
-
+-- IDP that works with TMW's alpha manager to inherit the real alpha of the icon that it is replicating.
 local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_METACHILD", "alpha_metaChild")
 Processor.dontInherit = true
 TMW.IconAlphaManager:AddHandler(50, "ALPHA_METACHILD", true)
@@ -103,6 +116,9 @@ end)
 
 
 ------- Recursive Icon Ref Detector -------
+-- This works by recursively going through all meta icon references of an icon.
+-- If there is recursive reference, it will stack overflow. We grab this error
+-- and then tell the user that it happened.
 
 local CCI_icon
 local function CheckCompiledIcons(icon)
@@ -214,7 +230,7 @@ local function Meta_OnUpdate(icon, time)
 	local Sort, CheckNext, CompiledIcons = icon.Sort, icon.CheckNext, icon.CompiledIcons
 
 	local icToUse
-	local d = Sort == -1 and huge or 0
+	local curSortDur = Sort == -1 and huge or 0
 
 	for n = 1, #CompiledIcons do
 		local GUID = CompiledIcons[n]
@@ -231,29 +247,36 @@ local function Meta_OnUpdate(icon, time)
 			ic:Update()
 
 			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from the ic:Update() call)
+				-- This icon is OK to be shown.
 				if Sort then
-					local _d = attributes.duration - (time - attributes.start)
-					if _d < 0 then
-						_d = 0
+					-- See if we can use this icon due to sorting.
+					local dur = attributes.duration - (time - attributes.start)
+					if dur < 0 then
+						dur = 0
 					end
-					if not icToUse or d*Sort < _d*Sort then
+					if not icToUse or curSortDur*Sort < dur*Sort then
 						icToUse = ic
-						d = _d
+						curSortDur = dur
 					end
 				else
 					if not icon:YieldInfo(true, ic) then
+						-- icon:YieldInfo() returns false if we don't need to keep harvesting icons to use.
 						break
 					end
 				end
 			else
+				-- Record that the icon has been checked in this update cycle,
+				-- so that other icons don't waste their time trying to check it again only to find it doesn't work.
 				ic.__lastMetaCheck = time
 			end
 		end
 	end
 
 	if icToUse then
+		-- This only happens if the meta icon is sorting.
 		icon:YieldInfo(true, icToUse)
 	else
+		-- Signal that we have ran out of icons to find.
 		icon:YieldInfo(false)
 	end
 
@@ -263,18 +286,22 @@ end
 function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 	if icToUse then
 		local dataSource, moduleSource = icToUse, icToUse
+
+		-- If we are displaying another meta icon,
+		-- look at that meta icon until we find the non-meta icon that is being displayed at whatever depth,
+		-- and use that as the source of the modules that we will set, instead of the meta icon itself.
 		while moduleSource.Type == "meta" and moduleSource.__metaModuleSource do
 			moduleSource = moduleSource.__metaModuleSource
 		end
 
-		local force
+		local needUpdate = false
 
 		if moduleSource ~= iconToSet.__metaModuleSource then
 			
 			iconToSet:SetModulesToEnabledStateOfIcon(moduleSource)
 			iconToSet:SetupAllModulesForIcon(moduleSource)
 			
-			force = 1
+			needUpdate = true
 
 			iconToSet.__metaModuleSource = moduleSource
 		end
@@ -283,14 +310,16 @@ function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 
 			TMW:Fire("TMW_ICON_META_INHERITED_ICON_CHANGED", iconToSet, dataSource)
 			
-			force = 1
+			needUpdate = true
 
 			iconToSet.__currentIcon = dataSource
 		end
 
+		-- Record that the icon has been shown in a meta icon for this update cycle
+		-- so that no other meta icons try to show it.
 		dataSource.__lastMetaCheck = TMW.time
 
-		if force or icon.metaUpdateQueued then
+		if needUpdate or icon.metaUpdateQueued then
 
 			-- Inherit the alpha of the icon. Don't SetInfo_INTERNAL here because the
 			-- call to :InheritDataFromIcon might not call TMW_ICON_UPDATED
@@ -339,7 +368,10 @@ function InsertIcon(icon, GUID, ics)
 	end
 end
 
-function GetFullIconTable(icon, icons) -- check what all the possible icons it can show are, for use with setting CheckNext
+
+-- Compile a table of all the possible icons a meta icon can show.
+-- All meta icons use this, but it is especially useful for use with setting CheckNext.
+function GetFullIconTable(icon, icons) 
 	local thisIconsView = icon.group.viewData.view
 	
 	for _, GUID in ipairs(icons) do
@@ -349,8 +381,10 @@ function GetFullIconTable(icon, icons) -- check what all the possible icons it c
 			local type = TMW:ParseGUID(GUID)
 
 			if type == "icon" then
+				-- If it's an icon, then just stick it in.
 				InsertIcon(icon, GUID)
 			elseif type == "group" then
+				-- If it's a group, then get all of the group's icons and stick those in.
 				local gs, group, domain, groupID = TMW:GetSettingsFromGUID(GUID)
 
 				if gs and not group then

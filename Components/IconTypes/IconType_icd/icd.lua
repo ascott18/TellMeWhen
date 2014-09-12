@@ -15,11 +15,13 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local SpellTextures = TMW.SpellTextures
+local UnitGUID = 
+	  UnitGUID
 
-local pGUID = UnitGUID("player") -- this isnt actually defined right here (it returns nil), so I will do it later too
-local clientVersion = select(4, GetBuildInfo())
+local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
+
+local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
 
 
 local Type = TMW.Classes.IconType:New("icd")
@@ -30,6 +32,7 @@ Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.hasNoGCD = true
 
+
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("spell")
@@ -37,10 +40,18 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
+
 Type:RegisterIconDefaults{
+	-- Determines what will trigger the start of the internal cooldown.
+	-- Values are "aura", "spellcast", or "caststart"
 	ICDType					= "aura",
+
+	-- True if the icon should not refresh its timer
+	-- if a trigger is found while the timer is already running.
 	DontRefresh				= false,
 }
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "spellwithduration",
@@ -88,42 +99,49 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ICDSettings", function
 	})
 end)
 
+
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	-- UnitGUID() returns nil at load time, so we need to run this later in order to get pGUID.
+	-- TMW_GLOBAL_UPDATE is good enough.
 	pGUID = UnitGUID("player")
 end)
 
 
 local function ICD_OnEvent(icon, event, ...)
-	local valid, i, n, _
-	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-		local p, g -- make these local separate from i and n
-		_, p, _, g, _, _, _, _, _, _, _, i, n = ...
+	local valid, spellID, spellName, _
 
-		valid = g == pGUID and (
-			p == "SPELL_AURA_APPLIED" or
-			p == "SPELL_AURA_REFRESH" or
-			p == "SPELL_ENERGIZE" or
-			p == "SPELL_AURA_APPLIED_DOSE" or
-			p == "SPELL_SUMMON" or
-			p == "SPELL_DAMAGE" or
-			p == "SPELL_MISSED"
+	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+		local cevent, GUID
+		_, cevent, _, GUID, _, _, _, _, _, _, _, spellID, spellName = ...
+
+		valid = GUID == pGUID and (
+			cevent == "SPELL_AURA_APPLIED" or
+			cevent == "SPELL_AURA_REFRESH" or
+			cevent == "SPELL_ENERGIZE" or
+			cevent == "SPELL_AURA_APPLIED_DOSE" or
+			cevent == "SPELL_SUMMON" or
+			cevent == "SPELL_DAMAGE" or
+			cevent == "SPELL_MISSED"
 		)
 	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
-		valid, n, _, _, i = ... -- I cheat. valid is actually a unitID here.
+		local unit
+		unit, spellName, _, _, spellID = ...
 
-		valid = valid == "player"
+		valid = unit == "player"
 	end
 
 	if valid then
 		local NameHash = icon.Names.Hash
-		local Key = NameHash[i] or NameHash[strlowerCache[n]]
+		local Key = NameHash[spellID] or NameHash[strlowerCache[spellName]]
 		if Key and not (icon.DontRefresh and (TMW.time - icon.ICDStartTime) < icon.Durations[Key]) then
+			-- Make sure we don't reset a running timer if we shouldn't.
+			-- If everything is good, record the data about this event and schedule an icon update.
 
 			icon.ICDStartTime = TMW.time
 			icon.ICDDuration = icon.Durations[Key]
 			icon:SetInfo("spell; texture", 
 				icon.ICDID,
-				SpellTextures[i]
+				SpellTextures[spellID]
 			)
 			icon.NextUpdateTime = 0
 		end
@@ -136,11 +154,13 @@ local function ICD_OnUpdate(icon, time)
 	local ICDDuration = icon.ICDDuration
 
 	if time - ICDStartTime > ICDDuration then
+		-- If the timer has expire, used the timer-expired alpha.
 		icon:SetInfo("alpha; start, duration",
 			icon.Alpha,
 			0, 0
 		)
 	else
+		-- If the timer is still running, use the timer-running alpha.
 		icon:SetInfo("alpha; start, duration",
 			icon.UnAlpha,
 			ICDStartTime, ICDDuration
@@ -157,8 +177,9 @@ function Type:Setup(icon)
 
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
-	--[[ keep these events per icon isntead of global like unitcooldowns are so that ...
-	well i had a reason here but it didnt make sense when i came back and read it a while later. Just do it. I guess.]]
+
+
+	-- Setup events and update functions.
 	if icon.ICDType == "spellcast" then
 		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	elseif icon.ICDType == "caststart" then

@@ -14,14 +14,16 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
+local print = TMW.print
+local pairs, ipairs =
+	  pairs, ipairs
 local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemInfo =
 	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemInfo
-local pairs =
-	  pairs
+
 local OnGCD = TMW.OnGCD
-local print = TMW.print
-local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
+
+
 
 local Type = TMW.Classes.IconType:New("item")
 LibStub("AceEvent-3.0"):Embed(Type)
@@ -29,6 +31,7 @@ Type.name = L["ICONMENU_ITEMCOOLDOWN"]
 Type.desc = L["ICONMENU_ITEMCOOLDOWN_DESC"]
 Type.menuIcon = "Interface\\Icons\\inv_jewelry_trinketpvp_01"
 Type.checksItems = true
+
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
@@ -39,12 +42,22 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
+
 Type:RegisterIconDefaults{
+	-- True to only check items that are equipped
 	OnlyEquipped			= false,
+
+	-- True to show the stacks of an item on the icon, including charges.
 	EnableStacks			= false,
+
+	-- True to only check items that are in the player's bags
 	OnlyInBags				= false,
+
+	-- True to check the range of an item, and treat it as unusable if it isn't in range.
 	RangeCheck				= false,
 }
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME_ITEMSLOT2"],
@@ -96,20 +109,21 @@ end)
 
 
 
-local function ItemCooldown_OnEvent(icon, event, unit)
-	icon.NextUpdateTime = 0
-end
-
 local function ItemCooldown_OnUpdate(icon, time)
 
-	local n, inrange, equipped, start, duration, count = 1
-
+	-- Upvalue things that will be referenced a lot in our loops.
 	local RangeCheck, OnlyEquipped, OnlyInBags, Items =
 	icon.RangeCheck, icon.OnlyEquipped, icon.OnlyInBags, icon.Items
-	
+
+
+	-- These variables will hold all the attributes that we pass to SetInfo().
+	local inrange, equipped, start, duration, count
+
+	local numChecked = 1
+
 	for i = 1, #Items do
 		local item = Items[i]
-		n = i
+		numChecked = i
 
 		start, duration = item:GetCooldown()
 
@@ -123,7 +137,9 @@ local function ItemCooldown_OnUpdate(icon, time)
 				equipped = false
 			end
 			
-			if equipped and inrange == 1 and (duration == 0 or OnGCD(duration)) then --usable
+			if equipped and inrange == 1 and (duration == 0 or OnGCD(duration)) then
+				-- This item is usable. Set the attributes and then stop.
+
 				icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
 					icon.Alpha,
 					item:GetIcon() or "Interface\\Icons\\INV_Misc_QuestionMark",
@@ -137,6 +153,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 		end
 	end
 
+	-- Find another item that fits the equipped and in-bags requirements.
 	local item2
 	if OnlyInBags then
 		for i = 1, #Items do
@@ -154,23 +171,20 @@ local function ItemCooldown_OnUpdate(icon, time)
 		item2 = Items[1]
 	end
 
-	-- if there is more than 1 spell that was checked
-	-- then we need to get these again for the first spell,
+	-- if there is more than 1 item that was checked
+	-- then we need to get these again for the first item,
 	-- otherwise reuse the values obtained above since they are just for the first one
 
-	if n > 1 then
+	if numChecked > 1 then
 		start, duration = item2:GetCooldown()
 
 		inrange, count = 1, item2:GetCount()
 		if RangeCheck then
 			inrange = item2:IsInRange("target") or 1
 		end
-		isGCD = OnGCD(duration)
 	end
+
 	if duration then
-		if duration == 0.001 then
-			duration = 0
-		end
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
 			icon.UnAlpha,
 			item2:GetIcon(),
@@ -194,7 +208,6 @@ function Type:Setup(icon)
 		icon:RegisterSimpleUpdateEvent("BAG_UPDATE_COOLDOWN")
 		icon:RegisterSimpleUpdateEvent("BAG_UPDATE")
 		icon:SetUpdateMethod("manual")
-		icon:SetScript("OnEvent", ItemCooldown_OnEvent)
 	end
 
 	if icon.OnlyEquipped then

@@ -430,7 +430,7 @@ function IconType:SetModuleAllowance(moduleName, allow)
 		TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 			if class.className == moduleName and class.SetAllowanceForType then
 				local IconModule = class
-				IconModule:SetAllowanceForType(self.type, allow) -- TODO: Change SetAllownaceForType name to SetTypeAllowance?
+				IconModule:SetAllowanceForType(self.type, allow)
 
 				TMW:UnregisterThisCallback()
 			end

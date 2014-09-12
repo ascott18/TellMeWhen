@@ -14,22 +14,25 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
-	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
-local UnitRangedDamage  =
-	  UnitRangedDamage
-local pairs =
-	  pairs
-local OnGCD = TMW.OnGCD
 local print = TMW.print
-local _, pclass = UnitClass("Player")
-local SpellTextures = TMW.SpellTextures
+local pairs, tonumber, strmatch, format =
+	  pairs, tonumber, strmatch, format
+local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo, GetActionCharges, GetActionCount =
+	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo, GetActionCharges, GetActionCount
+local GetSpellLink, UnitRangedDamage  =
+	  GetSpellLink, UnitRangedDamage
+
+local OnGCD = TMW.OnGCD
+
+-- GLOBALS: TellMeWhen_ChooseName
+
 
 local Type = TMW.Classes.IconType:New("multistate")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_MULTISTATECD"]
 Type.desc = L["ICONMENU_MULTISTATECD_DESC"]
 Type.menuIcon = "Interface\\Icons\\Spell_Holy_ConsumeMagic"
+
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("noMana")
@@ -42,12 +45,20 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
+
+
+
 Type:RegisterIconDefaults{
+	-- True to cause the icon to act as unusable when the ability is out of range.
 	RangeCheck				= false,
+
+	-- True to cause the icon to act as unusable when the ability lacks power to be used.
 	ManaCheck				= false,
 }
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME_MULTISTATE"],
@@ -78,12 +89,18 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_MultistateSettings", f
 end)
 
 
+
 local function MultiStateCD_OnEvent(icon, event)
 	if event == "ACTIONBAR_SLOT_CHANGED" then
-		local actionType, spellID = GetActionInfo(icon.Slot) -- check the current slot first, because it probably didnt change
+		-- Check the current slot first, because it probably didnt change
+		local actionType, spellID = GetActionInfo(icon.Slot) 
+
+
 		if actionType == "spell" and spellID == icon.Names.First then
-			-- do nothing
+			-- Indeed, it didn't change. All is well, so do nothing.
 		else
+			-- The action we want to check isn't in that slot anymore.
+			-- Search for it, and update the slot that it is in.
 			for i=1, 120 do
 				local actionType, spellID = GetActionInfo(i)
 				if actionType == "spell" and spellID == icon.Names.First then
@@ -93,6 +110,8 @@ local function MultiStateCD_OnEvent(icon, event)
 			end
 		end
 	end
+
+	-- Queue an icon update no matter what the event is.
 	icon.NextUpdateTime = 0
 end
 
@@ -118,7 +137,7 @@ local function MultiStateCD_OnUpdate(icon, time)
 		
 	
 	if duration then	
-		local inrange, nomana = 1
+		local inrange, nomana, _ = 1
 
 		if icon.RangeCheck then
 			inrange = IsActionInRange(Slot, "target") or 1
@@ -161,19 +180,26 @@ function Type:Setup(icon)
 	icon.Names = TMW:GetSpellNamesProxy(icon.Name, true)
 	local originalNameFirst = icon.Names.First
 
+
+	-- This icon type requires a spellID. Make one if the user didn't give us one.
 	if icon.Names.First and icon.Names.First ~= "" and GetSpellLink(icon.Names.First) and not tonumber(icon.Names.First) then
 		local ID = strmatch(GetSpellLink(icon.Names.First), ":(%d+)") -- extract the spellID from the link
 		icon.Names = TMW:GetSpellNamesProxy(ID, true)
 	end
 
+
+	-- Reset the slot, and then call our OnEvent handler to obtain the correct action slot.
 	icon.Slot = 0
-	MultiStateCD_OnEvent(icon, "ACTIONBAR_SLOT_CHANGED") -- the placement of this matters. so does the event arg
+	MultiStateCD_OnEvent(icon, "ACTIONBAR_SLOT_CHANGED")
 
 	if icon:IsBeingEdited() == "MAIN" then
-		-- icon.Slot was just obtained by the OnEvent method call
+		-- icon.Slot was just obtained by the OnEvent method call.
+		-- If it is still 0, that means the ability that the player wants to track
+		-- is not on their action bars.
 		if icon.Slot == 0 and originalNameFirst and originalNameFirst ~= "" and TellMeWhen_ChooseName then
 			TMW.HELP:Show{
 				code = "ICON_MS_NOTFOUND",
+				codeOrder = 5,
 				icon = icon,
 				relativeTo = TellMeWhen_ChooseName,
 				x = 0,

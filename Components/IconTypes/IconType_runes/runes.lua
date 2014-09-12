@@ -14,14 +14,13 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
+local print = TMW.print
 local GetRuneType, GetRuneCooldown
 	= GetRuneType, GetRuneCooldown
 local bit, wipe, ipairs, ceil
 	= bit, wipe, ipairs, ceil
 	
-local print = TMW.print
-local _, pclass = UnitClass("Player")
-local SpellTextures = TMW.SpellTextures
+local _, pclass = UnitClass("player")
 
 if not GetRuneType then return end
 
@@ -34,6 +33,7 @@ Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
 Type.hasNoGCD = true
 
+
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("charges, maxCharges")
@@ -43,11 +43,13 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
+
 Type:RegisterIconDefaults{
+	-- Sort the runes found by duration
 	Sort					= false,
-	RuneSlots				= 0xFFF, --(111111 111111)
-	RunesAsCharges			= false,
-	
+
+	-- Bitfield of the runes that will be checked.
 	--[[ From the LSB, RuneSlots corresponds to:
 		[0x003]   blood runes 1&2
 		[0x00C]   unholy runes 1&2
@@ -56,7 +58,30 @@ Type:RegisterIconDefaults{
 		[0x300] unholy death runes 1&2
 		[0xC00] frost death runes 1&2
 	]]
+	RuneSlots				= 0xFFF, --(111111 111111)
+
+	-- Treat any runes that are cooling down as an extra charge
+	RunesAsCharges			= false,
 }
+
+TMW:RegisterUpgrade(62033, {
+	icon = function(self, ics)
+		if ics.Type == "runes" then
+			local firstSix = bit.band(0x3F, ics.RuneSlots)
+			local secondSix = bit.lshift(firstSix, 6)
+			ics.RuneSlots = bit.bor(secondSix, firstSix)
+		end
+	end,
+})
+TMW:RegisterUpgrade(51024, {
+	icon = function(self, ics)
+		-- Import the setting from TotemSlots, which was what this setting used to be
+		if ics.Type == "runes" and ics.TotemSlots and ics.TotemSlots ~= 0xF then
+			ics.RuneSlots = ics.TotemSlots
+		end
+	end,
+})
+
 
 Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_Runes")
 
@@ -77,26 +102,8 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	},
 })
 
-
 Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
 
-TMW:RegisterUpgrade(62033, {
-	icon = function(self, ics)
-		if ics.Type == "runes" then
-			local firstSix = bit.band(0x3F, ics.RuneSlots)
-			local secondSix = bit.lshift(firstSix, 6)
-			ics.RuneSlots = bit.bor(secondSix, firstSix)
-		end
-	end,
-})
-TMW:RegisterUpgrade(51024, {
-	icon = function(self, ics)
-		-- Import the setting from TotemSlots, which was what this setting used to be
-		if ics.Type == "runes" and ics.TotemSlots and ics.TotemSlots ~= 0xF then
-			ics.RuneSlots = ics.TotemSlots
-		end
-	end,
-})
 
 local textures = {
 	"Interface\\Icons\\Spell_Deathknight_BloodPresence",

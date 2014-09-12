@@ -188,7 +188,6 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					name = strlower(name)
 
 					local fail =
-					clientBuild == "18689" or -- TODO: remove this line. Game crashes in this bhild when you set the tooltip to a spell. 78123, 90398, 90938 are known IDs that do it.
 					CONST.INVALID_TEXTURES[icon] or
 					findword(name, "dnd") or
 					findword(name, "test") or
