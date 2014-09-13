@@ -123,52 +123,68 @@ local runeNames = {
 local huge = math.huge
 local function Runes_OnUpdate(icon, time)
 
+	-- Upvalue things that will be referenced a lot in our loops.
 	local Slots, Sort = icon.Slots, icon.Sort
+
+	-- These variables will hold the attributes that we pass to YieldInfo().
 	local readyslot, readyslotType
 	local unstart, unduration, unslot, unslotType
-	local d = Sort == -1 and huge or 0
-
 	local usableCount = 0
 
-	for iSlot = 1, #Slots do
-		if Slots[iSlot] then
+
+	local curSortDur = Sort == -1 and huge or 0
+
+
+	for slot = 1, #Slots do
+		if Slots[slot] then
+			-- The user is interested in the slot.
+
 			local isDeath = false
-			if iSlot > 6 then
-				iSlot = iSlot - 6
+			if slot > 6 then
+				-- Slots above 6 correspond to the death rune version of that slot.
+				slot = slot - 6
 				isDeath = true
 			end
-			local runeType = GetRuneType(iSlot)
+
+			local runeType = GetRuneType(slot)
 			
+			-- Check if the rune is a death rune if it should be,
+			-- or if it isn't a death rune if it shouldn't be.
 			if isDeath == (runeType == 4) then
-				local start, duration, runeReady = GetRuneCooldown(iSlot)
+				local start, duration, runeReady = GetRuneCooldown(slot)
 				
+				-- Stupid API.
 				if start == 0 then duration = 0 end
+
+				-- Start times in the future indicate a rune that hasn't started its cooldown.
 				if start > time then runeReady = false end
 
 				if runeReady then
 					usableCount = usableCount + 1
 					if not readyslot then
-						readyslot = iSlot
+						-- Record this rune as the first one we found that's ready,
+						-- so that we can use it if we need to.
+						readyslot = slot
 						readyslotType = runeType
 					end
-					--[[if icon.Alpha > 0 then
-						break
-					end]]
 				else
 					if Sort then
-						local _d = duration - (time - start)
-						if d*Sort < _d*Sort then
-							unstart, unduration, unslot, d = start, duration, iSlot, _d
+						local remaining = duration - (time - start)
+						if curSortDur*Sort < remaining*Sort then
+							-- Sort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
+							-- If this rune beats the previous by sort order, then use it.
+								
+							unstart, unduration, unslot, curSortDur = start, duration, slot, remaining
 							unslotType = runeType
 						end
 					else
 						if not unstart or (unstart > time and start < time) then
-							unstart, unduration, unslot = start, duration, iSlot
+							-- If we haven't found an unusable rune yet, or if the one that we found 
+							-- hasn't started its cooldown yet and this rune has started its cooldown,
+							-- record this rune as the unusable rune that we will show data for.
+							unstart, unduration, unslot = start, duration, slot
 							unslotType = runeType
 						end
-						--[[if start < time and icon.Alpha == 0 then
-							break
-						end]]
 					end
 				end
 			end
@@ -177,6 +193,8 @@ local function Runes_OnUpdate(icon, time)
 
 
 	if readyslot then
+		-- We found a rune that is ready. Show it.
+
 		if icon.RunesAsCharges and unslot then
 			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
 				icon.Alpha,
@@ -184,7 +202,7 @@ local function Runes_OnUpdate(icon, time)
 				unstart, unduration,
 				usableCount, icon.RuneSlotsUsed,
 				usableCount, usableCount,
-				runeNames[readyslotType] -- MAYBE: change this arg? (to a special arg instead of spell)
+				runeNames[readyslotType] 
 			)
 		else
 			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
@@ -193,41 +211,49 @@ local function Runes_OnUpdate(icon, time)
 				0, 0,
 				nil, nil,
 				usableCount, usableCount,
-				runeNames[readyslotType] -- MAYBE: change this arg? (to a special arg instead of spell)
+				runeNames[readyslotType] 
 			)
 		end
 	elseif unslot then
+		-- We didn't find any ready runes. Show a cooling down rune.
 		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
 			icon.UnAlpha,
 			textures[unslotType],
 			unstart, unduration,
 			0, 0,
 			nil, nil,
-			runeNames[unslotType] -- MAYBE: change this arg? (to a special arg instead of spell)
+			runeNames[unslotType]
 		)
 	else
-		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText",
+		-- We didn't find any runes. This might mean that the types of runes being tracked are death runes,
+		-- or if tracking death runes, those death runes aren't death runes.
+		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
 			icon.UnAlpha,
-			icon.FirstTexture,
+			textures[icon.FirstSlot],
 			0, 0,
 			0, 0,
-			nil, nil
+			nil, nil,
+			runeNames[icon.FirstSlot]
 		)
 	end
 end
 
 function Type:FormatSpellForOutput(icon, data, doInsertLink)
-	return runeNames[data]
+	print(icon, data)
+	return data
 end
 
 
 function Type:Setup(icon)
 	icon.Slots = wipe(icon.Slots or {})
+	-- Stick the enabled state of every rune slot into a table
+	-- so we don't have to do bit magic in every OnUpdate.
 	for i=1, 12 do
 		local settingBit = bit.lshift(1, i - 1)
 		icon.Slots[i] = bit.band(icon.RuneSlots, settingBit) == settingBit
 	end
 	
+	-- This is used as maxCharges if icon.RunesAsCharges == true.
 	icon.RuneSlotsUsed = 0
 	for i = 1, 6 do
 		if icon.Slots[i] or icon.Slots[i+6] then
@@ -235,18 +261,22 @@ function Type:Setup(icon)
 		end
 	end
 
+	icon.FirstSlot = nil
 	for k, v in ipairs(icon.Slots) do
 		if v then
 			if k > 6 then
-				icon.FirstTexture = textures[4]
+				icon.FirstSlot = 4
 			else
-				icon.FirstTexture = textures[ceil(k/2)]
+				icon.FirstSlot = ceil(k/2)
 			end
 			break
 		end
 	end
 
-	icon:SetInfo("texture", icon.FirstTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
+	icon:SetInfo("texture; spell",
+		textures[icon.FirstSlot] or "Interface\\Icons\\INV_Misc_QuestionMark",
+		runeNames[icon.FirstSlot]
+	)
 
 	icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
 	icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
@@ -265,12 +295,15 @@ function Type:GetIconMenuText(ics)
 	local str = ""
 
 	for slot = 1, 12, 2 do
+		-- The first slot of a given rune type.
 		local settingBit = bit.lshift(1, slot - 1)
 		local slotEnabled = bit.band(RuneSlots, settingBit) == settingBit
 
+		-- The second slot of the same rune type.
 		local settingBit2 = bit.lshift(1, slot)
 		local slot2Enabled = bit.band(RuneSlots, settingBit) == settingBit
 
+		-- The number of runes of a given type that are enabled.
 		local n = (slotEnabled and 1 or 0) + (slot2Enabled and 1 or 0)
 
 		if n > 0 then

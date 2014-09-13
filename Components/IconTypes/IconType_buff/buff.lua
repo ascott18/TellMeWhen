@@ -241,13 +241,13 @@ local function Buff_OnUpdate(icon, time)
 
 					elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[_id])) then
 						if DurationSort then
-							local dur = (_expirationTime == 0 and huge) or _expirationTime - time
+							local remaining = (_expirationTime == 0 and huge) or _expirationTime - time
 
-							if not buffName or curSortDur*DurationSort < dur*DurationSort then
+							if not buffName or curSortDur*DurationSort < remaining*DurationSort then
 								-- DurationSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
 								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
 								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, curSortDur =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,    dur
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,    remaining
 							end
 						elseif StackSort then
 							local stack = _count or 0

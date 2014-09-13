@@ -58,7 +58,7 @@ Type:RegisterIconDefaults{
 	-- Sort meta icons found by their duration
 	Sort						= false,
 
-	-- Check sub-metas. Causes the meta icon to expand any meta icons it is checking into that meta icon's component icons.
+	-- Expand sub-metas. Causes the meta icon to expand any meta icons it is checking into that meta icon's component icons.
 	-- Also prevents any other meta icon with this setting enabled from showing the icon that this meta icon is showing.
 	CheckNext					= false,
 
