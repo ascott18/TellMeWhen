@@ -673,6 +673,11 @@ function Texts:CreateFontString(id)
 	return fontString
 end
 
+
+local function reSetup(self, event, icon)
+	self:SetupForIcon(icon)
+end
+
 function Texts:SetupForIcon(sourceIcon)
 	local icon = self.icon
 	
@@ -743,8 +748,13 @@ function Texts:SetupForIcon(sourceIcon)
 						if not _G[relativeTo] then
 							if self.hasSetupOnce then
 								TMW:Error("Couldn't find the anchor %q for icon %q, font string %s", anchorSettings.relativeTo, icon:GetName(), fontStringID)
+							else
+								-- Run the text setup again after the icon is updated if we were missing an anchor frame.
+								TMW:RegisterRunonceCallback("TMW_ICON_SETUP_POST", reSetup, self)
+
+								-- Temporary
+								relativeTo = icon
 							end
-							relativeTo = icon
 						end
 					end
 					
