@@ -842,7 +842,7 @@ function Texts:OnKwargsUpdated()
 		for textID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
 			local fontString = self.fontStrings[self:GetFontStringID(textID, fontStringSettings)]
 			
-			local text = TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, fontStringID)
+			local text = TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, textID)
 			
 			if fontString and text and text ~= "" then
 				-- We let DogTag do the styling of the outline on our texts.
