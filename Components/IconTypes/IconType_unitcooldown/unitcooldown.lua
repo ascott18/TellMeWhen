@@ -18,19 +18,20 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local type, wipe, pairs =
-	  type, wipe, pairs
+local print = TMW.print
+local type, wipe, pairs, rawget =
+	  type, wipe, pairs, rawget
 local UnitGUID, IsInInstance =
 	  UnitGUID, IsInInstance
-local print = TMW.print
+local bit_band = bit.band
+
+local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local huge = math.huge
+
 local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 
-local bit_band = bit.band
-
-local clientVersion = select(4, GetBuildInfo())
 
 
 local Type = TMW.Classes.IconType:New("unitcooldown")
@@ -43,6 +44,7 @@ Type.DurationSyntax = 1
 Type.unitType = "unitid"
 Type.canControlGroup = true
 
+
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
@@ -51,11 +53,19 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
+
 Type:RegisterIconDefaults{
+	-- The unit(s) to check for cooldowns
 	Unit					= "player", 
+
+	-- True to only show the icon if the unit has used the ability at least once.
 	OnlySeen				= false,
+
+	-- Sort the cooldowns found by duration
 	Sort					= false,
 }
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "spellwithduration",
@@ -88,56 +98,35 @@ Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings", {
 	end,
 })
 
+
+
+-- Holds all unitcooldown icons whose update method is "manual" (not "auto")
+-- Since the event handling for this icon type is all done by a single handler that operates on all icons,
+-- we need to know which icons we need to queue an update for when something changes.
 local ManualIcons = {}
 local ManualIconsManager = TMW.Classes.UpdateTableManager:New()
 ManualIconsManager:UpdateTable_Set(ManualIcons)
 
 
+-- Holds the cooldowns of all known units. Structure is:
+--[[ Cooldowns = {
+	[GUID] = {
+		[spellID] = lastCastTime,
+		[spellName] = spellID,
+		...
+	},
+	...
+}
+]]
 local Cooldowns = setmetatable({}, {__index = function(t, k)
 	local n = {}
 	t[k] = n
 	return n
 end}) TMW.Cooldowns = Cooldowns
 
+
+
 local resetsOnCast = {
-	[23989] = { -- Readiness
-		[120697] = 1, -- Lynx Rush
-		[19574] = 1, -- Bestial Wrath
-		[6991] = 1, -- Feed Pet
-		[53271] = 1, -- Master's Call
-		[82726] = 1, -- Fervor
-		[3674] = 1, -- Black Arrow
-		[13809] = 1, -- Ice Trap
-		[13813] = 1, -- Explosive Trap
-		[53351] = 1, -- Kill Shot
-		[19503] = 1, -- Scatter Shot
-		[19386] = 1, -- Wyvern Sting
-		[19263] = 1, -- Deterrence
-		[130392] = 1, -- Blink Strike
-		[3045] = 1, -- Rapid Fire
-		[1499] = 1, -- Freezing Trap
-		[131894] = 1, -- A Murder of Crows
-		[53301] = 1, -- Explosive Shot
-		[109304] = 1, -- Exhilaration
-		[34490] = 1, -- Silencing Shot
-		[109248] = 1, -- Binding Shot
-		[5116] = 1, -- Concussive Shot
-		[34600] = 1, -- Snake Trap
-		[34477] = 1, -- Misdirection
-		[51753] = 1, -- Camouflage
-		[20736] = 1, -- Distracting Shot
-		[120679] = 1, -- Dire Beast
-		[34026] = 1, -- Kill Command
-		-- [121818] = 1, -- Stampeed (5 min cd, doesn't get reset)
-		[5384] = 1, -- Feign Death
-		[19577] = 1, -- Intimidation
-		[1543] = 1, -- Flare
-		[781] = 1, -- Disengage
-		[53209] = 1, -- Chimera Shot
-		[109259] = 1, -- Powershot
-		[117050] = 1, -- Glaive Toss
-		[120360] = 1, -- Barrrage
-	},
 	
 	[108285] = { -- Call of the Elements
 		[108269] = 1, -- Capacitor Totem
@@ -150,15 +139,16 @@ local resetsOnCast = {
 		[108853] = 1, -- Inferno Blast
 	},
 	[11958] = { -- coldsnap
-		[44572] = 1,
-		[120] = 1,
-		[122] = 1,
+		[45438] = 1, -- iceblock
+		[31661] = 1, -- dragon's breath
+		[12043] = 1, -- presence of mind
+		[120] = 1, -- cone of cold
+		[122] = 1, -- frost nova
 	},
 	[14185] = { --prep
 		[5277] = 1, -- Evasion
 		[2983] = 1, -- Sprint
 		[1856] = 1, -- Vanish
-		[51722] = 1, -- Dismantle
 	},
 	[50334] = { --druid berserk or something
 		[33878] = 1,
@@ -219,6 +209,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 		local cooldownsForGUID = Cooldowns[sourceGUID]
 		
 		if cleuEvent == "SPELL_AURA_APPLIED" and resetsOnAura[spellID] then
+			-- Handle things that reset on aura application.
 			for id in pairs(resetsOnAura[spellID]) do
 				if cooldownsForGUID[id] then
 					-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
@@ -234,7 +225,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 			end
 		end
 		
-		-- DONT ELSEIF HERE
+
 		if cleuEvent == "SPELL_CAST_SUCCESS" then
 			if resetsOnCast[spellID] then
 				for id in pairs(resetsOnCast[spellID]) do
@@ -283,6 +274,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 	elseif cleuEvent == "UNIT_DIED" then
 		if destFlags then
 			if bit_band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= COMBATLOG_OBJECT_TYPE_PLAYER then
+				-- Don't reset the cooldowns of a player if they die. Only NPCs.
 				Cooldowns[destGUID] = nil
 			end
 		end
@@ -315,7 +307,9 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 	end
 end
 
--- wiping cooldowns for arenas
+
+
+-- Wipe cooldowns for arena enemies:
 local isArena
 local resetForArena = {}
 function Type:PLAYER_ENTERING_WORLD()
@@ -357,9 +351,13 @@ function Type:ARENA_OPPONENT_UPDATE()
 		end
 	end
 end
+-- End arena enemy cooldown reset code.
+
+
 
 local function UnitCooldown_OnEvent(icon, event, arg1)
 	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
 end
@@ -367,12 +365,18 @@ end
 local BLANKTABLE = {}
 
 local function UnitCooldown_OnUpdate(icon, time)
-	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
+
+	-- Upvalue things that will be referenced a lot in our loops.
 	local Alpha, NameArray, OnlySeen, Sort, Durations, Units =
 	icon.Alpha, icon.Names.Array, icon.OnlySeen, icon.Sort, icon.Durations, icon.Units
-	local NAL = #NameArray
-	local d = Sort == -1 and huge or 0
+
+	-- These variables will hold all the attributes that we pass to SetInfo().
+	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
 	
+	-- Initial values for the vars that track the duration/stack of the aura that currently occupies unname and related locals.
+	-- If we are sorting by smallest duration, we intitialize to math.huge so that the first thing we find is definitely smaller.
+	local curSortDur = Sort == -1 and huge or 0
+
 	for u = 1, #Units do
 		local unit = Units[u]
 		local GUID = UnitGUID(unit)
@@ -381,58 +385,73 @@ local function UnitCooldown_OnUpdate(icon, time)
 		if u == 1 and GUID and not cooldowns and not OnlySeen then
 			-- If this is the first unit, use a blank cooldowns table for it if it doesn't exist
 			-- so that we can still find the first usable spell.
+			-- Such a dirty, dirty hack.
 			cooldowns = BLANKTABLE
 		end
 
 		if cooldowns then
-			for i = 1, NAL do
+			for i = 1, #NameArray do
 				local iName = NameArray[i]
+
 				if not isNumber[iName] then
 					-- spell name keys have values that are the spellid of the name,
 					-- we need the spellid for the texture (thats why i did it like this)
 					iName = cooldowns[iName] or iName
 				end
-				local _start
+
+				local start
 				if OnlySeen then
-					_start = cooldowns[iName]
+					-- If we only want cooldowns that have been seen,
+					-- don't default to 0 if it isn't in the table.
+					start = cooldowns[iName]
 				else
-					_start = cooldowns[iName] or 0
+					start = cooldowns[iName] or 0
 				end
 
-				if _start then
-					local _duration = Durations[i]
-					local tms = time - _start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
-					local _d = (tms > _duration) and 0 or _duration - tms -- real duration remaining on the cooldown
+				if start then
+					local duration = Durations[i]
+					local remaining = duration - (time - start)
+					if remaining < 0 then remaining = 0 end
 
 					if Sort then
-						if _d ~= 0 then -- found an unusable cooldown
-							if (Sort == 1 and d < _d) or (Sort == -1 and d > _d) then -- the duration is lower or higher than the last duration that was going to be used
-								d = _d
+						if remaining ~= 0 then
+							-- Found an unusable cooldown
+							-- Sort is either 1 or -1, so multiply by it to get the correct ordering.
+							-- (multiplying by a negative flips inequalities)
+							if curSortDur*Sort < remaining*Sort then
+								curSortDur = remaining
 								unname = iName
-								unstart = _start
-								unduration = _duration
+								unstart = start
+								unduration = duration
 								unUnit = unit
 							end
-						else -- we found the first usable cooldown
+						else
+							-- We found the first usable cooldown
 							if not usename then
 								usename = iName
 								useUnit = unit
 							end
 						end
 					else
-						if _d ~= 0 and not unname then -- we found the first UNusable cooldown
+						if remaining ~= 0 and not unname then
+							-- We found the first UNusable cooldown
 							unname = iName
-							unstart = _start
-							unduration = _duration
+							unstart = start
+							unduration = duration
 							unUnit = unit
-							if Alpha == 0 then -- we DONT care about usable cooldowns, so stop looking
+
+							-- We DONT care about usable cooldowns, so stop looking
+							if Alpha == 0 then 
 								dobreak = 1
 								break
 							end
-						elseif _d == 0 and not usename then -- we found the first usable cooldown
+						elseif remaining == 0 and not usename then
+							-- We found the first usable cooldown
 							usename = iName
 							useUnit = unit
-							if Alpha ~= 0 then -- we care about usable cooldowns, so stop looking
+
+							-- We care about usable cooldowns, so stop looking
+							if Alpha ~= 0 then 
 								dobreak = 1
 								break
 							end
@@ -454,6 +473,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 			usename,
 			useUnit, nil
 		)
+
 	elseif unname then
 		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.UnAlpha,
@@ -462,17 +482,18 @@ local function UnitCooldown_OnUpdate(icon, time)
 			unname,
 			unUnit, nil
 		)
+
 	else
 		icon:SetInfo("alpha", 0)
 	end
 end
 
 local function UnitCooldown_OnUpdate_Controller(icon, time)
+
+	-- Upvalue things that will be referenced a lot in our loops.
 	local Alpha, UnAlpha, NameArray, OnlySeen, Durations, Units =
 	icon.Alpha, icon.UnAlpha, icon.Names.Array, icon.OnlySeen, icon.Durations, icon.Units
-	
-	local NAL = #NameArray
-	
+		
 	for u = 1, #Units do
 		local unit = Units[u]
 		local GUID = UnitGUID(unit)
@@ -481,19 +502,23 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 		if u == 1 and GUID and not cooldowns and not OnlySeen then
 			-- If this is the first unit, use a blank cooldowns table for it if it doesn't exist
 			-- so that we can still find the first usable spell.
+			-- Such a dirty, dirty hack.
 			cooldowns = BLANKTABLE
 		end
 
 		if cooldowns then
-			for i = 1, NAL do
+			for i = 1, #NameArray do
 				local iName = NameArray[i]
 				if not isNumber[iName] then
 					-- spell name keys have values that are the spellid of the name,
 					-- we need the spellid for the texture (thats why i did it like this)
 					iName = cooldowns[iName] or iName
 				end
+
 				local start
 				if OnlySeen then
+					-- If we only want cooldowns that have been seen,
+					-- don't default to 0 if it isn't in the table.
 					start = cooldowns[iName]
 				else
 					start = cooldowns[iName] or 0
@@ -501,17 +526,18 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 
 				if start then
 					local duration = Durations[i]
-					local tms = time - start -- Time Minus Start - time since the unit's last cast of the spell (not neccesarily the time it has been on cooldown)
-					local d = (tms > duration) and 0 or duration - tms -- real duration remaining on the cooldown
+					local remaining = duration - (time - start)
+					if remaining < 0 then remaining = 0 end
 
-
-					if d ~= 0 then
+					if remaining ~= 0 then
 						if UnAlpha > 0 and not icon:YieldInfo(true, iName, start, duration, unit, GUID, UnAlpha) then
+							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 							return
 						end
 
 					else
 						if Alpha > 0 and not icon:YieldInfo(true, iName, 0, 0, unit, GUID, Alpha) then
+							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 							return
 						end
 					end
@@ -520,6 +546,7 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 		end
 	end
 
+	-- Signal the group controller that we are at the end of our data harvesting.
 	icon:YieldInfo(false)
 end
 function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GUID, alpha)
@@ -544,6 +571,18 @@ function Type:Setup(icon)
 
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	
+
+	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
+
+
+
+	-- Setup event handling to catch unit spellcasts and such.
+	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+
+
+
+	-- Setup icon events and update functions.
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		ManualIconsManager:UpdateTable_Register(icon)
@@ -554,12 +593,6 @@ function Type:Setup(icon)
 		
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", UnitCooldown_OnEvent, icon)
 	end
-
-	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-
-	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
-
 
 	if icon:IsGroupController() then
 		icon:SetUpdateFunction(UnitCooldown_OnUpdate_Controller)
