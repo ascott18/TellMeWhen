@@ -2739,7 +2739,7 @@ function IE:GetRealNames(Name)
 	if SoI == "item" then
 		tbl = TMW:GetItems(text)
 	else
-		tbl = TMW:GetSpellNames(text, 1)
+		tbl = TMW:GetSpellNamesProxy(text).Array
 	end
 	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(text)
 
