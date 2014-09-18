@@ -172,7 +172,7 @@
 
 								local s = ""
 								local array = TMW:GetSpellNamesProxy(self:GetText()).ArrayNoLower
-								for k, v in pairs(TMW:GetSpellDurations(self:GetText())) do
+								for k, v in pairs(TMW:GetSpellNamesProxy(self:GetText()).Durations) do
 									if v == 0 then
 										s = s .. (s ~= "" and "; " or "") .. array[k]
 									end

@@ -2741,7 +2741,7 @@ function IE:GetRealNames(Name)
 	else
 		tbl = TMW:GetSpellNamesProxy(text).Array
 	end
-	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(text)
+	local durations = CI_typeData.DurationSyntax and TMW:GetSpellNamesProxy(text).Durations
 
 	local Cache = TMW:GetModule("SpellCache"):GetCache()
 	

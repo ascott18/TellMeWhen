@@ -4105,94 +4105,11 @@ TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 
 
 
-local tableArgs = {
-	--						lower,	first,	toname,	hash
-	First				= { 1,		1,		nil,	nil	},
-	FirstString			= { 1,		1,		1,		nil },
-	Array				= { 1,		nil,	nil,	nil },
-	StringArray			= { 1,		nil,	1,		nil	},
-	Hash				= { 1,		nil,	nil, 	1	},
-	StringHash			= { 1,		nil,	1,		1	},
-
-	--						lower,	first,	toname,	hash
-	FirstNoLower		= { nil,	1,		nil,	nil },
-	FirstStringNoLower	= { nil,	1,		1,		nil	},
-	ArrayNoLower		= { nil,	nil,	nil,	nil	},
-	StringArrayNoLower	= { nil,	nil,	1,		nil	},
-	HashNoLower			= { nil,	nil,	nil, 	1	},
-	StringHashNoLower	= { nil,	nil,	1,		1	},
-
-	-- DUrations is kept in this table because it should also be cleared
-	-- every time the cache needs to be reset (handled in the :Wipe() method).
-	-- It is handled specially, though.
-	Durations = true,
-}
-TMW:NewClass("SpellNameProxy"){
-	instancesByName = {
-		-- Keyed here by allowRenaming
-		[true] = setmetatable({}, {__mode='kv'}),
-		[false] = setmetatable({}, {__mode='kv'}),
-	},
 
 
 
-	OnFirstInstance = function(self)
-		self:MakeInstancesWeak()
 
-		self.__index_old = self.instancemeta.__index
-		local meta = {}
-		for k, v in pairs(self.instancemeta) do
-			meta[k] = v
-		end
-		meta.__index = self.__index
-		
-		self.betterMeta = meta
-	end,
-
-	OnNewInstance = function(self, name, allowRenaming)
-	 	allowRenaming = not not allowRenaming -- make sure its a boolean
-
-	 	self.__index_old = self.__index_old
-		self.Name = name
-		self.AllowRenaming = allowRenaming
-
-		if name then
-			self.instancesByName[allowRenaming][name] = self
-		end
-		
-		setmetatable(self, self.betterMeta)
-	end,
-
-	__index = function(self, k)
-		local v = self.__index_old[k]
-		if v then
-			return v
-		end
-		
-		if tableArgs[k] then
-			self[k] = TMW:GetSpellNames(self.Name, tableArgs[k][1], tableArgs[k][2], tableArgs[k][3], tableArgs[k][4], self.AllowRenaming)
-			return self[k]
-		end
-	end,
-
-	Wipe = function(self)
-		for k, v in pairs(self) do
-			if tableArgs[k] then
-				self[k] = nil
-			end 
-		end
-	end,
-}
-function TMW:GetSpellNamesProxy(name, alowRenaming)
-	TMW:ValidateType("2 (name)", "TMW:RegisterRunonceCallback(name, alowRenaming)", event, "string;number")
-
-	-- Make sure that alowRenaming is a boolean.
-	alowRenaming = not not alowRenaming
-
-	return TMW.C.SpellNameProxy.instancesByName[alowRenaming][name] or TMW.C.SpellNameProxy:New(name, alowRenaming)
-end
-
-function TMW:GetSpellNames_static(doLower, setting, keepDurations)
+local function getSpellNames_static(doLower, setting, keepDurations)
 
 	local buffNames = TMW:SplitNames(setting) -- Get a table of everything
 	
@@ -4272,9 +4189,9 @@ function TMW:GetSpellNames_static(doLower, setting, keepDurations)
 
 	return buffNames
 end
-TMW:MakeFunctionCached(TMW, "GetSpellNames_static")
+getSpellNames_static = TMW:MakeFunctionCached(getSpellNames_static)
 
-function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenaming)
+local function getSpellNames(setting, doLower, firstOnly, toname, hash, allowRenaming)
 	local buffNames = TMW:GetSpellNames_static(doLower, setting, false)
 
 	-- buffNames MUST BE COPIED because the return from GetSpellNames_static is cached.
@@ -4333,6 +4250,118 @@ function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenam
 	return buffNames
 end
 
+local function getSpellDurations(setting)
+	local NameArray = TMW:GetSpellNames_static(false, setting, true)
+
+	local DurationArray = CopyTable(NameArray)
+
+	-- EXTRACT SPELL DURATIONS
+	for k, buffName in pairs(NameArray) do
+		local dur = strmatch(buffName, ".-:([%d:%s%.]*)$")
+		if not dur then
+			DurationArray[k] = 0
+		else
+			DurationArray[k] = tonumber( TMW.toSeconds(dur:trim(" :;.")) )
+		end
+	end
+
+	return DurationArray
+end
+
+
+
+local tableArgs = {
+	--						lower,	first,	toname,	hash
+	First				= { 1,		1,		nil,	nil	},
+	FirstString			= { 1,		1,		1,		nil },
+	Array				= { 1,		nil,	nil,	nil },
+	StringArray			= { 1,		nil,	1,		nil	},
+	Hash				= { 1,		nil,	nil, 	1	},
+	StringHash			= { 1,		nil,	1,		1	},
+
+	--						lower,	first,	toname,	hash
+	FirstNoLower		= { nil,	1,		nil,	nil },
+	FirstStringNoLower	= { nil,	1,		1,		nil	},
+	ArrayNoLower		= { nil,	nil,	nil,	nil	},
+	StringArrayNoLower	= { nil,	nil,	1,		nil	},
+	HashNoLower			= { nil,	nil,	nil, 	1	},
+	StringHashNoLower	= { nil,	nil,	1,		1	},
+
+	-- DUrations is kept in this table because it should also be cleared
+	-- every time the cache needs to be reset (handled in the :Wipe() method).
+	-- It is handled specially, though.
+	Durations = true,
+}
+TMW:NewClass("SpellNameProxy"){
+	instancesByName = {
+		-- Keyed here by allowRenaming
+		[true] = setmetatable({}, {__mode='kv'}),
+		[false] = setmetatable({}, {__mode='kv'}),
+	},
+
+
+
+	OnFirstInstance = function(self)
+		self:MakeInstancesWeak()
+
+		self.__index_old = self.instancemeta.__index
+		local meta = {}
+		for k, v in pairs(self.instancemeta) do
+			meta[k] = v
+		end
+		meta.__index = self.__index
+		
+		self.betterMeta = meta
+	end,
+
+	OnNewInstance = function(self, name, allowRenaming)
+	 	allowRenaming = not not allowRenaming -- make sure its a boolean
+
+	 	self.__index_old = self.__index_old
+		self.Name = name
+		self.AllowRenaming = allowRenaming
+
+		if name then
+			self.instancesByName[allowRenaming][name] = self
+		end
+		
+		setmetatable(self, self.betterMeta)
+	end,
+
+	__index = function(self, k)
+		local v = self.__index_old[k]
+		if v then
+			return v
+		end
+		
+		if k == "Durations" then
+			self[k] = getSpellDurations(self.Name)
+			return self[k]
+		end
+
+		if tableArgs[k] then
+			self[k] = getSpellNames(self.Name, tableArgs[k][1], tableArgs[k][2], tableArgs[k][3], tableArgs[k][4], self.AllowRenaming)
+			return self[k]
+		end
+	end,
+
+	Wipe = function(self)
+		for k, v in pairs(self) do
+			if tableArgs[k] then
+				self[k] = nil
+			end 
+		end
+	end,
+}
+function TMW:GetSpellNamesProxy(name, alowRenaming)
+	TMW:ValidateType("2 (name)", "TMW:RegisterRunonceCallback(name, alowRenaming)", event, "string;number")
+
+	-- Make sure that alowRenaming is a boolean.
+	alowRenaming = not not alowRenaming
+
+	return TMW.C.SpellNameProxy.instancesByName[alowRenaming][name] or TMW.C.SpellNameProxy:New(name, alowRenaming)
+end
+
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	-- We need to wipe the stored objects/strings on every TMW_GLOBAL_UPDATE because of issues with
 	-- spells that replace other spells in different specs, like Corruption/Immolate.
@@ -4345,24 +4374,9 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 end)
 
 
-function TMW:GetSpellDurations(setting)
-	local NameArray = TMW:GetSpellNames_static(false, setting, true)
 
-	local DurationArray = CopyTable(NameArray)
 
-	-- EXTRACT SPELL DURATIONS
-	for k, buffName in pairs(NameArray) do
-		DurationArray[k] = strmatch(buffName, ".-:([%d:%s%.]*)$")
-		if not DurationArray[k] then
-			DurationArray[k] = 0
-		else
-			DurationArray[k] = tonumber( TMW.toSeconds(DurationArray[k]:trim(" :;.")) )
-		end
-	end
 
-	return DurationArray
-end
-TMW:MakeSingleArgFunctionCached(TMW, "GetSpellDurations")
 
 
 --TMW.TestTex = TMW:CreateTexture()

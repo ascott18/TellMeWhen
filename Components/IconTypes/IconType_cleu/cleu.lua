@@ -361,7 +361,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 				-- We found a spell in our list that matches the event.
 				-- See if the colon duration syntax was used, and if so, 
 				-- then use that duration to set on the icon.
-				duration = icon.Durations[key]
+				duration = icon.Names.Durations[key]
 				if duration == 0 then
 					duration = nil
 				end
@@ -427,7 +427,6 @@ end
 
 function Type:Setup(icon)
 	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
-	icon.Durations = TMW:GetSpellDurations(icon.Name)
 
 	-- only define units if there are any units. we dont want to waste time iterating an empty table.
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
