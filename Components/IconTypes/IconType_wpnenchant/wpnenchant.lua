@@ -243,7 +243,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 
 		elseif EnchantName then
 			-- We know what enchant is on the weapon. See if the user wants to track it.
-			icon.CorrectEnchant = icon.Names.Hash[strlowerCache[EnchantName]]
+			icon.CorrectEnchant = icon.Spells.Hash[strlowerCache[EnchantName]]
 
 		elseif unit then
 			-- We couldn't get an enchant name.
@@ -290,7 +290,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 end
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 
 
 	icon.SelectIndex = icon.WpnEnchantType == "SecondaryHandSlot" and 4 or 1

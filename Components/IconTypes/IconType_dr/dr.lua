@@ -187,7 +187,7 @@ end)
 local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
-			local NameHash = icon.Names.Hash
+			local NameHash = icon.Spells.Hash
 			if NameHash[spellID] or NameHash[strlowerCache[spellName]] then
 
 				-- Check that either the spell always has DR, or that the target is a player (or pet).
@@ -336,7 +336,7 @@ do	-- CheckCategories
 		for i, IDorName in ipairs(NameArray) do
 			for category, str in pairs(TMW.BE.dr) do
 
-				local Names = TMW:GetSpellNamesProxy(str)
+				local Names = TMW:GetSpells(str)
 
 				-- Check if the spell being checked by the icon is in the DR category that we are looking at.
 				if Names.Hash[IDorName] or Names.StringHash[IDorName] then
@@ -366,7 +366,7 @@ do	-- CheckCategories
 	end
 
 	CheckCategories = function(icon)
-		local append, doWarn, firstCategory = func(icon.Names.Array)
+		local append, doWarn, firstCategory = func(icon.Spells.Array)
 
 
 		if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
@@ -391,7 +391,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
@@ -408,7 +408,7 @@ function Type:Setup(icon)
 	-- Update this local from the global setting.
 	DRReset = TMW.db.global.DRDuration
 	
-	icon.FirstTexture = SpellTextures[icon.Names.First]
+	icon.FirstTexture = SpellTextures[icon.Spells.First]
 
 	-- Do the Right Thing and tell people if their DRs mismatch
 	local firstCategoy = CheckCategories(icon)

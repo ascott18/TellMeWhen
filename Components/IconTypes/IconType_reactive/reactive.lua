@@ -123,7 +123,7 @@ end)
 
 local function Reactive_OnEvent(icon, event, arg1)
 	-- If icon.UseActvtnOverlay == true, treat the icon as usable if the spell has an activation overlay glow.
-	if icon.Names.First == arg1 or strlowerCache[GetSpellInfo(arg1)] == icon.Names.FirstString then
+	if icon.Spells.First == arg1 or strlowerCache[GetSpellInfo(arg1)] == icon.Spells.FirstString then
 		icon.forceUsable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
 		icon.NextUpdateTime = 0
 	end
@@ -133,7 +133,7 @@ local function Reactive_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local NameArray, NameStringArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, forceUsable, IgnoreNomana =
-	 icon.Names.Array, icon.Names.StringArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.forceUsable, icon.IgnoreNomana
+	 icon.Spells.Array, icon.Spells.StringArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.forceUsable, icon.IgnoreNomana
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
 	local inrange, nomana, start, duration, CD, usable, charges, maxCharges, stack, start_charge, duration_charge
@@ -207,7 +207,7 @@ local function Reactive_OnUpdate(icon, time)
 	-- if there is more than 1 spell that was checked
 	-- then we need to get these again for the first spell,
 	-- otherwise reuse the values obtained above since they are just for the first one
-	local NameFirst = icon.Names.First
+	local NameFirst = icon.Spells.First
 	if numChecked > 1 then
 		charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameFirst)
 		if charges then
@@ -253,11 +253,11 @@ end
 
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, true)
+	icon.Spells = TMW:GetSpells(icon.Name, true)
 
 	icon.forceUsable = nil
 
-	icon.FirstTexture = SpellTextures[icon.Names.First]
+	icon.FirstTexture = SpellTextures[icon.Spells.First]
 
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	

@@ -349,7 +349,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			]]
 		end
 
-		local NameHash = icon.Names.Hash
+		local NameHash = icon.Spells.Hash
 		local duration
 		if icon.Name ~= "" and not EventsWithoutSpells[event] then
 			-- Filter the event by spell.
@@ -361,7 +361,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 				-- We found a spell in our list that matches the event.
 				-- See if the colon duration syntax was used, and if so, 
 				-- then use that duration to set on the icon.
-				duration = icon.Names.Durations[key]
+				duration = icon.Spells.Durations[key]
 				if duration == 0 then
 					duration = nil
 				end
@@ -426,7 +426,7 @@ local function CLEU_OnUpdate(icon, time)
 end
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 
 	-- only define units if there are any units. we dont want to waste time iterating an empty table.
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)

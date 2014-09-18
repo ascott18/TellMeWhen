@@ -197,7 +197,7 @@ TMW:RegisterUpgrade(48017, {
 local function Totem_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced in our loops.
-	local Slots, NameStringHash, NameFirst = icon.Slots, icon.Names.StringHash, icon.Names.First
+	local Slots, NameStringHash, NameFirst = icon.Slots, icon.Spells.StringHash, icon.Spells.First
 	
 	-- Be careful here. Slots that are explicitly disabled by the user are set false.
 	-- Slots that are disabled internally are set nil (which could change table length).
@@ -250,13 +250,13 @@ function Type:Setup(icon)
 		icon.Slots[4] = nil -- there is no mushroom 4
 	end
 
-	icon.Names = TMW:GetSpellNamesProxy(name, true)
+	icon.Spells = TMW:GetSpells(name, true)
 
-	icon.FirstTexture = icon.Names.FirstString and TMW.SpellTextures[icon.Names.FirstString]
+	icon.FirstTexture = icon.Spells.FirstString and TMW.SpellTextures[icon.Spells.FirstString]
 	icon:SetInfo("reverse; texture; spell",
 		true,
 		Type:GetConfigIconTexture(icon),
-		icon.Names.FirstString
+		icon.Spells.FirstString
 	)
 
 	icon:SetUpdateMethod("manual")

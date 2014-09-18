@@ -159,7 +159,7 @@ function IconType:GuessIconTexture(ics)
 	
 	if ics.Name and ics.Name ~= "" then
 
-		local name = TMW:GetSpellNamesProxy(ics.Name).First
+		local name = TMW:GetSpells(ics.Name).First
 		if name then
 			return SpellTextures[name]
 		end
@@ -184,7 +184,7 @@ function IconType:GetConfigIconTexture(icon)
 	
 		if icon.Name ~= "" then
 
-			local tbl = TMW:GetSpellNamesProxy(icon.Name).Array
+			local tbl = TMW:GetSpells(icon.Name).Array
 
 			for _, name in ipairs(tbl) do
 				local t = SpellTextures[name]

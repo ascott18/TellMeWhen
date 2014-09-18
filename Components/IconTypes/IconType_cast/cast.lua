@@ -125,7 +125,7 @@ local function Cast_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local NameFirst, NameStringHash, Units, Interruptible =
-	icon.Names.First, icon.Names.StringHash, icon.Units, icon.Interruptible
+	icon.Spells.First, icon.Spells.StringHash, icon.Units, icon.Interruptible
 
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -180,7 +180,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, spell, unit, texture, start, du
 			"alpha; start, duration; spell; unit, GUID",
 			icon.UnAlpha,
 			0, 0,
-			icon.Names.First,
+			icon.Spells.First,
 			icon.Units[1], nil
 		)
 	end
@@ -188,7 +188,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
@@ -221,7 +221,7 @@ end
 
 function Type:GuessIconTexture(ics)
 	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNamesProxy(ics.Name).First
+		local name = TMW:GetSpells(ics.Name).First
 		if name then
 			return TMW.SpellTextures[name]
 		end

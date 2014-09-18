@@ -192,7 +192,7 @@ local function Buff_OnUpdate(icon, time)
 	
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, NameArray, NameStringArray, NameHash, Filter, Filterh, DurationSort, StackSort
-	= icon.Units, icon.Names.Array, icon.Names.StringArray, icon.Names.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
+	= icon.Units, icon.Spells.Array, icon.Spells.StringArray, icon.Spells.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
 	local NotStealable = not icon.Stealable
 
 	-- These variables will hold all the attributes that we pass to YieldInfo().
@@ -336,7 +336,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 	
 	-- Upvalue things that will be used in our loops.
 	local Units, NameFirst, NameHash, Filter, Filterh
-	= icon.Units, icon.Names.First, icon.Names.Hash, icon.Filter, icon.Filterh
+	= icon.Units, icon.Spells.First, icon.Spells.Hash, icon.Filter, icon.Filterh
 	local NotStealable = not icon.Stealable
 	
 	for u = 1, #Units do
@@ -423,7 +423,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.Names.First,
+			icon.Spells.First,
 			nil, nil,
 			nil, nil
 		)
@@ -434,7 +434,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.Names.First,
+			icon.Spells.First,
 			Units[1], nil,
 			nil, nil
 		)
@@ -509,7 +509,7 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
@@ -530,11 +530,11 @@ function Type:Setup(icon)
 	-- Sorting is only handled if this value is true.
 	-- EffThreshold is a value that determines if we will switch to iterating by index instead of
 	-- iterating by spell if we are checking a large number of spells.
-	if icon.DurationSort or icon.StackSort or #icon.Names.Array > TMW.db.profile.EffThreshold then
+	if icon.DurationSort or icon.StackSort or #icon.Spells.Array > TMW.db.profile.EffThreshold then
 		icon.buffdebuff_iterateByAuraIndex = true
 	end
 
-	for k, spell in pairs(icon.Names.StringArray) do
+	for k, spell in pairs(icon.Spells.StringArray) do
 		if TMW.DS[spell] then
 			-- Dispel types are only handled in the part of the code that is ran if this var is true.
 			icon.buffdebuff_iterateByAuraIndex = true
@@ -551,7 +551,7 @@ function Type:Setup(icon)
 		TMW.HELP:Hide("ICONTYPE_BUFF_NOSOURCERPPM")
 		if icon.OnlyMine then
 			for _, badSpell in pairs(aurasWithNoSourceReported) do
-				if type(badSpell) == "string" and icon.Names.StringHash[badSpell:lower()] then
+				if type(badSpell) == "string" and icon.Spells.StringHash[badSpell:lower()] then
 					TMW.HELP:Show{
 						code = "ICONTYPE_BUFF_NOSOURCERPPM",
 						codeOrder = 2,
@@ -559,7 +559,7 @@ function Type:Setup(icon)
 						relativeTo = TellMeWhen_ChooseName,
 						x = 0,
 						y = 0,
-						text = format(L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.Names.Array[k]))
+						text = format(L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.Spells.Array[k]))
 					}
 					break
 				end
@@ -569,7 +569,7 @@ function Type:Setup(icon)
 
 
 
-	icon.FirstTexture = SpellTextures[icon.Names.First]
+	icon.FirstTexture = SpellTextures[icon.Spells.First]
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 	

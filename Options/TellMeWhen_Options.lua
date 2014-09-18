@@ -2739,9 +2739,9 @@ function IE:GetRealNames(Name)
 	if SoI == "item" then
 		tbl = TMW:GetItems(text)
 	else
-		tbl = TMW:GetSpellNamesProxy(text).Array
+		tbl = TMW:GetSpells(text).Array
 	end
-	local durations = CI_typeData.DurationSyntax and TMW:GetSpellNamesProxy(text).Durations
+	local durations = CI_typeData.DurationSyntax and TMW:GetSpells(text).Durations
 
 	local Cache = TMW:GetModule("SpellCache"):GetCache()
 	

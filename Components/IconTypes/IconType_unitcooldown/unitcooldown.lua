@@ -266,7 +266,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 		
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
-			local NameHash = icon.Names.Hash
+			local NameHash = icon.Spells.Hash
 			if NameHash and NameHash[spellID] or NameHash[spellName] then
 				icon.NextUpdateTime = 0
 			end
@@ -299,7 +299,7 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 		
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
-			local NameHash = icon.Names.Hash
+			local NameHash = icon.Spells.Hash
 			if NameHash and NameHash[spellID] or NameHash[spellName] then
 				icon.NextUpdateTime = 0
 			end
@@ -368,7 +368,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Alpha, NameArray, OnlySeen, Sort, Durations, Units =
-	icon.Alpha, icon.Names.Array, icon.OnlySeen, icon.Sort, icon.Names.Durations, icon.Units
+	icon.Alpha, icon.Spells.Array, icon.OnlySeen, icon.Sort, icon.Spells.Durations, icon.Units
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
@@ -492,7 +492,7 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Alpha, UnAlpha, NameArray, OnlySeen, Durations, Units =
-	icon.Alpha, icon.UnAlpha, icon.Names.Array, icon.OnlySeen, icon.Names.Durations, icon.Units
+	icon.Alpha, icon.UnAlpha, icon.Spells.Array, icon.OnlySeen, icon.Spells.Durations, icon.Units
 		
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -566,7 +566,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	

@@ -131,14 +131,14 @@ local function ICD_OnEvent(icon, event, ...)
 	end
 
 	if valid then
-		local NameHash = icon.Names.Hash
+		local NameHash = icon.Spells.Hash
 		local Key = NameHash[spellID] or NameHash[strlowerCache[spellName]]
-		if Key and not (icon.DontRefresh and (TMW.time - icon.ICDStartTime) < icon.Names.Durations[Key]) then
+		if Key and not (icon.DontRefresh and (TMW.time - icon.ICDStartTime) < icon.Spells.Durations[Key]) then
 			-- Make sure we don't reset a running timer if we shouldn't.
 			-- If everything is good, record the data about this event and schedule an icon update.
 
 			icon.ICDStartTime = TMW.time
-			icon.ICDDuration = icon.Names.Durations[Key]
+			icon.ICDDuration = icon.Spells.Durations[Key]
 			icon:SetInfo("spell; texture", 
 				icon.ICDID,
 				SpellTextures[spellID]
@@ -169,7 +169,7 @@ local function ICD_OnUpdate(icon, time)
 end
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 
 	icon.ICDStartTime = icon.ICDStartTime or 0
 	icon.ICDDuration = icon.ICDDuration or 0

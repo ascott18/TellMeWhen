@@ -96,14 +96,14 @@ local function MultiStateCD_OnEvent(icon, event)
 		local actionType, spellID = GetActionInfo(icon.Slot) 
 
 
-		if actionType == "spell" and spellID == icon.Names.First then
+		if actionType == "spell" and spellID == icon.Spells.First then
 			-- Indeed, it didn't change. All is well, so do nothing.
 		else
 			-- The action we want to check isn't in that slot anymore.
 			-- Search for it, and update the slot that it is in.
 			for i=1, 120 do
 				local actionType, spellID = GetActionInfo(i)
-				if actionType == "spell" and spellID == icon.Names.First then
+				if actionType == "spell" and spellID == icon.Spells.First then
 					icon.Slot = i
 					break
 				end
@@ -147,7 +147,7 @@ local function MultiStateCD_OnUpdate(icon, time)
 		end
 
 		local actionType, spellID = GetActionInfo(Slot)
-		spellID = actionType == "spell" and spellID or icon.Names.First
+		spellID = actionType == "spell" and spellID or icon.Spells.First
 
 		if (duration == 0 or OnGCD(duration)) and inrange == 1 and not nomana then
 			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
@@ -177,14 +177,14 @@ end
 
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, true)
-	local originalNameFirst = icon.Names.First
+	icon.Spells = TMW:GetSpells(icon.Name, true)
+	local originalNameFirst = icon.Spells.First
 
 
 	-- This icon type requires a spellID. Make one if the user didn't give us one.
-	if icon.Names.First and icon.Names.First ~= "" and GetSpellLink(icon.Names.First) and not tonumber(icon.Names.First) then
-		local ID = strmatch(GetSpellLink(icon.Names.First), ":(%d+)") -- extract the spellID from the link
-		icon.Names = TMW:GetSpellNamesProxy(ID, true)
+	if icon.Spells.First and icon.Spells.First ~= "" and GetSpellLink(icon.Spells.First) and not tonumber(icon.Spells.First) then
+		local ID = strmatch(GetSpellLink(icon.Spells.First), ":(%d+)") -- extract the spellID from the link
+		icon.Spells = TMW:GetSpells(ID, true)
 	end
 
 

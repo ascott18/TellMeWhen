@@ -117,7 +117,7 @@ end
 
 local function AutoShot_OnUpdate(icon, time)
 
-	local NameString = icon.Names.FirstString
+	local NameString = icon.Spells.FirstString
 	local asDuration = icon.asDuration
 
 	local ready = time - icon.asStart > asDuration
@@ -148,7 +148,7 @@ local unusableData = {}
 local function SpellCooldown_OnUpdate(icon, time)    
 	-- Upvalue things that will be referenced a lot in our loops.
 	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameStringArray =
-	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.Names.Array, icon.Names.StringArray
+	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.Spells.Array, icon.Spells.StringArray
 
 	local usableFound, unusableFound
 
@@ -261,13 +261,13 @@ end
 
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, true)
+	icon.Spells = TMW:GetSpells(icon.Name, true)
 	
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes =  nil
 	end
 	
-	if icon.Names.FirstString == strlower(GetSpellInfo(75)) and not icon.Names.Array[2] then
+	if icon.Spells.FirstString == strlower(GetSpellInfo(75)) and not icon.Spells.Array[2] then
 		-- Auto shot needs special handling - it isn't a regular cooldown, so it gets its own update function.
 		icon:SetInfo("texture", SpellTextures[75])
 		icon.asStart = icon.asStart or 0
@@ -282,7 +282,7 @@ function Type:Setup(icon)
 		
 		icon:SetUpdateFunction(AutoShot_OnUpdate)
 	else
-		icon.FirstTexture = SpellTextures[icon.Names.First]
+		icon.FirstTexture = SpellTextures[icon.Spells.First]
 		
 		icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), false)
 		

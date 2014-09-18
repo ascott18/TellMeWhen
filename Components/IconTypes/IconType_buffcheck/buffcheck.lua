@@ -134,7 +134,7 @@ local function BuffCheck_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, NameArray, NameStringArray, NameHash, Filter
-	= icon.Units, icon.Names.Array, icon.Names.StringArray, icon.Names.Hash, icon.Filter
+	= icon.Units, icon.Spells.Array, icon.Spells.StringArray, icon.Spells.Hash, icon.Filter
 	
 	-- These variables will hold all the attributes that we pass to YieldInfo().
 	local iconTexture, id, count, duration, expirationTime, caster, useUnit, _
@@ -203,7 +203,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.Names.First,
+			icon.Spells.First,
 			nil, nil,
 			nil, nil
 		)
@@ -214,7 +214,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.Names.First,
+			icon.Spells.First,
 			unit, nil,
 			nil, nil
 		)
@@ -235,7 +235,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
@@ -256,7 +256,7 @@ function Type:Setup(icon)
 
 
 
-	icon.FirstTexture = SpellTextures[icon.Names.First]
+	icon.FirstTexture = SpellTextures[icon.Spells.First]
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 	
