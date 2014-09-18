@@ -1747,6 +1747,7 @@ L["SUG_INSERTID"] = "%s to insert as an ID"
 L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
 L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
 L["SUG_INSERTTEXTSUB"] = "%s to insert tag"
+L["SUG_INSERTTUNITID"] = "%s to insert unitID"
 
 L["SUG_INSERTNAME_INTERFERE"] = [[%s to insert as a name
 

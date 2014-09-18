@@ -20,7 +20,7 @@ local print = TMW.print
 
 --- [[api/base-classes/generic-component/|GenericComponent]] is a base class of any objects that will be implemented into an instance of [[api/base-classes/generic-component-implementor/|GenericComponentImplementor]]
 -- 
--- GenericComponent provides a common base for these objects, but provides no functionality. It is an abstract class, and should not be directly instantiated.
+-- GenericComponent provides a common base for these objects, but provides no functionality currently, although this may change in the future. It is an abstract class, and should not be directly instantiated.
 -- 
 -- @class file
 -- @name GenericComponent.lua

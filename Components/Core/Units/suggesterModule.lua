@@ -50,15 +50,14 @@ function Module:Entry_AddToList_1(f, index)
 			f.tooltiptitle = unitData.tooltipTitle or unitData.text
 			
 			if unitData.range then
-				f.tooltiptext = "|cFFFF0000#|r = 1-" .. unitData.range
-				
 				unit = unit .. " 1-" .. unitData.range
-			elseif unitData.desc then
-				f.tooltiptext = unitData.desc
 			end
+
+			f.tooltiptext = unitData.desc
 			
 			f.Name:SetText(unit)
 			f.insert = unit
+			f.overrideInsertName = L["SUG_INSERTTUNITID"]
 		else			
 			f.Name:SetText("<ERROR>")
 			f.insert = ""
