@@ -105,20 +105,20 @@ end)
 -- GLOBALS: UIParent, CreateFrame, collectgarbage, geterrorhandler 
 
 ---------- Upvalues ----------
-local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
-	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
-local GetTalentInfo =
-	  GetTalentInfo
+local GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell =
+	  GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell
+local InCombatLockdown, GetTalentInfo, GetActiveSpecGroup =
+	  InCombatLockdown, GetTalentInfo, GetActiveSpecGroup
 local UnitPower, UnitClass, UnitName, UnitAura =
 	  UnitPower, UnitClass, UnitName, UnitAura
-local IsInGuild =
-	  IsInGuild
-local GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn =
-	  GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn
+local IsInGuild, IsInGroup, IsInInstance =
+	  IsInGuild, IsInGroup, IsInInstance
+local GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn, GetBuildInfo =
+	  GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn, GetBuildInfo
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack =
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack
-local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, max, ceil, floor, random =
-	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, max, ceil, floor, random
+local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin, max, ceil, floor, random =
+	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin, max, ceil, floor, random
 local _G, coroutine, table, GetTime, CopyTable =
 	  _G, coroutine, table, GetTime, CopyTable
 local tostringall = tostringall
@@ -1094,6 +1094,11 @@ local start_old = debugprofilestart
 local lastReset = 0
 function _G.debugprofilestart()
 	lastReset = lastReset + debugprofilestop()
+
+	TMW:Error("TMW has detected that one of your addons has called debugprofilestart().\n" .. 
+		"This is bad practice, and can break parts of TellMeWhen and other addons as well.\n" .. 
+		"Report this error to TellMeWhen's authors so that we can look into resolving the issue.")
+
 	return start_old()
 end
 
@@ -1101,7 +1106,6 @@ function _G.debugprofilestop_SAFE()
 	return debugprofilestop() + lastReset    
 end
 local debugprofilestop = debugprofilestop_SAFE
-
 
 
 
