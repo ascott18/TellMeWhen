@@ -685,12 +685,13 @@ CNDT.Substitutions = {
 {
 	src = "c.NameFirst2",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return strWrap(TMW:GetSpellNames(name2, nil, 1))
+		return strWrap(TMW:GetSpellNamesProxy(name2).First)
+
 	end,
 },{
 	src = "c.NameString2",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return strWrap(TMW:GetSpellNames(name2, nil, 1, 1))
+		return strWrap(TMW:GetSpellNamesProxy(name2).FirstString)
 	end,
 },{
 	src = "c.ItemID2",
@@ -710,12 +711,12 @@ CNDT.Substitutions = {
 {
 	src = "c.NameFirst",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return strWrap(TMW:GetSpellNames(name, nil, 1))
+		return strWrap(TMW:GetSpellNamesProxy(name).First)
 	end,
 },{
 	src = "c.NameString",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return strWrap(TMW:GetSpellNames(name, nil, 1, 1))
+		return strWrap(TMW:GetSpellNamesProxy(name).FirstString)
 	end,
 },{
 	src = "c.ItemID",
@@ -758,7 +759,8 @@ CNDT.Substitutions = {
 {
 	src = "c.GCDReplacedNameFirst2",
 	rep = function(conditionData, conditionSettings, name, name2)
-		local name = TMW:GetSpellNames(name2, nil, 1)
+
+		local name = TMW:GetSpellNamesProxy(name2).First
 		if name == "gcd" then
 			name = TMW.GCDSpell
 		end
@@ -767,7 +769,7 @@ CNDT.Substitutions = {
 },{
 	src = "c.GCDReplacedNameFirst",
 	rep = function(conditionData, conditionSettings, name, name2)
-		local name = TMW:GetSpellNames(name, nil, 1)
+		local name = TMW:GetSpellNamesProxy(name).First
 		if name == "gcd" then
 			name = TMW.GCDSpell
 		end

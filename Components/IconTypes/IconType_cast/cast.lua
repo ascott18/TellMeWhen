@@ -221,7 +221,7 @@ end
 
 function Type:GuessIconTexture(ics)
 	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(ics.Name, nil, 1)
+		local name = TMW:GetSpellNamesProxy(ics.Name).First
 		if name then
 			return TMW.SpellTextures[name]
 		end

@@ -158,10 +158,15 @@ function IconType:GuessIconTexture(ics)
 	self:AssertSelfIsInstance()
 	
 	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(ics.Name, nil, 1)
+
+		local name = TMW:GetSpellNamesProxy(ics.Name).First
 		if name then
 			return SpellTextures[name]
 		end
+	end
+
+	if self.usePocketWatch then
+		return "Interface\\Icons\\INV_Misc_PocketWatch_01"
 	end
 end
 
@@ -178,7 +183,8 @@ function IconType:GetConfigIconTexture(icon)
 	else
 	
 		if icon.Name ~= "" then
-			local tbl = TMW:GetSpellNames(icon.Name, 1)
+
+			local tbl = TMW:GetSpellNamesProxy(icon.Name).Array
 
 			for _, name in ipairs(tbl) do
 				local t = SpellTextures[name]

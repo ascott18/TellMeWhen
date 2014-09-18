@@ -48,7 +48,8 @@ end
 
 function Env.AuraCount(unit, nameRaw, filter)
 	local n = 0
-	local names = TMW:GetSpellNames(nameRaw, 1, nil, nil, 1)
+	local names = TMW:GetSpellNamesProxy(nameRaw).Hash
+	
 
 	for z = 1, 200 do
 		local buffName, _, _, _, _, _, _, _, _, _, id = UnitAura(unit, z, filter)
