@@ -159,7 +159,7 @@ end
 -- Create a valid object for invalid item input that may be used.
 Item.NullRef = Item:New()
 function Item.NullRef:IsInRange(unit)
-	return nil
+	return false
 end
 function Item.NullRef:GetIcon()
 	return "Interface\\Icons\\INV_Misc_QuestionMark"
@@ -168,7 +168,7 @@ function Item.NullRef:GetCount()
 	return 0
 end
 function Item.NullRef:GetEquipped()
-	return nil
+	return false
 end
 function Item.NullRef:GetCooldown()
 	return 0, 0, 0
