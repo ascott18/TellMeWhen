@@ -48,16 +48,26 @@ Type:UsesAttributes("texture")
 
 
 Type:RegisterIconDefaults{
-	 -- PLEASE NOTE: THIS IS SPELLED WRONG (i noticed too late to change it)
 	 -- Table that holds all of the loss of control types that the icon will track.
 	 -- If the blank string key is set to true, it will track all categories.
 	 -- SCHOOL_INTERRUPT is a bitfield that has bits for every spell school (using blizzard's regular spellschool bitflags)
-	LoseContolTypes = {
+	LoseControlTypes = {
 		["*"] = false,
 		[""] = false,
 		SCHOOL_INTERRUPT = 0,
 	},
 }
+
+TMW:RegisterUpgrade(71038, {
+	icon = function(self, ics)
+		-- Fix the misspelled setting name "LoseContolTypes" to "LoseControlTypes"
+		if ics.LoseContolTypes then
+			TMW:CopyTableInPlaceWithMeta(ics.LoseContolTypes, ics.LoseControlTypes)
+		end
+		ics.LoseContolTypes = nil
+	end,
+})
+
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_LoseControlTypes")
 
@@ -70,24 +80,23 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 
 
 local function LoseControl_OnUpdate(icon, time)
-	-- PLEASE NOTE: LoseContolTypes IS SPELLED WRONG
-	local LoseContolTypes = icon.LoseContolTypes
+	local LoseControlTypes = icon.LoseControlTypes
 	
 
 	for eventIndex = 1, GetNumEvents() do 
 		local locType, spellID, text, texture, start, _, duration, lockoutSchool = GetEventInfo(eventIndex)
 		
-		local isValidType = LoseContolTypes[""]
+		local isValidType = LoseControlTypes[""]
 		if not isValidType then
 			if locType == "SCHOOL_INTERRUPT" then
 				-- Check that the user has requested the schools that are locked out.
-				local setting = LoseContolTypes[locType]
+				local setting = LoseControlTypes[locType]
 				if setting ~= 0 and lockoutSchool and lockoutSchool ~= 0 and bit.band(lockoutSchool, setting) ~= 0 then
 					isValidType = true
 				end
 			else
 				-- Check that the user has requested the category that is active on the player.
-				for locType, v in pairs(LoseContolTypes) do
+				for locType, v in pairs(LoseControlTypes) do
 					if v and _G["LOSS_OF_CONTROL_DISPLAY_" .. locType] == text then
 						isValidType = true
 						break
