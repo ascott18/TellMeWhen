@@ -3935,6 +3935,8 @@ function TMW:SplitNames(input)
 	return tbl
 end
 
+
+--- Figure out if some string "abc" is in a semicolon-delimited string of strings "foo;abc;bar"
 function TMW:IsStringInSemicolonList(list, strtofind)
 	strtofind = tostring(strtofind)
 
@@ -4123,7 +4125,12 @@ local tableArgs = {
 	StringHash	= { 1, nil, 1, 1 },
 }
 TMW:NewClass("SpellNameProxy"){
-	
+	instancesByName = {
+		-- Keyed here by allowRenaming
+		[true] = setmetatable({}, {__mode='kv'}),
+		[false] = setmetatable({}, {__mode='kv'}),
+	},
+
 	OnFirstInstance = function(self)
 		self:MakeInstancesWeak()
 
@@ -4138,8 +4145,12 @@ TMW:NewClass("SpellNameProxy"){
 	end,
 
 	OnNewInstance = function(self, name, allowRenaming)
+	 	allowRenaming = not not allowRenaming -- make sure its a boolean
+
 		self.Name = name
 		self.AllowRenaming = allowRenaming
+
+		self.instancesByName[allowRenaming][name] = self
 		
 		setmetatable(self, self.betterMeta)
 	end,
@@ -4160,17 +4171,15 @@ TMW:NewClass("SpellNameProxy"){
 		for k, v in pairs(self) do
 			if k ~= "Name" then
 				self[k] = nil
-			end
+			end 
 		end
 	end,
 }
 function TMW:GetSpellNamesProxy(name, alowRenaming)
-	for _, instance in pairs(TMW.C.SpellNameProxy.instances) do
-		if instance.Name == name and instance.AllowRenaming == alowRenaming then
-			return instance
-		end
-	end
-	return TMW.C.SpellNameProxy:New(name, alowRenaming)
+	-- Make sure that alowRenaming is a boolean.
+	alowRenaming = not not alowRenaming
+
+	return TMW.C.SpellNameProxy.instancesByName[alowRenaming][name] or TMW.C.SpellNameProxy:New(name, alowRenaming)
 end
 
 function TMW:GetSpellNames_static(doLower, setting, keepDurations)
