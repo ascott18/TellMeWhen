@@ -368,7 +368,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Alpha, NameArray, OnlySeen, Sort, Durations, Units =
-	icon.Alpha, icon.Names.Array, icon.OnlySeen, icon.Sort, icon.Durations, icon.Units
+	icon.Alpha, icon.Names.Array, icon.OnlySeen, icon.Sort, icon.Names.Durations, icon.Units
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
@@ -492,7 +492,7 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Alpha, UnAlpha, NameArray, OnlySeen, Durations, Units =
-	icon.Alpha, icon.UnAlpha, icon.Names.Array, icon.OnlySeen, icon.Durations, icon.Units
+	icon.Alpha, icon.UnAlpha, icon.Names.Array, icon.OnlySeen, icon.Names.Durations, icon.Units
 		
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -567,7 +567,6 @@ end
 
 function Type:Setup(icon)
 	icon.Names = TMW:GetSpellNamesProxy(icon.Name, false)
-	icon.Durations = TMW:GetSpellDurations(icon.Name)
 
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	

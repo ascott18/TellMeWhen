@@ -4192,9 +4192,9 @@ end
 getSpellNames_static = TMW:MakeFunctionCached(getSpellNames_static)
 
 local function getSpellNames(setting, doLower, firstOnly, toname, hash, allowRenaming)
-	local buffNames = TMW:GetSpellNames_static(doLower, setting, false)
+	local buffNames = getSpellNames_static(doLower, setting, false)
 
-	-- buffNames MUST BE COPIED because the return from GetSpellNames_static is cached.
+	-- buffNames MUST BE COPIED because the return from getSpellNames_static is cached.
 	buffNames = CopyTable(buffNames)
 
 	if hash then
@@ -4251,7 +4251,7 @@ local function getSpellNames(setting, doLower, firstOnly, toname, hash, allowRen
 end
 
 local function getSpellDurations(setting)
-	local NameArray = TMW:GetSpellNames_static(false, setting, true)
+	local NameArray = getSpellNames_static(false, setting, true)
 
 	local DurationArray = CopyTable(NameArray)
 
@@ -4353,13 +4353,13 @@ TMW:NewClass("SpellNameProxy"){
 		end
 	end,
 }
-function TMW:GetSpellNamesProxy(name, alowRenaming)
-	TMW:ValidateType("2 (name)", "TMW:RegisterRunonceCallback(name, alowRenaming)", event, "string;number")
+function TMW:GetSpellNamesProxy(name, allowRenaming)
+	TMW:ValidateType("2 (name)", "TMW:GetSpellNamesProxy(name, allowRenaming)", name, "string;number")
 
-	-- Make sure that alowRenaming is a boolean.
-	alowRenaming = not not alowRenaming
+	-- Make sure that allowRenaming is a boolean.
+	allowRenaming = not not allowRenaming
 
-	return TMW.C.SpellNameProxy.instancesByName[alowRenaming][name] or TMW.C.SpellNameProxy:New(name, alowRenaming)
+	return TMW.C.SpellNameProxy.instancesByName[allowRenaming][name] or TMW.C.SpellNameProxy:New(name, allowRenaming)
 end
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
