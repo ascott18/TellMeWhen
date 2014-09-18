@@ -333,10 +333,10 @@ do	-- CheckCategories
 		local firstCategory
 		local append = ""
 
-		local Names = TMW:GetSpellNamesProxy(str)
-
 		for i, IDorName in ipairs(NameArray) do
 			for category, str in pairs(TMW.BE.dr) do
+
+				local Names = TMW:GetSpellNamesProxy(str)
 
 				-- Check if the spell being checked by the icon is in the DR category that we are looking at.
 				if Names.Hash[IDorName] or Names.StringHash[IDorName] then
