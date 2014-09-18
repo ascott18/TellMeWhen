@@ -333,10 +333,13 @@ do	-- CheckCategories
 		local firstCategory
 		local append = ""
 
+		local Names = TMW:GetSpellNamesProxy(str)
+
 		for i, IDorName in ipairs(NameArray) do
 			for category, str in pairs(TMW.BE.dr) do
+
 				-- Check if the spell being checked by the icon is in the DR category that we are looking at.
-				if TMW:IsStringInSemicolonList(str, IDorName) or TMW:GetSpellNames(str, 1, nil, 1, 1)[IDorName] then
+				if Names.Hash[IDorName] or Names.StringHash[IDorName] then
 					
 					-- Record it as the first category found if we haven't found one yet.
 					firstCategory = firstCategory or category

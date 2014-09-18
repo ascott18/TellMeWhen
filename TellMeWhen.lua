@@ -3936,16 +3936,6 @@ function TMW:SplitNames(input)
 end
 
 
---- Figure out if some string "abc" is in a semicolon-delimited string of strings "foo;abc;bar"
-function TMW:IsStringInSemicolonList(list, strtofind)
-	strtofind = tostring(strtofind)
-
-	for i, str in TMW:Vararg(strsplit(";", list)) do
-		if strtofind == str then
-			return true
-		end
-	end
-end
 
 function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	if abs(seconds) == math.huge then
