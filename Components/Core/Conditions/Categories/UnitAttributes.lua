@@ -321,6 +321,7 @@ ConditionCategory:RegisterCondition(9.5, "NPCID", {
 	tooltip = L["CONDITIONPANEL_NPCID_DESC"],
 	min = 0,
 	max = 1,
+	defaultUnit = "target",
 	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NPCIDTOMATCH", "CONDITIONPANEL_NPCIDTOOLTIP") editbox.label = L["CONDITIONPANEL_NPCIDTOMATCH"] end,
 	nooperator = true,
 	formatter = TMW.C.Formatter.BOOL,
@@ -329,7 +330,7 @@ ConditionCategory:RegisterCondition(9.5, "NPCID", {
 	Env = {
 		UnitGUID = UnitGUID,
 	},
-	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[ tonumber((UnitGUID(c.Unit) or ""):match(".-:%d+:%d+:%d+:%d+:(%d+)")) ]) and 1) )]],
+	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[ tonumber((UnitGUID(c.Unit) or ""):match(".-%-%d+%-%d+%-%d+%-%d+%-(%d+)")) ]) and 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
