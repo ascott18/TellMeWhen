@@ -4,11 +4,6 @@ TMW.CHANGELOG = {
 
 [==[===v7.1.0===]==],
 [==[]==],
-[==[* IMPORTANT: WARLORDS BETA NOTES:]==],
-[==[** IMPORTANT: The suggestion list for spells has been disabled build 18689 because Blizzard's tooltip for spells crashes the game for many spellIDs (too many for me to manually filter out).]==],
-[==[** The issue with Blizzard's SavedVariables serializer has been resolved in beta build 18663. You may still have a great deal of corrupt data, so I recommend re-importing your profiles from live servers if you notice anything that is unexplainably broken.]==],
-[==[** Blizzard's built-in cooldown text is very, very broken at the moment, although it is now supported by TMW. If it doesn't show up on some icons, get OmniCC and wait for Blizz to fix it.]==],
-[==[]==],
 [==[* Buff/Debuff equivalencies have been updated (with the exception of diminishing returns). Please open a ticket if you notice anything missing or mis-categorized.]==],
 [==[]==],
 [==[* New conditions]==],
