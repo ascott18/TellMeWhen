@@ -1,8 +1,6 @@
 ﻿<Ui>
 
  <Include file="GroupModule_Resizer\includes.config.xml"/>
- <Include file="GroupModule_Resizer_ScaleXY\includes.config.xml"/>
- <Include file="GroupModule_Resizer_ScaleY_SizeX\includes.config.xml"/>
  
  <Include file="GroupModule_GroupPosition\includes.config.xml"/>
  
