@@ -181,6 +181,7 @@ L["RESIZE_TOOLTIP"] = [[|cff7fffffClick-and-drag|r to resize]] -- keep this like
 L["RESIZE_TOOLTIP_SCALEXY"] = [[|cff7fffffClick-and-drag|r to scale
 |cff7fffffHold Control|r to invert scale axis]]
 L["RESIZE_TOOLTIP_SCALEY_SIZEX"] = [[|cff7fffffClick-and-drag|r to scale]]
+L["RESIZE_TOOLTIP_SCALEX_SIZEY"] = [[|cff7fffffClick-and-drag|r to scale]]
 L["RESIZE_TOOLTIP_CHANGEDIMS"] = [[|cff7fffffRight-Click-and-drag|r to change number of groups and columns]]
 
 L["RESIZE_GROUP_CLOBBERWARN"] = [[When shrinking a group using |cff7fffffRight-Click-and-drag|r, you may clobber some icons. These icons have been saved temporarily and will be restored if you increase the size again via |cff7fffffRight-Click-and-drag|r, but will be lost forever if you log out or reload your UI. ]]
@@ -721,6 +722,8 @@ L["UIPANEL_GROUPTYPE_ICON"] = "Icon"
 L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the group using TellMeWhen's traditional icon display.]]
 L["UIPANEL_GROUPTYPE_BAR"] = "Bar"
 L["UIPANEL_GROUPTYPE_BAR_DESC"] = [[Displays the icons in the group with progress bars attached to the icons.]]
+L["UIPANEL_GROUPTYPE_BARV"] = "Vertical Bar"
+L["UIPANEL_GROUPTYPE_BARV_DESC"] = [[Displays the icons in the group with vertical progress bars attached to the icons.]]
 
 L["UIPANEL_ICONS"] = "Icons"
 L["UIPANEL_COLORS"] = "Colors"
@@ -963,7 +966,9 @@ L["UIPANEL_FONT_HEIGHT_DESC"] = [[Set the maximum height of the text display. If
  If this text display is anchored on both its top and bottom sides, this setting will have no effect.]]
 
 L["UIPANEL_FONT_ROTATE"] = "Rotation"
-L["UIPANEL_FONT_ROTATE_DESC"] = [[Set the amount, in degrees, that you want to rotate the text display by.]]
+L["UIPANEL_FONT_ROTATE_DESC"] = [[Set the amount, in degrees, that you want to rotate the text display by.
+
+The way this is implemented is not supported by Blizzard, so if it behaves strangely, there isn't much that can be done.]]
 
 L["UIPANEL_FONT_XOFFS"] = "X Offset"
 L["UIPANEL_FONT_XOFFS_DESC"] = "The x-axis offset of the anchor"
@@ -1025,6 +1030,7 @@ L["TEXTLAYOUTS_ERROR_FALLBACK"] = [[The text layout for this icon could not be f
 L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"] = "<No Layout>"
 L["TEXTLAYOUTS_DEFAULTS_ICON1"] = "Icon Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_BAR1"] = "Bar Layout 1"
+L["TEXTLAYOUTS_DEFAULTS_BAR2"] = "Vertical Bar Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_DURATION"] = "Duration"
 L["TEXTLAYOUTS_DEFAULTS_SPELL"] = "Spell"
 L["TEXTLAYOUTS_DEFAULTS_STACKS"] = "Stacks"

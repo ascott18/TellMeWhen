@@ -3,8 +3,8 @@
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
 -- Other contributions by:
---		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
---		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
+--        Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--        Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
@@ -19,44 +19,45 @@ local print = TMW.print
 
 local ceil = ceil
 
-local View = TMW.Classes.IconView:New("bar")
+local View = TMW.Classes.IconView:New("barv")
 
-View.name = L["UIPANEL_GROUPTYPE_BAR"]
-View.desc = L["UIPANEL_GROUPTYPE_BAR_DESC"]
+View.name = L["UIPANEL_GROUPTYPE_BARV"]
+View.desc = L["UIPANEL_GROUPTYPE_BARV_DESC"]
 
 TMW:RegisterDatabaseDefaults{
 	global = {
 		TextLayouts = {
-			bar1 = {
-				Name = L["TEXTLAYOUTS_DEFAULTS_BAR1"],
-				GUID = "bar1",
+			bar2 = {
+				Name = L["TEXTLAYOUTS_DEFAULTS_BAR2"],
+				GUID = "bar2",
 				NoEdit = true,
 				n = 2,
 				
-				-- Default Layout 1
-				{	-- [1] Duration		
+				-- Bar Layout 2
+				{    -- [1] Duration        
 					StringName = L["TEXTLAYOUTS_DEFAULTS_DURATION"],
-					DefaultText = "[Duration(gcd=true):TMWFormatDuration]",	
+					DefaultText = "[Duration(gcd=true):TMWFormatDuration]",    
 					Anchors = {
 						{
-							x = -2,
-							point = "RIGHT",
-							relativePoint = "RIGHT",
+							point = "TOP",
+							relativePoint = "TOP",
+							y = -1,
 						}, -- [1]
 					},
 				},
-				{	-- [2] Spell
-					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],		
+				{    -- [2] Spell
+					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],        
 					DefaultText = "[Spell] [Stacks:Hide(0):Paren]",
 					
+					Rotate = 90,
 					Justify = "LEFT",
 					Anchors = {
-						n = 2,
 						{
-							x = 2,
-							point = "LEFT",
-							relativeTo = "IconModule_IconContainer_MasqueIconContainer",
-							relativePoint = "RIGHT",
+							x = 3,
+							y = -12,
+							point = "BOTTOMLEFT",
+							relativeTo = "IconModule_TimerBar_BarDisplayTimerBar",
+							relativePoint = "BOTTOMLEFT",
 						}, -- [1]
 						{
 							point = "RIGHT",
@@ -73,10 +74,10 @@ TMW:RegisterDatabaseDefaults{
 
 View:RegisterGroupDefaults{
 	SettingsPerView = {
-		bar = {
-			TextLayout = "bar1",
-			SizeX = 100,
-			SizeY = 20,
+		barv = {
+			TextLayout = "bar2",
+			SizeX = 20,
+			SizeY = 100,
 		}
 	}
 }
@@ -90,9 +91,7 @@ View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	if icon.ShowTimer or icon.ShowTimerText then
 		Module:Enable()
 	end
-	Module.cooldown:ClearAllPoints()
-	Module.cooldown:SetPoint("LEFT", icon)
-	Module.cooldown:SetSize(gspv.SizeY, gspv.SizeY)
+	Module.cooldown:SetSize(gspv.SizeX, gspv.SizeX)
 end)
 View:ImplementsModule("IconModule_Backdrop", 25, true)
 View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
@@ -100,15 +99,13 @@ View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
 	local gspv = group:GetSettingsPerView()
 	
 	Module:Enable()
-	Module.texture:ClearAllPoints()
-	Module.texture:SetPoint("LEFT", icon)
-	Module.texture:SetSize(gspv.SizeY, gspv.SizeY)
+	Module.texture:SetSize(gspv.SizeX, gspv.SizeX)
 end)
 View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, function(Module, icon)
 	Module:Enable()
-	
-	Module.bar:SetOrientation("HORIZONTAL")
-	Module.bar:SetRotatesTexture(false)
+
+	Module.bar:SetOrientation("VERTICAL")
+	Module.bar:SetRotatesTexture(true)
 end)
 View:ImplementsModule("IconModule_Texts", 570, true)
 View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, icon)
@@ -117,31 +114,39 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	local group = icon.group
 	local gspv = group:GetSettingsPerView()
 	
-	Masque.container:ClearAllPoints()
-	Masque.container:SetSize(gspv.SizeY, gspv.SizeY)
-	Masque.container:SetPoint("LEFT")
-	Masque:Enable()
 
-	---------- Skin-Dependent Module Layout ----------
 	local CooldownSweep = Modules.IconModule_CooldownSweep
+	if CooldownSweep then
+		CooldownSweep.cooldown:SetAllPoints(Masque.container)
+	end
+
+	local IconModule_Texture_Colored = Modules.IconModule_Texture_Colored
+	IconModule_Texture_Colored.texture:SetAllPoints(Masque.container)
+
+
+
+	Masque.container:ClearAllPoints()
+	Masque.container:SetSize(gspv.SizeX, gspv.SizeX)
+	Masque.container:SetPoint("BOTTOMLEFT")
+	Masque:Enable()
+	
+	---------- Skin-Dependent Module Layout ----------
 	local TimerBar_BarDisplay = Modules.IconModule_TimerBar_BarDisplay
 	
 	if CooldownSweep then
 		if Masque.isDefaultSkin then
 			CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
-			--TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + 1)
 		else
 			CooldownSweep.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
-			--TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -1)
 		end
 	end
 	
 	TimerBar_BarDisplay.bar:SetFrameLevel(icon:GetFrameLevel() + -0)
 	
 	TimerBar_BarDisplay.bar:ClearAllPoints()
+	TimerBar_BarDisplay.bar:SetPoint("TOPLEFT")
 	TimerBar_BarDisplay.bar:SetPoint("TOPRIGHT")
-	TimerBar_BarDisplay.bar:SetPoint("BOTTOMRIGHT")
-	TimerBar_BarDisplay.bar:SetPoint("LEFT", Masque.container, "RIGHT")
+	TimerBar_BarDisplay.bar:SetPoint("BOTTOM", Masque.container, "TOP")
 	
 	local Backdrop = Modules.IconModule_Backdrop
 	Backdrop.container:ClearAllPoints()
@@ -149,7 +154,7 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	Backdrop.container:SetFrameLevel(icon:GetFrameLevel() - 2)
 end)
 
-View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, group)
+View:ImplementsModule("GroupModule_Resizer_ScaleX_SizeY", 10, function(Module, group)
 	if TMW.Locked or group.Locked then
 		Module:Disable()
 	else
@@ -157,8 +162,8 @@ View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, g
 	end
 end)
 View:ImplementsModule("GroupModule_IconPosition_Sortable", 20, true)
-	
-	
+
+
 function View:Icon_SetSize(icon)
 	icon:SetSize(self:Icon_GetSize(icon))
 end
@@ -190,8 +195,7 @@ function View:Group_SetSize(group)
 end
 
 function View:Group_OnCreate(gs)
-	gs.Rows, gs.Columns = gs.Columns, gs.Rows
+	-- gs.Rows, gs.Columns = gs.Columns, gs.Rows
 end
 
-View:Register(10)
-
+View:Register(20)
