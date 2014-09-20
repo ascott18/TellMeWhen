@@ -336,6 +336,11 @@ function TMW:Group_Delete(group)
 end
 
 function TMW:Group_Add(domain, view)
+	if InCombatLockdown() then
+		-- Error if we are in combat because TMW:Update() won't create the group instantly if we are.
+		error("TMW: Can't add groups while in combat")
+	end
+
 	local groupID = TMW.db[domain].NumGroups + 1
 
 	TMW.db[domain].NumGroups = groupID
