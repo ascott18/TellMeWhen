@@ -214,7 +214,7 @@ function Type:Setup(icon)
 		icon.OnlyInBags = true
 	end
 
-	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
+	icon:SetInfo("texture; spell", Type:GetConfigIconTexture(icon), icon.Items[1] and icon.Items[1]:GetID())
 
 	icon:SetUpdateFunction(ItemCooldown_OnUpdate)
 	icon:Update()
