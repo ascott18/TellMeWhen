@@ -72,6 +72,7 @@ TMW:RegisterDatabaseDefaults{
 
 					Height			= 0, -- If we set a fontString's dimensions to 0,
 					Width			= 0, -- it will auto adjust, which is default behavior.
+					Rotate			= 0, -- Degrees to rotate by.
 					
 					Anchors = {
 						n = 1,
@@ -680,6 +681,35 @@ local function reSetup(self, event, icon)
 	self:SetupForIcon(icon)
 end
 
+local function rotate(self, degrees)
+	local anim = self.anim
+	if not anim then
+		if degrees == 0 then
+			return
+		end
+
+		self.animGroup = self:CreateAnimationGroup()
+
+		anim = self.animGroup:CreateAnimation("Rotation")
+		anim:SetDuration(0)
+		anim:SetEndDelay(math.huge)
+
+		self.anim = anim
+	end
+	
+	if degrees ~= 0 then
+		anim:SetDegrees(degrees)
+		anim:SetOrigin("CENTER", 0, 0)
+		
+		self.animGroup:Play()
+	else
+		self.animGroup:Stop()
+	end
+end
+
+
+
+
 function Texts:SetupForIcon(sourceIcon)
 	local icon = self.icon
 	
@@ -753,6 +783,8 @@ function Texts:SetupForIcon(sourceIcon)
 				-- Position settings:
 				fontString:SetWidth(fontStringSettings.Width)
 				fontString:SetHeight(fontStringSettings.Height)
+
+				rotate(fontString, fontStringSettings.Rotate)
 
 
 				fontString:ClearAllPoints()

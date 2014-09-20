@@ -15,6 +15,7 @@ TMW.CHANGELOG = {
 [==[** Instance Size]==],
 [==[** Zone PvP Type]==],
 [==[]==],
+[==[* You can now set a rotation amount for a icon's text displays.]==],
 [==[* The suggestion list now defers its sorting so that input is more responsive.]==],
 [==[* The "Highlight timer edge" setting is back.]==],
 [==[* You can now export all your global groups at once.]==],
