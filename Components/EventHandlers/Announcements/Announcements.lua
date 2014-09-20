@@ -255,7 +255,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(24, "BATTLEGROUND", {
 	wow_501 and 
 		function(icon, data, Text)
 			if UnitInBattleground("player") then
-				SendChatMessage(Text, TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+				SendChatMessage(Text, "INSTANCE_CHAT")
 			end
 		end
 	or nil,
@@ -266,7 +266,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(25, "INSTANCE_CHAT", {
 	hidden = not wow_501,
 	handler = function(icon, data, Text)
 		if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
-			SendChatMessage(Text, TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+			SendChatMessage(Text, "INSTANCE_CHAT")
 		end
 	end,
 })
@@ -279,7 +279,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(30, "SMART", {
 		function(icon, data, Text)
 			local channel = "SAY"
 			if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
-				channel = TMW.CONST.CHAT_TYPE_INSTANCE_CHAT
+				channel = "INSTANCE_CHAT"
 			elseif IsInRaid(LE_PARTY_CATEGORY_HOME) then
 				channel = "RAID"
 			elseif IsInGroup() then

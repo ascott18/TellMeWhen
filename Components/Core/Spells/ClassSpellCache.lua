@@ -272,7 +272,7 @@ function ClassSpellCache:PLAYER_ENTERING_WORLD()
 	if IsInGroup() then
 		self:SendCommMessage(self.CONST.COMM_SLUG, self:MakePacket("RCSL", nil), "PARTY")
 	end
-	self:SendCommMessage(self.CONST.COMM_SLUG, self:MakePacket("RCSL", nil), TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+	self:SendCommMessage(self.CONST.COMM_SLUG, self:MakePacket("RCSL", nil), "INSTANCE_CHAT")
 end
 
 

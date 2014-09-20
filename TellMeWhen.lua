@@ -166,7 +166,6 @@ TMW.EventList = {}
 TMW.COMMON = {}
 
 TMW.CONST = {
-	CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT",
 	GUID_SIZE = 12,
 }
 
@@ -3656,7 +3655,7 @@ function TMW:PLAYER_ENTERING_WORLD()
 			TMW:SendCommMessage("TMWV", versionCommString, "PARTY")
 		end
 		if IsInInstance() then
-			TMW:SendCommMessage("TMWV", versionCommString, TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+			TMW:SendCommMessage("TMWV", versionCommString, "INSTANCE_CHAT")
 		end
 	end
 end
