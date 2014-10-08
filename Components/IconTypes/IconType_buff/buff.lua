@@ -217,10 +217,10 @@ local function Buff_OnUpdate(icon, time)
 				
 
 				local index, stage = 1, 1
-				local filter = Filter
+				local useFilter = Filter
 
 				while true do
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, index, filter)
+					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, index, useFilter)
 					index = index + 1
 					
 					-- Bugfix: Enraged is an empty string.
@@ -229,11 +229,11 @@ local function Buff_OnUpdate(icon, time)
 					end
 
 					if not _buffName then
-						-- If we reached the end of auras found for filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
+						-- If we reached the end of auras found for Filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
 						-- iff we sort or haven't found anything yet.
 						if stage == 1 and Filterh and (doesSort or not buffName) then
 							index, stage = 1, 2
-							filter = Filterh
+							useFilter = Filterh
 						else
 							-- Break UnitAura loop (while true do ...)
 							break
@@ -288,18 +288,18 @@ local function Buff_OnUpdate(icon, time)
 						-- so iterate over the unit's auras and find a matching ID.
 
 						local index, stage = 1, 1
-						local filter = Filter
+						local useFilter = Filter
 
 						while true do
-							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, Filter)
+							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, useFilter)
 							index = index + 1
 
 							if not id then
-								-- If we reached the end of auras found for filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
+								-- If we reached the end of auras found for Filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
 								-- iff we sort or haven't found anything yet.
 								if stage == 1 and Filterh then
 									index, stage = 1, 2
-									filter = Filterh
+									useFilter = Filterh
 								else
 									-- Break while true loop (inner spell loop)
 									break
