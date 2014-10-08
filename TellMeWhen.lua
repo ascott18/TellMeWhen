@@ -1788,7 +1788,6 @@ end
 function TMW:OnInitialize()
 	-- Check for wrong WoW version
 	if select(4, GetBuildInfo()) < 60000 then
-		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		local version = GetBuildInfo()
 		StaticPopupDialogs["TMW_BADWOWVERSION"] = {

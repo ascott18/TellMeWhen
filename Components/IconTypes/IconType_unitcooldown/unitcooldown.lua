@@ -122,7 +122,7 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 	local n = {}
 	t[k] = n
 	return n
-end}) TMW.Cooldowns = Cooldowns
+end})
 
 
 
