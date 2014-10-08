@@ -1162,7 +1162,7 @@ function IE:PositionPanels()
 			if type(parent[#parent]) == "table" then
 				frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
 			else
-				frame:SetPoint("TOP", 0, -10)
+				frame:SetPoint("TOP", 0, -11)
 			end
 			parent[#parent + 1] = frame
 			
@@ -1586,6 +1586,25 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			-- Cheater! (We arent getting anything)
 			-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
 			get(self.supplementalData.OnSetup, self, panelInfo, self.supplementalData) 
+		end
+	end,
+
+	OnHide = function(self)
+		local p, r, t, x, y = self:GetPoint(1)
+		self:SetPoint(p, r, t, x, 1)
+
+		-- Set the height to 1 so things anchored under it are positioned right.
+		-- Can't set height to 0 anymore in WoD.
+		self.__oldHeight = self:GetHeight()
+		self:SetHeight(1)
+	end,
+	OnShow = function(self)
+		local p, r, t, x, y = self:GetPoint(1)
+		self:SetPoint(p, r, t, x, -11)
+
+		-- Restore the old height if it is still set to 1.
+		if self.__oldHeight and floor(self:GetHeight() + 0.5) == 1 then
+			self:SetHeight(self.__oldHeight)
 		end
 	end,
 

@@ -275,6 +275,13 @@ L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effec
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_BUFFDEBUFF_DESC"] = [[Tracks buffs and/or debuffs.]]
 
+L["ICONMENU_DOTWATCH"] = "All-Unit Buff/Debuff"
+L["ICONMENU_DOTWATCH_DESC"] = [[Tracks the buffs and debuffs that you cast on all units, regardless of unitID.
+
+Useful for tracking multi-dotting.
+
+This icon type MUST be used as a Group Controller - it cannot be a standalone icon.]]
+
 L["ICONMENU_BUFFCHECK"] = "Buff/Debuff Check"
 L["ICONMENU_BUFFCHECK_DESC"] = [[Checks if a buff is absent from any unit that you check.
 

@@ -19,6 +19,7 @@
 <Include file="IconType_swingtimer\includes.config.xml"/>
 <Include file="IconType_totem\includes.config.xml"/>
 <Include file="IconType_unitcooldown\includes.config.xml"/>
+<Include file="IconType_dotwatch\includes.config.xml"/>
 <Include file="IconType_wpnenchant\includes.config.xml"/>
 
 </Ui>
