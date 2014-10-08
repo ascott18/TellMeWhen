@@ -267,7 +267,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
 			local NameHash = icon.Spells.Hash
-			if NameHash and NameHash[spellID] or NameHash[spellName] then
+			if NameHash and (NameHash[spellID] or NameHash[spellName]) then
 				icon.NextUpdateTime = 0
 			end
 		end
@@ -300,7 +300,7 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
 			local NameHash = icon.Spells.Hash
-			if NameHash and NameHash[spellID] or NameHash[spellName] then
+			if NameHash and (NameHash[spellID] or NameHash[spellName]) then
 				icon.NextUpdateTime = 0
 			end
 		end
