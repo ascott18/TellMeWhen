@@ -32,7 +32,7 @@ CONFIG.Events = {
 		"",
 	"SPACE",
 
-	"CATEGORY_SWING",
+	"CAT_SWING",
 		"SWING_DAMAGE", -- normal
 		"SWING_MISSED", -- normal
 		"SPELL_EXTRA_ATTACKS", -- normal
@@ -41,7 +41,7 @@ CONFIG.Events = {
 		"RANGE_MISSED", -- normal
 
 
-	"CATEGORY_SPELL",
+	"CAT_SPELL",
 		"SPELL_DAMAGE", -- normal
 		"SPELL_DAMAGE_CRIT", -- normal
 		"SPELL_DAMAGE_NONCRIT", -- normal
@@ -62,7 +62,7 @@ CONFIG.Events = {
 		"DAMAGE_SHIELD_MISSED", -- normal
 
 
-	"CATEGORY_AURA",
+	"CAT_AURA",
 		"SPELL_DISPEL",-- extraSpellID/name
 		"SPELL_DISPEL_FAILED",-- extraSpellID/name
 		"SPELL_STOLEN",-- extraSpellID/name
@@ -84,7 +84,7 @@ CONFIG.Events = {
 		"SPELL_PERIODIC_MISSED",
 
 
-	"CATEGORY_CAST",
+	"CAT_CAST",
 		"SPELL_CAST_FAILED",
 		"SPELL_CAST_START",
 		"SPELL_CAST_SUCCESS",
@@ -93,7 +93,7 @@ CONFIG.Events = {
 		"SPELL_INTERRUPT_SPELL",-- extraSpellID/name
 
 
-	"CATEGORY_MISC",
+	"CAT_MISC",
 		"DAMAGE_SPLIT",
 	"SPACE",
 		"ENCHANT_APPLIED",
@@ -255,7 +255,7 @@ end
 function CONFIG:EventMenu()
 	local currentCategory
 	for _, event in ipairs(CONFIG.Events) do
-		if event:find("^CATEGORY_") then --and event ~= currentCategory then
+		if event:find("^CAT_") then --and event ~= currentCategory then
 			if TMW.DD.MENU_LEVEL == 1 then
 				local info = TMW.DD:CreateInfo()
 				info.text = L["CLEU_" .. event]
