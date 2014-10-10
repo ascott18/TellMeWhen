@@ -94,7 +94,7 @@ If enabled, the data harvested by this icon will fill up the group.
 
 All other icons in the group will be made unavailable for individual configuration.
 
-You may wish to customize the group's layout direction and/or sorting options if you decide to use it as a controlled group.]]
+You may wish to customize the group's layout direction and/or sorting options if you use it as a controlled group.]]
 L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"] = [[The current icon type does not have the ability to control an entire group.]]
 
 
@@ -275,12 +275,19 @@ L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effec
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_BUFFDEBUFF_DESC"] = [[Tracks buffs and/or debuffs.]]
 
-L["ICONMENU_DOTWATCH"] = "All-Unit Buff/Debuff"
-L["ICONMENU_DOTWATCH_DESC"] = [[Tracks the buffs and debuffs that you cast on all units, regardless of unitID.
+L["ICONMENU_DOTWATCH"] = "All-Unit Buffs/Debuffs"
+L["ICONMENU_DOTWATCH_DESC"] = [[Attempts to track the buffs and debuffs that you apply on all units, regardless of unitID.
 
 Useful for tracking multi-dotting.
 
 This icon type MUST be used as a Group Controller - it cannot be a standalone icon.]]
+L["ICONMENU_DOTWATCH_GCREQ"] = "Must be a group controller"
+L["ICONMENU_DOTWATCH_GCREQ_DESC"] = [[This icon type must be a group controller in order to function. You cannot enable it as a standalone icon.
+
+To make an icon into a group controller, it must be the first icon in a group (i.e. it has an iconID of 1). Then, enable the %q setting next to the %q checkbox.]]
+L["ICONMENU_DOTWATCH_AURASFOUND_DESC"] = "Set the icon opacity level for when any units have any of the buffs/debuffs being checked."
+L["ICONMENU_DOTWATCH_NOFOUND_DESC"] = "Set the icon opacity level for when none of the tracked buffs/debuffs are found."
+
 
 L["ICONMENU_BUFFCHECK"] = "Buff/Debuff Check"
 L["ICONMENU_BUFFCHECK_DESC"] = [[Checks if a buff is absent from any unit that you check.

@@ -73,19 +73,28 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[ 0x2 ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
-	[ 0x1 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
+	[ 0x2 ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_DOTWATCH_AURASFOUND_DESC"],	},
+	[ 0x1 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_DOTWATCH_NOFOUND_DESC"],	},
 })
 
-Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_DotwatchSettings", function(self)
-	self.Header:SetText(Type.name)
+Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
+	self.Header:SetText(L["ICONMENU_DOTWATCH_GCREQ"])
 
+	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	self.text:SetWordWrap(true)
+	self.text:SetPoint("TOP", 0, -10)
+	self.text:SetText(L["ICONMENU_DOTWATCH_GCREQ_DESC"])
+	self.text:SetWidth(self:GetWidth() - 15)
+	self:SetHeight(self.text:GetStringHeight() + 20)
+
+	self:SetScript("OnSizeChanged", function()
+		self:SetHeight(self.text:GetStringHeight() + 20)
+	end)
 	self.OnSetup = function(self, panelInfo, supplementalData)
 		if TMW.CI.icon:IsGroupController() then
 			self:Hide()
 		else
 			self:Show()
-			self.Header:SetText("Make me a Group controller")
 		end
 	end
 end)
@@ -135,6 +144,7 @@ end})
 TMW.Auras = Auras
 
 local BaseDurations = {[589] = 18}
+local DurationExtends = {}
 
 
 local AllUnits = TMW:GetUnits(nil, [[
@@ -155,19 +165,15 @@ local AllUnits = TMW:GetUnits(nil, [[
 
 	arena1-5;
 	arena1-5target;
-	arena1-5targettarget;
 
 	boss1-5;
 	boss1-5target;
-	boss1-5targettarget;
 
 	party1-4;
 	party1-4target;
-	party1-4targettarget;
 
 	raid1-40;
-	raid1-40target;
-	raid1-40targettarget]]
+	raid1-40target;]]
 )
 local function ScanAllUnits(GUID, spellName, spellID)
 	for i = 1, #AllUnits do
@@ -202,10 +208,8 @@ local function ScanAllUnits(GUID, spellName, spellID)
 				end
 			end
 
-			if id then
-				-- Record the base duration of the aura for future use.
-				BaseDurations[spellID] = duration
-
+			-- Make sure that this is an application that just happened before returning the duration.
+			if id and abs((GetTime() + duration) - expirationTime) < 0.1 then
 				return duration
 			end
 
@@ -248,7 +252,7 @@ local Aura = TMW:NewClass("Aura"){
 	unitName = "",
 	GUID = "",
 
-	OnNewInstance = function(self, spellID, destGUID, destName)
+	OnNewInstance = function(self, spellID, destGUID, destName, maybeRefresh)
 		self.GUID = destGUID
 		self.unitName = destName
 
@@ -256,9 +260,16 @@ local Aura = TMW:NewClass("Aura"){
 		self.spellName = GetSpellInfo(spellID)
 		self.start = TMW.time
 		local duration = BaseDurations[spellID]
+
 		if not duration then
 			-- ScanAllUnits will try and determine the base duration of the effect.
 			duration = ScanAllUnits(destGUID, self.spellName, spellID)
+			if not maybeRefresh then
+				-- Only record the duration if we are 100% sure that this is a first application.
+				-- Sometimes, we might be creating an object for a refresh of an aura that we never saw
+				-- the application of.
+				BaseDurations[spellID] = duration
+			end
 		end
 
 		-- TODO: debug only.
@@ -273,12 +284,27 @@ local Aura = TMW:NewClass("Aura"){
 	end,
 
 	Refresh = function(self)
-		local base = BaseDurations[self.spellID] or FALLBACK_DURATION
+		local base = BaseDurations[self.spellID]
+		local baseOrFallback = base or FALLBACK_DURATION
+
 		local remaining = self:Remaining()
+
+		local duration = ScanAllUnits(self.GUID, self.spellName, self.spellID, false)
 
 		self.refreshed = true
 		self.start = TMW.time
-		self.duration = min(base*MAX_REFRESH_AMOUNT, remaining+base)
+		if duration then
+			if base and duration > base + 1 then
+				-- If the duration is greater than the base by at least 1 second, assume that it does extend when refreshed
+				DurationExtends[self.spellID] = true
+			end
+
+			self.duration = duration
+		elseif DurationExtends[self.spellID] then
+			self.duration = min(baseOrFallback*MAX_REFRESH_AMOUNT, remaining+baseOrFallback)
+		else
+			self.duration = baseOrFallback
+		end
 	end,
 }
 Aura:MakeInstancesWeak()
@@ -304,14 +330,18 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 
 			local aura = aurasOnGUID[spellID]
 
-			if cleuEvent == "SPELL_AURA_REFRESH" then
-				if not aura then
-					error("no aura found for refresh of " .. spellName .. " " .. spellID)
-				end
+			local actuallyRefresh
+			if cleuEvent == "SPELL_AURA_REFRESH" and not aura then
+				-- This is dirty. But it prevents ugly code duplication.
+				-- This handles refreshes of auras that we never saw the initial application of.
+				cleuEvent = "SPELL_AURA_APPLIED"
+				actuallyRefresh = 1
+			end
 
+			if cleuEvent == "SPELL_AURA_REFRESH" then
 				aura:Refresh()
 			else -- SPELL_AURA_APPLIED
-				aura = Aura:New(spellID, destGUID, destName)
+				aura = Aura:New(spellID, destGUID, destName, actuallyRefresh)
 				aurasOnGUID[spellID] = aura
 			end
 		end
@@ -411,9 +441,14 @@ function Type:Setup(icon)
 
 	if icon:IsGroupController() then
 		icon:SetUpdateFunction(Dotwatch_OnUpdate_Controller)
-	else
-		error("can't use dotwatch as a non-unit controller")
-	--	icon:SetUpdateFunction(UnitCooldown_OnUpdate)
+	elseif icon.Enabled then
+		icon:GetSettings().Enabled = false
+		icon:Setup()
+
+		if icon:IsBeingEdited() then
+			TMW.IE:Load(1)
+			TellMeWhen_DotwatchSettings:Flash(1.5)
+		end
 	end
 
 	icon:Update()
@@ -428,4 +463,4 @@ TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 	ManualIconsManager:UpdateTable_Unregister(icon)
 end)
 
-Type:Register(40)
+Type:Register(102)

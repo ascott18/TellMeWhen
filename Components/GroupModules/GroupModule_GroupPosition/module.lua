@@ -161,7 +161,7 @@ function TMW_CursorAnchor:CheckState()
 
 	self:SetScale(1/UIParent:GetScale())
 
-	if TMW.Locked then
+	if TMW.Locked or not TMW.IE  then
 		self:SetClampedToScreen(false)
 		self.icon:Hide()
 		self.fs:Hide()
