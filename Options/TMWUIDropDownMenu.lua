@@ -76,7 +76,7 @@ DD.MAXBUTTONS = 0;
 DD.MAXLEVELS = 0;
 DD.BUTTON_HEIGHT = 16;
 DD.BORDER_HEIGHT = 15;
-DD.MAX_HEIGHT = 300;
+DD.MAX_HEIGHT = 400;
 -- The current open menu
 DD.OPEN_MENU = nil;
 -- The current menu being initialized

@@ -178,7 +178,8 @@
 							--tooltip = TMW.L[""],
 							func = TMW.CNDT.TypeMenu_DropDown,
 						})
-
+						
+						self:SetScrollable(true)
 						self:SetWidth(176)
 					</OnLoad>
 				</Scripts>
