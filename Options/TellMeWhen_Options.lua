@@ -1566,6 +1566,41 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self.height = self:GetHeight()
 	end,
 
+	Flash = function(self, dur)
+		local start = GetTime()
+		local duration = 0
+		local period = 0.2
+
+		while duration < dur do
+			duration = duration + (period * 2)
+		end
+		local ticker
+		ticker = C_Timer.NewTicker(0.01, function() 
+			local bg = TellMeWhen_DotwatchSettings.Background
+
+			local timePassed = GetTime() - start
+			local fadingIn = FlashPeriod == 0 or floor(timePassed/period) % 2 == 1
+
+			if FlashPeriod ~= 0 then
+				local remainingFlash = timePassed % period
+				local offs
+				if fadingIn then
+					offs = (period-remainingFlash)/period
+				else
+					offs = (remainingFlash/period)
+				end
+				offs = offs*0.3
+				bg:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05 + offs, 1, 1, 1, 0.10 + offs)
+			end
+
+			if timePassed > duration then
+				bg:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
+				ticker:Cancel()
+			end	
+		end)
+
+	end,
+
 	SetTitle = function(self, text)
 		self.Header:SetText(text)
 	end,
@@ -1589,6 +1624,14 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		end
 	end,
 
+
+	SetHeight = function(self, height)
+		if self.__oldHeight then
+			self.__oldHeight = height
+		else
+			self:SetHeight_base(height)
+		end
+	end,
 	OnHide = function(self)
 		local p, r, t, x, y = self:GetPoint(1)
 		self:SetPoint(p, r, t, x, 1)
@@ -1596,7 +1639,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		-- Set the height to 1 so things anchored under it are positioned right.
 		-- Can't set height to 0 anymore in WoD.
 		self.__oldHeight = self:GetHeight()
-		self:SetHeight(1)
+		self:SetHeight_base(1)
 	end,
 	OnShow = function(self)
 		local p, r, t, x, y = self:GetPoint(1)
@@ -1604,7 +1647,8 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 
 		-- Restore the old height if it is still set to 1.
 		if self.__oldHeight and floor(self:GetHeight() + 0.5) == 1 then
-			self:SetHeight(self.__oldHeight)
+			self:SetHeight_base(self.__oldHeight)
+			self.__oldHeight = nil
 		end
 	end,
 
