@@ -99,6 +99,12 @@ L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"] = [[The current icon type does not have
 
 
 
+L["UIPANEL_GROUP_QUICKSORT_DEFAULT"] = "Sort by ID"
+L["UIPANEL_GROUP_QUICKSORT_DEFAULT_DESC"] = "Quickly apply settings to sort the group by iconID. This is the default group behavior."
+L["UIPANEL_GROUP_QUICKSORT_DURATION"] = "Sort by Duration"
+L["UIPANEL_GROUP_QUICKSORT_DURATION_DESC"] = "Quickly apply settings to sort the group by duration."
+
+
 
 L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:
