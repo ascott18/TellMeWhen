@@ -21,6 +21,8 @@ local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 
+local strfindsug = SUG.strfindsug
+
 local Type = rawget(TMW.Types, "item")
 
 if not Type then return end
@@ -99,7 +101,7 @@ function Module:Table_GetSpecialSuggestions_2(suggestions, tbl, ...)
 		end
 	else
 		for id, name in pairs(self.Slots) do
-			if strfind(strlower(name), atBeginning) then
+			if strfindsug(strlower(name)) then
 				suggestions[#suggestions + 1] = id
 			end
 		end

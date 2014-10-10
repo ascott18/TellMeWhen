@@ -224,6 +224,9 @@ function SUG:SuggestingComplete(doSort)
 	end
 end
 
+local letterMatch, shouldLetterMatch, shouldWordMatch, wordMatch, wordMatch2
+local strfindsugMatches = {}
+
 function SUG:NameOnCursor(isClick)
 	if SpellCache:IsCaching() then
 		-- Wait for the spell cache to complete.
@@ -273,13 +276,13 @@ function SUG:NameOnCursor(isClick)
 		SUG.lastName = SUG.lastName:trim("_")
 	end
 
-	--if TMW.db.profile.SUG_atBeginning then
-	-- TMW.db.profile.SUG_atBeginning was removed as an option.
-		SUG.atBeginning = "^" .. SUG.lastName
-	--else
-	--	SUG.atBeginning = SUG.lastName
-	--end
-
+	SUG.atBeginning = "^" .. SUG.lastName
+	shouldLetterMatch = #SUG.lastName < 5
+	letterMatch = "^" .. gsub(SUG.lastName, "(.)", " %1.-"):trim()
+	shouldWordMatch = strfind(SUG.lastName, " ")
+	wordMatch = "^" .. gsub(SUG.lastName, " ", ".- "):trim()
+	wordMatch2 = " " .. gsub(SUG.lastName, " ", ".- "):trim()
+	wipe(strfindsugMatches)
 
 
 	SUG.inputType = type(tonumber(SUG.lastName) or SUG.lastName)
@@ -303,8 +306,22 @@ function SUG:NameOnCursor(isClick)
 		SUG:DoSuggest()
 	end
 
+	-- Create a new table so that old one, which is now nearly 2MB in size, can be GC'd.
+	-- Lua doesn't reduce the size of hash tables when they are emptied, apparently.
+	strfindsugMatches = {}
 end
 
+function SUG.strfindsug(str)
+	local matched = strfindsugMatches[str]
+	if matched ~= nil then
+		return matched
+	end
+
+	matched = strfind(str, SUG.atBeginning) or (shouldLetterMatch and strfind(str, letterMatch)) or (shouldWordMatch and (strfind(str, wordMatch) or strfind(str, wordMatch2)))
+	strfindsugMatches[str] = not not matched
+	return matched
+end
+local strfindsug = SUG.strfindsug
 
 
 ---------- EditBox Hooking ----------
@@ -498,31 +515,42 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		end
 	else
 		for id, name in pairs(tbl) do
-			if strfind(name, atBeginning) then
+			if strfindsug(name) then
 				suggestions[#suggestions + 1] = id
 			end
 		end
 	end
 end
 function Module:Table_GetEquivSuggestions(suggestions, tbl, ...)
-	local atBeginning = SUG.atBeginning
 	local lastName = SUG.lastName
 	local semiLN = ";" .. lastName
 	local long = #lastName > 2
 	
 	for _, tbl in TMW:Vararg(...) do
 		for equiv in pairs(tbl) do
-			if 	(long and (
-					(strfind(strlowerCache[equiv], lastName)) or
-					(strfind(strlowerCache[L[equiv]], lastName)) or
-					(not SUGIsNumberInput and strfind(strlowerCache[TMW.EquivFullNameLookup[equiv]], semiLN)) or
-					(SUGIsNumberInput and strfind(TMW.EquivFullIDLookup[equiv], semiLN))
-			)) or
-				(not long and (
-					(strfind(strlowerCache[equiv], atBeginning)) or
-					(strfind(strlowerCache[L[equiv]], atBeginning))
-			)) then
+			if 
+				(strfindsug(strlowerCache[equiv])) or
+				(strfindsug(strlowerCache[L[equiv]]))
+			then
 				suggestions[#suggestions + 1] = equiv
+
+			elseif long then
+				if SUGIsNumberInput then
+					for _, id in pairs(TMW:SplitNamesCached(TMW.EquivFullIDLookup[equiv])) do
+						-- Check for a match by ID to one of the spells in the equiv
+						if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then
+							suggestions[#suggestions + 1] = equiv
+							break
+						end
+					end
+				else
+					for _, name in pairs(TMW:SplitNamesCached(TMW.EquivFullNameLookup[equiv])) do
+						if strfindsug(strlowerCache[name]) then
+							suggestions[#suggestions + 1] = equiv
+							break
+						end
+					end
+				end
 			end
 		end
 	end
