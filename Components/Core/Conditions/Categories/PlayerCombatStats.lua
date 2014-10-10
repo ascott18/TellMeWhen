@@ -222,6 +222,7 @@ ConditionCategory:RegisterCondition(15, "VERSATILITY", {
 	Env = {
 		CR_VERSATILITY_DAMAGE_DONE = CR_VERSATILITY_DAMAGE_DONE,
 		GetCombatRatingBonus = GetCombatRatingBonus,
+		GetVersatilityBonus = GetVersatilityBonus,
 	},
 	events = function(ConditionObject, c)
 		return
