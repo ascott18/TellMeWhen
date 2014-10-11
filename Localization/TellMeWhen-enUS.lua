@@ -355,6 +355,20 @@ L["ICONMENU_CLEU_DESC"] = [=[Tracks combat events.
 
 Examples include spell reflects, misses, instant casts, and deaths, but the icon can track virtually anything.]=]
 
+
+
+L["ICONMENU_UIERROR"] = "Combat Error Event"
+L["ICONMENU_UIERROR_DESC"] = [=[Tracks UI error messages.
+
+Examples include things like "You are dead" and "You have no target".]=]
+L["ICONMENU_CHOOSENAME_EVENTS"] = "Choose message(s) to check"
+L["ICONMENU_CHOOSENAME_EVENTS_DESC"] = [=[Enter the error messages that you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
+
+Error messages much be matched exactly as they are typed, but are case-insensitive.]=]
+
+
+
+
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
 
@@ -1778,6 +1792,7 @@ L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
 L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
 L["SUG_INSERTTEXTSUB"] = "%s to insert tag"
 L["SUG_INSERTTUNITID"] = "%s to insert unitID"
+L["SUG_INSERTNAME"] = "%s to insert error message"
 
 L["SUG_INSERTNAME_INTERFERE"] = [[%s to insert as a name
 
@@ -1855,7 +1870,10 @@ L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of th
 Because this event occurs every time the icon is updated while a timer is running, you must set a condition, and the event will only occur when the state of that condition changes.]]
 
 L["SOUND_EVENT_ONCLEU"] = "On Combat Event"
-L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when a combat event that should be processed by the icon occurs.]]
+L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when the icon processes a combat event.]]
+
+L["SOUND_EVENT_ONUIERROR"] = "On Combat Error Event"
+L["SOUND_EVENT_ONUIERROR_DESC"] = [[This event triggers when the icon processes a combat event error.]]
 
 L["SOUND_EVENT_ONICONSHOW"] = "On Other Icon Show"
 L["SOUND_EVENT_ONICONSHOW_DESC"] = [[This event triggers when another icon (not this icon) is shown.

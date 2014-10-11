@@ -7,6 +7,7 @@
 <Include file="IconType_conditionicon\includes.config.xml"/>
 <Include file="IconType_cooldown\includes.config.xml"/>
 <Include file="IconType_default\includes.config.xml"/>
+<Include file="IconType_dotwatch\includes.config.xml"/>
 <Include file="IconType_dr\includes.config.xml"/>
 <Include file="IconType_icd\includes.config.xml"/>
 <Include file="IconType_item\includes.config.xml"/>
@@ -19,7 +20,7 @@
 <Include file="IconType_swingtimer\includes.config.xml"/>
 <Include file="IconType_totem\includes.config.xml"/>
 <Include file="IconType_unitcooldown\includes.config.xml"/>
-<Include file="IconType_dotwatch\includes.config.xml"/>
+<Include file="IconType_uierror\includes.config.xml"/>
 <Include file="IconType_wpnenchant\includes.config.xml"/>
 
 </Ui>

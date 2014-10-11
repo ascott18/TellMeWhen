@@ -11,6 +11,7 @@ TMW.CHANGELOG = {
 [==[** Zone PvP Type]==],
 [==[]==],
 [==[* New icon type: All-Unit Buffs/Debuffs. This icon type is mainly useful for tracking your multidotting on targets which might not have a unitID.]==],
+[==[* New icon type: Combat Event Error. For making an icon react to things like "Must be behind the target." or "You are already at full health."]==],
 [==[* New icon display method: Vertical Bars.]==],
 [==[]==],
 [==[* The suggestion list now defers its sorting so that input is more responsive.]==],
