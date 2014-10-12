@@ -19,10 +19,10 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local type, wipe, pairs, rawget =
-	  type, wipe, pairs, rawget
-local UnitGUID, IsInInstance =
-	  UnitGUID, IsInInstance
+local type, wipe, pairs, rawget, abs, min, next, GetTime =
+	  type, wipe, pairs, rawget, abs, min, next, GetTime
+local UnitGUID, UnitAura, GetSpellInfo =
+	  UnitGUID, UnitAura, GetSpellInfo
 local bit_band = bit.band
 
 local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
@@ -67,10 +67,6 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "buff",
 })
 
---[[Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
-	implementsConditions = true,
-})]]
-
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
 	[ 0x2 ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_DOTWATCH_AURASFOUND_DESC"],	},
@@ -99,41 +95,23 @@ Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", func
 	end
 end)
 
---[[Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings", {
-	hidden = function(self)
-		return TMW.CI.icon:IsGroupController()
-	end,
-})]]
-
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	-- UnitGUID() returns nil at load time, so we need to run this later in order to get pGUID.
-	-- TMW_GLOBAL_UPDATE is good enough.
-	pGUID = UnitGUID("player")
-end)
-
-
-
--- Holds all unitcooldown icons whose update method is "manual" (not "auto")
+-- Holds all dotwatch icons that we need to update.
 -- Since the event handling for this icon type is all done by a single handler that operates on all icons,
 -- we need to know which icons we need to queue an update for when something changes.
 local ManualIcons = {}
 local ManualIconsManager = TMW.Classes.UpdateTableManager:New()
 ManualIconsManager:UpdateTable_Set(ManualIcons)
 
-
--- Holds the cooldowns of all known units. Structure is:
---[[ Cooldowns = {
+-- Holds the cooldowns of all known auras. Structure is:
+--[[ Auras = {
 	[GUID] = {
-		[spellID] = lastCastTime,
+		[spellID] = TMW.C.Aura,
 		[spellName] = spellID,
 		...
 	},
 	...
 }
 ]]
-
-
 local Auras = setmetatable({}, {__index = function(t, k)
 	local n = {}
 	t[k] = n
@@ -175,11 +153,11 @@ local AllUnits = TMW:GetUnits(nil, [[
 	raid1-40;
 	raid1-40target;]]
 )
-local function ScanAllUnits(GUID, spellName, spellID)
+local function ScanForAura(GUID, spellName, spellID)
 	for i = 1, #AllUnits do
 		local unit = AllUnits[i]
 		if GUID == UnitGUID(unit) then
-			buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "PLAYER")
+			local buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "PLAYER")
 			if not buffName then
 				buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "HARMFUL|PLAYER")
 			end
@@ -192,7 +170,7 @@ local function ScanAllUnits(GUID, spellName, spellID)
 				local filter = "PLAYER"
 
 				while true do
-					buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, index, Filter)
+					buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, index, filter)
 					index = index + 1
 
 					if not id then
@@ -219,7 +197,71 @@ local function ScanAllUnits(GUID, spellName, spellID)
 end
 
 
-C_Timer.NewTicker(30, function() 
+local function VerifyAll()
+	-- Attempt to verify all auras that we can with actual data from UnitAura.
+	for i = 1, #AllUnits do
+		local unit = AllUnits[i]
+		local GUID = UnitGUID(unit)
+		local auras = rawget(Auras, GUID)
+		if auras then
+			for spellID, aura in pairs(auras) do
+				-- check that spellID is a number. It might be a name, in which case aura is a spellID.
+				-- We only care about the actual aura tables that are stored here.
+
+				if isNumber[spellID] and not aura.verified then
+					local spellName = aura.spellName
+
+					local buffName, _, _, count, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "PLAYER")
+					if not buffName then
+						buffName, _, _, count, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "HARMFUL|PLAYER")
+					end
+
+					if buffName and id ~= spellID then
+						-- We got a match by name, but not by ID,
+						-- so iterate over the unit's auras and find a matching ID.
+
+						local index, stage = 1, 1
+						local filter = "PLAYER"
+
+						while true do
+							buffName, _, _, count, _, duration, expirationTime, _, _, _, id = UnitAura(unit, index, filter)
+							index = index + 1
+
+							if not id then
+								-- If we reached the end of auras found for buffs, switch to debuffs
+								if stage == 1 then
+									index, stage = 1, 2
+									filter = "HARMFUL|PLAYER"
+								else
+									-- Break while true loop (spell loop)
+									break
+								end
+							end
+						end
+					end
+
+					-- Make sure that this is an application that just happened before returning the duration.
+					if id then
+						aura.start = expirationTime - duration
+						aura.duration = duration
+						aura.stacks = count
+						aura.verified = true
+						
+						for k = 1, #ManualIcons do
+							local icon = ManualIcons[k]
+							local NameHash = icon.Spells.Hash
+							if NameHash and (NameHash[spellID] or NameHash[strlowerCache[spellName]]) then
+								icon.NextUpdateTime = 0
+							end
+						end
+
+					end
+				end
+			end
+		end
+	end
+end
+local function CleanupOldAuras()
 	-- Cleanup function - occasionally get rid of units that aren't active.
 	for GUID, auras in pairs(Auras) do
 		if not next(auras) then
@@ -237,7 +279,8 @@ C_Timer.NewTicker(30, function()
 			end
 		end
 	end
-end)
+end
+
 
 
 
@@ -251,6 +294,9 @@ local Aura = TMW:NewClass("Aura"){
 	duration = 0,
 	unitName = "",
 	GUID = "",
+	stacks = nil,
+	verified = false,
+
 
 	OnNewInstance = function(self, spellID, destGUID, destName, maybeRefresh)
 		self.GUID = destGUID
@@ -262,8 +308,8 @@ local Aura = TMW:NewClass("Aura"){
 		local duration = BaseDurations[spellID]
 
 		if not duration then
-			-- ScanAllUnits will try and determine the base duration of the effect.
-			duration = ScanAllUnits(destGUID, self.spellName, spellID)
+			-- ScanForAura will try and determine the base duration of the effect.
+			duration = ScanForAura(destGUID, self.spellName, spellID)
 			if not maybeRefresh then
 				-- Only record the duration if we are 100% sure that this is a first application.
 				-- Sometimes, we might be creating an object for a refresh of an aura that we never saw
@@ -289,7 +335,7 @@ local Aura = TMW:NewClass("Aura"){
 
 		local remaining = self:Remaining()
 
-		local duration = ScanAllUnits(self.GUID, self.spellName, self.spellID, false)
+		local duration = ScanForAura(self.GUID, self.spellName, self.spellID, false)
 
 		self.refreshed = true
 		self.start = TMW.time
@@ -305,6 +351,7 @@ local Aura = TMW:NewClass("Aura"){
 		else
 			self.duration = baseOrFallback
 		end
+		self.verified = false
 	end,
 }
 Aura:MakeInstancesWeak()
@@ -341,10 +388,14 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 			end
 
 			if cleuEvent == "SPELL_AURA_APPLIED_DOSE" then
-				aura:Refresh()
+				if spellID ~= 155159 then -- Necrotic Plague doesn't refresh durations.
+					aura:Refresh()
+				end
 				aura.stacks = stack
+				aura.verified = false
 			elseif cleuEvent == "SPELL_AURA_REMOVED_DOSE" then
 				aura.stacks = stack
+				aura.verified = false
 			elseif cleuEvent == "SPELL_AURA_REFRESH" then
 				aura:Refresh()
 			else -- SPELL_AURA_APPLIED
@@ -440,7 +491,10 @@ function Type:Setup(icon)
 
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-
+	if not Type.CleanupTimer then
+		Type.CleanupTimer = C_Timer.NewTicker(30, CleanupOldAuras)
+		Type.VerifyTimer = C_Timer.NewTicker(0.001, VerifyAll)
+	end
 
 	icon.FirstTexture = SpellTextures[icon.Spells.First]
 
@@ -450,7 +504,8 @@ function Type:Setup(icon)
 
 	if icon:IsGroupController() then
 		icon:SetUpdateFunction(Dotwatch_OnUpdate_Controller)
-	elseif icon.Enabled and icon:IsBeingEdited() then
+	elseif icon.Enabled and icon:IsBeingEdited() and TellMeWhen_DotwatchSettings then
+		-- GLOBALS: TellMeWhen_DotwatchSettings
 		TellMeWhen_DotwatchSettings:Flash(1.5)
 	end
 
@@ -458,8 +513,18 @@ function Type:Setup(icon)
 end
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, icon)
+	-- UnitGUID() returns nil at load time, so we need to run this later in order to get pGUID.
+	-- TMW_GLOBAL_UPDATE is good enough.
+	pGUID = UnitGUID("player")
+
 	Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	Type:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	if Type.CleanupTimer then
+		Type.CleanupTimer:Cancel()
+		Type.CleanupTimer = nil
+		Type.VerifyTimer:Cancel()
+		Type.VerifyTimer = nil
+		CleanupOldAuras()
+	end
 end)
 
 TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
