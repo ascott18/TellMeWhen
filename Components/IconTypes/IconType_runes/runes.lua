@@ -239,7 +239,6 @@ local function Runes_OnUpdate(icon, time)
 end
 
 function Type:FormatSpellForOutput(icon, data, doInsertLink)
-	print(icon, data)
 	return data
 end
 
