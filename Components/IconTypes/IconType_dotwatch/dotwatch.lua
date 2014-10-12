@@ -487,7 +487,12 @@ end
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)	
 
-	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
+	icon:SetInfo("texture; reverse; spell; unit, GUID",
+		Type:GetConfigIconTexture(icon),
+		true,
+		icon.Spells.First,
+		nil, nil
+	)
 
 
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
