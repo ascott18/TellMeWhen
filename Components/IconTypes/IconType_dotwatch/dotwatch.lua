@@ -21,11 +21,10 @@ local L = TMW.L
 local print = TMW.print
 local type, wipe, pairs, rawget, abs, min, next, GetTime =
 	  type, wipe, pairs, rawget, abs, min, next, GetTime
-local UnitGUID, UnitAura, GetSpellInfo =
-	  UnitGUID, UnitAura, GetSpellInfo
-local bit_band = bit.band
+local UnitGUID, UnitAura, UnitName, GetSpellInfo =
+	  UnitGUID, UnitAura, UnitName, GetSpellInfo
 
-local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+local C_Timer = C_Timer
 local huge = math.huge
 
 local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
@@ -34,6 +33,7 @@ local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
 
+local Aura
 
 
 local Type = TMW.Classes.IconType:New("dotwatch")
@@ -118,10 +118,7 @@ local Auras = setmetatable({}, {__index = function(t, k)
 	return n
 end})
 
---TODO: debug only
-TMW.Auras = Auras
-
-local BaseDurations = {[589] = 18}
+local BaseDurations = {}
 local DurationExtends = {}
 
 
@@ -153,6 +150,9 @@ local AllUnits = TMW:GetUnits(nil, [[
 	raid1-40;
 	raid1-40target;]]
 )
+
+
+
 local function ScanForAura(GUID, spellName, spellID)
 	for i = 1, #AllUnits do
 		local unit = AllUnits[i]
@@ -196,71 +196,69 @@ local function ScanForAura(GUID, spellName, spellID)
 	end
 end
 
-
 local function VerifyAll()
 	-- Attempt to verify all auras that we can with actual data from UnitAura.
 	for i = 1, #AllUnits do
 		local unit = AllUnits[i]
 		local GUID = UnitGUID(unit)
-		local auras = rawget(Auras, GUID)
+		local auras = GUID and rawget(Auras, GUID)
 		if auras then
-			for spellID, aura in pairs(auras) do
-				-- check that spellID is a number. It might be a name, in which case aura is a spellID.
-				-- We only care about the actual aura tables that are stored here.
 
-				if isNumber[spellID] and not aura.verified then
-					local spellName = aura.spellName
+			local index, stage = 1, 1
+			local filter = "PLAYER"
 
-					local buffName, _, _, count, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "PLAYER")
-					if not buffName then
-						buffName, _, _, count, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "HARMFUL|PLAYER")
+			while true do
+				local buffName, _, _, count, _, duration, expirationTime, _, _, _, spellID = UnitAura(unit, index, filter)
+				index = index + 1
+
+				if spellID then
+					buffName = strlowerCache[buffName]
+
+					local aura = auras[spellID]
+					if not aura then
+						aura = Aura:New(spellID, GUID, UnitName(unit), true)
+						auras[spellID] = aura
+						auras[buffName] = spellID
 					end
 
-					if buffName and id ~= spellID then
-						-- We got a match by name, but not by ID,
-						-- so iterate over the unit's auras and find a matching ID.
-
-						local index, stage = 1, 1
-						local filter = "PLAYER"
-
-						while true do
-							buffName, _, _, count, _, duration, expirationTime, _, _, _, id = UnitAura(unit, index, filter)
-							index = index + 1
-
-							if not id then
-								-- If we reached the end of auras found for buffs, switch to debuffs
-								if stage == 1 then
-									index, stage = 1, 2
-									filter = "HARMFUL|PLAYER"
-								else
-									-- Break while true loop (spell loop)
-									break
-								end
-							end
-						end
+					local verified = aura.verified
+					if 	verified and 
+						(aura.start ~= expirationTime - duration 
+						or aura.duration ~= duration
+						or aura.stacks ~= count)
+					then
+						verified = false
 					end
 
-					-- Make sure that this is an application that just happened before returning the duration.
-					if id then
+					if not verified then
 						aura.start = expirationTime - duration
 						aura.duration = duration
 						aura.stacks = count
 						aura.verified = true
-						
+
 						for k = 1, #ManualIcons do
 							local icon = ManualIcons[k]
 							local NameHash = icon.Spells.Hash
-							if NameHash and (NameHash[spellID] or NameHash[strlowerCache[spellName]]) then
+							if NameHash and (NameHash[spellID] or NameHash[buffName]) then
 								icon.NextUpdateTime = 0
 							end
 						end
-
+					end
+				else
+					-- If we reached the end of auras found for buffs, switch to debuffs
+					if stage == 1 then
+						index, stage = 1, 2
+						filter = "HARMFUL|PLAYER"
+					else
+						-- Break while true loop (spell loop)
+						break
 					end
 				end
 			end
 		end
 	end
 end
+
 local function CleanupOldAuras()
 	-- Cleanup function - occasionally get rid of units that aren't active.
 	for GUID, auras in pairs(Auras) do
@@ -284,10 +282,11 @@ end
 
 
 
+
 local FALLBACK_DURATION = 15
 local MAX_REFRESH_AMOUNT = 1.3
 
-local Aura = TMW:NewClass("Aura"){
+Aura = TMW:NewClass("Aura"){
 	spellID = 0,
 	spellName = "",
 	start = 0,
@@ -356,6 +355,10 @@ local Aura = TMW:NewClass("Aura"){
 }
 Aura:MakeInstancesWeak()
 
+local noRefreshDuration = {
+	980,	-- Agony (Warlock)
+	155159,	-- Necrotic Plague
+}
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, destName, _, _, spellID, spellName, _, _, stack)
 	if sourceGUID == pGUID 
@@ -388,7 +391,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 			end
 
 			if cleuEvent == "SPELL_AURA_APPLIED_DOSE" then
-				if spellID ~= 155159 then -- Necrotic Plague doesn't refresh durations.
+				if noRefreshDuration[spellID] then
 					aura:Refresh()
 				end
 				aura.stacks = stack
