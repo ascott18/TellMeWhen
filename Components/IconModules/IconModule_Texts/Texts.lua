@@ -740,9 +740,7 @@ function Texts:SetupForIcon(sourceIcon)
 		
 	if layoutSettings then
 		-- Detect if masque skinning is being used on this icon.
-		local IconModule_IconContainer_Masque = icon:GetModuleOrModuleChild("IconModule_IconContainer_Masque")	
-		local isDefaultSkin = (not IconModule_IconContainer_Masque) or IconModule_IconContainer_Masque.isDefaultSkin
-			
+		local isDefaultSkin = not TMW.C.IconModule_IconContainer_Masque:IsIconSkinned(icon)
 
 		-- First, create all the fontStrings that will be used.
 		-- This is done first so that fontStrings that anchor to other fontStrings via the layout settings
@@ -768,7 +766,7 @@ function Texts:SetupForIcon(sourceIcon)
 	
 			
 			-- Setup the fontString if it isn't going to get skinned by Masque.
-			if not LMB or isDefaultSkin or fontStringSettings.SkinAs == "" then
+			if isDefaultSkin or fontStringSettings.SkinAs == "" then
 
 				-- Font settings:
 				fontString:SetFont(LSM:Fetch("font", fontStringSettings.Name), fontStringSettings.Size, fontStringSettings.Outline)

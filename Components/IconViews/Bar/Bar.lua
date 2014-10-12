@@ -110,7 +110,7 @@ View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, function(Module, ico
 	Module.bar:SetOrientation("HORIZONTAL")
 	Module.bar:SetRotatesTexture(false)
 end)
-View:ImplementsModule("IconModule_Texts", 570, true)
+View:ImplementsModule("IconModule_Texts", 70, true)
 View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, icon)
 	local Modules = icon.Modules
 	local Masque = Module

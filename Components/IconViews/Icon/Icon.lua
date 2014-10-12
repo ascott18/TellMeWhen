@@ -127,7 +127,7 @@ View:ImplementsModule("IconModule_TimerBar_Overlay", 50, function(Module, icon)
 		Module:Enable()
 	end
 end)
-View:ImplementsModule("IconModule_Texts", 560, true)
+View:ImplementsModule("IconModule_Texts", 60, true)
 View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, icon)
 	local Modules = icon.Modules
 	local Masque = Module
