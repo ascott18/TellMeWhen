@@ -310,9 +310,11 @@ local Aura = TMW:NewClass("Aura"){
 Aura:MakeInstancesWeak()
 
 
-function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, destName, _, _, spellID, spellName)
+function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, destName, _, _, spellID, spellName, _, _, stack)
 	if sourceGUID == pGUID 
 	and	(cleuEvent == "SPELL_AURA_APPLIED"
+	or cleuEvent == "SPELL_AURA_APPLIED_DOSE"
+	or cleuEvent == "SPELL_AURA_REMOVED_DOSE"
 	or cleuEvent == "SPELL_AURA_REFRESH"
 	or cleuEvent == "SPELL_AURA_REMOVED")
 	then
@@ -331,14 +333,19 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 			local aura = aurasOnGUID[spellID]
 
 			local actuallyRefresh
-			if cleuEvent == "SPELL_AURA_REFRESH" and not aura then
+			if cleuEvent ~= "SPELL_AURA_APPLIED" and not aura then
 				-- This is dirty. But it prevents ugly code duplication.
 				-- This handles refreshes of auras that we never saw the initial application of.
 				cleuEvent = "SPELL_AURA_APPLIED"
 				actuallyRefresh = 1
 			end
 
-			if cleuEvent == "SPELL_AURA_REFRESH" then
+			if cleuEvent == "SPELL_AURA_APPLIED_DOSE" then
+				aura:Refresh()
+				aura.stacks = stack
+			elseif cleuEvent == "SPELL_AURA_REMOVED_DOSE" then
+				aura.stacks = stack
+			elseif cleuEvent == "SPELL_AURA_REFRESH" then
 				aura:Refresh()
 			else -- SPELL_AURA_APPLIED
 				aura = Aura:New(spellID, destGUID, destName, actuallyRefresh)
@@ -387,7 +394,7 @@ local function Dotwatch_OnUpdate_Controller(icon, time)
 				local remaining = duration - (time - start)
 
 				if remaining > 0 then
-					if Alpha > 0 and not icon:YieldInfo(true, iName, start, duration, aura.unitName, GUID, Alpha) then
+					if Alpha > 0 and not icon:YieldInfo(true, iName, start, duration, aura.unitName, GUID, Alpha, aura.stacks) then
 						-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 						return
 					end
@@ -403,21 +410,23 @@ local function Dotwatch_OnUpdate_Controller(icon, time)
 	icon:YieldInfo(false)
 end
 
-function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GUID, alpha)
+function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GUID, alpha, stacks)
 	if name then
-		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
+		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID; stack, stackText",
 			alpha,
 			SpellTextures[name] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			start, duration,
 			name,
-			unit, GUID
+			unit, GUID,
+			stacks, stacks
 		)
 	else
-		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
+		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID; stack, stackText",
 			icon.UnAlpha,
 			icon.FirstTexture,
 			0, 0,
 			icon.Spells.First,
+			nil, nil,
 			nil, nil
 		)
 	end
@@ -441,14 +450,8 @@ function Type:Setup(icon)
 
 	if icon:IsGroupController() then
 		icon:SetUpdateFunction(Dotwatch_OnUpdate_Controller)
-	elseif icon.Enabled then
-		icon:GetSettings().Enabled = false
-		icon:Setup()
-
-		if icon:IsBeingEdited() then
-			TMW.IE:Load(1)
-			TellMeWhen_DotwatchSettings:Flash(1.5)
-		end
+	elseif icon.Enabled and icon:IsBeingEdited() then
+		TellMeWhen_DotwatchSettings:Flash(1.5)
 	end
 
 	icon:Update()

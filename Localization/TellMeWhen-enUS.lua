@@ -288,7 +288,7 @@ Useful for tracking multi-dotting.
 
 This icon type MUST be used as a Group Controller - it cannot be a standalone icon.]]
 L["ICONMENU_DOTWATCH_GCREQ"] = "Must be a group controller"
-L["ICONMENU_DOTWATCH_GCREQ_DESC"] = [[This icon type must be a group controller in order to function. You cannot enable it as a standalone icon.
+L["ICONMENU_DOTWATCH_GCREQ_DESC"] = [[This icon type must be a group controller in order to function. You cannot use it as a standalone icon.
 
 To make an icon into a group controller, it must be the first icon in a group (i.e. it has an iconID of 1). Then, enable the %q setting next to the %q checkbox.]]
 L["ICONMENU_DOTWATCH_AURASFOUND_DESC"] = "Set the icon opacity level for when any units have any of the buffs/debuffs being checked."
