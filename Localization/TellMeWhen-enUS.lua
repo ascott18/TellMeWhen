@@ -62,6 +62,7 @@ This backup, created from your session that began %s, has been restored.]]
 
 
 L["DIALOG_HEADER_CHANGELOG"] = "TellMeWhen Changelog"
+L["CHANGELOG_LAST_VERSION"] = "Previous Installed Version"
 
 
 L["NOGROUPS_DIALOG_BODY"] = [[Your current TellMeWhen configuration and/or player specialization does not allow any TellMeWhen groups to be shown, so there is nothing to configure.

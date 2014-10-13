@@ -1999,6 +1999,11 @@
 							log:SetJustifyV("TOP")
 							log:SetSpacing(2)
 							log:SetText(v)
+
+							local version = v:match("TellMeWhen v([%d%.]+)")
+							version = version and version:gsub("%.", "")
+							version = tonumber(version)
+							log.version = version and version * 100
 							
 							--local font, size = log:GetFont()
 							--log:SetFont(font, size, "THINOUTLINE")
@@ -2071,7 +2076,7 @@
 		</Frames>
 
 		<Scripts>
-
+ 
 			<OnLoad>
 				self.title:SetText(TMW.L["DIALOG_HEADER_CHANGELOG"])
 
@@ -2088,6 +2093,15 @@
 					self.resizer.y_min = 200
 					self.resizer.y_max = function() return UIParent:GetHeight()*0.9 end
 				end)
+
+				function self:SetLastVersion(ver)
+					for _, log in ipairs(self.ScrollContainer) do
+						if log.version and ver >= log.version then
+							log:SetText(log:GetText():gsub("([\r\n]+)", " |cFFF6682F(" .. TMW.L["CHANGELOG_LAST_VERSION"] .. ")|r%1", 1))
+							break
+						end
+					end
+				end
 
 				self.background:SetAlpha(0.95)
 
