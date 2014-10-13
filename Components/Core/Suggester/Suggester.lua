@@ -526,6 +526,9 @@ function Module:Table_GetEquivSuggestions(suggestions, tbl, ...)
 	local semiLN = ";" .. lastName
 	local long = #lastName > 2
 	
+	local len = #SUG.lastName - 1
+	local match = tonumber(SUG.lastName)
+	
 	for _, tbl in TMW:Vararg(...) do
 		for equiv in pairs(tbl) do
 			if 
