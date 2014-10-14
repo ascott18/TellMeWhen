@@ -41,7 +41,7 @@ function IconContainer_Masque:IsIconSkinned(icon)
 	self:AssertSelfIsClass()
 
 	if not LMB then
-		return true
+		return false
 	end
 
 	local lmbGroup = GetLMBGroup(icon)

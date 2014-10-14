@@ -2,6 +2,12 @@ if not TMW then return end
 
 TMW.CHANGELOG = {
 
+[==[===v7.1.1===]==],
+[==[]==],
+[==[====Bug Fixes====]==],
+[==[* Fixed a very silly mistake that broke anchoring of an icon's text displays when Masque was not installed.]==],
+[==[]==],
+[==[]==],
 [==[===v7.1.0===]==],
 [==[* TellMeWhen has been updated for Warlords of Draenor. Please open a ticket on CurseForge for TMW if you notice anything missing.]==],
 [==[]==],
