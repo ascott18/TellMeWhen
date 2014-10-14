@@ -4,6 +4,7 @@
 <Include file="Config.xml"/>
  -->
  
-<Script file="module.lua"/>
- 
+
+<Script file="dotwatch.lua"/>
+
 </Ui>

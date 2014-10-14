@@ -17,8 +17,10 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local type, pairs, assert, rawget, wipe =
-	  type, pairs, assert, rawget, wipe
+local type, pairs, ipairs, assert, rawget, wipe, error, tonumber, _G =
+	  type, pairs, ipairs, assert, rawget, wipe, error, tonumber, _G
+
+-- GLOBALS: FROM, CreateFrame
 
 
 local DogTag = LibStub("LibDogTag-3.0")
@@ -41,6 +43,13 @@ TEXT.MasqueSkinnableTexts = {
 }
 
 
+
+
+
+-- -------------------
+-- DEFAULTS
+-- -------------------
+
 TMW:RegisterDatabaseDefaults{
 	global = {
 		TextLayouts = {
@@ -57,12 +66,13 @@ TMW:RegisterDatabaseDefaults{
 					Name 		  	= "Arial Narrow",	-- Name of the Font (Stupid key for this setting, but it dates back to antiquity)
 					Size 		  	= 12,               -- Font size
 					Justify	 		= "CENTER",         -- 
-					JustifyV	 	= "CENTER",     -- 
+					JustifyV	 	= "MIDDLE",    		-- 
 					Outline 	  	= "THICKOUTLINE",   -- Font outline
 					Shadow			= 0,
 
 					Height			= 0, -- If we set a fontString's dimensions to 0,
 					Width			= 0, -- it will auto adjust, which is default behavior.
+					Rotate			= 0, -- Degrees to rotate by.
 					
 					Anchors = {
 						n = 1,
@@ -108,6 +118,9 @@ TMW:MergeDefaultsTables({
 		},
 	},
 }, TMW.Icon_Defaults)
+
+
+
 
 
 -- -------------------
@@ -532,6 +545,13 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...
 end)
 
 
+
+
+
+-- -------------------
+-- UTILITY FUNCTIONS
+-- -------------------
+
 function TEXT:GetTextLayoutForIconSettings(gs, ics, view)
 	-- arg3, view, is optional. Defaults to the current view
 	
@@ -656,86 +676,168 @@ function Texts:CreateFontString(id)
 	return fontString
 end
 
+
+local function reSetup(self, event, icon)
+	self:SetupForIcon(icon)
+end
+
+local function rotate(self, degrees)
+	local anim = self.anim
+	if not anim then
+		if degrees == 0 then
+			return
+		end
+
+		self.animGroup = self:CreateAnimationGroup()
+
+		anim = self.animGroup:CreateAnimation("Rotation")
+		anim:SetDuration(0)
+		anim:SetEndDelay(math.huge)
+
+		self.anim = anim
+	end
+	
+	if degrees ~= 0 then
+		anim:SetDegrees(degrees)
+		anim:SetOrigin("CENTER", 0, 0)
+		
+		self.animGroup:Play()
+	else
+		self.animGroup:Stop()
+	end
+end
+
+
+
+
 function Texts:SetupForIcon(sourceIcon)
 	local icon = self.icon
 	
 	
+	-- The strings that we will set on the fontStrings
 	local Texts = sourceIcon:GetSettingsPerView().Texts
+	-- The layout settings that will be used to style the fontStrings.
 	local _, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(sourceIcon) 
+
+
+	-- Store these tables on the moudle.
 	self.layoutSettings = layoutSettings
 	self.Texts = Texts
 	
+
+	-- Set the kwargs table to the correct vars for the source icon.
 	wipe(self.kwargs)
 	self.kwargs.icon = sourceIcon:GetGUID()
 	self.kwargs.unit = sourceIcon.attributes.dogTagUnit
-	--self.kwargs.shouldcolor = TMW.db.profile.ColorNames
 	
+
+	-- Queue all fontStrings for removal from DogTag.
+	-- Don't remove them all outright because DogTag uses a fuckton of CPU to do this.
+	-- This var will be set false on still-valid strings, so we will only remove ones we don't use.
 	for _, fontString in pairs(self.fontStrings) do
 		fontString.TMW_QueueForRemoval = true
 	end
 		
 	if layoutSettings then
-		local IconModule_IconContainer_Masque = icon:GetModuleOrModuleChild("IconModule_IconContainer_Masque")	
-		local isDefaultSkin = (not IconModule_IconContainer_Masque) or IconModule_IconContainer_Masque.isDefaultSkin
+		-- Detect if masque skinning is being used on this icon.
+		local isDefaultSkin = not TMW.C.IconModule_IconContainer_Masque:IsIconSkinned(icon)
+
+		-- First, create all the fontStrings that will be used.
+		-- This is done first so that fontStrings that anchor to other fontStrings via the layout settings
+		-- can anchor to them in the loop after this one with no issue.
+		for textID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
+
+			-- Figure out the identifier for the fontString.
+			-- This will be a string if its being skinned with masque, or a number if not.
+			local fontStringID = self:GetFontStringID(textID, fontStringSettings)
 			
-		for fontStringID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
-			fontStringID = self:GetFontStringID(fontStringID, fontStringSettings)
-			
+			-- Gets an existing fontString, or creates one if it doesn't exist.
 			local fontString = self.fontStrings[fontStringID] or self:CreateFontString(fontStringID)
+
+
 			fontString:Show()
 			fontString.settings = fontStringSettings
-			
-			--fontString:SetWidth(fontStringSettings.ConstrainWidth and icon:GetWidth() or 0)
+		end
+		
+		-- Now, go through and setup all the fontStrings that we just created.
+		for textID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
+			local fontStringID = self:GetFontStringID(textID, fontStringSettings)
+			local fontString = self.fontStrings[fontStringID]
 	
-			if not LMB or isDefaultSkin or fontStringSettings.SkinAs == "" then				
-				-- Font
+			
+			-- Setup the fontString if it isn't going to get skinned by Masque.
+			if isDefaultSkin or fontStringSettings.SkinAs == "" then
+
+				-- Font settings:
 				fontString:SetFont(LSM:Fetch("font", fontStringSettings.Name), fontStringSettings.Size, fontStringSettings.Outline)
 				
 				fontString:SetJustifyH(fontStringSettings.Justify)
 				fontString:SetJustifyV(fontStringSettings.JustifyV)
-			end
-		end
-		
-		for fontStringID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
-			fontStringID = self:GetFontStringID(fontStringID, fontStringSettings)
-			
-			local fontString = self.fontStrings[fontStringID] or self:CreateFontString(fontStringID)
-	
-			if not LMB or isDefaultSkin or fontStringSettings.SkinAs == "" then		
-				-- Position
-				fontString:ClearAllPoints()
-				local func = fontString.__MSQ_SetPoint or fontString.SetPoint
 				
-				for n, anchorSettings in TMW:InNLengthTable(fontStringSettings.Anchors) do
+				fontString:SetShadowOffset(fontStringSettings.Shadow, -fontStringSettings.Shadow)
+
+
+
+				-- Position settings:
+				fontString:SetWidth(fontStringSettings.Width)
+				fontString:SetHeight(fontStringSettings.Height)
+
+				rotate(fontString, fontStringSettings.Rotate)
+
+
+				fontString:ClearAllPoints()
+				local setPoint = fontString.__MSQ_SetPoint or fontString.SetPoint
+				
+				for _, anchorSettings in TMW:InNLengthTable(fontStringSettings.Anchors) do
 					local relativeTo = anchorSettings.relativeTo
 					if relativeTo:sub(1, 2) == "$$" then
+						-- If relativeTo starts with "$$", then it points at another fontString by textID (index).
+						-- Get that index:
 						relativeTo = tonumber(relativeTo:sub(3))
+
 						if relativeTo <= layoutSettings.n then
+							-- The index is valid for the current layout's number of fontStrings.
 							local fontStringSettingsOfAnchor = layoutSettings[relativeTo]
-							relativeTo = self:GetFontStringID(relativeTo, fontStringSettingsOfAnchor)
-							relativeTo = self.fontStrings[relativeTo]
+
+							-- Find the actual fontString being anchored to.
+							local relativeToID = self:GetFontStringID(relativeTo, fontStringSettingsOfAnchor)
+							relativeTo = self.fontStrings[relativeToID]
 						else
+							-- The index isn't valid for the current layout.
 							relativeTo = nil
 						end
+
 						if not relativeTo then
+							-- If the index was invalid, or by some incident of fuckery the fontString doesn't exist when it should,
+							-- throw an error.
 							TMW:Error("Couldn't find the anchor %q for icon %q, font string %s", anchorSettings.relativeTo, icon:GetName(), fontStringID)
 							relativeTo = icon
 						end
 					else
+						-- If relativeTo doesn't start with "$$", then the anchor is relative to an icon module's frame.
+						-- The full name of the frame being anchored to will be as such:
 						relativeTo = icon:GetName() .. relativeTo
+
+
 						if not _G[relativeTo] then
 							if self.hasSetupOnce then
+								-- We have already setup once, and the frame doesn't exist.
+								-- This probably means that it never will, so throw an error.
 								TMW:Error("Couldn't find the anchor %q for icon %q, font string %s", anchorSettings.relativeTo, icon:GetName(), fontStringID)
+							else
+								-- Run the text setup again after the icon is updated if we were missing an anchor frame.
+								-- It might just be an issue with the module implementation order, although IconModule_Texts should always be last.
+								TMW:RegisterRunonceCallback("TMW_ICON_SETUP_POST", reSetup, self)
+
+								-- Temporarily anchor to the icon.
+								relativeTo = icon
 							end
-							relativeTo = icon
 						end
 					end
 					
-					func(fontString, anchorSettings.point, relativeTo, anchorSettings.relativePoint, anchorSettings.x, anchorSettings.y)
+					-- Finally, set the point. We call it like this because we need to use Masque's SetPoint if it exists.
+					setPoint(fontString, anchorSettings.point, relativeTo, anchorSettings.relativePoint, anchorSettings.x, anchorSettings.y)
 				end
-
-				fontString:SetWidth(fontStringSettings.Width)
-				fontString:SetHeight(fontStringSettings.Height)
 			end
 		end
 	end
@@ -743,6 +845,8 @@ function Texts:SetupForIcon(sourceIcon)
 	-- TMW_QueueForRemoval gets set to nil for valid stings in OnKwargsUpdated, among other things
 	self:OnKwargsUpdated()
 	
+	-- Remove from DogTag all the fontStrings that don't end up getting used.
+	-- See the beginning of this function to see why we do it like this.
 	for fontStringID, fontString in pairs(self.fontStrings) do		
 		if fontString.TMW_QueueForRemoval then
 			fontString.TMW_QueueForRemoval = nil
@@ -750,10 +854,12 @@ function Texts:SetupForIcon(sourceIcon)
 			fontString:Hide()
 		end
 	end
+
 	self.hasSetupOnce = true
 end
 
-function Texts:GetFontStringID(fontStringID, fontStringSettings)
+function Texts:GetFontStringID(textID, fontStringSettings)
+	local fontStringID = textID
 	local SkinAs = fontStringSettings.SkinAs
 	if SkinAs ~= "" then
 		fontStringID = SkinAs
@@ -763,22 +869,24 @@ end
 
 function Texts:OnKwargsUpdated()
 	if self.layoutSettings and self.Texts then
-		for fontStringID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
-			local fontString = self.fontStrings[self:GetFontStringID(fontStringID, fontStringSettings)]
+		for textID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
+			local fontString = self.fontStrings[self:GetFontStringID(textID, fontStringSettings)]
 			
-			local text = TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, fontStringID)
+			local text = TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, textID)
 			
 			if fontString and text and text ~= "" then
+				-- We let DogTag do the styling of the outline on our texts.
+				-- Convert the style setting to a DogTag for the same style.
 				local styleString = ""
 				if fontStringSettings.Outline == "OUTLINE" or fontStringSettings.Outline == "THICKOUTLINE" or fontStringSettings.Outline == "MONOCHROME" then
 					styleString = styleString .. ("[%s]"):format(fontStringSettings.Outline)
 				end
 				
+				-- Let :SetupForIcon() know that we want to keep this fontString.
 				fontString.TMW_QueueForRemoval = nil
 				
-				fontString:SetShadowOffset(fontStringSettings.Shadow, -fontStringSettings.Shadow)
-				
-				DogTag:AddFontString(fontString, self.icon, styleString .. text, "TMW;Unit;Stats", self.kwargs)
+				-- Register the fontString with DogTag.
+				DogTag:AddFontString(fontString, self.icon, styleString .. text, TMW.DOGTAG.nsList, self.kwargs)
 			end
 		end
 	end

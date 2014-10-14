@@ -100,30 +100,35 @@ function TimerBar:UpdateValue(force)
 		self.bar:SetValue(value)
 
 		if value ~= 0 then
-			local co = self.completeColor
-			local ha = self.halfColor
-			local st = self.startColor
+			local completeColor = self.completeColor
+			local halfColor = self.halfColor
+			local startColor = self.startColor
 
 			if Invert then
-				co, st = st, co
+				completeColor, startColor = startColor, completeColor
 			end
 			
-			local pct = value / self.Max * 2
+			-- This is multiplied by 2 because we subtract 100% if it ends up being past
+			-- the point where halfColor will be used.
+			-- If we don't multiply by 2, we would check if (percent > 0.5), but then
+			-- we would have to multiply that percentage by 2 later anyway in order to use the
+			-- full range of colors available (we would only get half the range of colors otherwise, which looks like shit)
+			local percent = value / self.Max * 2
 
-			if pct > 1 then
-				co = ha
-				pct = pct - 1
+			if percent > 1 then
+				completeColor = halfColor
+				percent = percent - 1
 			else
-				st = ha
+				startColor = halfColor
 			end
 
-			local inv = 1-pct
+			local inv = 1-percent
 
 			self.bar:SetStatusBarColor(
-				(st.r * pct) + (co.r * inv),
-				(st.g * pct) + (co.g * inv),
-				(st.b * pct) + (co.b * inv),
-				(st.a * pct) + (co.a * inv)
+				(startColor.r * percent) + (completeColor.r * inv),
+				(startColor.g * percent) + (completeColor.g * inv),
+				(startColor.b * percent) + (completeColor.b * inv),
+				(startColor.a * percent) + (completeColor.a * inv)
 			)
 		end
 		self.__value = value

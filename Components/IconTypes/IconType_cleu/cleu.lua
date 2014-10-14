@@ -14,26 +14,28 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
+local print = TMW.print
 local _G = _G
 local bit_band, bit_bor =
 	  bit.band, bit.bor
 local UnitGUID, GetSpellTexture, GetItemIcon =
 	  UnitGUID, GetSpellTexture, GetItemIcon
-local print = TMW.print
 local SpellTextures = TMW.SpellTextures
 
-local pGUID = UnitGUID("player") -- this isnt actually defined right here (it returns nil at this stage of loading), so I will do it later too
+local pGUID = nil -- This can't be defined at load.
 local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 
+local COMBATLOG_OBJECT_NONE, ACTION_SWING =
+	  COMBATLOG_OBJECT_NONE, ACTION_SWING
 
 local Type = TMW.Classes.IconType:New("cleu")
 Type.name = L["ICONMENU_CLEU"]
 Type.desc = L["ICONMENU_CLEU_DESC"]
 Type.menuIcon = GetSpellTexture(20066)
+Type.menuSpaceBefore = true
 Type.usePocketWatch = 1
 Type.AllowNoName = true
-Type.spacebefore = true
 Type.unitType = "name"
 Type.hasNoGCD = true
 
@@ -49,19 +51,37 @@ Type:UsesAttributes("extraSpell")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
+
+
 Type:RegisterIconDefaults{
+	-- The source unit(s)/name(s) to filter each combat event by. Can be left blank to not filter by source unit.
 	SourceUnit				= "",
+
+	-- The destination unit(s)/name(s) to filter each combat event by. Can be left blank to not filter by source unit.
 	DestUnit 				= "",
+
+	-- The CLEU flags to filter the source of the event by. 0xFFFFFFFF allows all flags. Missing bits disallow that bit's flag.
 	SourceFlags				= 0xFFFFFFFF,
+
+	-- The CLEU flags to filter the destination of the event by. 0xFFFFFFFF allows all flags. Missing bits disallow that bit's flag.
 	DestFlags				= 0xFFFFFFFF,
+
+	-- True to prevent handling of an event if the timer is already running on the icon
 	CLEUNoRefresh			= false,
+
+	-- The timer to set on the icon when an event is triggered. Can be overridden using the spell: duration syntax in the spell filter for the icon.
 	CLEUDur					= 5,
+
+	-- A table of all CLEU events that will be checked by the icon.
+	-- If the blank string "" is defined as a key in this table, the icon will check all events.
 	CLEUEvents 				= {
 		["*"] 				= false
 	},
 }
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME2"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
@@ -83,11 +103,16 @@ Type:RegisterIconEvent(61, "OnCLEUEvent", {
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	-- This is here because UnitGUID() returns nil at load time.
+	-- It has to be called afterwords to set pGUID.
+	-- TMW_GLOBAL_UPDATE is good enough. Its the first event that came to mind.
 	pGUID = UnitGUID("player")
 end)
 
 
 local EnvironmentalTextures = {
+	-- Textures for events for taking damage from environmental sources.
+	-- These events aren't associated with a spell, so we have to come up with our own texture.
 	DROWNING = "Interface\\Icons\\Spell_Shadow_DemonBreath",
 	FALLING = GetSpellTexture(130),
 	FATIGUE = "Interface\\Icons\\Ability_Suffocate",
@@ -97,6 +122,8 @@ local EnvironmentalTextures = {
 }
 
 local EventsWithoutSpells = {
+	-- These are events without spells.
+	-- We need to maintain this list so that we don't attempt to filter these events by spell.
 	ENCHANT_APPLIED = true,
 	ENCHANT_REMOVED = true,
 	SWING_DAMAGE = true,
@@ -109,42 +136,49 @@ local EventsWithoutSpells = {
 }
 
 local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
-	
+
+	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
+		-- Make a fake event for spell reflects. This will fire in place of SPELL_MISSED when this happens.
+		event = "SPELL_REFLECT"
+
+		-- swap the source and the destination so they make sense.
+		sourceGUID, sourceName, sourceFlags, sourceRaidFlags,	destGUID, destName, destFlags, destRaidFlags =
+		destGUID, destName, destFlags, destRaidFlags,			sourceGUID, sourceName, sourceFlags, sourceRaidFlags
+	elseif event == "SPELL_INTERRUPT" then
+		-- Fake an event that allow filtering based on the spell that caused an interrupt rather than the spell that was interrupted.
+		-- Fire it in addition to, not in place of, SPELL_INTERRUPT
+		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+	elseif event == "SPELL_DAMAGE" then
+		local _, _, _, _, arg10 = ...
+		if arg10 then
+			-- Fake an event that fires if there was a crit. Fire mages like this.
+			-- Fire it in addition to, not in place of, SPELL_DAMAGE.
+			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_CRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+		else
+			-- Fake an event that fires if there was not a crit. Fire mages don't like this.
+			-- Fire it in addition to, not in place of, SPELL_DAMAGE.
+			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_NONCRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
+		end
+	end
+
 
 	if icon.CLEUNoRefresh then
+		-- Don't handle the event if CLEUNoRefresh is set and the icon's timer is still running.
 		local attributes = icon.attributes
 		if TMW.time - attributes.start < attributes.duration then
 			return
 		end
 	end
-	
-	if event == "SPELL_MISSED" and arg4 == "REFLECT" then
-		-- make a fake event for spell reflects
-		event = "SPELL_REFLECT"
 
-		-- swap the source and the destination
-		sourceGUID, sourceName, sourceFlags, sourceRaidFlags,    destGUID, destName, destFlags, destRaidFlags =
-		destGUID, destName, destFlags, destRaidFlags,    sourceGUID, sourceName, sourceFlags, sourceRaidFlags
-	elseif event == "SPELL_INTERRUPT" then
-		-- fake an event that allow filtering based on the spell that caused an interrupt rather than the spell that was interrupted.
-		-- fire it in addition to, not in place of, SPELL_INTERRUPT
-		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
-	elseif event == "SPELL_DAMAGE" then
-		local _, _, _, _, arg10 = ...
-		if arg10 then
-			-- fake an event that fires if there was a crit
-			-- fire it in addition to, not in place of, SPELL_DAMAGE
-			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_CRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
-		else
-			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_NONCRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
-		end
-	end
 
 	if icon.AllowAnyEvents or icon.CLEUEvents[event] then
 
 		if icon.SourceFlags then
+			-- icon.SourceFlags is nil if it is default, so we don't go into this code if we don't need to.
 			if not sourceName then
-				if destFlags then
+				-- If sourceName is nil, then there is no source unit. 
+				-- Give it the COMBATLOG_OBJECT_NONE flag so this can be filtered by the user.
+				if sourceFlags then
 					sourceFlags = bit_bor(sourceFlags, COMBATLOG_OBJECT_NONE)
 				else
 					sourceFlags = COMBATLOG_OBJECT_NONE
@@ -152,12 +186,16 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			end
 
 			if bit_band(icon.SourceFlags, sourceFlags) ~= sourceFlags then
+				-- Filtering by flags failed, so return out.
 				return
 			end
 		end
 
 		if icon.DestFlags then
+			-- icon.DestFlags is nil if it is default, so we don't go into this code if we don't need to.
 			if not destName then
+				-- If destName is nil, then there is no destination unit. 
+				-- Give it the COMBATLOG_OBJECT_NONE flag so this can be filtered by the user.
 				if destFlags then
 					destFlags = bit_bor(destFlags, COMBATLOG_OBJECT_NONE)
 				else
@@ -166,6 +204,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			end
 
 			if bit_band(icon.DestFlags, destFlags) ~= destFlags then
+				-- Filtering by flags failed, so return out.
 				return
 			end
 		end
@@ -173,20 +212,31 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		local SourceUnits = icon.SourceUnits
 		local sourceUnit = sourceName
 		if SourceUnits and sourceName then
+			-- We are filtering by source unit, and the event has a source unit, so see if that unit is valid.
+			-- (icon.SourceUnits is nil if it would be empty)
+
 			local matched
+			-- Loop over the source units that we are filtering by and attempt to find a valid unitID for the source unit.
+			-- CLEU only provides names and GUIDs, so we need to do some fun checking to find a match.
 			for i = 1, #SourceUnits do
 				local unit = SourceUnits[i]
-				local sourceName = strlowerCache[sourceName]
-				if unit == sourceName then -- match by name
+
+				-- See if the unit matches by name.
+				if unit == strlowerCache[sourceName] then
 					matched = 1
 					break
+
+				-- See if the unit matches by GUID.
 				elseif UnitGUID(unit) == sourceGUID then
-					sourceUnit = unit -- replace with the actual unitID
+					-- Replace the name with the actual unitID
+					sourceUnit = unit
 					matched = 1
 					break
 				end
 			end
+
 			if not matched then
+				-- We failed to find a matching unit, so return out.
 				return
 			end
 		end
@@ -194,30 +244,40 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		local DestUnits = icon.DestUnits
 		local destUnit = destName
 		if DestUnits and destName then
+			-- We are filtering by destination unit, and the event has a destination unit, so see if that unit is valid.
+			-- (icon.DestUnits is nil if it would be empty)
+
 			local matched
+			-- Loop over the destination units that we are filtering by and attempt to find a valid unitID for the destination unit.
+			-- CLEU only provides names and GUIDs, so we need to do some fun checking to find a match.
 			for i = 1, #DestUnits do
 				local unit = DestUnits[i]
-				local destName = strlowerCache[destName]
-				if unit == destName then -- match by name
+
+				-- See if the unit matches by name.
+				if unit == strlowerCache[destName] then
 					matched = 1
 					break
+
+				-- See if the unit matches by GUID.
 				elseif UnitGUID(unit) == destGUID then
-					destUnit = unit -- replace with the actual unitID
+					-- Replace the name with the actual unitID
+					destUnit = unit
 					matched = 1
 					break
 				end
 			end
+
 			if not matched then
+				-- We failed to find a matching unit, so return out.
 				return
 			end
 		end
 
-		--local spellID, spellName = arg1, arg2 -- this may or may not be true, depends on the event
 
 		local tex, spellID, spellName, extraID, extraName
 		if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
 			spellName = ACTION_SWING
-			-- dont define spellID here so that ACTION_SWING will be used in %s substitutions
+			-- dont define spellID here so that ACTION_SWING will be reported as the icon's spell.
 			tex = SpellTextures[6603]
 		elseif event == "ENCHANT_APPLIED" or event == "ENCHANT_REMOVED" then
 			spellID = arg1
@@ -226,13 +286,13 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		elseif event == "SPELL_INTERRUPT" or event == "SPELL_DISPEL" or event == "SPELL_DISPEL_FAILED" or event == "SPELL_STOLEN" then
 			extraID = arg1 -- the spell used (kick, cleanse, spellsteal)
 			extraName = arg2
-			spellID = arg4 -- the other spell (polymorph, greater heal, arcane intellect, corruption)
+			spellID = arg4 -- the spell that was interrupted or the aura that was removed
 			spellName = arg5
 			tex = SpellTextures[spellID]
 		elseif event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_INTERRUPT_SPELL" then
-			extraID = arg4 -- the spell that broke it
+			extraID = arg4 -- the spell that broke it, or the spell that was interrupted
 			extraName = arg5
-			spellID = arg1 -- the spell that was broken
+			spellID = arg1 -- the spell that was broken, or the spell used to interrupt
 			spellName = arg2
 			tex = SpellTextures[spellID]
 		elseif event == "ENVIRONMENTAL_DAMAGE" then
@@ -289,14 +349,19 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			]]
 		end
 
-		local NameHash = icon.NameHash
+		local NameHash = icon.Spells.Hash
 		local duration
-		if NameHash and not EventsWithoutSpells[event] then
+		if icon.Name ~= "" and not EventsWithoutSpells[event] then
+			-- Filter the event by spell.
 			local key = (NameHash[spellID] or NameHash[strlowerCache[spellName]])
 			if not key then
+				-- We are filtering by spell, but the even't spell wasn't in the list of OK spells. Return out.
 				return
 			else
-				duration = icon.Durations[key]
+				-- We found a spell in our list that matches the event.
+				-- See if the colon duration syntax was used, and if so, 
+				-- then use that duration to set on the icon.
+				duration = icon.Spells.Durations[key]
 				if duration == 0 then
 					duration = nil
 				end
@@ -305,7 +370,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 
 		TMW:Assert(tex or spellID)
 
-		-- set the info that was obtained from the event.
+		-- Set the info that was obtained from the event:
 		local unit, GUID
 		if destUnit then
 			unit, GUID = destUnit, destGUID
@@ -328,6 +393,8 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		-- half the icon changes on event and the other half changes on the next update cycle
 		icon:Update(true)
 
+
+		-- Fire the OnCLEUEvent icon event to immediately trigger any notifications for it, if needed.
 		if icon.EventHandlersSet.OnCLEUEvent then
 			icon:QueueEvent("OnCLEUEvent")
 			icon:ProcessQueuedEvents()
@@ -342,12 +409,14 @@ local function CLEU_OnUpdate(icon, time)
 	local duration = attributes.duration
 
 	if time - start > duration then
+		-- The timer is not running. Use the timer-not-running alpha value.
 		icon:SetInfo(
 			"alpha; start, duration",
 			icon.UnAlpha,
 			0, 0
 		)
 	else
+		-- The timer is running. Use the timer-is-running alpha value.
 		icon:SetInfo(
 			"alpha; start, duration",
 			icon.Alpha,
@@ -357,8 +426,7 @@ local function CLEU_OnUpdate(icon, time)
 end
 
 function Type:Setup(icon)
-	icon.NameHash = icon.Name ~= "" and TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
-	icon.Durations = TMW:GetSpellDurations(icon.Name)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 
 	-- only define units if there are any units. we dont want to waste time iterating an empty table.
 	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
@@ -373,14 +441,15 @@ function Type:Setup(icon)
 
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 
-	-- safety mechanism
-	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and not icon.NameHash and not icon.SourceFlags and not icon.DestFlags then
+	-- Tell the user if they have an icon that is going to respond to every fucking thing that happens.
+	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and icon.Name == "" and not icon.SourceFlags and not icon.DestFlags then
 		if TMW.Locked and icon.Enabled then
 			TMW.Warn(L["CLEU_NOFILTERS"]:format(icon:GetIconName(true)))
 		end
 		return
 	end
 
+	-- Setup events and update functions.
 	icon:SetUpdateMethod("manual")
 
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -393,6 +462,10 @@ end
 
 Type:Register(200)
 
+
+
+
+-- Icon Data Processors and DogTags to hold and display the source and destination unit of the combat event.
 
 local Processor = TMW.Classes.IconDataProcessor:New("CLEU_SOURCEUNIT", "sourceUnit, sourceGUID")
 function Processor:CompileFunctionSegment(t)
@@ -469,6 +542,9 @@ Processor:RegisterDogTag("TMW", "Destination", {
 	example = ('[Destination] => "target"; [Destination:Name] => "Kobold"; [Destination(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Destination(icon="TMW:icon:1I7MnrXDCz8T"):Name] => %q'):format(UnitName("player"), TMW.NAMES and TMW.NAMES:TryToAcquireName("player", true) or "???"),
 	category = L["ICON"],
 })
+
+
+-- IDP and DogTag to hold the extra spell for events like SPELL_DISPEL and SPELL_INTERRUPT.
 
 local Processor = TMW.Classes.IconDataProcessor:New("CLEU_EXTRASPELL", "extraSpell")
 -- Processor:CompileFunctionSegment(t) is default.

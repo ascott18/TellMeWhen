@@ -15,7 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "7.0.3"
+TELLMEWHEN_VERSION = "7.1.0"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -26,9 +26,11 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 70307 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 71045 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
-if TELLMEWHEN_VERSIONNUMBER > 71000 or TELLMEWHEN_VERSIONNUMBER < 70000 then
+TELLMEWHEN_FORCECHANGELOG = 71030 -- if the user hasn't seen the changelog until at least this version, show it to them.
+
+if TELLMEWHEN_VERSIONNUMBER > 72000 or TELLMEWHEN_VERSIONNUMBER < 71000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
 end 
@@ -61,15 +63,20 @@ TMW.L = L
 TMW.global = {}
 TMW.profile = {}
 
+
+-- Setup LibOO.
 TMW.Classes = LibOO:GetNamespace("TellMeWhen")
-TMW.C = TMW.Classes
+TMW.C = TMW.Classes -- shortcut
+
+-- These two methods are to replace the methods that used to be defined
+-- directly back when LibOO was written exclusively for TMW.
 function TMW:NewClass(...)
 	return TMW.Classes:NewClass(...)
 end
 function TMW:CInit(self, ...)
-	local className = self:GetAttribute("tmw-class")
+	local className = self.tmwClass
 	if not className then
-		error("tmw-class attribute not defined for " .. self:GetName() or "<unnamed>.")
+		error("tmwClass value not defined for " .. self:GetName() or "<unnamed>.")
 	end
 
 	local class = TMW.Classes[className]
@@ -79,6 +86,9 @@ function TMW:CInit(self, ...)
 
 	class:NewFromExisting(self, ...)
 end
+
+-- Callbacks to replicate the functionality of the old events
+-- that were fired by LibOO when it was written exclusively for TMW.
 TMW.Classes:RegisterCallback("OnNewClass", function(event, class)
 	return TMW:Fire("TMW_CLASS_NEW", class)
 end)
@@ -87,26 +97,28 @@ TMW.Classes:RegisterCallback("OnNewInstance", function(event, class, instance)
 end)
 
 
+
+
 -- GLOBALS: LibStub
 -- GLOBALS: TellMeWhenDB, TellMeWhen_Settings
 -- GLOBALS: TELLMEWHEN_VERSION, TELLMEWHEN_VERSION_MINOR, TELLMEWHEN_VERSION_FULL, TELLMEWHEN_VERSIONNUMBER, TELLMEWHEN_MAXROWS
 -- GLOBALS: UIParent, CreateFrame, collectgarbage, geterrorhandler 
 
 ---------- Upvalues ----------
-local GetSpellCooldown, GetSpellInfo, GetSpellTexture =
-	  GetSpellCooldown, GetSpellInfo, GetSpellTexture
-local GetTalentInfo =
-	  GetTalentInfo
+local GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell =
+	  GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell
+local InCombatLockdown, GetTalentInfo, GetActiveSpecGroup =
+	  InCombatLockdown, GetTalentInfo, GetActiveSpecGroup
 local UnitPower, UnitClass, UnitName, UnitAura =
 	  UnitPower, UnitClass, UnitName, UnitAura
-local IsInGuild =
-	  IsInGuild
-local GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn =
-	  GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn
+local IsInGuild, IsInGroup, IsInInstance =
+	  IsInGuild, IsInGroup, IsInInstance
+local GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn, GetBuildInfo =
+	  GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn, GetBuildInfo
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack =
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack
-local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, max, ceil, floor, random =
-	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, max, ceil, floor, random
+local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin, max, ceil, floor, random =
+	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin, max, ceil, floor, random
 local _G, coroutine, table, GetTime, CopyTable =
 	  _G, coroutine, table, GetTime, CopyTable
 local tostringall = tostringall
@@ -154,7 +166,6 @@ TMW.EventList = {}
 TMW.COMMON = {}
 
 TMW.CONST = {
-	CHAT_TYPE_INSTANCE_CHAT = "INSTANCE_CHAT",
 	GUID_SIZE = 12,
 }
 
@@ -181,11 +192,6 @@ TMW.Defaults = {
 
 		NumGroups			=	0,
 		-- Groups = {} -- this will be set to the profile group defaults in a second.
-	},
-	locale = {
-		WpnEnchDurs	= {
-			["*"] = 0,
-		},
 	},
 	profile = {
 	--	Version			= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
@@ -324,55 +330,48 @@ TMW.BE = {
 
 	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
 	debuffs = {
-		ReducedArmor		= "113746",
-		PhysicalDmgTaken	= "81326;35290;50518;57386;55749",
-		SpellDamageTaken	= "93068;_1490;34889;24844;116202",
-		ReducedPhysicalDone = "115798;50256;24423",
-		ReducedCastingSpeed = "31589;73975;5761;109466;50274;90314;126402;58604",
+		Silenced			= "_47476;_78675;_15487;_1330;114238;_18498;_25046;31935;31117;102051",
 		ReducedHealing		= "115804",
-		Stunned				= "_1833;_408;_91800;_113801;5211;9005;22570;19577;24394;56626;44572;_853;64044;96201;_20549;46968;132168;_30283;_7922;50519;91797;_89766;54786;105593;120086;117418;115001;_131402;108194;117526;105771;_122242;113953;118905;119392;119381;118271",
-		Incapacitated		= "20066;1776;_6770;115078;115268;107079",
-		Rooted				= "_339;_122;_64695;_19387;33395;_4167;54706;50245;90327;16979;45334;_87194;63685;102359;_128405;116706;123407;115197;107566",
-		Disarmed			= "_51722;_676;64058;50541;91644;117368",
-		Silenced			= "_47476;_78675;_34490;_55021;_15487;_1330;_24259;_18498;_25046;31935;31117;102051;116709;142895",
-		Shatterable			= "122;33395;_44572;_82691", -- by algus2
-		Disoriented			= "_19503;31661;_2094;_51514;90337;88625;105421;99",
-		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_20170;_115180;45524;_18223;_15407;_3409;26679;_58180;61391;44614;_7302;_8034;_63529;_15571;_7321;_7992;123586;47960;129923", -- by algus2 
-		Feared				= "_5782;5246;_8122;10326;1513;111397;_5484;_6789;_87204;20511;112928;113004;113792;113056",
-		Bleeding			= "_1822;_1079;9007;33745;1943;_703;_115767;89775;_11977;106830;77758",
+
+		Stunned				= "_1833;_408;_91800;_113801;5211;22570;19577;24394;44572;_853;_20549;46968;132168;_30283;_7922;64044;91797;_25;_89766;105593;120086;117418;115001;_131402;108194;117526;118905;119392;119381;118345;132169",
+		Incapacitated		= "99;3355;_19386;20066;_118;1776;_6770;115078;115268;107079;31661;82691;123393;_137460;88625;_51514",
+		Rooted				= "_339;_122;_64695;_19387;33395;16979;45334;_87194;63685;102359;_128405;116706;107566;96294;105771;53148;_114404",
+		Shatterable			= "122;33395;_44572;_82691;63685;102051", -- by algus2
+		Disoriented			= "31661;_2094;_51514;99;123393",
+		Slowed				= "_116;_120;_13810;_5116;_8056;_3600;_1715;_12323;116095;_20170;_115180;45524;50435;_15407;_3409;26679;_58180;61391;44614;_7302;_63529;_15571;_7321;_7992;123586;47960;129923", -- by algus2 
+		Feared				= "_5782;5246;_8122;10326;_137143;_5484;_6789;_87204",
+		Bleeding			= "_1822;_1079;33745;1943;_703;_115767;89775;_11977;106830;77758",
 		
-		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW (mists of pandaria)  ONES YET:
-		CrowdControl		= "_118;2637;33786;113506;_1499;_19503;_19386;20066;10326;_9484;_6770;_2094;_51514;76780;_710;_5782;_6358;_605;_82691;115078;115268;107079", -- originally by calico0 of Curse
+		CrowdControl		= "_118;33786;_1499;_19386;20066;10326;_9484;_6770;_2094;_51514;_710;_5782;_6358;_605;_82691;115078;115268;107079", -- originally by calico0 of Curse
 		
 	},
 	buffs = {
-		IncreasedMastery	= "19740;116956;93435;127830",
-		IncreasedSP			= "1459;61316;77747;109773;126309",
+		IncreasedMastery	= "155522;24907;19740;116956;93435;160039;128997;160073",
+		IncreasedHaste  	= "55610;49868;116956;113742;160003;135678;160074;128432",
+		IncreasedSP			= "1459;61316;109773;126309;90364",
 		IncreasedAP			= "57330;19506;6673",
-		IncreasedPhysHaste  = "55610;113742;30809;128432;128433",
-		IncreasedStats		= "1126;_117666;20217;90363",
-		BonusStamina		= "21562;109773;469;90364",
-		IncreasedSpellHaste = "24907;15473;51470;49868;135678",
-		IncreasedCrit		= "24932;1459;61316;97229;24604;90309;126373;126309;116781",
+		IncreasedStats		= "1126;20217;90363;115921;116781;159988;160017;160077;72586",
+		IncreasedVersatility= "55610;1126;167187;167188;159735;35290;160045;50518;57386;160077",
+		IncreasedMultistrike= "166916;49868;113742;109773;58604;34889;57386;24844;",
+		BonusStamina		= "21562;116928;469;90364;160003;160014;111922",
+		IncreasedCrit		= "24932;1459;61316;116781;97229;24604;90309;126373;126309;160052",
+		BurstHaste			= "2825;32182;80353;90355;146555;160452",
 		
 		-- From l337g0g0 of Curse:
-		DamageShield		= "_17;_11426;116849;115295;114908;110913;108416;112048;86273;114214;47753;65148;108008;1463;108366;119839;_6229;115635;77535;145441",
+		DamageShield		= "_17;_11426;116849;115295;114908;110913;108416;112048;86273;114214;47753;65148;108008;1463;108366;115635;77535;145441",
 		
-		-- EXISTING WAS CHECKED, DIDN'T LOOK FOR NEW (mists of pandaria) ONES YET:
 		ImmuneToStun		= "642;45438;48792;1022;33786;710;46924;19263;6615",
 		ImmuneToMagicCC		= "642;45438;48707;33786;710;46924;19263;31224;8178;23920;49039;114028",
-		BurstHaste			= "2825;32182;80353;90355;146555",
-		BurstManaRegen		= "29166;16191;64901",
 		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;19263;6940;31850;31224;42650;86657;118038;115176;115308;120954;115295;51271;12975;97463;102342;114039",
-		MiscHelpfulBuffs	= "96267;10060;23920;68992;54428;2983;1850;29166;16689;53271;1044;31821;45182;114028",
-		SpeedBoosts			= "54861;121557;_2983;_61684;68992;108843;65081;118922;108212;2379;58875;133278;85499;96268;137452;111400;116841;119085;7840;5118;13159;2645;122294;_77761",
-		DamageBuffs			= "1719;12292;50334;5217;3045;77801;34692;31884;51713;49016;12472;57933;86700;51271;_107574;114050;114051",
+		MiscHelpfulBuffs	= "10060;23920;68992;2983;1850;53271;1044;31821;45182;114028",
+		SpeedBoosts			= "54861;121557;_2983;_61684;68992;108843;65081;118922;137573;2379;58875;133278;85499;96268;137452;111400;116841;119085;7840;5118;13159;2645;_77761",
+		DamageBuffs			= "1719;12292;50334;5217;3045;77801;31884;51713;12472;57933;51271;_107574;114050;114051",
 	},
 	casts = {
 		--prefixing with _ doesnt really matter here since casts only match by name,
 		-- but it may prevent confusion if people try and use these as buff/debuff equivs
-		Heals				= "50464;5185;8936;740;2050;2060;2061;32546;596;64843;635;82326;19750;331;77472;8004;1064;73920;124682;115175;116694",
-		PvPSpells			= "33786;339;20484;1513;982;64901;_605;5782;5484;10326;51514;118;12051;20066",
+		Heals				= "5185;8936;740;2060;2061;32546;596;64843;82326;19750;77472;8004;1064;73920;124682;115175;116694;33076;120517;121135;48438;116670;114163;85222;85673",
+		PvPSpells			= "33786;339;20484;982;_605;5782;5484;10326;51514;118;12051;20066",
 		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
 		Tier12Interrupts	= "_97202;_100094",
 	},
@@ -439,6 +438,14 @@ function TMW:ProcessEquivalencies()
 					end
 				end
 			end
+			local t = TMW:SplitNames(str)
+			for _, spell in pairs(t) do
+				if type(spell) == "number" and not GetSpellInfo(spell) then
+					TMW:Debug("Invalid spellID found: %s (%s - %s)!",
+						spell, category, equiv)
+				end
+			end
+
 			TMW.BE[category][equiv] = str
 		end
 	end
@@ -879,7 +886,7 @@ function TMW.print(...)
 		--	prefix = prefix..format(" %4.0f", linenum(3))
 			prefix = format("|cffff0000 %s", linenum(3, 1))
 		end
-		if not TMW.Initialized then
+		if not TMW.debug then
 			prefix = prefix .. " PRE-INIT DEBUG"
 		end
 
@@ -1077,16 +1084,6 @@ do	-- TMW.safecall
 end
 local safecall = TMW.safecall
 
-function TMW:Do504SliderBugFix(slider)
-	if not slider._onsetting then -- is single threaded 
-		slider._onsetting = true
-		slider:SetValue(slider:GetValue())
-		slider._onsetting = false
-	else
-		-- Returning true will trigger the calling function to also return.
-		return true
-	end
-end
 
 
 -- This code is here to prevent other addons from resetting
@@ -1096,6 +1093,11 @@ local start_old = debugprofilestart
 local lastReset = 0
 function _G.debugprofilestart()
 	lastReset = lastReset + debugprofilestop()
+
+	TMW:Error("TMW has detected that one of your addons has called debugprofilestart().\n" .. 
+		"This is bad practice, and can break parts of TellMeWhen and other addons as well.\n" .. 
+		"Report this error to TellMeWhen's authors so that we can look into resolving the issue.")
+
 	return start_old()
 end
 
@@ -1103,7 +1105,6 @@ function _G.debugprofilestop_SAFE()
 	return debugprofilestop() + lastReset    
 end
 local debugprofilestop = debugprofilestop_SAFE
-
 
 
 
@@ -1135,6 +1136,8 @@ do -- InNLengthTable
 		return state.k, state.t[state.k]
 	end
 
+	--- Iterates over an array-style table that has a key "n" to indicate the length of the table.
+	-- Returns (key, value) pairs for each iteration.
 	function TMW:InNLengthTable(arg)
 		if arg then
 			return iter, getstate(0, arg)
@@ -1193,9 +1196,11 @@ do -- InIconSettings
 		return gs.Icons[iconID], gs, state.domain, state.groupID, iconID -- ics, gs, domain, groupID, iconID
 	end
 
+	--- Iterates over icon settings in the current profile
+	-- @param domain [string|nil] If groupID is also defined, it will restrict this iteration to a single group.
+	-- @param groupID [number|nil] If domain is also defined, it will restrict this iteration to a single group.
+	-- @return Iterator that will return (iconSettings, groupSettings, domain, groupID, iconID) for each iteration.
 	function TMW:InIconSettings(domain, groupID)
-		-- current icon (the second param here) is incremented at the beginning of the iterator call,
-		-- so it should be passed in as 0, not 1
 		return iter, getstate(domain, groupID)
 	end
 end
@@ -1231,6 +1236,8 @@ do -- InGroupSettings
 		return TMW.db[state.domain].Groups[state.cg], state.domain, state.cg -- group settings, domain, groupID
 	end
 
+	--- Iterates over group settings in the current profile
+	-- @return Iterator that will return (groupSettings, domain, groupID) for each iteration.
 	function TMW:InGroupSettings()
 		return iter, getstate()
 	end
@@ -1267,6 +1274,8 @@ do -- InGroups
 		return TMW[state.domain][state.cg], state.domain, state.cg -- group, domain, groupID
 	end
 
+	--- Iterates over all groups that have been created by TellMeWhen.
+	-- @return Iterator that will return (group, domain, groupID) for each iteration.
 	function TMW:InGroups()
 		return iter, getstate()
 	end
@@ -1299,6 +1308,8 @@ do -- vararg
 		return i, state[i], state.l
 	end
 
+	--- Iterates over each variable in a vararg.
+	-- @return Iterator that will return (i, var, totalNumVars) for each iteration.
 	function TMW:Vararg(...)
 		return iter, getstate(...)
 	end
@@ -1309,14 +1320,10 @@ do -- ordered pairs
 	local tables = {}
 	local unused = {}
 
-	local sortByValues, reverse
-	local function sorter(a, b)
-		if sortByValues then
-			local val_a, val_b = sortByValues[a], sortByValues[b]
-			if val_a ~= val_b then
-				a, b = val_a, val_b
-			end
-		end
+	local sortByValues, compareFunc, reverse
+
+	-- An alternative comparison function that can handle mismatched types.
+	local function betterCompare(a, b)
 		local ta, tb = type(a), type(b)
 		if ta ~= tb then
 			if reverse then
@@ -1341,7 +1348,27 @@ do -- ordered pairs
 		end
 	end
 
-	local function next(t, state)
+	local function sorter(a, b)
+		if sortByValues then
+			local val_a, val_b = sortByValues[a], sortByValues[b]
+			if val_a ~= val_b then
+				a, b = val_a, val_b
+			end
+		end
+
+		if compareFunc then
+			return compareFunc(a, b)
+		end
+
+		if reverse then
+			return a > b
+		end
+		return a < b
+
+		--return compare(a, b)
+	end
+
+	local function orderedNext(t, state)
 		local orderedIndex = tables[t]
 		
 		if state == nil then
@@ -1366,22 +1393,50 @@ do -- ordered pairs
 		return
 	end
 
-	function TMW:OrderedPairs(t, func, rev)
-		local orderedIndex = tremove(unused) or {}
-		for key in pairs(t) do
-			orderedIndex[#orderedIndex + 1] = key
+	--- Iterates over the table in an ordered fashion, without modifying the table.
+	-- @param t [table] The table to iterate over
+	-- @param compare [function|nil] The comparison function that will be used for sorting the keys or values of the table. Defaults to regular ascending order.
+	-- @param byValues [boolean|nil] True to have the iteration order based on values (values will be passed to the compare function if defined), false/nil to sort by keys.
+	-- @param rev [boolean|nil] True to reverse the sorted order of the iteration.
+	-- @return Iterator that will return (key, value) for each iteration.
+	function TMW:OrderedPairs(t, compare, byValues, rev)
+		if not next(t) then
+			return TMW.NULLFUNC
 		end
+
+		local orderedIndex = tremove(unused) or {}
+		local type_comparand = nil
+		for key, value in pairs(t) do
+			orderedIndex[#orderedIndex + 1] = key
+
+			-- Determine the types of what we're comparing by.
+			-- If we find more than one type, use betterCompare since it handles type mismatches.
+			if compare == nil then
+				local oldType = type_comparand
+				if byValues then
+					type_comparand = type(value)
+				else
+					type_comparand = type(key)
+				end
+				if oldType ~= type_comparand then
+					compare = compare or betterCompare
+				end
+			end
+		end
+
 		reverse = rev
-		if func == "values" then
-			func = sorter
+		compareFunc = compare
+
+		if byValues then
 			sortByValues = t
 		else
 			sortByValues = nil
 		end
-		sort(orderedIndex, func or sorter)
+
+		sort(orderedIndex, sorter)
 		tables[t] = orderedIndex
 
-		return next, t
+		return orderedNext, t
 	end
 end
 
@@ -1394,7 +1449,7 @@ end
 -- Callback lib
 ---------------------------------
 
-do -- Callback Lib
+do
 	-- because quite frankly, i hate the way CallbackHandler-1.0 works.
 	local callbackregistry = {}
 	local firingsInProgress = 0
@@ -1455,6 +1510,12 @@ do -- Callback Lib
 		TMW:RegisterCallback(event, RunonceWrapper, arg1)
 	end
 
+	--- Register a callback with TMW.
+	-- Possible call signatures are:
+	-- - TMW:RegisterCallback("TMW_EVENT", function() ... end) - Will call function(...)
+	-- - TMW:RegisterCallback("TMW_EVENT", function(arg) ... end, arg) - Will call function(arg, ...)
+	-- - TMW:RegisterCallback("TMW_EVENT", table) - Will call table:TMW_EVENT(...)
+	-- - TMW:RegisterCallback("TMW_EVENT", table, funcName) - Will call table[funcName](table, ...)
 	function TMW:RegisterCallback(event, func, arg1)
 		TMW:ValidateType("2 (event)", "TMW:RegisterCallback(event, func, arg1)", event, "string")
 		TMW:ValidateType("3 (func)", "TMW:RegisterCallback(event, func, arg1)", func, "function;table")
@@ -1497,12 +1558,15 @@ do -- Callback Lib
 		end
 	end
 
+	--- Unregister a callback from TMW.
+	-- Call signature should be the same as how TMW:RegisterCallback() was called to register the callback. 
 	function TMW:UnregisterCallback(event, func, arg1)
-		if type(func) == "table" then
-			local object = func
-			func = object[arg1 or event]
-			arg1 = object
-		end
+		TMW:ValidateType("2 (event)", "TMW:RegisterCallback(event, func, arg1)", event, "string")
+		TMW:ValidateType("3 (func)", "TMW:RegisterCallback(event, func, arg1)", func, "function;table")
+		TMW:ValidateType("4 (arg1)", "TMW:RegisterCallback(event, func, arg1)", arg1, "!boolean")
+		
+
+		func, arg1 = DetermineFuncAndArg(event, func, arg1)
 		arg1 = arg1 or true
 
 		local funcs = callbackregistry[event]
@@ -1530,6 +1594,8 @@ do -- Callback Lib
 		end
 	end
 	
+	--- Unregisters all callbacks for a given event.
+	-- @param event [string] The event to unregister all callbacks from.
 	function TMW:UnregisterAllCallbacks(event)
 		
 		local funcs = callbackregistry[event]
@@ -1543,6 +1609,9 @@ do -- Callback Lib
 	end
 	
 	local curEvent, curFunc, curArg1
+	--- Fires an event, calling all relevant callbacks
+	-- @param event [string] A string, beginning with "TMW_", that represents the event.
+	-- @param ... [...] The parameters to be passed to the callbacks.
 	function TMW:Fire(event, ...)
 		local funcs = callbackregistry[event]
 
@@ -1603,7 +1672,7 @@ do -- Callback Lib
 		end
 	end
 
-	--- Unregisters the currently firing callback
+	--- Unregisters the currently firing callback. Works with nested callbacks.
 	function TMW:UnregisterThisCallback()
 		TMW:UnregisterCallback(curEvent, curFunc, curArg1)
 	end
@@ -1717,8 +1786,23 @@ end
 
 -- ADDON ENTRY POINT: EVERYTHING STARTS FROM HERE!
 function TMW:OnInitialize()
-	-- if the file IS required for gross functionality
-	if not TMW.Classes or not TMW.Classes.Formatter then
+	-- Check for wrong WoW version
+	if select(4, GetBuildInfo()) < 60000 then
+		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
+		local version = GetBuildInfo()
+		StaticPopupDialogs["TMW_BADWOWVERSION"] = {
+			text = "TellMeWhen %s is not compatible with WoW %s. Please downgrade TellMeWhen or wait for a World of Warcraft update to WoW %s.", 
+			button1 = OKAY,
+			timeout = 0,
+			showAlert = true,
+			whileDead = true,
+			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+		}
+		StaticPopup_Show("TMW_BADWOWVERSION", TELLMEWHEN_VERSION_FULL, version, "6.0.2")
+		return
+
+	-- if the file is NOT required for gross functionality
+	elseif not TMW.Classes or not TMW.Classes.SpellSet then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1731,7 +1815,7 @@ function TMW:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Utils.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Spells/Spells.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 		return
 
 	-- if the file is NOT required for gross functionality
@@ -1752,6 +1836,7 @@ function TMW:OnInitialize()
 	--------------- Events/OnUpdate ---------------
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
+	-- TMW:PLAYER_LOGIN() handles the next stage of initialization.
 	TMW:RegisterEvent("PLAYER_LOGIN")
 	
 	TMW.OnInitialize = nil
@@ -1767,7 +1852,7 @@ function TMW:Initialize()
 	-- if upgrades and database initialization are done before those addons have a chance to load.
 	
 	
-	TMW.Initialize = TMW.NULLFUNC
+	TMW.Initialize = nil
 	TMW.Initialized = true
 	
 	TMW:InitializeDatabase()
@@ -1858,23 +1943,30 @@ end
 function TMW:PLAYER_LOGIN()
 	TMW:UnregisterEvent("PLAYER_LOGIN")
 	TMW.PLAYER_LOGIN = nil
+
+	TMW:UpdateTalentTextureCache()
 	
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 
-	-- TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 	-- Don't register PLAYER_TALENT_UPDATE. As far as I can tell, there is nothing that it fires for
 	-- that PLAYER_SPECIALIZATION_CHANGED won't also fire for. See ticket 949 for details on why
 	-- registering PLAYER_TALENT_UPDATE is bad now.
+	-- Addendum for Warlords: We're back to registering this again. Lets hope they've fixed the issue.
+	-- PLAYER_SPECIALIZATION_CHANGED doesn't fire nearly as much as it used to, which is why we need to keep PLAYER_TALENT_UPDATE
+
 
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 
 	TMW:ProcessEquivalencies()
+
+	TMW:Initialize()
 	
 	-- This should be done twice to get everything aware of everything else's GUID.
 	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
 	TMW:Update()
-	TMW:Update()
+	--TMW:Update()
 end
 
 
@@ -2073,6 +2165,13 @@ TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 
+		[71020] = {
+			icon = function(self, ics)
+				ics.Name = ics.Name:gsub("IncreasedPhysHaste", "IncreasedHaste")
+				ics.Name = ics.Name:gsub("IncreasedSpellHaste", "IncreasedHaste")
+			end,
+		},
+
 		[70001] = {
 			global = function(self)
 				local currentProfile = TMW.db:GetCurrentProfile()
@@ -2175,16 +2274,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					if v.CBC.Override and v.CBS.Override then
 						v.CBM.Override = true
 					end
-				end
-			end
-		},
-		[62216] = {
-			global = function(self)
-				if type(TMW.db.global.WpnEnchDurs) == "table" then
-					for k, v in pairs(TMW.db.global.WpnEnchDurs) do
-						TMW.db.locale.WpnEnchDurs[k] = max(TMW.db.locale.WpnEnchDurs[k] or 0, v)
-					end
-					TMW.db.global.WpnEnchDurs = nil
 				end
 			end
 		},
@@ -2355,8 +2444,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		},
 		[44009] = {
 			profile = function(self)
-				TMW.db.profile.WpnEnchDurs = nil
-
 				TMW.db.profile.HasImported = nil
 			end,
 		},
@@ -3116,9 +3203,7 @@ do	-- TMW:OnUpdate()
 end
 
 
-function TMW:UpdateNormally()
-	TMW:Initialize()
-	
+function TMW:UpdateNormally()	
 	if not TMW.InitializedFully then
 		return
 	end
@@ -3193,106 +3278,106 @@ end
 
 do -- TMW:UpdateViaCoroutine()
 
--- Blizzard's execution cap in combat is 200ms.
--- We will be extra safe and go for 100ms.
--- But actually, we will use 50ms, because somehow we are still getting extremely rare 'script ran too long' errors
-local COROUTINE_MAX_TIME_PER_FRAME = 50
+	-- Blizzard's execution cap in combat is 200ms.
+	-- We will be extra safe and go for 100ms.
+	-- But actually, we will use 50ms, because somehow we are still getting extremely rare 'script ran too long' errors
+	local COROUTINE_MAX_TIME_PER_FRAME = 50
 
-local NumCoroutinesQueued = 0
-local CoroutineStartTime
-local UpdateCoroutine
+	local NumCoroutinesQueued = 0
+	local CoroutineStartTime
+	local UpdateCoroutine
 
-local safecall_safe = TMW.safecall
+	local safecall_safe = TMW.safecall
 
-local function safecall_coroutine(func, ...)
-	return true, func(...)
-end
-
-local function CheckCoroutineTermination()
-	if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
-		coroutine.yield(UpdateCoroutine)
+	local function safecall_coroutine(func, ...)
+		return true, func(...)
 	end
-end
 
-local function OnUpdateDuringCoroutine(self)
-	-- This is an OnUpdate script, but don't be too concerned with performance because it is only used
-	-- when lock toggling in combat. Safety of the code (don't let it error!) is far more important than performance here.
-	time = GetTime()
-	TMW.time = time
-	
-	CoroutineStartTime = debugprofilestop()
-	
-	--if not IsAddOnLoaded("TellMeWhen_Options") then
-	--	error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
-	--end
-	
-	if NumCoroutinesQueued == 0 then
-		TMW.safecall = safecall_safe
-		safecall = safecall_safe
-		
-		--TMW:Print(L["SAFESETUP_COMPLETE"])
-		TMW:Fire("TMW_SAFESETUP_COMPLETE")
-		
-		TMW:SetScript("OnUpdate", TMW.OnUpdate)
-	else
-		-- Yielding a coroutine inside a pcall/xpcall isn't permitted,
-		-- so we will just have to temporarily throw all error protection out the window.
-		TMW.safecall = safecall_coroutine
-		safecall = safecall_coroutine
-		
-		if not UpdateCoroutine then
-			UpdateCoroutine = coroutine.create(TMW.UpdateNormally)
-			CheckCoroutineTermination() -- Make sure we haven't already exceeded this frame's threshold (from loading options, creating the coroutine, etc.)
+	local function CheckCoroutineTermination()
+		if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
+			coroutine.yield(UpdateCoroutine)
 		end
-		
-		TMW:RegisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
-		TMW:RegisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+	end
 
+	local function OnUpdateDuringCoroutine(self)
+		-- This is an OnUpdate script, but don't be too concerned with performance because it is only used
+		-- when lock toggling in combat. Safety of the code (don't let it error!) is far more important than performance here.
+		time = GetTime()
+		TMW.time = time
 		
-		if coroutine.status(UpdateCoroutine) == "dead" then
-			UpdateCoroutine = nil
-			NumCoroutinesQueued = NumCoroutinesQueued - 1
+		CoroutineStartTime = debugprofilestop()
+		
+		--if not IsAddOnLoaded("TellMeWhen_Options") then
+		--	error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
+		--end
+		
+		if NumCoroutinesQueued == 0 then
+			TMW.safecall = safecall_safe
+			safecall = safecall_safe
+			
+			--TMW:Print(L["SAFESETUP_COMPLETE"])
+			TMW:Fire("TMW_SAFESETUP_COMPLETE")
+			
+			TMW:SetScript("OnUpdate", TMW.OnUpdate)
 		else
-			local success, err = coroutine.resume(UpdateCoroutine)
-			if not success then
-				--TMW:Printf(L["SAFESETUP_FAILED"], err)
-				TMW:Fire("TMW_SAFESETUP_COMPLETE")
-				TMW:Error(err)
+			-- Yielding a coroutine inside a pcall/xpcall isn't permitted,
+			-- so we will just have to temporarily throw all error protection out the window.
+			TMW.safecall = safecall_coroutine
+			safecall = safecall_coroutine
+			
+			if not UpdateCoroutine then
+				UpdateCoroutine = coroutine.create(TMW.UpdateNormally)
+				CheckCoroutineTermination() -- Make sure we haven't already exceeded this frame's threshold (from loading options, creating the coroutine, etc.)
+			end
+			
+			TMW:RegisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
+			TMW:RegisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+
+			
+			if coroutine.status(UpdateCoroutine) == "dead" then
+				UpdateCoroutine = nil
+				NumCoroutinesQueued = NumCoroutinesQueued - 1
+			else
+				local success, err = coroutine.resume(UpdateCoroutine)
+				if not success then
+					--TMW:Printf(L["SAFESETUP_FAILED"], err)
+					TMW:Fire("TMW_SAFESETUP_COMPLETE")
+					TMW:Error(err)
+				end
+			end
+			
+			TMW:UnregisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
+			TMW:UnregisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+		end
+	end
+
+	function TMW:UpdateViaCoroutine()
+		if NumCoroutinesQueued == 0 then
+			--TMW:Print(L["SAFESETUP_TRIGGERED"])
+			TMW:Fire("TMW_SAFESETUP_TRIGGERED")
+			TMW:SetScript("OnUpdate", OnUpdateDuringCoroutine)
+		end
+		NumCoroutinesQueued = NumCoroutinesQueued + 1
+	end
+
+	TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+		if TMW.InitializedFully then
+			if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.Locked then
+				TMW:LockToggle()
 			end
 		end
-		
-		TMW:UnregisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
-		TMW:UnregisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
-	end
-end
-
-function TMW:UpdateViaCoroutine()
-	if NumCoroutinesQueued == 0 then
-		--TMW:Print(L["SAFESETUP_TRIGGERED"])
-		TMW:Fire("TMW_SAFESETUP_TRIGGERED")
-		TMW:SetScript("OnUpdate", OnUpdateDuringCoroutine)
-	end
-	NumCoroutinesQueued = NumCoroutinesQueued + 1
-end
-
-TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
-	if TMW.InitializedFully then
-		if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.Locked then
-			TMW:LockToggle()
-		end
-	end
-end)
-
-do
-	-- Auto-loads options if AllowCombatConfig is enabled.
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-		if TMW.db.global.AllowCombatConfig then
-			TMW:UnregisterThisCallback()
-			TMW.ALLOW_LOCKDOWN_CONFIG = true
-			TMW:LoadOptions()
-		end
 	end)
-end
+
+	do
+		-- Auto-loads options if AllowCombatConfig is enabled.
+		TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+			if TMW.db.global.AllowCombatConfig then
+				TMW:UnregisterThisCallback()
+				TMW.ALLOW_LOCKDOWN_CONFIG = true
+				TMW:LoadOptions()
+			end
+		end)
+	end
 end
 
 -- TMW:Update() sets up all groups, icons, and anything else.
@@ -3320,22 +3405,27 @@ function TMW:ScheduleUpdate(delay)
 	updateHandler = TMW:ScheduleTimer("ScheduledUpdateHandler", delay or 1)
 end
 
+function TMW:UpdateTalentTextureCache()
+	for spec = 1, MAX_TALENT_GROUPS do
+		for tier = 1, MAX_TALENT_TIERS do
+			for column = 1, NUM_TALENT_COLUMNS do
+				local id, name, tex = GetTalentInfo(tier, column, GetActiveSpecGroup())
+
+				local lower = name and strlowerCache[name]
+				
+				if lower then
+					SpellTexturesMetaIndex[lower] = tex
+				end
+			end
+		end
+	end
+end
+
 function TMW:PLAYER_SPECIALIZATION_CHANGED(...)
 	TMW:ScheduleUpdate(.2)
 	--TMW:Update()
-	
-	if not TMW.AddedTalentsToTextures then
-		for talent = 1, MAX_NUM_TALENTS do
-			local name, tex = GetTalentInfo(talent)
-			local lower = name and strlowerCache[name]
-			
-			if lower then
-				SpellTexturesMetaIndex[lower] = tex
-			end
-		end
-		
-		TMW.AddedTalentsToTextures = 1
-	end
+
+	TMW:UpdateTalentTextureCache()
 end
 
 function TMW:OnProfile(event, arg2, arg3)
@@ -3564,7 +3654,7 @@ function TMW:PLAYER_ENTERING_WORLD()
 			TMW:SendCommMessage("TMWV", versionCommString, "PARTY")
 		end
 		if IsInInstance() then
-			TMW:SendCommMessage("TMWV", versionCommString, TMW.CONST.CHAT_TYPE_INSTANCE_CHAT)
+			TMW:SendCommMessage("TMWV", versionCommString, "INSTANCE_CHAT")
 		end
 	end
 end
@@ -3750,26 +3840,30 @@ end
 ---------------------------------
 
 do	-- TMW.SpellHasNoMana(spell)
-	local jab = GetSpellInfo(100780)
-	function TMW.SpellHasNoMana(spell)
-		local name, _, _, cost, _, powerType = GetSpellInfo(spell)
+	-- local jab = GetSpellInfo(100780)
+	-- function TMW.SpellHasNoMana(spell)
+	-- 	local name, _, _, cost, _, powerType = GetSpellInfo(spell)
 		
-		if name == jab then
-			-- Jab is broken and doesnt report having a cost while in tiger stance 
-			-- (and maybe other stances) (see ticket #730)
-			local _, nomana = IsUsableSpell(spell)
-			return nomana
-		elseif powerType then
-			local power = UnitPower("player", powerType)
-			if power < cost then
-				return 1
-			end
-		end
+	-- 	if name == jab then
+	-- 		-- Jab is broken and doesnt report having a cost while in tiger stance 
+	-- 		-- (and maybe other stances) (see ticket #730)
+	-- 		local _, nomana = IsUsableSpell(spell)
+	-- 		return nomana
+	-- 	elseif powerType then
+	-- 		local power = UnitPower("player", powerType)
+	-- 		if power < cost then
+	-- 			return 1
+	-- 		end
+	-- 	end
+	-- end
+
+	-- TODO: in warlords, you can't determine spell costs anymore. Thanks, blizzard!
+
+	function TMW.SpellHasNoMana(spell)
+		local _, nomana = IsUsableSpell(spell)
+		return nomana
 	end
 end
-
--- Override for easy backwards/forwards compatibility
-TMW.UnitAura = _G.UnitAura
 
 
 
@@ -3843,15 +3937,10 @@ function TMW:SplitNames(input)
 	return tbl
 end
 
-function TMW:IsStringInSemicolonList(list, strtofind)
-	strtofind = tostring(strtofind)
+TMW.SplitNamesCached = TMW.SplitNames
+TMW:MakeSingleArgFunctionCached(TMW, "SplitNamesCached")
 
-	for i, str in TMW:Vararg(strsplit(";", list)) do
-		if strtofind == str then
-			return true
-		end
-	end
-end
+
 
 function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	if abs(seconds) == math.huge then
@@ -3893,302 +3982,8 @@ end
 
 
 
----------------------------------
--- Spell & Texture Helpers
----------------------------------
-
-local loweredbackup = {}
-function TMW:LowerNames(str)
-	-- Converts a string, or all values of a table, to lowercase. Numbers are kept as numbers.
-	
-	if type(str) == "table" then -- Handle a table with recursion
-		for k, v in pairs(str) do
-			str[k] = TMW:LowerNames(v)
-		end
-		return str
-	end
-
-	local str_lower = strlowerCache[str]
-	-- Dispel types retain their capitalization. Restore it here.
-	for ds in pairs(TMW.DS) do
-		if strlowerCache[ds] == str_lower then
-			return ds
-		end
-	end
-
-	if type(str_lower) == "string" then
-		if loweredbackup[str_lower] then
-			-- Dont replace names that are proper case with names that arent.
-			-- Generally, assume that strings with more capitals after non-letters are more proper than ones with less
-			local _, oldcount = gsub(loweredbackup[str_lower], "[^%a]%u", "%1")
-			local _, newcount = gsub(str, "[^%a]%u", "%1")
-
-			-- Check the first letter of each string for a capital
-			if strfind(loweredbackup[str_lower], "^%u") then
-				oldcount = oldcount + 1
-			end
-			if strfind(str, "^%u") then
-				newcount = newcount + 1
-			end
-
-			-- The new string has more than the old, so use it instead
-			if newcount > oldcount then
-				loweredbackup[str_lower] = str
-			end
-		else
-			-- There wasn't a string before, so set the base
-			loweredbackup[str_lower] = str
-		end
-	end
-
-	return str_lower
-end
-
-function TMW:RestoreCase(str)
-	if type(str) == "number" then
-		return str
-	elseif loweredbackup[str] then
-		return loweredbackup[str], str
-	else
-		for original, lowered in pairs(strlowerCache) do
-			if lowered == str then
-				return original, str
-			end
-		end
-		return str
-	end
-end
-
-function TMW:EquivToTable(name)
-	-- This function checks to see if a string is a valid equivalency.
-	-- If it is, all the spells that it represents will be put into an array and returned.
-	-- If it isn't, nil will be returned.
-
-	-- Everything in this function is handled as lowercase to prevent issues with user input capitalization.
-	-- DONT use TMW:LowerNames() here, because the input is not the output
-	name = strlowerCache[name]
 
 
-	-- See if the string being checked has a duration attached to it
-	-- (It really shouldn't because there is currently no point in doing so,
-	-- But a user did try this and made a bug report, so I fixed it anyway
-	local eqname, duration = strmatch(name, "(.-):([%d:%s%.]*)$") 
-
-	-- If there was a duration, then replace the old name with the actual name without the duration attached
-	name = eqname or name 
-
-	local names
-
-	-- Iterate over all of TMW.BE's sub-categories ('buffs', 'debuffs', 'casts', etc)
-	for k, v in pairs(TMW.BE) do
-		-- Iterate over each equivalency in the category
-		for equiv, str in pairs(v) do
-			if strlowerCache[equiv] == name then
-				-- We found a matching equivalency, so stop searching.
-				names = str
-				break
-			end
-		end
-		if names then break end
-	end
-
-	-- If we didnt find an equivalency string then get out
-	if not names then return end
-
-	-- Split the string into a table of spells.
-	local tbl = { strsplit(";", names) }
-
-	-- For each spell in the equivalency:
-	for a, b in pairs(tbl) do
-		-- Take off trailing spaces
-		local new = strtrim(b) 
-
-		-- Make sure it is a number if it can be
-		new = tonumber(new) or new 
-
-		-- Tack on the duration that should be applied to all spells if there was a duration
-		if duration then 
-			new = new .. ":" .. duration
-		end
-
-		-- Done. Stick the new value in the return table.
-		tbl[a] = new
-	end
-
-	return tbl
-end
-TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
-
-function TMW:GetSpellNames_static(doLower, setting, keepDurations)
-
-	local buffNames = TMW:SplitNames(setting) -- Get a table of everything
-	
-	if doLower then
-		buffNames = TMW:LowerNames(buffNames)
-	end
-
-	--INSERT EQUIVALENCIES
-	 --start at the end of the table, that way we dont have to worry
-	 --about increasing the key of buffNames to work with every time we insert something
-	local k = #buffNames
-	while k > 0 do
-		local eqtt = TMW:EquivToTable(buffNames[k]) -- Get the table form of the equivalency string
-		if eqtt then
-			local n = k	--point to start inserting the values at
-			tremove(buffNames, k)	--take the actual equavalancey itself out, because it isnt an actual spell name or anything
-			for z, x in ipairs(eqtt) do
-				tinsert(buffNames, n, x)	--put the names into the main table
-				n = n + 1	--increment the point of insertion
-			end
-		else
-			k = k - 1	--there is no equivalency to insert, so move backwards one key towards zero to the next key
-		end
-	end
-
-	-- REMOVE DUPLICATES
-	TMW.tRemoveDuplicates(buffNames)
-
-	-- REMOVE SPELL DURATIONS (FOR UNIT COOLDOWNS/ICDs)
-	if not keepDurations then
-		for k, buffName in pairs(buffNames) do
-			if strfind(buffName, ":[%d:%s%.]*$") then
-				local new = strmatch(buffName, "(.-):[%d:%s%.]*$")
-				buffNames[k] = tonumber(new) or new -- Turn it into a number if it is one
-			end
-		end
-	end
-
-	-- Remove invalid SpellIDs and entries that the user has chosed to omit by using a "-" prefix.
-	local k = #buffNames
-	while k > 0 do
-		local v = buffNames[k]
-		if type(v) == "number" and v >= 2^31 then
-			-- Invalid spellID. Remove it to prevent integer overflow errors.
-			tremove(buffNames, k)
-			TMW.Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
-		elseif type(v) == "string" and v:match("^%-") then
-			tremove(buffNames, k)
-
-			local thingToRemove = v:match("^%-%s*(.*)"):lower()
-
-			local i = 1
-			local removed
-			while buffNames[i] do
-				local name = buffNames[i]
-				
-				if type(name) == "string" then
-					name = name:lower()
-				end
-
-				if thingToRemove == name then
-					tremove(buffNames, i)
-					removed = true
-				else
-					i = i + 1
-				end
-			end
-
-			if not removed then
-				TMW:Printf(L["SPELL_EQUIV_REMOVE_FAILED"], thingToRemove, table.concat(buffNames, "; "))
-			end
-		else
-			-- The entry was valid, so move backwards towards the beginning.
-			k = k - 1
-		end
-	end
-
-	return buffNames
-end
-TMW:MakeFunctionCached(TMW, "GetSpellNames_static")
-
-function TMW:GetSpellNames(setting, doLower, firstOnly, toname, hash, allowRenaming)
-	local buffNames = TMW:GetSpellNames_static(doLower, setting, false)
-
-	-- buffNames MUST BE COPIED because the return from GetSpellNames_static is cached.
-	buffNames = CopyTable(buffNames)
-
-	if hash then
-		local hash = {}
-		for k, v in ipairs(buffNames) do
-			if toname and (allowRenaming or tonumber(v)) then
-				v = GetSpellInfo(v or "") or v -- Turn the value into a name if needed
-			end
-
-			v = TMW:LowerNames(v)
-
-			-- Put the final value in the table as well (may or may not be the same as the original value).
-			-- Value should be NameArrray's key, for use with the duration table.
-			hash[v] = k	
-		end
-		return hash
-	end
-
-	if toname then
-		if firstOnly then
-			-- Turn the first value into a name and return it
-			local ret = buffNames[1] or ""
-			if (allowRenaming or tonumber(ret)) then
-				ret = GetSpellInfo(ret) or ret 
-			end
-
-			if doLower then
-				ret = TMW:LowerNames(ret)
-			end
-
-			return ret
-		else
-			-- Convert everything to a name
-			for k, v in ipairs(buffNames) do
-				if (allowRenaming or tonumber(v)) then
-					buffNames[k] = GetSpellInfo(v or "") or v 
-				end
-			end
-
-			if doLower
-				then TMW:LowerNames(buffNames)
-			end
-
-			return buffNames
-		end
-	end
-
-	if firstOnly then
-		local ret = buffNames[1] or ""
-		return ret
-	end
-
-	return buffNames
-end
-do    -- TMW:GetSpellNames() cache management
-	-- We need to wipe the cache on every TMW_GLOBAL_UPDATE because of issues with
-	-- spells that replace other spells in different specs, like Corruption/Immolate.
-	-- TMW_GLOBAL_UPDATE might fire a little too often for this, but it is a surefire way to prevent issues that should
-	-- hold up through out all future game updates because TMW_GLOBAL_UPDATE should always react to any changes in spec/talents/etc
-	
-	local _, cache = TMW:MakeFunctionCached(TMW, "GetSpellNames")
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-		wipe(cache)
-	end)
-end
-
-function TMW:GetSpellDurations(setting)
-	local NameArray = TMW:GetSpellNames_static(false, setting, true)
-
-	local DurationArray = CopyTable(NameArray)
-
-	-- EXTRACT SPELL DURATIONS
-	for k, buffName in pairs(NameArray) do
-		DurationArray[k] = strmatch(buffName, ".-:([%d:%s%.]*)$")
-		if not DurationArray[k] then
-			DurationArray[k] = 0
-		else
-			DurationArray[k] = tonumber( TMW.toSeconds(DurationArray[k]:trim(" :;.")) )
-		end
-	end
-
-	return DurationArray
-end
-TMW:MakeSingleArgFunctionCached(TMW, "GetSpellDurations")
 
 
 --TMW.TestTex = TMW:CreateTexture()

@@ -50,15 +50,14 @@ function Module:Entry_AddToList_1(f, index)
 			f.tooltiptitle = unitData.tooltipTitle or unitData.text
 			
 			if unitData.range then
-				f.tooltiptext = "|cFFFF0000#|r = 1-" .. unitData.range
-				
 				unit = unit .. " 1-" .. unitData.range
-			elseif unitData.desc then
-				f.tooltiptext = unitData.desc
 			end
+
+			f.tooltiptext = unitData.desc
 			
 			f.Name:SetText(unit)
 			f.insert = unit
+			f.overrideInsertName = L["SUG_INSERTTUNITID"]
 		else			
 			f.Name:SetText("<ERROR>")
 			f.insert = ""
@@ -103,7 +102,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	end
 end
 
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	self:UpdateGroupedPlayersMap()
 	
@@ -192,10 +191,8 @@ Module.table = {
 	{ value = "unittarget",	text = L["UNITCONDITIONS_STATICUNIT_TARGET"],	desc = L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"]	},
 }
 
-function Module:Table_GetSorter()
-	return nil
-end
+-- No sorting. Override the inherited function.
+Module.Table_GetSorter = TMW.NULLFUNC
 
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
-	-- No specials
-end
+-- No specials. Override the inherited function.
+Module.Table_GetSpecialSuggestions_1 = TMW.NULLFUNC

@@ -17,95 +17,96 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local pairs, format, ipairs, rawget, wipe, _G, bit = 
+	  pairs, format, ipairs, rawget, wipe, _G, bit
 
--- GLOBALS: TMW.DD.CloseDropDownMenus
 -- GLOBALS: TellMeWhen_CLEUOptions
+
 
 local Type = TMW.Types.cleu
 Type.CONFIG = {}
 local CONFIG = Type.CONFIG
 
-TMW.HELP:NewCode("CLEU_WHOLECATEGORYEXCLUDED", 2, false)
-
 
 CONFIG.Events = {
-	"",
-"SPACE",
+		"",
+	"SPACE",
 
-"CAT_SWING",
-	"SWING_DAMAGE", -- normal
-	"SWING_MISSED", -- normal
-	"SPELL_EXTRA_ATTACKS", -- normal
-"SPACE",
-	"RANGE_DAMAGE", -- normal
-	"RANGE_MISSED", -- normal
-
-
-"CAT_SPELL",
-	"SPELL_DAMAGE", -- normal
-	"SPELL_DAMAGE_CRIT", -- normal
-	"SPELL_DAMAGE_NONCRIT", -- normal
-	"SPELL_MISSED", -- normal
-	"SPELL_REFLECT", -- normal
-"SPACE",
-	"SPELL_CREATE", -- normal
-	"SPELL_SUMMON", -- normal
-"SPACE",
-	"SPELL_HEAL", -- normal
-	"SPELL_RESURRECT", -- normal
-"SPACE",
-	"SPELL_ENERGIZE", -- normal
-	"SPELL_DRAIN", -- normal
-	"SPELL_LEECH", -- normal
-"SPACE",
-	"DAMAGE_SHIELD", -- normal
-	"DAMAGE_SHIELD_MISSED", -- normal
+	"CAT_SWING",
+		"SWING_DAMAGE", -- normal
+		"SWING_MISSED", -- normal
+		"SPELL_EXTRA_ATTACKS", -- normal
+	"SPACE",
+		"RANGE_DAMAGE", -- normal
+		"RANGE_MISSED", -- normal
 
 
-"CAT_AURA",
-	"SPELL_DISPEL",-- extraSpellID/name
-	"SPELL_DISPEL_FAILED",-- extraSpellID/name
-	"SPELL_STOLEN",-- extraSpellID/name
-"SPACE",
-	"SPELL_AURA_APPLIED", -- normal
-	"SPELL_AURA_APPLIED_DOSE",
-	"SPELL_AURA_REFRESH", -- normal
-	"SPELL_AURA_REMOVED", -- normal
-	"SPELL_AURA_REMOVED_DOSE",
-	"SPELL_AURA_BROKEN",
-
-	"SPELL_AURA_BROKEN_SPELL",-- extraSpellID/name
-"SPACE",
-	"SPELL_PERIODIC_DAMAGE",
-	"SPELL_PERIODIC_DRAIN",
-	"SPELL_PERIODIC_ENERGIZE",
-	"SPELL_PERIODIC_LEECH",
-	"SPELL_PERIODIC_HEAL",
-	"SPELL_PERIODIC_MISSED",
-
-
-"CAT_CAST",
-	"SPELL_CAST_FAILED",
-	"SPELL_CAST_START",
-	"SPELL_CAST_SUCCESS",
-"SPACE",
-	"SPELL_INTERRUPT",-- extraSpellID/name
-	"SPELL_INTERRUPT_SPELL",-- extraSpellID/name
+	"CAT_SPELL",
+		"SPELL_DAMAGE", -- normal
+		"SPELL_DAMAGE_CRIT", -- normal
+		"SPELL_DAMAGE_NONCRIT", -- normal
+		"SPELL_MISSED", -- normal
+		"SPELL_REFLECT", -- normal
+	"SPACE",
+		"SPELL_CREATE", -- normal
+		"SPELL_SUMMON", -- normal
+	"SPACE",
+		"SPELL_HEAL", -- normal
+		"SPELL_RESURRECT", -- normal
+	"SPACE",
+		"SPELL_ENERGIZE", -- normal
+		"SPELL_DRAIN", -- normal
+		"SPELL_LEECH", -- normal
+	"SPACE",
+		"DAMAGE_SHIELD", -- normal
+		"DAMAGE_SHIELD_MISSED", -- normal
 
 
-"CAT_MISC",
-	"DAMAGE_SPLIT",
-"SPACE",
-	"ENCHANT_APPLIED",
-	"ENCHANT_REMOVED",
-"SPACE",
-	"ENVIRONMENTAL_DAMAGE",
-"SPACE",
-	"UNIT_DIED",
-	"UNIT_DESTROYED",
-	"SPELL_INSTAKILL",
-	"PARTY_KILL",
+	"CAT_AURA",
+		"SPELL_DISPEL",-- extraSpellID/name
+		"SPELL_DISPEL_FAILED",-- extraSpellID/name
+		"SPELL_STOLEN",-- extraSpellID/name
+	"SPACE",
+		"SPELL_AURA_APPLIED", -- normal
+		"SPELL_AURA_APPLIED_DOSE",
+		"SPELL_AURA_REFRESH", -- normal
+		"SPELL_AURA_REMOVED", -- normal
+		"SPELL_AURA_REMOVED_DOSE",
+		"SPELL_AURA_BROKEN",
+
+		"SPELL_AURA_BROKEN_SPELL",-- extraSpellID/name
+	"SPACE",
+		"SPELL_PERIODIC_DAMAGE",
+		"SPELL_PERIODIC_DRAIN",
+		"SPELL_PERIODIC_ENERGIZE",
+		"SPELL_PERIODIC_LEECH",
+		"SPELL_PERIODIC_HEAL",
+		"SPELL_PERIODIC_MISSED",
+
+
+	"CAT_CAST",
+		"SPELL_CAST_FAILED",
+		"SPELL_CAST_START",
+		"SPELL_CAST_SUCCESS",
+	"SPACE",
+		"SPELL_INTERRUPT",-- extraSpellID/name
+		"SPELL_INTERRUPT_SPELL",-- extraSpellID/name
+
+
+	"CAT_MISC",
+		"DAMAGE_SPLIT",
+	"SPACE",
+		"ENCHANT_APPLIED",
+		"ENCHANT_REMOVED",
+	"SPACE",
+		"ENVIRONMENTAL_DAMAGE",
+	"SPACE",
+		"UNIT_DIED",
+		"UNIT_DESTROYED",
+		"SPELL_INSTAKILL",
+		"PARTY_KILL",
 }
+
 CONFIG.Flags = {
 					-- "COMBATLOG_OBJECT_REACTION_MASK",
     "COMBATLOG_OBJECT_REACTION_FRIENDLY",
@@ -136,6 +137,7 @@ CONFIG.Flags = {
     "COMBATLOG_OBJECT_MAINASSIST",
     "COMBATLOG_OBJECT_NONE",
 }
+
 CONFIG.BetterMasks = {
 	-- some of the default masks contain bits that arent used by any flags (read: they suck), so we will make our own
 	COMBATLOG_OBJECT_REACTION_MASK = bit.bor(
@@ -162,6 +164,7 @@ CONFIG.BetterMasks = {
 	),
 }
 
+
 function CONFIG:LoadConfig()
 	if TellMeWhen_CLEUOptions then
 		CONFIG:Menus_SetTexts()
@@ -171,29 +174,34 @@ function CONFIG:LoadConfig()
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", CONFIG.LoadConfig, CONFIG)
 
+
+--- Warn the user if they have disabled all flags in a single category.
 function CONFIG:CheckMasks()
 	TMW.HELP:Hide("CLEU_WHOLECATEGORYEXCLUDED")
 
+	-- Check the flags of the icon to make sure that the user hasn't excluded every flag in a given category.
+	-- If they have, then they have effectively disabled the icon. Tell the user if they have done this.
 	for _, key in TMW:Vararg("SourceFlags", "DestFlags") do
-		if key then
-			for maskName, mask in pairs(CONFIG.BetterMasks) do
-				if bit.band(TMW.CI.ics[key], mask) == 0 then
-					local category = L["CLEU_" .. maskName]
-					TMW.HELP:Show{
-						code = "CLEU_WHOLECATEGORYEXCLUDED",
-						icon = TMW.CI.icon,
-						relativeTo = TellMeWhen_CLEUOptions[key],
-						x = 23,
-						y = 3,
-						text = format(L["CLEU_WHOLECATEGORYEXCLUDED"], category)
-					}
-					return
-				end
+		for maskName, mask in pairs(CONFIG.BetterMasks) do
+			if bit.band(TMW.CI.ics[key], mask) == 0 then
+				local category = L["CLEU_" .. maskName]
+				TMW.HELP:Show{
+					code = "CLEU_WHOLECATEGORYEXCLUDED",
+					codeOrder = 2,
+					icon = TMW.CI.icon,
+					relativeTo = TellMeWhen_CLEUOptions[key],
+					x = 23,
+					y = 3,
+					text = format(L["CLEU_WHOLECATEGORYEXCLUDED"], category)
+				}
+				return
 			end
 		end
 	end
 end
 
+--- Helper function to count how many flags that are disabled in a flag set.
+-- This information gets displayed on the flag dropdowns.
 function CONFIG:CountDisabledBits(bitfield)
 	local n = 0
 	for _ = 1, 32 do
@@ -351,5 +359,6 @@ function Module:Entry_Colorize_3(f, id)
 		f.Background:SetVertexColor(1, .96, .41, 1) -- rogue yellow
 	end
 end
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
-end
+
+-- No specials. Override the inherited function.
+Module.Table_GetSpecialSuggestions_1 = TMW.NULLFUNC

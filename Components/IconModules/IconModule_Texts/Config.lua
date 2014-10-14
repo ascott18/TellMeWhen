@@ -37,6 +37,8 @@ if not TEXT then return end
 
 LibStub("AceHook-3.0"):Embed(TEXT)
 
+
+
 local DEFAULT_LAYOUT_SETTINGS = TMW.db.global.TextLayouts["\000"]
 TMW.db.global.TextLayouts["\000"] = nil
 
@@ -44,7 +46,11 @@ local DEFAULT_DISPLAY_SETTINGS = DEFAULT_LAYOUT_SETTINGS[1]
 DEFAULT_LAYOUT_SETTINGS[1] = nil
 
 
+
+
 TEXT.usedStrings = {}
+
+
 
 function TEXT:GetTextLayoutSettings(GUID)
 	return GUID and rawget(TMW.db.global.TextLayouts, GUID) or nil
@@ -90,6 +96,52 @@ function TEXT:GetLayoutName(settings, GUID, noDefaultWrapper)
 end
 
 
+
+
+local function layoutSort(GUID_a, GUID_b)
+	local layoutSettings_a, layoutSettings_b = TEXT:GetTextLayoutSettings(GUID_a), TEXT:GetTextLayoutSettings(GUID_b)
+	local NoEdit_a, NoEdit_b = layoutSettings_a.NoEdit, layoutSettings_b.NoEdit
+	
+	if NoEdit_a == NoEdit_b then
+		-- Simple string comparison for alphabetical sorting
+		return TEXT:GetLayoutName(layoutSettings_a, GUID_a) < TEXT:GetLayoutName(layoutSettings_b, GUID_b)
+	else
+		return NoEdit_a
+	end
+end
+
+function TEXT:Layout_DropDown()
+	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, layoutSort) do
+		if GUID ~= "" then
+			local info = TMW.DD:CreateInfo()
+			
+			info.text = TEXT:GetLayoutName(settings, GUID)
+			info.value = GUID
+			info.checked = GUID == TEXT:GetTextLayoutForIcon(CI.icon)
+			
+			local displays = ""
+			for i, fontStringSettings in TMW:InNLengthTable(settings) do
+				displays = displays .. "\r\n" .. TEXT:GetStringName(fontStringSettings, i)
+			end
+			info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
+			info.tooltipText = L["TEXTLAYOUTS_LAYOUTDISPLAYS"]:format(displays)
+			
+			info.func = TEXT.Layout_DropDown_OnClick
+			
+			TMW.DD:AddButton(info)
+		end
+	end
+end
+
+function TEXT:Layout_DropDown_OnClick()
+	CI.icon:GetSettingsPerView().TextLayout = self.value
+	TEXT:LoadConfig()
+	IE:ScheduleIconSetup()
+end
+
+
+
+
 function TEXT:CacheUsedStrings()
 	for text in pairs(TEXT.usedStrings) do
 		TEXT.usedStrings[text] = 0 -- set to 0, not nil, and dont wipe the table either
@@ -121,53 +173,10 @@ function TEXT:CacheUsedStrings()
 	TEXT.usedStrings[""] = nil
 end
 
-
-function TEXT.Layout_DropDown_Sort(GUID_a, GUID_b)
-	local layoutSettings_a, layoutSettings_b = TEXT:GetTextLayoutSettings(GUID_a), TEXT:GetTextLayoutSettings(GUID_b)
-	local NoEdit_a, NoEdit_b = layoutSettings_a.NoEdit, layoutSettings_b.NoEdit
-	
-	if NoEdit_a == NoEdit_b then
-		-- Simple string comparison for alphabetical sorting
-		return TEXT:GetLayoutName(layoutSettings_a, GUID_a) < TEXT:GetLayoutName(layoutSettings_b, GUID_b)
-	else
-		return NoEdit_a
-	end
-end
-
-function TEXT:Layout_DropDown()
-	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, TEXT.Layout_DropDown_Sort) do
-		if GUID ~= "" then
-			local info = TMW.DD:CreateInfo()
-			
-			info.text = TEXT:GetLayoutName(settings, GUID)
-			info.value = GUID
-			info.checked = GUID == TEXT:GetTextLayoutForIcon(CI.icon)
-			
-			local displays = ""
-			for i, fontStringSettings in TMW:InNLengthTable(settings) do
-				displays = displays .. "\r\n" .. TEXT:GetStringName(fontStringSettings, i)
-			end
-			info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
-			info.tooltipText = L["TEXTLAYOUTS_LAYOUTDISPLAYS"]:format(displays)
-			
-			info.func = TEXT.Layout_DropDown_OnClick
-			
-			TMW.DD:AddButton(info)
-		end
-	end
-end
-
-function TEXT:Layout_DropDown_OnClick()
-	CI.icon:GetSettingsPerView().TextLayout = self.value
-	TEXT:LoadConfig()
-	IE:ScheduleIconSetup()
-end
-
-
 function TEXT:CopyString_DropDown()
 	TEXT:CacheUsedStrings()
 	
-	for text, num in TMW:OrderedPairs(TEXT.usedStrings, "values", true) do
+	for text, num in TMW:OrderedPairs(TEXT.usedStrings, nil, true, true) do
 		local info = TMW.DD:CreateInfo()
 		
 		if #text > 50 then
@@ -197,21 +206,8 @@ function TEXT:CopyString_DropDown_OnClick(frame)
 	IE:ScheduleIconSetup()
 end
 
-function TEXT:TestDogTagFunc(success, ...)
-	if success then
-		local arg1, arg2 = ...
-		local numArgs = select("#", ...)
-		if numArgs == 2 and arg2 == nil and type(arg1) == "string" then
-			return arg1
-		end
-	end
-end
 
-if DogTag and DogTag.tagError then
-	hooksecurefunc(DogTag, "tagError", function(_, _, text)
-		TEXT.EvaluateError = text
-	end)
-end
+
 
 local function ttText(self)
 	GameTooltip:AddLine(L["TEXTLAYOUTS_STRING_SETDEFAULT_DESC"]:format(""), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
@@ -227,6 +223,8 @@ function TEXT:LoadConfig()
 	local Texts = CI.icon:GetSettingsPerView().Texts
 	local GUID, layoutSettings, isFallback = TEXT:GetTextLayoutForIcon(CI.icon)
 	
+	-- Run this every time that we load the config so that it will cache
+	-- strings that might not be used anymore (acts as sort of a backup mechanism)
 	TEXT:CacheUsedStrings()
 	
 	local layoutName
@@ -238,61 +236,74 @@ function TEXT:LoadConfig()
 			local text = TEXT:GetTextFromSettingsAndLayout(Texts, layoutSettings, i)
 			
 			if not frame then
-				frame = CreateFrame("Frame", TellMeWhen_TextDisplayOptions.FontStrings:GetName().."String"..i, TellMeWhen_TextDisplayOptions.FontStrings, "TellMeWhen_TextDisplayGroup", i)
+				frame = CreateFrame("Frame", "$parentString"..i, TellMeWhen_TextDisplayOptions, "TellMeWhen_TextDisplayGroup", i)
 				TEXT[i] = frame
-				frame:SetPoint("TOP", previousFrame, "BOTTOM")
+
+				if i == 1 then
+					frame:SetPoint("TOPLEFT", TellMeWhen_TextDisplayOptions.Layout, "BOTTOMLEFT", 0, 16)
+				else
+					frame:SetPoint("TOP", previousFrame, "BOTTOM")
+				end
+
+				-- Setup the tooltip for the reset button.
+				TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", ttText, nil, 1)
 			end
 			
 			frame:Show()
 
 			frame.stringSettings = stringSettings
 
+			-- display_N_stringName looks something like "Display 1: Binding/Label"
 			local display_N_stringName = L["TEXTLAYOUTS_fSTRING2"]:format(i, TEXT:GetStringName(stringSettings, i, true))
-			TMW:TT(frame.EditBox, display_N_stringName, "TEXTLAYOUTS_SETTEXT_DESC", 1)
+
+			-- Set it as the tooltip title and the label text on the editbox.
+			TMW:TT(frame.EditBox, display_N_stringName, "TEXTLAYOUTS_SETTEXT_DESC", 1, nil)
 			frame.EditBox.label = display_N_stringName
 
 			frame.EditBox:SetText(text)
-			frame.EditBox:GetScript("OnTextChanged")(frame.EditBox)
 			
+			-- DefaultText is the text that the string will be reverted to if the user pressed the rest button.
 			local DefaultText = stringSettings.DefaultText
 			if DefaultText == "" then
 				DefaultText = L["TEXTLAYOUTS_BLANK"]
 			else
-				DefaultText = ("%q"):format(DogTag:ColorizeCode(DefaultText))
+				DefaultText = DogTag:ColorizeCode(DefaultText)
 			end
 			frame.Default.DefaultText = DefaultText
-			TMW:TT(frame.Default, "TEXTLAYOUTS_STRING_SETDEFAULT", ttText, nil, 1)
 			
-			-- Ttest the string and its tags & syntax
+			-- Test the string and its tags & syntax
 			frame.Error:SetText(TMW:TestDogTagString(CI.icon, text))
 			
 			previousFrame = frame
 			
-			TEXT:SetTextDisplayContainerHeight(frame)
+			-- Update the height of the text display so that there is room for errors to be displayed.
+			TEXT:ResizeTextDisplayFrame(frame)
 		end
 		
 		for i = max(layoutSettings.n + 1, 1), #TEXT do
 			TEXT[i]:Hide()
 		end
 		
-		TEXT:ResizeParentFrame()
-		
 		layoutName = TEXT:GetLayoutName(layoutSettings, GUID, true)
 	else
 		layoutName = "UNKNOWN LAYOUT: " .. (GUID or "<?>")
 	end
 
-	if TEXT[1] then
-		TEXT[1]:SetPoint("TOP", TellMeWhen_TextDisplayOptions.FontStrings)
-	end
-	
+	-- Set the text of the dropdown to pick the text layout.
 	TellMeWhen_TextDisplayOptions.Layout.PickLayout:SetText("|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
 	
+	-- Set the error text for the entire layout (show if we are using a fallback layout)
 	TellMeWhen_TextDisplayOptions.Layout.Error:SetText(isFallback and L["TEXTLAYOUTS_ERROR_FALLBACK"] or nil)
+
+	-- After we have updated the height of all the child frames, update the height of the parent frame.
+	TEXT:ResizeParentFrame()
 	
+	-- Set the tooltip of the button that opens the layout settings for the currently used text layout
 	TMW:TT(TellMeWhen_TextDisplayOptions.Layout.LayoutSettings, "TEXTLAYOUTS_LAYOUTSETTINGS", L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"]:format(layoutName), nil, 1)
 end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", TEXT, "LoadConfig")
+
+
 
 function TEXT:ResizeParentFrame()
 	local layoutHeight = 45 + TellMeWhen_TextDisplayOptions.Layout.Error:GetHeight()
@@ -307,11 +318,10 @@ function TEXT:ResizeParentFrame()
 		end
 	end
 	
-	--TellMeWhen_TextDisplayOptions:SetHeight(height)
-	TMW:AnimateHeightChange(TellMeWhen_TextDisplayOptions, height, 0.1)
+	TellMeWhen_TextDisplayOptions:SetHeight(height)
 end
 
-function TEXT:SetTextDisplayContainerHeight(frame)
+function TEXT:ResizeTextDisplayFrame(frame)
 	local height = 1
 	
 	height = height + frame.EditBox:GetHeight()
@@ -324,7 +334,12 @@ function TEXT:SetTextDisplayContainerHeight(frame)
 	TEXT:ResizeParentFrame()
 end
 
-function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
+
+
+-- Explicitly sets the text layouts used by an icon on that icon's settings
+-- in case that icon is only inheriting from its group.
+-- This makes sure that the layout is the same in the destination as it was in the source.
+TMW:RegisterCallback("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", function(event, ics, gs)
 	if not ics.SettingsPerView then
 		return
 	end
@@ -339,12 +354,20 @@ function TEXT:TMW_ICON_PREPARE_SETTINGS_FOR_COPY(event, ics, gs)
 		end
 		settingsPerView.TextLayout = GUID
 	end
-end
-TMW:RegisterCallback("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", TEXT)
+end)
 
 
+
+
+
+
+-- -------------------------
+-- ACE3 CONFIG TEMPLATES
+-- -------------------------
 
 local function deepRecScanTableForLayout(profile, GUID, table, ...)
+	-- The vararg here acts like a stack, containing the key of
+	-- everything we've scanned to get to this depth.
 	local n = 0
 
 	for k, v in pairs(table) do
@@ -371,8 +394,10 @@ local function deepRecScanTableForLayout(profile, GUID, table, ...)
 
 	return n
 end
-
 function TEXT:GetNumTimesUsed(layoutGUID)
+	-- This function returns a string that lists all of the profiles that use the given text layout
+	-- along with how many times it is used in each profile.
+
 	TEXT.TextLayout_NumTimesUsedTemp = wipe(TEXT.TextLayout_NumTimesUsedTemp or {})
 	
 	local result = ""
@@ -394,24 +419,12 @@ function TEXT:GetNumTimesUsed(layoutGUID)
 	return result:trim("\r\n")
 end
 
+
 function TEXT:Display_IsDefault(displaySettings)
 	return not not TMW:DeepCompare(DEFAULT_DISPLAY_SETTINGS, displaySettings)
 end
 
-function TEXT:Layout_IsDefault(layoutSettings)
-	-- Remove the GUID from the layoutSettings, because otherwise it will always be non-default.
-	local GUID = layoutSettings.GUID
-	layoutSettings.GUID = ""
 	
-	-- safecall to avoid any disasters because layoutSettings is modified and is awaiting the restoration of its original state.
-	local isDefault = TMW.safecall(TMW.DeepCompare, TMW, DEFAULT_LAYOUT_SETTINGS, layoutSettings)
-	
-	-- Put the GUID back in.
-	layoutSettings.GUID = GUID
-	
-	return isDefault
-end
-
 TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 	name = L["TEXTLAYOUTS_SETGROUPLAYOUT"],
 	desc = L["TEXTLAYOUTS_SETGROUPLAYOUT_DESC"],
@@ -794,8 +807,8 @@ local anchorSet = {
 			desc = L["UIPANEL_FONT_XOFFS_DESC"],
 			type = "range",
 			order = 20,
-			min = -30,
-			max = 30,
+			softMin = -30,
+			softMax = 30,
 			step = 1,
 			bigStep = 1,
 		},
@@ -804,8 +817,8 @@ local anchorSet = {
 			desc = L["UIPANEL_FONT_YOFFS_DESC"],
 			type = "range",
 			order = 21,
-			min = -30,
-			max = 30,
+			softMin = -30,
+			softMax = 30,
 			step = 1,
 			bigStep = 1,
 		},
@@ -837,7 +850,7 @@ local anchorSet = {
 		},
 	},
 }
-		
+
 local textFontStringTemplate
 textFontStringTemplate = {
 	type = "group",
@@ -1092,7 +1105,7 @@ textFontStringTemplate = {
 							type = "range",
 							order = 1,
 							min = 0,
-							softMax = 60,
+							softMax = 200,
 							step = 1,
 							bigStep = 1,
 						},
@@ -1102,9 +1115,19 @@ textFontStringTemplate = {
 							type = "range",
 							order = 2,
 							min = 0,
-							softMax = 60,
+							softMax = 200,
 							step = 1,
 							bigStep = 1,
+						},
+						Rotate = {
+							name = L["UIPANEL_FONT_ROTATE"],
+							desc = L["UIPANEL_FONT_ROTATE_DESC"],
+							type = "range",
+							order = 3,
+							min = 0,
+							max = 360,
+							step = 1,
+							bigStep = 90,
 						},
 					},
 				},
@@ -1185,11 +1208,6 @@ local textlayouts_toplevel = {
 	type = "group",
 	name = L["TEXTLAYOUTS"],
 	order = 20,
---[=[	set = function(info, val)
-		TMW.db.profile[info[#info]] = val
-		TMW:Update()
-	end,
-	get = function(info) return TMW.db.profile[info[#info]] end,]=]
 
 	args = {
 		addlayout = {
@@ -1213,7 +1231,7 @@ local textlayouts_toplevel = {
 }
 
 
-
+-- Handles the implementation of all the templates that are used for text layout config.
 TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsTable)
 	OptionsTable.args.textlayouts = textlayouts_toplevel
 	
@@ -1247,13 +1265,13 @@ end)
 
 
 
+
 -- -------------------
 -- IMPORT/EXPORT
 -- -------------------
 
 local textlayout = TMW.Classes.SharableDataType:New("textlayout", 15)
 textlayout.extrasMap = {"GUID"}
-
 function textlayout:Import_ImportData(Item, GUID)
 	assert(type(GUID) == "string")
 	
@@ -1262,10 +1280,12 @@ function textlayout:Import_ImportData(Item, GUID)
 	TMW:CopyTableInPlaceWithMeta(Item.Settings, textlayout, true)
 	textlayout.GUID = GUID
 
+	-- We might have imported a default layout. Set it to be editable.
 	if textlayout.NoEdit then
 		textlayout.NoEdit = false -- must be false, not nil
 	end
 	
+	-- Calculate a new name for the layout if the name is used by another layout.
 	repeat
 		local found
 		for k, layoutSettings in pairs(TMW.db.global.TextLayouts) do
@@ -1277,6 +1297,7 @@ function textlayout:Import_ImportData(Item, GUID)
 		end
 	until not found
 	
+	-- Handle upgrades for the new layout.
 	local version = Item.Version
 	if version then
 		if version > TELLMEWHEN_VERSIONNUMBER then
@@ -1285,17 +1306,54 @@ function textlayout:Import_ImportData(Item, GUID)
 			TMW:DoUpgrade("textlayout", version, textlayout, GUID)
 		end
 	end
+
+	-- Run an update incase any icons should be using the new layout.
 	TMW:Update()
 end
-
-function textlayout:Import_CreateMenuEntry(info, Item)
+function textlayout:Import_CreateMenuEntry(info, Item, doLabel)
 	info.text = TMW.TEXT:GetLayoutName(Item.Settings, Item:GetExtra("GUID"))
+
+	if doLabel then
+		info.text = L["fTEXTLAYOUT"]:format(info.text)
+	end
 end
 
 
--- Profile's text layouts
-local SharableDataType_profile = TMW.Classes.SharableDataType.types.profile
-SharableDataType_profile:RegisterMenuBuilder(20, function(Item_profile)
+-- Build a menu for text layouts
+TMW.C.SharableDataType.types.database:RegisterMenuBuilder(17, function(Item_database)
+	local db = Item_database.Settings
+
+	if db.global.TextLayouts then
+		local isGood = false
+		for GUID, settings in pairs(db.global.TextLayouts) do
+			if GUID ~= "" and settings.GUID then
+				isGood = true
+				break
+			end
+		end
+
+		if not isGood then return end
+
+
+		local SettingsBundle = TMW.Classes.SettingsBundle:New("textlayout")
+
+		for GUID, layout in pairs(db.global.TextLayouts) do
+			local Item = TMW.Classes.SettingsItem:New("textlayout")
+
+			Item:SetParent(Item_database)
+			Item.Settings = layout
+			Item:SetExtra("GUID", GUID)
+
+			SettingsBundle:Add(Item)
+
+		end
+
+		SettingsBundle:CreateParentedMenuEntry(L["TEXTLAYOUTS"])
+	end
+end)
+
+-- Build a menu for profile text layouts (layouts that are still attached to a profile, should only be from an import string.)
+TMW.C.SharableDataType.types.profile:RegisterMenuBuilder(20, function(Item_profile)
 
 	if Item_profile.Settings.TextLayouts then
 		local isGood = false
@@ -1381,7 +1439,6 @@ end)
 
 
 textlayout.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.0+")
-
 function textlayout:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local GUID = EXPORTS[self.type]
@@ -1390,7 +1447,6 @@ function textlayout:Export_SetButtonAttributes(editbox, info)
 	info.text = text
 	info.tooltipTitle = text
 end
-
 function textlayout:Export_GetArgs(editbox)
 	-- settings, defaults, ...
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
@@ -1402,16 +1458,23 @@ function textlayout:Export_GetArgs(editbox)
 end
 
 
+
+
+
+-- Determine if the requesting editbox can import or export a text layout.
 TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
 	
 	import.textlayout_new = true
 	
 	if editbox == TMW.IE.ExportBox and CI.icon then
+		-- The main export box in the Icon Editor. Work with the current icon's layout.
 		local GUID = TEXT:GetTextLayoutForIcon(CI.icon)
 		
 		import.textlayout_overwrite = GUID
 		export.textlayout = GUID
+
 	elseif editbox.IsImportExportWidget then
+		-- A widget in the icon editor. Allow exports and import overwrites if it is on a text layout's options page.
 		local info = editbox.obj.userdata		
 		import.textlayout_overwrite = findlayout(info)
 		export.textlayout = findlayout(info)
@@ -1445,5 +1508,4 @@ local function GetTextLayouts(event, strings, type, settings)
 		end
 	end
 end
-
 TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", GetTextLayouts)

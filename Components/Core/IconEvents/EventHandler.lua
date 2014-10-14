@@ -378,7 +378,7 @@ end
 TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 	if class.className == "IconType" then
 		class:RegisterIconEvent(1000, "WCSP", {
-			text = L["SOUND_EVENT_WHILECONDITION"] .. " - |cff00ff00" .. NEW .. "|r!",
+			text = L["SOUND_EVENT_WHILECONDITION"],
 			desc = L["SOUND_EVENT_WHILECONDITION_DESC"],
 			settings = {
 				SimplyShown = true,

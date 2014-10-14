@@ -24,10 +24,27 @@
 	615,	--Essence of Corrupted Deathwing
 	676,	--Pandaren Archaeology Fragment
 	677,	--Mogu Archaeology Fragment
-	692,	--Conquest Random BG Meta
 	697,	--Elder Charm of Good Fortune
-	698,	--Zen Jewelcrafter\'s Token
 	738,	--Lesser Charm of Good Fortune
 	752,	--Mogu Rune of Fate
 	754,	--Mantid Archaeology Fragment
+	776,	--Warforged Seal
+	777,	--Timeless Coin
+	789,	--Bloody Coin
+	810,	--Black Iron Fragment
+	821,	--Draenor Clans Archaeology Fragment
+	823,	--Apexis Crystal
+	824,	--Garrison Resources
+	828,	--Ogre Archaeology Fragment
+	829,	--Arakkoa Archaeology Fragment
+	830,	--n/a
+	897,	--UNUSED
+	910,	--Secret of Draenor Alchemy
+	944,	--Artifact Fragment
+	980,	--Dingy Iron Coins
+	994,	--Seal of Tempered Fate
+	999,	--Secret of Draenor Tailoring
+	1008,	--Secret of Draenor Jewelcrafting
+	1017,	--Secret of Draenor Leatherworking
+	1020,	--Secret of Draenor Blacksmithing
 }

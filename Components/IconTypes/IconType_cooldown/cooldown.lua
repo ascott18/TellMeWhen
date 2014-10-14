@@ -14,23 +14,26 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell =
-	  GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell
+local print = TMW.print
+local GetSpellInfo, GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell =
+	  GetSpellInfo, GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell
 local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
 	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
 local UnitRangedDamage =
 	  UnitRangedDamage
-local pairs =
-	  pairs
+local pairs, wipe, strlower =
+	  pairs, wipe, strlower
+
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
-local print = TMW.print
 local isString = TMW.isString
-local _, pclass = UnitClass("Player")
 local SpellTextures = TMW.SpellTextures
-local mindfreeze = strlower(GetSpellInfo(47528))
+
+local _, pclass = UnitClass("Player")
 
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
+
+
 
 local Type = TMW.Classes.IconType:New("cooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
@@ -51,13 +54,22 @@ Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
+
+
 Type:RegisterIconDefaults{
+	-- True to cause the icon to act as unusable when the ability is out of range.
 	RangeCheck				= false,
+
+	-- True to cause the icon to act as unusable when the ability lacks power to be used.
 	ManaCheck				= false,
+
+	-- True to prevent rune cooldowns from causing the ability to be deemed unusable.
 	IgnoreRunes				= false,
 }
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
@@ -94,7 +106,10 @@ end)
 
 local function AutoShot_OnEvent(icon, event, unit, _, _, _, spellID)
 	if event == "UNIT_SPELLCAST_SUCCEEDED" and unit == "player" and spellID == 75 then
+		-- When an autoshot happens, set the timer for the next one.
+
 		icon.asStart = TMW.time
+		-- The first return of UnitRangedDamage() is ranged attack speed.
 		icon.asDuration = UnitRangedDamage("player")
 		icon.NextUpdateTime = 0
 	end
@@ -102,18 +117,18 @@ end
 
 local function AutoShot_OnUpdate(icon, time)
 
-	local NameName = icon.NameName
+	local NameString = icon.Spells.FirstString
 	local asDuration = icon.asDuration
 
 	local ready = time - icon.asStart > asDuration
-	local inrange = icon.RangeCheck and IsSpellInRange(NameName, "target") or 1
+	local inrange = icon.RangeCheck and IsSpellInRange(NameString, "target") or 1
 
 	if ready and inrange == 1 then
 		icon:SetInfo(
 			"alpha; start, duration; spell; inRange",
 			icon.Alpha,
 			0, 0,
-			NameName,
+			NameString,
 			inrange
 		)
 	else
@@ -121,7 +136,7 @@ local function AutoShot_OnUpdate(icon, time)
 			"alpha; start, duration; spell; inRange",
 			icon.UnAlpha,
 			icon.asStart, asDuration,
-			NameName,
+			NameString,
 			inrange
 		)
 	end
@@ -131,8 +146,9 @@ end
 local usableData = {}
 local unusableData = {}
 local function SpellCooldown_OnUpdate(icon, time)    
-	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameNameArray =
-	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.NameArray, icon.NameNameArray
+	-- Upvalue things that will be referenced a lot in our loops.
+	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameStringArray =
+	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.Spells.Array, icon.Spells.StringArray
 
 	local usableFound, unusableFound
 
@@ -141,9 +157,11 @@ local function SpellCooldown_OnUpdate(icon, time)
 		
 		local start, duration, stack
 		
-		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameNameArray[i])
+		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(NameStringArray[i])
 		if charges then
 			if charges < maxCharges then
+				-- If the ability has charges and isn't at max charges, 
+				-- the timer on the icon should be the time until the next charge is gained.
 				start, duration = start_charge, duration_charge
 			else
 				start, duration = GetSpellCooldown(iName)
@@ -155,10 +173,15 @@ local function SpellCooldown_OnUpdate(icon, time)
 		end
 		
 		if duration then
-			if IgnoreRunes and duration == 10 and NameNameArray[i] ~= mindfreeze then
+			if IgnoreRunes and duration == 10 then
+				-- DK abilities that are on cooldown because of runes are always reported
+				-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
+				-- We used to have to make sure the ability being checked wasn't Mind Freeze before doing this,
+				-- but Mind Freeze has a 15 second cooldown now (instead of 10), so we don't have to worry.
 				start, duration = 0, 0
 			end
-			local inrange, nomana = 1
+
+			local inrange, nomana = 1, nil
 			if RangeCheck then
 				inrange = IsSpellInRange(iName, "target") or 1
 			end
@@ -166,6 +189,10 @@ local function SpellCooldown_OnUpdate(icon, time)
 				nomana = SpellHasNoMana(iName)
 			end
 			
+
+			-- We store all our data in tables here because we need to keep track of both the first
+			-- usable cooldown and the first unusable cooldown found. We can't always determine which we will
+			-- use until we've found one of each. 
 			if inrange == 1 and not nomana and (duration == 0 or (charges and charges > 0) or OnGCD(duration)) then --usable
 				if not usableFound then
 					wipe(usableData)
@@ -234,17 +261,15 @@ end
 
 
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1, nil, nil, 1)
-	icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1, nil, 1)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1, nil, nil, nil, 1)
-	icon.NameNameArray = TMW:GetSpellNames(icon.Name, 1, nil, 1, nil, 1)
+	icon.Spells = TMW:GetSpells(icon.Name, true)
 	
 	if pclass ~= "DEATHKNIGHT" then
 		icon.IgnoreRunes =  nil
 	end
 	
-	if icon.NameName == strlower(GetSpellInfo(75)) and not icon.NameArray[2] then
-		icon:SetInfo("texture", GetSpellTexture(75))
+	if icon.Spells.FirstString == strlower(GetSpellInfo(75)) and not icon.Spells.Array[2] then
+		-- Auto shot needs special handling - it isn't a regular cooldown, so it gets its own update function.
+		icon:SetInfo("texture", SpellTextures[75])
 		icon.asStart = icon.asStart or 0
 		icon.asDuration = icon.asDuration or 0
 		
@@ -257,12 +282,14 @@ function Type:Setup(icon)
 		
 		icon:SetUpdateFunction(AutoShot_OnUpdate)
 	else
-		icon.FirstTexture = SpellTextures[icon.NameFirst]
+		icon.FirstTexture = SpellTextures[icon.Spells.First]
 		
-		icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), false)
+		icon:SetInfo("texture; reverse; spell", Type:GetConfigIconTexture(icon), false, icon.Spells.First)
 		
 		
 		if not icon.RangeCheck then
+			-- There are no events for when you become in range/out of range for a spell
+
 			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
 			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
 			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")

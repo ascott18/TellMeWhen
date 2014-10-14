@@ -3,9 +3,9 @@
 	<Button name="TellMeWhen_TypeCheckRuneTemplate" virtual="true">
 		<Size x="27.5" y="27.5"/>
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Button_Rune"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Button_Rune"/>
+		</KeyValues>
 
 		<Layers>
 			<Layer level="OVERLAY">

@@ -268,10 +268,10 @@ end
 local ScrollContainerHook_Hide = function(c) c.ScrollFrame:Hide() end
 local ScrollContainerHook_Show = function(c) c.ScrollFrame:Show() end
 local ScrollContainerHook_OnSizeChanged = function(c) c.ScrollFrame:Show() end
-function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX)
+function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX, leftSide)
 	
-	
-	local ScrollFrame = CreateFrame("ScrollFrame", container:GetName() .. "ScrollFrame", container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
+	local name = container:GetName() and container:GetName() .. "ScrollFrame"
+	local ScrollFrame = CreateFrame("ScrollFrame", name, container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
 	
 	-- Make the ScrollFrame clone the container's position and size
 	local x, y = container:GetSize()
@@ -287,10 +287,11 @@ function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition,
 	ScrollFrame:SetScrollChild(container)
 	container:SetSize(x, 1)
 	
+	local relPoint = leftSide and "LEFT" or "RIGHT"
 	if exteriorScrollBarPosition then
-		ScrollFrame.ScrollBar:SetPoint("LEFT", ScrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
+		ScrollFrame.ScrollBar:SetPoint("LEFT", ScrollFrame, relPoint, scrollBarXOffs or 0, 0)
 	else
-		ScrollFrame.ScrollBar:SetPoint("RIGHT", ScrollFrame, "RIGHT", scrollBarXOffs or 0, 0)
+		ScrollFrame.ScrollBar:SetPoint("RIGHT", ScrollFrame, relPoint, scrollBarXOffs or 0, 0)
 	end
 	
 	if scrollBarSizeX then
@@ -305,59 +306,6 @@ function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition,
 	
 end
 
-function TMW:AnimateHeightChange(f, endHeight, duration)
-	
-	-- This function currently disabled because of frame level issues.
-	-- Top frames need to be above lower frames, but editboxes seem to go underneath everything for some reason.
-	-- It doesn't look awful, but I'm going to leave it disabled till I decide otherwise.
-	f:SetHeight(endHeight)
-	do return end
-	
-	if not f.__animateHeightHooked then
-		f.__animateHeightHooked = true
-		f:HookScript("OnUpdate", function(f)
-				if f.__animateHeight_duration then
-					if TMW.time - f.__animateHeight_startTime > f.__animateHeight_duration then
-						f.__animateHeight_duration = nil
-						f:SetHeight(f.__animateHeight_end)
-						return  
-					end
-					
-					local pct = (TMW.time - f.__animateHeight_startTime)/f.__animateHeight_duration
-					
-					f:SetHeight((pct*f.__animateHeight_delta)+f.__animateHeight_start)
-				end
-		end)    
-	end
-	
-	f.__animateHeight_start = f:GetHeight()
-	f.__animateHeight_end = endHeight
-	f.__animateHeight_delta = f.__animateHeight_end - f.__animateHeight_start
-	f.__animateHeight_startTime = TMW.time
-	f.__animateHeight_duration = duration
-end
-
-do	-- TMW:GetParser()
-	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
-	function TMW:GetParser()
-		if not Parser then
-			Parser = CreateFrame("GameTooltip")
-
-			LT1 = Parser:CreateFontString()
-			RT1 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT1, RT1)
-
-			LT2 = Parser:CreateFontString()
-			RT2 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT2, RT2)
-
-			LT3 = Parser:CreateFontString()
-			RT3 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT3, RT3)
-		end
-		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
-	end
-end
 
 
 
@@ -388,6 +336,11 @@ function TMW:Group_Delete(group)
 end
 
 function TMW:Group_Add(domain, view)
+	if InCombatLockdown() then
+		-- Error if we are in combat because TMW:Update() won't create the group instantly if we are.
+		error("TMW: Can't add groups while in combat")
+	end
+
 	local groupID = TMW.db[domain].NumGroups + 1
 
 	TMW.db[domain].NumGroups = groupID
@@ -1209,7 +1162,7 @@ function IE:PositionPanels()
 			if type(parent[#parent]) == "table" then
 				frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
 			else
-				frame:SetPoint("TOP", 0, -10)
+				frame:SetPoint("TOP", 0, -11)
 			end
 			parent[#parent + 1] = frame
 			
@@ -1235,6 +1188,7 @@ function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
 	local numChildFrames = select("#", ...)
 	
 	local parentWidth = parent:GetWidth()
+
 	local paddingPerSide = 5 -- constant
 	local parentWidth_padded = parentWidth - paddingPerSide*2
 	
@@ -1316,10 +1270,12 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 
 	if IE.db.global.LastChangelogVersion > 0 then
 		if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
-			if TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
+			if IE.db.global.LastChangelogVersion < TELLMEWHEN_FORCECHANGELOG -- forced
+			or TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
 			or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
 			then
 				TellMeWhen_ChangelogDialog.showIEOnClose = true
+				TellMeWhen_ChangelogDialog:SetLastVersion(IE.db.global.LastChangelogVersion)
 				TellMeWhen_ChangelogDialog:Show()
 				shouldShow = false
 
@@ -1600,12 +1556,50 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 	CheckDisabled = TMW.NULLFUNC,
 
 	OnNewInstance_Panel = function(self)
+		if self:GetHeight() <= 0 then
+			self:SetHeight_base(1)
+		end
 		local hue = 2/3
 		
 		self.Background:SetTexture(hue, hue, hue) -- HUEHUEHUE
 		self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
 
 		self.height = self:GetHeight()
+	end,
+
+	Flash = function(self, dur)
+		local start = GetTime()
+		local duration = 0
+		local period = 0.2
+
+		while duration < dur do
+			duration = duration + (period * 2)
+		end
+		local ticker
+		ticker = C_Timer.NewTicker(0.01, function() 
+			local bg = TellMeWhen_DotwatchSettings.Background
+
+			local timePassed = GetTime() - start
+			local fadingIn = FlashPeriod == 0 or floor(timePassed/period) % 2 == 1
+
+			if FlashPeriod ~= 0 then
+				local remainingFlash = timePassed % period
+				local offs
+				if fadingIn then
+					offs = (period-remainingFlash)/period
+				else
+					offs = (remainingFlash/period)
+				end
+				offs = offs*0.3
+				bg:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05 + offs, 1, 1, 1, 0.10 + offs)
+			end
+
+			if timePassed > duration then
+				bg:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
+				ticker:Cancel()
+			end	
+		end)
+
 	end,
 
 	SetTitle = function(self, text)
@@ -1631,19 +1625,63 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		end
 	end,
 
-	OnHide = function(self)
-		self:SetHeight_base(-11)
-	end,
-	OnShow = function(self)
-		self:SetHeight_base(self.height)
-	end,
 
 	SetHeight = function(self, height)
-		self.height = height
-		if self:IsShown() then
+		if self.__oldHeight then
+			self.__oldHeight = height
+		else
 			self:SetHeight_base(height)
 		end
 	end,
+	OnHide = function(self)
+		local p, r, t, x, y = self:GetPoint(1)
+		self:SetPoint(p, r, t, x, 1)
+
+		-- Set the height to 1 so things anchored under it are positioned right.
+		-- Can't set height to 0 anymore in WoD.
+		self.__oldHeight = self:GetHeight()
+		self:SetHeight_base(1)
+	end,
+	OnShow = function(self)
+		local p, r, t, x, y = self:GetPoint(1)
+		self:SetPoint(p, r, t, x, -11)
+
+		-- Restore the old height if it is still set to 1.
+		if self.__oldHeight and floor(self:GetHeight() + 0.5) == 1 then
+			self:SetHeight_base(self.__oldHeight)
+			self.__oldHeight = nil
+		end
+	end,
+
+	--[[
+	SetHeight = function(self, endHeight)
+		-- This function currently disabled because of frame level issues.
+		-- Top frames need to be above lower frames, but editboxes seem to go underneath everything for some reason.
+		-- It doesn't look awful, but I'm going to leave it disabled till I decide otherwise.
+		
+		if not self.__animateHeightHooked then
+			self.__animateHeightHooked = true
+			self:HookScript("OnUpdate", function()
+				if self.__animateHeight_duration then
+					if TMW.time - self.__animateHeight_startTime > self.__animateHeight_duration then
+						self.__animateHeight_duration = nil
+						self:SetHeight_base(self.__animateHeight_end)
+						return  
+					end
+					
+					local pct = (TMW.time - self.__animateHeight_startTime)/self.__animateHeight_duration
+					
+					self:SetHeight_base((pct*self.__animateHeight_delta)+self.__animateHeight_start)
+				end
+			end)    
+		end
+		
+		self.__animateHeight_start = self:GetHeight()
+		self.__animateHeight_end = endHeight
+		self.__animateHeight_delta = self.__animateHeight_end - self.__animateHeight_start
+		self.__animateHeight_startTime = TMW.time
+		self.__animateHeight_duration = 0.1
+	end,]]
 }
 
 
@@ -1899,6 +1937,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	GetValue = function(self)
 		if self.EditBoxShowing then
 			local text = self.EditBox:GetText()
+			if text == "" then
+				text = 0
+			end
+
 			text = tonumber(text)
 			if text then
 				return self:CalculateValueRoundedToStep(text)
@@ -2059,6 +2101,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	end,
 
 	CalculateValueRoundedToStep = function(self, value)
+		if value == math.huge or value == -math.huge then
+			return value
+		end
+		
 		local step = self:GetValueStep()
 
 		return floor(value * (1/step) + 0.5) / (1/step)
@@ -2212,7 +2258,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 	UpdateRange = function(self, value)
 		if self.mode == self.MODE_ADJUSTING then
-			local deviation = self.range/2
+			local deviation = ceil(self.range/2)
 			local val = value or self:GetValue()
 
 			local newmin = min(max(self.min, val - deviation), self.max)
@@ -2360,7 +2406,7 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 		-- ShowWhen toggle
 		assert(data.bit, "SettingWhenCheckSet's data table must declare a bit flag to be toggled in ics.ShowWhen! (data.bit)")
 		
-		self.Check:SetAttribute("tmw-class", "Config_CheckButton_BitToggle")
+		self.Check.tmwClass = "Config_CheckButton_BitToggle"
 		TMW:CInit(self.Check, {
 			setting = "ShowWhen",
 			bit = data.bit,
@@ -2678,7 +2724,7 @@ TMW:MakeSingleArgFunctionCached(IE, "Equiv_GenerateTips")
 function IE:Type_DropDown()
 	for _, typeData in ipairs(TMW.OrderedTypes) do
 		if CI.ics.Type == typeData.type or not get(typeData.hidden) then
-			if typeData.spacebefore then
+			if typeData.menuSpaceBefore then
 				TMW.DD:AddSpacer()
 			end
 
@@ -2718,7 +2764,7 @@ function IE:Type_DropDown()
 				
 			TMW.DD:AddButton(info)
 
-			if typeData.spaceafter then
+			if typeData.menuSpaceAfter then
 				TMW.DD:AddSpacer()
 			end
 		end
@@ -2762,9 +2808,9 @@ function IE:GetRealNames(Name)
 	if SoI == "item" then
 		tbl = TMW:GetItems(text)
 	else
-		tbl = TMW:GetSpellNames(text, 1)
+		tbl = TMW:GetSpells(text).Array
 	end
-	local durations = CI_typeData.DurationSyntax and TMW:GetSpellDurations(text)
+	local durations = CI_typeData.DurationSyntax and TMW:GetSpells(text).Durations
 
 	local Cache = TMW:GetModule("SpellCache"):GetCache()
 	

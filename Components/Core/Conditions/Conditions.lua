@@ -506,7 +506,7 @@ CNDT.Env = {
 	SemicolonConcatCache = setmetatable(
 	{}, {
 		__index = function(t, i)
-			if not i then return end
+			if not i then return ";;" end
 
 			local o = ";" .. strlowerCache[i] .. ";"
 			
@@ -624,11 +624,8 @@ function CNDT:GetTableSubstitution(tbl)
 end
 
 CNDT.Substitutions = {
-{	src = "c.Level",
-	rep = function(conditionData, conditionSettings, name, name2)
-		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
-	end,
-},{	src = "BitFlagsMapAndCheck(%b())",
+
+{	src = "BITFLAGSMAPANDCHECK(%b())",
 	rep = function(conditionData, conditionSettings, name, name2)
 		if type(conditionSettings.BitFlags) == "table" then
 			if conditionSettings.Checked then
@@ -652,6 +649,22 @@ CNDT.Substitutions = {
 			return conditionSettings.BitFlags
 		end
 	end,
+},
+
+{	src = "BOOLCHECK(%b())",
+	rep = function(conditionData, conditionSettings, name, name2)
+		if conditionSettings.Level == 0 then
+			return [[%1]]
+		else
+			return [[not %1]]
+		end
+	end,
+},
+
+{	src = "c.Level",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
+	end,
 },{
 	src = "c.Checked",
 	rep = function(conditionData, conditionSettings, name, name2)
@@ -672,12 +685,13 @@ CNDT.Substitutions = {
 {
 	src = "c.NameFirst2",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return strWrap(TMW:GetSpellNames(name2, nil, 1))
+		return strWrap(TMW:GetSpells(name2).First)
+
 	end,
 },{
-	src = "c.NameName2",
+	src = "c.NameString2",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return strWrap(TMW:GetSpellNames(name2, nil, 1, 1))
+		return strWrap(TMW:GetSpells(name2).FirstString)
 	end,
 },{
 	src = "c.ItemID2",
@@ -697,12 +711,12 @@ CNDT.Substitutions = {
 {
 	src = "c.NameFirst",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return strWrap(TMW:GetSpellNames(name, nil, 1))
+		return strWrap(TMW:GetSpells(name).First)
 	end,
 },{
-	src = "c.NameName",
+	src = "c.NameString",
 	rep = function(conditionData, conditionSettings, name, name2)
-		return strWrap(TMW:GetSpellNames(name, nil, 1, 1))
+		return strWrap(TMW:GetSpells(name).FirstString)
 	end,
 },{
 	src = "c.ItemID",
@@ -745,7 +759,8 @@ CNDT.Substitutions = {
 {
 	src = "c.GCDReplacedNameFirst2",
 	rep = function(conditionData, conditionSettings, name, name2)
-		local name = TMW:GetSpellNames(name2, nil, 1)
+
+		local name = TMW:GetSpells(name2).First
 		if name == "gcd" then
 			name = TMW.GCDSpell
 		end
@@ -754,7 +769,7 @@ CNDT.Substitutions = {
 },{
 	src = "c.GCDReplacedNameFirst",
 	rep = function(conditionData, conditionSettings, name, name2)
-		local name = TMW:GetSpellNames(name, nil, 1)
+		local name = TMW:GetSpells(name).First
 		if name == "gcd" then
 			name = TMW.GCDSpell
 		end
@@ -994,8 +1009,7 @@ function CNDT:GetConditionObject(parent, conditionSettings)
 	
 	if conditionString and conditionString ~= "" then
 		local instances = TMW.Classes.ConditionObject.instances
-		for i = 1, #instances do
-			local instance = instances[i]
+		for i, instance in pairs(instances) do
 			if instance.conditionString == conditionString then
 				return instance
 			end

@@ -27,12 +27,38 @@ if LibStub("LibButtonFacade", true) and select(6, GetAddOnInfo("Masque")) == "MI
 	TMW.Warn("TellMeWhen no longer supports ButtonFacade. If you wish to continue to skin your icons, please upgrade to ButtonFacade's successor, Masque.")
 end
 
+
+local function GetLMBGroup(icon)
+	if icon.group.Domain == "global" then
+		return LMB:Group("TellMeWhen", L["DOMAIN_GLOBAL"] .. " " .. L["fGROUP"]:format(icon.group:GetID()))
+	else
+		return LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
+	end
+end
+
+--- Static method to check if a given icon will be skinned.
+function IconContainer_Masque:IsIconSkinned(icon)
+	self:AssertSelfIsClass()
+
+	if not LMB then
+		return true
+	end
+
+	local lmbGroup = GetLMBGroup(icon)
+	return lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled)
+end
+
+
+
 if not LMB then
 	IconContainer_Masque.isDefaultSkin = 1
 	-- IconModule_IconContainer_Masque will just be a clone of IconModule_IconContainer at this point.
 	-- No need to load any of the Masque-handling code it Masque isn't installed, so just leave it as a clone.
 	return
 end
+
+
+
 
 
 if LMB.GetSpellAlert then
@@ -64,11 +90,7 @@ if LMB.GetSpellAlert then
 end
 
 function IconContainer_Masque:OnNewInstance_IconContainer_Masque(icon)
-	if icon.group.Domain == "global" then
-		self.lmbGroup = LMB:Group("TellMeWhen", L["DOMAIN_GLOBAL"] .. " " .. L["fGROUP"]:format(icon.group:GetID()))
-	else
-		self.lmbGroup = LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
-	end
+	self.lmbGroup = GetLMBGroup(icon)
 end
 
 function IconContainer_Masque:SetupForIcon(icon)
@@ -80,6 +102,8 @@ function IconContainer_Masque:SetupForIcon(icon)
 		end
 	end
 end
+
+
 
 IconContainer_Masque:PostHookMethod("OnEnable", function(self)
 	local icon = self.icon

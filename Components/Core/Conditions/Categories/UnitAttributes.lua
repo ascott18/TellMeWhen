@@ -41,7 +41,7 @@ ConditionCategory:RegisterCondition(1,	 "EXISTS", {
 		if c.Unit == "player" then
 			return [[true]]
 		else
-			return [[c.1nil == UnitExists(c.Unit)]]
+			return [[BOOLCHECK( UnitExists(c.Unit) )]]
 		end
 	end,
 	events = function(ConditionObject, c)
@@ -67,7 +67,7 @@ ConditionCategory:RegisterCondition(2,	 "ALIVE", {
 	Env = {
 		UnitIsDeadOrGhost = UnitIsDeadOrGhost,
 	},
-	funcstr = [[c.nil1 == UnitIsDeadOrGhost(c.Unit)]], -- note usage of nil1, not 1nil
+	funcstr = [[not BOOLCHECK( UnitIsDeadOrGhost(c.Unit) )]], 
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -85,7 +85,7 @@ ConditionCategory:RegisterCondition(3,	 "COMBAT", {
 	Env = {
 		UnitAffectingCombat = UnitAffectingCombat,
 	},
-	funcstr = [[c.1nil == UnitAffectingCombat(c.Unit)]],
+	funcstr = [[BOOLCHECK( UnitAffectingCombat(c.Unit) )]],
 	events = function(ConditionObject, c)
 		if c.Unit == "player" then
 			return
@@ -109,7 +109,7 @@ ConditionCategory:RegisterCondition(4,	 "VEHICLE", {
 	Env = {
 		UnitHasVehicleUI = UnitHasVehicleUI,
 	},
-	funcstr = [[c.True == UnitHasVehicleUI(c.Unit)]],
+	funcstr = [[BOOLCHECK( UnitHasVehicleUI(c.Unit) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -129,7 +129,7 @@ ConditionCategory:RegisterCondition(5,	 "PVPFLAG", {
 	Env = {
 		UnitIsPVP = UnitIsPVP,
 	},
-	funcstr = [[c.1nil == UnitIsPVP(c.Unit)]],
+	funcstr = [[BOOLCHECK( UnitIsPVP(c.Unit) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -169,7 +169,7 @@ ConditionCategory:RegisterCondition(6.2, "ISPLAYER", {
 	Env = {
 		UnitIsPlayer = UnitIsPlayer,
 	},
-	funcstr = [[UnitIsPlayer(c.Unit) == c.1nil]],
+	funcstr = [[BOOLCHECK( UnitIsPlayer(c.Unit) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -278,7 +278,7 @@ ConditionCategory:RegisterCondition(8.5, "LIBRANGECHECK", {
 	funcstr = function(c, parent)
 		Env.LibRangeCheck = LibStub("LibRangeCheck-2.0")
 		if not Env.LibRangeCheck then
-			TMW:Error("The %s condition requires LibRangeCheck-2.0")
+			TMW:Error("The %s condition requires LibRangeCheck-2.0", L["CNDT_RANGE"])
 			return "false"
 		end
 
@@ -309,7 +309,7 @@ ConditionCategory:RegisterCondition(9,	 "NAME", {
 	Env = {
 		UnitName = UnitName,
 	},
-	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[UnitName(c.Unit) or ""]) and 1)]],
+	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[UnitName(c.Unit) or ""]) and 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -321,6 +321,7 @@ ConditionCategory:RegisterCondition(9.5, "NPCID", {
 	tooltip = L["CONDITIONPANEL_NPCID_DESC"],
 	min = 0,
 	max = 1,
+	defaultUnit = "target",
 	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NPCIDTOMATCH", "CONDITIONPANEL_NPCIDTOOLTIP") editbox.label = L["CONDITIONPANEL_NPCIDTOMATCH"] end,
 	nooperator = true,
 	formatter = TMW.C.Formatter.BOOL,
@@ -329,7 +330,7 @@ ConditionCategory:RegisterCondition(9.5, "NPCID", {
 	Env = {
 		UnitGUID = UnitGUID,
 	},
-	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[tonumber((UnitGUID(c.Unit) or "0x00000000000000000"):sub(6, 10), 16)]) and 1)]],
+	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[ tonumber((UnitGUID(c.Unit) or ""):match(".-%-%d+%-%d+%-%d+%-%d+%-(%d+)")) ]) and 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -445,7 +446,7 @@ ConditionCategory:RegisterCondition(11,	 "CLASS2", {
 		UnitClass = UnitClass,
 	},
 	funcstr = function(c)
-		return [[ BitFlagsMapAndCheck( select(3, UnitClass(c.Unit)) ) ]]
+		return [[ BITFLAGSMAPANDCHECK( select(3, UnitClass(c.Unit)) ) ]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -469,8 +470,6 @@ end
 local specNameToRole = {}
 local SPECS = CNDT:NewModule("Specs", "AceEvent-3.0")
 function SPECS:UpdateUnitSpecs()
-	RequestBattlefieldScoreData()
-
 	local _, z = IsInInstance()
 
 	wipe(Env.UnitSpecs)
@@ -490,6 +489,8 @@ function SPECS:UpdateUnitSpecs()
 		TMW:Fire("TMW_UNITSPEC_UPDATE")
 
 	elseif z == "pvp" then
+		RequestBattlefieldScoreData()
+
 		for i = 1, GetNumBattlefieldScores() do
 			name, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
 			local specID = specNameToRole[classToken][talentSpec]
@@ -516,12 +517,11 @@ function SPECS:PrepareUnitSpecEvents()
 	SPECS:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateUnitSpecs")
 	SPECS.PrepareUnitSpecEvents = TMW.NULLFUNC
 end
-ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
+ConditionCategory:RegisterCondition(11.1, "UNITSPEC", {
 	text = L["CONDITIONPANEL_UNITSPEC"],
 	tooltip = L["CONDITIONPANEL_UNITSPEC_DESC"],
 
-	-- TODO: CONDITIONPANEL_BITFLAGS_CHOOSEMENU is a horrible idea for localization. Get rid of it.
-	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"]:format(SPECIALIZATION),
+	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
 	bitFlags = {
 	    [ 62  ] = GetSpecText(62),  	-- Mage: Arcane
 	    [ 63  ] = GetSpecText(63),  	-- Mage: Fire
@@ -566,7 +566,8 @@ ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
 		UnitSpecs = {},
 		UnitSpec = function(unit)
 			if UnitIsUnit(unit, "player") then
-				return GetSpecializationInfo(GetSpecialization())
+				local spec = GetSpecialization()
+				return spec and GetSpecializationInfo(spec) or 0
 			else
 				local name, server = UnitName(unit)
 				if name and server then
@@ -579,7 +580,7 @@ ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
 		end,
 	},
 	funcstr = function(c)
-		return [[ BitFlagsMapAndCheck( UnitSpec(c.Unit) ) ]]
+		return [[ BITFLAGSMAPANDCHECK( UnitSpec(c.Unit) ) ]]
 	end,
 	events = function(ConditionObject, c)
 		SPECS:PrepareUnitSpecEvents()
@@ -587,7 +588,8 @@ ConditionCategory:RegisterCondition(11,	 "UNITSPEC", {
 
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("TMW_UNITSPEC_UPDATE")
+			ConditionObject:GenerateNormalEventString("TMW_UNITSPEC_UPDATE"),
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE")
 	end,
 })
 
@@ -645,7 +647,7 @@ ConditionCategory:RegisterCondition(13,	 "CREATURETYPE", {
 	Env = {
 		UnitCreatureType = UnitCreatureType,
 	},
-	funcstr = [[c.1nil == (strfind(c.Name, SemicolonConcatCache[UnitCreatureType(c.Unit) or ""]) and 1)]],
+	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[UnitCreatureType(c.Unit) or ""]) and 1) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -716,7 +718,7 @@ ConditionCategory:RegisterCondition(16,	 "UNITISUNIT", {
 	Env = {
 		UnitIsUnit = UnitIsUnit,
 	},
-	funcstr = [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]],
+	funcstr = [[BOOLCHECK( UnitIsUnit(c.Unit, c.Unit2) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),

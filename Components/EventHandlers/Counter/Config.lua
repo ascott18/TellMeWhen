@@ -150,7 +150,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	end
 end
 
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
 	if #SUG.lastName > 0 then
 		suggestions[#suggestions + 1] = "%A"
 	end

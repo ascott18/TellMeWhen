@@ -15,9 +15,9 @@
 			
 			<EditBox name="$parentCounter" inherits="TellMeWhen_InputBoxTemplate" parentKey="Counter" autoFocus="false">
 				<Size x="130" y="15"/>
-				<Attributes>
-  					<Attribute name="tmw-class" type="string" value="Config_EditBox_Event"/>
- 				</Attributes>
+				<KeyValues>
+  					<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event"/>
+ 				</KeyValues>
 
   				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="10" y="-22"/>
@@ -86,9 +86,9 @@
 			<EditBox name="$parentAmt" inherits="TellMeWhen_InputBoxTemplate" parentKey="Amt" autoFocus="false">
 				<Size x="55" y="15"/>
 
-				<Attributes>
-  					<Attribute name="tmw-class" type="string" value="Config_EditBox_Event"/>
- 				</Attributes>
+				<KeyValues>
+  					<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event"/>
+ 				</KeyValues>
 
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentOperation" relativePoint="RIGHT" x="8" y="3"/>

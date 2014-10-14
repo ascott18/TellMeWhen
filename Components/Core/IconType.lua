@@ -65,10 +65,11 @@ local RelevantToAll = {
 -- @field desc [function->|string|nil] A localized string that describes the IconType.
 -- @field tooltipTitle [function->|string|nil] A localized string that will be used as the title of the description tooltip for the IconType. Defaults to {{{IconType.name}}}.
 -- @field menuIcon [function->|string|nil] Path to the texture that will be displayed in the type selection menu.
--- @field spacebefore [boolean|nil] True if there should be an empty row displayed before this IconType in the type selection menu.
--- @field spaceafter [boolean|nil] True if there should be an empty row displayed after this IconType in the type selection menu.
+-- @field menuSpaceBefore [boolean|nil] True if there should be an empty row displayed before this IconType in the type selection menu.
+-- @field menuSpaceAfter [boolean|nil] True if there should be an empty row displayed after this IconType in the type selection menu.
 -- @field hidden [function->|boolean|nil] True if the IconType should not be displayed in the type selection menu.
 -- @field hasNoGCD [boolean|nil] True if timers/durations reported by the IconType are able to be on the global cooldown, otherwise nil. Default is nil.
+-- @field canControlGroup [boolean|nil] True if the icon type is capable of being a group controller. You must implement IconType:HandleYieldedInfo() if true, and use icon:YieldInfo() in your type's update methods instead of icon:SetInfo().
 -- 
 -- @field Icons [table] [READ-ONLY] Array of icons that use this IconType. Automatically updated, and should not be modified.
 -- @field type [string] [READ-ONLY] A short string that will identify the IconType across the addon. Set through the constructor, and should not be modified.
@@ -157,10 +158,15 @@ function IconType:GuessIconTexture(ics)
 	self:AssertSelfIsInstance()
 	
 	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(ics.Name, nil, 1)
+
+		local name = TMW:GetSpells(ics.Name).First
 		if name then
 			return SpellTextures[name]
 		end
+	end
+
+	if self.usePocketWatch then
+		return "Interface\\Icons\\INV_Misc_PocketWatch_01"
 	end
 end
 
@@ -177,7 +183,8 @@ function IconType:GetConfigIconTexture(icon)
 	else
 	
 		if icon.Name ~= "" then
-			local tbl = TMW:GetSpellNames(icon.Name, 1)
+
+			local tbl = TMW:GetSpells(icon.Name).Array
 
 			for _, name in ipairs(tbl) do
 				local t = SpellTextures[name]
@@ -282,9 +289,9 @@ function IconType:Register(order)
 	TMW:ValidateType("IconType.desc", "IconType:Register(order)", self.desc, "function;string;nil")
 	TMW:ValidateType("IconType.tooltipTitle", "IconType:Register(order)", self.tooltipTitle, "function;string;nil")
 	TMW:ValidateType("IconType.menuIcon", "IconType:Register(order)", self.menuIcon, "function;string;nil")
-	TMW:ValidateType("IconType.spacebefore", "IconType:Register(order)", self.spacebefore, "boolean;nil")
-	TMW:ValidateType("IconType.spaceafter", "IconType:Register(order)", self.spaceafter, "boolean;nil")
-	TMW:ValidateType("IconType.hidden", "IconType:Register(order)", self.spaceafter, "function;boolean;nil")
+	TMW:ValidateType("IconType.menuSpaceBefore", "IconType:Register(order)", self.menuSpaceBefore, "boolean;nil")
+	TMW:ValidateType("IconType.menuSpaceAfter", "IconType:Register(order)", self.menuSpaceAfter, "boolean;nil")
+	TMW:ValidateType("IconType.hidden", "IconType:Register(order)", self.menuSpaceAfter, "function;boolean;nil")
 	
 	TMW:ValidateType("2 (order)", "IconType:Register(order)", order, "number")
 	
@@ -429,7 +436,7 @@ function IconType:SetModuleAllowance(moduleName, allow)
 		TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 			if class.className == moduleName and class.SetAllowanceForType then
 				local IconModule = class
-				IconModule:SetAllowanceForType(self.type, allow) -- TODO: Change SetAllownaceForType name to SetTypeAllowance?
+				IconModule:SetAllowanceForType(self.type, allow)
 
 				TMW:UnregisterThisCallback()
 			end

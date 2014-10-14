@@ -30,9 +30,11 @@ local currencies = {
 		
 		395,	-- Justice Points
 		396,	-- Valor Points
+		823,	-- Apexis Crystal
+		"SPACE",
 		392,	-- Honor Points
 		390,	-- Conquest Points
-		--692,	-- Conquest Random BG Meta
+		944,	-- Artifact Fragment
 		"SPACE",
 		391,	-- Tol Barad Commendation
 		416,	-- Mark of the World Tree
@@ -45,6 +47,7 @@ local currencies = {
 		697,	-- Elder Charm of Good Fortune
 		752,	-- Mogu Rune of Fate
 		776,	-- Warforged Seal
+		994,	-- Seal of Tempered Fate
 		"SPACE",
 		614,	-- Mote of Darkness
 		615,	-- Essence of Corrupted Deathwing
@@ -54,6 +57,16 @@ local currencies = {
 		402,	-- Ironpaw Token
 		61,		-- Dalaran Jewelcrafter\'s Token
 		81,		-- Epicurean\'s Award
+		"SPACE",
+		910,	-- Secret of Draenor Alchemy
+		999,	-- Secret of Draenor Tailoring
+		1008,	-- Secret of Draenor Jewelcrafting
+		1017,	-- Secret of Draenor Leatherworking
+		1020,	-- Secret of Draenor Blacksmithing
+		"SPACE",
+		824,	-- Garrison Resources
+		810,	-- Black Iron Fragment
+		980,	-- Dingy Iron Coins
 	},
 	{
 		ID = "ARCHFRAGS",
@@ -75,6 +88,10 @@ local currencies = {
 		676,	-- Pandaren Archaeology Fragment
 		677,	-- Mogu Archaeology Fragment
 		754,	-- Mantid Archaeology Fragment
+
+		821,	-- Draenor Clans Archaeology Fragment
+		828,	-- Ogre Archaeology Fragment
+		829,	-- Arakkoa Archaeology Fragment
 	}
 }
 

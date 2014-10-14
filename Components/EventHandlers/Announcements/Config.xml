@@ -4,9 +4,9 @@
 	<Frame name="$parentAnnouncements" inherits="TellMeWhen_EventContainer" parentKey="Announcements">
 		<Frames>
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
-				<Attributes>
-					<Attribute name="tmw-class" type="string" value="Config_EditBox_DogTags"/>
-				</Attributes>
+				<KeyValues>
+					<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
+				</KeyValues>
 
 				<Size y="20"/>
 				<Anchors>

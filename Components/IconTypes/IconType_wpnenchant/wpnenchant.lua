@@ -14,23 +14,31 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local WpnEnchDurs
-local _G, strmatch, strtrim, select, floor, ceil =
-	  _G, strmatch, strtrim, select, floor, ceil
-local GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo =
-	  GetInventoryItemTexture, GetInventorySlotInfo, GetWeaponEnchantInfo
 local print = TMW.print
-local UIParent = UIParent
+local _G, strmatch, strtrim, select, floor, ceil, pairs, wipe, type, max =
+	  _G, strmatch, strtrim, select, floor, ceil, pairs, wipe, type, max
+local GetInventoryItemTexture, GetInventorySlotInfo, GetInventoryItemID, GetItemInfo, GetWeaponEnchantInfo =
+	  GetInventoryItemTexture, GetInventorySlotInfo, GetInventoryItemID, GetItemInfo, GetWeaponEnchantInfo
+
 local strlowerCache = TMW.strlowerCache
+
+local UIParent = UIParent
+local INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND =
+	  INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND
+
+
+local WpnEnchDurs
+
 
 
 local Type = TMW.Classes.IconType:New("wpnenchant")
 LibStub("AceTimer-3.0"):Embed(Type)
 Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
-Type.menuIcon = GetSpellTexture(8024)
+Type.menuIcon = "Interface\\Icons\\inv_fishingpole_02"
 Type.AllowNoName = true
-Type.spaceafter = true
+Type.menuSpaceAfter = true
+
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
@@ -40,10 +48,61 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
+
 Type:RegisterIconDefaults{
+	-- Hide the icon if the tracked slot has no weapon in it.
 	HideUnequipped			= false,
+
+	-- The weapon slot to track. Can also be "SecondaryHandSlot"
 	WpnEnchantType			= "MainHandSlot",
 }
+
+TMW:RegisterDatabaseDefaults{
+	locale = {
+		-- Holds the longest durations seen for every known weapon enchant.
+		-- This is needed because Blizzard's API doesn't return a total duration;
+		-- it only returns the time remaining. GG, Blizz!
+		WpnEnchDurs	= {
+			["*"] = 0,
+		},
+	},
+}
+
+TMW:RegisterUpgrade(71031, {
+	global = function(self)
+		-- Wipe this table with the new expansion.
+		if TMW.db.sv.locale then
+			for _, locale in pairs(TMW.db.sv.locale) do 
+				if locale.WpnEnchDurs then
+					wipe(locale.WpnEnchDurs)
+				end
+			end
+		end
+	end
+})
+TMW:RegisterUpgrade(62216, {
+	global = function(self)
+		-- This table is now locale-specific.
+
+		if type(TMW.db.global.WpnEnchDurs) == "table" then
+			for k, v in pairs(TMW.db.global.WpnEnchDurs) do
+				TMW.db.locale.WpnEnchDurs[k] = max(TMW.db.locale.WpnEnchDurs[k] or 0, v)
+			end
+			TMW.db.global.WpnEnchDurs = nil
+		end
+	end
+})
+TMW:RegisterUpgrade(62008, {
+	icon = function(self, ics)
+		-- Ranged weapon slot was removed from the game.
+		if ics.WpnEnchantType == "RangedSlot" then
+			ics.WpnEnchantType = "MainHandSlot"
+		end
+	end,
+})
+
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME_WPNENCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
@@ -84,13 +143,6 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_WpnEnchantSettings", f
 	})
 end)
 
-TMW:RegisterUpgrade(62008, {
-	icon = function(self, ics)
-		if ics.WpnEnchantType == "RangedSlot" then
-			ics.WpnEnchantType = "MainHandSlot"
-		end
-	end,
-})
 
 
 local Parser = CreateFrame("GameTooltip", "TellMeWhen_Parser", TMW, "GameTooltipTemplate")
@@ -105,8 +157,9 @@ local function GetWeaponEnchantName(slot)
 		local t = _G["TellMeWhen_ParserTextLeft" .. i]:GetText()
 		if t and t ~= "" then
 		
+			-- This magical regex should work with all locales and only get the weapon enchant name,
+			-- not other things (like the weapon DPS).
 			-- （） multibyte parenthesis are used in zhCN locale.
-			-- should work with all locales and only get the weapon enchant name, not other things (like the weapon DPS)
 			local r = strmatch(t, "(.+)[%(%（]%d+[^%.]*[^%d]+[%)%）]")
 
 			if r then
@@ -120,52 +173,39 @@ local function GetWeaponEnchantName(slot)
 	end
 end
 
-local function UpdateWeaponEnchantInfo(slot, selectIndex)
-	local has, expiration = select(selectIndex, GetWeaponEnchantInfo())
-
-	if has then
-		local EnchantName = GetWeaponEnchantName(slot)
-
-		if EnchantName then
-			expiration = expiration/1000
-			local d = WpnEnchDurs[EnchantName]
-
-			if d < expiration then
-				WpnEnchDurs[EnchantName] = ceil(expiration)
-			end
-		end
-	end
-end
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	WpnEnchDurs = TMW.db.locale.WpnEnchDurs
 end)
 
 
-local SlotsToNumbers = {
-	MainHandSlot = 1,
-	SecondaryHandSlot = 4,
-	RangedSlot = 7,
-}
-
 local function WpnEnchant_OnUpdate(icon, time)
 	local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
+
 	if has and icon.CorrectEnchant then
+		-- Convert milliseconds to seconds.
 		expiration = expiration/1000
 
 		local duration
 		local EnchantName = icon.EnchantName
 		if EnchantName then
+			-- We know the enchant name, which means the duration can be cached.
 			local d = WpnEnchDurs[EnchantName]
 			if d < expiration then
+				-- Re-cache the duration if we have a higher duration than what is stored.
 				WpnEnchDurs[EnchantName] = ceil(expiration)
 				duration = expiration
 			else
+				-- We don't beat the cached max duration. Just use what is cached.
 				duration = d
 			end
 		else
+			-- We don't know the enchant name, which is fucked.
+			-- The timer sweep won't work, but timer texts will.
 			duration = expiration
 		end
+
+
 		local start = floor(time - duration + expiration)
 
 		icon:SetInfo("alpha; start, duration; spell",
@@ -183,7 +223,9 @@ local function WpnEnchant_OnUpdate(icon, time)
 end
 
 local function WpnEnchant_OnEvent(icon, event, unit)
-	-- this function must be declared after _OnUpdate because it references _OnUpdate from inside it.
+	-- this function must be declared after WpnEnchant_OnUpdate because it references WpnEnchant_OnUpdate.
+
+
 	if not unit or unit == "player" then -- (not unit) covers calls from the timers set below
 		icon.NextUpdateTime = 0
 		
@@ -192,27 +234,36 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 		local EnchantName = GetWeaponEnchantName(Slot)
 		icon.LastEnchantName = icon.EnchantName or icon.LastEnchantName
 		icon.EnchantName = EnchantName
+		icon.CorrectEnchant = false
 
 		if icon.Name == "" then
+			-- If the user didn't input a name, they aren't filtering by it,
+			-- so we don't have to match anything
 			icon.CorrectEnchant = true
+
 		elseif EnchantName then
-			icon.CorrectEnchant = icon.NameHash[strlowerCache[EnchantName]]
+			-- We know what enchant is on the weapon. See if the user wants to track it.
+			icon.CorrectEnchant = icon.Spells.Hash[strlowerCache[EnchantName]]
+
 		elseif unit then
-			-- we couldn't get an enchant name.
+			-- We couldn't get an enchant name.
 			-- Either we checked too early, or there is no enchant.
 			-- Assume that we checked too early, and check again in a little bit.
-			-- We check that unit is defined here because if we are calling from a timer, unit will be false, and we dont want to endlessly chain timers.
+			-- We check that unit is defined here because if we are calling from a timer, unit will be nil,
+			-- and we dont want to endlessly chain timers.
 			-- A single func calling itself in 2 timers will create perpetual performance loss to the point of lockup. (duh....)
 			Type:ScheduleTimer(WpnEnchant_OnEvent, 0.1, icon)
 			Type:ScheduleTimer(WpnEnchant_OnEvent, 1, icon)
 		end
 
+		-- Update the texture.
 		local wpnTexture = GetInventoryItemTexture("player", Slot)
-
 		icon:SetInfo("texture", wpnTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
 
 		if icon.HideUnequipped then
 			if not wpnTexture then
+				-- If we should hide when there's no weapon, and there's no weapon,
+				-- then hide the icon and remove the update function.
 				icon:SetInfo("alpha", 0)
 				icon:SetUpdateFunction(nil)
 				return
@@ -222,12 +273,16 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			if itemID then
 				local _, _, _, _, _, _, _, _, invType = GetItemInfo(itemID)
 				if invType == "INVTYPE_HOLDABLE" or invType == "INVTYPE_RELIC" or invType == "INVTYPE_SHIELD" then
+					-- These item types can't have weapon enchants (because they aren't weapons).
+					-- Hide the icon and remove the update function.
 					icon:SetInfo("alpha", 0)
 					icon:SetUpdateFunction(nil)
 					return
 				end
 			end
 		end
+
+		-- Everything is good. Restore the update function if we removed it earlier.
 		if not icon.UpdateFunction then
 			icon:SetUpdateFunction(WpnEnchant_OnUpdate)
 		end
@@ -235,11 +290,11 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 end
 
 function Type:Setup(icon)
-	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
-	icon.SelectIndex = SlotsToNumbers[icon.WpnEnchantType] or 1
+	icon.Spells = TMW:GetSpells(icon.Name, false)
+
+
+	icon.SelectIndex = icon.WpnEnchantType == "SecondaryHandSlot" and 4 or 1
 	icon.Slot = GetInventorySlotInfo(icon.WpnEnchantType)
-	
-	UpdateWeaponEnchantInfo(icon.Slot, icon.SelectIndex)
 
 
 	icon:SetInfo("texture; reverse",

@@ -399,7 +399,10 @@ end
 -- [INTERNAL]
 function Group.Setup_Conditions(group)
 	-- Clear out/reset any previous conditions and condition-related stuff on the group
-	group.ConditionObject = nil
+	if group.ConditionObject then
+		group.ConditionObject:DeclareExternalUpdater(group, false)
+		group.ConditionObject = nil
+	end
 	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", group)
 	
 	-- Determine if we should process conditions
@@ -414,6 +417,8 @@ function Group.Setup_Conditions(group)
 			-- Setup the event handler and the update table if a ConditionObject was returned
 			-- (meaning that there are conditions that need to be checked)
 			group:UpdateTable_Register()
+
+			group.ConditionObject:DeclareExternalUpdater(group, true)
 	
 			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", group)
 		else

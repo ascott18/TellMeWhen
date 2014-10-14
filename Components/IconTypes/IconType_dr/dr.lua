@@ -14,18 +14,20 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local gsub, bitband =
-	  gsub, bit.band
+local print = TMW.print
+local gsub, pairs, ipairs, tostring, format, wipe, bitband =
+	  gsub, pairs, ipairs, tostring, format, wipe, bit.band
 local UnitGUID =
 	  UnitGUID
-local print = TMW.print
-local huge = math.huge
+
 local strlowerCache = TMW.strlowerCache
 local SpellTextures = TMW.SpellTextures
---local CL_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+
+local huge = math.huge
 local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 
-local clientVersion = select(4, GetBuildInfo())
+-- GLOBALS: TellMeWhen_ChooseName
+
 
 local DRData = LibStub("DRData-1.0")
 
@@ -48,6 +50,7 @@ Type.usePocketWatch = 1
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 
+
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
@@ -57,35 +60,60 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 
-TMW:MergeDefaultsTables({
+
+TMW:RegisterDatabaseDefaults{
 	global = {
+		-- The default length of diminishing returns.
+		-- Supposedly, the actual behavior is that the server "ticks" every 5 seconds to clear DRs.
+		-- This happens at a min of 15 seconds and a max of 20 seconds.
 		DRDuration = 17
 	},
-}, TMW.Defaults)
+}
 
 Type:RegisterIconDefaults{
+	-- The unit(s) to check for DRs
 	Unit					= "player", 
+
+	-- Listen to the combat log for spell refreshes.
+	-- This is a good thing and a bad thing.
+	-- You need it to catch re-applications of an effect before it ended
+	-- but it will also catch "fake" refreshes caused by spells that break after a certain amount of damage.
 	CheckRefresh			= true,
+
+	-- Show the icon even when no units have been known to have an effect put on them.
 	ShowWhenNone			= false,
 }
 
-TMW:RegisterUpgrade(70014, {
+TMW:RegisterUpgrade(71035, {
 	icon = function(self, ics)
 		-- DR categories that no longer exist (or never really existed):
 
 		ics.Name = ics.Name:
-			gsub("DR-DragonsBreath", "DR-ShortDisorient"):
-			gsub("DR-BindElemental", "DR-Disorient"):
-			gsub("DR-Charge", "DR-RandomStun"):
-			gsub("DR-IceWard", "DR-RandomRoot"):
-			gsub("DR-Scatter", "DR-ShortDisorient"):
-			gsub("DR-Banish", "DR-Disorient"):
-			gsub("DR-Entrapment", "DR-RandomRoot")
+			gsub("DR%-DragonsBreath", "DR-ShortDisorient"):
+			gsub("DR%-BindElemental", "DR-Disorient"):
+			gsub("DR%-Charge", "DR-RandomStun"):
+			gsub("DR%-IceWard", "DR-RandomRoot"):
+			gsub("DR%-Scatter", "DR-ShortDisorient"):
+			gsub("DR%-Banish", "DR-Disorient"):
+			gsub("DR%-Entrapment", "DR-RandomRoot"):
+			gsub("DR%-Fear", "DR-Incapacitate"):
+			gsub("DR%-MindControl", "DR-Incapacitate"):
+			gsub("DR%-Horrify", "DR-Incapacitate"):
+			gsub("DR%-RandomRoot", "DR-Root"):
+			gsub("DR%-ShortDisorient", "DR-Disorient"):
+			gsub("DR%-Fear", "DR-Disorient"):
+			gsub("DR%-Cyclone", "DR-Disorient"):
+			gsub("DR%-ControlledStun", "DR-Stun"):
+			gsub("DR%-RandomStun", "DR-Stun"):
+			gsub("DR%-ControlledRoot", "DR-Root")
 	end,
-	})
+})
+
+
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "dr",
 })
@@ -118,24 +146,27 @@ end)
 
 
 TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
+	-- Create our own DR equivalencies in TMW using the data from DRData-1.0
+
 	if DRData then
 		local myCategories = {
-			ctrlstun		= "DR-ControlledStun",
-			fear 			= "DR-Fear",
-			rndstun			= "DR-RandomStun",
+			ctrlstun		= "DR-Stun",
 			silence			= "DR-Silence",
-			mc 				= "DR-MindControl",
-			taunt 			= "DR-Taunt",
-			disarm			= "DR-Disarm",
-			horror			= "DR-Horrify",
-			cyclone			= "DR-Cyclone",
 			disorient		= "DR-Disorient",
-			shortdisorient	= "DR-ShortDisorient",
-			ctrlroot		= "DR-ControlledRoot", 
-			shortroot		= "DR-RandomRoot",
+			ctrlroot		= "DR-Root", 
+			incapacitate	= "DR-Incapacitate",
+			taunt 			= "DR-Taunt",
 		}
 
 		local ignored = {
+			rndstun = true,
+			fear = true,
+			mc = true,
+			cyclone = true,
+			shortdisorient = true,
+			horror = true,
+			disarm = true,
+			shortroot = true,
 			knockback = true,
 		}
 		
@@ -156,11 +187,17 @@ end)
 local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
-			local NameHash = icon.NameHash
+			local NameHash = icon.Spells.Hash
 			if NameHash[spellID] or NameHash[strlowerCache[spellName]] then
+
+				-- Check that either the spell always has DR, or that the target is a player (or pet).
 				if PvEDRs[spellID] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
+					-- dr is the table that holds the DR info for this target GUID.
 					local dr = icon.DRInfo[destGUID]
+
 					if cevent == "SPELL_AURA_APPLIED" then
+						-- If something is applied, and the timer is expired,
+						-- reset the timer in preparation for the effect falling off.
 						if dr and dr.start + dr.duration <= TMW.time then
 							dr.start = 0
 							dr.duration = 0
@@ -168,6 +205,8 @@ local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _,
 						end
 					else
 						if not dr then
+							-- If there isn't already a table, make one
+							-- Start it off at 50% because the unit just got diminished.
 							dr = {
 								amt = 50,
 								start = TMW.time,
@@ -176,6 +215,8 @@ local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _,
 							}
 							icon.DRInfo[destGUID] = dr
 						else
+							-- Diminish the unit by one tick.
+							-- Ticks go 100 -> 50 -> 25 -> 0
 							local amt = dr.amt
 							if amt and amt ~= 0 then
 								dr.amt = amt > 25 and amt/2 or 0
@@ -186,16 +227,19 @@ local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _,
 						end
 					end
 					
+					-- Schedule an update
 					icon.NextUpdateTime = 0
 				end
 			end
 		end
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
 end
 
 local function DR_OnUpdate(icon, time)
+	-- Upvalue things that will be referenced a lot in our loops.
 	local Alpha, UnAlpha, Units = icon.Alpha, icon.UnAlpha, icon.Units
 
 	for u = 1, #Units do
@@ -205,6 +249,8 @@ local function DR_OnUpdate(icon, time)
 
 		if dr then
 			if dr.start + dr.duration <= time then
+				-- The timer is expired.
+
 				icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
 					icon.Alpha,
 					dr.tex,
@@ -217,13 +263,13 @@ local function DR_OnUpdate(icon, time)
 					return
 				end
 			else
-				local duration = dr.duration
+				-- The timer is not expired.
+
 				local amt = dr.amt
-				
 				icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
 					icon.UnAlpha,
 					dr.tex,
-					dr.start, duration,
+					dr.start, dr.duration,
 					amt, amt .. "%",
 					unit, GUID
 				)
@@ -232,6 +278,7 @@ local function DR_OnUpdate(icon, time)
 				end
 			end
 		else
+			-- The unit doesn't have any DR.
 			icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
 				icon.Alpha,
 				icon.FirstTexture,
@@ -246,6 +293,7 @@ local function DR_OnUpdate(icon, time)
 	end
 	
 	if icon.ShowWhenNone then
+		-- Nothing found. Show default state of the icon.
 		icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
 			icon.Alpha,
 			icon.FirstTexture,
@@ -263,99 +311,116 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 end
 
 local CheckCategories
+-- CheckCategories is a function that will scan through the spells checked by an icon
+-- and tell the user if they are checking spells from more than one DR category in a single icon (which doesn't work).
 do	-- CheckCategories
-	local func = TMW:MakeSingleArgFunctionCached(function(NameArray)
-		local categoryTEMP = setmetatable({}, {
-			__index = function(t, k)
-				-- a ghetto sort mechanism
-				local len = 1
-				for k, v in pairs(t) do
-					len = len + 1
-				end
-				local str = format("%3.0f\001", len)
-				t[k] = str
-				return str
-			end
-		})
+	local length = 0
 
-		local firstCategory, doWarn
+	-- Holds the spells found from each category. Also increments the counter when a new category is found.
+	local categories = setmetatable({}, {
+		__index = function(t, k)
+			local tbl = {
+				order = length,
+				str = "",
+			}
+			length = length + 1
+			t[k] = tbl
+			return tbl
+		end
+	})
+
+	local func = function(NameArray)
+		local firstCategory
 		local append = ""
 
 		for i, IDorName in ipairs(NameArray) do
 			for category, str in pairs(TMW.BE.dr) do
-				if TMW:IsStringInSemicolonList(str, IDorName) or TMW:GetSpellNames(str, 1, nil, 1, 1)[IDorName] then
-					if not firstCategory then
-						firstCategory = category
-					end
-					categoryTEMP[category] = categoryTEMP[category] .. ";" .. TMW:RestoreCase(IDorName)
-					if firstCategory ~= category then
-						doWarn = true
-					end
+
+				local Names = TMW:GetSpells(str)
+
+				-- Check if the spell being checked by the icon is in the DR category that we are looking at.
+				if Names.Hash[IDorName] or Names.StringHash[IDorName] then
+					
+					-- Record it as the first category found if we haven't found one yet.
+					firstCategory = firstCategory or category
+
+					-- Stick the current spell onto the string for the category.
+					categories[category].str = categories[category].str .. ";" .. TMW:RestoreCase(IDorName)
 				end
 			end
 		end
 
-		if next(categoryTEMP) then
-			for category, string in TMW:OrderedPairs(categoryTEMP, "values") do
-				string = strmatch(string, ".*\001(.*)")
-				append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(string))
-			end
+		-- If there was more than one category of spells found, we need to warn the user about it.
+		local doWarn = length > 1
+
+		-- Create a string of every category and all the spells found for that category.
+		for category, data in TMW:OrderedPairs(categories, TMW.OrderSort, true) do
+			append = append .. format("\r\n\r\n%s:\r\n%s", L[category], TMW:CleanString(data.str))
 		end
+
+		-- Reset for the next use.
+		wipe(categories)
+		length = 0
 		
-		return {
-			append = append,
-			doWarn = doWarn,
-			firstCategory = firstCategory,
-		}
-	end)
+		return append, doWarn, firstCategory
+	end
 
 	CheckCategories = function(icon)
-		local result = func(icon.NameArray)
-		icon:SetInfo("spell", result.firstCategory)
+		local append, doWarn, firstCategory = func(icon.Spells.Array)
+
 
 		if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
-			if result.doWarn then
+			if doWarn then
 				TMW.HELP:Show{
 					code = "ICON_DR_MISMATCH",
+					codeOrder = 5,
 					icon = icon,
 					relativeTo = TellMeWhen_ChooseName,
 					x = 0,
 					y = 0,
-					text = format(L["WARN_DRMISMATCH"] .. result.append)
+					text = format(L["WARN_DRMISMATCH"] .. append)
 				}
 			else
 				TMW.HELP:Hide("ICON_DR_MISMATCH")
 			end
 		end
+
+		return firstCategory
 	end
 end
 
 
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
-	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 	
-	-- This looks really stupid, but it works exactly how it should.
-	local oldDRName = icon.Name
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
+
+	
+	-- If the spells being checked by the icon have changed since the last icon setup,
+	-- wipe the table that holds all the DR info for every unit.
 	if not icon.oldDRName then
 		icon.DRInfo = icon.DRInfo or {}
 		icon.oldDRName = icon.Name
-	elseif icon.DRInfo and oldDRName ~= icon.Name then
+	elseif icon.oldDRName and icon.oldDRName ~= icon.Name then
 		wipe(icon.DRInfo)
 	end
 	
+	-- Update this local from the global setting.
 	DRReset = TMW.db.global.DRDuration
 	
-	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
-	
-	icon.FirstTexture = SpellTextures[icon.NameFirst]
+	icon.FirstTexture = SpellTextures[icon.Spells.First]
 
 	-- Do the Right Thing and tell people if their DRs mismatch
-	CheckCategories(icon)
+	local firstCategoy = CheckCategories(icon)
 
-	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
+	icon:SetInfo("texture; spell",
+		Type:GetConfigIconTexture(icon),
+		firstCategoy
+	)
 
+
+
+	-- Setup events and update functions
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		for event in pairs(icon.UnitSet.updateEvents) do

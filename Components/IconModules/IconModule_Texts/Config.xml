@@ -64,6 +64,8 @@
 								TMW:CInit(self, {
 									func = TMW.TEXT.CopyString_DropDown,
 								})
+								
+								self:SetScrollable(true)
 								self.wrapTooltips = false
 							</OnLoad>
 						</Scripts>
@@ -91,9 +93,9 @@
 				Set the text for this text display
 			-->
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
-				<Attributes>
-					<Attribute name="tmw-class" type="string" value="Config_EditBox_DogTags"/>
-				</Attributes>
+				<KeyValues>
+					<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
+				</KeyValues>
 
 				<Size y="15"/>
 				<Anchors>
@@ -113,7 +115,7 @@
 						TMW:CInit(self, {
 							setting = self:GetParent():GetID(),
 							OnTextChanged = function(self)
-								TMW.TEXT:SetTextDisplayContainerHeight(self:GetParent())
+								TMW.TEXT:ResizeTextDisplayFrame(self:GetParent())
 							end,
 							OnEditFocusLost = function(self)
 								TMW.TEXT:LoadConfig()
@@ -256,6 +258,8 @@
 									func = TMW.TEXT.Layout_DropDown,
 								})
 
+								self:SetScrollable(true)
+
 								-- Save settings before changing the layout (most notably, save the text for the text displays)
 								self.Button:HookScript("OnClick", function(self)
 									TMW.IE:SaveSettings()
@@ -275,22 +279,9 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						hooksecurefunc(self.Error, "SetText", function(self, text)
-							TMW.TEXT:ResizeParentFrame()
-						end)
 						self.Error:SetWidth(self:GetWidth() - 20)
 					</OnLoad>
 				</Scripts>
-			</Frame>
-			
-			<!--
-				Container that holds instances of TellMeWhen_TextDisplayGroup, arranged vertically.
-			-->
-			<Frame name="$parentFontStrings" parentKey="FontStrings" >
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentLayout" relativePoint="BOTTOMLEFT" x="0" y="16"/>
-					<Anchor point="BOTTOMRIGHT" y="36"/>
-				</Anchors>
 			</Frame>
 		</Frames>
 		<Scripts>

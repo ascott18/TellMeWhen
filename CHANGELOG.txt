@@ -1,3 +1,29 @@
+===v7.1.0===
+ * TellMeWhen has been updated for Warlords of Draenor. Please open a ticket on CurseForge for TMW if you notice anything missing.
+ 
+ * New icon types:
+ ** All-Unit Buffs/Debuffs. This icon type is mainly useful for tracking your multi-dotting on targets which might not have a unitID.
+ ** Combat Event Error. This icon type reacts to messages like "Must be behind the target" or "You are already at full health".
+
+ * New icon display method: Vertical Bars.
+
+ * New conditions
+ ** Instance Size
+ ** Zone PvP Type
+
+ * You can now set a rotation amount for a icon's text displays.
+ * The "Highlight timer edge" setting is back.
+ * You can now export all your global groups at once.
+
+ * The suggestion list now defers its sorting so that input is more responsive.
+ * The suggestion list is now much smarter at suggesting things. For Example, "swp" will now suggestion "Shadow Word: Pain", and "dis mag" will suggest "Dispel Magic".
+ 
+
+====Bug Fixes====
+ * Fixed another issue with ElvUI's timer texts (they weren't going away when they should have been).
+ * A whole lot of other minor bugs have been fixed - too many to list here.
+
+
 ===v7.0.3===
  * Re-worked the Instance Type condition to make it more extensible in the future, and also added a few missing instance types to it.
  * Added a Unit Specialization condition that can check the specs of enemies in arenas, and all units in battlegrounds.

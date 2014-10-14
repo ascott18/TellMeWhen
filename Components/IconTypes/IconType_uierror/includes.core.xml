@@ -4,8 +4,7 @@
 <Include file="Config.xml"/>
  -->
  
-<!-- 
-<Include file="Config.xml"/>
- -->
+
+<Script file="uierror.lua"/>
 
 </Ui>

@@ -154,7 +154,7 @@ ConditionCategory:RegisterCondition(3,	 "MOUSEOVER", {
 	icon = "Interface\\Icons\\Ability_Marksmanship",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c, parent)
-		return [[c.True == ]] .. parent:GetName() .. [[:IsMouseOver()]]
+		return [[BOOLCHECK( ]] .. parent:GetName() .. [[:IsMouseOver() )]]
 	end,
 	-- events = -- there is no good way to handle events for this condition
 })
@@ -245,7 +245,7 @@ ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 	},
 	funcstr = function(c)
 		if c.Name ~= "" then
-			return [[IsQuestFlaggedCompleted(c.NameFirst) == c.1nil]]
+			return [[BOOLCHECK( IsQuestFlaggedCompleted(c.NameFirst) )]]
 		else
 			return [[false]]
 		end

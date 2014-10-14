@@ -104,7 +104,12 @@ View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
 	Module.texture:SetPoint("LEFT", icon)
 	Module.texture:SetSize(gspv.SizeY, gspv.SizeY)
 end)
-View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, true)
+View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, function(Module, icon)
+	Module:Enable()
+	
+	Module.bar:SetOrientation("HORIZONTAL")
+	Module.bar:SetRotatesTexture(false)
+end)
 View:ImplementsModule("IconModule_Texts", 70, true)
 View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, icon)
 	local Modules = icon.Modules

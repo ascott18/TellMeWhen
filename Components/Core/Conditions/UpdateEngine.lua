@@ -163,31 +163,13 @@ TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", UpdateEngine, "OnUpdate
 
 
 -- Automatically update all used ConditionObjects after a TMW_GLOBAL_UPDATE_POST.
-do
-	local RequestedObjects = {}
-	local GetConditionObject_old = CNDT.GetConditionObject
-
-	-- Wrap around CNDT:GetConditionObject(...) so that we can figure out what ConditionObjects
-	-- were requested in this update cycle so we don't update unused condition objects.
-	function CNDT:GetConditionObject(...)
-		local ConditionObject = GetConditionObject_old(CNDT, ...)
-
-		if ConditionObject then
-			RequestedObjects[ConditionObject] = true
-		end
-
-		return ConditionObject
-	end
-
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-		wipe(RequestedObjects)
-	end)
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
-		for ConditionObject in pairs(RequestedObjects) do
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+	for _, ConditionObject in pairs(TMW.C.ConditionObject.instances) do
+		if ConditionObject.registeredForUpdating then
 			ConditionObject:Check()
 		end
-	end)
-end
+	end
+end)
 
 
 
@@ -196,9 +178,9 @@ end
 -- Interfaces with ConditionObject
 -------------------------------------------
 
--- Top level methods for auto-updating, still private because they are called by ConditionObject
+-- Top level methods for auto-updating, still private(ish) because they are called by ConditionObject
 function UpdateEngine:RegisterObject(ConditionObject)
-	if ConditionObject.UpdateMethod == "OnUpdate" then
+	if ConditionObject.UpdateMethod == "OnUpdate" and ConditionObject.doesAutoUpdate then
 		self:RegisterObjForOnUpdate(ConditionObject)
 		
 	elseif ConditionObject.UpdateMethod == "OnEvent" then

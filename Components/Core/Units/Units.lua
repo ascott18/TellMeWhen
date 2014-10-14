@@ -45,22 +45,22 @@ local unitsWithExistsEvent = UNITS.unitsWithExistsEvent
 UNITS.unitsWithBaseExistsEvent = {}
 
 UNITS.Units = {
-	{ value = "player", 			text = PLAYER .. " " .. L["PLAYER_DESC"]  						  },
-	{ value = "target", 			text = TARGET 													  },
-	{ value = "targettarget", 		text = L["ICONMENU_TARGETTARGET"] 								  },
-	{ value = "focus", 				text = L["ICONMENU_FOCUS"] 										  },
-	{ value = "focustarget", 		text = L["ICONMENU_FOCUSTARGET"] 								  },
-	{ value = "pet", 				text = PET 														  },
-	{ value = "pettarget", 			text = L["ICONMENU_PETTARGET"] 									  },
-	{ value = "mouseover", 			text = L["ICONMENU_MOUSEOVER"] 									  },
-	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]  							  },
-	{ value = "vehicle", 			text = L["ICONMENU_VEHICLE"] 									  },
-	{ value = "party", 				text = PARTY, 							range = MAX_PARTY_MEMBERS },
-	{ value = "raid", 				text = RAID, 							range = MAX_RAID_MEMBERS  },
-	{ value = "arena",				text = ARENA, 							range = 5				  },
-	{ value = "boss", 				text = BOSS, 							range = MAX_BOSS_FRAMES	  },
-	{ value = "maintank", 			text = L["MAINTANK"], 					range = MAX_RAID_MEMBERS  },
-	{ value = "mainassist", 		text = L["MAINASSIST"],					range = MAX_RAID_MEMBERS  },
+	{ value = "player",				text = PLAYER .. " " .. L["PLAYER_DESC"] 							},
+	{ value = "target",				text = TARGET														},
+	{ value = "targettarget",		text = L["ICONMENU_TARGETTARGET"]									},
+	{ value = "focus",				text = L["ICONMENU_FOCUS"]											},
+	{ value = "focustarget",		text = L["ICONMENU_FOCUSTARGET"]									},
+	{ value = "pet",				text = PET 															},
+	{ value = "pettarget",			text = L["ICONMENU_PETTARGET"]										},
+	{ value = "mouseover",			text = L["ICONMENU_MOUSEOVER"]										},
+	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]								},
+	{ value = "vehicle",			text = L["ICONMENU_VEHICLE"]										},
+	{ value = "party",				text = PARTY,							range = MAX_PARTY_MEMBERS	},
+	{ value = "raid",				text = RAID,							range = MAX_RAID_MEMBERS	},
+	{ value = "arena",				text = ARENA,							range = 5					},
+	{ value = "boss",				text = BOSS,							range = MAX_BOSS_FRAMES		},
+	{ value = "maintank",			text = L["MAINTANK"],					range = MAX_RAID_MEMBERS	},
+	{ value = "mainassist",			text = L["MAINASSIST"],					range = MAX_RAID_MEMBERS	},
 }
 
 

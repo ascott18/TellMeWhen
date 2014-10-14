@@ -18,7 +18,7 @@ The funcstr field is the only one that is required. Errors may happen with the o
 ** [String] Localized description of the condition.
 
 * icon 
-** [Function>|Table>|String] Icon texture that will be shown in the condition type selection dropdown menu for this condition.
+** [Function>|String] Icon texture that will be shown in the condition type selection dropdown menu for this condition.
 
 * tcoords 
 ** [Table] Array-style table that defines the tex coords that will be set for the icon in the dropdown.
@@ -30,7 +30,7 @@ The funcstr field is the only one that is required. Errors may happen with the o
 
 == Slider & Value - Text
 * formatter 
-** [Function>|Table>|String] Maps numeric slider values with the text that should be displayed for it.
+** [TMW.C.Formatter] Maps numeric slider values with the text that should be displayed for it.
 * texttable 
 ** [Function>|Table>|String] Older method to map numeric slider values with the text that should be displayed for it. Will be wrapped with a formatter. You should not define both a formatter and a texttable.
 
@@ -139,10 +139,10 @@ The funcstr field is the only one that is required. Errors may happen with the o
 ** [Function>|String] A string, or a function that returns a string when called with the parameters {{{(conditionSettings, parent)}}} (parent represents the group or icon that is requesting the condition), that represents a single Lua expression that will be evaluated to determine the state of the condition.
 ** There are many substitutions that are automatically performed on {{{funcstr}}} to insert settings. For more information about the implementation of these, look at CNDT:DoConditionSubstitutions() in Conditions.lua. All available substitutions are listed below.
 ** Some examples of funcstrs:
-*** <<code lua>> [[UnitIsUnit(c.Unit, c.Unit2) == c.1nil]] <</code>>
+*** <<code lua>> [[BOOLCHECK( UnitIsUnit(c.Unit, c.Unit2) )]] <</code>>
 *** <<code lua>> [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]] <</code>>
 *** <<code lua>> funcstr = function(c)
-		return [[AuraStacks(c.Unit, c.NameFirst, c.NameName, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraStacks(c.Unit, c.NameFirst, c.NameString, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end, <</code>>
 
 
@@ -184,7 +184,7 @@ end <</code>>
 *** <<code lua>>anticipate = [[local _, dur = GetWeaponEnchantInfo()
   local VALUE = time + ((dur or 0)/1000) - c.Level]] <</code>>
 *** <<code lua>>anticipate = function(c)
-  return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameName, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+  return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameString, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
   local VALUE
   if dur and dur > 0 then
     VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
@@ -200,14 +200,14 @@ end<</code>>
 * "c.Level"
 ** Represents the raw numeric value of the slider. The substituted value will have been divided by 100 if the {{{percent}}} field is set to true.
 
-* "c.True"
-** Substitutes true when the slider is set to 0, otherwise substitutes false.
-* "c.False"
-** Substitutes true when the slider is set to 1, otherwise substitutes false.
-* "c.1nil"
-** Substitutes 1 when the slider is set to 0, otherwise substitutes nil.
-* "c.1nil"
-** Substitutes 1 when the slider is set to 1, otherwise substitutes nil.
+* "c.True" (Depricated)
+** Substitutes true when the slider is set to 0, otherwise substitutes false. Depricated - use BOOLCHECK(...)" instead.
+* "c.False" (Depricated)
+** Substitutes true when the slider is set to 1, otherwise substitutes false. Depricated - use "not BOOLCHECK(...)" instead.
+* "c.1nil" (Depricated)
+** Substitutes 1 when the slider is set to 0, otherwise substitutes nil. Depricated - use BOOLCHECK(...)" instead.
+* "c.nil1" (Depricated)
+** Substitutes 1 when the slider is set to 1, otherwise substitutes nil. Depricated - use "not BOOLCHECK(...)" instead.
 
 * "c.Operator"
 ** Substitutes a valid Lua operator (<, >, <=, >=, ~=, ==).
@@ -227,7 +227,7 @@ end<</code>>
 ** Substitues the value from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted.
 * "c.GCDReplacedNameFirst" & "c.GCDReplacedNameFirst2"
 ** Behaves exactly like "c.NameFirst" except that if the value of the setting is equal to "gcd", TMW.GCDSpell will be substituted instead.
-* "c.NameName" & "c.NameName2"
+* "c.NameString" & "c.NameString2"
 ** Substitues the spell name from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted. If the value inputted into these textboxes is not a valid spell, the raw value from the textbox will be used.
 
 * "c.Item" & "c.Item2"
@@ -237,6 +237,9 @@ end<</code>>
 ** Substitutes the boolean that represents the checked states of the first and second editboxes' check boxes, respectively.
 
 * "LOWER(...)"
-** A preprocessor function that will strlower anything in the vararg (strings or anything else). May not behave if the vararg contains any parentheses, so take caution.
+** A preprocessor function that will strlower anything in the vararg (strings or anything else).
+
+* "BOOLCHECK(...)"
+** A preprocessor function that will check that the vararg evaulates to true if c.Level == 0, or false if c.Level == 1.
 
 	

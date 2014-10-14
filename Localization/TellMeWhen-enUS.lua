@@ -62,6 +62,7 @@ This backup, created from your session that began %s, has been restored.]]
 
 
 L["DIALOG_HEADER_CHANGELOG"] = "TellMeWhen Changelog"
+L["CHANGELOG_LAST_VERSION"] = "Previous Installed Version"
 
 
 L["NOGROUPS_DIALOG_BODY"] = [[Your current TellMeWhen configuration and/or player specialization does not allow any TellMeWhen groups to be shown, so there is nothing to configure.
@@ -94,9 +95,15 @@ If enabled, the data harvested by this icon will fill up the group.
 
 All other icons in the group will be made unavailable for individual configuration.
 
-You may wish to customize the group's layout direction and/or sorting options if you decide to use it as a controlled group.]]
+You may wish to customize the group's layout direction and/or sorting options if you use it as a controlled group.]]
 L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"] = [[The current icon type does not have the ability to control an entire group.]]
 
+
+
+L["UIPANEL_GROUP_QUICKSORT_DEFAULT"] = "Sort by ID"
+L["UIPANEL_GROUP_QUICKSORT_DEFAULT_DESC"] = "Quickly apply settings to sort the group by iconID. This is the default group behavior."
+L["UIPANEL_GROUP_QUICKSORT_DURATION"] = "Sort by Duration"
+L["UIPANEL_GROUP_QUICKSORT_DURATION_DESC"] = "Quickly apply settings to sort the group by duration."
 
 
 
@@ -181,6 +188,7 @@ L["RESIZE_TOOLTIP"] = [[|cff7fffffClick-and-drag|r to resize]] -- keep this like
 L["RESIZE_TOOLTIP_SCALEXY"] = [[|cff7fffffClick-and-drag|r to scale
 |cff7fffffHold Control|r to invert scale axis]]
 L["RESIZE_TOOLTIP_SCALEY_SIZEX"] = [[|cff7fffffClick-and-drag|r to scale]]
+L["RESIZE_TOOLTIP_SCALEX_SIZEY"] = [[|cff7fffffClick-and-drag|r to scale]]
 L["RESIZE_TOOLTIP_CHANGEDIMS"] = [[|cff7fffffRight-Click-and-drag|r to change number of groups and columns]]
 
 L["RESIZE_GROUP_CLOBBERWARN"] = [[When shrinking a group using |cff7fffffRight-Click-and-drag|r, you may clobber some icons. These icons have been saved temporarily and will be restored if you increase the size again via |cff7fffffRight-Click-and-drag|r, but will be lost forever if you log out or reload your UI. ]]
@@ -274,6 +282,20 @@ L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effec
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_BUFFDEBUFF_DESC"] = [[Tracks buffs and/or debuffs.]]
 
+L["ICONMENU_DOTWATCH"] = "All-Unit Buffs/Debuffs"
+L["ICONMENU_DOTWATCH_DESC"] = [[Attempts to track the buffs and debuffs that you apply on all units, regardless of unitID.
+
+Useful for tracking multi-dotting.
+
+This icon type MUST be used as a Group Controller - it cannot be a standalone icon.]]
+L["ICONMENU_DOTWATCH_GCREQ"] = "Must be a group controller"
+L["ICONMENU_DOTWATCH_GCREQ_DESC"] = [[This icon type must be a group controller in order to function. You cannot use it as a standalone icon.
+
+To make an icon into a group controller, it must be the first icon in a group (i.e. it has an iconID of 1). Then, enable the %q setting next to the %q checkbox.]]
+L["ICONMENU_DOTWATCH_AURASFOUND_DESC"] = "Set the icon opacity level for when any units have any of the buffs/debuffs being checked."
+L["ICONMENU_DOTWATCH_NOFOUND_DESC"] = "Set the icon opacity level for when none of the tracked buffs/debuffs are found."
+
+
 L["ICONMENU_BUFFCHECK"] = "Buff/Debuff Check"
 L["ICONMENU_BUFFCHECK_DESC"] = [[Checks if a buff is absent from any unit that you check.
 
@@ -291,8 +313,6 @@ L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon enchants.]=]
 
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
-L["ICONMENU_GHOUL"] = "Non-%s ghoul"
-L["ICONMENU_GHOUL_DESC"] = [[Tracks your ghoul if you don't have the %s talent.]]
 L["ICONMENU_RUNEOFPOWER_DESC"] = [[Tracks the runes from the %s talent.]]
 L["ICONMENU_MUSHROOMS"] = "%s"
 L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
@@ -335,6 +355,20 @@ L["ICONMENU_CLEU"] = "Combat Event"
 L["ICONMENU_CLEU_DESC"] = [=[Tracks combat events.
 
 Examples include spell reflects, misses, instant casts, and deaths, but the icon can track virtually anything.]=]
+
+
+
+L["ICONMENU_UIERROR"] = "Combat Error Event"
+L["ICONMENU_UIERROR_DESC"] = [=[Tracks UI error messages.
+
+Examples include things like "You are dead" and "You have no target".]=]
+L["ICONMENU_CHOOSENAME_EVENTS"] = "Choose message(s) to check"
+L["ICONMENU_CHOOSENAME_EVENTS_DESC"] = [=[Enter the error messages that you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
+
+Error messages much be matched exactly as they are typed, but are case-insensitive.]=]
+
+
+
 
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
@@ -471,9 +505,7 @@ L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only chec
 L["ICONMENU_SHOWTIMER"] = "Show timer"
 L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
-L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
-
-This is only applicable if OmniCC (or similar) is installed.]]
+L["ICONMENU_SHOWTIMERTEXT_DESC"] = "Check this option to display a textual display of the remaining cooldown/duration on the icon."
 L["ICONMENU_INVERTTIMER"] = "Invert shading"
 L["ICONMENU_INVERTTIMER_DESC"] = "Check this option to invert the shading effect of the timer."
 L["ICONMENU_SHOWTIMERTEXT_NOOCC"] = "Show ElvUI timer text"
@@ -625,6 +657,7 @@ Advanced anchor settings are available in the group options.]]
 L["ICONMENU_SPLIT"] = "Split into new group"
 L["ICONMENU_SPLIT_GLOBAL"] = "Split into new |cff00c300global|r group"
 L["ICONMENU_SPLIT_DESC"] = "Create a new group and move this icon into it. Many group settings will carry over to the new group."
+L["ICONMENU_SPLIT_NOCOMBAT_DESC"] = "Can't create new groups while in combat. Leave combat to split into a new group."
 L["ICONMENU_COPYEVENTHANDLERS"] = "Copy %d |4Notification:Notifications;"
 L["ICONMENU_COPYEVENTHANDLERS_DESC"] = "Copy %s's %d |4Notification:Notifications; to %s."
 L["ICONMENU_COPYCONDITIONS"] = "Copy %d |4Condition:Conditions;"
@@ -724,6 +757,8 @@ L["UIPANEL_GROUPTYPE_ICON"] = "Icon"
 L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the group using TellMeWhen's traditional icon display.]]
 L["UIPANEL_GROUPTYPE_BAR"] = "Bar"
 L["UIPANEL_GROUPTYPE_BAR_DESC"] = [[Displays the icons in the group with progress bars attached to the icons.]]
+L["UIPANEL_GROUPTYPE_BARV"] = "Vertical Bar"
+L["UIPANEL_GROUPTYPE_BARV_DESC"] = [[Displays the icons in the group with vertical progress bars attached to the icons.]]
 
 L["UIPANEL_ICONS"] = "Icons"
 L["UIPANEL_COLORS"] = "Colors"
@@ -800,6 +835,8 @@ L["UIPANEL_TOOLTIP_PRIMARYSPEC"] = "Check to show this group while your primary 
 L["UIPANEL_TOOLTIP_SECONDARYSPEC"] = "Check to show this group while your secondary spec is active"
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"
+L["UIPANEL_FORCEDISABLEBLIZZ"] = "Disable Blizzard cooldown text"
+L["UIPANEL_FORCEDISABLEBLIZZ_DESC"] = "Forces Blizzard's built in cooldown timer text to be disabled. It will automatically be disabled if you have an addon installed that is known to be capable of providing this text."
 L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
 
 L["UIPANEL_DRDURATION"] = "DR Duration"
@@ -963,6 +1000,11 @@ L["UIPANEL_FONT_HEIGHT_DESC"] = [[Set the maximum height of the text display. If
 
  If this text display is anchored on both its top and bottom sides, this setting will have no effect.]]
 
+L["UIPANEL_FONT_ROTATE"] = "Rotation"
+L["UIPANEL_FONT_ROTATE_DESC"] = [[Set the amount, in degrees, that you want to rotate the text display by.
+
+The way this is implemented is not supported by Blizzard, so if it behaves strangely, there isn't much that can be done.]]
+
 L["UIPANEL_FONT_XOFFS"] = "X Offset"
 L["UIPANEL_FONT_XOFFS_DESC"] = "The x-axis offset of the anchor"
 L["UIPANEL_FONT_YOFFS"] = "Y Offset"
@@ -1023,6 +1065,7 @@ L["TEXTLAYOUTS_ERROR_FALLBACK"] = [[The text layout for this icon could not be f
 L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"] = "<No Layout>"
 L["TEXTLAYOUTS_DEFAULTS_ICON1"] = "Icon Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_BAR1"] = "Bar Layout 1"
+L["TEXTLAYOUTS_DEFAULTS_BAR2"] = "Vertical Bar Layout 1"
 L["TEXTLAYOUTS_DEFAULTS_DURATION"] = "Duration"
 L["TEXTLAYOUTS_DEFAULTS_SPELL"] = "Spell"
 L["TEXTLAYOUTS_DEFAULTS_STACKS"] = "Stacks"
@@ -1190,6 +1233,7 @@ L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
 L["CONDITIONPANEL_UNITSPEC"] = "Unit Specialization"
+L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"] = "Choose Specs..."
 L["CONDITIONPANEL_UNITSPEC_DESC"] = "This condition ONLY works for BATTLEGROUND and ARENA ENEMIES, as well as yourself."
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
 L["CONDITIONPANEL_ROLE"] = "Unit Group Role"
@@ -1226,9 +1270,16 @@ The NPC ID is the number found in the URL when looking at an NPC's Wowhead page 
 Players and other units without an NPC ID will be treated as having an ID of 0 in this condition.]]
 L["CONDITIONPANEL_NPCIDTOMATCH"] = "ID to Match"
 L["CONDITIONPANEL_NPCIDTOOLTIP"] = "You can enter multiple NPC IDs to be matched by separating each one with a semicolon (;). The condition will pass if any IDs are matched."
+L["CONDITIONPANEL_ZONEPVP"] = "Zone PvP Type"
+L["CONDITIONPANEL_ZONEPVP_FFA"] = "Free-For-All PvP"
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
 L["CONDITIONPANEL_INSTANCETYPE_NONE"] = "Outside"
+L["CONDITIONPANEL_INSTANCETYPE_LEGACY"] = "%s (Legacy)"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
+L["CONDITIONPANEL_GROUPSIZE"] = "Instance Size"
+L["CONDITIONPANEL_GROUPSIZE_DESC"] = [[Checks against the number of players that the current instance is tuned for.
+
+This includes the current flex raid tuning.]]
 L["CONDITIONPANEL_SWIMMING"] = "Swimming"
 L["CONDITIONPANEL_RESTING"] = "Resting"
 L["CONDITIONPANEL_INPETBATTLE"] = "In pet battle"
@@ -1265,7 +1316,8 @@ If more help is needed (but not help about how to write Lua code), open a ticket
 
 L["CONDITIONPANEL_OLD"] = "<|cffff1300OLD|r>"
 L["CONDITIONPANEL_OLD_DESC"] = "<|cffff1300OLD|r> - There is a newer version of this condition available."
-L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU"] = "Choose %ss..."
+L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"] = "Choose Types..."
+L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
 L["CONDITIONPANEL_BITFLAGS_SELECTED"] = "|cff7fffffSelected|r:"
 L["CONDITIONPANEL_BITFLAGS_NOT"] = "Not"
@@ -1383,12 +1435,6 @@ L["PET_TYPE_TENACITY"] = "Tenacity"
 L["PET_TYPE_FEROCITY"] = "Ferocity"
 
 L["SWINGTIMER"] = "Swing Timer"
-L["MELEEHASTE"] = "Melee Haste"
-L["MELEECRIT"] = "Melee Crit"
-L["RANGEDHASTE"] = "Ranged Haste"
-L["RANGEDCRIT"] = "Ranged Crit"
-L["SPELLHASTE"] = "Spell Haste"
-L["SPELLCRIT"] = "Spell Crit"
 L["ITEMINBAGS"] = "Item count (includes charges)"
 L["ITEMEQUIPPED"] = "Item is equipped"
 L["ITEMCOOLDOWN"] = "Item cooldown"
@@ -1677,6 +1723,9 @@ L["EXPORT_f"] = "Export %s"
 L["fPROFILE"] = "Profile: %s"
 L["fTEXTLAYOUT"] = "Text Layout: %s"
 
+L["fGROUPS"] = "Groups: %s"
+L["EXPORT_ALLGLOBALGROUPS"] = "All |cff00c300Global|r Groups"
+
 L["IMPORT_NEWGUIDS"] = [[The data you just imported conflicted with the unique identifiers of %d |4group:groups; and %d |4icon:icons;. This probably means that you have imported this data, or an older version of it, before.
 
 New unique identifiers have been assigned to the imported data. Icons that you import in the future that are supposed to reference the new data may not function as desired - they will instead reference the old icons that conflicted with the new data.
@@ -1701,6 +1750,7 @@ L["CACHING"] = [[TellMeWhen is caching and filtering all spells in the game. Thi
 You do not have to wait for this process to complete in order to use TellMeWhen. Only the suggestion list is dependent on the completion of the spell cache.]]
 L["CACHINGSPEED"] = "Spells per frame:"
 L["SUGGESTIONS"] = "Suggestions:"
+L["SUGGESTIONS_SORTING"] = "Sorting..."
 L["SUGGESTIONS_DOGTAGS"] = "DogTags:"
 L["SUG_TOOLTIPTITLE_GENERIC"] = [[As you type, TellMeWhen will try to determine the input that you were looking for.
 
@@ -1743,6 +1793,8 @@ L["SUG_INSERTID"] = "%s to insert as an ID"
 L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
 L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
 L["SUG_INSERTTEXTSUB"] = "%s to insert tag"
+L["SUG_INSERTTUNITID"] = "%s to insert unitID"
+L["SUG_INSERTNAME"] = "%s to insert error message"
 
 L["SUG_INSERTNAME_INTERFERE"] = [[%s to insert as a name
 
@@ -1754,7 +1806,6 @@ You should insert by ID instead.|r]]
 L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- enUS
 L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"
 L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
-L["SUG_MATCH_WPNENCH_ENCH"] = "(.*) Weapon" -- inconsistent key. oops.
 
 L["SUG_ATBEGINING"] = "Suggester: Match beginning"
 L["SUG_ATBEGINING_DESC"] = "If checked, the suggestion list will only display spells that start with the same name as the spell that is being typed in. Otherwise, it will match any part of a spell."
@@ -1821,7 +1872,10 @@ L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of th
 Because this event occurs every time the icon is updated while a timer is running, you must set a condition, and the event will only occur when the state of that condition changes.]]
 
 L["SOUND_EVENT_ONCLEU"] = "On Combat Event"
-L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when a combat event that should be processed by the icon occurs.]]
+L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when the icon processes a combat event.]]
+
+L["SOUND_EVENT_ONUIERROR"] = "On Combat Error Event"
+L["SOUND_EVENT_ONUIERROR_DESC"] = [[This event triggers when the icon processes a combat event error.]]
 
 L["SOUND_EVENT_ONICONSHOW"] = "On Other Icon Show"
 L["SOUND_EVENT_ONICONSHOW_DESC"] = [[This event triggers when another icon (not this icon) is shown.
@@ -2348,9 +2402,6 @@ L["HELP_CNDT_PARENTHESES_FIRSTSEE"] = [[You can group sets of conditions togethe
 L["HELP_CNDT_ANDOR_FIRSTSEE"] = [[You can choose whether both conditions are required to succeed or if only one needs to succeed.
 
 |cff7fffffClick|r this setting between your conditions to change this behavior if you wish to do so.]]
-L["HELP_IE_TIMERTEXTHANDLER_MISSING"] = [[TellMeWhen cannot find any installed addon that it knows to be capable of handling this setting.
-
-If you enable this setting but do not see any timer texts, please install the addon "OmniCC" from Curse.com or WoWInterface.com.]]
 
 L["HELP_SIMPLEGSTAB"] = "Click to toggle between group-only options and full main options."
 
@@ -2414,7 +2465,6 @@ L["ImmuneToStun"] = "Immune To Stun"
 L["ImmuneToMagicCC"] = "Immune To Magic CC"
 L["Disoriented"] = "Disoriented"
 L["Silenced"] = "Silenced"
-L["Disarmed"] = "Disarmed"
 L["Rooted"] = "Rooted"
 L["Shatterable"] = "Shatterable"
 L["IncreasedStats"] = "Increased Stats"
@@ -2422,28 +2472,32 @@ L["IncreasedCrit"] = "Increased Crit Chance"
 L["IncreasedMastery"] = "Increased Mastery"
 L["IncreasedAP"] = "Increased Attack Power"
 L["IncreasedSP"] = "Increased Spellpower"
-L["IncreasedSPsix"] = "Increased Spellpower (6%)"
-L["IncreasedSPten"] = "Increased Spellpower (10%)"
-L["IncreasedPhysHaste"] = "Increased Physical Haste"
-L["IncreasedSpellHaste"] = "Increased Spell Haste"
+L["IncreasedHaste"] = "Increased Haste"
 L["DamageShield"] = "Damage Shield"
 --L["BurstHaste"] = "Heroism/Bloodlust" -- defined in static formats
 L["BonusStamina"] = "Increased Stamina"
-L["BurstManaRegen"] = "Burst Mana Regen"
-L["PhysicalDmgTaken"] = "Physical Damage Taken"
-L["SpellDamageTaken"] = "Increased Spell Damage Taken"
-L["ReducedCastingSpeed"] = "Reduced Casting Speed"
-L["ReducedArmor"] = "Reduced Armor"
 L["ReducedHealing"] = "Reduced Healing"
-L["ReducedPhysicalDone"] = "Reduced Physical Damage Done"
 L["DefensiveBuffs"] = "Defensive Buffs"
 L["MiscHelpfulBuffs"] = "Misc. Helpful Buffs"
 L["SpeedBoosts"] = "Speed Boosts"
 L["DamageBuffs"] = "Damage Buffs"
+L["IncreasedVersatility"] = "Increased Versatility"
+L["IncreasedMultistrike"] = "Increased Multistrike"
 
 -- Deprecated
-L["DontMelee"] = "Don't Melee"
-L["MovementSlowed"] = "Movement Slowed"
+-- L["BurstManaRegen"] = "Burst Mana Regen"
+--L["DontMelee"] = "Don't Melee"
+--L["MovementSlowed"] = "Movement Slowed"
+--L["ReducedCastingSpeed"] = "Reduced Casting Speed"
+--L["ReducedPhysicalDone"] = "Reduced Physical Damage Done"
+--L["SpellDamageTaken"] = "Increased Spell Damage Taken"
+--L["ReducedArmor"] = "Reduced Armor"
+-- L["Disarmed"] = "Disarmed"
+--L["IncreasedSPsix"] = "Increased Spellpower (6%)"
+--L["IncreasedSPten"] = "Increased Spellpower (10%)"
+--L["IncreasedPhysHaste"] = "Increased Physical Haste"
+--L["IncreasedSpellHaste"] = "Increased Spell Haste"
+--L["PhysicalDmgTaken"] = "Physical Damage Taken"
 
 L["Heals"] = "Player Heals"
 L["PvPSpells"] = "PvP Crowd Control, etc."
@@ -2467,22 +2521,25 @@ L["worldboss"] = "World Boss"
 L["RaidWarningFrame"] = "Raid Warning Frame"
 
 
-L["DR-RandomStun"] = "Short/Random stuns"
-L["DR-ControlledStun"] = "Controlled stuns"
---L["DR-Scatter"] = "Scatter Shot"
-L["DR-Fear"] = "Fears"
+L["DR-Stun"] = "Stuns"
 L["DR-Silence"] = "Silences"
---L["DR-Banish"] = "Banish"
-L["DR-MindControl"] = "Mind Control"
---L["DR-Entrapment"] = "Entrapment"
 L["DR-Taunt"] = "Taunts"
-L["DR-Disarm"] = "Disarms"
-L["DR-Horrify"] = "Horrors"
-L["DR-Cyclone"] = "Cyclone"
-L["DR-Disorient"] = "Mesmerizes/Disorients"
-L["DR-ShortDisorient"] = "Short Mesmerizes/Disorients"
-L["DR-RandomRoot"] = "Short/Random roots"
-L["DR-ControlledRoot"] = "Controlled roots"
+L["DR-Disorient"] = "Disorients"
+L["DR-Root"] = "Roots"
+L["DR-Incapacitate"] = "Incapacitates"
+--L["DR-RandomStun"] = "Short/Random stuns"
+--L["DR-ControlledStun"] = "Controlled stuns"
+--L["DR-Horrify"] = "Horrors"
+--L["DR-Fear"] = "Fears"
+--L["DR-Cyclone"] = "Cyclone"
+--L["DR-Scatter"] = "Scatter Shot"
+--L["DR-Banish"] = "Banish"
+--L["DR-Entrapment"] = "Entrapment"
+--L["DR-MindControl"] = "Mind Control"
+--L["DR-ShortDisorient"] = "Short Mesmerizes/Disorients"
+--L["DR-Disarm"] = "Disarms"
+--L["DR-RandomRoot"] = "Short/Random roots"
+--L["DR-ControlledRoot"] = "Controlled roots"
 --L["DR-DragonsBreath"] = "Dragon's Breath"
 --L["DR-BindElemental"] = "Bind Elemental"
 --L["DR-Charge"] = "Charge"

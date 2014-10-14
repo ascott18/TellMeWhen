@@ -18,12 +18,12 @@ if not _G.C_LossOfControl then
 	return
 end
 
+local print = TMW.print
 local GetSpellTexture, GetSpellLink, GetSpellInfo =
 	  GetSpellTexture, GetSpellLink, GetSpellInfo
 local GetEventInfo = C_LossOfControl.GetEventInfo
 local GetNumEvents = C_LossOfControl.GetNumEvents
 
-local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
 
@@ -46,13 +46,28 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+
 Type:RegisterIconDefaults{
-	LoseContolTypes = { -- PLEASE NOTE: THIS IS SPELLED WRONG (i noticed too late to change it)
+	 -- Table that holds all of the loss of control types that the icon will track.
+	 -- If the blank string key is set to true, it will track all categories.
+	 -- SCHOOL_INTERRUPT is a bitfield that has bits for every spell school (using blizzard's regular spellschool bitflags)
+	LoseControlTypes = {
 		["*"] = false,
 		[""] = false,
 		SCHOOL_INTERRUPT = 0,
 	},
 }
+
+TMW:RegisterUpgrade(71038, {
+	icon = function(self, ics)
+		-- Fix the misspelled setting name "LoseContolTypes" to "LoseControlTypes"
+		if ics.LoseContolTypes then
+			TMW:CopyTableInPlaceWithMeta(ics.LoseContolTypes, ics.LoseControlTypes)
+		end
+		ics.LoseContolTypes = nil
+	end,
+})
+
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_LoseControlTypes")
 
@@ -65,24 +80,23 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 
 
 local function LoseControl_OnUpdate(icon, time)
-	-- PLEASE NOTE: LoseContolTypes IS SPELLED WRONG
-
-	local LoseContolTypes = icon.LoseContolTypes
+	local LoseControlTypes = icon.LoseControlTypes
 	
-	-- Be careful here. Slots that are explicitly disabled by the user are set false.
-	-- Slots that are disabled internally are set nil (which could change table length).
+
 	for eventIndex = 1, GetNumEvents() do 
 		local locType, spellID, text, texture, start, _, duration, lockoutSchool = GetEventInfo(eventIndex)
 		
-		local isValidType = LoseContolTypes[""]
+		local isValidType = LoseControlTypes[""]
 		if not isValidType then
 			if locType == "SCHOOL_INTERRUPT" then
-				local setting = LoseContolTypes[locType]
+				-- Check that the user has requested the schools that are locked out.
+				local setting = LoseControlTypes[locType]
 				if setting ~= 0 and lockoutSchool and lockoutSchool ~= 0 and bit.band(lockoutSchool, setting) ~= 0 then
 					isValidType = true
 				end
 			else
-				for locType, v in pairs(LoseContolTypes) do
+				-- Check that the user has requested the category that is active on the player.
+				for locType, v in pairs(LoseControlTypes) do
 					if v and _G["LOSS_OF_CONTROL_DISPLAY_" .. locType] == text then
 						isValidType = true
 						break
@@ -91,10 +105,12 @@ local function LoseControl_OnUpdate(icon, time)
 			end
 		end
 		if isValidType and not icon:YieldInfo(true, text, texture, start, duration, spellID) then
+			-- icon:YieldInfo() returns false if we don't need to harvest any more info
 			return
 		end
 	end
 	
+	-- Signal that we are done harvesting info.
 	icon:YieldInfo(false)
 end
 
@@ -140,7 +156,7 @@ Type:Register(102)
 
 
 
-
+-- Create an IDP to hold the Loss of Control catgegory that the icon is displaying the spell for. Also create a DogTag to display this info.
 local Processor = TMW.Classes.IconDataProcessor:New("LOC_CATEGORY", "locCategory")
 -- Processor:CompileFunctionSegment(t) is default.
 

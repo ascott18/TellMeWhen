@@ -60,9 +60,9 @@
 	</Frame>
 
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true" hidden="true">
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Panel"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Panel"/>
+		</KeyValues>
 
 		<Anchors>
 			<Anchor point="LEFT" x="0"/>
@@ -171,8 +171,8 @@
 								}
 
 								local s = ""
-								local array = TMW:GetSpellNames(self:GetText())
-								for k, v in pairs(TMW:GetSpellDurations(self:GetText())) do
+								local array = TMW:GetSpells(self:GetText()).ArrayNoLower
+								for k, v in pairs(TMW:GetSpells(self:GetText()).Durations) do
 									if v == 0 then
 										s = s .. (s ~= "" and "; " or "") .. array[k]
 									end
@@ -239,8 +239,7 @@
 		<Scripts>
 			<OnLoad>				
 				function self:AdjustHeight()
-					--self:SetHeight(11 + self.Name:GetHeight())
-					TMW:AnimateHeightChange(self, 11 + self.Name:GetHeight(), 0.1)
+					self:SetHeight(11 + self.Name:GetHeight())
 				end
 						
 				function self:SetLabels(title, text)
@@ -426,8 +425,7 @@
 				self.Header:SetText(TMW.L["ICONMENU_UNITSTOWATCH"])
 				
 				function self:AdjustHeight()
-					--self:SetHeight(15 + self.UnitConditions:GetHeight()+self.Unit:GetHeight())
-					TMW:AnimateHeightChange(self, 15 + self.UnitConditions:GetHeight()+self.Unit:GetHeight(), 0.1)
+					self:SetHeight(15 + self.UnitConditions:GetHeight()+self.Unit:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>
@@ -527,12 +525,12 @@
 	<Frame name="TellMeWhen_WhenCheckSet" virtual="true">
 		<Size y="40"/>
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Frame_WhenChecks"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Frame_WhenChecks"/>
+		</KeyValues>
 
 		<Frames>
-			<CheckButton name="$parentCheck" parentKey="Check" inherits="TellMeWhen_CheckTemplate">
+			<CheckButton parentKey="Check" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="5"/>
 				</Anchors>
@@ -542,10 +540,10 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<Slider name="$parentAlpha" parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
+			<Slider parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentCheck" relativePoint="RIGHT" x="5" />
+					<Anchor point="LEFT" relativeKey="$parent.Check" relativePoint="RIGHT" x="5" />
 					<Anchor point="RIGHT" x="-11" />
 				</Anchors>
 				<Scripts>
@@ -620,9 +618,11 @@
 	<ScrollFrame name="TellMeWhen_ScrollFrameTemplate" parentKey="ScrollFrame" virtual="true">
 		<Scripts>
 			<OnLoad>
+				self.AllowEdgeScrolling = false
 				self.edgeScrollMouseCursorRange = 5
 				self.edgeScrollScrollDistancePerSecond = 150
 				self.scrollPercentage = 1/2
+				self.scrollStep = nil
 			</OnLoad>
 			<OnScrollRangeChanged>
 				local yrange = self:GetVerticalScrollRange()
@@ -854,9 +854,9 @@
 	<CheckButton name="TellMeWhen_CheckTemplate" virtual="true">
 		<Size x="30" y="30"/>
 		
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_CheckButton"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_CheckButton"/>
+		</KeyValues>
 
         <Layers>
 			<Layer level="ARTWORK">
@@ -951,9 +951,9 @@
 	<EditBox name="TellMeWhen_InputBoxTemplate" enableMouse="true" virtual="true" autoFocus="false">
 		<Size y="15"/>
 		
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_EditBox"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_EditBox"/>
+		</KeyValues>
 
 		<HitRectInsets left="-1" right="-1" top="-1" bottom="-1" />
 		<TextInsets>
@@ -1052,9 +1052,9 @@
 	<Button name="TellMeWhen_ButtonTemplate" virtual="true">
 		<Size x="144" y="15"/>
 		
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Button"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Button"/>
+		</KeyValues>
 
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
@@ -1133,9 +1133,9 @@
 	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
 		<Size y="17"/>
 
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Slider"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Slider"/>
+		</KeyValues>
 
 		<Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
 			<EdgeSize>
@@ -1181,9 +1181,9 @@
 	</Slider>
 
 	<Slider name="TellMeWhen_SliderTemplate_Alpha" inherits="TellMeWhen_SliderTemplate" virtual="true">
-		<Attributes>
-			<Attribute name="tmw-class" type="string" value="Config_Slider_Alpha"/>
-		</Attributes>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Slider_Alpha"/>
+		</KeyValues>
 	</Slider>
 
 
@@ -1235,6 +1235,8 @@
 						TMW:CInit(self, {
 							func = TMW.IE.ImportExport_DropDown,
 						})
+						
+						self:SetScrollable(true)
 						self:Hide()
 					</OnLoad>
 					<OnKeyDown>
@@ -1360,6 +1362,7 @@
 					import.profile_new = true
 					import.profile_overwrite = true
 					export.profile = true
+					export.globalgroups = true
 					
 					import.group_new = true
 					-- callbacks will insert into tables as desired
@@ -1478,7 +1481,7 @@
 		</Anchors>
 
 		<Frames>
-			<Button name="$parentNeverAgain" parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="NeverAgain" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="155" y="15"/>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" x="-5" y="5"/>
@@ -1491,15 +1494,9 @@
 						TMW.IE.db.global.ConfigWarning = false
 						self:GetParent():Hide()
 					</OnClick>
-					<OnShow>
-						self:SetWidth(155)
-					</OnShow>
-					<OnHide>
-						self:SetWidth(-10)
-					</OnHide>
 				</Scripts>
 			</Button>
-			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="5" y="5"/>
@@ -1526,8 +1523,10 @@
 				TMW.IE.db.global.ConfigWarningN = TMW.IE.db.global.ConfigWarningN + 1
 				if TMW.IE.db.global.ConfigWarningN > 3 then
 					self.NeverAgain:Show()
+					self.Exit:SetPoint("BOTTOMRIGHT", self.NeverAgain, "BOTTOMLEFT", -10, 0)
 				else
 					self.NeverAgain:Hide()
+					self.Exit:SetPoint("BOTTOMRIGHT", -5, 5)
 				end
 			</OnShow>
 		</Scripts>
@@ -2000,6 +1999,11 @@
 							log:SetJustifyV("TOP")
 							log:SetSpacing(2)
 							log:SetText(v)
+
+							local version = v:match("TellMeWhen v([%d%.]+)")
+							version = version and version:gsub("%.", "")
+							version = tonumber(version)
+							log.version = version and version * 100
 							
 							--local font, size = log:GetFont()
 							--log:SetFont(font, size, "THINOUTLINE")
@@ -2072,7 +2076,7 @@
 		</Frames>
 
 		<Scripts>
-
+ 
 			<OnLoad>
 				self.title:SetText(TMW.L["DIALOG_HEADER_CHANGELOG"])
 
@@ -2089,6 +2093,15 @@
 					self.resizer.y_min = 200
 					self.resizer.y_max = function() return UIParent:GetHeight()*0.9 end
 				end)
+
+				function self:SetLastVersion(ver)
+					for _, log in ipairs(self.ScrollContainer) do
+						if log.version and ver >= log.version then
+							log:SetText(log:GetText():gsub("([\r\n]+)", " |cFFF6682F(" .. TMW.L["CHANGELOG_LAST_VERSION"] .. ")|r%1", 1))
+							break
+						end
+					end
+				end
 
 				self.background:SetAlpha(0.95)
 

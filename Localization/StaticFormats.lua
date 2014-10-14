@@ -5,7 +5,7 @@ local pname = UnitName("player")
 local spellFmt = "|T%s:0|t%s"
 local function Spell(id)
 	local name, _, tex = GetSpellInfo(id)
-	if not name or not tex then
+	if not name or name == "" or not tex then
 		return "?????"
 	end
 	if id == 42292 then
@@ -20,8 +20,6 @@ L["HELP_FIRSTUCD"] 					  	= L["HELP_FIRSTUCD"]			 		 	:format(L["ICONMENU_CHOOS
 L["HELP_MISSINGDURS"] 				  	= L["HELP_MISSINGDURS"]			 	 		:format("%s", GetSpellInfo(1766)) -- keep the first "%s" as "%s"
 L["ICONMENU_IGNORENOMANA_DESC"] 	  	= L["ICONMENU_IGNORENOMANA_DESC"]		 	:format(Spell(85288), Spell(5308))
 L["ICONMENU_REACTIVE_DESC"] 		  	= L["ICONMENU_REACTIVE_DESC"]	 		 	:format(Spell(53351), Spell(5308), Spell(17962))
-L["ICONMENU_GHOUL"] 			  		= L["ICONMENU_GHOUL"]		 	 			:format(GetSpellInfo(52143))
-L["ICONMENU_GHOUL_DESC"] 			  	= L["ICONMENU_GHOUL_DESC"]		 	 		:format(Spell(52143))
 L["ICONMENU_RUNEOFPOWER_DESC"] 		  	= L["ICONMENU_RUNEOFPOWER_DESC"]	 	 	:format(Spell(116011))
 L["ICONMENU_MUSHROOMS"] 			  	= L["ICONMENU_MUSHROOMS"]		 			:format(GetSpellInfo(88747))
 L["ICONMENU_MUSHROOMS_DESC"] 		  	= L["ICONMENU_MUSHROOMS_DESC"]	 		 	:format(Spell(88747))
@@ -51,7 +49,8 @@ L["ICONMENU_SPELLCAST_START_DESC"] 	  	= L["ICONMENU_SPELLCAST_START_DESC"]	 	:f
 L["ICONMENU_ICDAURA_DESC"] 			  	= L["ICONMENU_ICDAURA_DESC"]			 	:format(L["ICONMENU_CHOOSENAME2"])
 --L["CHOOSENAME_EQUIVS_TOOLTIP"] 		  	= L["CHOOSENAME_EQUIVS_TOOLTIP"]		 	:format(L["ICONMENU_CHOOSENAME2"])
 L["SORTBYNONE_DESC"]					= L["SORTBYNONE_DESC"]				 		:format(L["ICONMENU_CHOOSENAME2"])
-L["CLEU_TIMER_DESC"]					= L["CLEU_TIMER_DESC"]				 		:format(L["ICONMENU_CHOOSENAME2"], L["ICONMENU_CHOOSENAME2"])
+L["CLEU_TIMER_DESC"]					= L["CLEU_TIMER_DESC"]				 		:format(L["ICONMENU_CHOOSENAME2"])
+L["UIERROR_TIMER_DESC"]					= L["CLEU_TIMER_DESC"]				 		:format(L["ICONMENU_CHOOSENAME_EVENTS"])
 
 L["SOUND_EVENT_ONSHOW_DESC"]		  	= L["SOUND_EVENT_ONSHOW_DESC"]	 	 		:format(L["ICONALPHAPANEL_FAKEHIDDEN"])
 L["SOUND_EVENT_ONHIDE_DESC"]		  	= L["SOUND_EVENT_ONHIDE_DESC"]	 	 		:format(L["ICONALPHAPANEL_FAKEHIDDEN"])
@@ -116,6 +115,9 @@ L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"] 	= L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"]
 L["ANN_FCT_DESC"] 						= L["ANN_FCT_DESC"]							:format(FLOATING_COMBAT_SELF_LABEL)
 
 
+
+L["ICONMENU_DOTWATCH_GCREQ_DESC"] 		= L["ICONMENU_DOTWATCH_GCREQ_DESC"]			:format(L["ICONMENU_CTRLGROUP"], L["ICONMENU_ENABLE"])
+
 L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"] = L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"]:format(GAME, GAMEMENU_HELP, SHOW_LUA_ERRORS)
 
 
@@ -142,23 +144,3 @@ L["CONDITIONALPHA_METAICON_DESC"] = L["CONDITIONALPHA_METAICON_DESC"]:format(L["
 --L["CNDT_SLIDER_DESC_CLICKSWAP_TOMANUAL"] = L["CNDT_SLIDER_DESC_BASE"] .. "\r\n\r\n" .. L["CNDT_SLIDER_DESC_CLICKSWAP_TOMANUAL"]
 --L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER"] = L["CNDT_SLIDER_DESC_BASE"] .. "\r\n\r\n" .. L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER"]
 
-
--- Wizard magic to make ICONMENU_CHOOSENAME_WPNENCH_DESC be locale-dynamic
-do
-	local FlametongueWeapon = GetSpellInfo(8024)
-	local FlametongueWeaponEnchant
-	for i = 1, select("#", strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
-		local enchant = select(i, strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"]))
-		enchant = FlametongueWeapon:match(enchant)
-		if enchant then
-			FlametongueWeaponEnchant = enchant
-			break
-		end
-	end
-	
-	if FlametongueWeaponEnchant then
-		L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] 	= L["ICONMENU_CHOOSENAME_WPNENCH_DESC"]	 	:format(FlametongueWeaponEnchant, FlametongueWeapon) 
-	else
-		--- Uhh... I just noticed there is no code right here. Hopefully nothing breaks.
-	end
-end

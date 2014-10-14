@@ -21,7 +21,7 @@ local SUG = TMW.SUG
 
 local Module_spell = SUG:GetModule("spell")
 local Module = SUG:NewModule("spellWithGCD", Module_spell)
-function Module:Table_GetSpecialSuggestions(suggestions)
+function Module:Table_GetSpecialSuggestions_1(suggestions)
 	local atBeginning = SUG.atBeginning
 	local lastName = SUG.lastName
 

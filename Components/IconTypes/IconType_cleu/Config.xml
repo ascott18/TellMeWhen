@@ -195,8 +195,7 @@
 				self.CLEUDur.text2:SetHeight(30)
 				
 				function self:AdjustHeight()
-					--self:SetHeight(75 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
-					TMW:AnimateHeightChange(self, 75 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight(), 0.1)
+					self:SetHeight(75 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
 				end
 			</OnLoad>
 		</Scripts>

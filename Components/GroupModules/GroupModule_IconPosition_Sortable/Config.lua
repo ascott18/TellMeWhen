@@ -74,7 +74,7 @@ groupSortMethodTemplate = {
 		return ""
 	end,
 	order = function(info)
-		return tonumber(info[#info])
+		return 50+ tonumber(info[#info])
 	end,
 	disabled = function(info, priorityID)
 		local group = FindGroupFromInfo(info)
@@ -184,7 +184,57 @@ groupSortMethodTemplate = {
 	}
 }
 
-local Sorting_args = {}
+local Sorting_args = {
+	quick_default = {
+		name = L["UIPANEL_GROUP_QUICKSORT_DEFAULT"],
+		desc = L["UIPANEL_GROUP_QUICKSORT_DEFAULT_DESC"],
+		type = "execute",
+		order = 10,
+		func = function(info)
+			local group = FindGroupFromInfo(info)
+			local gs = group:GetSettings()
+
+			for priorityID, priority in TMW:Vararg("id") do
+				local oldPriority = gs.SortPriorities[priorityID]
+
+				for k, v in pairs(gs.SortPriorities) do
+					if v.Method == priority then
+						gs.SortPriorities[k] = oldPriority
+						gs.SortPriorities[priorityID] = v
+						break
+					end
+				end
+			end
+
+			group:Setup()
+		end,
+	},
+	quick_duration = {
+		name = L["UIPANEL_GROUP_QUICKSORT_DURATION"],
+		desc = L["UIPANEL_GROUP_QUICKSORT_DURATION_DESC"],
+		type = "execute",
+		order = 11,
+		func = function(info)
+			local group = FindGroupFromInfo(info)
+			local gs = group:GetSettings()
+
+			for priorityID, priority in TMW:Vararg("duration", "visibleshown", "id") do
+				local oldPriority = gs.SortPriorities[priorityID]
+
+				for k, v in pairs(gs.SortPriorities) do
+					if v.Method == priority then
+						gs.SortPriorities[k] = oldPriority
+						gs.SortPriorities[priorityID] = v
+						break
+					end
+				end
+			end
+
+			group:Setup()
+		end,
+	},
+	
+}
 for i = 1, #TMW.Group_Defaults.SortPriorities do
 	Sorting_args[tostring(i)] = groupSortMethodTemplate
 end

@@ -178,7 +178,8 @@
 							--tooltip = TMW.L[""],
 							func = TMW.CNDT.TypeMenu_DropDown,
 						})
-
+						
+						self:SetScrollable(true)
 						self:SetWidth(176)
 					</OnLoad>
 				</Scripts>
@@ -474,6 +475,7 @@
 							func = TMW.CNDT.BitFlags_DropDown,
 						})
 
+						self:SetScrollable(true)
 						self:SetWidth(190)
 					</OnLoad>
 				</Scripts>

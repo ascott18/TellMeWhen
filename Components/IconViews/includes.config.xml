@@ -2,5 +2,6 @@
 
 <Include file="Icon\includes.config.xml"/>
 <Include file="Bar\includes.config.xml"/>
+<Include file="BarV\includes.config.xml"/>
 
 </Ui>

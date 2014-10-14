@@ -57,6 +57,23 @@ TMW.IconDragger:RegisterIconDragHandler(220, -- Add to meta icon
 
 
 
+-- Include child icons and groups when exporting a meta icon
+TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, type, settings)
+	if type == "icon" and settings.Type == "meta" then
+		for k, GUID in pairs(settings.Icons) do
+			if GUID ~= settings.GUID then
+				local type = TMW:ParseGUID(GUID)
+				local settings = TMW:GetSettingsFromGUID(GUID)
+				if type == "icon" and settings then
+					TMW:GetSettingsStrings(strings, type, settings, TMW.Icon_Defaults)
+				end
+			end
+		end
+	end
+end)
+
+
+
 function Type:GetIconMenuText(ics)
 	local text = Type.name .. " " .. L["ICONMENU_META_ICONMENUTOOLTIP"]:format(ics.Icons and #ics.Icons or 0)
 	
@@ -88,7 +105,7 @@ function ME:LoadConfig()
 		mg.icon:SetGUID(GUID)
 	end
 
-	TMW:AnimateHeightChange(TellMeWhen_MetaIconOptions, (#settings * ME[1]:GetHeight()) + 35, 0.1)
+	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 35)
 	
 	for f=#settings+1, #ME do
 		ME[f]:Hide()

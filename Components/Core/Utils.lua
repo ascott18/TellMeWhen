@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -42,6 +42,28 @@ function UTIL.shallowCopy(t)
 end
 
 
+
+do	-- TMW:GetParser()
+	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
+	function TMW:GetParser()
+		if not Parser then
+			Parser = CreateFrame("GameTooltip")
+
+			LT1 = Parser:CreateFontString()
+			RT1 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT1, RT1)
+
+			LT2 = Parser:CreateFontString()
+			RT2 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT2, RT2)
+
+			LT3 = Parser:CreateFontString()
+			RT3 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT3, RT3)
+		end
+		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
+	end
+end
 
 
 
@@ -202,3 +224,133 @@ Formatter{
 	BOOL_USABLEUNUSABLE = Formatter:New{[0]=L["ICONMENU_USABLE"], [1]=L["ICONMENU_UNUSABLE"]},
 	BOOL_PRESENTABSENT = Formatter:New{[0]=L["ICONMENU_PRESENT"], [1]=L["ICONMENU_ABSENT"]},
 }
+
+
+
+
+do	-- TMW.shellsortDeferred
+	-- From http://lua-users.org/wiki/LuaSorting - shellsort
+	-- Written by Rici Lake. The author disclaims all copyright and offers no warranty.
+	--
+	-- This module returns a single function (not a table) whose interface is upwards-
+	-- compatible with the interface to table.sort:
+	--
+	-- array = shellsort(array, before, n)
+	-- array is an array of comparable elements to be sorted in place
+	-- before is a function of two arguments which returns true if its first argument
+	--    should be before the second argument in the second result. It must define
+	--    a total order on the elements of array.
+	--      Alternatively, before can be one of the strings "<" or ">", in which case
+	--    the comparison will be done with the indicated operator.
+	--    If before is omitted, the default value is "<"
+	-- n is the number of elements in the array. If it is omitted, #array will be used.
+	-- For convenience, shellsort returns its first argument.
+
+	-- A036569
+	local incs = { 8382192, 3402672, 1391376,
+		463792, 198768, 86961, 33936,
+		13776, 4592, 1968, 861, 336, 
+	112, 48, 21, 7, 3, 1 }
+
+	local execCap = 17
+	local start = 0
+	
+	local function ssup(v, testval)
+		return v < testval
+	end
+	
+	local function ssdown(v, testval)
+		return v > testval
+	end
+	
+	local function ssgeneral(t, n, before, progressCallback, progressCallbackArg)
+		local lastProgress = 100
+
+		for idx, h in ipairs(incs) do
+			local count = 1
+			for i = h + 1, n do
+				local v = t[i]
+				for j = i - h, 1, -h do
+					local testval = t[j]
+					if not before(v, testval) then break end
+					t[i] = testval; i = j
+				end
+				t[i] = v
+
+				count = count + 1
+
+				if (count % 200 == 0) and debugprofilestop() - start > execCap then
+					local progress = #incs - idx + 1
+
+					if progressCallback and progress ~= lastProgress then
+						if progressCallbackArg then
+							progressCallback(progressCallbackArg, progress)
+						else
+							progressCallback(progress)
+						end
+						lastProgress = progress
+					end
+					
+					coroutine.yield()
+				end
+			end
+		end
+		return t
+	end
+	
+	local coroutines = {}
+	local function shellsort(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
+		n = n or #t
+		if not before or before == "<" then
+			ssgeneral(t, n, ssup, progressCallback, progressCallbackArg)
+		elseif before == ">" then
+			ssgeneral(t, n, ssdown, progressCallback, progressCallbackArg)
+		else
+			ssgeneral(t, n, before, progressCallback, progressCallbackArg)
+		end
+
+		if callbackArg ~= nil then
+			callback(callbackArg)
+		else
+			callback()
+		end
+
+		coroutines[t] = nil
+	end
+	
+	local f = CreateFrame("Frame")
+	function f:OnUpdate()
+		local table, co = next(coroutines)
+
+		if table then
+			if coroutine.status(co) == "dead" then
+				-- This might happen if there was an error thrown before the coroutine could finish.
+				coroutines[table] = nil
+				return
+			end
+			-- dynamic execution cap based on framerate.
+			-- this will keep us from dropping the user's framerate too much
+			-- without doing so little sorting that the process goes super slowly.
+			-- subtract a little bit to account for CPU usage for other things, like the game itself.
+			execCap = 1000/max(20, GetFramerate()) - 5
+
+			start = debugprofilestop()
+			assert(coroutine.resume(co))
+		end
+
+		if not next(coroutines) then
+			f:SetScript("OnUpdate", nil)
+		end
+	end
+
+
+	-- The purpose of shellSortDeferred is to have a sort that won't
+	-- lock up the game when we sort huge things.
+	function TMW.shellsortDeferred(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
+		local co = coroutine.create(shellsort)
+		coroutines[t] = co
+		start = debugprofilestop()
+		f:SetScript("OnUpdate", f.OnUpdate)
+		assert(coroutine.resume(co, t, before, n, callback, callbackArg, progressCallback, progressCallbackArg))
+	end
+end

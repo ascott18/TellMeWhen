@@ -126,28 +126,21 @@ Module.stances = {
 		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
 		[71] = 		GetSpellInfo(71),		-- Defensive Stance
 		[2458] = 	GetSpellInfo(2458), 	-- Berserker Stance
+		[156291] = 	GetSpellInfo(156291), 	-- Gladiator Stance
 	},
 	DRUID = {
 		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
 		[768] = 	GetSpellInfo(768),		-- Cat Form
-		[1066] = 	GetSpellInfo(1066), 	-- Aquatic Form
 		[783] = 	GetSpellInfo(783),		-- Travel Form
 		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
-		[33891] = 	GetSpellInfo(33891), 	-- Tree of Life
-		[33943] = 	GetSpellInfo(33943), 	-- Flight Form
-		[40120] = 	GetSpellInfo(40120), 	-- Swift Flight Form	
+		[33891] = 	GetSpellInfo(33891), 	-- Incarnation: Tree of Life
+		[171745] = 	GetSpellInfo(171745), 	-- Claws of Shirvallah	
 	},
 	PRIEST = {
 		[15473] = 	GetSpellInfo(15473), 	-- Shadowform	
 	},
 	ROGUE = {
 		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
-	},
-	HUNTER = {
-		[13165] = 	GetSpellInfo(13165), 	-- Aspect of the Hawk
-		[109260] = 	GetSpellInfo(109260), 	-- Aspect of the Iron Hawk
-		[5118] = 	GetSpellInfo(5118), 	-- Aspect of the Cheetah
-		[13159] = 	GetSpellInfo(13159), 	-- Aspect of the Pack
 	},
 	DEATHKNIGHT = {
 		[48263] = 	GetSpellInfo(48263), 	-- Blood Presence
@@ -163,7 +156,6 @@ Module.stances = {
 	},
 	WARLOCK = {
 		[103958] = 	GetSpellInfo(103958),	-- Metamorphosis
-		[114168] = 	GetSpellInfo(114168),	-- Dark Apotheosis
 	},
 	MONK = {
 		[115069] = 	GetSpellInfo(115069),	-- Sturdy Ox
@@ -206,7 +198,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 		end
 	end
 end
-function Module:Table_GetSpecialSuggestions(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
 	local atBeginning = SUG.atBeginning
 	if strfind(strlower(NONE), atBeginning) then
 		suggestions[#suggestions + 1] = 0
@@ -222,41 +214,42 @@ Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 Module.table = {}
 
 function Module:OnInitialize()
-	for talent = 1, MAX_NUM_TALENTS do
-		local name = GetTalentInfo(talent)
-		local lower = name and strlowerCache[name]
-		if lower then
-			self.table[lower] = talent
-		end
-	end
+	-- nothing
 end
 function Module:Table_Get()
+	wipe(self.table)
+
+	for spec = 1, MAX_TALENT_GROUPS do
+		for tier = 1, MAX_TALENT_TIERS do
+			for column = 1, NUM_TALENT_COLUMNS do
+				local id, name = GetTalentInfo(tier, column, spec)
+				
+				local lower = name and strlowerCache[name]
+				if lower then
+					self.table[id] = lower
+				end
+			end
+		end
+	end
+
 	return self.table
 end
 function Module:Table_GetSorter()
 	return nil
 end
-function Module:Entry_AddToList_1(f, name)
-	local talent = self.table[name]
-	local name, tex = GetTalentInfo(talent) -- restore case
+function Module:Entry_AddToList_1(f, id)
+	local id, name, iconTexture = GetTalentInfoByID(id) -- restore case
 
 	f.Name:SetText(name)
+	f.ID:SetText(id)
 
 	f.tooltipmethod = "SetHyperlink"
-	f.tooltiparg = GetTalentLink(talent)
+	f.tooltiparg = GetTalentLink(id)
 
 	f.insert = name
+	f.insert2 = id
 
-	f.Icon:SetTexture(tex)
-end
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
-	local atBeginning = SUG.atBeginning
-
-	for name in pairs(tbl) do
-		if strfind(name, atBeginning) then
-			suggestions[#suggestions + 1] = name
-		end
-	end
+	f.Icon:SetTexture(iconTexture)
 end
 
 

@@ -763,7 +763,10 @@ function Icon.DisableIcon(icon, soft)
 	TMW:Fire("TMW_ICON_DISABLE", icon, soft)
 
 	-- Reset condition stuff
-	icon.ConditionObject = nil
+	if icon.ConditionObject then
+		icon.ConditionObject:DeclareExternalUpdater(icon, false)
+		icon.ConditionObject = nil
+	end
 	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
 	icon:SetInfo("conditionFailed", nil)
 
@@ -878,6 +881,7 @@ function Icon.Setup(icon)
 			icon.ConditionObject = ConditionObjectConstructor:Construct()
 			
 			if icon.ConditionObject then
+				icon.ConditionObject:DeclareExternalUpdater(icon, true)
 				TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
 				icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
 			end
@@ -901,7 +905,7 @@ function Icon.Setup(icon)
 		if icon.attributes.texture == "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled" then
 			icon:SetInfo("texture", "")
 		end
-		icon:EnableMouse(0)
+		icon:EnableMouse(false)
 	else
 		icon:Show()
 		ClearScripts(icon)
@@ -918,7 +922,7 @@ function Icon.Setup(icon)
 			icon:SetInfo("texture", "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 		end
 
-		icon:EnableMouse(1)
+		icon:EnableMouse(true)
 	end
 
 

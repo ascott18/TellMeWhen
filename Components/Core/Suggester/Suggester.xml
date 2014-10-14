@@ -283,10 +283,24 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+			<Button parentKey="blocker" setAllPoints="true" hidden="true">
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="tex" setAllPoints="true">
+							<Color r="0" g="0" b="0" a="0.6"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnShow>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 100)
+					</OnShow>
+				</Scripts>
+			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				TMW.SUG.Suggest = self
+				TMW.SUG.SuggestionList = self
 				self.Header:SetText(TMW.L["SUGGESTIONS"])
 				self.InfoText:SetText(TMW.L["CACHING"])
 
@@ -297,6 +311,8 @@
 				firstItem.ClearAllPoints = TMW.NULLFUNC
 				firstItem.SetPoint = TMW.NULLFUNC
 				firstItem.SetSize = TMW.NULLFUNC
+
+				self.blocker:SetPoint("TOPLEFT", firstItem)
 
 				TMW.SUG[1]:HookScript("OnShow", function(self)
 					TMW.HELP:Show{

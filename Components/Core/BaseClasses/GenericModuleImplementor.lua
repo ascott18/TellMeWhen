@@ -44,12 +44,13 @@ end
 --- Searches for an instance of a specified [[api/base-classes/object-module/|ObjectModule]], or any instances that inherit from the specified [[api/base-classes/object-module/|ObjectModule]], that has been implemented into this [[api/base-classes/generic-module-implementor/|GenericModuleImplementor]].
 -- @param moduleName [string] Class name of a [[api/base-classes/object-module/|ObjectModule]] to search for. An error is thrown if {{{TMW.Classes[moduleName] == nil}}}.
 -- @param allowDisabled [boolean|nil] True if the method should return an [[api/base-classes/object-module/|ObjectModule]] instance that was found even if {{{ObjectModule.IsEnabled == false}}} for the instance.
+-- @param allowUnimplemented [boolean|nil] True if the method should return an [[api/base-classes/object-module/|ObjectModule]] instance that was found even if the module is not implemented.
 -- @return [[[api/base-classes/object-module/|ObjectModule]]|nil] A matching [[api/base-classes/object-module/|ObjectModule]], or nil if none was found.
-function GenericModuleImplementor:GetModuleOrModuleChild(moduleName, allowDisabled)
+function GenericModuleImplementor:GetModuleOrModuleChild(moduleName, allowDisabled, allowUnimplemented)
 	local Modules = self.Modules
 	
 	local Module = Modules[moduleName]
-	if Module and self.ComponentsLookup[Module] and (allowDisabled or Module.IsEnabled) then
+	if Module and (allowUnimplemented or self.ComponentsLookup[Module]) and (allowDisabled or Module.IsEnabled) then
 		return Module
 	else
 		local ModuleClassToSearchFor = TMW.Classes[moduleName]
@@ -59,7 +60,7 @@ function GenericModuleImplementor:GetModuleOrModuleChild(moduleName, allowDisabl
 		end
 		
 		for _, Module in pairs(Modules) do
-			if Module.class.inherits[ModuleClassToSearchFor] and self.ComponentsLookup[Module] and (allowDisabled or Module.IsEnabled) then
+			if Module.class.inherits[ModuleClassToSearchFor] and (allowUnimplemented or self.ComponentsLookup[Module]) and (allowDisabled or Module.IsEnabled) then
 				return Module
 			end
 		end

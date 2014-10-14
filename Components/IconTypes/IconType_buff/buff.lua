@@ -14,56 +14,76 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local EFF_THRESHOLD, DS
-local tonumber =
-	  tonumber
-local UnitAura, UnitExists =
-	  TMW.UnitAura, UnitExists
 local print = TMW.print
+local tonumber, pairs, type, format =
+	  tonumber, pairs, type, format
+local UnitAura =
+	  UnitAura
+
 local SpellTextures = TMW.SpellTextures
 local strlowerCache = TMW.strlowerCache
-local _, pclass = UnitClass("Player")
 local isNumber = TMW.isNumber
-local unitsWithExistsEvent
 
-local clientVersion = select(4, GetBuildInfo())
-local wow_501 = clientVersion >= 50100
+-- GLOBALS: TellMeWhen_ChooseName
+
 
 local Type = TMW.Classes.IconType:New("buff")
-Type.canControlGroup = true
 Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
-Type.spacebefore = true
+Type.menuSpaceBefore = true
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
-Type:UsesAttributes("reverse")
+Type:UsesAttributes("spell")
 Type:UsesAttributes("stack, stackText")
+Type:UsesAttributes("reverse")
+Type:UsesAttributes("auraSourceUnit, auraSourceGUID")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
-Type:UsesAttributes("auraSourceUnit, auraSourceGUID")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
+
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
+
+
 Type:RegisterIconDefaults{
+	-- Sort the auras found by duration
 	Sort					= false,
+
+	-- Sort the aruas found by stacks
 	StackSort				= false,
+
+	-- The unit(s) to check for auras
 	Unit					= "player", 
+
+	-- What type of aura to check for. Values are "HELPFUL", "HARMFUL", or "EITHER".
+	-- EITHER is handled specially by TMW by having looping a second time for a second filter (FilterH in the code).
 	BuffOrDebuff			= "HELPFUL", 
-	Stealable				= false,     
-	ShowTTText				= false,     
+
+	-- Only check stealable auras. This DOES function for non-mages.
+	Stealable				= false,
+
+	-- Show variable text. This is the extra return values at the end of UnitAura.
+	-- It includes things like the strength of a shield spell. 
+	-- The first non-zero value from those variables will be reported as the icon's stack count.
+	ShowTTText				= false,
+
+	-- Only check auras casted by the player. Appends "|PLAYER" to the UnitAura filter.
 	OnlyMine				= false,
+
+	-- Hide the icon if TMW's unit system left icon.Units empty.
+	-- This can happen, for example, if checking only raid units while not in a raid.
 	HideIfNoUnits			= false,
 }
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	OnSetup = function(self, panelInfo, supplementalData)
@@ -142,14 +162,10 @@ Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettingsWithStacks", {
 })
 
 
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	EFF_THRESHOLD = TMW.db.profile.EffThreshold
-	DS = TMW.DS
-	unitsWithExistsEvent = TMW.UNITS.unitsWithExistsEvent
-end)
-
 
 local NOT_ACTUALLY_SPELLSTEALABLE = {
+	-- Nice API, Blizzard. <3
+
 	[43438] = true,	-- Ice Block
 	[642] = true,	-- Divine Shield
 }
@@ -157,6 +173,7 @@ local NOT_ACTUALLY_SPELLSTEALABLE = {
 
 local function Buff_OnEvent(icon, event, arg1)
 	if event == "UNIT_AURA" then
+		-- See if the icon is checking the unit. If so, schedule an update for the icon.
 		local Units = icon.Units
 		for u = 1, #Units do
 			if arg1 == Units[u] then
@@ -165,6 +182,7 @@ local function Buff_OnEvent(icon, event, arg1)
 			end
 		end
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
 end
@@ -172,32 +190,37 @@ end
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
 	
-	local Units, NameArray, NameNameArray, NameHash, Filter, Filterh, DurationSort, StackSort
-	= icon.Units, icon.NameArray, icon.NameNameArray, icon.NameHash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
+	-- Upvalue things that will be referenced a lot in our loops.
+	local Units, NameArray, NameStringArray, NameHash, Filter, Filterh, DurationSort, StackSort
+	= icon.Units, icon.Spells.Array, icon.Spells.StringArray, icon.Spells.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
 	local NotStealable = not icon.Stealable
-	local NAL = #icon.NameArray
 
-	local buffName, _, iconTexture, dispelType, duration, expirationTime, caster, count, canSteal, id, v1, v2, v3, v4
-	local useUnit
+	-- These variables will hold all the attributes that we pass to YieldInfo().
+	local buffName, iconTexture, duration, expirationTime, caster, count, canSteal, id, v1, v2, v3, v4, useUnit, _
 
 	local doesSort = DurationSort or StackSort
-	local d = DurationSort == -1 and huge or 0
-	local s = StackSort == -1 and huge or -1
+
+	-- Initial values for the vars that track the duration/stack of the aura that currently occupies buffName and related locals.
+	-- If we are sorting by smallest duration, we intitialize these to math.huge so that the first thing we find is definitely smaller.
+	local curSortDur = DurationSort == -1 and huge or 0
+	local curSortStacks = StackSort == -1 and huge or -1
 	
 	for u = 1, #Units do
 		local unit = Units[u]
+		-- UnitSet:UnitExists(unit) is an improved UnitExists() that returns early if the unit
+		-- is known by TMW.UNITS to definitely exist.
 		if icon.UnitSet:UnitExists(unit) then
 
 			if icon.buffdebuff_iterateByAuraIndex then
-				-- If we are sorting, or if the icon's number of auras checked exceeds EFF_THRESHOLD, or if we are checking dispel types
+				-- If we are sorting, or if the icon's number of auras checked exceeds the efficiency threshold, or if we are checking dispel types,
 				-- then check every aura on the unit instead of checking the unit for every aura we are checking.
 				
 
 				local index, stage = 1, 1
-				local filter = Filter
+				local useFilter = Filter
 
 				while true do
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, index, filter)
+					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, index, useFilter)
 					index = index + 1
 					
 					-- Bugfix: Enraged is an empty string.
@@ -206,29 +229,34 @@ local function Buff_OnUpdate(icon, time)
 					end
 
 					if not _buffName then
+						-- If we reached the end of auras found for Filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
+						-- iff we sort or haven't found anything yet.
 						if stage == 1 and Filterh and (doesSort or not buffName) then
 							index, stage = 1, 2
-							filter = Filterh
+							useFilter = Filterh
 						else
+							-- Break UnitAura loop (while true do ...)
 							break
 						end
 
 					elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[_id])) then
 						if DurationSort then
-							local _d = (_expirationTime == 0 and huge) or _expirationTime - time
+							local remaining = (_expirationTime == 0 and huge) or _expirationTime - time
 
-							if not buffName or d*DurationSort < _d*DurationSort then
+							if not buffName or curSortDur*DurationSort < remaining*DurationSort then
+								-- DurationSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
 								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, d =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,   _d
+								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, curSortDur =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,    remaining
 							end
 						elseif StackSort then
-							local _s = _count or 0
+							local stack = _count or 0
 
-							if not buffName or s*StackSort < _s*StackSort then
+							if not buffName or curSortStacks*StackSort < stack*StackSort then
+								-- StackSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
 								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, s =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,   _s
+								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, curSortStacks =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,    stack
 							end
 						else
 							-- We aren't sorting, and we haven't found anything yet, so record this
@@ -247,12 +275,12 @@ local function Buff_OnUpdate(icon, time)
 				end
 			else
 
-				for i = 1, NAL do
+				for i = 1, #NameArray do
 					local iName = NameArray[i]
 
-					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filter)
+					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameStringArray[i], nil, Filter)
 					if Filterh and not buffName then
-						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameNameArray[i], nil, Filterh)
+						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameStringArray[i], nil, Filterh)
 					end
 
 					if buffName and id ~= iName and isNumber[iName] then
@@ -260,17 +288,20 @@ local function Buff_OnUpdate(icon, time)
 						-- so iterate over the unit's auras and find a matching ID.
 
 						local index, stage = 1, 1
-						local filter = Filter
+						local useFilter = Filter
 
 						while true do
-							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, Filter)
+							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, useFilter)
 							index = index + 1
 
 							if not id then
+								-- If we reached the end of auras found for Filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
+								-- iff we sort or haven't found anything yet.
 								if stage == 1 and Filterh then
 									index, stage = 1, 2
-									filter = Filterh
+									useFilter = Filterh
 								else
+									-- Break while true loop (inner spell loop)
 									break
 								end
 							elseif id == iName then -- and (NotStealable or canSteal) then
@@ -284,11 +315,14 @@ local function Buff_OnUpdate(icon, time)
 					end
 
 					if buffName and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id])) then
+						-- We found a spell that will work for us.
+						-- This half of the code doesn't handle sorting or anything,
+						-- so break out of the loops right away.
 						useUnit = unit
 						break -- break spell loop
 					end
 				end
-				if buffName and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id])) then
+				if useUnit then
 					break --  break unit loop
 				end
 			end
@@ -300,12 +334,15 @@ end
 
 local function Buff_OnUpdate_Controller(icon, time)
 	
-	local Units, NameHash, Filter, Filterh
-	= icon.Units, icon.NameHash, icon.Filter, icon.Filterh
+	-- Upvalue things that will be used in our loops.
+	local Units, NameFirst, NameHash, Filter, Filterh
+	= icon.Units, icon.Spells.First, icon.Spells.Hash, icon.Filter, icon.Filterh
 	local NotStealable = not icon.Stealable
 	
 	for u = 1, #Units do
 		local unit = Units[u]
+		-- UnitSet:UnitExists(unit) is an improved UnitExists() that returns early if the unit
+		-- is known by TMW.UNITS to definitely exist.
 		if icon.UnitSet:UnitExists(unit) then
 
 			local index, stage = 1, 1
@@ -321,6 +358,8 @@ local function Buff_OnUpdate_Controller(icon, time)
 				end
 
 				if not buffName then
+					-- If we reached the end of auras found for filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
+					-- iff we sort or haven't found anything yet.
 					if stage == 1 and Filterh and not buffName then
 						index, stage = 1, 2
 						filter = Filterh
@@ -328,11 +367,12 @@ local function Buff_OnUpdate_Controller(icon, time)
 						break
 					end
 
-				elseif  (icon.NameFirst == '' or NameHash[id] or NameHash[dispelType] or NameHash[strlowerCache[buffName]])
+				elseif  (NameFirst == '' or NameHash[id] or NameHash[dispelType] or NameHash[strlowerCache[buffName]])
 					and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id]))
 				then
 					
 					if not icon:YieldInfo(true, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit) then
+						-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 						return
 					end
 				end
@@ -340,11 +380,19 @@ local function Buff_OnUpdate_Controller(icon, time)
 		end
 	end
 
+	-- Signal the group controller that we are at the end of our data harvesting.
 	icon:YieldInfo(false)
 end
 function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
 	local Units = icon.Units
-	if buffName then
+
+	-- Check that unit is defined here in order to determine if we found something.
+	-- If icon.buffdebuff_iterateByAuraIndex == false, the code there might return a buffName
+	-- that shouldn't actually be used because it didn't pass checks for stealable.
+	-- Unit is only defined there (as useUnit) once something is found that definitely matches.
+	-- It is a bit bad that the code works this way, but it is nicer than manually nilling out all of the yielded info
+	-- after determining that no matching auras were found.
+	if unit then
 		if icon.ShowTTText then
 			if v1 and v1 > 0 then
 				count = v1
@@ -375,7 +423,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.NameFirst,
+			icon.Spells.First,
 			nil, nil,
 			nil, nil
 		)
@@ -386,7 +434,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
-			icon.NameFirst,
+			icon.Spells.First,
 			Units[1], nil,
 			nil, nil
 		)
@@ -394,15 +442,29 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 end
 
 local aurasWithNoSourceReported = {
+	-- Mists:
 	GetSpellInfo(104993),	-- Jade Spirit
 	GetSpellInfo(116660),	-- River's Song
 	GetSpellInfo(120032),	-- Dancing Steel
 	GetSpellInfo(116631),	-- Colossus
 	GetSpellInfo(104423),	-- Windsong
-	nil,	-- Terminate with nil to prevent all Windsong's return values from filling the table
+
+	-- Warlords:
+	GetSpellInfo(156060),	-- Megawatt Filament
+	GetSpellInfo(156055),	-- Oglethorpe's Missile Splitter
+	GetSpellInfo(173288),	-- Hemet's Heartseeker (maybe unused?)
+	GetSpellInfo(159679),	-- Mark of Blackrock
+	GetSpellInfo(159678),	-- Mark of Shadowmoon
+	GetSpellInfo(159676),	-- Mark of the Frostwolf
+	GetSpellInfo(159239),	-- Mark of the Shattered Hand
+	GetSpellInfo(159234),	-- Mark of the Thunderlord
+	GetSpellInfo(159675),	-- Mark of Warsong
+	nil,	-- Terminate with nil to prevent all Warsong's return values from filling the table
 }
 
 
+
+-- This IDP is used to hold the source of the aura being repoted by the icon. Used by the [AuraSource] DogTag.
 local Processor = TMW.Classes.IconDataProcessor:New("BUFF_SOURCEUNIT", "auraSourceUnit, auraSourceGUID")
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: auraSourceUnit, auraSourceGUID
@@ -445,15 +507,15 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 
 
 
+
 function Type:Setup(icon)
-	icon.NameFirst = TMW:GetSpellNames(icon.Name, 1, 1)
-	--icon.NameName = TMW:GetSpellNames(icon.Name, 1, 1, 1)
-	icon.NameArray = TMW:GetSpellNames(icon.Name, 1)
-	icon.NameNameArray = TMW:GetSpellNames(icon.Name, 1, nil, 1)
-	icon.NameHash = TMW:GetSpellNames(icon.Name, 1, nil, nil, 1)
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
+
+	-- Setup the filters for UnitAura.
+	-- Filterh is used as the filter in a second loop through if the icon is checking both buffs and debuffs.
 	icon.Filter = icon.BuffOrDebuff
 	icon.Filterh = icon.BuffOrDebuff == "EITHER" and "HARMFUL"
 	if icon.OnlyMine then
@@ -461,21 +523,35 @@ function Type:Setup(icon)
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
 
-	local isEditing
-	if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
-		TMW.HELP:Hide("ICONTYPE_BUFF_NOSOURCERPPM")
-		isEditing = true
-	end
+
 
 	icon.buffdebuff_iterateByAuraIndex = false
-	if doesSort or #icon.NameArray > EFF_THRESHOLD then
+
+	-- Sorting is only handled if this value is true.
+	-- EffThreshold is a value that determines if we will switch to iterating by index instead of
+	-- iterating by spell if we are checking a large number of spells.
+	if icon.DurationSort or icon.StackSort or #icon.Spells.Array > TMW.db.profile.EffThreshold then
 		icon.buffdebuff_iterateByAuraIndex = true
 	end
 
-	for k, spell in pairs(icon.NameNameArray) do
-		if icon.OnlyMine and isEditing then
+	for k, spell in pairs(icon.Spells.StringArray) do
+		if TMW.DS[spell] then
+			-- Dispel types are only handled in the part of the code that is ran if this var is true.
+			icon.buffdebuff_iterateByAuraIndex = true
+		end
+	end
+
+
+
+	-- There are lots of spells (RPPM enchants) that don't report a source.
+	-- Because of this, you can't track them while OnlyMine is enabled.
+	-- So, tell the user about this so I can stop getting millions of comments from confused people.
+	-- GLOBALS: TellMeWhen_ChooseName
+	if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
+		TMW.HELP:Hide("ICONTYPE_BUFF_NOSOURCERPPM")
+		if icon.OnlyMine then
 			for _, badSpell in pairs(aurasWithNoSourceReported) do
-				if type(badSpell) == "string" and badSpell:lower() == spell then
+				if type(badSpell) == "string" and icon.Spells.StringHash[badSpell:lower()] then
 					TMW.HELP:Show{
 						code = "ICONTYPE_BUFF_NOSOURCERPPM",
 						codeOrder = 2,
@@ -483,22 +559,23 @@ function Type:Setup(icon)
 						relativeTo = TellMeWhen_ChooseName,
 						x = 0,
 						y = 0,
-						text = format(L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.NameArray[k]))
+						text = format(L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.Spells.Array[k]))
 					}
 					break
 				end
 			end
 		end
-
-		if TMW.DS[spell] then
-			icon.buffdebuff_iterateByAuraIndex = true
-		end
 	end
 
-	icon.FirstTexture = SpellTextures[icon.NameFirst]
+
+
+	icon.FirstTexture = SpellTextures[icon.Spells.First]
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 	
+
+
+	-- Setup events and update functions.
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		
@@ -519,16 +596,6 @@ function Type:Setup(icon)
 	end
 
 	icon:Update()
-end
-
-function Type:GuessIconTexture(ics)
-	if ics.Name and ics.Name ~= "" then
-		local name = TMW:GetSpellNames(ics.Name, nil, 1)
-		if name then
-			return SpellTextures[name]
-		end
-	end
-	return "Interface\\Icons\\INV_Misc_PocketWatch_01"
 end
 	
 Type:Register(100)
