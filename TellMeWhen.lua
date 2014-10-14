@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 71044 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 71045 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 71030 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -352,7 +352,7 @@ TMW.BE = {
 		IncreasedAP			= "57330;19506;6673",
 		IncreasedStats		= "1126;20217;90363;115921;116781;159988;160017;160077;72586",
 		IncreasedVersatility= "55610;1126;167187;167188;159735;35290;160045;50518;57386;160077",
-		IncreasedMultistrike= "166916;49868;113742;109773;58604;34889;57386;24844;", -- TODO: basilisks, foxes, and chimaera are supposed to have this, but they currently don't in beta.
+		IncreasedMultistrike= "166916;49868;113742;109773;58604;34889;57386;24844;",
 		BonusStamina		= "21562;116928;469;90364;160003;160014;111922",
 		IncreasedCrit		= "24932;1459;61316;116781;97229;24604;90309;126373;126309;160052",
 		BurstHaste			= "2825;32182;80353;90355;146555;160452",
@@ -1791,14 +1791,14 @@ function TMW:OnInitialize()
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		local version = GetBuildInfo()
 		StaticPopupDialogs["TMW_BADWOWVERSION"] = {
-			text = "TellMeWhen %s is not compatible with WoW %s. Please update TellMeWhen.", 
+			text = "TellMeWhen %s is not compatible with WoW %s. Please downgrade TellMeWhen or wait for a World of Warcraft update to WoW %s.", 
 			button1 = OKAY,
 			timeout = 0,
 			showAlert = true,
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_BADWOWVERSION", TELLMEWHEN_VERSION_FULL, version)
+		StaticPopup_Show("TMW_BADWOWVERSION", TELLMEWHEN_VERSION_FULL, version, "6.0.2")
 		return
 
 	-- if the file is NOT required for gross functionality

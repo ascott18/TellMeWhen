@@ -317,10 +317,6 @@ Aura = TMW:NewClass("Aura"){
 			end
 		end
 
-		-- TODO: debug only.
-		if not duration then
-			print("using fallback duration for " .. spellID)
-		end
 		self.duration = duration or FALLBACK_DURATION
 	end,
 
