@@ -207,11 +207,9 @@ function CooldownSweep:SetupForIcon(icon)
 	end
 	
 	
-	if tukui_loaded then
-		-- Tukui forcibly disables its own timers if OmniCC is installed, so no worry about overlap.
-		self.cooldown.noCooldownCount = not icon.ShowTimerText
-		self.cooldown.noOCC = not icon.ShowTimerText
-	elseif elvui_loaded then
+	-- Tukui uses Blizzard's cooldown count numbers, and just styles them.
+	
+	if elvui_loaded then
 		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
 	else
@@ -220,7 +218,6 @@ function CooldownSweep:SetupForIcon(icon)
 
 	if omnicc_loaded
 	or tullacc_loaded
-	or tukui_loaded
 	or TMW.db.profile.ForceNoBlizzCC
 	or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true)
 	then
@@ -256,6 +253,17 @@ function CooldownSweep:UpdateCooldown()
 					-- Consistency!
 					E:Cooldown_StopTimer(cd.timer)
 				end
+			end
+		elseif Tukui then
+			local T = Tukui[1]
+			if T and T.Cooldowns then
+				-- This is broken as of Tukui v16.02
+				-- The code in this function is really badly written - it includes a loop that serves no purpose,
+				-- and it only ever looks at the cooldown sweep's first region to see if it is the text.
+				-- I emailed them about this, so maybe it will be fixed in the future and this will resume working.
+
+				-- We will safecall this just to be safe, in case it changes in a way that breaks things.
+				TMW.safecall(T.Cooldowns.UpdateCooldown, cd, cd.start, duration, true, cd.charges, cd.maxCharges, false)
 			end
 		end
 
