@@ -349,7 +349,7 @@ ConditionCategory:RegisterCondition(13,	 "ITEMRANGE", {
 	icon = "Interface\\Icons\\ability_hunter_snipershot",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return 1-c.Level .. [[ == (c.Item:IsInRange(c.Unit) or 0)]]
+		return [[ BOOLCHECK( c.Item:IsInRange(c.Unit) ) ]]
 	end,
 	-- events = absolutely none
 })
