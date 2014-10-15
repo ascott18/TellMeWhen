@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 71201 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 71202 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 71030 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1093,10 +1093,6 @@ local start_old = debugprofilestart
 local lastReset = 0
 function _G.debugprofilestart()
 	lastReset = lastReset + debugprofilestop()
-
-	TMW:Error("TMW has detected that one of your addons has called debugprofilestart().\n" .. 
-		"This is bad practice, and can break parts of TellMeWhen and other addons as well.\n" .. 
-		"Report this error to TellMeWhen's authors so that we can look into resolving the issue.")
 
 	return start_old()
 end

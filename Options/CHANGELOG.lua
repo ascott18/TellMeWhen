@@ -3,7 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG = {
 
 [==[===v7.1.2===]==],
-[==[* Various tooltips now reflect that WoW only supports .ogg files for custom sound files - MP3s are no longer allowed.]==],
+[==[* Various tooltips now reflect that WoW only supports .ogg files for custom sound files - MP3s are no longer supported by the game client.]==],
+[==[* Removed error warning about other addons using debugprofilestart() - we got the data we needed.]==],
+[==[]==],
 [==[]==],
 [==[===v7.1.1===]==],
 [==[]==],
