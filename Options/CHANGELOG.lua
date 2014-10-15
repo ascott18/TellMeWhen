@@ -11,7 +11,6 @@ TMW.CHANGELOG = {
 [==[* TellMeWhen will no longer forcibly disable Blizzard's cooldown timer text when Tukui is enabled since Tukui now uses those texts as its timers.]==],
 [==[]==],
 [==[===v7.1.1===]==],
-[==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed a very silly mistake that broke anchoring of an icon's text displays when Masque was not installed.]==],
 [==[]==],
