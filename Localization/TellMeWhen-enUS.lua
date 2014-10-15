@@ -244,19 +244,30 @@ L["UNKNOWN_ICON"] = "<Unknown/Unavailable Icon>"
 L["UNKNOWN_GROUP"] = "<Unknown/Unavailable Group>"
 L["UNKNOWN_UNKNOWN"] = "<Unknown ???>"
 
-L["ICONMENU_ALPHA"] = "Opacity"
-L["CONDITIONALPHA"] = "Failed Conditions/Reqs."
-L["CONDITIONALPHA_DESC"] = "This will be used when conditions fail, or if the duration or stack requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
-L["CONDITIONALPHA_CONDITIONICON"] = "Failed Duration"
-L["CONDITIONALPHA_CONDITIONICON_DESC"] = "This will be used when the duration requirements are not met. This setting will be ignored if the icon is already hidden by the other two opacity settings."
+
+
+L["REQFAILED_ALPHA"] = "Opacity when failed"
+
 L["CONDITIONALPHA_METAICON"] = "Failed Conditions"
 L["CONDITIONALPHA_METAICON_DESC"] = [[This opacity will be used when conditions fail.
 
+This setting will be ignored if the icon is already hidden due to its %s settings.
+
 Conditions can be configured in the %q tab.]]
 
-L["REQFAILED_ALPHA"] = "Opacity when failed"
-L["DURATIONALPHA_DESC"] = "Set the opacity level that the icon should display at when these duration requirements fail."
-L["STACKALPHA_DESC"] = "Set the opacity level that the icon should display at when these stack requirements fail."
+
+L["DURATIONALPHA_DESC"] = [[Set the opacity level that the icon should display at when these duration requirements fail.
+
+This setting will be ignored if the icon is already hidden due to its %s settings.]]
+L["STACKALPHA_DESC"] = [[Set the opacity level that the icon should display at when these stack requirements fail.
+
+This setting will be ignored if the icon is already hidden due to its %s settings.]]
+
+
+
+
+
+
 
 
 L["ICONMENU_TYPE"] = "Icon type"
