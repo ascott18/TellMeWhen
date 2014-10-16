@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 71203 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 71204 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 71030 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1781,7 +1781,10 @@ end
 ---------------------------------
 
 -- ADDON ENTRY POINT: EVERYTHING STARTS FROM HERE!
-function TMW:OnInitialize()
+function TMW:PLAYER_LOGIN()
+	TMW:UnregisterEvent("PLAYER_LOGIN")
+	TMW.PLAYER_LOGIN = nil
+
 	-- Check for wrong WoW version
 	if select(4, GetBuildInfo()) < 60000 then
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
@@ -1829,39 +1832,36 @@ function TMW:OnInitialize()
 		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Common/DogTags/DogTags.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 	end
 	
-	--------------- Events/OnUpdate ---------------
-	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
-	-- TMW:PLAYER_LOGIN() handles the next stage of initialization.
-	TMW:RegisterEvent("PLAYER_LOGIN")
-	
-	TMW.OnInitialize = nil
-end
 
-function TMW:Initialize()
-	-- Everything in this function is either database initialization
-	-- or other initialization processes that depend on the database being initialized.
-	
-	-- This all used to be handled in the OnInitialize method, but with the advent of 
-	-- fully modular icon modules and types, we need to be able to handle default settings
-	-- and setting upgrades from 3rd-party addons that load after TMW, and this isn't possible
-	-- if upgrades and database initialization are done before those addons have a chance to load.
+	TMW:UpdateTalentTextureCache()
+	TMW:ProcessEquivalencies()
+
+
 	
 	
-	TMW.Initialize = nil
-	TMW.Initialized = true
+	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+	-- There was a time where we did not register PLAYER_TALENT_UPDATE because it fired way too much (See ticket 949)
+	-- We definitely need it in Warlords, though, because PLAYER_SPECIALIZATION_CHANGED doesnt happen as often.
+	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
+
+
+
+
 	
 	TMW:InitializeDatabase()
 	
-
 	-- DEFAULT_ICON_SETTINGS is used for comparisons against a blank icon setup,
 	-- most commonly used to see if the user has configured an icon at all.
 	TMW.DEFAULT_ICON_SETTINGS = TMW.db.profile.Groups[0].Icons[0]
 	TMW.db.profile.Groups[0] = nil
 	
+
+
+
 	
 	--------------- Communications ---------------
-	
 	-- Channel TMW is used for sharing data.
 	-- ReceiveComm is a setting that allows users to disable receiving shared data.
 	if TMW.db.profile.ReceiveComm then
@@ -1870,12 +1870,24 @@ function TMW:Initialize()
 	
 	-- Channel TMWV is used for version notifications.
 	TMW:RegisterComm("TMWV")
+	-- PLAYER_ENTERING_WORLD handles sending version warnings
+	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+
+
+
+
 	
 	TMW:Fire("TMW_INITIALIZE")
 	TMW:UnregisterAllCallbacks("TMW_INITIALIZE")
 	
-	TMW.InitializedFully = true
+	TMW.Initialized = true
+	
+	TMW:SetScript("OnUpdate", TMW.OnUpdate)
+	TMW:Update()
 end
+TMW:RegisterEvent("PLAYER_LOGIN")
+
 
 function TMW:InitializeDatabase()
 	
@@ -1935,37 +1947,6 @@ function TMW:InitializeDatabase()
 		TMW.UpgradeGlobal = nil
 	end
 end
-
-function TMW:PLAYER_LOGIN()
-	TMW:UnregisterEvent("PLAYER_LOGIN")
-	TMW.PLAYER_LOGIN = nil
-
-	TMW:UpdateTalentTextureCache()
-	
-	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
-	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
-	-- Don't register PLAYER_TALENT_UPDATE. As far as I can tell, there is nothing that it fires for
-	-- that PLAYER_SPECIALIZATION_CHANGED won't also fire for. See ticket 949 for details on why
-	-- registering PLAYER_TALENT_UPDATE is bad now.
-	-- Addendum for Warlords: We're back to registering this again. Lets hope they've fixed the issue.
-	-- PLAYER_SPECIALIZATION_CHANGED doesn't fire nearly as much as it used to, which is why we need to keep PLAYER_TALENT_UPDATE
-
-
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
-
-	TMW:ProcessEquivalencies()
-
-	TMW:Initialize()
-	
-	-- This should be done twice to get everything aware of everything else's GUID.
-	-- Especially when logging in while in combat with the Allow Config in Combat option disabled
-	TMW:Update()
-	--TMW:Update()
-end
-
-
 
 
 
@@ -3200,7 +3181,7 @@ end
 
 
 function TMW:UpdateNormally()	
-	if not TMW.InitializedFully then
+	if not TMW.Initialized then
 		return
 	end
 	
@@ -3357,7 +3338,7 @@ do -- TMW:UpdateViaCoroutine()
 	end
 
 	TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
-		if TMW.InitializedFully then
+		if TMW.Initialized then
 			if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.Locked then
 				TMW:LockToggle()
 			end
@@ -3495,7 +3476,7 @@ function TMW:LockToggle()
 end
 
 function TMW:SlashCommand(str)
-	if not TMW.InitializedFully then
+	if not TMW.Initialized then
 		TMW:Print(L["ERROR_NOTINITIALIZED_NO_ACTION"])
 		return
 	end
@@ -3599,7 +3580,7 @@ function TMW:LoadOptions(recursed)
 	if IsAddOnLoaded("TellMeWhen_Options") then
 		return true
 	end
-	if not TMW.InitializedFully then
+	if not TMW.Initialized then
 		TMW:Print(L["ERROR_NOTINITIALIZED_NO_LOAD"])
 		return 
 	end
