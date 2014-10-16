@@ -190,7 +190,6 @@ function CooldownSweep:OnDisable()
 	self:UpdateCooldown()
 end
 
-local tukui_loaded = IsAddOnLoaded("Tukui")
 local elvui_loaded = IsAddOnLoaded("ElvUI")
 local omnicc_loaded = IsAddOnLoaded("OmniCC")
 local tullacc_loaded = IsAddOnLoaded("tullaCC")
@@ -257,10 +256,7 @@ function CooldownSweep:UpdateCooldown()
 		elseif Tukui then
 			local T = Tukui[1]
 			if T and T.Cooldowns then
-				-- This is broken as of Tukui v16.02
-				-- The code in this function is really badly written - it includes a loop that serves no purpose,
-				-- and it only ever looks at the cooldown sweep's first region to see if it is the text.
-				-- I emailed them about this, so maybe it will be fixed in the future and this will resume working.
+				-- This is broken as of Tukui v16.02, but should be fixed soon after (I emailed and they quickly responded)
 
 				-- We will safecall this just to be safe, in case it changes in a way that breaks things.
 				TMW.safecall(T.Cooldowns.UpdateCooldown, cd, cd.start, duration, true, cd.charges, cd.maxCharges, false)
