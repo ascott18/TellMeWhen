@@ -2258,6 +2258,35 @@ L["CLEU_UNIT_DIED"] = "Unit Died"
 L["CLEU_PARTY_KILL"] = "Party Kill"
 L["CLEU_PARTY_KILL_DESC"] = "Occurs when someone in your party kills something."
 
+
+-- Multistrike strings
+L["CLEU_RANGE_DAMAGE_MULTISTRIKE"] = "Ranged Damage Multistrike" -- custom event
+L["CLEU_RANGE_DAMAGE_MULTISTRIKE_DESC"] = [[Occurs when your auto shot multistrikes.
+
+This will occur at the same time as the %q event.]]
+L["CLEU_SWING_DAMAGE_MULTISTRIKE"] = "Swing Damage Multistrike" -- custom event
+L["CLEU_SWING_DAMAGE_MULTISTRIKE_DESC"] = [[Occurs when your normal melee attacks multistrike.
+
+This will occur at the same time as the %q event.]]
+L["CLEU_SPELL_DAMAGE_MULTISTRIKE"] = "Spell Damage Multistrike" -- custom event
+L["CLEU_SPELL_DAMAGE_MULTISTRIKE_DESC"] = [[Occurs when a spell multistrikes.
+
+This will occur at the same time as the %q event.]]
+L["CLEU_SPELL_PERIODIC_DAMAGE_MULTISTRIKE"] = "Periodic Damage Multistrike" -- custom event
+L["CLEU_SPELL_PERIODIC_DAMAGE_MULTISTRIKE_DESC"] = [[Occurs when a DoT multistrikes.
+
+This will occur at the same time as the %q event.]]
+L["CLEU_SPELL_HEAL_MULTISTRIKE"] = "Heal Multistrike" -- custom event
+L["CLEU_SPELL_HEAL_MULTISTRIKE_DESC"] = [[Occurs when a heal multistrikes.
+
+This will occur at the same time as the %q event.]]
+L["CLEU_SPELL_PERIODIC_HEAL_MULTISTRIKE"] = "Periodic Heal Multistrike" -- custom event
+L["CLEU_SPELL_PERIODIC_HEAL_MULTISTRIKE_DESC"] = [[Occurs when a HoT multistrikes.
+
+This will occur at the same time as the %q event.]]
+
+
+
 L["CLEU_CAT_CAST"] = "Casts"
 L["CLEU_CAT_SWING"] = "Melee/Ranged"
 L["CLEU_CAT_SPELL"] = "Spells"

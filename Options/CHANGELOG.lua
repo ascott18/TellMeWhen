@@ -3,6 +3,7 @@ if not TMW then return end
 TMW.CHANGELOG = {
 
 [==[===v7.1.2===]==],
+[==[* The Combat Event icon type now has special events that will fire when you multistrike.]==],
 [==[* Various tooltips now reflect that WoW only supports .ogg files for custom sound files - MP3s are no longer supported by the game client.]==],
 [==[* Removed error warning about other addons using debugprofilestart() - we got the data we needed.]==],
 [==[]==],
