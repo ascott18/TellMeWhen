@@ -612,12 +612,30 @@ L["RUNEOFPOWER"] = "Rune %d"
 L["GENERICTOTEM"] = "Totem %d"
 L["RUNES"] = "Rune(s) to check"
 
-L["ICONMENU_SHOWTTTEXT"] = "Show variable text"
-L["ICONMENU_SHOWTTTEXT_DESC"] = [[Check this to display the first variable associated with the aura that is being displayed. Practical uses include monitoring damage shield amounts.
+
+
+L["ICONMENU_SHOWTTTEXT2"] = "Aura variables"
+L["ICONMENU_SHOWTTTEXT_DESC2"] = [[Report the icon's stacks as a variable associated with the aura. Practical uses include monitoring damage shield amounts.
 
 This value will be reported and shown in place of the icon's stack count.
 
-Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. In most practical cases, though, the correct number will be shown.]]
+Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura.]]
+
+L["ICONMENU_SHOWTTTEXT_STACKS"] = "Stacks (default behavior)"
+L["ICONMENU_SHOWTTTEXT_STACKS_DESC"] = "Causes the buff/debuff's stacks to be reported as the icon's stacks."
+L["ICONMENU_SHOWTTTEXT_FIRST"] = "First non-zero variable"
+L["ICONMENU_SHOWTTTEXT_FIRST_DESC"] = [[Causes the first non-zero variable assoeciated with the buff/debuff to be reported as the icon's stacks.
+
+Usually this will be the correct variable if you desire one of the aura's variables.
+
+If tracking %s, you need to explicitly watch for Variable #1]]
+L["ICONMENU_SHOWTTTEXT_VAR"] = "Only Variable #%d"
+L["ICONMENU_SHOWTTTEXT_VAR_DESC"] = [[Causes only this variable to be reported as the icon's stacks.
+
+Use this if other, incorrect variables are sometimes reported. Use trial-and-error to figure out which of the variables is correct.]]
+
+
+
 L["ICONMENU_RANGECHECK"] = "Range check"
 L["ICONMENU_RANGECHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of range."
 L["ICONMENU_MANACHECK"] = "Power check"

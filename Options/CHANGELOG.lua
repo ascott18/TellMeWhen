@@ -2,6 +2,9 @@ if not TMW then return end
 
 TMW.CHANGELOG = {
 
+[==[===v7.2.0===]==],
+[==[* Buff/Debuff icons can now explicity set which varible they want to look at for the Show Variable Text option.]==],
+[==[]==],
 [==[===v7.1.2===]==],
 [==[* The Combat Event icon type now has special events that will fire when you multistrike.]==],
 [==[* Various tooltips now reflect that WoW only supports .ogg files for custom sound files - MP3s are no longer supported by the game client.]==],

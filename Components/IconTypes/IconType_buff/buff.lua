@@ -132,11 +132,6 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			tooltip = L["ICONMENU_ONLYMINE_DESC"],
 		},
 		{
-			setting = "ShowTTText",
-			title = L["ICONMENU_SHOWTTTEXT"],
-			tooltip = L["ICONMENU_SHOWTTTEXT_DESC"],
-		},
-		{
 			setting = "Stealable",
 			title = L["ICONMENU_STEALABLE"],
 			tooltip = L["ICONMENU_STEALABLE_DESC"],
@@ -147,6 +142,50 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			tooltip = L["ICONMENU_HIDENOUNITS_DESC"],
 		},
 	})
+
+	self.ShowTTText = TMW.C.Config_DropDownMenu:New("Frame", "$parentShowTTText", self, "TMW_DropDownMenuTemplate", nil, {
+		title = L["ICONMENU_SHOWTTTEXT2"],
+		tooltip = L["ICONMENU_SHOWTTTEXT_DESC2"],
+		clickFunc = function(button, arg1)
+			TMW.CI.ics.ShowTTText = arg1
+			TMW.IE:Load(1)
+		end,
+		func = function(self)
+			local info = TMW.DD:CreateInfo()
+			info.text = L["ICONMENU_SHOWTTTEXT_STACKS"]
+			info.tooltipTitle = info.text
+			info.tooltipText = L["ICONMENU_SHOWTTTEXT_STACKS_DESC"]
+			info.func = self.data.clickFunc
+			info.arg1 = false
+			info.checked = info.arg1 == TMW.CI.ics.ShowTTText
+			TMW.DD:AddButton(info)
+
+			local info = TMW.DD:CreateInfo()
+			info.text = L["ICONMENU_SHOWTTTEXT_FIRST"]
+			info.tooltipTitle = info.text
+			info.tooltipText = L["ICONMENU_SHOWTTTEXT_FIRST_DESC"]
+			info.func = self.data.clickFunc
+			info.arg1 = true
+			info.checked = info.arg1 == TMW.CI.ics.ShowTTText
+			TMW.DD:AddButton(info)
+
+			TMW.DD:AddSpacer()
+
+			for _, var in TMW:Vararg(1, 2, 3) do
+				local info = TMW.DD:CreateInfo()
+				info.text = L["ICONMENU_SHOWTTTEXT_VAR"]:format(var)
+				info.tooltipTitle = info.text
+				info.tooltipText = L["ICONMENU_SHOWTTTEXT_VAR_DESC"]
+				info.func = self.data.clickFunc
+				info.arg1 = var
+				info.checked = info.arg1 == TMW.CI.ics.ShowTTText
+				TMW.DD:AddButton(info)
+			end
+		end,
+	})
+	self.ShowTTText:SetWidth(135)
+	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.HideIfNoUnits, self.ShowTTText)
+	self.HideIfNoUnits:ConstrainLabel(self.ShowTTText)
 end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
@@ -196,7 +235,7 @@ local function Buff_OnUpdate(icon, time)
 	local NotStealable = not icon.Stealable
 
 	-- These variables will hold all the attributes that we pass to YieldInfo().
-	local buffName, iconTexture, duration, expirationTime, caster, count, canSteal, id, v1, v2, v3, v4, useUnit, _
+	local buffName, iconTexture, duration, expirationTime, caster, count, canSteal, id, v1, v2, v3, useUnit, _
 
 	local doesSort = DurationSort or StackSort
 
@@ -220,7 +259,7 @@ local function Buff_OnUpdate(icon, time)
 				local useFilter = Filter
 
 				while true do
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _v1, _v2, _v3, _v4 = UnitAura(unit, index, useFilter)
+					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _v1, _v2, _v3 = UnitAura(unit, index, useFilter)
 					index = index + 1
 					
 					-- Bugfix: Enraged is an empty string.
@@ -246,8 +285,8 @@ local function Buff_OnUpdate(icon, time)
 							if not buffName or curSortDur*DurationSort < remaining*DurationSort then
 								-- DurationSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
 								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, curSortDur =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,    remaining
+								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit, curSortDur =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit,    remaining
 							end
 						elseif StackSort then
 							local stack = _count or 0
@@ -255,13 +294,13 @@ local function Buff_OnUpdate(icon, time)
 							if not buffName or curSortStacks*StackSort < stack*StackSort then
 								-- StackSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
 								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit, curSortStacks =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit,    stack
+								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit, curSortStacks =
+								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit,    stack
 							end
 						else
 							-- We aren't sorting, and we haven't found anything yet, so record this
-							 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3,  v4, useUnit =
-							_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, _v4, unit
+							 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit =
+							_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit
 
 							-- We don't need to look for anything else. Stop looking.
 							break
@@ -278,9 +317,9 @@ local function Buff_OnUpdate(icon, time)
 				for i = 1, #NameArray do
 					local iName = NameArray[i]
 
-					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameStringArray[i], nil, Filter)
+					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, NameStringArray[i], nil, Filter)
 					if Filterh and not buffName then
-						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, NameStringArray[i], nil, Filterh)
+						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, NameStringArray[i], nil, Filterh)
 					end
 
 					if buffName and id ~= iName and isNumber[iName] then
@@ -291,7 +330,7 @@ local function Buff_OnUpdate(icon, time)
 						local useFilter = Filter
 
 						while true do
-							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, useFilter)
+							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, index, useFilter)
 							index = index + 1
 
 							if not id then
@@ -329,7 +368,7 @@ local function Buff_OnUpdate(icon, time)
 		end
 	end
 	
-	icon:YieldInfo(true, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, useUnit)
+	icon:YieldInfo(true, useUnit, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3)
 end
 
 local function Buff_OnUpdate_Controller(icon, time)
@@ -349,7 +388,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 			local filter = Filter
 
 			while true do
-				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, index, filter)
+				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, index, filter)
 				index = index + 1
 				
 				-- Bugfix: Enraged is an empty string.
@@ -371,7 +410,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 					and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id]))
 				then
 					
-					if not icon:YieldInfo(true, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit) then
+					if not icon:YieldInfo(true, unit, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3) then
 						-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 						return
 					end
@@ -383,7 +422,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 	-- Signal the group controller that we are at the end of our data harvesting.
 	icon:YieldInfo(false)
 end
-function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3, v4, unit)
+function Type:HandleYieldedInfo(icon, iconToSet, unit, buffName, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3)
 	local Units = icon.Units
 
 	-- Check that unit is defined here in order to determine if we found something.
@@ -394,16 +433,19 @@ function Type:HandleYieldedInfo(icon, iconToSet, buffName, iconTexture, count, d
 	-- after determining that no matching auras were found.
 	if unit then
 		if icon.ShowTTText then
-			if v1 and v1 > 0 then
-				count = v1
-			elseif v2 and v2 > 0 then
-				count = v2
-			elseif v3 and v3 > 0 then
-				count = v3
-			elseif v4 and v4 > 0 then
-				count = v4
+			if icon.ShowTTText == true then
+				if v1 and v1 > 0 then
+					count = v1
+				elseif v2 and v2 > 0 then
+					count = v2
+				elseif v3 and v3 > 0 then
+					count = v3
+				else
+					count = 0
+				end
 			else
-				count = 0
+				-- icon.ShowTTText is a number if it isn't false and it isn't true
+				count = select(icon.ShowTTText, v1, v2, v3)
 			end
 		end
 
