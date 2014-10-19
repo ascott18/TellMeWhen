@@ -3,8 +3,8 @@ if not TMW then return end
 TMW.CHANGELOG = {
 
 [==[===v7.2.0===]==],
-[==[* Buff/Debuff icons can now explicity set which varible they want to look at for the Show Variable Text option.]==],
 [==[* Combat Event icons can now be group controllers, filling up a group with each event captured.]==],
+[==[* Buff/Debuff icons can now explicity set which variable they want to look at for the "Show variable text" option.]==],
 [==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed range checking for multiple icon types (notably Multistate cooldowns, but also others).]==],
