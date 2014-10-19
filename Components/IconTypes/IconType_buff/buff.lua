@@ -15,8 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local tonumber, pairs, type, format =
-	  tonumber, pairs, type, format
+local tonumber, pairs, type, format, select =
+	  tonumber, pairs, type, format, select
 local UnitAura =
 	  UnitAura
 
@@ -601,7 +601,7 @@ function Type:Setup(icon)
 						relativeTo = TellMeWhen_ChooseName,
 						x = 0,
 						y = 0,
-						text = format(L["HELP_BUFF_NOSOURCERPPM"], TMW:RestoreCase(icon.Spells.Array[k]))
+						text = format(L["HELP_BUFF_NOSOURCERPPM"], badSpell)
 					}
 					break
 				end
