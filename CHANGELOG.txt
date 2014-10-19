@@ -1,5 +1,6 @@
 ===v7.2.0===
  * Buff/Debuff icons can now explicity set which varible they want to look at for the Show Variable Text option.
+ * Combat Event icons can now be group controllers, filling up a group with each event captured.
 
 ===v7.1.2===
  * The Combat Event icon type now has special events that will fire when you multistrike.

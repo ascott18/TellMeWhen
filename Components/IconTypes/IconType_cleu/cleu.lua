@@ -16,8 +16,8 @@ local L = TMW.L
 
 local print = TMW.print
 local _G = _G
-local bit_band, bit_bor =
-	  bit.band, bit.bor
+local bit_band, bit_bor, tinsert, tremove, unpack, wipe =
+	  bit.band, bit.bor, tinsert, tremove, unpack, wipe
 local UnitGUID, GetSpellTexture, GetItemIcon =
 	  UnitGUID, GetSpellTexture, GetItemIcon
 local SpellTextures = TMW.SpellTextures
@@ -38,6 +38,7 @@ Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.unitType = "name"
 Type.hasNoGCD = true
+Type.canControlGroup = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -403,21 +404,32 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			unit, GUID = sourceUnit, sourceGUID
 		end
 
-		icon:SetInfo(
-			"start, duration; texture; spell; extraSpell; unit, GUID; sourceUnit, sourceGUID; destUnit, destGUID",
-			TMW.time, duration or icon.CLEUDur,
-			tex or SpellTextures[spellID],
-			spellID or spellName,
-			extraID,
-			unit, GUID,
-			sourceUnit, sourceGUID,
-			destUnit, destGUID
-		)
+		if icon:IsGroupController() then
+			tinsert(icon.capturedCLEUEvents, 1, {
+				TMW.time, duration or icon.CLEUDur,
+				tex or SpellTextures[spellID],
+				spellID or spellName,
+				extraID,
+				unit, GUID,
+				sourceUnit, sourceGUID,
+				destUnit, destGUID
+			})
+		else
+			icon:SetInfo(
+				"start, duration; texture; spell; extraSpell; unit, GUID; sourceUnit, sourceGUID; destUnit, destGUID",
+				TMW.time, duration or icon.CLEUDur,
+				tex or SpellTextures[spellID],
+				spellID or spellName,
+				extraID,
+				unit, GUID,
+				sourceUnit, sourceGUID,
+				destUnit, destGUID
+			)
+		end
 
 		-- do an immediate update because it might look stupid if
 		-- half the icon changes on event and the other half changes on the next update cycle
 		icon:Update(true)
-
 
 		-- Fire the OnCLEUEvent icon event to immediately trigger any notifications for it, if needed.
 		if icon.EventHandlersSet.OnCLEUEvent then
@@ -446,6 +458,43 @@ local function CLEU_OnUpdate(icon, time)
 			"alpha; start, duration",
 			icon.Alpha,
 			start, duration
+		)
+	end
+end
+
+local function CLEU_OnUpdate_Controller(icon, time)
+	local events = icon.capturedCLEUEvents
+
+	local offs = 0
+	for i = 1, #events do
+		local k = i + offs
+		local event = events[k]
+		local start, duration = event[1], event[2]
+
+		if time - start >= duration then
+			-- Remove expired timers.
+			tremove(events, k)
+			offs = offs - 1
+		elseif not icon:YieldInfo(true, event) then
+			-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
+			return
+		end
+	end
+
+	icon:YieldInfo(false)
+end
+function Type:HandleYieldedInfo(icon, iconToSet, capturedEvent)
+	if capturedEvent then
+		iconToSet:SetInfo(
+			"alpha; start, duration; texture; spell; extraSpell; unit, GUID; sourceUnit, sourceGUID; destUnit, destGUID",
+			icon.Alpha,
+			unpack(capturedEvent)
+		)
+	else
+		iconToSet:SetInfo(
+			"alpha; start, duration",
+			icon.UnAlpha,
+			0, 0
 		)
 	end
 end
@@ -480,7 +529,16 @@ function Type:Setup(icon)
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	icon:SetScript("OnEvent", CLEU_OnEvent)
 
-	icon:SetUpdateFunction(CLEU_OnUpdate)
+	if icon:IsGroupController() then
+		icon.capturedCLEUEvents = icon.capturedCLEUEvents or {}
+		if not TMW.Locked then
+			wipe(icon.capturedCLEUEvents)
+		end
+
+		icon:SetUpdateFunction(CLEU_OnUpdate_Controller)
+	else
+		icon:SetUpdateFunction(CLEU_OnUpdate)
+	end
 	icon:Update()
 end
 
