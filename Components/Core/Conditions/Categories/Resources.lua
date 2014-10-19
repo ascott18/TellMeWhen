@@ -318,15 +318,15 @@ ConditionCategory:RegisterCondition(15.5, "CHI", {
 
 ConditionCategory:RegisterCondition(16,	 "COMBO", {
 	text = L["CONDITIONPANEL_COMBO"],
-	defaultUnit = "target",
 	min = 0,
 	max = 5,
+	unit = TARGET,
 	icon = "Interface\\Icons\\ability_rogue_eviscerate",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetComboPoints = GetComboPoints,
 	},
-	funcstr = [[GetComboPoints("player", c.Unit) c.Operator c.Level]],
+	funcstr = [[GetComboPoints("player", "target") c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),

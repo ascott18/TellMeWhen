@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 72004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 72005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 71030 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1840,6 +1840,8 @@ function TMW:PLAYER_LOGIN()
 
 	
 	
+	TMW:RegisterEvent("BARBER_SHOP_OPEN")
+	TMW:RegisterEvent("BARBER_SHOP_CLOSE")
 	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 	-- There was a time where we did not register PLAYER_TALENT_UPDATE because it fired way too much (See ticket 949)
 	-- We definitely need it in Warlords, though, because PLAYER_SPECIALIZATION_CHANGED doesnt happen as often.
@@ -3426,6 +3428,14 @@ function TMW:OnProfile(event, arg2, arg3)
 	end
 	
 	TMW:Fire("TMW_ON_PROFILE", event, arg2, arg3)
+end
+
+function TMW:BARBER_SHOP_OPEN()
+	TMW:Hide()
+end
+
+function TMW:BARBER_SHOP_CLOSE()
+	TMW:Show()
 end
 
 
