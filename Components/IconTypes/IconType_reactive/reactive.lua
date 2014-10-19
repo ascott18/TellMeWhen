@@ -160,10 +160,15 @@ local function Reactive_OnUpdate(icon, time)
 		end
 		
 		if duration then
-			inrange, CD = 1, nil
+			inrange, CD = true, nil
 
 			if RangeCheck then
-				inrange = IsSpellInRange(iName, "target") or 1
+				inrange = IsSpellInRange(iName, "target")
+				if inrange == 1 or inrange == nil then
+					inrange = true
+				else
+					inrange = false
+				end
 			end
 
 			usable, nomana = IsUsableSpell(iName)
@@ -188,7 +193,7 @@ local function Reactive_OnUpdate(icon, time)
 			end
 
 			usable = forceUsable or usable
-			if usable and not CD and not nomana and inrange == 1 then --usable
+			if usable and not CD and not nomana and inrange then --usable
 				icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
 					icon.Alpha,
 					SpellTextures[iName],
@@ -226,9 +231,14 @@ local function Reactive_OnUpdate(icon, time)
 			start, duration = 0, 0
 		end
 
-		inrange, nomana = 1
+		inrange, nomana = true
 		if RangeCheck then
-			inrange = IsSpellInRange(NameFirst, "target") or 1
+			inrange = IsSpellInRange(NameFirst, "target")
+			if inrange == 1 or inrange == nil then
+				inrange = true
+			else
+				inrange = false
+			end
 		end
 		if ManaCheck then
 			nomana = SpellHasNoMana(NameFirst)

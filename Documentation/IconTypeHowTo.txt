@@ -120,17 +120,22 @@ local function TestType_OnUpdate(icon, time)
 	end
 	
 	if duration then
-		local inrange = 1
+		local inrange = true
 		local nomana
 		
 		if icon.RangeCheck then
-			inrange = IsSpellInRange(NameFirst, "target") or 1
+			inrange = IsSpellInRange(NameFirst, "target")
+			if inrange == 1 or inrange == nil then
+				inrange = true
+			else
+				inrange = false
+			end
 		end
 		if icon.ManaCheck then
 			nomana = SpellHasNoMana(NameFirst)
 		end
 		
-		if inrange == 1 and not nomana and (duration == 0 or OnGCD(duration)) then
+		if inrange and not nomana and (duration == 0 or OnGCD(duration)) then
 			-- Usable
 			
 			icon:SetInfo(
@@ -279,17 +284,22 @@ local function TestType_OnUpdate(icon, time)
 	end
 	
 	if duration then
-		local inrange = 1
+		local inrange = true
 		local nomana
 		
 		if icon.RangeCheck then
-			inrange = IsSpellInRange(NameFirst, "target") or 1
+			inrange = IsSpellInRange(NameFirst, "target")
+			if inrange == 1 or inrange == nil then
+				inrange = true
+			else
+				inrange = false
+			end
 		end
 		if icon.ManaCheck then
 			nomana = SpellHasNoMana(NameFirst)
 		end
 		
-		if inrange == 1 and not nomana and (duration == 0 or OnGCD(duration)) then
+		if inrange and not nomana and (duration == 0 or OnGCD(duration)) then
 			-- Usable
 			
 			icon:SetInfo(

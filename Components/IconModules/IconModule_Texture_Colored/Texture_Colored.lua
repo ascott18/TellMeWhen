@@ -59,9 +59,9 @@ function Texture_Colored:UPDATE(icon)
 	local color
 	if not TMW.Locked then
 		color = COLOR_UNLOCKED
-	elseif inrange == 0 and nomana then
+	elseif inrange == false and nomana then
 		color = self.Colors.OORM
-	elseif inrange == 0 then
+	elseif inrange == false then
 		color = self.Colors.OOR
 	elseif nomana then
 		color = self.Colors.OOM

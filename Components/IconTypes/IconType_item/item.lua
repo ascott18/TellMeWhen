@@ -128,16 +128,17 @@ local function ItemCooldown_OnUpdate(icon, time)
 		start, duration = item:GetCooldown()
 
 		if duration then
-			inrange, equipped, count = 1, true, item:GetCount()
+			inrange, equipped, count = true, true, item:GetCount()
 			if RangeCheck then
-				inrange = item:IsInRange("target") or 1
+				inrange = item:IsInRange("target")
+				if inrange == nil then inrange = true end
 			end
 
 			if (OnlyEquipped and not item:GetEquipped()) or (OnlyInBags and (count == 0)) then
 				equipped = false
 			end
 			
-			if equipped and inrange == 1 and (duration == 0 or OnGCD(duration)) then
+			if equipped and inrange and (duration == 0 or OnGCD(duration)) then
 				-- This item is usable. Set the attributes and then stop.
 
 				icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
@@ -178,9 +179,10 @@ local function ItemCooldown_OnUpdate(icon, time)
 	if numChecked > 1 then
 		start, duration = item2:GetCooldown()
 
-		inrange, count = 1, item2:GetCount()
+		inrange, count = true, item2:GetCount()
 		if RangeCheck then
-			inrange = item2:IsInRange("target") or 1
+			inrange = item2:IsInRange("target")
+			if inrange == nil then inrange = true end
 		end
 	end
 

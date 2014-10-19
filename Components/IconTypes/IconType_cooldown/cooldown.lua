@@ -17,8 +17,6 @@ local L = TMW.L
 local print = TMW.print
 local GetSpellInfo, GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell =
 	  GetSpellInfo, GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell
-local GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo =
-	  GetActionCooldown, IsActionInRange, IsUsableAction, GetActionTexture, GetActionInfo
 local UnitRangedDamage =
 	  UnitRangedDamage
 local pairs, wipe, strlower =
@@ -121,9 +119,17 @@ local function AutoShot_OnUpdate(icon, time)
 	local asDuration = icon.asDuration
 
 	local ready = time - icon.asStart > asDuration
-	local inrange = icon.RangeCheck and IsSpellInRange(NameString, "target") or 1
+	local inrange = true
+	if icon.RangeCheck then
+		inrange = IsSpellInRange(NameString, "target")
+		if inrange == 1 or inrange == nil then
+			inrange = true
+		else
+			inrange = false
+		end
+	end
 
-	if ready and inrange == 1 then
+	if ready and inrange then
 		icon:SetInfo(
 			"alpha; start, duration; spell; inRange",
 			icon.Alpha,
@@ -181,9 +187,14 @@ local function SpellCooldown_OnUpdate(icon, time)
 				start, duration = 0, 0
 			end
 
-			local inrange, nomana = 1, nil
+			local inrange, nomana = true, nil
 			if RangeCheck then
-				inrange = IsSpellInRange(iName, "target") or 1
+				inrange = IsSpellInRange(iName, "target")
+				if inrange == 1 or inrange == nil then
+					inrange = true
+				else
+					inrange = false
+				end
 			end
 			if ManaCheck then
 				nomana = SpellHasNoMana(iName)
@@ -193,7 +204,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			-- We store all our data in tables here because we need to keep track of both the first
 			-- usable cooldown and the first unusable cooldown found. We can't always determine which we will
 			-- use until we've found one of each. 
-			if inrange == 1 and not nomana and (duration == 0 or (charges and charges > 0) or OnGCD(duration)) then --usable
+			if inrange and not nomana and (duration == 0 or (charges and charges > 0) or OnGCD(duration)) then --usable
 				if not usableFound then
 					wipe(usableData)
 					usableData.alpha = icon.Alpha

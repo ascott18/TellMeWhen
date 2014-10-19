@@ -137,10 +137,11 @@ local function MultiStateCD_OnUpdate(icon, time)
 		
 	
 	if duration then	
-		local inrange, nomana, _ = 1
+		local inrange, nomana, _ = true
 
 		if icon.RangeCheck then
-			inrange = IsActionInRange(Slot, "target") or 1
+			inrange = IsActionInRange(Slot, "target")
+			if inrange == nil then inrange = true end
 		end
 		if icon.ManaCheck then
 			_, nomana = IsUsableAction(Slot)

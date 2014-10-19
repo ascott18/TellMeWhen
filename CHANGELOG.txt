@@ -2,6 +2,9 @@
  * Buff/Debuff icons can now explicity set which varible they want to look at for the Show Variable Text option.
  * Combat Event icons can now be group controllers, filling up a group with each event captured.
 
+====Bug Fixes====
+ * Fixed range checking for multiple icon types (notably Multistate cooldowns, but also others).
+
 ===v7.1.2===
  * The Combat Event icon type now has special events that will fire when you multistrike.
  * Various tooltips now reflect that WoW only supports .ogg files for custom sound files - MP3s are no longer supported by the game client.
