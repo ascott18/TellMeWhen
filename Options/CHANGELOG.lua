@@ -10,6 +10,7 @@ TMW.CHANGELOG = {
 [==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed range checking for multiple icon types (notably Multistate cooldowns, but also others).]==],
+[==[* Blood Pact should now have the correct ID in the BonusStamina equivalency.]==],
 [==[]==],
 [==[===v7.1.2===]==],
 [==[* The Combat Event icon type now has special events that will fire when you multistrike.]==],
