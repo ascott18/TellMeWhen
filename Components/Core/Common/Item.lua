@@ -130,6 +130,9 @@ end
 function Item:GetCooldown()
 	error("This function must be overridden by subclasses")
 end
+function Item:HasUseEffect()
+	return not not GetItemSpell(self:GetID())
+end
 function Item:GetID()
 	error("This function must be overridden by subclasses")
 end

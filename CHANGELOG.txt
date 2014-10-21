@@ -4,6 +4,8 @@
  * All icons are now hidden when you are at the barber shop.
  * The combo point condition now only checks your target (so you can't try to check "player", which doesn't work).
 
+ * New condition: Item has on use effect
+
 ====Bug Fixes====
  * Fixed range checking for multiple icon types (notably Multistate cooldowns, but also others).
  * Blood Pact should now have the correct ID in the BonusStamina equivalency.

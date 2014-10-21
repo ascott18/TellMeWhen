@@ -392,6 +392,24 @@ ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
 	end,
 })
+ConditionCategory:RegisterCondition(16,	 "ITEMSPELL", {
+	text = L["ITEMSPELL"],
+	min = 0,
+	max = 1,
+	nooperator = true,
+	formatter = TMW.C.Formatter.BOOL,
+	name = function(editbox) TMW:TT(editbox, "ITEMSPELL", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
+	useSUG = "itemwithslots",
+	unit = false,
+	icon = "Interface\\Icons\\inv_misc_bone_elfskull_01",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[BOOLCHECK( c.Item:HasUseEffect() )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("BAG_UPDATE"),
+			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
+	end,
+})
 
 
 ConditionCategory:RegisterSpacer(18)
