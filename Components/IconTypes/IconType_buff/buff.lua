@@ -184,6 +184,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		end,
 	})
 	self.ShowTTText:SetWidth(135)
+	self.ShowTTText:SetDropdownAnchor("TOPRIGHT", self.ShowTTText.Middle, "BOTTOMRIGHT")
 	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.HideIfNoUnits, self.ShowTTText)
 	self.HideIfNoUnits:ConstrainLabel(self.ShowTTText)
 end)
