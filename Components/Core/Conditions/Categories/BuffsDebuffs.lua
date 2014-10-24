@@ -165,6 +165,24 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	end,
 })
 ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
+	--[[
+		The percent conditions are being deprecated because a lot of people are
+		misusing them. In Warlords of Draenor, the point at which you can refresh
+		a buff/debuff without clipping any of the original duration is at 30% of
+		the BASE DURATION of the effect. TellMeWhen can't (reliably) determine the
+		base duration of an effect - only the game client knows that. A lot of
+		users are using these conditions to check when something has less than 30%
+		remaining, but this is bad because if you refresh at 30% remaining of an
+		already extended aura, you are going to clip some of it.
+
+		I don't want to be misleading people into thinking that these conditions
+		are checking things that they aren't able to check, so lets just disable them
+		from being chosen.
+	]]
+	hidden = true,
+	old = true,
+	tooltip = L["PERCENTAGE_DEPRECATED_DESC"],
+
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"] .. " - " .. L["PERCENTAGE"],
 	min = 0,
 	max = 100,
@@ -323,6 +341,24 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	end,
 })
 ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
+	--[[
+		The percent conditions are being deprecated because a lot of people are
+		misusing them. In Warlords of Draenor, the point at which you can refresh
+		a buff/debuff without clipping any of the original duration is at 30% of
+		the BASE DURATION of the effect. TellMeWhen can't (reliably) determine the
+		base duration of an effect - only the game client knows that. A lot of
+		users are using these conditions to check when something has less than 30%
+		remaining, but this is bad because if you refresh at 30% remaining of an
+		already extended aura, you are going to clip some of it.
+
+		I don't want to be misleading people into thinking that these conditions
+		are checking things that they aren't able to check, so lets just disable them
+		from being chosen.
+	]]
+	hidden = true,
+	old = true,
+	tooltip = L["PERCENTAGE_DEPRECATED_DESC"],
+
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"] .. " - " .. L["PERCENTAGE"],
 	min = 0,
 	max = 100,

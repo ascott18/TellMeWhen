@@ -1344,7 +1344,7 @@ If more help is needed (but not help about how to write Lua code), open a ticket
 
 
 L["CONDITIONPANEL_OLD"] = "<|cffff1300OLD|r>"
-L["CONDITIONPANEL_OLD_DESC"] = "<|cffff1300OLD|r> - There is a newer version of this condition available."
+L["CONDITIONPANEL_OLD_DESC"] = "<|cffff1300OLD|r> - There is a newer/better version of this condition available."
 L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"] = "Choose Types..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
@@ -1458,6 +1458,13 @@ L["CODETOEXE"] = "Code to Execute"
 L["MACROTOEVAL"] = "Macro Conditional(s) to Evaluate"
 L["COMPARISON"] = "Comparison"
 L["PERCENTAGE"] = "Percentage"
+L["PERCENTAGE_DEPRECATED_DESC"] = [[The percent conditions are deprecated because they are deceiving.
+
+In Warlords of Draenor, the point at which you can refresh a buff/debuff without clipping any of the existing duration is at 30% of the BASE DURATION of the effect - not the current duration.
+
+Using these conditions to check when a buff/debuff has less than 30% remaining is bad practice, because if you refresh at 30% remaining of an already extended aura, you are going to clip some of it.
+
+Instead, you should manually calculate 30% of the base duration of what you want to check, and compare against that value.]]
 
 L["PET_TYPE_CUNNING"] = "Cunning"
 L["PET_TYPE_TENACITY"] = "Tenacity"

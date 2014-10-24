@@ -6,6 +6,11 @@
 
  * New condition: Item has on use effect
 
+ * IMPORTANT: The Buff/Debuff Duration Percent conditions are being phased out because they are deceiving.
+ ** In Warlords of Draenor, the point at which you can refresh a buff/debuff without clipping any of the existing duration is at 30% of the BASE DURATION of the effect - not 30% the current duration.
+ ** Using these conditions to check when a buff/debuff has less than 30% remaining is bad practice, because if you refresh at 30% remaining of an already extended aura, you are going to clip some of it.
+ ** Instead, you should manually calculate 30% of the base duration of what you want to check, and compare against that value in a regular Buff/Debuff Duration condition.
+
 ====Bug Fixes====
  * Fixed range checking for multiple icon types (notably Multistate cooldowns, but also others).
  * Blood Pact should now have the correct ID in the BonusStamina equivalency.
