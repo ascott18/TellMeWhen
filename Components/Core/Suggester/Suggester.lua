@@ -352,10 +352,15 @@ local EditBoxHooks = {
 		end
 	end,
 	OnTextChanged = function(self, userInput)
-		if userInput and self.SUG_Enabled then
-			SUG.redoIfSame = nil
-			SUG:NameOnCursor()
+		if self.SUGTimer then
+			self.SUGTimer:Cancel()
 		end
+		self.SUGTimer = C_Timer.NewTimer(0.2, function()
+			if userInput and self.SUG_Enabled then
+				SUG.redoIfSame = nil
+				SUG:NameOnCursor()
+			end
+		end)
 	end,
 	OnMouseUp = function(self)
 		if self.SUG_Enabled then
