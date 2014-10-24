@@ -491,6 +491,7 @@ local aurasWithNoSourceReported = {
 	GetSpellInfo(120032),	-- Dancing Steel
 	GetSpellInfo(116631),	-- Colossus
 	GetSpellInfo(104423),	-- Windsong
+	GetSpellInfo(109085),	-- Blastington's
 
 	-- Warlords:
 	GetSpellInfo(156060),	-- Megawatt Filament
