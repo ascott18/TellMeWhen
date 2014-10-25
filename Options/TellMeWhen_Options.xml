@@ -553,6 +553,14 @@
 				</Scripts>
 			</Slider>
 		</Frames>
+		<Scripts>
+			<OnShow>
+				self:GetParent():AdjustHeight()
+			</OnShow>
+			<OnHide>
+				self:GetParent():AdjustHeight()
+			</OnHide>
+		</Scripts>
 	</Frame>
 	<Frame name="TellMeWhen_WhenChecks" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="78"/>
@@ -583,7 +591,7 @@
 			</Frame>
 			<Frame name="$parentUnAlpha" inherits="TellMeWhen_WhenCheckSet">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentAlpha" relativePoint="BOTTOM" y="2"/>
+					<Anchor point="TOP" relativeTo="$parentAlpha" relativePoint="BOTTOM" y="1"/>
 					<Anchor point="LEFT" />
 					<Anchor point="RIGHT" />
 				</Anchors>
@@ -599,6 +607,16 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
+				function self:AdjustHeight()
+					local height = 0
+					for _, child in TMW:Vararg(self:GetChildren()) do
+						if child:IsShown() then
+							height = height + 40
+						end
+					end
+					self:SetHeight(height)
+				end
+
 				TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
 					if frame == self then
 						local supplementalData = panelInfo.supplementalData
@@ -607,6 +625,8 @@
 						
 						-- Set the title for the frame
 						self.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
+
+						self:AdjustHeight()
 					end
 				end)
 			</OnLoad>

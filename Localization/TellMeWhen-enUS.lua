@@ -381,6 +381,11 @@ Error messages much be matched exactly as they are typed, but are case-insensiti
 
 
 
+L["ICONMENU_VALUE"] = "Resource Display"
+L["ICONMENU_VALUE_DESC"] = [=[Displays the resources (Health, Mana, etc.) of a unit.]=]
+L["ICONMENU_VALUE_POWERTYPE"] = "Resource Type"
+L["ICONMENU_VALUE_POWERTYPE_DESC"] = "Configure what resource you want the icon to track."
+
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
 
@@ -395,6 +400,12 @@ Remember that icons will only work when TellMeWhen is in its locked state, so ty
 
 
 As you configure TellMeWhen, make sure to read the tooltips for each setting. These tooltips often contain important information about the how the setting works!]]
+
+
+L["ICONMENU_VIEWREQ"] = "Incompatible Group Display Method"
+L["ICONMENU_VIEWREQ_DESC"] = [[This icon type cannot be used with this group's current display method because it doesn't have the necessary components to display the needed data.
+
+Change the group's display method or create a new group to use this icon type.]]
 
 
 
@@ -1710,6 +1721,8 @@ L["DT_DOC_Spell"] = "Returns the spell or item that the icon is showing data for
 L["DT_DOC_Stacks"] = "Returns the current stacks of the icon"
 L["DT_DOC_Unit"] = "Returns the unit or the name of the unit that the icon is checking. Best use in conjunction with the [Name] tag."
 L["DT_DOC_PreviousUnit"] = "Returns the unit or the name of the unit that the icon is checked prior to the current unit. Best use in conjunction with the [Name] tag."
+L["DT_DOC_Value"] = "Returns the numerical value that the icon is displaying. This is only used by a small number of icon types."
+L["DT_DOC_ValueMax"] = "Returns the maximum of the numerical value that the icon is displaying. This is only used by a small number of icon types."
 
 L["DT_INSERTGUID_TOOLTIP"] = "|cff7fffffShift-click|r to insert this icon's identifier into a DogTag."
 L["DT_INSERTGUID_GENERIC_DESC"] = [[If you would like one icon to display information about another, |cff7fffffShift-click|r that icon to insert its unique identifier that you can pass as the tag's "icon" parameter.]]

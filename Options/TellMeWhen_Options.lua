@@ -1158,7 +1158,7 @@ function IE:PositionPanels()
 			end
 		end
 		
-		if frame then
+		if frame and frame:ShouldShow() then
 			if type(parent[#parent]) == "table" then
 				frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
 			else
@@ -1599,7 +1599,6 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 				ticker:Cancel()
 			end	
 		end)
-
 	end,
 
 	SetTitle = function(self, text)
@@ -1625,6 +1624,9 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		end
 	end,
 
+	ShouldShow = function(self)
+		return true
+	end,
 
 	SetHeight = function(self, height)
 		if self.__oldHeight then
@@ -2469,6 +2471,9 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 					L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(supplementalDataForBit.text),
 					supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
 				)
+				self:Show()
+			else
+				self:Hide()
 			end
 		end
 	end,

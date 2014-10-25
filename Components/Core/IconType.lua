@@ -494,6 +494,25 @@ function IconType:IsAllowedByView(viewName)
 	end
 end
 
+IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_IsViewAllowed", function(self)
+	self.Header:SetText(L["ICONMENU_VIEWREQ"])
+
+	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	self.text:SetWordWrap(true)
+	self.text:SetPoint("TOP", 0, -10)
+	self.text:SetText(L["ICONMENU_VIEWREQ_DESC"])
+	self.text:SetWidth(self:GetWidth() - 15)
+	self:SetHeight(self.text:GetStringHeight() + 20)
+
+	self:SetScript("OnSizeChanged", function()
+		self:SetHeight(self.text:GetStringHeight() + 20)
+	end)
+	self.ShouldShow = function(self)
+		return not TMW.CI.icon.typeData:IsAllowedByView(TMW.CI.group.View)
+	end
+end)
+
+
 -- [REQUIRED IF USED, FALLBACK]
 --- Processes data passed from icon:YieldInfo(hasInfo, ...) and sets it on iconToSet. You must override this method if your icon type's methods call icon:YieldInfo().
 -- @param icon [TMW.Classes.Icon] The icon that yielded the info.

@@ -21,6 +21,7 @@
 <Include file="IconType_totem\includes.core.xml"/>
 <Include file="IconType_uierror\includes.core.xml"/>
 <Include file="IconType_unitcooldown\includes.core.xml"/>
+<Include file="IconType_value\includes.core.xml"/>
 <Include file="IconType_wpnenchant\includes.core.xml"/>
 
 </Ui>

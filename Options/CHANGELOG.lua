@@ -3,6 +3,8 @@ if not TMW then return end
 TMW.CHANGELOG = {
 
 [==[===v7.2.0===]==],
+[==[* New icon type: Resource Display. Works with Bar and Vertical Bar group display methods to show the amount of health, mana, etc. that some unit has.]==],
+[==[]==],
 [==[* Combat Event icons can now be group controllers, filling up a group with each event captured.]==],
 [==[* Buff/Debuff icons can now explicity set which variable they want to look at for the "Show variable text" option.]==],
 [==[* All icons are now hidden when you are at the barber shop.]==],

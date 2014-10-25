@@ -571,7 +571,7 @@ do
 	local Processor = TMW.Classes.IconDataProcessor:New("VALUE", "value, maxValue, valueColor")
 
 	function Processor:CompileFunctionSegment(t)
-		-- GLOBALS: charges, maxValue
+		-- GLOBALS: value, maxValue, valueColor
 		t[#t+1] = [[
 		
 		if attributes.value ~= value or attributes.maxValue ~= maxValue or attributes.maxValue ~= valueColor then
@@ -589,6 +589,42 @@ do
 	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
 		icon:SetInfo("value, maxValue, valueColor", nil, nil, nil)
 	end)
+		
+	Processor:RegisterDogTag("TMW", "Value", {
+		code = function(icon)
+			icon = TMW.GUIDToOwner[icon]
+			
+			local value = icon and icon.attributes.value or 0
+			
+			return isNumber[value] or value
+		end,
+		arg = {
+			'icon', 'string', '@req',
+		},
+		events = TMW:CreateDogTagEventString("VALUE"),
+		ret = "number",
+		doc = L["DT_DOC_Value"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+		example = '[Value] => "256891"; [Value(icon="TMW:icon:1I7MnrXDCz8T")] => "2"',
+		category = L["ICON"],
+	})
+		
+	Processor:RegisterDogTag("TMW", "ValueMax", {
+		code = function(icon)
+			icon = TMW.GUIDToOwner[icon]
+			
+			local maxValue = icon and icon.attributes.maxValue or 0
+			
+			return isNumber[maxValue] or maxValue
+		end,
+		arg = {
+			'icon', 'string', '@req',
+		},
+		events = TMW:CreateDogTagEventString("VALUE"),
+		ret = "number",
+		doc = L["DT_DOC_ValueMax"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+		example = '[ValueMax] => "312856"; [ValueMax(icon="TMW:icon:1I7MnrXDCz8T")] => "3"',
+		category = L["ICON"],
+	})
 end
 
 

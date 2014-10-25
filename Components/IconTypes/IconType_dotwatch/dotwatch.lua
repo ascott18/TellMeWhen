@@ -86,12 +86,8 @@ Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", func
 	self:SetScript("OnSizeChanged", function()
 		self:SetHeight(self.text:GetStringHeight() + 20)
 	end)
-	self.OnSetup = function(self, panelInfo, supplementalData)
-		if TMW.CI.icon:IsGroupController() then
-			self:Hide()
-		else
-			self:Show()
-		end
+	self.ShouldShow = function(self)
+		return not TMW.CI.icon:IsGroupController()
 	end
 end)
 

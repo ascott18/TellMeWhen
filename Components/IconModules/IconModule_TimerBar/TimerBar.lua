@@ -15,14 +15,22 @@ if not TMW then return end
 
 local TMW = TMW
 local L = TMW.L
+local print = TMW.print
+
+
 local LSM = LibStub("LibSharedMedia-3.0")
 local	pairs, wipe =
 		pairs, wipe
-local BarsToUpdate = {}
 
 local OnGCD = TMW.OnGCD
 
+
+
+local BarsToUpdate = {}
+
 local StatusBarTexture
+
+
 
 local TimerBar = TMW:NewClass("IconModule_TimerBar", "IconModule", "UpdateTableManager")
 TimerBar:UpdateTable_Set(BarsToUpdate)
