@@ -197,6 +197,13 @@ function PowerBar:ScanForCost(spellLink)
 
 	local costString = LT2:GetText()
 
+	if not costString then
+		-- Apparently this can happen sometimes.
+		-- There are some obscure spells that it happens to all the time
+		-- (because they really only have one line in their tooltip), but these spells aren't player spells.
+		return 0, 0
+	end
+
 	for powerType, strings in pairs(costs) do
 	    for _, string in pairs(strings) do
 	        local amount = costString:match("^" .. string .. "$")
@@ -205,7 +212,7 @@ function PowerBar:ScanForCost(spellLink)
 	            amount = amount:gsub("[^0-9]", "")
 	            amount = tonumber(amount)
 
-	            return amount, powerType
+		        return amount, powerType
 	        end
 	    end
 	end
