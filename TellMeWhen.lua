@@ -1801,7 +1801,7 @@ function TMW:PLAYER_LOGIN()
 		return
 
 	-- if the file is NOT required for gross functionality
-	elseif not TMW.Classes or not TMW.Classes.SpellSet then
+	elseif not TMW.Classes or not TMW.Classes.IconDataProcessor.ProcessorsByName.SHOWN then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {

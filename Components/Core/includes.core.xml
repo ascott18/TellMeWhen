@@ -30,4 +30,7 @@
 <Script file="IconDataProcessorHook.lua"/>
 
 
+<Script file="IconDataProcessors.lua"/>
+
+
 </Ui>

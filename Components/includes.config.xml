@@ -4,7 +4,6 @@
 
 <Include file="EventHandlers\includes.config.xml"/>
 
-<Include file="IconDataProcessors\includes.config.xml"/>
 <Include file="IconDataProcessorHooks\includes.config.xml"/>
 
 <Include file="GroupModules\includes.config.xml"/>
