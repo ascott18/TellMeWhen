@@ -34,6 +34,81 @@ TimerBar_BarDisplay:RegisterIconDefaults{
 
 TimerBar_BarDisplay:RegisterConfigPanel_XMLTemplate(210, "TellMeWhen_BarDisplayBarOptions")
 
+
+TimerBar_BarDisplay:PostHookMethod("OnEnable", function(self)
+	self:VALUE(icon, attributes.value, attributes.maxValue, attributes.valueColor)
+end)
+
+function TimerBar_BarDisplay:GetValue()
+	-- returns value, doTerminate
+
+	local duration = self.duration
+
+	if duration then
+		-- Display a timer.
+		if self.Invert then
+			if duration == 0 then
+				return self.Max, true
+			else
+				local value = TMW.time - self.start + self.Offset
+				return value, value >= self.Max
+			end
+		else
+			if duration == 0 then
+				return 0, true
+			else
+				local value = duration - (TMW.time - self.start) + self.Offset
+				return value, value <= 0
+			end
+		end
+
+	else
+		-- Display a set value.
+		if self.Invert then
+			return self.Max - self.value + self.Offset, false
+		else
+			return self.value + self.Offset, false
+		end
+	end
+end
+
+function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
+	if value then
+		self.duration = nil
+		self.start = nil
+
+		self.value = value
+		self.Max = self.FakeMax or maxValue
+		self.bar:SetMinMaxValues(0, self.Max)
+
+		self:SetupColors(valueColor)
+
+		self:UpdateValue()
+	end
+end
+TimerBar_BarDisplay:SetDataListner("VALUE")
+
+function TimerBar_BarDisplay:SetupColors(valueColor)
+	if sourceIcon.BarDisplay_EnableColors then
+		self:SetColors(
+			sourceIcon.BarDisplay_StartColor,
+			sourceIcon.BarDisplay_MiddleColor,
+			sourceIcon.BarDisplay_CompleteColor)
+
+	elseif valueColor then
+		self:SetColors(
+			valueColor,
+			valueColor,
+			valueColor)
+
+	else
+		self:SetColors(
+			sourceIcon.typeData.Colors.CBS,
+			sourceIcon.typeData.Colors.CBM,
+			sourceIcon.typeData.Colors.CBC)
+	end
+end
+
 function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 	self.Invert = sourceIcon.BarDisplay_Invert
 	
@@ -50,17 +125,7 @@ function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 		self.FakeMax = sourceIcon.BarDisplay_FakeMax
 	end
 
-	if sourceIcon.BarDisplay_EnableColors then
-		self:SetColors(
-			sourceIcon.BarDisplay_StartColor,
-			sourceIcon.BarDisplay_MiddleColor,
-			sourceIcon.BarDisplay_CompleteColor)
-	else
-		self:SetColors(
-			sourceIcon.typeData.Colors.CBS,
-			sourceIcon.typeData.Colors.CBM,
-			sourceIcon.typeData.Colors.CBC)
-	end
+	self:SetupColors(nil)
 	
 	self:UpdateValue(1)
 end

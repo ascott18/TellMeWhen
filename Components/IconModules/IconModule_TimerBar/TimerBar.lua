@@ -63,28 +63,34 @@ function TimerBar:OnDisable()
 	self:UpdateTable_Unregister()
 end
 
-function TimerBar:UpdateValue(force)
-	local ret = 0
-	
-	local value, doTerminate
+function TimerBar:GetValue()
+	-- returns value, doTerminate
 
 	local start, duration, Invert = self.start, self.duration, self.Invert
 
 	if Invert then
 		if duration == 0 then
-			value = self.Max
+			return self.Max, true
 		else
-			value = TMW.time - start + self.Offset
+			local value = TMW.time - start + self.Offset
+			return value, value >= self.Max
 		end
-		doTerminate = value >= self.Max
 	else
 		if duration == 0 then
-			value = 0
+			return 0, true
 		else
-			value = duration - (TMW.time - start) + self.Offset
+			local value = duration - (TMW.time - start) + self.Offset
+			return value, value <= 0
 		end
-		doTerminate = value <= 0
 	end
+end
+
+function TimerBar:UpdateValue(force)
+	local ret = 0
+	
+	local Invert = self.Invert
+
+	local value, doTerminate = self:GetValue()
 
 	if doTerminate then
 		self:UpdateTable_Unregister()

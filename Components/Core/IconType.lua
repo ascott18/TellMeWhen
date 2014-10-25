@@ -202,7 +202,7 @@ function IconType:GetConfigIconTexture(icon)
 					relativeTo = TMW.IE.icontexture,
 					x = 0,
 					y = 0,
-					text = format(L["HELP_POCKETWATCH"])
+					text = L["HELP_POCKETWATCH"],
 				}
 			end
 			return "Interface\\Icons\\INV_Misc_PocketWatch_01", false
