@@ -135,7 +135,7 @@ function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 
 	self.Offset = 0
 
-	if sourceIcon.BarDisplay_FakeMax == 0 then
+	if self.Invert_base or sourceIcon.BarDisplay_FakeMax == 0 then
 		self.FakeMax = nil
 	else
 		self.FakeMax = sourceIcon.BarDisplay_FakeMax
@@ -157,7 +157,7 @@ TimerBar_BarDisplay:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, 
 		
 		Module.bar:SetValue(Module.Max)
 		Module.bar:SetAlpha(.6)
-		
+
 		local co = Module.completeColor
 		Module.bar:SetStatusBarColor(
 			co.r,
