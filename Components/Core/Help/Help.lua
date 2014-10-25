@@ -108,10 +108,17 @@ function HELP:Show(help)
 	return 1
 end
 
-function HELP:Hide(code)
+function HELP:Hide(code, userDidntAcknowledge)
 	if self.Queued[code] then
 		self.Queued[code] = nil
 	elseif self:GetShown() == code then
+
+		-- If it had an OnlyOnce setting, and the user might not have noticed the help,
+		-- then give it a chance to show again.
+		if self.showingHelp.onlyOnceSetting and userDidntAcknowledge then
+			TMW.db.global.HelpSettings[self.showingHelp.onlyOnceSetting] = false
+		end
+
 		self.showingHelp = nil
 		self:ShowNext()
 	end

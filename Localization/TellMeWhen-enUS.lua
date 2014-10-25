@@ -2471,6 +2471,14 @@ L["HELP_CNDT_ANDOR_FIRSTSEE"] = [[You can choose whether both conditions are req
 
 L["HELP_SIMPLEGSTAB"] = "Click to toggle between group-only options and full main options."
 
+L["HELP_SCROLLBAR_DROPDOWN"] = [[Some of TellMeWhen's dropdown menus have scrollbars.
+
+You will need to scroll down to see everything in this menu.
+
+You can also use your mouse wheel.]]
+
+
+
 L["IMPORT_ICON_DISABLED_DESC"] = "You must be editing an icon to be able to import an icon."
 
 

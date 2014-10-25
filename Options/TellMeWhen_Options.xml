@@ -649,7 +649,6 @@
 		  
 			<OnVerticalScroll>			
 				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(offset*self.percentage))
-
 			</OnVerticalScroll>
 			<OnMouseWheel>
 				local scrollStep = self.scrollStep or self:GetHeight() * self.scrollPercentage
@@ -665,6 +664,8 @@
 					newScroll = self:GetVerticalScrollRange()
 				end
 				self:SetVerticalScroll(newScroll)
+				
+				TMW.HELP:Hide("SCROLLBAR_DROPDOWN")
 			</OnMouseWheel>
 			
 			<OnUpdate>
@@ -755,7 +756,7 @@
 						</PushedTexture>
 						
 						<Layers>
-							<Layer level="OVERLAY">							
+							<Layer level="OVERLAY">
 								<Texture parentKey="tick1">
 									<Color r="0.2" g="0.2" b="0.2"/>
 									<Size y="1"/>
@@ -791,6 +792,21 @@
 							<OnLoad>
 								self:RegisterForDrag("LeftButton")
 							</OnLoad>
+							<OnShow>
+								TMW.HELP:Show{
+									code = "SCROLLBAR_DROPDOWN",
+									codeOrder = 1,
+									codeOnlyOnce = true,
+									icon = nil,
+									relativeTo = self,
+									x = 0,
+									y = 0,
+									text = TMW.L["HELP_SCROLLBAR_DROPDOWN"]
+								}
+							</OnShow>
+							<OnHide>
+								TMW.HELP:Hide("SCROLLBAR_DROPDOWN", true)
+							</OnHide>
 							<OnDragStart>
 								local _
 								self.IsScrolling = true
@@ -798,6 +814,7 @@
 								self.startHeight = select(5, self:GetPoint(1))
 								self:SetButtonState("PUSHED")
 								self:LockHighlight()
+								TMW.HELP:Hide("SCROLLBAR_DROPDOWN")
 							</OnDragStart>
 							<OnDragStop>
 								self.IsScrolling = false

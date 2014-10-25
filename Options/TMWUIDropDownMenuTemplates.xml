@@ -268,6 +268,9 @@
 
 						self.ScrollFrame.scrollStep = TMW.DD.BUTTON_HEIGHT * 5
 
+						self.ScrollFrame:HookScript("OnHide", function(self)
+							self:SetVerticalScroll(0)
+						end)
 						self.ScrollFrame.ScrollBar:HookScript("OnEnter", function()
 							TMW.DD.StopCounting(self, motion);
 						end)
