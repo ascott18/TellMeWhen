@@ -28,9 +28,11 @@ local SpellTextures = TMW.SpellTextures
 local Type = TMW.Classes.IconType:New("value")
 Type.name = L["ICONMENU_VALUE"]
 Type.desc = L["ICONMENU_VALUE_DESC"]
-Type.menuIcon = "Interface\\Icons\\INV_Gauntlets_04"
+Type.menuIcon = "Interface/Icons/inv_potion_49"
+Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
+Type.menuSpaceBefore = true
 
 Type:SetAllowanceForView("icon", false)
 
@@ -61,12 +63,12 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ALPHA"],			},
-	--[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_SWINGTIMER_NOTSWINGING"],		},
+	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_VALUE_HASUNIT"],			},
+	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_VALUE_NOUNIT"],		},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", function(self)
-	self.Header:SetText(Type.name)
+	self.Header:SetText(L["ICONMENU_VALUE_POWERTYPE"])
 
 	local types = {
 		[-2] = L["CONDITIONPANEL_POWER"],
@@ -136,7 +138,7 @@ PowerBarColor[SPELL_POWER_ECLIPSE].negative.a = 1
 PowerBarColor[SPELL_POWER_ECLIPSE].positive.a = 1
 
 
-local function SwingTimer_OnUpdate(icon, time)
+local function Value_OnUpdate(icon, time)
 	local PowerType = icon.PowerType
 	local Units = icon.Units
 
@@ -176,22 +178,30 @@ local function SwingTimer_OnUpdate(icon, time)
 end
 
 function Type:HandleYieldedInfo(icon, iconToSet, unit, value, maxValue, valueColor)
-	iconToSet:SetInfo("alpha; value, maxValue, valueColor; unit, GUID",
-		icon.Alpha,
-		value, maxValue, valueColor,
-		unit, nil
-	)
+	if unit then
+		iconToSet:SetInfo("alpha; value, maxValue, valueColor; unit, GUID",
+			icon.Alpha,
+			value, maxValue, valueColor,
+			unit, nil
+		)
+	else
+		iconToSet:SetInfo("alpha; value, maxValue, valueColor; unit, GUID",
+			icon.UnAlpha,
+			0, 0, nil,
+			nil, nil
+		)
+	end
 end
 
 
 function Type:Setup(icon)
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
-	icon:SetInfo("texture", SpellTextures[137587])
+	icon:SetInfo("texture", "Interface/Icons/inv_potion_49")
 	
 	icon:SetUpdateMethod("auto")
 	
-	icon:SetUpdateFunction(SwingTimer_OnUpdate)
+	icon:SetUpdateFunction(Value_OnUpdate)
 	
 	
 	icon:Update()
@@ -219,5 +229,5 @@ TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, ty
 end)
 
 
-Type:Register(155)
+Type:Register(157)
 

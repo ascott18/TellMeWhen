@@ -385,6 +385,8 @@ L["ICONMENU_VALUE"] = "Resource Display"
 L["ICONMENU_VALUE_DESC"] = [=[Displays the resources (Health, Mana, etc.) of a unit.]=]
 L["ICONMENU_VALUE_POWERTYPE"] = "Resource Type"
 L["ICONMENU_VALUE_POWERTYPE_DESC"] = "Configure what resource you want the icon to track."
+L["ICONMENU_VALUE_HASUNIT"] = "Unit Found"
+L["ICONMENU_VALUE_NOUNIT"] = "No Units Found"
 
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
