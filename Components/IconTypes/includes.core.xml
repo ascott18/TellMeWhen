@@ -1,27 +1,27 @@
 ﻿<Ui>
 
-<Include file="IconType_buff\includes.core.xml"/>
-<Include file="IconType_buffcheck\includes.core.xml"/>
-<Include file="IconType_cast\includes.core.xml"/>
-<Include file="IconType_cleu\includes.core.xml"/>
-<Include file="IconType_conditionicon\includes.core.xml"/>
-<Include file="IconType_cooldown\includes.core.xml"/>
-<Include file="IconType_default\includes.core.xml"/>
-<Include file="IconType_dotwatch\includes.core.xml"/>
-<Include file="IconType_dr\includes.core.xml"/>
-<Include file="IconType_icd\includes.core.xml"/>
-<Include file="IconType_item\includes.core.xml"/>
-<Include file="IconType_lightwell\includes.core.xml"/>
-<Include file="IconType_losecontrol\includes.core.xml"/>
-<Include file="IconType_meta\includes.core.xml"/>
-<Include file="IconType_multistate\includes.core.xml"/>
-<Include file="IconType_reactive\includes.core.xml"/>
-<Include file="IconType_runes\includes.core.xml"/>
-<Include file="IconType_swingtimer\includes.core.xml"/>
-<Include file="IconType_totem\includes.core.xml"/>
-<Include file="IconType_uierror\includes.core.xml"/>
-<Include file="IconType_unitcooldown\includes.core.xml"/>
-<Include file="IconType_value\includes.core.xml"/>
-<Include file="IconType_wpnenchant\includes.core.xml"/>
+<Script file="IconType_buff\buff.lua"/>
+<Script file="IconType_buffcheck\buffcheck.lua"/>
+<Script file="IconType_cast\cast.lua"/>
+<Script file="IconType_cleu\cleu.lua"/>
+<Script file="IconType_conditionicon\conditionicon.lua"/>
+<Script file="IconType_cooldown\cooldown.lua"/>
+<Script file="IconType_default\default.lua"/>
+<Script file="IconType_dotwatch\dotwatch.lua"/>
+<Script file="IconType_dr\dr.lua"/>
+<Script file="IconType_icd\icd.lua"/>
+<Script file="IconType_item\item.lua"/>
+<Script file="IconType_lightwell\lightwell.lua"/>
+<Script file="IconType_losecontrol\losecontrol.lua"/>
+<Script file="IconType_meta\meta.lua"/>
+<Script file="IconType_multistate\multistate.lua"/>
+<Script file="IconType_reactive\reactive.lua"/>
+<Script file="IconType_runes\runes.lua"/>
+<Script file="IconType_swingtimer\swingtimer.lua"/>
+<Script file="IconType_totem\totem.lua"/>
+<Script file="IconType_uierror\uierror.lua"/>
+<Script file="IconType_unitcooldown\unitcooldown.lua"/>
+<Script file="IconType_value\value.lua"/>
+<Script file="IconType_wpnenchant\wpnenchant.lua"/>
 
 </Ui>

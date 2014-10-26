@@ -1,27 +1,96 @@
 ﻿<Ui>
 
-<Include file="IconType_buff\includes.config.xml"/>
-<Include file="IconType_buffcheck\includes.config.xml"/>
-<Include file="IconType_cast\includes.config.xml"/>
-<Include file="IconType_cleu\includes.config.xml"/>
-<Include file="IconType_conditionicon\includes.config.xml"/>
-<Include file="IconType_cooldown\includes.config.xml"/>
-<Include file="IconType_default\includes.config.xml"/>
-<Include file="IconType_dotwatch\includes.config.xml"/>
-<Include file="IconType_dr\includes.config.xml"/>
-<Include file="IconType_icd\includes.config.xml"/>
-<Include file="IconType_item\includes.config.xml"/>
-<Include file="IconType_lightwell\includes.config.xml"/>
-<Include file="IconType_losecontrol\includes.config.xml"/>
-<Include file="IconType_meta\includes.config.xml"/>
-<Include file="IconType_multistate\includes.config.xml"/>
-<Include file="IconType_reactive\includes.config.xml"/>
-<Include file="IconType_runes\includes.config.xml"/>
-<Include file="IconType_swingtimer\includes.config.xml"/>
-<Include file="IconType_totem\includes.config.xml"/>
-<Include file="IconType_uierror\includes.config.xml"/>
-<Include file="IconType_unitcooldown\includes.config.xml"/>
-<Include file="IconType_value\includes.config.xml"/>
-<Include file="IconType_wpnenchant\includes.config.xml"/>
+
+<!-- <Include file="IconType_buff\Config.xml"/> -->
+<!-- <Script file="IconType_buff\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_buffcheck\Config.xml"/> -->
+<!-- <Script file="IconType_buffcheck\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_cast\Config.xml"/> -->
+<!-- <Script file="IconType_cast\Config.lua"/> -->
+
+
+<Include file="IconType_cleu\Config.xml"/>
+<Script file="IconType_cleu\Config.lua"/>
+
+
+<Include file="IconType_conditionicon\Config.xml"/>
+<!-- <Script file="IconType_conditionicon\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_cooldown\Config.xml"/> -->
+<!-- <Script file="IconType_cooldown\Config.lua"/> -->
+
+
+<Include file="IconType_default\Config.xml"/>
+<!-- <Script file="IconType_default\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_dotwatch\Config.xml"/> -->
+<!-- <Script file="IconType_dotwatch\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_dr\Config.xml"/> -->
+<Script file="IconType_dr\Config.lua"/>
+
+
+<!-- <Include file="IconType_icd\Config.xml"/> -->
+<!-- <Script file="IconType_icd\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_item\Config.xml"/> -->
+<Script file="IconType_item\Config.lua"/>
+
+
+<!-- <Include file="IconType_lightwell\Config.xml"/> -->
+<!-- <Script file="IconType_lightwell\Config.lua"/> -->
+
+
+<Include file="IconType_losecontrol\Config.xml"/>
+<Script file="IconType_losecontrol\Config.lua"/>
+
+
+<Include file="IconType_meta\Config.xml"/>
+<Script file="IconType_meta\Config.lua"/>
+
+
+<!-- <Include file="IconType_multistate\Config.xml"/> -->
+<Script file="IconType_multistate\Config.lua"/>
+
+
+<!-- <Include file="IconType_reactive\Config.xml"/> -->
+<!-- <Script file="IconType_reactive\Config.lua"/> -->
+
+
+<Include file="IconType_runes\Config.xml"/>
+<!-- <Script file="IconType_runes\Config.lua"/> -->
+
+
+<Include file="IconType_swingtimer\Config.xml"/>
+<!-- <Script file="IconType_swingtimer\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_totem\Config.xml"/> -->
+<!-- <Script file="IconType_totem\Config.lua"/> -->
+
+
+<Include file="IconType_uierror\Config.xml"/>
+<!-- <Script file="IconType_uierror\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_unitcooldown\Config.xml"/> -->
+<!-- <Script file="IconType_unitcooldown\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_value\Config.xml"/> -->
+<!-- <Script file="IconType_value\Config.lua"/> -->
+
+
+<!-- <Include file="IconType_wpnenchant\Config.xml"/> -->
+<Script file="IconType_wpnenchant\Config.lua"/>
+
 
 </Ui>

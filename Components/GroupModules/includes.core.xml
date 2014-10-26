@@ -1,12 +1,12 @@
 ﻿<Ui>
 
- <Include file="GroupModule_Resizer\includes.core.xml"/>
- 
- <Include file="GroupModule_GroupPosition\includes.core.xml"/>
- 
- <Include file="GroupModule_IconPosition\includes.core.xml"/>
- <Include file="GroupModule_IconPosition_Sortable\includes.core.xml"/>
- 
- <Include file="GroupModule_Alpha\includes.core.xml"/>
+<!-- <Script file="GroupModule_Resizer\module.lua"/> -->
+
+<Script file="GroupModule_GroupPosition\module.lua"/>
+
+<Script file="GroupModule_IconPosition\module.lua"/>
+<Script file="GroupModule_IconPosition_Sortable\module.lua"/>
+
+<Script file="GroupModule_Alpha\module.lua"/>
 
 </Ui>
