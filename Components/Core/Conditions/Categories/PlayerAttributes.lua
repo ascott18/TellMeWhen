@@ -265,6 +265,7 @@ ConditionCategory:RegisterCondition(2.1, "GROUPSIZE", {
 	tooltip = L["CONDITIONPANEL_GROUPSIZE_DESC"],
 	min = 0,
 	max = 40,
+	unit = false,
 	icon = "Interface\\Icons\\spell_deathknight_armyofthedead",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
