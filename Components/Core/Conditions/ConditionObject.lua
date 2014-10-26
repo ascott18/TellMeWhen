@@ -234,7 +234,7 @@ function ConditionObject:RegisterForUpdating()
 
 	CNDT.UpdateEngine:RegisterObject(self)
 
-	self:Check()
+	TMW.safecall(self.Check, self)
 end
 
 -- [INTERNAL] Unregisters the ConditionObject from the update engine.
