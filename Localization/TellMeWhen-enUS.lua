@@ -1972,7 +1972,7 @@ L["SOUND_EVENT_WHILECONDITION_DESC"] = "This notification will trigger for as lo
 
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
-L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are some examples, where "file" is the name of your sound, and "ext" is the file's extension (ogg only!):
+L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are some examples, where "file" is the name of your sound, and "ext" is the file's extension (ogg or mp3 only!):
 
 - "CustomSounds\file.ext": a file placed in a new folder named "CustomSounds" that is in WoW's root directory (the same location as Wow.exe, Interface and WTF folders, etc)
 
@@ -2061,7 +2061,7 @@ L["SOUNDERROR1"] = "File must have an extension!"
 L["SOUNDERROR2"] = [[Custom WAV files are not supported by WoW 4.0+
 
 (Sounds build into WoW will still work, though)]]
-L["SOUNDERROR3"] = "Only OGG files are supported!"
+L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text"
 L["ANN_TAB_DESC"] = [[Configure text to be outputted. Destinations include Blizzard text channels, UI frames, and other AddOns.]]

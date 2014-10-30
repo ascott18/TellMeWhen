@@ -16,6 +16,7 @@
 ====Bug Fixes====
  * Fixed range checking for multiple icon types (notably Multistate cooldowns, but also others).
  * Blood Pact should now have the correct ID in the BonusStamina equivalency.
+ * Various tooltips now reflect that the game client once again supports MP3s.
 
 ===v7.1.2===
  * The Combat Event icon type now has special events that will fire when you multistrike.

@@ -202,7 +202,7 @@
 							 -- which is still valid.
 							--t = "None"
 							wt = TMW.L["SOUNDERROR2"]
-						elseif not (strfind(strlower(t), "%.ogg$")) then
+						elseif not (strfind(strlower(t), "%.ogg$") or strfind(strlower(t), "%.mp3$")) then
 							wt = TMW.L["SOUNDERROR3"]
 						end
 
