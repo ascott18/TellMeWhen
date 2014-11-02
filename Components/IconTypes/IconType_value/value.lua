@@ -78,7 +78,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	    [SPELL_POWER_RAGE] = RAGE,
 	    [SPELL_POWER_FOCUS] = FOCUS,
 	    [SPELL_POWER_ENERGY] = ENERGY,
-	    --[4] = HAPPINESS,
+	    [4] = L["CONDITIONPANEL_COMBO"],
 	    [SPELL_POWER_RUNES] = RUNES,
 	    [SPELL_POWER_RUNIC_POWER] = RUNIC_POWER,
 	    [SPELL_POWER_SOUL_SHARDS] = SOUL_SHARDS,
@@ -91,7 +91,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	    [SPELL_POWER_BURNING_EMBERS] = BURNING_EMBERS,
 	    [SPELL_POWER_DEMONIC_FURY] = DEMONIC_FURY,
 
-		[100] = L["CONDITIONPANEL_COMBO"],
+		--[100] = L["CONDITIONPANEL_COMBO"],
 	}
 
 	self.PowerType = TMW.C.Config_DropDownMenu:New("Frame", "$parent", self, "TMW_DropDownMenuTemplate", nil, {
@@ -126,6 +126,17 @@ end)
 
 
 
+TMW:RegisterUpgrade(72011, {
+	icon = function(self, ics)
+		-- Apparently UnitPower("player", 4) now tracks combo points.
+		if ics.PowerType == 100 then
+			ics.PowerType = 4
+		end
+	end,
+})
+
+
+
 local PowerBarColor = CopyTable(PowerBarColor)
 for k, v in pairs(PowerBarColor) do
 	v.a = 1
@@ -153,9 +164,11 @@ local function Value_OnUpdate(icon, time)
 				value, maxValue, valueColor = UnitHealth(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
 			elseif PowerType == -2 then
 				value, maxValue, valueColor = UnitPower(unit), UnitPowerMax(unit), PowerBarColor[UnitPowerType(unit)]
-			elseif PowerType == 100 then -- combo points
-				value, maxValue = GetComboPoints("player", "target"), 5
 			else
+				if PowerType == 4 then -- combo points
+					unit = "player"
+				end
+				
 				value, maxValue, valueColor = UnitPower(unit, PowerType, true), UnitPowerMax(unit, PowerType, true), PowerBarColor[PowerType]
 				if PowerType == SPELL_POWER_ECLIPSE then
 					if value < 0 then

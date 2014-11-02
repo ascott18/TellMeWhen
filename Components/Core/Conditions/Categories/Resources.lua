@@ -324,9 +324,9 @@ ConditionCategory:RegisterCondition(16,	 "COMBO", {
 	icon = "Interface\\Icons\\ability_rogue_eviscerate",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetComboPoints = GetComboPoints,
+		UnitPower = UnitPower,
 	},
-	funcstr = [[GetComboPoints("player", "target") c.Operator c.Level]],
+	funcstr = [[UnitPower("player", 4) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
