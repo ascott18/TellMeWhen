@@ -17,6 +17,7 @@
  * Fixed range checking for multiple icon types (notably Multistate cooldowns, but also others).
  * Blood Pact should now have the correct ID in the BonusStamina equivalency.
  * Various tooltips now reflect that the game client once again supports MP3s.
+ * Patched a potential Lua code injection attack vector in certain condition settings. (There is no evidence that this has been abused by anybody).
 
 ===v7.1.2===
  * The Combat Event icon type now has special events that will fire when you multistrike.

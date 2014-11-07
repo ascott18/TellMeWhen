@@ -643,9 +643,11 @@ CNDT.Substitutions = {
 	end,
 },{	src = "c.BitFlags",
 	rep = function(conditionData, conditionSettings, name, name2)
+		TMW:ValidateType("c.BitFlags", conditionData.identifier, conditionSettings.BitFlags, "table;number")
+
 		if type(conditionSettings.BitFlags) == "table" then
 			return CNDT:GetTableSubstitution(conditionSettings.BitFlags)
-		else
+		elseif type(conditionSettings.BitFlags) == "number" then
 			return conditionSettings.BitFlags
 		end
 	end,
@@ -663,21 +665,32 @@ CNDT.Substitutions = {
 
 {	src = "c.Level",
 	rep = function(conditionData, conditionSettings, name, name2)
+		TMW:ValidateType("c.Level", conditionData.identifier, conditionSettings.Level, "number")
+
 		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
 	end,
 },{
 	src = "c.Checked",
 	rep = function(conditionData, conditionSettings, name, name2)
+		TMW:ValidateType("c.Checked", conditionData.identifier, conditionSettings.Checked, "boolean")
+
 		return tostring(conditionSettings.Checked)
 	end,
 },{
 	src = "c.Checked2",
 	rep = function(conditionData, conditionSettings, name, name2)
+		TMW:ValidateType("c.Checked2", conditionData.identifier, conditionSettings.Checked2, "boolean")
+
 		return tostring(conditionSettings.Checked2)
 	end,
 },{
 	src = "c.Operator",
 	rep = function(conditionData, conditionSettings, name, name2)
+		TMW:ValidateType("c.Operator", conditionData.identifier, conditionSettings.Operator, "string")
+		if conditionSettings.Operator:find("[^<>~=]") then
+			error("Invalid operator to " .. conditionData.identifier)
+		end
+
 		return conditionSettings.Operator
 	end,
 },
