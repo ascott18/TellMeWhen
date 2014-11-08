@@ -1708,7 +1708,9 @@ Returns the position of the first occurrence of pattern within value, starting a
 L["DT_DOC_Name"] = "Returns the name of the unit. This is an improved version of the default [Name] tag provided by DogTag."
 L["DT_DOC_StripServer"] = "Removes the server from a unit name. This is considered to be everything after the last dash in the name."
 
-L["DT_DOC_AuraSource"] = "Returns the source unit of the buff/debuff that the icon is checking. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
+L["DT_DOC_AuraSource"] = [[Returns the source unit of the buff/debuff that the icon is checking. It will only have data if there is a valid unitID for the source of the aura (usually this is only the case if the caster is in your group).
+
+Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons).]]
 
 L["DT_DOC_Source"] = "Returns the source unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
 L["DT_DOC_Destination"] = "Returns the destination unit or name of the last Combat Event that the icon processed. Best use in conjunction with the [Name] tag. (This tag should only be used with %s type icons)."
