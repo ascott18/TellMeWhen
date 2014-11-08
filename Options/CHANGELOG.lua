@@ -21,6 +21,8 @@ TMW.CHANGELOG = {
 [==[* Fixed range checking for multiple icon types (notably Multistate cooldowns, but also others).]==],
 [==[* Blood Pact should now have the correct ID in the BonusStamina equivalency.]==],
 [==[* Various tooltips now reflect that the game client once again supports MP3s.]==],
+[==[* Fixed an issue that was breaking conditions that reference other icons.]==],
+[==[* Fixed an issue that was causing icons in controlled groups to flash shown for one frame after an update is performed.]==],
 [==[* Patched a potential Lua code injection attack vector in certain condition settings. (There is no evidence that this has been abused by anybody).]==],
 [==[]==],
 [==[===v7.1.2===]==],

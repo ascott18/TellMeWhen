@@ -657,7 +657,7 @@ function Icon.Update(icon, force)
 				if TMW.Locked then
 					for i = icon.__controlledIconIndex+1, icon.group.numIcons do
 						local ic = icon.group[i]
-						if ic then
+						if ic and ic.attributes.shown then
 							ic:Hide()
 						end
 					end
@@ -851,7 +851,9 @@ function Icon.Setup(icon)
 		end
 	end
 	
-	icon:Show()
+	if not icon:IsControlled() then
+		icon:Show()
+	end
 	icon:SetFrameLevel(group:GetFrameLevel() + 1)
 
 	TMW:Fire("TMW_ICON_SETUP_PRE", icon)
