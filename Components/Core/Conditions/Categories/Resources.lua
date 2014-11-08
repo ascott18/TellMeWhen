@@ -337,7 +337,7 @@ ConditionCategory:RegisterCondition(16,	 "COMBO", {
 ConditionCategory:RegisterCondition(17,	 "SHADOW_ORBS", {
 	text = SHADOW_ORBS,
 	min = 0,
-	max = 3,
+	max = 5,
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Spell_Priest_Shadoworbs",
 	tcoords = CNDT.COMMON.standardtcoords,
