@@ -685,6 +685,7 @@ function Module:OnSuggest()
 	AuraCache_Cache = AuraCache:GetCache()
 	SpellCache_Cache = SpellCache:GetCache()
 	PlayerSpells = ClassSpellCache:GetPlayerSpells()
+	ClassSpellCache:GetSpellLookup()
 	EquivFirstIDLookup = TMW.EquivFirstIDLookup
 end
 function Module:Table_Get()
@@ -750,7 +751,7 @@ function Module:Entry_AddToList_1(f, id)
 		f.Name:SetText(name)
 		f.ID:SetText(id)
 
-		f.tooltipmethod = "SetSpellByID"
+		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
 		f.tooltiparg = id
 
 		if TMW.EquivFirstIDLookup[name] then
@@ -770,13 +771,9 @@ function Module:Entry_Colorize_1(f, id)
 	if PlayerSpells[id] then
 		f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
 		return
-	else
-		for class, tbl in pairs(ClassSpellCache:GetCache()) do
-			if tbl[id] then
-				f.Background:SetVertexColor(.96, .55, .73, 1) --color all other known class spells paladin pink
-				return
-			end
-		end
+	elseif ClassSpellLookup[id] then
+		f.Background:SetVertexColor(.96, .55, .73, 1) --color all other known class spells paladin pink
+		return
 	end
 
 	local whoCasted = AuraCache_Cache[id]
@@ -811,193 +808,6 @@ function Module:Entry_AddToList_1(f, id)
 	end
 end
 
--- Currently unused. I'm not sure if I like this or not.
--- It includes item textures (the plain texture suggestion module doesn't), but the sorting is really weird and also CPU-intensive
---[===[
-local Module = SUG:NewModule("texture2", SUG:GetModule("default"), "AceEvent-3.0")
-local ItemCache_Cache
-Module.Sources = {
-	
-}
-function Module:GetShouldSuggest()
-	if SUG.inputType == "number" and #SUG.lastName < 2 then
-		return false
-	end
-	return true
-end
-function Module:OnSuggest()
-	AuraCache_Cache = AuraCache:GetCache()
-	SpellCache_Cache = SpellCache:GetCache()
-	ItemCache_Cache = ItemCache:GetCache()
-	PlayerSpells = ClassSpellCache:GetPlayerSpells()
-	EquivFirstIDLookup = TMW.EquivFirstIDLookup
-	
-	Module.Sources.s = SpellCache_Cache
-	Module.Sources.i = ItemCache_Cache
-end
-function Module:GET_ITEM_INFO_RECEIVED()
-	if SUG.CurrentModule and SUG.CurrentModule.moduleName == "texture" then
-		SUG:SuggestingComplete()
-	end
-end
-Module:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
-	local atBeginning = SUG.atBeginning
-	local lastName = SUG.lastName
-
-	for idType, tbl in pairs(Module.Sources) do
-		if SUG.inputType == "number" then
-			local len = #SUG.lastName - 1
-			local match = tonumber(SUG.lastName)
-			for id in pairs(tbl) do
-				if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
-			--	if strfind(id, atBeginning) then
-					suggestions[#suggestions + 1] = idType .. id
-				end
-			end
-		else
-			for id, name in pairs(tbl) do
-				if strfind(name, atBeginning) then
-					suggestions[#suggestions + 1] = idType .. id
-				end
-			end
-		end
-	end
-end
-function Module:Etc_GetID(id)
-	local idType, id = strmatch(id, "(.)(.*)")
-	id = tonumber(id)
-	return idType, id
-end
-function Module:Entry_AddToList_1(f, id)
-	local idType, id = self:Etc_GetID(id)
-	
-	if idType == "i" and id then
-		local name, link = GetItemInfo(id)
-
-		f.Name:SetText(link and link:gsub("[%[%]]", ""))
-		f.ID:SetText(id)
-
-		f.insert = GetItemIcon(id)
-
-		f.tooltipmethod = "SetHyperlink"
-		f.tooltiparg = link
-
-		f.Icon:SetTexture(GetItemIcon(id))
-	end
-end
-function Module:Entry_AddToList_2(f, id)
-	local idType, id = self:Etc_GetID(id)
-	
-	if idType == "s" and id then
-		local name = GetSpellInfo(id)
-
-		f.Name:SetText(name)
-		f.ID:SetText(id)
-
-		f.tooltipmethod = "SetSpellByID"
-		f.tooltiparg = id
-
-		f.insert = id
-		f.insert2 = SpellTextures[id]
-
-		f.Icon:SetTexture(SpellTextures[id])
-	end
-end
-function Module.Sorter_Textures(a, b)
-	local idType_a, a = Module:Etc_GetID(a)
-	local idType_b, b = Module:Etc_GetID(b)
-	
-	if idType_a == idType_b and idType_a == "s" then
-		local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
-		if haveA or haveB then
-			if haveA and haveB then
-				return a < b
-			else
-				return haveA
-			end
-		end
-		
-		local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
-		if haveA or haveB then
-			if haveA and haveB then
-				return a < b
-			else
-				return haveA
-			end
-		end
-
-		--player's spells (pclass)
-		local haveA, haveB = PlayerSpells[a], PlayerSpells[b]
-		if (haveA and not haveB) or (haveB and not haveA) then
-			return haveA
-		end
-
-		--all player spells (any class)
-		local haveA, haveB = ClassSpellLookup[a], ClassSpellLookup[b]
-		if (haveA and not haveB) or (haveB and not haveA) then
-			return haveA
-		elseif not (haveA or haveB) then
-
-			local haveA, haveB = AuraCache_Cache[a], AuraCache_Cache[b] -- Auras
-			if haveA and haveB and haveA ~= haveB then -- if both are auras (kind doesnt matter) AND if they are different aura types, then compare the types
-				return haveA > haveB -- greater than is intended.. player auras are 2 while npc auras are 1, player auras should go first
-			elseif (haveA and not haveB) or (haveB and not haveA) then --otherwise, if only one of them is an aura, then prioritize the one that is an aura
-				return haveA
-			end
-			--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
-		end
-	end
-
-	if SUGIsNumberInput then
-		--sort by id
-		return a < b
-	else
-		--sort by name
-		local nameA, nameB = Module.Sources[idType_a][a], Module.Sources[idType_b][b]
-
-		if nameA == nameB then
-			--sort identical names by ID
-			return a < b
-		elseif nameA and nameB then
-			--sort by name
-			return nameA < nameB
-		else
-			return nameA
-		end
-	end
-end
-function Module:Table_GetSorter()
-	return self.Sorter_Textures
-end
-function Module:Entry_Colorize_1(f, id)
-	local idType, id = self:Etc_GetID(id)
-	
-	if idType == "s" then
-		if PlayerSpells[id] then
-			f.Background:SetVertexColor(.41, .8, .94, 1) --color all other spells that you have in your/your pet's spellbook mage blue
-			return
-		else
-			for class, tbl in pairs(ClassSpellCache:GetCache()) do
-				if tbl[id] then
-					f.Background:SetVertexColor(.96, .55, .73, 1) --color all other known class spells paladin pink
-					return
-				end
-			end
-		end
-
-		local whoCasted = AuraCache_Cache[id]
-		if whoCasted == AuraCache.CONST.AURA_TYPE_NONPLAYER then
-			 -- Color known NPC auras warrior brown.
-			f.Background:SetVertexColor(.78, .61, .43, 1)
-		elseif whoCasted == AuraCache.CONST.AURA_TYPE_PLAYER then
-			-- Color known PLAYER auras a bright pink-ish/pruple-ish color that is similar to paladin pink,
-			-- but has sufficient contrast for distinguishing.
-			f.Background:SetVertexColor(.79, .30, 1, 1)
-		end
-	end
-end
-]===]
 
 
 local Module = SUG:NewModule("spellwithduration", SUG:GetModule("spell"))
