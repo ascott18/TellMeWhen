@@ -879,15 +879,12 @@ function TMW:DoInitialWarn()
 end
 
 function TMW.print(...)
-	if TMW.debug or not TMW.Initialized then
+	if TMW.debug or not TMW.Initialized or TELLMEWHEN_VERSION_MINOR == "dev" then
 		local prefix = "|cffff0000TMW"
 		-- GLOBALS: linenum
 		if linenum then
 		--	prefix = prefix..format(" %4.0f", linenum(3))
 			prefix = format("|cffff0000 %s", linenum(3, 1))
-		end
-		if not TMW.debug then
-			prefix = prefix .. " PRE-INIT DEBUG"
 		end
 
 		prefix = prefix..":|r "
