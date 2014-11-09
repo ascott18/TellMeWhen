@@ -19,6 +19,7 @@
  * Various tooltips now reflect that the game client once again supports MP3s.
  * Fixed an issue that was breaking conditions that reference other icons.
  * Fixed an issue that was causing icons in controlled groups to flash shown for one frame after an update is performed.
+ * Fixed an issue that was causing While Condition Set Passing event triggers to not start when their condition sets are passing after leaving config mode.
  * Patched a potential Lua code injection attack vector in certain condition settings. (There is no evidence that this has been abused by anybody).
 
 ===v7.1.2===

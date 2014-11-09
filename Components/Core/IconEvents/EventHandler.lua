@@ -317,7 +317,16 @@ end
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 	wipe(icon.EventHandlersSet)
+	
+	-- make sure events dont fire while, or shortly after, we are setting up
+	-- Don't set nil because that will make it fall back on the class-defined value
+	icon.runEvents = false
+	
+	EVENTS:CancelTimer(icon.runEventsTimerHandler, 1)
+	icon.runEventsTimerHandler = EVENTS.ScheduleTimer(icon, "RestoreEvents", TMW.UPD_INTV*2.1)
+end)	
 
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(_, icon)
 	for _, eventSettings in TMW:InNLengthTable(icon.Events) do
 		local event = eventSettings.Event
 		if event then
@@ -335,13 +344,6 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 			end
 		end
 	end
-	
-	-- make sure events dont fire while, or shortly after, we are setting up
-	-- Don't set nil because that will make it fall back on the class-defined value
-	icon.runEvents = false
-	
-	EVENTS:CancelTimer(icon.runEventsTimerHandler, 1)
-	icon.runEventsTimerHandler = EVENTS.ScheduleTimer(icon, "RestoreEvents", TMW.UPD_INTV*2.1)
 end)
 
 TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function(event, time, Locked)

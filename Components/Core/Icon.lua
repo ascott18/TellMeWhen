@@ -376,7 +376,7 @@ end
 
 -- [INTERNAL] (no documentation needed)
 function Icon.RestoreEvents(icon)
-	icon.runEvents = runEvents
+	icon.runEvents = true
 	icon.runEventsTimerHandler = nil
 	if icon.EventHandlersSet.OnEventsRestored and TMW.Locked then
 		icon:QueueEvent("OnEventsRestored")
