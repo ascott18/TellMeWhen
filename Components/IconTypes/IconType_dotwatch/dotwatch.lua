@@ -31,7 +31,7 @@ local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
 
 local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 local Aura
 
@@ -460,7 +460,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GU
 	if name then
 		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID; stack, stackText",
 			alpha,
-			SpellTextures[name] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			GetSpellTexture(name) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			start, duration,
 			name,
 			unit, GUID,
@@ -496,7 +496,7 @@ function Type:Setup(icon)
 		Type.VerifyTimer = C_Timer.NewTicker(0.001, VerifyAll)
 	end
 
-	icon.FirstTexture = SpellTextures[icon.Spells.First]
+	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
 	icon:SetUpdateMethod("manual")
 	ManualIconsManager:UpdateTable_Register(icon)

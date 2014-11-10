@@ -30,7 +30,7 @@ local huge = math.huge
 
 local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 
 
@@ -468,7 +468,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	if usename and Alpha > 0 then
 		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.Alpha,
-			SpellTextures[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			GetSpellTexture(usename) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			0, 0,
 			usename,
 			useUnit, nil
@@ -477,7 +477,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	elseif unname then
 		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			icon.UnAlpha,
-			SpellTextures[unname],
+			GetSpellTexture(unname),
 			unstart, unduration,
 			unname,
 			unUnit, nil
@@ -553,7 +553,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GU
 	if name then
 		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
 			alpha,
-			SpellTextures[name] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			GetSpellTexture(name) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			start, duration,
 			name,
 			unit, GUID

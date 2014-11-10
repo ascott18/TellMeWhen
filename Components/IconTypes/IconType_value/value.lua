@@ -21,7 +21,7 @@ local pairs
 	= pairs  
 	
 local _, pclass = UnitClass("Player")
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 
 

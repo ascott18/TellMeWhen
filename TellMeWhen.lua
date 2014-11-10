@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 72020 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 72021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -523,36 +523,6 @@ TMW.strlowerCache = setmetatable(
 	end,
 }) local strlowerCache = TMW.strlowerCache
 
-TMW.SpellTexturesMetaIndex = {}
-TMW.SpellTexturesBase = {
-	--hack for pvp tinkets
-	[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
-	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
-}
-local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
-TMW.SpellTextures = setmetatable(
-	CopyTable(TMW.SpellTexturesBase),
-	{
-		__index = function(t, name)
-			if not name then return end
-
-			
-			local tex =
-				rawget(t, strlowerCache[name]) or -- rawget the strlower because hardcoded entries (talents, mainly) are put into the table as lowercase
-				GetSpellTexture(name) or
-				SpellTexturesMetaIndex[name] or
-				rawget(SpellTexturesMetaIndex, strlowerCache[name])
-
-
-			t[name] = tex
-			return tex
-		end,
-		__call = function(t, i)
-			return t[i]
-		end,
-	}
-) local SpellTextures = TMW.SpellTextures
-
 TMW.isNumber = setmetatable(
 {}, {
 	__mode = "kv",
@@ -563,6 +533,23 @@ TMW.isNumber = setmetatable(
 		return o
 end})
 
+
+TMW.SpellTexturesMetaIndex = {
+	--hack for pvp tinkets
+	[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
+	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
+}
+local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
+
+function TMW.GetSpellTexture(spell)
+	if not spell then return end
+
+	return
+		GetSpellTexture(spell) or
+		SpellTexturesMetaIndex[spell] or
+		rawget(SpellTexturesMetaIndex, strlowerCache[spell])
+end
+local GetSpellTexture = TMW.GetSpellTexture
 
 
 
@@ -3189,9 +3176,6 @@ function TMW:UpdateNormally()
 		TMW.PreviousGUIDToOwner[k] = v
 	end
 	wipe(TMW.GUIDToOwner)
-
-	wipe(SpellTextures)
-	SpellTextures = TMW:CopyTableInPlaceWithMeta(TMW.SpellTexturesBase, SpellTextures)
 	
 	-- Add a very small amount so that we don't call the same icon multiple times
 	-- in the same frame if the interval has been set 0.
@@ -3965,8 +3949,8 @@ function TMW:GetTexturePathFromSetting(setting)
 		
 	if setting and setting ~= "" then
 		-- See http://us.battle.net/wow/en/forum/topic/5977979895#1 for the resoning behind this stupid shit right here.
-		if SpellTextures[setting] then
-			return SpellTextures[setting]
+		if GetSpellTexture(setting) then
+			return GetSpellTexture(setting)
 		end
 		if strfind(setting, "[\\/]") then -- if there is a slash in it, then it is probably a full path
 			return setting:gsub("/", "\\")
@@ -3980,7 +3964,7 @@ function TMW:GetTexturePathFromSetting(setting)
 		-- Pre-MOP code for testing valid textures.
 		-- Kept here in a comment for ease of restoring it should it ever start working again.
 		
-		TMW.TestTex:SetTexture(SpellTextures[setting])
+		TMW.TestTex:SetTexture(GetSpellTexture(setting))
 		if not TMW.TestTex:GetTexture() then
 			TMW.TestTex:SetTexture(setting)
 		end

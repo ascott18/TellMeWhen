@@ -23,7 +23,7 @@ local pairs, ipairs, setmetatable, rawget, date, tinsert, type
 	= pairs, ipairs, setmetatable, rawget, date, tinsert, type
 	
 
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 local tContains = TMW.tContains
 local tDeleteItem = TMW.tDeleteItem
 local OnGCD = TMW.OnGCD
@@ -161,7 +161,7 @@ function IconType:GuessIconTexture(ics)
 
 		local name = TMW:GetSpells(ics.Name).First
 		if name then
-			return SpellTextures[name]
+			return GetSpellTexture(name)
 		end
 	end
 
@@ -187,7 +187,7 @@ function IconType:GetConfigIconTexture(icon)
 			local tbl = TMW:GetSpells(icon.Name).Array
 
 			for _, name in ipairs(tbl) do
-				local t = SpellTextures[name]
+				local t = GetSpellTexture(name)
 				if t then
 					return t, true
 				end

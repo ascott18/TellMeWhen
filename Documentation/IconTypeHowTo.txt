@@ -13,7 +13,7 @@ if not TMW then return end
 
 local L = TMW.L
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 local SpellHasNoMana = TMW.SpellHasNoMana
 local OnGCD = TMW.OnGCD
 
@@ -140,14 +140,14 @@ local function TestType_OnUpdate(icon, time)
 			
 			icon:SetInfo(
 				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				icon.Alpha, SpellTextures[NameFirst], start, duration, NameFirst, inrange, nomana, stack, stackText
+				icon.Alpha, GetSpellTexture(NameFirst), start, duration, NameFirst, inrange, nomana, stack, stackText
 			)
 		else
 			-- Unusable
 			
 			icon:SetInfo(
 				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				icon.UnAlpha, SpellTextures[NameFirst], start, duration, NameFirst, inrange, nomana, stack, stackText
+				icon.UnAlpha, GetSpellTexture(NameFirst), start, duration, NameFirst, inrange, nomana, stack, stackText
 			)
 		end
 	else
@@ -210,7 +210,7 @@ if not TMW then return end
 
 local L = TMW.L
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 local SpellHasNoMana = TMW.SpellHasNoMana
 local OnGCD = TMW.OnGCD
 
@@ -304,14 +304,14 @@ local function TestType_OnUpdate(icon, time)
 			
 			icon:SetInfo(
 				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				icon.Alpha, SpellTextures[NameFirst], start, duration, NameFirst, inrange, nomana, stack, stackText
+				icon.Alpha, GetSpellTexture(NameFirst), start, duration, NameFirst, inrange, nomana, stack, stackText
 			)
 		else
 			-- Unusable
 			
 			icon:SetInfo(
 				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				icon.UnAlpha, SpellTextures[NameFirst], start, duration, NameFirst, inrange, nomana, stack, stackText
+				icon.UnAlpha, GetSpellTexture(NameFirst), start, duration, NameFirst, inrange, nomana, stack, stackText
 			)
 		end
 	else

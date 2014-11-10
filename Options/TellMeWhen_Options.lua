@@ -42,7 +42,7 @@ local _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsControlKeyDown, PlayS
 	  _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsControlKeyDown, PlaySound
 
 local strlowerCache = TMW.strlowerCache
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 local print = TMW.print
 local Types = TMW.Types
 local IE
@@ -2826,7 +2826,7 @@ function IE:GetRealNames(Name)
 			texture = v:GetIcon()
 		else
 			name, _, texture = GetSpellInfo(v)
-			texture = texture or SpellTextures[name or v]
+			texture = texture or GetSpellTexture(name or v)
 			
 			if not name and Cache then
 				local lowerv = strlower(v)
@@ -2844,7 +2844,7 @@ function IE:GetRealNames(Name)
 			
 			name = name or v or ""
 
-			texture = texture or SpellTextures[name]
+			texture = texture or GetSpellTexture(name)
 		end
 
 		if type(v) == "number" then

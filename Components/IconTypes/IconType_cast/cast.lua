@@ -223,7 +223,7 @@ function Type:GuessIconTexture(ics)
 	if ics.Name and ics.Name ~= "" then
 		local name = TMW:GetSpells(ics.Name).First
 		if name then
-			return TMW.SpellTextures[name]
+			return TMW.GetSpellTexture(name)
 		end
 	end
 	return "Interface\\Icons\\Temp"

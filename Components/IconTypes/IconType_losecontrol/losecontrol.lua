@@ -19,8 +19,8 @@ if not _G.C_LossOfControl then
 end
 
 local print = TMW.print
-local GetSpellTexture, GetSpellLink, GetSpellInfo =
-	  GetSpellTexture, GetSpellLink, GetSpellInfo
+local GetSpellLink, GetSpellInfo =
+	  GetSpellLink, GetSpellInfo
 local GetEventInfo = C_LossOfControl.GetEventInfo
 local GetNumEvents = C_LossOfControl.GetNumEvents
 

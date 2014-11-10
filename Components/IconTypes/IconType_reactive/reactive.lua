@@ -19,7 +19,7 @@ local GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCo
 	  GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount
 local _, pclass = UnitClass("player")
 
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
@@ -195,7 +195,7 @@ local function Reactive_OnUpdate(icon, time)
 			if usable and not CD and not nomana and inrange then --usable
 				icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
 					icon.Alpha,
-					SpellTextures[iName],
+					GetSpellTexture(iName),
 					start, duration,
 					charges, maxCharges,
 					stack, stack,
@@ -266,7 +266,7 @@ function Type:Setup(icon)
 
 	icon.forceUsable = nil
 
-	icon.FirstTexture = SpellTextures[icon.Spells.First]
+	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	

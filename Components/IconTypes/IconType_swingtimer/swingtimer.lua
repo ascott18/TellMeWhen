@@ -15,13 +15,13 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local GetInventoryItemTexture, GetInventorySlotInfo, GetSpellTexture
-	= GetInventoryItemTexture, GetInventorySlotInfo, GetSpellTexture
+local GetInventoryItemTexture, GetInventorySlotInfo
+	= GetInventoryItemTexture, GetInventorySlotInfo
 local pairs
 	= pairs  
 	
 local _, pclass = UnitClass("Player")
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 local INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND =
 	  INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND
@@ -88,7 +88,7 @@ local function SwingTimer_OnEvent(icon, event, unit, _, _, _, spellID)
 	if event == "UNIT_INVENTORY_CHANGED" then
 		-- Update the icon's texture when the player changes weapons.
 		local wpnTexture = GetInventoryItemTexture("player", icon.Slot)
-		icon:SetInfo("texture", wpnTexture or SpellTextures[15590])
+		icon:SetInfo("texture", wpnTexture or GetSpellTexture(15590))
 
 	elseif event == "TMW_COMMON_SWINGTIMER_CHANGED" then
 		-- Queue an icon update when the swing timer updates.
@@ -126,7 +126,7 @@ function Type:Setup(icon)
 
 
 	local wpnTexture = GetInventoryItemTexture("player", icon.Slot)
-	icon:SetInfo("texture", wpnTexture or SpellTextures[15590])
+	icon:SetInfo("texture", wpnTexture or GetSpellTexture(15590))
 	
 	
 	-- Register events and setup update functions.

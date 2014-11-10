@@ -18,7 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 local strlowerCache = TMW.strlowerCache
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 local _, pclass = UnitClass("Player")
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -764,7 +764,7 @@ function Module:Entry_AddToList_1(f, id)
 			f.insert2 = SUG.inputType ~= "number" and id or name
 		end
 
-		f.Icon:SetTexture(SpellTextures[id])
+		f.Icon:SetTexture(GetSpellTexture(id))
 	end
 end
 function Module:Entry_Colorize_1(f, id)
@@ -804,7 +804,7 @@ function Module:Entry_AddToList_1(f, id)
 			f.insert2 = name
 		end
 
-		f.Icon:SetTexture(SpellTextures[id])
+		f.Icon:SetTexture(GetSpellTexture(id))
 	end
 end
 
@@ -928,7 +928,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.tooltipmethod = "TMW_SetEquiv"
 		f.tooltiparg = equiv
 
-		f.Icon:SetTexture(SpellTextures[id])
+		f.Icon:SetTexture(GetSpellTexture(id))
 	end
 end
 function Module:Entry_Colorize_2(f, id)
@@ -1000,7 +1000,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.tooltipmethod = "TMW_SetEquiv"
 		f.tooltiparg = equiv
 
-		f.Icon:SetTexture(SpellTextures[firstid])
+		f.Icon:SetTexture(GetSpellTexture(firstid))
 	end
 end
 function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)

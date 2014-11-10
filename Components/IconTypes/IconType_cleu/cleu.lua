@@ -18,9 +18,9 @@ local print = TMW.print
 local _G = _G
 local bit_band, bit_bor, tinsert, tremove, unpack, wipe =
 	  bit.band, bit.bor, tinsert, tremove, unpack, wipe
-local UnitGUID, GetSpellTexture, GetItemIcon =
-	  UnitGUID, GetSpellTexture, GetItemIcon
-local SpellTextures = TMW.SpellTextures
+local UnitGUID, GetItemIcon =
+	  UnitGUID, GetItemIcon
+local GetSpellTexture = TMW.GetSpellTexture
 
 local pGUID = nil -- This can't be defined at load.
 local clientVersion = select(4, GetBuildInfo())
@@ -295,7 +295,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
 			spellName = ACTION_SWING
 			-- dont define spellID here so that ACTION_SWING will be reported as the icon's spell.
-			tex = SpellTextures[6603]
+			tex = GetSpellTexture(6603)
 		elseif event == "ENCHANT_APPLIED" or event == "ENCHANT_REMOVED" then
 			spellID = arg1
 			spellName = arg2
@@ -305,13 +305,13 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			extraName = arg2
 			spellID = arg4 -- the spell that was interrupted or the aura that was removed
 			spellName = arg5
-			tex = SpellTextures[spellID]
+			tex = GetSpellTexture(spellID)
 		elseif event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_INTERRUPT_SPELL" then
 			extraID = arg4 -- the spell that broke it, or the spell that was interrupted
 			extraName = arg5
 			spellID = arg1 -- the spell that was broken, or the spell used to interrupt
 			spellName = arg2
-			tex = SpellTextures[spellID]
+			tex = GetSpellTexture(spellID)
 		elseif event == "ENVIRONMENTAL_DAMAGE" then
 			spellName = _G["ACTION_ENVIRONMENTAL_DAMAGE_" .. arg1]
 			tex = EnvironmentalTextures[arg1] or "Interface\\Icons\\INV_Misc_QuestionMark" -- arg1 is
@@ -407,7 +407,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		if icon:IsGroupController() then
 			tinsert(icon.capturedCLEUEvents, 1, {
 				TMW.time, duration or icon.CLEUDur,
-				tex or SpellTextures[spellID],
+				tex or GetSpellTexture(spellID),
 				spellID or spellName,
 				extraID,
 				unit, GUID,
@@ -418,7 +418,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			icon:SetInfo(
 				"start, duration; texture; spell; extraSpell; unit, GUID; sourceUnit, sourceGUID; destUnit, destGUID",
 				TMW.time, duration or icon.CLEUDur,
-				tex or SpellTextures[spellID],
+				tex or GetSpellTexture(spellID),
 				spellID or spellName,
 				extraID,
 				unit, GUID,

@@ -18,7 +18,7 @@ local print = TMW.print
 local UnitGUID, GetGlyphSocketInfo, GetTotemInfo =
 	  UnitGUID, GetGlyphSocketInfo, GetTotemInfo
 
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 local _, pclass = UnitClass("Player")
 local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
@@ -157,7 +157,7 @@ end
 
 function Type:Setup(icon)
 	icon:SetInfo("texture; spell; reverse",
-		SpellTextures[CONST_SPELLID_LIGHTWELL_SUMMONSPELL],
+		GetSpellTexture(CONST_SPELLID_LIGHTWELL_SUMMONSPELL),
 		CONST_SPELLID_LIGHTWELL_SUMMONSPELL,
 		true
 	)

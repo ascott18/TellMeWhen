@@ -24,7 +24,7 @@ local pairs, wipe, strlower =
 
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 local _, pclass = UnitClass("Player")
 
@@ -207,7 +207,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				if not usableFound then
 					wipe(usableData)
 					usableData.alpha = icon.Alpha
-					usableData.tex = SpellTextures[iName]
+					usableData.tex = GetSpellTexture(iName)
 					usableData.inrange = inrange
 					usableData.nomana = nomana
 					usableData.iName = iName
@@ -226,7 +226,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			elseif not unusableFound then
 				wipe(unusableData)
 				unusableData.alpha = icon.UnAlpha
-				unusableData.tex = SpellTextures[iName]
+				unusableData.tex = GetSpellTexture(iName)
 				unusableData.inrange = inrange
 				unusableData.nomana = nomana
 				unusableData.iName = iName
@@ -279,7 +279,7 @@ function Type:Setup(icon)
 	
 	if icon.Spells.FirstString == strlower(GetSpellInfo(75)) and not icon.Spells.Array[2] then
 		-- Auto shot needs special handling - it isn't a regular cooldown, so it gets its own update function.
-		icon:SetInfo("texture", SpellTextures[75])
+		icon:SetInfo("texture", GetSpellTexture(75))
 		icon.asStart = icon.asStart or 0
 		icon.asDuration = icon.asDuration or 0
 		
@@ -292,7 +292,7 @@ function Type:Setup(icon)
 		
 		icon:SetUpdateFunction(AutoShot_OnUpdate)
 	else
-		icon.FirstTexture = SpellTextures[icon.Spells.First]
+		icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 		
 		icon:SetInfo("texture; reverse; spell", Type:GetConfigIconTexture(icon), false, icon.Spells.First)
 		

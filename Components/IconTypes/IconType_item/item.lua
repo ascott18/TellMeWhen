@@ -21,7 +21,7 @@ local GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemInfo =
 	  GetItemCooldown, IsItemInRange, IsEquippedItem, GetItemIcon, GetItemInfo
 
 local OnGCD = TMW.OnGCD
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 
 

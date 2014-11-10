@@ -21,7 +21,7 @@ local UnitGUID =
 	  UnitGUID
 
 local strlowerCache = TMW.strlowerCache
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 local huge = math.huge
 local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
@@ -211,7 +211,7 @@ local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _,
 								amt = 50,
 								start = TMW.time,
 								duration = DRReset,
-								tex = SpellTextures[spellID]
+								tex = GetSpellTexture(spellID)
 							}
 							icon.DRInfo[destGUID] = dr
 						else
@@ -222,7 +222,7 @@ local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _,
 								dr.amt = amt > 25 and amt/2 or 0
 								dr.duration = DRReset
 								dr.start = TMW.time
-								dr.tex = SpellTextures[spellID]
+								dr.tex = GetSpellTexture(spellID)
 							end
 						end
 					end
@@ -408,7 +408,7 @@ function Type:Setup(icon)
 	-- Update this local from the global setting.
 	DRReset = TMW.db.global.DRDuration
 	
-	icon.FirstTexture = SpellTextures[icon.Spells.First]
+	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
 	-- Do the Right Thing and tell people if their DRs mismatch
 	local firstCategoy = CheckCategories(icon)

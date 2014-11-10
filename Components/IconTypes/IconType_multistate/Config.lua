@@ -19,7 +19,7 @@ local print = TMW.print
 
 local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 local SpellCache = TMW:GetModule("SpellCache")
 local Module_spell = SUG:GetModule("spell")

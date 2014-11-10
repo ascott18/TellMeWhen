@@ -18,9 +18,10 @@ local print = TMW.print
 
 local format, type, tonumber, wipe, bit =
 	  format, type, tonumber, wipe, bit
-local GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo =
-	  GetTotemInfo, GetSpellTexture, GetSpellLink, GetSpellInfo
+local GetTotemInfo, GetSpellLink, GetSpellInfo =
+	  GetTotemInfo, GetSpellLink, GetSpellInfo
 
+local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("Player")
@@ -252,7 +253,7 @@ function Type:Setup(icon)
 
 	icon.Spells = TMW:GetSpells(name, true)
 
-	icon.FirstTexture = icon.Spells.FirstString and TMW.SpellTextures[icon.Spells.FirstString]
+	icon.FirstTexture = icon.Spells.FirstString and GetSpellTexture(icon.Spells.FirstString)
 	icon:SetInfo("reverse; texture; spell",
 		true,
 		Type:GetConfigIconTexture(icon),

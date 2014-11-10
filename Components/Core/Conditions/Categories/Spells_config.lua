@@ -44,7 +44,7 @@ function Module:Entry_AddToList_2(f, id)
 
 		f.insert = "GCD"
 
-		f.Icon:SetTexture(TMW.SpellTextures[spellID])
+		f.Icon:SetTexture(TMW.GetSpellTexture(spellID))
 	end
 end
 function Module:Entry_Colorize_2(f, id)

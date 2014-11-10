@@ -20,7 +20,7 @@ local tonumber, pairs, type, format, select =
 local UnitAura =
 	  UnitAura
 
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
 
@@ -613,7 +613,7 @@ function Type:Setup(icon)
 
 
 
-	icon.FirstTexture = SpellTextures[icon.Spells.First]
+	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 	

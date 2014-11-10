@@ -19,7 +19,7 @@ local print = TMW.print
 
 local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
-local SpellTextures = TMW.SpellTextures
+local GetSpellTexture = TMW.GetSpellTexture
 
 local Type = rawget(TMW.Types, "wpnenchant")
 
