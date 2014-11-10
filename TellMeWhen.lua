@@ -563,19 +563,6 @@ TMW.isNumber = setmetatable(
 		return o
 end})
 
-TMW.isString = setmetatable(
-{}, {
-	__mode = "kv",
-	__index = function(t, s)
-		if s == nil then
-			return false
-		else
-			local o = type(s) == "string"
-			t[s] = o
-			return o
-		end
-end})
-
 
 
 

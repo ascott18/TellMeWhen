@@ -17,7 +17,6 @@ local L = TMW.L
 local print = TMW.print
 local GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount =
 	  GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount
-local isString = TMW.isString
 local _, pclass = UnitClass("player")
 
 local SpellTextures = TMW.SpellTextures

@@ -24,7 +24,6 @@ local pairs, wipe, strlower =
 
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
-local isString = TMW.isString
 local SpellTextures = TMW.SpellTextures
 
 local _, pclass = UnitClass("Player")
