@@ -775,8 +775,7 @@ end)
 -- While Condition Set Passing handling
 -------------------------------------------
 
-MapConditionObjectToEventSettings = {}
-MapEventSettingsToAnimationTable = {}
+local MapEventSettingsToAnimationTable = {}
 
 
 TMW:RegisterCallback("TMW_ICON_ANIMATION_START", function(_, icon, table)

@@ -103,7 +103,8 @@ TMW:RegisterUpgrade(50020, {
 })
 TMW:RegisterUpgrade(48010, {
 	icon = function(self, ics)
-		-- OnlyShown was disabled for OnHide (not togglable anymore), so make sure that icons dont get stuck with it enabled
+		-- OnlyShown was disabled for OnHide (not togglable anymore),
+		-- so make sure that icons dont get stuck with it enabled
 		local OnHide = rawget(ics.Events, "OnHide")
 		if OnHide then
 			OnHide.OnlyShown = false
@@ -124,6 +125,7 @@ TMW:RegisterUpgrade(47320, {
 	end,
 })
 TMW:RegisterCallback("TMW_DB_PRE_DEFAULT_UPGRADES", function()
+	-- The default value of eventSettings.PassThrough changed from false to true.
 	if TellMeWhenDB.profiles and TellMeWhenDB.Version < 50035 then
 		for _, p in pairs(TellMeWhenDB.profiles) do
 			if p.Groups then
@@ -150,7 +152,7 @@ TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...
 	if type == "icon" then
 		local ics, gs, iconID = ...
 		
-		-- delegate to events
+		-- Delegate the upgrade to eventSettings.
 		for eventID, eventSettings in TMW:InNLengthTable(ics.Events) do
 			TMW:DoUpgrade("iconEventHandler", version, eventSettings, eventID, ics)
 		end
@@ -173,7 +175,10 @@ function EventHandler:GetEventHandler(identifier)
 	return EventHandler.instancesByName[identifier]
 end
 
-
+--- Gets an EventHandler instance by name.
+-- Wrapper around EventHandler:GetEventHandler(identifier)
+-- @param identifier [string] The identifier of the event handler being requested.
+-- @return [EventHandler|nil] The requested EventHandler instance, or nil if it was not found.
 function EVENTS:GetEventHandler(identifier)
 	return EventHandler:GetEventHandler(identifier)
 end
@@ -216,6 +221,8 @@ do	-- EVENTS:InIconEventSettings
 		return eventSettings
 	end
 
+	--- Iterates over all event settings of icons in the current profile, and in global groups.
+	-- Returns only eventSettings for each event setting.
 	function EVENTS:InIconEventSettings()
 		return iter, getstate()
 	end
@@ -303,7 +310,7 @@ function EventHandler:RegisterEventDefaults(defaults)
 end
 
 
--- [INTERNAL]
+--- Tests the event. Triggered by clicking on the test button in the config UI.
 function EventHandler:TestEvent(eventID)
 	if not self.testable then
 		return
@@ -316,21 +323,24 @@ end
 
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
+	-- Setup all of an icon's event handlers.
+
 	wipe(icon.EventHandlersSet)
+
 	for _, eventSettings in TMW:InNLengthTable(icon.Events) do
 		local event = eventSettings.Event
 		if event then
 			local Handler = EventHandler:GetEventHandler(eventSettings.Type)
 			
+			-- Check if the event actually is configured to do something.
 			local thisHasEventHandlers = Handler and Handler:ProcessIconEventSettings(event, eventSettings)
 
 			if thisHasEventHandlers then
+				-- The event is good. Fire an event to let people know that the icon has this event.
 				TMW:Fire("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", icon, event, eventSettings)
-				
-				if event ~= "WCSP" then
-					icon.EventHandlersSet[event] = true
-					icon.EventsToFire = icon.EventsToFire or {}
-				end
+
+				icon.EventHandlersSet[event] = true
+				icon.EventsToFire = icon.EventsToFire or {}
 			end
 		end
 	end
@@ -344,6 +354,10 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 end)
 
 TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function(event, time, Locked)
+	-- Process all events that were queued in the current update cycle.
+	-- This is done all at once because some events (OnCondition) might be triggered by changes in other icons,
+	-- and we want everything to happen at the same time so that the firing order makes sense.
+
 	local Icon = TMW.Classes.Icon
 	local QueuedIcons = Icon.QueuedIcons
 	
@@ -358,10 +372,14 @@ TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function(event, time, 
 end)
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function(event, time, Locked)
+	-- Wipe all queued events when we do a complete update of TMW
+	-- in order to kill any events that got queued while setting up an icon (OnShow, etc).
+	
 	wipe(TMW.Classes.Icon.QueuedIcons)
 end)
 
 
+-- Base class for EventHandlers that have sub-handlers (e.g. animations and announcements).
 TMW:NewClass("EventHandler_ColumnConfig", "EventHandler"){
 	OnNewInstance_ColumnConfig = function(self)
 		self.ConfigFrameData = {}
@@ -370,6 +388,20 @@ TMW:NewClass("EventHandler_ColumnConfig", "EventHandler"){
 
 
 
+
+
+
+-------------------------------------------
+-- While Condition Set Passing handling
+-------------------------------------------
+--[[
+While Condition Set Passing (WCSP) is very tightly integrated with TMW.C.EventHandler
+because it has very different behavior for different event handlers. Event handlers
+need to be aware of what to do when the conditions start passing, and what to do
+when they start failing. Animations triggered by WCSP must start/stop based on the
+state of conditions, while other event handlers trigger repeatedly while
+conditions are passing (EventHandler_WhileConditions_Repetitive)
+]]
 
 if TMW.C.IconType then
 	error("Bad load order! TMW.C.IconType shouldn't exist at this point!")
@@ -421,6 +453,8 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 
 		local ConditionObjectConstructor = icon:Conditions_GetConstructor(eventSettings.OnConditionConditions)
 
+		-- If the OnlyShown setting is enabled, add a condition to check that the icon is shown.
+		-- It is possible that the condition set is empty, in which case this will be the only condition.
 		if eventSettings.OnlyShown then
 			local condition = ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
 
@@ -430,9 +464,12 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 
 		local ConditionObject = ConditionObjectConstructor:Construct()
 
+		-- ConditionObject is nil if there were no conditions at all.
 		if ConditionObject then
+			-- We won't request updates manually - let the condition engine take care of updating.
 			ConditionObject:RequestAutoUpdates(eventSettings, true)
 			
+			-- Associate the condition object with the event settings and the icon that the event settings are from.
 			local matches = self.MapConditionObjectToEventSettings[ConditionObject]
 			if not matches then
 				matches = {}
@@ -440,18 +477,25 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 			end
 			matches[eventSettings] = icon
 			
+			-- Listen for changes in condition state so that we can ask
+			-- the event handler to do what it needs to do.
 			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", self)
 
 
-			-- Do this right now so the animation is always up-to-date with the state
+			-- Check condition state right now so the animation is always up-to-date with the state.
+			-- This might end up not doing anything since this code is called during TMW_ICON_SETUP_PRE
 			self:CheckState(ConditionObject)
 
-			-- Queue an update later, because animations might be missing required icon components when this is triggered.
+			-- Queue an update during TMW_ICON_SETUP_POST, 
+			-- because animations might be missing required icon components when this is triggered.
 			self.UpdatesQueued[ConditionObject] = true
 		end
 	end,
 
 	TMW_ICON_SETUP_POST = function(self, _, icon)
+		-- Run updates for anything that is queued. 
+		-- There should only be one icon worth of ConditionObjects in here,
+		-- since TMW_ICON_SETUP_PRE and TMW_ICON_SETUP_POST are always called in pairs.
 		for ConditionObject in pairs(self.UpdatesQueued) do
 			self:CheckState(ConditionObject)
 		end
@@ -466,10 +510,13 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 		local matches = self.MapConditionObjectToEventSettings[ConditionObject]
 
 		if TMW.Locked and matches then
+			-- If TMW is locked, and there are eventSettings that are using this ConditionObject,
+			-- then have the event handler do what needs to be done for all of the matching eventSettings.
 			self:HandleConditionStateChange(matches, ConditionObject.Failed)
 		end
 	end,
 }
+
 
 TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileConditions"){
 	frequencyMinimum = 0.2,
@@ -482,6 +529,7 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 	end,
 
 	TMW_ICON_DISABLE_2 = function(self, _, icon, soft)
+		-- Halt all of the timers for an icon when it is disabled.
 		for eventSettings, timerTable in pairs(self.RunningTimers) do
 			if timerTable.icon == icon then
 				timerTable.halted = true
@@ -490,9 +538,12 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 	end,
 
 	TMW_ONUPDATE_POST = function(self, event, time, Locked)
+		-- Check all events to see if we should handle them again.
 		if Locked then
 			for eventSettings, timerTable in pairs(self.RunningTimers) do
 				if not timerTable.halted and timerTable.nextRun < time then
+
+					-- Increment the timer until it has passed the current time.
 					if eventSettings.Frequency > 0 then
 						-- Test if Frequency > 0 before starting loop because otherwise it will be infinite.
 						while timerTable.nextRun < time do
@@ -500,6 +551,7 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 						end
 					end
 
+					-- Actually handle the event.
 					self:HandleEvent(timerTable.icon, eventSettings)
 				end
 			end
@@ -508,20 +560,27 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 
 	HandleConditionStateChange = function(self, eventSettingsList, failed)
 		if not failed then
+			-- Conditions are passing.
+			-- Start/resume timers for all the eventSettings that are attached to the conditions.
 			for eventSettings, icon in pairs(eventSettingsList) do
 				local timerTable = self.RunningTimers[eventSettings]
+
 				if not timerTable then
+					-- Create a timer if there wasn't already one for the eventSettings.
 					self.RunningTimers[eventSettings] = {icon = icon, nextRun = TMW.time}
 				else
-					local Frequency = eventSettings.Frequency
-
+					-- Resume the timer if it was previously halted due to failing conditions.
 					timerTable.halted = false
+
+					-- Fast-foward the timer to right now, so that it triggers immediately.
 					if timerTable.nextRun < TMW.time then
 						timerTable.nextRun = TMW.time
 					end
 				end
 			end
 		else
+			-- Conditions are failing.
+			-- Halt all the timers for the eventSettings which rely on these conditions.
 			for eventSettings, icon in pairs(eventSettingsList) do
 				if self.RunningTimers[eventSettings] then
 					self.RunningTimers[eventSettings].halted = true

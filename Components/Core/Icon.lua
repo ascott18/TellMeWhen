@@ -368,6 +368,10 @@ end
 --    end
 --  end
 function Icon.QueueEvent(icon, eventInfo)
+	-- Events that get queued will be processed when icon:ProcessQueuedEvents() is called.
+	-- This can be done manually if an event needs to be processed immediately in an OnEvent handler,
+	-- but it will be done automatically for all icons during TMW_ONUPDATE_TIMECONSTRAINED_POST (in EventHandler.lua)
+
 	icon.EventsToFire[eventInfo] = true
 	icon.eventIsQueued = true
 	
