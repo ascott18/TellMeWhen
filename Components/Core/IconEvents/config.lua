@@ -432,7 +432,8 @@ function EVENTS:LoadPickerButtons()
 		frame:Hide()
 	end
 
-	for i, eventData in ipairs(EVENTS:GetValidEvents()) do
+	local EventHandler = self:GetEventHandler(self.pickedHandler)
+	for i, eventData in ipairs(EVENTS:GetValidEvents(EventHandler)) do
 
 		local frame = EventPickers[i]
 		if not frame then
@@ -457,6 +458,8 @@ function EVENTS:LoadPickerButtons()
 end
 
 function EVENTS:ShowHandlerPickerButtons()
+	self.pickedHandler = nil
+
 	EVENTS:LoadPickerButtons()
 	EVENTS:LoadEventID(nil)
 
@@ -468,6 +471,8 @@ function EVENTS:ShowHandlerPickerButtons()
 end
 
 function EVENTS:ShowEventPickerButtons()
+	EVENTS:LoadPickerButtons()
+
 	IE.Events.HandlerPickers:Hide()
 	IE.Events.EventPickers:Show()
 end 
@@ -533,11 +538,12 @@ TMW:RegisterCallback("TMW_CONFIG_LOADED", EVENTS, "SetTabText")
 
 
 function EVENTS:IsEventIDValid(id)
-	local validEvents = EVENTS:GetValidEvents()
-	
 	local eventSettings = EVENTS:GetEventSettings(id)
 
 	local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventSettings)
+
+	local validEvents = EVENTS:GetValidEvents(EventHandler)
+
 
 	if eventSettings.Event == "" then
 		-- The event is not set
@@ -611,18 +617,22 @@ function EVENTS:GetEventHandlerForEventSettings(arg1)
 	end
 end
 
-function EVENTS:GetValidEvents()
+function EVENTS:GetValidEvents(EventHandler)
 	local ValidEvents = EVENTS.ValidEvents
 	
 	ValidEvents = wipe(ValidEvents or {})
 	
 	for _, Component in ipairs(TMW.CI.icon.Components) do
 		for _, eventData in ipairs(Component.IconEvents) do
-			-- Put it in the table as an indexed field.
-			ValidEvents[#ValidEvents+1] = eventData
-			
-			-- Put it in the table keyed by the event, for lookups.
-			ValidEvents[eventData.event] = eventData
+
+			-- Don't include WhileConditionSetPassing if the event handler doesn't support it.
+			if eventData.event ~= "WCSP" or not EventHandler or EventHandler.supportWCSP then
+				-- Put it in the table as an indexed field.
+				ValidEvents[#ValidEvents+1] = eventData
+				
+				-- Put it in the table keyed by the event, for lookups.
+				ValidEvents[eventData.event] = eventData
+			end
 		end
 	end
 	
@@ -671,8 +681,11 @@ end
 function EVENTS:ChangeEvent_Dropdown()
 	if TMW.DD.MENU_LEVEL == 1 then
 		local eventButton = self:GetParent()
+		local eventID = eventButton:GetID()
+		local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
+
 		
-		for _, eventData in ipairs(EVENTS:GetValidEvents()) do
+		for _, eventData in ipairs(EVENTS:GetValidEvents(EventHandler)) do
 			local info = TMW.DD:CreateInfo()
 
 			info.text = get(eventData.text)
@@ -692,8 +705,8 @@ function EVENTS:ChangeEvent_Dropdown()
 	end
 end
 function EVENTS:ChangeEvent_Dropdown_OnClick(eventButton, event)
-	local n = eventButton:GetID()
-	local eventSettings = TMW.CI.ics.Events[n]
+	local eventID = eventButton:GetID()
+	local eventSettings = EVENTS:GetEventSettings(eventID)
 
 	eventSettings.Event = event
 

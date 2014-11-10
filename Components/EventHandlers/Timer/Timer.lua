@@ -18,7 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 
-local Timer = TMW.C.EventHandler_WhileConditions_Repetitive:New("Timer", 51)
+local Timer = TMW.C.EventHandler:New("Timer", 51)
 Timer.frequencyMinimum = 0
 
 Timer:RegisterEventDefaults{
