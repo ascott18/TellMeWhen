@@ -317,16 +317,6 @@ end
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 	wipe(icon.EventHandlersSet)
-	
-	-- make sure events dont fire while, or shortly after, we are setting up
-	-- Don't set nil because that will make it fall back on the class-defined value
-	icon.runEvents = false
-	
-	EVENTS:CancelTimer(icon.runEventsTimerHandler, 1)
-	icon.runEventsTimerHandler = EVENTS.ScheduleTimer(icon, "RestoreEvents", TMW.UPD_INTV*2.1)
-end)	
-
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(_, icon)
 	for _, eventSettings in TMW:InNLengthTable(icon.Events) do
 		local event = eventSettings.Event
 		if event then
@@ -344,6 +334,13 @@ TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(_, icon)
 			end
 		end
 	end
+	
+	-- make sure events dont fire while, or shortly after, we are setting up
+	-- Don't set nil because that will make it fall back on the class-defined value
+	icon.runEvents = false
+	
+	EVENTS:CancelTimer(icon.runEventsTimerHandler, 1)
+	icon.runEventsTimerHandler = EVENTS.ScheduleTimer(icon, "RestoreEvents", TMW.UPD_INTV*2.1)
 end)
 
 TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function(event, time, Locked)
@@ -398,9 +395,11 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 
 	OnNewInstance_WhileConditions = function(self)
 		self.MapConditionObjectToEventSettings = {}
+		self.UpdatesQueued = {}
 
 		TMW:RegisterCallback("TMW_ICON_DISABLE", self)
 		TMW:RegisterCallback("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", self)
+		TMW:RegisterCallback("TMW_ICON_SETUP_POST", self)
 	end,
 
 
@@ -443,16 +442,31 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 			
 			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", self)
 
+
 			-- Do this right now so the animation is always up-to-date with the state
-			self:TMW_CNDT_OBJ_PASSING_CHANGED(nil, ConditionObject, ConditionObject.Failed)
+			self:CheckState(ConditionObject)
+
+			-- Queue an update later, because animations might be missing required icon components when this is triggered.
+			self.UpdatesQueued[ConditionObject] = true
 		end
 	end,
 
+	TMW_ICON_SETUP_POST = function(self, _, icon)
+		for ConditionObject in pairs(self.UpdatesQueued) do
+			self:CheckState(ConditionObject)
+		end
+		wipe(self.UpdatesQueued)
+	end,
+
 	TMW_CNDT_OBJ_PASSING_CHANGED = function(self, _, ConditionObject, failed)
+		self:CheckState(ConditionObject)
+	end,
+
+	CheckState = function(self, ConditionObject)
 		local matches = self.MapConditionObjectToEventSettings[ConditionObject]
 
 		if TMW.Locked and matches then
-			self:HandleConditionStateChange(matches, failed)
+			self:HandleConditionStateChange(matches, ConditionObject.Failed)
 		end
 	end,
 }
