@@ -4,6 +4,7 @@ TMW.CHANGELOG = {
 
 [==[===v7.2.0===]==],
 [==[* New icon type: Resource Display. Works with Bar and Vertical Bar group display methods to show the amount of health, mana, etc. that some unit has.]==],
+[==[* The Multi-state Cooldown icon type is gone - Spell Cooldown icons can replicate its functionality.]==],
 [==[]==],
 [==[* Combat Event icons can now be group controllers, filling up a group with each event captured.]==],
 [==[* Buff/Debuff icons can now explicity set which variable they want to look at for the "Show variable text" option.]==],

@@ -57,10 +57,6 @@
 <Script file="IconType_meta\Config.lua"/>
 
 
-<!-- <Include file="IconType_multistate\Config.xml"/> -->
-<Script file="IconType_multistate\Config.lua"/>
-
-
 <!-- <Include file="IconType_reactive\Config.xml"/> -->
 <!-- <Script file="IconType_reactive\Config.lua"/> -->
 

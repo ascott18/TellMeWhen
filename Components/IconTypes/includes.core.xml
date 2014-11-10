@@ -14,7 +14,6 @@
 <Script file="IconType_lightwell\lightwell.lua"/>
 <Script file="IconType_losecontrol\losecontrol.lua"/>
 <Script file="IconType_meta\meta.lua"/>
-<Script file="IconType_multistate\multistate.lua"/>
 <Script file="IconType_reactive\reactive.lua"/>
 <Script file="IconType_runes\runes.lua"/>
 <Script file="IconType_swingtimer\swingtimer.lua"/>

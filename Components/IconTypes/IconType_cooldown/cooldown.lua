@@ -67,6 +67,17 @@ Type:RegisterIconDefaults{
 	IgnoreRunes				= false,
 }
 
+TMW:RegisterUpgrade(72022, {
+	icon = function(self, ics)
+		-- Multistate cooldown icon type has been removed (no longer needed)
+		if ics.Type == "multistate" then
+			ics.Type = "cooldown"
+			ics.IgnoreRunes = false -- mscd icons didnt have this setting. Make sure it is disabled.
+			ics.wasmscd = true -- flag this so we can undo this change if we need to. TODO: remove this flag from all icons when we're sure this is an OK change.
+		end
+	end,
+})
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
