@@ -1343,10 +1343,7 @@ do -- ordered pairs
 
 	local function sorter(a, b)
 		if sortByValues then
-			local val_a, val_b = sortByValues[a], sortByValues[b]
-			if val_a ~= val_b then
-				a, b = val_a, val_b
-			end
+			a, b = sortByValues[a], sortByValues[b]
 		end
 
 		if compareFunc then
