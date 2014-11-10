@@ -1,0 +1,89 @@
+﻿<Ui>
+	
+	<Frame name="$parentTimer" inherits="TellMeWhen_EventContainer" parentKey="Timer">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+
+		<Frames>
+			
+			<EditBox name="$parentCounter" inherits="TellMeWhen_InputBoxTemplate" parentKey="Counter" autoFocus="false">
+				<Size x="130" y="15"/>
+				<KeyValues>
+  					<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event"/>
+ 				</KeyValues>
+
+  				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="10" y="-22"/>
+				</Anchors>
+
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentTitle" parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" y="2"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+
+				<Scripts>
+					<OnLoad>
+						self.Title:SetText(TMW.L["EVENTS_SETTINGS_TIMER_NAME"])
+
+						TMW:CInit(self, {
+							setting = "Counter",
+							title = TMW.L["EVENTS_SETTINGS_TIMER_NAME"],
+							tooltip = TMW.L["EVENTS_SETTINGS_TIMER_NAME_DESC"],
+							ModifySettingValue = function(self, value)
+								local Timer = TMW.EVENTS:GetEventHandler("Timer")
+								return Timer:SanitizeTimerName(value)
+							end,
+						})
+
+						TMW.SUG:EnableEditBox(self, "timerName", true)
+
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			<Frame name="$parentOperation" parentKey="Operation" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentCounter" relativePoint="RIGHT" x="6" y="-3"/>
+				</Anchors>
+
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="$parentTitle" parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="20" y="-0.5"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self, {
+							title = TMW.L["EVENTS_SETTINGS_COUNTER_OP"],
+							tooltip = TMW.L["EVENTS_SETTINGS_TIMER_OP_DESC"],
+							
+							func = TMW.EVENTS:GetEventHandler("Timer").OperationMenu_DropDown,
+						})
+
+						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_OP"])
+
+						self:SetWidth(163)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
+
+	</Frame>
+	
+</Ui>

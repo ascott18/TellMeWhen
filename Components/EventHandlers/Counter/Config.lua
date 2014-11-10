@@ -83,6 +83,7 @@ function Counter:OperationMenu_DropDown()
 		info.func = Counter.OperationMenu_DropDown_OnClick
 		info.text = v.text
 		info.value = v.value
+		info.checked = v.value == EVENTS:GetEventSettings().CounterOperation
 		info.arg1 = self
 		TMW.DD:AddButton(info)
 	end
@@ -93,6 +94,8 @@ function Counter:OperationMenu_DropDown_OnClick(frame)
 	
 	local eventSettings = EVENTS:GetEventSettings()
 	eventSettings.CounterOperation = self.value
+
+	TMW.EVENTS:LoadConfig()
 end
 
 
@@ -144,7 +147,11 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 
 
 	for eventSettings in EVENTS:InIconEventSettings() do
-		if eventSettings.Counter ~= "" and strfind(eventSettings.Counter, lastName) and not TMW.tContains(suggestions, eventSettings.Counter) then
+		if eventSettings.Type == "Counter"
+			and eventSettings.Counter ~= ""
+			and strfind(eventSettings.Counter, lastName)
+			and not TMW.tContains(suggestions, eventSettings.Counter)
+		then
 			suggestions[#suggestions + 1] = eventSettings.Counter
 		end
 	end

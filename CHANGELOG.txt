@@ -7,6 +7,7 @@
  * The combo point condition now only checks your target (so you can't try to check "player", which doesn't work).
 
  * New condition: Item has on use effect
+ * New notification handler: Timer. Manipulates a stopwatch-style timer when it is triggered.
 
  * IMPORTANT: The Buff/Debuff Duration Percent conditions are being phased out because they are deceiving.
  ** In Warlords of Draenor, the point at which you can refresh a buff/debuff without clipping any of the existing duration is at 30% of the BASE DURATION of the effect - not 30% the current duration.

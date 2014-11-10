@@ -1698,6 +1698,7 @@ L["NOTYPE"] = "<No Icon Type>"
 L["MISCELLANEOUS"] = "Miscellaneous"
 L["TEXTMANIP"] = "Text manipulation"
 L["DT_DOC_Counter"] = "Returns the value of a TellMeWhen Counter. Counters are created and modified with Icon Notifications."
+L["DT_DOC_Timer"] = "Returns the value of a TellMeWhen Timer. Timer are created and modified with Icon Notifications."
 L["DT_DOC_TMWFormatDuration"] = "Returns a string formatted by TellMeWhen's time format. Alternative to [FormatDuration]."
 L["DT_DOC_gsub"] = [[Gives access to Lua's string.gsub function for DogTags for powerful string manipulation capabilities.
 
@@ -2177,15 +2178,37 @@ L["EVENTHANDLER_LUA_CODE_DESC"] = "Type the Lua code that should be executed whe
 L["CONDITIONPANEL_COUNTER_DESC"] = "Check the value of a counter that has been established and modified by the \"Counter\" Notification handler"
 L["CONDITION_COUNTER"] = "Counter to check"
 L["CONDITION_COUNTER_EB_DESC"] = "Enter the name of the counter that you would like to check."
+
+L["CONDITIONPANEL_TIMER_DESC"] = "Check the value of a timer that has been established and modified by the \"Timer\" Notification handler"
+L["CONDITION_TIMER"] = "Timer to check"
+L["CONDITION_TIMER_EB_DESC"] = "Enter the name of the timer that you would like to check."
+
 L["OPERATION_SET"] = "Set"
 L["OPERATION_PLUS"] = "Add"
 L["OPERATION_MINUS"] = "Subtract"
 L["OPERATION_MULTIPLY"] = "Multiply"
 L["OPERATION_DIVIDE"] = "Divide"
+
+
+L["OPERATION_TRESET"] = "Reset"
+L["OPERATION_TRESET_DESC"] = "Resets the timer to 0. Does not stop it if it's running."
+L["OPERATION_TSTART"] = "Start"
+L["OPERATION_TSTART_DESC"] = "Starts the timer if it isn't running. Does not reset it."
+L["OPERATION_TRESTART"] = "Restart"
+L["OPERATION_TRESTART_DESC"] = "Resets the timer to 0, and starts it if it isn't runnning."
+L["OPERATION_TPAUSE"] = "Pause"
+L["OPERATION_TPAUSE_DESC"] = "Pauses the timer."
+L["OPERATION_TSTOP"] = "Stop"
+L["OPERATION_TSTOP_DESC"] = "Stops and resets the timer to 0."
+
 L["EVENTHANDLER_COUNTER_TAB"] = "Counter"
 L["EVENTHANDLER_COUNTER_TAB_DESC"] = "Configure a numerical counter to be modified or set. This counter can be checked in Conditions and displayed as text with DogTags."
 
+L["EVENTHANDLER_TIMER_TAB"] = "Timer"
+L["EVENTHANDLER_TIMER_TAB_DESC"] = "Configure a stopwatch-style timer. This timer can be checked in Conditions and displayed as text with DogTags."
+
 L["EVENTS_SETTINGS_COUNTER_HEADER"] = "Counter Settings"
+L["EVENTS_SETTINGS_TIMER_HEADER"] = "Timer Settings"
 
 L["EVENTS_SETTINGS_COUNTER_NAME"] = "Counter Name"
 L["EVENTS_SETTINGS_COUNTER_NAME_DESC"] = [[Enter the name of the counter to be modified. If the counter doesn't exist the first time it is modified, it's intial value is 0.
@@ -2196,8 +2219,18 @@ Use this counter name in other places where you would like to check this counter
 
 
 Advanced Users: Counters are stored in TMW.COUNTERS[counterName] = value.   Call TMW:Fire( "TMW_COUNTER_MODIFIED", counterName ) if you change a counter in a custom Lua script.]]
+
+L["EVENTS_SETTINGS_TIMER_NAME"] = "Timer Name"
+L["EVENTS_SETTINGS_TIMER_NAME_DESC"] = [[Enter the name of the timer to be modified.
+
+Counter names must be lower-case with no spaces.
+
+Use this timer name in other places where you would like to check this timer (Conditions and Text Displays via the [Timer] DogTag)]]
+
+
 L["EVENTS_SETTINGS_COUNTER_OP"] = "Operation"
 L["EVENTS_SETTINGS_COUNTER_OP_DESC"] = "Choose the operation that you would like to perform on the counter"
+L["EVENTS_SETTINGS_TIMER_OP_DESC"] = "Choose the operation that you would like to perform on the timer"
 L["EVENTS_SETTINGS_COUNTER_AMOUNT"] = "Value"
 L["EVENTS_SETTINGS_COUNTER_AMOUNT_DESC"] = "Enter the amount that you want the counter to be set to or be modified by."
 

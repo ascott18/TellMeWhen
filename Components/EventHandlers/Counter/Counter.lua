@@ -17,9 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local loadstring =
-	  loadstring
-
 
 local Counter = TMW.C.EventHandler_WhileConditions_Repetitive:New("Counter", 50)
 Counter.frequencyMinimum = 0
@@ -32,6 +29,7 @@ Counter:RegisterEventDefaults{
 
 TMW.COUNTERS = setmetatable({}, {__index = function() return 0 end})
 local COUNTERS = TMW.COUNTERS
+
 
 function Counter:SanitizeCounterName(counter)
 	-- don't return in a single line because that will return all of gsub's return values, which we don't want.

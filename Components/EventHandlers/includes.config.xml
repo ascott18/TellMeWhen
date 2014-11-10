@@ -4,6 +4,7 @@
 <Include file="Announcements\includes.config.xml"/>
 <Include file="Animations\includes.config.xml"/>
 <Include file="Counter\includes.config.xml"/>
+<Include file="Timer\includes.config.xml"/>
 <Include file="Lua\includes.config.xml"/>
 
 </Ui>
