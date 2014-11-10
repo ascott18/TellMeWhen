@@ -396,7 +396,7 @@ end
 
 
 
-function EVENTS:LoadPickerButtons()
+function EVENTS:LoadHandlerPickerButtons()
 	local previousFrame
 
 	-- Handler pickers
@@ -424,7 +424,10 @@ function EVENTS:LoadPickerButtons()
 
 		previousFrame = frame
 	end
-	previousFrame = nil
+end
+
+function EVENTS:LoadEventPickerButtons()
+	local previousFrame
 
 	-- Event (Trigger) pickers
 	local EventPickers = IE.Events.EventPickers
@@ -460,7 +463,7 @@ end
 function EVENTS:ShowHandlerPickerButtons()
 	self.pickedHandler = nil
 
-	EVENTS:LoadPickerButtons()
+	EVENTS:LoadHandlerPickerButtons()
 	EVENTS:LoadEventID(nil)
 
 	IE.Events.AddEvent:LockHighlight()
@@ -471,7 +474,7 @@ function EVENTS:ShowHandlerPickerButtons()
 end
 
 function EVENTS:ShowEventPickerButtons()
-	EVENTS:LoadPickerButtons()
+	EVENTS:LoadEventPickerButtons()
 
 	IE.Events.HandlerPickers:Hide()
 	IE.Events.EventPickers:Show()
@@ -618,6 +621,8 @@ function EVENTS:GetEventHandlerForEventSettings(arg1)
 end
 
 function EVENTS:GetValidEvents(EventHandler)
+	TMW:ValidateType("2 (EventHandler)", "EVENTS:GetValidEvents(EventHandler)", EventHandler, "EventHandler")
+
 	local ValidEvents = EVENTS.ValidEvents
 	
 	ValidEvents = wipe(ValidEvents or {})
@@ -626,7 +631,7 @@ function EVENTS:GetValidEvents(EventHandler)
 		for _, eventData in ipairs(Component.IconEvents) do
 
 			-- Don't include WhileConditionSetPassing if the event handler doesn't support it.
-			if eventData.event ~= "WCSP" or not EventHandler or EventHandler.supportWCSP then
+			if eventData.event ~= "WCSP" or EventHandler.supportWCSP then
 				-- Put it in the table as an indexed field.
 				ValidEvents[#ValidEvents+1] = eventData
 				
