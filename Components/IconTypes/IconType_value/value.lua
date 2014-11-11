@@ -44,6 +44,8 @@ Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
+Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 
 
 Type:RegisterIconDefaults{
