@@ -596,6 +596,14 @@ function group:Import_ImportData(Item_group, domain, createNewGroup, oldgroupID,
 			TMW:DoUpgrade("group", version, gs, domain, group.ID)
 		end
 	end
+
+	group:Setup()
+	if group:IsVisible() then
+		TellMeWhen_GroupImportFlash:Play(group)
+
+	elseif not TMW.Locked then
+		TMW:Printf(L["IMPORT_GROUPNOVISIBLE"])
+	end
 end
 
 function group:Import_CreateMenuEntry(info, Item, doLabel)

@@ -1781,6 +1781,9 @@ L["fTEXTLAYOUT"] = "Text Layout: %s"
 L["fGROUPS"] = "Groups: %s"
 L["EXPORT_ALLGLOBALGROUPS"] = "All |cff00c300Global|r Groups"
 
+L["IMPORT_GROUPNOVISIBLE"] = "The group you just imported isn't shown because of its configuration and your current class and specialization. Check its setting in TMW's group options - '/tmw options'."
+L["IMPORT_GROUPIMPORTED"] = "Group Imported!"
+
 L["IMPORT_NEWGUIDS"] = [[The data you just imported conflicted with the unique identifiers of %d |4group:groups; and %d |4icon:icons;. This probably means that you have imported this data, or an older version of it, before.
 
 New unique identifiers have been assigned to the imported data. Icons that you import in the future that are supposed to reference the new data may not function as desired - they will instead reference the old icons that conflicted with the new data.

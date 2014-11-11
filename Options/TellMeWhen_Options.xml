@@ -1494,6 +1494,40 @@
 	
 	<!-- END TEMPLATES -->
 
+	<Frame name="TellMeWhen_GroupImportFlash" frameStrata="FULLSCREEN" parent="UIParent" hidden="true">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString parentKey="text" inherits="GameFontNormalLargeOutline" justifyH="CENTER" justifyV="CENTER" setAllPoints="true">
+				</FontString>
+
+				<Texture parentKey="glow" setAllPoints="true" alpha="0">
+					<Color r="0" g="0.4" b="0"/>
+					<Animations>
+						<AnimationGroup parentKey="anim">
+							<Alpha startDelay="0" change="0.9" duration="0.8" order="1"/>
+							<Alpha startDelay="0.6" change="-0.9" duration="1" order="2"/>
+							<Scripts>
+								<OnFinished>
+									self:GetParent():GetParent():Hide()
+								</OnFinished>
+							</Scripts>
+						</AnimationGroup>
+					</Animations>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.text:SetText(TMW.L["IMPORT_GROUPIMPORTED"])
+				function self:Play(group)
+					self:SetAllPoints(group)
+					self:Show()
+					self.glow.anim:Play()
+				end
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
 	<Frame name="TellMeWhen_ConfigWarning" inherits="TellMeWhen_SimpleDialog" >
 		<Anchors>
 			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
