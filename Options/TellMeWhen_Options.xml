@@ -684,8 +684,6 @@
 					newScroll = self:GetVerticalScrollRange()
 				end
 				self:SetVerticalScroll(newScroll)
-				
-				TMW.HELP:Hide("SCROLLBAR_DROPDOWN")
 			</OnMouseWheel>
 			
 			<OnUpdate>
@@ -812,21 +810,6 @@
 							<OnLoad>
 								self:RegisterForDrag("LeftButton")
 							</OnLoad>
-							<OnShow>
-								TMW.HELP:Show{
-									code = "SCROLLBAR_DROPDOWN",
-									codeOrder = 1,
-									codeOnlyOnce = true,
-									icon = nil,
-									relativeTo = self,
-									x = 0,
-									y = 0,
-									text = TMW.L["HELP_SCROLLBAR_DROPDOWN"]
-								}
-							</OnShow>
-							<OnHide>
-								TMW.HELP:Hide("SCROLLBAR_DROPDOWN", true)
-							</OnHide>
 							<OnDragStart>
 								local _
 								self.IsScrolling = true
@@ -834,7 +817,6 @@
 								self.startHeight = select(5, self:GetPoint(1))
 								self:SetButtonState("PUSHED")
 								self:LockHighlight()
-								TMW.HELP:Hide("SCROLLBAR_DROPDOWN")
 							</OnDragStart>
 							<OnDragStop>
 								self.IsScrolling = false

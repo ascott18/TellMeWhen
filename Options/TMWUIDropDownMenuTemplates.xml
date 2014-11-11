@@ -269,8 +269,13 @@
 						self.ScrollFrame.scrollStep = TMW.DD.BUTTON_HEIGHT * 5
 
 						self.ScrollFrame:HookScript("OnHide", function(self)
+							TMW.HELP:Hide("SCROLLBAR_DROPDOWN", true)
 							self:SetVerticalScroll(0)
 						end)
+						self.ScrollFrame:HookScript("OnVerticalScroll", function(self)
+							TMW.HELP:Hide("SCROLLBAR_DROPDOWN")
+						end)
+						
 						self.ScrollFrame.ScrollBar:HookScript("OnEnter", function()
 							TMW.DD.StopCounting(self, motion);
 						end)
@@ -330,6 +335,17 @@
 				if self.shouldScroll then
 					addWidth = addWidth + 15
 					self.ScrollFrame:SetPoint("TOPLEFT", 10, -15)
+
+					TMW.HELP:Show{
+						code = "SCROLLBAR_DROPDOWN",
+						codeOrder = 1,
+						codeOnlyOnce = true,
+						icon = nil,
+						relativeTo = self,
+						x = 0,
+						y = 0,
+						text = TMW.L["HELP_SCROLLBAR_DROPDOWN"]
+					}
 				else
 					self.ScrollFrame:SetPoint("TOPLEFT", 0, -15)
 				end
@@ -342,6 +358,7 @@
 				end
 			</OnShow>
 			<OnHide>
+				TMW.HELP:Hide("SCROLLBAR_DROPDOWN", true)
 				local id = self:GetID()
 				if ( self.onHide ) then
 					self.onHide(id+1);
