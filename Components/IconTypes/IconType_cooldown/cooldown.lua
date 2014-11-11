@@ -74,6 +74,7 @@ TMW:RegisterUpgrade(72022, {
 			ics.Type = "cooldown"
 			ics.IgnoreRunes = false -- mscd icons didnt have this setting. Make sure it is disabled.
 			ics.wasmscd = true -- flag this so we can undo this change if we need to. TODO: remove this flag from all icons when we're sure this is an OK change.
+			-- also TODO: remove static formats and localization strings for things that were used for mscd.
 		end
 	end,
 })

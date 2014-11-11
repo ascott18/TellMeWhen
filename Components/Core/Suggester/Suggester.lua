@@ -685,7 +685,6 @@ function Module:OnSuggest()
 	AuraCache_Cache = AuraCache:GetCache()
 	SpellCache_Cache = SpellCache:GetCache()
 	PlayerSpells = ClassSpellCache:GetPlayerSpells()
-	ClassSpellCache:GetSpellLookup()
 	EquivFirstIDLookup = TMW.EquivFirstIDLookup
 end
 function Module:Table_Get()
