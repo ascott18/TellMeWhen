@@ -405,7 +405,7 @@ As you configure TellMeWhen, make sure to read the tooltips for each setting. Th
 
 
 L["ICONMENU_VIEWREQ"] = "Incompatible Group Display Method"
-L["ICONMENU_VIEWREQ_DESC"] = [[This icon type cannot be used with this group's current display method because it doesn't have the necessary components to display the needed data.
+L["ICONMENU_VIEWREQ_DESC"] = [[This icon type cannot be used with this group's current display method because it doesn't have the necessary components to display all the data.
 
 Change the group's display method or create a new group to use this icon type.]]
 
