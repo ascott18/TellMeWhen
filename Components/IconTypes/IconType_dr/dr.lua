@@ -150,10 +150,10 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 
 	if DRData then
 		local myCategories = {
-			ctrlstun		= "DR-Stun",
+			stun			= "DR-Stun",
 			silence			= "DR-Silence",
 			disorient		= "DR-Disorient",
-			ctrlroot		= "DR-Root", 
+			root			= "DR-Root", 
 			incapacitate	= "DR-Incapacitate",
 			taunt 			= "DR-Taunt",
 		}
