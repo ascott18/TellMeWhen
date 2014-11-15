@@ -101,7 +101,7 @@ end)
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
-	Cache_OptDB = TMW.IE.db.global.AuraCache
+	local Cache_OptDB = TMW.IE.db.global.AuraCache
 
 	if Cache == TMW.db.global.AuraCache then
 

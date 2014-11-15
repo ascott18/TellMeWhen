@@ -41,7 +41,7 @@ end)
 --  varType: item
 -----------------------
 local IconsWithVarTex_item = {}
-function UpdateVarTex_item(icon, varData)
+local function UpdateVarTex_item(icon, varData)
 	icon.CustomTex_OverrideTex = GetInventoryItemTexture("player", varData) or nil
 	
 	-- setting it nil causes the original data processor and the hook to be ran,

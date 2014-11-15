@@ -63,7 +63,7 @@ end
 
 
 local function getParentTableFromPath(path)
-	parentTable = TMW.approachTable(TMW.GroupConfigTemplate, strsplit(".", path))
+	local parentTable = TMW.approachTable(TMW.GroupConfigTemplate, strsplit(".", path))
 	
 	if parentTable == nil then
 		error("An invalid parent table path passed to GroupComponent:RegisterConfigTable()!", 3)

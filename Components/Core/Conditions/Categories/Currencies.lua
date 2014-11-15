@@ -95,7 +95,7 @@ local currencies = {
 	}
 }
 
-blacklist = {
+local blacklist = {
 	483,	-- Conquest Arena Meta
 	484,	-- Conquest Rated BG Meta
 	692,	-- Conquest Random BG Meta
