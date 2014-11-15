@@ -3557,6 +3557,89 @@ TMW:RegisterChatCommand("tmw", "SlashCommand")
 TMW:RegisterChatCommand("tellmewhen", "SlashCommand")
 
 function TMW:LoadOptions(recursed)
+	--[[ Here's the story of some taint. A better version is at
+		http://www.wowace.com/addons/chinchilla/tickets/177-positioning-scaling-minimap-cluster-taints-other-addons/
+
+		TellMeWhen_Options is getting blamed for tainting the item buttons in the quest log.
+		I spent a huge amount of time trying to debug this. What it seems to come down to is that TMW
+		is somehow tainting OBJECTIVE_TRACKER_UPDATE_REASON and OBJECTIVE_TRACKER_UPDATE_ID,
+		which eventually cascades and taints the var that holds the item for a line in the
+		quest tracker, which causes UseQuestLogSpecialItem() to get blocked due to taint.
+
+		This taint is happening through these 3 paths:
+			Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:995 ObjectiveTracker_Update()
+			Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_QuestObjectiveTracker.lua:115 QuestObjectiveTracker_FinishGlowAnim()
+			<unnamed>:OnFinished()
+		and
+			Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:996 ObjectiveTracker_Update()
+			Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_QuestObjectiveTracker.lua:115 QuestObjectiveTracker_FinishGlowAnim()
+			<unnamed>:OnFinished()
+		and
+			Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:996 ObjectiveTracker_Update()
+			Interface\AddOns\Blizzard_ObjectiveTracker\Blizzard_QuestObjectiveTracker.lua:129 QuestObjectiveTracker_FinishFadeOutAnim()
+			<unnamed>:OnFinished()
+
+		There is another way that TMW_Options can introduce taint, but this is only when shift-clicking
+		on items in the quest log - TMW's ChatEdit_InsertLink hook taints execution, which will taint ACTIVE_CHAT_EDIT_BOX,
+		which then tains execution when calling ChatEdit_GetActiveWindow(), which will cause UseQuestLogSpecialItem() to
+		be blocked when holding the shift key (Blizzard_QuestObjectiveTracker.lua:192).
+
+		That taint isn't really the issue, though (its sill an issue, but we don't really care). The issue is
+		that regular use of quest items is getting blocked. After hours upon hours of debugging, it turns out that
+		for some unknown reason, the loading of TellMeWhen_Options is triggering ObjectiveTrackerFrame's OnSizeChanged to fire.
+		This function in turn calls ObjectiveTracker_Update(), and there's a fairly good chance that this will be the first time
+		that it is called, so it ends up being TMW_Options that initializes a lot of the quest tracker (if TMW_Options is loading immediately).
+
+		Here's that full call stack:
+			[string "TMWOPT_taint debug"]:45: in function <[string "TMWOPT_taint debug"]:43>
+			[C]: in function `ObjectiveTracker_Update'
+			...zzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:700: in function <...zzard_ObjectiveTracker\Blizzard_ObjectiveTracker.lua:699>
+			[C]: ?
+			Interface\AddOns\TellMeWhen\TellMeWhen.lua:3574: in function `LoadOptions'
+			Interface\AddOns\TellMeWhen\TellMeWhen.lua:3164: in function `UpdateNormally'
+			Interface\AddOns\TellMeWhen\TellMeWhen.lua:3335: in function `Update'
+			Interface\AddOns\TellMeWhen\TellMeWhen.lua:1857: in function `?'
+			...Ons\Ace3\CallbackHandler-1.0\CallbackHandler-1.0.lua:147: in function <...Ons\Ace3\CallbackHandler-1.0\CallbackHandler-1.0.lua:147>
+			[string "safecall Dispatcher[1]"]:4: in function <[string "safecall Dispatcher[1]"]:4>
+			[C]: ?
+			[string "safecall Dispatcher[1]"]:13: in function `?'
+			...Ons\Ace3\CallbackHandler-1.0\CallbackHandler-1.0.lua:92: in function `Fire'
+			Interface\AddOns\Ace3\AceEvent-3.0\AceEvent-3.0.lua:120: in function <Interface\AddOns\Ace3\AceEvent-3.0\AceEvent-3.0.lua:119>
+
+		It is worth noting that the taint never happens right away. I don't know what exactly triggers it,
+		but it never happens until I've been questing for an hour or so. Because the taint is coming from the 
+		OnFinished animation script handlers, I suspect I just have to complete a whole bunch of quests until the stars align and it taints.
+
+		After tearing apart a ton of TellMeWhen_Options for several more hours, I eventually came down to a single thing
+		that will reliably cause ObjectiveTrackerFrame:OnSizeChanged to fire due to TMW_Options. Brace yourselves for this:
+
+		With a huge amount of TMW_Options code deleted from the includes.config.xml files, it finally came down to adding/removing 
+		the configuration panel for the Sound icon event handler. Even if I replaced it with just "<Frame/>" in the xml file,
+		the taint still happened. But, after removing it, the taint stopped. Now, this same action DOES NOT affect the taint
+		without the very specific set of files that were not being loaded. I have absolutely no clue why this is what was able to "toggle" the taint,
+		but it was. After doing further debugging, it ALWAYS happens immediately after that frame is created, but before the next frame is created.
+
+		So, in further attempts to debug what was going on, I thought to add a call to ObjectiveTracker:GetSize() so I could see what the size was BEFORE
+		the OnSizeChanged handler was getting called, so I could see if the size really was changing. And guess what? It doesn't get called anymore after
+		I added that in. So, that's the story of why the next line of code exists.
+
+	Addendum:
+		After a lot more testing, it turns out that this issue always happens at the same time as the first time that TellMeWhen_Options creates
+		a frame in xml (doesn't happen when creating a frame in a Lua file). If TellMeWhen_Options is loaded at the very end of this file,
+		the issue doesn't happen. If it is loaded in an ADDON_LOADED handlers after TMW finishes loading, it does happen.
+		
+		It also only happens when my minimap addon (Chinchilla) is loaded, and is allowed to scale and/or re-position the MinimapCluster.
+
+		I've asked Chinchilla's author to add calls to ObjectiveTrackerFrame:GetSize() so that Chinchilla gets blamed for the taint instead of TMW_Options.
+		If TellMeWhen calls ObjectiveTrackerFrame:GetSize(), it will just be TellMeWhen that gets blamed for the taint.
+
+	Addendum 2:
+		Despite the changes made to Chinchilla, the issue still happens. It doesn't blame TMW_Options every time, though - sometimes
+		it will blame other addons instead. I'm not sure that this bug can ever be fixed unless Blizzard lesses the restrictions on UseQuestLogItemSpecial().
+		
+
+	]]
+
 	if IsAddOnLoaded("TellMeWhen_Options") then
 		return true
 	end
