@@ -325,7 +325,7 @@ end
 
 
 --- Tests an event for TMW.CI.icon
-. Triggered by clicking on the test button in the config UI.
+-- Triggered by clicking on the test button in the config UI.
 -- @param eventID [number] The ID of the event you want to test, or nil to test the event that is being configured.
 function EventHandler:TestEvent(eventID)
 	if not self.testable then
