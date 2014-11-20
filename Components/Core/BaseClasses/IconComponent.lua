@@ -86,11 +86,10 @@ function IconComponent:RegisterEventHandlerData(identifier, ...)
 	local eventHandlerData = {
 		eventHandler = EventHandler,
 		identifier = identifier,
-		...,
 	}
 	
 	if EventHandler then
-		EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
+		EventHandler:RegisterEventHandlerDataTable(eventHandlerData, ...)
 		
 		tinsert(self.EventHandlerData, eventHandlerData)
 	else
@@ -98,7 +97,7 @@ function IconComponent:RegisterEventHandlerData(identifier, ...)
 			if EventHandler.identifier == identifier then
 				eventHandlerData.eventHandler = EventHandler
 	
-				EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
+				EventHandler:RegisterEventHandlerDataTable(eventHandlerData, ...)
 				
 				tinsert(self.EventHandlerData, eventHandlerData)
 

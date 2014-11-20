@@ -99,7 +99,7 @@ TMW:NewClass("Config_EditBox_Event", "Config_Base_Event", "Config_EditBox"){
 
 
 function EVENTS:LoadConfig()
-	local EventHandlerFrames = self.EventHandlerFrames
+	local EventHandlerFrames = EVENTS.EventHandlerFrames
 	local previousFrame
 
 	local yAdjustTitle, yAdjustText = 0, 0
@@ -109,7 +109,7 @@ function EVENTS:LoadConfig()
 	end
 
 	
-	local oldID = max(1, self.currentEventID or 1)
+	local oldID = max(1, EVENTS.currentEventID or 1)
 
 	local didLoad
 	for i = 1, TMW.CI.ics.Events.n do
@@ -122,7 +122,7 @@ function EVENTS:LoadConfig()
 
 
 		-- Get the frame that this event will be listed in.
-		local frame = self.EventHandlerFrames[eventID]
+		local frame = EVENTS.EventHandlerFrames[eventID]
 		if not frame then
 			-- If the frame doesn't exist, then create it.
 			frame = CreateFrame("Button", EventHandlerFrames:GetName().."Event"..eventID, EventHandlerFrames, "TellMeWhen_Event", eventID)
@@ -149,8 +149,8 @@ function EVENTS:LoadConfig()
 
 		-- Check if this eventID is valid, and load it if it is.
 		local isValid, reason = EVENTS:IsEventIDValid(eventID)
-		local eventSettings = self:GetEventSettings(eventID)
-		local EventHandler = self:GetEventHandlerForEventSettings(eventSettings)
+		local eventSettings = EVENTS:GetEventSettings(eventID)
+		local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventSettings)
 		local eventData = TMW.EventList[eventSettings.Event]
 
 		
@@ -191,6 +191,7 @@ function EVENTS:LoadConfig()
 			-- If we have not yet loaded an event for this configuration load,
 			-- then load this event. The proper event settings and event handler
 			-- configuration will be shown and setup with stored settings.
+			-- This is the reason why we start with the currently selected eventID.
 			if not didLoad then
 				EVENTS:LoadEventID(eventID)
 				didLoad = true
@@ -250,12 +251,12 @@ end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", EVENTS, "LoadConfig")
 
 function EVENTS:LoadEventID(eventID)
-	-- Loads the configuration for the specified e
-	local eventFrame = eventID and self.EventHandlerFrames[eventID]
+	-- Loads the configuration for the specified eventID
+	local eventFrame = eventID and EVENTS.EventHandlerFrames[eventID]
 	
 	EVENTS.currentEventID = eventID ~= 0 and eventID or nil
 
-	for i, frame in ipairs(self.EventHandlerFrames) do
+	for i, frame in ipairs(EVENTS.EventHandlerFrames) do
 		frame.selected = nil
 		frame:UnlockHighlight()
 		frame:GetHighlightTexture():SetAlpha(0.1)
@@ -265,7 +266,7 @@ function EVENTS:LoadEventID(eventID)
 	for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 		EventHandler.ConfigContainer:Hide()
 	end
-	self.EventSettingsContainer:Hide()
+	EVENTS.EventSettingsContainer:Hide()
 	--IE.Events.HelpText:Show()
 
 
@@ -275,12 +276,10 @@ function EVENTS:LoadEventID(eventID)
 
 	EVENTS:HidePickerButtons()
 	
-	local EventHandler = self:GetEventHandlerForEventSettings(eventID)
+	local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
 	if EventHandler then
-		self.EventSettingsContainer:Show()
+		EVENTS.EventSettingsContainer:Show()
 		EventHandler.ConfigContainer:Show()
-		--IE.Events.HelpText:Hide()
-		IE.Events.HandlerPickers:Hide()
 		
 		EVENTS.currentEventHandler = EventHandler
 		
@@ -295,15 +294,15 @@ function EVENTS:LoadEventID(eventID)
 end
 
 function EVENTS:LoadEventSettings()
-	local EventSettingsContainer = self.EventSettingsContainer
+	local EventSettingsContainer = EVENTS.EventSettingsContainer
 
 	if not EVENTS.currentEventID then
 		EventSettingsContainer:Hide()
 		return
 	end
 
-	local eventSettings = self:GetEventSettings()
-	local EventHandler = self:GetEventHandlerForEventSettings(eventSettings)
+	local eventSettings = EVENTS:GetEventSettings()
+	local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventSettings)
 
 	EventSettingsContainer:Show()
 
@@ -321,7 +320,7 @@ function EVENTS:LoadEventSettings()
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
 
 
-	local eventData = self:GetEventData()
+	local eventData = EVENTS:GetEventData()
 
 	if eventData then
 		IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
@@ -435,7 +434,7 @@ function EVENTS:LoadEventPickerButtons()
 		frame:Hide()
 	end
 
-	local EventHandler = self:GetEventHandler(self.pickedHandler)
+	local EventHandler = EVENTS:GetEventHandler(EVENTS.pickedHandler)
 	for i, eventData in ipairs(EVENTS:GetValidEvents(EventHandler)) do
 
 		local frame = EventPickers[i]
@@ -461,7 +460,7 @@ function EVENTS:LoadEventPickerButtons()
 end
 
 function EVENTS:ShowHandlerPickerButtons()
-	self.pickedHandler = nil
+	EVENTS.pickedHandler = nil
 
 	EVENTS:LoadHandlerPickerButtons()
 	EVENTS:LoadEventID(nil)
@@ -489,7 +488,7 @@ function EVENTS:HidePickerButtons()
 end
 
 function EVENTS:PickEvent(event)
-	local handlerIdentifier = self.pickedHandler
+	local handlerIdentifier = EVENTS.pickedHandler
 
 	TMW.CI.ics.Events.n = TMW.CI.ics.Events.n + 1
 
@@ -515,8 +514,8 @@ end
 
 
 function EVENTS:AdjustScrollFrame()
-	local ScrollFrame = self.EventHandlerFrames.ScrollFrame
-	local eventFrame = self.EventHandlerFrames[self.currentEventID]
+	local ScrollFrame = EVENTS.EventHandlerFrames.ScrollFrame
+	local eventFrame = EVENTS.EventHandlerFrames[EVENTS.currentEventID]
 
 	if not eventFrame then return end
 
@@ -685,7 +684,7 @@ end
 
 function EVENTS:ChangeEvent_Dropdown()
 	if TMW.DD.MENU_LEVEL == 1 then
-		local eventButton = self:GetParent()
+		local eventButton = EVENTS:GetParent()
 		local eventID = eventButton:GetID()
 		local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
 

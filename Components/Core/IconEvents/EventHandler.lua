@@ -71,22 +71,43 @@ TMW:RegisterUpgrade(50020, {
 	-- Upgrade from the old event system that only allowed one event of each type per icon.
 	icon = function(self, ics)
 		local Events = ics.Events
-		for event, eventSettings in pairs(CopyTable(Events)) do -- dont use InNLengthTable here
+
+		local EventsCopy = CopyTable(Events)
+
+		-- If the value of ["n"] is a table (it might have happened accidentally),
+		-- reset it to a number so we can start incrementing it.
+		if type(rawget(Events, "n") or 0) == "table" then
+			Events.n = 0
+		end
+
+		-- Dont use InNLengthTable here, because n was not used as the length key for the old settings.
+		-- We copy the table because we will start modifying it in the loop.
+		for event, eventSettings in pairs(EventsCopy) do
+			-- Events used to be stored in this table using keys being the event.
+			-- After this upgrade, they are stored with sequential indicies, and event is stored inside eventSettings.
 			if type(event) == "string" and event ~= "n" then
 				local addedAnEvent
 				for identifier, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
+
+					-- Check that these eventSettings have data for the handler.
 					local hasHandlerOfType = EventHandler:ProcessIconEventSettings(event, eventSettings)
-					if type(rawget(Events, "n") or 0) == "table" then
-						Events.n = 0
-					end
 					if hasHandlerOfType then
+						-- Increment n so it keeps accurate to the data.
 						Events.n = (rawget(Events, "n") or 0) + 1
+
+						-- Clone the old eventSettings because they might get used again for another handler.
 						Events[Events.n] = CopyTable(eventSettings)
+
+						-- Set the new fields that are needed to keep the eventSettings associated with the
+						-- proper event and handler.
 						Events[Events.n].Type = identifier
 						Events[Events.n].Event = event
 						Events[Events.n].PassThrough = true
 
 						addedAnEvent = true
+						-- DON'T BREAK AFTER WE FIND THE FIRST VALID EVENT!
+						-- The old settings could have multiple handlers per event
+						-- (all the settings for each handler were stored in the same table together).
 					end
 				end
 
@@ -96,6 +117,9 @@ TMW:RegisterUpgrade(50020, {
 				if addedAnEvent then
 					Events[Events.n].PassThrough = eventSettings.PassThrough
 				end
+
+				-- We have finished creating all the new tables for this event.
+				-- Get rid of the old data stored under the old key.
 				Events[event] = nil
 			end
 		end
@@ -165,22 +189,11 @@ EventHandler.testable = true
 EventHandler.instancesByName = {}
 EventHandler.orderedInstances = {}
 
---- Gets an EventHandler instance by name
--- You may also use {{{TMW.EVENTS:GetEventHandler(identifier)}}} to accomplish the same thing.
--- @param identifier [string] The identifier of the event handler being requested.
--- @return [EventHandler|nil] The requested EventHandler instance, or nil if it was not found.
-function EventHandler:GetEventHandler(identifier)
-	self:AssertSelfIsClass()
-	
-	return EventHandler.instancesByName[identifier]
-end
-
 --- Gets an EventHandler instance by name.
--- Wrapper around EventHandler:GetEventHandler(identifier)
 -- @param identifier [string] The identifier of the event handler being requested.
 -- @return [EventHandler|nil] The requested EventHandler instance, or nil if it was not found.
 function EVENTS:GetEventHandler(identifier)
-	return EventHandler:GetEventHandler(identifier)
+	return EventHandler.instancesByName[identifier]
 end
 
 
@@ -200,21 +213,28 @@ do	-- EVENTS:InIconEventSettings
 		state.currentEventID = state.currentEventID + 1
 
 		if not state.currentEvents or state.currentEventID > (state.currentEvents.n or #state.currentEvents) then
+			-- We're out of events on the current icon (or we don't have a current icon).
+			-- Get the next icon, and start on its events.
+
 			local ics = state.extIter(state.extIterState)
 			
 			if not ics then
+				-- There are no more icons. We're done.
 				tinsert(states, state)
 				return
 			end
 			state.currentEvents = ics.Events
 			state.currentEventID = 0
 			
+			-- Call the iter again to start on the first event of the new icon.
 			return iter(state)
 		end
 		
 		local eventSettings = rawget(state.currentEvents, state.currentEventID)
 		
 		if not eventSettings then
+			-- There are no event settings when we expected there to be some.
+			-- Shrug it off, and call iter again so we can move to the next eventSettings.
 			return iter(state)
 		end
 		
@@ -246,24 +266,19 @@ function EventHandler:OnNewInstance_EventHandler(identifier, order)
 end
 
 -- [INTERNAL]
-function EventHandler:RegisterEventHandlerDataTable(eventHandlerData)
+function EventHandler:RegisterEventHandlerDataTable(eventHandlerData, ...)
 	-- This function simply makes sure that we can keep track of all eventHandlerData that has been registed.
 	-- Without it, we would have to search through every single IconComponent when an event is fired to get this data.
 	
-	-- Feel free to extend this method in instances of EventHandler to make it easier to perform these data lookups.
+	-- Feel free to hook this method in instances of EventHandler to make it easier to perform these data lookups.
 	-- But, this method should probably never be called by anything except the event core (no third-party calls)
 	
 	self:AssertSelfIsInstance()
 	
-	TMW:ValidateType("eventHandlerData.eventHandler", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.eventHandler, "table")
-	TMW:ValidateType("eventHandlerData.identifier", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData)", eventHandlerData.identifier, "string")
+	TMW:ValidateType("eventHandlerData.eventHandler", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData, ...)", eventHandlerData.eventHandler, "table")
+	TMW:ValidateType("eventHandlerData.identifier", "EventHandler:RegisterEventHandlerDataTable(eventHandlerData, ...)", eventHandlerData.identifier, "string")
 	
-	TMW.safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, unpack(eventHandlerData))
-
-	for i = 1, #eventHandlerData do
-		-- This stuff has been processed, so it is safe to get rid of it now.
-		eventHandlerData[i] = nil
-	end
+	TMW.safecall(self.OnRegisterEventHandlerDataTable, self, eventHandlerData, ...)
 	
 	tinsert(self.AllEventHandlerData, eventHandlerData)
 end
@@ -275,11 +290,10 @@ function EventHandler:RegisterEventHandlerDataNonSpecific(...)
 	
 	local eventHandlerData = {
 		eventHandler = self,
-		identifier = self.identifier,
-		...,
+		identifier = self.identifier
 	}
 	
-	self:RegisterEventHandlerDataTable(eventHandlerData)
+	self:RegisterEventHandlerDataTable(eventHandlerData, ...)
 	
 	tinsert(self.NonSpecificEventHandlerData, eventHandlerData)
 end
@@ -299,7 +313,7 @@ end
 --    Size = 0,
 --  }
 function EventHandler:RegisterEventDefaults(defaults)
-	assert(type(defaults) == "table", "arg1 to RegisterGroupDefaults must be a table")
+	TMW:ValidateType("defaults", "EventHandler:RegisterEventDefaults(defaults)", defaults, "table")
 		
 	if TMW.InitializedDatabase then
 		error(("Defaults for EventHandler %q are being registered too late. They need to be registered before the database is initialized."):format(self.name or "<??>"))
@@ -310,7 +324,9 @@ function EventHandler:RegisterEventDefaults(defaults)
 end
 
 
---- Tests the event. Triggered by clicking on the test button in the config UI.
+--- Tests an event for TMW.CI.icon
+. Triggered by clicking on the test button in the config UI.
+-- @param eventID [number] The ID of the event you want to test, or nil to test the event that is being configured.
 function EventHandler:TestEvent(eventID)
 	if not self.testable then
 		return
@@ -323,14 +339,14 @@ end
 
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
-	-- Setup all of an icon's event handlers.
+	-- Setup all of an icon's events.
 
 	wipe(icon.EventHandlersSet)
 
 	for _, eventSettings in TMW:InNLengthTable(icon.Events) do
 		local event = eventSettings.Event
 		if event then
-			local Handler = EventHandler:GetEventHandler(eventSettings.Type)
+			local Handler = EVENTS:GetEventHandler(eventSettings.Type)
 			
 			-- Check if the event actually is configured to do something.
 			local thisHasEventHandlers = Handler and Handler:ProcessIconEventSettings(event, eventSettings)
@@ -340,12 +356,14 @@ TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 				TMW:Fire("TMW_ICON_EVENTS_PROCESSED_EVENT_FOR_USE", icon, event, eventSettings)
 
 				icon.EventHandlersSet[event] = true
+
+				-- This table will be used by icon:QueueEvent()
 				icon.EventsToFire = icon.EventsToFire or {}
 			end
 		end
 	end
 	
-	-- make sure events dont fire while, or shortly after, we are setting up
+	-- Make sure events dont fire while, or shortly after, we are setting up
 	-- Don't set nil because that will make it fall back on the class-defined value
 	icon.runEvents = false
 	
@@ -375,7 +393,13 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function(event, time, Locked)
 	-- Wipe all queued events when we do a complete update of TMW
 	-- in order to kill any events that got queued while setting up an icon (OnShow, etc).
 	
-	wipe(TMW.Classes.Icon.QueuedIcons)
+	local QueuedIcons = TMW.Classes.Icon.QueuedIcons
+
+	for i = 1, #QueuedIcons do
+		wipe(QueuedIcons[i].EventsToFire)
+	end
+	
+	wipe(QueuedIcons)
 end)
 
 
@@ -407,6 +431,9 @@ if TMW.C.IconType then
 	error("Bad load order! TMW.C.IconType shouldn't exist at this point!")
 end
 TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
+	-- Register the WCSP event on IconType itself.
+	-- God, this is a awful hack.
+	-- TODO: Make this not a hack.
 	if class.className == "IconType" then
 		class:RegisterIconEvent(1000, "WCSP", {
 			text = L["SOUND_EVENT_WHILECONDITION"],
@@ -542,6 +569,7 @@ TMW:NewClass("EventHandler_WhileConditions_Repetitive", "EventHandler_WhileCondi
 		if Locked then
 			for eventSettings, timerTable in pairs(self.RunningTimers) do
 				if not timerTable.halted and timerTable.nextRun < time then
+					-- Enough time has passed. We need to handle the event again right now.
 
 					-- Increment the timer until it has passed the current time.
 					if eventSettings.Frequency > 0 then
