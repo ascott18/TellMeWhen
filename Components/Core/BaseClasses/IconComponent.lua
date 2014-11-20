@@ -93,11 +93,12 @@ function IconComponent:RegisterEventHandlerData(identifier, ...)
 		
 		tinsert(self.EventHandlerData, eventHandlerData)
 	else
+		local data = {...}
 		TMW:RegisterCallback("TMW_CLASS_EventHandler_INSTANCE_NEW", function(event, class, EventHandler)
 			if EventHandler.identifier == identifier then
 				eventHandlerData.eventHandler = EventHandler
 	
-				EventHandler:RegisterEventHandlerDataTable(eventHandlerData, ...)
+				EventHandler:RegisterEventHandlerDataTable(eventHandlerData, unpack(data))
 				
 				tinsert(self.EventHandlerData, eventHandlerData)
 
