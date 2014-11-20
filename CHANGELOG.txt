@@ -1,6 +1,7 @@
 ===v7.2.1===
 ====Bug Fixes====
  * Fixed incorrect DR categories after changes made to DRData-1.0.
+ * Rage (and perhaps other powers) should no longer be multipled by 10 in the Resource Display icon type.
 
 ===v7.2.0===
  * New icon type: Resource Display. Works with Bar and Vertical Bar group display methods to show the amount of health, mana, etc. that some unit has.

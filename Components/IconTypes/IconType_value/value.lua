@@ -150,6 +150,10 @@ PowerBarColor[SPELL_POWER_DEMONIC_FURY] = PowerBarColor["DEMONIC_FURY"]
 PowerBarColor[SPELL_POWER_ECLIPSE].negative.a = 1
 PowerBarColor[SPELL_POWER_ECLIPSE].positive.a = 1
 
+local hasParts = {
+	[SPELL_POWER_SOUL_SHARDS] = true,
+	[SPELL_POWER_BURNING_EMBERS] = true,
+}
 
 local function Value_OnUpdate(icon, time)
 	local PowerType = icon.PowerType
@@ -171,7 +175,8 @@ local function Value_OnUpdate(icon, time)
 					unit = "player"
 				end
 				
-				value, maxValue, valueColor = UnitPower(unit, PowerType, true), UnitPowerMax(unit, PowerType, true), PowerBarColor[PowerType]
+				local hasParts = hasParts[PowerType]
+				value, maxValue, valueColor = UnitPower(unit, PowerType, parts), UnitPowerMax(unit, PowerType, parts), PowerBarColor[PowerType]
 				if PowerType == SPELL_POWER_ECLIPSE then
 					if value < 0 then
 						valueColor = valueColor.negative
