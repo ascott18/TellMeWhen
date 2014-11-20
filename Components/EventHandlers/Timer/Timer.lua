@@ -140,8 +140,8 @@ ConditionCategory:RegisterCondition(0.51,	"TIMER", {
 		local timer = format("%q", Timer:SanitizeTimerName(c.Name))
 
 		return [[
-			local curTime = TIMERS[]] .. timer .. [[]:GetTime()
-			local VALUE = time + (c.Level - curTime)
+			local timer = TIMERS[]] .. timer .. [[]
+			local VALUE = not timer.started and huge or (time + (c.Level - timer:GetTime()))
 		]]
 	end,
 })
