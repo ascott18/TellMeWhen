@@ -488,14 +488,19 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE", {
 	icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
 	tcoords = {GetTexCoordsForRole("HEALER")},
 	Env = {
-		GetSpecialization = GetSpecialization,
-		GetSpecializationInfo = GetSpecializationInfo,
+		GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole,
 		SpeclizationRoles = SpeclizationRoles,
 	},
-	funcstr = [[(SpeclizationRoles[select(6, GetSpecializationInfo(GetSpecialization() or 0))] or 0) c.Operator c.Level]],
+	funcstr = [[(SpeclizationRoles[GetCurrentSpecializationRole()] or 0) c.Operator c.Level]],
 	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED")
+		if pclass == "WARRIOR" then
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED"),
+				ConditionObject:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")-- Check for gladiator stance.
+		else
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED")
+		end
 	end,
 })
 

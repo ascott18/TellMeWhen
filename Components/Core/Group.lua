@@ -22,6 +22,8 @@ local sort, type, pairs
 local UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
 	= UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
 
+local GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole
+
 
 --- [[api/group/api-documentation/|Group]] is the class of all Icons.
 -- 
@@ -322,18 +324,15 @@ function Group.GetSettingsPerView(group, view)
 	return gs.SettingsPerView[view]
 end
 
-
 local function helper_currentSpecMatchesRole(Role)
 	if Role == 0x7 then
 		return true
 	end
 
-	local currentSpec = GetSpecialization()
-	if not currentSpec then
+	local role = GetCurrentSpecializationRole()
+	if not role then
 		return false
 	end
-
-	local _, _, _, _, _, role = GetSpecializationInfo(currentSpec)
 
 	local currentBit
 	if role == "DAMAGER" then
@@ -529,10 +528,19 @@ function Group.Setup(group, noIconSetup)
 	if group.OnlyInCombat then
 		group:RegisterEvent("PLAYER_REGEN_ENABLED")
 		group:RegisterEvent("PLAYER_REGEN_DISABLED")
-		group:SetScript("OnEvent", group.OnEvent)
 	else
-		group:SetScript("OnEvent", nil)
+		group:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		group:UnregisterEvent("PLAYER_REGEN_DISABLED")
 	end
+
+	if pclass == "WARRIOR" and group.Role ~= 0x7 then
+		-- Check for entering/leaving gladiator stance.
+		group:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+	else
+		group:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
+	end
+
+	group:SetScript("OnEvent", group.OnEvent)
 
 	
 	TMW:Fire("TMW_GROUP_SETUP_POST", group)
