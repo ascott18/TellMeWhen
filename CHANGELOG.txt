@@ -1,8 +1,11 @@
+===v7.2.2===
+====Bug Fixes====
+ * Rage (and perhaps other powers) should no longer be multipled by 10 in the Resource Display icon type.
+ * Warriors in Gladiator Stance will now be treated as DPS for groups' role setting and for the Specialization Role condition.
+
 ===v7.2.1===
 ====Bug Fixes====
  * Fixed incorrect DR categories after changes made to DRData-1.0.
- * Rage (and perhaps other powers) should no longer be multipled by 10 in the Resource Display icon type.
- * Warriors in Gladiator Stance will now be treated as DPS for groups' role setting and for the Specialization Role condition.
 
 ===v7.2.0===
  * New icon type: Resource Display. Works with Bar and Vertical Bar group display methods to show the amount of health, mana, etc. that some unit has.
@@ -173,7 +176,7 @@
  * Currency conditions should once again be listed in the condition type selection menu.
  * The NPC ID condition should now work correctly with npcIDs that are greater than 65535 (0xFFFF).
  * Meta icons should reflect changes in the icons that they are checking that are caused by using slash commands to enable/disable icons while TMW is locked.
- * TellMeWhen no longer registers PLAYER_TALENT_UPDATE - there is a Blizzard big causing this to fire at random for warlocks, and possibly other classes as well, which triggers a TMW:Update() which can cause a sudden framerate drop. PLAYER_SPECIALIZATION_CHANGED still fires for everything that we cared about.
+ * TellMeWhen no longer registers PLAYER_TALENT_UPDATE - there is a Blizzard bug causing this to fire at random for warlocks, and possibly other classes as well, which triggers a TMW:Update() which can cause a sudden framerate drop. PLAYER_SPECIALIZATION_CHANGED still fires for everything that we cared about.
 
 ===v6.2.6===
 ====Bug Fixes====
