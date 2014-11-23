@@ -251,6 +251,7 @@ function Module:Entry_AddToList_1(f, id)
 
 	f.Icon:SetTexture(iconTexture)
 end
+Module.Entry_Colorize_1 = TMW.NULLFUNC
 
 
 
