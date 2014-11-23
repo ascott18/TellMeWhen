@@ -683,12 +683,27 @@ end
 
 
 function EVENTS:ChangeEvent_Dropdown()
-	if TMW.DD.MENU_LEVEL == 1 then
-		local eventButton = EVENTS:GetParent()
-		local eventID = eventButton:GetID()
-		local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
+	local eventButton = self:GetParent()
+	local eventID = eventButton:GetID()
+	local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
 
-		
+	if TMW.DD.MENU_LEVEL == 1 then		
+		local info = TMW.DD:CreateInfo()
+		info.text = L["EVENTS_CLONEHANDLER"]
+		info.arg1 = eventID
+		info.func = EVENTS.ChangeEvent_Dropdown_OnClick_Clone
+		info.keepShownOnClick = false
+		info.notCheckable = true
+		TMW.DD:AddButton(info)
+
+		local info = TMW.DD:CreateInfo()
+		info.text = L["EVENTS_CHANGETRIGGER"]
+		info.value = "CHANGE"
+		info.hasArrow = true
+		info.notCheckable = true
+		TMW.DD:AddButton(info)
+
+	elseif TMW.DD.MENU_VALUE == "CHANGE" then
 		for _, eventData in ipairs(EVENTS:GetValidEvents(EventHandler)) do
 			local info = TMW.DD:CreateInfo()
 
@@ -720,8 +735,20 @@ function EVENTS:ChangeEvent_Dropdown_OnClick(eventButton, event)
 	end
 
 	EVENTS:LoadConfig()
+end
+function EVENTS:ChangeEvent_Dropdown_OnClick_Clone(eventID)
+	local eventSettings = EVENTS:GetEventSettings(eventID)
 
-	TMW.DD:CloseDropDownMenus()
+	local n = TMW.CI.ics.Events.n + 1
+	TMW:CopyTableInPlaceWithMeta(eventSettings, TMW.CI.ics.Events[n])
+	TMW.CI.ics.Events.n = n
+	--EVENTS.currentEventID = n
+
+	EVENTS:LoadConfig()
+
+	if EVENTS:IsEventIDValid(n) then
+		EVENTS:LoadEventID(n)
+	end
 end
 
 

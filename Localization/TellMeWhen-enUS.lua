@@ -1997,13 +1997,16 @@ L["EVENTS_HANDLERS_ADD"] = "Add Notification..."
 L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose a notification to add to this icon."
 L["EVENTS_HANDLER_ADD_DESC"] = "|cff7fffffClick|r to add this type of notification."
 L["EVENTS_HANDLERS_GLOBAL_DESC"] = [[|cff7fffffClick|r for notification options
-|cff7fffffRight-click|r to change trigger
+|cff7fffffRight-click|r to clone or change trigger
 |cff7fffffClick-and-drag|r to rearrange]]
 L["EVENTS_HANDLERS_PLAY"] = "Test Notification"
 L["EVENTS_HANDLERS_PLAY_DESC"] = "|cff7fffffClick|r to test the notification"
 
 L["EVENTS_CHOOSE_HANDLER"] = "Choose Notification:"
 L["EVENTS_CHOOSE_EVENT"] = "Choose Trigger:"
+
+L["EVENTS_CLONEHANDLER"] = "Clone"
+L["EVENTS_CHANGETRIGGER"] = "Change Trigger"
 
 
 L["EVENTS_SETTINGS_HEADER"] = "Trigger Settings"

@@ -5,6 +5,8 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = {
 
 [==[===v7.2.2===]==],
+[==[* You can now easily clone an event handler by right-clicking it in the Notifications tab.]==],
+[==[]==],
 [==[====Bug Fixes====]==],
 [==[* Rage (and perhaps other powers) should no longer be multipled by 10 in the Resource Display icon type.]==],
 [==[* Warriors in Gladiator Stance will now be treated as DPS for groups' role settings, and for the Specialization Role condition.]==],
