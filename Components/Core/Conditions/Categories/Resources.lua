@@ -295,6 +295,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	if conditionData and conditionData.identifier == "RUNES" then
 		CndtGroup.Runes:Show()
 		CndtGroup.RunesCheck:Show()
+		CndtGroup.RunesCheck:SetChecked(conditionSettings.Checked)
 	else
 		CndtGroup.Runes:Hide()
 		CndtGroup.RunesCheck:Hide()
