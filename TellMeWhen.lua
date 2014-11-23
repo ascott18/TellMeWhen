@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 72206 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 72207 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -3547,7 +3547,7 @@ function TMW:SlashCommand(str)
 			end
 		end
 		if TMW.IE then
-			TellMeWhen_ChangelogDialog:Show()
+			TMW.IE:ShowChangelog(0)
 		end
 	else
 		TMW:LockToggle()
@@ -3879,32 +3879,31 @@ end
 -- WoW API Helpers
 ---------------------------------
 
-do	-- TMW.SpellHasNoMana(spell)
-	-- local jab = GetSpellInfo(100780)
-	-- function TMW.SpellHasNoMana(spell)
-	-- 	local name, _, _, cost, _, powerType = GetSpellInfo(spell)
-		
-	-- 	if name == jab then
-	-- 		-- Jab is broken and doesnt report having a cost while in tiger stance 
-	-- 		-- (and maybe other stances) (see ticket #730)
-	-- 		local _, nomana = IsUsableSpell(spell)
-	-- 		return nomana
-	-- 	elseif powerType then
-	-- 		local power = UnitPower("player", powerType)
-	-- 		if power < cost then
-	-- 			return 1
-	-- 		end
-	-- 	end
-	-- end
-
+function TMW.SpellHasNoMana(spell)
 	-- TODO: in warlords, you can't determine spell costs anymore. Thanks, blizzard!
+	-- This function used to get the spell cost, and determine usability from that, 
+	-- but we can't do that anymore. It was a more reliable method because IsUsableSpell
+	-- was broken for some abilities (like Jab)
 
-	function TMW.SpellHasNoMana(spell)
-		local _, nomana = IsUsableSpell(spell)
-		return nomana
-	end
+	local _, nomana = IsUsableSpell(spell)
+	return nomana
 end
 
+local GLADIATOR_STANCE = GetSpellInfo(156291)
+function TMW.GetCurrentSpecializationRole()
+	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
+	-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
+	local currentSpec = GetSpecialization()
+	if not currentSpec then
+		return nil
+	end
+
+	local _, _, _, _, _, role = GetSpecializationInfo(currentSpec)
+	if role == "TANK" and UnitAura("player", GLADIATOR_STANCE) then
+		return "DAMAGER"
+	end
+	return role
+end
 
 
 

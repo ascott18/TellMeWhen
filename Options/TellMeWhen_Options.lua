@@ -1216,6 +1216,20 @@ function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
 	end
 end
 
+function IE:CreateChangelogDialog()
+	if not TellMeWhen_ChangelogDialog then
+		CreateFrame("Frame", "TellMeWhen_ChangelogDialog", UIParent, "TellMeWhen_ChangelogDialogTemplate")
+	end
+end
+
+function IE:ShowChangelog(lastVer)
+	IE:CreateChangelogDialog()
+	TellMeWhen_ChangelogDialog:Show()
+	if lastVer then
+		TellMeWhen_ChangelogDialog:SetLastVersion(lastVer)
+	end
+end
+
 function IE:Load(isRefresh, icon, isHistoryChange)
 	TMW.ACEOPTIONS:CompileOptions()
 
@@ -1263,7 +1277,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 	end
 
 	local shouldShow = true
-	if TellMeWhen_ChangelogDialog.showIEOnClose then
+	if TellMeWhen_ChangelogDialog and TellMeWhen_ChangelogDialog.showIEOnClose then
 		-- Wait for the changelog to hide before attemping to load again
 		return
 	end
@@ -1274,9 +1288,10 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 			or TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
 			or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
 			then
+				IE:CreateChangelogDialog()
 				TellMeWhen_ChangelogDialog.showIEOnClose = true
-				TellMeWhen_ChangelogDialog:SetLastVersion(IE.db.global.LastChangelogVersion)
 				TellMeWhen_ChangelogDialog:Show()
+				TellMeWhen_ChangelogDialog:SetLastVersion(IE.db.global.LastChangelogVersion)
 				shouldShow = false
 
 				TMW.HELP:Show{

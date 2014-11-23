@@ -1947,7 +1947,7 @@
 	</Frame>
 
 
-	<Frame name="TellMeWhen_ChangelogDialog" inherits="TellMeWhen_SimpleDialog" toplevel="true" frameStrata="FULLSCREEN_DIALOG" hidden="true">
+	<Frame name="TellMeWhen_ChangelogDialogTemplate" inherits="TellMeWhen_SimpleDialog" toplevel="true" frameStrata="FULLSCREEN_DIALOG" hidden="true" virtual="true">
 		<Size x="600" y="650"/>
 
 		<Anchors>
@@ -1999,7 +1999,7 @@
 							v = v:trim()
 							
 							while v:find("^ *%*") do
-								v = v:gsub("%*", "   ", 1)
+								v = v:gsub("%*", "    ", 1)
 							end
 							
 							v = v:gsub("IMPORTANT", "|cffff0000IMPORTANT|r")
@@ -2016,19 +2016,18 @@
 								v = v:gsub("^    ", "", 1)
 								
 								local _, spaceCount = v:find("^( *)")
-								local numIndents = ((spaceCount + 3) / 3) % 3
-								
+								local numIndents = ((spaceCount + 3) / 4) % 4
+
 								local color, c2 = "", ""
 								if numIndents == 1 then
-									color, c2 = "4FD678", "acecbf"
+									color, c2 = "4FD678-", "acecbf"
 								elseif numIndents == 2 then
-									color, c2 = "4F69D6", "acb9ec"
-								elseif numIndents == 0 then
-									color, c2 = "D64FAD", "ecacd9"
+									color, c2 = "4F69D6--", "acb9ec"
+								elseif numIndents == 3 then
+									color, c2 = "D64FAD---", "ecacd9"
 								end
 								
-								c2 = "ffffff"
-								v = v:gsub("^( *)(.*)", "%1 |cFF" .. color .. "> |cff" .. c2 .. "%2")
+								v = v:gsub("^( *)(.*)", "%1 |cFF" .. color .. " |r%2")
 								
 							end
 							
@@ -2040,7 +2039,9 @@
 
 						-- Put the last one in
 						tinsert(CHANGELOGS, s:trim("\r\n "))
-						tinsert(CHANGELOGS, "\r\n\r\nTo see the changelog for older versions, open CHANGELOG.txt in Interface/AddOns/TellMeWhen or visit TellMeWhen's AddOn page on Curse.com")
+						tinsert(CHANGELOGS,
+							"\r\n\r\nTo see the changelog for versions up to v" .. TMW.CHANGELOG_LASTVER .. ", type /tmw changelog." ..
+							"\n\nTo see the changelog for versions older than that, visit TellMeWhen's AddOn page on Curse.com")
 
 						-- Send this out to the garbage collector
 						TMW.CHANGELOG = nil
@@ -2135,25 +2136,39 @@
 
 				self:SetScale(1)
 
-				TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-					self.resizer = TMW.Classes.Resizer_Generic:New(self)
-					self.resizer:Show()
+				self.resizer = TMW.Classes.Resizer_Generic:New(self)
+				self.resizer:Show()
 
-					self.resizer:SetModes(self.resizer.MODE_SIZE, self.resizer.MODE_SIZE)
-					self.resizer.scale_min = 0.4
-					self.resizer.x_min = 280
-					self.resizer.x_max = function() return UIParent:GetWidth()*0.8 end
-					self.resizer.y_min = 200
-					self.resizer.y_max = function() return UIParent:GetHeight()*0.9 end
-				end)
+				self.resizer:SetModes(self.resizer.MODE_SIZE, self.resizer.MODE_SIZE)
+				self.resizer.scale_min = 0.4
+				self.resizer.x_min = 280
+				self.resizer.x_max = function() return UIParent:GetWidth()*0.8 end
+				self.resizer.y_min = 200
+				self.resizer.y_max = function() return UIParent:GetHeight()*0.9 end
 
 				function self:SetLastVersion(ver)
-					for _, log in ipairs(self.ScrollContainer) do
+					local startHiding, lastLog
+					for i = 1, #self.ScrollContainer do
+						local log = self.ScrollContainer[i]
+
+						if startHiding and log.version then
+							log:Hide()
+							--log:SetText(log:GetText():gsub("([\r\n]+)", " |cFFF6682F(" .. TMW.L["CHANGELOG_LAST_VERSION"] .. ")|r%1", 1))
+							--break
+						else
+							if i ~= #self.ScrollContainer then
+								lastLog = log
+							end
+							log:Show()
+						end
+
 						if log.version and ver >= log.version then
-							log:SetText(log:GetText():gsub("([\r\n]+)", " |cFFF6682F(" .. TMW.L["CHANGELOG_LAST_VERSION"] .. ")|r%1", 1))
-							break
+							startHiding = true
 						end
 					end
+
+					-- Set the position of the "to see the changelog for older versions..." line
+					self.ScrollContainer[#self.ScrollContainer]:SetPoint("TOPLEFT", lastLog, "BOTTOMLEFT", 0, -15)
 				end
 
 				self.background:SetAlpha(0.95)

@@ -7,7 +7,7 @@ TMW.CHANGELOG = {
 [==[===v7.2.2===]==],
 [==[====Bug Fixes====]==],
 [==[* Rage (and perhaps other powers) should no longer be multipled by 10 in the Resource Display icon type.]==],
-[==[* Warriors in Gladiator Stance will now be treated as DPS for groups' role setting and for the Specialization Role condition.]==],
+[==[* Warriors in Gladiator Stance will now be treated as DPS for groups' role settings, and for the Specialization Role condition.]==],
 [==[]==],
 [==[===v7.2.1===]==],
 [==[====Bug Fixes====]==],
