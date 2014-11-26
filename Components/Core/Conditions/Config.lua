@@ -480,7 +480,6 @@ function CNDT:BitFlags_DropDown()
 	local conditionSettings = group:GetConditionSettings()
 
 	for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
-		local flag = bit.lshift(1, index-1)
 		local info = TMW.DD:CreateInfo()
 
 		info.text = name
@@ -492,6 +491,7 @@ function CNDT:BitFlags_DropDown()
 		if type(conditionSettings.BitFlags) == "table" then
 			info.checked = conditionSettings.BitFlags[index]
 		else
+			local flag = bit.lshift(1, index-1)
 			info.checked = bit.band(conditionSettings.BitFlags, flag) == flag
 		end
 		info.keepShownOnClick = true
@@ -508,11 +508,11 @@ function CNDT:BitFlags_DropDown_OnClick(frame)
 	local conditionSettings = group:GetConditionSettings()
 
 	local index = self.value
-	local flag = bit.lshift(1, index-1)
 
 	if type(conditionSettings.BitFlags) == "table" then
 		conditionSettings.BitFlags[index] = (not conditionSettings.BitFlags[index]) and true or nil
 	else
+		local flag = bit.lshift(1, index-1)
 		conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, flag)
 	end
 
@@ -1024,16 +1024,21 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 		-- Auto switch to a table if there are too many options for numeric bit flags.
 		if type(conditionSettings.BitFlags) == "number" then
-			local maxIndex = 0
+
+			local switch
 			for index, name in pairs(conditionData.bitFlags) do
-				maxIndex = max(index, maxIndex)
+				if type(index) ~= "number" or index >= 32 then
+					switch = true
+					break
+				end
 			end
-			if maxIndex >= 32 then
+
+			if switch then
 				local flagsOld = conditionSettings.BitFlags
 				conditionSettings.BitFlags = {}
 
 				for index, name in pairs(conditionData.bitFlags) do
-					if index < 32 then
+					if type(index) == "number" and index < 32 then
 						local flag = bit.lshift(1, index-1)
 						local flagSet = bit.band(flagsOld, flag) == flag
 						conditionSettings.BitFlags[index] = flagSet and true or nil
@@ -1044,12 +1049,12 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 		local text = ""
 		for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
-			local flag = bit.lshift(1, index-1)
 
 			local flagSet
 			if type(conditionSettings.BitFlags) == "table" then
 				flagSet = conditionSettings.BitFlags[index]
 			else
+				local flag = bit.lshift(1, index-1)
 				flagSet = bit.band(conditionSettings.BitFlags, flag) == flag
 			end
 
