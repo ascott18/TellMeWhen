@@ -347,8 +347,8 @@ TMW:RegisterCallback("TMW_ICON_PREPARE_SETTINGS_FOR_COPY", function(event, ics, 
 	for view, settingsPerView in pairs(ics.SettingsPerView) do
 		local GUID = settingsPerView.TextLayout
 		if not GUID then
-			local GUID_group = gs.SettingsPerView[view].TextLayout
-			if GUID_group ~= TMW.approachTable(TMW.Group_Defaults, "SettingsPerView", view, "TextLayout") then
+			local GUID_group = TMW.approachTable(gs, "SettingsPerView", view, "TextLayout")
+			if GUID_group and GUID_group ~= TMW.approachTable(TMW.Group_Defaults, "SettingsPerView", view, "TextLayout") then
 				GUID = GUID_group
 			end
 		end

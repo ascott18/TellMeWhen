@@ -337,7 +337,7 @@ function profile:Import_CreateMenuEntry(info, Item, doLabel)
 	info.text = Item:GetExtra("Name")
 
 	if doLabel then
-		info.text = L["fPROFILE"]:format(info.text)
+		info.text = L["fPROFILE"]:format(info.text or "<UNNAMED>")
 	end
 end
 
