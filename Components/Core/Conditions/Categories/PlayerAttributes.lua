@@ -441,7 +441,7 @@ ConditionCategory:RegisterCondition(7,	 "SPEC", {
 	events = function(ConditionObject, c)
 		return
 			--ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
-			--ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED"),
+			--ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED", "player"),
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end,
 })
@@ -461,7 +461,7 @@ ConditionCategory:RegisterCondition(8,	 "TREE", {
 	funcstr = [[(GetSpecialization() or 0) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED")
+			ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED", "player")
 	end,
 })
 
@@ -495,11 +495,11 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE", {
 	events = function(ConditionObject, c)
 		if pclass == "WARRIOR" then
 			return
-				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED"),
+				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED", "player"),
 				ConditionObject:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")-- Check for gladiator stance.
 		else
 			return
-				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED")
+				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED", "player")
 		end
 	end,
 })

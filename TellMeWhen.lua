@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 72211 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 72212 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -3368,7 +3368,11 @@ function TMW:UpdateTalentTextureCache()
 	end
 end
 
-function TMW:PLAYER_SPECIALIZATION_CHANGED(...)
+function TMW:PLAYER_SPECIALIZATION_CHANGED(event, unit)
+	if event == "PLAYER_SPECIALIZATION_CHANGED" and unit ~= "player" then
+		return
+	end
+
 	if not InCombatLockdown() then
 		TMW:ScheduleUpdate(.2)
 		--TMW:Update()
