@@ -6,6 +6,7 @@ TMW.CHANGELOG = {
 
 [==[===v7.2.2===]==],
 [==[* You can now easily clone an event handler by right-clicking it in the Notifications tab.]==],
+[==[* There is a new special unitID in TellMeWhen, "group" that will check raid or party depending on which you are in. It prevents the overlap that happens when checking "player; group; raid".]==],
 [==[]==],
 [==[====Bug Fixes====]==],
 [==[* Rage (and perhaps other powers) should no longer be multipled by 10 in the Resource Display icon type.]==],

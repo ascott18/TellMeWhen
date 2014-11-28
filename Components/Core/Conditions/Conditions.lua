@@ -601,7 +601,7 @@ function CNDT:GROUP_ROSTER_UPDATE()
 	
 	for oldunit in pairs(Env) do
 		if CNDT.SpecialUnitsUsed[oldunit] then
-			TMW.UNITS:SubstituteTankAndAssistUnit(oldunit, Env, oldunit, true)
+			TMW.UNITS:SubstituteSpecialUnit(oldunit, Env, oldunit, true)
 		end
 	end
 end
@@ -847,7 +847,7 @@ function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr
 			elseif append == "" then
 				unit = CNDT:GetUnit(conditionSettings.Unit)
 			end
-			if (strfind(unit, "maintank") or strfind(unit, "mainassist")) then
+			if (strfind(unit, "maintank") or strfind(unit, "mainassist") or strfind(unit, "group")) then
 				funcstr = gsub(funcstr, "c.Unit" .. append,		unit) -- sub it in as a variable
 				Env[unit] = unit
 				CNDT.SpecialUnitsUsed[unit] = true

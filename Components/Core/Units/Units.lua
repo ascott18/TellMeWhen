@@ -45,7 +45,7 @@ local unitsWithExistsEvent = UNITS.unitsWithExistsEvent
 UNITS.unitsWithBaseExistsEvent = {}
 
 UNITS.Units = {
-	{ value = "player",				text = PLAYER .. " " .. L["PLAYER_DESC"] 							},
+	{ value = "player",				text = PLAYER, 											desc = L["PLAYER_DESC"] },
 	{ value = "target",				text = TARGET														},
 	{ value = "targettarget",		text = L["ICONMENU_TARGETTARGET"]									},
 	{ value = "focus",				text = L["ICONMENU_FOCUS"]											},
@@ -55,12 +55,13 @@ UNITS.Units = {
 	{ value = "mouseover",			text = L["ICONMENU_MOUSEOVER"]										},
 	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]								},
 	{ value = "vehicle",			text = L["ICONMENU_VEHICLE"]										},
-	{ value = "party",				text = PARTY,							range = MAX_PARTY_MEMBERS	},
-	{ value = "raid",				text = RAID,							range = MAX_RAID_MEMBERS	},
-	{ value = "arena",				text = ARENA,							range = 5					},
-	{ value = "boss",				text = BOSS,							range = MAX_BOSS_FRAMES		},
-	{ value = "maintank",			text = L["MAINTANK"],					range = MAX_RAID_MEMBERS	},
-	{ value = "mainassist",			text = L["MAINASSIST"],					range = MAX_RAID_MEMBERS	},
+	{ value = "party",				text = PARTY,				range = MAX_PARTY_MEMBERS				},
+	{ value = "raid",				text = RAID,				range = MAX_RAID_MEMBERS				},
+	{ value = "group",				text = GROUP,				range = MAX_RAID_MEMBERS,	desc = L["ICONMENU_GROUPUNIT_DESC"]	},
+	{ value = "arena",				text = ARENA,				range = 5								},
+	{ value = "boss",				text = BOSS,				range = MAX_BOSS_FRAMES					},
+	{ value = "maintank",			text = L["MAINTANK"],		range = MAX_RAID_MEMBERS,	desc = L["MAINTANK_DESC"]			},
+	{ value = "mainassist",			text = L["MAINASSIST"],		range = MAX_RAID_MEMBERS,	desc = L["MAINASSIST_DESC"]				},
 }
 
 
@@ -182,20 +183,36 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^maintank") or unit:find("^mainassist") then
-				UNITS:UpdateTankAndAssistMap()
 				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
-				UNITS.unitsWithExistsEvent[unit] = true
-				self.hasTankAndAssistRefs = true
+
+				UNITS:UpdateTankAndAssistMap()
+				self.hasSpecialUnitRefs = true
 				UNITS.doTankAndAssistMap = true
-				if not (unit:find("^maintank%d+$") or unit:find("^mainassist%d+$")) then
+
+				if (unit:find("^maintank%d+$") or unit:find("^mainassist%d+$")) then
+					UNITS.unitsWithExistsEvent[unit] = true
+				else
 					self.allUnitsChangeOnEvent = false
+					UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(main[a-z]+d+)")
+				end
+
+
+			elseif unit:find("^group%d+") then
+				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
+
+				self.hasSpecialUnitRefs = true
+
+				if unit:find("^group%d+$") then
+					UNITS.unitsWithExistsEvent[unit] = true
+				else
+					self.allUnitsChangeOnEvent = false
+					UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(group%d+)")
 				end
 			else
 				-- we found a unit and we dont really know what the fuck it is.
 				-- it MIGHT be a player name (or a derrivative thereof),
 				-- so register some events so that we can exchange it out with a real unitID when possible.
 
-				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				self.updateEvents.UNIT_PET = true
 				UNITS.doGroupedPlayersMap = true
@@ -252,7 +269,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 	Update = function(self)
 		local originalUnits, exposedUnits = self.originalUnits, self.exposedUnits
-		local hasTankAndAssistRefs = self.hasTankAndAssistRefs
+		local hasSpecialUnitRefs = self.hasSpecialUnitRefs
 		local mightHaveWackyUnitRefs = self.mightHaveWackyUnitRefs
 
 		local ConditionObjects = self.ConditionObjects
@@ -265,16 +282,16 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		for k = 1, #originalUnits do
 			local unit = originalUnits[k]
 
-			local tankOrAssistWasSubbed, wackyUnitWasSubbed
+			local specialUnitWasSubbed, wackyUnitWasSubbed
 
 			-- Handles maintank and mainassist units.
-			if hasTankAndAssistRefs then
+			if hasSpecialUnitRefs then
 				local old = exposedUnits[exposed_len+1]
 
 				-- Try to sub it out for a real unitID.
-				tankOrAssistWasSubbed = UNITS:SubstituteTankAndAssistUnit(unit, exposedUnits, exposed_len+1)
+				specialUnitWasSubbed = UNITS:SubstituteSpecialUnit(unit, exposedUnits, exposed_len+1)
 
-				if tankOrAssistWasSubbed then
+				if specialUnitWasSubbed then
 					changed = changed or old ~= exposedUnits[exposed_len+1]
 					exposed_len = exposed_len + 1
 				end
@@ -301,7 +318,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 			if
 					-- Don't expose the unit if it was already handled above
-					tankOrAssistWasSubbed == nil
+					specialUnitWasSubbed == nil
 				and wackyUnitWasSubbed == nil
 
 					-- Don't expose the unit if it has conditions and those conditions failed
@@ -531,13 +548,38 @@ function UNITS:OnEvent(event, ...)
 	end
 end
 
-function UNITS:SubstituteTankAndAssistUnit(oldunit, table, key, putInvalidUnitsBack)
-	if strfind(oldunit, "^maintank") then -- the old unit (maintank1)
+function UNITS:SubstituteSpecialUnit(oldunit, table, key, putInvalidUnitsBack)
+	if strfind(oldunit, "^group") then -- the old unit (group1)
+
+		local newunit
+		if IsInRaid() then
+			newunit = gsub(oldunit, "group", "raid") -- the new unit (raid1) (number not changed yet)
+		else
+			local oldnumber = tonumber(strmatch(oldunit, "(%d+)")) -- the old number (1)
+			if oldnumber == 1 then
+				table[key] = "player"
+				return true
+			else
+				newunit = gsub(oldunit, "group", "party") -- the new unit (party1) (number not changed yet)
+				newunit = gsub(newunit, oldnumber, oldnumber - 1, 1)
+			end
+		end
+
+		if UnitExists(newunit) then
+			table[key] = newunit
+			return true
+		end
+
+		-- signal that the unit was valid but doesn't exist
+		-- placement of this inside the if block is crucial
+		return false
+
+	elseif strfind(oldunit, "^maintank") then -- the old unit (maintank1)
 		local newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid1) (number not changed yet)
 		local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (1)
 		local newnumber = oldnumber and UNITS.mtMap[oldnumber] -- the new number(7)
 		if newnumber then
-			table[key] = gsub(newunit, oldnumber, newnumber)
+			table[key] = gsub(newunit, oldnumber, newnumber, 1)
 			return true
 		elseif putInvalidUnitsBack then
 			table[key] = oldunit
@@ -551,7 +593,7 @@ function UNITS:SubstituteTankAndAssistUnit(oldunit, table, key, putInvalidUnitsB
 		local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
 		local newnumber = oldnumber and UNITS.maMap[oldnumber]
 		if newnumber then
-			table[key] = gsub(newunit, oldnumber, newnumber)
+			table[key] = gsub(newunit, oldnumber, newnumber, 1)
 			return true
 		elseif putInvalidUnitsBack then
 			table[key] = oldunit

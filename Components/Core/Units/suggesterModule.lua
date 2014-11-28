@@ -69,11 +69,15 @@ function Module:Entry_AddToList_1(f, index)
 			
 			local color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[select(2, UnitClass(name))]
 			
-			-- GLOBALS: CUSTOM_CLASS_COLORS, RAID_CLASS_COLORS
-			if color.colorStr then
-				color = "|c" .. color.colorStr
+			if not color then
+				color = ""
 			else
-				color = ("|cff%02x%02x%02x"):format(color.r * 0xFF, color.g * 0xFF, color.b * 0xFF)
+				-- GLOBALS: CUSTOM_CLASS_COLORS, RAID_CLASS_COLORS
+				if color.colorStr then
+					color = "|c" .. color.colorStr
+				else
+					color = ("|cff%02x%02x%02x"):format(color.r * 0xFF, color.g * 0xFF, color.b * 0xFF)
+				end
 			end
 	
 			f.Name:SetText(color .. name)

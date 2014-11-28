@@ -491,8 +491,13 @@ L["ICONMENU_PETTARGET"] = "Pet's target"
 L["ICONMENU_MOUSEOVER"] = "Mouseover"
 L["ICONMENU_MOUSEOVERTARGET"] = "Mouseover's target"
 L["ICONMENU_VEHICLE"] = "Vehicle"
+L["ICONMENU_GROUPUNIT_DESC"] = [[Group is a special unit in TellMeWhen that will track raid members if you are in a raid, or party members if you are in a party.
+
+There will never be any duplicated units if you are in a raid (whereas tracking "player; party; raid" has overlap when in a raid, causing party members to be checked twice.)]]
 L["MAINTANK"] = "Main Tank"
+L["MAINTANK_DESC"] = "Tracks units that have been marked as main tanks in your raid."
 L["MAINASSIST"] = "Main Assist"
+L["MAINASSIST_DESC"] = "Tracks units that have been marked as main assists in you raid."
 
 L["ICONMENU_CHOSEICONTOEDIT"] = "Choose an icon to edit:"
 L["ICONMENU_CHOSEICONTODRAGTO"] = "Choose an icon to drag to:"
@@ -1739,7 +1744,7 @@ L["ALLOWCOMM"] = "Allow in-game sharing"
 L["ALLOWCOMM_DESC"] = "Allow other TellMeWhen users to send you data."
 L["ALLOWVERSIONWARN"] = "Notify of new version"
 L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
-L["PLAYER_DESC"] = "(You)"
+L["PLAYER_DESC"] = "The 'player' unit is you."
 
 
 L["IMPORT_EXPORT"] = "Import/Export/Restore"
