@@ -1768,7 +1768,7 @@ function TMW:PLAYER_LOGIN()
 		StaticPopup_Show("TMW_BADWOWVERSION", TELLMEWHEN_VERSION_FULL, version)
 		return
 
-	-- if the file is NOT required for gross functionality
+	-- if the file IS required for gross functionality
 	elseif not TMW.Classes or not TMW.Classes.IconDataProcessor.ProcessorsByName.SHOWN then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
