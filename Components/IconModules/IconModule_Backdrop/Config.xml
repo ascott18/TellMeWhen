@@ -1,19 +1,38 @@
 ﻿<Ui>
 
 	<Frame name="TellMeWhen_BackdropOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="30"/>
+		<Size y="40"/>
 		<Frames>
+			<Slider parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
+				<Size y="17"/>
+				<Anchors>
+					<Anchor point="LEFT" x="10" />
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="TOP" y="-13" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.text:SetWidth(self:GetWidth())
 						
+						TMW.IE:RegisterRapidSetting("ConditionAlpha")
+
+						TMW:CInit(self, {
+							title = TMW.L["CONFIGPANEL_BACKDROP_ALPHA"],
+							tooltip = TMW.L["CONFIGPANEL_BACKDROP_ALPHA_DESC"],
+							setting = "BackdropAlpha",
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>	
 		</Frames>
 		<Scripts>
 			<OnLoad>
 				self.Header:SetText(TMW.L["CONFIGPANEL_BACKDROP_HEADER"])
-				
-				--self.ShowPBar:ConstrainLabel(self.InvertPBar)
-				
-				--TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ShowPBar, self.InvertPBar, self.PBarOffs)
 			</OnLoad>
 		</Scripts>
 	</Frame>
+
+
+
  
 </Ui>

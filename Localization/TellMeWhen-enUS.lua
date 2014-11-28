@@ -1804,6 +1804,10 @@ L["CONFIGPANEL_PBAR_HEADER"] = "Power Bar Overlay"
 L["CONFIGPANEL_CLEU_HEADER"] = "Combat Events"
 L["CONFIGPANEL_CNDTTIMERS_HEADER"] = "Condition Timers"
 
+L["CONFIGPANEL_BACKDROP_HEADER"] = "Backdrop"
+L["CONFIGPANEL_BACKDROP_ALPHA"] = "Backdrop Opacity"
+L["CONFIGPANEL_BACKDROP_ALPHA_DESC"] = "Set the opacity of the backdrop underneath the bar."
+
 
 
 
