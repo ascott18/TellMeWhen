@@ -84,20 +84,17 @@ local function parseSpellsString(setting, doLower, keepDurations)
 			-- Invalid spellID. Remove it to prevent integer overflow errors.
 			tremove(buffNames, k)
 			TMW.Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
-		elseif type(v) == "string" and v:match("^%-") then
+		elseif (type(v) == "string" and v:match("^%-")) or (type(v) == "number" and v < 0) then
+
 			tremove(buffNames, k)
 
-			local thingToRemove = v:match("^%-%s*(.*)"):lower()
+			local thingToRemove = tostring(v):match("^%-%s*(.*)"):lower()
 
 			local i = 1
 			local removed
 			while buffNames[i] do
-				local name = buffNames[i]
+				local name = tostring(buffNames[i]):lower()
 				
-				if type(name) == "string" then
-					name = name:lower()
-				end
-
 				if thingToRemove == name then
 					tremove(buffNames, i)
 					removed = true

@@ -14,6 +14,7 @@ TMW.CHANGELOG = {
 [==[* Warriors in Gladiator Stance will now be treated as DPS for groups' role settings, and for the Specialization Role condition.]==],
 [==[* The "Force top-row runes..." condition setting checkbox should now always reflect the icon's settings.]==],
 [==[* The Zone PvP Type condition now actually works.]==],
+[==[* Excluding spells from equivalencies now works if the spell is an ID in the equivalency.]==],
 [==[]==],
 [==[===v7.2.1===]==],
 [==[====Bug Fixes====]==],

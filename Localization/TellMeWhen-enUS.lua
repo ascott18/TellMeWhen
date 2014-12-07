@@ -1703,7 +1703,7 @@ L["NOTYPE"] = "<No Icon Type>"
 L["MISCELLANEOUS"] = "Miscellaneous"
 L["TEXTMANIP"] = "Text manipulation"
 L["DT_DOC_Counter"] = "Returns the value of a TellMeWhen Counter. Counters are created and modified with Icon Notifications."
-L["DT_DOC_Timer"] = "Returns the value of a TellMeWhen Timer. Timer are created and modified with Icon Notifications."
+L["DT_DOC_Timer"] = "Returns the value of a TellMeWhen Timer. Timers are created and modified with Icon Notifications."
 L["DT_DOC_TMWFormatDuration"] = "Returns a string formatted by TellMeWhen's time format. Alternative to [FormatDuration]."
 L["DT_DOC_gsub"] = [[Gives access to Lua's string.gsub function for DogTags for powerful string manipulation capabilities.
 
@@ -2238,7 +2238,7 @@ Advanced Users: Counters are stored in TMW.COUNTERS[counterName] = value.   Call
 L["EVENTS_SETTINGS_TIMER_NAME"] = "Timer Name"
 L["EVENTS_SETTINGS_TIMER_NAME_DESC"] = [[Enter the name of the timer to be modified.
 
-Counter names must be lower-case with no spaces.
+Timer names must be lower-case with no spaces.
 
 Use this timer name in other places where you would like to check this timer (Conditions and Text Displays via the [Timer] DogTag)]]
 
