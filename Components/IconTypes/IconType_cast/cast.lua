@@ -89,10 +89,12 @@ end)
 
 -- The unit spellcast events that the icon will register.
 -- We keep them in a table because there's a fuckload of them.
-local events = {	
+local events = {
 	UNIT_SPELLCAST_START = true,
 	UNIT_SPELLCAST_STOP = true,
+	UNIT_SPELLCAST_SUCCEEDED = true,
 	UNIT_SPELLCAST_FAILED = true,
+	UNIT_SPELLCAST_FAILED_QUIET = true,
 	UNIT_SPELLCAST_DELAYED = true,
 	UNIT_SPELLCAST_INTERRUPTED = true,
 	UNIT_SPELLCAST_CHANNEL_START = true,

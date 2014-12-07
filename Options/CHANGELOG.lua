@@ -15,6 +15,7 @@ TMW.CHANGELOG = {
 [==[* The "Force top-row runes..." condition setting checkbox should now always reflect the icon's settings.]==],
 [==[* The Zone PvP Type condition now actually works.]==],
 [==[* Excluding spells from equivalencies now works if the spell is an ID in the equivalency.]==],
+[==[* Added event registrations to two more spellcast events in hopes of fixing an issue where Spell Cast icons sometimes don't disappear (also added these to the spell cast condition).]==],
 [==[]==],
 [==[===v7.2.1===]==],
 [==[====Bug Fixes====]==],

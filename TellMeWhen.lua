@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 72214 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 72215 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1769,7 +1769,7 @@ function TMW:PLAYER_LOGIN()
 		return
 
 	-- if the file IS required for gross functionality
-	elseif not TMW.Classes or not TMW.Classes.IconDataProcessor.ProcessorsByName.SHOWN then
+	elseif not TMW.Classes or not TMW.Classes.IconDataProcessor or not TMW.Classes.IconDataProcessor.ProcessorsByName.SHOWN then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1782,7 +1782,7 @@ function TMW:PLAYER_LOGIN()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Spells/Spells.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/IconDataProcessors.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 		return
 
 	-- if the file is NOT required for gross functionality
