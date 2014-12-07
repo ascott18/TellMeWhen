@@ -737,7 +737,8 @@ function Texts:SetupForIcon(sourceIcon)
 	for _, fontString in pairs(self.fontStrings) do
 		fontString.TMW_QueueForRemoval = true
 	end
-		
+	local queueMasqeSkin = nil
+
 	if layoutSettings then
 		-- Detect if masque skinning is being used on this icon.
 		local isDefaultSkin = not TMW.C.IconModule_IconContainer_Masque:IsIconSkinned(icon)
@@ -834,10 +835,12 @@ function Texts:SetupForIcon(sourceIcon)
 							end
 						end
 					end
-					
+					print(icon, fontString, isDefaultSkin, fontStringSettings.SkinAs, anchorSettings.x, anchorSettings.y)
 					-- Finally, set the point. We call it like this because we need to use Masque's SetPoint if it exists.
 					setPoint(fontString, anchorSettings.point, relativeTo, anchorSettings.relativePoint, anchorSettings.x, anchorSettings.y)
 				end
+			else
+				queueMasqeSkin = true
 			end
 		end
 	end
@@ -853,6 +856,9 @@ function Texts:SetupForIcon(sourceIcon)
 			DogTag:RemoveFontString(fontString)
 			fontString:Hide()
 		end
+	end
+	if queueMasqeSkin then
+
 	end
 
 	self.hasSetupOnce = true

@@ -45,7 +45,14 @@ function IconContainer_Masque:IsIconSkinned(icon)
 	end
 
 	local lmbGroup = GetLMBGroup(icon)
-	return lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled)
+	if lmbGroup.Disabled then
+		return false
+	end
+	if lmbGroup.db and lmbGroup.db.Disabled then
+		return false
+	end
+	
+	return true
 end
 
 
@@ -104,8 +111,8 @@ function IconContainer_Masque:SetupForIcon(icon)
 end
 
 
+function IconContainer_Masque:DoSkin()
 
-IconContainer_Masque:PostHookMethod("OnEnable", function(self)
 	local icon = self.icon
 	local container = self.container
 	
@@ -134,7 +141,9 @@ IconContainer_Masque:PostHookMethod("OnEnable", function(self)
 	if disabled and not icon.normaltex then
 		self.isDefaultSkin = 1
 	end
-end)
+end
+
+IconContainer_Masque:PostHookMethod("OnEnable", IconContainer_Masque.DoSkin)
 
 IconContainer_Masque:PostHookMethod("OnDisable", function(self)
 	self.lmbGroup:RemoveButton(self.container, true)
