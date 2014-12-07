@@ -835,7 +835,7 @@ function Texts:SetupForIcon(sourceIcon)
 							end
 						end
 					end
-					print(icon, fontString, isDefaultSkin, fontStringSettings.SkinAs, anchorSettings.x, anchorSettings.y)
+					
 					-- Finally, set the point. We call it like this because we need to use Masque's SetPoint if it exists.
 					setPoint(fontString, anchorSettings.point, relativeTo, anchorSettings.relativePoint, anchorSettings.x, anchorSettings.y)
 				end
