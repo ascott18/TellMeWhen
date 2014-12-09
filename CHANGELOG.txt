@@ -1,6 +1,6 @@
 ===v7.2.2===
  * You can now easily clone an event handler by right-clicking it in the Notifications tab.
- * There is a new special unitID in TellMeWhen, "group" that will check raid or party depending on which you are in. It prevents the overlap that happens when checking "player; group; raid".
+ * There is a new special unitID in TellMeWhen, "group" that will check raid or party depending on which you are in. It prevents the overlap that happens when checking "player; party; raid".
  * You can now adjust the opacity of the backdrop for bar icons.
 
 ====Bug Fixes====

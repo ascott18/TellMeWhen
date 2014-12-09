@@ -2040,8 +2040,8 @@
 						-- Put the last one in
 						tinsert(CHANGELOGS, s:trim("\r\n "))
 						tinsert(CHANGELOGS,
-							"\r\n\r\nTo see the changelog for versions up to v" .. TMW.CHANGELOG_LASTVER .. ", type /tmw changelog." ..
-							"\n\nTo see the changelog for versions older than that, visit TellMeWhen's AddOn page on Curse.com")
+							"\r\n\r\nTo see the changelog for versions up to v" .. TMW.CHANGELOG_LASTVER .. ", type /tmw changelog. " ..
+							"For older versions, visit TellMeWhen's AddOn page on Curse.com")
 
 						-- Send this out to the garbage collector
 						TMW.CHANGELOG = nil
