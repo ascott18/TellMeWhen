@@ -81,6 +81,7 @@ end
 TMW:RegisterCallback("TMW_SPELLCACHE_COMPLETED", SUG)
 
 ---------- Suggesting ----------
+local suggestedForModule
 function SUG:DoSuggest()
 	if not SUG.SuggestionList:IsVisible() then
 		return
@@ -103,6 +104,7 @@ function SUG:DoSuggest()
 		Table_GetSpecialSuggestions(SUG.CurrentModule, SUGpreTable, SUG.CurrentModule:Table_Get())
 	end
 
+	suggestedForModule = SUG.CurrentModule
 	SUG:SuggestingComplete(1)
 end
 
@@ -123,6 +125,11 @@ function SUG:SuggestingComplete(doSort)
 		SUG.SuggestionList.blocker:Show()
 		SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"])
 		TMW.shellsortDeferred(SUGpreTable, SUG.CurrentModule:Table_GetSorter(), nil, SUG.SuggestingComplete, SUG, progressCallback)
+		return
+	end
+
+	if suggestedForModule ~= SUG.CurrentModule then
+		TMW:Debug("SUG module changed mid-suggestion")
 		return
 	end
 
