@@ -218,7 +218,7 @@ local Sorting_args = {
 			local group = FindGroupFromInfo(info)
 			local gs = group:GetSettings()
 
-			for priorityID, priority in TMW:Vararg("duration", "visibleshown", "id") do
+			for priorityID, priority in TMW:Vararg("visibleshown", "duration", "id") do
 				local oldPriority = gs.SortPriorities[priorityID]
 
 				for k, v in pairs(gs.SortPriorities) do

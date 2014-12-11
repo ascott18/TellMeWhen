@@ -135,7 +135,11 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 			local instanceDifficulty
 			
 			if wow_502 then
-				_, _, instanceDifficulty = GetInstanceInfo()
+				_, _, instanceDifficulty, _, _, _, _, instanceMapID = GetInstanceInfo()
+				if instanceMapID == 1116 then
+					-- Draenor sometiems return 1 if you were in your garrison.
+					instanceDifficulty = 0
+				end
 			else
 				instanceDifficulty = GetInstanceDifficulty() - 1
 			end
