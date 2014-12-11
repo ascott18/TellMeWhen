@@ -36,6 +36,21 @@ local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo =
 	  
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], true, false)
 
+
+
+
+local actuallyOutsideMapIDs = {
+	[1116] = true,	-- 	Draenor (gets reported as an instance if you were in your garrison and left)
+
+	[1152] = true,	-- 	FW Horde Garrison Level 1
+	[1330] = true,	-- 	FW Horde Garrison Level 2
+	[1153] = true,	-- 	FW Horde Garrison Level 3
+	[1154] = true,	-- 	FW Horde Garrison Level 4
+	[1158] = true,	-- 	SMV Alliance Garrison Level 1
+	[1331] = true,	-- 	SMV Alliance Garrison Level 2
+	[1159] = true,	-- 	SMV Alliance Garrison Level 3
+	[1160] = true,	-- 	SMV Alliance Garrison Level 4
+}
 ConditionCategory:RegisterCondition(1,	 "INSTANCE", {	-- old
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
 
@@ -136,8 +151,9 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 			
 			if wow_502 then
 				_, _, instanceDifficulty, _, _, _, _, instanceMapID = GetInstanceInfo()
-				if instanceMapID == 1116 then
-					-- Draenor sometiems return 1 if you were in your garrison.
+
+				-- Fix mapIDs that are really outside, but get reported wrong.
+				if actuallyOutsideMapIDs[instanceMapID] then
 					instanceDifficulty = 0
 				end
 			else
@@ -188,6 +204,8 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 			ConditionObject:GenerateNormalEventString("PLAYER_DIFFICULTY_CHANGED")
 	end,
 })
+
+
 
 ConditionCategory:RegisterCondition(1.5, "ZONEPVP", {
 	text = L["CONDITIONPANEL_ZONEPVP"],
