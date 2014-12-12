@@ -282,44 +282,34 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		for k = 1, #originalUnits do
 			local unit = originalUnits[k]
 
-			local specialUnitWasSubbed, wackyUnitWasSubbed
+			local subbedUnit
 
 			-- Handles maintank and mainassist units.
 			if hasSpecialUnitRefs then
-				local old = exposedUnits[exposed_len+1]
-
 				-- Try to sub it out for a real unitID.
-				specialUnitWasSubbed = UNITS:SubstituteSpecialUnit(unit, exposedUnits, exposed_len+1)
-
-				if specialUnitWasSubbed then
-					changed = changed or old ~= exposedUnits[exposed_len+1]
-					exposed_len = exposed_len + 1
-				end
+				subbedUnit = UNITS:SubstituteSpecialUnit(unit)
 			end
 
 			-- Wacky units are the ones that we don't know anything about.
 			-- These include player names and anything else that has no known base unit.
-			if mightHaveWackyUnitRefs then
-				local old = exposedUnits[exposed_len+1]
-
+			if subbedUnit == nil and mightHaveWackyUnitRefs then
 				-- Try to sub a player name with a unitID.
-				wackyUnitWasSubbed = UNITS:SubstituteGroupedUnit(unit, exposedUnits, exposed_len+1)
-
-				if wackyUnitWasSubbed then
-					changed = changed or old ~= exposedUnits[exposed_len+1]
-					exposed_len = exposed_len + 1
-				end
+				subbedUnit = UNITS:SubstituteGroupedUnit(unit)
 			end
 
-
+			if subbedUnit then
+				unit = subbedUnit
+			end
 
 			local hasExistsEvent = UNITS.unitsWithExistsEvent[unit]
 			local baseUnit = UNITS.unitsWithBaseExistsEvent[unit]
 
 			if
-					-- Don't expose the unit if it was already handled above
-					specialUnitWasSubbed == nil
-				and wackyUnitWasSubbed == nil
+					-- Don't expose the unit if it was supposed to be subbed,
+					-- but didn't get subbed because it didn't exist. 
+					-- subbedUnit will be false if this is what happened.
+					-- If it was subbed, its a string, and if it didnt need to be subbed, it will be nil.
+					subbedUnit ~= false
 
 					-- Don't expose the unit if it has conditions and those conditions failed
 				and (not ConditionObjects or not ConditionObjects[k] or not ConditionObjects[k].Failed)
@@ -548,7 +538,7 @@ function UNITS:OnEvent(event, ...)
 	end
 end
 
-function UNITS:SubstituteSpecialUnit(oldunit, table, key, putInvalidUnitsBack)
+function UNITS:SubstituteSpecialUnit(oldunit)
 	if strfind(oldunit, "^group") then -- the old unit (group1)
 
 		local newunit
@@ -557,8 +547,7 @@ function UNITS:SubstituteSpecialUnit(oldunit, table, key, putInvalidUnitsBack)
 		else
 			local oldnumber = tonumber(strmatch(oldunit, "(%d+)")) -- the old number (1)
 			if oldnumber == 1 then
-				table[key] = "player"
-				return true
+				return "player"
 			else
 				newunit = gsub(oldunit, "group", "party") -- the new unit (party1) (number not changed yet)
 				newunit = gsub(newunit, oldnumber, oldnumber - 1, 1)
@@ -566,12 +555,10 @@ function UNITS:SubstituteSpecialUnit(oldunit, table, key, putInvalidUnitsBack)
 		end
 
 		if UnitExists(newunit) then
-			table[key] = newunit
-			return true
+			return newunit
 		end
 
-		-- signal that the unit was valid but doesn't exist
-		-- placement of this inside the if block is crucial
+		-- Return false to signal it was in a form that should be replaced, but was not replaced.
 		return false
 
 	elseif strfind(oldunit, "^maintank") then -- the old unit (maintank1)
@@ -579,41 +566,35 @@ function UNITS:SubstituteSpecialUnit(oldunit, table, key, putInvalidUnitsBack)
 		local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (1)
 		local newnumber = oldnumber and UNITS.mtMap[oldnumber] -- the new number(7)
 		if newnumber then
-			table[key] = gsub(newunit, oldnumber, newnumber, 1)
-			return true
-		elseif putInvalidUnitsBack then
-			table[key] = oldunit
+			return gsub(newunit, oldnumber, newnumber, 1)
 		end
 
-		-- signal that the unit was valid but doesn't exist
-		-- placement of this inside the if block is crucial
-		return false 
+
+		-- Return false to signal it was in a form that should be replaced, but was not replaced.
+		return false
+
 	elseif strfind(oldunit, "^mainassist") then
 		local newunit = gsub(oldunit, "mainassist", "raid")
 		local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
 		local newnumber = oldnumber and UNITS.maMap[oldnumber]
 		if newnumber then
-			table[key] = gsub(newunit, oldnumber, newnumber, 1)
-			return true
-		elseif putInvalidUnitsBack then
-			table[key] = oldunit
+			return gsub(newunit, oldnumber, newnumber, 1)
 		end
 
-		-- signal that the unit was valid but doesn't exist
-		-- placement of this inside the if block is crucial
+		
+		-- Return false to signal it was in a form that should be replaced, but was not replaced.
 		return false
 	end
 
-	-- nil is returned if the unit was not in the form maintank# or mainassist#
+	-- nil is returned if the unit was not in the form that should be replaced.
 	return nil
 end
 
-function UNITS:SubstituteGroupedUnit(oldunit, table, key)
+function UNITS:SubstituteGroupedUnit(oldunit)
 	for groupedName, groupedUnitID in pairs(UNITS.gpMap) do
 		local atBeginning = "^" .. groupedName
 		if strfind(oldunit, atBeginning .. "$") or strfind(oldunit, atBeginning .. "%-.") then
-			table[key] = gsub(oldunit, atBeginning .. "%-?", groupedUnitID)
-			return true
+			return gsub(oldunit, atBeginning .. "%-?", groupedUnitID)
 		end
 	end
 

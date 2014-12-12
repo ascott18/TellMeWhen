@@ -600,9 +600,10 @@ end
 function CNDT:GROUP_ROSTER_UPDATE()
 	TMW.UNITS:UpdateTankAndAssistMap()
 	
-	for oldunit in pairs(Env) do
-		if CNDT.SpecialUnitsUsed[oldunit] then
-			TMW.UNITS:SubstituteSpecialUnit(oldunit, Env, oldunit, true)
+	for oldUnit in pairs(Env) do
+		if CNDT.SpecialUnitsUsed[oldUnit] then
+			local newUnit = TMW.UNITS:SubstituteSpecialUnit(oldUnit)
+			Env[oldUnit] = newUnit or oldUnit
 		end
 	end
 end
