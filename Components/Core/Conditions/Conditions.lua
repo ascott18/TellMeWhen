@@ -642,6 +642,7 @@ function CNDT:ToggleBitFlag(conditionSettings, index)
 	end
 end
 
+
 CNDT.Substitutions = {
 
 {	src = "BITFLAGSMAPANDCHECK(%b())",

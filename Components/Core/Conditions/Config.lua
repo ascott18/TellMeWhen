@@ -488,12 +488,7 @@ function CNDT:BitFlags_DropDown()
 		--info.tooltipText = 
 
 		info.value = index
-		if type(conditionSettings.BitFlags) == "table" then
-			info.checked = conditionSettings.BitFlags[index]
-		else
-			local flag = bit.lshift(1, index-1)
-			info.checked = bit.band(conditionSettings.BitFlags, flag) == flag
-		end
+		info.checked = CNDT:GetBitFlag(conditionSettings, index)
 		info.keepShownOnClick = true
 		info.isNotRadio = true
 		info.func = CNDT.BitFlags_DropDown_OnClick
@@ -509,12 +504,7 @@ function CNDT:BitFlags_DropDown_OnClick(frame)
 
 	local index = self.value
 
-	if type(conditionSettings.BitFlags) == "table" then
-		conditionSettings.BitFlags[index] = (not conditionSettings.BitFlags[index]) and true or nil
-	else
-		local flag = bit.lshift(1, index-1)
-		conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, flag)
-	end
+	CNDT:ToggleBitFlag(conditionSettings, index)
 
 	TMW.IE:ScheduleIconSetup()
 	group:LoadAndDraw()
@@ -984,12 +974,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		for k, rune in pairs(CndtGroup.Runes) do
 			if type(rune) == "table" then
 				local index = rune:GetID()
-				if type(conditionSettings.BitFlags) == "table" then
-					rune:SetChecked(conditionSettings.BitFlags[index])
-				else
-					local flag = bit.lshift(1, index-1)
-					rune:SetChecked(bit.band(conditionSettings.BitFlags, flag) == flag)
-				end
+				rune:SetChecked(CNDT:GetBitFlag(conditionSettings, index))
 			end
 		end
 
@@ -1049,13 +1034,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		local text = ""
 		for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
 
-			local flagSet
-			if type(conditionSettings.BitFlags) == "table" then
-				flagSet = conditionSettings.BitFlags[index]
-			else
-				local flag = bit.lshift(1, index-1)
-				flagSet = bit.band(conditionSettings.BitFlags, flag) == flag
-			end
+			local flagSet = CNDT:GetBitFlag(conditionSettings, index)
 
 			if flagSet then
 				if conditionSettings.Checked then
