@@ -250,9 +250,14 @@ ConditionCategory:RegisterCondition(13.2, "ECLIPSE_DIRECTION", {
 	end,
 })
 
+
+
 ConditionCategory:RegisterCondition(15,	 "RUNES", {
+	old = true,
+	customDeprecated = true,
+
 	text = RUNES,
-	tooltip = L["CONDITIONPANEL_RUNES_DESC"],
+	--tooltip = L["CONDITIONPANEL_RUNES_DESC"],
 	unit = false,
 	nooperator = true,
 	noslide = true,
@@ -262,18 +267,22 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 		GetRuneCount = GetRuneCount,
 	},
 	funcstr = function(c) -- sub-constructor function
+		-- This condiion is now deprecated. The code to run it is still here because
+		-- the new one is quite different, and I can't do an automatic upgrade.
 		local str = ""
-		for k, v in pairs(c.Runes) do
-			if v ~= nil then
-				str = str .. "and" .. (v==false and " not" or "")
-				if k > 6 then
-					k=k-6
-					str = str .. [[(GetRuneType(]]..k..[[)==4 and GetRuneCount(]]..k..[[)==1)]]
-				else
-					if c.Checked then
-						str = str .. [[(GetRuneType(]]..k..[[)~=4 and GetRuneCount(]]..k..[[)==1)]]
+		if c.Runes then
+			for k, v in pairs(c.Runes) do
+				if v ~= nil then
+					str = str .. "and" .. (v==false and " not" or "")
+					if k > 6 then
+						k=k-6
+						str = str .. [[(GetRuneType(]]..k..[[)==4 and GetRuneCount(]]..k..[[)==1)]]
 					else
-						str = str .. [[(GetRuneCount(]]..k..[[)==1)]]
+						if c.Checked then
+							str = str .. [[(GetRuneType(]]..k..[[)~=4 and GetRuneCount(]]..k..[[)==1)]]
+						else
+							str = str .. [[(GetRuneCount(]]..k..[[)==1)]]
+						end
 					end
 				end
 			end
@@ -293,14 +302,140 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 })
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 	if conditionData and conditionData.identifier == "RUNES" then
-		CndtGroup.Runes:Show()
-		CndtGroup.RunesCheck:Show()
-		CndtGroup.RunesCheck:SetChecked(conditionSettings.Checked)
-	else
-		CndtGroup.Runes:Hide()
-		CndtGroup.RunesCheck:Hide()
+		local runes = conditionSettings.Runes
+		local str = "This condition has been replaced by the Rune Count condition.\n\n" ..
+		"This condition will still function as it did, but is no longer configurable. Here is your old configuration:\n\n"
+		if runes then
+			for k, v in pairs(runes) do
+				local slot = k
+				local death = ""
+				if slot > 6 then
+					slot = slot - 6
+					death = "Death "
+				end
+				str = str .. death
+				if slot == 1 or slot == 2 then
+					str = str .. "Blood " .. slot .. ", "
+				elseif slot == 3 or slot == 4 then
+					str = str .. "Unholy " .. slot-2 .. ", "
+				elseif slot == 5 or slot == 6 then
+					str = str .. "Frost " .. slot-4 .. ", "
+				end
+			end
+		else
+			str = str .. "<No Runes Selected>"
+		end
+
+		CndtGroup.Deprecated:SetFormattedText(str:trim(" ,"))
+
+
+		if CndtGroup.Deprecated:IsShown() then
+			CndtGroup:SetHeight(CndtGroup:GetHeight() - CndtGroup.Deprecated:GetHeight())
+			CndtGroup.Deprecated:Hide()
+		end
+		if not CndtGroup.Deprecated:IsShown() then
+			-- Need to reset the height to 0 before calling GetStringHeight
+			-- for consistency. Causes weird behavior if we don't do this.
+			CndtGroup.Deprecated:SetHeight(0)
+			CndtGroup.Deprecated:SetHeight(CndtGroup.Deprecated:GetStringHeight())
+
+			CndtGroup:SetHeight(CndtGroup:GetHeight() + CndtGroup.Deprecated:GetHeight())
+			CndtGroup.Deprecated:Show()
+		end
 	end
 end)
+
+
+ConditionCategory:RegisterCondition(15.1, "RUNES2", {
+	text = L["CONDITIONPANEL_RUNES"],
+	tooltip = L["CONDITIONPANEL_RUNES_DESC2"],
+	unit = false,
+	min = 0,
+	max = 6,
+	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
+	Env = {
+		GetRuneType = GetRuneType,
+		GetRuneCount = GetRuneCount,
+	},
+	funcstr = function(c) -- sub-constructor function
+		local str = ""
+		for i = 1, 6 do
+			--[[
+				[1] = blood
+				[2] = unholy
+				[3] = frost
+
+				[4] = death blood
+				[5] = death unholy
+				[6] = death frost
+			]]
+			local checked = CNDT:GetBitFlag(c, i)
+
+			if checked then
+				local death = false
+				local bothTypes
+				if i > 3 then
+					death = true
+					i = i - 3
+					bothTypes = CNDT:GetBitFlag(c, i)
+				else
+					bothTypes = CNDT:GetBitFlag(c, i+3)
+				end
+
+				-- An index of 2 corresponds to runes 3 and 4, for example.
+				-- An index of 3 corresponds to runes 5 and 6.
+				local runeID1 = i*2 - 1
+				local runeID2 = runeID1 + 1
+
+				for _, runeID in TMW:Vararg(runeID1, runeID2) do
+					-- If we aren't on death runes in our outer loop,
+					-- or if we are only checking one type of this rune slot, 
+					-- put the plus now.
+					if not (death and bothTypes) then
+						str = str .. [[ + ]]
+					end
+
+					-- If we're checking both runes of this slot, we don't need to check if
+					-- the rune is a death rune (because we would check again to see if it isn't a death rune),
+					-- which is completely redundant.
+					if not bothTypes then
+						str = str .. [[ (GetRuneType(]]..runeID..[[)]]
+						str = str .. (death and "=" or "~") .. [[=4 and ]]
+					end
+
+					-- If we aren't on death runes in our outer loop,
+					-- or if we are only checking one type of this rune slot, 
+					-- then check the count of this rune slot.
+
+					-- If we ARE on death runes, and we are checking both types of this slot,
+					-- then don't check for this, because it will already exist in the string,
+					-- which would cause double counting.
+					if not (death and bothTypes) then
+						if bothTypes then
+							-- We still need the parenthesis that was excluded earlier.
+							str = str .. "("
+						end
+
+						str = str .. [[GetRuneCount(]]..runeID..[[) or 0)]]
+					end
+				end
+			end
+		end
+		if str == "" then
+			return [[true]]
+		else
+			return "print(" .. str:trim("+ ") .. ") c.Operator c.Level" 
+		end
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE"),
+			ConditionObject:GenerateNormalEventString("RUNE_TYPE_UPDATE")
+	end,
+	hidden = pclass ~= "DEATHKNIGHT",
+})
+
+
 
 ConditionCategory:RegisterCondition(15.5, "CHI", {
 	text = CHI_POWER,

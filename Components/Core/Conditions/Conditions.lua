@@ -76,19 +76,20 @@ CNDT.COMMON.standardtcoords = {0.07, 0.93, 0.07, 0.93}
 CNDT.Condition_Defaults = {
 	n 					= 0,
 	["**"] = {
-		AndOr 	   		= "AND",
-		Type 	   		= "",
-		Icon 	   		= "",
-		Operator   		= "==",
-		Level 	   		= 0,
-		Unit 	   		= "player",
-		Name 	   		= "",
-		Name2 	   		= "",
-		PrtsBefore 		= 0,
-		PrtsAfter  		= 0,
+		AndOr			= "AND",
+		Type			= "",
+		Icon			= "",
+		Operator		= "==",
+		Level			= 0,
+		Unit			= "player",
+		Name			= "",
+		Name2			= "",
+		PrtsBefore		= 0,
+		PrtsAfter		= 0,
 		Checked			= false,
-		Checked2   		= false,
-		Runes 	   		= {},
+		Checked2		= false,
+
+		-- Runes 		= {}, -- Deprecated
 
 		-- IMPORTANT: This setting can be a number OR a table.
 		BitFlags		= 0x0, -- may also be a table.
@@ -621,6 +622,24 @@ function CNDT:GetTableSubstitution(tbl)
 	CNDT.Env.TABLES[var] = tbl
 
 	return "TABLES." .. var
+end
+
+function CNDT:GetBitFlag(conditionSettings, index)
+	if type(conditionSettings.BitFlags) == "table" then
+		return conditionSettings.BitFlags[index]
+	else
+		local flag = bit.lshift(1, index-1)
+		return bit.band(conditionSettings.BitFlags, flag) == flag
+	end
+end
+
+function CNDT:ToggleBitFlag(conditionSettings, index)
+	if type(conditionSettings.BitFlags) == "table" then
+		conditionSettings.BitFlags[index] = (not conditionSettings.BitFlags[index]) and true or nil
+	else
+		local flag = bit.lshift(1, index-1)
+		conditionSettings.BitFlags = bit.bxor(conditionSettings.BitFlags, flag)
+	end
 end
 
 CNDT.Substitutions = {

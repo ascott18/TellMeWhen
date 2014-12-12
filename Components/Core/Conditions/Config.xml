@@ -24,41 +24,32 @@
 			<OnClick>
 				PlaySound("igMainMenuOptionCheckBoxOn")
 
-				if self.checked then
-					self.checked = false
-					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
-				elseif self.checked == false then
-					self.checked = nil
-					self.Check:SetTexture(nil)
-				elseif self.checked == nil then
-					self.checked = true
-					self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-				end
-				TMW.CNDT:RuneHandler(self)
-
 				local CndtGroup = self:GetParent():GetParent()
-				local condition = CndtGroup:GetConditionSettings()
-				for k, rune in pairs(self:GetParent()) do
-					if type(rune) == "table" then
-						condition.Runes[rune:GetID()] = rune:GetChecked()
-					end
-				end
+				local conditionSettings = CndtGroup:GetConditionSettings()
+				local index = self:GetID()
+
+				TMW.CNDT:ToggleBitFlag(conditionSettings, index)
+
+				self:SetChecked(not self:GetChecked())
+
 				CndtGroup:LoadAndDraw()
 			</OnClick>
 			<OnLoad>
 				self.GetChecked = TMW.CNDT.Rune_GetChecked
 				self.SetChecked = TMW.CNDT.Rune_SetChecked
 
-
-				-- detect what texture should be used
-				local runeName = gsub(self:GetName(), self:GetParent():GetName(), "")
-				local runeType, death = runeName:match("(.*)%d(.*)")
-
-				if death and death ~= "" then
-					self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeType)
+				if self.death then
+					self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. self.runeType)
 				else
-					self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeType)
+					self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. self.runeType)
 				end
+
+				local title = _G["COMBAT_TEXT_RUNE_" .. (self.runeType):upper()]
+				if self.death then
+					title = COMBAT_TEXT_RUNE_DEATH .. " (" .. title .. ")"
+				end
+
+				TMW:TT(self, title, "CONDITIONPANEL_RUNES_CHECK_DESC", true, false)
 
 			</OnLoad>
 		</Scripts>
@@ -367,100 +358,77 @@
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
 				<Size x="1" y="1"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="8" y="8"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="11" y="8"/>
 				</Anchors>
 				<Frames>
-					<Button name="$parentBlood1" parentKey="blood1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
+					<Button parentKey="rune1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Blood"/>
+							<KeyValue key="key" type="number" value="1"/>
+							<KeyValue key="death" type="boolean" value="false"/>
+						</KeyValues>
 						<Anchors>
 							<Anchor point="TOPLEFT"/>
 						</Anchors>
 					</Button>
-					<Button name="$parentBlood2" parentKey="blood2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
+
+		 			<Button parentKey="rune2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Frost"/>
+							<KeyValue key="key" type="number" value="3"/>
+							<KeyValue key="death" type="boolean" value="false"/>
+						</KeyValues>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
+							<Anchor point="LEFT" relativeKey="$parent.rune1" relativePoint="RIGHT" x="4"/>
 						</Anchors>
 					</Button>
-		 			<Button name="$parentFrost1" parentKey="frost1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
+
+					<Button parentKey="rune3" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Unholy"/>
+							<KeyValue key="key" type="number" value="2"/>
+							<KeyValue key="death" type="boolean" value="false"/>
+						</KeyValues>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT"/>
-						</Anchors>
-					</Button>
-					<Button name="$parentFrost2" parentKey="frost2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
-						</Anchors>
-					</Button>
-					<Button name="$parentUnholy1" parentKey="unholy1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost2" relativePoint="RIGHT"/>
-						</Anchors>
-					</Button>
-					<Button name="$parentUnholy2" parentKey="unholy2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
+							<Anchor point="LEFT" relativeKey="$parent.rune2" relativePoint="RIGHT" x="4"/>
 						</Anchors>
 					</Button>
 
 
-					<Button name="$parentBlood1Death" parentKey="blood1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="7">
+					<Button parentKey="rune4" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Blood"/>
+							<KeyValue key="key" type="number" value="4"/>
+							<KeyValue key="death" type="boolean" value="true"/>
+						</KeyValues>
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM"/>
+							<Anchor point="TOP" relativeKey="$parent.rune1" relativePoint="BOTTOM"/>
 						</Anchors>
 					</Button>
-					<Button name="$parentBlood2Death" parentKey="blood2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="8">
+					<Button parentKey="rune5" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Frost"/>
+							<KeyValue key="key" type="number" value="6"/>
+							<KeyValue key="death" type="boolean" value="true"/>
+						</KeyValues>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT"/>
+							<Anchor point="LEFT" relativeKey="$parent.rune4" relativePoint="RIGHT" x="4"/>
 						</Anchors>
 					</Button>
-					<Button name="$parentFrost1Death" parentKey="frost1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="11">
+					<Button parentKey="rune6" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Unholy"/>
+							<KeyValue key="key" type="number" value="5"/>
+							<KeyValue key="death" type="boolean" value="true"/>
+						</KeyValues>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT"/>
-						</Anchors>
-					</Button>
-					<Button name="$parentFrost2Death" parentKey="frost2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="12">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT"/>
-						</Anchors>
-					</Button>
-					<Button name="$parentUnholy1Death" parentKey="unholy1death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="9">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentFrost2Death" relativePoint="RIGHT"/>
-						</Anchors>
-					</Button>
-					<Button name="$parentUnholy2Death" parentKey="unholy2death" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="10">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT"/>
+							<Anchor point="LEFT" relativeKey="$parent.rune5" relativePoint="RIGHT" x="4"/>
 						</Anchors>
 					</Button>
 
 
 				</Frames>
 			</Frame>
-			<CheckButton name="$parentRunesCheck" inherits="TellMeWhen_CheckTemplate" parentKey="RunesCheck">
-				<Size x="26" y="26"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentRunesUnholy2" relativePoint="RIGHT" x="5"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.text:SetText(TMW.L["CONDITIONPANEL_RUNES_CHECK"])
-						self.text:SetPoint("TOP", 0, -4)
-						self.text:SetPoint("RIGHT", self:GetParent(), "RIGHT")
-						self.text:SetHeight(40)
-						self.text:SetMaxLines(5)
-						self.text:SetJustifyV("TOP")
-						
-						TMW:TT(self, "CONDITIONPANEL_RUNES_CHECK", "CONDITIONPANEL_RUNES_CHECK_DESC")
-					</OnLoad>
-					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
-
-						local CndtGroup = self:GetParent()
-						CndtGroup:GetConditionSettings().Checked = not not self:GetChecked()
-						CndtGroup:LoadAndDraw()
-					</OnClick>
-				</Scripts>
-			</CheckButton>
 			
 
 			<Frame name="$parentBitFlags" parentKey="BitFlags" inherits="TMW_DropDownMenuTemplate">

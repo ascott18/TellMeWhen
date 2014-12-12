@@ -4,6 +4,9 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = {
 
+[==[===v7.2.3===]==],
+[==[* The old Runes condition has been deprecated. In its place is a new condition, Rune Count, that should be much easier to use.]==],
+[==[]==],
 [==[===v7.2.2===]==],
 [==[* You can now easily clone an event handler by right-clicking it in the Notifications tab.]==],
 [==[* There is a new special unitID in TellMeWhen, "group" that will check raid or party depending on which you are in. It prevents the overlap that happens when checking "player; party; raid".]==],

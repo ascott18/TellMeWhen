@@ -1267,15 +1267,14 @@ If you don't want to display the icon being checked, check %q in the icon editor
 
 The group of the icon being checked must be shown in order to check the icon.]=]
 
-L["CONDITIONPANEL_RUNES_DESC"] = [=[Use this condition type to only show the icon when the selected runes are available.
+L["CONDITIONPANEL_RUNES"] = "Rune Count"
+L["CONDITIONPANEL_RUNES_DESC2"] = [=[Use this condition type to only show the icon when the desired number of runes are available.
 
-Each rune is a check button. A check mark will require that the rune be usable, an 'X' will require that the rune be unusable, no mark will ignore the rune.
+Each rune is a check button. Check each rune to have it be counted into the conditions.
 
-The runes in the second row are the death rune version of each rune above.]=]
-L["CONDITIONPANEL_RUNES_CHECK"] = "Force top-row runes to only match non-death runes."
-L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Normally, configuring the runes in the top row for this condition will let them match either a normal rune or a death rune in that slot.
+The runes in the first row will not match death runes. The runes in the second row are the death rune version of each rune above.]=]
+L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Check this rune to count this rune type into the total count for the condition.]=]
 
-Enable this option to force the runes in the top row to only match non-death runes.]=]
 L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
