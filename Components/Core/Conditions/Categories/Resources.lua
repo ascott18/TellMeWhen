@@ -440,7 +440,7 @@ ConditionCategory:RegisterCondition(15.1, "RUNES2", {
 ConditionCategory:RegisterCondition(15.5, "CHI", {
 	text = CHI_POWER,
 	min = 0,
-	max = 5,
+	max = 6,
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_monk_chiwave",
 	tcoords = CNDT.COMMON.standardtcoords,

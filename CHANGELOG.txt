@@ -1,5 +1,6 @@
 ===v7.2.3===
  * The old Runes condition has been deprecated. In its place is a new condition, Rune Count, that should be much easier to use.
+ * Updated the Chi condition to support a max of 6.
 
 ====Bug Fixes====
 * Fixed an issue that caused Unit Conditions to not work with special units (group, maintank, mainassist, and player names).
