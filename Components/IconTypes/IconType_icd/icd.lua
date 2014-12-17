@@ -107,14 +107,20 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 end)
 
 
+-- Auras that don't report a source, but can only be self-applied,
+-- so if the destination is the player, we know its the player's proc.
+local noSource = {
+	[159679] = true, -- mark of blackrock
+	[159678] = true, -- mark of shadowmoon
+}
 local function ICD_OnEvent(icon, event, ...)
 	local valid, spellID, spellName, _
 
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-		local cevent, GUID
-		_, cevent, _, GUID, _, _, _, _, _, _, _, spellID, spellName = ...
+		local cevent, sourceGUID
+		_, cevent, _, sourceGUID, _, _, _, destGUID, _, _, _, spellID, spellName = ...
 
-		valid = GUID == pGUID and (
+		valid = (sourceGUID == pGUID or (noSource[spellID] and destGUID == pGUID)) and (
 			cevent == "SPELL_AURA_APPLIED" or
 			cevent == "SPELL_AURA_REFRESH" or
 			cevent == "SPELL_ENERGIZE" or
@@ -123,6 +129,7 @@ local function ICD_OnEvent(icon, event, ...)
 			cevent == "SPELL_DAMAGE" or
 			cevent == "SPELL_MISSED"
 		)
+
 	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
 		local unit
 		unit, spellName, _, _, spellID = ...
