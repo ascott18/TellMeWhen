@@ -84,8 +84,9 @@ TMW.IE:RegisterUpgrade(71016, {
 		TMW.IE.db.global.CacheLength = nil
 		TMW.IE.db.global.IncompleteCache = nil
 		TMW.IE.db.global.WoWVersion = nil
-
-		TMW.IE.db.locale.SpellCacheWoWVersion = 0
+	end,
+	locale = function(self, locale)
+		locale.SpellCacheWoWVersion = 0
 	end,
 })
 

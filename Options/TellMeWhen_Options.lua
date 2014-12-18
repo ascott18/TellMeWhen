@@ -638,8 +638,10 @@ function IE:DoUpgrade(type, version, ...)
 	if type == "global" then
 	
 		-- delegate to locale
-		for locale, ls in pairs(IE.db.locale) do
-			IE:DoUpgrade("locale", version, ls, locale)
+		if IE.db.sv.locale then
+			for locale, ls in pairs(IE.db.sv.locale) do
+				IE:DoUpgrade("locale", version, ls, locale)
+			end
 		end
 	
 		--All Global Upgrades Complete

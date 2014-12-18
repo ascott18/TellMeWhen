@@ -183,9 +183,11 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADING", function()
 		end,
 	})
 
-	TMW.IE:RegisterUpgrade(70021, {
-		locale = function(self)
-			TMW.IE.db.locale.Currencies = nil
+	-- This used to happen at version 70021, but I realized now in 72310 that
+	-- the locale upgrade was broken, so we will run it again.
+	TMW.IE:RegisterUpgrade(72310, {
+		locale = function(self, locale)
+			locale.Currencies = nil
 		end,
 	})
 end)

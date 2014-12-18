@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 72308 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 72310 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -2907,8 +2907,10 @@ function TMW:DoUpgrade(type, version, ...)
 	-- delegate out to sub-types
 	if type == "global" then
 		-- delegate to locale
-		for locale, ls in pairs(TMW.db.locale) do
-			TMW:DoUpgrade("locale", version, ls, locale)
+		if TMW.db.sv.locale then
+			for locale, ls in pairs(TMW.db.locale) do
+				TMW:DoUpgrade("locale", version, ls, locale)
+			end
 		end
 
 		-- delegate to groups

@@ -21,8 +21,13 @@ local clientVersion = select(4, GetBuildInfo())
 
 local ItemCache = TMW:NewModule("ItemCache", "AceEvent-3.0", "AceTimer-3.0")
 
+local CACHE_INVALIDATION_TIME = 1209600 -- 2 weeks
+
 local Cache
+local CompiledCache
 local CurrentItems = {}
+
+local currentTimestamp = time()
 
 local doUpdateCache = true
 
@@ -31,10 +36,17 @@ TMW.IE:RegisterDatabaseDefaults{
 	locale = {
 		XPac_ItemCache = 0,
 		ItemCache = {
-
+			["*"] = {}
 		},
 	},
 }
+
+TMW.IE:RegisterUpgrade(72310, {
+	locale = function(self, locale)
+		locale.ItemCache = nil
+		locale.XPac_ItemCache = nil
+	end,
+})
 
 TMW.IE:RegisterUpgrade(62217, {
 	global = function(self)
@@ -51,13 +63,13 @@ Cache = {
 }
 ]]
 function ItemCache:GetCache()
-	if not Cache then
+	if not CompiledCache then
 		error("ItemCache is not yet initialized", 2)
 	end
 	
 	self:CacheItems()
 	
-	return Cache
+	return CompiledCache
 end
 
 --[[ Returns a list of items that the player currently has. Structure:
@@ -82,6 +94,7 @@ end
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
 	Cache = TMW.IE.db.locale.ItemCache
+	CompiledCache = {}
 
 	-- Wipe the item cache if user is running a new expansion
 	-- (User probably doesn't have most item in the cache anymore,
@@ -92,13 +105,27 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		TMW.IE.db.locale.XPac_ItemCache = XPac
 	end
 	
-	--Start requests so that we can validate itemIDs.
-	for id in pairs(Cache) do
-		GetItemInfo(id)
+	-- Delete old item caches.
+	for _, locale in pairs(TMW.IE.db.sv.locale) do
+		for timestamp in pairs(locale.ItemCache) do
+			if timestamp + CACHE_INVALIDATION_TIME < currentTimestamp then
+				Cache[timeStamp] = nil
+			end
+		end
 	end
 
-	-- Queue the validation for 1 minute
-	ItemCache:ScheduleTimer("ValidateItemIDs", 60)
+	-- Compile all items from all timesegments into a cohesive table for
+	-- fast lookups and easy iteration.
+	for timestamp, items in pairs(Cache) do
+		for id, name in pairs(items) do
+			CompiledCache[id] = name
+		end
+	end
+
+	--Start requests so that we can validate itemIDs.
+	for id in pairs(CompiledCache) do
+		GetItemInfo(id)
+	end
 
 	ItemCache:RegisterEvent("BAG_UPDATE")
 	ItemCache:RegisterEvent("BANKFRAME_OPENED", "BAG_UPDATE")
@@ -106,21 +133,27 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	ItemCache:CacheItems()
 end)
 
-function ItemCache:BAG_UPDATE()
-	doUpdateCache = true
+local function cacheItem(itemID, name)
+	-- The item is not cached at all.
+	if not CompiledCache[itemID] then
+		Cache[currentTimestamp][itemID] = name
+		CompiledCache[itemID] = name
+
+	-- The item is in an old cache timesegment.
+	elseif not Cache[currentTimestamp][itemID] then
+		-- Remove the item from the old cache.
+		for timeStamp, items in pairs(Cache) do
+			items[itemID] = nil
+		end
+
+		-- Add it to the current cache timesegment.
+		Cache[currentTimestamp][itemID] = name
+	end
 end
 
-function ItemCache:ValidateItemIDs()
-	-- Function to call once data about items has been collected from the server.
-	-- All data should be in by now, see what actually exists.
-	for id in pairs(Cache) do
-		if not GetItemInfo(id) then
-			Cache[id] = nil
-		end
-	end
-	
-	-- Don't need this function anymore, so get rid of it.
-	self.ValidateItemIDs = nil
+
+function ItemCache:BAG_UPDATE()
+	doUpdateCache = true
 end
 
 function ItemCache:CacheItems(force)
@@ -130,7 +163,8 @@ function ItemCache:CacheItems(force)
 
 	wipe(CurrentItems)
 
-	for container = -2, NUM_BAG_SLOTS do
+	-- Cache items in bags.
+	for container = 0, NUM_BAG_SLOTS do
 		for slot = 1, GetContainerNumSlots(container) do
 			local id = GetContainerItemID(container, slot)
 			if id then
@@ -138,11 +172,12 @@ function ItemCache:CacheItems(force)
 				name = name and strlower(name)
 
 				CurrentItems[id] = name
-				Cache[id] = name
+				cacheItem(id, name)
 			end
 		end
 	end
 
+	-- Cache equipped items
 	for slot = 1, 19 do
 		local id = GetInventoryItemID("player", slot)
 		if id then
@@ -150,7 +185,7 @@ function ItemCache:CacheItems(force)
 			name = name and strlower(name)
 
 			CurrentItems[id] = name
-			Cache[id] = name
+			cacheItem(id, name)
 		end
 	end
 

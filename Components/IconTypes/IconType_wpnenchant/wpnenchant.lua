@@ -70,14 +70,10 @@ TMW:RegisterDatabaseDefaults{
 }
 
 TMW:RegisterUpgrade(71031, {
-	global = function(self)
+	locale = function(self, locale)
 		-- Wipe this table with the new expansion.
-		if TMW.db.sv.locale then
-			for _, locale in pairs(TMW.db.sv.locale) do 
-				if locale.WpnEnchDurs then
-					wipe(locale.WpnEnchDurs)
-				end
-			end
+		if locale.WpnEnchDurs then
+			wipe(locale.WpnEnchDurs)
 		end
 	end
 })
