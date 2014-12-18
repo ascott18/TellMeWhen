@@ -125,7 +125,12 @@ local costs = {
     },
     [SPELL_POWER_RAGE] = {
         RAGE_COST:gsub("%%d", "(%%d+)"), -- = "%d Rage";
-        RAGE_COST_PER_TIME:gsub("%%d", "(%%d+)"), -- = "%d Rage, plus %d per sec";
+
+        -- In deDE, this string is "%1$d Wut und %2$d pro Sek." wtf...
+        GetLocale() == "deDE" and RAGE_COST_PER_TIME:gsub("%%%d%$d", "(%%d+)") or nil, -- = "%d Rage, plus %d per sec";
+        GetLocale() ~= "deDE" and RAGE_COST_PER_TIME:gsub("%%d", "(%%d+)") or nil, -- = "%d Rage, plus %d per sec";
+
+
         RAGE_COST_PER_TIME_NO_BASE:gsub("%%d", "(%%d+)"), -- = "%d Rage per sec";
         nil,
     },

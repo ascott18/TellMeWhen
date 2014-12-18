@@ -11,6 +11,7 @@ TMW.CHANGELOG = {
 [==[====Bug Fixes====]==],
 [==[* Fixed an issue that caused Unit Conditions to not work with special units (group, maintank, mainassist, and player names).]==],
 [==[* Mark of Shadowmoon and Mark of Blackrock should now work with the Internal Cooldown icon type.]==],
+[==[* Fixed an error with power bar spell cost detection for German clients.]==],
 [==[]==],
 [==[===v7.2.2===]==],
 [==[* You can now easily clone an event handler by right-clicking it in the Notifications tab.]==],
