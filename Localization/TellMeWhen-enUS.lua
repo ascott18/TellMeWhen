@@ -1209,6 +1209,10 @@ L["TEXTLAYOUTS_POINT_DESC"] = "The point on the text display that will be anchor
 L["TEXTLAYOUTS_RELATIVEPOINT_DESC"] = "The point on the object that will be anchored to"
 L["TEXTLAYOUTS_RELATIVETO_DESC"] = "The object that the text will be anchored to"
 
+
+L["TEXTLAYOUTS_ERR_ANCHOR_BADINDEX"] = "Layout error: Text display #%d is trying to anchor to text display #%d, but #%d doesn't exist, so text display #%d won't work."
+L["TEXTLAYOUTS_ERR_ANCHOR_BADANCHOR"] = "This text layout doesn't work with this group's display method. Choose a different text layout. (Missing anchor: %s)"
+
 L["UIPANEL_ANCHORNUM"] = "Anchor %d"
 
 -- -------------

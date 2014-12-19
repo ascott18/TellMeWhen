@@ -708,7 +708,82 @@ local function rotate(self, degrees)
 end
 
 
+function Texts:GetAnchor(layoutSettings, anchorSettings, fontStringID)
+	local icon = self.icon
 
+	local relativeTo = anchorSettings.relativeTo
+	local err = nil
+
+	if relativeTo:sub(1, 2) == "$$" then
+		-- If relativeTo starts with "$$", then it points at another fontString by textID (index).
+		-- Get that index:
+		local index = tonumber(relativeTo:sub(3))
+
+		if index <= layoutSettings.n then
+			-- The index is valid for the current layout's number of fontStrings.
+			local fontStringSettingsOfAnchor = layoutSettings[index]
+
+			-- Find the actual fontString being anchored to.
+			local relativeToID = self:GetFontStringID(index, fontStringSettingsOfAnchor)
+			relativeTo = self.fontStrings[relativeToID]
+		else
+			-- The index isn't valid for the current layout.
+			relativeTo = nil
+		end
+
+		if not relativeTo then
+			-- If the index was invalid, or by some incident of fuckery the fontString doesn't exist when it should,
+			-- show an error.
+			err = L["TEXTLAYOUTS_ERR_ANCHOR_BADINDEX"]:format(fontStringID, index, index, fontStringID)
+		end
+	else
+		-- If relativeTo doesn't start with "$$", then the anchor is relative to an icon module's frame.
+		-- The full name of the frame being anchored to will be as such:
+		relativeTo = icon:GetName() .. relativeTo
+
+
+		if not _G[relativeTo] then
+			if self.hasSetupOnce then
+				-- We have already setup once, and the frame doesn't exist.
+				-- This probably means that it never will, so show an error.
+				err = L["TEXTLAYOUTS_ERR_ANCHOR_BADANCHOR"]:format(anchorSettings.relativeTo:gsub("IconModule_", ""))
+
+				relativeTo = nil
+			else
+				-- Run the text setup again after the icon is updated if we were missing an anchor frame.
+				-- It might just be an issue with the module implementation order, although IconModule_Texts should always be last.
+				TMW:RegisterRunonceCallback("TMW_ICON_SETUP_POST", reSetup, self)
+
+				-- Temporarily anchor to the icon.
+				relativeTo = icon
+			end
+		end
+	end
+
+	return relativeTo, err
+end
+
+
+function Texts:CheckAnchorValidity()
+	local _, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(self.icon) 
+
+	for textID, fontStringSettings in TMW:InNLengthTable(layoutSettings) do
+		local fontStringID = self:GetFontStringID(textID, fontStringSettings)
+		local fontString = self.fontStrings[fontStringID]
+
+		for _, anchorSettings in TMW:InNLengthTable(fontStringSettings.Anchors) do
+			
+			-- Determine what the actual frame is for the anchor.
+			local relativeTo, err = self:GetAnchor(layoutSettings, anchorSettings, fontStringID)
+			
+			if err then
+				return err
+			end
+		end
+	end
+
+	return nil
+end
 
 function Texts:SetupForIcon(sourceIcon)
 	local icon = self.icon
@@ -790,54 +865,16 @@ function Texts:SetupForIcon(sourceIcon)
 				local setPoint = fontString.__MSQ_SetPoint or fontString.SetPoint
 				
 				for _, anchorSettings in TMW:InNLengthTable(fontStringSettings.Anchors) do
-					local relativeTo = anchorSettings.relativeTo
-					if relativeTo:sub(1, 2) == "$$" then
-						-- If relativeTo starts with "$$", then it points at another fontString by textID (index).
-						-- Get that index:
-						relativeTo = tonumber(relativeTo:sub(3))
-
-						if relativeTo <= layoutSettings.n then
-							-- The index is valid for the current layout's number of fontStrings.
-							local fontStringSettingsOfAnchor = layoutSettings[relativeTo]
-
-							-- Find the actual fontString being anchored to.
-							local relativeToID = self:GetFontStringID(relativeTo, fontStringSettingsOfAnchor)
-							relativeTo = self.fontStrings[relativeToID]
-						else
-							-- The index isn't valid for the current layout.
-							relativeTo = nil
-						end
-
-						if not relativeTo then
-							-- If the index was invalid, or by some incident of fuckery the fontString doesn't exist when it should,
-							-- throw an error.
-							TMW:Error("Couldn't find the anchor %q for icon %q, font string %s", anchorSettings.relativeTo, icon:GetName(), fontStringID)
-							relativeTo = icon
-						end
-					else
-						-- If relativeTo doesn't start with "$$", then the anchor is relative to an icon module's frame.
-						-- The full name of the frame being anchored to will be as such:
-						relativeTo = icon:GetName() .. relativeTo
-
-
-						if not _G[relativeTo] then
-							if self.hasSetupOnce then
-								-- We have already setup once, and the frame doesn't exist.
-								-- This probably means that it never will, so throw an error.
-								TMW:Error("Couldn't find the anchor %q for icon %q, font string %s", anchorSettings.relativeTo, icon:GetName(), fontStringID)
-							else
-								-- Run the text setup again after the icon is updated if we were missing an anchor frame.
-								-- It might just be an issue with the module implementation order, although IconModule_Texts should always be last.
-								TMW:RegisterRunonceCallback("TMW_ICON_SETUP_POST", reSetup, self)
-
-								-- Temporarily anchor to the icon.
-								relativeTo = icon
-							end
-						end
-					end
 					
-					-- Finally, set the point. We call it like this because we need to use Masque's SetPoint if it exists.
-					setPoint(fontString, anchorSettings.point, relativeTo, anchorSettings.relativePoint, anchorSettings.x, anchorSettings.y)
+					-- Determine what the actual frame is for the anchor.
+					local relativeTo, err = self:GetAnchor(layoutSettings, anchorSettings, fontStringID)
+					
+					if relativeTo then
+						-- Finally, set the point. We call it like this because we need to use Masque's SetPoint if it exists.
+						setPoint(fontString, anchorSettings.point, relativeTo, anchorSettings.relativePoint, anchorSettings.x, anchorSettings.y)
+
+						-- If there was an error, it will be shown in the icon editor - we won't print to chat.
+					end
 				end
 			else
 				queueMasqeSkin = true

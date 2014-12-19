@@ -292,8 +292,19 @@ function TEXT:LoadConfig()
 	-- Set the text of the dropdown to pick the text layout.
 	TellMeWhen_TextDisplayOptions.Layout.PickLayout:SetText("|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
 	
+
 	-- Set the error text for the entire layout (show if we are using a fallback layout)
 	TellMeWhen_TextDisplayOptions.Layout.Error:SetText(isFallback and L["TEXTLAYOUTS_ERROR_FALLBACK"] or nil)
+	
+	-- Validate the anchors for the text layout on the icon.
+	-- If there are invalid anchors, display an error message.
+	local IconModule_Texts = TMW.CI.icon:GetModuleOrModuleChild("IconModule_Texts")
+	if IconModule_Texts then
+		local err = IconModule_Texts:CheckAnchorValidity()
+		if err then
+			TellMeWhen_TextDisplayOptions.Layout.Error:SetText(err)
+		end
+	end
 
 	-- After we have updated the height of all the child frames, update the height of the parent frame.
 	TEXT:ResizeParentFrame()
