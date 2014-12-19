@@ -52,7 +52,7 @@ function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
 end
 function Module:Entry_Colorize_2(f, id)
 	if tostring(id):find("^$item") then
-		f.Background:SetVertexColor(.58, .51, .79, 1) -- color item slots warlock purple
+		f.Background:SetVertexColor(.23, .20, .29, 1) -- color item slots purpleish
 	end
 end
 function Module:Entry_AddToList_2(f, id)
@@ -96,7 +96,7 @@ function Module:Table_GetSorter()
 	if SUG.lastName:sub(1, 1) == "$" then
 		return self.Sorter_VarTex
 	else
-		return self.Sorter_Spells
+		return self.Sorter_Spells, self.Sorter_Bucket
 	end
 end
 

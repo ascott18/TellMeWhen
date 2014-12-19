@@ -49,7 +49,7 @@ function Module:Entry_AddToList_2(f, id)
 end
 function Module:Entry_Colorize_2(f, id)
 	if id == "GCD" then
-		f.Background:SetVertexColor(.58, .51, .79, 1) -- color item slots warlock purple
+		f.Background:SetVertexColor(.23, .20, .29, 1) -- color gcd purpleish
 	end
 end
 function Module.Sorter_Spells(a, b)

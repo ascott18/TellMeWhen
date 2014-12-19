@@ -116,16 +116,56 @@ local function progressCallback(countdown)
 	SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"] .. " " .. countdown)
 end
 
+local buckets_meta = {__index = function(t, k)
+	t[k] = {}
+	return t[k]
+end}
+local buckets = setmetatable({}, buckets_meta)
+
 function SUG:SuggestingComplete(doSort)
-	local numFramesNeeded = TMW.SUG:GetNumFramesNeeded()
 
 	SUG.SuggestionList.blocker:Hide()
 	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
 	if doSort and not SUG.CurrentModule.dontSort then
-		SUG.SuggestionList.blocker:Show()
-		SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"])
-		TMW.shellsortDeferred(SUGpreTable, SUG.CurrentModule:Table_GetSorter(), nil, SUG.SuggestingComplete, SUG, progressCallback)
-		return
+		local sorter, sorterBucket = SUG.CurrentModule:Table_GetSorter()
+
+		if sorterBucket then
+
+			-- Don't GC the buckets while we're using them
+			-- (idk if this would ever happen, but better safe than sorry)
+			buckets_meta.__mode = nil
+
+			-- Fill the bukkits.
+			sorterBucket(SUGpreTable, buckets)
+
+			-- All this data is in the buckets now, so wipe SUGpreTable
+			-- so we can fill it after we sort the buckets.
+			wipe(SUGpreTable)
+
+			for k, bucket in TMW:OrderedPairs(buckets) do
+				-- Sort the bucket.
+				sort(bucket, sorter)
+
+				-- Add the sorted bucket's contents to the main table.
+				for i = 1, #bucket do
+					SUGpreTable[#SUGpreTable + 1] = bucket[i]
+				end
+
+				-- We're done with this bucket. Prepare it for next use.
+				-- It might get reused, or it might get GC'd.
+				wipe(bucket)
+			end
+
+			-- Resume GC on the buckets.
+			buckets_meta.__mode = 'kv'
+
+		else
+			SUG.SuggestionList.blocker:Show()
+			SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"])
+
+			TMW.shellsortDeferred(SUGpreTable, sorter, nil, SUG.SuggestingComplete, SUG, progressCallback)
+			return
+		end
 	end
 
 	if suggestedForModule ~= SUG.CurrentModule then
@@ -143,6 +183,7 @@ function SUG:SuggestingComplete(doSort)
 	end
 
 	-- SUG:GetFrame() creates a frame if it doesn't exist.
+	local numFramesNeeded = TMW.SUG:GetNumFramesNeeded()
 	for id = 1, numFramesNeeded do
 		SUG:GetFrame(id)
 	end
@@ -697,39 +738,43 @@ end
 function Module:Table_Get()
 	return SpellCache_Cache
 end
-function Module.Sorter_Spells(a, b)
 
-	local haveA, haveB = EquivFirstIDLookup[a], EquivFirstIDLookup[b]
-	if haveA or haveB then
-		if haveA and haveB then
-			return a < b
+function Module.Sorter_Bucket(suggestions, buckets)
+	for i = 1, #suggestions do
+		local id = suggestions[i]
+
+		if id == "GCD" then
+			 -- Used by the spell suggestions for the spell CD condition.
+			 -- We put it here so that we can still use bucket sort.
+			tinsert(buckets[0.5], id)
+		elseif EquivFirstIDLookup[id] then
+			tinsert(buckets[1], id)
+		elseif PlayerSpells[id] then
+			tinsert(buckets[2], id)
+		elseif ClassSpellLookup[id] then
+			tinsert(buckets[3], id)
 		else
-			return haveA
+			local auraSoruce = AuraCache_Cache[id]
+			if auraSoruce == 2 then
+				tinsert(buckets[4], id)
+			elseif auraSoruce == 1 then
+				tinsert(buckets[5], id)
+			else
+				if SUGIsNumberInput then
+					tinsert(buckets[6 + floor(id/5000)], id)
+				else
+					local name = SpellCache_Cache[id]
+					local offset = strbyte(name) or 0
+					tinsert(buckets[6 + offset], id)
+				end
+			end
 		end
 	end
+end
 
-	--player's spells (pclass)
-	local haveA, haveB = PlayerSpells[a], PlayerSpells[b]
-	if (haveA and not haveB) or (haveB and not haveA) then
-		return haveA
-	end
-
-	--all player spells (any class)
-	local haveA, haveB = ClassSpellLookup[a], ClassSpellLookup[b]
-	if (haveA and not haveB) or (haveB and not haveA) then
-		return haveA
-	elseif not (haveA or haveB) then
-
-		local haveA, haveB = AuraCache_Cache[a], AuraCache_Cache[b] -- Auras
-		if haveA and haveB and haveA ~= haveB then -- if both are auras (kind doesnt matter) AND if they are different aura types, then compare the types
-			return haveA > haveB -- greater than is intended.. player auras are 2 while npc auras are 1, player auras should go first
-		elseif (haveA and not haveB) or (haveB and not haveA) then --otherwise, if only one of them is an aura, then prioritize the one that is an aura
-			return haveA
-		end
-		--if they both were auras, and they were auras of the same type (player, NPC) then procede on to the rest of the code to sort them by name/id
-	end
-
-	if SUGIsNumberInput then
+function Module.Sorter_Spells(a, b)
+	-- Due to bucket sort, if EquivFirstIDLookup[a], then it is true for b as well.
+	if SUGIsNumberInput or EquivFirstIDLookup[a] then
 		--sort by id
 		return a < b
 	else
@@ -748,7 +793,7 @@ function Module.Sorter_Spells(a, b)
 	end
 end
 function Module:Table_GetSorter()
-	return self.Sorter_Spells
+	return self.Sorter_Spells, self.Sorter_Bucket
 end
 function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check
