@@ -424,7 +424,7 @@ ConditionCategory:RegisterCondition(15.1, "RUNES2", {
 		if str == "" then
 			return [[true]]
 		else
-			return "print(" .. str:trim("+ ") .. ") c.Operator c.Level" 
+			return "" .. str:trim("+ ") .. " c.Operator c.Level" 
 		end
 	end,
 	events = function(ConditionObject, c)

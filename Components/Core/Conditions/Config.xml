@@ -26,7 +26,7 @@
 
 				local CndtGroup = self:GetParent():GetParent()
 				local conditionSettings = CndtGroup:GetConditionSettings()
-				local index = self:GetID()
+				local index = self.key
 
 				TMW.CNDT:ToggleBitFlag(conditionSettings, index)
 

@@ -973,7 +973,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 		for k, rune in pairs(CndtGroup.Runes) do
 			if type(rune) == "table" then
-				local index = rune:GetID()
+				local index = rune.key
 				rune:SetChecked(CNDT:GetBitFlag(conditionSettings, index))
 			end
 		end
