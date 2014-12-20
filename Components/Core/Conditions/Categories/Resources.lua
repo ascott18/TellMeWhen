@@ -410,7 +410,7 @@ local function runeFuncstrHelper(c)
 						str = str .. [[GetRuneCount(]]..runeID..[[) or 0)]]
 
 					elseif c.Type == "RUNESRECH" then
-						str = str .. [[1-(GetRuneCount(]]..runeID..[[) or 0))]]
+						str = str .. [[IsRuneRecharging(]]..runeID..[[,]] .. (runeID == runeID1 and runeID2 or runeID1) .. [[) and 1 or 0)]]
 
 					elseif c.Type == "RUNESLOCK" then
 						-- This is more efficient to be in a helper function (otherwise it would require 3 calls to GetRuneCooldown)
@@ -428,6 +428,46 @@ local function runeFuncstrHelper(c)
 	else
 		return "" .. str:trim("+ ") .. " c.Operator c.Level" 
 	end
+end
+local function IsRuneLocked(runeSlot, otherSlot)
+    local start = GetRuneCooldown(runeSlot)
+    if start == 0 then
+    	-- This rune is ready, so it isn't locked.
+        return false
+    else
+        local start2 = GetRuneCooldown(otherSlot)
+        if start2 == 0 then
+        	-- The other rune is ready, so this one is ready or recharging.
+            return false
+        end
+        if start > start2 then
+        	-- Both runes aren't ready, and this one has a start time after the other,
+        	-- so it must be locked.
+            return true
+        end
+    end
+    
+    return false
+end
+local function IsRuneRecharging(runeSlot, otherSlot)
+    local start = GetRuneCooldown(runeSlot)
+    if start == 0 then
+    	-- This rune is ready, so it isn't recharging.
+        return false
+    else
+        local start2 = GetRuneCooldown(otherSlot)
+        if start2 == 0 then
+        	-- The other rune is ready, and this one isn't, so it must be recharging.
+            return true
+        end
+        if start < start2 then
+        	-- Both runes aren't ready, and this one has a start time before the other,
+        	-- so it must be recharging (the other one is locked).
+            return true
+        end
+    end
+    
+    return false
 end
 
 ConditionCategory:RegisterCondition(15.1, "RUNES2", {
@@ -461,6 +501,7 @@ ConditionCategory:RegisterCondition(15.2, "RUNESRECH", {
 	Env = {
 		GetRuneType = GetRuneType,
 		GetRuneCount = GetRuneCount,
+		IsRuneRecharging = IsRuneRecharging,
 	},
 	funcstr = runeFuncstrHelper,
 	events = function(ConditionObject, c)
@@ -481,22 +522,7 @@ ConditionCategory:RegisterCondition(15.3, "RUNESLOCK", {
 	Env = {
 		GetRuneType = GetRuneType,
 		GetRuneCooldown = GetRuneCooldown,
-		IsRuneLocked = function(runeSlot, otherSlot)
-		    local start = GetRuneCooldown(runeSlot)
-		    if start == 0 then
-		        return false
-		    else
-		        local start2 = GetRuneCooldown(otherSlot)
-		        if start2 == 0 then
-		            return false
-		        end
-		        if start > start2 then
-		            return true
-		        end
-		    end
-		    
-		    return false
-		end,
+		IsRuneLocked = IsRuneLocked,
 	},
 	funcstr = runeFuncstrHelper,
 	events = function(ConditionObject, c)
