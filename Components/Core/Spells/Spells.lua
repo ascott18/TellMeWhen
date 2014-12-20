@@ -34,8 +34,23 @@ local strlowerCache = TMW.strlowerCache
 -- Spell String Parsing Functions
 ---------------------------------
 
--- These functions are as old as TMW itself (except for getSpellDurations). They have changed much over the years,
+-- These functions are as old as TMW itself (except for duration stuff). They have changed much over the years,
 -- but they're one of the few things that are still here in some form.
+
+
+local function splitSpellAndDuration(str)
+	local spell, duration = strmatch(str, "(.-):([%d:%s%.]*)$")
+	if not spell then
+		return str, 0
+	end
+	if not duration then
+		duration = 0
+	else
+		duration = tonumber( TMW.toSeconds(duration:trim(" :;.")) )
+	end
+
+	return spell, duration
+end
 
 local function parseSpellsString(setting, doLower, keepDurations)
 
@@ -46,8 +61,8 @@ local function parseSpellsString(setting, doLower, keepDurations)
 	end
 
 	--INSERT EQUIVALENCIES
-	 --start at the end of the table, that way we dont have to worry
-	 --about increasing the key of buffNames to work with every time we insert something
+	--start at the end of the table, that way we dont have to worry
+	--about increasing the key of buffNames to work with every time we insert something
 	local k = #buffNames
 	while k > 0 do
 		local eqtt = TMW:EquivToTable(buffNames[k]) -- Get the table form of the equivalency string
@@ -66,36 +81,25 @@ local function parseSpellsString(setting, doLower, keepDurations)
 	-- REMOVE DUPLICATES
 	TMW.tRemoveDuplicates(buffNames)
 
-	-- REMOVE SPELL DURATIONS (FOR UNIT COOLDOWNS/ICDs)
-	if not keepDurations then
-		for k, buffName in pairs(buffNames) do
-			if strfind(buffName, ":[%d:%s%.]*$") then
-				local new = strmatch(buffName, "(.-):[%d:%s%.]*$")
-				buffNames[k] = tonumber(new) or new -- Turn it into a number if it is one
-			end
-		end
-	end
 
-	-- Remove invalid SpellIDs and entries that the user has chosed to omit by using a "-" prefix.
+	-- Remove entries that the user has chosed to omit by using a "-" prefix.
 	local k = #buffNames
 	while k > 0 do
 		local v = buffNames[k]
-		if type(v) == "number" and v >= 2^31 then
-			-- Invalid spellID. Remove it to prevent integer overflow errors.
-			tremove(buffNames, k)
-			TMW.Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
-		elseif (type(v) == "string" and v:match("^%-")) or (type(v) == "number" and v < 0) then
+		if (type(v) == "string" and v:match("^%-")) or (type(v) == "number" and v < 0) then
 
 			tremove(buffNames, k)
 
 			local thingToRemove = tostring(v):match("^%-%s*(.*)"):lower()
+			local spellToRemove, durationToRemove = splitSpellAndDuration(thingToRemove)
 
 			local i = 1
 			local removed
 			while buffNames[i] do
 				local name = tostring(buffNames[i]):lower()
+				local spell, duration = splitSpellAndDuration(name)
 				
-				if thingToRemove == name then
+				if spellToRemove == spell and durationToRemove == duration then
 					tremove(buffNames, i)
 					removed = true
 				else
@@ -112,9 +116,31 @@ local function parseSpellsString(setting, doLower, keepDurations)
 		end
 	end
 
+	-- Remove invalid SpellIDs
+	for k = #buffNames, 1, -1 do
+		local v = buffNames[k]
+		local spell, duration = splitSpellAndDuration(v)
+		if (tonumber(spell) or 0) >= 2^31 or duration >= 2^31 then
+			-- Invalid spellID or duration. Remove it to prevent integer overflow errors.
+			tremove(buffNames, k)
+			TMW.Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
+		end
+	end
+
+
+	-- REMOVE SPELL DURATIONS (FOR UNIT COOLDOWNS/ICDs)
+	-- THIS MUST HAPPEN LAST or else the duration array and spell array can get mismatched.
+	if not keepDurations then
+		for k, buffName in pairs(buffNames) do
+			local spell, duration = splitSpellAndDuration(buffName)
+			buffNames[k] = tonumber(spell) or spell
+		end
+	end
+
 	return buffNames
 end
 parseSpellsString = TMW:MakeFunctionCached(parseSpellsString)
+
 
 local function getSpellNames(setting, doLower, firstOnly, toname, hash, allowRenaming)
 	local buffNames = parseSpellsString(setting, doLower, false)

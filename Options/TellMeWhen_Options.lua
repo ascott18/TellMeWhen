@@ -2821,24 +2821,24 @@ function IE:GetRealNames(Name)
 	local text = TMW:CleanString(Name)
 	
 	local CI_typeData = Types[CI.ics.Type]
-	local SoI = CI_typeData.checksItems and "item" or "spell"
+	local checksItems = CI_typeData.checksItems
 	
 	-- Note 11/12/12 (WoW 5.0.4) - caching causes incorrect results with "replacement spells" after switching specs like the corruption/immolate pair 
 	--if cachednames[CI.ics.Type .. SoI .. text] then return cachednames[CI.ics.Type .. SoI .. text] end
 
 	local tbl
-	if SoI == "item" then
+	if checksItems then
 		tbl = TMW:GetItems(text)
 	else
 		tbl = TMW:GetSpells(text).Array
 	end
-	local durations = CI_typeData.DurationSyntax and TMW:GetSpells(text).Durations
+	local durations = TMW:GetSpells(text).Durations
 
 	local Cache = TMW:GetModule("SpellCache"):GetCache()
 	
 	for k, v in pairs(tbl) do
 		local name, texture
-		if SoI == "item" then
+		if checksItems then
 			name = v:GetName() or v.what or ""
 			texture = v:GetIcon()
 		else
@@ -2864,27 +2864,25 @@ function IE:GetRealNames(Name)
 			texture = texture or GetSpellTexture(name)
 		end
 
-		if type(v) == "number" then
-			name = format("%s |cff7f6600(%d)|r", name, v)
+		local dur = ""
+		if CI_typeData.DurationSyntax or durations[k] > 0 then
+			dur = ": "..TMW:FormatSeconds(durations[k])
 		end
 
-		if not tiptemp[name] then --prevents duplicates.
+		local str = (texture and ("|T" .. texture .. ":0|t") or "") .. name .. dur
 
-			local dur = Types[CI.ics.Type].DurationSyntax and ": "..TMW:FormatSeconds(durations[k]).."" or ""
-
-			local str = (texture and ("|T" .. texture .. ":0|t") or "") .. name .. dur
-			tinsert(outTable,  str)
+		if type(v) == "number" and tonumber(name) ~= v then
+			str = str .. format(" |cff7f6600(%d)|r", v)
 		end
 
-		tiptemp[name] = true
+		tinsert(outTable,  str)
 	end
-	wipe(tiptemp)
 
 	return outTable
 end
 
 function GameTooltip:TMW_AddSpellBreakdown(tbl)
-	if #tbl <= 1 then
+	if #tbl <= 0 then
 		return
 	end
 
