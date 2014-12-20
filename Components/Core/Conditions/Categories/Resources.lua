@@ -27,10 +27,11 @@ Env.UnitHealthMax = UnitHealthMax
 Env.UnitPower = UnitPower
 Env.UnitPowerMax = UnitPowerMax
 
+local GetRuneCooldown = GetRuneCooldown
+
 
 TMW:RegisterUpgrade(62032, {
 	condition = function(self, condition)
-		-- Don't show these help messages for users who already use the settings.
 		if condition.Type == "RUNES" then
 			condition.Checked = false
 		end
@@ -346,10 +347,94 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 end)
 
 
+local function runeFuncstrHelper(c)
+	local str = ""
+	for i = 1, 6 do
+		--[[
+			[1] = blood
+			[2] = unholy
+			[3] = frost
+
+			[4] = death blood
+			[5] = death unholy
+			[6] = death frost
+		]]
+		local checked = CNDT:GetBitFlag(c, i)
+
+		if checked then
+			local death = false
+			local bothTypes
+			if i > 3 then
+				death = true
+				i = i - 3
+				bothTypes = CNDT:GetBitFlag(c, i)
+			else
+				bothTypes = CNDT:GetBitFlag(c, i+3)
+			end
+
+			-- An index of 2 corresponds to runes 3 and 4, for example.
+			-- An index of 3 corresponds to runes 5 and 6.
+			local runeID1 = i*2 - 1
+			local runeID2 = runeID1 + 1
+
+			for _, runeID in TMW:Vararg(runeID1, runeID2) do
+				-- If we aren't on death runes in our outer loop,
+				-- or if we are only checking one type of this rune slot, 
+				-- put the plus now.
+				if not (death and bothTypes) then
+					str = str .. [[ + ]]
+				end
+
+				-- If we're checking both runes of this slot, we don't need to check if
+				-- the rune is a death rune (because we would check again to see if it isn't a death rune),
+				-- which is completely redundant.
+				if not bothTypes then
+					str = str .. [[ (GetRuneType(]]..runeID..[[)]]
+					str = str .. (death and "=" or "~") .. [[=4 and ]]
+				end
+
+				-- If we aren't on death runes in our outer loop,
+				-- or if we are only checking one type of this rune slot, 
+				-- then check the count of this rune slot.
+
+				-- If we ARE on death runes, and we are checking both types of this slot,
+				-- then don't check for this, because it will already exist in the string,
+				-- which would cause double counting.
+				if not (death and bothTypes) then
+					if bothTypes then
+						-- We still need the parenthesis that was excluded earlier.
+						str = str .. "("
+					end
+
+					if c.Type == "RUNES2" then
+						str = str .. [[GetRuneCount(]]..runeID..[[) or 0)]]
+
+					elseif c.Type == "RUNESRECH" then
+						str = str .. [[1-(GetRuneCount(]]..runeID..[[) or 0))]]
+
+					elseif c.Type == "RUNESLOCK" then
+						-- This is more efficient to be in a helper function (otherwise it would require 3 calls to GetRuneCooldown)
+						-- We can't do simple comparison to see if the start time is in the future to check if a rune is locked
+						-- because this doesn't work all the time (sometimes a cooldown down rune will report a start slightly in the future
+						-- right when it starts).
+						str = str .. [[IsRuneLocked(]]..runeID..[[,]] .. (runeID == runeID1 and runeID2 or runeID1) .. [[) and 1 or 0)]]
+					end
+				end
+			end
+		end
+	end
+	if str == "" then
+		return [[true]]
+	else
+		return "" .. str:trim("+ ") .. " c.Operator c.Level" 
+	end
+end
+
 ConditionCategory:RegisterCondition(15.1, "RUNES2", {
 	text = L["CONDITIONPANEL_RUNES"],
-	tooltip = L["CONDITIONPANEL_RUNES_DESC2"],
+	tooltip = L["CONDITIONPANEL_RUNES_DESC3"] .. "\r\n\r\n" .. L["CONDITIONPANEL_RUNES_DESC_GENERIC"],
 	unit = false,
+	runesConfig = true,
 	min = 0,
 	max = 6,
 	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
@@ -357,76 +442,63 @@ ConditionCategory:RegisterCondition(15.1, "RUNES2", {
 		GetRuneType = GetRuneType,
 		GetRuneCount = GetRuneCount,
 	},
-	funcstr = function(c) -- sub-constructor function
-		local str = ""
-		for i = 1, 6 do
-			--[[
-				[1] = blood
-				[2] = unholy
-				[3] = frost
-
-				[4] = death blood
-				[5] = death unholy
-				[6] = death frost
-			]]
-			local checked = CNDT:GetBitFlag(c, i)
-
-			if checked then
-				local death = false
-				local bothTypes
-				if i > 3 then
-					death = true
-					i = i - 3
-					bothTypes = CNDT:GetBitFlag(c, i)
-				else
-					bothTypes = CNDT:GetBitFlag(c, i+3)
-				end
-
-				-- An index of 2 corresponds to runes 3 and 4, for example.
-				-- An index of 3 corresponds to runes 5 and 6.
-				local runeID1 = i*2 - 1
-				local runeID2 = runeID1 + 1
-
-				for _, runeID in TMW:Vararg(runeID1, runeID2) do
-					-- If we aren't on death runes in our outer loop,
-					-- or if we are only checking one type of this rune slot, 
-					-- put the plus now.
-					if not (death and bothTypes) then
-						str = str .. [[ + ]]
-					end
-
-					-- If we're checking both runes of this slot, we don't need to check if
-					-- the rune is a death rune (because we would check again to see if it isn't a death rune),
-					-- which is completely redundant.
-					if not bothTypes then
-						str = str .. [[ (GetRuneType(]]..runeID..[[)]]
-						str = str .. (death and "=" or "~") .. [[=4 and ]]
-					end
-
-					-- If we aren't on death runes in our outer loop,
-					-- or if we are only checking one type of this rune slot, 
-					-- then check the count of this rune slot.
-
-					-- If we ARE on death runes, and we are checking both types of this slot,
-					-- then don't check for this, because it will already exist in the string,
-					-- which would cause double counting.
-					if not (death and bothTypes) then
-						if bothTypes then
-							-- We still need the parenthesis that was excluded earlier.
-							str = str .. "("
-						end
-
-						str = str .. [[GetRuneCount(]]..runeID..[[) or 0)]]
-					end
-				end
-			end
-		end
-		if str == "" then
-			return [[true]]
-		else
-			return "" .. str:trim("+ ") .. " c.Operator c.Level" 
-		end
+	funcstr = runeFuncstrHelper,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE"),
+			ConditionObject:GenerateNormalEventString("RUNE_TYPE_UPDATE")
 	end,
+	hidden = pclass ~= "DEATHKNIGHT",
+})
+ConditionCategory:RegisterCondition(15.2, "RUNESRECH", {
+	text = L["CONDITIONPANEL_RUNESRECH"],
+	tooltip = L["CONDITIONPANEL_RUNESRECH_DESC"] .. "\r\n\r\n" .. L["CONDITIONPANEL_RUNES_DESC_GENERIC"],
+	unit = false,
+	runesConfig = true,
+	min = 0,
+	max = 6,
+	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost",
+	Env = {
+		GetRuneType = GetRuneType,
+		GetRuneCount = GetRuneCount,
+	},
+	funcstr = runeFuncstrHelper,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE"),
+			ConditionObject:GenerateNormalEventString("RUNE_TYPE_UPDATE")
+	end,
+	hidden = pclass ~= "DEATHKNIGHT",
+})
+ConditionCategory:RegisterCondition(15.3, "RUNESLOCK", {
+	text = L["CONDITIONPANEL_RUNESLOCK"],
+	tooltip = L["CONDITIONPANEL_RUNESLOCK_DESC"] .. "\r\n\r\n" .. L["CONDITIONPANEL_RUNES_DESC_GENERIC"],
+	unit = false,
+	runesConfig = true,
+	min = 0,
+	max = 6,
+	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy",
+	Env = {
+		GetRuneType = GetRuneType,
+		GetRuneCooldown = GetRuneCooldown,
+		IsRuneLocked = function(runeSlot, otherSlot)
+		    local start = GetRuneCooldown(runeSlot)
+		    if start == 0 then
+		        return false
+		    else
+		        local start2 = GetRuneCooldown(otherSlot)
+		        if start2 == 0 then
+		            return false
+		        end
+		        if start > start2 then
+		            return true
+		        end
+		    end
+		    
+		    return false
+		end,
+	},
+	funcstr = runeFuncstrHelper,
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE"),

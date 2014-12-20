@@ -969,7 +969,7 @@ end)
 
 -- Runes
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
-	if conditionData and conditionData.identifier == "RUNES2" then
+	if conditionData and conditionData.runesConfig then
 
 		for k, rune in pairs(CndtGroup.Runes) do
 			if type(rune) == "table" then
