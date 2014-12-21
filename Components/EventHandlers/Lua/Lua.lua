@@ -62,7 +62,7 @@ function Lua:OnRegisterEventHandlerDataTable()
 end
 
 TMW:RegisterLuaImportDetector(function(table, id, parentTableName)
-	if parentTableName == "Events" and table.Type == "Lua" and type(table.Lua) == "string" then
+	if parentTableName == "Events" and rawget(table, "Type") == "Lua" and type(rawget(table, "Lua")) == "string" then
 		
 		local code = table.Lua
 

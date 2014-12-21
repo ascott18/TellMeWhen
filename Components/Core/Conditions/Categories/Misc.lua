@@ -323,7 +323,7 @@ ConditionCategory:RegisterCondition(31,	 "LUA", {
 })
 
 TMW:RegisterLuaImportDetector(function(table)
-	if table.Type == "LUA" and table.Name ~= "" then
+	if rawget(table, "Type") == "LUA" and rawget(table, "Name") ~= "" then
 		return table.Name, L["LUACONDITION2"]
 	end
 end)
