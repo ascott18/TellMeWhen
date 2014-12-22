@@ -500,10 +500,6 @@ Icon.Update_Method = "auto"
 -- @param method [string] A string the indicates the update method that will be used for the icon. Must be either "auto" or "manual".
 -- @usage icon:SetUpdateMethod("manual")
 function Icon.SetUpdateMethod(icon, method)
-	if TMW.db.profile.DEBUG_ForceAutoUpdate then
-		method = "auto"
-	end
-
 	icon.Update_Method = method
 
 	if method == "auto" then

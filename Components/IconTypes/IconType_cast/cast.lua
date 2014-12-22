@@ -129,6 +129,8 @@ local function Cast_OnUpdate(icon, time)
 	local NameFirst, NameStringHash, Units, Interruptible =
 	icon.Spells.First, icon.Spells.StringHash, icon.Units, icon.Interruptible
 
+	local foundCast
+
 	for u = 1, #Units do
 		local unit = Units[u]
 		-- UnitSet:UnitExists(unit) is an improved UnitExists() that returns early if the unit
@@ -152,11 +154,26 @@ local function Cast_OnUpdate(icon, time)
 				start, endTime = start/1000, endTime/1000
 				local duration = endTime - start
 
+				foundCast = true
+
 				if not icon:YieldInfo(true, name, unit, iconTexture, start, duration, reverse) then
 					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
 					return
 				end
 			end
+		end
+	end
+
+	-- We do this stupid bullshit because sometimes, events seem to not fire
+	-- when a cast is interrupted or canceled. See ticket #1038
+	-- So, to counter this, we do auto updates until no cast is found on the icon,
+	-- and then switch to manual to become dormant until the next cast.
+	if icon.cast_canManualUpdate then
+		local updateMethod = icon.Update_Method
+		if foundCast then
+			icon:SetUpdateMethod("auto")
+		else
+			icon:SetUpdateMethod("manual")
 		end
 	end
 
@@ -199,10 +216,12 @@ function Type:Setup(icon)
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	
 
-
 	-- Setup events and update functions.
+	icon.cast_canManualUpdate = nil
+
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
+		icon.cast_canManualUpdate = true
 
 		for event in pairs(icon.UnitSet.updateEvents) do
 			icon:RegisterSimpleUpdateEvent(event)
