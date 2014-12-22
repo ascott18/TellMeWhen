@@ -921,7 +921,7 @@ function Texts:OnKwargsUpdated()
 				-- We let DogTag do the styling of the outline on our texts.
 				-- Convert the style setting to a DogTag for the same style.
 				local styleString = ""
-				if fontStringSettings.Outline == "OUTLINE" or fontStringSettings.Outline == "THICKOUTLINE" or fontStringSettings.Outline == "MONOCHROME" then
+				if fontStringSettings.Outline == "OUTLINE" or fontStringSettings.Outline == "THICKOUTLINE" then
 					styleString = styleString .. ("[%s]"):format(fontStringSettings.Outline)
 				end
 				

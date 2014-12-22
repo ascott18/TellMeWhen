@@ -996,7 +996,7 @@ textFontStringTemplate = {
 						[""] = L["OUTLINE_NO"],
 						OUTLINE = L["OUTLINE_THIN"],
 						THICKOUTLINE = L["OUTLINE_THICK"],
-						MONOCHROME = L["OUTLINE_MONOCHORME"],
+						--MONOCHROME = L["OUTLINE_MONOCHORME"],
 					},
 					style = "dropdown",
 					order = 1,
