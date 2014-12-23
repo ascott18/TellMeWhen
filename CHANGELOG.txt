@@ -8,7 +8,7 @@
 * Mark of Shadowmoon and Mark of Blackrock should now work with the Internal Cooldown icon type.
 * Fixed an error with power bar spell cost detection for German clients.
 * Removed the Monochrome font outline option because it causes crashes so often.
-* Cast icons no longer get stuck showing a spell cast in rare circumstances after the cast has been cancelled or interrupted.
+* Cast icons no longer get stuck showing a spell cast in rare circumstances after the cast has been canceled or interrupted.
 
 ===v7.2.2===
  * You can now easily clone an event handler by right-clicking it in the Notifications tab.
