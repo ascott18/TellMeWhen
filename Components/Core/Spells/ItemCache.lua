@@ -109,7 +109,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	for _, locale in pairs(TMW.IE.db.sv.locale) do
 		for timestamp in pairs(locale.ItemCache) do
 			if timestamp + CACHE_INVALIDATION_TIME < currentTimestamp then
-				Cache[timeStamp] = nil
+				locale.ItemCache[timestamp] = nil
 			end
 		end
 	end
@@ -142,7 +142,7 @@ local function cacheItem(itemID, name)
 	-- The item is in an old cache timesegment.
 	elseif not Cache[currentTimestamp][itemID] then
 		-- Remove the item from the old cache.
-		for timeStamp, items in pairs(Cache) do
+		for timestamp, items in pairs(Cache) do
 			items[itemID] = nil
 		end
 
