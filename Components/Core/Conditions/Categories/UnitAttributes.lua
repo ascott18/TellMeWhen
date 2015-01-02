@@ -493,8 +493,10 @@ function SPECS:UpdateUnitSpecs()
 
 		for i = 1, GetNumBattlefieldScores() do
 			name, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i)
-			local specID = classToken and talentSpec and specNameToRole[classToken][talentSpec]
-			Env.UnitSpecs[name] = specID
+			if name then
+				local specID = specNameToRole[classToken][talentSpec]
+				Env.UnitSpecs[name] = specID
+			end
 		end
 		
 		TMW:Fire("TMW_UNITSPEC_UPDATE")
