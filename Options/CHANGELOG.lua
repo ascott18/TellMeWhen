@@ -8,6 +8,7 @@ TMW.CHANGELOG = {
 [==[* The old Runes condition has been deprecated. In its place are 3 new conditions that should be much easier to use.]==],
 [==[* The Spell Cast Count condition has been deprecated. Its functionality can be replicated using the counter notification handler on a Combat Event icon.]==],
 [==[* Updated the Chi condition to support a max of 6.]==],
+[==[* You can now globally enable/disable global groups.]==],
 [==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed an issue that caused Unit Conditions to not work with special units (group, maintank, mainassist, and player names).]==],

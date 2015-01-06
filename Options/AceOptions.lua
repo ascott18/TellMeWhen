@@ -233,24 +233,8 @@ TMW.GroupConfigTemplate = {
 			order = 1,
 			args = {
 				Enabled = {
-					name = function(info)
-						local group = FindGroupFromInfo(info)
-
-						if group.Domain == "global" then
-							return L["UIPANEL_ENABLEGROUP_FORPROFILE"]:format(TMW.db:GetCurrentProfile())
-						elseif group.Domain == "profile" then
-							return L["UIPANEL_ENABLEGROUP"]
-						end
-					end,
-					desc = function(info)
-						local group = FindGroupFromInfo(info)
-
-						if group.Domain == "global" then
-							return L["UIPANEL_TOOLTIP_ENABLEGROUP_GLOBAL_DESC"]
-						elseif group.Domain == "profile" then
-							return L["UIPANEL_TOOLTIP_ENABLEGROUP"]
-						end
-					end,
+					name = L["UIPANEL_ENABLEGROUP"],
+					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
 
 					type = "toggle",
 					order = 1,
@@ -258,10 +242,32 @@ TMW.GroupConfigTemplate = {
 					set = function(info, val)
 						local group = FindGroupFromInfo(info)
 						
+						group:GetSettings().Enabled = val
+
+						group:Setup()
+					end,
+					get = function(info)
+						local group = FindGroupFromInfo(info)
+
+						return group:GetSettings().Enabled
+					end,
+				},
+				EnabledProfile = {
+					name = function(info)
+						local group = FindGroupFromInfo(info)
+
+						return L["UIPANEL_ENABLEGROUP_FORPROFILE"]:format(TMW.db:GetCurrentProfile())
+					end,
+					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP_GLOBAL_DESC"],
+
+					type = "toggle",
+					order = 1.5,
+					width = "full",
+					set = function(info, val)
+						local group = FindGroupFromInfo(info)
+						
 						if group.Domain == "global" then
 							group:GetSettings().EnabledProfiles[TMW.db:GetCurrentProfile()] = val
-						elseif group.Domain == "profile" then
-							group:GetSettings().Enabled = val
 						end
 
 						group:Setup()
@@ -271,11 +277,17 @@ TMW.GroupConfigTemplate = {
 
 						if group.Domain == "global" then
 							return group:GetSettings().EnabledProfiles[TMW.db:GetCurrentProfile()]
-						elseif group.Domain == "profile" then
-							return group:GetSettings().Enabled
 						end
 					end,
+
+					hidden = function(info)
+						local group = FindGroupFromInfo(info)
+
+						return group.Domain ~= "global"
+					end,
 				},
+
+
 				Name = {
 					name = L["UIPANEL_GROUPNAME"],
 					type = "input",

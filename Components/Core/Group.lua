@@ -379,7 +379,7 @@ end
 -- @return [boolean] True if the group is enabled; otherwise false.
 function Group.IsEnabled(group)
 	if group.Domain == "global" then
-		return group.EnabledProfiles[TMW.db:GetCurrentProfile()]
+		return group.Enabled and group.EnabledProfiles[TMW.db:GetCurrentProfile()]
 	else
 		return group.Enabled
 	end
