@@ -176,7 +176,7 @@ local function Value_OnUpdate(icon, time)
 				end
 				
 				local hasParts = hasParts[PowerType]
-				value, maxValue, valueColor = UnitPower(unit, PowerType, parts), UnitPowerMax(unit, PowerType, parts), PowerBarColor[PowerType]
+				value, maxValue, valueColor = UnitPower(unit, PowerType, hasParts), UnitPowerMax(unit, PowerType, hasParts), PowerBarColor[PowerType]
 				if PowerType == SPELL_POWER_ECLIPSE then
 					if value < 0 then
 						valueColor = valueColor.negative
