@@ -356,8 +356,8 @@ ConditionCategory:RegisterCondition(13,	 "ITEMRANGE", {
 ConditionCategory:RegisterCondition(14,	 "ITEMINBAGS", {
 	text = L["ITEMINBAGS"],
 	min = 0,
-	max = 50,
-	texttable = function(k) return format(ITEM_SPELL_CHARGES, k) end,
+	range = 25,
+	step = 0.1,
 	name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
 	useSUG = "itemwithslots",
 	unit = false,
