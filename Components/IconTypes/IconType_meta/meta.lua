@@ -188,7 +188,7 @@ TMW:RegisterCallback("TMW_ICON_UPDATED", function(event, icon)
 	for i = 1, #Icons do
 		local icon_meta = Icons[i]
 
-		if icon_meta == icon or icon_meta.IconsLookup[GUID] then
+		if icon_meta == icon or (not icon_meta:IsControlled() and icon_meta.IconsLookup[GUID]) then
 			icon_meta.metaUpdateQueued = true
 		end
 	end
@@ -200,7 +200,7 @@ TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 	for i = 1, #Icons do
 		local icon_meta = Icons[i]
 
-		if icon_meta.IconsLookup[icon:GetGUID()] then
+		if (not icon_meta:IsControlled() and icon_meta.IconsLookup[icon:GetGUID()]) then
 			Type:Setup(icon_meta)
 		end
 	end
@@ -212,7 +212,7 @@ TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
 	for i = 1, #Icons do
 		local icon_meta = Icons[i]
 
-		if icon_meta.IconsLookup[group:GetGUID()] then
+		if (not icon_meta:IsControlled() and icon_meta.IconsLookup[group:GetGUID()]) then
 			Type:Setup(icon_meta)
 		end
 	end
