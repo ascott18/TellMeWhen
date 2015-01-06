@@ -124,11 +124,10 @@ local function Cast_OnEvent(icon, event, arg1)
 end
 
 local function Cast_OnUpdate(icon, time)
+
 	-- Upvalue things that will be referenced a lot in our loops.
 	local NameFirst, NameStringHash, Units, Interruptible =
 	icon.Spells.First, icon.Spells.StringHash, icon.Units, icon.Interruptible
-
-	local foundCast
 
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -153,24 +152,12 @@ local function Cast_OnUpdate(icon, time)
 				start, endTime = start/1000, endTime/1000
 				local duration = endTime - start
 
-				-- See below for why we do this.
-				foundCast = true
-				icon:SetUpdateMethod("auto")
-
 				if not icon:YieldInfo(true, name, unit, iconTexture, start, duration, reverse) then
 					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
 					return
 				end
 			end
 		end
-	end
-
-	-- We do this stupid bullshit because sometimes, events seem to not fire
-	-- when a cast is interrupted or canceled. See ticket #1038
-	-- So, to counter this, we do auto updates until no cast is found on the icon,
-	-- and then switch to manual to become dormant until the next cast.
-	if icon.cast_canManualUpdate and not foundCast then
-		icon:SetUpdateMethod("manual")
 	end
 
 	-- Signal the group controller that we are at the end of our data harvesting.
@@ -212,12 +199,10 @@ function Type:Setup(icon)
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	
 
-	-- Setup events and update functions.
-	icon.cast_canManualUpdate = nil
 
+	-- Setup events and update functions.
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-		icon.cast_canManualUpdate = true
 
 		for event in pairs(icon.UnitSet.updateEvents) do
 			icon:RegisterSimpleUpdateEvent(event)
