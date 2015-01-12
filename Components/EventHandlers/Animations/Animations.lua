@@ -702,7 +702,7 @@ function AnimatedObject:Animations_OnUnused()
 	end
 end
 function AnimatedObject:Animations_Start(table)
-	local Animation = table.eventSettings.Animation
+	local Animation = table.Animation or table.eventSettings.Animation
 	local AnimationData = Animation and Animations.AllSubHandlersByIdentifier[Animation]
 
 	if AnimationData then
@@ -711,7 +711,7 @@ function AnimatedObject:Animations_Start(table)
 		table.Animation = Animation
 
 		-- Make sure not to overwrite this value.
-		-- This is used to distingusih inherited meta animations from original animations on a metaicon.
+		-- This is used to distinguish inherited meta animations from original animations on a metaicon.
 		table.originIcon = table.originIcon or self
 
 		if AnimationData.OnStart then
@@ -743,6 +743,8 @@ function AnimatedObject:Animations_Stop(arg1)
 		if AnimationData.OnStop then
 			AnimationData.OnStop(self, table)
 		end
+
+		TMW:Fire("TMW_ICON_ANIMATION_STOP", self, table)
 
 		if not next(animations) then
 			self:Animations_OnUnused()
@@ -795,11 +797,20 @@ TMW:RegisterCallback("TMW_ICON_ANIMATION_START", function(_, icon, table)
 	end
 end)
 
+TMW:RegisterCallback("TMW_ICON_ANIMATION_STOP", function(_, icon, table)
+	-- When an animation stops, find the next animation of the same type to play.
+	Animations:DetermineNextPlayingAnimation(icon, table.Animation)
+end)
+
 
 function Animations:HandleConditionStateChange(eventSettingsList, failed)
 	if not failed then
 		for eventSettings, icon in pairs(eventSettingsList) do
-			self:HandleEvent(icon, eventSettings)
+			-- These event settings just started passing,
+			-- but check to see if we should actually play them,
+			-- or if there is something earlier in the list that
+			-- should be played instead.
+			Animations:DetermineNextPlayingAnimation(icon, eventSettings.Animation)
 		end
 	else
 		for eventSettings, icon in pairs(eventSettingsList) do
@@ -807,6 +818,40 @@ function Animations:HandleConditionStateChange(eventSettingsList, failed)
 			if animationTable then
 				animationTable.HALTED = true
 				MapEventSettingsToAnimationTable[eventSettings] = nil
+			end
+		end
+	end
+end
+
+--- Determine what animation of the given animation type should be played.
+-- This method exists so that if an icon has multiple animations of the same type
+-- with WCSP triggers, the ones that are higher in the list are played first,
+-- instead of the most-recently-started-passing handler being the one to play.
+function Animations:DetermineNextPlayingAnimation(icon, Animation)
+	for i, eventSettings in TMW:InNLengthTable(icon.Events) do
+
+		if icon:Animations_Has() then
+			local existingAnimationTable = icon:Animations_Get()[Animation]
+			if existingAnimationTable
+				and not existingAnimationTable.HALTED
+				and not existingAnimationTable.eventSettings.Infinite
+				and existingAnimationTable.eventSettings.Event ~= "WCSP"
+			then
+				-- There is still an animation of the given type playing,
+				-- and it isn't a WCSP event, and it isn't an infinite duration animation,
+				-- so don't do anything.
+				return
+			end
+		end
+
+		-- This eventSettings is the animation type we're asking at.
+		if eventSettings.Type == "Animations" and eventSettings.Animation == Animation then
+			local ConditionObject = self.EventSettingsToConditionObject[eventSettings]
+
+			if ConditionObject and not ConditionObject.Failed then
+				-- We found a WCSP-triggered animation of the requested type, and its conditions are passing, so play it.
+				self:HandleEvent(icon, eventSettings)
+				return
 			end
 		end
 	end

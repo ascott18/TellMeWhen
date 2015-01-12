@@ -454,6 +454,7 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 
 	OnNewInstance_WhileConditions = function(self)
 		self.MapConditionObjectToEventSettings = {}
+		self.EventSettingsToConditionObject = {}
 		self.UpdatesQueued = {}
 
 		TMW:RegisterCallback("TMW_ICON_DISABLE", self)
@@ -468,6 +469,7 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 				if ic == icon then
 					ConditionObject:RequestAutoUpdates(eventSettings, false)
 					matches[eventSettings] = nil
+					self.EventSettingsToConditionObject[eventSettings] = nil
 				end
 			end
 		end
@@ -503,6 +505,10 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 				self.MapConditionObjectToEventSettings[ConditionObject] = matches
 			end
 			matches[eventSettings] = icon
+
+			-- Allow backwards lookups of this, too.
+			self.EventSettingsToConditionObject[eventSettings] = ConditionObject
+
 			
 			-- Listen for changes in condition state so that we can ask
 			-- the event handler to do what it needs to do.

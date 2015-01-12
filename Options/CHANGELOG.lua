@@ -17,6 +17,7 @@ TMW.CHANGELOG = {
 [==[* Removed the Monochrome font outline option because it causes crashes so often.]==],
 [==[* Resource Display icons should now correctly display partial resources.]==],
 [==[* Fixed some errors that happen when using meta icons as group controllers.]==],
+[==[* While Condition Set Passing-triggered animations now work on a priority system, with those notifications higher in the configuration list having priority over lower-ranked notifications if both are eligible to play at the same time.]==],
 [==[]==],
 [==[===v7.2.2===]==],
 [==[* You can now easily clone an event handler by right-clicking it in the Notifications tab.]==],
