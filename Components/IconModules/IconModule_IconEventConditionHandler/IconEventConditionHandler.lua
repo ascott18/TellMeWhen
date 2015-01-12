@@ -24,7 +24,8 @@ local Module = TMW:NewClass("IconModule_IconEventConditionHandler", "IconModule"
 Module:SetAllowanceForType("", false)
 Module.dontInherit = true
 
-Module:RegisterIconEvent(101, "OnCondition", {
+Module:RegisterIconEvent(3, "OnCondition", {
+	category = L["EVENT_CATEGORY_CONDITION"],
 	text = L["SOUND_EVENT_ONCONDITION"],
 	desc = L["SOUND_EVENT_ONCONDITION_DESC"],
 	settings = {

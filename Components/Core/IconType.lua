@@ -523,6 +523,7 @@ function IconType:HandleYieldedInfo(icon, iconToSet, ...)
 end
 
 IconType:RegisterIconEvent(100, "OnEventsRestored", {
+	category = L["EVENT_CATEGORY_MISC"],
 	text = L["SOUND_EVENT_ONEVENTSRESTORED"],
 	desc = L["SOUND_EVENT_ONEVENTSRESTORED_DESC"],
 })

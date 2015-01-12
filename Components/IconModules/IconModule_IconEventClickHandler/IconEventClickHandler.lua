@@ -23,10 +23,12 @@ Module:SetAllowanceForType("", false)
 Module.dontInherit = true
 
 Module:RegisterIconEvent(91, "OnLeftClick", {
+	category = L["EVENT_CATEGORY_CLICK"],
 	text = L["SOUND_EVENT_ONLEFTCLICK"],
 	desc = L["SOUND_EVENT_ONLEFTCLICK_DESC"],
 })
 Module:RegisterIconEvent(92, "OnRightClick", {
+	category = L["EVENT_CATEGORY_CLICK"],
 	text = L["SOUND_EVENT_ONRIGHTCLICK"],
 	desc = L["SOUND_EVENT_ONRIGHTCLICK_DESC"],
 })

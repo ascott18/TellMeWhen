@@ -83,10 +83,12 @@ do
 	TMW.Classes.Icon.attributes.realAlpha = 0
 
 	Processor:RegisterIconEvent(11, "OnShow", {
+		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONSHOW"],
 		desc = L["SOUND_EVENT_ONSHOW_DESC"],
 	})
 	Processor:RegisterIconEvent(12, "OnHide", {
+		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONHIDE"],
 		desc = L["SOUND_EVENT_ONHIDE_DESC"],
 		settings = {
@@ -94,6 +96,7 @@ do
 		},
 	})
 	Processor:RegisterIconEvent(13, "OnAlphaInc", {
+		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONALPHAINC"],
 		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
 		settings = {
@@ -109,6 +112,7 @@ do
 		end,
 	})
 	Processor:RegisterIconEvent(14, "OnAlphaDec", {
+		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONALPHADEC"],
 		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
 		settings = {
@@ -225,16 +229,19 @@ do
 	TMW.Classes.Icon.attributes.duration = 0
 
 	Processor:RegisterIconEvent(21, "OnStart", {
+		category = L["EVENT_CATEGORY_TIMER"],
 		text = L["SOUND_EVENT_ONSTART"],
 		desc = L["SOUND_EVENT_ONSTART_DESC"],
 	})
 
 	Processor:RegisterIconEvent(22, "OnFinish", {
+		category = L["EVENT_CATEGORY_TIMER"],
 		text = L["SOUND_EVENT_ONFINISH"],
 		desc = L["SOUND_EVENT_ONFINISH_DESC"],
 	})
 
 	Processor:RegisterIconEvent(23, "OnDuration", {
+		category = L["EVENT_CATEGORY_TIMER"],
 		text = L["SOUND_EVENT_ONDURATION"],
 		desc = L["SOUND_EVENT_ONDURATION_DESC"],
 		settings = {
@@ -497,6 +504,7 @@ do
 	end
 
 	Processor:RegisterIconEvent(31, "OnSpell", {
+		category = L["EVENT_CATEGORY_CHANGED"],
 		text = L["SOUND_EVENT_ONSPELL"],
 		desc = L["SOUND_EVENT_ONSPELL_DESC"],
 	})
@@ -654,6 +662,7 @@ do
 	end
 
 	Processor:RegisterIconEvent(51, "OnStack", {
+		category = L["EVENT_CATEGORY_CHANGED"],
 		text = L["SOUND_EVENT_ONSTACK"],
 		desc = L["SOUND_EVENT_ONSTACK_DESC"],
 		settings = {
@@ -754,6 +763,7 @@ do
 	end
 
 	Processor:RegisterIconEvent(41, "OnUnit", {
+		category = L["EVENT_CATEGORY_CHANGED"],
 		text = L["SOUND_EVENT_ONUNIT"],
 		desc = L["SOUND_EVENT_ONUNIT_DESC"],
 	})

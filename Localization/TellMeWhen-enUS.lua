@@ -1918,6 +1918,13 @@ L["LOSECONTROL_TYPE_MAGICAL_IMMUNITY"] = "Magical Immunity"
 L["LOSECONTROL_TYPE_DESC_USEUNKNOWN"] = "NOTE: It is not known if this loss of control type is used or not."
 
 
+L["EVENT_CATEGORY_CONDITION"] = "Conditions"
+L["EVENT_CATEGORY_MISC"] = "Miscellaneous"
+L["EVENT_CATEGORY_VISIBILITY"] = "Visibility"
+L["EVENT_CATEGORY_TIMER"] = "Timer"
+L["EVENT_CATEGORY_CHANGED"] = "Data Changed"
+L["EVENT_CATEGORY_CLICK"] = "Interaction"
+
 L["SOUND_EVENT_ONSHOW"] = "On Show"
 L["SOUND_EVENT_ONSHOW_DESC"] = "This event triggers when the icon becomes shown (even if %q is checked)."
 

@@ -180,6 +180,7 @@ function IconComponent:RegisterIconEvent(order, event, eventData)
 	TMW:ValidateType("settings", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.settings, "table;nil")
 	TMW:ValidateType("valueName", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.valueName, "string;nil")
 	TMW:ValidateType("valueSuffix", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.valueSuffix, "string;nil")
+	TMW:ValidateType("category", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.category, "string;nil")
 	TMW:ValidateType("conditionChecker", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.conditionChecker, "function;nil")
 	
 	eventData.event = event

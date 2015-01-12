@@ -435,7 +435,8 @@ TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 	-- God, this is a awful hack.
 	-- TODO: Make this not a hack.
 	if class.className == "IconType" then
-		class:RegisterIconEvent(1000, "WCSP", {
+		class:RegisterIconEvent(2, "WCSP", {
+			category = L["EVENT_CATEGORY_CONDITION"],
 			text = L["SOUND_EVENT_WHILECONDITION"],
 			desc = L["SOUND_EVENT_WHILECONDITION_DESC"],
 			settings = {

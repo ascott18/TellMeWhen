@@ -98,6 +98,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_CLEUOptions")
 
 Type:RegisterIconEvent(61, "OnCLEUEvent", {
+	category = L["ICONMENU_CLEU"],
 	text = L["SOUND_EVENT_ONCLEU"],
 	desc = L["SOUND_EVENT_ONCLEU_DESC"],
 })

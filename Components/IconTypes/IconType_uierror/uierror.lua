@@ -66,6 +66,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_UIErrorOptions")
 
 Type:RegisterIconEvent(61, "OnUIErrorEvent", {
+	category = L["ICONMENU_UIERROR"],
 	text = L["SOUND_EVENT_ONUIERROR"],
 	desc = L["SOUND_EVENT_ONUIERROR_DESC"],
 })

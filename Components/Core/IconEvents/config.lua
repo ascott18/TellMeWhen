@@ -444,10 +444,18 @@ function EVENTS:LoadEventPickerButtons()
 			EventPickers[i] = frame
 		end
 
+		frame.Header:SetText(eventData.category)
+
 		if i == 1 then
-			frame:SetPoint("TOP")
+			frame:SetPoint("TOP", 0, -18)
 		else
-			frame:SetPoint("TOP", previousFrame, "BOTTOM", 0, -1)
+			if EventPickers[i-1].Header:GetText() ~= eventData.category then
+				frame:SetPoint("TOP", previousFrame, "BOTTOM", 0, -20)
+				frame.Header:Show()
+			else
+				frame:SetPoint("TOP", previousFrame, "BOTTOM", 0, -1)
+				frame.Header:Hide()
+			end
 		end
 
 		frame:Show()
