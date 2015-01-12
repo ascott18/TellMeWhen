@@ -161,6 +161,7 @@ Module.stances = {
 		[115069] = 	GetSpellInfo(115069),	-- Sturdy Ox
 		[115070] = 	GetSpellInfo(115070),	-- Wise Serpent
 		[103985] = 	GetSpellInfo(103985),	-- Fierce Tiger
+		[154436] =  GetSpellInfo(154436),	-- Spirited Crane
 	},
 }
 function Module:Table_Get()
