@@ -166,15 +166,15 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 	if event == "SPELL_DAMAGE" or event == "SPELL_PERIODIC_DAMAGE" or event == "SWING_DAMAGE" or event == "RANGE_DAMAGE" then
 		local _, _, _, _, critical, _, _, _, multistrike = ...
 		if multistrike then
-			-- Fake an event that fires if there was a crit. Fire mages like this.
+			-- Fake an event that fires if there was a multistrike.
 			-- Fire it in addition to, not in place of, SPELL_DAMAGE.
 			CLEU_OnEvent(icon, _, t, event .. "_MULTISTRIKE", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 		end
 	elseif event == "SPELL_HEAL" or  event == "SPELL_PERIODIC_HEAL" then
 		local _, critical, multistrike = ...
 		if multistrike then
-			-- Fake an event that fires if there was a crit. Fire mages like this.
-			-- Fire it in addition to, not in place of, SPELL_DAMAGE.
+			-- Fake an event that fires if there was a multistrike.
+			-- Fire it in addition to, not in place of, SPELL_HEAL.
 			CLEU_OnEvent(icon, _, t, event .. "_MULTISTRIKE", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 		end
 	end
