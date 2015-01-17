@@ -10,6 +10,7 @@ TMW.CHANGELOG = {
 [==[* Updated the Chi condition to support a max of 6.]==],
 [==[* You can now globally enable/disable global groups.]==],
 [==[* While Condition Set Passing-triggered animations now work on a priority system, with those notifications higher in the configuration list having priority over lower-ranked notifications if both are eligible to play at the same time. This also prevents situations where no animations will play even though one should be.]==],
+[==[* You can now customize the color of the backdrop for bar groups.]==],
 [==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed an issue that caused Unit Conditions to not work with special units (group, maintank, mainassist, and player names).]==],

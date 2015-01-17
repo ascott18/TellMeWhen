@@ -1206,6 +1206,66 @@
 	</Slider>
 
 
+	<Button name="TellMeWhen_ColorButtonTemplate" virtual="true">
+		<Size x="20" y="20"/>
+
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_ColorButton"/>
+		</KeyValues>
+
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="background1">
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+						<Anchor point="RIGHT" relativePoint="TOP"/>
+						<Anchor point="BOTTOM" relativePoint="LEFT"/>
+					</Anchors>
+					<Color r="1.0" g="1.0" b="1.0"/>
+				</Texture>
+				<Texture parentKey="background2">
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+						<Anchor point="LEFT" relativePoint="TOP"/>
+						<Anchor point="BOTTOM" relativePoint="RIGHT"/>
+					</Anchors>
+					<Color r="0" g="0" b="0"/>
+				</Texture>
+				<Texture parentKey="background3">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT"/>
+						<Anchor point="RIGHT" relativePoint="BOTTOM"/>
+						<Anchor point="TOP" relativePoint="LEFT"/>
+					</Anchors>
+					<Color r="0" g="0" b="0"/>
+				</Texture>
+				<Texture parentKey="background4">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT"/>
+						<Anchor point="LEFT" relativePoint="BOTTOM"/>
+						<Anchor point="TOP" relativePoint="RIGHT"/>
+					</Anchors>
+					<Color r="1.0" g="1.0" b="1.0"/>
+				</Texture>
+
+				<Texture parentKey="swatch">
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+				</Texture>
+
+				<FontString parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
+
+
+
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
 		<Size y="15"/>
 		<Frames>

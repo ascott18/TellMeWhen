@@ -564,6 +564,9 @@ L["ICONMENU_BAROFFS"] = [[This amount will be added to the bar in order to offse
 
 Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt.]]
 
+L["ICONMENU_BAR_COLOR_BACKDROP"] = "Backdrop Color/Opacity"
+L["ICONMENU_BAR_COLOR_BACKDROP_DESC"] = "Configure the color and opacity of the backdrop beind the bar."
+
 L["ICONMENU_BAR_COLOR_START"] = "Start Color"
 L["ICONMENU_BAR_COLOR_START_DESC"] = "Color of the bar when the cooldown/duration has just begun."
 L["ICONMENU_BAR_COLOR_MIDDLE"] = "Halfway Color"

@@ -2504,7 +2504,7 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	
 	OnNewInstance_ColorButton = function(self, data)
-		assert(self.background and self.text and self:GetNormalTexture(), 
+		assert(self.background1 and self.text and self.swatch, 
 			"This setting frame doesn't inherit from the thing that it should have inherited from")
 
 		self.text:SetText(get(data.label or data.title))
@@ -2563,8 +2563,8 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		if settings then
 			local c = settings[self.setting]
 
-			self:GetNormalTexture():SetVertexColor(c.r, c.g, c.b, 1)
-			self.background:SetAlpha(c.a)
+			self.swatch:SetTexture(c.r, c.g, c.b, c.a)
+		--	self.background:SetAlpha(c.a)
 
 			self:CheckInteractionStates()
 		end

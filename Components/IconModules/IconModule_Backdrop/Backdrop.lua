@@ -23,8 +23,15 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local Backdrop = TMW:NewClass("IconModule_Backdrop", "IconModule")
 
 Backdrop:RegisterIconDefaults{
-	BackdropAlpha			= 0.5,
+	BackdropColor		= { r=0.2, g=0.2, b=0.2, a=0.5 },
 }
+
+TMW:RegisterUpgrade(72330, {
+	icon = function(self, ics)
+		ics.BackdropColor.a = ics.BackdropAlpha or 0.5
+	end,
+})
+
 
 Backdrop:RegisterConfigPanel_XMLTemplate(216, "TellMeWhen_BackdropOptions")
 
@@ -47,7 +54,9 @@ end
 
 function Backdrop:SetupForIcon(icon)
 	self.backdrop:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
-	self.backdrop:SetVertexColor(0.2, 0.2, 0.2, 1)
-	self.container:SetAlpha(icon.BackdropAlpha)
+	
+	local c = icon.BackdropColor
+	self.backdrop:SetVertexColor(c.r, c.b, c.g, 1)
+	self.container:SetAlpha(c.a)
 end
 	

@@ -151,12 +151,10 @@ TimerBar_BarDisplay:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, 
 	if TMW.Locked then
 		Module:UpdateTable_Register()
 		
-		Module.bar:SetAlpha(.95)
 	else
 		Module:UpdateTable_Unregister()
 		
 		Module.bar:SetValue(Module.Max)
-		Module.bar:SetAlpha(.6)
 
 		local co = Module.completeColor
 		Module.bar:SetStatusBarColor(
