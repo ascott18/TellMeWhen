@@ -496,7 +496,7 @@ ConditionCategory:RegisterCondition(15.2, "RUNESRECH", {
 	unit = false,
 	runesConfig = true,
 	min = 0,
-	max = 6,
+	max = 3,
 	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost",
 	Env = {
 		GetRuneType = GetRuneType,
@@ -517,7 +517,7 @@ ConditionCategory:RegisterCondition(15.3, "RUNESLOCK", {
 	unit = false,
 	runesConfig = true,
 	min = 0,
-	max = 6,
+	max = 3,
 	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy",
 	Env = {
 		GetRuneType = GetRuneType,
