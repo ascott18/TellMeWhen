@@ -921,6 +921,10 @@ function ColumnConfig:SetupConfig(subHandlerData)
 	local EventSettings = EVENTS:GetEventSettings()
 	local Frames = self.ConfigContainer.ConfigFrames
 
+	if not EventSettings then
+		return
+	end
+
 	assert(Frames, self.className .. " doesn't have a ConfigFrames table!")
 	
 	for configFrameIdentifier, configFrameData in pairs(self.ConfigFrameData) do
