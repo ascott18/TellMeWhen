@@ -612,16 +612,16 @@ end
 function CNDT:GetTableSubstitution(tbl)
 	TMW:ValidateType("CNDT:GetTableSubstitution(tbl)", "tbl", tbl, "table")
 
+	-- We used to check the format of the address explicitly,
+	-- but ticket 1076 demonstrates that sometimes it can be in the format
+	-- "table: 0000000312EBEB0" (the format I get), or "table: 0x1ba1bbb00" (from the ticket)
+	-- so instead we just check that the metatable exists.
 	local address = tostring(tbl)
-	if not address:match("^table: [0-9A-F]*$") then
-		if TMW.approachTable(tbl, getmetatable, "__tostring") then
-			error("can't substitute tables with __tostring metamethods: " .. address)
-		else
-			error("Unexpected bad table mem address: " .. address)
-		end
+	if TMW.approachTable(tbl, getmetatable, "__tostring") then
+		error("can't substitute tables with __tostring metamethods: " .. address)
 	end
 
-	local var = address:gsub(": ", "_")
+	local var = address:gsub(":", "_"):gsub(" ", "")
 	CNDT.Env.TABLES[var] = tbl
 
 	return "TABLES." .. var
