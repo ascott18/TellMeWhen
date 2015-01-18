@@ -764,7 +764,7 @@ function Module.Sorter_Bucket(suggestions, buckets)
 					tinsert(buckets[6 + floor(id/5000)], id)
 				else
 					local name = SpellCache_Cache[id]
-					local offset = strbyte(name) or 0
+					local offset = name and strbyte(name) or 0
 					tinsert(buckets[6 + offset], id)
 				end
 			end
