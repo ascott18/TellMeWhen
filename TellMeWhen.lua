@@ -959,7 +959,7 @@ function TMW:ValidateType(argN, methodName, var, reqType)
 		end
 
 
-		error(("Bad argument #%s to %q. %s expected, got %s"):format(argN, methodName, reqType, varTypeName), 3)
+		error(("Bad argument #%s to %q. %s expected, got %s (%s)"):format(argN, methodName, reqType, varTypeName, tostring(var) or "[noval]"), 3)
 	end
 end
 

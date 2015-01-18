@@ -610,13 +610,15 @@ end
 
 
 function CNDT:GetTableSubstitution(tbl)
-	if type(tbl) ~= "table" then
-		error("not a table")
-	end
+	TMW:ValidateType("CNDT:GetTableSubstitution(tbl)", "tbl", tbl, "table")
 
 	local address = tostring(tbl)
 	if not address:match("^table: [0-9A-F]*$") then
-		error("can't substitute tables with __tostring metamethods")
+		if TMW.approachTable(tbl, getmetatable, "__tostring") then
+			error("can't substitute tables with __tostring metamethods: " .. address)
+		else
+			error("Unexpected bad table mem address: " .. address)
+		end
 	end
 
 	local var = address:gsub(": ", "_")
