@@ -4,6 +4,10 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = {
 
+[==[===v7.2.4===]==],
+[==[====Bug Fixes====]==],
+[==[* Fixed an error that will happen when screen animations end.]==],
+[==[]==],
 [==[===v7.2.3===]==],
 [==[* The old Runes condition has been deprecated. In its place are 3 new conditions that should be much easier to use.]==],
 [==[* The Spell Cast Count condition has been deprecated. Its functionality can be replicated using the counter notification handler on a Combat Event icon.]==],

@@ -828,6 +828,11 @@ end
 -- with WCSP triggers, the ones that are higher in the list are played first,
 -- instead of the most-recently-started-passing handler being the one to play.
 function Animations:DetermineNextPlayingAnimation(icon, Animation)
+	-- If the animation isn't an icon animation, then don't do anything.
+	if not icon.IsIcon then
+		return
+	end
+
 	for i, eventSettings in TMW:InNLengthTable(icon.Events) do
 
 		if icon:Animations_Has() then
