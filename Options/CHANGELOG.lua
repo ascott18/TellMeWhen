@@ -7,6 +7,7 @@ TMW.CHANGELOG = {
 [==[===v7.2.4===]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed an error that will happen when screen animations end.]==],
+[==[* Cooldown icons that aren't set to show when usable should once again fire an On Finish event.]==],
 [==[]==],
 [==[===v7.2.3===]==],
 [==[* The old Runes condition has been deprecated. In its place are 3 new conditions that should be much easier to use.]==],

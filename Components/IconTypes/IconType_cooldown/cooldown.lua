@@ -262,6 +262,9 @@ local function SpellCooldown_OnUpdate(icon, time)
 		dataToUse = usableData
 	elseif unusableFound then
 		dataToUse = unusableData
+	elseif usableFound then
+		usableData.Alpha = 0
+		dataToUse = usableData
 	end
 	
 	if dataToUse then
