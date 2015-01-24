@@ -96,6 +96,8 @@ local function RegisterShownHiddenTimerCallback()
 end
 
 ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {
+	old = true,
+
 	text = L["CONDITIONPANEL_ICONSHOWNTIME"],
 	tooltip = L["CONDITIONPANEL_ICONSHOWNTIME_DESC"],
 	range = 30,
@@ -119,6 +121,8 @@ ConditionCategory:RegisterCondition(1.2,	"ICONSHOWNTME", {
 	end,
 })
 ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
+	old = true,
+	
 	text = L["CONDITIONPANEL_ICONHIDDENTIME"],
 	tooltip = L["CONDITIONPANEL_ICONHIDDENTIME_DESC"],
 	range = 30,

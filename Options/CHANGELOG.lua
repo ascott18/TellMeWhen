@@ -6,6 +6,7 @@ TMW.CHANGELOG = {
 
 [==[===v7.2.4===]==],
 [==[* Added Dialog as a possible sound channel.]==],
+[==[* The Icon Shown Time and Icon Hidden Time conditions are now deprecated in favor of using timer notification handlers.]==],
 [==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed an error that will happen when screen animations end.]==],
