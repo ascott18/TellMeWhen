@@ -757,7 +757,7 @@ L["ICONALPHAPANEL_FAKEHIDDEN_DESC"] = [[Forces the icon to be hidden all the tim
 
 |cff7fffff-|r The icon can still be checked by conditions of other icons.
 |cff7fffff-|r Meta icons can display this icon.
-|cff7fffff-|r This icon's events will still be processed.]]
+|cff7fffff-|r This icon's notifications will still be processed.]]
 L["ICONMENU_WPNENCHANTTYPE"] = "Weapon slot to monitor"
 L["ICONMENU_HIDEUNEQUIPPED"] = "Hide when slot lacks weapon"
 L["ICONMENU_HIDEUNEQUIPPED_DESC"] = "Check this to force the icon to be hidden if the weapon spot being checked does not have a weapon in it, or if that slot has a shield or an off-hand frill."
