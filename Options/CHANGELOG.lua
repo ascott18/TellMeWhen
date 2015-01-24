@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = {
 
 [==[===v7.2.4===]==],
+[==[* New icon type: Unit Condition Icon.]==],
 [==[* Added Dialog as a possible sound channel.]==],
 [==[* The Icon Shown Time and Icon Hidden Time conditions are now deprecated in favor of using timer notification handlers.]==],
 [==[]==],

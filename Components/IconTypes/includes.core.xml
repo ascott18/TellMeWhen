@@ -20,6 +20,7 @@
 <Script file="IconType_totem\totem.lua"/>
 <Script file="IconType_uierror\uierror.lua"/>
 <Script file="IconType_unitcooldown\unitcooldown.lua"/>
+<Script file="IconType_unitcondition\unitcondition.lua"/>
 <Script file="IconType_value\value.lua"/>
 <Script file="IconType_wpnenchant\wpnenchant.lua"/>
 

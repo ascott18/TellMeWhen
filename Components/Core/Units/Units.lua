@@ -117,6 +117,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
 		self.updateEvents = {PLAYER_ENTERING_WORLD = true,}
 		self.exposedUnits = {}
+		self.translatedUnits = {}
 		self.allUnitsChangeOnEvent = true
 
 		-- determine the operations that the set needs to stay updated
@@ -268,7 +269,8 @@ local UnitSet = TMW:NewClass("UnitSet"){
 	end,
 
 	Update = function(self)
-		local originalUnits, exposedUnits = self.originalUnits, self.exposedUnits
+		local originalUnits, exposedUnits, translatedUnits =
+		      self.originalUnits, self.exposedUnits, self.translatedUnits
 		local hasSpecialUnitRefs = self.hasSpecialUnitRefs
 		local mightHaveWackyUnitRefs = self.mightHaveWackyUnitRefs
 
@@ -299,6 +301,14 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 			if subbedUnit then
 				unit = subbedUnit
+			end
+
+			if subbedUnit ~= false then
+				-- If subbedUnit isn't false, then the unit didn't need to be subbed,
+				-- or it was successfully subbed.
+				translatedUnits[k] = unit
+			else
+				translatedUnits[k] = nil
 			end
 
 			local hasExistsEvent = UNITS.unitsWithExistsEvent[unit]

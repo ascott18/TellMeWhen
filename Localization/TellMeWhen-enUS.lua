@@ -347,6 +347,13 @@ L["ICONMENU_ICD_DESC"] = [=[Tracks the cooldown of a proc or a similar effect.
 L["ICONMENU_CAST"] = "Spell Cast"
 L["ICONMENU_CAST_DESC"] = [=[Tracks spell casts and channels.]=]
 
+L["ICONMENU_UNITCNDTIC"] = "Unit Condition Icon"
+L["ICONMENU_UNITCNDTIC_DESC"] = [=[Tracks the state of conditions on a number of units.
+
+The settings configured for this icon apply to each unit being checked.]=]
+L["ICONMENU_UNITFAIL"] = "Unit's Conditions Fail"
+L["ICONMENU_UNITSUCCEED"] = "Unit's Conditions Succeed"
+
 L["ICONMENU_CNDTIC"] = "Condition Icon"
 L["ICONMENU_CNDTIC_DESC"] = [=[Tracks the state of conditions.]=]
 L["ICONMENU_CNDTIC_ICONMENUTOOLTIP"] = "(%d |4Condition:Conditions;)"
