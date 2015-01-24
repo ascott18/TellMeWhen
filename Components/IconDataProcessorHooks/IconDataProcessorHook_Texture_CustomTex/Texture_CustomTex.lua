@@ -55,6 +55,11 @@ function Hook:PLAYER_EQUIPMENT_CHANGED()
 end
 
 function Hook:OnImplementIntoIcon(icon)
+	if icon:IsControlled() then
+		icon.CustomTex_OverrideTex = nil
+		return
+	end
+	
 	local CustomTex = icon.CustomTex:trim()
 	
 	if CustomTex:sub(1, 1) == "$" then
