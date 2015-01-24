@@ -5,6 +5,8 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = {
 
 [==[===v7.2.4===]==],
+[==[* Added Dialog as a possible sound channel.]==],
+[==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed an error that will happen when screen animations end.]==],
 [==[* Cooldown icons that aren't set to show when usable should once again fire an On Finish event.]==],

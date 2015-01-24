@@ -236,7 +236,7 @@ end
 
 ---------- Tests ----------
 local soundChannels = {
-	-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME
+	-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME, DIALOG_VOLUME
 	SFX = {
 		text = ENABLE_SOUNDFX,
 		enableCVar = "Sound_EnableSFX",
@@ -251,6 +251,11 @@ local soundChannels = {
 		text = AMBIENCE_VOLUME,
 		enableCVar = "Sound_EnableAmbience",
 		volumeCVar = "Sound_AmbienceVolume",
+	},
+	Dialog = {
+		text = DIALOG_VOLUME,
+		enableCVar = "Sound_EnableDialog",
+		volumeCVar = "Sound_DialogVolume",
 	},
 	Master = {
 		text = MASTER_VOLUME,

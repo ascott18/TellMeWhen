@@ -914,6 +914,7 @@ TMW.OptionsTable = {
 						SFX = SOUND_VOLUME,
 						Music = MUSIC_VOLUME,
 						Ambience = AMBIENCE_VOLUME,
+						Dialog = DIALOG_VOLUME,
 						Master = L["SOUND_CHANNEL_MASTER"],
 					},
 					order = 29,
