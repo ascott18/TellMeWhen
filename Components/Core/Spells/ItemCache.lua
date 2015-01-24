@@ -107,9 +107,11 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	
 	-- Delete old item caches.
 	for _, locale in pairs(TMW.IE.db.sv.locale) do
-		for timestamp in pairs(locale.ItemCache) do
-			if timestamp + CACHE_INVALIDATION_TIME < currentTimestamp then
-				locale.ItemCache[timestamp] = nil
+		if locale.ItemCache then -- May not exist if empty for non-current locales.
+			for timestamp in pairs(locale.ItemCache) do
+				if timestamp + CACHE_INVALIDATION_TIME < currentTimestamp then
+					locale.ItemCache[timestamp] = nil
+				end
 			end
 		end
 	end
