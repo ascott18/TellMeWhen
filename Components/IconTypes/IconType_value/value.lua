@@ -178,6 +178,9 @@ local function Value_OnUpdate(icon, time)
 				local hasParts = hasParts[PowerType]
 				value, maxValue, valueColor = UnitPower(unit, PowerType, hasParts), UnitPowerMax(unit, PowerType, hasParts), PowerBarColor[PowerType]
 				if PowerType == SPELL_POWER_ECLIPSE then
+					if GetEclipseDirection() == "none" then
+						value = 0
+					end
 					if value < 0 then
 						valueColor = valueColor.negative
 					else
