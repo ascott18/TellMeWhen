@@ -26,6 +26,15 @@ Backdrop:RegisterIconDefaults{
 	BackdropColor		= { r=0.2, g=0.2, b=0.2, a=0.5 },
 }
 
+TMW:RegisterUpgrade(72411, {
+	icon = function(self, ics)
+		-- These values were accidentally switched in code.
+		-- Swap them when upgrading to keep the user's old color.
+		ics.BackdropColor.g, ics.BackdropColor.b =
+		ics.BackdropColor.b, ics.BackdropColor.g
+	end,
+})
+
 TMW:RegisterUpgrade(72330, {
 	icon = function(self, ics)
 		ics.BackdropColor.a = ics.BackdropAlpha or 0.5
