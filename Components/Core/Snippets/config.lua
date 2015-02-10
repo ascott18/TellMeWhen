@@ -278,7 +278,7 @@ end
 -- IMPORT/EXPORT
 -- -----------------------
 
-local codesnippet = TMW.Classes.SharableDataType:New("codesnippet", 20)
+local codesnippet = TMW.Classes.SharableDataType:New("codesnippet", 17)
 
 function codesnippet:Import_ImportData(Item, domain)
 	assert(type(domain) == "string")

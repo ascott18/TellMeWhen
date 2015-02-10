@@ -295,7 +295,7 @@ end
 
 
 ---------- Database ----------
-local database = SharableDataType:New("database", 0)
+local database = SharableDataType:New("database", 40)
 
 
 
@@ -305,7 +305,7 @@ local database = SharableDataType:New("database", 0)
 
 
 ---------- Profile ----------
-local profile = SharableDataType:New("profile", 10)
+local profile = SharableDataType:New("profile", 30)
 profile.extrasMap = {"Name"}
 
 function profile:Import_ImportData(Item, profileName)
@@ -459,7 +459,7 @@ end
 
 
 ---------- Gloabl Groups ----------
-local globalgroups = SharableDataType:New("globalgroups", 11)
+local globalgroups = SharableDataType:New("globalgroups", 20)
 
 globalgroups.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("7.0.0+")
 function globalgroups:Export_SetButtonAttributes(editbox, info)
@@ -502,9 +502,10 @@ end)
 
 
 ---------- Group ----------
-local group = SharableDataType:New("group", 20)
+local group = SharableDataType:New("group", 10)
 group.numPerGroup = 10
 group.extrasMap = {"groupID"}
+group.spaceAfter = true
 
 local function remapGUIDs(data, GUIDmap)
 	for k, v in pairs(data) do
@@ -614,7 +615,7 @@ function group:Import_CreateMenuEntry(info, Item, doLabel)
 	info.tooltipTitle = format(L["fGROUP"], groupID)
 	info.tooltipText = 	(L["UIPANEL_ROWS"] .. ": " .. (gs.Rows or 1) .. "\r\n") ..
 					L["UIPANEL_COLUMNS"] .. ": " .. (gs.Columns or 4) ..
-					((gs.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
+					((gs.Enabled ~= false and "") or "\r\n(" .. L["DISABLED"] .. ")")
 
 	if doLabel then
 		info.text = L["fGROUP"]:format(info.text)
@@ -728,7 +729,6 @@ end)
 
 
 
-group.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("4.6.0+")
 
 function group:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
@@ -755,7 +755,7 @@ end
 
 
 ---------- Icon ----------
-local icon = SharableDataType:New("icon", 30)
+local icon = SharableDataType:New("icon", 1)
 icon.extrasMap = {}
 
 function icon:Import_ImportData(Item)
@@ -914,7 +914,7 @@ function icon:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local icon = EXPORTS.icon
 	
-	local text = L["fICON"]:format(icon.ID)
+	local text = L["fICON"]:format(icon.typeData.name)
 	info.text = text
 	info.tooltipTitle = text
 
@@ -1143,6 +1143,10 @@ function ExportDestination:HandleTopLevelMenu()
 			end
 			
 			TMW.DD:AddButton(info)
+
+			if dataType.spaceAfter then
+				TMW.DD:AddSpacer()
+			end
 		end
 	end
 end
