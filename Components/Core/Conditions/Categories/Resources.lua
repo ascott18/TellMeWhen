@@ -226,8 +226,7 @@ ConditionCategory:RegisterCondition(13.1, "ECLIPSE", {
 	funcstr = [[UnitPower(c.Unit, 8) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit))
 	end,
 	hidden = pclass ~= "DRUID",
 })

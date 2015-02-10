@@ -15,6 +15,7 @@ TMW.CHANGELOG = {
 [==[* Fixed ItemCache.lua:110 bad argument #1 to 'pairs' (table expected, got nil)]==],
 [==[* Fixed an issue that would break upgrades over locale-specific data.]==],
 [==[* Fixed colors of the backdrop being wrong (green and blue were swapped).]==],
+[==[* The Eclipse condition should now be much more responsive.]==],
 [==[]==],
 [==[===v7.2.3===]==],
 [==[* The old Runes condition has been deprecated. In its place are 3 new conditions that should be much easier to use.]==],
