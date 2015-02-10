@@ -56,7 +56,7 @@ function Backdrop:SetupForIcon(icon)
 	self.backdrop:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
 	
 	local c = icon.BackdropColor
-	self.backdrop:SetVertexColor(c.r, c.b, c.g, 1)
+	self.backdrop:SetVertexColor(c.r, c.g, c.b, 1)
 	self.container:SetAlpha(c.a)
 end
 	

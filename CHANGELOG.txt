@@ -8,6 +8,7 @@
  * Cooldown icons that aren't set to show when usable should once again fire an On Finish event.
  * Fixed ItemCache.lua:110 bad argument #1 to 'pairs' (table expected, got nil)
  * Fixed an issue that would break upgrades over locale-specific data.
+ * Fixed colors of the backdrop being wrong (green and blue were swapped).
 
 ===v7.2.3===
  * The old Runes condition has been deprecated. In its place are 3 new conditions that should be much easier to use.
