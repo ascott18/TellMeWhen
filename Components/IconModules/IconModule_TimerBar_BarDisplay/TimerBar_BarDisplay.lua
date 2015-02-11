@@ -105,7 +105,7 @@ function TimerBar_BarDisplay:SetupColors(icon, valueColor)
 			icon.BarDisplay_CompleteColor)
 
 	elseif valueColor then
-		if #valueColor == 3 then
+		if type(valueColor) == "table" and #valueColor == 3 then
 			self:SetColors(unpack(valueColor))
 		else
 			self:SetColors(

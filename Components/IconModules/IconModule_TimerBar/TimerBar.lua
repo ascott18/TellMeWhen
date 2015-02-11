@@ -42,7 +42,6 @@ function TimerBar:OnNewInstance(icon)
 	self.bar = bar
 	
 	self.texture = bar:CreateTexture(nil, "OVERLAY")
-	self.texture:SetAllPoints()
 	bar:SetStatusBarTexture(self.texture)
 	
 	self.Max = 1
@@ -54,7 +53,7 @@ function TimerBar:OnNewInstance(icon)
 	self.duration = 0
 	self.Offset = 0
 	
-	self:UpdateValue(1)
+	self:UpdateValue(true)
 end
 
 function TimerBar:OnEnable()
@@ -112,6 +111,11 @@ function TimerBar:UpdateValue(force)
 
 	if force or value ~= self.__value then
 		self.bar:SetValue(value)
+
+		-- This line is here to fix an issue with the bar texture
+		-- not being in the correct location/correct size if
+		-- the bar is modified while it, or a parent, is hidden.
+		self.texture:GetSize()
 
 		if value ~= 0 then
 			local completeColor = self.completeColor
