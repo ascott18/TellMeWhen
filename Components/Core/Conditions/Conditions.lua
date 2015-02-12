@@ -523,7 +523,7 @@ CNDT.Env = {
 	-- Don't make it weak because sometimes tables in use can get GCd
 	-- if their settings table has been removed but the condition
 	-- is still registered for updating.
-	TABLES = setmetatable(),--{}, {__mode='kv'}),
+	TABLES = {}, --setmetatable({}, {__mode='kv'}),
 	
 	-- These are here as a primitive security measure to prevent some of the most basic forms of malicious Lua conditions.
 	-- This list isn't even exhaustive, and it is in no way cracker-proof, but its a start.
