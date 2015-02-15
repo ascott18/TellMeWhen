@@ -328,7 +328,7 @@ function ClassSpellCache:TMW_DB_INITIALIZED()
 	
 	self:BuildClassSpellLookup()
 end
-TMW:RegisterCallback("TMW_DB_INITIALIZED", ClassSpellCache)
+TMW:RegisterRunonceCallback("TMW_DB_INITIALIZED", ClassSpellCache)
 
 
 

@@ -780,8 +780,8 @@ function IE:InitializeDatabase()
 		IE.db.global.TellMeWhenDBBackup = TellMeWhenDB
 	end
 
-	TMW:Fire("TMW_DB_INITIALIZED")
-	TMW:UnregisterAllCallbacks("TMW_DB_INITIALIZED")
+	TMW:Fire("TMW_IE_DB_INITIALIZED")
+	TMW:UnregisterAllCallbacks("TMW_IE_DB_INITIALIZED")
 end
 
 function IE:OnProfile(event, arg2, arg3)
