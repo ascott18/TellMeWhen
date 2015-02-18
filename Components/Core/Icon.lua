@@ -428,8 +428,9 @@ function Icon.ProcessQueuedEvents(icon)
 						conditionResult = conditionChecker(icon, EventSettings)
 						
 						if EventSettings.CndtJustPassed then
-							if conditionResult ~= EventSettingsWasPassingConditionMap[EventSettings] then
-								EventSettingsWasPassingConditionMap[EventSettings] = conditionResult
+							local uniqueKey = tostring(icon) .. tostring(EventSettings)
+							if conditionResult ~= EventSettingsWasPassingConditionMap[uniqueKey] then
+								EventSettingsWasPassingConditionMap[uniqueKey] = conditionResult
 							else
 								conditionResult = false
 							end

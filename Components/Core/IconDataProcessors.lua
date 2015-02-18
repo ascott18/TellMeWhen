@@ -374,7 +374,11 @@ do
 							(lastCheckedDuration > durationToCheck -- Make sure that we just reached this duration (so it doesn't continually fire)
 							or lastCheckedDuration < currentIconDuration -- or make sure that the duration increased since the last time we checked the triggers.
 						) then
-							icon.NextUpdateTime = 0
+							if icon:IsControlled() then
+								icon.group.Controller.NextUpdateTime = 0
+							else
+								icon.NextUpdateTime = 0
+							end
 						--	print(icon, "TRIGGER")
 							--icon:Update()
 							--icon:SetInfo("start, duration", icon.attributes.start, icon.attributes.duration)

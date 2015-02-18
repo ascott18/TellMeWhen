@@ -11,6 +11,7 @@
  * Fixed colors of the backdrop being wrong (green and blue were swapped).
  * The Eclipse condition should now be much more responsive.
  * Fixed: ClassSpellCache.lua line 281: Usage: GetClassInfo(ID)
+ * Fixed several issues when using On Duration Changed notification triggers on controlled groups.
  
 ===v7.2.3===
  * The old Runes condition has been deprecated. In its place are 3 new conditions that should be much easier to use.
