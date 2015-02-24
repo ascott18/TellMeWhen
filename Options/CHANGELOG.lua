@@ -14,7 +14,7 @@ TMW.CHANGELOG = {
 [==[* Cooldown icons that aren't set to show when usable should once again fire an On Finish event.]==],
 [==[* Fixed ItemCache.lua:110 bad argument #1 to 'pairs' (table expected, got nil)]==],
 [==[* Fixed an issue that would break upgrades over locale-specific data.]==],
-[==[* Fixed colors of the backdrop being wrong (green and blue were swapped).]==],
+[==[* Fixed colors of the backdrop for bar groups being wrong (green and blue were swapped).]==],
 [==[* The Eclipse condition should now be much more responsive.]==],
 [==[* Fixed: ClassSpellCache.lua line 281: Usage: GetClassInfo(ID)]==],
 [==[* Fixed several issues when using On Duration Changed notification triggers on controlled groups.]==],
