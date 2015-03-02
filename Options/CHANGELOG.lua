@@ -5,6 +5,8 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = {
 
 [==[===v7.2.5===]==],
+[==[* Tweaked some of the default text layouts so that they more closely resemble their pre-WoW-6.1 appearance.]==],
+[==[]==],
 [==[====Bug Fixes====]==],
 [==[* Removed some old code that was needed back when cooldown sweeps weren't inheriting their parent's opacity in the WoD beta. This was breaking cooldown sweeps on icons with Icon Alpha Flash animations where the alpha would go to 0.]==],
 [==[]==],

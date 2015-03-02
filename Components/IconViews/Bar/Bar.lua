@@ -49,6 +49,8 @@ TMW:RegisterDatabaseDefaults{
 					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],		
 					DefaultText = "[Spell] [Stacks:Hide(0):Paren]",
 					
+					Height = 1, -- This is needed in 6.1 - texts with a height of 0 default to wordwrapping now.
+
 					Justify = "LEFT",
 					Anchors = {
 						n = 2,

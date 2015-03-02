@@ -56,6 +56,8 @@ TMW:RegisterDatabaseDefaults{
 						},
 					},
 					
+					Height = 1, -- This is needed in 6.1 - texts with a height of 0 default to wordwrapping now.
+					
 					StringName		= L["TEXTLAYOUTS_DEFAULTS_BINDINGLABEL"],
 					DefaultText		= "",
 					SkinAs			= "HotKey",
