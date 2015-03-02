@@ -237,19 +237,13 @@ function CooldownSweep:UpdateCooldown()
 	local cd = self.cooldown
 	local duration = cd.duration
 	
-	local alpha = self.icon:GetEffectiveAlpha()
-	if duration > 0 and alpha > 0 then
+	if duration > 0 then
 		if ElvUI then
 			local E = ElvUI[1]
 			if E and E.OnSetCooldown then
 				if not self.noOCC and E.private.cooldown.enable then
 					E.OnSetCooldown(cd, cd.start, duration, cd.charges, cd.maxCharges)
 				elseif cd.timer then
-					-- Hey guys! Look at this inconsistent syntax for calling that is used! Isn't that fun?!?!? Colon on one, dot on the other!!
-					-- cd.timer is ElvUI's timer text overlay. We pass it in to this method instead of the cooldown sweep itself because... ...  ...
-					-- ...
-					-- ...
-					-- Consistency!
 					E:Cooldown_StopTimer(cd.timer)
 				end
 			end
@@ -278,10 +272,7 @@ function CooldownSweep:UpdateCooldown()
 		end
 
 		cd:SetCooldown(cd.start, duration)
-		cd:SetSwipeColor(0, 0, 0, min(0.8, alpha))
 		cd:Show()
-	else
-		cd:Hide()
 	end
 end
 
@@ -321,15 +312,3 @@ function CooldownSweep:REVERSE(icon, reverse)
 	self.cooldown:SetReverse(reverse)
 end
 CooldownSweep:SetDataListner("REVERSE")
-
-
-function CooldownSweep:REALALPHA(icon, alpha)
-	local IconModule_Alpha = icon:GetModuleOrModuleChild("IconModule_Alpha")
-	
-	if alpha == 0 or IconModule_Alpha.FakeHidden then
-		self.cooldown:Hide()
-	else
-		self:UpdateCooldown()
-	end
-end
-CooldownSweep:SetDataListner("REALALPHA")
