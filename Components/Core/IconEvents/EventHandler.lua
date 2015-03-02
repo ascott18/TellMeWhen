@@ -339,6 +339,10 @@ end
 
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
+	wipe(icon.EventHandlersSet)
+end)
+
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(_, icon)
 	-- Setup all of an icon's events.
 
 	wipe(icon.EventHandlersSet)
