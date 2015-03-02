@@ -93,7 +93,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 	for u = 1, #UnitSet.originalUnits do
 		local unit = Units[u]
 		if unit and UnitExists(unit) then
-			local succeeded = not Conditions[u].Failed
+			local succeeded = not Conditions or not Conditions[u].Failed
 			local status = unitStatus[unit]
 
 			local alpha = succeeded and icon.Alpha or icon.UnAlpha
