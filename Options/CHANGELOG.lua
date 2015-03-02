@@ -10,6 +10,7 @@ TMW.CHANGELOG = {
 [==[====Bug Fixes====]==],
 [==[* Removed some old code that was needed back when cooldown sweeps weren't inheriting their parent's opacity in the WoD beta. This was breaking cooldown sweeps on icons with Icon Alpha Flash animations where the alpha would go to 0.]==],
 [==[* Icon Events are now setup at the end of icon setup to avoid issues with animations missing required anchors.]==],
+[==[* Fixed a rare issue caused by unused parentheses on condition settings with less than 3 conditions.]==],
 [==[]==],
 [==[===v7.2.4===]==],
 [==[* New icon type: Unit Condition Icon.]==],

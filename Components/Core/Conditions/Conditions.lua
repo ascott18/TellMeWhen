@@ -980,6 +980,13 @@ function CNDT:CheckParentheses(settings)
 	-- Second return is a localized error message if they are invalid.
 
 	if settings.n < 3 then
+		-- Remove hanging parens from condition settings with less than 3 conditions.
+		-- This prevents issues with post-user condition modifying via ConditionObjectConstructor,
+		-- and just ensures general sanity.
+		for _, Condition in TMW:InNLengthTable(settings) do
+			Condition.PrtsBefore = 0
+			Condition.PrtsAfter = 0
+		end
 		return true
 	end
 	
