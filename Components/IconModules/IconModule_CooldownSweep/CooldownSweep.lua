@@ -273,6 +273,8 @@ function CooldownSweep:UpdateCooldown()
 
 		cd:SetCooldown(cd.start, duration)
 		cd:Show()
+	else
+		cd:Hide()
 	end
 end
 
