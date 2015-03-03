@@ -65,15 +65,6 @@ Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 
 
-TMW:RegisterDatabaseDefaults{
-	global = {
-		-- The default length of diminishing returns.
-		-- Supposedly, the actual behavior is that the server "ticks" every 5 seconds to clear DRs.
-		-- This happens at a min of 15 seconds and a max of 20 seconds.
-		DRDuration = 17
-	},
-}
-
 Type:RegisterIconDefaults{
 	-- The unit(s) to check for DRs
 	Unit					= "player", 
@@ -87,6 +78,16 @@ Type:RegisterIconDefaults{
 	-- Show the icon even when no units have been known to have an effect put on them.
 	ShowWhenNone			= false,
 }
+
+
+TMW:RegisterUpgrade(72506, {
+	global = function(self, ics)
+		-- In patch 6.1, this changed from being a range of 15-20 seconds
+		-- to being always 18 seconds.
+		-- http://us.battle.net/wow/en/forum/topic/16529192789#1
+		TMW.db.global.DRDuration = nil
+	end,
+})
 
 TMW:RegisterUpgrade(71035, {
 	icon = function(self, ics)
@@ -405,8 +406,6 @@ function Type:Setup(icon)
 		wipe(icon.DRInfo)
 	end
 	
-	-- Update this local from the global setting.
-	DRReset = TMW.db.global.DRDuration
 	
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
