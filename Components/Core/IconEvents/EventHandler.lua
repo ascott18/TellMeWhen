@@ -340,9 +340,7 @@ end
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 	wipe(icon.EventHandlersSet)
-end)
-
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(_, icon)
+	
 	-- Setup all of an icon's events.
 
 	wipe(icon.EventHandlersSet)
@@ -520,9 +518,9 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", self)
 
 
-			-- Check condition state right now so the animation is always up-to-date with the state.
-			-- This might end up not doing anything since this code is called during TMW_ICON_SETUP_PRE
-			self:CheckState(ConditionObject)
+			-- DO NOT check the state right here, since animations might be missing required components. 
+			-- just let it happen during the queued update for TMW_ICON_SETUP_POST
+			-- self:CheckState(ConditionObject)
 
 			-- Queue an update during TMW_ICON_SETUP_POST, 
 			-- because animations might be missing required icon components when this is triggered.

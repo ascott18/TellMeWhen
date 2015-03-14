@@ -4,6 +4,10 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = {
 
+[==[===v7.2.6===]==],
+[==[====Bug Fixes====]==],
+[==[* Implemented a better fix to animations missing required anchors, since the fix in v7.2.5 broke several things.]==],
+[==[]==],
 [==[===v7.2.5===]==],
 [==[* Tweaked some of the default text layouts so that they more closely resemble their pre-WoW-6.1 appearance.]==],
 [==[* Removed the diminishing returns duration setting, as it is now always 18 seconds.]==],
