@@ -75,9 +75,9 @@
 				end
 				TMW.SUG:SuggestingComplete()
 			</OnMouseWheel>
-		</Scripts>
+		</Scripts><!-- 
 		<NormalFont style="GameFontNormal"/>
-		<HighlightFont style="GameFontHighlight"/>
+		<HighlightFont style="GameFontHighlight"/> -->
 		<HighlightTexture file="Interface\BUTTONS\UI-Listbox-Highlight2" alphaMode="ADD" alpha="0.5">
 			<Anchors>
 				<Anchor point="TOPLEFT" y="-0.5"/>
@@ -108,6 +108,7 @@
 					</Anchors>
 				</FontString>
 				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT">
+					<Size y="1"/> <!-- Fix for WoW 6.1's issues with text anchoring and wrapping -->
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="2"/>
 						<Anchor point="RIGHT" relativeTo="$parentID" relativePoint="LEFT" x="-1"/>
