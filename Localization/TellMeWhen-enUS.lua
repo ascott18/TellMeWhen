@@ -541,7 +541,9 @@ L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only chec
 L["ICONMENU_SHOWTIMER"] = "Show timer"
 L["ICONMENU_SHOWTIMER_DESC"] = "Check this option to display the standard cooldown sweep animation on the icon."
 L["ICONMENU_SHOWTIMERTEXT"] = "Show timer text"
-L["ICONMENU_SHOWTIMERTEXT_DESC"] = "Check this option to display a textual display of the remaining cooldown/duration on the icon."
+L["ICONMENU_SHOWTIMERTEXT_DESC"] = [[Check this option to display a textual display of the remaining cooldown/duration on the icon.
+
+For this to work, you either need an addon like OmniCC installed, or you need to enable Blizzard's timer texts in the interface options, under the ActionBars category.]]
 L["ICONMENU_INVERTTIMER"] = "Invert shading"
 L["ICONMENU_INVERTTIMER_DESC"] = "Check this option to invert the shading effect of the timer."
 L["ICONMENU_SHOWTIMERTEXT_NOOCC"] = "Show ElvUI timer text"
