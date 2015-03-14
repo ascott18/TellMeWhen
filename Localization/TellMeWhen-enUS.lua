@@ -1358,6 +1358,8 @@ This includes the current flex raid tuning.]]
 L["CONDITIONPANEL_SWIMMING"] = "Swimming"
 L["CONDITIONPANEL_RESTING"] = "Resting"
 L["CONDITIONPANEL_INPETBATTLE"] = "In pet battle"
+L["CONDITIONPANEL_OVERRBAR"] = "Action bar overridden"
+L["CONDITIONPANEL_OVERRBAR_DESC"] = "Checks if you have some effect that override your primary action bar. This does not include pet battles."
 L["CONDITIONPANEL_MANAUSABLE"] = "Spell Usable (Mana/Energy/etc.)"
 L["CONDITIONPANEL_MANAUSABLE_DESC"] = [[Checks if a spell is usable base on how much primary resource (mana/energy/rage/focus/runic power/etc.) you have.
 

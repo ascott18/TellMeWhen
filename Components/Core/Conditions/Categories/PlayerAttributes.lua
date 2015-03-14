@@ -371,6 +371,25 @@ ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
 	end,
 })
 
+ConditionCategory:RegisterCondition(5.3, "OVERRBAR", {
+	text = L["CONDITIONPANEL_OVERRBAR"],
+	min = 0,
+	max = 1,
+	formatter = TMW.C.Formatter.BOOL,
+	nooperator = true,
+	unit = PLAYER,
+	icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		HasOverrideActionBar = HasOverrideActionBar,
+	},
+	funcstr = [[BOOLCHECK( HasOverrideActionBar() )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UPDATE_OVERRIDE_ACTIONBAR")
+	end,
+})
+
 local NumShapeshiftForms
 local GetShapeshiftForm = GetShapeshiftForm
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
