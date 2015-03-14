@@ -128,19 +128,19 @@
 		
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" parentKey="Background">
+				<Texture parentKey="Background">
 					<Color r="0.05" g="0.05" b="0.05" a="0.970"/>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
-				<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT">
+				<FontString inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOP" y="-4"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 			<Layer level="ARTWORK">
-				<FontString name="$parentInfoText" parentKey="InfoText" hidden="true" inherits="GameFontHighlight">
+				<FontString parentKey="InfoText" hidden="true" inherits="GameFontHighlight">
 					<Size x="180"/>
 					<Anchors>
 						<Anchor point="TOP" y="-45"/>
@@ -149,10 +149,10 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Slider name="$parentSpeed" inherits="TellMeWhen_SliderTemplate" parentKey="Speed" hidden="true">
+			<Slider inherits="TellMeWhen_SliderTemplate" parentKey="Speed" hidden="true">
 				<Size x="165" y="18"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentInfoText" relativePoint="BOTTOM" y="-25"/>
+					<Anchor point="TOP" relativeKey="$parent.InfoText" relativePoint="BOTTOM" y="-25"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -195,10 +195,10 @@
 					</OnHide>
 				</Scripts>
 			</Slider>
-			<StatusBar name="$parentStatus" parentKey="Status" hidden="true">
+			<StatusBar parentKey="Status" hidden="true">
 				<Size x="175" y="25"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentSpeed" relativePoint="BOTTOM" y="-15"/>
+					<Anchor point="TOP" relativeKey="$parent.Speed" relativePoint="BOTTOM" y="-15"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -235,7 +235,7 @@
 					</OnValueChanged>
 				</Scripts>
 			</StatusBar>
-			<Button name="$parentHelp" inherits="MainMenuBarMicroButton" hidden="false">
+			<Button parentKey="Help" inherits="MainMenuBarMicroButton" hidden="false">
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-5" y="16"/>
 				</Anchors>
@@ -260,7 +260,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentFinish" parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="true">
+			<Button parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="true">
 				<Size x="190" y="15"/>
 				<Anchors>
 					<Anchor point="BOTTOM" y="20"/>
@@ -301,6 +301,8 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
+				self:SetFrameLevel(100)
+
 				TMW.SUG.SuggestionList = self
 				self.Header:SetText(TMW.L["SUGGESTIONS"])
 				self.InfoText:SetText(TMW.L["CACHING"])
@@ -309,9 +311,6 @@
 				
 				local firstItem = TMW.SUG:GetFrame(1)
 				firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
-				firstItem.ClearAllPoints = TMW.NULLFUNC
-				firstItem.SetPoint = TMW.NULLFUNC
-				firstItem.SetSize = TMW.NULLFUNC
 
 				self.blocker:SetPoint("TOPLEFT", firstItem)
 

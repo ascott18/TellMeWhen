@@ -124,6 +124,7 @@ end}
 local buckets = setmetatable({}, buckets_meta)
 
 function SUG:SuggestingComplete(doSort)
+	SUG:SetStyle(false)
 
 	SUG.SuggestionList.blocker:Hide()
 	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
@@ -267,18 +268,29 @@ function SUG:SuggestingComplete(doSort)
 			end
 
 			f:Show()
-
-			if frameID == SUG.tabIndex then
-				f:GetScript("OnEnter")(f)
-			end
 		else
 			f:Hide()
+		end
+	end
+
+	if self.inline then
+		if #SUGpreTable >= numFramesNeeded then
+			SUG.SuggestionList:SetHeight(SUG:GetHeightForFrames(numFramesNeeded))
+		else
+			SUG.SuggestionList:SetHeight(SUG:GetHeightForFrames(#SUGpreTable))
 		end
 	end
 
 	-- If there is a frame that we are mousing over, update its tooltip
 	if SUG.mousedOver then
 		TMW:TT_Update(SUG.mousedOver)
+	else
+		-- Otherwise, show the tooltip of the current tab index
+		local f = SUG[SUG.tabIndex]
+		if f and f:IsVisible() then
+			f:GetScript("OnEnter")(f)
+			TMW.SUG.mousedOver = nil -- this gets set on the OnEnter, but it isn't correct.
+		end
 	end
 end
 
@@ -381,60 +393,62 @@ function SUG.strfindsug(str)
 end
 local strfindsug = SUG.strfindsug
 
-local KeyManager = CreateFrame("Frame", nil, UIParent)
-KeyManager:SetFrameStrata("FULLSCREEN")
-KeyManager:EnableKeyboard(true)
-KeyManager:Show()
-function KeyManager:HandlePress(key)
-	if key == "UP" then
-		if SUG.tabIndex > 1 then
-			SUG.tabIndex = SUG.tabIndex - 1
-		elseif SUG.offset > 0 then
-			SUG.offset = SUG.offset - 1
-		end
 
-	elseif key == "DOWN" then
-		if TMW.SUG[SUG.tabIndex + 1] and TMW.SUG[SUG.tabIndex + 1]:IsVisible() then
-			SUG.tabIndex = SUG.tabIndex + 1
+do	-- KeyManger
+	local KeyManager = CreateFrame("Frame", nil, UIParent)
+	KeyManager:SetFrameStrata("FULLSCREEN")
+	KeyManager:EnableKeyboard(true)
+	KeyManager:Show()
+	function KeyManager:HandlePress(key)
+		if key == "UP" then
+			if SUG.tabIndex > 1 then
+				SUG.tabIndex = SUG.tabIndex - 1
+			elseif SUG.offset > 0 then
+				SUG.offset = SUG.offset - 1
+			end
+
+		elseif key == "DOWN" then
+			if TMW.SUG[SUG.tabIndex + 1] and TMW.SUG[SUG.tabIndex + 1]:IsVisible() then
+				SUG.tabIndex = SUG.tabIndex + 1
+			else
+				SUG.offset = SUG.offset + 1
+			end
+		
 		else
-			SUG.offset = SUG.offset + 1
+			return
 		end
-	
-	else
-		return
+
+		SUG:SuggestingComplete()
 	end
 
-	SUG:SuggestingComplete()
-end
+	KeyManager:SetScript("OnKeyDown", function(self, key)
+		if SUG.SuggestionList:IsVisible() and (key == "UP" or key == "DOWN") then
+			KeyManager:SetPropagateKeyboardInput(false)
+			self.down = {key = key, start = TMW.time}
 
-KeyManager:SetScript("OnKeyDown", function(self, key)
-	if SUG.SuggestionList:IsVisible() and (key == "UP" or key == "DOWN") then
-		KeyManager:SetPropagateKeyboardInput(false)
-		self.down = {key = key, start = TMW.time}
-
-		self:HandlePress(key)
-	else
+			self:HandlePress(key)
+		else
+			KeyManager:SetPropagateKeyboardInput(true)
+		end
+	end)
+	KeyManager:SetScript("OnKeyUp", function(self, key)
 		KeyManager:SetPropagateKeyboardInput(true)
-	end
-end)
-KeyManager:SetScript("OnKeyUp", function(self, key)
-	KeyManager:SetPropagateKeyboardInput(true)
 
-	self.down = nil
-end)
-KeyManager:SetScript("OnUpdate", function(self, key)
-	if not self.down then
-		return
-	end
-	local data = self.down
+		self.down = nil
+	end)
+	KeyManager:SetScript("OnUpdate", function(self, key)
+		if not self.down then
+			return
+		end
+		local data = self.down
 
-	local repeatRate = 0.05
-	if (not data.last and data.start + 0.5 < TMW.time) or (data.last and data.last + repeatRate < TMW.time) then
-		self:HandlePress(data.key)
-		data.last = (data.last or TMW.time) + repeatRate
-	end
-end)
-
+		local repeatRate = 0.05
+		if (not data.last and data.start + 0.5 < TMW.time) or (data.last and data.last + repeatRate < TMW.time) then
+			self:HandlePress(data.key)
+			data.last = (data.last or TMW.time) + repeatRate
+		end
+	end)
+end
   
 
 ---------- EditBox Hooking ----------
@@ -548,8 +562,49 @@ function SUG:ColorHelp(frame)
 	GameTooltip:Show()
 end
 
+local INLINE_MAX_FRAMES = 10
 function SUG:GetNumFramesNeeded()
-	return floor((TMW.SUG.SuggestionList:GetHeight() + 5)/TMW.SUG[1]:GetHeight()) - 2
+	if self.inline then
+		return INLINE_MAX_FRAMES
+	end
+
+	return floor((TMW.SUG.SuggestionList:GetHeight() + 5)/TMW.SUG[1]:GetHeight()) - (self.inline and 1 or 2)
+end
+
+function SUG:GetHeightForFrames(numFrames)
+	return (numFrames + 1) * TMW.SUG[1]:GetHeight() - 12
+end
+
+function SUG:SetStyle(inline)
+	local firstItem = TMW.SUG:GetFrame(1)
+	self.inline = inline
+
+	local List = SUG.SuggestionList
+
+	if inline then
+
+		firstItem:SetPoint("TOP", 0, -6)
+		List.Header:Hide()
+		List.Help:Hide()
+
+		List:ClearAllPoints()
+		List:SetPoint("TOPLEFT", SUG.Box, "BOTTOMLEFT", 0, -2)
+		List:SetPoint("TOPRIGHT", SUG.Box, "BOTTOMRIGHT", 0, -2)
+		--List:SetParent(SUG.Box)
+		List:SetHeight(SUG:GetHeightForFrames(INLINE_MAX_FRAMES))
+		List.Background:SetTexture(0.02, 0.02, 0.02, 0.970)
+	else
+		firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
+
+		List:ClearAllPoints()
+		List:SetPoint("TOPLEFT", TMW.IE, "TOPRIGHT", 0, 1)
+		List:SetPoint("BOTTOMLEFT", TMW.IE, "BOTTOMRIGHT", 0, 1)
+		--List:SetParent(TMW.IE)
+
+		List.Header:Show()
+		List.Help:Show()
+		List.Background:SetTexture(0.05, 0.05, 0.05, 0.970)
+	end
 end
 
 function SUG:GetFrame(id)
