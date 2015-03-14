@@ -4,6 +4,9 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = {
 
+[==[===v7.3.0===]==],
+[==[* The suggestion list now works with arrow keys to pick what line tab will insert.]==],
+[==[]==],
 [==[===v7.2.6===]==],
 [==[====Bug Fixes====]==],
 [==[* Implemented a better fix to animations missing required anchors, since the fix in v7.2.5 broke several things.]==],

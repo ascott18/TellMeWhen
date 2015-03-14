@@ -39,14 +39,14 @@
 				GameTooltip:AddLine(" ")
 				if self.insert2 then
 					local text = TMW.L["SUG_INSERT_LEFT"]
-					if not TMW.SUG.CurrentModule.noTab and self:GetID() == 1 then
+					if not TMW.SUG.CurrentModule.noTab and self:GetID() == TMW.SUG.tabIndex then
 						text = text .. TMW.L["SUG_INSERT_TAB"]
 					end
 					GameTooltip:AddLine(first:format(text), 0, .5, 1, nil)
 					GameTooltip:AddLine(second:format(TMW.L["SUG_INSERT_RIGHT"]), 0, .5, 1, nil)
 				else
 					local text = TMW.L["SUG_INSERT_ANY"]
-					if not TMW.SUG.CurrentModule.noTab and self:GetID() == 1 then
+					if not TMW.SUG.CurrentModule.noTab and self:GetID() == TMW.SUG.tabIndex then
 						text = text .. TMW.L["SUG_INSERT_TAB"]
 					end
 					GameTooltip:AddLine(first:format(text), 0, .5, 1, nil)

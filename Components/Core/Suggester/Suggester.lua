@@ -105,6 +105,7 @@ function SUG:DoSuggest()
 	end
 
 	suggestedForModule = SUG.CurrentModule
+	SUG.tabIndex = 1
 	SUG:SuggestingComplete(1)
 end
 
@@ -189,7 +190,7 @@ function SUG:SuggestingComplete(doSort)
 	end
 	
 	for frameID = 1, #SUG do
-		local id
+		local id, key
 		while true do
 		
 			-- Here is how this horrifying line of code works:
@@ -197,7 +198,7 @@ function SUG:SuggestingComplete(doSort)
 			-- The plus 1 is so that there will be one blank frame at the end to show the user that they're at the end.
 			SUG.offset = min(SUG.offset, max(0, #SUGpreTable-numFramesNeeded+1))
 			
-			local key = frameID + SUG.offset
+			key = frameID + SUG.offset
 			id = SUGpreTable[key]
 			
 			if not id then
@@ -228,6 +229,7 @@ function SUG:SuggestingComplete(doSort)
 		f.overrideInsertName = nil
 		f.Background:SetVertexColor(0, 0, 0, 0)
 		f.Icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+		f:UnlockHighlight()
 
 		if SUG.CurrentModule.noTexture then
 			f.Icon:SetWidth(0.00001)
@@ -260,7 +262,15 @@ function SUG:SuggestingComplete(doSort)
 				Entry_Colorize(SUG.CurrentModule, f, id)
 			end
 
+			if frameID == SUG.tabIndex then
+				f:LockHighlight()
+			end
+
 			f:Show()
+
+			if frameID == SUG.tabIndex then
+				f:GetScript("OnEnter")(f)
+			end
 		else
 			f:Hide()
 		end
@@ -371,6 +381,61 @@ function SUG.strfindsug(str)
 end
 local strfindsug = SUG.strfindsug
 
+local KeyManager = CreateFrame("Frame", nil, UIParent)
+KeyManager:SetFrameStrata("FULLSCREEN")
+KeyManager:EnableKeyboard(true)
+KeyManager:Show()
+function KeyManager:HandlePress(key)
+	if key == "UP" then
+		if SUG.tabIndex > 1 then
+			SUG.tabIndex = SUG.tabIndex - 1
+		elseif SUG.offset > 0 then
+			SUG.offset = SUG.offset - 1
+		end
+
+	elseif key == "DOWN" then
+		if TMW.SUG[SUG.tabIndex + 1] and TMW.SUG[SUG.tabIndex + 1]:IsVisible() then
+			SUG.tabIndex = SUG.tabIndex + 1
+		else
+			SUG.offset = SUG.offset + 1
+		end
+	
+	else
+		return
+	end
+
+	SUG:SuggestingComplete()
+end
+
+KeyManager:SetScript("OnKeyDown", function(self, key)
+	if SUG.SuggestionList:IsVisible() and (key == "UP" or key == "DOWN") then
+		KeyManager:SetPropagateKeyboardInput(false)
+		self.down = {key = key, start = TMW.time}
+
+		self:HandlePress(key)
+	else
+		KeyManager:SetPropagateKeyboardInput(true)
+	end
+end)
+KeyManager:SetScript("OnKeyUp", function(self, key)
+	KeyManager:SetPropagateKeyboardInput(true)
+
+	self.down = nil
+end)
+KeyManager:SetScript("OnUpdate", function(self, key)
+	if not self.down then
+		return
+	end
+	local data = self.down
+
+	local repeatRate = 0.05
+	if (not data.last and data.start + 0.5 < TMW.time) or (data.last and data.last + repeatRate < TMW.time) then
+		self:HandlePress(data.key)
+		data.last = (data.last or TMW.time) + repeatRate
+	end
+end)
+
+  
 
 ---------- EditBox Hooking ----------
 local EditBoxHooks = {
@@ -415,9 +480,13 @@ local EditBoxHooks = {
 			SUG:NameOnCursor(1)
 		end
 	end,
+
 	OnTabPressed = function(self)
-		if self.SUG_Enabled and SUG[1] and SUG[1].insert and SUG[1]:IsVisible() and not SUG.CurrentModule.noTab and not SUG.SuggestionList.blocker:IsShown() then
-			SUG[1]:Click("LeftButton")
+		local i = SUG.tabIndex
+
+		if self.SUG_Enabled and SUG[i] and SUG[i].insert and SUG[i]:IsVisible()
+			and not SUG.CurrentModule.noTab and not SUG.SuggestionList.blocker:IsShown() then
+			SUG[i]:Click("LeftButton")
 			TMW.HELP:Hide("SUG_FIRSTHELP")
 		end
 	end,

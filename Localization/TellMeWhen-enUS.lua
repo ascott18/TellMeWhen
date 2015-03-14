@@ -465,10 +465,10 @@ Entering "none" or "blank" will cause the icon to show no texture.
 You can view a list of dynamic textures by typing "$" (dollar sign; ALT-036) in this box.
 
 |cff00d1ffCustom|r
-You can use your own textures too as long as they are placed in WoW's directory, are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, etc). Set this field to the path to the texture relative to WoW's root folder.]]
+You can use your own textures too as long as they are placed in a subfolder of WoW's directory, are .tga or .blp format, and have dimensions that are powers of 2 (32, 64, etc). Set this field to the path to the texture relative to WoW's root folder.]]
 
 L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"] = [[|cff00d1ffTroubleshooting|r
-|TNULL:0|t If this icon's texture is showing as solid green, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root and update the setting here accordingly to allow it to work correctly. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist.]]
+|TNULL:0|t If this icon's texture is showing as solid green, and your custom texture is in WoW's root folder, then please move it into a subdirectory of WoW's root, restart WoW, and update this setting to the new location. If the custom texture is set to a spell, and it is either a spell name or a spell that no longer exists, then you should try and change it to a spellID of a spell that does exist.]]
 
 
 L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
@@ -1887,13 +1887,13 @@ L["SUG_INSERT_LEFT"] = "|cff7fffffLeft-click|r"
 L["SUG_INSERT_RIGHT"] = "|cff7fffffRight-click|r"
 L["SUG_INSERT_TAB"] = " or |cff7fffffTab|r"
 
-L["SUG_INSERTNAME"] = "%s to insert as a name"
-L["SUG_INSERTID"] = "%s to insert as an ID"
-L["SUG_INSERTITEMSLOT"] = "%s to insert as an item slot ID"
+L["SUG_INSERTNAME"] = "%s to insert name"
+L["SUG_INSERTID"] = "%s to insert ID"
+L["SUG_INSERTITEMSLOT"] = "%s to insert item slot ID"
 L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
 L["SUG_INSERTTEXTSUB"] = "%s to insert tag"
 L["SUG_INSERTTUNITID"] = "%s to insert unitID"
-L["SUG_INSERTNAME"] = "%s to insert error message"
+L["SUG_INSERTERROR"] = "%s to insert error message"
 
 L["SUG_INSERTNAME_INTERFERE"] = [[%s to insert as a name
 
@@ -1909,13 +1909,15 @@ L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
 L["SUG_ATBEGINING"] = "Suggester: Match beginning"
 L["SUG_ATBEGINING_DESC"] = "If checked, the suggestion list will only display spells that start with the same name as the spell that is being typed in. Otherwise, it will match any part of a spell."
 
-L["SUG_FIRSTHELP_DESC"] = [[This is the suggestion list. You can insert entries from it to speed up configuration.
+L["SUG_FIRSTHELP_DESC"] = [[The suggestion list speeds up configuration.
 
-If you are inserting by name, you do not need to chose the entry with the correct ID - all that matters is that you pick the correct name.
+|cff7fffffClick|r, or use the |cff7fffffUp/Down|r arrow keys and |cff7fffffTab|r, to insert entries.
 
-In almost all cases, it is best to track things by name. You only need to track things by ID if there are multiple things with the same name but with different effects that could overlap.
+If you want a name, you don't need to choose the correct ID - just pick the correct name.
 
-Press tab at any time to insert the first entry shown. Right-click to insert an ID if you are typing a name, and vice-versa.]]
+Usually, it's best to track things by name. You only need to use IDs if there are different things with the same name that could overlap.
+
+|cff7fffffRight-click|r to insert an ID if you are typing a name, and vice-versa.]]
 
 
 

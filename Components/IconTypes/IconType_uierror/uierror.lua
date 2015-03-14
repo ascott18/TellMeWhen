@@ -200,6 +200,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		f.tooltiptitle = message
 
 		f.insert = message:trim()
+		f.overrideInsertName = L["SUG_INSERTERROR"]
 	end
 end)
 
