@@ -1138,3 +1138,58 @@ function CndtGroup:GetConditionData()
 end
 
 
+
+local SUG = TMW.SUG
+local strfindsug = SUG.strfindsug
+local Module = SUG:NewModule("conditions", SUG:GetModule("default"), "AceEvent-3.0")
+Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+function Module:Table_Get()
+	return CNDT.ConditionsByType
+end
+function Module.Sorter_ByName(a, b)
+	local nameA, nameB = CNDT.ConditionsByType[a].text, CNDT.ConditionsByType[b].text
+	if nameA == nameB then
+		--sort identical names by ID
+		return a < b
+	else
+		--sort by name
+		return nameA < nameB
+	end
+end
+function Module:Table_GetSorter()
+	return self.Sorter_ByName
+end
+function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	for identifier, conditionData in pairs(tbl) do
+		local text = conditionData.text
+		text = text and text:lower()
+		if conditionData:ShouldList() and text and (strfindsug(text) or strfind(text, SUG.lastName)) then
+			suggestions[#suggestions + 1] = identifier
+		end
+	end
+end
+function Module:Entry_AddToList_1(f, identifier)
+	local conditionData = CNDT.ConditionsByType[identifier]
+
+	f.Name:SetText(conditionData.text)
+
+	f.insert = identifier
+
+	f.tooltiptitle = conditionData.text
+	f.tooltiptext = conditionData.category.name
+	if conditionData.tooltip then
+		f.tooltiptext = f.tooltiptext .. "\r\n\r\n" .. conditionData.tooltip
+	end
+
+	f.Icon:SetTexture(get(conditionData.icon))
+	if conditionData.tcoords then
+		f.Icon:SetTexCoord(unpack(conditionData.tcoords))
+	end
+end
+function Module:Entry_OnClick(frame, button)
+	local cndtGroup = SUG.Box:GetParent():GetParent()
+	print(frame.insert)
+	cndtGroup:GetConditionSettings().Type = frame.insert
+end
+
