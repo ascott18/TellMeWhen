@@ -373,6 +373,7 @@ ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
 
 ConditionCategory:RegisterCondition(5.3, "OVERRBAR", {
 	text = L["CONDITIONPANEL_OVERRBAR"],
+	tooltip = L["CONDITIONPANEL_OVERRBAR_DESC"],
 	min = 0,
 	max = 1,
 	formatter = TMW.C.Formatter.BOOL,
