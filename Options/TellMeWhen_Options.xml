@@ -981,37 +981,25 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				
-				<Texture parentKey="borderTop">
-					<Size x="1" y="1"/>
-					<Color r="0.4" g="0.4" b="0.4" a="1"/>
-
+				<Texture parentKey="borderTop" inherits="TellMeWhen_InputBoxTemplateBorder">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="-2"/>
 						<Anchor point="TOPRIGHT"/>
 					</Anchors>
 				</Texture>
-				<Texture parentKey="borderBottom">
-					<Size x="1" y="1"/>
-					<Color r="0.4" g="0.4" b="0.4" a="1"/>
-
+				<Texture parentKey="borderBottom" inherits="TellMeWhen_InputBoxTemplateBorder">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="-2" y="-1"/>
 						<Anchor point="BOTTOMRIGHT" y="-1"/>
 					</Anchors>
 				</Texture>
-				<Texture parentKey="borderLeft">
-					<Size x="1" y="1"/>
-					<Color r="0.4" g="0.4" b="0.4" a="1"/>
-
+				<Texture parentKey="borderLeft" inherits="TellMeWhen_InputBoxTemplateBorder">
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeKey="$parent.borderTop" relativePoint="BOTTOMLEFT"/>
 						<Anchor point="BOTTOMLEFT" relativeKey="$parent.borderBottom" relativePoint="TOPLEFT"/>
 					</Anchors>
 				</Texture>
-				<Texture parentKey="borderRight">
-					<Size x="1" y="1"/>
-					<Color r="0.4" g="0.4" b="0.4" a="1"/>
-
+				<Texture parentKey="borderRight" inherits="TellMeWhen_InputBoxTemplateBorder">
 					<Anchors>
 						<Anchor point="TOPRIGHT" relativeKey="$parent.borderTop" relativePoint="BOTTOMRIGHT"/>
 						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.borderBottom" relativePoint="TOPRIGHT"/>
@@ -1047,7 +1035,7 @@
 			</OnEditFocusLost>
 			<OnEditFocusGained>
 				EditBox_HighlightText(self)
-				self.BackgroundText:SetText(nil)
+			--	self.BackgroundText:SetText(nil)
 			</OnEditFocusGained>
 			<OnEnterPressed>
 				if self:IsMultiLine() and IsModifierKeyDown() then

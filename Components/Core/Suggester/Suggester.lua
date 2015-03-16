@@ -124,8 +124,6 @@ end}
 local buckets = setmetatable({}, buckets_meta)
 
 function SUG:SuggestingComplete(doSort)
-	SUG:SetStyle(false)
-
 	SUG.SuggestionList.blocker:Hide()
 	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
 	if doSort and not SUG.CurrentModule.dontSort then
@@ -274,6 +272,7 @@ function SUG:SuggestingComplete(doSort)
 	end
 
 	if self.inline then
+		print(#SUGpreTable, numFramesNeeded)
 		if #SUGpreTable >= numFramesNeeded then
 			SUG.SuggestionList:SetHeight(SUG:GetHeightForFrames(numFramesNeeded))
 		else
@@ -374,6 +373,8 @@ function SUG:NameOnCursor(isClick)
 
 		SUG.offset = 0
 		SUG:DoSuggest()
+	else
+		SUG:SuggestingComplete()
 	end
 
 	-- Create a new table so that old one, which is now nearly 2MB in size, can be GC'd.
@@ -475,6 +476,7 @@ local EditBoxHooks = {
 			SUG.Box = self
 			SUG.CurrentModule = newModule
 			SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
+			SUG:SetStyle(self.SUG_inline)
 			SUG:NameOnCursor()
 		end
 	end,
@@ -507,7 +509,11 @@ local EditBoxHooks = {
 }
 
 --- Enable the suggestion list on an editbox.
-function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
+-- @param editbox [EditBox] The editbox to enable the suggestion list on.
+-- @param inputType [string] The name of the suggestion list module to use.
+-- @param onlyOneEntry [boolean|nil] True to have the suggestion list hide after inserting an entry.
+-- @param inline [boolean|nil] True to cause the suggestion list to display underneath the editbox. Otherwise, will be attached to the IconEditor.
+function SUG:EnableEditBox(editbox, inputType, onlyOneEntry, inline)
 	editbox.SUG_Enabled = 1
 
 	inputType = TMW.get(inputType)
@@ -516,6 +522,7 @@ function SUG:EnableEditBox(editbox, inputType, onlyOneEntry)
 		return SUG:DisableEditBox(editbox)
 	end
 	editbox.SUG_type = inputType
+	editbox.SUG_inline = inline
 	editbox.SUG_onlyOneEntry = onlyOneEntry
 
 	if not editbox.SUG_hooked then
@@ -572,7 +579,7 @@ function SUG:GetNumFramesNeeded()
 end
 
 function SUG:GetHeightForFrames(numFrames)
-	return (numFrames + 1) * TMW.SUG[1]:GetHeight() - 12
+	return (numFrames * TMW.SUG[1]:GetHeight()) + 6
 end
 
 function SUG:SetStyle(inline)
@@ -583,22 +590,26 @@ function SUG:SetStyle(inline)
 
 	if inline then
 
-		firstItem:SetPoint("TOP", 0, -6)
+		firstItem:SetPoint("TOP", 0, -3)
 		List.Header:Hide()
 		List.Help:Hide()
 
+		List:SetFrameLevel(100)
+		List:SetScale(0.85)
 		List:ClearAllPoints()
 		List:SetPoint("TOPLEFT", SUG.Box, "BOTTOMLEFT", 0, -2)
-		List:SetPoint("TOPRIGHT", SUG.Box, "BOTTOMRIGHT", 0, -2)
+		--List:SetPoint("TOPRIGHT", SUG.Box, "BOTTOMRIGHT", 0, -2)
 		--List:SetParent(SUG.Box)
 		List:SetHeight(SUG:GetHeightForFrames(INLINE_MAX_FRAMES))
 		List.Background:SetTexture(0.02, 0.02, 0.02, 0.970)
 	else
 		firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
 
+		List:SetFrameLevel(TMW.IE:GetFrameLevel() + 1)
+		List:SetScale(1)
 		List:ClearAllPoints()
-		List:SetPoint("TOPLEFT", TMW.IE, "TOPRIGHT", 0, 1)
-		List:SetPoint("BOTTOMLEFT", TMW.IE, "BOTTOMRIGHT", 0, 1)
+		List:SetPoint("TOPLEFT", TMW.IE, "TOPRIGHT", 1, 0)
+		List:SetPoint("BOTTOMLEFT", TMW.IE, "BOTTOMRIGHT", 1, 0)
 		--List:SetParent(TMW.IE)
 
 		List.Header:Show()
@@ -609,17 +620,19 @@ end
 
 function SUG:GetFrame(id)
 	local Suggest = TMW.SUG.SuggestionList
-	if TMW.SUG[id] then
-		return TMW.SUG[id]
+	local f = TMW.SUG[id]
+	
+	if not f then
+		f = CreateFrame("Button", Suggest:GetName().."Item"..id, Suggest, "TellMeWhen_SpellSuggestTemplate", id)
+		TMW.SUG[id] = f
+		
+		if TMW.SUG[id-1] then
+			f:SetPoint("TOPRIGHT", TMW.SUG[id-1], "BOTTOMRIGHT", 0, 0)
+			f:SetPoint("TOPLEFT", TMW.SUG[id-1], "BOTTOMLEFT", 0, 0)
+		end
 	end
 	
-	local f = CreateFrame("Button", Suggest:GetName().."Item"..id, Suggest, "TellMeWhen_SpellSuggestTemplate", id)
-	TMW.SUG[id] = f
-	
-	if TMW.SUG[id-1] then
-		f:SetPoint("TOPRIGHT", TMW.SUG[id-1], "BOTTOMRIGHT", 0, 0)
-		f:SetPoint("TOPLEFT", TMW.SUG[id-1], "BOTTOMLEFT", 0, 0)
-	end
+	f:SetFrameLevel(f:GetParent():GetFrameLevel() + 5)
 	
 	return f
 end

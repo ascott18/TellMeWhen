@@ -162,6 +162,44 @@
 				<Anchors>
 					<Anchor point="TOPLEFT" x="26" y="-14.5"/>
 				</Anchors>
+				<Frames>
+					<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="7" y="-5"/>
+							<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="1" y="13"/>
+							<Anchor point="BOTTOM" x="0" y="12"/>
+						</Anchors>
+						<FontString inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
+							<Size y="10"/>
+						</FontString>
+						<Scripts>
+							<OnLoad>
+								local CndtGroup = self:GetParent():GetParent()
+								self.label = TMW.L["CONDITIONPANEL_DEFAULT"],
+
+								self:HookScript("OnEditFocusLost", function(self)
+									CndtGroup:LoadAndDraw()
+								end)
+
+								self:HookScript("OnEditFocusGained", function(self)
+									TMW.DD:CloseDropDownMenus()
+								end)
+
+								self:GetParent().Button:HookScript("OnClick", function()
+									self:ClearFocus()
+								end)
+
+								TMW.SUG:EnableEditBox(self, "conditions", true, nil)
+								
+								self.background:Hide()
+								self.borderTop:Hide()
+								self.borderBottom:Hide()
+								self.borderLeft:Hide()
+								self.borderRight:Hide()
+							</OnLoad>
+						</Scripts>
+					</EditBox>
+				</Frames>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self, {
@@ -169,7 +207,7 @@
 							--tooltip = TMW.L[""],
 							func = TMW.CNDT.TypeMenu_DropDown,
 						})
-						
+
 						self:SetScrollable(true)
 						self:SetWidth(176)
 					</OnLoad>
@@ -761,6 +799,7 @@
 								
 								TMW.CNDT:AddCondition(TMW.CNDT.settings)
 								TMW.CNDT:LoadConfig()
+								TMW.CNDT[TMW.CNDT.settings.n].Type.EditBox:SetFocus()
 							</OnClick>
 						</Scripts>
 						<HighlightTexture alphaMode="ADD" alpha="0.06">

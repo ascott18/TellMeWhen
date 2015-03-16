@@ -357,30 +357,33 @@ function CNDT:TypeMenu_DropDown()
 	end
 end
 
-function CNDT:TypeMenu_DropDown_OnClick(data)
-	TMW.DD.OPEN_MENU:SetText(data.text)
-	
-	local group = TMW.DD.OPEN_MENU:GetParent()
-	
-	local condition = group:GetConditionSettings()
-	if data.defaultUnit and condition.Unit == "player" then
-		condition.Unit = data.defaultUnit
+function CNDT:SelectType(CndtGroup, conditionData)
+
+	local condition = CndtGroup:GetConditionSettings()
+	if conditionData.defaultUnit and condition.Unit == "player" then
+		condition.Unit = conditionData.defaultUnit
 	end
 
-	get(data.applyDefaults, data, condition)
+	get(conditionData.applyDefaults, conditionData, condition)
 
-	if condition.Type ~= self.value then
-		condition.Type = self.value
+	if condition.Type ~= conditionData.identifier then
+		condition.Type = conditionData.identifier
 
 		-- wipe this, since flags mean totally different things for different conditions.
 		-- and having some flags set that a condition doesn't know about could screw things up.
 		condition.BitFlags = 0
 	end
 	
-	group:LoadAndDraw()
+	CndtGroup:LoadAndDraw()
 	TMW.IE:ScheduleIconSetup()
 	
 	TMW.DD:CloseDropDownMenus()
+end
+
+function CNDT:TypeMenu_DropDown_OnClick(data)	
+	local group = TMW.DD.OPEN_MENU:GetParent()
+
+	CNDT:SelectType(group, data)
 end
 
 
@@ -723,7 +726,13 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 
 	local text = conditionData and conditionData.text or conditionSettings.Type
-	CndtGroup.Type:SetText(text)
+	--CndtGroup.Type:SetText("")
+	if conditionData.identifier ~= "" then
+		CndtGroup.Type.EditBox:SetText(text)
+		CndtGroup.Type.EditBox:SetCursorPosition(0)
+	else
+		CndtGroup.Type.EditBox:SetText("")
+	end
 
 	if conditionData then
 		TMW:TT(CndtGroup.Type, conditionData.text, conditionData.tooltip, 1, 1)
@@ -1188,8 +1197,10 @@ function Module:Entry_AddToList_1(f, identifier)
 	end
 end
 function Module:Entry_OnClick(frame, button)
-	local cndtGroup = SUG.Box:GetParent():GetParent()
-	print(frame.insert)
-	cndtGroup:GetConditionSettings().Type = frame.insert
+	local CndtGroup = SUG.Box:GetParent():GetParent()
+
+	CNDT:SelectType(CndtGroup, CNDT.ConditionsByType[frame.insert])
+	
+	SUG.Box:ClearFocus()
 end
 

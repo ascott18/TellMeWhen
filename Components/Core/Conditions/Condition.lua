@@ -81,7 +81,13 @@ function Condition:ShouldList()
 end
 
 function Condition:ShouldHide()
-	return get(self.hidden, self)
+	if CNDT.CurrentConditionSet.ConditionTypeFilter then
+		if not CNDT.CurrentConditionSet:ConditionTypeFilter(self) then
+			return true
+		end
+	end
+
+	return get(self.hidden, self)			
 end
 
 function Condition:IsDeprecated()

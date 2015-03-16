@@ -2,8 +2,8 @@
 	<Button name="TellMeWhen_SpellSuggestTemplate" virtual="true" hidden="true">
 		<Size y="19"/>
 		<Anchors>
-			<Anchor point="LEFT" x="5"/>
-			<Anchor point="RIGHT" x="-5"/>
+			<Anchor point="LEFT" x="3"/>
+			<Anchor point="RIGHT" x="-3"/>
 		</Anchors>
 		<Scripts>
 			<OnLoad>
@@ -301,8 +301,6 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self:SetFrameLevel(100)
-
 				TMW.SUG.SuggestionList = self
 				self.Header:SetText(TMW.L["SUGGESTIONS"])
 				self.InfoText:SetText(TMW.L["CACHING"])
@@ -335,6 +333,16 @@
 					TMW.SUG:SuggestingComplete()
 				end
 			</OnSizeChanged>
+			<OnHide>
+				-- Hide the tooltip if it is showing for a suggestion entry.
+				-- This is needed because we show the tooltip manually (not in an OnEnter script)
+				-- sometimes, and when the parent of the frame that it is shown for is hidden,
+				-- the tooltip isnt automatically hidden.
+				local ttOwner = GameTooltip:GetOwner()
+				if ttOwner and ttOwner:GetParent() == self then
+					GameTooltip:Hide()
+				end
+			</OnHide>
 		</Scripts>
 	</Frame>
 

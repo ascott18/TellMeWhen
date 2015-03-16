@@ -1,5 +1,6 @@
 ===v7.3.0===
  * The suggestion list now works with arrow keys to pick what line tab will insert.
+ * You can now use the suggestion list to pick condition types (the Condition Type dropdown now has a textbox on it).
 
 ===v7.2.6===
 ====Bug Fixes====
