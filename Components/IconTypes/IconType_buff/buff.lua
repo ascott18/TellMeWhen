@@ -509,6 +509,7 @@ local aurasWithNoSourceReported = {
 	GetSpellInfo(159676),	-- Mark of the Frostwolf
 	GetSpellInfo(159239),	-- Mark of the Shattered Hand
 	GetSpellInfo(159234),	-- Mark of the Thunderlord
+	GetSpellInfo(173322),	-- Mark of Bleeding Hollow
 	GetSpellInfo(159675),	-- Mark of Warsong
 	nil,	-- Terminate with nil to prevent all Warsong's return values from filling the table
 }
