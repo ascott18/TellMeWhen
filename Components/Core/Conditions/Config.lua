@@ -290,12 +290,6 @@ function CNDT:TypeMenu_DropDown()
 				if not conditionData.IS_SPACER then
 					local shouldAdd = conditionData:ShouldList()
 					
-					if CurrentConditionSet.ConditionTypeFilter then
-						if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
-							shouldAdd = false
-						end
-					end
-					
 					if shouldAdd then
 						shouldAddCategory = true
 						break
@@ -336,12 +330,6 @@ function CNDT:TypeMenu_DropDown()
 			else
 				local selected = conditionData.identifier == conditionSettings.Type
 				local shouldAdd = selected or conditionData:ShouldList() --or TMW.debug
-				
-				if shouldAdd and not conditionData.IS_SPACER and CurrentConditionSet.ConditionTypeFilter then
-					if not CurrentConditionSet:ConditionTypeFilter(conditionData) then
-						shouldAdd = false
-					end
-				end
 				
 				if shouldAdd then
 					if hasAddedOneCondition and queueSpacer then
