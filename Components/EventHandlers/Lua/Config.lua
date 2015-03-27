@@ -42,6 +42,8 @@ end)
 
 -- Overrides TestEvent inherited from TMW.Classes.EventHandler
 function Lua:TestEvent(eventID)
+	self.ConfigContainer.Code:ClearFocus()
+
 	local eventSettings = EVENTS:GetEventSettings(eventID)
 
 	local code = eventSettings.Lua
@@ -52,7 +54,9 @@ function Lua:TestEvent(eventID)
 		local success, err = pcall(func, TMW.CI.icon)
 		
 		if not success then
-			self:SetError(code, "RUNTIME", err)
+			self:SetError(code, "RUNTIME", err or "<???>")
+		else
+			return true
 		end
 	end
 end
