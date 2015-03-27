@@ -197,8 +197,9 @@ local function VerifyAll()
 	for i = 1, #AllUnits do
 		local unit = AllUnits[i]
 		local GUID = UnitGUID(unit)
-		local auras = GUID and rawget(Auras, GUID)
-		if auras then
+
+		if GUID then
+			local auras
 
 			local index, stage = 1, 1
 			local filter = "PLAYER"
@@ -210,6 +211,7 @@ local function VerifyAll()
 				if spellID then
 					buffName = strlowerCache[buffName]
 
+					auras = auras or Auras[GUID]
 					local aura = auras[spellID]
 					if not aura then
 						aura = Aura:New(spellID, GUID, UnitName(unit), true)
@@ -317,6 +319,10 @@ Aura = TMW:NewClass("Aura"){
 	end,
 
 	Remaining = function(self)
+		if self.duration == 0 and self.start == 0 then
+			return math.huge
+		end
+
 		return self.duration - (TMW.time - self.start)
 	end,
 
@@ -410,6 +416,13 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 			
 	elseif cleuEvent == "UNIT_DIED" and destGUID then
 		Auras[destGUID] = nil
+
+		-- Updating all icons when something dies is far easier, and probably faster,
+		-- than trying to figure out what icons the death will affect.
+		for k = 1, #ManualIcons do
+			local icon = ManualIcons[k]
+			icon.NextUpdateTime = 0
+		end
 	end
 end
 
