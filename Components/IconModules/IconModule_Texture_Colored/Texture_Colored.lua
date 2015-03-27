@@ -42,7 +42,7 @@ local COLOR_UNLOCKED = {
 }
 function Texture_Colored:UPDATE(icon)
 	local attributes = icon.attributes
-	local duration, inrange, nomana = attributes.duration, attributes.inRange, attributes.noMana
+	local duration, inrange, nomana, charges = attributes.duration, attributes.inRange, attributes.noMana, attributes.charges
 --[[
 	OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
 	OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
@@ -69,7 +69,8 @@ function Texture_Colored:UPDATE(icon)
 
 		local s
 
-		if not duration or duration == 0 or (ColorGCD and icon:OnGCD(duration)) then
+		
+		if not duration or duration == 0 or (ColorGCD and icon:OnGCD(duration)) or (charges and charges > 0) then
 			s = "N" -- Not counting
 		else
 			s = "C" -- Counting
@@ -116,6 +117,7 @@ end
 Texture_Colored:SetDataListner("INRANGE", Texture_Colored.UPDATE)
 Texture_Colored:SetDataListner("NOMANA", Texture_Colored.UPDATE)
 Texture_Colored:SetDataListner("DURATION", Texture_Colored.UPDATE)
+Texture_Colored:SetDataListner("SPELLCHARGES", Texture_Colored.UPDATE)
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
