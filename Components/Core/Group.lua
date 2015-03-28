@@ -182,6 +182,11 @@ function Group.Show(group)
 		TMW:Fire("TMW_GROUP_SHOW_PRE", group)
 		group:Show_Blizz()
 		group.__shown = 1
+
+		for icon in group:InIcons() do
+			icon.NextUpdateTime = 0
+		end
+
 		TMW:Fire("TMW_GROUP_SHOW_POST", group)
 	end
 end
