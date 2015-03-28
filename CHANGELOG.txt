@@ -3,8 +3,8 @@
  * You can now use the suggestion list to pick condition types (the Condition Type dropdown now has a textbox on it).
 
 ====Bug Fixes====
- ** Fixed some issues with the All-Unit Buff/Debuff icon type caused by some auras (A Murder of Crows) not firing combat log events on application/removal.
- ** Icons should no longer be treated as being on cooldown for color settings if they're tracking an ability that still has charges remaining.
+ * Fixed some issues with the All-Unit Buff/Debuff icon type caused by some auras (A Murder of Crows) not firing combat log events on application/removal.
+ * Icons should no longer be treated as being on cooldown for color settings if they're tracking an ability that still has charges remaining.
 
 ===v7.2.6===
 ====Bug Fixes====
