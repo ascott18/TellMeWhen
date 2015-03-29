@@ -1307,7 +1307,7 @@ end})
 --    end
 --    
 --    if attributes.dogTagUnit ~= dogTagUnit then
---      doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdate
+--      doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdated
 --    end
 --    --]]
 --  end)

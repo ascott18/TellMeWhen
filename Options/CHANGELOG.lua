@@ -11,6 +11,7 @@ TMW.CHANGELOG = {
 [==[====Bug Fixes====]==],
 [==[* Fixed some issues with the All-Unit Buff/Debuff icon type caused by some auras (A Murder of Crows) not firing combat log events on application/removal.]==],
 [==[* Icons should no longer be treated as being on cooldown for color settings if they're tracking an ability that still has charges remaining.]==],
+[==[* Fixed a typo that could sometimes break icon sorting, and may have also broken meta icons occasionally.]==],
 [==[]==],
 [==[===v7.2.6===]==],
 [==[====Bug Fixes====]==],
