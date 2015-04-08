@@ -58,10 +58,6 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 		"AlphaStandalone",
 	},
 
-	applyDefaultsToSetting = function(eventSettings)
-		eventSettings.a_anim = 0
-	end,
-
 	Play = function(icon, eventSettings)
 		local Duration = 0
 		local Period = eventSettings.Period

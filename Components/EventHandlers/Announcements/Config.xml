@@ -65,6 +65,10 @@
 			</Frame>
 
 			<Frame name="$parentConfigFrames" parentKey="ConfigFrames">
+				<KeyValues>
+					<KeyValue key="tmwClass" type="string" value="Events_ColumnConfigContainer"/>
+				</KeyValues>
+
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOPRIGHT" x="5" y="0"/>
 					<Anchor point="BOTTOMRIGHT" x="-0" y="0"/>
@@ -187,66 +191,54 @@
 					</EditBox>
 
 					<CheckButton name="$parentSticky" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Sticky">
+						<Size x="30" y="30"/>
+						<Scripts>
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Sticky",
+									title   = TMW.L["ANN_STICKY"],
+								})
+							</OnLoad>
+						</Scripts>
 					</CheckButton>
 
 					<CheckButton name="$parentShowIconTex" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="ShowIconTex">
+						<Size x="30" y="30"/>
+						<Scripts>
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "ShowIconTex",
+									title   = TMW.L["ANN_SHOWICON"],
+									tooltip = TMW.L["ANN_SHOWICON_DESC"],
+								})
+							</OnLoad>
+						</Scripts>
 					</CheckButton>
 
-					<Button name="$parentColor" parentKey="Color">
-						<Size x="20" y="20"/>
+					<Button name="$parentColor" inherits="TellMeWhen_ColorButtonTemplate" parentKey="Color">
+						<KeyValues>
+							<KeyValue key="tmwClass" type="string" value="Config_ColorButton_Event"/>
+						</KeyValues>
+
 						<Anchors>
 							<Anchor point="LEFT" x="15" />
 						</Anchors>
-						<Layers>
-							<Layer level="BACKGROUND">
-								<Texture parentKey="background">
-									<Size x="17.5" y="17.5"/>
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Color r="1.0" g="1.0" b="1.0"/>
-								</Texture>
-								<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
-									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
 						<Scripts>
 							<OnLoad>
-								self.text:SetText(TMW.L["FONTCOLOR"])
-								self.func = function()
-									local settings = TMW.EVENTS:GetEventSettings()
-									local r, g, b = ColorPickerFrame:GetColorRGB()
-									settings.r = r
-									settings.g = g
-									settings.b = b
-									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconSetup()
-								end
-								self.cancel = function()
-									local settings = TMW.EVENTS:GetEventSettings()
-									local r, g, b = self.br, self.bg, self.bb
-									settings.r = r
-									settings.g = g
-									settings.b = b
-									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconSetup()
-								end
+								TMW:CInit(self, {
+									title = TMW.L["FONTCOLOR"],
+									GetRGBA = function(self)
+										local s = self:GetSettingTable()
+										return s.r, s.g, s.b, 1
+									end,
+									SetRGBA = function(self, r, g, b)
+										local s = self:GetSettingTable()
+										s.r, s.g, s.b = r, g, b
+									end,
+									hasOpacity = false,
+								})
 							</OnLoad>
-							<OnClick>
-								local settings = TMW.EVENTS:GetEventSettings()
-								local r, g, b = settings.r, settings.g, settings.b
-								self.br, self.bg, self.bb = r, g, b
-
-								ColorPickerFrame.hasOpacity = nil
-								ColorPickerFrame.func, ColorPickerFrame.cancelFunc = self.func, self.cancel
-								ColorPickerFrame:SetColorRGB(r,g,b)
-								ColorPickerFrame:Show()
-							</OnClick>
 						</Scripts>
-						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
 					</Button>
 
 					<Slider name="$parentSize" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" parentKey="Size" valuestep="1">
@@ -258,7 +250,9 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "Size",
+									title   = TMW.L["FONTSIZE"],
 
+									-- TODO: make this a formatter.
 									OnValueChanged = function(self)
 										local value = self:GetValue()
 										self.Mid:SetText(value == 0 and TMW.L["DEFAULT"] or value)
@@ -280,6 +274,7 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "TextDuration",
+									title   = TMW.L["DURATION"],
 								})
 								
 								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
@@ -290,9 +285,12 @@
 							</OnLoad>
 						</Scripts>
 					</Slider>
-
-
 				</Frames>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+					</OnLoad>
+				</Scripts>
 			</Frame>
 		</Frames>
 

@@ -16,6 +16,10 @@
 			</Frame>
 			
 			<Frame name="$parentConfigFrames" parentKey="ConfigFrames">
+				<KeyValues>
+					<KeyValue key="tmwClass" type="string" value="Events_ColumnConfigContainer"/>
+				</KeyValues>
+
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOPRIGHT" x="5" y="0"/>
 					<Anchor point="BOTTOMRIGHT" x="-0" y="0"/>
@@ -26,6 +30,11 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "Duration",
+									title   = TMW.L["ANIM_DURATION"],
+									tooltip = TMW.L["ANIM_DURATION_DESC"],
+
+									topPadding = 13,
+									bottomPadding = 13,
 								})
 								
 								self:SetMode(self.MODE_ADJUSTING)
@@ -39,20 +48,23 @@
 					</Slider>
 
 					<CheckButton name="$parentInfinite" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Infinite">
+						<Size x="30" y="30"/>
 						<Scripts>
 							<OnLoad>
-								hooksecurefunc(self, "SetChecked", function(self, value)
-									if value then
-										self:GetParent().Duration:Disable()
-									else
-										self:GetParent().Duration:Enable()
-									end
-								end)
+								TMW:CInit(self, {
+									setting = "Infinite",
+									title   = TMW.L["ANIM_INFINITE"],
+									tooltip = TMW.L["ANIM_INFINITE_DESC"],
+
+									OnState = function(self)
+										if self:GetChecked() then
+											self:GetParent().Duration:Disable()
+										else
+											self:GetParent().Duration:Enable()
+										end
+									end,
+								})
 							</OnLoad>
-							<OnClick>
-								self:SetChecked(self:GetChecked()) -- trigger the hook
-								TMW.EVENTS:GetEventSettings().Infinite = not not self:GetChecked()
-							</OnClick>
 						</Scripts>
 					</CheckButton>
 
@@ -61,6 +73,11 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "Magnitude",
+									title   = TMW.L["ANIM_MAGNITUDE"],
+									tooltip = TMW.L["ANIM_MAGNITUDE_DESC"],
+									
+									topPadding = 13,
+									bottomPadding = 13,
 								})
 								
 								self:SetMode(self.MODE_ADJUSTING)
@@ -76,6 +93,11 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "Period",
+									title   = TMW.L["ANIM_PERIOD"],
+									tooltip = TMW.L["ANIM_PERIOD_DESC"],
+									
+									topPadding = 13,
+									bottomPadding = 13,
 								})
 								
 								self:SetMode(self.MODE_ADJUSTING)
@@ -87,77 +109,39 @@
 					</Slider>
 					
 
-					<Button name="$parentColor" parentKey="Color">
-						<Size x="20" y="20"/>
+					<Button name="$parentColor" inherits="TellMeWhen_ColorButtonTemplate" parentKey="Color">
+						<KeyValues>
+							<KeyValue key="tmwClass" type="string" value="Config_ColorButton_Event"/>
+						</KeyValues>
+
 						<Anchors>
-							<!-- <Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" x="0" y="-25"/> -->
-							<Anchor point="LEFT" x="10" />
+							<Anchor point="LEFT" x="15" />
 						</Anchors>
-						<Layers>
-							<Layer level="BACKGROUND">
-								<Texture parentKey="background">
-									<Size x="17.5" y="17.5"/>
-									<Anchors>
-										<Anchor point="CENTER"/>
-									</Anchors>
-									<Color r="1.0" g="1.0" b="1.0"/>
-								</Texture>
-								<FontString name="$parenttext" parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
-									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
 						<Scripts>
 							<OnLoad>
-								self.text:SetText(TMW.L["ANIM_COLOR"])
-								TMW:TT(self, "ANIM_COLOR", "ANIM_COLOR_DESC")
-								self.func = function()
-									local settings = TMW.EVENTS:GetEventSettings()
-									local r, g, b = ColorPickerFrame:GetColorRGB()
-									settings.r_anim = r
-									settings.g_anim = g
-									settings.b_anim = b
-									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									TMW.IE:ScheduleIconSetup()
-								end
-								self.opacityFunc = function()
-									local settings = TMW.EVENTS:GetEventSettings()
-									local a = 1 - OpacitySliderFrame:GetValue()
-									settings.a_anim = a
-									self.background:SetAlpha(a)
-									TMW.IE:ScheduleIconSetup()
-								end
-								self.cancel = function()
-									local settings = TMW.EVENTS:GetEventSettings()
-									local r, g, b, a = self.br, self.bg, self.bb, self.ba
-									settings.r_anim = r
-									settings.g_anim = g
-									settings.b_anim = b
-									settings.a_anim = a
-									self:GetNormalTexture():SetVertexColor(r, g, b, 1)
-									self.background:SetAlpha(a)
-									TMW.IE:ScheduleIconSetup()
-								end
+								TMW:CInit(self, {
+									title = TMW.L["ANIM_COLOR"],
+									tooltip = TMW.L["ANIM_COLOR_DESC"],
+									GetRGBA = function(self)
+										local s = self:GetSettingTable()
+										return s.r_anim, s.g_anim, s.b_anim, s.a_anim
+									end,
+									SetRGBA = function(self, r, g, b, a)
+										local s = self:GetSettingTable()
+										s.r_anim, s.g_anim, s.b_anim, s.a_anim = r, g, b, a
+									end,
+									hasOpacity = true,
+								})
 							</OnLoad>
-							<OnClick>
-								local settings = TMW.EVENTS:GetEventSettings()
-								local r, g, b, a = settings.r_anim, settings.g_anim, settings.b_anim, settings.a_anim
-								self.br, self.bg, self.bb, self.ba = r, g, b, a
-
-								ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = self.func, self.opacityFunc, self.cancel
-								ColorPickerFrame:SetColorRGB(r, g, b)
-								ColorPickerFrame.hasOpacity = true
-								ColorPickerFrame.opacity = 1 - a
-								ColorPickerFrame:Show()
-							</OnClick>
 						</Scripts>
-						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\ChatFrameColorSwatch"/>
 					</Button>
 
 
 					<EditBox name="$parentImage" inherits="TellMeWhen_InputBoxTemplate" parentKey="Image" autoFocus="false">
+						<KeyValues>
+							<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event"/>
+						</KeyValues>
+
 						<Size y="15"/>
 						<Anchors>
 							<!-- <Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" x="4" y="-25"/> -->
@@ -166,27 +150,37 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:TT(self, "ANIM_TEX", "ANIM_TEX_DESC")
-								self.label = TMW.L["ANIM_TEX"]
-								self.BackgroundText:SetWidth(self:GetWidth())
+								TMW:CInit(self, {
+									setting = "Image",
+									title = TMW.L["ANIM_TEX"],
+									tooltip = TMW.L["ANIM_TEX_DESC"],
+									label = TMW.L["ANIM_TEX"],
+									doCleanString = true,
+
+									topPadding = 4,
+									bottomPadding = 7,
+
+									ModifySettingValue = function(self, value)
+										return value:gsub([[\\]], [[\]])
+									end,
+								})
+
 								TMW.SUG:EnableEditBox(self, "texture", true)
 							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								self:SetText(self:GetText():gsub([[\\]], [[\]]))
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Image = TMW:CleanString(self)
-									TMW.IE:ScheduleIconSetup()
-								end
-
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
 
 					<CheckButton name="$parentFade" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Fade">
+						<Size x="30" y="30"/>
+						<Scripts>
+							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Fade",
+									title   = TMW.L["ANIM_FADE"],
+									tooltip = TMW.L["ANIM_FADE_DESC"],
+								})
+							</OnLoad>
+						</Scripts>
 					</CheckButton>
 
 					<Slider name="$parentAlphaStandalone" parentKey="AlphaStandalone" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
@@ -194,6 +188,11 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "a_anim",
+									title   = TMW.L["ANIM_ALPHASTANDALONE"],
+									tooltip = TMW.L["ANIM_ALPHASTANDALONE_DESC"],
+									
+									topPadding = 13,
+									bottomPadding = 13,
 								})
 								
 								self:SetMinMaxValues(0, 1)
@@ -210,6 +209,11 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "Thickness",
+									title   = TMW.L["ANIM_THICKNESS"],
+									tooltip = TMW.L["ANIM_THICKNESS_DESC"],
+									
+									topPadding = 13,
+									bottomPadding = 13,
 								})
 								
 								self:SetMode(self.MODE_ADJUSTING)
@@ -227,6 +231,11 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "Size_anim",
+									title   = TMW.L["ANIM_SIZE_ANIM"],
+									tooltip = TMW.L["ANIM_SIZE_ANIM_DESC"],
+									
+									topPadding = 13,
+									bottomPadding = 13,
 								})
 								
 								self:SetMode(self.MODE_ADJUSTING)
@@ -244,6 +253,11 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "SizeX",
+									title   = TMW.L["ANIM_SIZEX"],
+									tooltip = TMW.L["ANIM_SIZEX_DESC"],
+									
+									topPadding = 13,
+									bottomPadding = 13,
 								})
 								
 								self:SetMode(self.MODE_ADJUSTING)
@@ -261,6 +275,11 @@
 							<OnLoad>
 								TMW:CInit(self, {
 									setting = "SizeY",
+									title   = TMW.L["ANIM_SIZEY"],
+									tooltip = TMW.L["ANIM_SIZEY_DESC"],
+									
+									topPadding = 13,
+									bottomPadding = 13,
 								})
 								
 								self:SetMode(self.MODE_ADJUSTING)
@@ -276,7 +295,7 @@
 					<Frame name="$parentAnchorTo" parentKey="AnchorTo" inherits="TMW_DropDownMenuTemplate">
 						<Anchors>
 							<Anchor point="LEFT" x="9" />
-							<Anchor point="RIGHT" x="-9" />
+							<Anchor point="RIGHT" x="-12" />
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -295,6 +314,9 @@
 									title = TMW.L["ANCHORTO"],
 									--tooltip = TMW.L[""],
 									func = TMW.EVENTS:GetEventHandler("Animations").AnchorTo_Dropdown,
+
+									topPadding = 14,
+									bottomPadding = 4,
 								})
 								self.text:SetText(TMW.L["ANCHORTO"])
 							
@@ -303,6 +325,12 @@
 					</Frame>
 
 				</Frames>
+
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+					</OnLoad>
+				</Scripts>
 			</Frame>
 		</Frames>
 		<Layers>

@@ -299,21 +299,10 @@
 		</KeyValues>
 	</CheckButton>
 
-	<CheckButton name="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
+	<CheckButton name="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" inherits="TellMeWhen_EventSettings_CheckTemplate" virtual="true">
 		<Anchors>
 			<Anchor point="LEFT" x="10" />
 		</Anchors>
-		<Scripts>
-			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
-
-				if TMW.CI.ics then
-					TMW.EVENTS:GetEventSettings()[self.setting] = not not self:GetChecked()
-					TMW.IE:ScheduleIconSetup()
-				end
-				TMW.EVENTS:LoadEventSettings()
-			</OnClick>
-		</Scripts>
 	</CheckButton>
 
 	<Slider name="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">
@@ -327,14 +316,6 @@
 			<Anchor point="LEFT" x="10" />
 			<Anchor point="RIGHT" x="-20"/>
 		</Anchors>
-		<Scripts>
-			<OnLoad>
-				TMW:CInit(self, {})
-
-				self:SetMode(self.MODE_ADJUSTING)
-				self:SetRange(10)
-			</OnLoad>
-		</Scripts>
 	</Slider>
 
 	<Frame name="TellMeWhen_EventContainer" parent="TellMeWhen_IconEditorEvents" hidden="true" virtual="true">

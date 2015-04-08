@@ -870,6 +870,40 @@
 	</ScrollFrame>
 	
 	
+	<Button name="TellMeWhen_clickinterceptor" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.parent = self:GetParent()
+				self:SetAllPoints(self.parent.text)
+			</OnLoad>
+			<OnEnter>
+				if not self.parent:IsEnabled() and not self.parent:GetMotionScriptsWhileDisabled() then
+					return
+				end
+				
+				self.parent:LockHighlight()
+				
+				local OnEnter = self.parent:GetScript("OnEnter")
+				if OnEnter then
+					OnEnter(self.parent)
+				end
+			</OnEnter>
+			<OnLeave>
+				self.parent:UnlockHighlight()
+				
+				local OnLeave = self.parent:GetScript("OnLeave")
+				if OnLeave then
+					OnLeave(self.parent)
+				end
+			</OnLeave>
+			<OnClick>
+				if not self.parent:IsEnabled() then return end
+				
+				self.parent:Click(button)
+			</OnClick>
+		</Scripts>
+	</Button>
+
 	<CheckButton name="TellMeWhen_CheckTemplate" virtual="true">
 		<Size x="30" y="30"/>
 		
@@ -887,39 +921,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="clickinterceptor">
-				<Scripts>
-					<OnLoad>
-						self.parent = self:GetParent()
-						self:SetAllPoints(self.parent.text)
-					</OnLoad>
-					<OnEnter>
-						if not self.parent:IsEnabled() and not self.parent:GetMotionScriptsWhileDisabled() then
-							return
-						end
-						
-						self.parent:LockHighlight()
-						
-						local OnEnter = self.parent:GetScript("OnEnter")
-						if OnEnter then
-							OnEnter(self.parent)
-						end
-					</OnEnter>
-					<OnLeave>
-						self.parent:UnlockHighlight()
-						
-						local OnLeave = self.parent:GetScript("OnLeave")
-						if OnLeave then
-							OnLeave(self.parent)
-						end
-					</OnLeave>
-					<OnClick>
-						if not self.parent:IsEnabled() then return end
-						
-						self.parent:Click(button)
-					</OnClick>
-				</Scripts>
-			</Button>
+			<Button inherits="TellMeWhen_clickinterceptor"/>
 		</Frames>
 		<Scripts>
 			<OnEnable>
@@ -1245,11 +1247,14 @@
 
 				<FontString parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" x="3"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
+		<Frames>
+			<Button inherits="TellMeWhen_clickinterceptor"/>
+		</Frames>
 	</Button>
 
 

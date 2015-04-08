@@ -105,6 +105,7 @@
 							setting = "BarDisplay_StartColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_START"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_START_DESC"],
+							hasOpacity = true,
 							disabled = function(self)
 								return not TMW.CI.ics.BarDisplay_EnableColors
 							end,
@@ -123,6 +124,7 @@
 							setting = "BarDisplay_MiddleColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_MIDDLE"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_MIDDLE_DESC"],
+							hasOpacity = true,
 							disabled = function(self)
 								return not TMW.CI.ics.BarDisplay_EnableColors
 							end,
@@ -141,6 +143,7 @@
 							setting = "BarDisplay_CompleteColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_COMPLETE"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_COMPLETE_DESC"],
+							hasOpacity = true,
 							disabled = function(self)
 								return not TMW.CI.ics.BarDisplay_EnableColors
 							end,

@@ -97,6 +97,8 @@ TMW:NewClass("Config_EditBox_Event", "Config_Base_Event", "Config_EditBox"){
 	},
 }
 
+TMW:NewClass("Config_ColorButton_Event", "Config_Base_Event", "Config_ColorButton")
+
 
 function EVENTS:LoadConfig()
 	local EventHandlerFrames = EVENTS.EventHandlerFrames
@@ -251,6 +253,9 @@ end
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", EVENTS, "LoadConfig")
 
 function EVENTS:LoadEventID(eventID)
+
+	TMW.IE:SaveSettings()
+	
 	-- Loads the configuration for the specified eventID
 	local eventFrame = eventID and EVENTS.EventHandlerFrames[eventID]
 	
@@ -901,7 +906,7 @@ function ColumnConfig:RegisterConfigFrame(identifier, configFrameData)
 	TMW:ValidateType("identifier", "RegisterConfigFrame(identifier, configFrameData)", identifier, "string")
 	
 	TMW:ValidateType("configFrameData.frame", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.frame, "string;frame")
-	TMW:ValidateType("configFrameData.Load", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.Load, "function")
+	TMW:ValidateType("configFrameData.Load", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.Load, "function;nil")
 	
 	TMW:ValidateType("configFrameData.topPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.topPadding, "number;nil")
 	TMW:ValidateType("configFrameData.bottomPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.bottomPadding, "number;nil")
@@ -926,16 +931,10 @@ function ColumnConfig:SetupConfig(subHandlerData)
 	end
 
 	assert(Frames, self.className .. " doesn't have a ConfigFrames table!")
+	assert(Frames.ConfigFrames, self.className .. " isn't a TMW.C.Events_ColumnConfigContainer!")
 	
-	for configFrameIdentifier, configFrameData in pairs(self.ConfigFrameData) do
-		
-		local frame = configFrameData.frame
-		if type(frame) == "string" then
-			frame = Frames[frame]
-		end
-		if frame then
-			frame:Hide()
-		end
+	for i, frame in pairs(Frames.ConfigFrames) do
+		frame:Hide()
 	end
 
 	if not desiredFrames then
@@ -945,20 +944,14 @@ function ColumnConfig:SetupConfig(subHandlerData)
 	local lastFrame, lastFrameBottomPadding
 	for i, configFrameIdentifier in ipairs(desiredFrames) do
 		if not self:IsFrameBlacklisted(configFrameIdentifier) then
-			local configFrameData = self.ConfigFrameData[configFrameIdentifier]
+			local frame = Frames[configFrameIdentifier]
 			
-			if not configFrameData then
-				TMW:Error("Values in ConfigFrames for event handler %q must resolve to a table registered via EventHandler_ColumnConfig:RegisterConfigFrame()", subHandlerIdentifier)
+			if not frame then
+				TMW:Error("Column config frame %q could not be found for event handler %q.", configFrameIdentifier, subHandlerIdentifier)
 			else
-				local frame = configFrameData.frame
-				if type(frame) == "string" then
-					frame = Frames[frame]
-					if not frame then
-						TMW:Error("Couldn't find child of %s with key %q for event handler %q", Frames:GetName(), configFrameData.frame, subHandlerIdentifier)
-					end
-				end
-				
-				local yOffset = (configFrameData.topPadding or 0) + (lastFrameBottomPadding or 0)
+				-- Data is the table passed to TMW:CInit(frame, data)
+				local data = frame.data
+				local yOffset = (data and data.topPadding or 0) + (lastFrameBottomPadding or 0)
 				
 				if lastFrame then
 					frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -yOffset)
@@ -968,33 +961,23 @@ function ColumnConfig:SetupConfig(subHandlerData)
 				frame:Show()
 				lastFrame = frame
 				
-				TMW.safecall(configFrameData.Load, configFrameData, frame, EventSettings)
-				
-				lastFrameBottomPadding = configFrameData.bottomPadding
+				-- TODO: remove this after all old functions are integrated
+			--	if configFrameData.Load then
+			--		TMW.safecall(configFrameData.Load, configFrameData, frame, EventSettings)
+			--	end
+
+				lastFrameBottomPadding = data and data.bottomPadding
 			end
 		end
 	end	
 end
 
+TMW:NewClass("Events_ColumnConfigContainer", "Frame"){
+	OnNewInstance = function(self)
+		self.ConfigFrames = {}
 
-function ColumnConfig.Load_Generic_Slider(configFrameData, frame, EventSettings)
-	frame:ReloadSetting()
-
-	if configFrameData.text then
-		frame.text:SetText(configFrameData.text)
-		frame:SetTooltip(configFrameData.text, configFrameData.desc)
-	end
-
-	frame:Enable()
-end
-
-function ColumnConfig.Load_Generic_Check(configFrameData, frame, EventSettings)
-	frame:SetChecked(EventSettings[configFrameData.identifier])
-
-	frame.setting = configFrameData.identifier
-
-	if configFrameData.text then
-		frame.text:SetText(configFrameData.text)
-		TMW:TT(frame, configFrameData.text, configFrameData.desc, 1, 1)
-	end
-end
+		for i, child in TMW:Vararg(self:GetChildren()) do
+			tinsert(self.ConfigFrames, child)
+		end
+	end,
+}

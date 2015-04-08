@@ -2513,8 +2513,8 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	OnClick = function(self, button)
 		local settings = self:GetSettingTable()
 
-		local prevColor = settings[self.setting]
-		self.prevColor = prevColor
+		local prevRGBA = {self:GetRGBA()}
+		self.prevRGBA = prevRGBA
 
 		self:GenerateMethods()
 
@@ -2522,9 +2522,9 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		ColorPickerFrame.opacityFunc = self.colorFunc
 		ColorPickerFrame.cancelFunc = self.cancelFunc
 
-		ColorPickerFrame:SetColorRGB(prevColor.r, prevColor.g, prevColor.b)
-		ColorPickerFrame.hasOpacity = true
-		ColorPickerFrame.opacity = 1 - prevColor.a
+		ColorPickerFrame:SetColorRGB(unpack(prevRGBA))
+		ColorPickerFrame.hasOpacity = self.data.hasOpacity
+		ColorPickerFrame.opacity = 1 - prevRGBA[4]
 
 		ColorPickerFrame:Show()
 	end,
@@ -2535,9 +2535,7 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 			local r, g, b = ColorPickerFrame:GetColorRGB()
 			local a = 1 - OpacitySliderFrame:GetValue()
 
-			local settings = self:GetSettingTable()
-
-			settings[self.setting] = {r=r, g=g, b=b, a=a}
+			self:SetRGBA(r, g, b, a)
 
 			self:ReloadSetting()
 
@@ -2545,9 +2543,7 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		end
 
 		self.cancelFunc = function()
-			local settings = self:GetSettingTable()
-
-			settings[self.setting] = self.prevColor
+			self:SetRGBA(unpack(self.prevRGBA))
 
 			self:ReloadSetting()
 
@@ -2561,12 +2557,30 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		local settings = self:GetSettingTable()
 
 		if settings then
-			local c = settings[self.setting]
-
-			self.swatch:SetTexture(c.r, c.g, c.b, c.a)
-		--	self.background:SetAlpha(c.a)
+			self.swatch:SetTexture(self:GetRGBA())
 
 			self:CheckInteractionStates()
+		end
+	end,
+
+	GetRGBA = function(self)
+		if self.data.GetRGBA then
+			return self.data.GetRGBA(self)
+		else
+			local settings = self:GetSettingTable()
+			local c = settings[self.setting]
+			return c.r, c.g, c.b, c.a
+		end
+	end,
+
+	SetRGBA = function(self, r, g, b, a)
+		if self.data.SetRGBA then
+			return self.data.SetRGBA(self, r, g, b, a)
+		else
+			local settings = self:GetSettingTable()
+			local c = settings[self.setting]
+
+			c.r, c.g, c.b, c.a = r, g, b, a
 		end
 	end,
 }

@@ -94,9 +94,6 @@ function Announcements:Location_DropDown_OnClick(text)
 end
 
 
-local Load_Generic_Slider = Announcements.Load_Generic_Slider
-local Load_Generic_Check = Announcements.Load_Generic_Check
-
 
 local Announcements = EVENTS:GetEventHandler("Announcements")
 
@@ -138,21 +135,12 @@ Announcements:RegisterConfigFrame("Sticky", {
 	frame = "Sticky",
 	--topPadding = 13,
 	--bottomPadding = 13,
-
-	text = L["ANN_STICKY"],
-
-	Load = Load_Generic_Check,
 })
 
 Announcements:RegisterConfigFrame("ShowIconTex", {
 	frame = "ShowIconTex",
 	--topPadding = 13,
 	--bottomPadding = 13,
-
-	text = L["ANN_SHOWICON"],
-	desc = L["ANN_SHOWICON_DESC"],
-
-	Load = Load_Generic_Check,
 })
 
 Announcements:RegisterConfigFrame("Color", {
@@ -171,10 +159,6 @@ Announcements:RegisterConfigFrame("Size", {
 	frame = "Size",
 	topPadding = 13,
 	bottomPadding = 13,
-
-	text = L["FONTSIZE"],
-	
-	Load = Load_Generic_Slider,
 })
 
 TMW.IE:RegisterRapidSetting("TextDuration")
@@ -182,10 +166,6 @@ Announcements:RegisterConfigFrame("TextDuration", {
 	frame = "TextDuration",
 	topPadding = 13,
 	bottomPadding = 13,
-
-	text = L["DURATION"],
-	
-	Load = Load_Generic_Slider,
 })
 
 

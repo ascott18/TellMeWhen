@@ -15,6 +15,7 @@
 							setting = "BackdropColor",
 							title = TMW.L["ICONMENU_BAR_COLOR_BACKDROP"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_BACKDROP_DESC"],
+							hasOpacity = true,
 						})
 					</OnLoad>
 				</Scripts>
