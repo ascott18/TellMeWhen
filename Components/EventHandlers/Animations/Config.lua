@@ -72,26 +72,7 @@ TMW.IE:RegisterRapidSetting("r_anim")
 TMW.IE:RegisterRapidSetting("g_anim")
 TMW.IE:RegisterRapidSetting("b_anim")
 TMW.IE:RegisterRapidSetting("a_anim")
-Animations:RegisterConfigFrame("Color", {
-	frame = "Color",
-	topPadding = 4,
-	bottomPadding = 4,
-	
-	Load = function(self, frame, EventSettings)
-		local r, g, b, a = EventSettings.r_anim, EventSettings.g_anim, EventSettings.b_anim, EventSettings.a_anim
-		frame:GetNormalTexture():SetVertexColor(r, g, b, 1)
-		frame.background:SetAlpha(a)
-	end,
-})
 
-
-Animations:RegisterConfigFrame("AnchorTo", {
-	frame = "AnchorTo",
-	
-	Load = function(self, frame, EventSettings)
-		Animations:AnchorTo_Dropdown_SetText(EventSettings.AnchorTo)
-	end,
-})
 
 function Animations:AnchorTo_Dropdown()
 	for _, IconModule in pairs(TMW.CI.icon.Modules) do

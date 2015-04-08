@@ -76,6 +76,15 @@ end)
 
 
 ---------- Interface ----------
+
+TMW:NewClass("Config_EditBox_Event_DogTags", "Config_Base_Event", "Config_EditBox_DogTags"){
+	METHOD_EXTENSIONS = {
+		SaveSetting = function(self, button)
+			EVENTS:LoadConfig()
+		end,
+	},
+}
+
 function Announcements:Location_DropDown()
 	local channelData = Announcements.currentSubHandlerData
 	if channelData and channelData.dropdown then
@@ -93,80 +102,6 @@ function Announcements:Location_DropDown_OnClick(text)
 	EVENTS:GetEventSettings().Location = dropdown.value
 end
 
-
-
-local Announcements = EVENTS:GetEventHandler("Announcements")
-
-
-Announcements:RegisterConfigFrame("Location", {
-	frame = "Location",
-	topPadding = 14,
-	bottomPadding = 4,
-	
-	Load = function(self, frame, EventSettings)
-		local channelData = Announcements.currentSubHandlerData
-
-		local defaultlocation = get(channelData.defaultlocation)
-		local location = EventSettings.Location
-		
-		location = location and location ~= "" and location or defaultlocation
-		location = channelData.ddtext(location) and location or defaultlocation
-		
-		EventSettings.Location = location
-		local loc = channelData.ddtext(location)
-		
-		frame.selectedValue = location
-		frame:SetText(loc)
-			
-	end,
-})
-
-Announcements:RegisterConfigFrame("WhisperTarget", {
-	frame = "WhisperTarget",
-	topPadding = 14,
-	bottomPadding = 4,
-	
-	Load = function(self, frame, EventSettings)
-		frame:SetText(EventSettings.Location)
-	end,
-})
-
-Announcements:RegisterConfigFrame("Sticky", {
-	frame = "Sticky",
-	--topPadding = 13,
-	--bottomPadding = 13,
-})
-
-Announcements:RegisterConfigFrame("ShowIconTex", {
-	frame = "ShowIconTex",
-	--topPadding = 13,
-	--bottomPadding = 13,
-})
-
-Announcements:RegisterConfigFrame("Color", {
-	frame = "Color",
-	topPadding = 4,
-	bottomPadding = 4,
-	
-	Load = function(self, frame, EventSettings)
-		local r, g, b = EventSettings.r, EventSettings.g, EventSettings.b
-		frame:GetNormalTexture():SetVertexColor(r, g, b, 1)
-	end,
-})
-
-TMW.IE:RegisterRapidSetting("Size")
-Announcements:RegisterConfigFrame("Size", {
-	frame = "Size",
-	topPadding = 13,
-	bottomPadding = 13,
-})
-
-TMW.IE:RegisterRapidSetting("TextDuration")
-Announcements:RegisterConfigFrame("TextDuration", {
-	frame = "TextDuration",
-	topPadding = 13,
-	bottomPadding = 13,
-})
 
 
 

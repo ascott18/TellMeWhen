@@ -5,7 +5,7 @@
 		<Frames>
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
 				<KeyValues>
-					<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
+					<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event_DogTags"/>
 				</KeyValues>
 
 				<Size y="20"/>
@@ -34,13 +34,7 @@
 							tooltip = TMW.L["ANN_EDITBOX_DESC"],
 							label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"],
 							setting = "Text",
-							OnEditFocusLost = function(self)
-								TMW.EVENTS:LoadConfig()
-							end,
 						})
-						function self:GetSettingTable()
-							return TMW.EVENTS:GetEventSettings()
-						end
 						self:EnableLinkInsertion()
 						
 						self.Header:SetText(TMW.L["ANN_EDITBOX"])
@@ -81,7 +75,7 @@
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormal" parentKey="Header" justifyH="LEFT" text="">
+								<FontString inherits="GameFontNormal" parentKey="Header" justifyH="LEFT" text="">
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 									</Anchors>
@@ -90,11 +84,39 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
+								local Announcements = TMW.EVENTS:GetEventHandler("Announcements")
+
 								TMW:CInit(self, {
 									title = TMW.L["ANN_SUB_CHANNEL"],
 									--tooltip = TMW.L[""],
-									func = TMW.EVENTS:GetEventHandler("Announcements").Location_DropDown,
+									func = Announcements.Location_DropDown,
+
+									topPadding = 14,
+									bottomPadding = 4,
 								})
+
+								function self:ReloadSetting()
+									local EventSettings = TMW.EVENTS:GetEventSettings()
+
+									local channelData = Announcements.currentSubHandlerData
+
+									if not channelData or not self:IsShown() then
+										return
+									end
+
+									local defaultlocation = TMW.get(channelData.defaultlocation)
+									local location = EventSettings.Location
+									
+									location = location and location ~= "" and location or defaultlocation
+									location = channelData.ddtext(location) and location or defaultlocation
+									
+									EventSettings.Location = location
+									local loc = channelData.ddtext(location)
+									
+									self.selectedValue = location
+									self:SetText(loc)
+								end
+								TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", self, "ReloadSetting")
 
 								self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
 							</OnLoad>
@@ -102,6 +124,10 @@
 					</Frame>
 
 					<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
+						<KeyValues>
+							<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event_DogTags"/>
+						</KeyValues>
+
 						<Size x="135" y="15"/>
 						<Anchors>
 							<Anchor point="LEFT" x="30"/>
@@ -117,76 +143,19 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
+								TMW:CInit(self, {
+									setting = "Location",
+									title = TMW.L["ANN_WHISPERTARGET"],
+									tooltip = TMW.L["ANN_WHISPERTARGET_DESC"],
+									label = TMW.L["ANN_WHISPERTARGET"],
+
+									topPadding = 14,
+									bottomPadding = 4,
+								})
+
 								self.Header:SetText(TMW.L["ANN_WHISPERTARGET"])
-								TMW:TT(self, "ANN_WHISPERTARGET", "ANN_WHISPERTARGET_DESC")
-								self.label = TMW.L["ANN_WHISPERTARGET"]
-								self.BackgroundText:SetWidth(self:GetWidth())
 								TMW.SUG:EnableEditBox(self, "dogtags")
 							</OnLoad>
-							<OnTextChanged>
-								local text = self:GetText()
-								if text == "" then
-									self.BackgroundText:SetText(self.label)
-								else
-									self.BackgroundText:SetText(nil)
-								end
-								
-								local DogTag = LibStub("LibDogTag-3.0")
-								local colorText = self:GetText()
-								if self.lastText ~= colorText then
-									local text = colorText:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-									
-									self.lastText = DogTag:ColorizeCode(text):gsub("|r", "")
-									local position = self:GetCursorPosition()
-									local skip = 0
-									for i = 1, position do
-										if colorText:byte(i) == ("|"):byte() then
-											if colorText:byte(i+1) == ("c"):byte() then
-												skip = skip + 10
-											elseif colorText:byte(i+1) == ("r"):byte() then
-												skip = skip + 2
-											end
-										end
-									end
-									position = position - skip
-									self:SetText(self.lastText)
-									
-									local betterPosition = 0
-									for i = 1, position do
-										betterPosition = betterPosition + 1
-										while self.lastText:byte(betterPosition) == ("|"):byte() do
-											if self.lastText:byte(betterPosition+1) == ("c"):byte() then
-												betterPosition = betterPosition + 10
-											elseif self.lastText:byte(betterPosition+1) == ("r"):byte() then
-												betterPosition = betterPosition + 2
-											else
-												break
-											end
-										end
-									end
-									
-									self:SetCursorPosition(betterPosition)
-								end
-							</OnTextChanged>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-								
-								local DogTag = LibStub("LibDogTag-3.0")
-								self:SetText(DogTag:CleanCode(self:GetText()))
-								self:SetText(DogTag:ColorizeCode(self:GetText()))
-								
-								local text = self:GetText():trim("; \t\r\n")
-								
-								if TMW.CI.ics then
-									text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-									TMW.EVENTS:GetEventSettings().Location = text
-								end
-								
-								TMW.IE:ScheduleIconSetup()
-								self:GetScript("OnTextChanged")(self)
-
-								TMW.EVENTS:LoadConfig()
-							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
 
@@ -236,6 +205,9 @@
 										s.r, s.g, s.b = r, g, b
 									end,
 									hasOpacity = false,
+
+									topPadding = 4,
+									bottomPadding = 4,
 								})
 							</OnLoad>
 						</Scripts>

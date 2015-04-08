@@ -901,19 +901,6 @@ function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
 	self:SetupEventDisplay(self.currentEventID)
 end
 
-function ColumnConfig:RegisterConfigFrame(identifier, configFrameData)
-	configFrameData.identifier = identifier
-	TMW:ValidateType("identifier", "RegisterConfigFrame(identifier, configFrameData)", identifier, "string")
-	
-	TMW:ValidateType("configFrameData.frame", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.frame, "string;frame")
-	TMW:ValidateType("configFrameData.Load", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.Load, "function;nil")
-	
-	TMW:ValidateType("configFrameData.topPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.topPadding, "number;nil")
-	TMW:ValidateType("configFrameData.bottomPadding", "RegisterConfigFrame(identifier, configFrameData)", configFrameData.bottomPadding, "number;nil")
-	
-	self.ConfigFrameData[identifier] = configFrameData
-end
-
 -- Override this method for handlers that need to blacklist a setting.
 function ColumnConfig:IsFrameBlacklisted(frameName)
 	return false
@@ -960,11 +947,6 @@ function ColumnConfig:SetupConfig(subHandlerData)
 				end
 				frame:Show()
 				lastFrame = frame
-				
-				-- TODO: remove this after all old functions are integrated
-			--	if configFrameData.Load then
-			--		TMW.safecall(configFrameData.Load, configFrameData, frame, EventSettings)
-			--	end
 
 				lastFrameBottomPadding = data and data.bottomPadding
 			end

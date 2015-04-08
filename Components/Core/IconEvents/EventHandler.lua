@@ -408,7 +408,6 @@ end)
 -- Base class for EventHandlers that have sub-handlers (e.g. animations and announcements).
 TMW:NewClass("EventHandler_ColumnConfig", "EventHandler"){
 	OnNewInstance_ColumnConfig = function(self)
-		self.ConfigFrameData = {}
 	end,
 }
 

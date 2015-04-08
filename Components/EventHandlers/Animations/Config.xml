@@ -131,6 +131,9 @@
 										s.r_anim, s.g_anim, s.b_anim, s.a_anim = r, g, b, a
 									end,
 									hasOpacity = true,
+									
+									topPadding = 4,
+									bottomPadding = 4,
 								})
 							</OnLoad>
 						</Scripts>
@@ -299,7 +302,7 @@
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
-								<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
+								<FontString parentKey="Header" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
 										<Anchor point="LEFT" x="-5"/>
@@ -310,16 +313,24 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
+								local Animations = TMW.EVENTS:GetEventHandler("Animations")
+
 								TMW:CInit(self, {
 									title = TMW.L["ANCHORTO"],
 									--tooltip = TMW.L[""],
-									func = TMW.EVENTS:GetEventHandler("Animations").AnchorTo_Dropdown,
+									func = Animations.AnchorTo_Dropdown,
 
 									topPadding = 14,
 									bottomPadding = 4,
 								})
-								self.text:SetText(TMW.L["ANCHORTO"])
-							
+
+								function self:ReloadSetting()
+									local EventSettings = TMW.EVENTS:GetEventSettings()
+									Animations:AnchorTo_Dropdown_SetText(EventSettings.AnchorTo)
+								end
+								TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", self, "ReloadSetting")
+
+								self.Header:SetText(TMW.L["ANCHORTO"])
 							</OnLoad>
 						</Scripts>
 					</Frame>
