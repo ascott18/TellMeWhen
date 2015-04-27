@@ -479,9 +479,9 @@ function SPECS:UpdateUnitSpecs()
 			local unit = "arena" .. i
 
 			local name, server = UnitName(unit)
-			if name and server then
+			if name then
 				local specID = GetArenaOpponentSpec(i)
-				name = name .. "-" .. server
+				name = name .. (server and "-" .. server or "")
 				Env.UnitSpecs[name] = specID
 			end
 		end
@@ -572,8 +572,8 @@ ConditionCategory:RegisterCondition(11.1, "UNITSPEC", {
 				return spec and GetSpecializationInfo(spec) or 0
 			else
 				local name, server = UnitName(unit)
-				if name and server then
-					name = name .. "-" .. server
+				if name then
+					name = name .. (server and "-" .. server or "")
 					return Env.UnitSpecs[name] or 0
 				end
 			end

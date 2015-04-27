@@ -13,6 +13,7 @@ TMW.CHANGELOG = {
 [==[* Icons should no longer be treated as being on cooldown for color settings if they're tracking an ability that still has charges remaining.]==],
 [==[* Fixed a typo that could sometimes break icon sorting, and may have also broken meta icons occasionally.]==],
 [==[* Refactored the configuration for Animation and Text notifications, fixing a minor issue with settings not saving in the process.]==],
+[==[* The Unit Specialization condition should now work for arena enemies from your own server.]==],
 [==[]==],
 [==[===v7.2.6===]==],
 [==[====Bug Fixes====]==],
