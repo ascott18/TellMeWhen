@@ -472,14 +472,17 @@ local SPECS = CNDT:NewModule("Specs", "AceEvent-3.0")
 function SPECS:UpdateUnitSpecs()
 	local _, z = IsInInstance()
 
-	wipe(Env.UnitSpecs)
+	if next(Env.UnitSpecs) then
+		wipe(Env.UnitSpecs)
+		TMW:Fire("TMW_UNITSPEC_UPDATE")
+	end
 
 	if z == "arena" then
 		for i = 1, GetNumArenaOpponents() do
 			local unit = "arena" .. i
 
 			local name, server = UnitName(unit)
-			if name then
+			if name and name ~= UNKNOWN then
 				local specID = GetArenaOpponentSpec(i)
 				name = name .. (server and "-" .. server or "")
 				Env.UnitSpecs[name] = specID
@@ -514,6 +517,7 @@ function SPECS:PrepareUnitSpecEvents()
 	end
 
 	SPECS:RegisterEvent("UPDATE_WORLD_STATES",   "UpdateUnitSpecs")
+	SPECS:RegisterEvent("UNIT_NAME_UPDATE",   "UpdateUnitSpecs")
 	SPECS:RegisterEvent("ARENA_OPPONENT_UPDATE", "UpdateUnitSpecs")
 	SPECS:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdateUnitSpecs")
 	SPECS:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateUnitSpecs")
