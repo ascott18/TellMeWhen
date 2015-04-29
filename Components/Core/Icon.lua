@@ -864,18 +864,24 @@ function Icon.Setup(icon)
 	
 	-- actually run the icon's update function
 	if icon.Enabled or not TMW.Locked then
+
+		------------ Icon View ------------
+		viewData:Icon_Setup(icon)
+		viewData:ImplementIntoIcon(icon)
+		viewData:Icon_Setup_Post(icon)
 	
 		------------ Icon Type ------------
 		typeData:ImplementIntoIcon(icon)
 		
 		if icon.typeData ~= typeData_old then
 			TMW:Fire("TMW_ICON_TYPE_CHANGED", icon, typeData, typeData_old)
-		end		
-		
-		------------ Icon View ------------
-		viewData:Icon_Setup(icon)
-		viewData:ImplementIntoIcon(icon)
-		viewData:Icon_Setup_Post(icon)
+		end	
+			
+		if not icon:IsControlled() then -- true for controllers and non-controlled groups
+			icon.LastUpdate = 0
+			icon.NextUpdateTime = 0
+			TMW.safecall(typeData.Setup, typeData, icon)
+		end
 
 
 		------------ Conditions ------------
@@ -888,12 +894,6 @@ function Icon.Setup(icon)
 				TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
 				icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
 			end
-		end
-			
-		if not icon:IsControlled() then -- true for controllers and non-controlled groups
-			icon.LastUpdate = 0
-			icon.NextUpdateTime = 0
-			TMW.safecall(typeData.Setup, typeData, icon)
 		end
 	else
 		icon:DisableIcon()
