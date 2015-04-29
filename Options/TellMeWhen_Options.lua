@@ -2816,7 +2816,7 @@ function IE:Type_Dropdown_OnClick()
 
 	CI.icon:SetInfo("texture", nil)
 
-	local old = CI.ics.Type
+	local oldType = CI.ics.Type
 	CI.ics.Type = self.value
 
 	TMW:Fire("TMW_CONFIG_ICON_TYPE_CHANGED", icon, CI.ics.Type, oldType)
