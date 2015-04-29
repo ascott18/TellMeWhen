@@ -230,10 +230,10 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, typeData_old)
-		local icspv = icon:GetSettingsPerView()
+TMW:RegisterCallback("TMW_CONFIG_ICON_TYPE_CHANGED", function(event, icon, type, oldType)
+	local icspv = icon:GetSettingsPerView()
 
-	if typeData == Type and typeData_old then
+	if type == Type.type then
 		icon:GetSettings().CustomTex = "NONE"
 		local layout = TMW.TEXT:GetTextLayoutForIcon(icon)
 
@@ -241,7 +241,7 @@ TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, ty
 			icspv.Texts[1] = "[(Value / ValueMax * 100):Round:Percent]"
 			icspv.Texts[2] = "[Value:Short \"/\" ValueMax:Short]"
 		end
-	elseif typeData_old == Type then
+	elseif oldType == Type.type then
 		if icspv.Texts[1] == "[(Value / ValueMax * 100):Round:Percent]" then
 			icspv.Texts[1] = nil
 		end

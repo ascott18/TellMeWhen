@@ -2814,10 +2814,12 @@ function IE:Type_Dropdown_OnClick()
 		CI.ics.Enabled = true
 	end
 
-	CI.ics.Type = self.value
 	CI.icon:SetInfo("texture", nil)
 
+	local old = CI.ics.Type
 	CI.ics.Type = self.value
+
+	TMW:Fire("TMW_CONFIG_ICON_TYPE_CHANGED", icon, CI.ics.Type, oldType)
 	
 	CI.icon:Setup()
 	
