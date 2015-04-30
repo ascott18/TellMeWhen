@@ -776,12 +776,10 @@ function Icon.DisableIcon(icon, soft)
 
 	if icon.typeData then
 		icon.typeData:UnimplementFromIcon(icon)
-		icon.typeData = nil
 	end
 	
 	if icon.viewData then
 		icon.viewData:UnimplementFromIcon(icon)
-		icon.viewData = nil
 	end
 end
 
@@ -849,6 +847,11 @@ function Icon.Setup(icon)
 	TMW:DeclareDataOwner(iconGUID, icon)
 	
 
+	-- Store these on the icon for convenience
+	icon.typeData = typeData
+	icon.viewData = viewData
+	
+
 	-- Store all of the icon's relevant settings on the icon,
 	-- and nil out any settings that aren't relevant.
 	-- TODO: (really big TODO) get rid of this behavior.
@@ -890,8 +893,6 @@ function Icon.Setup(icon)
 
 	
 	if icon.Enabled or not TMW.Locked then
-		icon.typeData = typeData
-		icon.viewData = viewData
 
 		------------ Icon View ------------
 		viewData:Icon_Setup(icon)
