@@ -265,7 +265,7 @@ function IconView:OnImplementIntoIcon(icon)
 			local Module = icon.Modules[moduleName]
 			
 			-- Don't create the module if it is disallowed for the default icon type and the icon uses the default icon type.
-			if not Module and not (icon.typeData.type == "" and not ModuleClass:IsAllowedByType("")) then
+			if not Module and not (icon:GetSettings().Type == "" and not ModuleClass:IsAllowedByType("")) then
 				Module = ModuleClass:New(icon)
 			end
 

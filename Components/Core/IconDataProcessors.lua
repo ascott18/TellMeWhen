@@ -841,8 +841,9 @@ do
 		-- GLOBALS: unit
 		t[#t+1] = [[
 		local dogTagUnit
+		local typeData = icon.typeData
 		
-		if icon.typeData.unitType == "unitid" then
+		if not typeData or typeData.unitType == "unitid" then
 			dogTagUnit = unit
 			if not DogTag.IsLegitimateUnit[dogTagUnit] then
 				dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)

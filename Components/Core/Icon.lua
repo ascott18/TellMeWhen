@@ -773,12 +773,15 @@ function Icon.DisableIcon(icon, soft)
 
 	icon:DisableAllModules()
 	
+
 	if icon.typeData then
 		icon.typeData:UnimplementFromIcon(icon)
+		icon.typeData = nil
 	end
 	
 	if icon.viewData then
 		icon.viewData:UnimplementFromIcon(icon)
+		icon.viewData = nil
 	end
 end
 
@@ -810,11 +813,6 @@ function Icon.Setup(icon)
 		return
 	end
 	
-
-	-- Declare the viewData and typeData on the icon for easy reference.
-	icon.viewData = viewData
-	icon.typeData = typeData
-
 
 	-- Determine if this icon is a group controller, and setup the entire group if it is.
 	if icon.ID == 1 then
@@ -892,6 +890,8 @@ function Icon.Setup(icon)
 
 	
 	if icon.Enabled or not TMW.Locked then
+		icon.typeData = typeData
+		icon.viewData = viewData
 
 		------------ Icon View ------------
 		viewData:Icon_Setup(icon)
