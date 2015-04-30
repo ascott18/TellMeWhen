@@ -477,7 +477,7 @@ do
 	local Processor = TMW.Classes.IconDataProcessor:New("REVERSE", "reverse")
 	-- Processor:CompileFunctionSegment(t) is default.
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("reverse", nil)
 	end)
 end
@@ -539,7 +539,7 @@ do
 		category = L["ICON"],
 	})
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("spell", nil)
 	end)
 end
@@ -568,7 +568,7 @@ do
 		--]]
 	end
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("charges, maxCharges", nil, nil)
 	end)
 end
@@ -598,7 +598,7 @@ do
 		--]]
 	end
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("value, maxValue, valueColor", nil, nil, nil)
 	end)
 		
@@ -706,7 +706,7 @@ do
 		end
 	end)
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("stack, stackText", nil, nil)
 	end)
 end
@@ -811,7 +811,7 @@ do
 		category = L["ICON"],
 	})
 
-	TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon, typeData, oldTypeData)
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 		icon:SetInfo("unit, GUID", nil, nil)
 	end)
 end

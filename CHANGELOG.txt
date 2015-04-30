@@ -8,6 +8,7 @@
  * Fixed a typo that could sometimes break icon sorting, and may have also broken meta icons occasionally.
  * Refactored the configuration for Animation and Text notifications, fixing a minor issue with settings not saving in the process.
  * The Unit Specialization condition should now work for arena enemies from your own server.
+ * Fixed: meta.lua line 191: attempt to index field 'IconsLookup' (a nil value) (Ticket #1114)
 
 ===v7.2.6===
 ====Bug Fixes====

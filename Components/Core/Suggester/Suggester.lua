@@ -54,7 +54,7 @@ local SUGpreTable = {}
 local ClassSpellLookup = ClassSpellCache:GetSpellLookup()
 
 ---------- Initialization/Spell Caching ----------
-TMW:RegisterCallback("TMW_ICON_TYPE_CHANGED", function(event, icon)
+TMW:RegisterCallback("TMW_CONFIG_ICON_TYPE_CHANGED", function(event, icon)
 	if icon == TMW.CI.icon then
 		SUG.redoIfSame = 1
 		SUG.SuggestionList:Hide()
