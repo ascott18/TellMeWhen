@@ -2819,7 +2819,7 @@ function IE:Type_Dropdown_OnClick()
 	local oldType = CI.ics.Type
 	CI.ics.Type = self.value
 
-	TMW:Fire("TMW_CONFIG_ICON_TYPE_CHANGED", icon, CI.ics.Type, oldType)
+	TMW:Fire("TMW_CONFIG_ICON_TYPE_CHANGED", CI.icon, CI.ics.Type, oldType)
 	
 	CI.icon:Setup()
 	
