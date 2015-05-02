@@ -483,8 +483,20 @@ function CNDT:BitFlags_DropDown()
 
 		info.text = name
 
-		--info.tooltipTitle = name
-		--info.tooltipText = 
+		if type(data) == "table" then
+			info.tooltipTitle = name
+			info.tooltipText = data.tooltip
+
+			info.icon = data.icon
+			
+			if data.tcoords then
+				info.tCoordLeft = data.tcoords[1]
+				info.tCoordRight = data.tcoords[2]
+				info.tCoordTop = data.tcoords[3]
+				info.tCoordBottom = data.tcoords[4]
+			end
+		end
+
 
 		info.value = index
 		info.checked = CNDT:GetBitFlag(conditionSettings, index)

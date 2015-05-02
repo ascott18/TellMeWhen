@@ -331,7 +331,6 @@ function DD:AddButton(info, level)
 		end
 		-- Set icon
 		if ( info.icon ) then
-			icon:SetSize(16,16);
 			icon:SetTexture(info.icon);
 			icon:ClearAllPoints();
 			icon:SetPoint("RIGHT");

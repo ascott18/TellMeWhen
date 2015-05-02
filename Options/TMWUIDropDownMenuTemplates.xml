@@ -26,9 +26,7 @@
 					<TexCoords left="0.5" right="1.0" top="0.5" bottom="1.0"/>
 				</Texture>
 				<Texture parentKey="Icon" hidden="true">
-					<Size>
-						<AbsDimension x="16" y="16"/>
-					</Size>
+					<Size x="15" y="15"/>
 					<Anchors>
 						<Anchor point="RIGHT">
 							<Offset x="0" y="0"/>

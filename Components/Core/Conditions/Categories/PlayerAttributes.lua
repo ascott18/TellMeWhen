@@ -228,7 +228,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 				end
 
 
-				-- 40 man Event raid      (18 -> 12) (level 100 molten code, remap to 40 man raid)
+				-- 40 man Event raid      (18 -> 12) (level 100 molten core, remap to 40 man raid)
 				if instanceDifficulty == 18 then
 					return 12
 				end
@@ -248,7 +248,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 			end
 		end,
 	},
-	funcstr = [[BITFLAGSMAPANDCHECK(GetZoneType2())]],
+	funcstr = [[BITFLAGSMAPANDCHECK( GetZoneType2() )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("ZONE_CHANGED_NEW_AREA"),

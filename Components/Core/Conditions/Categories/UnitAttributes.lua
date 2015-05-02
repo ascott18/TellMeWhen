@@ -402,19 +402,6 @@ ConditionCategory:RegisterCondition(11,	 "CLASS", {	-- OLD
 })
 
 
-local function GetClassText(classID)
-	local name, token, classID = GetClassInfoByID(classID)
-	if not name then
-		return nil
-	end
-
-	return "|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:0:0:0:0:256:256:" ..
-		(CLASS_ICON_TCOORDS[token][1]+.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[token][2]-.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[token][3]+.02)*256 .. ":" .. 
-		(CLASS_ICON_TCOORDS[token][4]-.02)*256 .. "|t " ..
-		PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name)
-end
 ConditionCategory:RegisterCondition(11,	 "CLASS2", {
 	text = L["CONDITIONPANEL_CLASS"],
 
@@ -422,7 +409,18 @@ ConditionCategory:RegisterCondition(11,	 "CLASS2", {
 	bitFlags = (function()
 		local t = {}
 		for i = 1, GetNumClasses() do
-			t[i] = GetClassText(i)
+			local name, token, classID = GetClassInfoByID(i)
+			t[i] = {
+				order = i,
+				text = PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name),
+				icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+				tcoords = {
+					(CLASS_ICON_TCOORDS[token][1]+.02),
+					(CLASS_ICON_TCOORDS[token][2]-.02),
+					(CLASS_ICON_TCOORDS[token][3]+.02),
+					(CLASS_ICON_TCOORDS[token][4]-.02),
+				}
+			}
 		end
 		return t
 	end)(),
@@ -449,17 +447,7 @@ ConditionCategory:RegisterCondition(11,	 "CLASS2", {
 
 
 
-local function GetSpecText(specID)
-	local id, name, description, icon, background, role, class = GetSpecializationInfoByID(specID)
 
-	return 
-	--"|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:0:0:0:0:256:256:" ..
-	--	(CLASS_ICON_TCOORDS[class][1]+.02)*256 .. ":" .. 
-	--	(CLASS_ICON_TCOORDS[class][2]-.02)*256 .. ":" .. 
-	--	(CLASS_ICON_TCOORDS[class][3]+.02)*256 .. ":" .. 
-	--	(CLASS_ICON_TCOORDS[class][4]-.02)*256 .. "|t " .. 
-		"|T" .. icon .. ":0:0:0:0:32:32:2.24:29.76:2.24:29.76|t " .. PLAYER_CLASS:format(RAID_CLASS_COLORS[class].colorStr, name, LOCALIZED_CLASS_NAMES_MALE[class])	
-end
 local specNameToRole = {}
 local SPECS = CNDT:NewModule("Specs", "AceEvent-3.0")
 function SPECS:UpdateUnitSpecs()
@@ -519,9 +507,14 @@ ConditionCategory:RegisterCondition(11.1, "UNITSPEC", {
 			specNameToRole[class] = {}
 
 			for j = 1, GetNumSpecializationsForClassID(classID) do
-				local specID, spec = GetSpecializationInfoForClassID(classID, j)
+				local specID, spec, desc, icon = GetSpecializationInfoForClassID(classID, j)
 				specNameToRole[class][spec] = specID
-				t[specID] = GetSpecText(specID)
+				t[specID] = {
+					order = specID,
+					text = PLAYER_CLASS:format(RAID_CLASS_COLORS[class].colorStr, spec, LOCALIZED_CLASS_NAMES_MALE[class]),
+					icon = icon,
+					tcoords = CNDT.COMMON.standardtcoords
+				}
 			end
 		end
 		return t
