@@ -1,6 +1,7 @@
 ===v7.3.0===
  * The suggestion list now works with arrow keys to pick what line tab will insert.
  * You can now use the suggestion list to pick condition types (the Condition Type dropdown now has a textbox on it).
+ * The Player Specialization condition is now deprecated in favor of the Unit Specialization condition.
 
 ====Bug Fixes====
  * Fixed some issues with the All-Unit Buff/Debuff icon type caused by some auras (A Murder of Crows) not firing combat log events on application/removal.

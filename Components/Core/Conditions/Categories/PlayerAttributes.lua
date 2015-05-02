@@ -122,24 +122,54 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
-		[ 1  ] = L["CONDITIONPANEL_INSTANCETYPE_NONE"],											
-		[ 2  ] = BATTLEGROUND,																	
-		[ 3  ] = ARENA,																			
-		[ 4  ] = DUNGEON_DIFFICULTY_5PLAYER,														
-		[ 5  ] = DUNGEON_DIFFICULTY_5PLAYER_HEROIC,												
-		[ 6  ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER),		
-		[ 7  ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER),		
-		[ 8  ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER_HEROIC),	
-		[ 9  ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER_HEROIC),	
-		[ 10 ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_FINDER),						
-		[ 11 ] = CHALLENGE_MODE,																	
-		[ 12 ] = L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_40PLAYER),		
-		[ 13 ] = HEROIC_SCENARIO,																	
-		[ 14 ] = GUILD_CHALLENGE_TYPE4,								-- (regular scenario)
-		[ 15 ] = format("%s (%s)", PLAYER_DIFFICULTY1, FLEX_RAID),	-- (Warlords Normal Flex)
-		[ 16 ] = format("%s (%s)", PLAYER_DIFFICULTY2, FLEX_RAID),	-- (Warlords Heroic Flex)
-		[ 17 ] = PLAYER_DIFFICULTY6,								-- (Warlords Mythic)
-		[ 18 ] = format("%s (%s)", PLAYER_DIFFICULTY3, FLEX_RAID),	-- (Warlords LFR Flex)
+		-- None (Outside)
+		[ 1  ] = {order=01, text=L["CONDITIONPANEL_INSTANCETYPE_NONE"],		space=true,								},
+		-- Battleground
+		[ 2  ] = {order=02, text=BATTLEGROUND,																		},
+		-- Arena
+		[ 3  ] = {order=03, text=ARENA,										space=true,								},
+
+
+		-- 5-player
+		[ 4  ] = {order=10, text=DUNGEON_DIFFICULTY_5PLAYER,														},
+		-- 5-player Heroic
+		[ 5  ] = {order=11, text=DUNGEON_DIFFICULTY_5PLAYER_HEROIC,													},
+		-- Challenge Mode 5-man
+		[ 11 ] = {order=12, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, CHALLENGE_MODE),																	},
+		-- Warlords 5-man Timewalker (or "timewalker" so I can use this build for pre-6.2)
+		[ 24 ] = {order=13, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, PLAYER_DIFFICULTY_TIMEWALKER or "Timewalker"),		}, 
+		-- Warlords 5-man Mythic
+		[ 23 ] = {order=14, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, PLAYER_DIFFICULTY6),	space=true,	}, 
+
+
+		-- Normal scenario
+		[ 14 ] = {order=17, text=GUILD_CHALLENGE_TYPE4,									},
+		-- Heroic scenario
+		[ 13 ] = {order=18, text=HEROIC_SCENARIO,							space=true,								},
+
+
+		-- Warlords LFR Flex
+		[ 18 ] = {order=21, text=format("%s (%s)", PLAYER_DIFFICULTY3, FLEX_RAID),		},
+		-- Warlords Normal Flex
+		[ 15 ] = {order=22, text=format("%s (%s)", PLAYER_DIFFICULTY1, FLEX_RAID),		},
+		-- Warlords Heroic Flex
+		[ 16 ] = {order=23, text=format("%s (%s)", PLAYER_DIFFICULTY2, FLEX_RAID),		},
+		-- Warlords Mythic
+		[ 17 ] = {order=24, text=PLAYER_DIFFICULTY6,						space=true,	},
+
+		-- LFR (legacy, non-flex)
+		[ 10 ] = {order=31, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_FINDER),						},
+		-- 10-player raid (legacy)
+		[ 6  ] = {order=32, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER),			},
+		-- 25-player raid (legacy)
+		[ 7  ] = {order=33, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER),			},
+		-- 10-player heroic raid (legacy)
+		[ 8  ] = {order=34, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER_HEROIC),	},
+		-- 25-player heroic raid (legacy)
+		[ 9  ] = {order=35, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER_HEROIC),	},
+		-- 40-man raid (legacy)
+		[ 12 ] = {order=36, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_40PLAYER),			},
+
 	},
 
 	icon = "Interface\\Icons\\Spell_Frost_Stun",
@@ -161,39 +191,60 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 			end
 			
 			if z == "pvp" then
-				-- Battleground (2)
+				-- Battleground           (__ -> 02)
 				return 2
 			elseif z == "arena" then
-				-- Arena (3)
+				-- Arena                  (__ -> 03)
 				return 3
 			elseif instanceDifficulty == 0 then
-				-- None (1)
+				-- None                   (__ -> 01)
 				return 1
 			else
-				-- 5 man normal (4)
-				-- 5 man heroic (5)
-				-- 10 man normal (6)
-				-- 25 man normal (7)
-				-- 10 man heroic (8)
-				-- 25 man heroic (9)
-				-- LFR (10)
-				-- Challenge Mode (11)
-				-- 40 man (12)
+				-- 5 man normal           (01 -> 04)
+				-- 5 man heroic           (02 -> 05)
+				-- 10 man normal          (03 -> 06)
+				-- 25 man normal          (04 -> 07)
+				-- 10 man heroic          (05 -> 08)
+				-- 25 man heroic          (06 -> 09)
+				-- LFR                    (07 -> 10)
+				-- Challenge Mode         (08 -> 11)
+				-- 40 man                 (09 -> 12)
 				if instanceDifficulty <= 9 then
-					return 3 + instanceDifficulty -- 4-12
+					return 3 + instanceDifficulty
 				end
 
-				-- heroic scenario (13)
-				-- scenario (14)
+				-- heroic scenario        (11 -> 13)
+				-- scenario               (12 -> 14)
 				if instanceDifficulty <= 12 then
-					return 2 + instanceDifficulty --13-14
+					return 2 + instanceDifficulty
 				end
 
-				-- Normal Flex (15)
-				-- Heroic Flex (16)
-				-- Mythic (17)
-				-- LFR Flex (18)
-				return 1 + instanceDifficulty
+				-- Normal Flex            (14 -> 15)
+				-- Heroic Flex            (15 -> 16)
+				-- Mythic                 (16 -> 17)
+				-- LFR Flex               (17 -> 18)
+				if instanceDifficulty <= 17 then
+					return 1 + instanceDifficulty
+				end
+
+
+				-- 40 man Event raid      (18 -> 12) (level 100 molten code, remap to 40 man raid)
+				if instanceDifficulty == 18 then
+					return 12
+				end
+
+				-- 5 man Event dungeon    (19 -> 04) (level 90 UBRS at WoD launch, remap to 5 man dungeon)
+				if instanceDifficulty == 19 then
+					return 4
+				end
+
+				-- Skip 19 so we can end this legacy silliness of keeping things sequential
+				-- (A relic from the days when this condition was slider-based).
+
+				-- 25 man Event scenario  (20 -> 20) (unused)
+				-- Mythic 5 man           (23 -> 23)
+				-- Timewalker 5 man       (24 -> 24)
+				return instanceDifficulty
 			end
 		end,
 	},
@@ -213,13 +264,14 @@ ConditionCategory:RegisterCondition(1.5, "ZONEPVP", {
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
-	    arena = rawget(L, "CONDITIONPANEL_ZONEPVP_FFA") or FREE_FOR_ALL_TERRITORY:trim("()（）"), -- Only use the TMW translation if it exists.
-	    combat = COMBAT_ZONE:trim("()（）"),
-	    contested = CONTESTED_TERRITORY:trim("()（）"),
-	    friendly = FACTION_CONTROLLED_TERRITORY:format(FRIENDLY):trim("()（）"),
-	    hostile = FACTION_CONTROLLED_TERRITORY:format(HOSTILE):trim("()（）"),
-	    sanctuary = SANCTUARY_TERRITORY:trim("()（）"),
-	    none = NONE,
+	    none = 		{order=1, text=NONE,},
+	    sanctuary = {order=2, text=SANCTUARY_TERRITORY:trim("()（）"),},
+	    friendly = 	{order=3, text=FACTION_CONTROLLED_TERRITORY:format(FRIENDLY):trim("()（）"),},
+	    contested = {order=4, text=CONTESTED_TERRITORY:trim("()（）"),},
+	    hostile = 	{order=5, text=FACTION_CONTROLLED_TERRITORY:format(HOSTILE):trim("()（）"),},
+	    combat = 	{order=6, text=COMBAT_ZONE:trim("()（）"),},
+		-- Only use the TMW translation if it exists for arena (ffa):
+	    arena = 	{order=7, text=rawget(L, "CONDITIONPANEL_ZONEPVP_FFA") or FREE_FOR_ALL_TERRITORY:trim("()（）"), },
 	},
 
 	icon = "Interface\\Icons\\inv_bannerpvp_01",
@@ -489,6 +541,7 @@ ConditionCategory:RegisterCondition(7,	 "SPEC", {
 })
 
 ConditionCategory:RegisterCondition(8,	 "TREE", {
+	old = true,
 	text = L["UIPANEL_SPECIALIZATION"],
 	min = 1,
 	max = GetNumSpecializations,
@@ -506,6 +559,7 @@ ConditionCategory:RegisterCondition(8,	 "TREE", {
 			ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED", "player")
 	end,
 })
+
 
 
 local SpeclizationRoles = {
@@ -546,8 +600,6 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE", {
 	end,
 })
 
-
-ConditionCategory:RegisterSpacer(8.9)
 
 CNDT.Env.TalentMap = {}
 function CNDT:PLAYER_TALENT_UPDATE()
@@ -653,6 +705,7 @@ ConditionCategory:RegisterSpacer(11.5)
 
 ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	text = L["CONDITIONPANEL_AUTOCAST"],
+	tooltip = L["CONDITIONPANEL_AUTOCAST_DESC"],
 	min = 0,
 	max = 1,
 	formatter = TMW.C.Formatter.BOOL,
@@ -673,7 +726,7 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 })
 
 local PetModes = {
-	select(4, GetBuildInfo()) >= 40200 and "PET_MODE_ASSIST" or "PET_MODE_AGGRESSIVE",
+	"PET_MODE_ASSIST",
 	"PET_MODE_DEFENSIVE",
 	"PET_MODE_PASSIVE",
 }
@@ -681,6 +734,8 @@ for k, v in pairs(PetModes) do
 	PetModes[v] = k
 end
 ConditionCategory:RegisterCondition(13,	 "PETMODE", {
+	old = true,
+
 	text = L["CONDITIONPANEL_PETMODE"],
 	min = 1,
 	max = 3,
@@ -703,11 +758,48 @@ ConditionCategory:RegisterCondition(13,	 "PETMODE", {
 	funcstr = [[GetActivePetMode() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
+			ConditionObject:GenerateNormalEventString("UNIT_PET", "player"),
+			ConditionObject:GenerateNormalEventString("PET_BAR_UPDATE")
+	end,
+})
+ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
+	text = L["CONDITIONPANEL_PETMODE"],
+	tooltip = L["CONDITIONPANEL_PETMODE_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
+	bitFlags = {
+		[0] = L["CONDITIONPANEL_PETMODE_NONE"],
+		[1] = PET_MODE_ASSIST,
+		[2] = PET_MODE_DEFENSIVE,
+		[3] = PET_MODE_PASSIVE
+	},
+
+	unit = false,
+	icon = PET_ASSIST_TEXTURE,
+	tcoords = CNDT.COMMON.standardtcoords,
+
+	Env = {
+		GetActivePetMode2 = function()
+			for i = NUM_PET_ACTION_SLOTS, 1, -1 do -- go backwards since they are probably at the end of the action bar
+				local name, _, _, isToken, isActive = GetPetActionInfo(i)
+				if isToken and isActive and PetModes[name] then
+					return PetModes[name]
+				end
+			end
+			return 0
+		end,
+	},
+	funcstr = [[BITFLAGSMAPANDCHECK( GetActivePetMode2() )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UNIT_PET", "player"),
 			ConditionObject:GenerateNormalEventString("PET_BAR_UPDATE")
 	end,
 })
 
 ConditionCategory:RegisterCondition(14,	 "PETSPEC", {
+	old = true,
+
 	text = L["CONDITIONPANEL_PETSPEC"],
 	min = 0,
 	max = 3,
@@ -732,28 +824,32 @@ ConditionCategory:RegisterCondition(14,	 "PETSPEC", {
 			ConditionObject:GenerateNormalEventString("PET_SPECIALIZATION_CHANGED")
 	end,
 })
-ConditionCategory:RegisterCondition(15,	 "PETTREE", {
-	-- THIS CONDITION IS OUTDATED, BUT DON'T DELETE IT!
-	-- IT HANDLES UPGRADES TO THE MOP VERSION OF IT!
-	text = L["CONDITIONPANEL_PETTREE"],
-	min = 409,
-	max = 411,
-	funcstr = function(c)
-		-- Brilliant hack that will automatically upgrade to the MOP version of the condition when it is processed.
-		
-		c.Type = "PETSPEC"
-		
-		if c.Level == 409 then -- old tenacity
-			c.Level = 2 -- new tenacity
-		elseif c.Level == 410 then -- old ferocity
-			c.Level = 1 -- new ferocity
-		elseif c.Level == 411 then -- old cunning
-			c.Level = 3 -- new cunning
-		end
-		
-		return CNDT.ConditionsByType.PETSPEC.funcstr
+ConditionCategory:RegisterCondition(14.1, "PETSPEC2", {
+	text = L["CONDITIONPANEL_PETSPEC"],
+	tooltip = L["CONDITIONPANEL_PETSPEC_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
+	bitFlags = {
+		[0] = NONE,
+		[1] = L["PET_TYPE_FEROCITY"],
+		[2] = L["PET_TYPE_TENACITY"],
+		[3] = L["PET_TYPE_CUNNING"]
+	},
+
+	hidden = pclass ~= "HUNTER",
+	unit = false,
+	icon = "Interface\\Icons\\Ability_Druid_DemoralizingRoar",
+	tcoords = CNDT.COMMON.standardtcoords,
+
+	Env = {
+		GetSpecialization = GetSpecialization
+	},
+	funcstr = [[BITFLAGSMAPANDCHECK( GetSpecialization(nil, true) or 0 )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UNIT_PET", "player"),
+			ConditionObject:GenerateNormalEventString("PET_SPECIALIZATION_CHANGED")
 	end,
-	hidden = true,
 })
 
 
@@ -770,6 +866,7 @@ function CNDT:MINIMAP_UPDATE_TRACKING()
 end
 ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 	text = L["CONDITIONPANEL_TRACKING"],
+	tooltip = L["CONDITIONPANEL_TRACKING_DESC"],
 	min = 0,
 	max = 1,
 	formatter = TMW.C.Formatter.BOOL,

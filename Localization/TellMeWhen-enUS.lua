@@ -1311,10 +1311,21 @@ L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
 L["CONDITIONPANEL_UNITSPEC"] = "Unit Specialization"
 L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"] = "Choose Specs..."
-L["CONDITIONPANEL_UNITSPEC_DESC"] = "This condition ONLY works for BATTLEGROUND and ARENA ENEMIES, as well as yourself."
+L["CONDITIONPANEL_UNITSPEC_DESC"] = [[This condition ONLY works for:
+|cff7fffff-|r Yourself
+|cff7fffff-|r Battleground enemies
+|cff7fffff-|r Arena enemies
+
+It does NOT work for: |TInterface\AddOns\TellMeWhen\Textures\Alert:0:2|t
+|cff7fffff-|r Group members
+|cff7fffff-|r Any other players]]
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
+L["CONDITIONPANEL_CLASSIFICATION_DESC"] = "Checks the rare/elite/world boss status of a unit."
 L["CONDITIONPANEL_ROLE"] = "Unit Group Role"
+L["CONDITIONPANEL_ROLE_DESC"] = "Checks the assigned role of the player in your group/raid"
 L["CONDITIONPANEL_RAIDICON"] = "Unit Raid Icon"
+L["CONDITIONPANEL_RAIDICON_DESC"] = "Checks the raid marker icon assigned to a unit."
+L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_RAIDICON"] = "Choose Icons..."
 L["CONDITIONPANEL_UNITISUNIT"] = "Unit is Unit"
 L["CONDITIONPANEL_UNITISUNIT_DESC"] = "This condition will pass if the unit in the first editbox and the second editbox are the same entity."
 L["CONDITIONPANEL_UNITISUNIT_EBDESC"] = "Enter a unit in this editbox to be compared with the first unit."
@@ -1369,10 +1380,15 @@ Does not check usability based on secondary resources (runes/holy power/chi/etc.
 L["CONDITIONPANEL_SPELLRANGE"] = "Spell in range of unit"
 L["CONDITIONPANEL_ITEMRANGE"] = "Item in range of unit"
 L["CONDITIONPANEL_AUTOCAST"] = "Pet spell autocasting"
+L["CONDITIONPANEL_AUTOCAST_DESC"] = "Checks if the specified pet spell is autocasting."
 L["CONDITIONPANEL_PETMODE"] = "Pet attack mode"
+L["CONDITIONPANEL_PETMODE_DESC"] = "Checks the attack mode of your current pet."
+L["CONDITIONPANEL_PETMODE_NONE"] = "No Pet"
 L["CONDITIONPANEL_PETTREE"] = "Pet talent tree"
 L["CONDITIONPANEL_PETSPEC"] = "Pet specialization"
+L["CONDITIONPANEL_PETSPEC_DESC"] = "Checks the specialization of your current pet."
 L["CONDITIONPANEL_TRACKING"] = "Tracking active"
+L["CONDITIONPANEL_TRACKING_DESC"] = "Checks what types of minimap tracking you have active."
 L["CONDITIONPANEL_BLIZZEQUIPSET"] = "Equipment set equipped"
 L["CONDITIONPANEL_BLIZZEQUIPSET_DESC"] = "Checks whether or not you have a specific Blizzard equipment manager set equipped."
 L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT"] = "Equipment set name"
@@ -1491,6 +1507,7 @@ L["PRESENCE"] = "Presence"
 L["SPEED"] = "Unit Speed"
 L["SPEED_DESC"] = [[This refers to the current movement speed of the unit. If the unit is not moving, it is zero.  If you wish to track the maximum run speed of the unit, use the 'Unit Run Speed' condition instead.]]
 L["RUNSPEED"] = "Unit Run Speed"
+L["RUNSPEED_DESC"] = "This refers to the maximum run speed of the unit, regardless of whether the unit is presently moving."
 L["SPELLTOCHECK"] = "Spell to Check"
 L["GLYPHTOCHECK"] = "Glyph to Check"
 L["SPELLTOCOMP1"] = "First Spell to Compare"

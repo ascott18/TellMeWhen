@@ -464,13 +464,21 @@ function CNDT:OperatorMenu_DropDown_OnClick(frame)
 	TMW.IE:ScheduleIconSetup()
 end
 
+function CNDT:InBitflags(bitFlags)
+	local tableValues = type(select(2, next(bitFlags))) == "table"
+	return TMW:OrderedPairs(bitFlags, tableValues and TMW.OrderSort or nil, tableValues)
+end
 
 function CNDT:BitFlags_DropDown()
 	local group = self:GetParent()
 	local conditionData = group:GetConditionData()
 	local conditionSettings = group:GetConditionSettings()
 
-	for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
+	local tableValues = type(select(2, next(conditionData.bitFlags))) == "table"
+
+	for index, data in CNDT:InBitflags(conditionData.bitFlags) do
+		local name = get(data, "text")
+
 		local info = TMW.DD:CreateInfo()
 
 		info.text = name
@@ -486,6 +494,10 @@ function CNDT:BitFlags_DropDown()
 		info.arg1 = self
 
 		TMW.DD:AddButton(info)
+
+		if type(data) == "table" and data.space then
+			TMW.DD:AddSpacer()
+		end
 	end
 end
 
@@ -661,6 +673,8 @@ end
 function CndtGroup:LoadAndDraw()
 	local conditionData = self:GetConditionData()
 	local conditionSettings = self:GetConditionSettings()
+
+	TMW.IE:ScheduleIconSetup()
 	
 	TMW:Fire("TMW_CNDT_GROUP_DRAWGROUP", self, conditionData, conditionSettings)
 end
@@ -724,6 +738,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 	if conditionData then
 		TMW:TT(CndtGroup.Type, conditionData.text, conditionData.tooltip, 1, 1)
+		TMW:TT(CndtGroup.Type.EditBox, conditionData.text, conditionData.tooltip, 1, 1)
 	end
 end)
 
@@ -1007,7 +1022,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		if type(conditionSettings.BitFlags) == "number" then
 
 			local switch
-			for index, name in pairs(conditionData.bitFlags) do
+			for index, _ in pairs(conditionData.bitFlags) do
 				if type(index) ~= "number" or index >= 32 then
 					switch = true
 					break
@@ -1018,7 +1033,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				local flagsOld = conditionSettings.BitFlags
 				conditionSettings.BitFlags = {}
 
-				for index, name in pairs(conditionData.bitFlags) do
+				for index, _ in pairs(conditionData.bitFlags) do
 					if type(index) == "number" and index < 32 then
 						local flag = bit.lshift(1, index-1)
 						local flagSet = bit.band(flagsOld, flag) == flag
@@ -1029,8 +1044,8 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		end
 
 		local text = ""
-		for index, name in TMW:OrderedPairs(conditionData.bitFlags) do
-
+		for index, data in CNDT:InBitflags(conditionData.bitFlags) do
+			local name = get(data, "text")
 			local flagSet = CNDT:GetBitFlag(conditionSettings, index)
 
 			if flagSet then
