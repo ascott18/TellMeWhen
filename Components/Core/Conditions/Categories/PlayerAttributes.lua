@@ -63,6 +63,7 @@ local actuallyOutsideMapIDs = {
 }
 ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
+	tooltip = L["CONDITIONPANEL_INSTANCETYPE_DESC"],
 
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
@@ -185,6 +186,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 
 ConditionCategory:RegisterCondition(1.5, "ZONEPVP", {
 	text = L["CONDITIONPANEL_ZONEPVP"],
+	tooltip = L["CONDITIONPANEL_ZONEPVP_DESC"],
 
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
@@ -226,6 +228,7 @@ TMW:RegisterUpgrade(73019, {
 })
 ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 	text = L["CONDITIONPANEL_GROUPTYPE"],
+	tooltip = L["CONDITIONPANEL_GROUPTYPE_DESC"],
 
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
@@ -432,6 +435,7 @@ ConditionCategory:RegisterSpacer(6.5)
 
 ConditionCategory:RegisterCondition(7,	 "SPEC", {
 	text = L["UIPANEL_SPEC"],
+	tooltip = L["UIPANEL_SPEC"],
 	min = 1,
 	max = 2,
 	texttable = {

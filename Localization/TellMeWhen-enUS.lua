@@ -836,6 +836,7 @@ Set this setting to 0 if you want to hide the entire group will still allowing i
 
 L["UIPANEL_ONLYINCOMBAT"] = "Only show in combat"
 L["UIPANEL_SPEC"] = "Dual Spec"
+L["UIPANEL_SPEC_DESC"] = "Checks whether you are in your primary or secondary specialization."
 L["UIPANEL_TREE"] = "Talent Tree"
 L["UIPANEL_SPECIALIZATION"] = "Talent Specialization"
 L["UIPANEL_SPECIALIZATIONROLE"] = "Specialization Role"
@@ -1251,7 +1252,7 @@ L["CONDITIONPANEL_ABSOLUTE"] = "Absolute"
 L["CONDITIONPANEL_MAX"] = "Max"
 L["CONDITIONPANEL_COMBO"] = "Combo Points"
 L["CONDITIONPANEL_ALTPOWER"] = "Alt. Power"
-L["CONDITIONPANEL_ALTPOWER_DESC"] = [[This is the encounter specific power used in several encounters in Cataclysm, including Cho'gall and Atramedes]]
+L["CONDITIONPANEL_ALTPOWER_DESC"] = [[This is the encounter-specific power used for many quests and boss fights.]]
 L["CONDITIONPANEL_EXISTS"] = "Unit Exists"
 L["CONDITIONPANEL_ALIVE"] = "Unit is Alive"
 L["CONDITIONPANEL_ALIVE_DESC"] = "The condition will pass if the unit specified is alive."
@@ -1359,11 +1360,14 @@ Players and other units without an NPC ID will be treated as having an ID of 0 i
 L["CONDITIONPANEL_NPCIDTOMATCH"] = "ID to Match"
 L["CONDITIONPANEL_NPCIDTOOLTIP"] = "You can enter multiple NPC IDs to be matched by separating each one with a semicolon (;). The condition will pass if any IDs are matched."
 L["CONDITIONPANEL_ZONEPVP"] = "Zone PvP Type"
+L["CONDITIONPANEL_ZONEPVP_DESC"] = "Checks the PvP mode of the zone (e.g. Contested, Sanctuary, Combat Zone, etc.)"
 L["CONDITIONPANEL_ZONEPVP_FFA"] = "Free-For-All PvP"
 L["CONDITIONPANEL_INSTANCETYPE"] = "Instance Type"
+L["CONDITIONPANEL_INSTANCETYPE_DESC"] = "Checks the type of instance that you are in, including the difficulty setting of any dungeon or raid."
 L["CONDITIONPANEL_INSTANCETYPE_NONE"] = "Outside"
 L["CONDITIONPANEL_INSTANCETYPE_LEGACY"] = "%s (Legacy)"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
+L["CONDITIONPANEL_GROUPTYPE_DESC"] = "Checks the type of group that you are in (solo, party, or raid)."
 L["CONDITIONPANEL_GROUPSIZE"] = "Instance Size"
 L["CONDITIONPANEL_GROUPSIZE_DESC"] = [[Checks against the number of players that the current instance is tuned for.
 
