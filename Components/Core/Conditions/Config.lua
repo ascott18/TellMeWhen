@@ -488,7 +488,7 @@ function CNDT:BitFlags_DropDown()
 			info.tooltipText = data.tooltip
 
 			info.icon = data.icon
-			
+
 			if data.tcoords then
 				info.tCoordLeft = data.tcoords[1]
 				info.tCoordRight = data.tcoords[2]
@@ -740,18 +740,18 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 
 	local text = conditionData and conditionData.text or conditionSettings.Type
+	local tooltip = conditionData and conditionData.tooltip
 	--CndtGroup.Type:SetText("")
-	if conditionData.identifier ~= "" then
+
+	if not conditionData or conditionData.identifier ~= "" then
 		CndtGroup.Type.EditBox:SetText(text)
 		CndtGroup.Type.EditBox:SetCursorPosition(0)
 	else
 		CndtGroup.Type.EditBox:SetText("")
 	end
 
-	if conditionData then
-		TMW:TT(CndtGroup.Type, conditionData.text, conditionData.tooltip, 1, 1)
-		TMW:TT(CndtGroup.Type.EditBox, conditionData.text, conditionData.tooltip, 1, 1)
-	end
+	TMW:TT(CndtGroup.Type, text, tooltip, 1, 1)
+	TMW:TT(CndtGroup.Type.EditBox, text, tooltip, 1, 1)
 end)
 
 -- Operator
@@ -1035,7 +1035,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 			local switch
 			for index, _ in pairs(conditionData.bitFlags) do
-				if type(index) ~= "number" or index >= 32 then
+				if type(index) ~= "number" or index >= 32 or index < 1 then
 					switch = true
 					break
 				end
@@ -1046,7 +1046,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				conditionSettings.BitFlags = {}
 
 				for index, _ in pairs(conditionData.bitFlags) do
-					if type(index) == "number" and index < 32 then
+					if type(index) == "number" and index < 32 and index >= 1 then
 						local flag = bit.lshift(1, index-1)
 						local flagSet = bit.band(flagsOld, flag) == flag
 						conditionSettings.BitFlags[index] = flagSet and true or nil

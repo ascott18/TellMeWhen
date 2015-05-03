@@ -467,7 +467,40 @@ TMW:RegisterUpgrade(20100, {
 	end,
 })
 
-
+function CNDT:ConvertSliderCondition(condition, min, max, flagRemap)
+    local op = condition.Operator
+    local flags = {}
+    condition.BitFlags = flags
+    if op == "==" then
+        flags[condition.Level] = true
+    elseif op == "<=" then
+        for i = min, condition.Level do
+            flags[i] = true
+        end
+    elseif op == "<" then
+        for i = min, condition.Level-1 do
+            flags[i] = true
+        end
+    elseif op == ">" then
+        for i = condition.Level+1, max do
+            flags[i] = true
+        end
+    elseif op == ">=" then
+        for i = condition.Level, max do
+            flags[i] = true
+        end
+    elseif op == "~=" then
+        flags[condition.Level] = true
+        condition.Checked = true
+    end
+    if flagRemap then
+        local fc = CopyTable(flags)
+        wipe(flags)
+        for k, v in pairs(fc) do 
+            flags[flagRemap[k]] = v 
+        end
+    end
+end
 
 
 

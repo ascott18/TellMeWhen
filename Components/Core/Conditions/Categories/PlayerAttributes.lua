@@ -39,6 +39,16 @@ local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_AT
 
 
 
+TMW:RegisterUpgrade(73019, {
+	condition = function(self, condition)
+		if condition.Type == "INSTANCE" then
+			condition.Type = "INSTANCE2"
+			condition.Checked = false
+			-- We give a metatable to add one to the indexes because the indexes did shift +1 from the old to the new condition.
+			CNDT:ConvertSliderCondition(condition, 0, 11, setmetatable({}, {__index=function(s,k) return k+1 end}))
+		end
+	end,
+})
 local actuallyOutsideMapIDs = {
 	[1116] = true,	-- 	Draenor (gets reported as an instance if you were in your garrison and left)
 
@@ -51,124 +61,39 @@ local actuallyOutsideMapIDs = {
 	[1159] = true,	-- 	SMV Alliance Garrison Level 3
 	[1160] = true,	-- 	SMV Alliance Garrison Level 4
 }
-ConditionCategory:RegisterCondition(1,	 "INSTANCE", {	-- old
-	text = L["CONDITIONPANEL_INSTANCETYPE"],
-
-	old = true,
-
-	min = 0,
-	max = 11,
-	unit = false,
-	texttable = {
-		[0] = NONE,
-		[1] = BATTLEGROUND,
-		[2] = ARENA,
-		[3] = DUNGEON_DIFFICULTY_5PLAYER,
-		[4] = DUNGEON_DIFFICULTY_5PLAYER_HEROIC,
-		[5] = RAID_DIFFICULTY_10PLAYER,
-		[6] = RAID_DIFFICULTY_25PLAYER,
-		[7] = RAID_DIFFICULTY_10PLAYER_HEROIC,
-		[8] = RAID_DIFFICULTY_25PLAYER_HEROIC,
-		[9] = RAID_FINDER,
-		[10] = CHALLENGE_MODE,
-		[11] = RAID_DIFFICULTY_40PLAYER,
-	},
-	icon = "Interface\\Icons\\Spell_Frost_Stun",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetZoneType = function()
-			local _, z = IsInInstance()
-			local instanceDifficulty
-			
-			if wow_502 then
-				_, _, instanceDifficulty = GetInstanceInfo()
-			else
-				instanceDifficulty = GetInstanceDifficulty() - 1
-			end
-			
-			if z == "pvp" then
-				-- Battleground (1)
-				return 1
-			elseif z == "arena" then
-				-- Arena (2)
-				return 2
-			elseif instanceDifficulty == 0 then
-				-- None (0)
-				return 0
-			else
-				-- 5 man normal (3)
-				-- 5 man heroic (4)
-				-- 10 man normal (5)
-				-- 25 man normal (6)
-				-- 10 man heroic (7)
-				-- 25 man heroic (8)
-				-- LFR (9)
-				-- Challenge Mode (10)
-				-- 40 man (11)
-				return 2 + instanceDifficulty --3-11
-			end
-		end,
-	},
-	funcstr = [[GetZoneType() c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("ZONE_CHANGED_NEW_AREA"),
-			ConditionObject:GenerateNormalEventString("PLAYER_DIFFICULTY_CHANGED")
-	end,
-})
 ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	text = L["CONDITIONPANEL_INSTANCETYPE"],
 
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
-		-- None (Outside)
-		[ 1  ] = {order=01, text=L["CONDITIONPANEL_INSTANCETYPE_NONE"],		space=true,								},
-		-- Battleground
-		[ 2  ] = {order=02, text=BATTLEGROUND,																		},
-		-- Arena
-		[ 3  ] = {order=03, text=ARENA,										space=true,								},
+		[01] = {order=01, text=L["CONDITIONPANEL_INSTANCETYPE_NONE"],                                space=true,   }, -- None (Outside)
+		[02] = {order=02, text=BATTLEGROUND,                                                                       }, -- Battleground
+		[03] = {order=03, text=ARENA,                                                                space=true,   }, -- Arena
 
 
-		-- 5-player
-		[ 4  ] = {order=10, text=DUNGEON_DIFFICULTY_5PLAYER,														},
-		-- 5-player Heroic
-		[ 5  ] = {order=11, text=DUNGEON_DIFFICULTY_5PLAYER_HEROIC,													},
-		-- Challenge Mode 5-man
-		[ 11 ] = {order=12, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, CHALLENGE_MODE),																	},
-		-- Warlords 5-man Timewalker (or "timewalker" so I can use this build for pre-6.2)
-		[ 24 ] = {order=13, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, PLAYER_DIFFICULTY_TIMEWALKER or "Timewalker"),		}, 
-		-- Warlords 5-man Mythic
-		[ 23 ] = {order=14, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, PLAYER_DIFFICULTY6),	space=true,	}, 
+		[04] = {order=10, text=DUNGEON_DIFFICULTY_5PLAYER,                                                         }, -- 5-player
+		[05] = {order=11, text=DUNGEON_DIFFICULTY_5PLAYER_HEROIC,                                                  }, -- 5-player Heroic
+		[11] = {order=12, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, CHALLENGE_MODE),                      }, -- Challenge Mode 5-man
+		[24] = {order=13, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, PLAYER_DIFFICULTY_TIMEWALKER or "TW"),}, -- Warlords 5-man Timewalker
+		[23] = {order=14, text=format("%s (%s)", DUNGEON_DIFFICULTY_5PLAYER, PLAYER_DIFFICULTY6),    space=true,   }, -- Warlords 5-man Mythic
 
 
-		-- Normal scenario
-		[ 14 ] = {order=17, text=GUILD_CHALLENGE_TYPE4,									},
-		-- Heroic scenario
-		[ 13 ] = {order=18, text=HEROIC_SCENARIO,							space=true,								},
+		[14] = {order=17, text=GUILD_CHALLENGE_TYPE4,                                                              }, -- Normal scenario
+		[13] = {order=18, text=HEROIC_SCENARIO,                                                      space=true,   }, -- Heroic scenario
 
 
-		-- Warlords LFR Flex
-		[ 18 ] = {order=21, text=format("%s (%s)", PLAYER_DIFFICULTY3, FLEX_RAID),		},
-		-- Warlords Normal Flex
-		[ 15 ] = {order=22, text=format("%s (%s)", PLAYER_DIFFICULTY1, FLEX_RAID),		},
-		-- Warlords Heroic Flex
-		[ 16 ] = {order=23, text=format("%s (%s)", PLAYER_DIFFICULTY2, FLEX_RAID),		},
-		-- Warlords Mythic
-		[ 17 ] = {order=24, text=PLAYER_DIFFICULTY6,						space=true,	},
+		[18] = {order=21, text=format("%s (%s)", PLAYER_DIFFICULTY3, FLEX_RAID),                                   }, -- Warlords LFR Flex
+		[15] = {order=22, text=format("%s (%s)", PLAYER_DIFFICULTY1, FLEX_RAID),                                   }, -- Warlords Normal Flex
+		[16] = {order=23, text=format("%s (%s)", PLAYER_DIFFICULTY2, FLEX_RAID),                                   }, -- Warlords Heroic Flex
+		[17] = {order=24, text=PLAYER_DIFFICULTY6,                                                   space=true,   }, -- Warlords Mythic
 
-		-- LFR (legacy, non-flex)
-		[ 10 ] = {order=31, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_FINDER),						},
-		-- 10-player raid (legacy)
-		[ 6  ] = {order=32, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER),			},
-		-- 25-player raid (legacy)
-		[ 7  ] = {order=33, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER),			},
-		-- 10-player heroic raid (legacy)
-		[ 8  ] = {order=34, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER_HEROIC),	},
-		-- 25-player heroic raid (legacy)
-		[ 9  ] = {order=35, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER_HEROIC),	},
-		-- 40-man raid (legacy)
-		[ 12 ] = {order=36, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_40PLAYER),			},
+		[10] = {order=31, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_FINDER),                        }, -- LFR (legacy, non-flex)
+		[06] = {order=32, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER),           }, -- 10-player raid (legacy)
+		[07] = {order=33, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER),           }, -- 25-player raid (legacy)
+		[08] = {order=34, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_10PLAYER_HEROIC),    }, -- 10-player heroic raid (legacy)
+		[09] = {order=35, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_25PLAYER_HEROIC),    }, -- 25-player heroic raid (legacy)
+		[12] = {order=36, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_40PLAYER),           }, -- 40-man raid (legacy)
 
 	},
 
@@ -289,25 +214,14 @@ ConditionCategory:RegisterCondition(1.5, "ZONEPVP", {
 })
 
 
-ConditionCategory:RegisterCondition(2,	 "GROUP", {		-- old
-	text = L["CONDITIONPANEL_GROUPTYPE"],
-	old = true,
-
-	min = 0,
-	max = 2,
-	midt = true,
-	unit = false,
-	texttable = {[0] = SOLO, [1] = PARTY, [2] = RAID},
-	icon = "Interface\\Calendar\\MeetingIcon",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		IsInRaid = IsInRaid,
-		IsInGroup = IsInGroup,
-	},
-	funcstr = [[((IsInRaid() and 2) or (IsInGroup() and 1) or 0) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
+TMW:RegisterUpgrade(73019, {
+	condition = function(self, condition)
+		if condition.Type == "GROUP" then
+			condition.Type = "GROUP2"
+			condition.Checked = false
+			-- We give a metatable to add one to the indexes because the indexes did shift +1 from the old to the new condition.
+			CNDT:ConvertSliderCondition(condition, 0, 2, setmetatable({}, {__index=function(s,k) return k+1 end}))
+		end
 	end,
 })
 ConditionCategory:RegisterCondition(2,	 "GROUP2", {
@@ -725,43 +639,23 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	end,
 })
 
-local PetModes = {
-	"PET_MODE_ASSIST",
-	"PET_MODE_DEFENSIVE",
-	"PET_MODE_PASSIVE",
-}
-for k, v in pairs(PetModes) do
-	PetModes[v] = k
-end
-ConditionCategory:RegisterCondition(13,	 "PETMODE", {
-	old = true,
 
-	text = L["CONDITIONPANEL_PETMODE"],
-	min = 1,
-	max = 3,
-	midt = true,
-	texttable = function(k) return _G[PetModes[k]] end,
-	unit = PET,
-	icon = PET_ASSIST_TEXTURE,
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetActivePetMode = function()
-			for i = NUM_PET_ACTION_SLOTS, 1, -1 do -- go backwards since they are probably at the end of the action bar
-				local name, _, _, isToken, isActive = GetPetActionInfo(i)
-				if isToken and isActive and PetModes[name] then
-					return PetModes[name]
-				end
-			end
-			return 3
-		end,
-	},
-	funcstr = [[GetActivePetMode() c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_PET", "player"),
-			ConditionObject:GenerateNormalEventString("PET_BAR_UPDATE")
+
+TMW:RegisterUpgrade(73019, {
+	condition = function(self, condition)
+		if condition.Type == "PETMODE" then
+			condition.Type = "PETMODE2"
+			condition.Checked = false
+			-- We give a metatable to add one to the indexes because the indexes did shift +1 from the old to the new condition.
+			CNDT:ConvertSliderCondition(condition, 1, 3)
+		end
 	end,
 })
+local PetModes = {
+	PET_MODE_ASSIST = 1,
+	PET_MODE_DEFENSIVE = 2,
+	PET_MODE_PASSIVE = 3,
+}
 ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
 	text = L["CONDITIONPANEL_PETMODE"],
 	tooltip = L["CONDITIONPANEL_PETMODE_DESC"],
@@ -797,31 +691,13 @@ ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
 	end,
 })
 
-ConditionCategory:RegisterCondition(14,	 "PETSPEC", {
-	old = true,
-
-	text = L["CONDITIONPANEL_PETSPEC"],
-	min = 0,
-	max = 3,
-	midt = true,
-	texttable = {
-		[0] = NONE,
-		L["PET_TYPE_FEROCITY"],
-		L["PET_TYPE_TENACITY"],
-		L["PET_TYPE_CUNNING"],
-	},
-	unit = PET,
-	icon = "Interface\\Icons\\Ability_Druid_DemoralizingRoar",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetSpecialization = GetSpecialization
-	},
-	funcstr = [[(GetSpecialization(nil, true) or 0) c.Operator c.Level]],
-	hidden = pclass ~= "HUNTER",
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_PET", "player"),
-			ConditionObject:GenerateNormalEventString("PET_SPECIALIZATION_CHANGED")
+TMW:RegisterUpgrade(73019, {
+	condition = function(self, condition)
+		if condition.Type == "PETSPEC" then
+			condition.Type = "PETSPEC2"
+			condition.Checked = false
+			CNDT:ConvertSliderCondition(condition, 0, 3)
+		end
 	end,
 })
 ConditionCategory:RegisterCondition(14.1, "PETSPEC2", {
