@@ -66,7 +66,7 @@ function TimerBar_Overlay:SetupForIcon(sourceIcon)
 	end
 	self:SetColors(sourceIcon.typeData.Colors.CBS, sourceIcon.typeData.Colors.CBM, sourceIcon.typeData.Colors.CBC)
 	
-	self:UpdateValue(1)
+	self:UpdateValue(true)
 end
 
 

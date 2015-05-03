@@ -85,12 +85,18 @@ function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
 		self.Invert = not self.Invert_base
 
 		self.value = value
+
+		local oldMax = self.Max
 		self.Max = self.FakeMax or maxValue
-		self.bar:SetMinMaxValues(0, self.Max)
+		if oldMax ~= self.Max then
+			self.bar:SetMinMaxValues(0, self.Max)
+		end
 
 		self:SetupColors(self.sourceIcon, valueColor)
 
-		self:UpdateValue()
+		-- Force an update here since it won't get updated if the color changes and the value doesnt.
+		-- This is harmless, because 99% of the the time, the value has changed, so an update would be performed anyway.
+		self:UpdateValue(true)
 	end
 end
 TimerBar_BarDisplay:SetDataListner("VALUE")
@@ -144,7 +150,7 @@ function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 	self.sourceIcon = sourceIcon
 	self:SetupColors(sourceIcon, sourceIcon.attributes.valueColor)
 	
-	self:UpdateValue(1)
+	self:UpdateValue(true)
 end
 
 TimerBar_BarDisplay:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)

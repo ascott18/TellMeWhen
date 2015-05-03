@@ -586,7 +586,7 @@ do
 		-- GLOBALS: value, maxValue, valueColor
 		t[#t+1] = [[
 		
-		if attributes.value ~= value or attributes.maxValue ~= maxValue or attributes.maxValue ~= valueColor then
+		if attributes.value ~= value or attributes.maxValue ~= maxValue or attributes.valueColor ~= valueColor then
 
 			attributes.value = value
 			attributes.maxValue = maxValue
