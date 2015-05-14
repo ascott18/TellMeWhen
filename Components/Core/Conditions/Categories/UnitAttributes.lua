@@ -274,7 +274,7 @@ ConditionCategory:RegisterCondition(0.4,  "RAIDICON2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_RAIDICON"],
 	bitFlags = (function()
 		local t = {[0]=NONE}
-		for i = 1, NUM_RAID_ICONS do
+		for i = 1, 8 do  -- Dont use NUM_RAID_ICONS since it is defined in Blizzard's CRF manager addon, which might not be loaded
 			t[i] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..i..":0|t ".._G["RAID_TARGET_"..i]
 		end
 		return t

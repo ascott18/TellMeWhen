@@ -1,3 +1,7 @@
+===v7.3.1===
+====Bug Fixes====
+ * Fixed: UnitAttributes.lua:277: 'for' limit must be a number.
+
 ===v7.3.0===
  * The suggestion list now works with arrow keys to pick what line tab will insert.
  * You can now use the suggestion list to pick condition types (the Condition Type dropdown now has a textbox on it).
