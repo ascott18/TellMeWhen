@@ -835,6 +835,8 @@ function Icon.Setup(icon)
 
 	-- Set this so that we can prevent update table registration checks from happening
 	-- until the end of this method (its a slightly intensive process that adds up if done a ton of times)
+	-- This is also used externally (in some IconModules, for eg) to prevent other thigns from happening
+	-- during setup. Listen for TMW_ICON_SETUP_POST to find when this gets set to nil.
 	icon.IsSettingUp = true
 	
 
