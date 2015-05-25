@@ -4,6 +4,10 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = {
 
+[==[===v7.3.2===]==],
+[==[====Bug Fixes====]==],
+[==[* Fixed: Condition_THREATSCALED: Usage: UnitDetailedThreatSituation("unit" [, "mob"])]==],
+[==[]==],
 [==[===v7.3.1===]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed: UnitAttributes.lua:277: 'for' limit must be a number.]==],

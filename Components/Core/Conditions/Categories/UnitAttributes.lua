@@ -751,9 +751,10 @@ ConditionCategory:RegisterCondition(17,   "THREATSCALED", {
 	icon = "Interface\\Icons\\spell_misc_emotionangry",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
+		UnitExists = UnitExists,
 		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
 	},
-	funcstr = [[(select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
+	funcstr = [[UnitExists(c.Unit) and ((select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level)]],
 	-- events = absolutely no events
 })
 
@@ -767,8 +768,9 @@ ConditionCategory:RegisterCondition(18,   "THREATRAW", {
 	icon = "Interface\\Icons\\spell_misc_emotionhappy",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
+		UnitExists = UnitExists,
 		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
 	},
-	funcstr = [[(select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level]],
+	funcstr = [[UnitExists(c.Unit) and ((select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level)]],
 	-- events = absolutely no events
 })
