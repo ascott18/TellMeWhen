@@ -272,6 +272,11 @@ function Icon.GetGUID(icon, generate)
 		else
 			return icon.TempGUID
 		end
+	else
+		-- Nil this out for icons that are imported that have a GUID.
+		-- There will be a tempGUID already for the icon, but it won't match
+		-- the imported GUID.
+		icon.TempGUID = nil
 	end
 
 	return GUID
