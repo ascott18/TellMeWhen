@@ -74,14 +74,21 @@ local Cache = {
 	}
 }
 
+local CacheIsReady = false
+
 local PlayerSpells = {}
 local ClassSpellLookup = {}
+local NameCache
 
 
 -- PUBLIC:
 
 -- Contains a dictionary of spellIDs that are player spells.
 function ClassSpellCache:GetSpellLookup()	
+	if not CacheIsReady then
+		error("The class spell cache hasn't been prepared yet.")
+	end
+
 	return ClassSpellLookup
 end
 
@@ -143,7 +150,42 @@ Cache = {
 }
 ]]
 function ClassSpellCache:GetCache()
+	if not CacheIsReady then
+		error("The class spell cache hasn't been prepared yet.")
+	end
+
 	return Cache
+end
+
+--[[ Returns a mapping of spell names to spellIDs. Structure:
+NameCache = {
+	[classToken] = {
+		[spellName] = true,
+	},
+}
+]]
+function ClassSpellCache:GetNameCache()
+	if not CacheIsReady then
+		error("The class spell cache hasn't been prepared yet.")
+	end
+	
+	if not NameCache then
+		NameCache = {}
+		for class, spells in pairs(Cache) do
+			if class ~= "RACIAL" and class ~= "PET" then
+				local c = {}
+				NameCache[class] = c
+				for spellID, value in pairs(spells) do
+					local name = GetSpellInfo(spellID)
+					if name then
+						c[name:lower()] = true
+					end
+				end
+			end
+		end
+	end
+
+	return NameCache
 end
 
 -- From Interface/GlueXML/CharacterCreate
@@ -333,6 +375,8 @@ function ClassSpellCache:TMW_DB_INITIALIZED()
 			ClassSpellLookup[id] = class
 		end
 	end
+
+	CacheIsReady = true
 end
 TMW:RegisterRunonceCallback("TMW_DB_INITIALIZED", ClassSpellCache)
 

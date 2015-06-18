@@ -775,8 +775,17 @@ L["ICONMENU_HIDENOUNITS"] = "Hide if no units"
 L["ICONMENU_HIDENOUNITS_DESC"] = "Check this to cause the icon to hide if all the units that this icon is checking have been invalidated because of unit conditions and/or units not existing."
 L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
-L["ICONMENU_ONLYSEEN"] = "Only if seen"
-L["ICONMENU_ONLYSEEN_DESC"] = "Check this to make the icon only show a cooldown if the unit has cast it at least once. You should check this if you are checking spells from different Classes in one icon."
+
+L["ICONMENU_ONLYSEEN_HEADER"] = "Spell Filtering"
+L["ICONMENU_ONLYSEEN_ALL"] = "Allow All Spells"
+L["ICONMENU_ONLYSEEN_ALL_DESC"] = "Check this to allow all abilities to be shown for all units checked."
+L["ICONMENU_ONLYSEEN"] = "Only Observed Spells"
+L["ICONMENU_ONLYSEEN_DESC"] = "Check this to only let the icon show an ability if the unit has cast it at least once."
+L["ICONMENU_ONLYSEEN_CLASS"] = "Only Unit's Class Spells"
+L["ICONMENU_ONLYSEEN_CLASS_DESC"] = [[Check this to only let the icon show an ability if the unit's class is known to have the ability.
+
+Known class spells are highlighted with blue or pink in the suggestion list.]]
+
 L["ICONMENU_SHOWWHENNONE"] = "Show if no result"
 L["ICONMENU_SHOWWHENNONE_DESC"] = "Check this to allow the icon to show as Undiminished when no diminishing returns could be detected on any unit."
 L["ICONMENU_CHECKREFRESH"] = "Listen for refreshes"

@@ -32,6 +32,8 @@ local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local GetSpellTexture = TMW.GetSpellTexture
 
+local classSpellNameCache
+
 
 
 local Type = TMW.Classes.IconType:New("unitcooldown")
@@ -59,7 +61,9 @@ Type:RegisterIconDefaults{
 	-- The unit(s) to check for cooldowns
 	Unit					= "player", 
 
-	-- True to only show the icon if the unit has used the ability at least once.
+	-- False to allow all spells
+	-- True to only show abilities if the unit has used the ability at least once.
+	-- "class" to only show abilities if the unit's class has the ability.
 	OnlySeen				= false,
 
 	-- Sort the cooldowns found by duration
@@ -82,12 +86,26 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings", function(self)
-	self.Header:SetText(Type.name)
+	self.Header:SetText(L["ICONMENU_ONLYSEEN_HEADER"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		numPerRow = 2,
 		{
 			setting = "OnlySeen",
+			value = false,
+			title = L["ICONMENU_ONLYSEEN_ALL"],
+			tooltip = L["ICONMENU_ONLYSEEN_ALL_DESC"],
+		},
+		{
+			setting = "OnlySeen",
+			value = true,
 			title = L["ICONMENU_ONLYSEEN"],
 			tooltip = L["ICONMENU_ONLYSEEN_DESC"],
+		},
+		{
+			setting = "OnlySeen",
+			value = "class",
+			title = L["ICONMENU_ONLYSEEN_CLASS"],
+			tooltip = L["ICONMENU_ONLYSEEN_CLASS_DESC"],
 		},
 	})
 end)
@@ -242,6 +260,8 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 					end
 				end
 			end
+
+
 			cooldownsForGUID[spellName] = spellID
 			cooldownsForGUID[spellID] = TMW.time
 		else
@@ -382,7 +402,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 		local GUID = UnitGUID(unit)
 		local cooldowns = GUID and rawget(Cooldowns, GUID)
 
-		if u == 1 and GUID and not cooldowns and not OnlySeen then
+		if u == 1 and GUID and not cooldowns and OnlySeen ~= true then
 			-- If this is the first unit, use a blank cooldowns table for it if it doesn't exist
 			-- so that we can still find the first usable spell.
 			-- Such a dirty, dirty hack.
@@ -392,6 +412,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 		if cooldowns then
 			for i = 1, #NameArray do
 				local iName = NameArray[i]
+				local baseName = iName
 
 				if not isNumber[iName] then
 					-- spell name keys have values that are the spellid of the name,
@@ -400,10 +421,16 @@ local function UnitCooldown_OnUpdate(icon, time)
 				end
 
 				local start
-				if OnlySeen then
+				if OnlySeen == true then
 					-- If we only want cooldowns that have been seen,
 					-- don't default to 0 if it isn't in the table.
 					start = cooldowns[iName]
+				elseif OnlySeen == "class" then
+					local _, class = UnitClass(unit)
+
+					if classSpellNameCache[class][baseName] then
+						start = cooldowns[iName] or 0
+					end
 				else
 					start = cooldowns[iName] or 0
 				end
@@ -499,7 +526,7 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 		local GUID = UnitGUID(unit)
 		local cooldowns = GUID and rawget(Cooldowns, GUID)
 
-		if u == 1 and GUID and not cooldowns and not OnlySeen then
+		if u == 1 and GUID and not cooldowns and OnlySeen ~= true then
 			-- If this is the first unit, use a blank cooldowns table for it if it doesn't exist
 			-- so that we can still find the first usable spell.
 			-- Such a dirty, dirty hack.
@@ -509,6 +536,8 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 		if cooldowns then
 			for i = 1, #NameArray do
 				local iName = NameArray[i]
+				local baseName = iName
+
 				if not isNumber[iName] then
 					-- spell name keys have values that are the spellid of the name,
 					-- we need the spellid for the texture (thats why i did it like this)
@@ -516,10 +545,16 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 				end
 
 				local start
-				if OnlySeen then
+				if OnlySeen == true then
 					-- If we only want cooldowns that have been seen,
 					-- don't default to 0 if it isn't in the table.
 					start = cooldowns[iName]
+				elseif OnlySeen == "class" then
+					local _, class = UnitClass(unit)
+
+					if classSpellNameCache[class][baseName] then
+						start = cooldowns[iName] or 0
+					end
 				else
 					start = cooldowns[iName] or 0
 				end
@@ -579,7 +614,9 @@ function Type:Setup(icon)
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	Type:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
-
+	if icon.OnlySeen == "class" then
+		classSpellNameCache = TMW:GetModule("ClassSpellCache"):GetNameCache()
+	end
 
 	-- Setup icon events and update functions.
 	if icon.UnitSet.allUnitsChangeOnEvent then
