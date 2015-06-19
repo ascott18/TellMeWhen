@@ -1,6 +1,7 @@
 ﻿local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 
 local pname = UnitName("player")
+local locale = GetLocale()
 
 local spellFmt = "|T%s:0|t%s"
 local function Spell(id)
@@ -15,6 +16,8 @@ local function Spell(id)
 	return spellFmt:format(tex, name)--:gsub("\\\\", "\\"):gsub("\\\\", "\\")
 end
 
+-- Blizzard has a typo in the English string ("Ecplise")
+L["ECLIPSE"] = (locale == "enUS" or locale == "enGB") and "Eclipse" or ECLIPSE
 
 L["HELP_FIRSTUCD"] 					  	= L["HELP_FIRSTUCD"]			 		 	:format(L["ICONMENU_CHOOSENAME2"], GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618))
 L["HELP_MISSINGDURS"] 				  	= L["HELP_MISSINGDURS"]			 	 		:format("%s", GetSpellInfo(1766)) -- keep the first "%s" as "%s"

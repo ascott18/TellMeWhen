@@ -6,6 +6,7 @@ TMW.CHANGELOG = {
 
 [==[===v7.3.2===]==],
 [==[* Unit Cooldown icons can now filter spells based on the known class spells of a unit.]==],
+[==[]==],
 [==[====Bug Fixes====]==],
 [==[* Fixed: Condition_THREATSCALED: Usage: UnitDetailedThreatSituation("unit" [, "mob"])]==],
 [==[]==],

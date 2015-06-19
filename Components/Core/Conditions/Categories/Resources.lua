@@ -210,7 +210,7 @@ ConditionCategory:RegisterCondition(12,	 "HOLY_POWER", {
 })
 
 ConditionCategory:RegisterCondition(13.1, "ECLIPSE", {
-	text = ECLIPSE,
+	text = L["ECLIPSE"],
 	tooltip = L["CONDITIONPANEL_ECLIPSE_DESC"],
 	min = -100,
 	max = 100,
