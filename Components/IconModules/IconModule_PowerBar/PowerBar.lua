@@ -94,8 +94,13 @@ function PowerBar:SetSpell(spell)
 	local bar = self.bar
 	self.spell = spell
 	self.spellLink = GetSpellLink(spell)
+
 	
-	if spell then
+	if self.spellLink then
+		-- We have to manually extract the spellID from the link because
+		-- GetSpellInfo doesn't work for spell links since wotlk.
+		self.spellID = self.spellLink:match("Hspell:(%d+)")
+		
 		self:UpdateCost()
 
 		self:UpdateTable_Register()
@@ -192,13 +197,17 @@ local costs = {
 
 local Parser, LT1, LT2 = TMW:GetParser()
 
-function PowerBar:ScanForCost(spellLink)
-	if not spellLink then
+function PowerBar:ScanForCost(spellID)
+	if not spellID then
 		return nil
 	end
 
 	Parser:SetOwner(UIParent, "ANCHOR_NONE")
-	Parser:SetHyperlink(spellLink)
+
+	-- Prior to WoW 6.2, this function took a spell link and used Parser:SetHyperlink().
+	-- In 6.2, setting a spell by hyperlink specifically omits the cost from the tooltip.
+	-- In order to get the cost, we need to set it by ID.
+	Parser:SetSpellByID(spellID)
 
 	local costString = LT2:GetText()
 
@@ -236,7 +245,7 @@ function PowerBar:UpdateCost()
 	local spell = self.spell
 	
 	if spell then
-		local cost, powerType = self:ScanForCost(self.spellLink)
+		local cost, powerType = self:ScanForCost(self.spellID)
 		
 		if cost then
 		
