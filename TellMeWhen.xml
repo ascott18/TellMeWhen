@@ -83,33 +83,37 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
+				local explanation = ""
 				if not _G.TellMeWhen then
 					local AceLocale = LibStub("AceLocale-3.0", true)
 					local msg
 					if AceLocale then
 						local L = AceLocale:GetLocale("TellMeWhen", true)
 						msg = L["ERROR_NOTLOADED_ERROR"]
+						explanation = L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"]
 					else
 						msg = "TellMeWhen has failed to load! Are you missing a required library?"
+						explanation = msg .. "\r\n\r\nAt the very least, you are missing AceLocale."
 					end
 					
 					DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99TellMeWhen|r: " .. msg)
-					 
-					return
+				else
+					explanation = TMW.L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"]
+
+					self:RegisterEvent("PLAYER_REGEN_ENABLED")
+					self:RegisterEvent("PLAYER_REGEN_DISABLED")
 				end
 				
 				self.name = "TellMeWhen"
 				InterfaceOptions_AddCategory(self)
 				
-				self.text:SetText(TMW.L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"])
+				self.text:SetText(explanation)
 				
-				self:RegisterEvent("PLAYER_REGEN_ENABLED")
-				self:RegisterEvent("PLAYER_REGEN_DISABLED")
 			</OnLoad>
 			<OnShow>
 				self.text:SetWidth(self:GetWidth() - 150)
 				
-				if TMW:CheckCanDoLockedAction(false) then
+				if TMW and TMW:CheckCanDoLockedAction(false) then
 					TMW:LoadOptions()
 					
 					if TMW:AssertOptionsInitialized() then

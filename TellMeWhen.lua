@@ -15,7 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "7.3.3"
+TELLMEWHEN_VERSION = GetAddOnMetadata("TellMeWhen", "Version")
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -32,8 +32,12 @@ TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until
 
 if TELLMEWHEN_VERSIONNUMBER > 74000 or TELLMEWHEN_VERSIONNUMBER < 73000 then
 	-- safety check because i accidentally made the version number 414069 once
-	return error("YOU SCREWED UP THE VERSION NUMBER OR DIDNT CHANGE THE SAFETY LIMITS")
-end 
+	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
+end
+
+if not strfind(TELLMEWHEN_VERSIONNUMBER, TELLMEWHEN_VERSION:gsub("%.", ""), nil) then
+	return error("TELLMEWHEN: TELLMEWHEN_VERSION DOESN'T AGREE WITH TELLMEWHEN_VERSIONNUMBER")
+end
 
 TELLMEWHEN_MAXROWS = 20
 
