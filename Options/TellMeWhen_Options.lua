@@ -1218,20 +1218,6 @@ function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
 	end
 end
 
-function IE:CreateChangelogDialog()
-	if not TellMeWhen_ChangelogDialog then
-		CreateFrame("Frame", "TellMeWhen_ChangelogDialog", UIParent, "TellMeWhen_ChangelogDialogTemplate")
-	end
-end
-
-function IE:ShowChangelog(lastVer)
-	IE:CreateChangelogDialog()
-	TellMeWhen_ChangelogDialog:Show()
-	if lastVer then
-		TellMeWhen_ChangelogDialog:SetLastVersion(lastVer)
-	end
-end
-
 function IE:Load(isRefresh, icon, isHistoryChange)
 	TMW.ACEOPTIONS:CompileOptions()
 
@@ -1290,10 +1276,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 			or TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
 			or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
 			then
-				IE:CreateChangelogDialog()
-				TellMeWhen_ChangelogDialog.showIEOnClose = true
-				TellMeWhen_ChangelogDialog:Show()
-				TellMeWhen_ChangelogDialog:SetLastVersion(IE.db.global.LastChangelogVersion)
+				IE:ShowChangelog(IE.db.global.LastChangelogVersion, true)
 				shouldShow = false
 
 				TMW.HELP:Show{
@@ -2955,6 +2938,8 @@ end
 
 
 
+
+
 -- -----------------------
 -- IMPORT/EXPORT
 -- -----------------------
@@ -3203,6 +3188,9 @@ end)
 
 
 
+
+
+
 -- ----------------------
 -- UNDO/REDO
 -- ----------------------
@@ -3378,5 +3366,183 @@ end
 
 
 
+
+-- ----------------------
+-- CHANGELOG
+-- ----------------------
+
+function IE:CreateChangelogDialog()
+	if not TellMeWhen_ChangelogDialog then
+		CreateFrame("Frame", "TellMeWhen_ChangelogDialog", UIParent, "TellMeWhen_ChangelogDialogTemplate")
+	end
+
+	return TellMeWhen_ChangelogDialog
+end
+
+local changelogEnd = "<p align='center'>|cff666666To see the changelog for versions up to v" ..
+(TMW.CHANGELOG_LASTVER or "???") .. ", type /tmw changelog.|r</p>"
+local changelogEndAll = "<p align='center'>|cff666666For older versions, visit TellMeWhen's AddOn page on Curse.com|r</p>"
+
+function IE:ShowChangelog(lastVer, showIEOnClose)
+	if not lastVer then lastVer = 0 end
+
+	local CHANGELOGS = IE:ProcessChangelogData()
+
+	local dialog = IE:CreateChangelogDialog()
+	dialog.showIEOnClose = showIEOnClose
+
+	local texts = {}
+
+	for version, text in TMW:OrderedPairs(CHANGELOGS, nil, nil, true) do
+		if lastVer >= version then
+			if lastVer > 0 then
+				text = text:gsub("</h1>", " (" .. L["CHANGELOG_LAST_VERSION"] .. ")</h1>")
+			end
+				
+			tinsert(texts, text)
+			break
+		else
+			tinsert(texts, text)
+		end
+	end
+
+	if lastVer > 0 then
+		tinsert(texts, changelogEnd .. changelogEndAll)
+	else
+		tinsert(texts, changelogEndAll)
+	end
+
+	local body = format("<html><body>%s</body></html>", table.concat(texts, "<br/>"))
+	dialog.scrollContainer.html:SetText(body)
+
+	-- This has to be stored because there is no GetText method.
+	dialog.scrollContainer.html.text = body
+
+	if showIEOnClose then
+		dialog.Okay:SetText(TMW.L["CHANGELOG_OKAY_OPENIE"])
+	else
+		dialog.Okay:SetText(OKAY)
+	end
+
+	dialog:Show()
+end
+
+local function htmlEscape(char)
+	if char == "&" then
+		return "&amp;"
+	elseif char == "<" then
+		return "&lt;"
+	elseif char == ">" then
+		return "&gt;"
+	end
+end
+
+local bulletColors = {
+	"4FD678",
+	"2F99FF",
+	"F62FAD",
+}
+
+local function bullets(b, text)
+	local numDashes = #b 
+	
+	if numDashes <= 0 then
+		return "><p>" .. text .. "</p><"
+	end
+
+	local color = bulletColors[(numDashes-1) % #bulletColors + 1]
+	
+	-- This is not a regular space. It is U+2002 - EN SPACE
+	local dashes = (" "):rep(numDashes) .. "•"
+
+	return "><p>|cFF" .. color .. dashes .. " |r" .. text .. "</p><"
+end
+
+local CHANGELOGS
+function IE:ProcessChangelogData()
+	if CHANGELOGS then
+		return CHANGELOGS
+	end
+
+	CHANGELOGS = {}
+
+	if not TMW.CHANGELOG then
+		TMW:Error("There was an error loading TMW's changelog data.")
+		TMW:Print("There was an error loading TMW's changelog data.")
+	end
+
+	local log = TMW.CHANGELOG
+
+	log = log:gsub("([&<>])", htmlEscape)        
+	log = log:trim(" \t\r\n")
+
+	-- Replace 4 equals with h2
+	log = log:gsub("[ \t]*====(.-)====[ \t]*", "<h2>%1</h2>")
+
+	-- Replace 3 equals with h1, formatting as a version name
+	log = log:gsub("[ \t]*===(.-)===[ \t]*", "<h1>TellMeWhen %1</h1>")
+
+	-- Remove extra space after closing header tags
+	log = log:gsub("(</h.>)%s*", "%1")
+
+	-- Remove extra space before opening header tags.
+	log = log:gsub("%s*(<h.>)", "%1")
+
+	-- Convert newlines to <br/>
+	log = log:gsub("\r\n", "<br/>")
+	log = log:gsub("\n", "<br/>")
+
+	-- Put a break at the end for the next gsub - it relies on a tag of some kind
+	-- being at the end of each line.
+	log = log .. "<br/>"
+
+	-- Convert asterisks to colored dashes
+	log = log:gsub(">%s*(*+)%s*(.-)<", bullets)
+
+	-- Remove double breaks 
+	log = log:gsub("<br/><br/>", "<br/>")
+
+	-- Remove breaks between paragraphs
+	log = log:gsub("</p><br/><p>", "</p><p>")
+
+	-- Add breaks between paragraphs and h2ss
+	-- Put an empty paragraph in since they are smaller than a full break.
+	log = log:gsub("</p>%s*<h2>", "</p><p> </p><h2>")
+
+	-- Add a "General" header before the first paragraph after an h1
+	log = log:gsub("</h1>%s*<p>", "</h1><h2>General</h2><p>")
+
+
+	local subStart, subEnd = 0, 0
+	repeat
+		local done
+
+		-- Find the start of a version
+		subStart, endH1 = log:find("<h1>", subEnd)
+
+		-- Find the start of the next version
+		subEnd = log:find("<h1>", endH1)
+
+		if not subEnd then
+			-- We're at the end of the data. Set the length of the data as the end position.
+			subEnd = #log
+			done = true
+		else
+			-- We want to end just before the start of the next version.
+			subEnd = subEnd - 1
+		end
+
+		local versionString = log:match("TellMeWhen v([0-9%.]+)", subStart):gsub("%.", "")
+		local versionNumber = tonumber(versionString) * 100
+		
+		-- A full version's changelog is between subStart and subEnd. Store it.
+		CHANGELOGS[versionNumber] = log:sub(subStart, subEnd)
+	until done
+
+	-- Send this out to the garbage collector
+	TMW.CHANGELOG = nil
+
+	return CHANGELOGS
+end
 
 

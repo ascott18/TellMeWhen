@@ -24,6 +24,7 @@ TMW.DOGTAG = DOGTAG
 
 TMW.DOGTAG.nsList = "Base;TMW;Unit;Stats"
 
+local abs = math.abs
 
 
 ---------------------------------
@@ -54,7 +55,7 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", DogTag.FireEvent, DogTag)
 
 DogTag:AddTag("TMW", "TMWFormatDuration", {
 	code = TMW:MakeSingleArgFunctionCached(function(seconds)
-		return TMW:FormatSeconds(seconds, seconds == 0 or seconds > 10, true)
+		return TMW:FormatSeconds(seconds, seconds == 0 or abs(seconds) > 10, true)
 	end),
 	arg = {
 		'seconds', 'number', '@req',

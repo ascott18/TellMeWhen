@@ -1,6 +1,10 @@
+===v7.3.5===
+====Bug Fixes====
+ * The TMWFormatDuration DogTag now properly handles negative durations.
+
 ===v7.3.4===
  * Blizzard's new completion pulse animation on cooldown sweeps is now disabled by default, and can be enabled in TMW's main options.
- 
+
 ====Bug Fixes====
  * Power Bar Overlays should function once again.
 

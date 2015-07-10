@@ -662,7 +662,7 @@
 				local height = self:GetHeight()
 				self.percentage = height/(yrange+height)
 
-				self.ScrollBar.Thumb:SetHeight(max(height*self.percentage, 15))
+				self.ScrollBar.Thumb:SetHeight(max(height*self.percentage, 20))
 
 				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(self:GetVerticalScroll()*self.percentage))
 			</OnScrollRangeChanged>
@@ -2001,7 +2001,7 @@
 
 
 	<Frame name="TellMeWhen_ChangelogDialogTemplate" inherits="TellMeWhen_SimpleDialog" toplevel="true" frameStrata="FULLSCREEN_DIALOG" hidden="true" virtual="true">
-		<Size x="600" y="650"/>
+		<Size x="600" y="500"/>
 
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent" />
@@ -2011,7 +2011,7 @@
 		<Frames>
 
 			<Button name="$parentOkay" parentKey="Okay" inherits="TellMeWhen_ButtonTemplate">
-				<Size y="15" x="1"/>
+				<Size y="18" x="1"/>
 				<Anchors>
 					<Anchor point="LEFT" x="5"/>
 					<Anchor point="RIGHT" x="-5"/>
@@ -2024,7 +2024,7 @@
 				</Scripts>
 			</Button>
 
-			<Frame name="$parentScrollContainer" parentKey="ScrollContainer">
+			<Frame name="$parentScrollContainer" parentKey="scrollContainer">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.HeaderBackground" relativePoint="BOTTOM" y="-5"/>
 					<Anchor point="BOTTOM" relativeTo="$parentOkay" relativePoint="TOP" y="5"/>
@@ -2032,151 +2032,64 @@
 					<Anchor point="RIGHT" x="-5" />
 				</Anchors>
 
+				<Frames>
+					<SimpleHTML parentKey="html" justifyH="LEFT" justifyV="TOP">
+						<Anchors>
+							<Anchor point="TOPLEFT" y="-10" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								local font = "Interface/Addons/TellMeWhen/Textures/OpenSans-Regular.ttf"
+
+								-- Just incase they haven't restarted after installing the version 
+								-- that first included this font (v7.3.5)
+								if not self:SetFont(font, 12) then
+									font = "Fonts\\FRIZQT__.TTF"
+								end
+
+								self:SetFont(font, 12)
+								self:SetFont("h1", font, 20)
+								self:SetFont("h2", font, 14)
+
+								self:SetSpacing("h1", 10)
+								self:SetSpacing("h2", 6)
+								self:SetSpacing("p", 5)
+								self:SetIndentedWordWrap("p", true)
+
+								self:SetTextColor("h1", 0xFF/0xFF, 0x63/0xFF, 0x00/0xFF)
+								self:SetTextColor("h2", 0x00/0xFF, 0xF1/0xFF, 0xFF/0xFF)
+
+								self:SetWidth(self:GetParent():GetWidth()-15)
+							</OnLoad>
+						</Scripts>
+					</SimpleHTML>
+				</Frames>
 				<Scripts>
 					<OnLoad>
-						TMW:ConvertContainerToScrollFrame(self, false, 0, 10)
+						TMW:ConvertContainerToScrollFrame(self, false, 0, 12)
 						self.ScrollFrame.scrollStep = 25
-
-						local s = ""
-
-						local CHANGELOGS = {}
-
-						if not TMW.CHANGELOG then
-							TMW:Print("There was an error loading TMW's changelog data.")
-						end
-
-
-						-- Turns wikicreole bulletpoints (asterisks) into prettyness
-						for k, v in pairs(TMW.CHANGELOG) do
-							
-							v = v:trim()
-							
-							while v:find("^ *%*") do
-								v = v:gsub("%*", "    ", 1)
-							end
-							
-							v = v:gsub("IMPORTANT", "|cffff0000IMPORTANT|r")
-							
-							if v:match("====(.*)====") then
-								v = v:gsub("====(.*)====", "|cff00d1ff%1|r")
-
-							elseif v:match("===(v.*)===") then
-								tinsert(CHANGELOGS, s:trim("\r\n "))
-								s = ""
-								
-								v = "|cFFF6682FTellMeWhen " .. v:match("===(v.*)===") .. "|r:"
-							elseif v ~= "" then
-								v = v:gsub("^    ", "", 1)
-								
-								local _, spaceCount = v:find("^( *)")
-								local numIndents = ((spaceCount + 3) / 4) % 4
-
-								local color, c2 = "", ""
-								if numIndents == 1 then
-									color, c2 = "4FD678-", "acecbf"
-								elseif numIndents == 2 then
-									color, c2 = "4F69D6--", "acb9ec"
-								elseif numIndents == 3 then
-									color, c2 = "D64FAD---", "ecacd9"
-								end
-								
-								v = v:gsub("^( *)(.*)", "%1 |cFF" .. color .. " |r%2")
-								
-							end
-							
-							s = s .. v .. "\r\n"
-						end
-
-						-- The first one is nothing. Get rid of it.
-						tremove(CHANGELOGS, 1)
-
-						-- Put the last one in
-						tinsert(CHANGELOGS, s:trim("\r\n "))
-						tinsert(CHANGELOGS,
-							"\r\n\r\n|cff666666To see the changelog for versions up to v" .. (TMW.CHANGELOG_LASTVER or "???") .. ", type /tmw changelog. " ..
-							"For older versions, visit TellMeWhen's AddOn page on Curse.com")
-
-						-- Send this out to the garbage collector
-						TMW.CHANGELOG = nil
-
-						for k, v in pairs(CHANGELOGS) do
-							local log = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-							
-							log:SetJustifyH("LEFT")
-							log:SetJustifyV("TOP")
-							log:SetSpacing(2)
-							log:SetText(v)
-
-							local version = v:match("TellMeWhen v([%d%.]+)")
-							version = version and version:gsub("%.", "")
-							version = tonumber(version)
-							log.version = version and version * 100
-							
-							--local font, size = log:GetFont()
-							--log:SetFont(font, size, "THINOUTLINE")
-
-							self[#self + 1] = log
-
-							if #self == 1 then
-								log:SetPoint("TOPLEFT", 0, -5)
-							else
-								log:SetPoint("TOPLEFT", self[#self - 1], "BOTTOMLEFT", 0, -15)
-							end
-
-							--log:SetSize(0, 1)
-							log:SetWidth(self:GetWidth()-15)
-
-							-- Don't set the height here. It will be set in the OnShow script.
-							--log:SetHeight(log:GetStringHeight() + 20)
-						end
-
-
 					</OnLoad>
 					<OnShow>
-						if not self.FixedWrapping and not InCombatLockdown() then
-							for k, log in ipairs(self) do
-
-								-- Because of wrapping issues, we usually don't get the height that
-								-- we want the first time that we set the height (when we change the height,
-								-- the number of lines will probably change as more lines are given enough room to wrap).
-
-								-- To get around this, we might keep trying until we get the right height.
-								-- Unforunately, this is horribly slow (this used to be the way this was done)
-								-- because log:GetHeight() and log:GetStringHeight() are stupidly slow.
-
-								-- Fortunately, the stupid solution is also stupid fast: Make the FontString super tall
-								-- and then shrink it down to the correct size. log:SetHeight() is stupidly fast, even though
-								-- it has to actually re-render things. I don't really understand why it is so fast compared to
-								-- :GetStringHeight() and :GetHeight(), but i'll take it.
-								
-								log:SetHeight(100000)
-								log:SetHeight(log:GetStringHeight() + 20)
-									
-							end
-							self.FixedWrapping = true
-						end
+						self:GetScript("OnSizeChanged")(self)
 					</OnShow>
 					<OnSizeChanged>
-						for k, log in ipairs(self) do
+						-- Because of wrapping issues, we usually don't get the height that
+						-- we want the first time that we set the height (when we change the height,
+						-- the number of lines will probably change as more lines are given enough room to wrap).
 
-							-- Because of wrapping issues, we usually don't get the height that
-							-- we want the first time that we set the height (when we change the height,
-							-- the number of lines will probably change as more lines are given enough room to wrap).
+						-- To get around this, we might keep trying until we get the right height.
+						-- Unforunately, this is horribly slow (this used to be the way this was done)
+						-- because log:GetHeight() and log:GetStringHeight() are stupidly slow.
 
-							-- To get around this, we might keep trying until we get the right height.
-							-- Unforunately, this is horribly slow (this used to be the way this was done)
-							-- because log:GetHeight() and log:GetStringHeight() are stupidly slow.
+						-- Fortunately, the stupid solution is also stupid fast: Make the FontString super tall
+						-- and then shrink it down to the correct size. log:SetHeight() is stupidly fast, even though
+						-- it has to actually re-render things. I don't really understand why it is so fast compared to
+						-- :GetStringHeight() and :GetHeight(), but i'll take it.
 
-							-- Fortunately, the stupid solution is also stupid fast: Make the FontString super tall
-							-- and then shrink it down to the correct size. log:SetHeight() is stupidly fast, even though
-							-- it has to actually re-render things. I don't really understand why it is so fast compared to
-							-- :GetStringHeight() and :GetHeight(), but i'll take it.
-
-							log:SetWidth(self:GetWidth()-15)
-							log:SetHeight(100000)
-							log:SetHeight(log:GetStringHeight() + 20)
-								
-						end
+						self.html:SetWidth(self:GetWidth()-15)
+						self.html:SetText(self.html.text)
+						self.html:SetHeight(100000)
+						self.html:SetHeight(self.html:GetContentHeight() + 20)
 					</OnSizeChanged>
 				</Scripts>
 			</Frame>
@@ -2199,44 +2112,12 @@
 				self.resizer.y_min = 200
 				self.resizer.y_max = function() return UIParent:GetHeight()*0.9 end
 
-				function self:SetLastVersion(ver)
-					local startHiding, lastLog
-					for i = 1, #self.ScrollContainer do
-						local log = self.ScrollContainer[i]
-
-						if startHiding and log.version then
-							log:Hide()
-							--log:SetText(log:GetText():gsub("([\r\n]+)", " |cFFF6682F(" .. TMW.L["CHANGELOG_LAST_VERSION"] .. ")|r%1", 1))
-							--break
-						else
-							if i ~= #self.ScrollContainer then
-								lastLog = log
-							end
-							log:Show()
-						end
-
-						if log.version and ver >= log.version then
-							startHiding = true
-						end
-					end
-
-					-- Set the position of the "to see the changelog for older versions..." line
-					self.ScrollContainer[#self.ScrollContainer]:SetPoint("TOPLEFT", lastLog, "BOTTOMLEFT", 0, -15)
-				end
-
+				
 				self.background:SetAlpha(0.95)
-
 
 				tinsert(UISpecialFrames, self:GetName())
 
 			</OnLoad>
-			<OnShow>
-				if self.showIEOnClose then
-					self.Okay:SetText(TMW.L["CHANGELOG_OKAY_OPENIE"])
-				else
-					self.Okay:SetText(OKAY)
-				end
-			</OnShow>
 			<OnHide>
 				TMW.HELP:Hide("CHANGELOG_INFO")
 
