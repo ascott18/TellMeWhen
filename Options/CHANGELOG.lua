@@ -5,6 +5,8 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = {
 
 [==[===v7.3.4===]==],
+[==[* Blizzard's new completion pulse animation on cooldown sweeps is now disabled by default, and can be enabled in TMW's main options.]==],
+[==[]==],
 [==[====Bug Fixes====]==],
 [==[* Power Bar Overlays should function once again.]==],
 [==[]==],

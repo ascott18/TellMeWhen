@@ -902,10 +902,20 @@ L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"
 L["UIPANEL_TOOLTIP_ONLYINCOMBAT"] = "Check to cause this group to only be shown in combat"
 L["UIPANEL_TOOLTIP_PRIMARYSPEC"] = "Check to show this group while your primary spec is active"
 L["UIPANEL_TOOLTIP_SECONDARYSPEC"] = "Check to show this group while your secondary spec is active"
+
+
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"
 L["UIPANEL_FORCEDISABLEBLIZZ"] = "Disable Blizzard cooldown text"
-L["UIPANEL_FORCEDISABLEBLIZZ_DESC"] = "Forces Blizzard's built in cooldown timer text to be disabled. It will automatically be disabled if you have an addon installed that is known to be capable of providing this text."
+L["UIPANEL_FORCEDISABLEBLIZZ_DESC"] = [[Forces Blizzard's built in cooldown timer text to be disabled.
+
+It will automatically be disabled if you have an addon installed that is known to be capable of providing this text.]]
+L["UIPANEL_HIDEBLIZZCDBLING"] = "Disable Blizzard cooldown finish pulse"
+L["UIPANEL_HIDEBLIZZCDBLING_DESC"] = [[Disables Blizzard's pulse effect on cooldown sweeps when their timer finishes.
+
+This effect was added by Blizzard in patch 6.2.]]
+
+
 L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
 
 L["UIPANEL_DRDURATION"] = "DR Duration"

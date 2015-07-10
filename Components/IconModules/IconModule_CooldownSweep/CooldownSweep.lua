@@ -32,6 +32,7 @@ CooldownSweep:RegisterIconDefaults{
 TMW:RegisterDatabaseDefaults{
 	profile = {
 		ForceNoBlizzCC = false,
+		HideBlizzCDBling = true,
 		DrawEdge = false,
 	},
 }
@@ -109,6 +110,14 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		width = "double",
 		type = "toggle",
 		order = 61,
+	}
+
+	TMW.OptionsTable.args.main.args.checks.args.HideBlizzCDBling = {
+		name = TMW.L["UIPANEL_HIDEBLIZZCDBLING"],
+		desc = TMW.L["UIPANEL_HIDEBLIZZCDBLING_DESC"],
+		width = "double",
+		type = "toggle",
+		order = 62,
 	}
 end)
 
@@ -215,6 +224,7 @@ function CooldownSweep:SetupForIcon(icon)
 		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 	end
 
+	-- new in WoW 6.0
 	if omnicc_loaded
 	or tullacc_loaded
 	or TMW.db.profile.ForceNoBlizzCC
@@ -224,6 +234,9 @@ function CooldownSweep:SetupForIcon(icon)
 	else
 		self.cooldown:SetHideCountdownNumbers(not self.ShowTimerText)
 	end
+
+	-- new in WoW 6.2
+	self.cooldown:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
 	
 	local attributes = icon.attributes
 	
