@@ -1,55 +1,91 @@
 ﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ .. \FrameXML\UI.xsd">
 
 	<!-- TEMPLATES -->
+
+	<Frame name="TellMeWhen_GenericBorder" virtual="true" parentKey="border" setAllPoints="true">
+		<Size x="1" y="1"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="borderTop">
+					<Size x="1" y="1"/>
+				</Texture>
+				<Texture parentKey="borderBottom">
+					<Size x="1" y="1"/>
+				</Texture>
+				<Texture parentKey="borderLeft">
+					<Size x="1" y="1"/>
+
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.borderTop" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.borderBottom" relativePoint="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="borderRight">
+					<Size x="1" y="1"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.borderTop" relativePoint="BOTTOMRIGHT"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.borderBottom" relativePoint="TOPRIGHT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				function self:SetSize(pixels)
+					self.size = pixels
+					self.borderTop:ClearAllPoints()
+					self.borderBottom:ClearAllPoints()
+
+					for i, tex in TMW:Vararg(self:GetRegions()) do
+						tex:SetShown(pixels ~= 0)
+						tex:SetSize(math.abs(pixels), math.abs(pixels))
+					end
+
+					-- Negative sizes should make inset borders.
+					-- Positive sizes will make outset borders
+					if 0 > pixels then
+						pixels = 0
+					end
+
+					self.borderTop:SetPoint("TOPLEFT", -pixels, pixels)
+					self.borderTop:SetPoint("TOPRIGHT", pixels, pixels)
+					
+					self.borderBottom:SetPoint("BOTTOMLEFT", -pixels, -pixels)
+					self.borderBottom:SetPoint("BOTTOMRIGHT", pixels, -pixels)
+
+				end
+
+				function self:SetColor(r, g, b, a)
+					a = a or 1
+
+					for i, tex in TMW:Vararg(self:GetRegions()) do
+						tex:SetTexture(r, g, b, a)
+					end
+				end
+
+				self:SetSize(1)
+				self:SetColor(0, 0, 0, 1)
+			--	self:SetScale(1/self:GetParent():GetEffectiveScale())
+			</OnLoad>
+			<OnSizeChanged>
+			--	self:SetScale(1/self:GetParent():GetEffectiveScale())
+			</OnSizeChanged>
+		</Scripts>
+	</Frame>
 	
 	<Frame name="TellMeWhen_GroupTemplate" enableMouse="false" toplevel="true" movable="true" parent="TMW" virtual="true">
 		<Size x="1" y="1"/>
 	</Frame>
 
-	<Texture name="TellMeWhen_GlobalGroupBorder" virtual="true">
-		<Size x="1" y="1"/>
-		<Color r="0" g="0.7647" b="0" a="0.75"/>
-	</Texture>
-
 	<Frame name="TellMeWhen_GlobalGroupTemplate" inherits="TellMeWhen_GroupTemplate" virtual="true">
 		<Frames>
-			<Frame parentKey="Borders" setAllPoints="true">
-				<Layers>
-					<Layer level="OVERLAY">
-
-						<Texture parentKey="BorderTop" inherits="TellMeWhen_GlobalGroupBorder">
-							<Anchors>
-								<Anchor point="TOPLEFT" x="0" y="0"/>
-								<Anchor point="TOPRIGHT" x="0" y="0"/>
-							</Anchors>
-						</Texture>
-						<Texture parentKey="BorderBottom" inherits="TellMeWhen_GlobalGroupBorder">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" x="0" y="0"/>
-								<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
-							</Anchors>
-						</Texture>
-						<Texture parentKey="BorderLeft" inherits="TellMeWhen_GlobalGroupBorder">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.BorderTop" relativePoint="BOTTOMLEFT"/>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.BorderBottom" relativePoint="TOPLEFT"/>
-							</Anchors>
-						</Texture>
-						<Texture parentKey="BorderRight" inherits="TellMeWhen_GlobalGroupBorder">
-							<Anchors>
-								<Anchor point="TOPRIGHT" relativeKey="$parent.BorderTop" relativePoint="BOTTOMRIGHT"/>
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BorderBottom" relativePoint="TOPRIGHT"/>
-							</Anchors>
-						</Texture>
-
-					</Layer>
-				</Layers>
-			</Frame>
+			<Frame inherits="TellMeWhen_GenericBorder"/>
 		</Frames>
 		<Scripts>
-			<OnSizeChanged>
-				self.Borders:SetScale(1.3/self:GetScale())
-			</OnSizeChanged>
+			<OnLoad>
+				self.border:SetSize(1)
+				self.border:SetColor(0, 0.7647, 0, 0.75)
+			</OnLoad>
 		</Scripts>
 	</Frame>
 

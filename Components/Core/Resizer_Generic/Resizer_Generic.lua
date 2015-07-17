@@ -30,9 +30,9 @@ TMW:NewClass("Resizer_Generic"){
 	-- Configuration. Set these on created instances.
 	scale_min = 0.4,
 	scale_max = math.huge,
-	x_min = 0,
+	x_min = 1,
 	x_max = math.huge,
-	y_min = 0,
+	y_min = 1,
 	y_max = math.huge,
 	
 	OnNewInstance_Resizer = function(self, parent)

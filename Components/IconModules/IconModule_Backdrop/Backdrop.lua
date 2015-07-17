@@ -61,11 +61,20 @@ function Backdrop:OnDisable()
 	self.container:Hide()
 end
 
+function Backdrop:SetBorder(size, r, g, b, a)
+	if not self.border then
+		self.border = CreateFrame("Frame", nil, self.container, "TellMeWhen_GenericBorder")
+	end
+
+	self.border:SetSize(size)
+	self.border:SetColor(r, g, b, a)
+end
+
 function Backdrop:SetupForIcon(icon)
 	self.backdrop:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
 	
 	local c = icon.BackdropColor
 	self.backdrop:SetVertexColor(c.r, c.g, c.b, 1)
-	self.container:SetAlpha(c.a)
+	self.backdrop:SetAlpha(c.a)
 end
 	

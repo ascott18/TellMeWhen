@@ -134,11 +134,8 @@ TMW.Classes.GroupModule_GroupPosition:RegisterConfigTable("args.position.args", 
 			Module:SetPos()
 		end
 	end,
-	get = function(info)
-		local group = FindGroupFromInfo(info)
-
-		return group:GetSettings()[info[#info]]
-	end,
+	get = "group_get_spv",
+	
 	dialogInline = true,
 	guiInline = true,
 	

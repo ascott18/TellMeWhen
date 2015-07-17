@@ -98,16 +98,27 @@ end
 --		step = 0.01,
 --	})
 function GroupComponent:RegisterConfigTable(parentTable, key, configTable)
-	self:AssertSelfIsClass()
 	
 	TMW:ValidateType("2 (defaults)", "GroupComponent:RegisterConfigTable(parentTable, key, configTable)", parentTable, "table;string")
 	TMW:ValidateType("3 (key)", "GroupComponent:RegisterConfigTable(parentTable, key, configTable)", key, "string")
 	TMW:ValidateType("4 (configTable)", "GroupComponent:RegisterConfigTable(parentTable, key, configTable)", configTable, "table")
 	
-	configTable.hidden = function(info)
-		local group = TMW.FindGroupFromInfo(info)
-		
-		return not group or not group:GetModuleOrModuleChild(self.className, true)
+	if self.class.inherits[TMW.C.GroupModule] then
+		self:AssertSelfIsClass()
+
+		configTable.hidden = function(info)
+			local group = TMW.FindGroupFromInfo(info)
+			
+			return not group or not group:GetModuleOrModuleChild(self.className, true)
+		end
+	elseif self.isLibOOInstance then
+		configTable.hidden = function(info)
+			local group = TMW.FindGroupFromInfo(info)
+			
+			return not group or not group.ComponentsLookup[self]
+		end
+	else
+		error("GroupComponent:RegisterConfigTable can't handle non-module, non-instance components")
 	end
 		
 	if type(parentTable) == "string" and IsAddOnLoaded("TellMeWhen_Options") then

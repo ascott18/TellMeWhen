@@ -2,63 +2,6 @@
  ..\FrameXML\UI.xsd">
  
 
-	<Frame name="TellMeWhen_GenericBorder" virtual="true" parentKey="border" setAllPoints="true">
-		<Size x="1" y="1"/>
-		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture parentKey="borderTop">
-					<Size x="1" y="1"/>
-				</Texture>
-				<Texture parentKey="borderBottom">
-					<Size x="1" y="1"/>
-				</Texture>
-				<Texture parentKey="borderLeft">
-					<Size x="1" y="1"/>
-
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.borderTop" relativePoint="BOTTOMLEFT"/>
-						<Anchor point="BOTTOMLEFT" relativeKey="$parent.borderBottom" relativePoint="TOPLEFT"/>
-					</Anchors>
-				</Texture>
-				<Texture parentKey="borderRight">
-					<Size x="1" y="1"/>
-					<Anchors>
-						<Anchor point="TOPRIGHT" relativeKey="$parent.borderTop" relativePoint="BOTTOMRIGHT"/>
-						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.borderBottom" relativePoint="TOPRIGHT"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnLoad>
-				function self:SetSize(pixels)
-					self.borderTop:ClearAllPoints()
-					self.borderTop:SetPoint("TOPLEFT", -pixels, pixels)
-					self.borderTop:SetPoint("TOPRIGHT", pixels, pixels)
-					
-					self.borderBottom:ClearAllPoints()
-					self.borderBottom:SetPoint("BOTTOMLEFT", -pixels, -pixels)
-					self.borderBottom:SetPoint("BOTTOMRIGHT", pixels, -pixels)
-
-					for i, tex in TMW:Vararg(self:GetRegions()) do
-						tex:SetSize(pixels, pixels)
-					end
-				end
-
-				function self:SetColor(r, g, b, a)
-					a = a or 1
-
-					for i, tex in TMW:Vararg(self:GetRegions()) do
-						tex:SetTexture(r, g, b, a)
-					end
-				end
-
-				self:SetSize(1)
-				self:SetColor(0, 0, 0, 1)
-			</OnLoad>
-		</Scripts>
-	</Frame>
-
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true" hidden="true">
 		<KeyValues>
 			<KeyValue key="tmwClass" type="string" value="Config_Panel"/>

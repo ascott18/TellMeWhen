@@ -143,7 +143,11 @@ function IconContainer_Masque:DoSkin()
 	end
 end
 
-IconContainer_Masque:PostHookMethod("OnEnable", IconContainer_Masque.DoSkin)
+
+-- IconContainer_Masque:PostHookMethod("OnEnable", IconContainer_Masque.DoSkin)
+IconContainer_Masque:SetIconEventListner("TMW_ICON_SETUP_POST", function(Module, icon)
+	Module:DoSkin()
+end)
 
 IconContainer_Masque:PostHookMethod("OnDisable", function(self)
 	self.lmbGroup:RemoveButton(self.container, true)

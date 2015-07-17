@@ -182,8 +182,40 @@ local specializationSettingHidden = function(info)
 	return false
 end
 
+local common = {}
+function common:group_set(info, val)
+	local group = FindGroupFromInfo(info)
+	local gspv = group:GetSettings()
+
+	gspv[info[#info]] = val
+
+	group:Setup()
+end
+function common:group_get(info)
+	local group = FindGroupFromInfo(info)
+	local gspv = group:GetSettings()
+	
+	return gspv[info[#info]]
+end
+
+function common:group_set_spv(info, val)
+	local group = FindGroupFromInfo(info)
+	local gspv = group:GetSettingsPerView()
+
+	gspv[info[#info]] = val
+
+	group:Setup()
+end
+function common:group_get_spv(info)
+	local group = FindGroupFromInfo(info)
+	local gspv = group:GetSettingsPerView()
+	
+	return gspv[info[#info]]
+end
+
 TMW.GroupConfigTemplate = {
 	type = "group",
+	handler = common,
 	childGroups = "tab",
 	name = function(info)
 		local group = FindGroupFromInfo(info)
@@ -765,10 +797,10 @@ for k, v in pairs(colorOrder) do
 	colorIconTypeTemplate.args[v] = colorTemplate
 end
 
-
 TMW.OptionsTable = {
 	name = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL,
 	type = "group",
+	handler = common,
 	args = {
 		main = {
 			type = "group",

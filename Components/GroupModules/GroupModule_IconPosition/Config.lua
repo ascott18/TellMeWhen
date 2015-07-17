@@ -20,28 +20,6 @@ local print = TMW.print
 local FindGroupFromInfo = TMW.FindGroupFromInfo
 
 
-
-local set = function(info, val)
-	local group = FindGroupFromInfo(info)
-	local gspv = group:GetSettingsPerView()
-
-	gspv[info[#info]] = val
-	
-	local Module = group:GetModuleOrModuleChild("GroupModule_IconPosition")
-	
-	if Module then
-	--	Module:PositionIcons()
-	end
-
-	group:Setup()
-end
-local get = function(info)
-	local group = FindGroupFromInfo(info)
-	local gspv = group:GetSettingsPerView()
-	
-	return gspv[info[#info]]
-end
-
 TMW.Classes.GroupModule_IconPosition:RegisterConfigTable("args.main.args", "SpacingX", {
 	name = L["UIPANEL_ICONSPACINGX"],
 	desc = L["UIPANEL_ICONSPACING_DESC"],
@@ -51,8 +29,8 @@ TMW.Classes.GroupModule_IconPosition:RegisterConfigTable("args.main.args", "Spac
 	softMax = 20,
 	step = 0.1,
 	bigStep = 1,
-	set = set,
-	get = get,
+	set = "group_set_spv",
+	get = "group_get_spv",
 })
 TMW.Classes.GroupModule_IconPosition:RegisterConfigTable("args.main.args", "SpacingY", {
 	name = L["UIPANEL_ICONSPACINGY"],
@@ -63,6 +41,6 @@ TMW.Classes.GroupModule_IconPosition:RegisterConfigTable("args.main.args", "Spac
 	softMax = 20,
 	step = 0.1,
 	bigStep = 1,
-	set = set,
-	get = get,
+	set = "group_set_spv",
+	get = "group_get_spv",
 })

@@ -3,6 +3,12 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v7.4.0===
+* Bar and Vertical Bar groups now have several new options:
+** Show/Hide icon
+** Flip Icon
+** Bar & Icon Borders
+
 ===v7.3.5===
 ====Bug Fixes====
 * The TMWFormatDuration DogTag now properly handles negative durations.

@@ -45,6 +45,15 @@ function IconContainer:OnDisable()
 	self.container:Hide()
 end
 
+function IconContainer:SetBorder(size, r, g, b, a)
+	if not self.border then
+		self.border = CreateFrame("Frame", nil, self.container, "TellMeWhen_GenericBorder")
+	end
+
+	self.border:SetSize(size)
+	self.border:SetColor(r, g, b, a)
+end
+
 
 
 

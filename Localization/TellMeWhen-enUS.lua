@@ -828,6 +828,20 @@ L["UIPANEL_GROUPTYPE_BAR_DESC"] = [[Displays the icons in the group with progres
 L["UIPANEL_GROUPTYPE_BARV"] = "Vertical Bar"
 L["UIPANEL_GROUPTYPE_BARV_DESC"] = [[Displays the icons in the group with vertical progress bars attached to the icons.]]
 
+L["UIPANEL_BAR_SHOWICON"] = "Show Icon"
+L["UIPANEL_BAR_SHOWICON_DESC"] = "Disable this setting to hide the texture, cooldown sweep, and other similar components."
+L["UIPANEL_BAR_FLIP"] = "Flip Icon"
+L["UIPANEL_BAR_FLIP_DESC"] = "Place the texture, cooldown sweep, and other similar components on the opposite side of the icon."
+L["UIPANEL_BAR_PADDING"] = "Padding"
+L["UIPANEL_BAR_PADDING_DESC"] = "Set the space between the icon and the bar."
+L["UIPANEL_BAR_BORDERICON"] = "Icon Border"
+L["UIPANEL_BAR_BORDERICON_DESC"] = "Set a border around the texture, cooldown sweep, and other similar components."
+L["UIPANEL_BAR_BORDERBAR"] = "Bar Border"
+L["UIPANEL_BAR_BORDERBAR_DESC"] = "Set a border around the bar."
+L["UIPANEL_BAR_BORDERCOLOR"] = "Border Color"
+L["UIPANEL_BAR_BORDERCOLOR_DESC"] = "Change the color of the icon and bar borders."
+
+
 L["UIPANEL_ICONS"] = "Icons"
 L["UIPANEL_COLORS"] = "Colors"
 L["UIPANEL_COLORS_DESC"] = "Settings that control the coloring/tinting of icons based on their attributes."

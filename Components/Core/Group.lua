@@ -461,11 +461,11 @@ function Group.Setup(group, noIconSetup)
 	
 
 	-- The green border for global groups
-	if group.Borders then
+	if group.border then
 		if TMW.Locked then
-			group.Borders:Hide()
+			group.border:Hide()
 		else
-			group.Borders:Show()
+			group.border:Show()
 		end
 	end
 	
