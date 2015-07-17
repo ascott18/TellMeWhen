@@ -5,9 +5,9 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = [==[
 ===v7.4.0===
 * Bar and Vertical Bar groups now have several new options:
-** Show/Hide icon
-** Flip Icon
-** Bar & Icon Borders
+** Show/Hide Icon - A better alternative to using "none" as a custom texture.
+** Flip Icon - Swaps the side of the bar that the icon is on.
+** Bar & Icon Borders - Beautify your bars!
 
 ===v7.3.5===
 ====Bug Fixes====
