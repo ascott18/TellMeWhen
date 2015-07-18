@@ -38,8 +38,6 @@ end
 
 --- Static method to check if a given icon will be skinned.
 function IconContainer_Masque:IsIconSkinned(icon)
-	self:AssertSelfIsClass()
-
 	if not LMB then
 		return false
 	end
@@ -58,7 +56,6 @@ end
 
 
 if not LMB then
-	IconContainer_Masque.isDefaultSkin = 1
 	-- IconModule_IconContainer_Masque will just be a clone of IconModule_IconContainer at this point.
 	-- No need to load any of the Masque-handling code it Masque isn't installed, so just leave it as a clone.
 	return
@@ -116,9 +113,6 @@ function IconContainer_Masque:DoSkin()
 	local icon = self.icon
 	local container = self.container
 	
-	-- I really really hate the fact that this exists. But, oh well. At least it works more than 26.8% of the time.
-	self.isDefaultSkin = nil
-	
 	local lmbGroup = self.lmbGroup
 	
 	local disabled = lmbGroup.Disabled or (lmbGroup.db and lmbGroup.db.Disabled)
@@ -126,21 +120,18 @@ function IconContainer_Masque:DoSkin()
 	if self.hasSkinned then
 		lmbGroup:AddButton(container, icon.lmbButtonData)
 	end
+	
 	if disabled then
 		if self.hasSkinned then
 			lmbGroup:RemoveButton(container)
 		end
-		--self.isDefaultSkin = 1
+
 	elseif not self.hasSkinned then
 		lmbGroup:AddButton(container, icon.lmbButtonData)
 		self.hasSkinned = true
 	end
 	
 	icon.normaltex = container.__MSQ_NormalTexture or container:GetNormalTexture()
-	
-	if disabled and not icon.normaltex then
-		self.isDefaultSkin = 1
-	end
 end
 
 
@@ -151,8 +142,6 @@ end)
 
 IconContainer_Masque:PostHookMethod("OnDisable", function(self)
 	self.lmbGroup:RemoveButton(self.container, true)
-	
-	self.isDefaultSkin = 1
 end)
 
 

@@ -132,26 +132,28 @@ end)
 View:ImplementsModule("IconModule_Texts", 60, true)
 View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, icon)
 	local Modules = icon.Modules
-	local Masque = Module
 	
-	Masque.container:ClearAllPoints()
-	Masque.container:SetSize(icon:GetSize())
-	Masque.container:SetAllPoints()	
-	Masque:Enable()
+	Module.container:ClearAllPoints()
+	Module.container:SetSize(icon:GetSize())
+	Module.container:SetAllPoints()	
+	Module:Enable()
 
 	---------- Skin-Dependent Module Layout ----------
 	local CooldownSweep = Modules.IconModule_CooldownSweep
 	local PowerBar_Overlay = Modules.IconModule_PowerBar_Overlay
 	local TimerBar_Overlay = Modules.IconModule_TimerBar_Overlay
 	local IconModule_Texture_Colored = Modules.IconModule_Texture_Colored
+
+
+	local isDefaultSkin = not Module:IsIconSkinned(icon)
 	
-	local frameLevelOffset = Masque.isDefaultSkin and 1 or -2
+	local frameLevelOffset = isDefaultSkin and 1 or -2
 	
 	if CooldownSweep then
 		CooldownSweep.cooldown:SetFrameLevel( icon:GetFrameLevel() + 0 + frameLevelOffset)
 	end
 	
-	local insets = Masque.isDefaultSkin and 1.5 or 0
+	local insets = isDefaultSkin and 1.5 or 0
 	local anchorTo = IconModule_Texture_Colored and IconModule_Texture_Colored.texture or icon
 	
 	if TimerBar_Overlay then

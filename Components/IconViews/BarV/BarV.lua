@@ -218,7 +218,7 @@ View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 
 	Module.cooldown:SetAllPoints(IconContainer.container)
 
-	if IconContainer.isDefaultSkin then
+	if IconContainer:IsIconSkinned(icon) then
 		Module.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
 	else
 		Module.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
