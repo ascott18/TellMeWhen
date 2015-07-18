@@ -65,11 +65,7 @@
 
 				self:SetSize(1)
 				self:SetColor(0, 0, 0, 1)
-			--	self:SetScale(1/self:GetParent():GetEffectiveScale())
 			</OnLoad>
-			<OnSizeChanged>
-			--	self:SetScale(1/self:GetParent():GetEffectiveScale())
-			</OnSizeChanged>
 		</Scripts>
 	</Frame>
 	
@@ -79,7 +75,13 @@
 
 	<Frame name="TellMeWhen_GlobalGroupTemplate" inherits="TellMeWhen_GroupTemplate" virtual="true">
 		<Frames>
-			<Frame inherits="TellMeWhen_GenericBorder"/>
+			<Frame inherits="TellMeWhen_GenericBorder">
+				<Scripts>
+					<OnSizeChanged>
+						self:SetScale(1/self:GetParent():GetEffectiveScale())
+					</OnSizeChanged>
+				</Scripts>
+			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad>
