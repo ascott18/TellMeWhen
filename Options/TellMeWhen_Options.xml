@@ -2076,6 +2076,7 @@
 
 	<Button name="TellMeWhen_IE_Tab" virtual="true">
 		<Size x="50"/>
+		<HitRectInsets left="0" right="0" top="-5" bottom="0" />
 		<Anchors>
 			<Anchor point="TOP"/>
 			<Anchor point="BOTTOM"/>
@@ -2346,176 +2347,186 @@
 							</Layer>
 						</Layers>
 					</Frame>
+					<Frame parentKey="art" setAllPoints="true">
+						<Layers>
+							<!-- Base background -->
+							<Layer level="ARTWORK" textureSubLevel="0">
+								<Texture >
+									<Color r="0.015686" g="0.015686" b="0.015686" a="1"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" />
+										<Anchor point="BOTTOMRIGHT" />
+									</Anchors>
+								</Texture>
+							</Layer>
+
+							<!-- PRIMARY TABS -->
+							<Layer level="ARTWORK" textureSubLevel="2">
+
+								<!-- Primary Selected horizontal -->
+								<Texture parentKey="pSelectedHorizontal" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<!-- Anchors will be set when a tab is selected. -->
+								</Texture>
+
+								<!-- Primary Left riser to selected tab -->
+								<Texture parentKey="pLeftRiser" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<Anchors>
+										<Anchor point="TOPRIGHT" relativeKey="$parent.pSelectedHorizontal" relativePoint="TOPLEFT" />
+										<Anchor point="BOTTOM"/>
+									</Anchors>
+								</Texture>
+
+								<!-- Primary Right riser to selected tab -->
+								<Texture parentKey="pRightRiser" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeKey="$parent.pSelectedHorizontal" relativePoint="TOPRIGHT" />
+										<Anchor point="BOTTOM"/>
+									</Anchors>
+								</Texture>
+
+								<!-- Primary RIGHT horizontal to end -->
+								<Texture inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<Anchors>
+										<Anchor point="BOTTOMLEFT" relativeKey="$parent.pRightRiser" relativePoint="BOTTOMRIGHT" />
+										<Anchor point="RIGHT" />
+									</Anchors>
+								</Texture>
+
+								<!-- Primary center horizontal -->
+								<Texture inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<Anchors>
+										<Anchor point="BOTTOMLEFT" relativeKey="$parent.$parent.secondary" relativePoint="BOTTOMRIGHT" />
+										<Anchor point="BOTTOMRIGHT" relativeKey="$parent.pLeftRiser" relativePoint="BOTTOMLEFT" />
+									</Anchors>
+								</Texture>
+
+
+								<!-- Primary Left riser to secondary tabs -->
+								<Texture parentKey="pLeftRiser2" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeKey="$parent.$parent.secondary" />
+										<Anchor point="BOTTOMLEFT" relativeKey="$parent.$parent.secondary"/>
+									</Anchors>
+								</Texture>
+
+								<!-- Primary secondary tabs horizontal -->
+								<Texture parentKey="pHorizontal2" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeKey="$parent.$parent.secondary" />
+										<Anchor point="TOPRIGHT" relativeKey="$parent.$parent.secondary" />
+									</Anchors>
+								</Texture>
+
+								<!-- Primary Right riser to secondary tabs -->
+								<Texture parentKey="pRightRiser2" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<Anchors>
+										<Anchor point="TOPRIGHT" relativeKey="$parent.$parent.secondary" />
+										<Anchor point="BOTTOMRIGHT" relativeKey="$parent.$parent.secondary" />
+									</Anchors>
+								</Texture>
+
+								<!-- Primary Left horizontal -->
+								<Texture  inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+									<Anchors>
+										<Anchor point="LEFT"/>
+										<Anchor point="BOTTOMRIGHT" relativeKey="$parent.pLeftRiser2" relativePoint="BOTTOMLEFT" />
+									</Anchors>
+								</Texture>
+
+								<!-- Selected primary tab -->
+								<Texture>
+									<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
+									<Anchors>
+										<Anchor point="BOTTOMLEFT" relativeKey="$parent.pLeftRiser" relativePoint="BOTTOMRIGHT" />
+										<Anchor point="RIGHT" relativeKey="$parent.pRightRiser" relativePoint="LEFT" />
+										<Anchor point="TOP" relativeKey="$parent.pSelectedHorizontal" relativePoint="BOTTOM" />
+									</Anchors>
+								</Texture>
+
+							</Layer>
+
+							<!-- Secondary tabs background -->
+							<Layer level="ARTWORK" textureSubLevel="3">
+								<Texture>
+									<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
+									<Anchors>
+										<Anchor point="BOTTOMLEFT" relativeKey="$parent.pLeftRiser2" relativePoint="BOTTOMRIGHT" />
+										<Anchor point="RIGHT" relativeKey="$parent.pRightRiser2" relativePoint="LEFT" />
+										<Anchor point="TOP" relativeKey="$parent.pHorizontal2" relativePoint="BOTTOM" />
+									</Anchors>
+								</Texture>
+							</Layer>
+
+							<!-- SECONDARY TABS -->
+							<Layer level="ARTWORK" textureSubLevel="4">
+
+								<!-- Secondary Selected horizontal -->
+								<Texture parentKey="sSelectedHorizontal" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
+									<!-- Anchors will be set when a tab is selected. -->
+								</Texture>
+
+								<!-- Secondary Left riser to selected tab -->
+								<Texture parentKey="sLeftRiser" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
+									<Anchors>
+										<Anchor point="BOTTOMRIGHT" relativeKey="$parent.sSelectedHorizontal" relativePoint="BOTTOMLEFT" />
+										<Anchor point="TOP"/>
+									</Anchors>
+								</Texture>
+
+								<!-- Secondary Left horizontal -->
+								<Texture  inherits="TellMeWhen_IE_Tab_SecondaryBorder">
+									<Anchors>
+										<Anchor point="LEFT"/>
+										<Anchor point="TOPRIGHT" relativeKey="$parent.sLeftRiser" relativePoint="TOPLEFT" />
+									</Anchors>
+								</Texture>
+
+								<!-- Secondary Right riser to selected tab -->
+								<Texture parentKey="sRightRiser" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
+									<Anchors>
+										<Anchor point="BOTTOMLEFT" relativeKey="$parent.sSelectedHorizontal" relativePoint="BOTTOMRIGHT" />
+										<Anchor point="TOP"/>
+									</Anchors>
+								</Texture>
+
+								<!-- Secondary Right horizontal -->
+								<Texture  inherits="TellMeWhen_IE_Tab_SecondaryBorder">
+									<Anchors>
+										<Anchor point="RIGHT"/>
+										<Anchor point="TOPLEFT" relativeKey="$parent.sRightRiser" relativePoint="TOPRIGHT" />
+									</Anchors>
+								</Texture>
+
+								<!-- Selected secondary tab -->
+								<Texture>
+									<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeKey="$parent.sLeftRiser" relativePoint="TOPRIGHT" />
+										<Anchor point="RIGHT" relativeKey="$parent.sRightRiser" relativePoint="LEFT" />
+										<Anchor point="BOTTOM" relativeKey="$parent.sSelectedHorizontal" relativePoint="TOP" />
+									</Anchors>
+								</Texture>
+
+								<!-- IE background to bottom -->
+								<Texture>
+									<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT"/>
+										<Anchor point="BOTTOMRIGHT" relativeKey="$parent.$parent.$parent" />
+									</Anchors>
+								</Texture>
+							</Layer>
+						</Layers>
+
+						<Scripts>
+							<OnSizeChanged>
+								self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
+								self:SetScale(1/self:GetParent():GetEffectiveScale())
+							</OnSizeChanged>
+						</Scripts>
+					</Frame>
 				</Frames>
-				<Layers>
-					<!-- Base background -->
-					<Layer level="ARTWORK" textureSubLevel="0">
-						<Texture >
-							<Color r="0.015686" g="0.015686" b="0.015686" a="1"/>
-							<Anchors>
-								<Anchor point="TOPLEFT" />
-								<Anchor point="BOTTOMRIGHT" />
-							</Anchors>
-						</Texture>
-					</Layer>
-
-					<!-- PRIMARY TABS -->
-					<Layer level="ARTWORK" textureSubLevel="2">
-
-						<!-- Primary Selected horizontal -->
-						<Texture parentKey="pSelectedHorizontal" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<!-- Anchors will be set when a tab is selected. -->
-						</Texture>
-
-						<!-- Primary Left riser to selected tab -->
-						<Texture parentKey="pLeftRiser" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="TOPRIGHT" relativeKey="$parent.pSelectedHorizontal" relativePoint="TOPLEFT" />
-								<Anchor point="BOTTOM"/>
-							</Anchors>
-						</Texture>
-
-						<!-- Primary Right riser to selected tab -->
-						<Texture parentKey="pRightRiser" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.pSelectedHorizontal" relativePoint="TOPRIGHT" />
-								<Anchor point="BOTTOM"/>
-							</Anchors>
-						</Texture>
-
-						<!-- Primary RIGHT horizontal to end -->
-						<Texture inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pRightRiser" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="RIGHT" />
-							</Anchors>
-						</Texture>
-
-						<!-- Primary center horizontal -->
-						<Texture inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.secondary" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.pLeftRiser" relativePoint="BOTTOMLEFT" />
-							</Anchors>
-						</Texture>
-
-
-						<!-- Primary Left riser to secondary tabs -->
-						<Texture parentKey="pLeftRiser2" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.secondary" />
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.secondary"/>
-							</Anchors>
-						</Texture>
-
-						<!-- Primary secondary tabs horizontal -->
-						<Texture parentKey="pHorizontal2" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.secondary" />
-								<Anchor point="TOPRIGHT" relativeKey="$parent.secondary" />
-							</Anchors>
-						</Texture>
-
-						<!-- Primary Right riser to secondary tabs -->
-						<Texture parentKey="pRightRiser2" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="TOPRIGHT" relativeKey="$parent.secondary" />
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.secondary" />
-							</Anchors>
-						</Texture>
-
-						<!-- Primary Left horizontal -->
-						<Texture  inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="LEFT"/>
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.pLeftRiser2" relativePoint="BOTTOMLEFT" />
-							</Anchors>
-						</Texture>
-
-						<!-- Selected primary tab -->
-						<Texture>
-							<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pLeftRiser" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="RIGHT" relativeKey="$parent.pRightRiser" relativePoint="LEFT" />
-								<Anchor point="TOP" relativeKey="$parent.pSelectedHorizontal" relativePoint="BOTTOM" />
-							</Anchors>
-						</Texture>
-
-					</Layer>
-
-					<!-- Secondary tabs background -->
-					<Layer level="ARTWORK" textureSubLevel="3">
-						<Texture>
-							<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pLeftRiser2" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="RIGHT" relativeKey="$parent.pRightRiser2" relativePoint="LEFT" />
-								<Anchor point="TOP" relativeKey="$parent.pHorizontal2" relativePoint="BOTTOM" />
-							</Anchors>
-						</Texture>
-					</Layer>
-
-					<!-- SECONDARY TABS -->
-					<Layer level="ARTWORK" textureSubLevel="4">
-
-						<!-- Secondary Selected horizontal -->
-						<Texture parentKey="sSelectedHorizontal" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
-							<!-- Anchors will be set when a tab is selected. -->
-						</Texture>
-
-						<!-- Secondary Left riser to selected tab -->
-						<Texture parentKey="sLeftRiser" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
-							<Anchors>
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.sSelectedHorizontal" relativePoint="BOTTOMLEFT" />
-								<Anchor point="TOP"/>
-							</Anchors>
-						</Texture>
-
-						<!-- Secondary Left horizontal -->
-						<Texture  inherits="TellMeWhen_IE_Tab_SecondaryBorder">
-							<Anchors>
-								<Anchor point="LEFT"/>
-								<Anchor point="TOPRIGHT" relativeKey="$parent.sLeftRiser" relativePoint="TOPLEFT" />
-							</Anchors>
-						</Texture>
-
-						<!-- Secondary Right riser to selected tab -->
-						<Texture parentKey="sRightRiser" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.sSelectedHorizontal" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="TOP"/>
-							</Anchors>
-						</Texture>
-
-						<!-- Secondary Right horizontal -->
-						<Texture  inherits="TellMeWhen_IE_Tab_SecondaryBorder">
-							<Anchors>
-								<Anchor point="RIGHT"/>
-								<Anchor point="TOPLEFT" relativeKey="$parent.sRightRiser" relativePoint="TOPRIGHT" />
-							</Anchors>
-						</Texture>
-
-						<!-- Selected secondary tab -->
-						<Texture>
-							<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.sLeftRiser" relativePoint="TOPRIGHT" />
-								<Anchor point="RIGHT" relativeKey="$parent.sRightRiser" relativePoint="LEFT" />
-								<Anchor point="BOTTOM" relativeKey="$parent.sSelectedHorizontal" relativePoint="TOP" />
-							</Anchors>
-						</Texture>
-
-						<!-- IE background to bottom -->
-						<Texture>
-							<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
-							<Anchors>
-								<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT"/>
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.$parent" />
-							</Anchors>
-						</Texture>
-					</Layer>
-				</Layers>
+				
 			</Frame>
 
 
@@ -2752,7 +2763,7 @@
 						<Scripts>
 							<OnLoad>
 								local AceGUI = LibStub("AceGUI-3.0", true)
-								local Type, Version = "TMWIEGroupOptions", 1
+								local Type, Version = "TMWIEAceOptions", 1
 
 								local widget = {
 									localstatus = {},
@@ -2800,7 +2811,7 @@
 							</OnLoad>
 							<OnShow>
 								if not TMW.IE.MainOptionsWidget then
-									LibStub("AceGUI-3.0", true):Create("TMWIEGroupOptions")
+									LibStub("AceGUI-3.0", true):Create("TMWIEAceOptions")
 								end
 							</OnShow>
 							<OnHide>

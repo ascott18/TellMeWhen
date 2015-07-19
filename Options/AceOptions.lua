@@ -25,41 +25,35 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 
 
-local ACEOPTIONS = TMW:NewModule("IEOptTab", "AceEvent-3.0")
+local ACEOPTIONS = TMW:NewModule("AceOptions", "AceEvent-3.0")
 TMW.ACEOPTIONS = ACEOPTIONS
 
+function ACEOPTIONS:RegisterTab(parentIdentifier, order, appName, scale)
+	local tab = TMW.IE:RegisterTab(parentIdentifier, appName:upper(), "MainOptions", order)
+	
+	tab:PostHookMethod("ClickHandler", function(self)
+		TMW.ACEOPTIONS:CompileOptions()
+
+		LibStub("AceConfigDialog-3.0"):Open(appName, TMW.IE.MainOptionsWidget)
+
+		IE.Panels.MainOptions:SetScale(scale)
+	end)
+
+	return tab
+end
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	IE.MainOptionsTab = TMW.IE:RegisterTab("MAIN", "MAINOPTS", "MainOptions", 20)
-
+	IE.MainOptionsTab = ACEOPTIONS:RegisterTab("MAIN", 20, "TMWIEMain", 0.75)
 	IE.MainOptionsTab:SetTitleComponents(false, false)
 	IE.MainOptionsTab:SetText(TMW.L["UIPANEL_MAINOPT"])
 	TMW:TT(IE.MainOptionsTab, "UIPANEL_MAINOPT", "GROUPADDONSETTINGS_DESC")
-	
-	IE.MainOptionsTab:PostHookMethod("ClickHandler", function(self)
-		TMW.ACEOPTIONS:CompileOptions()
-
-		LibStub("AceConfigDialog-3.0"):Open("TMWIEMain", TMW.IE.MainOptionsWidget)
-
-		IE.Panels.MainOptions:SetScale(0.75)
-		IE.MainOptionsTab:SetTitleComponents(false, false)
-	end)
 
 
-	IE.GroupOptionsTab = TMW.IE:RegisterTab("GROUP", "GROUPOPTS", "MainOptions", 1)
-
-	IE.GroupOptionsTab:SetTitleComponents(false, false)
-	IE.GroupOptionsTab:SetText(TMW.L["GROUPADDONSETTINGS"])
-	TMW:TT(IE.GroupOptionsTab, "GROUPADDONSETTINGS", "GROUPSETTINGS_DESC")
-	
-	IE.GroupOptionsTab:PostHookMethod("ClickHandler", function(self)
-		TMW.ACEOPTIONS:CompileOptions()
-
-		LibStub("AceConfigDialog-3.0"):Open("TMWIEGroup", TMW.IE.MainOptionsWidget)
-
-		IE.Panels.MainOptions:SetScale(1)
-		IE.GroupOptionsTab:SetTitleComponents(false, true)
-		
+	local GroupOptionsTab = ACEOPTIONS:RegisterTab("GROUP", 1, "TMWIEGroup", 1)
+	GroupOptionsTab:SetTitleComponents(false, true)
+	GroupOptionsTab:SetText(TMW.L["GROUP"])
+	TMW:TT(GroupOptionsTab, "GROUP", "GROUPSETTINGS_DESC")
+	GroupOptionsTab:PostHookMethod("ClickHandler", function(self)
 		if TMW.CI.group then
 			ACEOPTIONS:LoadConfigGroup("TMWIEGroup", TMW.CI.group)
 		end

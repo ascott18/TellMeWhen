@@ -357,7 +357,7 @@
 			<Frame name="$parentEventHandlerFrames" parentKey="EventHandlerFrames">
 				<Size x="210" y="10"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="12" y="-50"/>
+					<Anchor point="TOPLEFT" x="12" y="-55"/>
 					<Anchor point="BOTTOM" relativePoint="LEFT" y="0"/>
 				</Anchors>
 				<Scripts>

@@ -108,14 +108,12 @@ end)
 -- Dynamic Conditions Tab handling
 
 CNDT.DynamicConditionTab = TMW.IE:RegisterTab("ICON", "CNDTDYN", "Conditions", 25)
-CNDT.DynamicConditionTab:SetTitleComponents()
+CNDT.DynamicConditionTab:SetTitleComponents(nil, nil)
 
-local tempHide = false
 CNDT.DynamicConditionTab.ShouldShowTab = function(self)
 	local ConditionSet = CNDT.CurrentConditionSet
 
-	if not tempHide
-	and ConditionSet
+	if ConditionSet
 	and ConditionSet.useDynamicTab
 	and ConditionSet.ShouldShowTab
 	and ConditionSet:ShouldShowTab() then
@@ -132,9 +130,8 @@ TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", function(event, icon)
 end)
 
 TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, currentTab, oldTab)
-	tempHide = false
 	if oldTab == CNDT.DynamicConditionTab and currentTab ~= CNDT.DynamicConditionTab then
-		tempHide = true
+		CNDT.CurrentConditionSet = nil
 	end
 end)
 

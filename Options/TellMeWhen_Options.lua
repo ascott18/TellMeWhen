@@ -486,9 +486,9 @@ function IE:OnInitialize()
 	IE.historyState = 0
 
 
-	IE.MainTab = TMW.IE:RegisterTab("ICON", "MAIN", "Main", 1)
-	IE.MainTab:SetText(TMW.L["MAIN"])
-	TMW:TT(IE.MainTab, "MAIN", "MAIN_DESC")
+	IE.MainTab = IE:RegisterTab("ICON", "MAIN", "Main", 1)
+	IE.MainTab:SetText(L["ICON"])
+	TMW:TT(IE.MainTab, "ICON", "MAIN_DESC")
 	
 
 	-- Create resizer
@@ -870,9 +870,9 @@ TMW:NewClass("IconEditorTabSecondary", "IconEditorTab"){
 		IE.CurrentTab = self
 		self.parent.lastTab = self
 
-		TMW.IE.tabs.sSelectedHorizontal:ClearAllPoints()
-		TMW.IE.tabs.sSelectedHorizontal:SetPoint("BOTTOMLEFT", self)
-		TMW.IE.tabs.sSelectedHorizontal:SetPoint("BOTTOMRIGHT", self)
+		TMW.IE.tabs.art.sSelectedHorizontal:ClearAllPoints()
+		TMW.IE.tabs.art.sSelectedHorizontal:SetPoint("BOTTOMLEFT", self)
+		TMW.IE.tabs.art.sSelectedHorizontal:SetPoint("BOTTOMRIGHT", self)
 
 		-- show the selected tab's frame
 		if frame then
@@ -1091,9 +1091,9 @@ function IE:RefreshTabs()
 
 	TMW.IE.tabs.secondary:SetWidth(width)
 
-	TMW.IE.tabs.pSelectedHorizontal:ClearAllPoints()
-	TMW.IE.tabs.pSelectedHorizontal:SetPoint("TOPLEFT", tabGroup)
-	TMW.IE.tabs.pSelectedHorizontal:SetPoint("TOPRIGHT", tabGroup)
+	TMW.IE.tabs.art.pSelectedHorizontal:ClearAllPoints()
+	TMW.IE.tabs.art.pSelectedHorizontal:SetPoint("TOPLEFT", tabGroup)
+	TMW.IE.tabs.art.pSelectedHorizontal:SetPoint("TOPRIGHT", tabGroup)
 
 	if tabGroup.lastTab and tabGroup.lastTab:IsShown() then
 		if tabGroup.lastTab ~= IE.CurrentTab then

@@ -66,7 +66,7 @@ do	-- TMW.CNDT implementation
 		GetTab = function(self)
 			return tab
 		end,
-		tabText = L["GROUPCONDITIONS"],
+		tabText = L["CONDITIONS"],
 		tabTooltip = L["GROUPCONDITIONS_DESC"],
 	})
 	
