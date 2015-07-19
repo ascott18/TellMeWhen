@@ -85,7 +85,7 @@ do
 	})
 	
 	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-		tab = TMW.Classes.IconEditorTab:NewTab("CNDTICON", 5, "Conditions")
+		tab = TMW.IE:RegisterTab("ICON", "CNDTICON", "Conditions", 5)
 		
 		tab:PostHookMethod("ClickHandler", function()
 			TMW.CNDT:LoadConfig("Icon")

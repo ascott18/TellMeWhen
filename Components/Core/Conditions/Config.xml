@@ -749,12 +749,12 @@
 	</Frame>
 	
 	
-	<Frame name="$parentConditions" parent="TellMeWhen_IconEditor" hidden="true" setAllPoints="true" parentKey="Conditions">
+	<Frame name="$parentConditions" parent="TellMeWhen_IconEditorPanels" hidden="true" setAllPoints="true" parentKey="Conditions">
 		<Frames>			
 			<Frame name="$parentGroups" parentKey="Groups" >
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-29" x="-5"/>
-					<Anchor point="BOTTOMRIGHT" y="26"/>
+					<Anchor point="TOPLEFT" y="-4" x="-5"/>
+					<Anchor point="BOTTOMRIGHT" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>

@@ -30,7 +30,7 @@ EVENTS.CONST = {
 	EVENT_INVALID_REASON_NOEVENT = 4,
 }
 
-local EventsTab = TMW.Classes.IconEditorTab:NewTab("ICONEVENTS", 10, "Events")
+local EventsTab = TMW.IE:RegisterTab("ICON", "ICONEVENTS", "Events", 10)
 EventsTab:SetText(TMW.L["EVENTS_TAB"])
 TMW:TT(EventsTab, "EVENTS_TAB", "EVENTS_TAB_DESC")
 
@@ -543,9 +543,9 @@ function EVENTS:SetTabText()
 	local n = EVENTS:GetNumUsedEvents()
 
 	if n > 0 then
-		EventsTab:SetText(L["EVENTS_TAB"] .. " |cFFFF5959(" .. n .. ")")
+		EventsTab:SetText(L["EVENTS_TAB"] .. ": |cFFFF5959" .. n)
 	else
-		EventsTab:SetText(L["EVENTS_TAB"] .. " (" .. n .. ")")
+		EventsTab:SetText(L["EVENTS_TAB"] .. ": 0")
 	end
 end
 TMW:RegisterCallback("TMW_CONFIG_LOADED", EVENTS, "SetTabText")

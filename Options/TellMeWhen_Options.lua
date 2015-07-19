@@ -486,7 +486,7 @@ function IE:OnInitialize()
 	IE.historyState = 0
 
 
-	IE.MainTab = TMW.Classes.IconEditorTab:NewTab("MAIN", 1, "Main")
+	IE.MainTab = TMW.IE:RegisterTab("ICON", "MAIN", "Main", 1)
 	IE.MainTab:SetText(TMW.L["MAIN"])
 	TMW:TT(IE.MainTab, "MAIN", "MAIN_DESC")
 	
@@ -802,46 +802,45 @@ end)
 
  
 
-
-
 TMW:NewClass("IconEditorTab", "Button"){
 	
-	NewTab = function(self, identifier, order, attachedFrame)
-		self:AssertSelfIsClass()
-		
-		TMW:ValidateType("2 (identifier)", "IconEditorTab:NewTab(identifier, order, attachedFrame)", identifier, "string")
-		TMW:ValidateType("3 (order)", "IconEditorTab:NewTab(identifier, order, attachedFrame)", order, "number")
-		TMW:ValidateType("4 (attachedFrame)", "IconEditorTab:NewTab(identifier, order, attachedFrame)", attachedFrame, "string")
-		
-		local tab = self:New("Button", "TellMeWhen_IconEditorTab" .. #IE.Tabs + 1, TellMeWhen_IconEditor, "CharacterFrameTabButtonTemplate")
-		
-		tab.doesIcon = 1
-		tab.doesGroup = 1
-	
-		tab.identifier = identifier
-		tab.order = order
-		tab.attachedFrame = attachedFrame
-		
-		IE.Tabs[#IE.Tabs + 1] = tab
-		tab:SetID(#IE.Tabs)
-		
-		TellMeWhen_IconEditor.numTabs = #IE.Tabs
-		
-		TMW:SortOrderedTables(IE.Tabs)
-		
-		
-		for id, tab in pairs(IE.Tabs) do
-			if id == 1 then
-				tab:SetPoint("BOTTOMLEFT", 0, -30)
-			else
-				tab:SetPoint("LEFT", IE.Tabs[id - 1], "RIGHT", IE.CONST.TAB_OFFS_X, 0)
-			end
-		end
-		
-		PanelTemplates_TabResize(tab, -6)
-				
-		return tab
+	AdjustWidth = function(self)
+		self:SetWidth(self.text:GetStringWidth() + 10)
 	end,
+
+	OnShow = function(self)
+		self:AdjustWidth()
+		self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
+	end,
+	OnHide = function(self)
+		self:SetWidth(TMW.IE.CONST.TAB_OFFS_X)
+	end,
+	
+	OnSizeChanged = function(self)
+		self:AdjustWidth()
+
+		IE:RefreshTabs()
+	end,
+
+	METHOD_EXTENSIONS = {
+		SetText = function(self, text)
+			self:AdjustWidth()
+		end,
+	},
+}
+
+TMW:NewClass("IconEditorTabPrimary", "IconEditorTab"){
+	
+	OnClick = function(self)
+		PlaySound("igCharacterInfoTab")
+
+		IE.CurrentTabGroup = self
+
+		IE:RefreshTabs()
+	end,
+}
+
+TMW:NewClass("IconEditorTabSecondary", "IconEditorTab"){
 	
 	OnClick = function(self)
 		if self.doesGroup and not CI.icon then
@@ -853,43 +852,49 @@ TMW:NewClass("IconEditorTab", "Button"){
 	end,
 	
 	ClickHandlerBase = function(self, frame)
-		-- invoke blizzard's tab click function to set the apperance of all the tabs
-		PanelTemplates_Tab_OnClick(self, self:GetParent())
 		PlaySound("igCharacterInfoTab")
 
-		-- hide all tabs' frames, including the current tab so that the OnHide and OnShow scripts fire
-		for _, tab in ipairs(IE.Tabs) do
-			local frame = tab.attachedFrame
-			if TellMeWhen_IconEditor.Panels[frame] then
-				TellMeWhen_IconEditor.Panels[frame]:Hide()
-			end
+		if IE.CurrentTabGroup ~= self.parent then
+			self.parent:Click()
 		end
-		IE.Panels.NotLoadedMessage:Hide()
+
+		-- hide all tabs' frames, including the current tab so that the OnHide and OnShow scripts fire
+		for _, panel in TMW:Vararg(TMW.IE.Panels:GetChildren()) do
+			panel:Hide()
+		end
 
 		local oldTab = IE.CurrentTab
 		
 		-- state the current tab.
 		-- this is used in many other places, including inside some OnShow scripts, so it MUST go before the :Show()s below
 		IE.CurrentTab = self
+		self.parent.lastTab = self
+
+		TMW.IE.tabs.sSelectedHorizontal:ClearAllPoints()
+		TMW.IE.tabs.sSelectedHorizontal:SetPoint("BOTTOMLEFT", self)
+		TMW.IE.tabs.sSelectedHorizontal:SetPoint("BOTTOMRIGHT", self)
 
 		-- show the selected tab's frame
 		if frame then
 			frame:Show()
 		end
-
-		-- show the icon editor
-		--IE:Show()
 		
-		TMW:Fire("TMW_CONFIG_TAB_CLICKED", IE.CurrentTab, oldTab)
+		TMW:Fire("TMW_CONFIG_TAB_CLICKED", self, oldTab)
+
+		IE:RefreshTabs()
 	end,
 	
 	ClickHandler = function(self)
-		local frame = TellMeWhen_IconEditor.Panels[self.attachedFrame]
+		local frame = TellMeWhen_IconEditor.Panels[self.panelKey]
 		if not frame then
-			TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(self.attachedFrame))
+			TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(self.panelKey))
 		end
 
 		self:ClickHandlerBase(frame)
+	end,
+
+	ShouldShowTab = function(self)
+		return true
 	end,
 
 	SetupHeader = function(self)
@@ -962,27 +967,146 @@ TMW:NewClass("IconEditorTab", "Button"){
 		self.doesIcon = doesIcon
 		self.doesGroup = doesGroup
 	end,
-	
 
-
-	OnShow = function(self)
-		PanelTemplates_TabResize(self, -6)
-		self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
-	end,
-	OnHide = function(self)
-		self:SetWidth(TMW.IE.CONST.TAB_OFFS_X)
-	end,
-	
-	OnSizeChanged = function(self)
-		PanelTemplates_TabResize(self, -6)
-	end,
-	
-	METHOD_EXTENSIONS = {
-		SetText = function(self, text)
-			PanelTemplates_TabResize(self, -6)
-		end,
-	}
 }
+
+
+
+
+IE.TabGroups = {}
+function IE:RegisterTabGroup(identifier, text, order)
+	local sig = "IE:RegisterTabGroup(identifier, text, order)"
+	TMW:ValidateType("2 (identifier)", sig, identifier, "string")
+	TMW:ValidateType("3 (text)",       sig, text,       "string")
+	TMW:ValidateType("4 (order)",      sig, order,      "number")
+	
+	local tab = TMW.C.IconEditorTabPrimary:New("Button", nil, TMW.IE.tabs.primary, "TellMeWhen_IE_Tab")
+	TMW.IE.tabs.primary[identifier] = tab
+
+	tab.identifier = identifier
+	tab.order = order
+	tab.tabs = {}
+
+	tab:SetText(text)
+
+	IE.TabGroups[#IE.TabGroups + 1] = tab
+
+	TMW:SortOrderedTables(IE.TabGroups)
+
+	for i, tab in ipairs(TMW.IE.tabs.primary) do
+		tab:Hide()
+	end
+	
+	for i = #IE.TabGroups, 1, -1 do
+		local tab = IE.TabGroups[i]
+
+		if i == #IE.TabGroups then
+			tab:SetPoint("RIGHT", -5)
+		else
+			tab:SetPoint("RIGHT", IE.TabGroups[i+1], "LEFT", -5, 0)
+		end
+		tab:Show()
+	end
+
+	--TMW.IE.tabs.primary:SetPoint("LEFT", IE.TabGroups[1], "LEFT", -5, 0)
+
+	return tab
+end
+
+function IE:RegisterTab(groupIdentifier, identifier, panelKey, order)
+	local sig = "IE:RegisterTab(groupIdentifier, identifier, panelKey, order)"
+	TMW:ValidateType("2 (groupIdentifier)", sig, groupIdentifier, "string")
+	TMW:ValidateType("3 (identifier)",      sig, identifier,      "string")
+	TMW:ValidateType("4 (panelKey)",        sig, panelKey,        "string")
+	TMW:ValidateType("5 (order)",           sig, order,           "number")
+
+	local tabGroup
+	for i, group in pairs(IE.TabGroups) do
+		if group.identifier == groupIdentifier then
+			tabGroup = group
+			break
+		end
+	end
+
+	if not tabGroup then
+		error("Could not find tab group registered with identifier " .. groupIdentifier)
+	end
+
+	local tab = TMW.C.IconEditorTabSecondary:New("Button", nil, TMW.IE.tabs.secondary, "TellMeWhen_IE_Tab")
+	TMW.IE.tabs.secondary[identifier] = tab
+	
+	tab:SetTitleComponents(1, 1)
+
+	tab.identifier = identifier
+	tab.panelKey = panelKey
+	tab.order = order
+	tab.parent = tabGroup
+
+	tabGroup.tabs[#tabGroup.tabs + 1] = tab
+
+	TMW:SortOrderedTables(tabGroup.tabs)
+
+	return tab
+end
+
+function IE:RefreshTabs()
+	local tabGroup = IE.CurrentTabGroup
+
+	if not tabGroup then
+		IE.TabGroups[1]:Click()
+		return
+	end
+
+	for i, tab in TMW:Vararg(TMW.IE.tabs.secondary:GetChildren()) do
+		tab:ClearAllPoints()
+		tab:Hide()
+	end
+
+	local endPadding = 6
+	local interPadding = 5
+	local width = endPadding*2 - interPadding -- This was derived using magic.
+	local lastTab
+	local firstShown
+	for i = 1, #tabGroup.tabs do
+		local tab = tabGroup.tabs[i]
+
+		if tab:ShouldShowTab() then
+			if not lastTab then
+				tab:SetPoint("LEFT", endPadding, 0)
+			else
+				tab:SetPoint("LEFT", lastTab, "RIGHT", interPadding, 0)
+			end
+			tab:SetPoint("TOP")
+			tab:SetPoint("BOTTOM")
+
+			lastTab = tab
+
+			tab:Show()
+			tab:SetFrameLevel(tab:GetParent():GetFrameLevel() + 3)
+			firstShown = firstShown or tab
+			width = width + tab:GetWidth() + interPadding
+		end
+	end
+
+
+	TMW.IE.tabs.secondary:SetWidth(width)
+
+	TMW.IE.tabs.pSelectedHorizontal:ClearAllPoints()
+	TMW.IE.tabs.pSelectedHorizontal:SetPoint("TOPLEFT", tabGroup)
+	TMW.IE.tabs.pSelectedHorizontal:SetPoint("TOPRIGHT", tabGroup)
+
+	if tabGroup.lastTab and tabGroup.lastTab:IsShown() then
+		if tabGroup.lastTab ~= IE.CurrentTab then
+			tabGroup.lastTab:Click()
+		end
+	elseif firstShown then
+		if firstShown ~= IE.CurrentTab then
+			firstShown:Click()
+		end
+	else
+		error("No tabs shown to click for primary tab " .. tabGroup.identifier)
+	end
+end
 
 
 function IE:OnUpdate()
@@ -1328,7 +1452,7 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		IE:PositionPanels()
 		
 		if CI.ics.Type == "" then
-			IE.Main.Type:SetText(L["ICONMENU_TYPE"])
+			IE.Panels.Main.Type:SetText(L["ICONMENU_TYPE"])
 		else
 			local Type = rawget(TMW.Types, CI.ics.Type)
 			if Type then

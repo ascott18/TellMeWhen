@@ -2074,20 +2074,25 @@
 
 
 
-	<Button name="TellMeWhen_IE_Tab_Primary" virtual="true">
+	<Button name="TellMeWhen_IE_Tab" virtual="true">
 		<Size x="50"/>
-
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString inherits="GameFontNormal" justifyH="CENTER" text="GROUP">
-					<Anchors>
-						<Anchor point="CENTER" />
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
+		<Anchors>
+			<Anchor point="TOP"/>
+			<Anchor point="BOTTOM"/>
+		</Anchors>
+		<ButtonText parentKey="text" justifyH="CENTER">
+			<Anchors>
+				<Anchor point="CENTER" />
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightFont style="GameFontHighlight"/>
 	</Button>
 	<Texture name="TellMeWhen_IE_Tab_PrimaryBorder" virtual="true">
+		<Size x="1" y="1" />
+		<Color r="0.150" g="0.150" b="0.150" a="1"/>
+	</Texture>
+	<Texture name="TellMeWhen_IE_Tab_SecondaryBorder" virtual="true">
 		<Size x="1" y="1" />
 		<Color r="0.353" g="0.353" b="0.353" a="1"/>
 	</Texture>
@@ -2309,7 +2314,7 @@
 			</EditBox>
 
 			<Frame parentKey="tabs">
-				<Size y="29" />
+				<Size y="33" />
 				<Anchors>
 					<Anchor point="LEFT" />
 					<Anchor point="RIGHT" />
@@ -2319,37 +2324,10 @@
 					<Frame parentKey="primary">
 						<Size x="130" />
 						<Anchors>
-							<Anchor point="TOPLEFT" y="-6"/>
+							<Anchor point="TOPRIGHT" y="-8" x="-10"/>
 							<Anchor point="BOTTOM" />
 						</Anchors>
-						<Frames>
 
-							<!-- PLACEHOLDERS -->
-							<Button inherits="TellMeWhen_IE_Tab_Primary" parentKey="tab1">
-								<Size x="50"/>
-
-								<Anchors>
-									<Anchor point="TOPLEFT" x="10"/>
-									<Anchor point="BOTTOM"/>
-								</Anchors>
-							</Button>
-							<Button inherits="TellMeWhen_IE_Tab_Primary" parentKey="tab2">
-								<Size x="50"/>
-
-								<Anchors>
-									<Anchor point="TOPLEFT" x="70"/>
-									<Anchor point="BOTTOM"/>
-								</Anchors>
-							</Button>
-							<Button inherits="TellMeWhen_IE_Tab_Primary" parentKey="tab3">
-								<Size x="50"/>
-
-								<Anchors>
-									<Anchor point="TOPLEFT" x="130"/>
-									<Anchor point="BOTTOM"/>
-								</Anchors>
-							</Button>
-						</Frames>
 						<Layers>
 							<Layer level="OVERLAY">
 							</Layer>
@@ -2358,38 +2336,10 @@
 					<Frame parentKey="secondary">
 						<Size x="200" />
 						<Anchors>
-							<Anchor point="LEFT" relativeKey="$parent.primary" relativePoint="RIGHT" x="100"/>
-							<Anchor point="TOP" y="-6"/>
+							<Anchor point="TOPLEFT" y="-8" x="10"/>
 							<Anchor point="BOTTOM" />
 						</Anchors>
-						<Frames>
 
-							<!-- PLACEHOLDERS -->
-							<Button inherits="TellMeWhen_IE_Tab_Primary" parentKey="tab1">
-								<Size x="50"/>
-
-								<Anchors>
-									<Anchor point="TOPLEFT" x="10"/>
-									<Anchor point="BOTTOM"/>
-								</Anchors>
-							</Button>
-							<Button inherits="TellMeWhen_IE_Tab_Primary" parentKey="tab2">
-								<Size x="50"/>
-
-								<Anchors>
-									<Anchor point="TOPLEFT" x="70"/>
-									<Anchor point="BOTTOM"/>
-								</Anchors>
-							</Button>
-							<Button inherits="TellMeWhen_IE_Tab_Primary" parentKey="tab3">
-								<Size x="50"/>
-
-								<Anchors>
-									<Anchor point="TOPLEFT" x="130"/>
-									<Anchor point="BOTTOM"/>
-								</Anchors>
-							</Button>
-						</Frames>
 						<Layers>
 							<Layer level="OVERLAY">
 								
@@ -2398,15 +2348,23 @@
 					</Frame>
 				</Frames>
 				<Layers>
-					<!-- BORDERS -->
+					<!-- Base background -->
+					<Layer level="ARTWORK" textureSubLevel="0">
+						<Texture >
+							<Color r="0.015686" g="0.015686" b="0.015686" a="1"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" />
+								<Anchor point="BOTTOMRIGHT" />
+							</Anchors>
+						</Texture>
+					</Layer>
+
+					<!-- PRIMARY TABS -->
 					<Layer level="ARTWORK" textureSubLevel="2">
 
 						<!-- Primary Selected horizontal -->
-						<Texture parentKey="pSelectedHorizontal" inherits="TellMeWhen_IE_Tab_PrimaryBorder">1"/>
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.primary.tab2"  />
-								<Anchor point="TOPRIGHT" relativeKey="$parent.primary.tab2"  />
-							</Anchors>
+						<Texture parentKey="pSelectedHorizontal" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+							<!-- Anchors will be set when a tab is selected. -->
 						</Texture>
 
 						<!-- Primary Left riser to selected tab -->
@@ -2414,14 +2372,6 @@
 							<Anchors>
 								<Anchor point="TOPRIGHT" relativeKey="$parent.pSelectedHorizontal" relativePoint="TOPLEFT" />
 								<Anchor point="BOTTOM"/>
-							</Anchors>
-						</Texture>
-
-						<!-- Primary Left horizontal -->
-						<Texture  inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="LEFT"/>
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.pLeftRiser" relativePoint="BOTTOMLEFT" />
 							</Anchors>
 						</Texture>
 
@@ -2433,11 +2383,19 @@
 							</Anchors>
 						</Texture>
 
-						<!-- Primary center horizontal -->
+						<!-- Primary RIGHT horizontal to end -->
 						<Texture inherits="TellMeWhen_IE_Tab_PrimaryBorder">
 							<Anchors>
 								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pRightRiser" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="RIGHT" relativeKey="$parent.secondary" relativePoint="BOTTOMLEFT" />
+								<Anchor point="RIGHT" />
+							</Anchors>
+						</Texture>
+
+						<!-- Primary center horizontal -->
+						<Texture inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.secondary" relativePoint="BOTTOMRIGHT" />
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.pLeftRiser" relativePoint="BOTTOMLEFT" />
 							</Anchors>
 						</Texture>
 
@@ -2446,7 +2404,7 @@
 						<Texture parentKey="pLeftRiser2" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
 							<Anchors>
 								<Anchor point="TOPLEFT" relativeKey="$parent.secondary" />
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.secondary" />
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.secondary"/>
 							</Anchors>
 						</Texture>
 
@@ -2466,27 +2424,48 @@
 							</Anchors>
 						</Texture>
 
-						<!-- Primary RIGHT horizontal to end -->
-						<Texture inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+						<!-- Primary Left horizontal -->
+						<Texture  inherits="TellMeWhen_IE_Tab_PrimaryBorder">
 							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pRightRiser2" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="RIGHT" />
+								<Anchor point="LEFT"/>
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.pLeftRiser2" relativePoint="BOTTOMLEFT" />
 							</Anchors>
 						</Texture>
 
+						<!-- Selected primary tab -->
+						<Texture>
+							<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pLeftRiser" relativePoint="BOTTOMRIGHT" />
+								<Anchor point="RIGHT" relativeKey="$parent.pRightRiser" relativePoint="LEFT" />
+								<Anchor point="TOP" relativeKey="$parent.pSelectedHorizontal" relativePoint="BOTTOM" />
+							</Anchors>
+						</Texture>
 
+					</Layer>
 
+					<!-- Secondary tabs background -->
+					<Layer level="ARTWORK" textureSubLevel="3">
+						<Texture>
+							<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pLeftRiser2" relativePoint="BOTTOMRIGHT" />
+								<Anchor point="RIGHT" relativeKey="$parent.pRightRiser2" relativePoint="LEFT" />
+								<Anchor point="TOP" relativeKey="$parent.pHorizontal2" relativePoint="BOTTOM" />
+							</Anchors>
+						</Texture>
+					</Layer>
+
+					<!-- SECONDARY TABS -->
+					<Layer level="ARTWORK" textureSubLevel="4">
 
 						<!-- Secondary Selected horizontal -->
-						<Texture parentKey="sSelectedHorizontal" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.secondary.tab2"  />
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.secondary.tab2"  />
-							</Anchors>
+						<Texture parentKey="sSelectedHorizontal" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
+							<!-- Anchors will be set when a tab is selected. -->
 						</Texture>
 
 						<!-- Secondary Left riser to selected tab -->
-						<Texture parentKey="sLeftRiser" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+						<Texture parentKey="sLeftRiser" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
 							<Anchors>
 								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.sSelectedHorizontal" relativePoint="BOTTOMLEFT" />
 								<Anchor point="TOP"/>
@@ -2494,7 +2473,7 @@
 						</Texture>
 
 						<!-- Secondary Left horizontal -->
-						<Texture  inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+						<Texture  inherits="TellMeWhen_IE_Tab_SecondaryBorder">
 							<Anchors>
 								<Anchor point="LEFT"/>
 								<Anchor point="TOPRIGHT" relativeKey="$parent.sLeftRiser" relativePoint="TOPLEFT" />
@@ -2502,7 +2481,7 @@
 						</Texture>
 
 						<!-- Secondary Right riser to selected tab -->
-						<Texture parentKey="sRightRiser" inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+						<Texture parentKey="sRightRiser" inherits="TellMeWhen_IE_Tab_SecondaryBorder">
 							<Anchors>
 								<Anchor point="BOTTOMLEFT" relativeKey="$parent.sSelectedHorizontal" relativePoint="BOTTOMRIGHT" />
 								<Anchor point="TOP"/>
@@ -2510,55 +2489,14 @@
 						</Texture>
 
 						<!-- Secondary Right horizontal -->
-						<Texture  inherits="TellMeWhen_IE_Tab_PrimaryBorder">
+						<Texture  inherits="TellMeWhen_IE_Tab_SecondaryBorder">
 							<Anchors>
 								<Anchor point="RIGHT"/>
 								<Anchor point="TOPLEFT" relativeKey="$parent.sRightRiser" relativePoint="TOPRIGHT" />
 							</Anchors>
 						</Texture>
-					</Layer>
 
-
-
-					<!-- BACKGROUNDS -->
-
-					<!-- Base background -->
-					<Layer level="ARTWORK" textureSubLevel="0">
-						<Texture >
-							<Color r="0.015686" g="0.015686" b="0.015686" a="1"/>
-							<Anchors>
-								<Anchor point="TOPLEFT" />
-								<Anchor point="BOTTOMRIGHT" />
-							</Anchors>
-						</Texture>
-					</Layer>
-
-					<!-- Secondary tabs -->
-					<Layer level="ARTWORK" textureSubLevel="1">
-						<Texture>
-							<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pLeftRiser2" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="RIGHT" relativeKey="$parent.pRightRiser2" relativePoint="LEFT" />
-								<Anchor point="TOP" relativeKey="$parent.pSelectedHorizontal" relativePoint="BOTTOM" />
-							</Anchors>
-						</Texture>
-					</Layer>
-
-					<!-- Selected primary tab -->
-					<Layer level="ARTWORK" textureSubLevel="3">
-						<Texture>
-							<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.pLeftRiser" relativePoint="BOTTOMRIGHT" />
-								<Anchor point="RIGHT" relativeKey="$parent.pRightRiser" relativePoint="LEFT" />
-								<Anchor point="TOP" relativeKey="$parent.pHorizontal2" relativePoint="BOTTOM" />
-							</Anchors>
-						</Texture>
-					</Layer>
-
-					<!-- Selected secondary tab -->
-					<Layer level="ARTWORK" textureSubLevel="4">
+						<!-- Selected secondary tab -->
 						<Texture>
 							<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
 							<Anchors>
@@ -2567,10 +2505,8 @@
 								<Anchor point="BOTTOM" relativeKey="$parent.sSelectedHorizontal" relativePoint="TOP" />
 							</Anchors>
 						</Texture>
-					</Layer>
 
-					<!-- IE background to bottom -->
-					<Layer level="ARTWORK" textureSubLevel="5">
+						<!-- IE background to bottom -->
 						<Texture>
 							<Color r="0.03529" g="0.03529" b="0.03529" a="1"/>
 							<Anchors>
@@ -2583,7 +2519,7 @@
 			</Frame>
 
 
-			<Frame parentKey="Panels" >
+			<Frame name="$parentPanels" parentKey="Panels" >
 				<Anchors>
 					<Anchor point="LEFT" />
 					<Anchor point="TOP" y="-23"/>
@@ -2599,7 +2535,7 @@
 								<Anchors>
 									<Anchor point="LEFT" x="7"/>
 									<Anchor point="TOP" y="-35"/>
-									<Anchor point="BOTTOM" y="3"/>
+									<Anchor point="BOTTOM" y="0"/>
 									<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
 								</Anchors>
 								<Scripts>
@@ -2614,7 +2550,7 @@
 								<Anchors>
 									<Anchor point="LEFT" relativePoint="TOP" x="5"/>
 									<Anchor point="TOP" y="-35"/>
-									<Anchor point="BOTTOM" y="3"/>
+									<Anchor point="BOTTOM" y="0"/>
 									<Anchor point="RIGHT" x="-9"/>
 								</Anchors>
 								<Scripts>
@@ -2768,8 +2704,8 @@
 						<Frames>
 							<Frame parentKey="content">
 								<Anchors>
-									<Anchor point="TOPLEFT" x="6" y="-11"/>
-									<Anchor point="BOTTOMRIGHT" x="-6" y="8"/>
+									<Anchor point="TOPLEFT" x="5" y="-4"/>
+									<Anchor point="BOTTOMRIGHT" x="-5" y="0"/>
 								</Anchors>
 							</Frame>
 							<CheckButton parentKey="SimpleGSTab" inherits="TellMeWhen_CheckTemplate" parent="TellMeWhen_IconEditor" hidden="true">
@@ -2826,8 +2762,8 @@
 
 									OnAcquire = function(self)
 										TMW.IE.MainOptionsWidget = self
-										self.frame:SetParent(TMW.IE)
-										self.frame:SetAllPoints()
+										--self.frame:SetParent(TMW.IE)
+										--self.frame:SetAllPoints()
 										self.frame:Show()
 									end,
 									OnRelease = function(self)
@@ -2894,10 +2830,15 @@
 		<Scripts>
 			<OnLoad>
 				self:SetFrameLevel(20)
-				
+
 				for k, v in pairs(self) do
 					TMW.IE[k] = v
 				end
+
+				-- TODO: put these in a nicer place.
+				TMW.IE:RegisterTabGroup("ICON", TMW.L["ICON"], 1)
+				TMW.IE:RegisterTabGroup("GROUP", TMW.L["GROUP"], 2)
+				TMW.IE:RegisterTabGroup("MAIN", TMW.L["MAIN"], 3)
 				
 				-- Needs to go before TellMeWhen_ChangelogDialog or else it will get hidden immediately after the changelog hides.
 				tinsert(UISpecialFrames, 1, self:GetName())

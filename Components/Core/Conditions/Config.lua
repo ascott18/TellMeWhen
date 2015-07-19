@@ -50,7 +50,7 @@ function CNDT:LoadConfig(conditionSetName)
 	
 	if ConditionSet.useDynamicTab then
 		if conditionSetName then
-			CNDT.DynamicConditionTab:Show()
+			TMW.IE:RefreshTabs()
 		
 			-- Only click the tab if we are manually loading the conditionSet (should only happen on user input/hardware event)
 			CNDT.DynamicConditionTab:ClickHandler()
@@ -65,7 +65,7 @@ function CNDT:LoadConfig(conditionSetName)
 			
 		end
 	else
-		CNDT.DynamicConditionTab:Hide()
+		TMW.IE:RefreshTabs()
 	end
 	
 	
@@ -90,7 +90,7 @@ function CNDT:LoadConfig(conditionSetName)
 		end
 	end
 	
-	local AddCondition = TellMeWhen_IconEditor.Conditions.Groups.AddCondition
+	local AddCondition = TellMeWhen_IconEditor.Panels.Conditions.Groups.AddCondition
 	AddCondition:SetPoint("TOPLEFT", CNDT[n+1])
 	AddCondition:SetPoint("TOPRIGHT", CNDT[n+1])
 	
@@ -107,35 +107,34 @@ end)
 
 -- Dynamic Conditions Tab handling
 
-CNDT.DynamicConditionTab = TMW.Classes.IconEditorTab:NewTab("CNDTDYN", 25, "Conditions")
+CNDT.DynamicConditionTab = TMW.IE:RegisterTab("ICON", "CNDTDYN", "Conditions", 25)
 CNDT.DynamicConditionTab:SetTitleComponents()
-CNDT.DynamicConditionTab:Hide()
+
+local tempHide = false
+CNDT.DynamicConditionTab.ShouldShowTab = function(self)
+	local ConditionSet = CNDT.CurrentConditionSet
+
+	if not tempHide
+	and ConditionSet
+	and ConditionSet.useDynamicTab
+	and ConditionSet.ShouldShowTab
+	and ConditionSet:ShouldShowTab() then
+		return true
+	end
+
+	return false
+end
 
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", function(event, icon)
 	if TMW.IE.CurrentTab == CNDT.DynamicConditionTab then
 		TMW.IE.MainTab:Click()
 	end
 end)
-TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, currentTab, oldTab)
-	if oldTab == CNDT.DynamicConditionTab then
-		CNDT.DynamicConditionTab:Hide()
-	end
-end)
 
-local f = CreateFrame("Frame")
-f:SetScript("OnUpdate", function()	
-	local CurrentConditionSet = CNDT.CurrentConditionSet
-	
-	if CurrentConditionSet and CurrentConditionSet.useDynamicTab and CurrentConditionSet.ShouldShowTab then
-		if not CurrentConditionSet:ShouldShowTab() then
-			if TMW.IE.CurrentTab == CNDT.DynamicConditionTab then
-				TMW.IE.MainTab:Click()
-			else
-				CNDT.DynamicConditionTab:Hide()
-			end
-		end
-	else
-		CNDT.DynamicConditionTab:Hide()
+TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, currentTab, oldTab)
+	tempHide = false
+	if oldTab == CNDT.DynamicConditionTab and currentTab ~= CNDT.DynamicConditionTab then
+		tempHide = true
 	end
 end)
 
@@ -166,7 +165,7 @@ function CNDT:GetTabText(conditionSetName)
 		TMW.HELP:Show{
 			code = "CNDT_PARENTHESES_ERROR",
 			icon = nil,
-			relativeTo = TellMeWhen_IconEditor.Conditions,
+			relativeTo = TellMeWhen_IconEditor.Panels.Conditions,
 			x = 0,
 			y = 0,
 			text = format(errorMessage)
@@ -177,9 +176,9 @@ function CNDT:GetTabText(conditionSetName)
 
 	if n > 0 then
 		local prefix = (not parenthesesAreValid and "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t|cFFFF0000" or "")
-		return prefix .. tabText .. " |cFFFF5959(" .. n .. ")"
+		return prefix .. tabText .. ": |cFFFF5959" .. n
 	else
-		return tabText .. " (" .. n .. ")"
+		return tabText .. ": 0"
 	end
 end
 
@@ -567,7 +566,7 @@ CNDT.colors = setmetatable(
 end})
 
 function CNDT:ColorizeParentheses()
-	if not TellMeWhen_IconEditor.Conditions:IsShown() then return end
+	if not TellMeWhen_IconEditor.Panels.Conditions:IsShown() then return end
 
 	CNDT.Parens = wipe(CNDT.Parens or {})
 
@@ -640,7 +639,7 @@ function CNDT:CreateGroups(num)
 	local start = #CNDT + 1
 
 	for i=start, num do
-		TMW.Classes.CndtGroup:New("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
+		TMW.Classes.CndtGroup:New("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Panels.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
 	end
 end
 

@@ -1710,6 +1710,7 @@ L["ICONGROUP"] = "Icon: %s (Group: %s)"
 L["fGROUP"] = "Group: %s"
 L["fICON"] = "Icon: %s"
 L["ICON"] = "Icon"
+L["GROUP"] = "Group" --TODO: add translations for this to all locales
 L["DISABLED"] = "Disabled"
 L["COPYPOSSCALE"] = "Copy position/scale only"
 L["COPYGROUP"] = "Copy Group"
@@ -1748,7 +1749,7 @@ L["IE_SIMPLEGS_DESC"] = [[Check to display TMW's full main options in this tab.
 Uncheck to only display the options of the group of the currently loaded icon in this tab.]]
 
 L["GROUPADDONSETTINGS"] = "Group Settings"
-L["GROUPADDONSETTINGS_DESC"] = [[Configure settings for this group, other groups, and all other general addon settings.]]
+L["GROUPADDONSETTINGS_DESC"] = [[Configure settings for other groups, and all other general addon settings.]]
 L["GROUPSETTINGS_DESC"] = [[Configure settings for this group.]]
 L["CONDITIONS"] = "Conditions"
 L["ICONCONDITIONS_DESC"] = "Configure conditions that allow you to fine-tune when this icon is shown."

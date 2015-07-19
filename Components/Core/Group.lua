@@ -71,7 +71,7 @@ do	-- TMW.CNDT implementation
 	})
 	
 	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-		tab = TMW.Classes.IconEditorTab:NewTab("CNDTGROUP", 15, "Conditions")
+		tab = TMW.IE:RegisterTab("GROUP", "CNDTGROUP", "Conditions", 15)
 		tab:SetTitleComponents(nil, 1)
 		
 		tab:PostHookMethod("ClickHandler", function()

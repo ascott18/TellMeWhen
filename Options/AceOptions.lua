@@ -23,77 +23,47 @@ local IE = TMW.IE
 local LSM = LibStub("LibSharedMedia-3.0")
 
 
-local tab
+
 
 local ACEOPTIONS = TMW:NewModule("IEOptTab", "AceEvent-3.0")
 TMW.ACEOPTIONS = ACEOPTIONS
 
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	IE.MainOptionsTab = TMW.Classes.IconEditorTab:NewTab("GROUPOPTS", 20, "MainOptions")
-	tab = IE.MainOptionsTab
-	ACEOPTIONS.tab = tab
+	IE.MainOptionsTab = TMW.IE:RegisterTab("MAIN", "MAINOPTS", "MainOptions", 20)
 
-	tab:SetTitleComponents(false, false)
-	tab:SetText(TMW.L["GROUPADDONSETTINGS"])
-	TMW:TT(tab, "GROUPADDONSETTINGS", "GROUPADDONSETTINGS_DESC")
+	IE.MainOptionsTab:SetTitleComponents(false, false)
+	IE.MainOptionsTab:SetText(TMW.L["UIPANEL_MAINOPT"])
+	TMW:TT(IE.MainOptionsTab, "UIPANEL_MAINOPT", "GROUPADDONSETTINGS_DESC")
 	
-	tab:PostHookMethod("ClickHandler", function(self)
+	IE.MainOptionsTab:PostHookMethod("ClickHandler", function(self)
 		TMW.ACEOPTIONS:CompileOptions()
 
-		local app = "TMWIEMain"
-		if IE.db.global.SimpleGSTab then
-			app = "TMWIEGroup"
-		end
+		LibStub("AceConfigDialog-3.0"):Open("TMWIEMain", TMW.IE.MainOptionsWidget)
 
-		LibStub("AceConfigDialog-3.0"):Open(app, TMW.IE.MainOptionsWidget)
+		IE.Panels.MainOptions:SetScale(0.75)
+		IE.MainOptionsTab:SetTitleComponents(false, false)
+	end)
+
+
+	IE.GroupOptionsTab = TMW.IE:RegisterTab("GROUP", "GROUPOPTS", "MainOptions", 1)
+
+	IE.GroupOptionsTab:SetTitleComponents(false, false)
+	IE.GroupOptionsTab:SetText(TMW.L["GROUPADDONSETTINGS"])
+	TMW:TT(IE.GroupOptionsTab, "GROUPADDONSETTINGS", "GROUPSETTINGS_DESC")
+	
+	IE.GroupOptionsTab:PostHookMethod("ClickHandler", function(self)
+		TMW.ACEOPTIONS:CompileOptions()
+
+		LibStub("AceConfigDialog-3.0"):Open("TMWIEGroup", TMW.IE.MainOptionsWidget)
+
+		IE.Panels.MainOptions:SetScale(1)
+		IE.GroupOptionsTab:SetTitleComponents(false, true)
 		
 		if TMW.CI.group then
-			ACEOPTIONS:LoadConfigGroup(app, TMW.CI.group)
-		end
-
-		self:OnUpdate()
-	end)
-		
-	tab:PostHookMethod("SetupHeader", function(self)
-		if IE.CurrentTab == tab then
-			IE.Header:SetPoint("LEFT", IE.SimpleGSTab.text, "RIGHT", 4, 0)
+			ACEOPTIONS:LoadConfigGroup("TMWIEGroup", TMW.CI.group)
 		end
 	end)
-	
-	function tab:OnUpdate()
-		if IE.CurrentTab == self then
-			IE.SimpleGSTab:Show()
-		else
-			IE.SimpleGSTab:Hide()
-		end
-
-		if IE.MainOptionsWidget then
-			if IE.MainOptionsWidget.userdata.appName == "TMWIEGroup" then
-				IE.MainOptions:SetScale(1.03)
-				tab:SetTitleComponents(false, true)
-			else
-				IE.MainOptions:SetScale(0.75)
-				tab:SetTitleComponents(false, false)
-			end
-
-			if not IE.db.global.SimpleGSTab or (IE.MainOptionsWidget.userdata.appName == "TMWIEMain" and IE.MainOptions:IsVisible()) then
-				tab:SetText(TMW.L["UIPANEL_MAINOPT"])
-				TMW:TT(tab, "UIPANEL_MAINOPT", "GROUPADDONSETTINGS_DESC")
-			elseif IE.db.global.SimpleGSTab and (IE.MainOptionsWidget.userdata.appName == "TMWIEGroup" or not IE.MainOptions:IsVisible()) then
-				tab:SetText(TMW.L["GROUPADDONSETTINGS"])
-				TMW:TT(tab, "GROUPADDONSETTINGS", "GROUPSETTINGS_DESC")
-			else
-				tab:SetText(TMW.L["GROUPADDONSETTINGS"])
-				TMW:TT(tab, "GROUPADDONSETTINGS", "GROUPADDONSETTINGS_DESC")
-			end
-		elseif IE.db.global.SimpleGSTab then
-			-- We haven't visited the tab yet.
-			TMW:TT(tab, "GROUPADDONSETTINGS", "GROUPSETTINGS_DESC")
-		end
-	end
-
-	tab:HookScript("OnUpdate", tab.OnUpdate)
 end)
 
 function ACEOPTIONS:LoadConfigGroup(info, group)
@@ -122,7 +92,7 @@ function ACEOPTIONS:NotifyChanges()
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMWStandalone")
 
 	-- Notify the group settings tab in the icon editor of any changes
-	if IE.MainOptionsWidget and TMW.IE.MainOptionsWidget:GetUserDataTable().appName and IE.MainOptions:IsShown() then
+	if IE.MainOptionsWidget and IE.MainOptionsWidget:GetUserDataTable().appName and IE.Panels.MainOptions:IsShown() then
 		-- :Open() is used instead of :NotifyChanges because :NotifyChanges() only works for standalone ACD windows.
 		LibStub("AceConfigDialog-3.0"):Open(IE.MainOptionsWidget:GetUserDataTable().appName, IE.MainOptionsWidget)
 	end

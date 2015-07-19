@@ -318,7 +318,7 @@
 		</Anchors>
 	</Slider>
 
-	<Frame name="TellMeWhen_EventContainer" parent="TellMeWhen_IconEditorEvents" hidden="true" virtual="true">
+	<Frame name="TellMeWhen_EventContainer" parent="TellMeWhen_IconEditorPanelsEvents" hidden="true" virtual="true">
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="16" y="0"/>
 			<Anchor point="RIGHT"/>
@@ -352,12 +352,7 @@
 	</Frame>
 
 	
-	<Frame name="$parentEvents" parent="TellMeWhen_IconEditor" setAllPoints="true" parentKey="Events">
-		<Anchors>
-			<Anchor point="TOPLEFT" y="-26"/>
-			<Anchor point="BOTTOMRIGHT" y="26"/>
-		</Anchors>
-		
+	<Frame name="$parentEvents" parent="TellMeWhen_IconEditorPanels" setAllPoints="true" parentKey="Events">		
 		<Frames>					
 			<Frame name="$parentEventHandlerFrames" parentKey="EventHandlerFrames">
 				<Size x="210" y="10"/>
