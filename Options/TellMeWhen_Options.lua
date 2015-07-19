@@ -845,9 +845,9 @@ TMW:NewClass("IconEditorTab", "Button"){
 	
 	OnClick = function(self)
 		if self.doesGroup and not CI.icon then
-			self:ClickHandlerBase(IE.NotLoadedMessage)
+			self:ClickHandlerBase(IE.Panels.NotLoadedMessage)
 		else
-			IE.NotLoadedMessage:Hide()
+			IE.Panels.NotLoadedMessage:Hide()
 			self:ClickHandler()
 		end
 	end,
@@ -860,11 +860,11 @@ TMW:NewClass("IconEditorTab", "Button"){
 		-- hide all tabs' frames, including the current tab so that the OnHide and OnShow scripts fire
 		for _, tab in ipairs(IE.Tabs) do
 			local frame = tab.attachedFrame
-			if TellMeWhen_IconEditor[frame] then
-				TellMeWhen_IconEditor[frame]:Hide()
+			if TellMeWhen_IconEditor.Panels[frame] then
+				TellMeWhen_IconEditor.Panels[frame]:Hide()
 			end
 		end
-		IE.NotLoadedMessage:Hide()
+		IE.Panels.NotLoadedMessage:Hide()
 
 		local oldTab = IE.CurrentTab
 		
@@ -884,7 +884,7 @@ TMW:NewClass("IconEditorTab", "Button"){
 	end,
 	
 	ClickHandler = function(self)
-		local frame = TellMeWhen_IconEditor[self.attachedFrame]
+		local frame = TellMeWhen_IconEditor.Panels[self.attachedFrame]
 		if not frame then
 			TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(self.attachedFrame))
 		end
@@ -1121,7 +1121,7 @@ function IE:PositionPanels()
 	
 	TMW:SortOrderedTables(panelList)
 	
-	local ParentLeft, ParentRight = TellMeWhen_IconEditorMainPanelsLeft, TellMeWhen_IconEditorMainPanelsRight
+	local ParentLeft, ParentRight = TellMeWhen_IconEditor.Panels.Main.PanelsLeft, TellMeWhen_IconEditor.Panels.Main.PanelsRight
 	for i = 1, #ParentLeft do
 		ParentLeft[i] = nil
 	end
@@ -1246,8 +1246,8 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 			end
 			
 			if ic_old ~= CI.icon then
-				IE.Main.PanelsLeft.ScrollFrame:SetVerticalScroll(0)
-				IE.Main.PanelsRight.ScrollFrame:SetVerticalScroll(0)
+				IE.Panels.Main.PanelsLeft.ScrollFrame:SetVerticalScroll(0)
+				IE.Panels.Main.PanelsRight.ScrollFrame:SetVerticalScroll(0)
 			end
 
 
@@ -1332,9 +1332,9 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		else
 			local Type = rawget(TMW.Types, CI.ics.Type)
 			if Type then
-				IE.Main.Type:SetText(Type.name)
+				IE.Panels.Main.Type:SetText(Type.name)
 			else
-				IE.Main.Type:SetText(CI.ics.Type .. ": UNKNOWN TYPE")
+				IE.Panels.Main.Type:SetText(CI.ics.Type .. ": UNKNOWN TYPE")
 			end
 		end
 
