@@ -94,9 +94,11 @@ Formatter:MakeInstancesWeak()
 
 -- Some commonly used formatters.
 Formatter{
+	NONE = Formatter:New(TMW.NULLFUNC),
 	PASS = Formatter:New(tostring),
 
 
+	F_0 = Formatter:New("%.0f"),
 	F_1 = Formatter:New("%.1f"),
 	F_2 = Formatter:New("%.2f"),
 
@@ -131,6 +133,10 @@ Formatter{
 		if abs(seconds) == math.huge then
 			return tostring(seconds)
 		end
+
+		if seconds < 0 then
+			error("This function doesn't support negative seconds")
+		end
 		
 		local y =  seconds / 31556925
 		local d = (seconds % 31556925) / 86400
@@ -157,6 +163,10 @@ Formatter{
 	TIME_YDHMS = Formatter:New(function(seconds)
 		if abs(seconds) == math.huge then
 			return tostring(seconds)
+		end
+
+		if seconds < 0 then
+			error("This function doesn't support negative seconds")
 		end
 		
 		local y =  seconds / 31556926

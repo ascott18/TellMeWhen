@@ -68,13 +68,7 @@ View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
 	Module.texture:SetAllPoints(icon)
 end)
 
-View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, group)
-	if TMW.Locked or group.Locked then
-		Module:Disable()
-	else
-		Module:Enable()
-	end
-end)
+View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, true)
 <</code>>
 
 The first two modules we implemented don't require any sort of special handling - just implement them and forget about them. As mentioned earlier, {{{IconModule_Texts}}} does require that the {{{TextLayout}}} setting in the IV's {{{SettingsPerView}}} table for group defaults refer to a valid text layout.
@@ -178,13 +172,7 @@ View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
 	Module.texture:SetAllPoints(icon)
 end)
 
-View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, function(Module, group)
-	if TMW.Locked or group.Locked then
-		Module:Disable()
-	else
-		Module:Enable()
-	end
-end)
+View:ImplementsModule("GroupModule_Resizer_ScaleY_SizeX", 10, true)
 
 function View:Icon_Setup(icon)
 	local group = icon.group

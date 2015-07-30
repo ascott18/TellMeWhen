@@ -21,11 +21,11 @@
 				<Texture parentKey="Background" setAllPoints="true"/>
 			</Layer>
 			<Layer level="OVERLAY">
-				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormalSmall" justifyH="CENTER" alpha="1">
+				<FontString parentKey="Header" inherits="GameFontNormalSmall" justifyH="CENTER" alpha="1">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="0"/>
-						<Anchor point="LEFT" x="1" />
-						<Anchor point="RIGHT" x="-1" />
+				<!-- 		<Anchor point="LEFT" x="1" />
+						<Anchor point="RIGHT" x="-1" /> -->
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -35,7 +35,7 @@
 	<Frame name="TellMeWhen_ChooseName" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<!-- <Size y="50"/> -->
 		<Frames>
-			<EditBox name="$parentName" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="Name" autoFocus="false">
+			<EditBox inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="Name" autoFocus="false">
 				<Size x="545" y="15"/>
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
@@ -44,7 +44,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
-						<FontString name="$parentFS1" inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
+						<FontString inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="RIGHT" x="19" y="-1"/>
 							</Anchors>
@@ -212,7 +212,7 @@
 	
 	<Frame name="TellMeWhen_Unit" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Frames>
-			<EditBox name="$parentUnit" inherits="TellMeWhen_UnitEditBox" parentKey="Unit">
+			<EditBox inherits="TellMeWhen_UnitEditBox" parentKey="Unit">
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="LEFT" x="9" />
@@ -310,9 +310,7 @@
 			<Button name="$parentUnitConditions" parentKey="UnitConditions" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="160" y="16"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentUnit" relativePoint="BOTTOM" y="-7"/>
-					<!-- <Anchor point="LEFT" relativeTo="$parentUnit" x="-1"/>
-					<Anchor point="RIGHT" relativeTo="$parentUnit" x="1"/> -->
+					<Anchor point="TOP" relativeKey="$parent.Unit" relativePoint="BOTTOM" y="-7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -509,7 +507,7 @@
 		<Size y="78"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentFS1" inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
+				<FontString inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="-10" y="10"/>
 					</Anchors>
@@ -517,7 +515,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame name="$parentAlpha" inherits="TellMeWhen_WhenCheckSet">
+			<Frame parentKey="Alpha" inherits="TellMeWhen_WhenCheckSet">
 				<Anchors>
 					<Anchor point="TOP" y="-6"/>
 					<Anchor point="LEFT" />
@@ -532,9 +530,9 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentUnAlpha" inherits="TellMeWhen_WhenCheckSet">
+			<Frame parentKey="UnAlpha" inherits="TellMeWhen_WhenCheckSet">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentAlpha" relativePoint="BOTTOM" y="1"/>
+					<Anchor point="TOP" relativeKey="$parent.Alpha" relativePoint="BOTTOM" y="1"/>
 					<Anchor point="LEFT" />
 					<Anchor point="RIGHT" />
 				</Anchors>
@@ -921,20 +919,20 @@
 
 		<HitRectInsets left="-1" right="-1" top="-1" bottom="-1" />
 		<TextInsets>
-			<AbsInset left="2" right="2" top="2" bottom="2"/>
+			<AbsInset left="4" right="2" top="2" bottom="2"/>
 		</TextInsets>
 		<Layers>
 			<Layer level="BACKGROUND">
 				
 				<Texture parentKey="borderTop" inherits="TellMeWhen_InputBoxTemplateBorder">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="-2"/>
+						<Anchor point="TOPLEFT" x="0"/>
 						<Anchor point="TOPRIGHT"/>
 					</Anchors>
 				</Texture>
 				<Texture parentKey="borderBottom" inherits="TellMeWhen_InputBoxTemplateBorder">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="-2" y="-1"/>
+						<Anchor point="BOTTOMLEFT" x="0" y="-1"/>
 						<Anchor point="BOTTOMRIGHT" y="-1"/>
 					</Anchors>
 				</Texture>
@@ -1105,7 +1103,7 @@
 			<Layer level="ARTWORK">
 				<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
 					<Anchors>
-						<Anchor point="BOTTOM" relativePoint="TOP" y="-1"/>
+						<Anchor point="BOTTOM" relativePoint="TOP" y="-2"/>
 						<Anchor point="LEFT" x="-5"/>
 						<Anchor point="RIGHT" x="5"/>
 					</Anchors>
@@ -1200,6 +1198,137 @@
 		</Frames>
 	</Button>
 
+
+	<Button name="TellMeWhen_PointTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="isSelected" type="boolean" value="false"/>
+		</KeyValues>
+
+		<Layers>
+			<Layer level="ARTWORK" textureSubLevel="1">
+				<Texture setAllPoints="true">
+					<Color r="0.3" g="0.3" b="0.3"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="1" y="-1"/>
+						<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="2">
+				<Texture setAllPoints="true">
+					<Color r="0.02" g="0.02" b="0.02"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="2" y="-2"/>
+						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+
+			<Layer level="OVERLAY">
+				<Texture parentKey="selectedTexture" hidden="true">
+					<Color r="1.0" g="0.82" b="0" a="0.8"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="2" y="-2"/>
+						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+
+		<Scripts>
+			<OnLoad>
+				TMW:TT(self, point, nil)
+			</OnLoad>
+			<OnClick>
+				self:GetParent():SelectChild(self)
+			</OnClick>
+		</Scripts>
+	</Button>
+
+	<Frame name="TellMeWhen_PointSelectTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_PointSelect"/>
+		</KeyValues>
+
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString parentKey="Header" inherits="GameFontHighlightSmall" justifyH="CENTER" alpha="1">
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+
+		<Frames>
+			<Button parentKey="CENTER" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="CENTER"/>
+				</Anchors>
+			</Button>
+
+			<Button parentKey="TOPLEFT" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.CENTER" relativePoint="TOPLEFT"/>
+				</Anchors>
+			</Button>
+
+			<Button parentKey="TOPRIGHT" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="TOPRIGHT"/>
+					<Anchor point="BOTTOMLEFT" relativeKey="$parent.CENTER" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Button>
+
+			<Button parentKey="BOTTOMLEFT" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.CENTER" relativePoint="BOTTOMLEFT"/>
+				</Anchors>
+			</Button>
+
+			<Button parentKey="BOTTOMRIGHT" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.CENTER" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+
+
+			<Button parentKey="LEFT" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="LEFT"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.CENTER" relativePoint="TOPLEFT"/>
+					<Anchor point="RIGHT" relativeKey="$parent.CENTER" relativePoint="BOTTOMLEFT"/>
+				</Anchors>
+			</Button>
+
+			<Button parentKey="RIGHT" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="RIGHT"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.CENTER" relativePoint="TOPRIGHT"/>
+					<Anchor point="BOTTOMLEFT" relativeKey="$parent.CENTER" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+
+			<Button parentKey="BOTTOM" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="BOTTOM"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.CENTER" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.CENTER" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+
+			<Button parentKey="TOP" inherits="TellMeWhen_PointTemplate">
+				<Anchors>
+					<Anchor point="TOP"/>
+					<Anchor point="BOTTOMLEFT" relativeKey="$parent.CENTER" relativePoint="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.CENTER" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Button>
+		</Frames>
+	</Frame>
 
 
 	<EditBox name="TellMeWhen_ExportBoxTemplate" inherits="TellMeWhen_InputBoxTemplate" virtual="true">
@@ -2089,14 +2218,36 @@
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
 	</Button>
+
 	<Texture name="TellMeWhen_IE_Tab_PrimaryBorder" virtual="true">
 		<Size x="1" y="1" />
 		<Color r="0.150" g="0.150" b="0.150" a="1"/>
 	</Texture>
+
 	<Texture name="TellMeWhen_IE_Tab_SecondaryBorder" virtual="true">
 		<Size x="1" y="1" />
 		<Color r="0.353" g="0.353" b="0.353" a="1"/>
 	</Texture>
+
+	<Frame name="TellMeWhen_IE_PanelColumn" virtual="true">
+		<Anchors>
+			<Anchor point="LEFT" x="7"/>
+			<Anchor point="TOP" y="-35"/>
+			<Anchor point="BOTTOM" y="0"/>
+			<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
+		</Anchors>
+		<Scripts>
+			<OnLoad>
+				local parent = self:GetParent()
+				parent.panelColumns = parent.panelColumns or {}
+				self.currentPanels = {}
+				tinsert(parent.panelColumns, self)
+
+				TMW:ConvertContainerToScrollFrame(self, true, 1, 5)
+				self.ScrollFrame.scrollPercentage = 1/3
+			</OnLoad>
+		</Scripts>
+	</Frame>
 
 
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG" inherits="TellMeWhen_SimpleDialog">
@@ -2533,50 +2684,34 @@
 			<Frame name="$parentPanels" parentKey="Panels" >
 				<Anchors>
 					<Anchor point="LEFT" />
-					<Anchor point="TOP" y="-23"/>
+					<Anchor point="TOP" relativeKey="$parent.HeaderBackground" relativePoint="BOTTOM"/>
 					<Anchor point="RIGHT" />
-					<Anchor point="BOTTOM" relativeKey="$parent.tabs" relativePoint="TOP" y="5"/>
+					<Anchor point="BOTTOM" relativeKey="$parent.tabs" relativePoint="TOP" y="1"/>
 				</Anchors>
 				
 				<Frames>
 					<Frame parentKey="Main" hidden="true" setAllPoints="true">
 						<Frames>
 							
-							<Frame name="$parentPanelsLeft" parentKey="PanelsLeft">
+							<Frame inherits="TellMeWhen_IE_PanelColumn" parentKey="PanelsLeft">
 								<Anchors>
 									<Anchor point="LEFT" x="7"/>
-									<Anchor point="TOP" y="-35"/>
-									<Anchor point="BOTTOM" y="0"/>
 									<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
 								</Anchors>
-								<Scripts>
-									<OnLoad>
-										TMW:ConvertContainerToScrollFrame(self, true, 1, 5)
-										self.ScrollFrame.scrollPercentage = 1/3
-									</OnLoad>
-								</Scripts>
 							</Frame>
 							
-							<Frame name="$parentPanelsRight" parentKey="PanelsRight">
+							<Frame inherits="TellMeWhen_IE_PanelColumn" parentKey="PanelsRight">
 								<Anchors>
 									<Anchor point="LEFT" relativePoint="TOP" x="5"/>
-									<Anchor point="TOP" y="-35"/>
-									<Anchor point="BOTTOM" y="0"/>
 									<Anchor point="RIGHT" x="-9"/>
 								</Anchors>
-								<Scripts>
-									<OnLoad>
-										TMW:ConvertContainerToScrollFrame(self, true, 1, 5)
-										self.ScrollFrame.scrollPercentage = 1/3
-									</OnLoad>
-								</Scripts>
 							</Frame>
 						
 							<Frame name="$parentType" inherits="TMW_DropDownMenuTemplate" parentKey="Type">
 								<Anchors>
 									<Anchor point="TOP" y="-6"/>
-									<Anchor point="LEFT" relativeTo="$parentPanelsLeft" x="7" />
-									<Anchor point="RIGHT" relativeTo="$parentPanelsLeft" x="-7" />
+									<Anchor point="LEFT" relativeKey="$parent.PanelsLeft" x="7" />
+									<Anchor point="RIGHT" relativeKey="$parent.PanelsLeft" x="-7" />
 								</Anchors>
 								<Scripts>
 									<OnLoad>
@@ -2649,6 +2784,14 @@
 						<Scripts>
 							<OnLoad>
 								self:RegisterForDrag("LeftButton")
+
+								function self:GetSettingTable()
+									return TMW.CI.ics
+								end
+								
+								function self:OnSettingSaved()
+									return TMW.IE:ScheduleIconSetup()
+								end
 							</OnLoad>
 							<OnReceiveDrag>
 								TMW.IE:SpellItemToIcon(TMW.CI.icon)
@@ -2656,6 +2799,44 @@
 							<OnMouseUp>
 								TMW.IE:SpellItemToIcon(TMW.CI.icon)
 							</OnMouseUp>
+							<OnDragStart>
+								TMW.IE:StartMoving()
+							</OnDragStart>
+							<OnDragStop>
+								TMW.IE:StopMovingOrSizing()
+							</OnDragStop>
+						</Scripts>
+					</Frame>
+
+					<Frame parentKey="GroupMain" hidden="true" setAllPoints="true">
+						<Frames>
+							
+							<Frame inherits="TellMeWhen_IE_PanelColumn" parentKey="PanelsLeft">
+								<Anchors>
+									<Anchor point="LEFT" x="7"/>
+									<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
+								</Anchors>
+							</Frame>
+							
+							<Frame inherits="TellMeWhen_IE_PanelColumn" parentKey="PanelsRight">
+								<Anchors>
+									<Anchor point="LEFT" relativePoint="TOP" x="5"/>
+									<Anchor point="RIGHT" x="-9"/>
+								</Anchors>
+							</Frame>							
+						</Frames>
+						<Scripts>
+							<OnLoad>
+								self:RegisterForDrag("LeftButton")
+
+								function self:GetSettingTable()
+									return TMW.CI.gs
+								end
+
+								function self:OnSettingSaved()
+									return TMW.CI.group:Setup()
+								end
+							</OnLoad>
 							<OnDragStart>
 								TMW.IE:StartMoving()
 							</OnDragStart>

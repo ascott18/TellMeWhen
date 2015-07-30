@@ -467,24 +467,6 @@ TMW.GroupConfigTemplate = {
 			name = L["UIPANEL_POSITION"],
 			desc = L["UIPANEL_POSITION_DESC"],
 			args = {
-				lock = {
-					name = L["UIPANEL_LOCK"],
-					desc = L["UIPANEL_LOCK_DESC"],
-					type = "toggle",
-					order = 40,
-					set = function(info, val)
-						local group = FindGroupFromInfo(info)
-
-						group:GetSettings().Locked = val
-				
-						group:Setup()
-					end,
-					get = function(info)
-						local group = FindGroupFromInfo(info)
-
-						return group:GetSettings().Locked
-					end
-				},
 			},
 		},
 	}

@@ -77,6 +77,7 @@ local RelevantToAll = {
 
 local IconType = TMW:NewClass("IconType", "IconComponent")
 IconType.UsedAttributes = {}
+IconType.DefaultPanelColumnIndex = 1
 
 --- Constructor - Creates a new IconType
 -- @name IconType:New
@@ -494,7 +495,7 @@ function IconType:IsAllowedByView(viewName)
 	end
 end
 
-IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_IsViewAllowed", function(self)
+local panelInfo = IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_IsViewAllowed", function(self)
 	self.Header:SetText(L["ICONMENU_VIEWREQ"])
 
 	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -507,10 +508,10 @@ IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_IsViewAllowed", func
 	self:SetScript("OnSizeChanged", function()
 		self:SetHeight(self.text:GetStringHeight() + 20)
 	end)
-	self.ShouldShow = function(self)
-		return not TMW.CI.icon.typeData:IsAllowedByView(TMW.CI.group.View)
-	end
 end)
+function panelInfo:ShouldShow()
+	return not TMW.CI.icon.typeData:IsAllowedByView(TMW.CI.group.View)
+end
 
 
 -- [REQUIRED IF USED, FALLBACK]

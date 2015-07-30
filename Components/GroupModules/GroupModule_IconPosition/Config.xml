@@ -1,0 +1,66 @@
+<Ui>
+
+	<Frame name="TellMeWhen_GM_IconPosition" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="40"/>
+		<Frames>
+			<Slider parentKey="X" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="10" y="-13"/>
+					<Anchor point="RIGHT" relativePoint="TOP" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_ICONSPACINGX"],
+							tooltip = TMW.L["UIPANEL_ICONSPACING_DESC"],
+							setting = "SpacingX",
+							min = -100,
+							max = 100,
+							range = 10,
+							step = 0.1,
+							wheelStep = 1,
+						})
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+			<Slider parentKey="Y" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.X" />
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="LEFT" relativePoint="TOP" x="10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_ICONSPACINGY"],
+							tooltip = TMW.L["UIPANEL_ICONSPACING_DESC"],
+							setting = "SpacingY",
+							min = -100,
+							max = 100,
+							range = 10,
+							step = 0.1,
+							wheelStep = 1,
+						})
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
+
+					</OnLoad>
+				</Scripts>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				function self:GetSettingTable()
+					return TMW.CI.group:GetSettingsPerView()
+				end
+
+				self.Header:SetText(TMW.L["UIPANEL_ICONSPACING"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

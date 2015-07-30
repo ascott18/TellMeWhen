@@ -73,7 +73,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	[ 0x1 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_DOTWATCH_NOFOUND_DESC"],	},
 })
 
-Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
+local panelInfo = Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
 	self.Header:SetText(L["ICONMENU_DOTWATCH_GCREQ"])
 
 	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -86,10 +86,11 @@ Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", func
 	self:SetScript("OnSizeChanged", function()
 		self:SetHeight(self.text:GetStringHeight() + 20)
 	end)
-	self.ShouldShow = function(self)
-		return not TMW.CI.icon:IsGroupController()
-	end
+	
 end)
+function panelInfo:ShouldShow()
+	return not TMW.CI.icon:IsGroupController()
+end
 
 -- Holds all dotwatch icons that we need to update.
 -- Since the event handling for this icon type is all done by a single handler that operates on all icons,
@@ -506,7 +507,7 @@ function Type:Setup(icon)
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	if not Type.CleanupTimer then
 		Type.CleanupTimer = C_Timer.NewTicker(30, CleanupOldAuras)
-		Type.VerifyTimer = C_Timer.NewTicker(0.001, VerifyAll)
+		TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", VerifyAll)
 	end
 
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
@@ -531,11 +532,11 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, icon)
 	pGUID = UnitGUID("player")
 
 	Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+
+	TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", VerifyAll)
 	if Type.CleanupTimer then
 		Type.CleanupTimer:Cancel()
 		Type.CleanupTimer = nil
-		Type.VerifyTimer:Cancel()
-		Type.VerifyTimer = nil
 		CleanupOldAuras()
 	end
 end)

@@ -177,9 +177,9 @@ TMW:NewClass("Resizer_Generic"){
 		--[[
 			Holy shit. Look at this wicked sick dimensional analysis:
 			
-			std_newHeight	oldScale
+			std_newHeight   oldScale
 			------------- X	-------- = newScale
-			std_oldHeight	    1
+			std_oldHeight       1
 
 			'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
 			I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell

@@ -44,6 +44,8 @@ local rawget, date, tinsert, ipairs, error, ceil
 local IconView = TMW:NewClass("IconView", "GroupComponent", "IconComponent")
 IconView.ModuleImplementors = {}
 
+IconView.DefaultPanelSet = "group"
+
 
 
 
@@ -345,6 +347,7 @@ end
 
 
 -- Default modules
+IconView:ImplementsModule("GroupModule_BaseConfig", 0.5, true)
 IconView:ImplementsModule("GroupModule_GroupPosition", 1, true)
 IconView:ImplementsModule("GroupModule_Alpha", 1.5, true)
 

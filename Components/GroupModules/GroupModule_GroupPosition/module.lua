@@ -21,15 +21,17 @@ local print = TMW.print
 local GroupPosition = TMW:NewClass("GroupModule_GroupPosition", "GroupModule")
 
 GroupPosition:RegisterGroupDefaults{
-	Scale			= 2.0,
-	Level			= 10,
+	Locked  = false,
+	Scale   = 2.0,
+	Level   = 10,
+	Strata  = "MEDIUM",
 
 	Point = {
-		point 		  = "CENTER",
-		relativeTo 	  = "UIParent",
+		point         = "CENTER",
+		relativeTo    = "UIParent",
 		relativePoint = "CENTER",
-		x 			  = 0,
-		y 			  = 0,
+		x             = 0,
+		y             = 0,
 	},
 }
 
@@ -39,6 +41,8 @@ TMW:RegisterUpgrade(41402, {
 	end,
 })
 
+
+GroupPosition:RegisterConfigPanel_XMLTemplate(10, "TellMeWhen_GM_GroupPosition")
 
 
 local function GetAnchoredPoints(group)
@@ -224,6 +228,26 @@ function GroupPosition:UpdatePositionAfterMovement()
 	self:SetPos()
 end
 
+function GroupPosition:SetNewScale(newScale)
+	local group = self.group 
+	local oldScale = group:GetScale()
+	local newX = group:GetLeft() * oldScale / newScale
+	local newY = group:GetTop() * oldScale / newScale
+
+
+	group:ClearAllPoints()
+	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+
+	group:GetSettings().Scale = newScale
+	group:SetScale(newScale)
+
+	self:UpdatePositionAfterMovement()
+end
+
+function GroupPosition:CanMove()
+	return not self.group:GetSettings().Locked
+end
+
 
 function GroupPosition:CalibrateAnchors()
 	local group = self.group
@@ -301,5 +325,21 @@ function GroupPosition:SetPos()
 	group:SetScale(gs.Scale)
 end
 
+function GroupPosition:Reset()
+	local group = self.group
+	local gs = group:GetSettings()
+	
+	for k, v in pairs(TMW.Group_Defaults.Point) do
+		gs.Point[k] = v
+	end
 
+	gs.Level = TMW.Group_Defaults.Level
+	gs.Scale = TMW.Group_Defaults.Scale
+	gs.Locked = TMW.Group_Defaults.Locked
+	gs.Strata = TMW.Group_Defaults.Strata
+	
+	group:Setup()
+	
+	TMW.IE:Load(1)
+end
 

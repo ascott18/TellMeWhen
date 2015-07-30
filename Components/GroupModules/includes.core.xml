@@ -1,5 +1,7 @@
 ﻿<Ui>
 
+ <Script file="GroupModule_BaseConfig\module.lua"/>
+
 <!-- <Script file="GroupModule_Resizer\module.lua"/> -->
 
 <Script file="GroupModule_GroupPosition\module.lua"/>

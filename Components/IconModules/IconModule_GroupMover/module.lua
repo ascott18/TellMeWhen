@@ -29,6 +29,7 @@ local function stopMoving(group)
 	
 	group:Setup()
 	
+	TMW.IE:Load(1)
 	TMW.ACEOPTIONS:NotifyChanges()
 end
 
@@ -56,7 +57,9 @@ local Module = TMW:NewClass("IconModule_GroupMover", "IconModule"){
 Module:SetScriptHandler("OnDragStart", function(Module, icon, button)
 	if button == "LeftButton" then
 		local group = icon:GetParent()
-		if not TMW.Locked and not group.Locked then
+		local GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+
+		if not TMW.Locked and GroupPosition and GroupPosition:CanMove() then
 
 			local GroupModule_Resizer = group:GetModuleOrModuleChild("GroupModule_Resizer")
 			if GroupModule_Resizer then

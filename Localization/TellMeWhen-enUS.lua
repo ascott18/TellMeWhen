@@ -183,6 +183,7 @@ L["SAFESETUP_COMPLETE"] = "Safe & slow setup complete."
 L["SAFESETUP_FAILED"] = "Safe & slow setup FAILED: %s"
 
 L["LOCKED"] = "Locked"
+L["LOCKED2"] = "Position Locked."
 L["RESIZE"] = "Resize"
 L["RESIZE_TOOLTIP"] = [[|cff7fffffClick-and-drag|r to resize]] -- keep this like this, used by the icon editor
 L["RESIZE_TOOLTIP_SCALEXY"] = [[|cff7fffffClick-and-drag|r to scale
@@ -206,10 +207,10 @@ L["FROMNEWERVERSION"] = "You have imported data that was created in a newer vers
 
 L["ICONMENU_CHOOSENAME2"] = "Choose spell(s) to check"
 
-L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose enchant(s) to check"
-L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] = [=[Enter the name(s) the weapon enchants you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
+L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose imbue(s) to check"
+L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] = [=[Enter the name(s) the weapon imbues you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
 
-|cFFFF5959IMPORTANT|r: Enchant names must be entered exactly as they appear on the tooltip of your weapon while the enchant is active (e.g. "%s", not "%s").]=]
+|cFFFF5959IMPORTANT|r: Imbue names must be entered exactly as they appear on the tooltip of your weapon while the imbue is active (e.g. "%s", not "%s").]=]
 
 L["ICONMENU_CHOOSENAME_ITEMSLOT2"] = "Choose item(s) to check"
 L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"] = [=[Enter the Name, ID, or equipment slot of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equipment slots) by separating them with semicolons (;).
@@ -319,8 +320,8 @@ L["ICONMENU_REACTIVE_DESC"] = [[Tracks the usability of reactive abilities.
 
 Reactive abilities are things like %s, %s, and %s - abilities that are only usable when certain conditions are met.]]
 
-L["ICONMENU_WPNENCHANT"] = "Weapon Enchant"
-L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon enchants.]=]
+L["ICONMENU_WPNENCHANT"] = "Weapon Imbue"
+L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon imbues.]=]
 
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
@@ -848,6 +849,7 @@ L["UIPANEL_COLORS_DESC"] = "Settings that control the coloring/tinting of icons 
 L["UIPANEL_ENABLEGROUP"] = "Enable Group"
 L["UIPANEL_ENABLEGROUP_FORPROFILE"] = "Enable Group for profile %s"
 L["UIPANEL_GROUPNAME"] = "Rename Group"
+L["UIPANEL_DIMENSIONS"] = "Dimensions"
 L["UIPANEL_ROWS"] = "Rows"
 L["UIPANEL_COLUMNS"] = "Columns"
 L["UIPANEL_GROUPALPHA"] = "Group Opacity"
@@ -898,8 +900,9 @@ L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = [[Sets how often (in seconds) icons are ch
 Zero is as fast as possible. Lower values may have a slight impact on framerate for low-end computers.]]
 L["UIPANEL_EFFTHRESHOLD"] = "Buff Efficiency Threshold"
 L["UIPANEL_EFFTHRESHOLD_DESC"] = "Sets the minimum number of buffs/debuffs to switch to a more efficient mode of checking them when there are a high number. Note that once the number of auras being checked exceeds this number, older auras will be prioritized instead of priority based on the order in which they were entered."
-L["UIPANEL_ICONSPACINGX"] = "Horizontal Icon Spacing"
-L["UIPANEL_ICONSPACINGY"] = "Vertical Icon Spacing"
+L["UIPANEL_ICONSPACING"] = "Icon Spacing"
+L["UIPANEL_ICONSPACINGX"] = "Horizontal"
+L["UIPANEL_ICONSPACINGY"] = "Vertical"
 L["UIPANEL_ICONSPACING_DESC"] = "Distance that icons within a group are away from each other"
 L["UIPANEL_ADDGROUP"] = "+ Add Another Group +"
 L["UIPANEL_ADDGROUP_DESC"] = "The new group will be assigned the next available groupID"
@@ -1108,13 +1111,14 @@ L["UIPANEL_FONT_JUSTIFYV"] = "Vertical Justification"
 L["UIPANEL_FONT_JUSTIFYV_DESC"] = "Set the vertical justification (Top/Center/Bottom) for this text display."
 L["UIPANEL_POSITION"] = "Position"
 L["UIPANEL_POSITION_DESC"] = "Contains settings that control the position of the group on your screen."
-L["UIPANEL_POINT"] = "Point"
+L["UIPANEL_POINT"] = "Group Point"
 L["UIPANEL_POINT_DESC"] = "The point on the group that will be anchored"
-L["UIPANEL_RELATIVETO"] = "Relative To"
+L["UIPANEL_POINT2_DESC"] = "Anchor the %s of the group to the anchor target."
+L["UIPANEL_RELATIVETO"] = "Anchor Target"
 L["UIPANEL_RELATIVETO_DESC"] = "Type '/framestack' to toggle a tooltip that contains a list of all the frames that your mouse is over, and their names, to put into this dialog."
 L["UIPANEL_RELATIVETO_DESC_GUIDINFO"] = "The current value is the unique identifier of another group. It was set when this group was right-click dragged to another group and the Anchor To option was chosen."
-L["UIPANEL_RELATIVEPOINT"] = "Relative Point"
-L["UIPANEL_RELATIVEPOINT_DESC"] = "The point that the group will be anchored to"
+L["UIPANEL_RELATIVEPOINT"] = "Target Point"
+L["UIPANEL_RELATIVEPOINT2_DESC"] = "Anchor the group to the %s of the anchor target."
 L["CHECKORDER"] = "Update Order"
 L["CHECKORDER_ICONDESC"] = "Sets the order in which icons within this group will be updated. This really only matters if you are using the feature of meta icons to check sub-metas."
 L["CHECKORDER_GROUPDESC"] = "Sets the order in which groups will be updated. This really only matters if you are using the feature of meta icons to check sub-metas."
@@ -1122,7 +1126,9 @@ L["ASCENDING"] = "Ascending"
 L["DESCENDING"] = "Descending"
 L["UIPANEL_SCALE"] = "Scale"
 L["UIPANEL_LEVEL"] = "Frame Level"
+L["UIPANEL_LEVEL_DESC"] = "The level within the group's strata that it should be drawn on."
 L["UIPANEL_STRATA"] = "Frame Strata"
+L["UIPANEL_STRATA_DESC"] = "The layer of the UI that the group should be drawn on."
 L["UIPANEL_LOCK"] = "Lock Position"
 L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by dragging the group or the scale tab."
 

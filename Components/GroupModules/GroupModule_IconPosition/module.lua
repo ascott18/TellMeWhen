@@ -40,6 +40,9 @@ TMW:RegisterUpgrade(60005, {
 })
 
 
+IconPosition:RegisterConfigPanel_XMLTemplate(30, "TellMeWhen_GM_IconPosition")
+
+
 function IconPosition:OnEnable()
 	TMW:RegisterCallback("TMW_GROUP_SETUP_POST", self)
 end

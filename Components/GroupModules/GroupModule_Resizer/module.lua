@@ -25,10 +25,16 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 		OnImplementIntoGroup = function(self)
 			local group = self.group
 			
-			local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+			local GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 			
-			if not GroupModule_GroupPosition then
+			if not GroupPosition then
 				error("Implementing GroupModule_Resizer (or a derivative) requies that GroupModule_GroupPosition (or a derivative) already be implemented.")
+			end
+
+			if TMW.Locked or not GroupPosition:CanMove() then
+				self:Disable()
+			else
+				self:Enable()
 			end
 		
 			self.resizeButton:SetFrameLevel(group:GetFrameLevel() + 3)

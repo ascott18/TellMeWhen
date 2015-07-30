@@ -408,7 +408,6 @@ IE = TMW:NewModule("IconEditor", "AceEvent-3.0", "AceTimer-3.0") TMW.IE = IE
 IE.Tabs = {}
 
 IE.CONST = {
-	TAB_OFFS_X = -18,
 	IE_HEIGHT_MIN = 400,
 	IE_HEIGHT_MAX = 1200,
 }
@@ -489,6 +488,11 @@ function IE:OnInitialize()
 	IE.MainTab = IE:RegisterTab("ICON", "MAIN", "Main", 1)
 	IE.MainTab:SetText(L["ICON"])
 	TMW:TT(IE.MainTab, "ICON", "MAIN_DESC")
+
+	local groupMainTab = IE:RegisterTab("GROUP", "GROUPMAIN", "GroupMain", 1)
+	groupMainTab:SetTitleComponents(false, true)
+	groupMainTab:SetText(L["GROUP"])
+	TMW:TT(groupMainTab, "GROUP", "GROUP") --TODO: this needs a real description.
 	
 
 	-- Create resizer
@@ -810,16 +814,12 @@ TMW:NewClass("IconEditorTab", "Button"){
 
 	OnShow = function(self)
 		self:AdjustWidth()
-		self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1)
-	end,
-	OnHide = function(self)
-		self:SetWidth(TMW.IE.CONST.TAB_OFFS_X)
 	end,
 	
 	OnSizeChanged = function(self)
 		self:AdjustWidth()
 
-		IE:RefreshTabs()
+		IE:ResizeTabs()
 	end,
 
 	METHOD_EXTENSIONS = {
@@ -842,6 +842,9 @@ TMW:NewClass("IconEditorTabPrimary", "IconEditorTab"){
 
 TMW:NewClass("IconEditorTabSecondary", "IconEditorTab"){
 	
+	endPadding = 6,
+	interPadding = 5,
+
 	OnClick = function(self)
 		if self.doesGroup and not CI.icon then
 			self:ClickHandlerBase(IE.Panels.NotLoadedMessage)
@@ -1049,6 +1052,21 @@ function IE:RegisterTab(groupIdentifier, identifier, panelKey, order)
 	return tab
 end
 
+function IE:ResizeTabs()
+	local endPadding = TMW.C.IconEditorTabSecondary.endPadding
+	local interPadding = TMW.C.IconEditorTabSecondary.interPadding
+
+	local width = endPadding*2 - interPadding -- This was derived using magic.
+
+	for i, tab in TMW:Vararg(TMW.IE.tabs.secondary:GetChildren()) do
+		if tab:IsShown() then
+			width = width + tab:GetWidth() + interPadding
+		end
+	end
+
+	TMW.IE.tabs.secondary:SetWidth(width)
+end
+
 function IE:RefreshTabs()
 	local tabGroup = IE.CurrentTabGroup
 
@@ -1058,13 +1076,9 @@ function IE:RefreshTabs()
 	end
 
 	for i, tab in TMW:Vararg(TMW.IE.tabs.secondary:GetChildren()) do
-		tab:ClearAllPoints()
 		tab:Hide()
 	end
-
-	local endPadding = 6
-	local interPadding = 5
-	local width = endPadding*2 - interPadding -- This was derived using magic.
+	
 	local lastTab
 	local firstShown
 	for i = 1, #tabGroup.tabs do
@@ -1072,9 +1086,9 @@ function IE:RefreshTabs()
 
 		if tab:ShouldShowTab() then
 			if not lastTab then
-				tab:SetPoint("LEFT", endPadding, 0)
+				tab:SetPoint("LEFT", tab.endPadding, 0, 0)
 			else
-				tab:SetPoint("LEFT", lastTab, "RIGHT", interPadding, 0)
+				tab:SetPoint("LEFT", lastTab, "RIGHT", tab.interPadding, 0)
 			end
 			tab:SetPoint("TOP")
 			tab:SetPoint("BOTTOM")
@@ -1084,12 +1098,10 @@ function IE:RefreshTabs()
 			tab:Show()
 			tab:SetFrameLevel(tab:GetParent():GetFrameLevel() + 3)
 			firstShown = firstShown or tab
-			width = width + tab:GetWidth() + interPadding
 		end
 	end
 
-
-	TMW.IE.tabs.secondary:SetWidth(width)
+	IE:ResizeTabs()
 
 	TMW.IE.tabs.art.pSelectedHorizontal:ClearAllPoints()
 	TMW.IE.tabs.art.pSelectedHorizontal:SetPoint("TOPLEFT", tabGroup)
@@ -1222,92 +1234,51 @@ end
 
 
 ---------- Interface ----------
-IE.AllDisplayPanels = {}
-local panelList = {}
 
-function IE:PositionPanels()
-	for _, frame in pairs(IE.AllDisplayPanels) do
-		frame:Hide()
-	end
-	
-	if not CI.icon then
-		return
-	end
-
-	wipe(panelList)
-	for _, Component in pairs(CI.icon.Components) do
-		if Component:ShouldShowConfigPanels(CI.icon) then
-			for _, panelInfo in pairs(Component.ConfigPanels) do
-				tinsert(panelList, panelInfo)
-			end		
-		end
-	end
-	
+function IE:PositionPanels(parentPanelName, panelList)	
 	TMW:SortOrderedTables(panelList)
 	
-	local ParentLeft, ParentRight = TellMeWhen_IconEditor.Panels.Main.PanelsLeft, TellMeWhen_IconEditor.Panels.Main.PanelsRight
-	for i = 1, #ParentLeft do
-		ParentLeft[i] = nil
-	end
-	for i = 1, #ParentRight do
-		ParentRight[i] = nil
-	end
-	
-	for i, panelInfo in ipairs(panelList) do
-		local GenericComponent = panelInfo.component
-		
-		local parent
-		if GenericComponent.className == "IconType" then 
-			parent = ParentLeft
-		else
-			parent = ParentRight
+
+	local panelColumns = TellMeWhen_IconEditor.Panels[parentPanelName].panelColumns
+	for _, panelColumn in ipairs(panelColumns) do
+		for _, panel in TMW:Vararg(panelColumn:GetChildren()) do
+			panel:Hide()
 		end
-		
-		local frame
-		-- Get the frame for the panel if it already exists, or create it if it doesn't.
-		if panelInfo.panelType == "XMLTemplate" then
-			frame = IE.AllDisplayPanels[panelInfo.xmlTemplateName]
-			
-			if not frame then
-				frame = TMW.C.Config_Panel:New("Frame", panelInfo.xmlTemplateName, parent, panelInfo.xmlTemplateName)
-
-				IE.AllDisplayPanels[panelInfo.xmlTemplateName] = frame
-			end
-		elseif panelInfo.panelType == "ConstructorFunc" then
-			frame = IE.AllDisplayPanels[panelInfo] 
-			
-			if not frame then
-				frame = TMW.C.Config_Panel:New("Frame", panelInfo.frameName, parent, "TellMeWhen_OptionsModuleContainer")
-
-				IE.AllDisplayPanels[panelInfo] = frame
-				TMW.safecall(panelInfo.func, frame)
-			end
-		end
-		
-		if frame and frame:ShouldShow() then
-			if type(parent[#parent]) == "table" then
-				frame:SetPoint("TOP", parent[#parent], "BOTTOM", 0, -11)
-			else
-				frame:SetPoint("TOP", 0, -11)
-			end
-			parent[#parent + 1] = frame
-			
-			
-			frame:Show()
-
-			frame:Setup(panelInfo)
-			
-			TMW:Fire("TMW_CONFIG_PANEL_SETUP", frame, panelInfo)
-		end	
-	end	
+		wipe(panelColumn.currentPanels)
+	end
 	
 	local IE_FL = IE:GetFrameLevel()
-	for i = 1, #ParentLeft do
-		ParentLeft[i]:SetFrameLevel(IE_FL + 3) --(#ParentLeft-i+1)*3)
-	end
-	for i = 1, #ParentRight do
-		ParentRight[i]:SetFrameLevel(IE_FL + 3) --(#ParentRight-i+1)*3)
-	end
+
+	for i, panelInfo in ipairs(panelList) do
+		local frameName = panelInfo:GetFrameName()
+
+		if not panelInfo.columnIndex or panelInfo.columnIndex < 1 or panelInfo.columnIndex > #panelColumns then	
+			error("columnIndex out of bounds for panel " .. frameName)
+		end
+		
+		if panelInfo:ShouldShow() then
+
+			local panelColumn = panelColumns[panelInfo.columnIndex]
+			local frame = panelInfo:GetPanel(panelColumn)
+
+			if frame then
+				local last = panelColumn.currentPanels[#panelColumn.currentPanels]
+
+				if type(last) == "table" then
+					frame:SetPoint("TOP", last, "BOTTOM", 0, -11)
+				else
+					frame:SetPoint("TOP", 0, -11)
+				end
+				panelColumn.currentPanels[#panelColumn.currentPanels + 1] = frame
+				
+				
+				frame:Show()
+				frame:SetFrameLevel(IE_FL + 3)
+
+				frame:Setup(panelInfo)
+			end	
+		end	
+	end	
 end
 
 function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
@@ -1449,7 +1420,32 @@ function IE:Load(isRefresh, icon, isHistoryChange)
 		-- so that the correct config panels will be loaded and shown for the icon.
 		CI.icon:Setup()
 
-		IE:PositionPanels()
+
+
+		local panelList = {}
+		for _, Component in pairs(CI.icon.Components) do
+			if Component:ShouldShowConfigPanels(CI.icon) then
+				for _, panelInfo in pairs(Component.ConfigPanels) do
+					if panelInfo.panelSet == "icon" then
+						tinsert(panelList, panelInfo)
+					end
+				end		
+			end
+		end
+		IE:PositionPanels("Main", panelList)
+
+
+		local panelList = {}
+		for _, Component in pairs(CI.group.Components) do
+			if Component:ShouldShowConfigPanels(CI.group) then
+				for _, panelInfo in pairs(Component.ConfigPanels) do
+					if panelInfo.panelSet == "group" then
+						tinsert(panelList, panelInfo)
+					end
+				end		
+			end
+		end
+		IE:PositionPanels("GroupMain", panelList)
 		
 		if CI.ics.Type == "" then
 			IE.Panels.Main.Type:SetText(L["ICONMENU_TYPE"])
@@ -1560,6 +1556,61 @@ end
 
 ---------- Settings ----------
 
+-- These classes are declared in TellMeWhen.lua. This extends them.
+TMW.C.ConfigPanelInfo {
+	ShouldShow = function(self)
+		return true
+	end,
+
+	GetPanel = function(self, panelColumn)
+		if not self.panel and _G[self:GetFrameName()] then
+			self.panel = _G[self:GetFrameName()]
+		end
+		if self.panel then
+			self.panel:SetParent(panelColumn)
+
+			return self.panel
+		end
+
+		local success
+		success, self.panel = TMW.safecall(self.MakePanel, self, panelColumn)
+
+		if self.panel then
+			self.panel.panelInfo = self
+		end
+
+		return self.panel
+	end,
+}
+
+TMW.C.XmlConfigPanelInfo {
+	GetFrameName = function(self)
+		return self.xmlTemplateName
+	end,
+
+	MakePanel = function(self, panelColumn)
+		return TMW.C.Config_Panel:New("Frame", self:GetFrameName(), panelColumn, self.xmlTemplateName)
+	end,
+}
+
+TMW.C.LuaConfigPanelInfo {
+	GetFrameName = function(self)
+		return self.frameName
+	end,
+
+	MakePanel = function(self, panelColumn)
+		local panel = TMW.C.Config_Panel:New("Frame", self:GetFrameName(), panelColumn, "TellMeWhen_OptionsModuleContainer")
+
+		TMW.safecall(self.constructor, panel)
+		
+		-- no longer needed. Off to the GC!
+		self.constructor = nil
+
+		return panel
+	end,
+}
+
+
 
 
 TMW:NewClass("Config_Frame", "Frame"){
@@ -1667,7 +1718,27 @@ TMW:NewClass("Config_Frame", "Frame"){
 	end,
 
 	GetSettingTable = function(self)
-		return CI.ics
+		local frame = self
+		repeat
+			frame = frame:GetParent()
+			if frame.GetSettingTable then
+				return frame:GetSettingTable()
+			end
+		until frame == TellMeWhen_IconEditor
+
+		error("Could not get setting table for setting " .. tostring(self.setting or "<???>"))
+	end,
+
+	OnSettingSaved = function(self)
+		local frame = self
+		repeat
+			frame = frame:GetParent()
+			if frame.OnSettingSaved then
+				return frame:OnSettingSaved()
+			end
+		until frame == TellMeWhen_IconEditor
+
+		error("Could not find OnSettingSaved for setting " .. tostring(self.setting or "<???>"))
 	end,
 
 	ReloadSetting = TMW.NULLFUNC
@@ -1746,10 +1817,8 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
 			get(self.supplementalData.OnSetup, self, panelInfo, self.supplementalData) 
 		end
-	end,
-
-	ShouldShow = function(self)
-		return true
+			
+		TMW:Fire("TMW_CONFIG_PANEL_SETUP", self, panelInfo)
 	end,
 
 	SetHeight = function(self, height)
@@ -1842,7 +1911,8 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 				settings[self.setting] = self.data.value
 				self:SetChecked(true)
 			end
-			IE:ScheduleIconSetup()
+
+			self:OnSettingSaved()
 		end
 		
 		-- Cheater! (We arent getting anything)
@@ -1936,8 +2006,8 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 			value = get(self.data.ModifySettingValue, self, value) or value
 
 			settings[self.setting] = value
-		
-			IE:ScheduleIconSetup()
+
+			self:OnSettingSaved()
 		end
 	end,
 
@@ -2409,8 +2479,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			value = get(self.data.ModifySettingValue, self, value) or value
 			
 			settings[self.setting] = value
-			
-			IE:ScheduleIconSetup()
+
+			self:OnSettingSaved()
 		end
 	end,
 
@@ -2418,7 +2488,11 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		local settings = self:GetSettingTable()
 
 		if settings and self.setting then
-			self:SetValue(settings[self.setting])
+
+			local value = settings[self.setting]
+			value = get(self.data.UnModifySettingValue, self, value) or value
+
+			self:SetValue(value)
 			
 			self:CheckInteractionStates()
 		end
@@ -2501,7 +2575,7 @@ TMW:NewClass("Config_BitflagBase"){
 		if settings and self.setting then
 			settings[self.setting] = bit.bxor(settings[self.setting], self.bit)
 			
-			IE:ScheduleIconSetup()
+			self:OnSettingSaved()
 		end
 		
 		-- Cheater! (We arent getting anything)
@@ -2645,16 +2719,16 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 			self:SetRGBA(r, g, b, a)
 
 			self:ReloadSetting()
-
-			TMW.IE:ScheduleIconSetup()
+			
+			self:OnSettingSaved()
 		end
 
 		self.cancelFunc = function()
 			self:SetRGBA(unpack(self.prevRGBA))
 
 			self:ReloadSetting()
-
-			TMW.IE:ScheduleIconSetup()
+			
+			self:OnSettingSaved()
 		end
 
 		self.GenerateMethods = TMW.NULLFUNC
@@ -2733,6 +2807,99 @@ TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame
 	end,
 }
 
+
+TMW:NewClass("Config_PointSelect", "Config_Frame") {
+	OnNewInstance_Config_PS = function(self, data)
+		self.Header:SetText(get(self.data.title))
+
+		if self.data.tooltip then
+			self:SetTooltipBody(get(self.data.tooltip))
+		end
+	end,
+
+	SetTooltipBody = function(self, body)
+		TMW:ValidateType("2 (body)", "SetTooltipBody", body, "string")
+
+		assert(body:find("%%s"), "tooltip body should contain a %s that will be formatted to the point.")
+
+		for k, v in pairs(self) do
+			if type(v) == "table" and v.GetObjectType and v:GetObjectType() == "Button" then
+				TMW:TT(v, TMW.L[k], body:format(TMW.L[k]), 1, 1)
+			end
+		end
+	end,
+
+	SetSelectedPoint = function(self, point)
+		TMW:ValidateType("2 (point)", "SetSelectedPoint", point, "string")
+
+		point = tostring(point):upper()
+
+		if not self[point] then
+			error("Invalid point " .. point .. " to Config_PointSelect:SetSelected(point)")
+		end
+
+		local old = self:GetSelectedPoint()
+		if old then
+			self[old].selected = false
+			self[old].selectedTexture:Hide()
+		end
+
+		self[point].selected = true
+		self[point].selectedTexture:Show()
+	end,
+
+	SelectChild = function(self, child)
+		TMW:ValidateType("2 (child)", "SelectChild", child, "frame")
+
+		for k, v in pairs(self) do
+			if v == child then
+
+				local settings = self:GetSettingTable()
+
+				PlaySound("igMainMenuOptionCheckBoxOn")
+				self:SetSelectedPoint(k)
+
+				if settings and self.setting then
+					settings[self.setting] = k
+
+					self:OnSettingSaved()
+				end
+				
+				-- Cheater! (We arent getting anything)
+				-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
+				get(self.data.OnClick, self, button)
+
+				return
+			end
+		end
+
+		error("child wasn't valid")
+	end,
+
+	GetSelectedPoint = function(self)
+		for k, v in pairs(self) do
+			if type(v) == "table" and v.GetObjectType and v:GetObjectType() == "Button" then
+				if v.selected then
+					return k
+				end
+			end
+		end
+	end,
+	
+	ReloadSetting = function(self)
+		local settings = self:GetSettingTable()
+
+		if settings then
+			self:SetSelectedPoint(settings[self.setting])
+
+			-- self:CheckInteractionStates()
+		end
+	end,
+
+	OnSizeChanged = function(self)
+		self.CENTER:SetSize(self:GetWidth() / 3, self:GetHeight() / 3)
+	end,
+}
 
 
 function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)

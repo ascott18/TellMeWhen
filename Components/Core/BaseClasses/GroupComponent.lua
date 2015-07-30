@@ -31,6 +31,9 @@ local tDeleteItem = TMW.tDeleteItem
 
 
 local GroupComponent = TMW:NewClass("GroupComponent", "GenericComponent")
+
+GroupComponent.DefaultPanelSet = "group"
+
 GroupComponent.ConfigTables = {}
 
 

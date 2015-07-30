@@ -32,26 +32,24 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 -- @name IconComponent.lua
 
 
-local IconComponent = TMW:NewClass("IconComponent")
+local IconComponent = TMW:NewClass("IconComponent", "GenericComponent")
 
-IconComponent.InstancesAreSingletons = true
+IconComponent.DefaultPanelSet = "icon"
+IconComponent.DefaultPanelColumnIndex = 2
 
 IconComponent.IconSettingDefaults = {}
 IconComponent.EventHandlerData = {}
-IconComponent.ConfigPanels = {}
 IconComponent.IconEvents = {}
 
 function IconComponent:OnClassInherit_IconComponent(newClass)
 	newClass:InheritTable(self, "IconSettingDefaults")
 	newClass:InheritTable(self, "EventHandlerData")
-	newClass:InheritTable(self, "ConfigPanels")
 	newClass:InheritTable(self, "IconEvents")
 end
 
 function IconComponent:OnNewInstance_IconComponent()
 	if self.class.InstancesAreSingletons then
 		self:InheritTable(self.class, "IconSettingDefaults")
-		self:InheritTable(self.class, "ConfigPanels")
 		self:InheritTable(self.class, "IconEvents")
 	end
 end
@@ -196,90 +194,6 @@ function IconComponent:RegisterIconEvent(order, event, eventData)
 	self.IconEvents[#self.IconEvents + 1] = eventData
 end
 
--- [INTERNAL]
-function IconComponent:RegisterConfigPanel(order, panelType, supplementalData)	
-	local t = {
-		component = self,
-		panelType = panelType,
-		order = order,
-		supplementalData = supplementalData,
-	}
-	
-	self.ConfigPanels[#self.ConfigPanels + 1] = t
-	return t
-end
-
---- Register an Icon Editor config panel using an XML template as a source
--- @param order [number] The order of the config panel relative to other panels in the Icon Editor.
--- @param xmlTemplateName [string] The name of an XML template. This template must inherit from the XML template {{{TellMeWhen_OptionsModuleContainer}}}. The frame will be created once it is needed, and it will be named after the template it is based on (the string passed as this param). Some XML templates for commonly used settings are built into TMW, like {{{TellMeWhen_ChooseName}}} and {{{TellMeWhen_WhenChecks}}}.
--- @param supplementalData [.*] Any data that will be associated with the created frame when it is used for this specific {{{TellMeWhen.Classes.IconComponent}}} implementation. This data can be accessed through the 2nd arg of event {{{TMW_CONFIG_PANEL_SETUP}}} as can be seen in the usage example below.
--- @usage
---  -- Registering an XML Template config panel:
---  Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ConfigPanel_Example", {
---    text = "Title for the panel",
---    someData1 = 4,
---    someData2 = "Some other data",
---  })
--- 
---   -- Accessing supplementalData:
---  TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
---    if frame:GetName() == "TellMeWhen_ConfigPanel_Example" then
---      local supplementalData = panelInfo.supplementalData
---      frame.Header:SetText(supplementalData.text)
---    end
---  end)
-function IconComponent:RegisterConfigPanel_XMLTemplate(order, xmlTemplateName, supplementalData)
-	TMW:ValidateType(2, "IconComponent:RegisterConfigPanel_XMLTemplate()", order, "number")
-	TMW:ValidateType(3, "IconComponent:RegisterConfigPanel_XMLTemplate()", xmlTemplateName, "string")
-	
-	local t = self:RegisterConfigPanel(order, "XMLTemplate", supplementalData)
-	
-	t.xmlTemplateName = xmlTemplateName
-end
-
---- Register an Icon Editor config panel using a function that recieve an empty panel that can be sized, scripted, and filled with child frames.
--- @param order [number] The order of the config panel relative to other panels in the Icon Editor.
--- @param frameName [string] The name that will be given to the panel when it is created.
--- @param func [function] A function that will be called immediately after the frame for this panel has been constructed. The panel inherits from XML template {{{TellMeWhen_OptionsModuleContainer}}}, and will be passed as the first arg to this function.
--- @param supplementalData [.*] Any data that will be associated with the created frame when it is used for this specific {{{TellMeWhen.Classes.IconComponent}}} implementation. This data can be accessed through the 2nd arg of event {{{TMW_CONFIG_PANEL_SETUP}}} as can be seen in the usage example below. Using {{{supplementalData}}} with {{{:RegisterConfigPanel_ConstructorFunc}}} is highly impractical since panels created using this method cannot be shared with other [[api/base-classes/icon-component/|IconComponent]], and the purpose of {{{supplementalData}}} is to encourage the reusability of frames.
--- @usage
---  -- Taken from the example at api/icon-type/how-to-use/
---  Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
---    self.Header:SetText(Type.name)
---    TMW.IE:BuildSimpleCheckSettingFrame(self, {
---      {
---        setting = "RangeCheck",
---        title = L["ICONMENU_RANGECHECK"],
---        tooltip = L["ICONMENU_RANGECHECK_DESC"],
---      },
---      {
---        setting = "ManaCheck",
---        title = L["ICONMENU_MANACHECK"],
---        tooltip = L["ICONMENU_MANACHECK_DESC"],
---      },
---      {
---        setting = "TestType_SomeSetting",
---        title = "Some Custom Setting",
---        tooltip = "Check for stack text to be 'Hello'. Uncheck for stack text to be 'World'",
---      },
---    })
---  end)
-function IconComponent:RegisterConfigPanel_ConstructorFunc(order, frameName, func, supplementalData)
-	TMW:ValidateType(2, "IconComponent:RegisterConfigPanel_ConstructorFunc()", order, "number")
-	TMW:ValidateType(3, "IconComponent:RegisterConfigPanel_ConstructorFunc()", frameName, "string")
-	TMW:ValidateType(4, "IconComponent:RegisterConfigPanel_ConstructorFunc()", func, "function")
-	
-	local t = self:RegisterConfigPanel(order, "ConstructorFunc", supplementalData)
-	
-	t.frameName = frameName
-	t.func = func
-end
-
--- [INTERNAL] (Not really, but really, it should be internal. If you are reading this, I don't care if you override this. Just do it properly. I'm not going to document it since it is self-explanatory.
-function IconComponent:ShouldShowConfigPanels(icon)
-	-- Defaults to true. Subclasses of IconComponent can overwrite this function for their own usage.
-	return true
-end
 
 -- [INTERNAL]
 function IconComponent:ImplementIntoIcon(icon)

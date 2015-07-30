@@ -1,0 +1,318 @@
+<Ui>
+
+	<Frame name="TellMeWhen_GM_GroupPosition" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="200"/>
+		<Frames>
+			<EditBox parentKey="RelativeTo" inherits="TellMeWhen_InputBoxTemplate">
+				<Anchors>
+					<Anchor point="TOP" y="-16"/>
+					<Anchor point="LEFT" x="9" />
+					<Anchor point="RIGHT" x="-9" />
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString parentKey="headerText" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
+								<Anchor point="LEFT" x="-5"/>
+								<Anchor point="RIGHT" x="5"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self, {
+							setting = "relativeTo",
+							title = TMW.L["UIPANEL_RELATIVETO"],
+							tooltip = TMW.L["UIPANEL_RELATIVETO_DESC"],
+							label = TMW.L["UIPANEL_RELATIVETO"],
+
+							ModifySettingValue = function(self, value)
+								value = value:trim()
+
+								if value == "" then
+									value = "UIParent"
+									self:SetText("UIParent")
+								end
+
+								return value
+							end,
+						})
+
+						self.headerText:SetText(TMW.L["UIPANEL_RELATIVETO"])
+
+					--	TMW.SUG:EnableEditBox(self, "texture", true)
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+
+			<Frame parentKey="Point" inherits="TellMeWhen_PointSelectTemplate">
+				<Size x="65" y="55"/>
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.RelativeTo" relativePoint="BOTTOM" y="-19"/>
+					<Anchor point="LEFT" x="8" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_POINT"],
+							tooltip = TMW.L["UIPANEL_POINT2_DESC"],
+							setting = "point",
+						})
+
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<Frame parentKey="RelativePoint" inherits="TellMeWhen_PointSelectTemplate">
+				<Size x="65" />
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.Point" relativePoint="RIGHT" x="10" />
+
+					<Anchor point="TOP" relativeKey="$parent.Point" />
+					<Anchor point="BOTTOM" relativeKey="$parent.Point" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_RELATIVEPOINT"],
+							tooltip = TMW.L["UIPANEL_RELATIVEPOINT2_DESC"],
+							setting = "relativePoint",
+						})
+
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<Slider parentKey="X" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.Point" y="2"/>
+					<Anchor point="LEFT" relativeKey="$parent.RelativePoint" relativePoint="RIGHT" x="10" />
+					<Anchor point="RIGHT" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_FONT_XOFFS"],
+							tooltip = TMW.L["UIPANEL_FONT_XOFFS_DESC"],
+							setting = "x",
+							min = -math.huge,
+							max = math.huge,
+							range = 20,
+							step = 0.1,
+							wheelStep = 1,
+						})
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetTextFormatter(TMW.C.Formatter.F_1, TMW.C.Formatter.F_0)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+			<Slider parentKey="Y" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.X"/>
+					<Anchor point="RIGHT" relativeKey="$parent.X"/>
+					<Anchor point="BOTTOM" relativeKey="$parent.Point" y="4"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_FONT_YOFFS"],
+							tooltip = TMW.L["UIPANEL_FONT_YOFFS_DESC"],
+							setting = "y",
+							min = -math.huge,
+							max = math.huge,
+							range = 20,
+							step = 0.1,
+							wheelStep = 1,
+						})
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetTextFormatter(TMW.C.Formatter.F_1, TMW.C.Formatter.F_0)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+			<Slider parentKey="Level" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.Point" relativePoint="BOTTOM"  y="-17"/>
+					<Anchor point="LEFT" x="10" />
+					<Anchor point="RIGHT" relativeKey="$parent.RelativePoint" x="-5" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_LEVEL"],
+							setting = "Level",
+							min = 5,
+							max = math.huge,
+							range = 20,
+							step = 1,
+						})
+
+						function self:GetSettingTable()
+							return TMW.CI.gs
+						end
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetTextFormatter(TMW.C.Formatter:New(UNIT_LEVEL_TEMPLATE), TMW.C.Formatter.PASS)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+
+			<Slider parentKey="Strata" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.Level" />
+					<Anchor point="LEFT" relativeKey="$parent.Y" />
+					<Anchor point="RIGHT" relativeKey="$parent.Y" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						local stratas = {
+							"BACKGROUND",
+							"LOW",
+							"MEDIUM",
+							"HIGH",
+							"DIALOG",
+							"FULLSCREEN",
+							"FULLSCREEN_DIALOG",
+							"TOOLTIP",
+						}
+
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_STRATA"],
+							tooltip = TMW.L["UIPANEL_STRATA_DESC"],
+							setting = "Strata",
+							min = 1,
+							max = #stratas,
+							step = 1,
+
+							ModifySettingValue = function(self, value)
+								return stratas[value]
+							end,
+							UnModifySettingValue = function(self, value)
+								return TMW.tContains(stratas, value)
+							end,
+						})
+
+						function self:GetSettingTable()
+							return TMW.CI.gs
+						end
+
+						self:SetTextFormatter(TMW.C.Formatter:New(function(value)
+							if value and stratas[value] then
+								return TMW.L["STRATA_" .. stratas[value]]
+							else
+								return ""
+							end
+						end), TMW.C.Formatter.NONE)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+			<Slider parentKey="Scale" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.Level" relativePoint="BOTTOM"  y="-24"/>
+					<Anchor point="LEFT" relativeKey="$parent.Level" />
+					<Anchor point="RIGHT" relativeKey="$parent.Level" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_SCALE"],
+							setting = "Scale",
+							min = 0.4,
+							max = math.huge,
+							range = 0.5,
+							step = 0.01,
+
+							ModifySettingValue = function(self, value)
+								local group = TMW.CI.group
+
+								local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+								GroupModule_GroupPosition:SetNewScale(value)
+
+								return value
+							end,
+						})
+
+						function self:GetSettingTable()
+							return TMW.CI.gs
+						end
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetTextFormatter(TMW.C.Formatter.PERCENT100, TMW.C.Formatter.PERCENT100)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+
+							
+			<CheckButton parentKey="Locked" inherits="TellMeWhen_CheckTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Strata" relativePoint="BOTTOMLEFT" x="-4" y="-7"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self, {
+							setting = "Locked",
+							title = TMW.L["UIPANEL_LOCK"],
+							tooltip = TMW.L["UIPANEL_LOCK_DESC"],
+						})
+
+						function self:GetSettingTable()
+							return TMW.CI.gs
+						end
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+			<Button parentKey="ResetButton" inherits="TellMeWhen_ButtonTemplate" text="RESET">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="-11" y="9"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetScale(0.9)
+						self:SetText(TMW.L["UIPANEL_GROUPRESET"])
+						TMW:TT(self, "UIPANEL_GROUPRESET", "UIPANEL_TOOLTIP_GROUPRESET")
+
+						-- Fill the "right column", or fit the text, whichever is bigger.
+						self:SetWidth(max(self:GetTextWidth()+15,  self:GetParent().Strata:GetWidth()/self:GetScale()))
+
+						self:SetFrameLevel(self:GetFrameLevel()+2)
+					</OnLoad>
+					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
+						local group = TMW.CI.group
+						local module = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+						module:Reset()
+					</OnClick>
+				</Scripts>
+			</Button>
+
+
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				function self:GetSettingTable()
+					return TMW.CI.gs.Point
+				end
+
+				-- These have to go AFTER we declare GetSettingTable.
+				-- That's why they aren't above with the sliders' OnLoads
+				self.X:UseEditBox()
+				self.Y:UseEditBox()
+
+				self.Header:SetText(TMW.L["UIPANEL_POSITION"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

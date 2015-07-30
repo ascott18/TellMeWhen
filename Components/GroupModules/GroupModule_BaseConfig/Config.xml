@@ -1,0 +1,51 @@
+﻿<Ui>
+
+	<Frame name="TellMeWhen_GM_Dims" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="85"/>
+		<Frames>
+			<Slider parentKey="Rows" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" y="-13"/>
+					<Anchor point="LEFT" x="10" />
+					<Anchor point="RIGHT" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_ROWS"],
+							tooltip = TMW.L["UIPANEL_TOOLTIP_ROWS"],
+							setting = "Rows",
+							min = 1,
+							max = TELLMEWHEN_MAXROWS,
+							step = 1,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
+			<Slider parentKey="Columns" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Rows" y="-40"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.Rows" y="-40"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_COLUMNS"],
+							tooltip = TMW.L["UIPANEL_TOOLTIP_COLUMNS"],
+							setting = "Columns",
+							min = 1,
+							max = TELLMEWHEN_MAXROWS,
+							step = 1,
+						})
+					</OnLoad>
+				</Scripts>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["UIPANEL_DIMENSIONS"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+ 
+</Ui>

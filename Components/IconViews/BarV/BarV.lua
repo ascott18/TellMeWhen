@@ -302,13 +302,7 @@ View:ImplementsModule("IconModule_Texts", 70, true)
 
 
 
-View:ImplementsModule("GroupModule_Resizer_ScaleX_SizeY", 10, function(Module, group)
-	if TMW.Locked or group.Locked then
-		Module:Disable()
-	else
-		Module:Enable()
-	end
-end)
+View:ImplementsModule("GroupModule_Resizer_ScaleX_SizeY", 10, true)
 View:ImplementsModule("GroupModule_IconPosition_Sortable", 20, true)
 
 

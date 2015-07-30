@@ -231,7 +231,7 @@
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 				<Size x="120" y="15"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="12" y="3"/>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="10" y="3"/>
 				</Anchors>
 				
 				<Scripts>
@@ -312,6 +312,9 @@
 						self.GetSettingTable = function(self)
 							return self:GetParent():GetConditionSettings()
 						end
+						self.OnSettingSaved = function(self)
+							TMW.IE:ScheduleIconSetup() --TODO: there needs to be a way for condition config to intelligently run a setup on a parent object using the current ConditionSet.
+						end
 						self.CheckInteractionStates = TMW.NULLFUNC
 						
 
@@ -325,7 +328,7 @@
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="6" y="2"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="4" y="2"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -341,7 +344,7 @@
 			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="15"/>
+					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="13"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>

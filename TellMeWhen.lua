@@ -247,10 +247,8 @@ TMW.Defaults = {
 					["*"]		= true,
 				},
 				OnlyInCombat	= false,
-				Locked			= false,
 				View			= "icon",
 				Name			= "",
-				Strata			= "MEDIUM",
 				Rows			= 1,
 				Columns			= 4,
 				CheckOrder		= -1,
@@ -3687,6 +3685,49 @@ function TMW:LoadOptions(recursed)
 		collectgarbage()
 	end
 end
+
+TMW:NewClass("ConfigPanelInfo"){
+	columnIndex = 1,
+	panelSet = "",
+	
+	panel = nil,
+
+	SetColumnIndex = function(self, columnIndex)
+		self.columnIndex = columnIndex
+	end,
+
+	SetPanelSet = function(self, panelSet)
+		self.panelSet = panelSet
+	end,
+}
+
+TMW:NewClass("XmlConfigPanelInfo", "ConfigPanelInfo"){
+	OnNewInstance_Xml = function(self, order, xmlTemplateName, supplementalData)
+		TMW:ValidateType(2, "XmlConfigPanelInfo:New()", order, "number")
+		TMW:ValidateType(3, "XmlConfigPanelInfo:New()", xmlTemplateName, "string")
+		TMW:ValidateType(4, "XmlConfigPanelInfo:New()", supplementalData, "table;nil")
+
+		self.order = order
+		self.xmlTemplateName = xmlTemplateName
+		self.supplementalData = supplementalData
+	end,
+}
+
+TMW:NewClass("LuaConfigPanelInfo", "ConfigPanelInfo"){
+	OnNewInstance_Lua = function(self, order, frameName, constructor, supplementalData)
+		TMW:ValidateType(2, "LuaConfigPanelInfo:New()", order, "number")
+		TMW:ValidateType(3, "LuaConfigPanelInfo:New()", frameName, "string")
+		TMW:ValidateType(4, "LuaConfigPanelInfo:New()", constructor, "function")
+		TMW:ValidateType(5, "LuaConfigPanelInfo:New()", supplementalData, "table;nil")
+
+		self.order = order
+		self.frameName = frameName
+		self.constructor = constructor
+		self.supplementalData = supplementalData
+	end,
+}
+
+
 
 
 
