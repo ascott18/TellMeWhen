@@ -1616,54 +1616,167 @@ TMW.C.LuaConfigPanelInfo {
 
 
 
-
-local function bubble(frame, one, method, ...)
-	if frame == TellMeWhen_IconEditor or frame == UIParent or not frame then
+local CScriptProvider
+local function bubble(frame, get, method, ...)
+	if not frame then
 		return
 	end
-	
-	if frame[method] then
-		local ret = frame[method](frame, ...)
-		if one and ret then
-			return ret
+
+	if frame.isLibOOInstance and frame.class.inherits[CScriptProvider] then
+		if get then
+			local ret = frame:CScriptCallGet(method, ...)
+			if ret then
+				return ret
+			end
+		else
+			frame:CScriptCall(method, ...)
 		end
 	end
 
-	return bubble(frame:GetParent(), one, method, ...)
+	return bubble(frame:GetParent(), get, method, ...)
 end
 
-local function tunnel(frame, one, method, ...)
-	if frame[method] then
-		local ret = frame[method](frame, ...)
-		if one and ret then
-			return ret
+local function tunnel(frame, get, method, ...)
+	if frame.isLibOOInstance and frame.class.inherits[CScriptProvider] then
+		if get then
+			local ret = frame:CScriptCallGet(method, ...)
+			if ret then
+				return ret
+			end
+		else
+			frame:CScriptCall(method, ...)
 		end
 	end
 
 	for _, child in TMW:Vararg(frame:GetChildren()) do
-		local ret = tunnel(child, one, method, ...)
-		if one and ret then
+		local ret = tunnel(child, get, method, ...)
+		if get and ret then
 			return ret
 		end
 	end
 end
 
 
-TMW:NewClass("Config_Frame", "Frame"){
-	CallTunnelOne = function(self, method, ...)
-		return tunnel(self, true, method, ...)
+CScriptProvider = TMW:NewClass("CScriptProvider") {
+	CScriptCallTunnelGet = function(self, method, ...)
+		for _, child in TMW:Vararg(frame:GetChildren()) do
+			local ret = tunnel(child, true, method, ...)
+			if ret then
+				return ret
+			end
+		end
 	end,
-	CallBubbleOne = function(self, method, ...)
+	CScriptCallBubbleGet = function(self, method, ...)
 		return bubble(self:GetParent(), true, method, ...)
 	end,
-	CallTunnelAll = function(self, method, ...)
-		return tunnel(self, false, method, ...)
+	CScriptCallTunnel = function(self, method, ...)
+		for _, child in TMW:Vararg(self:GetChildren()) do
+			tunnel(child, false, method, ...)
+		end
 	end,
-	CallBubbleAll = function(self, method, ...)
+	CScriptCallBubble = function(self, method, ...)
 		return bubble(self:GetParent(), false, method, ...)
 	end,
 
+	CScriptAdd = function(self, script, func)
+		self.__CScripts = self.__CScripts or {}
+		local existing = self.__CScripts[script]
+		local existing_t = type(existing)
 
+		if existing_t == nil then
+			self.__CScripts[script] = func
+		elseif existing_t == "function" then
+			self.__CScripts[script] = {existing, func}
+		else
+			tinsert(existing, func)
+		end
+	end,
+
+	CScriptAddPre = function(self, script, func)
+		self.__CScripts = self.__CScripts or {}
+		local existing = self.__CScripts[script]
+		local existing_t = type(existing)
+
+		if existing_t == nil then
+			self.__CScripts[script] = func
+		elseif existing_t == "function" then
+			self.__CScripts[script] = {func, existing}
+		else
+			tinsert(existing, 1, func)
+		end
+	end,
+
+	CScriptRemove = function(self, script, func)
+		if not self.__CScripts then
+			return
+		end
+
+		if func == nil then
+			self.__CScripts[script] = nil
+			return
+		end
+
+		local existing = self.__CScripts[script]
+		if not existing then
+			return
+		end
+
+		if type(existing) == "function" then
+			if existing == func then
+				self.__CScripts[script] = nil
+			end
+		else
+			TMW.tDeleteItem(existing, func, 1)
+		end
+	end,
+
+	CScriptRemoveAll = function(self)
+		self.__CScripts = null
+	end,
+
+	CScriptCall = function(self, script, ...)
+		if not self.__CScripts then
+			return
+		end
+
+		local existing = self.__CScripts[script]
+		if not existing then
+			return
+		end
+
+		if type(existing) == "function" then
+			existing(self, ...)
+		else
+			for i = 1, #existing do
+				existing[i](self, ...)
+			end
+		end
+	end,
+
+	CScriptCallGet = function(self, script, ...)
+		if not self.__CScripts then
+			return
+		end
+
+		local existing = self.__CScripts[script]
+		if not existing then
+			return
+		end
+
+		if type(existing) == "function" then
+			return existing(self, ...)
+		else
+			for i = 1, #existing do
+				local ret = existing[i](self, ...)
+				if ret then
+					return ret
+				end
+			end
+		end
+	end,
+}
+
+TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 
 	-- Constructor
 	OnNewInstance_Frame = function(self, data)
