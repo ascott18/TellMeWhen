@@ -377,8 +377,9 @@ function TMW:Group_Swap(domain, groupID1, groupID2)
 		groupGUID = CI.group:GetGUID()
 	end
 
-	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
+	IE:Load(1, false)
 
+	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
 	TMW:Update()
 
 	IE:Load(1, groupGUID and TMW:GetDataOwner(groupGUID)[iconID])
@@ -1589,7 +1590,9 @@ TMW.C.XmlConfigPanelInfo {
 	end,
 
 	MakePanel = function(self, panelColumn)
-		return TMW.C.Config_Panel:New("Frame", self:GetFrameName(), panelColumn, self.xmlTemplateName)
+		local panel = CreateFrame("Frame", self:GetFrameName(), panelColumn, self.xmlTemplateName)
+		TMW:CInit(panel, {})
+		return panel
 	end,
 }
 
@@ -1613,7 +1616,55 @@ TMW.C.LuaConfigPanelInfo {
 
 
 
+
+local function bubble(frame, one, method, ...)
+	if frame == TellMeWhen_IconEditor or frame == UIParent or not frame then
+		return
+	end
+	
+	if frame[method] then
+		local ret = frame[method](frame, ...)
+		if one and ret then
+			return ret
+		end
+	end
+
+	return bubble(frame:GetParent(), one, method, ...)
+end
+
+local function tunnel(frame, one, method, ...)
+	if frame[method] then
+		local ret = frame[method](frame, ...)
+		if one and ret then
+			return ret
+		end
+	end
+
+	for _, child in TMW:Vararg(frame:GetChildren()) do
+		local ret = tunnel(child, one, method, ...)
+		if one and ret then
+			return ret
+		end
+	end
+end
+
+
 TMW:NewClass("Config_Frame", "Frame"){
+	CallTunnelOne = function(self, method, ...)
+		return tunnel(self, true, method, ...)
+	end,
+	CallBubbleOne = function(self, method, ...)
+		return bubble(self:GetParent(), true, method, ...)
+	end,
+	CallTunnelAll = function(self, method, ...)
+		return tunnel(self, false, method, ...)
+	end,
+	CallBubbleAll = function(self, method, ...)
+		return bubble(self:GetParent(), false, method, ...)
+	end,
+
+
+
 	-- Constructor
 	OnNewInstance_Frame = function(self, data)
 		-- Setup callbacks that will load the settings when needed.
@@ -1656,7 +1707,7 @@ TMW:NewClass("Config_Frame", "Frame"){
 	IsEnabled = function(self)
 		return self.Enabled
 	end,
-	SetEnabled = function(self, enabled)		
+	SetEnabled = function(self, enabled)
 		if self.Enabled ~= enabled then
 			self.Enabled = enabled
 			if enabled then
@@ -1718,27 +1769,11 @@ TMW:NewClass("Config_Frame", "Frame"){
 	end,
 
 	GetSettingTable = function(self)
-		local frame = self
-		repeat
-			frame = frame:GetParent()
-			if frame.GetSettingTable then
-				return frame:GetSettingTable()
-			end
-		until frame == TellMeWhen_IconEditor
-
-		error("Could not get setting table for setting " .. tostring(self.setting or "<???>"))
+		return self:CallBubbleOne("GetSettingTable")
 	end,
 
 	OnSettingSaved = function(self)
-		local frame = self
-		repeat
-			frame = frame:GetParent()
-			if frame.OnSettingSaved then
-				return frame:OnSettingSaved()
-			end
-		until frame == TellMeWhen_IconEditor
-
-		error("Could not find OnSettingSaved for setting " .. tostring(self.setting or "<???>"))
+		return self:CallBubbleOne("OnSettingSaved")
 	end,
 
 	ReloadSetting = TMW.NULLFUNC
@@ -1817,6 +1852,8 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
 			get(self.supplementalData.OnSetup, self, panelInfo, self.supplementalData) 
 		end
+
+		self:ReloadSetting()
 			
 		TMW:Fire("TMW_CONFIG_PANEL_SETUP", self, panelInfo)
 	end,

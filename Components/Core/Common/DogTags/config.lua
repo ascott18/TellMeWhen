@@ -175,6 +175,7 @@ local extendedTags = {
 	Unit = "Unit:Name",
 	PreviousUnit = "PreviousUnit:Name",
 	Stacks = "Stacks:Hide(0)",
+	Timer = "Timer:TMWFormatDuration",
 }
 
 local function prepareEditBox(box)

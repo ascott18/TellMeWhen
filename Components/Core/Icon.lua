@@ -195,17 +195,25 @@ end
 -- [WRAPPER] (no documentation needed)
 Icon.RegisterEvent_Blizz = Icon.RegisterEvent
 function Icon.RegisterEvent(icon, event)
+	if not icon.registeredEvents then
+		icon.registeredEvents = {}
+	end
+	icon.registeredEvents[event] = true
+
 	icon:RegisterEvent_Blizz(event)
-	icon.hasEvents = 1
 end
 
 -- [WRAPPER] (no documentation needed)
 Icon.UnregisterAllEvents_Blizz = Icon.UnregisterAllEvents
 function Icon.UnregisterAllEvents(icon, event)
-	-- UnregisterAllEvents_Blizz uses a metric fuckton of CPU, so only do it if needed
-	if icon.hasEvents then
-		icon:UnregisterAllEvents_Blizz()
-		icon.hasEvents = nil
+	-- UnregisterAllEvents_Blizz uses a metric fuckton of CPU, so don't do it.
+	-- Instead, keep track of events that we register, and unregister them by hand.
+	
+	if icon.registeredEvents then
+		for event in pairs(icon.registeredEvents) do
+			icon:UnregisterEvent(event)
+		end
+		wipe(icon.registeredEvents)
 	end
 end
 

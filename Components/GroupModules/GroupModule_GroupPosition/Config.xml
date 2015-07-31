@@ -272,13 +272,16 @@
 			</CheckButton>
 
 			<Button parentKey="ResetButton" inherits="TellMeWhen_ButtonTemplate" text="RESET">
-				<Size y="15"/>
+				<Size y="14"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-11" y="9"/>
+					<Anchor point="BOTTOMRIGHT" x="-11" y="7"/>
 				</Anchors>
+				
+				<NormalFont style="GameFontNormalSmall"/>
+				<HighlightFont style="GameFontHighlightSmall"/>
+
 				<Scripts>
 					<OnLoad>
-						self:SetScale(0.9)
 						self:SetText(TMW.L["UIPANEL_GROUPRESET"])
 						TMW:TT(self, "UIPANEL_GROUPRESET", "UIPANEL_TOOLTIP_GROUPRESET")
 

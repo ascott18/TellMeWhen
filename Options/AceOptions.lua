@@ -296,46 +296,6 @@ TMW.GroupConfigTemplate = {
 						group:Setup()
 					end,
 				},
-				OnlyInCombat = {
-					name = L["UIPANEL_ONLYINCOMBAT"],
-					desc = L["UIPANEL_TOOLTIP_ONLYINCOMBAT"],
-					type = "toggle",
-					order = 4,
-				},
-				PrimarySpec = {
-					name = L["UIPANEL_PRIMARYSPEC"],
-					desc = L["UIPANEL_TOOLTIP_PRIMARYSPEC"],
-					type = "toggle",
-					order = 7,
-					hidden = specializationSettingHidden,
-				},
-				SecondarySpec = {
-					name = L["UIPANEL_SECONDARYSPEC"],
-					desc = L["UIPANEL_TOOLTIP_SECONDARYSPEC"],
-					type = "toggle",
-					order = 8,
-					hidden = specializationSettingHidden,
-				},
-				Columns = {
-					name = L["UIPANEL_COLUMNS"],
-					desc = L["UIPANEL_TOOLTIP_COLUMNS"],
-					type = "range",
-					order = 20,
-					min = 1,
-					max = TELLMEWHEN_MAXROWS,
-					step = 1,
-					bigStep = 1,
-				},
-				Rows = {
-					name = L["UIPANEL_ROWS"],
-					desc = L["UIPANEL_TOOLTIP_ROWS"],
-					type = "range",
-					order = 21,
-					min = 1,
-					max = TELLMEWHEN_MAXROWS,
-					step = 1,
-					bigStep = 1,
-				},
 				
 				CheckOrder = {
 					name = L["CHECKORDER"],
@@ -461,39 +421,9 @@ TMW.GroupConfigTemplate = {
 				ImportExport = importExportBoxTemplate,
 			},
 		},
-		position = {
-			type = "group",
-			order = 20,
-			name = L["UIPANEL_POSITION"],
-			desc = L["UIPANEL_POSITION_DESC"],
-			args = {
-			},
-		},
 	}
 }
 
-for i, role in TMW:Vararg("DAMAGER", "HEALER", "TANK") do
-	local settingBit = bit.lshift(1, i-1)
-	TMW.GroupConfigTemplate.args.main.args[role] = {
-		type = "toggle",
-		name = L["ROLEf"]:format(_G[role]),
-		desc = L["UIPANEL_ROLE_DESC"],
-		order = 9+i,
-		set = function(info, val)
-			local group = FindGroupFromInfo(info)
-			local gs = group:GetSettings()
-
-			gs.Role = bit.bxor(gs.Role, settingBit)
-
-			group:Setup()
-		end,
-		get = function(info)
-			local group = FindGroupFromInfo(info)
-
-			return bit.band(group:GetSettings().Role, settingBit) == settingBit
-		end,
-	}
-end
 local addGroupFunctionGroup = {
 	type = "group",
 	name = L["UIPANEL_ADDGROUP"],

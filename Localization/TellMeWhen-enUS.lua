@@ -223,6 +223,10 @@ L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose spell to check"
 L["ICONMENU_CHOOSENAME_ORBLANK"] = "|cff7fffffOR|r leave blank to track all"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["ICONMENU_ENABLE_DESC"] = "Icons will only function when they are enabled."
+L["ICONMENU_ENABLE_GROUP_DESC"] = "Groups will only function when they are enabled."
+L["ICONMENU_ENABLE_PROFILE"] = "Enabled for profile"
+L["ICONMENU_ENABLE_PROFILE_DESC"] = "Uncheck to disable the |cff00c300global|r group for the current profile."
+
 --L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
 L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
@@ -908,10 +912,12 @@ L["UIPANEL_ADDGROUP"] = "+ Add Another Group +"
 L["UIPANEL_ADDGROUP_DESC"] = "The new group will be assigned the next available groupID"
 L["UIPANEL_DELGROUP"] = "Delete this Group"
 L["UIPANEL_DELGROUP_DESC2"] = "Hold |cff7fffffCtrl|r to bypass confirmation."
-L["UIPANEL_GROUPMOVEUP"] = "Move up"
-L["UIPANEL_GROUPMOVEUP_DESC"] = "Shifts this group's groupID up by one"
-L["UIPANEL_GROUPMOVEDOWN"] = "Move Down"
-L["UIPANEL_GROUPMOVEDOWN_DESC"] = "Shifts this group's groupID down by one"
+
+
+L["UIPANEL_GROUPID"] = "Group ID"
+L["UIPANEL_GROUPID_DESC"] = "Changes the ID of this group."
+
+
 L["UIPANEL_TOOLTIP_ENABLEGROUP"] = "Show and enable this group"
 L["UIPANEL_TOOLTIP_ENABLEGROUP_GLOBAL_DESC"] = "Show and enable this group for this profile. Changing this setting will not affect your other profiles."
 L["UIPANEL_TOOLTIP_ROWS"] = "Set the number of rows in this group"
@@ -945,6 +951,15 @@ This option is account-wide: all of your profiles will share this setting.]]
 
 L["UIPANEL_GROUPSORT"] = "Icon Sorting"
 L["UIPANEL_GROUPSORT_DESC"] = "Contains settings for sorting an positioning icons within a group based on their atributes."
+
+L["UIPANEL_GROUPSORT_ALLDESC"] = [[|cff7fffffClick|r to change the direction of this sort priority.
+|cff7fffffClick-and-drag|r to rearrange.]]
+
+L["UIPANEL_GROUPSORT_ADD"] = "Add Priority"
+L["UIPANEL_GROUPSORT_ADD_DESC"] = "Add a new icon sorting priority to this group."
+L["UIPANEL_GROUPSORT_ADD_NOMORE"] = "No Available Priorities"
+L["UIPANEL_GROUPSORT_PRESETS"] = "Choose Preset..."
+L["UIPANEL_GROUPSORT_PRESETS_DESC"] = "Choose from a list of preset sorting priorities to apply to this icon."
 L["UIPANEL_GROUPSORT_METHODNAME"] = "Icon Sort Priority %d"
 L["UIPANEL_GROUPSORT_METHODNAME_DESC"] = "This will be used as the number %d priority when sorting icons to be positioned within a group."
 L["UIPANEL_GROUPSORT_SORTASCENDING"] = "Low"
@@ -956,18 +971,33 @@ L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen\\T
 
 L["UIPANEL_GROUPSORT_id"] = "Icon ID"
 L["UIPANEL_GROUPSORT_id_DESC"] = "Sorts the group by the ID numbers of its icons."
+L["UIPANEL_GROUPSORT_id_1"] = "Low IDs first"
+L["UIPANEL_GROUPSORT_id_-1"] = "High IDs first"
+
 L["UIPANEL_GROUPSORT_duration"] = "Duration"
 L["UIPANEL_GROUPSORT_duration_DESC"] = "Sorts the group by the duration remaining on its icons."
-L["UIPANEL_GROUPSORT_alpha"] = "Opacity (Ignore %s)"
-L["UIPANEL_GROUPSORT_alpha_DESC"] = "Sorts the group by the opacity of its icons, ignoring whether or not icons are hidden by the %s setting."
-L["UIPANEL_GROUPSORT_visiblealpha"] = "Opacity (Respect %s)"
-L["UIPANEL_GROUPSORT_visiblealpha_DESC"] = "Sorts the group by the opacity of its icons, using whatever opacity the icon is actually visible at."
-L["UIPANEL_GROUPSORT_shown"] = "Shown (Ignore %s)"
-L["UIPANEL_GROUPSORT_shown_DESC"] = "Sorts the group by whether or not an icon is shown, ignoring whether or not icons are hidden by the %s setting."
-L["UIPANEL_GROUPSORT_visibleshown"] = "Shown (Respect %s)"
-L["UIPANEL_GROUPSORT_visibleshown_DESC"] = "Sorts the group by whether or not an icon is visible to you."
+L["UIPANEL_GROUPSORT_duration_1"] = "Low duration first"
+L["UIPANEL_GROUPSORT_duration_-1"] = "High duration first"
+
+L["UIPANEL_GROUPSORT_alpha"] = "Opacity"
+L["UIPANEL_GROUPSORT_alpha_DESC"] = "Sorts the group by the opacity of its icons."
+L["UIPANEL_GROUPSORT_alpha_1"] = "Low opacity first"
+L["UIPANEL_GROUPSORT_alpha_-1"] = "High opacity first"
+
+L["UIPANEL_GROUPSORT_shown"] = "Shown"
+L["UIPANEL_GROUPSORT_shown_DESC"] = "Sorts the group by whether or not an icon is shown."
+L["UIPANEL_GROUPSORT_shown_1"] = "Hidden icons first"
+L["UIPANEL_GROUPSORT_shown_-1"] = "Shown icons first"
+
 L["UIPANEL_GROUPSORT_stacks"] = "Stacks"
 L["UIPANEL_GROUPSORT_stacks_DESC"] = "Sorts the group by the stacks of each icon."
+L["UIPANEL_GROUPSORT_stacks_1"] = "Low stacks first"
+L["UIPANEL_GROUPSORT_stacks_-1"] = "High stacks first"
+
+L["UIPANEL_GROUPSORT_fakehidden"] = "%s"
+L["UIPANEL_GROUPSORT_fakehidden_DESC"] = "Sorts the group by the state of the %q setting."
+L["UIPANEL_GROUPSORT_fakehidden_1"] = "Not always hidden first"
+L["UIPANEL_GROUPSORT_fakehidden_-1"] = "Always hidden first"
 
 
 

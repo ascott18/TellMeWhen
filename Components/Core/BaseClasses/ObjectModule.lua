@@ -68,6 +68,26 @@ function ObjectModule:Enable()
 	end
 end
 
+local queuedDisableDelayed = {}
+local timerStarted = false
+local function OnDisableDelayedHandler()
+	timerStarted = false
+	for i, module in ipairs(queuedDisableDelayed) do
+		if not module.IsEnabled then
+			TMW.safecall(module.OnDisableDelayed, module)
+		end
+	end
+	wipe(queuedDisableDelayed)
+end
+local function QueueDisableDelayed(module)
+	queuedDisableDelayed[#queuedDisableDelayed + 1] = module
+
+	if not timerStarted then
+		C_Timer.After(0, OnDisableDelayedHandler)
+		timerStarted = true
+	end
+end
+
 --- Disables an instance of a [[api/base-classes/object-module/|ObjectModule]]. An [[api/base-classes/object-module/|ObjectModule]] should, and will, only function when it is enabled.
 function ObjectModule:Disable()
 	self:AssertSelfIsInstance()
@@ -81,6 +101,9 @@ function ObjectModule:Disable()
 		
 		if self.OnDisable then
 			TMW.safecall(self.OnDisable, self)
+		end
+		if self.OnDisableDelayed then
+			QueueDisableDelayed(self)
 		end
 	end
 end

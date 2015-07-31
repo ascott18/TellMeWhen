@@ -17,7 +17,7 @@
  <!-- <Script file="GroupModule_IconPosition\Config.lua"/> -->
 
  
- <!-- <Include file="GroupModule_IconPosition_Sortable\Config.xml"/> -->
+ <Include file="GroupModule_IconPosition_Sortable\Config.xml"/>
  <Script file="GroupModule_IconPosition_Sortable\Config.lua"/>
 
  

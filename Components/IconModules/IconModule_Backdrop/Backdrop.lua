@@ -59,15 +59,18 @@ function Backdrop:OnEnable()
 end
 function Backdrop:OnDisable()
 	self.container:Hide()
+	self:SetBorder(0, 1, 1, 1, 1)
 end
 
 function Backdrop:SetBorder(size, r, g, b, a)
-	if not self.border then
+	if not self.border and size ~= 0 then
 		self.border = CreateFrame("Frame", nil, self.container, "TellMeWhen_GenericBorder")
 	end
 
-	self.border:SetSize(size)
-	self.border:SetColor(r, g, b, a)
+	if self.border then
+		self.border:SetSize(size)
+		self.border:SetColor(r, g, b, a)
+	end
 end
 
 function Backdrop:SetupForIcon(icon)

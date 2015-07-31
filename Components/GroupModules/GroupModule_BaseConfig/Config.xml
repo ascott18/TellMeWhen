@@ -1,5 +1,114 @@
 ﻿<Ui>
 
+	<Frame name="TellMeWhen_GM_Rename" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<!-- <Size y="50"/> -->
+		<Frames>
+			<EditBox parentKey="Name" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
+				<Size x="545" y="15"/>
+				<Anchors>
+					<Anchor point="TOP" y="-5"/>
+					<Anchor point="LEFT" x="9" />
+					<Anchor point="RIGHT" x="-9" />
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" x="19" y="-1"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.BackgroundText:SetWidth(self:GetWidth())
+						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_GROUPNAME"],
+							label = TMW.L["UIPANEL_GROUPNAME"],
+							setting = "Name",
+							doCleanString = true,
+						})
+
+					</OnLoad>
+					
+					<OnTextChanged>
+						local text = self:GetText()
+						if text == "" then
+							local label = self.label
+							self.BackgroundText:SetText(label)
+						else
+							self.BackgroundText:SetText(nil)
+						end
+						
+						self:GetParent():AdjustHeight()
+					</OnTextChanged>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>		
+				self.Header:SetText(TMW.L["UIPANEL_GROUPNAME"])		
+
+				function self:AdjustHeight()
+					self:SetHeight(11 + self.Name:GetHeight())
+				end
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+
+	<Frame name="TellMeWhen_GM_DBLoc" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="85"/>
+		<Frames>
+			<Slider parentKey="ID" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" y="-13"/>
+					<Anchor point="LEFT" x="10" />
+					<Anchor point="RIGHT" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self, {
+							title = TMW.L["UIPANEL_GROUPID"],
+							tooltip = TMW.L["UIPANEL_GROUPID_DESC"],
+							setting = "ID",
+							min = 1,
+							max = 1,
+							step = 1,
+
+							ModifySettingValue = function(self, newID)
+								local group = self:GetSettingTable()
+								local oldID = group.ID
+
+								TMW:Group_Swap(group.Domain, oldID, newID)
+
+								-- IMPORTANT: we return the old ID since we don't want to actually change the ID of the group.
+								-- What this actually does is swap the settings between two groups. GroupIDs never actually change.
+								return oldID
+							end,
+						})
+
+						function self:GetSettingTable()
+							if TMW.CI.group then
+								self:SetMinMaxValues(1, #TMW[TMW.CI.group.Domain])
+							end
+
+							return TMW.CI.group
+						end
+					</OnLoad>
+				</Scripts>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.Header:SetText(TMW.L["UIPANEL_DIMENSIONS"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+
+
 	<Frame name="TellMeWhen_GM_Dims" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="85"/>
 		<Frames>

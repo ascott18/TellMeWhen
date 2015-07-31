@@ -26,7 +26,7 @@ function IconContainer:OnNewInstance_IconContainer(icon)
 	
 	container:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
 	container:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress")
-	
+
 	self.container = container
 	
 	container:EnableMouse(false)
@@ -36,22 +36,30 @@ function IconContainer:OnEnable()
 	local icon = self.icon
 	local container = self.container
 	
-	container:Show()
+	if not container:IsShown() then
+		container:Show()
+	end
 	
 	container:SetFrameLevel(icon:GetFrameLevel())
 end
 
 function IconContainer:OnDisable()
+	self:SetBorder(0, 1, 1, 1, 1)
+end
+
+function IconContainer:OnDisableDelayed()
 	self.container:Hide()
 end
 
 function IconContainer:SetBorder(size, r, g, b, a)
-	if not self.border then
+	if not self.border and size ~= 0 then
 		self.border = CreateFrame("Frame", nil, self.container, "TellMeWhen_GenericBorder")
 	end
 
-	self.border:SetSize(size)
-	self.border:SetColor(r, g, b, a)
+	if self.border then
+		self.border:SetSize(size)
+		self.border:SetColor(r, g, b, a)
+	end
 end
 
 

@@ -19,230 +19,422 @@ local print = TMW.print
 
 local FindGroupFromInfo = TMW.FindGroupFromInfo
 
+local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
+
+
 
 ---------------------
 -- Layout Direction
 ---------------------
 
-TMW.Classes.GroupModule_IconPosition_Sortable:RegisterConfigTable("args.main.args", "LayoutDirection", {
-	name = L["LAYOUTDIRECTION"],
-	desc = L["LAYOUTDIRECTION_DESC"],
-	type = "select",
-	values = {
-		L["LAYOUTDIRECTION_1"],
-		L["LAYOUTDIRECTION_2"],
-		L["LAYOUTDIRECTION_3"],
-		L["LAYOUTDIRECTION_4"],
-		L["LAYOUTDIRECTION_5"],
-		L["LAYOUTDIRECTION_6"],
-		L["LAYOUTDIRECTION_7"],
-		L["LAYOUTDIRECTION_8"],
-	},  
-	style = "dropdown",
-	order = 27,
-})
+TMW:NewClass("Config_ArrowButton", "Config_CheckButton") {
+	OnNewInstance_CheckButton = function(self, data)
+		if not self:GetParent().class == TMW.C.Config_ArrowButtonSet then
+			error("Config_ArrowButton must be a child of a Config_ArrowButtonSet")
+		end
+
+		if data and data.orientation then
+			self:SetOrientation(data.orientation)
+		end
+	end,
+
+	orientationData = {
+		RIGHT = { 1, 1, 0, 1, 1, 0, 0, 0 },
+		LEFT  = { 1, 0, 0, 0, 1, 1, 0, 1 },
+		UP    = { 0, 0, 0, 1, 1, 0, 1, 1 },
+		DOWN  = { 0, 1, 0, 0, 1, 1, 1, 0 },
+
+
+		-- RIGHT = { 0.6875, 0.65625, 0.21875, 0.65625, 0.6875, 0.34375, 0.21875, 0.34375 },
+		-- LEFT  = { 0.6875, 0.34375, 0.21875, 0.34375, 0.6875, 0.65625, 0.21875, 0.65625 },
+		-- UP    = { 0.21875, 0.34375, 0.21875, 0.65625, 0.6875, 0.34375, 0.6875, 0.65625 },
+		-- DOWN  = { 0.21875, 0.65625, 0.21875, 0.34375, 0.6875, 0.65625, 0.6875, 0.34375 },
+	},
+	
+	OnDisable = function(self)
+		self:SetAlpha(0.5)
+		
+		if self.data.disabledtooltip then
+			self:SetTooltip(self.data.title, self.data.disabledtooltip)
+		end
+	end,
+
+	SetOrientation = function(self, orientation)
+		TMW:ValidateType("orientation", "SetOrientation(orientation)", orientation, "string")
+
+		local data = self.orientationData[orientation:upper()]
+		if not data then
+			error("Invalid orientation to SetOrientation()")
+		end
+
+		self:GetNormalTexture():SetTexCoord(unpack(data))
+		self:GetHighlightTexture():SetTexCoord(unpack(data))
+		self:GetDisabledTexture():SetTexCoord(unpack(data))
+		self:GetCheckedTexture():SetTexCoord(unpack(data))
+	end,
+
+	GetSettingTable = function(self)
+		return self:GetParent()
+	end,
+}
+
+TMW:NewClass("Config_ArrowButtonSet", "Config_Frame") {
+
+	OnNewInstance_ArrowButtonSet = function(self, data)
+		self.arrows = {}
+
+		if data then
+			if data.title then
+				self.Header:SetText(data.title)
+			end
+		end
+
+		for i, orientation in TMW:Vararg("LEFT", "DOWN", "RIGHT", "UP") do
+			local arrow = TMW.C.Config_ArrowButton:New("CheckButton", nil, self, "TellMeWhen_ArrowButton_Template", nil, {
+				setting = "Orientation",
+				value = orientation,
+			})
+			arrow:SetOrientation(orientation)
+			self.arrows[orientation] = arrow
+
+			if orientation == "DOWN" then
+				arrow:SetPoint("BOTTOM", 0, 0)
+			elseif orientation == "UP" then
+				arrow:SetPoint("TOP", 0, 0)
+			else
+				arrow:SetPoint(orientation, 0, 0)
+			end
+
+		end
+	end,
+
+	EnableOrientations = function(self, ...)
+		for _, orientation in TMW:Vararg(...) do
+			local arrow = self.arrows[orientation]
+			arrow:Enable()
+
+			-- If there were no enabled arrows in the set, select this one.
+			if self.Orientation == nil then
+				self:SetOrientation(orientation)
+			end
+		end
+	end,
+
+	DisableOrientations = function(self, ...)
+		for _, orientation in TMW:Vararg(...) do
+			local arrow = self.arrows[orientation]
+			arrow:Disable()
+
+			-- If the disabled arrow was the selected orientation, select a new orientation.
+			if self.Orientation == orientation then
+				self:SetOrientation(nil)
+				for orientation, arrow in pairs(self.arrows) do
+					if arrow:IsEnabled() then
+						self:SetOrientation(orientation)
+						break
+					end
+				end
+			end
+		end
+	end,
+
+	OnSettingSaved = function(self)
+		self:SetOrientation(self.Orientation)
+		self:GetParent():SaveSetting()
+	end,
+
+	SetOrientation = function(self, orientation)
+		TMW:ValidateType("orientation", "SetOrientation(orientation)", orientation, "string;nil")
+
+		if orientation then
+			orientation = orientation:upper()
+
+			if not self.arrows[orientation] then
+				error("Invalid orientation to SetOrientation()")
+			end
+		end
+
+
+		for orientation, arrow in pairs(self.arrows) do
+			arrow:SetChecked(false)
+		end
+
+		if orientation then
+			self.arrows[orientation]:SetChecked(true)
+		end
+		self.Orientation = orientation
+	end,
+
+	GetOrientation = function(self)
+		return self.Orientation
+	end,
+}
+
+TMW:NewClass("TellMeWhen_GM_IconPosition_Sortable_Dir", "Config_Panel") {
+	map = {
+		["UP,LEFT"] = 7,
+		["UP,RIGHT"] = 8,
+		["DOWN,LEFT"] = 6,
+		["DOWN,RIGHT"] = 5,
+		["LEFT,UP"] = 3,
+		["LEFT,DOWN"] = 2,
+		["RIGHT,UP"] = 4,
+		["RIGHT,DOWN"] = 1,
+	},
+
+	AdjustSecondary = function(self)
+		local primary = self.Primary:GetOrientation()
+
+		if primary == "UP" or primary == "DOWN" then
+			self.Secondary:EnableOrientations("LEFT", "RIGHT")
+			self.Secondary:DisableOrientations("UP", "DOWN")
+		else
+			self.Secondary:EnableOrientations("UP", "DOWN")
+			self.Secondary:DisableOrientations("LEFT", "RIGHT")
+		end
+	end,
+
+	OnState = function(self)
+		self:AdjustSecondary()
+	end,
+
+	SaveSetting = function(self)
+		self:AdjustSecondary()
+		local primary = self.Primary:GetOrientation()
+		local secondary = self.Secondary:GetOrientation()
+
+		local value = primary and secondary and self.map[primary .. "," .. secondary]
+
+		if not value then
+			print(primary, secondary, value)
+			error("COULDNT FIND A VALUE FOR TellMeWhen_GM_IconPosition_Sortable_Dir")
+		end
+
+		self:GetSettingTable().LayoutDirection = value
+		self:OnSettingSaved()
+	end,
+
+	ReloadSetting = function(self)
+		local value = self:GetSettingTable().LayoutDirection
+
+		local primary, secondary = strsplit(",", TMW.tContains(self.map, value))
+
+		self.Primary:SetOrientation(primary)
+		self:AdjustSecondary()
+		self.Secondary:SetOrientation(secondary)
+	end,
+}
+
+
 
 
 ---------------------
 -- Sorting
 ---------------------
 
-local groupSortPriorities = {
-	"id",
-	"duration",
-	"stacks",
-	"visiblealpha",
-	"visibleshown",
-	"alpha",
-	"shown",
-}
-
-local groupSortValues = {
-	L["UIPANEL_GROUPSORT_id"],
-	L["UIPANEL_GROUPSORT_duration"],
-	L["UIPANEL_GROUPSORT_stacks"],
-	L["UIPANEL_GROUPSORT_visiblealpha"],
-	L["UIPANEL_GROUPSORT_visibleshown"],
-	L["UIPANEL_GROUPSORT_alpha"],
-	L["UIPANEL_GROUPSORT_shown"],
-}
-
-local groupSortMethodTemplate -- this pre-declaraion is intentional
-groupSortMethodTemplate = {
-	type = "group",
-	name = function(info)
-		return ""
+TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
+	
+	OnNewInstance_IconSortFrame = function(self)
+		self:RegisterForDrag("LeftButton", "RightButton")
+		self:EnableMouse(true)
+		self.Background:SetGradientAlpha("vertical", 1, 1, 1, 0.5, 1, 1, 1, 0.3)
+		self.Background:SetTexture(0.0, 0.0, 0.0, 0.9)
 	end,
-	order = function(info)
-		return 50+ tonumber(info[#info])
-	end,
-	disabled = function(info, priorityID)
-		local group = FindGroupFromInfo(info)
-		local priorityID = priorityID or tonumber(info[#info-1])
 
-		for k, v in pairs(group:GetSettings().SortPriorities) do
-			if k < priorityID and v.Method == "id" then
-				return true
+	Swap = function(self, other)
+		local SortPriorities = self:GetSettingTable()
+
+		local selfSettings = SortPriorities[self:GetID()]
+		local otherSettings = SortPriorities[other:GetID()]
+
+		SortPriorities[self:GetID()] = otherSettings
+		SortPriorities[other:GetID()] = selfSettings
+
+		self:OnSettingSaved()
+		IconPosition_Sortable:LoadConfig()
+	end,
+
+	OnClick = function(self)
+		local SortPriorities = self:GetSettingTable()
+		local settings = SortPriorities[self:GetID()]
+
+		settings.Order = settings.Order * -1
+
+		self:OnSettingSaved()
+		IconPosition_Sortable:LoadConfig()
+	end,
+
+	OnDragStart = function(self)
+		local parent = self:GetParent()
+		
+		parent.draggingFrame = self
+	end,
+
+	OnDragStop = function(self)
+		local parent = self:GetParent()
+		
+		parent.draggingFrame = nil
+
+		local SortPriorities = self:GetSettingTable()
+		local startDeleting = false
+		for i, data in ipairs(SortPriorities) do
+			if data.Method == "id" then
+				startDeleting = true
+			elseif startDeleting then
+				SortPriorities[i] = nil
 			end
 		end
+
+		self:OnSettingSaved()
+		IconPosition_Sortable:LoadConfig()
 	end,
-	dialogInline = true,
-	guiInline = true,
-	args = {
-		method = {
-			name = function(info)
-				local priorityID = tonumber(info[#info-1])
-				return L["UIPANEL_GROUPSORT_METHODNAME"]:format(priorityID)
-			end,
-			desc = function(info)
-				local group = FindGroupFromInfo(info)
 
-				local priorityID = tonumber(info[#info-1])
-				local Method = group:GetSettings().SortPriorities[priorityID].Method
+	OnUpdate = function(self)
+		local parent = self:GetParent()
+		
+		if self:IsMouseOver() and parent.draggingFrame and self ~= parent.draggingFrame then
+			self:Swap(parent.draggingFrame)
+			parent.draggingFrame = self
+		end
+	end,
 
-				local desc = L["UIPANEL_GROUPSORT_METHODNAME_DESC"]:format(priorityID) .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_" .. Method .. "_DESC"]
-				if groupSortMethodTemplate.disabled(info, priorityID) then
-					desc = desc .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"]
-				end
-				return desc
-			end,
-			type = "select",
-			width = "double",
-			values = groupSortValues,
-			style = "dropdown",
-			order = 1,
-			get = function(info)
-				local group = FindGroupFromInfo(info)
+	GetSettingTable = function(self)
+		local gs = TMW.CI.gs
+		return gs and gs.SortPriorities
+	end,
 
-				local priorityID = tonumber(info[#info-1])
-				local Method = group:GetSettings().SortPriorities[priorityID].Method
+	ReloadSetting = function(self)
+		local SortPriorities = self:GetSettingTable()
+		local settings = SortPriorities and SortPriorities[self:GetID()]
 
-				for k, v in pairs(groupSortPriorities) do
-					if Method == v then
-						return k
-					end
-				end
-			end,
-			set = function(info, val)
-				local group = FindGroupFromInfo(info)
-				local gs = group:GetSettings()
+		if settings then
+			local data = IconPosition_Sortable.Sorters[settings.Method]
 
-				local priorityID = tonumber(info[#info-1])
-				local oldPriority = gs.SortPriorities[priorityID]
+			local title = L["UIPANEL_GROUPSORT_" .. settings.Method]
+			self.Name:SetText(title)
 
-				for k, v in pairs(gs.SortPriorities) do
-					if v.Method == groupSortPriorities[val] then
-						gs.SortPriorities[k] = oldPriority
-						gs.SortPriorities[priorityID] = v
-						break
-					end
-				end
-
-				group:Setup()
-			end,
-		},
-		OrderAscending = {
-			name = L["UIPANEL_GROUPSORT_SORTASCENDING"],
-			desc = L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"],
-			type = "toggle",
-			width = "half",
-			order = 2,
-			get = function(info)
-				local group = FindGroupFromInfo(info)
-				local priorityID = tonumber(info[#info-1])
-
-				return group:GetSettings().SortPriorities[priorityID].Order == 1
-			end,
-			set = function(info)
-				local group = FindGroupFromInfo(info)
-				local priorityID = tonumber(info[#info-1])
-
-				group:GetSettings().SortPriorities[priorityID].Order = 1
-				group:Setup()
-			end,
-		},
-		OrderDescending = {
-			name = L["UIPANEL_GROUPSORT_SORTDESCENDING"],
-			desc = L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"],
-			type = "toggle",
-			width = "half",
-			order = 3,
-			get = function(info)
-				local group = FindGroupFromInfo(info)
-				local priorityID = tonumber(info[#info-1])
-
-				return group:GetSettings().SortPriorities[priorityID].Order == -1
-			end,
-			set = function(info)
-				local group = FindGroupFromInfo(info)
-				local priorityID = tonumber(info[#info-1])
-				
-				group:GetSettings().SortPriorities[priorityID].Order = -1
-				group:Setup()
-			end,
-		},
-	}
-}
-
-local Sorting_args = {
-	quick_default = {
-		name = L["UIPANEL_GROUP_QUICKSORT_DEFAULT"],
-		desc = L["UIPANEL_GROUP_QUICKSORT_DEFAULT_DESC"],
-		type = "execute",
-		order = 10,
-		func = function(info)
-			local group = FindGroupFromInfo(info)
-			local gs = group:GetSettings()
-
-			for priorityID, priority in TMW:Vararg("id") do
-				local oldPriority = gs.SortPriorities[priorityID]
-
-				for k, v in pairs(gs.SortPriorities) do
-					if v.Method == priority then
-						gs.SortPriorities[k] = oldPriority
-						gs.SortPriorities[priorityID] = v
-						break
-					end
-				end
+			if data then
+				self.Order:SetText(data[settings.Order] or "<UNKNOWN ORDER>")
+			else
+				self.Order:SetText("")
 			end
 
-			group:Setup()
-		end,
-	},
-	quick_duration = {
-		name = L["UIPANEL_GROUP_QUICKSORT_DURATION"],
-		desc = L["UIPANEL_GROUP_QUICKSORT_DURATION_DESC"],
-		type = "execute",
-		order = 11,
-		func = function(info)
-			local group = FindGroupFromInfo(info)
-			local gs = group:GetSettings()
-
-			for priorityID, priority in TMW:Vararg("visibleshown", "duration", "id") do
-				local oldPriority = gs.SortPriorities[priorityID]
-
-				for k, v in pairs(gs.SortPriorities) do
-					if v.Method == priority then
-						gs.SortPriorities[k] = oldPriority
-						gs.SortPriorities[priorityID] = v
-						break
-					end
-				end
-			end
-
-			group:Setup()
-		end,
-	},
-	
+			self:SetTooltip(title, L["UIPANEL_GROUPSORT_" .. settings.Method .. "_DESC"] .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_ALLDESC"])
+		end
+	end,
 }
-for i = 1, #TMW.Group_Defaults.SortPriorities do
-	Sorting_args[tostring(i)] = groupSortMethodTemplate
+
+
+local sortFrames = {}
+function IconPosition_Sortable:LoadConfig()
+	self:AssertSelfIsClass()
+
+	local group = TMW.CI.group
+	local gs = group:GetSettings()
+
+	local panel = TellMeWhen_GM_IconPosition_Sortable
+
+	for i, data in ipairs(gs.SortPriorities) do
+		local frame = sortFrames[i]
+		if not frame then
+			frame = TMW.C.Config_IconSortFrame:New("Button", nil, panel, "TellMeWhen_GM_IPS_IconSortTemplate")
+			sortFrames[i] = frame
+			frame:SetID(i)
+			frame.Number:SetText("" .. i .. ".")
+
+			if i == 1 then
+				frame:SetPoint("TOP", panel.Add, "BOTTOM", 0, -10)
+				frame:SetPoint("LEFT", 20, 0)
+				frame:SetPoint("RIGHT", -10, 0)
+			else
+				frame:SetPoint("TOP", sortFrames[i-1], "BOTTOM", 0, -2)
+				frame:SetPoint("LEFT", sortFrames[i-1], "LEFT", 0, 0)
+				frame:SetPoint("RIGHT", sortFrames[i-1], "RIGHT", 0, 0)
+			end
+		end
+		
+		frame:Show()
+		frame:ReloadSetting()
+	end
+
+	for i = #gs.SortPriorities + 1, #sortFrames do
+		sortFrames[i]:Hide()
+	end
+
+	local last = sortFrames[#gs.SortPriorities]
+	panel:SetHeight(panel:GetHeight() + (panel:GetBottom() - last:GetBottom()) + 10)
 end
 
-TMW.Classes.GroupModule_IconPosition_Sortable:RegisterConfigTable("args", "Sorting", {
-	name = L["UIPANEL_GROUPSORT"],
-	desc = L["UIPANEL_GROUPSORT_DESC"],
-	type = "group",
-	order = 10,
-	args = Sorting_args,
-})
+
+local function AddOnClick(button, identifier, data)
+	local SortPriorities = TMW.CI.gs.SortPriorities
+
+	tinsert(SortPriorities, #SortPriorities, { Method = identifier, Order = data.DefaultOrder })
+
+	TMW.DD:CloseDropDownMenus()
+	TMW.CI.group:Setup()
+	IconPosition_Sortable:LoadConfig()
+end
+function IconPosition_Sortable:AddDropdown()
+	local used = {}
+	for _, data in pairs(TMW.CI.gs.SortPriorities) do
+		used[data.Method] = true
+	end
+
+	local addedOne = false
+	for identifier, data in pairs(IconPosition_Sortable.Sorters) do
+		if not used[identifier] then
+			local info = TMW.DD:CreateInfo()
+
+			info.text = L["UIPANEL_GROUPSORT_" .. identifier]
+			info.tooltipTitle = info.text
+			info.tooltipText = L["UIPANEL_GROUPSORT_" .. identifier .. "_DESC"]
+			info.notCheckable = true
+			info.arg1 = identifier
+			info.arg2 = data
+			info.func = AddOnClick
+
+			TMW.DD:AddButton(info)
+			addedOne = true
+		end
+	end
+
+	if not addedOne then
+		local info = TMW.DD:CreateInfo()
+
+		info.text = L["UIPANEL_GROUPSORT_ADD_NOMORE"]
+		info.notCheckable = true
+		info.disabled = true
+
+		TMW.DD:AddButton(info)
+
+	end
+end
+
+
+local function PresetOnClick(button, settings)
+	TMW.CI.gs.SortPriorities = CopyTable(settings)
+
+	TMW.DD:CloseDropDownMenus()
+	TMW.CI.group:Setup()
+	IconPosition_Sortable:LoadConfig()
+end
+function IconPosition_Sortable:PresetDropdown()
+
+	for text, settings in pairs(IconPosition_Sortable.Presets) do
+		local info = TMW.DD:CreateInfo()
+
+		info.text = text
+		info.notCheckable = true
+		info.arg1 = settings
+		info.func = PresetOnClick
+
+		TMW.DD:AddButton(info)
+	end
+end
+
+TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
+	if frame == TellMeWhen_GM_IconPosition_Sortable then
+		IconPosition_Sortable:LoadConfig()
+	end
+end)

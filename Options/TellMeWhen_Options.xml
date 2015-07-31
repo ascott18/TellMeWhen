@@ -2811,19 +2811,69 @@
 					<Frame parentKey="GroupMain" hidden="true" setAllPoints="true">
 						<Frames>
 							
-							<Frame inherits="TellMeWhen_IE_PanelColumn" parentKey="PanelsLeft">
+							<Frame parentKey="PanelsLeft" inherits="TellMeWhen_IE_PanelColumn">
 								<Anchors>
 									<Anchor point="LEFT" x="7"/>
 									<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
 								</Anchors>
 							</Frame>
 							
-							<Frame inherits="TellMeWhen_IE_PanelColumn" parentKey="PanelsRight">
+							<Frame parentKey="PanelsRight" inherits="TellMeWhen_IE_PanelColumn">
 								<Anchors>
 									<Anchor point="LEFT" relativePoint="TOP" x="5"/>
 									<Anchor point="RIGHT" x="-9"/>
 								</Anchors>
-							</Frame>							
+							</Frame>	
+							
+							<CheckButton parentKey="Enabled" inherits="TellMeWhen_CheckTemplate">
+								<Anchors>
+									<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-4"/>
+									<Anchor point="LEFT" relativeKey="$parent.PanelsRight" relativePoint="LEFT" />
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										TMW:CInit(self, {
+											setting = "Enabled",
+											title = TMW.L["ICONMENU_ENABLE"],
+											tooltip = TMW.L["ICONMENU_ENABLE_GROUP_DESC"],
+										})
+									</OnLoad>
+								</Scripts>
+							</CheckButton>
+
+							<CheckButton parentKey="EnabledProfile" inherits="TellMeWhen_CheckTemplate">
+								<Anchors>
+									<Anchor point="TOP" relativeKey="$parent.Enabled" relativePoint="TOP"/>
+									<Anchor point="LEFT" relativeKey="$parent.PanelsRight" relativePoint="CENTER" x="-15" />
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										TMW:CInit(self, {
+											setting = TMW.db:GetCurrentProfile(),
+											title = TMW.L["ICONMENU_ENABLE_PROFILE"],
+											tooltip = TMW.L["ICONMENU_ENABLE_PROFILE_DESC"],
+
+											hidden = function(self)
+												return TMW.CI.group.domain == "profile"
+											end,
+											OnClick = function(self)
+												TMW:Update()
+												TMW.IE:Load(1)
+											end,
+										})
+
+										function self:GetSettingTable()
+											return TMW.CI.gs and TMW.CI.gs.EnabledProfiles
+										end
+
+										TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+											self.setting = TMW.db:GetCurrentProfile()
+										end)
+
+										self:ConstrainLabel(self:GetParent(), "RIGHT")
+									</OnLoad>
+								</Scripts>
+							</CheckButton>						
 						</Frames>
 						<Scripts>
 							<OnLoad>
