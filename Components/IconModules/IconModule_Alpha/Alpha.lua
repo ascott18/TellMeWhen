@@ -31,11 +31,10 @@ Alpha:RegisterIconDefaults{
 Alpha:RegisterConfigPanel_ConstructorFunc(195, "TellMeWhen_AlphaModuleSettings", function(self)
 	self.Header:SetText(L["ICONALPHAPANEL_FAKEHIDDEN"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "FakeHidden",
-			title = L["ICONALPHAPANEL_FAKEHIDDEN"],
-			tooltip = L["ICONALPHAPANEL_FAKEHIDDEN_DESC"],
-		}
+		function(check)
+			check:SetTexts(L["ICONALPHAPANEL_FAKEHIDDEN"], L["ICONALPHAPANEL_FAKEHIDDEN_DESC"])
+			check:SetSetting("FakeHidden")
+		end
 	})
 end)
 

@@ -69,16 +69,14 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_WPNENCHANTTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "SwingTimerSlot",
-			value = "MainHandSlot",
-			title = INVTYPE_WEAPONMAINHAND,
-		},
-		{
-			setting = "SwingTimerSlot",
-			value = "SecondaryHandSlot",
-			title = INVTYPE_WEAPONOFFHAND,
-		},
+		function(check)
+			check:SetTexts(INVTYPE_WEAPONMAINHAND, nil)
+			check:SetSetting("SwingTimerSlot", "MainHandSlot")
+		end,
+		function(check)
+			check:SetTexts(INVTYPE_WEAPONOFFHAND, nil)
+			check:SetSetting("SwingTimerSlot", "SecondaryHandSlot")
+		end,
 	})
 end)
 

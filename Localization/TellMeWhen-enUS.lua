@@ -1779,11 +1779,6 @@ L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar (Bar display)"
 L["IconModule_SelfIcon"] = "Icon"
 
 
-L["IE_SIMPLEGS"] = "Full Options"
-L["IE_SIMPLEGS_DESC"] = [[Check to display TMW's full main options in this tab.
-
-Uncheck to only display the options of the group of the currently loaded icon in this tab.]]
-
 L["GROUPADDONSETTINGS"] = "Group Settings"
 L["GROUPADDONSETTINGS_DESC"] = [[Configure settings for other groups, and all other general addon settings.]]
 L["GROUPSETTINGS_DESC"] = [[Configure settings for this group.]]
@@ -2665,8 +2660,6 @@ L["HELP_CNDT_PARENTHESES_FIRSTSEE"] = [[You can group sets of conditions togethe
 L["HELP_CNDT_ANDOR_FIRSTSEE"] = [[You can choose whether both conditions are required to succeed or if only one needs to succeed.
 
 |cff7fffffClick|r this setting between your conditions to change this behavior if you wish to do so.]]
-
-L["HELP_SIMPLEGSTAB"] = "Click to toggle between group-only options and full main options."
 
 L["HELP_SCROLLBAR_DROPDOWN"] = [[Some of TellMeWhen's dropdown menus have scrollbars.
 

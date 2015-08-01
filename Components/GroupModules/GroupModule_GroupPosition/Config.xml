@@ -22,23 +22,21 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "relativeTo",
-							title = TMW.L["UIPANEL_RELATIVETO"],
-							tooltip = TMW.L["UIPANEL_RELATIVETO_DESC"],
-							label = TMW.L["UIPANEL_RELATIVETO"],
+						TMW:CInit(self)
 
-							ModifySettingValue = function(self, value)
-								value = value:trim()
+						self:SetTexts(TMW.L["UIPANEL_RELATIVETO"], TMW.L["UIPANEL_RELATIVETO_DESC"])
+						self:SetSetting("relativeTo")
 
-								if value == "" then
-									value = "UIParent"
-									self:SetText("UIParent")
-								end
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							value = value:trim()
 
-								return value
-							end,
-						})
+							if value == "" then
+								value = "UIParent"
+								self:SetText("UIParent")
+							end
+
+							return value
+						end)
 
 						self.headerText:SetText(TMW.L["UIPANEL_RELATIVETO"])
 
@@ -55,12 +53,10 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self)
 
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_POINT"],
-							tooltip = TMW.L["UIPANEL_POINT2_DESC"],
-							setting = "point",
-						})
+						self:SetTexts(TMW.L["UIPANEL_POINT"], TMW.L["UIPANEL_POINT2_DESC"])
+						self:SetSetting("point")
 
 					</OnLoad>
 				</Scripts>
@@ -76,12 +72,10 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self)
 
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_RELATIVEPOINT"],
-							tooltip = TMW.L["UIPANEL_RELATIVEPOINT2_DESC"],
-							setting = "relativePoint",
-						})
+						self:SetTexts(TMW.L["UIPANEL_RELATIVEPOINT"], TMW.L["UIPANEL_RELATIVEPOINT2_DESC"])
+						self:SetSetting("relativePoint")
 
 					</OnLoad>
 				</Scripts>
@@ -95,18 +89,17 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_FONT_XOFFS"],
-							tooltip = TMW.L["UIPANEL_FONT_XOFFS_DESC"],
-							setting = "x",
-							min = -math.huge,
-							max = math.huge,
-							range = 20,
-							step = 0.1,
-							wheelStep = 1,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_FONT_XOFFS"], TMW.L["UIPANEL_FONT_XOFFS_DESC"])
+						self:SetSetting("x")
 
 						self:SetMode(self.MODE_ADJUSTING)
+						self:SetMinMaxValues(-math.huge, math.huge)
+						self:SetRange(20)
+						self:SetValueStep(0.1)
+						self:SetWheelStep(1)
+
 						self:SetTextFormatter(TMW.C.Formatter.F_1, TMW.C.Formatter.F_0)
 					</OnLoad>
 				</Scripts>
@@ -119,18 +112,17 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_FONT_YOFFS"],
-							tooltip = TMW.L["UIPANEL_FONT_YOFFS_DESC"],
-							setting = "y",
-							min = -math.huge,
-							max = math.huge,
-							range = 20,
-							step = 0.1,
-							wheelStep = 1,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_FONT_YOFFS"], TMW.L["UIPANEL_FONT_YOFFS_DESC"])
+						self:SetSetting("y")
 
 						self:SetMode(self.MODE_ADJUSTING)
+						self:SetMinMaxValues(-math.huge, math.huge)
+						self:SetRange(20)
+						self:SetValueStep(0.1)
+						self:SetWheelStep(1)
+						
 						self:SetTextFormatter(TMW.C.Formatter.F_1, TMW.C.Formatter.F_0)
 					</OnLoad>
 				</Scripts>
@@ -144,20 +136,20 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_LEVEL"],
-							setting = "Level",
-							min = 5,
-							max = math.huge,
-							range = 20,
-							step = 1,
-						})
+						TMW:CInit(self)
 
-						function self:GetSettingTable()
-							return TMW.CI.gs
-						end
+						self:SetTexts(TMW.L["UIPANEL_LEVEL"], nil)
+						self:SetSetting("Level")
 
 						self:SetMode(self.MODE_ADJUSTING)
+						self:SetMinMaxValues(5, math.huge)
+						self:SetRange(20)
+						self:SetValueStep(1)
+
+						self:CScriptAdd("SettingTableRequested", function(requester)
+							return TMW.CI.gs
+						end)
+
 						self:SetTextFormatter(TMW.C.Formatter:New(UNIT_LEVEL_TEMPLATE), TMW.C.Formatter.PASS)
 					</OnLoad>
 				</Scripts>
@@ -183,25 +175,25 @@
 							"TOOLTIP",
 						}
 
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_STRATA"],
-							tooltip = TMW.L["UIPANEL_STRATA_DESC"],
-							setting = "Strata",
-							min = 1,
-							max = #stratas,
-							step = 1,
+						TMW:CInit(self)
 
-							ModifySettingValue = function(self, value)
-								return stratas[value]
-							end,
-							UnModifySettingValue = function(self, value)
-								return TMW.tContains(stratas, value)
-							end,
-						})
+						self:SetTexts(TMW.L["UIPANEL_STRATA"], TMW.L["UIPANEL_STRATA_DESC"])
+						self:SetSetting("Strata")
 
-						function self:GetSettingTable()
+						self:SetMinMaxValues(1, #stratas)
+						self:SetValueStep(1)
+
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return stratas[value]
+						end)
+
+						self:CScriptAdd("UnModifySettingValueRequested", function(self, value)
+							return TMW.tContains(stratas, value)
+						end)
+
+						self:CScriptAdd("SettingTableRequested", function(requester)
 							return TMW.CI.gs
-						end
+						end)
 
 						self:SetTextFormatter(TMW.C.Formatter:New(function(value)
 							if value and stratas[value] then
@@ -222,30 +214,31 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_SCALE"],
-							setting = "Scale",
-							min = 0.4,
-							max = math.huge,
-							range = 0.5,
-							step = 0.01,
+						TMW:CInit(self)
 
-							ModifySettingValue = function(self, value)
-								local group = TMW.CI.group
-
-								local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
-								GroupModule_GroupPosition:SetNewScale(value)
-
-								return value
-							end,
-						})
-
-						function self:GetSettingTable()
-							return TMW.CI.gs
-						end
+						self:SetTexts(TMW.L["UIPANEL_SCALE"], nil)
+						self:SetSetting("Scale")
 
 						self:SetMode(self.MODE_ADJUSTING)
+						self:SetMinMaxValues(0.4, math.huge)
+						self:SetRange(0.5)
+						self:SetValueStep(0.01)
+
 						self:SetTextFormatter(TMW.C.Formatter.PERCENT100, TMW.C.Formatter.PERCENT100)
+
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							local group = TMW.CI.group
+
+							local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+							GroupModule_GroupPosition:SetNewScale(value)
+
+							return value
+						end)
+
+						self:CScriptAdd("SettingTableRequested", function(requester)
+							return TMW.CI.gs
+						end)
+
 					</OnLoad>
 				</Scripts>
 			</Slider>
@@ -258,15 +251,14 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "Locked",
-							title = TMW.L["UIPANEL_LOCK"],
-							tooltip = TMW.L["UIPANEL_LOCK_DESC"],
-						})
+						TMW:CInit(self)
 
-						function self:GetSettingTable()
+						self:SetTexts(TMW.L["UIPANEL_LOCK"], TMW.L["UIPANEL_LOCK_DESC"])
+						self:SetSetting("Locked")
+
+						self:CScriptAdd("SettingTableRequested", function(requester)
 							return TMW.CI.gs
-						end
+						end)
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -304,9 +296,11 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				function self:GetSettingTable()
+				TMW:CInit(self, {})
+				
+				self:CScriptAdd("SettingTableRequested", function(requester)
 					return TMW.CI.gs.Point
-				end
+				end)
 
 				-- These have to go AFTER we declare GetSettingTable.
 				-- That's why they aren't above with the sliders' OnLoads

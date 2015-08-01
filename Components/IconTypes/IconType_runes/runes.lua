@@ -88,11 +88,10 @@ Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_Runes")
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_RuneSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "RunesAsCharges",
-			title = L["ICONMENU_RUNES_CHARGES"],
-			tooltip = L["ICONMENU_RUNES_CHARGES_DESC"],
-		}
+		function(check)
+			check:SetTexts(L["ICONMENU_RUNES_CHARGES"], L["ICONMENU_RUNES_CHARGES_DESC"])
+			check:SetSetting("RunesAsCharges")
+		end
 	})
 end)
 

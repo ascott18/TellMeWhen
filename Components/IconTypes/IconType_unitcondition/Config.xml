@@ -19,9 +19,6 @@
 							disabled = function(self)
 								return not TMW.CI.ics.ConditionDurEnabled
 							end,
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
-							end,
 						})
 					</OnLoad>
 				</Scripts>
@@ -42,9 +39,6 @@
 							tooltip = TMW.L["CONDITION_TIMERS_FAIL_DESC"],
 							disabled = function(self)
 								return not TMW.CI.ics.UnConditionDurEnabled
-							end,
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
 							end,
 						})
 					</OnLoad>
@@ -102,17 +96,17 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							setting = "OnlyIfCounting",
-							title = TMW.L["ICONMENU_ONLYIFCOUNTING"],
-							tooltip = TMW.L["ICONMENU_ONLYIFCOUNTING_DESC"],
-							
-							OnState = function(self)
-								if TMW.CI.ics.OnlyIfCounting then
-									TMW.CI.ics.OnlyIfNotCounting = false
-								end
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_ONLYIFCOUNTING"], TMW.L["ICONMENU_ONLYIFCOUNTING_DESC"])
+						self:SetSetting("OnlyIfCounting")
+
+						self:CScriptAdd("SettingSaved", function()
+							local settings = self:GetSettingTable()
+							if settings.OnlyIfCounting then
+								settings.OnlyIfNotCounting = false
+							end
+						end)
 						
 						self:ConstrainLabel(self:GetParent(), "RIGHT")
 					</OnLoad>
@@ -126,17 +120,17 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							setting = "OnlyIfNotCounting",
-							title = TMW.L["ICONMENU_ONLYIFNOTCOUNTING"],
-							tooltip = TMW.L["ICONMENU_ONLYIFNOTCOUNTING_DESC"],
-							
-							OnState = function(self)
-								if TMW.CI.ics.OnlyIfNotCounting then
-									TMW.CI.ics.OnlyIfCounting = false
-								end
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_ONLYIFNOTCOUNTING"], TMW.L["ICONMENU_ONLYIFNOTCOUNTING_DESC"])
+						self:SetSetting("OnlyIfNotCounting")
+
+						self:CScriptAdd("SettingSaved", function()
+							local settings = self:GetSettingTable()
+							if settings.OnlyIfNotCounting then
+								settings.OnlyIfCounting = false
+							end
+						end)
 						
 						self:ConstrainLabel(self:GetParent(), "RIGHT")
 					</OnLoad>

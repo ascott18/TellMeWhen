@@ -29,12 +29,11 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = TMW.L["ANN_EDITBOX"],
-							tooltip = TMW.L["ANN_EDITBOX_DESC"],
-							label = "|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"],
-							setting = "Text",
-						})
+						TMW:CInit(self)
+
+						self:SetLabel("|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"], nil)
+						self:SetTexts(TMW.L["ANN_EDITBOX"], TMW.L["ANN_EDITBOX_DESC"])
+						self:SetSetting("Text")
 						self:EnableLinkInsertion()
 						
 						self.Header:SetText(TMW.L["ANN_EDITBOX"])
@@ -86,17 +85,19 @@
 							<OnLoad>
 								local Announcements = TMW.EVENTS:GetEventHandler("Announcements")
 
-								TMW:CInit(self, {
-									title = TMW.L["ANN_SUB_CHANNEL"],
-									--tooltip = TMW.L[""],
-									func = Announcements.Location_DropDown,
+								self.tmwClass = "Config_DropDownMenu_Event"
+								TMW:CInit(self)
 
-									topPadding = 14,
-									bottomPadding = 4,
-								})
+								self:SetTexts(TMW.L["ANN_SUB_CHANNEL"], nil)
+								self:SetFunction(Announcements.Location_DropDown)
+								self:SetColumnPadding(14, 4)
 
-								function self:ReloadSetting()
-									local EventSettings = TMW.EVENTS:GetEventSettings()
+
+								self:CScriptAdd("ReloadRequested", function()
+									local settings = self:GetSettingTable()
+									if not settings then
+										return
+									end
 
 									local channelData = Announcements.currentSubHandlerData
 
@@ -105,18 +106,20 @@
 									end
 
 									local defaultlocation = TMW.get(channelData.defaultlocation)
-									local location = EventSettings.Location
+									local location = settings.Location
 									
 									location = location and location ~= "" and location or defaultlocation
 									location = channelData.ddtext(location) and location or defaultlocation
 									
-									EventSettings.Location = location
-									local loc = channelData.ddtext(location)
+
+									if settings.Location ~= location then
+										settings.Location = location
+										self:OnSettingSaved()
+									end
 									
 									self.selectedValue = location
-									self:SetText(loc)
-								end
-								TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", self, "ReloadSetting")
+									self:SetText(channelData.ddtext(location))
+								end)
 
 								self.Header:SetText(TMW.L["ANN_SUB_CHANNEL"])
 							</OnLoad>
@@ -143,15 +146,11 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "Location",
-									title = TMW.L["ANN_WHISPERTARGET"],
-									tooltip = TMW.L["ANN_WHISPERTARGET_DESC"],
-									label = TMW.L["ANN_WHISPERTARGET"],
+								TMW:CInit(self)
 
-									topPadding = 14,
-									bottomPadding = 4,
-								})
+								self:SetTexts(TMW.L["ANN_WHISPERTARGET"], TMW.L["ANN_WHISPERTARGET_DESC"])
+								self:SetSetting("Location")
+								self:SetColumnPadding(14, 4)
 
 								self.Header:SetText(TMW.L["ANN_WHISPERTARGET"])
 								TMW.SUG:EnableEditBox(self, "dogtags")
@@ -163,10 +162,10 @@
 						<Size x="30" y="30"/>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "Sticky",
-									title   = TMW.L["ANN_STICKY"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["ANN_STICKY"], nil)
+								self:SetSetting("Sticky")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -175,11 +174,10 @@
 						<Size x="30" y="30"/>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "ShowIconTex",
-									title   = TMW.L["ANN_SHOWICON"],
-									tooltip = TMW.L["ANN_SHOWICON_DESC"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["ANN_SHOWICON"], TMW.L["ANN_SHOWICON_DESC"])
+								self:SetSetting("ShowIconTex")
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -195,7 +193,6 @@
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self, {
-									title = TMW.L["FONTCOLOR"],
 									GetRGBA = function(self)
 										local s = self:GetSettingTable()
 										return s.r, s.g, s.b, 1
@@ -205,10 +202,10 @@
 										s.r, s.g, s.b = r, g, b
 									end,
 									hasOpacity = false,
-
-									topPadding = 4,
-									bottomPadding = 4,
 								})
+
+								self:SetTexts(TMW.L["FONTCOLOR"], nil)
+								self:SetColumnPadding(4, 4)
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -220,18 +217,17 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "Size",
-									title   = TMW.L["FONTSIZE"],
+								TMW:CInit(self)
 
-									-- TODO: make this a formatter.
-									OnValueChanged = function(self)
-										local value = self:GetValue()
-										self.Mid:SetText(value == 0 and TMW.L["DEFAULT"] or value)
-									end,
-								})
+								self:SetTexts(TMW.L["FONTSIZE"], nil)
+								self:SetSetting("Size")
 								
 								self:SetMinMaxValues(0, 38)
+
+								local formatter = TMW.C.Formatter:New(function(value)
+									return value == 0 and TMW.L["DEFAULT"] or value
+								end)
+								self:SetTextFormatter(formatter, formatter)
 
 							</OnLoad>
 						</Scripts>
@@ -244,10 +240,11 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "TextDuration",
-									title   = TMW.L["DURATION"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["DURATION"], nil)
+								self:SetSetting("TextDuration")
+								self:SetColumnPadding(13, 0)
 								
 								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
 								self:SetMode(self.MODE_ADJUSTING)

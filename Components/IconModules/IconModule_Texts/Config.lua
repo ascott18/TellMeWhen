@@ -240,7 +240,7 @@ function TEXT:LoadConfig()
 				TEXT[i] = frame
 
 				if i == 1 then
-					frame:SetPoint("TOPLEFT", TellMeWhen_TextDisplayOptions.Layout, "BOTTOMLEFT", 0, 16)
+					frame:SetPoint("TOPLEFT", TellMeWhen_TextDisplayOptions.Layout, "BOTTOMLEFT", 0, 0)
 				else
 					frame:SetPoint("TOP", previousFrame, "BOTTOM")
 				end
@@ -317,19 +317,11 @@ TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", TEXT, "LoadConfig")
 
 
 function TEXT:ResizeParentFrame()
-	local layoutHeight = 45 + TellMeWhen_TextDisplayOptions.Layout.Error:GetHeight()
+	local layoutHeight = 26 + TellMeWhen_TextDisplayOptions.Layout.Error:GetHeight()
 	
 	TellMeWhen_TextDisplayOptions.Layout:SetHeight(layoutHeight)
 	
-	local height = layoutHeight
-	
-	for i = 1, #TEXT do
-		if TEXT[i]:IsShown() then
-			height = height + TEXT[i]:GetHeight()
-		end
-	end
-	
-	TellMeWhen_TextDisplayOptions:SetHeight(height)
+	TellMeWhen_TextDisplayOptions:AdjustHeight(10)
 end
 
 function TEXT:ResizeTextDisplayFrame(frame)

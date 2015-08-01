@@ -61,9 +61,9 @@
 					<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									func = TMW.TEXT.CopyString_DropDown,
-								})
+								TMW:CInit(self)
+						
+								self:SetFunction(TMW.TEXT.CopyString_DropDown)
 								
 								self:SetScrollable(true)
 								self.wrapTooltips = false
@@ -105,27 +105,27 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						-- This is handled manually.
-						-- Set to nullfunc before calling CInit - it won't get overridden,
-						-- but we need to make it nullfunc before initializing because otherwise
-						-- the original ReloadSetting will be immediately registered.
-						self.ReloadSetting = TMW.NULLFUNC
-
-
 						TMW:CInit(self, {
 							setting = self:GetParent():GetID(),
-							OnTextChanged = function(self)
-								TMW.TEXT:ResizeTextDisplayFrame(self:GetParent())
-							end,
-							OnEditFocusLost = function(self)
-								TMW.TEXT:LoadConfig()
-							end,
 						})
 
-						function self:GetSettingTable()
+						self:HookScript("OnEditFocusLost", function()
+							TMW.TEXT:LoadConfig()
+						end)
+		
+						-- This is handled manually.
+						self:CScriptRemove("ReloadRequested")
+
+						self:CScriptAdd("SettingTableRequested", function()
 							return TMW.CI.icon and TMW.CI.icon:GetSettingsPerView().Texts
-						end
+						end)
+
+						
 					</OnLoad>
+					<OnSizeChanged>
+						if not self.class then return end
+						TMW.TEXT:ResizeTextDisplayFrame(self:GetParent())
+					</OnSizeChanged>
 				</Scripts>
 			</EditBox>
 
@@ -169,7 +169,7 @@
 					The reset all button
 			-->
 			<Frame name="$parentLayout" parentKey="Layout">
-				<Size y="46"/>
+				<Size y="26"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="0" y="-7"/>
 					<Anchor point="RIGHT"/>
@@ -247,16 +247,15 @@
 					-->
 					<Frame name="$parentPickLayout" inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
 						<Anchors>
-							<Anchor point="TOPLEFT" x="9" y="1"/>
+							<Anchor point="TOPLEFT" x="9" y="0"/>
 							<Anchor point="RIGHT" relativeTo="$parentLayoutSettings"  relativePoint="LEFT" x="-7" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									title = TMW.L["TEXTLAYOUTS_CHOOSELAYOUT"],
-									tooltip = TMW.L["TEXTLAYOUTS_CHOOSELAYOUT_DESC"],
-									func = TMW.TEXT.Layout_DropDown,
-								})
+								TMW:CInit(self)
+						
+								self:SetTexts(TMW.L["TEXTLAYOUTS_CHOOSELAYOUT"], TMW.L["TEXTLAYOUTS_CHOOSELAYOUT_DESC"])
+								self:SetFunction(TMW.TEXT.Layout_DropDown)
 
 								self:SetScrollable(true)
 

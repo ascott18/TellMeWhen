@@ -10,12 +10,12 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "StackMinEnabled",
-							label = "",
-							title = ENABLE,
-							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MIN_DESC"]:gsub("^%u", strlower)),
-						})
+						TMW:CInit(self)
+
+						self:SetLabel("")
+						self:SetTexts(ENABLE,
+							TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MIN_DESC"]:gsub("^%u", strlower)))
+						self:SetSetting("StackMinEnabled")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -26,12 +26,12 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "StackMaxEnabled",
-							label = "",
-							title = ENABLE,
-							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MAX_DESC"]:gsub("^%u", strlower)),
-						})
+						TMW:CInit(self)
+
+						self:SetLabel("")
+						self:SetTexts(ENABLE,
+							TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MAX_DESC"]:gsub("^%u", strlower)))
+						self:SetSetting("StackMaxEnabled")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -49,17 +49,15 @@
 						self.text:SetPoint("LEFT", 2, 0)
 						self.text:SetPoint("RIGHT", self)
 						
-						TMW:CInit(self, {
-							setting = "StackMin",
-							title = MAXIMUM,
-							tooltip = TMW.L["ICONMENU_STACKS_MIN_DESC"],
-							disabled = function(self)
-								return not TMW.CI.ics.StackMinEnabled
-							end,
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_STACKS_MIN_DESC"])
+						self:SetSetting("StackMin")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.StackMinEnabled)
+						end)
 					</OnLoad>
 				</Scripts>
 			</EditBox>
@@ -75,17 +73,15 @@
 						self.text:SetPoint("LEFT", 2, 0)
 						self.text:SetPoint("RIGHT", self)
 						
-						TMW:CInit(self, {
-							setting = "StackMax",
-							title = MAXIMUM,
-							tooltip = TMW.L["ICONMENU_STACKS_MAX_DESC"],
-							disabled = function(self)
-								return not TMW.CI.ics.StackMaxEnabled
-							end,
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_STACKS_MAX_DESC"])
+						self:SetSetting("StackMax")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.StackMaxEnabled)
+						end)
 					</OnLoad>
 				</Scripts>
 
@@ -100,18 +96,17 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["REQFAILED_ALPHA"],
-							tooltip = TMW.L["STACKALPHA_DESC"],
-							setting = "StackAlpha",
-							setOrangeAtValue = 1,
-							disabled = function(self)
-								local ics = TMW.CI.ics
-								if ics then
-									return not ics.StackMinEnabled and not ics.StackMaxEnabled
-								end
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["REQFAILED_ALPHA"], TMW.L["STACKALPHA_DESC"])
+						self:SetSetting("StackAlpha")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.StackMinEnabled or settings.StackMaxEnabled)
+						end)
+
+						self:SetOrangeValue(1)
 					</OnLoad>
 				</Scripts>
 			</Slider>

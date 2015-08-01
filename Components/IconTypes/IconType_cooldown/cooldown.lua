@@ -93,21 +93,18 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "RangeCheck",
-			title = L["ICONMENU_RANGECHECK"],
-			tooltip = L["ICONMENU_RANGECHECK_DESC"],
-		},
-		{
-			setting = "ManaCheck",
-			title = L["ICONMENU_MANACHECK"],
-			tooltip = L["ICONMENU_MANACHECK_DESC"],
-		},
-		pclass == "DEATHKNIGHT" and {
-			setting = "IgnoreRunes",
-			title = L["ICONMENU_IGNORERUNES"],
-			tooltip = L["ICONMENU_IGNORERUNES_DESC"],
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_RANGECHECK"], L["ICONMENU_RANGECHECK_DESC"])
+			check:SetSetting("RangeCheck")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_MANACHECK"], L["ICONMENU_MANACHECK_DESC"])
+			check:SetSetting("ManaCheck")
+		end,
+		pclass == "DEATHKNIGHT" and function(check)
+			check:SetTexts(L["ICONMENU_IGNORERUNES"], L["ICONMENU_IGNORERUNES_DESC"])
+			check:SetSetting("IgnoreRunes")
+		end,
 	})
 end)
 

@@ -79,105 +79,48 @@ if pclass ~= "DRUID" and pclass ~= "MAGE" then
 	})
 end
 
-if pclass == "SHAMAN" then
-	-- Name shaman totem slot settings with their element types.
 
-	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Shaman", function(self)
-		self.Header:SetText(L["TOTEMS"])
-		TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {
-			numPerRow = 4,
-			{
-				setting = "TotemSlots",
-				value = 1,
-				title = L["FIRE"],
-			},
-			{
-				setting = "TotemSlots",
-				value = 2,
-				title = L["EARTH"],
-			},
-			{
-				setting = "TotemSlots",
-				value = 3,
-				title = L["WATER"],
-			},
-			{
-				setting = "TotemSlots",
-				value = 4,
-				title = L["AIR"],
-			},
-		})
-	end)
+local totemNames = {
+	SHAMAN = {
+		L["FIRE"],
+		L["EARTH"],
+		L["WATER"],
+		L["AIR"],
+	},
+	DRUID = {
+		L["MUSHROOM"]:format(1),
+		L["MUSHROOM"]:format(2),
+		L["MUSHROOM"]:format(3),
+	},
+	MAGE = {
+		L["RUNEOFPOWER"]:format(1),
+		L["RUNEOFPOWER"]:format(2),
+	},
+	OTHER = {
+		L["GENERICTOTEM"]:format(1),
+		L["GENERICTOTEM"]:format(2),
+		L["GENERICTOTEM"]:format(3),
+		L["GENERICTOTEM"]:format(4),
+	}
+}
+totemNames = totemNames[pclass] or totemNames.OTHER
 
-elseif pclass == "DRUID" then
-	-- Name druid totem types with numbered "Mushroom #" labels.
-	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Druid", function(self)
-		self.Header:SetText(L["MUSHROOMS"])
-		TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {				
-			{
-				setting = "TotemSlots",
-				value = 1,
-				title = format(L["MUSHROOM"], 1),
-			},
-			{
-				setting = "TotemSlots",
-				value = 2,
-				title = format(L["MUSHROOM"], 2),
-			},
-			{
-				setting = "TotemSlots",
-				value = 3,
-				title = format(L["MUSHROOM"], 3),
-			},
-		})
-	end)
+Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots", function(self)
+	self.Header:SetText(L["TOTEMS"])
 
-elseif pclass == "MAGE" then
-	-- Name druid totem types with numbered "Rune of Power #" labels.
-	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Mage", function(self)
-		self.Header:SetText(L["RUNESOFPOWER"])
-		TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {				
-			{
-				setting = "TotemSlots",
-				value = 1,
-				title = format(L["RUNEOFPOWER"], 1),
-			},
-			{
-				setting = "TotemSlots",
-				value = 2,
-				title = format(L["RUNEOFPOWER"], 2),
-			},
-		})
-	end)
+	local data = { numPerRow = #totemNames >= 4 and #totemNames/2 or #totemNames}
+	for i, name in ipairs(totemNames) do
+		tinsert(data, function(check)
+			check:SetTexts(name, nil)
+			check:SetSetting("TotemSlots")
+			check:SetSettingBitID(check:GetID())
+		end)
+	end
 
-else
-	-- Name totems for everyone else just generic "Totem #" names.
-	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots_Generic", function(self)
-		self.Header:SetText(L["TOTEMS"])
-		TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {				
-			{
-				setting = "TotemSlots",
-				value = 1,
-				title = format(L["GENERICTOTEM"], 1),
-			},
-			{
-				setting = "TotemSlots",
-				value = 2,
-				title = format(L["GENERICTOTEM"], 2),
-			},
-			{
-				setting = "TotemSlots",
-				value = 3,
-				title = format(L["GENERICTOTEM"], 3),
-			},
-			{
-				setting = "TotemSlots",
-				value = 4,
-				title = format(L["GENERICTOTEM"], 3),
-			},
-		})
-	end)
-end
+	TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", data)
+end)
+
+
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],

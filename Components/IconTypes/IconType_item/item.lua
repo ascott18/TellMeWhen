@@ -75,36 +75,36 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", functio
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
-		{
-			setting = "OnlyInBags",
-			title = L["ICONMENU_ONLYBAGS"],
-			tooltip = L["ICONMENU_ONLYBAGS_DESC"],
-			disabled = function(self)
-				return TMW.CI.ics.OnlyEquipped
-			end,
-		},
-		{
-			setting = "OnlyEquipped",
-			title = L["ICONMENU_ONLYEQPPD"],
-			tooltip = L["ICONMENU_ONLYEQPPD_DESC"],
-			OnState = function(self, button)
-				if self:GetChecked() then
-					TMW.CI.ics.OnlyInBags = true
-					self:GetParent().OnlyInBags:ReloadSetting()
-				end
-			end,
-		},
-		{
-			setting = "EnableStacks",
-			title = L["ICONMENU_SHOWSTACKS"],
-			tooltip = L["ICONMENU_SHOWSTACKS_DESC"],
-		},
-		{
-			setting = "RangeCheck",
-			title = L["ICONMENU_RANGECHECK"],
-			tooltip = L["ICONMENU_RANGECHECK_DESC"],
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_ONLYBAGS"], L["ICONMENU_ONLYBAGS_DESC"])
+			check:SetSetting("OnlyInBags")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_ONLYEQPPD"], L["ICONMENU_ONLYEQPPD_DESC"])
+			check:SetSetting("OnlyEquipped")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_SHOWSTACKS"], L["ICONMENU_SHOWSTACKS_DESC"])
+			check:SetSetting("EnableStacks")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_RANGECHECK"], L["ICONMENU_RANGECHECK_DESC"])
+			check:SetSetting("RangeCheck")
+		end,
 	})
+
+	self.OnlyEquipped:CScriptAdd("ReloadRequested", function()
+		local settings = self:GetSettingTable()
+
+		if settings then
+			self.OnlyInBags:SetEnabled(not settings.OnlyEquipped)
+
+			if settings.OnlyEquipped then
+				settings.OnlyInBags = true
+				self:OnSettingSaved()
+			end
+		end
+	end)
 end)
 
 

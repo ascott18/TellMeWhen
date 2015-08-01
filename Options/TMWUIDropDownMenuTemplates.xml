@@ -373,34 +373,32 @@
 			<KeyValue key="tmwClass" type="string" value="Config_DropDownMenu"/>
 		</KeyValues>
 
-		<Size x="40" y="32"/>
-
-		<HitRectInsets left="0" right="0" top="1" bottom="7" />
+		<Size x="40" y="22"/>
 
 		<Layers>
 			<Layer level="ARTWORK">
 				<Texture parentKey="Left" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Size x="25" y="61.5"/>
+					<Size x="22" />
 					<Anchors>
-						<Anchor point="TOP" y="17"/>
-						<Anchor point="LEFT" x="-17" />
+						<Anchor point="TOPLEFT" />
+						<Anchor point="BOTTOMLEFT" />
 					</Anchors>
-					<TexCoords left="0" right="0.1953125" top="0" bottom="1"/>
+					<TexCoords left="0" right="0.1875" top="0" bottom="0.73"/>
 				</Texture>
 				<Texture parentKey="Right" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Size x="25" y="61.5"/>
+					<Size x="22"/>
 					<Anchors>
-						<Anchor point="TOPRIGHT" x="17" y="17"/>
+						<Anchor point="TOPRIGHT" />
+						<Anchor point="BOTTOMRIGHT" />
 					</Anchors>
-					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
+					<TexCoords left="0.8125" right="1" top="0" bottom="0.73"/>
 				</Texture>
 				<Texture parentKey="Middle" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Size y="61.5"/>
 					<Anchors>
-						<Anchor point="LEFT" relativeKey="$parent.Left" relativePoint="RIGHT"/>
-						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="LEFT"/>
+						<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT"/>
 					</Anchors>
-					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
+					<TexCoords left="0.1875" right="0.8125" top="0" bottom="0.73"/>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
@@ -414,9 +412,9 @@
 		</Layers>
 		<Frames>
 			<Button parentKey="Button" motionScriptsWhileDisabled="true" >
-				<Size x="22" y="22"/>
+				<Size x="24" y="24"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.Right" x="-16.5" y="1"/>
+					<Anchor point="RIGHT" relativeKey="$parent.Right" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnEnter>
@@ -439,28 +437,12 @@
 					</OnClick>
 				</Scripts>
 				<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
-					<Size x="24" y="24"/>
-					<Anchors>
-						<Anchor point="RIGHT"/>
-					</Anchors>
 				</NormalTexture>
 				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
-					<Size x="24" y="24"/>
-					<Anchors>
-						<Anchor point="RIGHT"/>
-					</Anchors>
 				</PushedTexture>
 				<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
-					<Size x="24" y="24"/>
-					<Anchors>
-						<Anchor point="RIGHT"/>
-					</Anchors>
 				</DisabledTexture>
 				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
-					<Size x="24" y="24"/>
-					<Anchors>
-						<Anchor point="RIGHT"/>
-					</Anchors>
 				</HighlightTexture>
 			</Button>
 		</Frames>
@@ -470,7 +452,7 @@
 				<FontString parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
 					<Size y="10"/>
 					<Anchors>
-						<Anchor point="LEFT" relativeKey="$parent.Left" x="27" y="1"/>
+						<Anchor point="LEFT" relativeKey="$parent.Left" x="7" y="-1"/>
 						<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="0" />
 					</Anchors>
 				</FontString>

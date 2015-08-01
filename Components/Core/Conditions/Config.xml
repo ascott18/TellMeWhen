@@ -160,14 +160,14 @@
 		<Frames>
 			<Frame name="$parentType" parentKey="Type" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="26" y="-14.5"/>
+					<Anchor point="TOPLEFT" x="26" y="-15"/>
 				</Anchors>
 				<Frames>
 					<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" x="7" y="-5"/>
-							<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="1" y="13"/>
-							<Anchor point="BOTTOM" x="0" y="12"/>
+							<Anchor point="TOPLEFT" x="4" y="-3"/>
+							<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="1" />
+							<Anchor point="BOTTOM" x="0" y="3"/>
 						</Anchors>
 						<FontString inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
 							<Size y="10"/>
@@ -229,9 +229,9 @@
 				</Scripts>
 			</Frame>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
-				<Size x="120" y="15"/>
+				<Size x="120" y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="10" y="3"/>
+					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="10" y="0"/>
 				</Anchors>
 				
 				<Scripts>
@@ -272,7 +272,7 @@
 			</EditBox>
 			<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="6" y="-3"/>
+					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="6" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -291,7 +291,7 @@
 			<Slider name="$parentSlider" parentKey="Slider" inherits="TellMeWhen_SliderTemplate" hidden="true" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
 				<Size x="522" y="17"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-5" y="-39"/>
+					<Anchor point="TOPRIGHT" x="-13" y="-39"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -299,26 +299,26 @@
 
 						TMW:CInit(self, {
 							setting = "Level",
-							OnValueChanged = function(self)
-								local CndtGroup = self:GetParent()
-								
-								local conditionData = CndtGroup:GetConditionData()
-
-								local value = self:GetValue()
-								conditionData.formatter:SetFormattedText(CndtGroup.ValText, value)
-							end,
 						})
 
-						self.GetSettingTable = function(self)
+						self:HookScript("OnValueChanged", function(self)
+							local CndtGroup = self:GetParent()
+							
+							local conditionData = CndtGroup:GetConditionData()
+
+							local value = self:GetValue()
+							conditionData.formatter:SetFormattedText(CndtGroup.ValText, value)
+						end)
+
+						self:CScriptAdd("SettingTableRequested", function(requester)
 							return self:GetParent():GetConditionSettings()
-						end
-						self.OnSettingSaved = function(self)
+						end)
+
+						self:CScriptAdd("SettingSaved", function(requester)
 							TMW.IE:ScheduleIconSetup() --TODO: there needs to be a way for condition config to intelligently run a setup on a parent object using the current ConditionSet.
-						end
+						end)
+
 						self.CheckInteractionStates = TMW.NULLFUNC
-						
-
-
 					</OnLoad>
 				</Scripts>
 			</Slider>
@@ -328,7 +328,7 @@
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="4" y="2"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="0" y="-9"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -399,7 +399,7 @@
 			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
 				<Size x="1" y="1"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="11" y="8"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="11" y="10"/>
 				</Anchors>
 				<Frames>
 					<Button parentKey="rune1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
@@ -491,7 +491,7 @@
 			</Frame>
 			<CheckButton parentKey="BitFlagsCheck" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.BitFlags" relativePoint="RIGHT" x="5" y="2"/>
+					<Anchor point="LEFT" relativeKey="$parent.BitFlags" relativePoint="RIGHT" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -628,6 +628,7 @@
 						self:GetParent():UpOrDown(-1)
 					</OnClick>
 				</Scripts>
+				<!-- TODO: convert to this, and all other arrows that use this texture, to the new arrow texture -->
 				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
 					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
 					<Color r=".7" g=".7" b=".7" a="1"/>
@@ -685,7 +686,7 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="-0.5"/>
+						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextUnit" parentKey="TextUnit" inherits="GameFontNormalSmall" justifyH="CENTER">
@@ -695,22 +696,22 @@
 				</FontString>
 				<FontString name="$parentTextIcon" parentKey="TextIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentIcon" relativePoint="TOP" y="-0.5"/>
+						<Anchor point="BOTTOM" relativeto="$parentIcon" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="-0.5"/>
+						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="9" y="-0.5"/>
+						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="9" y="2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="7" y="3"/>
+						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="9" y="0"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentTextUnitDef" parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
@@ -743,7 +744,7 @@
 				<FontString parentKey="BitFlagsSelectedText" inherits="GameFontNormal" hidden="true" justifyH="LEFT" justifyV="TOP">
 					<Size x="400" y="30"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="0" y="4"/>
+						<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="0" y="-4"/>
 						<Anchor point="BOTTOMRIGHT" x="-30" y="0"/>
 					</Anchors>
 				</FontString>

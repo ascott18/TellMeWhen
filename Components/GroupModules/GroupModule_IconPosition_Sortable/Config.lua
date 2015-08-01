@@ -36,6 +36,8 @@ TMW:NewClass("Config_ArrowButton", "Config_CheckButton") {
 		if data and data.orientation then
 			self:SetOrientation(data.orientation)
 		end
+		
+		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
 	end,
 
 	orientationData = {
@@ -73,7 +75,7 @@ TMW:NewClass("Config_ArrowButton", "Config_CheckButton") {
 		self:GetCheckedTexture():SetTexCoord(unpack(data))
 	end,
 
-	GetSettingTable = function(self)
+	SettingTableRequested = function(self)
 		return self:GetParent()
 	end,
 }
@@ -104,8 +106,9 @@ TMW:NewClass("Config_ArrowButtonSet", "Config_Frame") {
 			else
 				arrow:SetPoint(orientation, 0, 0)
 			end
-
 		end
+
+		self:CScriptAdd("DescendantSettingSaved", self.DescendantSettingSaved)
 	end,
 
 	EnableOrientations = function(self, ...)
@@ -138,7 +141,7 @@ TMW:NewClass("Config_ArrowButtonSet", "Config_Frame") {
 		end
 	end,
 
-	OnSettingSaved = function(self)
+	DescendantSettingSaved = function(self)
 		self:SetOrientation(self.Orientation)
 		self:GetParent():SaveSetting()
 	end,
@@ -194,10 +197,6 @@ TMW:NewClass("TellMeWhen_GM_IconPosition_Sortable_Dir", "Config_Panel") {
 		end
 	end,
 
-	OnState = function(self)
-		self:AdjustSecondary()
-	end,
-
 	SaveSetting = function(self)
 		self:AdjustSecondary()
 		local primary = self.Primary:GetOrientation()
@@ -239,6 +238,8 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 		self:EnableMouse(true)
 		self.Background:SetGradientAlpha("vertical", 1, 1, 1, 0.5, 1, 1, 1, 0.3)
 		self.Background:SetTexture(0.0, 0.0, 0.0, 0.9)
+		
+		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
 	end,
 
 	Swap = function(self, other)
@@ -298,7 +299,7 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 		end
 	end,
 
-	GetSettingTable = function(self)
+	SettingTableRequested = function(self)
 		local gs = TMW.CI.gs
 		return gs and gs.SortPriorities
 	end,
@@ -361,8 +362,7 @@ function IconPosition_Sortable:LoadConfig()
 		sortFrames[i]:Hide()
 	end
 
-	local last = sortFrames[#gs.SortPriorities]
-	panel:SetHeight(panel:GetHeight() + (panel:GetBottom() - last:GetBottom()) + 10)
+	panel:AdjustHeight()
 end
 
 
@@ -433,8 +433,4 @@ function IconPosition_Sortable:PresetDropdown()
 	end
 end
 
-TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
-	if frame == TellMeWhen_GM_IconPosition_Sortable then
-		IconPosition_Sortable:LoadConfig()
-	end
-end)
+

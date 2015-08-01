@@ -12,11 +12,10 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "BarDisplay_Invert",
-							title = TMW.L["ICONMENU_INVERTBARS"],
-							tooltip = TMW.L["ICONMENU_INVERTBARDISPLAYBAR_DESC"],
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_INVERTBARS"], TMW.L["ICONMENU_INVERTBARDISPLAYBAR_DESC"])
+						self:SetSetting("BarDisplay_Invert")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -44,23 +43,23 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "BarDisplay_EnableColors",
-							title = TMW.L["ICONMENU_ENABLECOLORS"],
-							tooltip = TMW.L["ICONMENU_ENABLECOLORS_DESC"],
-							OnState = function(self)
-								if self:GetChecked() then
-									TMW.HELP:Show{
-										code = "COLOR_COPY_DRAG",
-										icon = nil,
-										relativeTo = self,
-										x = 0,
-										y = 0,
-										text = format(TMW.L["ICONMENU_ENABLECOLORS_HELP"])
-									}
-								end
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_ENABLECOLORS"], TMW.L["ICONMENU_ENABLECOLORS_DESC"])
+						self:SetSetting("BarDisplay_EnableColors")
+
+						self:CScriptAdd("SettingSaved", function()
+							if self:GetChecked() then
+								TMW.HELP:Show{
+									code = "COLOR_COPY_DRAG",
+									icon = nil,
+									relativeTo = self,
+									x = 0,
+									y = 0,
+									text = format(TMW.L["ICONMENU_ENABLECOLORS_HELP"])
+								}
+							end
+						end)
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -80,17 +79,15 @@
 						
 						self:SetPoint("LEFT", self:GetParent().BarGCD, "LEFT", 8, 0)
 						
-						TMW:CInit(self, {
-							setting = "BarDisplay_FakeMax",
-							title = TMW.L["ICONMENU_FAKEMAX"],
-							tooltip = TMW.L["ICONMENU_FAKEMAX_DESC"],
-							disabled = function(self)
-								return TMW.CI.ics.BarDisplay_Invert
-							end,
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_FAKEMAX"], TMW.L["ICONMENU_FAKEMAX_DESC"])
+						self:SetSetting("BarDisplay_FakeMax")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(not settings.BarDisplay_Invert)
+						end)
 					</OnLoad>
 				</Scripts>
 			</EditBox>
@@ -106,10 +103,12 @@
 							title = TMW.L["ICONMENU_BAR_COLOR_START"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_START_DESC"],
 							hasOpacity = true,
-							disabled = function(self)
-								return not TMW.CI.ics.BarDisplay_EnableColors
-							end,
 						})
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.BarDisplay_EnableColors)
+						end)
 					</OnLoad>
 				</Scripts>
 			</Button>
@@ -125,10 +124,12 @@
 							title = TMW.L["ICONMENU_BAR_COLOR_MIDDLE"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_MIDDLE_DESC"],
 							hasOpacity = true,
-							disabled = function(self)
-								return not TMW.CI.ics.BarDisplay_EnableColors
-							end,
 						})
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.BarDisplay_EnableColors)
+						end)
 					</OnLoad>
 				</Scripts>
 			</Button>
@@ -144,10 +145,12 @@
 							title = TMW.L["ICONMENU_BAR_COLOR_COMPLETE"],
 							tooltip = TMW.L["ICONMENU_BAR_COLOR_COMPLETE_DESC"],
 							hasOpacity = true,
-							disabled = function(self)
-								return not TMW.CI.ics.BarDisplay_EnableColors
-							end,
 						})
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.BarDisplay_EnableColors)
+						end)
 					</OnLoad>
 				</Scripts>
 			</Button>

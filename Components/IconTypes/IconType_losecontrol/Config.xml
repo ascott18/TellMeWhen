@@ -6,18 +6,16 @@
 		
 			<Frame name="$parentLocTypes" inherits="TMW_DropDownMenuTemplate" parentKey="LocTypes">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="7" y="-5"/>
+					<Anchor point="TOPLEFT" x="7" y="-6"/>
 					<Anchor point="RIGHT" x="-7" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = TMW.L["LOSECONTROL_DROPDOWNLABEL"],
-							tooltip = TMW.L["LOSECONTROL_DROPDOWNLABEL_DESC"],
-							func = TMW.Types.losecontrol.CONFIG.DropdownMenu_SelectTypes,
-						})
-
-						self:SetText(TMW.L["LOSECONTROL_DROPDOWNLABEL"])
+						TMW:CInit(self)
+				
+						self:SetTexts(TMW.L["LOSECONTROL_DROPDOWNLABEL"], TMW.L["LOSECONTROL_DROPDOWNLABEL_DESC"])
+						self:SetFunction(TMW.Types.losecontrol.CONFIG.DropdownMenu_SelectTypes)
+						
 						self.Button:HookScript("OnClick", function(self)
 							TMW.IE:SaveSettings()
 						end)

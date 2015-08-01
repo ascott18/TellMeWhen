@@ -58,12 +58,23 @@ TMW.IconDragger:RegisterIconDragHandler(120, -- Copy Event Handlers
 	end
 )
 
+-- TODO - PUT THIS IN A  BETTER PLACE, AND NARROW THE FRAME THAT IT GETS CALLED ON.
+local function Reload()
+	TMW.IE:CScriptCallTunnel("ReloadRequested")
+end
+TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", Reload)
+
 TMW:NewClass("Config_Base_Event"){
 	OnNewInstance_Base_Event = function(self, data)
-		TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", self, "ReloadSetting")
+		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
 	end,
 
-	GetSettingTable = function(self)
+	SetColumnPadding = function(self, top, bottom)
+		self.columnPaddingTop = top
+		self.columnPaddingBottom = bottom
+	end,
+
+	SettingTableRequested = function(self)
 		return TMW.CI.ics and EVENTS:GetEventSettings()
 	end,
 }
@@ -98,6 +109,9 @@ TMW:NewClass("Config_EditBox_Event", "Config_Base_Event", "Config_EditBox"){
 }
 
 TMW:NewClass("Config_ColorButton_Event", "Config_Base_Event", "Config_ColorButton")
+
+TMW:NewClass("Config_DropDownMenu_Event", "Config_Base_Event", "Config_DropDownMenu")
+
 
 
 function EVENTS:LoadConfig()
@@ -938,7 +952,7 @@ function ColumnConfig:SetupConfig(subHandlerData)
 			else
 				-- Data is the table passed to TMW:CInit(frame, data)
 				local data = frame.data
-				local yOffset = (data and data.topPadding or 0) + (lastFrameBottomPadding or 0)
+				local yOffset = (frame.columnPaddingTop or 0) + (lastFrameBottomPadding or 0)
 				
 				if lastFrame then
 					frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -yOffset)
@@ -948,7 +962,7 @@ function ColumnConfig:SetupConfig(subHandlerData)
 				frame:Show()
 				lastFrame = frame
 
-				lastFrameBottomPadding = data and data.bottomPadding
+				lastFrameBottomPadding = frame.columnPaddingBottom
 			end
 		end
 	end	

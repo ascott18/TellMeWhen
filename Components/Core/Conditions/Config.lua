@@ -191,11 +191,13 @@ end
 
 TMW:NewClass("Config_Slider_Condition", "Config_Slider")
 {
-	GetSettingTable = function(self)
-		return self:GetParent():GetConditionSettings()
+	OnNewInstance_Config_Slider_Condition = function(self, data)
+		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
 	end,
 
-
+	SettingTableRequested = function(self)
+		return self:GetParent():GetConditionSettings()
+	end,
 }
 
 function CNDT:ValidateLevelForCondition(level, conditionType)
@@ -1018,7 +1020,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 		CndtGroup.BitFlags:ClearAllPoints()
 		if CndtGroup.Unit:IsShown() then
-			CndtGroup.BitFlags:SetPoint("LEFT", CndtGroup.Unit, "RIGHT", 8, -3)
+			CndtGroup.BitFlags:SetPoint("LEFT", CndtGroup.Unit, "RIGHT", 8, 0)
 			CndtGroup.BitFlags:SetWidth(150)
 			CndtGroup.Unit:SetWidth(90)
 		else

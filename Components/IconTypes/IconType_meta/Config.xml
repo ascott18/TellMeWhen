@@ -10,13 +10,11 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self)
+				
 						self:RegisterForDrag("LeftButton", "RightButton")
-
-						TMW:CInit(self, {
-							title = TMW.L["CHOOSEICON"],
-							tooltip = TMW.L["CHOOSEICON_DESC"],
-							func = TMW.ME.IconMenu,
-						})
+						self:SetTexts(TMW.L["CHOOSEICON"], TMW.L["CHOOSEICON_DESC"])
+						self:SetFunction(TMW.ME.IconMenu)
 
 						self:SetPreviewSize(21)
 					</OnLoad>
@@ -63,7 +61,7 @@
 			
 			<Button name="$parentDelete" parentKey="delete" inherits="UIPanelCloseButton">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-1" y="2"/>
+					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-1" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -119,56 +117,25 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							setting = "CheckNext",
-							title = TMW.L["ICONMENU_CHECKNEXT"],
-							tooltip = TMW.L["ICONMENU_CHECKNEXT_DESC"],
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_CHECKNEXT"], TMW.L["ICONMENU_CHECKNEXT_DESC"])
+						self:SetSetting("CheckNext")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
 			
 			<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentCheckNext" relativePoint="BOTTOM" y="-3"/>
-					<Anchor point="LEFT" x="-3"/>
-					<Anchor point="TOPRIGHT" y="-12"/>
+					<Anchor point="TOP" relativeTo="$parentCheckNext" relativePoint="BOTTOM" y="1"/>
+					<Anchor point="LEFT" />
+					<Anchor point="RIGHT" />
 				</Anchors>
 			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad>
 				self.Header:SetText(TMW.L["ICONMENU_COMPONENTICONS"])
-			</OnLoad>
-		</Scripts>
-	</Frame>
-	
-	<Frame name="TellMeWhen_MetaSortSettings" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="92"/>
-		<Scripts>
-			<OnLoad>
-				self.Header:SetText(TMW.L["SORTBY"])
-				TMW.IE:BuildSimpleCheckSettingFrame(self, {
-					numPerRow = 3,
-					{
-						setting = "Sort",
-						value = false,
-						title = TMW.L["SORTBYNONE"],
-						tooltip = TMW.L["SORTBYNONE_META_DESC"],
-					},
-					{
-						setting = "Sort",
-						value = -1,
-						title = TMW.L["ICONMENU_SORTASC"],
-						tooltip = TMW.L["ICONMENU_SORTASC_META_DESC"],
-					},
-					{
-						setting = "Sort",
-						value = 1,
-						title = TMW.L["ICONMENU_SORTDESC"],
-						tooltip = TMW.L["ICONMENU_SORTDESC_META_DESC"],
-					},
-				})
 			</OnLoad>
 		</Scripts>
 	</Frame>

@@ -15,17 +15,14 @@
 						self.label = TMW.L["ICONMENU_CUSTOMTEX"]
 						
 						self.__ttMinWidth = 300
-						TMW:CInit(self, {
-							setting = "CustomTex",
-							title = TMW.L["ICONMENU_CUSTOMTEX"],
-							tooltip = TMW.L["ICONMENU_CUSTOMTEX_DESC"],
-							OnTextChanged = function(self)
-								self:GetParent():AdjustHeight()
-							end,
-							ModifySettingValue = function(self, value)
-								return value:gsub([[\\]], [[\]])
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_CUSTOMTEX"], TMW.L["ICONMENU_CUSTOMTEX_DESC"])
+						self:SetSetting("CustomTex")
+						
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return value:gsub([[\\]], [[\]])
+						end)
 						
 						
 						function self:DragReceived(icon, t, data, subType)
@@ -78,6 +75,9 @@
 						end)
 
 					</OnLoad>
+					<OnSizeChanged>
+						self:GetParent():AdjustHeight()
+					</OnSizeChanged>
 					<OnReceiveDrag>
 						TMW.IE:SpellItemToIcon(TMW.CI.icon, self.DragReceived, self)
 					</OnReceiveDrag>
@@ -90,10 +90,6 @@
 		<Scripts>
 			<OnLoad>
 				self.Header:SetText(TMW.L["ICONMENU_CUSTOMTEX"])
-				
-				function self:AdjustHeight()
-					self:SetHeight(11 + self.CustomTex:GetHeight())
-				end
 			</OnLoad>
 		</Scripts>
 	</Frame>

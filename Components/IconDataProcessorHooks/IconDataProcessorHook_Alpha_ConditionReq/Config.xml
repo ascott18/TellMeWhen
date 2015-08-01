@@ -16,12 +16,12 @@
 						
 						TMW.IE:RegisterRapidSetting("ConditionAlpha")
 
-						TMW:CInit(self, {
-							title = TMW.L["REQFAILED_ALPHA"],
-							tooltip = TMW.L["CONDITIONALPHA_METAICON_DESC"],
-							setting = "ConditionAlpha",
-							setOrangeAtValue = 1,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["REQFAILED_ALPHA"], TMW.L["CONDITIONALPHA_METAICON_DESC"])
+						self:SetSetting("ConditionAlpha")
+
+						self:SetOrangeValue(1)
 					</OnLoad>
 				</Scripts>
 			</Slider>

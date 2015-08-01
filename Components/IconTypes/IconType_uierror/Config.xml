@@ -23,14 +23,10 @@
 					<OnLoad>
 						self.text2:SetText(TMW.L["CLEU_TIMER"])
 						
-						TMW:CInit(self, {
-							setting = "CLEUDur",
-							title = TMW.L["CLEU_TIMER"],
-							tooltip = TMW.L["UIERROR_TIMER_DESC"],
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["CLEU_TIMER"], TMW.L["UIERROR_TIMER_DESC"])
+						self:SetSetting("CLEUDur")
 					</OnLoad>
 				</Scripts>
 			</EditBox>
@@ -43,11 +39,10 @@
 					<OnLoad>
 						self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
 					
-						TMW:CInit(self, {
-							setting = "CLEUNoRefresh",
-							title = TMW.L["ICONMENU_CLEU_NOREFRESH"],
-							tooltip = TMW.L["ICONMENU_CLEU_NOREFRESH_DESC"],
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_CLEU_NOREFRESH"], TMW.L["ICONMENU_CLEU_NOREFRESH_DESC"])
+						self:SetSetting("CLEUNoRefresh")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>

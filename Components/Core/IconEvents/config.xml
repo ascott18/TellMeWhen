@@ -92,9 +92,9 @@
 			<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							func = TMW.EVENTS.ChangeEvent_Dropdown,
-						})
+						TMW:CInit(self)
+						
+						self:SetFunction(TMW.EVENTS.ChangeEvent_Dropdown)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -566,11 +566,10 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "PassThrough",
-									title = TMW.L["EVENTS_SETTINGS_PASSTHROUGH"],
-									tooltip = TMW.L["EVENTS_SETTINGS_PASSTHROUGH_DESC"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["EVENTS_SETTINGS_PASSTHROUGH"], TMW.L["EVENTS_SETTINGS_PASSTHROUGH_DESC"])
+								self:SetSetting("PassThrough")
 
 								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
@@ -583,11 +582,10 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "OnlyShown",
-									title = TMW.L["EVENTS_SETTINGS_SIMPLYSHOWN"],
-									tooltip = TMW.L["EVENTS_SETTINGS_SIMPLYSHOWN_DESC"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["EVENTS_SETTINGS_SIMPLYSHOWN"], TMW.L["EVENTS_SETTINGS_SIMPLYSHOWN_DESC"])
+								self:SetSetting("OnlyShown")
 								
 								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
@@ -600,11 +598,10 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "OnlyShown",
-									title = TMW.L["EVENTS_SETTINGS_ONLYSHOWN"],
-									tooltip = TMW.L["EVENTS_SETTINGS_ONLYSHOWN_DESC"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["EVENTS_SETTINGS_ONLYSHOWN"], TMW.L["EVENTS_SETTINGS_ONLYSHOWN_DESC"])
+								self:SetSetting("OnlyShown")
 								
 								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
@@ -617,11 +614,10 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "PassingCndt",
-									title = TMW.L["EVENTS_SETTINGS_PASSINGCNDT"],
-									tooltip = TMW.L["EVENTS_SETTINGS_PASSINGCNDT_DESC"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["EVENTS_SETTINGS_PASSINGCNDT"], TMW.L["EVENTS_SETTINGS_PASSINGCNDT_DESC"])
+								self:SetSetting("PassingCndt")
 								
 								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
@@ -636,18 +632,16 @@
 							<Layer level="OVERLAY">
 								<FontString name="$parentValueLabel" inherits="GameFontHighlight" parentKey="ValueLabel" justifyH="RIGHT">
 									<Anchors>
-										<Anchor point="RIGHT" relativePoint="LEFT" x="-5" y="3"/>
+										<Anchor point="RIGHT" relativePoint="LEFT" x="-5" y="0"/>
 									</Anchors>
 								</FontString>
 							</Layer>
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									--title = TMW.L[""],
-									--tooltip = TMW.L[""],
-									func = TMW.EVENTS.OperatorMenu_DropDown,
-								})
+								TMW:CInit(self)
+								
+								self:SetFunction(TMW.EVENTS.OperatorMenu_DropDown)
 
 								self:SetWidth(63)
 								self.Text:SetFontObject(GameFontHighlightLarge)
@@ -658,7 +652,7 @@
 					<EditBox name="$parentValue" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="Value" autoFocus="false">
 						<Size x="45" y="18"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentOperator" relativePoint="RIGHT" x="12" y="4"/>
+							<Anchor point="LEFT" relativeTo="$parentOperator" relativePoint="RIGHT" x="12" y="0"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -705,11 +699,10 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "CndtJustPassed",
-									title = TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED"],
-									tooltip = TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED"], TMW.L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"])
+								self:SetSetting("CndtJustPassed")
 								
 								self:ConstrainLabel(self:GetParent(), "RIGHT")
 							</OnLoad>
@@ -758,11 +751,10 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									setting = "Frequency",
-									title = TMW.L["EVENT_FREQUENCY"],
-									tooltip = TMW.L["EVENT_FREQUENCY_DESC"],
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["EVENT_FREQUENCY"], TMW.L["EVENT_FREQUENCY_DESC"])
+								self:SetSetting("Frequency")
 								
 								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
 								self:SetMode(self.MODE_ADJUSTING)

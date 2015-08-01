@@ -76,27 +76,24 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff2", functi
 	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
-		{
-			setting = "BuffOrDebuff",
-			value = "HELPFUL",
-			title = "|cFF00FF00" .. L["ICONMENU_BUFF"],
-		},
-		{
-			setting = "BuffOrDebuff",
-			value = "HARMFUL",
-			title = "|cFFFF0000" .. L["ICONMENU_DEBUFF"],
-		},
+		function(check)
+			check:SetTexts("|cFF00FF00" .. L["ICONMENU_BUFF"], nil)
+			check:SetSetting("BuffOrDebuff", "HELPFUL")
+		end,
+		function(check)
+			check:SetTexts("|cFFFF0000" .. L["ICONMENU_DEBUFF"], nil)
+			check:SetSetting("BuffOrDebuff", "HARMFUL")
+		end,
 	})
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffCheckSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "OnlyMine",
-			title = L["ICONMENU_ONLYMINE"],
-			tooltip = L["ICONMENU_ONLYMINE_DESC"],
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
+			check:SetSetting("OnlyMine")
+		end,
 		-- {
 		-- 	setting = "HideIfNoUnits",
 		-- 	title = L["ICONMENU_HIDENOUNITS"],

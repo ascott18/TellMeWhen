@@ -37,15 +37,15 @@
 					<OnLoad>
 						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_NAME"])
 
-						TMW:CInit(self, {
-							setting = "Counter",
-							title = TMW.L["EVENTS_SETTINGS_COUNTER_NAME"],
-							tooltip = TMW.L["EVENTS_SETTINGS_COUNTER_NAME_DESC"],
-							ModifySettingValue = function(self, value)
-								local Counter = TMW.EVENTS:GetEventHandler("Counter")
-								return Counter:SanitizeCounterName(value)
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["EVENTS_SETTINGS_COUNTER_NAME"], TMW.L["EVENTS_SETTINGS_COUNTER_NAME_DESC"])
+						self:SetSetting("Counter")
+						
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							local Counter = TMW.EVENTS:GetEventHandler("Counter")
+							return Counter:SanitizeCounterName(value)
+						end)
 
 						TMW.SUG:EnableEditBox(self, "counterName", true)
 
@@ -54,14 +54,14 @@
 			</EditBox>
 			<Frame name="$parentOperation" parentKey="Operation" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentCounter" relativePoint="RIGHT" x="6" y="-3"/>
+					<Anchor point="LEFT" relativeTo="$parentCounter" relativePoint="RIGHT" x="6" y="0"/>
 				</Anchors>
 
 				<Layers>
 					<Layer level="OVERLAY">
 						<FontString name="$parentTitle" parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
 							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="20" y="-0.5"/>
+								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="20" y="0"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -69,14 +69,10 @@
 
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = TMW.L["EVENTS_SETTINGS_COUNTER_OP"],
-							tooltip = TMW.L["EVENTS_SETTINGS_COUNTER_OP_DESC"],
-							
-							func = TMW.EVENTS:GetEventHandler("Counter").OperationMenu_DropDown,
-						})
-
-						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_OP"])
+						TMW:CInit(self)
+						
+						self:SetTexts(TMW.L["EVENTS_SETTINGS_COUNTER_OP"], TMW.L["EVENTS_SETTINGS_COUNTER_OP_DESC"])
+						self:SetFunction(TMW.EVENTS:GetEventHandler("Counter").OperationMenu_DropDown)
 
 						self:SetWidth(96)
 					</OnLoad>
@@ -91,7 +87,7 @@
  				</KeyValues>
 
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentOperation" relativePoint="RIGHT" x="8" y="3"/>
+					<Anchor point="LEFT" relativeTo="$parentOperation" relativePoint="RIGHT" x="8" y="0"/>
 				</Anchors>
 
 				<Layers>
@@ -108,15 +104,15 @@
 					<OnLoad>
 						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT"])
 
-						TMW:CInit(self, {
-							setting = "CounterAmt",
-							title = TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT"],
-							tooltip = TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT_DESC"],
-							ModifySettingValue = function(self, value)
-								local Counter = TMW.EVENTS:GetEventHandler("Counter")
-								return tonumber(self:GetText():trim()) or 0
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT"], TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT_DESC"])
+						self:SetSetting("CounterAmt")
+
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							local Counter = TMW.EVENTS:GetEventHandler("Counter")
+							return tonumber(self:GetText():trim()) or 0
+						end)
 					</OnLoad>
 				</Scripts>
 			</EditBox>

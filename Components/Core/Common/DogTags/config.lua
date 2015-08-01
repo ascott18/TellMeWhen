@@ -25,13 +25,13 @@ local DOGTAG = TMW.DOGTAG
 
 TMW:NewClass("Config_EditBox_DogTags", "Config_EditBox"){
 	OnNewInstance_EditBox_DogTags = function(self, data)
-		data.ModifySettingValue = self.ModifySettingValue
+		self:CScriptAdd("ModifySettingValueRequested", self.ModifySettingValueRequested)
 
 		self.BackgroundText:SetWidth(self:GetWidth())
 		TMW.SUG:EnableEditBox(self, "dogtags")
 	end,
 
-	ModifySettingValue = function(self, text)
+	ModifySettingValueRequested = function(self, text)
 		return text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
 	end,
 

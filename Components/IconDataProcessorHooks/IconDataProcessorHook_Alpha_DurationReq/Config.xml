@@ -10,12 +10,12 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "DurationMinEnabled",
-							label = "",
-							title = ENABLE,
-							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MIN_DESC"]:gsub("^%u", strlower)),
-						})
+						TMW:CInit(self)
+
+						self:SetLabel("")
+						self:SetTexts(ENABLE,
+							TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MIN_DESC"]:gsub("^%u", strlower)))
+						self:SetSetting("DurationMinEnabled")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -26,13 +26,12 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						
-						TMW:CInit(self, {
-							setting = "DurationMaxEnabled",
-							label = "",
-							title = ENABLE,
-							tooltip = TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MAX_DESC"]:gsub("^%u", strlower)),
-						})
+						TMW:CInit(self)
+
+						self:SetLabel("")
+						self:SetTexts(ENABLE,
+							TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MAX_DESC"]:gsub("^%u", strlower)))
+						self:SetSetting("DurationMaxEnabled")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -49,17 +48,16 @@
 						self.text:SetPoint("LEFT", 2, 0)
 						self.text:SetPoint("RIGHT", self)
 						
-						TMW:CInit(self, {
-							setting = "DurationMin",
-							title = MINIMUM,
-							tooltip = TMW.L["ICONMENU_DURATION_MIN_DESC"],
-							disabled = function(self)
-								return not TMW.CI.ics.DurationMinEnabled
-							end,
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetLabel("")
+						self:SetTexts(MINIMUM, TMW.L["ICONMENU_DURATION_MIN_DESC"])
+						self:SetSetting("DurationMin")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.DurationMinEnabled)
+						end)
 					</OnLoad>
 				</Scripts>
 			</EditBox>
@@ -75,17 +73,16 @@
 						self.text:SetPoint("LEFT", 2, 0)
 						self.text:SetPoint("RIGHT", self)
 						
-						TMW:CInit(self, {
-							setting = "DurationMax",
-							title = MAXIMUM,
-							tooltip = TMW.L["ICONMENU_DURATION_MIN_DESC"],
-							disabled = function(self)
-								return not TMW.CI.ics.DurationMaxEnabled
-							end,
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetLabel("")
+						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_DURATION_MIN_DESC"])
+						self:SetSetting("DurationMax")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.DurationMaxEnabled)
+						end)
 					</OnLoad>
 				</Scripts>
 
@@ -102,18 +99,17 @@
 					<OnLoad>
 						self.text:SetWidth(self:GetWidth())
 						
-						TMW:CInit(self, {
-							title = TMW.L["REQFAILED_ALPHA"],
-							tooltip = TMW.L["DURATIONALPHA_DESC"],
-							setting = "DurationAlpha",
-							setOrangeAtValue = 1,
-							disabled = function(self)
-								local ics = TMW.CI.ics
-								if ics then
-									return not ics.DurationMinEnabled and not ics.DurationMaxEnabled
-								end
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["REQFAILED_ALPHA"], TMW.L["DURATIONALPHA_DESC"])
+						self:SetSetting("DurationAlpha")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.DurationMinEnabled or settings.DurationMaxEnabled)
+						end)
+
+						self:SetOrangeValue(1)
 					</OnLoad>
 				</Scripts>
 			</Slider>

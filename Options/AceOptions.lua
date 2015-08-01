@@ -329,41 +329,6 @@ TMW.GroupConfigTemplate = {
 					end,
 					args = {}
 				},
-				moveup = {
-					name = L["UIPANEL_GROUPMOVEUP"],
-					desc = L["UIPANEL_GROUPMOVEUP_DESC"],
-					type = "execute",
-					order = 48,
-					func = function(info)
-						local group = FindGroupFromInfo(info)
-						local domain = group.Domain
-
-						TMW:Group_Swap(domain, group.ID, group.ID - 1)
-
-						TMW.ACEOPTIONS:LoadConfigGroup(info, TMW[domain][group.ID-1])
-					end,
-					disabled = function(info)
-						return FindGroupFromInfo(info).ID == 1
-					end,
-				},
-				movedown = {
-					name = L["UIPANEL_GROUPMOVEDOWN"],
-					desc = L["UIPANEL_GROUPMOVEDOWN_DESC"],
-					type = "execute",
-					order = 49,
-					func = function(info)
-						local group = FindGroupFromInfo(info)
-						local domain = group.Domain
-
-						TMW:Group_Swap(domain, group.ID, group.ID + 1)
-
-						TMW.ACEOPTIONS:LoadConfigGroup(info, TMW[domain][group.ID+1])
-					end,
-					disabled = function(info)
-						local group = FindGroupFromInfo(info)
-						return group.ID == TMW.db[group.Domain].NumGroups
-					end,
-				},
 				delete = {
 					name = L["UIPANEL_DELGROUP"],
 					--desc = L["UIPANEL_DELGROUP_DESC2"],

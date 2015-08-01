@@ -33,6 +33,40 @@ if not Type then return end
 -- GLOBALS: CreateFrame
 
 
+
+Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
+
+Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_MetaSortSettings", function(self)
+	self.Header:SetText(TMW.L["SORTBY"])
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		numPerRow = 3,
+		{
+			setting = "Sort",
+			value = false,
+			title = TMW.L["SORTBYNONE"],
+			tooltip = TMW.L["SORTBYNONE_META_DESC"],
+		},
+		{
+			setting = "Sort",
+			value = -1,
+			title = TMW.L["ICONMENU_SORTASC"],
+			tooltip = TMW.L["ICONMENU_SORTASC_META_DESC"],
+		},
+		{
+			setting = "Sort",
+			value = 1,
+			title = TMW.L["ICONMENU_SORTDESC"],
+			tooltip = TMW.L["ICONMENU_SORTDESC_META_DESC"],
+		},
+	})
+
+	self:CScriptAdd("PanelSetup", function()
+		if TMW.CI.icon:IsGroupController() then
+			self:Hide()
+		end
+	end)
+end)
+
 TMW.IconDragger:RegisterIconDragHandler(220, -- Add to meta icon
 	function(IconDragger, info)
 		if IconDragger.desticon

@@ -36,9 +36,6 @@ local bitband = bit.band
 local function ClearScripts(f)
 	f:SetScript("OnEvent", nil)
 	f:SetScript("OnUpdate", nil)
-	if f:HasScript("OnValueChanged") then
-		f:SetScript("OnValueChanged", nil)
-	end
 end
 
 local UPD_INTV

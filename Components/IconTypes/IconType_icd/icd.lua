@@ -91,11 +91,10 @@ end)
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ICDSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "DontRefresh",
-			title = L["ICONMENU_DONTREFRESH"],
-			tooltip = L["ICONMENU_DONTREFRESH_DESC"],
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_DONTREFRESH"], L["ICONMENU_DONTREFRESH_DESC"])
+			check:SetSetting("DontRefresh")
+		end,
 	})
 end)
 

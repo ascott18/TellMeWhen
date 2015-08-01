@@ -30,11 +30,10 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_GS_Combat", functi
 	
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 1,
-		{
-			setting = "OnlyInCombat",
-			title = L["UIPANEL_ONLYINCOMBAT"],
-			tooltip = L["UIPANEL_TOOLTIP_ONLYINCOMBAT"],
-		},
+		function(check)
+			check:SetTexts(L["UIPANEL_ONLYINCOMBAT"], L["UIPANEL_TOOLTIP_ONLYINCOMBAT"])
+			check:SetSetting("OnlyInCombat")
+		end,
 	})
 end)
 
@@ -47,19 +46,19 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(11, "TellMeWhen_GS_Role", functio
 			setting = "Role",
 			title = DAMAGER,
 			tooltip = L["UIPANEL_ROLE_DESC"],
-			value = 1,
+			-- value = 1,  -- Derived from the ID of the frame.
 		},
 		{
 			setting = "Role",
 			title = HEALER,
 			tooltip = L["UIPANEL_ROLE_DESC"],
-			value = 2,
+			-- value = 2,  -- Derived from the ID of the frame.
 		},
 		{
 			setting = "Role",
 			title = TANK,
 			tooltip = L["UIPANEL_ROLE_DESC"],
-			value = 3,
+			-- value = 3,  -- Derived from the ID of the frame.
 		},
 	})
 end)
@@ -73,11 +72,10 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", functio
 
 	for i = 1, GetNumSpecializations() do
 		local _, name = GetSpecializationInfo(i)
-		tinsert(data, {
-			setting = "Tree"..i,
-			title = name,
-			tooltip = L["UIPANEL_TREE_DESC"],
-		})
+		tinsert(data, function(check)
+			check:SetTexts(name, L["UIPANEL_TREE_DESC"])
+			check:SetSetting("Tree"..i)
+		end)
 	end
 
 	TMW.IE:BuildSimpleCheckSettingFrame(self, data)
@@ -88,16 +86,14 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(13, "TellMeWhen_GS_DualSpec", fun
 	
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
-		{
-			setting = "PrimarySpec",
-			title = L["UIPANEL_PRIMARYSPEC"],
-			tooltip = L["UIPANEL_TOOLTIP_PRIMARYSPEC"],
-		},
-		{
-			setting = "SecondarySpec",
-			title = L["UIPANEL_SECONDARYSPEC"],
-			tooltip = L["UIPANEL_TOOLTIP_SECONDARYSPEC"],
-		},
+		function(check)
+			check:SetTexts(L["UIPANEL_PRIMARYSPEC"], L["UIPANEL_TOOLTIP_PRIMARYSPEC"])
+			check:SetSetting("PrimarySpec")
+		end,
+		function(check)
+			check:SetTexts(L["UIPANEL_SECONDARYSPEC"], L["UIPANEL_TOOLTIP_SECONDARYSPEC"])
+			check:SetSetting("SecondarySpec")
+		end,
 	})
 end)
 

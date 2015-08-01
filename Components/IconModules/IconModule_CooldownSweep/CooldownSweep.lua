@@ -42,16 +42,14 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 	
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
-		{
-			setting = "ShowTimer",
-			title = L["ICONMENU_SHOWTIMER"],
-			tooltip = L["ICONMENU_SHOWTIMER_DESC"],
-		},
-		{
-			setting = "ShowTimerText",
-			title = L["ICONMENU_SHOWTIMERTEXT"],
-			tooltip = L["ICONMENU_SHOWTIMERTEXT_DESC"],
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWTIMER_DESC"])
+			check:SetSetting("ShowTimer")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_SHOWTIMERTEXT"], L["ICONMENU_SHOWTIMERTEXT_DESC"])
+			check:SetSetting("ShowTimerText")
+		end,
 		{
 			setting = "InvertTimer",
 			title = L["ICONMENU_INVERTTIMER"],
@@ -67,33 +65,23 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			disabled = function(self)
 				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText and not TMW.CI.ics.ShowTimerTextnoOCC
 			end,
-			hidden = function(self)
-				return TMW.CI.icon.typeData.hasNoGCD
-			end,
 		},
 		{
 			setting = "ShowTimerTextnoOCC",
 			title = L["ICONMENU_SHOWTIMERTEXT_NOOCC"],
 			tooltip = L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"],
-			hidden = function()
-				return not IsAddOnLoaded("ElvUI")
-			end,
 			disabled = function(self)
 				return not TMW.CI.ics.ShowTimer
 			end,
 		},
 	})
 
-	local function CheckHidden()
-		if not self.ShowTimerTextnoOCC:IsShown() then
-			self:SetHeight(60)
-		else
-			self:SetHeight(90)
-		end
-	end
+	self:CScriptAdd("ReloadRequested", function()
+		self.ShowTimerTextnoOCC:SetShown(IsAddOnLoaded("ElvUI"))
+		self.ClockGCD:SetShown(TMW.CI.icon.typeData.hasNoGCD)
 
-	self.ShowTimerTextnoOCC:HookScript("OnShow", CheckHidden)
-	self.ShowTimerTextnoOCC:HookScript("OnHide", CheckHidden)
+		self:AdjustHeight()
+	end)
 end)
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()

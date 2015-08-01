@@ -105,42 +105,36 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", functio
 	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 3,
-		{
-			setting = "BuffOrDebuff",
-			value = "HELPFUL",
-			title = "|cFF00FF00" .. L["ICONMENU_BUFF"],
-		},
-		{
-			setting = "BuffOrDebuff",
-			value = "HARMFUL",
-			title = "|cFFFF0000" .. L["ICONMENU_DEBUFF"],
-		},
-		{
-			setting = "BuffOrDebuff",
-			value = "EITHER",
-			title = L["ICONMENU_BOTH"],
-		},
+		function(check)
+			check:SetTexts("|cFF00FF00" .. L["ICONMENU_BUFF"], nil)
+			check:SetSetting("BuffOrDebuff", "HELPFUL")
+		end,
+		function(check)
+			check:SetTexts("|cFFFF0000" .. L["ICONMENU_DEBUFF"], nil)
+			check:SetSetting("BuffOrDebuff", "HARMFUL")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_BOTH"], nil)
+			check:SetSetting("BuffOrDebuff", "EITHER")
+		end,
 	})
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "OnlyMine",
-			title = L["ICONMENU_ONLYMINE"],
-			tooltip = L["ICONMENU_ONLYMINE_DESC"],
-		},
-		{
-			setting = "Stealable",
-			title = L["ICONMENU_STEALABLE"],
-			tooltip = L["ICONMENU_STEALABLE_DESC"],
-		},
-		{
-			setting = "HideIfNoUnits",
-			title = L["ICONMENU_HIDENOUNITS"],
-			tooltip = L["ICONMENU_HIDENOUNITS_DESC"],
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
+			check:SetSetting("OnlyMine")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_STEALABLE"], L["ICONMENU_STEALABLE_DESC"])
+			check:SetSetting("Stealable")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_HIDENOUNITS"], L["ICONMENU_HIDENOUNITS_DESC"])
+			check:SetSetting("HideIfNoUnits")
+		end,
 	})
 
 	self.ShowTTText = TMW.C.Config_DropDownMenu:New("Frame", "$parentShowTTText", self, "TMW_DropDownMenuTemplate", nil, {
@@ -184,15 +178,16 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		end,
 	})
 
-	TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
-		if frame == self then
-			self.ShowTTText:SetText((TMW.CI.ics.ShowTTText ~= false and "|cffff5959" or "") .. L["ICONMENU_SHOWTTTEXT2"])
-		end
+	self:CScriptAdd("ReloadRequested", function(self, panel, panelInfo)
+		self.ShowTTText:SetText((TMW.CI.ics.ShowTTText ~= false and "|cffff5959" or "") .. L["ICONMENU_SHOWTTTEXT2"])
 	end)
 
 	self.ShowTTText:SetWidth(135)
 	self.ShowTTText:SetDropdownAnchor("TOPRIGHT", self.ShowTTText.Middle, "BOTTOMRIGHT")
 	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.HideIfNoUnits, self.ShowTTText)
+	self.ShowTTText:ClearAllPoints()
+	self.ShowTTText:SetPoint("TOPLEFT", self.Stealable, "BOTTOMLEFT", 4, 0)
+	self.ShowTTText:SetPoint("RIGHT", -7, 0)
 	self.HideIfNoUnits:ConstrainLabel(self.ShowTTText)
 end)
 

@@ -9,11 +9,10 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "ShowCBar",
-							title = TMW.L["ICONMENU_ENABLE"],
-							tooltip = TMW.L["ICONMENU_SHOWCBAR_DESC"],
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_ENABLE"], TMW.L["ICONMENU_SHOWCBAR_DESC"])
+						self:SetSetting("ShowCBar")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -51,9 +50,6 @@
 							tooltip = TMW.L["ICONMENU_BAROFFS"],
 							disabled = function(self)
 								return not TMW.CI.ics.ShowCBar
-							end,
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
 							end,
 						})
 					</OnLoad>

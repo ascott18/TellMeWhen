@@ -48,11 +48,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>		
-				self.Header:SetText(TMW.L["UIPANEL_GROUPNAME"])		
-
-				function self:AdjustHeight()
-					self:SetHeight(11 + self.Name:GetHeight())
-				end
+				self.Header:SetText(TMW.L["UIPANEL_GROUPNAME"])
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -76,26 +72,26 @@
 							min = 1,
 							max = 1,
 							step = 1,
-
-							ModifySettingValue = function(self, newID)
-								local group = self:GetSettingTable()
-								local oldID = group.ID
-
-								TMW:Group_Swap(group.Domain, oldID, newID)
-
-								-- IMPORTANT: we return the old ID since we don't want to actually change the ID of the group.
-								-- What this actually does is swap the settings between two groups. GroupIDs never actually change.
-								return oldID
-							end,
 						})
 
-						function self:GetSettingTable()
+						self:CScriptAdd("ModifySettingValueRequested", function(self, newID)
+							local group = self:GetSettingTable()
+							local oldID = group.ID
+
+							TMW:Group_Swap(group.Domain, oldID, newID)
+
+							-- IMPORTANT: we return the old ID since we don't want to actually change the ID of the group.
+							-- What this actually does is swap the settings between two groups. GroupIDs never actually change.
+							return oldID
+						end)
+
+						self:CScriptAdd("SettingTableRequested", function(requester)
 							if TMW.CI.group then
 								self:SetMinMaxValues(1, #TMW[TMW.CI.group.Domain])
 							end
 
 							return TMW.CI.group
-						end
+						end)
 					</OnLoad>
 				</Scripts>
 			</Slider>

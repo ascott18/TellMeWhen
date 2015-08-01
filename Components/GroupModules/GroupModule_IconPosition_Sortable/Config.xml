@@ -121,16 +121,6 @@
 	<Frame name="TellMeWhen_GM_IconPosition_Sortable" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="200"/>
 		<Frames>
-			<Frame parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self, {
-							func = TMW.EVENTS.ChangeEvent_Dropdown,
-						})
-					</OnLoad>
-				</Scripts>
-			</Frame>
-
 			<Button parentKey="Add" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="160" y="15"/>
 				<Anchors>
@@ -141,9 +131,9 @@
 					<Frame parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									func = TMW.C.GroupModule_IconPosition_Sortable.AddDropdown,
-								})
+								TMW:CInit(self)
+						
+								self:SetFunction(TMW.C.GroupModule_IconPosition_Sortable.AddDropdown)
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -181,9 +171,9 @@
 					<Frame parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									func = TMW.C.GroupModule_IconPosition_Sortable.PresetDropdown,
-								})
+								TMW:CInit(self)
+						
+								self:SetFunction(TMW.C.GroupModule_IconPosition_Sortable.PresetDropdown)
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -213,7 +203,13 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
+				TMW:CInit(self, {})
+
 				self.Header:SetText(TMW.L["UIPANEL_GROUPSORT"])
+
+				self:CScriptAdd("ReloadRequested", function(self, panel, panelInfo)
+					TMW.C.GroupModule_IconPosition_Sortable:LoadConfig()
+				end)
 			</OnLoad>
 		</Scripts>
 	</Frame>

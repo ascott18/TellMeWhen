@@ -530,7 +530,6 @@ IE.Defaults = {
 		EditorHeight	= 600,
 		ConfigWarning	= true,
 		ConfigWarningN	= 0,
-		SimpleGSTab		= true,
 	},
 }
 
@@ -1591,7 +1590,12 @@ TMW.C.XmlConfigPanelInfo {
 
 	MakePanel = function(self, panelColumn)
 		local panel = CreateFrame("Frame", self:GetFrameName(), panelColumn, self.xmlTemplateName)
-		TMW:CInit(panel, {})
+
+		-- TODO: Put the CInit in the template for the panel? might break Lua panels though...
+		if not panel.isLibOOInstance then
+			TMW:CInit(panel, {})
+		end
+
 		return panel
 	end,
 }
@@ -1681,11 +1685,10 @@ CScriptProvider = TMW:NewClass("CScriptProvider") {
 	CScriptAdd = function(self, script, func)
 		self.__CScripts = self.__CScripts or {}
 		local existing = self.__CScripts[script]
-		local existing_t = type(existing)
 
-		if existing_t == nil then
+		if existing == nil then
 			self.__CScripts[script] = func
-		elseif existing_t == "function" then
+		elseif type(existing) == "function" then
 			self.__CScripts[script] = {existing, func}
 		else
 			tinsert(existing, func)
@@ -1695,11 +1698,10 @@ CScriptProvider = TMW:NewClass("CScriptProvider") {
 	CScriptAddPre = function(self, script, func)
 		self.__CScripts = self.__CScripts or {}
 		local existing = self.__CScripts[script]
-		local existing_t = type(existing)
 
-		if existing_t == nil then
+		if existing == nil then
 			self.__CScripts[script] = func
-		elseif existing_t == "function" then
+		elseif type(existing) == "function" then
 			self.__CScripts[script] = {func, existing}
 		else
 			tinsert(existing, 1, func)
@@ -1776,24 +1778,39 @@ CScriptProvider = TMW:NewClass("CScriptProvider") {
 	end,
 }
 
+-- TODO - PUT THIS IN A  BETTER PLACE
+local function Reload()
+	TMW.IE:CScriptCallTunnel("ReloadRequested")
+end
+TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", Reload)
+TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CREATED", Reload)
+TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", Reload)
+
 TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 
 	-- Constructor
 	OnNewInstance_Frame = function(self, data)
 		-- Setup callbacks that will load the settings when needed.
-		TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", self, "ReloadSetting")
-		TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CREATED", self, "ReloadSetting")
-		TMW:RegisterCallback("TMW_CONFIG_ICON_HISTORY_STATE_CHANGED", self, "ReloadSetting")
+
+		self:CScriptAdd("ReloadRequested", self.ReloadSetting)
 
 		if data then
 			-- Set appearance and settings
 			self.data = data
-			self.setting = data.setting
+			self:SetSetting(data.setting)
 
 			if self.data.title or self.data.tooltip then
 				self:SetTooltip(self.data.title, self.data.tooltip)
 			end
 		end
+	end,
+
+	SetSetting = function(self, key)
+		self.setting = key
+	end,
+
+	SetTexts = function(self, title, tooltip)
+		self:SetTooltip(title, tooltip)
 	end,
 	
 
@@ -1801,7 +1818,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	OnEnable = function(self)
 		self:SetAlpha(1)
 		
-		if self.data.disabledtooltip then
+		if self.data and self.data.disabledtooltip then
 			self:SetTooltip(self.data.title, self.data.tooltip)
 		end
 	end,
@@ -1809,7 +1826,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	OnDisable = function(self)
 		self:SetAlpha(0.2)
 		
-		if self.data.disabledtooltip then
+		if self.data and self.data.disabledtooltip then
 			self:SetTooltip(self.data.title, self.data.disabledtooltip)
 		end
 	end,
@@ -1838,7 +1855,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	end,
 
 	CheckDisabled = function(self)
-		if self.data.disabled ~= nil then
+		if self.data and self.data.disabled ~= nil then
 			if get(self.data.disabled, self) then
 				self:Disable()
 			else
@@ -1848,7 +1865,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	end,
 	
 	CheckHidden = function(self)
-		if self.data.hidden ~= nil then
+		if self.data and self.data.hidden ~= nil then
 			if get(self.data.hidden, self) then
 				self:Hide()
 			else
@@ -1882,11 +1899,12 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	end,
 
 	GetSettingTable = function(self)
-		return self:CallBubbleOne("GetSettingTable")
+		return self:CScriptCallGet("SettingTableRequested") or self:CScriptCallBubbleGet("SettingTableRequested")
 	end,
 
 	OnSettingSaved = function(self)
-		return self:CallBubbleOne("OnSettingSaved")
+		self:CScriptCall("SettingSaved")
+		self:CScriptCallBubble("DescendantSettingSaved", self)
 	end,
 
 	ReloadSetting = TMW.NULLFUNC
@@ -1966,6 +1984,8 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			get(self.supplementalData.OnSetup, self, panelInfo, self.supplementalData) 
 		end
 
+		self:CScriptCallTunnel("PanelSetup", self, panelInfo)
+
 		self:ReloadSetting()
 			
 		TMW:Fire("TMW_CONFIG_PANEL_SETUP", self, panelInfo)
@@ -1998,45 +2018,66 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		end
 	end,
 
-	--[[
-	SetHeight = function(self, endHeight)
-		-- This function currently disabled because of frame level issues.
-		-- Top frames need to be above lower frames, but editboxes seem to go underneath everything for some reason.
-		-- It doesn't look awful, but I'm going to leave it disabled till I decide otherwise.
-		
-		if not self.__animateHeightHooked then
-			self.__animateHeightHooked = true
-			self:HookScript("OnUpdate", function()
-				if self.__animateHeight_duration then
-					if TMW.time - self.__animateHeight_startTime > self.__animateHeight_duration then
-						self.__animateHeight_duration = nil
-						self:SetHeight_base(self.__animateHeight_end)
-						return  
-					end
-					
-					local pct = (TMW.time - self.__animateHeight_startTime)/self.__animateHeight_duration
-					
-					self:SetHeight_base((pct*self.__animateHeight_delta)+self.__animateHeight_start)
-				end
-			end)    
+	AdjustHeight = function(self, bottomPadding)
+		local top = self:GetTop() * self:GetEffectiveScale()
+		local lowest = top
+
+		if not lowest or lowest < 0 then
+			return
 		end
-		
-		self.__animateHeight_start = self:GetHeight()
-		self.__animateHeight_end = endHeight
-		self.__animateHeight_delta = self.__animateHeight_end - self.__animateHeight_start
-		self.__animateHeight_startTime = TMW.time
-		self.__animateHeight_duration = 0.1
-	end,]]
+
+		local highest = -1
+
+		for _, child in TMW:Vararg(self:GetChildren()) do
+			if child:IsShown() then
+				if child:GetBottom() then
+					lowest = min(lowest, child:GetBottom() * child:GetEffectiveScale())
+					highest = max(highest, child:GetTop() * child:GetEffectiveScale())
+				end
+			end
+		end
+
+		if highest < 0 then
+			return
+		end
+
+		-- If a bottom padding isn't specified, calculate it using the same gap
+		-- that exists between the highest child and the top of the frame.
+		bottomPadding = bottomPadding or (top - highest)
+		bottomPadding = max(bottomPadding, 0)
+
+		self:SetHeight(max(1, top - lowest + bottomPadding)/self:GetEffectiveScale())
+	end,
 }
 
 
 TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	-- Constructor
 	OnNewInstance_CheckButton = function(self, data)
-		self.text:SetText(get(self.data.label or self.data.title))
+		if self.data then
+			self.text:SetText(get(self.data.label or self.data.title)) -- TODO: is label here ever used at all?
+			self:SetSetting(self.data.setting, self.data.value)
+		end
 		self:SetMotionScriptsWhileDisabled(true)
 	end,
 
+	SetTexts = function(self, title, tooltip)
+		if not self.label then
+			self:SetLabel(title)
+		end
+		self:SetTooltip(title, tooltip)
+	end,
+
+	SetLabel = function(self, label)
+		self.label = label
+		self.text:SetText(label)
+	end,
+
+
+	SetSetting = function(self, key, value)
+		self.setting = key
+		self.value = value
+	end,
 
 	-- Script Handlers
 	OnClick = function(self, button)
@@ -2044,7 +2085,7 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 
 		local checked = not not self:GetChecked()
 
-		if self.data.invert then
+		if self.data and self.data.invert then
 			checked = not checked
 		end
 
@@ -2055,46 +2096,31 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 		end
 
 		if settings and self.setting then
-			if self.data.value == nil then
+			if self.value == nil then
 				settings[self.setting] = checked
 			else --if checked then
-				settings[self.setting] = self.data.value
+				settings[self.setting] = self.value
 				self:SetChecked(true)
 			end
 
 			self:OnSettingSaved()
 		end
-		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnClick, self, button) 
-
-		self:OnState()
-	end,
-
-
-	-- Methods
-	OnState = function(self)
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnState, self) 
 	end,
 	
 	ReloadSetting = function(self)
 		local settings = self:GetSettingTable()
 
 		if settings then
-			if self.data.value ~= nil then
-				self:SetChecked(settings[self.setting] == self.data.value)
+			if self.value ~= nil then
+				self:SetChecked(settings[self.setting] == self.value)
 			else
-				if self.data.invert then
+				if self.data and self.data.invert then
 					self:SetChecked(not settings[self.setting])
 				else
 					self:SetChecked(settings[self.setting])
 				end
 			end
 			self:CheckInteractionStates()
-			self:OnState()
 		end
 	end,
 }
@@ -2110,21 +2136,23 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 			self.label = data.label
 		end
 	end,
+
+	SetTexts = function(self, title, tooltip)
+		if not self.label then
+			self:SetLabel(title)
+		end
+		self:SetTooltip(title, tooltip)
+	end,
+
+	SetLabel = function(self, label)
+		self.label = label
+		self:GetScript("OnTextChanged")(self)
+	end,
 	
 
 	-- Scripts
 	OnEditFocusLost = function(self, button)
 		self:SaveSetting()
-		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnEditFocusLost, self, button) 
-	end,
-
-	OnTextChanged = function(self, button)		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnTextChanged, self, button) 
 	end,
 
 	METHOD_EXTENSIONS = {
@@ -2153,7 +2181,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 				value = self:GetText()
 			end
 			
-			value = get(self.data.ModifySettingValue, self, value) or value
+			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
 
 			settings[self.setting] = value
 
@@ -2173,6 +2201,23 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 		end
 	end,
 }
+
+
+TMW:NewClass("Config_TimeEditBox", "Config_EditBox") {
+
+	OnEditFocusLost = function(self, button)
+		local t = TMW:CleanString(self)
+		if strfind(t, ":") then
+			t = TMW.toSeconds(t)
+		end
+		t = tonumber(t) or 0
+		self:SetText(t)
+		self:GetScript("OnTextChanged")(self)
+
+		self:SaveSetting()
+	end,
+}
+
 
 TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 {
@@ -2195,7 +2240,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	Config_EditBox_Slider = TMW:NewClass("Config_EditBox_Slider", "Config_EditBox"){
 		
 		-- Constructor
-		OnNewInstance_EditBox_Slider = function(self, data)
+		OnNewInstance_EditBox_Slider = function(self)
 			self:EnableMouseWheel(true)
 		end,
 		
@@ -2260,23 +2305,31 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 		self:SetMode(self.MODE_STATIC)
 
-		if data.min and data.max then
-			self:SetMinMaxValues(data.min, data.max)
+		if data then
+			if data.min and data.max then
+				self:SetMinMaxValues(data.min, data.max)
+			end
+			if data.range then
+				self:SetRange(data.range)
+			end
+
+			self:SetValueStep(data.step or self:GetValueStep() or 1)
+			self:SetWheelStep(data.wheelStep)
+			
+			self.text:SetText(data.label or data.title)
+
+
+			self:SetTooltip(data.title, data.tooltip)
 		end
-		if data.range then
-			self:SetRange(data.range)
-		end
-
-		self:SetValueStep(data.step or self:GetValueStep() or 1)
-		self:SetWheelStep(data.wheelStep)
-		
-		self.text:SetText(data.label or data.title)
-
-
-		self:SetTooltip(data.title, data.tooltip)
 
 		
 		self:EnableMouseWheel(true)
+	end,
+
+
+	SetTexts = function(self, title, tooltip)
+		self.text:SetText(title)
+		self:SetTooltip(title, tooltip)
 	end,
 
 	-- Blizzard Overrides
@@ -2312,7 +2365,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		end
 
 		if not self.scriptFiredOnValueChanged and value ~= self:GetValue_base() then
-			self:OnValueChanged()
+			self:GetScript("OnValueChanged")(self, value)
 		end
 	end,
 
@@ -2395,10 +2448,6 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		end
 
 		self:UpdateTexts()
-		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnValueChanged, self) 
 	end,
 
 	OnMouseDown = function(self, button)
@@ -2626,7 +2675,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			TMW:TT_Update(self.EditBoxShowing and self.EditBox or self)
 
 			local value = self:GetValue()
-			value = get(self.data.ModifySettingValue, self, value) or value
+			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
 			
 			settings[self.setting] = value
 
@@ -2640,7 +2689,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		if settings and self.setting then
 
 			local value = settings[self.setting]
-			value = get(self.data.UnModifySettingValue, self, value) or value
+			value = self:CScriptCallGet("UnModifySettingValueRequested", value) or value
 
 			self:SetValue(value)
 			
@@ -2651,7 +2700,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	-- Constructor
-	OnNewInstance_Slider_Alpha = function(self, data)
+	OnNewInstance_Slider_Alpha = function(self)
 		self:SetMinMaxValues(0, 1)
 		self:SetValueStep(0.01)
 		
@@ -2683,12 +2732,16 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	FakeSetValue = function(self, value)
 		self:SetValue(value)
 	end,
+
+	SetOrangeValue = function(self, value)
+		self.setOrangeAtValue = value
+	end,
 	
 	UpdateTexts = function(self)
 		local value = self:GetValue()
 				
 		if value and self:IsEnabled() then
-			if value == self.data.setOrangeAtValue then
+			if value == self.setOrangeAtValue then
 				self.Mid:SetText("|cffff7400" .. value * 100 .. "%")
 			else
 				self.Mid:SetText(value * 100 .. "%")
@@ -2702,19 +2755,22 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 
 TMW:NewClass("Config_BitflagBase"){
 	-- Constructor
-	OnNewInstance_BitflagBase = function(self, data)
-		if data.bit then
-			self.bit = data.bit
+	OnNewInstance_BitflagBase = function(self)
+		if self:GetID() and not self:GetSettingBit() then
+			self:SetSettingBitID(self:GetID())
 		end
+	end,
 
-		if data.bit then
-			self.bit = data.bit
-		else
-			local bitID = data.value or self:GetID()
-			assert(bitID, "Couldn't figure out what bit " .. self:GetName() .. " is supposed to operate on!")
-			
-			self.bit = bit.lshift(1, (data.value or self:GetID()) - 1)
-		end
+	SetSettingBit = function(self, bit)
+		self.bit = bit
+	end,
+
+	GetSettingBit = function(self)
+		return self.bit
+	end,
+
+	SetSettingBitID = function(self, bitID)
+		self:SetSettingBit(bit.lshift(1, bitID - 1))
 	end,
 
 
@@ -2722,15 +2778,11 @@ TMW:NewClass("Config_BitflagBase"){
 	OnClick = function(self, button)	
 		local settings = self:GetSettingTable()
 
-		if settings and self.setting then
+		if settings and self.setting and self.bit then
 			settings[self.setting] = bit.bxor(settings[self.setting], self.bit)
 			
 			self:OnSettingSaved()
 		end
-		
-		-- Cheater! (We arent getting anything)
-		-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-		get(self.data.OnClick, self, button) 
 	end,
 	
 
@@ -2759,8 +2811,9 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 		self.Check.tmwClass = "Config_CheckButton_BitToggle"
 		TMW:CInit(self.Check, {
 			setting = "ShowWhen",
-			bit = data.bit,
 		})
+
+		self.Check:SetSettingBit(data.bit)
 		
 		
 		-- Alpha slider
@@ -2768,7 +2821,6 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 		
 		TMW:CInit(self.Alpha, {
 			setting = data.alphaSettingName,
-			setOrangeAtValue = data.setOrangeAtValue or 0,
 			disabled = function(self)
 				local ics = TMW.CI.ics
 				if ics then
@@ -2776,11 +2828,14 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 				end
 			end,
 		})
+
+		self.Alpha:SetOrangeValue(0)
 		
 		-- Reparent the label text on the slider so that it will be at full opacity even while disabled.
 		self.Alpha.text:SetParent(self)
 
-		TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", self)
+
+		self:CScriptAdd("PanelSetup", self.PanelSetup)
 	end,
 	
 
@@ -2797,37 +2852,35 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 	
 
 	-- Methods
-	TMW_CONFIG_PANEL_SETUP = function(self, event, frame, panelInfo)
-		if frame == self:GetParent() then
-			local supplementalData = panelInfo.supplementalData
+	PanelSetup = function(self, panel, panelInfo)
+		local supplementalData = panelInfo.supplementalData
+		
+		assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_WhenChecks!")
+		
+		-- Set the title for the frame
+		panel.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
+		
+		-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
+		local supplementalDataForBit = supplementalData[self.data.bit]
+		if supplementalDataForBit then
+			self.Check:SetTooltip(
+				L["ICONMENU_SHOWWHEN_SHOWWHEN_WRAP"]:format(supplementalDataForBit.text),
+				supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_SHOW_GENERIC_DESC"]
+			)
 			
-			assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_WhenChecks!")
-			
-			-- Set the title for the frame
-			frame.Header:SetText(supplementalData.text)
-			
-			-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
-			local supplementalDataForBit = supplementalData[self.data.bit]
-			if supplementalDataForBit then
-				self.Check:SetTooltip(
-					L["ICONMENU_SHOWWHEN_SHOWWHEN_WRAP"]:format(supplementalDataForBit.text),
-					supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_SHOW_GENERIC_DESC"]
-				)
-				
-				self.Alpha.text:SetText(supplementalDataForBit.text)
-				self.Alpha:SetTooltip(
-					L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(supplementalDataForBit.text),
-					supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
-				)
-				self:Show()
-			else
-				self:Hide()
-			end
+			self.Alpha.text:SetText(supplementalDataForBit.text)
+			self.Alpha:SetTooltip(
+				L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(supplementalDataForBit.text),
+				supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
+			)
+			self:Show()
+		else
+			self:Hide()
 		end
 	end,
 
 	ReloadSetting = function(self)
-		-- Bad Things happen if this isn't defined
+		self:GetParent():AdjustHeight()
 	end,
 }
 
@@ -2924,8 +2977,18 @@ TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame
 		"Frost",
 	},
 
-	OnNewInstance_Button_Rune = function(self, data)
-		self.runeNumber = data.value or self:GetID()
+	OnNewInstance_Button_Rune = function(self)
+		if not self:GetRuneNumber() then
+			self:SetRuneNumber(self:GetID())
+		end
+	end,
+
+	GetRuneNumber = function(self)
+		return self.runeNumber
+	end,
+
+	SetRuneNumber = function(self, runeNumber)
+		self.runeNumber = runeNumber
 
 		-- detect what texture should be used
 		local runeType = ((self.runeNumber-1)%6)+1 -- gives 1, 2, 3, 4, 5, 6
@@ -2937,7 +3000,7 @@ TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame
 			self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeName)
 		end
 
-		self.bit = bit.lshift(1, self.runeNumber - 1)
+		self:SetSettingBitID(self.runeNumber)
 	end,
 
 
@@ -2960,10 +3023,12 @@ TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame
 
 TMW:NewClass("Config_PointSelect", "Config_Frame") {
 	OnNewInstance_Config_PS = function(self, data)
-		self.Header:SetText(get(self.data.title))
+		if self.data then
+			self.Header:SetText(get(self.data.title))
 
-		if self.data.tooltip then
-			self:SetTooltipBody(get(self.data.tooltip))
+			if self.data.tooltip then
+				self:SetTooltipBody(get(self.data.tooltip))
+			end
 		end
 	end,
 
@@ -3014,10 +3079,6 @@ TMW:NewClass("Config_PointSelect", "Config_Frame") {
 
 					self:OnSettingSaved()
 				end
-				
-				-- Cheater! (We arent getting anything)
-				-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-				get(self.data.OnClick, self, button)
 
 				return
 			end
@@ -3073,28 +3134,33 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 	local lastCheckButton
 	local numFrames = 0
 	local numPerRow = allData.numPerRow or min(#allData, 2)
+	parent.checks = {}
 	for i, data in ipairs(allData) do
 		if data ~= nil and data ~= false then -- skip over nils/false (dont freak out about them, they are probably intentional)
-		
-			assert(type(data) == "table", "All values in allData must be tables!")
-			
-			local setting = data.setting -- the setting that the check will handle
-			-- the setting is used by the current icon type, and doesnt have an override that is "hiding" the check, so procede to set it up
-			
-			-- An human-friendly-ish unique (hopefully) identifier for the frame
-			local identifier = setting .. (data.value ~= nil and tostring(data.value) or "")
-			
-			local f = parent[identifier]
-			if not f then
-				f = class:New(objectType, parent:GetName() .. identifier, parent, "TellMeWhen_CheckTemplate", nil, data)
-				parent[identifier] = f
-				parent[i] = f
+
+			local f
+			if type(data) == "table" then
+				f = class:New(objectType, nil, parent, "TellMeWhen_CheckTemplate", i, data)
+
+				-- An human-friendly-ish unique (hopefully) identifier for the frame
+				parent[data.setting .. (data.value ~= nil and tostring(data.value) or "")] = f
+
+			elseif type(data) == "function" then
+				f = class:New(objectType, nil, parent, "TellMeWhen_CheckTemplate", i)
+				data(f)
+				if f.setting then
+					parent[f.setting .. (f.value ~= nil and tostring(f.value) or "")] = f
+				end
 			end
+
+			-- I would store these directly on parent,
+			-- but framestack breaks catastrophically when you store frames on their parent with integer keys.
+			parent.checks[i] = f
 			
 			if lastCheckButton then
 				-- Anchor it to the previous check if it isn't the first one.
 				if numFrames%numPerRow == 0 then
-					f:SetPoint("TOP", parent[i-numPerRow], "BOTTOM", 0, 2)
+					f:SetPoint("TOP", parent.checks[i-numPerRow], "BOTTOM", 0, 2)
 				else
 					-- This will get overwritten soon.
 					--f:SetPoint("LEFT", "RIGHT", 5, 0)
@@ -3112,9 +3178,9 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 	end
 	
 	-- Set the bounds of the label text on all the checkboxes to prevent overlapping.
-	for i = 1, #parent do
-		local f0 = parent[i]
-		local f1 = parent[i+1]
+	for i = 1, #parent.checks do
+		local f0 = parent.checks[i]
+		local f1 = parent.checks[i+1]
 		
 		if not f1 or f1.row ~= f0.row then
 			f0:ConstrainLabel(parent, "RIGHT", -1, 0)
@@ -3124,12 +3190,12 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 	end
 	
 	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function()
-		for i = 1, #parent, numPerRow do
-			IE:DistributeFrameAnchorsLaterally(parent, numPerRow, unpack(parent, i))
+		for i = 1, #parent.checks, numPerRow do
+			IE:DistributeFrameAnchorsLaterally(parent, numPerRow, unpack(parent.checks, i))
 		end		
 	end)
 	
-	parent:SetHeight(ceil(numFrames/numPerRow)*30)
+	parent:AdjustHeight()
 	
 	return parent
 end

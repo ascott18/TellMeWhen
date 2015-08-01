@@ -6,16 +6,16 @@
 		
 			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-3"/>
+					<Anchor point="TOPLEFT" x="5" y="-5"/>
 					<Anchor point="RIGHT" x="-5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = TMW.L["CLEU_EVENTS"],
-							tooltip = TMW.L["CLEU_EVENTS_DESC"],
-							func = TMW.Types.cleu.CONFIG.EventMenu,
-						})
+						TMW:CInit(self)
+				
+						self:SetTexts(TMW.L["CLEU_EVENTS"], TMW.L["CLEU_EVENTS_DESC"])
+						self:SetFunction(TMW.Types.cleu.CONFIG.EventMenu)
+
 						self.SHOW_TIME = 0.5
 
 						self.Button:HookScript("OnClick", function(self)
@@ -27,7 +27,7 @@
 			
 			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" y="3"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" y="-7"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -45,14 +45,10 @@
 						self.text2:SetWidth(self:GetParent().CLEUEvents:GetWidth() - self:GetWidth() - 35)
 						self.setting = "CLEUDur"
 						
-						TMW:CInit(self, {
-							setting = "CLEUDur",
-							title = TMW.L["CLEU_TIMER"],
-							tooltip = TMW.L["CLEU_TIMER_DESC"],
-							ModifySettingValue = function(self, value)
-								return tonumber(value) or 0
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["CLEU_TIMER"], TMW.L["CLEU_TIMER_DESC"])
+						self:SetSetting("CLEUDur")
 					</OnLoad>
 				</Scripts>
 			</EditBox>
@@ -65,11 +61,10 @@
 					<OnLoad>
 						self:SetFrameLevel(self:GetFrameLevel() + 2) -- sometimes it ends up under the type dropdown which makes half of the checkbox unclickable
 					
-						TMW:CInit(self, {
-							setting = "CLEUNoRefresh",
-							title = TMW.L["ICONMENU_CLEU_NOREFRESH"],
-							tooltip = TMW.L["ICONMENU_CLEU_NOREFRESH_DESC"],
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_CLEU_NOREFRESH"], TMW.L["ICONMENU_CLEU_NOREFRESH_DESC"])
+						self:SetSetting("CLEUNoRefresh")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -97,26 +92,29 @@
 									return TMW.L["CLEU_SOURCEUNITS_DESC"]
 								end
 							end,
-							OnTextChanged = function(self)
-								self:GetParent():AdjustHeight()
-							end,
 							doCleanString = true,
 						})
 					</OnLoad>
+					<OnSizeChanged>
+						local parent = self:GetParent()
+						if parent.AdjustHeight then
+							parent:AdjustHeight()
+						end
+					</OnSizeChanged>
 				</Scripts>
 			</EditBox>
 			<Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentSourceUnit" relativePoint="BOTTOMRIGHT" x="2" y="-11"/>
+					<Anchor point="LEFT" relativeTo="$parentSourceUnit" relativePoint="RIGHT" x="3" />
 					<Anchor point="RIGHT" x="-5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = TMW.L["CLEU_FLAGS_SOURCE"],
-							tooltip = TMW.L["CLEU_FLAGS_DESC"],
-							func = TMW.Types.cleu.CONFIG.FlagsMenu,
-						})
+						TMW:CInit(self)
+				
+						self:SetTexts(TMW.L["CLEU_FLAGS_SOURCE"], TMW.L["CLEU_FLAGS_DESC"])
+						self:SetFunction(TMW.Types.cleu.CONFIG.FlagsMenu)
+
 						self.SHOW_TIME = 0.5
 
 						self.flagSet = "SourceFlags" -- the setting name, basically
@@ -151,27 +149,30 @@
 									return TMW.L["CLEU_DESTUNITS_DESC"]
 								end
 							end,
-							OnTextChanged = function(self)
-								self:GetParent():AdjustHeight()
-							end,
 							doCleanString = true,
 						})
 					</OnLoad>
+					<OnSizeChanged>
+						local parent = self:GetParent()
+						if parent.AdjustHeight then
+							parent:AdjustHeight()
+						end
+					</OnSizeChanged>
 				</Scripts>
 			</EditBox>
 			<Frame name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate" parentKey="DestFlags">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentDestUnit" relativePoint="BOTTOMRIGHT" x="2" y="-11"/>
+					<Anchor point="LEFT" relativeTo="$parentDestUnit" relativePoint="RIGHT" x="3" />
 					<Anchor point="RIGHT" x="-5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = TMW.L["CLEU_FLAGS_DEST"],
-							tooltip = TMW.L["CLEU_FLAGS_DESC"],
-							func = TMW.Types.cleu.CONFIG.FlagsMenu,
-						})
-						self.SHOW_TIME = 0.5
+						TMW:CInit(self)
+				
+						self:SetTexts(TMW.L["CLEU_FLAGS_DEST"], TMW.L["CLEU_FLAGS_DESC"])
+						self:SetFunction(TMW.Types.cleu.CONFIG.FlagsMenu)
+
+						self.SHOW_TIME = 0.5 --TODO: make a method for this.
 
 						self.flagSet = "DestFlags" -- the setting name, basically
 						self.Button:HookScript("OnClick", function(self)
@@ -193,10 +194,6 @@
 
 				self.CLEUDur.text2:SetPoint("RIGHT", self.CLEUNoRefresh, "LEFT")
 				self.CLEUDur.text2:SetHeight(30)
-				
-				function self:AdjustHeight()
-					self:SetHeight(75 + self.SourceUnit:GetHeight() + self.DestUnit:GetHeight())
-				end
 			</OnLoad>
 		</Scripts>
 	</Frame>

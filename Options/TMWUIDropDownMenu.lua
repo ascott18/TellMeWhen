@@ -28,12 +28,19 @@ local DD = TMW:NewClass("Config_DropDownMenu", "Config_Frame"){
 		self.Button:SetMotionScriptsWhileDisabled(false)
 		self.wrapTooltips = true
 
-		if data.func then
-			self:SetFunction(data.func)
+		if data then
+			if data.func then
+				self:SetFunction(data.func)
+			end
+			if data.title then
+				self:SetText(data.title)
+			end
 		end
-		if data.title then
-			self:SetText(data.title)
-		end
+	end,
+
+	SetTexts = function(self, title, tooltip)
+		self:SetTooltip(title, tooltip)
+		self:SetText(title)
 	end,
 
 	SetUIDropdownText = function(self, value, tbl, text)

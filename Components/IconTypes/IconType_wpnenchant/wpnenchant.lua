@@ -115,27 +115,24 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_WPNENCHANTTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "WpnEnchantType",
-			value = "MainHandSlot",
-			title = INVTYPE_WEAPONMAINHAND,
-		},
-		{
-			setting = "WpnEnchantType",
-			value = "SecondaryHandSlot",
-			title = INVTYPE_WEAPONOFFHAND,
-		},
+		function(check)
+			check:SetTexts(INVTYPE_WEAPONMAINHAND, nil)
+			check:SetSetting("WpnEnchantType", "MainHandSlot")
+		end,
+		function(check)
+			check:SetTexts(INVTYPE_WEAPONOFFHAND, nil)
+			check:SetSetting("WpnEnchantType", "SecondaryHandSlot")
+		end,
 	})
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_WpnEnchantSettings", function(self)
 	self.Header:SetText(Type.name)
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
-		{
-			setting = "HideUnequipped",
-			title = L["ICONMENU_HIDEUNEQUIPPED"],
-			tooltip = L["ICONMENU_HIDEUNEQUIPPED_DESC"],
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_HIDEUNEQUIPPED"], L["ICONMENU_HIDEUNEQUIPPED_DESC"])
+			check:SetSetting("HideUnequipped")
+		end,
 	})
 end)
 
