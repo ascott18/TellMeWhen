@@ -95,21 +95,19 @@ end
 --  Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
 --    self.Header:SetText(Type.name)
 --    TMW.IE:BuildSimpleCheckSettingFrame(self, {
---      {
---        setting = "RangeCheck",
---        title = L["ICONMENU_RANGECHECK"],
---        tooltip = L["ICONMENU_RANGECHECK_DESC"],
---      },
---      {
---        setting = "ManaCheck",
---        title = L["ICONMENU_MANACHECK"],
---        tooltip = L["ICONMENU_MANACHECK_DESC"],
---      },
---      {
---        setting = "TestType_SomeSetting",
---        title = "Some Custom Setting",
---        tooltip = "Check for stack text to be 'Hello'. Uncheck for stack text to be 'World'",
---      },
+--      function(check)
+--          check:SetTexts(L["ICONMENU_RANGECHECK"], L["ICONMENU_RANGECHECK_DESC"])
+--          check:SetSetting("RangeCheck")
+--      end,
+--      function(check)
+--          check:SetTexts(L["ICONMENU_MANACHECK"], L["ICONMENU_MANACHECK_DESC"])
+--          check:SetSetting("ManaCheck")
+--      end,
+--      function(check)
+--          check:SetSetting("TestType_SomeSetting")
+--          check:SetTexts("Some Custom Setting",
+--      		"All about this setting.")
+--      end,
 --    })
 --  end)
 function GenericComponent:RegisterConfigPanel_ConstructorFunc(order, frameName, func, supplementalData)

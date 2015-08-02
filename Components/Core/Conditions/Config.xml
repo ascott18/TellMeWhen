@@ -312,8 +312,6 @@
 						self:CScriptAdd("SettingSaved", function(requester)
 							TMW.IE:ScheduleIconSetup() --TODO: there needs to be a way for condition config to intelligently run a setup on a parent object using the current ConditionSet.
 						end)
-
-						self.CheckInteractionStates = TMW.NULLFUNC
 					</OnLoad>
 				</Scripts>
 			</Slider>

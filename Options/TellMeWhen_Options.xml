@@ -760,7 +760,7 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" setAllPoints="true">
-					<Color r="0.66" g="0.66" b="0.66" a="1"/>
+					<Color r="0.9" g="0.9" b="0.9" a="1"/>
 					
 					<Gradient orientation="VERTICAL">
 						<MinColor r="1" g="1" b="1" a="0.05"/>

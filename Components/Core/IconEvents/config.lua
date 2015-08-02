@@ -86,8 +86,6 @@ TMW:NewClass("Config_CheckButton_Event", "Config_Base_Event", "Config_CheckButto
 			EVENTS:LoadEventSettings()
 		end,
 	},
-
-	CheckInteractionStates = TMW.NULLFUNC,
 }
 
 TMW:NewClass("Config_Slider_Event", "Config_Base_Event", "Config_Slider"){
@@ -96,8 +94,6 @@ TMW:NewClass("Config_Slider_Event", "Config_Base_Event", "Config_Slider"){
 		self.Low:SetTextColor(color, color, color, 1)
 		self.High:SetTextColor(color, color, color, 1)
 	end,
-
-	CheckInteractionStates = TMW.NULLFUNC,
 }
 
 TMW:NewClass("Config_EditBox_Event", "Config_Base_Event", "Config_EditBox"){
@@ -278,7 +274,7 @@ function EVENTS:LoadEventID(eventID)
 	for i, frame in ipairs(EVENTS.EventHandlerFrames) do
 		frame.selected = nil
 		frame:UnlockHighlight()
-		frame:GetHighlightTexture():SetAlpha(0.07)
+		frame:GetHighlightTexture():SetAlpha(0.1)
 	end
 
 
@@ -309,7 +305,7 @@ function EVENTS:LoadEventID(eventID)
 
 	eventFrame.selected = 1
 	eventFrame:LockHighlight()
-	eventFrame:GetHighlightTexture():SetAlpha(0.15)
+	eventFrame:GetHighlightTexture():SetAlpha(0.2)
 end
 
 function EVENTS:LoadEventSettings()
@@ -493,7 +489,7 @@ function EVENTS:ShowHandlerPickerButtons()
 	EVENTS:LoadEventID(nil)
 
 	IE.Events.AddEvent:LockHighlight()
-	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.15)
+	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.2)
 
 	IE.Events.HandlerPickers:Show()
 	IE.Events.EventPickers:Hide()
@@ -508,7 +504,7 @@ end
 
 function EVENTS:HidePickerButtons()
 	IE.Events.AddEvent:UnlockHighlight()
-	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.07)
+	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.1)
 
 	IE.Events.HandlerPickers:Hide()
 	IE.Events.EventPickers:Hide()
@@ -898,7 +894,7 @@ function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
 			end
 			f.selected = nil
 			f:UnlockHighlight()
-			f:GetHighlightTexture():SetAlpha(0.07)
+			f:GetHighlightTexture():SetAlpha(0.1)
 		end
 	end
 
@@ -909,7 +905,7 @@ function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
 
 	if subHandlerListButton then
 		subHandlerListButton:LockHighlight()
-		subHandlerListButton:GetHighlightTexture():SetAlpha(0.15)
+		subHandlerListButton:GetHighlightTexture():SetAlpha(0.2)
 	end
 
 	self:SetupEventDisplay(self.currentEventID)

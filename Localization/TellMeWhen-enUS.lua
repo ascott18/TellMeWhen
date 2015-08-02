@@ -1359,7 +1359,7 @@ The group of the icon being checked must be shown in order to check the icon.]=]
 
 
 L["CONDITIONPANEL_RUNES"] = "Rune Count"
-L["CONDITIONPANEL_RUNES_DESC3"] = [=[Use this condition type to only show the icon when the desired number of runes are available.]=]
+L["CONDITIONPANEL_RUNES_DESC3"] = [=[Use this condition type to check when the desired number of runes are available.]=]
 L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Check this rune to count this rune type into the total count for the condition.]=]
 
 L["CONDITIONPANEL_RUNES_DESC_GENERIC"] = [=[Each rune is a check button. Check each rune to have it be counted into the conditions.
@@ -1368,12 +1368,12 @@ The runes in the first row will not match death runes. The runes in the second r
 
 
 L["CONDITIONPANEL_RUNESRECH"] = "Recharging Rune Count"
-L["CONDITIONPANEL_RUNESRECH_DESC"] = [=[Use this condition type to only show the icon when the desired number of runes are recharging.]=]
+L["CONDITIONPANEL_RUNESRECH_DESC"] = [=[Use this condition type to check when the desired number of runes are recharging.]=]
 
 
 
 L["CONDITIONPANEL_RUNESLOCK"] = "Locked Rune Count"
-L["CONDITIONPANEL_RUNESLOCK_DESC"] = [=[Use this condition type to only show the icon when the desired number of runes are locked (awaiting recharge).]=]
+L["CONDITIONPANEL_RUNESLOCK_DESC"] = [=[Use this condition type to check when the desired number of runes are locked (awaiting recharge).]=]
 
 
 

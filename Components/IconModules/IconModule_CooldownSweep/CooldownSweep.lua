@@ -50,38 +50,37 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			check:SetTexts(L["ICONMENU_SHOWTIMERTEXT"], L["ICONMENU_SHOWTIMERTEXT_DESC"])
 			check:SetSetting("ShowTimerText")
 		end,
-		{
-			setting = "InvertTimer",
-			title = L["ICONMENU_INVERTTIMER"],
-			tooltip = L["ICONMENU_INVERTTIMER_DESC"],
-			disabled = function(self)
-				return not TMW.CI.ics.ShowTimer
-			end,
-		},
-		{
-			setting = "ClockGCD",
-			title = L["ICONMENU_ALLOWGCD"],
-			tooltip = L["ICONMENU_ALLOWGCD_DESC"],
-			disabled = function(self)
-				return not TMW.CI.ics.ShowTimer and not TMW.CI.ics.ShowTimerText and not TMW.CI.ics.ShowTimerTextnoOCC
-			end,
-		},
-		{
-			setting = "ShowTimerTextnoOCC",
-			title = L["ICONMENU_SHOWTIMERTEXT_NOOCC"],
-			tooltip = L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"],
-			disabled = function(self)
-				return not TMW.CI.ics.ShowTimer
-			end,
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_INVERTTIMER"], L["ICONMENU_INVERTTIMER_DESC"])
+			check:SetSetting("InvertTimer")
+
+			check:CScriptAdd("ReloadRequested", function()
+				check:SetEnabled(TMW.CI.ics.ShowTimer)
+			end)
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_ALLOWGCD"], L["ICONMENU_ALLOWGCD_DESC"])
+			check:SetSetting("ClockGCD")
+
+			check:CScriptAdd("ReloadRequested", function()
+				check:SetShown(not TMW.CI.icon.typeData.hasNoGCD)
+				check:GetParent():AdjustHeight()
+
+				check:SetEnabled(TMW.CI.ics.ShowTimer or TMW.CI.ics.ShowTimerText or TMW.CI.ics.ShowTimerTextnoOCC)
+			end)
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_SHOWTIMERTEXT_NOOCC"], L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"])
+			check:SetSetting("ShowTimerTextnoOCC")
+
+			check:CScriptAdd("ReloadRequested", function()
+				check:SetShown(IsAddOnLoaded("ElvUI"))
+				check:GetParent():AdjustHeight()
+
+				check:SetEnabled(TMW.CI.ics.ShowTimer)
+			end)
+		end,
 	})
-
-	self:CScriptAdd("ReloadRequested", function()
-		self.ShowTimerTextnoOCC:SetShown(IsAddOnLoaded("ElvUI"))
-		self.ClockGCD:SetShown(not TMW.CI.icon.typeData.hasNoGCD)
-
-		self:AdjustHeight()
-	end)
 end)
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()

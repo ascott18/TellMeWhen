@@ -91,10 +91,6 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", fun
 			check:SetSetting("IgnoreNomana")
 		end,
 		function(check)
-			check:SetTexts(L["ICONMENU_COOLDOWNCHECK"], L["ICONMENU_COOLDOWNCHECK_DESC"])
-			check:SetSetting("CooldownCheck")
-		end,
-		function(check)
 			check:SetTexts(L["ICONMENU_RANGECHECK"], L["ICONMENU_RANGECHECK_DESC"])
 			check:SetSetting("RangeCheck")
 		end,
@@ -102,15 +98,22 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", fun
 			check:SetTexts(L["ICONMENU_MANACHECK"], L["ICONMENU_MANACHECK_DESC"])
 			check:SetSetting("ManaCheck")
 		end,
-		pclass == "DEATHKNIGHT" and {
-			setting = "IgnoreRunes",
-			title = L["ICONMENU_IGNORERUNES"],
-			tooltip = L["ICONMENU_IGNORERUNES_DESC"],
-			disabledtooltip = L["ICONMENU_IGNORERUNES_DESC_DISABLED"],
-			disabled = function(self)
-				return not TMW.CI.ics.CooldownCheck
-			end,
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_COOLDOWNCHECK"], L["ICONMENU_COOLDOWNCHECK_DESC"])
+			check:SetSetting("CooldownCheck")
+		end,
+		pclass == "DEATHKNIGHT" and function(check)
+			check:SetSetting("IgnoreRunes")
+
+			check:CScriptAdd("ReloadRequested", function()
+				check:SetEnabled(TMW.CI.ics.CooldownCheck)
+				if TMW.CI.ics.CooldownCheck then
+					check:SetTexts(L["ICONMENU_IGNORERUNES"], L["ICONMENU_IGNORERUNES_DESC"])
+				else
+					check:SetTexts(L["ICONMENU_IGNORERUNES"], L["ICONMENU_IGNORERUNES_DESC_DISABLED"])
+				end
+			end)
+		end,
 	})
 end)
 

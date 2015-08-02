@@ -94,11 +94,6 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffCheckSettings", fu
 			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
 			check:SetSetting("OnlyMine")
 		end,
-		-- {
-		-- 	setting = "HideIfNoUnits",
-		-- 	title = L["ICONMENU_HIDENOUNITS"],
-		-- 	tooltip = L["ICONMENU_HIDENOUNITS_DESC"],
-		-- },
 	})
 end)
 
