@@ -295,6 +295,7 @@
 
 						TMW:CInit(self)
 						self:SetSetting("Level")
+						self:SetExtremesColor(1)
 
 						self:HookScript("OnValueChanged", function(self)
 							local CndtGroup = self:GetParent()
@@ -351,9 +352,9 @@
 				</Scripts>
 			</EditBox>
 			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
-				<Size x="26" y="26"/>
+				<Size x="25" y="25"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentEditBox" x="5" y="-1"/>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -370,9 +371,9 @@
 				</Scripts>
 			</CheckButton>
 			<CheckButton name="$parentCheck2" inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
-				<Size x="26" y="26"/>
+				<Size x="25" y="25"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentEditBox2" x="5" y="-1"/>
+					<Anchor point="RIGHT" relativeTo="$parentEditBox2" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -601,62 +602,10 @@
 					</CheckButton>
 				</Frames>
 			</Frame>
-
-			<Button name="$parentUp" parentKey="Up">
-				<Size x="15" y="15"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" x="4" y="-32"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
-						TMW:TT(self, "METAPANEL_UP")
-						self:SetScale(0.8)
-					</OnLoad>
-					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
-
-						self:GetParent():UpOrDown(-1)
-					</OnClick>
-				</Scripts>
-				<!-- TODO: convert to this, and all other arrows that use this texture, to the new arrow texture -->
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
-					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-					<Color r=".7" g=".7" b=".7" a="1"/>
-				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
-					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-				</HighlightTexture>
-			</Button>
-			<Button name="$parentDown" parentKey="Down">
-				<Size x="15" y="15"/>
-				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentUp" relativePoint="BOTTOM" y="-3"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
-						TMW:TT(self, "METAPANEL_DOWN")
-						self:SetScale(0.8)
-					</OnLoad>
-					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
-
-						self:GetParent():UpOrDown(1)
-					</OnClick>
-				</Scripts>
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
-					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-					<Color r=".7" g=".7" b=".7" a="1"/>
-				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up" alphaMode="ADD">
-					<TexCoords left="0.21875" right="0.6875" top="0.34375" bottom="0.65625"/>
-				</HighlightTexture>
-			</Button>
-			<Button name="$parentAddDelete" parentKey="AddDelete">
+			<Button parentKey="DeleteButton">
 				<Size x="30" y="30"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="-4" y="4"/>
+					<Anchor point="TOPLEFT" x="-3" y="5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -672,6 +621,63 @@
 				<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
 				<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
+
+			<Button parentKey="Up">
+				<Size x="18" y="18"/>
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.DeleteButton" relativePoint="BOTTOM" x="-1" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+						TMW:TT(self, "METAPANEL_UP")
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
+						self:GetParent():UpOrDown(-1)
+					</OnClick>
+				</Scripts>
+
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+					<TexCoords left="0" right="1" top="0" bottom="1"/>
+					<Color r="1.0" g="0.92" b="0" a="0.7"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" alphaMode="ADD">
+					<TexCoords left="0" right="1" top="0" bottom="1"/>
+					<Color r="1" g="1" b="1" a="0.4"/>
+				</HighlightTexture>
+			</Button>
+
+			<Button parentKey="Down">
+				<Size x="18" y="18"/>
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.Up" relativePoint="BOTTOM" y="-7"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2)
+						TMW:TT(self, "METAPANEL_DOWN")
+						self:SetScale(0.8)
+					</OnLoad>
+					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
+						self:GetParent():UpOrDown(1)
+					</OnClick>
+				</Scripts>
+
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+					<TexCoords left="0" right="1" top="1" bottom="0"/>
+					<Color r="1.0" g="0.92" b="0" a="0.7"/>
+				</NormalTexture>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" alphaMode="ADD">
+					<TexCoords left="0" right="1" top="1" bottom="0"/>
+					<Color r="1" g="1" b="1" a="0.4"/>
+				</HighlightTexture>
+			</Button>
+
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">

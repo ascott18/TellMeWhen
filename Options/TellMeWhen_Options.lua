@@ -2173,7 +2173,6 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 	end,
 }
 
-
 TMW:NewClass("Config_TimeEditBox", "Config_EditBox") {
 	
 	OnEditFocusLost = function(self, button)
@@ -2188,7 +2187,6 @@ TMW:NewClass("Config_TimeEditBox", "Config_EditBox") {
 		self:SaveSetting()
 	end,
 }
-
 
 TMW:NewClass("Config_EditBoxWithCheck", "Config_Frame") {
 	OnNewInstance_TimeEditBoxWithCheck = function(self)
@@ -2215,7 +2213,6 @@ TMW:NewClass("Config_EditBoxWithCheck", "Config_Frame") {
 		self.Duration:SetSetting(durationSetting)
 	end,
 }
-
 
 TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 {
@@ -2304,12 +2301,18 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		self:SetMode(self.MODE_STATIC)
 		
 		self:EnableMouseWheel(true)
+		self:SetExtremesColor(0.25)
 	end,
 
 
 	SetTexts = function(self, title, tooltip)
 		self.text:SetText(title)
 		self:SetTooltip(title, tooltip)
+	end,
+
+	SetExtremesColor = function(self, color)
+		self.Low:SetTextColor(color, color, color, 1)
+		self.High:SetTextColor(color, color, color, 1)
 	end,
 
 	-- Blizzard Overrides
@@ -2681,10 +2684,6 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	OnNewInstance_Slider_Alpha = function(self)
 		self:SetMinMaxValues(0, 1)
 		self:SetValueStep(0.01)
-		
-		local color = 34/0xFF
-		self.Low:SetTextColor(color, color, color, 1)
-		self.High:SetTextColor(color, color, color, 1)
 	end,
 
 
@@ -2725,7 +2724,6 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 		end
 	end,
 }
-
 
 TMW:NewClass("Config_BitflagBase"){
 	-- Constructor
@@ -2846,7 +2844,6 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 		self:GetParent():AdjustHeight()
 	end,
 }
-
 
 TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	hasOpacity = false,

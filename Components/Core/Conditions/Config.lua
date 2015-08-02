@@ -668,10 +668,6 @@ function CndtGroup:OnNewInstance()
 	CNDT[ID] = self
 
 	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -16.5)
-
-	--[[local p, _, rp, x, y = TMW.CNDT[1].AddDelete:GetPoint()
-	self.AddDelete:ClearAllPoints()
-	self.AddDelete:SetPoint(p, CNDT[ID], rp, x, y)]]
 	
 	self:Hide()
 	

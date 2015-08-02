@@ -1172,8 +1172,8 @@ L["DOWN"] = "Down"
 L["LEFT"] = "Left"
 L["RIGHT"] = "Right"
 
-L["LAYOUTDIRECTION_PRIMARY_DESC"] = "Make the primary layout direction of icons be in the %s direction."
-L["LAYOUTDIRECTION_SECONDARY_DESC"] = "Make successive rows/columns of icons be in the %s direction."
+L["LAYOUTDIRECTION_PRIMARY_DESC"] = "Make the primary layout direction of icons expand in the %s direction."
+L["LAYOUTDIRECTION_SECONDARY_DESC"] = "Make successive rows/columns of icons expand in the %s direction."
 
 
 L["TEXTLAYOUTS"] = "Text Layouts"

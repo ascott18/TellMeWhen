@@ -67,6 +67,7 @@ TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", Reload)
 TMW:NewClass("Config_Base_Event"){
 	OnNewInstance_Base_Event = function(self, data)
 		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
+		self:CScriptAdd("DescendantSettingSaved", self.DescendantSettingSaved)
 	end,
 
 	SetColumnPadding = function(self, top, bottom)
@@ -77,32 +78,17 @@ TMW:NewClass("Config_Base_Event"){
 	SettingTableRequested = function(self)
 		return TMW.CI.ics and EVENTS:GetEventSettings()
 	end,
-}
 
-TMW:NewClass("Config_CheckButton_Event", "Config_Base_Event", "Config_CheckButton"){
-
-	METHOD_EXTENSIONS = {
-		OnClick = function(self, button)
-			EVENTS:LoadEventSettings()
-		end,
-	},
-}
-
-TMW:NewClass("Config_Slider_Event", "Config_Base_Event", "Config_Slider"){
-	OnNewInstance_Slider_Event = function(self)
-		local color = 34/0xFF
-		self.Low:SetTextColor(color, color, color, 1)
-		self.High:SetTextColor(color, color, color, 1)
+	DescendantSettingSaved = function(self)
+		EVENTS:LoadConfig()
 	end,
 }
 
-TMW:NewClass("Config_EditBox_Event", "Config_Base_Event", "Config_EditBox"){
-	METHOD_EXTENSIONS = {
-		SaveSetting = function(self, button)
-			EVENTS:LoadConfig()
-		end,
-	},
-}
+TMW:NewClass("Config_CheckButton_Event", "Config_Base_Event", "Config_CheckButton")
+
+TMW:NewClass("Config_Slider_Event", "Config_Base_Event", "Config_Slider")
+
+TMW:NewClass("Config_EditBox_Event", "Config_Base_Event", "Config_EditBox")
 
 TMW:NewClass("Config_ColorButton_Event", "Config_Base_Event", "Config_ColorButton")
 

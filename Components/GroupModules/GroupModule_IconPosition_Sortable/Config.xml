@@ -45,7 +45,7 @@
 		<!-- <HitRectInsets left="-2" right="-2" top="-2" bottom="-2" /> -->
 
 		<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
-			<Color r="1.0" g="0.92" b="0.9" a="0.3"/>
+			<Color r="1.0" g="0.92" b="0.9" a="0.25"/>
 		</NormalTexture>
 		<DisabledTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
 			<Color r="0" g="0" b="0" a="1"/>

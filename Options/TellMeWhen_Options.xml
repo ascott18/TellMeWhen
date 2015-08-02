@@ -2165,7 +2165,7 @@
 				self.currentPanels = {}
 				tinsert(parent.panelColumns, self)
 
-				TMW:ConvertContainerToScrollFrame(self, true, 1, 5)
+				TMW:ConvertContainerToScrollFrame(self, true, 1, 7)
 				self.ScrollFrame.scrollPercentage = 1/3
 			</OnLoad>
 		</Scripts>
@@ -2295,7 +2295,6 @@
 			<Button parentKey="BackButton" >
 				<Size x="18" y="18"/>
 				<Anchors>
-					<Anchor point="TOP" y="-10"/>
 					<Anchor point="LEFT" relativeKey="$parent.icontexture" relativePoint="RIGHT" x="10" />
 				</Anchors>
 				<HitRectInsets left="-2" right="-2" top="-2" bottom="-2" />
@@ -2310,9 +2309,12 @@
 						TMW:TT(self, "BACK_IE", desc, nil, 1)
 
 						self:SetFrameLevel(self:GetFrameLevel()+2)
-						self:GetNormalTexture():SetTexCoord(0.6875, 0.34375, 0.21875, 0.34375, 0.6875, 0.65625, 0.21875, 0.65625)
-						self:GetHighlightTexture():SetTexCoord(0.6875, 0.34375, 0.21875, 0.34375, 0.6875, 0.65625, 0.21875, 0.65625)
-						self:GetDisabledTexture():SetTexCoord(0.6875, 0.34375, 0.21875, 0.34375, 0.6875, 0.65625, 0.21875, 0.65625)
+
+						local coords = {1, 0, 0, 0, 1, 1, 0, 1}
+
+						self:GetNormalTexture():SetTexCoord(unpack(coords))
+						self:GetHighlightTexture():SetTexCoord(unpack(coords))
+						self:GetDisabledTexture():SetTexCoord(unpack(coords))
 						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
@@ -2329,11 +2331,15 @@
 					</OnDisable>
 				</Scripts>
 
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
-					<Color r=".7" g=".7" b=".7" a="1"/>
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+					<Color r="1.0" g="0.92" b="0" a="0.7"/>
 				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD"/>
-				<DisabledTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled" alphaMode="ADD"/>
+				<DisabledTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+					<Color r="0" g="0" b="0" a="1"/>
+				</DisabledTexture>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" alphaMode="ADD">
+					<Color r="1" g="1" b="1" a="0.4"/>
+				</HighlightTexture>
 			</Button>
 			<Button parentKey="ForwardsButton" >
 				<Size x="18" y="18"/>
@@ -2353,9 +2359,11 @@
 
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 
-						self:GetNormalTexture():SetTexCoord(0.6875, 0.65625, 0.21875, 0.65625, 0.6875, 0.34375, 0.21875, 0.34375)
-						self:GetHighlightTexture():SetTexCoord(0.6875, 0.65625, 0.21875, 0.65625, 0.6875, 0.34375, 0.21875, 0.34375)
-						self:GetDisabledTexture():SetTexCoord(0.6875, 0.65625, 0.21875, 0.65625, 0.6875, 0.34375, 0.21875, 0.34375)
+						local coords = {1, 1, 0, 1, 1, 0, 0, 0}
+
+						self:GetNormalTexture():SetTexCoord(unpack(coords))
+						self:GetHighlightTexture():SetTexCoord(unpack(coords))
+						self:GetDisabledTexture():SetTexCoord(unpack(coords))
 						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
@@ -2372,11 +2380,15 @@
 					</OnDisable>
 				</Scripts>
 
-				<NormalTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD">
-					<Color r=".7" g=".7" b=".7" a="1"/>
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+					<Color r="1.0" g="0.92" b="0" a="0.7"/>
 				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up" alphaMode="ADD"/>
-				<DisabledTexture urgency="5" file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled" alphaMode="ADD"/>
+				<DisabledTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+					<Color r="0" g="0" b="0" a="1"/>
+				</DisabledTexture>
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" alphaMode="ADD">
+					<Color r="1" g="1" b="1" a="0.4"/>
+				</HighlightTexture>
 			</Button>
 
 
