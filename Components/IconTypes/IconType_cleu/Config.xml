@@ -76,25 +76,27 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetSetting("SourceUnit")
+						self:SetTexts(TMW.L["CLEU_SOURCEUNITS"], function()
+							if IsModifierKeyDown() then
+								return TMW.UNITS:GetUnitInputDetailedTooltip(self)
+							else
+								return TMW.L["CLEU_SOURCEUNITS_DESC"]
+							end
+						end)
+						
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return TMW:CleanString(value)
+						end)
+
 						TMW.SUG:EnableEditBox(self, "units")
-						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
-						self.label = TMW.L["CLEU_SOURCEUNITS"]
-						self.BackgroundText:SetWidth(self:GetWidth())
-						
-						TMW:CInit(self, {
-							setting = "SourceUnit",
-							title = TMW.L["CLEU_SOURCEUNITS"],
-							tooltip = function()
-								if IsModifierKeyDown() then
-									return TMW.UNITS:GetUnitInputDetailedTooltip(self)
-								else
-									return TMW.L["CLEU_SOURCEUNITS_DESC"]
-								end
-							end,
-							doCleanString = true,
-						})
 					</OnLoad>
+					<OnEvent>
+						TMW:TT_Update(self)
+					</OnEvent>
 					<OnSizeChanged>
 						local parent = self:GetParent()
 						if parent.AdjustHeight then
@@ -133,25 +135,27 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetSetting("DestUnit")
+						self:SetTexts(TMW.L["CLEU_DESTUNITS"], function()
+							if IsModifierKeyDown() then
+								return TMW.UNITS:GetUnitInputDetailedTooltip(self)
+							else
+								return TMW.L["CLEU_DESTUNITS_DESC"]
+							end
+						end)
+						
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return TMW:CleanString(value)
+						end)
+
 						TMW.SUG:EnableEditBox(self, "units")
-						
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
-						self.label = TMW.L["CLEU_DESTUNITS"]
-						self.BackgroundText:SetWidth(self:GetWidth())
-						
-						TMW:CInit(self, {
-							setting = "DestUnit",
-							title = TMW.L["CLEU_DESTUNITS"],
-							tooltip = function()
-								if IsModifierKeyDown() then
-									return TMW.UNITS:GetUnitInputDetailedTooltip(self)
-								else
-									return TMW.L["CLEU_DESTUNITS_DESC"]
-								end
-							end,
-							doCleanString = true,
-						})
 					</OnLoad>
+					<OnEvent>
+						TMW:TT_Update(self)
+					</OnEvent>
 					<OnSizeChanged>
 						local parent = self:GetParent()
 						if parent.AdjustHeight then

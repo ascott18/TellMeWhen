@@ -89,32 +89,46 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings",
 	self.Header:SetText(L["ICONMENU_ONLYSEEN_HEADER"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 2,
-		{
-			setting = "OnlySeen",
-			value = false,
-			title = L["ICONMENU_ONLYSEEN_ALL"],
-			tooltip = L["ICONMENU_ONLYSEEN_ALL_DESC"],
-		},
-		{
-			setting = "OnlySeen",
-			value = true,
-			title = L["ICONMENU_ONLYSEEN"],
-			tooltip = L["ICONMENU_ONLYSEEN_DESC"],
-		},
-		{
-			setting = "OnlySeen",
-			value = "class",
-			title = L["ICONMENU_ONLYSEEN_CLASS"],
-			tooltip = L["ICONMENU_ONLYSEEN_CLASS_DESC"],
-		},
+		function(check)
+			check:SetTexts(L["ICONMENU_ONLYSEEN_ALL"], L["ICONMENU_ONLYSEEN_ALL_DESC"])
+			check:SetSetting("OnlySeen", false)
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_ONLYSEEN"], L["ICONMENU_ONLYSEEN_DESC"])
+			check:SetSetting("OnlySeen", true)
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_ONLYSEEN_CLASS"], L["ICONMENU_ONLYSEEN_CLASS_DESC"])
+			check:SetSetting("OnlySeen", "class")
+		end,
 	})
 end)
 
-Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings", {
-	hidden = function(self)
-		return TMW.CI.icon:IsGroupController()
-	end,
-})
+Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_UCDSortSettings", function(self)
+	self.Header:SetText(TMW.L["SORTBY"])
+
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		numPerRow = 3,
+		function(check)
+			check:SetTexts(TMW.L["SORTBYNONE"], TMW.L["SORTBYNONE_DESC"])
+			check:SetSetting("Sort", false)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTASC"], TMW.L["ICONMENU_SORTASC_DESC"])
+			check:SetSetting("Sort", -1)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTDESC"], TMW.L["ICONMENU_SORTDESC_DESC"])
+			check:SetSetting("Sort", 1)
+		end,
+	})
+
+	self:CScriptAdd("PanelSetup", function()
+		if TMW.CI.icon:IsGroupController() then
+			self:Hide()
+		end
+	end)
+end)
 
 
 

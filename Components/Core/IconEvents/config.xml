@@ -88,19 +88,12 @@
 					<TexCoords left="0.3125" right="0.625" top="0.3" bottom="0.71857"/>
 				</HighlightTexture>
 			</Button>
-		
-			<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
-						
-						self:SetFunction(TMW.EVENTS.ChangeEvent_Dropdown)
-					</OnLoad>
-				</Scripts>
-			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad>
+				self.DD = TMW.C.Config_DropDownMenu_NoFrame:New()
+				self.DD:SetFunction(TMW.EVENTS.ChangeEvent_Dropdown)
+
 				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 				self:RegisterForDrag("LeftButton", "RightButton")
 			</OnLoad>
@@ -136,6 +129,7 @@
 				local EventHandler = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
 				if button == "RightButton" then
 					PlaySound("igMainMenuOptionCheckBoxOn")
+					self.DD.eventButton = self
 					self.DD:Toggle(1, nil, self, 0, 0)
 				end
 			</OnMouseUp>
@@ -282,10 +276,12 @@
 				self.EventHandler:SetSubHandler(self.subHandlerIdentifier)
 			</OnClick>
 		</Scripts>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+		
+		<HighlightTexture alphaMode="ADD" alpha="0.1">
+			<Color r="1" g="1" b="1"/>
 			<Anchors>
-				<Anchor point="TOPLEFT" y="-1"/>
-				<Anchor point="BOTTOMRIGHT" y="1"/>
+				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
+				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
 			</Anchors>
 		</HighlightTexture>
 	</Button>

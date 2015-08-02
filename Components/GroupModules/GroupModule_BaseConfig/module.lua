@@ -42,24 +42,18 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(11, "TellMeWhen_GS_Role", functio
 	
 	TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {
 		numPerRow = 3,
-		{
-			setting = "Role",
-			title = DAMAGER,
-			tooltip = L["UIPANEL_ROLE_DESC"],
-			-- value = 1,  -- Derived from the ID of the frame.
-		},
-		{
-			setting = "Role",
-			title = HEALER,
-			tooltip = L["UIPANEL_ROLE_DESC"],
-			-- value = 2,  -- Derived from the ID of the frame.
-		},
-		{
-			setting = "Role",
-			title = TANK,
-			tooltip = L["UIPANEL_ROLE_DESC"],
-			-- value = 3,  -- Derived from the ID of the frame.
-		},
+		function(check)
+			check:SetTexts(DAMAGER, L["UIPANEL_ROLE_DESC"])
+			check:SetSetting("Role", 1)
+		end,
+		function(check)
+			check:SetTexts(HEALER, L["UIPANEL_ROLE_DESC"])
+			check:SetSetting("Role", 2)
+		end,
+		function(check)
+			check:SetTexts(TANK, L["UIPANEL_ROLE_DESC"])
+			check:SetSetting("Role", 3)
+		end,
 	})
 end)
 

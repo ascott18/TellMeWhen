@@ -183,7 +183,7 @@
 						self:SetActualValue(self.SpellCache:GetNumCachePerFrame())
 					</OnLoad>
 					<OnValueChanged>
-						value = self:GetActualValue()
+						local value = self:GetActualValue()
 						self.SpellCache:SetNumCachePerFrame(value)
 						self.Mid:SetText(value)
 					</OnValueChanged>
@@ -230,7 +230,7 @@
 					</OnLoad>
 					<OnValueChanged>
 						if self:IsShown() then
-							self.text:SetText(value .. " / ~" .. self.SpellCache:GetExpectedCacheLength())
+							self.text:SetText(self:GetValue() .. " / ~" .. self.SpellCache:GetExpectedCacheLength())
 						end
 					</OnValueChanged>
 				</Scripts>

@@ -1,5 +1,4 @@
-﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
- ..\FrameXML\UI.xsd">
+﻿<Ui>
  
 
 	<Frame name="TellMeWhen_OptionsModuleContainer" virtual="true" hidden="true">
@@ -55,11 +54,12 @@
 					<OnLoad>
 						self.BackgroundText:SetWidth(self:GetWidth())
 						
-						-- Turn it into a setting frame (automatically handles loading settings)
-						TMW:CInit(self, {
-							setting = "Name",
-							doCleanString = true,
-						})
+						TMW:CInit(self)
+						self:SetSetting("Name")
+						
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return TMW:CleanString(value)
+						end)
 						
 						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
 							if TMW.Types[TMW.CI.ics.Type].checksItems and linkType ~= "item" then
@@ -240,12 +240,14 @@
 							self:GetScript("OnTextChanged")(self)
 						end
 
-						TMW:CInit(self, {
-							setting = "Unit",
-							title = TMW.L["ICONMENU_UNITSTOWATCH"],
-							tooltip = text,
-							doCleanString = true,
-						})
+						TMW:CInit(self)
+						
+						self:SetTexts(TMW.L["ICONMENU_UNITSTOWATCH"], text)
+						self:SetSetting("Unit")
+
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return TMW:CleanString(value)
+						end)
 
 						self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 							local supplementalData = panelInfo.supplementalData
@@ -267,8 +269,12 @@
 
 							self:SetLabels(title, text)
 						end)
-						
+
+						self:RegisterEvent("MODIFIER_STATE_CHANGED")
 					</OnLoad>
+					<OnEvent>
+						TMW:TT_Update(self)
+					</OnEvent>
 					<OnTextChanged>
 						local text = self:GetText()
 
@@ -327,7 +333,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				TMW:CInit(self, {})
+				TMW:CInit(self)
 
 				self.Header:SetText(TMW.L["ICONMENU_UNITSTOWATCH"])
 
@@ -349,99 +355,7 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
-	
-	<Frame name="TellMeWhen_SortSettings" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="92"/>
-		<Scripts>
-			<OnLoad>
-				self.Header:SetText(TMW.L["SORTBY"])
-
-				TMW.IE:BuildSimpleCheckSettingFrame(self, {
-					numPerRow = 3,
-					{
-						setting = "Sort",
-						value = false,
-						title = TMW.L["SORTBYNONE"],
-						tooltip = TMW.L["SORTBYNONE_DESC"],
-					},
-					{
-						setting = "Sort",
-						value = -1,
-						title = TMW.L["ICONMENU_SORTASC"],
-						tooltip = TMW.L["ICONMENU_SORTASC_DESC"],
-					},
-					{
-						setting = "Sort",
-						value = 1,
-						title = TMW.L["ICONMENU_SORTDESC"],
-						tooltip = TMW.L["ICONMENU_SORTDESC_DESC"],
-					},
-				})
-			</OnLoad>
-		</Scripts>
-	</Frame>
-	
-	<Frame name="TellMeWhen_SortSettingsWithStacks" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="92"/>
-		<Scripts>
-			<OnLoad>
-				TMW:CInit(self, {})
-
-				self.Header:SetText(TMW.L["SORTBY"])
-				TMW.IE:BuildSimpleCheckSettingFrame(self, {
-					numPerRow = 3,
-					{
-						setting = "Sort",
-						value = false,
-						title = TMW.L["SORTBYNONE_DURATION"],
-						tooltip = TMW.L["SORTBYNONE_DESC"],
-					},
-					{
-						setting = "Sort",
-						value = -1,
-						title = TMW.L["ICONMENU_SORTASC"],
-						tooltip = TMW.L["ICONMENU_SORTASC_DESC"],
-					},
-					{
-						setting = "Sort",
-						value = 1,
-						title = TMW.L["ICONMENU_SORTDESC"],
-						tooltip = TMW.L["ICONMENU_SORTDESC_DESC"],
-					},
-
-					{
-						setting = "StackSort",
-						value = false,
-						title = TMW.L["SORTBYNONE_STACKS"],
-						tooltip = TMW.L["SORTBYNONE_DESC"],
-					},
-					{
-						setting = "StackSort",
-						value = -1,
-						title = TMW.L["ICONMENU_SORT_STACKS_ASC"],
-						tooltip = TMW.L["ICONMENU_SORT_STACKS_ASC_DESC"],
-					},
-					{
-						setting = "StackSort",
-						value = 1,
-						title = TMW.L["ICONMENU_SORT_STACKS_DESC"],
-						tooltip = TMW.L["ICONMENU_SORT_STACKS_DESC_DESC"],
-					},
-				})
-
-				self:CScriptAdd("DescendantSettingSaved", function()
-					local settings = self:GetSettingTable()
-					if settings.StackSort then
-						settings.Sort = false
-					elseif settings.Sort then
-						settings.StackSort = false
-					end
-				end)
-				
-			</OnLoad>
-		</Scripts>
-	</Frame>
-	
+		
 	<Frame name="TellMeWhen_WhenCheckSet" virtual="true">
 		<Size y="40"/>
 
@@ -502,10 +416,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							alphaSettingName = "Alpha",
-							bit = 0x2,
-						})
+						TMW:CInit(self)
+
+						self:SetSettings("Alpha", 0x2)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -517,10 +430,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							alphaSettingName = "UnAlpha",
-							bit = 0x1,
-						})
+						TMW:CInit(self)
+
+						self:SetSettings("UnAlpha", 0x1)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -848,7 +760,7 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" setAllPoints="true">
-					<Color r="1" g="1" b="1" a="1"/>
+					<Color r="0.66" g="0.66" b="0.66" a="1"/>
 					
 					<Gradient orientation="VERTICAL">
 						<MinColor r="1" g="1" b="1" a="0.05"/>
@@ -1023,20 +935,75 @@
 				</FontString>
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnEditFocusLost>
-				EditBox_ClearHighlight(self)
-
-				local t = TMW:CleanString(self)
-				if strfind(t, ":") then
-					t = TMW.toSeconds(t)
-				end
-				t = tonumber(t) or 0
-				self:SetText(t)
-				self:GetScript("OnTextChanged")(self)
-			</OnEditFocusLost>
-		</Scripts>
 	</EditBox>
+
+	<Frame name="TellMeWhen_EditBoxWithCheckTemplateBase" virtual="true">
+		<Size x="80" y="33"/>
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_EditBoxWithCheck"/>
+		</KeyValues>
+
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" X="4" />
+						<Anchor point="RIGHT" />
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+
+		<Frames>
+			<CheckButton parentKey="EnableCheck" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+		</Frames>
+	</Frame>
+
+	<Frame name="TellMeWhen_EditBoxWithCheckTemplate" inherits="TellMeWhen_EditBoxWithCheckTemplateBase" virtual="true">
+		<Frames>
+			<EditBox parentKey="Duration" inherits="TellMeWhen_InputBoxTemplate">
+				<Size y="16"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.EnableCheck" relativePoint="RIGHT" x="0"/>
+					<Anchor point="RIGHT" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+					</OnLoad>
+				</Scripts>
+
+			</EditBox>
+		</Frames>
+	</Frame>
+
+	<Frame name="TellMeWhen_TimeEditBoxWithCheckTemplate" inherits="TellMeWhen_EditBoxWithCheckTemplateBase" virtual="true">
+		<Frames>
+			<EditBox parentKey="Duration" inherits="TellMeWhen_TimeEditBoxTemplate">
+				<Size y="16"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.EnableCheck" relativePoint="RIGHT" x="0"/>
+					<Anchor point="RIGHT" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+					</OnLoad>
+				</Scripts>
+
+			</EditBox>
+		</Frames>
+	</Frame>
 
 	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
 		<Size y="17"/>
@@ -1107,41 +1074,30 @@
 				<Texture parentKey="background1">
 					<Anchors>
 						<Anchor point="TOPLEFT"/>
-						<Anchor point="RIGHT" relativePoint="TOP"/>
-						<Anchor point="BOTTOM" relativePoint="LEFT"/>
+						<Anchor point="BOTTOMRIGHT" relativePoint="CENTER"/>
 					</Anchors>
 					<Color r="1.0" g="1.0" b="1.0"/>
 				</Texture>
 				<Texture parentKey="background2">
 					<Anchors>
 						<Anchor point="TOPRIGHT"/>
-						<Anchor point="LEFT" relativePoint="TOP"/>
-						<Anchor point="BOTTOM" relativePoint="RIGHT"/>
+						<Anchor point="BOTTOMLEFT" relativePoint="CENTER"/>
 					</Anchors>
 					<Color r="0" g="0" b="0"/>
 				</Texture>
 				<Texture parentKey="background3">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT"/>
-						<Anchor point="RIGHT" relativePoint="BOTTOM"/>
-						<Anchor point="TOP" relativePoint="LEFT"/>
+						<Anchor point="TOPRIGHT" relativePoint="CENTER"/>
 					</Anchors>
 					<Color r="0" g="0" b="0"/>
 				</Texture>
 				<Texture parentKey="background4">
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT"/>
-						<Anchor point="LEFT" relativePoint="BOTTOM"/>
-						<Anchor point="TOP" relativePoint="RIGHT"/>
+						<Anchor point="TOPLEFT" relativePoint="CENTER"/>
 					</Anchors>
 					<Color r="1.0" g="1.0" b="1.0"/>
-				</Texture>
-
-				<Texture parentKey="swatch">
-					<Anchors>
-						<Anchor point="TOPLEFT"/>
-						<Anchor point="BOTTOMRIGHT"/>
-					</Anchors>
 				</Texture>
 
 				<FontString parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
@@ -1149,6 +1105,14 @@
 						<Anchor point="LEFT" relativePoint="RIGHT" x="3"/>
 					</Anchors>
 				</FontString>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture parentKey="swatch">
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+				</Texture>
 			</Layer>
 		</Layers>
 		<Frames>
@@ -2673,15 +2637,9 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										TMW:CInit(self, {
-											title = function()
-												return TMW.Types[TMW.CI.ics.Type].name
-											end,
-											tooltip = function()
-												return TMW.Types[TMW.CI.ics.Type].desc
-											end,
-										})
+										TMW:CInit(self)
 				
+										self:SetTooltip(title, tooltip)
 										self:SetFunction(TMW.IE.Type_DropDown)
 
 										self.Button:HookScript("OnClick", function(self)
@@ -2713,21 +2671,23 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										TMW:CInit(self, {
-											setting = "Controlled",
-											title = TMW.L["ICONMENU_CTRLGROUP"],
-											tooltip = TMW.L["ICONMENU_CTRLGROUP_DESC"],
-											disabledtooltip = TMW.L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"],
-											disabled = function(self)
-												return not TMW.CI.icon.typeData.canControlGroup
-											end,
-											hidden = function(self)
-												return TMW.CI.icon.ID ~= 1
-											end,
-										})
+										TMW:CInit(self)
+
+										self:SetSetting("Controlled")
 		
 										self:CScriptAdd("SettingTableRequested", function()
-											return TMW.CI.group and TMW.CI.group:GetSettings()
+											return TMW.CI.gs
+										end)
+
+										self:CScriptAdd("ReloadRequested", function()
+											self:SetShown(TMW.CI.icon.ID == 1)
+											self:SetEnabled(TMW.CI.icon.typeData.canControlGroup)
+
+											if self:IsEnabled() then
+												self:SetTexts(TMW.L["ICONMENU_CTRLGROUP"], TMW.L["ICONMENU_CTRLGROUP_DESC"])
+											else
+												self:SetTexts(TMW.L["ICONMENU_CTRLGROUP"], TMW.L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"])
+											end
 										end)
 
 										self:CScriptAdd("SettingSaved", function()
@@ -2744,7 +2704,7 @@
 						<Scripts>
 							<OnLoad>
 								self.tmwClass = "Config_Frame"
-								TMW:CInit(self, {})
+								TMW:CInit(self)
 
 								self:CScriptAdd("SettingTableRequested", function(requester)
 									return TMW.CI.ics
@@ -2810,15 +2770,14 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										TMW:CInit(self, {
-											setting = TMW.db:GetCurrentProfile(),
-											title = TMW.L["ICONMENU_ENABLE_PROFILE"],
-											tooltip = TMW.L["ICONMENU_ENABLE_PROFILE_DESC"],
+										TMW:CInit(self)
 
-											hidden = function(self)
-												return TMW.CI.group.domain == "profile"
-											end,
-										})
+										self:SetTexts(TMW.L["ICONMENU_ENABLE_PROFILE"], TMW.L["ICONMENU_ENABLE_PROFILE_DESC"])
+										self:SetSetting(TMW.db:GetCurrentProfile())
+
+										self:CScriptAdd("ReloadRequested", function()
+											self:SetShown(TMW.CI.group.domain == "global")
+										end)
 
 										self:CScriptAdd("SettingTableRequested", function(requester)
 											return TMW.CI.gs and TMW.CI.gs.EnabledProfiles
@@ -2829,9 +2788,8 @@
 											TMW.IE:Load(1)
 										end)
 
-										-- TODO: replace this assignment with a method call.
 										TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-											self.setting = TMW.db:GetCurrentProfile()
+											self:SetSetting(TMW.db:GetCurrentProfile())
 										end)
 
 										self:ConstrainLabel(self:GetParent(), "RIGHT")
@@ -2842,7 +2800,7 @@
 						<Scripts>
 							<OnLoad>
 								self.tmwClass = "Config_Frame"
-								TMW:CInit(self, {})
+								TMW:CInit(self)
 
 								self:CScriptAdd("SettingTableRequested", function(requester)
 									return TMW.CI.gs

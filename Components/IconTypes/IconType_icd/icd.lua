@@ -67,24 +67,18 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_ICDType", function(sel
 	self.Header:SetText(TMW.L["ICONMENU_ICDTYPE"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 1,
-		{
-			setting = "ICDType",
-			value = "aura",
-			title = TMW.L["ICONMENU_ICDBDE"],
-			tooltip = TMW.L["ICONMENU_ICDAURA_DESC"],
-		},
-		{
-			setting = "ICDType",
-			value = "spellcast",
-			title = TMW.L["ICONMENU_SPELLCAST_COMPLETE"],
-			tooltip = TMW.L["ICONMENU_SPELLCAST_COMPLETE_DESC"],
-		},
-		{
-			setting = "ICDType",
-			value = "caststart",
-			title = TMW.L["ICONMENU_SPELLCAST_START"],
-			tooltip = TMW.L["ICONMENU_SPELLCAST_START_DESC"],
-		},
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_ICDBDE"], TMW.L["ICONMENU_ICDAURA_DESC"])
+			check:SetSetting("ICDType", "aura")
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SPELLCAST_COMPLETE"], TMW.L["ICONMENU_SPELLCAST_COMPLETE_DESC"])
+			check:SetSetting("ICDType", "spellcast")
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SPELLCAST_START"], TMW.L["ICONMENU_SPELLCAST_START_DESC"])
+			check:SetSetting("ICDType", "caststart")
+		end,
 	})
 end)
 

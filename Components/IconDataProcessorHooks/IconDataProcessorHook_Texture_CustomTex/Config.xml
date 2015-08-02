@@ -21,7 +21,7 @@
 						self:SetSetting("CustomTex")
 						
 						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
-							return value:gsub([[\\]], [[\]])
+							return value:trim():gsub([[\\]], [[\]])
 						end)
 						
 						

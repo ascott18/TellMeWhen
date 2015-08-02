@@ -57,22 +57,13 @@
 				<Anchors>
 					<Anchor point="RIGHT" relativeTo="$parentDefault"  relativePoint="LEFT" x="-5" y="-0.5"/>
 				</Anchors>
-				<Frames>
-					<Frame name="$parentDD" parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
-						<Scripts>
-							<OnLoad>
-								TMW:CInit(self)
-						
-								self:SetFunction(TMW.TEXT.CopyString_DropDown)
-								
-								self:SetScrollable(true)
-								self.wrapTooltips = false
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
 				<Scripts>
 					<OnLoad>
+						self.DD = TMW.C.Config_DropDownMenu_NoFrame:New()
+						self.DD:SetFunction(TMW.TEXT.CopyString_DropDown)
+						self.DD:SetScrollable(true)
+						self.DD.wrapTooltips = false -- TODO: make a method for this
+
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 						TMW:TT(self, "TEXTLAYOUTS_STRING_COPYMENU", "TEXTLAYOUTS_STRING_COPYMENU_DESC")
 					</OnLoad>
@@ -105,14 +96,14 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = self:GetParent():GetID(),
-						})
+						TMW:CInit(self)
+						self:SetSetting(self:GetParent():GetID())
 
 						self:HookScript("OnEditFocusLost", function()
 							TMW.TEXT:LoadConfig()
 						end)
 		
+						-- TODO: FIgure out a better way to do this. Why is it done manually?
 						-- This is handled manually.
 						self:CScriptRemove("ReloadRequested")
 

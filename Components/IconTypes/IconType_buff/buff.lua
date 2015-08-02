@@ -137,53 +137,51 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		end,
 	})
 
-	self.ShowTTText = TMW.C.Config_DropDownMenu:New("Frame", "$parentShowTTText", self, "TMW_DropDownMenuTemplate", nil, {
-		title = L["ICONMENU_SHOWTTTEXT2"],
-		tooltip = L["ICONMENU_SHOWTTTEXT_DESC2"],
-		clickFunc = function(button, arg1)
-			TMW.CI.ics.ShowTTText = arg1
-			TMW.IE:Load(1)
-		end,
-		func = function(self)
+	local function OnClick(button, arg1)
+		TMW.CI.ics.ShowTTText = arg1
+		TMW.IE:Load(1)
+	end
+	self.ShowTTText = TMW.C.Config_DropDownMenu:New("Frame", "$parentShowTTText", self, "TMW_DropDownMenuTemplate")
+	self.ShowTTText:SetTexts(L["ICONMENU_SHOWTTTEXT2"], L["ICONMENU_SHOWTTTEXT_DESC2"])
+	self.ShowTTText:SetWidth(135)
+	self.ShowTTText:SetDropdownAnchor("TOPRIGHT", self.ShowTTText.Middle, "BOTTOMRIGHT")
+	self.ShowTTText:SetFunction(function(self)
+		local info = TMW.DD:CreateInfo()
+		info.text = L["ICONMENU_SHOWTTTEXT_STACKS"]
+		info.tooltipTitle = info.text
+		info.tooltipText = L["ICONMENU_SHOWTTTEXT_STACKS_DESC"]
+		info.func = OnClick
+		info.arg1 = false
+		info.checked = info.arg1 == TMW.CI.ics.ShowTTText
+		TMW.DD:AddButton(info)
+
+		local info = TMW.DD:CreateInfo()
+		info.text = L["ICONMENU_SHOWTTTEXT_FIRST"]
+		info.tooltipTitle = info.text
+		info.tooltipText = L["ICONMENU_SHOWTTTEXT_FIRST_DESC"]
+		info.func = OnClick
+		info.arg1 = true
+		info.checked = info.arg1 == TMW.CI.ics.ShowTTText
+		TMW.DD:AddButton(info)
+
+		TMW.DD:AddSpacer()
+
+		for _, var in TMW:Vararg(1, 2, 3) do
 			local info = TMW.DD:CreateInfo()
-			info.text = L["ICONMENU_SHOWTTTEXT_STACKS"]
+			info.text = L["ICONMENU_SHOWTTTEXT_VAR"]:format(var)
 			info.tooltipTitle = info.text
-			info.tooltipText = L["ICONMENU_SHOWTTTEXT_STACKS_DESC"]
-			info.func = self.data.clickFunc
-			info.arg1 = false
+			info.tooltipText = L["ICONMENU_SHOWTTTEXT_VAR_DESC"]
+			info.func = OnClick
+			info.arg1 = var
 			info.checked = info.arg1 == TMW.CI.ics.ShowTTText
 			TMW.DD:AddButton(info)
-
-			local info = TMW.DD:CreateInfo()
-			info.text = L["ICONMENU_SHOWTTTEXT_FIRST"]
-			info.tooltipTitle = info.text
-			info.tooltipText = L["ICONMENU_SHOWTTTEXT_FIRST_DESC"]
-			info.func = self.data.clickFunc
-			info.arg1 = true
-			info.checked = info.arg1 == TMW.CI.ics.ShowTTText
-			TMW.DD:AddButton(info)
-
-			TMW.DD:AddSpacer()
-
-			for _, var in TMW:Vararg(1, 2, 3) do
-				local info = TMW.DD:CreateInfo()
-				info.text = L["ICONMENU_SHOWTTTEXT_VAR"]:format(var)
-				info.tooltipTitle = info.text
-				info.tooltipText = L["ICONMENU_SHOWTTTEXT_VAR_DESC"]
-				info.func = self.data.clickFunc
-				info.arg1 = var
-				info.checked = info.arg1 == TMW.CI.ics.ShowTTText
-				TMW.DD:AddButton(info)
-			end
-		end,
-	})
+		end
+	end)
 
 	self:CScriptAdd("ReloadRequested", function(self, panel, panelInfo)
 		self.ShowTTText:SetText((TMW.CI.ics.ShowTTText ~= false and "|cffff5959" or "") .. L["ICONMENU_SHOWTTTEXT2"])
 	end)
 
-	self.ShowTTText:SetWidth(135)
-	self.ShowTTText:SetDropdownAnchor("TOPRIGHT", self.ShowTTText.Middle, "BOTTOMRIGHT")
 	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.HideIfNoUnits, self.ShowTTText)
 	self.ShowTTText:ClearAllPoints()
 	self.ShowTTText:SetPoint("TOPLEFT", self.Stealable, "BOTTOMLEFT", 4, 0)
@@ -197,11 +195,46 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	[ 0x1 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
 })
 
-Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettingsWithStacks", {
-	hidden = function(self)
-		return TMW.CI.icon:IsGroupController()
-	end,
-})
+Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_SortSettingsWithStacks", function(self)
+	self.Header:SetText(TMW.L["SORTBY"])
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		numPerRow = 3,
+		function(check)
+			check:SetTexts(TMW.L["SORTBYNONE_DURATION"], TMW.L["SORTBYNONE_DESC"])
+			check:SetSetting("Sort", false)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTASC"], TMW.L["ICONMENU_SORTASC_DESC"])
+			check:SetSetting("Sort", -1)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTDESC"], TMW.L["ICONMENU_SORTDESC_DESC"])
+			check:SetSetting("Sort", 1)
+		end,
+
+		function(check)
+			check:SetTexts(TMW.L["SORTBYNONE_STACKS"], TMW.L["SORTBYNONE_DESC"])
+			check:SetSetting("StackSort", false)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORT_STACKS_ASC"], TMW.L["ICONMENU_SORT_STACKS_ASC_DESC"])
+			check:SetSetting("StackSort", -1)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORT_STACKS_DESC"], TMW.L["ICONMENU_SORT_STACKS_DESC_DESC"])
+			check:SetSetting("StackSort", 1)
+		end,
+	})
+
+	self:CScriptAdd("DescendantSettingSaved", function()
+		local settings = self:GetSettingTable()
+		if settings.StackSort then
+			settings.Sort = false
+		elseif settings.Sort then
+			settings.StackSort = false
+		end
+	end)
+end)
 
 
 

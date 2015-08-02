@@ -9,18 +9,16 @@
 					<Anchor point="RIGHT" relativePoint="TOP" x="-10" />
 				</Anchors>
 				<Scripts>
-					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_ICONSPACINGX"],
-							tooltip = TMW.L["UIPANEL_ICONSPACING_DESC"],
-							setting = "SpacingX",
-							min = -100,
-							max = 100,
-							range = 10,
-							step = 0.1,
-							wheelStep = 1,
-						})
+					<OnLoad>
+						TMW:CInit(self)
 
+						self:SetTexts(TMW.L["UIPANEL_ICONSPACINGX"], TMW.L["UIPANEL_ICONSPACING_DESC"])
+						self:SetSetting("SpacingX")
+
+						self:SetMinMaxValues(-100, 100)
+						self:SetRange(10)
+						self:SetValueStep(0.1)
+						self:SetWheelStep(1)
 						self:SetMode(self.MODE_ADJUSTING)
 						self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
 					</OnLoad>
@@ -33,18 +31,16 @@
 					<Anchor point="LEFT" relativePoint="TOP" x="10" />
 				</Anchors>
 				<Scripts>
-					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_ICONSPACINGY"],
-							tooltip = TMW.L["UIPANEL_ICONSPACING_DESC"],
-							setting = "SpacingY",
-							min = -100,
-							max = 100,
-							range = 10,
-							step = 0.1,
-							wheelStep = 1,
-						})
+					<OnLoad>
+						TMW:CInit(self)
 
+						self:SetTexts(TMW.L["UIPANEL_ICONSPACINGY"], TMW.L["UIPANEL_ICONSPACING_DESC"])
+						self:SetSetting("SpacingY")
+
+						self:SetMinMaxValues(-100, 100)
+						self:SetRange(10)
+						self:SetValueStep(0.1)
+						self:SetWheelStep(1)
 						self:SetMode(self.MODE_ADJUSTING)
 						self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
 
@@ -54,7 +50,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				TMW:CInit(self, {})
+				TMW:CInit(self)
 				
 				self:CScriptAdd("SettingTableRequested", function(requester)
 					return TMW.CI.group:GetSettingsPerView()

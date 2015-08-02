@@ -23,45 +23,42 @@ local Module = TMW:NewClass("IconModule_IconEditorLoader", "IconModule")
 
 
 local icons = {}
-local DD = TMW.C.Config_DropDownMenu:New("Frame", "TMW_IELoaderDD", UIParent, "TMW_DropDownMenuTemplate", nil, {
-	OnClick = function(button, self, icon)
-		icon.group:Raise()
-		TMW.IE:Load(nil, icon)
-	end,
-	
-	func = function(self)
-		local info = TMW.DD:CreateInfo()
-		info.text = L["ICONMENU_CHOSEICONTOEDIT"]
-		info.isTitle = true
-		info.notCheckable = true
-		TMW.DD:AddButton(info)
+local DD = TMW.C.Config_DropDownMenu_NoFrame:New()
+local function DropdownOnClick(button, self, icon)
+	icon.group:Raise()
+	TMW.IE:Load(nil, icon)
+end
+DD:SetFunction(function(self)
+	local info = TMW.DD:CreateInfo()
+	info.text = L["ICONMENU_CHOSEICONTOEDIT"]
+	info.isTitle = true
+	info.notCheckable = true
+	TMW.DD:AddButton(info)
 
-		for i, icon in pairs(icons) do
-			if not icon:IsControlled() then
-				local info = TMW.DD:CreateInfo()
-				info.text = icon:GetIconName()
-				
-				local text, textshort, tooltip = icon:GetIconMenuText()
-				info.tooltipTitle = text
-				info.tooltipText = tooltip
+	for i, icon in pairs(icons) do
+		if not icon:IsControlled() then
+			local info = TMW.DD:CreateInfo()
+			info.text = icon:GetIconName()
+			
+			local text, textshort, tooltip = icon:GetIconMenuText()
+			info.tooltipTitle = text
+			info.tooltipText = tooltip
 
-				info.icon = icon.attributes.texture
-				info.tCoordLeft = 0.07
-				info.tCoordRight = 0.93
-				info.tCoordTop = 0.07
-				info.tCoordBottom = 0.93
-				
-				info.func = self.data.OnClick
-				info.arg1 = self
-				info.arg2 = icon
-				info.notCheckable = true
-				
-				TMW.DD:AddButton(info)
-			end
+			info.icon = icon.attributes.texture
+			info.tCoordLeft = 0.07
+			info.tCoordRight = 0.93
+			info.tCoordTop = 0.07
+			info.tCoordBottom = 0.93
+			
+			info.func = DropdownOnClick
+			info.arg1 = self
+			info.arg2 = icon
+			info.notCheckable = true
+			
+			TMW.DD:AddButton(info)
 		end
-	end,
-})
-DD:Hide()
+	end
+end)
 
 
 Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)

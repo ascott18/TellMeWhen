@@ -162,30 +162,32 @@ do
 	end
 
 
-	local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
-	if IconPosition_Sortable then
-		IconPosition_Sortable:RegisterIconSorter("alpha", {
-			DefaultOrder = -1,
-			[1] = L["UIPANEL_GROUPSORT_alpha_1"],
-			[-1] = L["UIPANEL_GROUPSORT_alpha_-1"],
-		}, function(iconA, iconB, attributesA, attributesB, order)
-			local a, b = attributesA.realAlpha, attributesB.realAlpha
-			if a ~= b then
-				return a*order < b*order
-			end
-		end)
+	TMW:RegisterCallback("TMW_INITIALIZE", function()
+		local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
+		if IconPosition_Sortable then
+			IconPosition_Sortable:RegisterIconSorter("alpha", {
+				DefaultOrder = -1,
+				[1] = L["UIPANEL_GROUPSORT_alpha_1"],
+				[-1] = L["UIPANEL_GROUPSORT_alpha_-1"],
+			}, function(iconA, iconB, attributesA, attributesB, order)
+				local a, b = attributesA.realAlpha, attributesB.realAlpha
+				if a ~= b then
+					return a*order < b*order
+				end
+			end)
 
-		IconPosition_Sortable:RegisterIconSorter("shown", {
-			DefaultOrder = -1,
-			[1] = L["UIPANEL_GROUPSORT_shown_1"],
-			[-1] = L["UIPANEL_GROUPSORT_shown_-1"],
-		}, function(iconA, iconB, attributesA, attributesB, order)
-			local a, b = (attributesA.shown and attributesA.realAlpha > 0) and 1 or 0, (attributesB.shown and attributesB.realAlpha > 0) and 1 or 0
-			if a ~= b then
-				return a*order < b*order
-			end
-		end)
-	end
+			IconPosition_Sortable:RegisterIconSorter("shown", {
+				DefaultOrder = -1,
+				[1] = L["UIPANEL_GROUPSORT_shown_1"],
+				[-1] = L["UIPANEL_GROUPSORT_shown_-1"],
+			}, function(iconA, iconB, attributesA, attributesB, order)
+				local a, b = (attributesA.shown and attributesA.realAlpha > 0) and 1 or 0, (attributesB.shown and attributesB.realAlpha > 0) and 1 or 0
+				if a ~= b then
+					return a*order < b*order
+				end
+			end)
+		end
+	end)
 
 	
 	Processor:RegisterDogTag("TMW", "IsShown", {	
@@ -419,32 +421,34 @@ do
 	end)
 
 
-	local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
-	if IconPosition_Sortable then
-		IconPosition_Sortable:RegisterIconSorter("duration", {
-			DefaultOrder = 1,
-			[1] = L["UIPANEL_GROUPSORT_duration_1"],
-			[-1] = L["UIPANEL_GROUPSORT_duration_-1"],
-		}, function(iconA, iconB, attributesA, attributesB, order)
-			local time = TMW.time
-			
-			local durationA = attributesA.duration
-			local durationB = attributesB.duration
+	TMW:RegisterCallback("TMW_INITIALIZE", function()
+		local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
+		if IconPosition_Sortable then
+			IconPosition_Sortable:RegisterIconSorter("duration", {
+				DefaultOrder = 1,
+				[1] = L["UIPANEL_GROUPSORT_duration_1"],
+				[-1] = L["UIPANEL_GROUPSORT_duration_-1"],
+			}, function(iconA, iconB, attributesA, attributesB, order)
+				local time = TMW.time
+				
+				local durationA = attributesA.duration
+				local durationB = attributesB.duration
 
-			durationA = iconA:OnGCD(durationA) and 0 or durationA - (time - attributesA.start)
-			durationB = iconB:OnGCD(durationB) and 0 or durationB - (time - attributesB.start)
+				durationA = iconA:OnGCD(durationA) and 0 or durationA - (time - attributesA.start)
+				durationB = iconB:OnGCD(durationB) and 0 or durationB - (time - attributesB.start)
 
-			if durationA ~= durationB then
-				return durationA*order < durationB*order
-			end
-		end)
+				if durationA ~= durationB then
+					return durationA*order < durationB*order
+				end
+			end)
 
-		IconPosition_Sortable:RegisterIconSortPreset(L["UIPANEL_GROUP_QUICKSORT_DURATION"], {
-			{ Method = "shown", Order = -1 },
-			{ Method = "duration", Order = 1 },
-			{ Method = "id", Order = 1 }
-		})
-	end
+			IconPosition_Sortable:RegisterIconSortPreset(L["UIPANEL_GROUP_QUICKSORT_DURATION"], {
+				{ Method = "shown", Order = -1 },
+				{ Method = "duration", Order = 1 },
+				{ Method = "id", Order = 1 }
+			})
+		end
+	end)
 
 
 
@@ -753,19 +757,21 @@ do
 		category = L["ICON"],
 	})
 
-	local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
-	if IconPosition_Sortable then
-		IconPosition_Sortable:RegisterIconSorter("stacks", {
-			DefaultOrder = -1,
-			[1] = L["UIPANEL_GROUPSORT_stacks_1"],
-			[-1] = L["UIPANEL_GROUPSORT_stacks_-1"],
-		}, function(iconA, iconB, attributesA, attributesB, order)
-			local a, b = attributesA.stack or 0, attributesB.stack or 0
-			if a ~= b then
-				return a*order < b*order
-			end
-		end)
-	end
+	TMW:RegisterCallback("TMW_INITIALIZE", function()
+		local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
+		if IconPosition_Sortable then
+			IconPosition_Sortable:RegisterIconSorter("stacks", {
+				DefaultOrder = -1,
+				[1] = L["UIPANEL_GROUPSORT_stacks_1"],
+				[-1] = L["UIPANEL_GROUPSORT_stacks_-1"],
+			}, function(iconA, iconB, attributesA, attributesB, order)
+				local a, b = attributesA.stack or 0, attributesB.stack or 0
+				if a ~= b then
+					return a*order < b*order
+				end
+			end)
+		end
+	end)
 
 	TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 		if not TMW.Locked then

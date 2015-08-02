@@ -108,22 +108,13 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									title = TMW.L["ANIM_COLOR"],
-									tooltip = TMW.L["ANIM_COLOR_DESC"],
-									GetRGBA = function(self)
-										local s = self:GetSettingTable()
-										return s.r_anim, s.g_anim, s.b_anim, s.a_anim
-									end,
-									SetRGBA = function(self, r, g, b, a)
-										local s = self:GetSettingTable()
-										s.r_anim, s.g_anim, s.b_anim, s.a_anim = r, g, b, a
-									end,
-									hasOpacity = true,
-									
-									topPadding = 4,
-									bottomPadding = 4,
-								})
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["ANIM_COLOR"], TMW.L["ANIM_COLOR_DESC"])
+								self:SetHasOpacity(true)
+								self:SetColorSettingKeys("r_anim", "g_anim", "b_anim", "a_anim")
+
+								self:SetColumnPadding(4, 4)
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -142,16 +133,14 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									doCleanString = true,
-								})
+								TMW:CInit(self)
 
 								self:SetTexts(TMW.L["ANIM_TEX"], TMW.L["ANIM_TEX_DESC"])
 								self:SetSetting("Image")
 								self:SetColumnPadding(4, 7)
 
 								self:CScriptAdd("ModifySettingValueRequested", function(self, value)
-									return value:gsub([[\\]], [[\]])
+									return value:trim():gsub([[\\]], [[\]])
 								end)
 
 								TMW.SUG:EnableEditBox(self, "texture", true)

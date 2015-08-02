@@ -28,13 +28,9 @@ local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
 ---------------------
 
 TMW:NewClass("Config_ArrowButton", "Config_CheckButton") {
-	OnNewInstance_CheckButton = function(self, data)
+	OnNewInstance_CheckButton = function(self)
 		if not self:GetParent().class == TMW.C.Config_ArrowButtonSet then
 			error("Config_ArrowButton must be a child of a Config_ArrowButtonSet")
-		end
-
-		if data and data.orientation then
-			self:SetOrientation(data.orientation)
 		end
 		
 		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
@@ -52,13 +48,13 @@ TMW:NewClass("Config_ArrowButton", "Config_CheckButton") {
 		-- UP    = { 0.21875, 0.34375, 0.21875, 0.65625, 0.6875, 0.34375, 0.6875, 0.65625 },
 		-- DOWN  = { 0.21875, 0.65625, 0.21875, 0.34375, 0.6875, 0.65625, 0.6875, 0.34375 },
 	},
+
+	SetTexts = function(self, title, tooltip)
+		self:SetTooltip(title, tooltip)
+	end,
 	
 	OnDisable = function(self)
 		self:SetAlpha(0.5)
-		
-		if self.data.disabledtooltip then
-			self:SetTooltip(self.data.title, self.data.disabledtooltip)
-		end
 	end,
 
 	SetOrientation = function(self, orientation)
@@ -82,20 +78,12 @@ TMW:NewClass("Config_ArrowButton", "Config_CheckButton") {
 
 TMW:NewClass("Config_ArrowButtonSet", "Config_Frame") {
 
-	OnNewInstance_ArrowButtonSet = function(self, data)
+	OnNewInstance_ArrowButtonSet = function(self)
 		self.arrows = {}
 
-		if data then
-			if data.title then
-				self.Header:SetText(data.title)
-			end
-		end
-
 		for i, orientation in TMW:Vararg("LEFT", "DOWN", "RIGHT", "UP") do
-			local arrow = TMW.C.Config_ArrowButton:New("CheckButton", nil, self, "TellMeWhen_ArrowButton_Template", nil, {
-				setting = "Orientation",
-				value = orientation,
-			})
+			local arrow = TMW.C.Config_ArrowButton:New("CheckButton", nil, self, "TellMeWhen_ArrowButton_Template")
+			arrow:SetSetting("Orientation", orientation)
 			arrow:SetOrientation(orientation)
 			self.arrows[orientation] = arrow
 
@@ -109,6 +97,14 @@ TMW:NewClass("Config_ArrowButtonSet", "Config_Frame") {
 		end
 
 		self:CScriptAdd("DescendantSettingSaved", self.DescendantSettingSaved)
+	end,
+
+	SetTexts = function(self, title, tooltip)
+		self.Header:SetText(title)
+
+		for orientation, arrow in pairs(self.arrows) do
+			arrow:SetTexts(L[orientation], tooltip:format(L[orientation]))
+		end
 	end,
 
 	EnableOrientations = function(self, ...)
@@ -375,6 +371,9 @@ local function AddOnClick(button, identifier, data)
 	TMW.CI.group:Setup()
 	IconPosition_Sortable:LoadConfig()
 end
+local function SorterCompare(identifierA, identifierB)
+	return L["UIPANEL_GROUPSORT_" .. identifierA] < L["UIPANEL_GROUPSORT_" .. identifierB]
+end
 function IconPosition_Sortable:AddDropdown()
 	local used = {}
 	for _, data in pairs(TMW.CI.gs.SortPriorities) do
@@ -382,7 +381,7 @@ function IconPosition_Sortable:AddDropdown()
 	end
 
 	local addedOne = false
-	for identifier, data in pairs(IconPosition_Sortable.Sorters) do
+	for identifier, data in TMW:OrderedPairs(IconPosition_Sortable.Sorters, SorterCompare) do
 		if not used[identifier] then
 			local info = TMW.DD:CreateInfo()
 
@@ -421,7 +420,7 @@ local function PresetOnClick(button, settings)
 end
 function IconPosition_Sortable:PresetDropdown()
 
-	for text, settings in pairs(IconPosition_Sortable.Presets) do
+	for text, settings in TMW:OrderedPairs(IconPosition_Sortable.Presets) do
 		local info = TMW.DD:CreateInfo()
 
 		info.text = text

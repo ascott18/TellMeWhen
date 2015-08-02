@@ -953,7 +953,9 @@ L["UIPANEL_GROUPSORT"] = "Icon Sorting"
 L["UIPANEL_GROUPSORT_DESC"] = "Contains settings for sorting an positioning icons within a group based on their atributes."
 
 L["UIPANEL_GROUPSORT_ALLDESC"] = [[|cff7fffffClick|r to change the direction of this sort priority.
-|cff7fffffClick-and-drag|r to rearrange.]]
+|cff7fffffClick-and-drag|r to rearrange.
+
+Drag to the bottom to delete.]]
 
 L["UIPANEL_GROUPSORT_ADD"] = "Add Priority"
 L["UIPANEL_GROUPSORT_ADD_DESC"] = "Add a new icon sorting priority to this group."
@@ -1164,14 +1166,14 @@ L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by drag
 
 L["LAYOUTDIRECTION"] = "Layout Direction"
 L["LAYOUTDIRECTION_DESC"] = "Sets the direction that icons will layout in the group."
-L["LAYOUTDIRECTION_1"] = "Right then Down"
-L["LAYOUTDIRECTION_2"] = "Left then Down"
-L["LAYOUTDIRECTION_3"] = "Left then Up"
-L["LAYOUTDIRECTION_4"] = "Right then Up"
-L["LAYOUTDIRECTION_5"] = "Down then Right"
-L["LAYOUTDIRECTION_6"] = "Down then Left"
-L["LAYOUTDIRECTION_7"] = "Up then Left"
-L["LAYOUTDIRECTION_8"] = "Up then Right"
+
+L["UP"] = "Up"
+L["DOWN"] = "Down"
+L["LEFT"] = "Left"
+L["RIGHT"] = "Right"
+
+L["LAYOUTDIRECTION_PRIMARY_DESC"] = "Make the primary layout direction of icons be in the %s direction."
+L["LAYOUTDIRECTION_SECONDARY_DESC"] = "Make successive rows/columns of icons be in the %s direction."
 
 
 L["TEXTLAYOUTS"] = "Text Layouts"

@@ -30,9 +30,9 @@
 				self:SetChecked(not self:GetChecked())
 			</OnClick>
 			<OnLoad>
-				TMW:CInit(self, {
-					setting = "RuneSlots"
-				})
+				TMW:CInit(self)
+
+				self:SetSetting("RuneSlots")
 			</OnLoad>
 		</Scripts>
 	</Button>

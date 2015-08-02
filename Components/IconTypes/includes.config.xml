@@ -81,6 +81,10 @@
 <!-- <Script file="IconType_unitcooldown\Config.lua"/> -->
 
 
+<!-- <Include file="IconType_unitcondition\Config.xml"/> -->
+<!-- <Script file="IconType_unitcondition\Config.lua"/> -->
+
+
 <!-- <Include file="IconType_value\Config.xml"/> -->
 <!-- <Script file="IconType_value\Config.lua"/> -->
 

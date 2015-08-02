@@ -19,14 +19,15 @@
 			<CheckButton name="$parentInvertPBar" inherits="TellMeWhen_CheckTemplate" parentKey="InvertPBar">
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "InvertPBar",
-							title = TMW.L["ICONMENU_INVERTBARS"],
-							tooltip = TMW.L["ICONMENU_INVERTPBAR_DESC"],
-							disabled = function(self)
-								return not TMW.CI.ics.ShowPBar
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_INVERTBARS"], TMW.L["ICONMENU_INVERTPBAR_DESC"])
+						self:SetSetting("InvertPBar")
+						
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.ShowPBar)
+						end)
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -37,29 +38,28 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetText(TMW.L["ICONMENU_OFFS"])
+						self.text:SetText(TMW.L["ICONMENU_OFFS"]) -- TODO: standardize editbox title texts. make a method to set the position of it, and include it in SetTexts.
 						self.text:SetWidth(50)
-						self.setting = "PBarOffs"
 						
 						self.text:ClearAllPoints()
 						self.text:SetPoint("LEFT", self, "RIGHT", 1, 0)
 						
-						TMW:CInit(self, {
-							setting = "PBarOffs",
-							title = TMW.L["ICONMENU_OFFS"],
-							tooltip = TMW.L["ICONMENU_BAROFFS"],
-							disabled = function(self)
-								return not TMW.CI.ics.ShowPBar
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_OFFS"], TMW.L["ICONMENU_BAROFFS"])
+						self:SetSetting("PBarOffs")
+						
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(settings.ShowPBar)
+						end)
 					</OnLoad>
 				</Scripts>
 			</EditBox>
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["CONFIGPANEL_PBAR_HEADER"])
-				
+				self.Header:SetText(TMW.L["CONFIGPANEL_PBAR_HEADER"]) -- TODO: MAKE THIS A METHOD FOR P ANELS				
 				
 				self.ShowPBar:ConstrainLabel(self.InvertPBar)
 				self.InvertPBar:ConstrainLabel(self.PBarOffs)

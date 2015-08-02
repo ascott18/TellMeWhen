@@ -3,94 +3,40 @@
 	<Frame name="TellMeWhen_StackRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="40"/>
 		<Frames>
-			<CheckButton name="$parentStackMinEnabled" parentKey="StackMinEnabled" inherits="TellMeWhen_CheckTemplate">
-				<Size x="26" y="26"/>
+			<Frame parentKey="StackMin" inherits="TellMeWhen_EditBoxWithCheckTemplate">
+				<Size x="67" y="33"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-11"/>
+					<Anchor point="TOPLEFT" x="5" y="-5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:SetLabel("")
-						self:SetTexts(ENABLE,
-							TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MIN_DESC"]:gsub("^%u", strlower)))
-						self:SetSetting("StackMinEnabled")
+						self:SetSettings("StackMinEnabled", "StackMin")
+						self:SetTexts(MINIMUM, TMW.L["ICONMENU_STACKS_MIN_DESC"])
 					</OnLoad>
 				</Scripts>
-			</CheckButton>
-			<CheckButton name="$parentStackMaxEnabled" parentKey="StackMaxEnabled" inherits="TellMeWhen_CheckTemplate">
-				<Size x="26" y="26"/>
+			</Frame>
+
+			<Frame parentKey="StackMax" inherits="TellMeWhen_EditBoxWithCheckTemplate">
+				<Size x="67" y="33"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentStackMinEnabled" relativePoint="RIGHT" x="45"/>
+					<Anchor point="LEFT" relativeKey="$parent.StackMin" relativePoint="RIGHT" x="4"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:SetLabel("")
-						self:SetTexts(ENABLE,
-							TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_STACKS_MAX_DESC"]:gsub("^%u", strlower)))
-						self:SetSetting("StackMaxEnabled")
-					</OnLoad>
-				</Scripts>
-			</CheckButton>
-			
-			
-			<EditBox name="$parentStackMin" parentKey="StackMin" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="40" y="15"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeto="$parentStackMinEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.text:SetText(MINIMUM)
-						self.text:SetParent(self:GetParent().StackMinEnabled) -- This is evil and lazy. So, so lazy.
-						self.text:SetPoint("LEFT", 2, 0)
-						self.text:SetPoint("RIGHT", self)
-						
-						TMW:CInit(self)
-
-						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_STACKS_MIN_DESC"])
-						self:SetSetting("StackMin")
-
-						self:CScriptAdd("ReloadRequested", function()
-							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.StackMinEnabled)
-						end)
-					</OnLoad>
-				</Scripts>
-			</EditBox>
-			<EditBox name="$parentStackMax" parentKey="StackMax" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="40" y="15"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeto="$parentStackMaxEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.text:SetText(MAXIMUM)
-						self.text:SetParent(self:GetParent().StackMaxEnabled) -- This is evil and lazy. So, so lazy.
-						self.text:SetPoint("LEFT", 2, 0)
-						self.text:SetPoint("RIGHT", self)
-						
-						TMW:CInit(self)
-
+						self:SetSettings("StackMaxEnabled", "StackMax")
 						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_STACKS_MAX_DESC"])
-						self:SetSetting("StackMax")
-
-						self:CScriptAdd("ReloadRequested", function()
-							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.StackMaxEnabled)
-						end)
 					</OnLoad>
 				</Scripts>
-
-			</EditBox>
+			</Frame>
 			
 			<Slider name="$parentStackAlpha" parentKey="StackAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentStackMax" relativePoint="RIGHT" x="15" />
+					<Anchor point="LEFT" relativeKey="$parent.StackMax" relativePoint="RIGHT" x="15" />
 					<Anchor point="RIGHT" x="-10" />
 					<Anchor point="TOP" y="-13" />
 				</Anchors>

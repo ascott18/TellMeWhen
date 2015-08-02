@@ -192,19 +192,12 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self, {
-									GetRGBA = function(self)
-										local s = self:GetSettingTable()
-										return s.r, s.g, s.b, 1
-									end,
-									SetRGBA = function(self, r, g, b)
-										local s = self:GetSettingTable()
-										s.r, s.g, s.b = r, g, b
-									end,
-									hasOpacity = false,
-								})
+								TMW:CInit(self)
 
 								self:SetTexts(TMW.L["FONTCOLOR"], nil)
+								self:SetHasOpacity(false)
+								self:SetColorSettingKeys("r", "g", "b")
+
 								self:SetColumnPadding(4, 4)
 							</OnLoad>
 						</Scripts>

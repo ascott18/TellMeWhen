@@ -94,11 +94,8 @@
 								self:SetValueStep(1)
 							</OnLoad>
 							<OnValueChanged>
-								value = self:GetValue()
-
-
 								local Sound = TMW.EVENTS:GetEventHandler("Sound")
-								Sound:SetSoundsOffset(value)
+								Sound:SetSoundsOffset(self:GetValue())
 							</OnValueChanged>
 						</Scripts>
 					</Slider>

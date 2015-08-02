@@ -96,25 +96,24 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 		--[100] = L["CONDITIONPANEL_COMBO"],
 	}
 
-	self.PowerType = TMW.C.Config_DropDownMenu:New("Frame", "$parent", self, "TMW_DropDownMenuTemplate", nil, {
-		title = L["ICONMENU_VALUE_POWERTYPE"],
-		tooltip = L["ICONMENU_VALUE_POWERTYPE_DESC"],
-		clickFunc = function(button, arg1)
-			TMW.CI.ics.PowerType = arg1
-			self.PowerType:SetText(button.value)
-			TMW.IE:Load(1)
-		end,
-		func = function(self)
-			for id, name in TMW:OrderedPairs(types) do
-				local info = TMW.DD:CreateInfo()
-				info.text = name
-				info.func = self.data.clickFunc
-				info.arg1 = id
-				info.checked = info.arg1 == TMW.CI.ics.PowerType
-				TMW.DD:AddButton(info)
-			end
-		end,
-	})
+	self.PowerType = TMW.C.Config_DropDownMenu:New("Frame", "$parent", self, "TMW_DropDownMenuTemplate")
+
+	self.PowerType:SetTexts(L["ICONMENU_VALUE_POWERTYPE"], L["ICONMENU_VALUE_POWERTYPE_DESC"])
+	local function DropdownOnClick(button, arg1)
+		TMW.CI.ics.PowerType = arg1
+		self.PowerType:SetText(button.value)
+		TMW.IE:Load(1)
+	end
+	self.PowerType:SetFunction(function(self)
+		for id, name in TMW:OrderedPairs(types) do
+			local info = TMW.DD:CreateInfo()
+			info.text = name
+			info.func = DropdownOnClick
+			info.arg1 = id
+			info.checked = info.arg1 == TMW.CI.ics.PowerType
+			TMW.DD:AddButton(info)
+		end
+	end)
 
 	self:SetHeight(36)
 	self.PowerType:SetDropdownAnchor("TOPRIGHT", self.PowerType.Middle, "BOTTOMRIGHT")

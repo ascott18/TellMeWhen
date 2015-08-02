@@ -296,7 +296,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				TMW:CInit(self, {})
+				TMW:CInit(self)
 				
 				self:CScriptAdd("SettingTableRequested", function(requester)
 					return TMW.CI.gs.Point

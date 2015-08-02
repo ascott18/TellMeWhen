@@ -22,6 +22,8 @@ local print = TMW.print
 local IconDragger = TMW:NewModule("IconDragger", "AceTimer-3.0", "AceEvent-3.0")
 TMW.IconDragger = IconDragger
 
+
+
 function IconDragger:OnInitialize()
 	WorldFrame:HookScript("OnMouseDown", function() -- this contains other bug fix stuff too
 		IconDragger.DraggerFrame:Hide()
@@ -72,6 +74,10 @@ function IconDragger:DropDownFunc()
 	TMW.DD:AddButton(info)
 end
 
+IconDragger.Dropdown = TMW.C.Config_DropDownMenu_NoFrame:New()
+IconDragger.Dropdown:SetFunction(IconDragger.DropDownFunc)
+local Dropdown = IconDragger.Dropdown
+
 function IconDragger:Start(icon)
 	IconDragger.srcicon = icon
 
@@ -113,18 +119,18 @@ function IconDragger:CompleteDrag(script, icon)
 				return
 			end
 
-			IconDragger.DraggerFrame.Dropdown:SetDropdownAnchor("TOPLEFT", icon, "BOTTOMLEFT", 0, 0)
+			Dropdown:SetDropdownAnchor("TOPLEFT", icon, "BOTTOMLEFT", 0, 0)
 
 		else
 			IconDragger.desticon = nil
 			IconDragger.destFrame = icon -- not actually an icon. just some frame.
 			local cursorX, cursorY = GetCursorPosition()
 			local UIScale = UIParent:GetScale()
-			IconDragger.DraggerFrame.Dropdown:SetDropdownAnchor(nil, UIParent, "BOTTOMLEFT", cursorX/UIScale, cursorY/UIScale)
+			Dropdown:SetDropdownAnchor(nil, UIParent, "BOTTOMLEFT", cursorX/UIScale, cursorY/UIScale)
 		end
 
-		if not DropDownList1:IsShown() or TMW.DD.OPEN_MENU ~= IconDragger.DraggerFrame.Dropdown then
-			IconDragger.DraggerFrame.Dropdown:Toggle(1)
+		if not DropDownList1:IsShown() or TMW.DD.OPEN_MENU ~= Dropdown then
+			Dropdown:Toggle(1)
 		end
 	end
 end

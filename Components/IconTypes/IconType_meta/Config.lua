@@ -40,24 +40,18 @@ Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_MetaSortSettings", fun
 	self.Header:SetText(TMW.L["SORTBY"])
 	TMW.IE:BuildSimpleCheckSettingFrame(self, {
 		numPerRow = 3,
-		{
-			setting = "Sort",
-			value = false,
-			title = TMW.L["SORTBYNONE"],
-			tooltip = TMW.L["SORTBYNONE_META_DESC"],
-		},
-		{
-			setting = "Sort",
-			value = -1,
-			title = TMW.L["ICONMENU_SORTASC"],
-			tooltip = TMW.L["ICONMENU_SORTASC_META_DESC"],
-		},
-		{
-			setting = "Sort",
-			value = 1,
-			title = TMW.L["ICONMENU_SORTDESC"],
-			tooltip = TMW.L["ICONMENU_SORTDESC_META_DESC"],
-		},
+		function(check)
+			check:SetTexts(TMW.L["SORTBYNONE"], TMW.L["SORTBYNONE_META_DESC"])
+			check:SetSetting("Sort", false)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTASC"], TMW.L["ICONMENU_SORTASC_META_DESC"])
+			check:SetSetting("Sort", -1)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTDESC"], TMW.L["ICONMENU_SORTDESC_META_DESC"])
+			check:SetSetting("Sort", 1)
+		end,
 	})
 
 	self:CScriptAdd("PanelSetup", function()

@@ -367,6 +367,21 @@ function TMW:Group_Add(domain, view)
 end
 
 function TMW:Group_Swap(domain, groupID1, groupID2)
+	TMW:ValidateType("domain", "TMW:GroupSwap(domain, groupID1, groupID2", domain, "string")
+	TMW:ValidateType("groupID1", "TMW:GroupSwap(domain, groupID1, groupID2", groupID1, "number")
+	TMW:ValidateType("groupID2", "TMW:GroupSwap(domain, groupID1, groupID2", groupID2, "number")
+
+	if groupID1 == groupID2 then
+		return
+	end
+
+	if type(TMW[domain]) ~= "table" then
+		error("Invalid domain to Group_Swap")
+	end
+
+	TMW:ValidateType("group 1", "TMW:GroupSwap(domain, groupID1, groupID2)", TMW[domain][groupID1], "Group")
+	TMW:ValidateType("group 2", "TMW:GroupSwap(domain, groupID1, groupID2)", TMW[domain][groupID2], "Group")
+
 	local Groups = TMW.db[domain].Groups
 	
 	-- The point of this is to keep the icon editor's
@@ -375,14 +390,28 @@ function TMW:Group_Swap(domain, groupID1, groupID2)
 	if CI.icon then
 		iconID = CI.icon.ID
 		groupGUID = CI.group:GetGUID()
+
+		if not iconID or not groupGUID then
+			error("Couldn't get the guid of the current group")
+		end
 	end
 
 	IE:Load(1, false)
 
-	Groups[groupID1], Groups[groupID2] = Groups[groupID2], Groups[groupID1]
-	TMW:Update()
+	local group1Orig, group2Orig = Groups[groupID1], Groups[groupID2]
+	Groups[groupID1], Groups[groupID2] = group2Orig, group1Orig
 
-	IE:Load(1, groupGUID and TMW:GetDataOwner(groupGUID)[iconID])
+	local success, err = TMW.safecall(function()
+		TMW:Update()
+
+		IE:Load(1, groupGUID and TMW:GetDataOwner(groupGUID)[iconID])
+	end)
+
+	if not success then
+		TMW:Error("There was an error while trying to swap " .. domain .. " groups " .. groupID1 .. " and " .. groupID2)
+		Groups[groupID1], Groups[groupID2] = group1Orig, group2Orig
+		TMW:Update()
+	end
 end
 
 
@@ -1593,7 +1622,7 @@ TMW.C.XmlConfigPanelInfo {
 
 		-- TODO: Put the CInit in the template for the panel? might break Lua panels though...
 		if not panel.isLibOOInstance then
-			TMW:CInit(panel, {})
+			TMW:CInit(panel)
 		end
 
 		return panel
@@ -1683,6 +1712,9 @@ CScriptProvider = TMW:NewClass("CScriptProvider") {
 	end,
 
 	CScriptAdd = function(self, script, func)
+		TMW:ValidateType("script", "CScriptAdd(script, func)", script, "string")
+		TMW:ValidateType("func", "CScriptAdd(script, func)", func, "function")
+
 		self.__CScripts = self.__CScripts or {}
 		local existing = self.__CScripts[script]
 
@@ -1696,6 +1728,9 @@ CScriptProvider = TMW:NewClass("CScriptProvider") {
 	end,
 
 	CScriptAddPre = function(self, script, func)
+		TMW:ValidateType("script", "CScriptAddPre(script, func)", script, "string")
+		TMW:ValidateType("func", "CScriptAddPre(script, func)", func, "function")
+
 		self.__CScripts = self.__CScripts or {}
 		local existing = self.__CScripts[script]
 
@@ -1709,6 +1744,9 @@ CScriptProvider = TMW:NewClass("CScriptProvider") {
 	end,
 
 	CScriptRemove = function(self, script, func)
+		TMW:ValidateType("script", "CScriptRemove(script, func)", script, "string")
+		TMW:ValidateType("func", "CScriptRemove(script, func)", func, "function;nil")
+
 		if not self.__CScripts then
 			return
 		end
@@ -2056,7 +2094,8 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	OnNewInstance_CheckButton = function(self, data)
 		if self.data then
 			self.text:SetText(get(self.data.label or self.data.title)) -- TODO: is label here ever used at all?
-			self:SetSetting(self.data.setting, self.data.value)
+
+			self.setting = self.setting or self.data.setting
 		end
 		self:SetMotionScriptsWhileDisabled(true)
 	end,
@@ -2174,12 +2213,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 		local settings = self:GetSettingTable()
 
 		if settings and self.setting then
-			local value
-			if self.data.doCleanString then
-				value = TMW:CleanString(self)
-			else
-				value = self:GetText()
-			end
+			local value = self:GetText()
 			
 			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
 
@@ -2204,7 +2238,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 
 
 TMW:NewClass("Config_TimeEditBox", "Config_EditBox") {
-
+	
 	OnEditFocusLost = function(self, button)
 		local t = TMW:CleanString(self)
 		if strfind(t, ":") then
@@ -2215,6 +2249,33 @@ TMW:NewClass("Config_TimeEditBox", "Config_EditBox") {
 		self:GetScript("OnTextChanged")(self)
 
 		self:SaveSetting()
+	end,
+}
+
+
+TMW:NewClass("Config_EditBoxWithCheck", "Config_Frame") {
+	OnNewInstance_TimeEditBoxWithCheck = function(self)
+		self.EnableCheck:CScriptAdd("ReloadRequested", self.ReloadRequested)
+	end,
+
+	ReloadRequested = function(enableCheck)
+		local self = enableCheck:GetParent()
+		self.Duration:SetEnabled(enableCheck:GetChecked())
+	end,
+
+	SetTexts = function(self, title, tooltip)
+		self.text:SetText(title)
+
+		self.Duration:SetLabel("")
+		self.Duration:SetTexts(title, tooltip)
+
+		self.EnableCheck:SetLabel("")
+		self.EnableCheck:SetTexts(ENABLE, TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(tooltip:gsub("^%u", strlower)))
+	end,
+
+	SetSettings = function(self, enableSetting, durationSetting)
+		self.EnableCheck:SetSetting(enableSetting)
+		self.Duration:SetSetting(durationSetting)
 	end,
 }
 
@@ -2349,7 +2410,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		return self:CalculateValueRoundedToStep(self:GetValue_base())
 	end,
 	SetValue = function(self, value)
-		self.scriptFiredOnValueChanged = nil
+		self.__scriptFiredOnValueChanged = nil
 
 		if value < self.min then
 			value = self.min
@@ -2364,7 +2425,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			self.EditBox:SetText(value)
 		end
 
-		if not self.scriptFiredOnValueChanged and value ~= self:GetValue_base() then
+		if not self.__scriptFiredOnValueChanged and value ~= self:GetValue_base() then
 			self:GetScript("OnValueChanged")(self, value)
 		end
 	end,
@@ -2436,7 +2497,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			return
 		end
 
-		self.scriptFiredOnValueChanged = true
+		self.__scriptFiredOnValueChanged = true
 
 		if self.EditBox then
 			self.EditBox:SetText(self:GetValue())
@@ -2729,10 +2790,6 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	
 
 	-- Methods
-	FakeSetValue = function(self, value)
-		self:SetValue(value)
-	end,
-
 	SetOrangeValue = function(self, value)
 		self.setOrangeAtValue = value
 	end,
@@ -2802,42 +2859,21 @@ TMW:NewClass("Config_CheckButton_BitToggle", "Config_BitflagBase", "Config_Check
 
 TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 	-- Constructor
-	OnNewInstance_Frame_WhenChecks = function(self, data)
-		local data = self.data
-		
-		-- ShowWhen toggle
-		assert(data.bit, "SettingWhenCheckSet's data table must declare a bit flag to be toggled in ics.ShowWhen! (data.bit)")
+	OnNewInstance_Frame_WhenChecks = function(self)
 		
 		self.Check.tmwClass = "Config_CheckButton_BitToggle"
-		TMW:CInit(self.Check, {
-			setting = "ShowWhen",
-		})
-
-		self.Check:SetSettingBit(data.bit)
-		
-		
-		-- Alpha slider
-		assert(data.alphaSettingName, "SettingWhenCheckSet's data table must declare an alpha setting to be used! (data.alphaSettingName)")
-		
-		TMW:CInit(self.Alpha, {
-			setting = data.alphaSettingName,
-			disabled = function(self)
-				local ics = TMW.CI.ics
-				if ics then
-					return bit.band(ics.ShowWhen, data.bit) == 0
-				end
-			end,
-		})
-
+		TMW:CInit(self.Check)
+		self.Check:SetSetting("ShowWhen")
+				
+		TMW:CInit(self.Alpha)
 		self.Alpha:SetOrangeValue(0)
-		
+		self.Alpha:CScriptAdd("ReloadRequested", self.AlphaReloadRequested)
+
 		-- Reparent the label text on the slider so that it will be at full opacity even while disabled.
 		self.Alpha.text:SetParent(self)
 
-
 		self:CScriptAdd("PanelSetup", self.PanelSetup)
 	end,
-	
 
 	-- Script Handlers
 	OnEnable = function(self)
@@ -2851,7 +2887,14 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 	end,
 	
 
-	-- Methods
+	-- Methods	
+	SetSettings = function(self, alphaSettingName, bit)
+		self.Alpha:SetSetting(alphaSettingName)
+		self.Check:SetSettingBit(bit)
+
+		self.bit = bit
+	end,
+
 	PanelSetup = function(self, panel, panelInfo)
 		local supplementalData = panelInfo.supplementalData
 		
@@ -2861,7 +2904,7 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 		panel.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
 		
 		-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
-		local supplementalDataForBit = supplementalData[self.data.bit]
+		local supplementalDataForBit = supplementalData[self.bit]
 		if supplementalDataForBit then
 			self.Check:SetTooltip(
 				L["ICONMENU_SHOWWHEN_SHOWWHEN_WRAP"]:format(supplementalDataForBit.text),
@@ -2879,6 +2922,11 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 		end
 	end,
 
+	AlphaReloadRequested = function(slider)
+		local self = slider:GetParent()
+		slider:SetEnabled(self.Check:GetChecked())
+	end,
+
 	ReloadSetting = function(self)
 		self:GetParent():AdjustHeight()
 	end,
@@ -2886,12 +2934,23 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 
 
 TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
-	
-	OnNewInstance_ColorButton = function(self, data)
-		assert(self.background1 and self.text and self.swatch, 
-			"This setting frame doesn't inherit from the thing that it should have inherited from")
+	hasOpacity = false,
 
-		self.text:SetText(get(data.label or data.title))
+	colorSettingKeys = {
+		r = "r",
+		g = "g",
+		b = "b",
+		a = "a",
+	},
+
+	OnNewInstance_ColorButton = function(self)
+		assert(self.background1 and self.text and self.swatch, 
+			"This setting frame doesn't inherit from TellMeWhen_ColorButtonTemplate")
+	end,
+
+	SetTexts = function(self, title, tooltip)
+		self:SetTooltip(title, tooltip)
+		self.text:SetText(title)
 	end,
 	
 	OnClick = function(self, button)
@@ -2907,10 +2966,16 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		ColorPickerFrame.cancelFunc = self.cancelFunc
 
 		ColorPickerFrame:SetColorRGB(unpack(prevRGBA))
-		ColorPickerFrame.hasOpacity = self.data.hasOpacity
+		ColorPickerFrame.hasOpacity = self.hasOpacity
 		ColorPickerFrame.opacity = 1 - prevRGBA[4]
 
 		ColorPickerFrame:Show()
+	end,
+
+	SetHasOpacity = function(self, hasOpacity)
+		self.hasOpacity = hasOpacity
+
+		self:ReloadSetting()
 	end,
 
 	-- We have to do this for these to have access to self.
@@ -2947,24 +3012,49 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		end
 	end,
 
+	SetColorSettingKeys = function(self, r, g, b, a)
+		self.colorSettingKeysSet = true
+		self.colorSettingKeys = {
+			r = r or "r",
+			g = g or "g",
+			b = b or "b",
+			a = a or "a",
+		}
+	end,
+
 	GetRGBA = function(self)
-		if self.data.GetRGBA then
-			return self.data.GetRGBA(self)
+		local settings = self:GetSettingTable()
+		local k = self.colorSettingKeys
+
+		local c
+		if self.setting then
+			c = settings[self.setting]
+		elseif self.colorSettingKeysSet then
+			c = settings
+		end
+
+		if self.hasOpacity then
+			return c[k.r], c[k.g], c[k.b], c[k.a]
 		else
-			local settings = self:GetSettingTable()
-			local c = settings[self.setting]
-			return c.r, c.g, c.b, c.a
+			return c[k.r], c[k.g], c[k.b], 1
 		end
 	end,
 
 	SetRGBA = function(self, r, g, b, a)
-		if self.data.SetRGBA then
-			return self.data.SetRGBA(self, r, g, b, a)
-		else
-			local settings = self:GetSettingTable()
-			local c = settings[self.setting]
+		local settings = self:GetSettingTable()
+		local k = self.colorSettingKeys
 
-			c.r, c.g, c.b, c.a = r, g, b, a
+		local c
+		if self.setting then
+			c = settings[self.setting]
+		elseif self.colorSettingKeysSet then
+			c = settings
+		end
+
+		c[k.r], c[k.g], c[k.b] = r, g, b
+
+		if self.hasOpacity then
+			c[k.a] = a
 		end
 	end,
 }
@@ -3142,15 +3232,14 @@ function IE:BuildSimpleCheckSettingFrame(parent, arg2, arg3)
 			if type(data) == "table" then
 				f = class:New(objectType, nil, parent, "TellMeWhen_CheckTemplate", i, data)
 
-				-- An human-friendly-ish unique (hopefully) identifier for the frame
-				parent[data.setting .. (data.value ~= nil and tostring(data.value) or "")] = f
-
 			elseif type(data) == "function" then
 				f = class:New(objectType, nil, parent, "TellMeWhen_CheckTemplate", i)
 				data(f)
-				if f.setting then
-					parent[f.setting .. (f.value ~= nil and tostring(f.value) or "")] = f
-				end
+			end
+
+			-- An human-friendly-ish unique (hopefully) identifier for the frame
+			if f.setting then
+				parent[f.setting .. (f.value ~= nil and tostring(f.value) or "")] = f
 			end
 
 			-- I would store these directly on parent,

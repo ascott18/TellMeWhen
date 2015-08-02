@@ -78,7 +78,7 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 
 	self:CScriptAdd("ReloadRequested", function()
 		self.ShowTimerTextnoOCC:SetShown(IsAddOnLoaded("ElvUI"))
-		self.ClockGCD:SetShown(TMW.CI.icon.typeData.hasNoGCD)
+		self.ClockGCD:SetShown(not TMW.CI.icon.typeData.hasNoGCD)
 
 		self:AdjustHeight()
 	end)

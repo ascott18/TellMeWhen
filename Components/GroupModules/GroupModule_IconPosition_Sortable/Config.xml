@@ -92,9 +92,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = PRIMARY
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(PRIMARY, TMW.L["LAYOUTDIRECTION_PRIMARY_DESC"])
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -104,9 +104,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = SECONDARY
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(SECONDARY, TMW.L["LAYOUTDIRECTION_SECONDARY_DESC"])
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -126,25 +126,15 @@
 				<Anchors>
 					<Anchor point="TOPLEFT" x="11" y="-10"/>
 				</Anchors>
-
-				<Frames>
-					<Frame parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
-						<Scripts>
-							<OnLoad>
-								TMW:CInit(self)
-						
-								self:SetFunction(TMW.C.GroupModule_IconPosition_Sortable.AddDropdown)
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
 				
 				<NormalFont style="GameFontNormalSmall"/>
 				<HighlightFont style="GameFontHighlightSmall"/>
 
 				<Scripts>
 					<OnLoad>
-					
+						self.DD = TMW.C.Config_DropDownMenu_NoFrame:New()
+						self.DD:SetFunction(TMW.C.GroupModule_IconPosition_Sortable.AddDropdown)
+
 						self:SetText([[|TInterface\PaperDollInfoFrame\Character-Plus:0|t ]] .. TMW.L["UIPANEL_GROUPSORT_ADD"])
 						
 						TMW:TT(self, "UIPANEL_GROUPSORT_ADD", "UIPANEL_GROUPSORT_ADD_DESC")
@@ -167,23 +157,13 @@
 					<Anchor point="TOPRIGHT" x="-11" y="-10"/>
 				</Anchors>
 
-				<Frames>
-					<Frame parentKey="DD" inherits="TMW_DropDownMenuTemplate" hidden="true">
-						<Scripts>
-							<OnLoad>
-								TMW:CInit(self)
-						
-								self:SetFunction(TMW.C.GroupModule_IconPosition_Sortable.PresetDropdown)
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
-
 				<NormalFont style="GameFontNormalSmall"/>
 				<HighlightFont style="GameFontHighlightSmall"/>
 
 				<Scripts>
 					<OnLoad>
+						self.DD = TMW.C.Config_DropDownMenu_NoFrame:New()
+						self.DD:SetFunction(TMW.C.GroupModule_IconPosition_Sortable.PresetDropdown)
 					
 						self:SetText(TMW.L["UIPANEL_GROUPSORT_PRESETS"])
 						
@@ -203,7 +183,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				TMW:CInit(self, {})
+				TMW:CInit(self)
 
 				self.Header:SetText(TMW.L["UIPANEL_GROUPSORT"])
 

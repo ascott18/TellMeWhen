@@ -24,14 +24,14 @@
 				<!-- Anchoring is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "BarDisplay_BarGCD",
-							title = TMW.L["ICONMENU_ALLOWGCD"],
-							tooltip = TMW.L["ICONMENU_ALLOWGCD_DESC"],
-							hidden = function(self)
-								return TMW.CI.icon.typeData.hasNoGCD
-							end,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_ALLOWGCD"], TMW.L["ICONMENU_ALLOWGCD_DESC"])
+						self:SetSetting("BarDisplay_BarGCD")
+						
+						self:CScriptAdd("ReloadRequested", function()
+							self:SetShown(not TMW.CI.icon.typeData.hasNoGCD)
+						end)
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -98,12 +98,11 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "BarDisplay_StartColor",
-							title = TMW.L["ICONMENU_BAR_COLOR_START"],
-							tooltip = TMW.L["ICONMENU_BAR_COLOR_START_DESC"],
-							hasOpacity = true,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_BAR_COLOR_START"], TMW.L["ICONMENU_BAR_COLOR_START_DESC"])
+						self:SetSetting("BarDisplay_StartColor")
+						self:SetHasOpacity(true)
 
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()
@@ -119,12 +118,11 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "BarDisplay_MiddleColor",
-							title = TMW.L["ICONMENU_BAR_COLOR_MIDDLE"],
-							tooltip = TMW.L["ICONMENU_BAR_COLOR_MIDDLE_DESC"],
-							hasOpacity = true,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_BAR_COLOR_MIDDLE"], TMW.L["ICONMENU_BAR_COLOR_MIDDLE_DESC"])
+						self:SetSetting("BarDisplay_MiddleColor")
+						self:SetHasOpacity(true)
 
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()
@@ -140,12 +138,11 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "BarDisplay_CompleteColor",
-							title = TMW.L["ICONMENU_BAR_COLOR_COMPLETE"],
-							tooltip = TMW.L["ICONMENU_BAR_COLOR_COMPLETE_DESC"],
-							hasOpacity = true,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_BAR_COLOR_COMPLETE"], TMW.L["ICONMENU_BAR_COLOR_COMPLETE_DESC"])
+						self:SetSetting("BarDisplay_CompleteColor")
+						self:SetHasOpacity(true)
 
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()

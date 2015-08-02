@@ -21,54 +21,16 @@ local print = TMW.print
 
 
 
-local DD = TMW:NewClass("Config_DropDownMenu", "Config_Frame"){
+local DD = TMW:NewClass("Config_DropDownMenu_NoFrame"){
 	noResize = 1,
-
-	OnNewInstance_DropDownMenu = function(self, data)
-		self.Button:SetMotionScriptsWhileDisabled(false)
-		self.wrapTooltips = true
-
-		if data then
-			if data.func then
-				self:SetFunction(data.func)
-			end
-			if data.title then
-				self:SetText(data.title)
-			end
-		end
-	end,
-
-	SetTexts = function(self, title, tooltip)
-		self:SetTooltip(title, tooltip)
-		self:SetText(title)
-	end,
-
-	SetUIDropdownText = function(self, value, tbl, text)
-		self.selectedValue = value
-
-		if tbl then
-			for k, v in pairs(tbl) do
-				if v.value == value then
-					self:SetText(v.text)
-					return v
-				end
-			end
-		end
-		self:SetText(text or value)
-	end,
 
 	SetFunction = function(self, func)
 		self.initialize = func
 	end,
 
-	METHOD_EXTENSIONS = {
-		OnEnable = function(self)
-			self.Button:Enable()
-		end,
-		OnDisable = function(self)
-			self.Button:Disable()
-		end,
-	}
+	OnNewInstance_DropDownMenu_NoFrame = function(self)
+		self.wrapTooltips = true
+	end,
 }
 
 
@@ -145,23 +107,8 @@ function DD:Initialize(initFunction, displayMode, level, menuList)
 	if(level == nil) then
 		level = 1;
 	end
-	DD.LISTS[level].dropdown = self;
 
-	-- Change appearance based on the displayMode
-	if ( displayMode == "MENU" ) then
-		local name = self:GetName();
-		self.Left:Hide();
-		self.Middle:Hide();
-		self.Right:Hide();
-		self.Button:GetNormalTexture():SetTexture("");
-		self.Button:GetDisabledTexture():SetTexture("");
-		self.Button:GetPushedTexture():SetTexture("");
-		self.Button:GetHighlightTexture():SetTexture("");
-		self.Button:ClearAllPoints();
-		self.Button:SetPoint("LEFT", name.."Text", "LEFT", -9, 0);
-		self.Button:SetPoint("RIGHT", name.."Text", "RIGHT", 6, 0);
-		self.displayMode = "MENU";
-	end
+	self.LISTS[level].dropdown = self;
 end
 
 -- Start the countdown on a frame
@@ -935,20 +882,12 @@ function DD:CloseDropDownMenus(level)
 	end
 end
 
-function DD:SetText(text)
-	self.Text:SetText(text)
-end
-
-function DD:GetText()
-	return self.Text:GetText()
-end
-
 function DD:ClearAll()
 	-- Previous code refreshed the menu quite often and was a performance bottleneck
 	self.selectedID = nil;
 	self.selectedName = nil;
 	self.selectedValue = nil;
-	DD.SetText(self, "");
+	self:SetText("");
 
 	local button, checkImage, uncheckImage;
 	for i=1, DD.MAXBUTTONS do
@@ -959,21 +898,6 @@ function DD:ClearAll()
 		checkImage:Hide();
 		uncheckImage = button.UnCheck;
 		uncheckImage:Hide();
-	end
-end
-
-function DD:JustifyText(justification)
-	local text = self.Text
-	text:ClearAllPoints();
-	if ( justification == "LEFT" ) then
-		text:SetPoint("LEFT", self.Left, "LEFT", 27, 1);
-		text:SetJustifyH("LEFT");
-	elseif ( justification == "RIGHT" ) then
-		text:SetPoint("RIGHT", self.Right, "RIGHT", -43, 1);
-		text:SetJustifyH("RIGHT");
-	elseif ( justification == "CENTER" ) then
-		text:SetPoint("CENTER", self.Middle, "CENTER", -5, 1);
-		text:SetJustifyH("CENTER");
 	end
 end
 
@@ -993,19 +917,6 @@ function DD:GetCurrentDropDown()
 	end
 end
 
-
-function DD:OnDisable()
-	self.Text:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
-	self.Button:Disable();
-	self.Enabled = false;
-end
-
-function DD:OnEnable()
-	self.Text:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
-	self.Button:Enable();
-	self.Enabled = true;
-end
-
 function DD:SetScrollable(scrollable, maxHeight)
 	self = fixself(self)
 
@@ -1023,7 +934,84 @@ end
 
 
 
+local DD_Frame = TMW:NewClass("Config_DropDownMenu", "Config_Frame", "Config_DropDownMenu_NoFrame"){
+	OnNewInstance_DropDownMenu = function(self)
+		self.Button:SetMotionScriptsWhileDisabled(false)
+		self.wrapTooltips = true
+	end,
 
+	SetTexts = function(self, title, tooltip)
+		self:SetTooltip(title, tooltip)
+		self:SetText(title)
+	end,
+
+	SetUIDropdownText = function(self, value, tbl, text)
+		self.selectedValue = value
+
+		if tbl then
+			for k, v in pairs(tbl) do
+				if v.value == value then
+					self:SetText(v.text)
+					return v
+				end
+			end
+		end
+		self:SetText(text or value)
+	end,
+}
+
+DD_Frame:PostHookMethod("Initialize", function(self, initFunction, displayMode, level, menuList)
+	-- Change appearance based on the displayMode
+	if ( displayMode == "MENU" ) then
+		local name = self:GetName();
+		self.Left:Hide();
+		self.Middle:Hide();
+		self.Right:Hide();
+		self.Button:GetNormalTexture():SetTexture("");
+		self.Button:GetDisabledTexture():SetTexture("");
+		self.Button:GetPushedTexture():SetTexture("");
+		self.Button:GetHighlightTexture():SetTexture("");
+		self.Button:ClearAllPoints();
+		self.Button:SetPoint("LEFT", name.."Text", "LEFT", -9, 0);
+		self.Button:SetPoint("RIGHT", name.."Text", "RIGHT", 6, 0);
+		self.displayMode = "MENU";
+	end
+end)
+
+function DD_Frame:SetText(text)
+	self.Text:SetText(text)
+end
+
+function DD_Frame:GetText()
+	return self.Text:GetText()
+end
+
+function DD_Frame:OnDisable()
+	self.Text:SetVertexColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
+	self.Button:Disable();
+	self.Enabled = false;
+end
+
+function DD_Frame:OnEnable()
+	self.Text:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
+	self.Button:Enable();
+	self.Enabled = true;
+end
+
+function DD_Frame:JustifyText(justification)
+	local text = self.Text
+	text:ClearAllPoints();
+	if ( justification == "LEFT" ) then
+		text:SetPoint("LEFT", self.Left, "LEFT", 27, 1);
+		text:SetJustifyH("LEFT");
+	elseif ( justification == "RIGHT" ) then
+		text:SetPoint("RIGHT", self.Right, "RIGHT", -43, 1);
+		text:SetJustifyH("RIGHT");
+	elseif ( justification == "CENTER" ) then
+		text:SetPoint("CENTER", self.Middle, "CENTER", -5, 1);
+		text:SetJustifyH("CENTER");
+	end
+end
 
 TMW:NewClass("Config_DropDownMenu_Icon", "Config_DropDownMenu"){
 	previewSize = 18,

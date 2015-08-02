@@ -101,7 +101,25 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	},
 })
 
-Type:RegisterConfigPanel_XMLTemplate(170, "TellMeWhen_SortSettings")
+Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_RuneSortSettings", function(self)
+	self.Header:SetText(TMW.L["SORTBY"])
+
+	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+		numPerRow = 3,
+		function(check)
+			check:SetTexts(TMW.L["SORTBYNONE"], TMW.L["SORTBYNONE_DESC"])
+			check:SetSetting("Sort", false)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTASC"], TMW.L["ICONMENU_SORTASC_DESC"])
+			check:SetSetting("Sort", -1)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTDESC"], TMW.L["ICONMENU_SORTDESC_DESC"])
+			check:SetSetting("Sort", 1)
+		end,
+	})
+end)
 
 
 local textures = {

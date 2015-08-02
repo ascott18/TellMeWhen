@@ -11,12 +11,11 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							setting = "BackdropColor",
-							title = TMW.L["ICONMENU_BAR_COLOR_BACKDROP"],
-							tooltip = TMW.L["ICONMENU_BAR_COLOR_BACKDROP_DESC"],
-							hasOpacity = true,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_BAR_COLOR_BACKDROP"], TMW.L["ICONMENU_BAR_COLOR_BACKDROP_DESC"])
+						self:SetSetting("BackdropColor")
+						self:SetHasOpacity(true)
 					</OnLoad>
 				</Scripts>
 			</Button>

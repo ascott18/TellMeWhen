@@ -202,11 +202,9 @@
 				</Frames>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							--title = TMW.L[""],
-							--tooltip = TMW.L[""],
-							func = TMW.CNDT.TypeMenu_DropDown,
-						})
+						TMW:CInit(self)
+
+						self:SetFunction(TMW.CNDT.TypeMenu_DropDown)
 
 						self:SetScrollable(true)
 						self:SetWidth(176)
@@ -219,10 +217,10 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							title = TMW.L["CHOOSEICON"],
-							func = TMW.CNDT.IconMenu_DropDown,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["CHOOSEICON"], nil)
+						self:SetFunction(TMW.CNDT.IconMenu_DropDown)
 
 						-- Width is set in the TMW_CNDT_GROUP_DRAWGROUP handler for this frame.
 					</OnLoad>
@@ -276,11 +274,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							--title = TMW.L[""],
-							--tooltip = TMW.L[""],
-							func = TMW.CNDT.OperatorMenu_DropDown,
-						})
+						TMW:CInit(self)
+
+						self:SetFunction(TMW.CNDT.OperatorMenu_DropDown)
 
 						self.Text:SetFontObject(GameFontHighlightLarge)
 						self:SetWidth(66)
@@ -288,7 +284,7 @@
 				</Scripts>
 			</Frame>
 			
-			<Slider name="$parentSlider" parentKey="Slider" inherits="TellMeWhen_SliderTemplate" hidden="true" minvalue="0" maxvalue="100" valuestep="1" defaultvalue="100">
+			<Slider name="$parentSlider" parentKey="Slider" inherits="TellMeWhen_SliderTemplate" hidden="true">
 				<Size x="522" y="17"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-13" y="-39"/>
@@ -297,9 +293,8 @@
 					<OnLoad>
 						self.__noWrapTooltipText = true
 
-						TMW:CInit(self, {
-							setting = "Level",
-						})
+						TMW:CInit(self)
+						self:SetSetting("Level")
 
 						self:HookScript("OnValueChanged", function(self)
 							local CndtGroup = self:GetParent()
@@ -478,11 +473,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self, {
-							--title = TMW.L[""],
-							--tooltip = TMW.L[""],
-							func = TMW.CNDT.BitFlags_DropDown,
-						})
+						TMW:CInit(self)
+
+						self:SetFunction(TMW.CNDT.BitFlags_DropDown)
 
 						self:SetScrollable(true)
 						self:SetWidth(190)

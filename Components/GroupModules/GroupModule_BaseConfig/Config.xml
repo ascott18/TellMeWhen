@@ -23,16 +23,19 @@
 					<OnLoad>
 						self.BackgroundText:SetWidth(self:GetWidth())
 						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_GROUPNAME"],
-							label = TMW.L["UIPANEL_GROUPNAME"],
-							setting = "Name",
-							doCleanString = true,
-						})
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_GROUPNAME"], nil)
+						self:SetSetting("Name")
+						
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return TMW:CleanString(value)
+						end)
 
 					</OnLoad>
 					
 					<OnTextChanged>
+						-- TODO: this should be integrated with Config_EditBox
 						local text = self:GetText()
 						if text == "" then
 							local label = self.label
@@ -41,7 +44,9 @@
 							self.BackgroundText:SetText(nil)
 						end
 						
-						self:GetParent():AdjustHeight()
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight()
+						end
 					</OnTextChanged>
 				</Scripts>
 			</EditBox>
@@ -65,32 +70,24 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_GROUPID"],
-							tooltip = TMW.L["UIPANEL_GROUPID_DESC"],
-							setting = "ID",
-							min = 1,
-							max = 1,
-							step = 1,
-						})
+						TMW:CInit(self)
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, newID)
-							local group = self:GetSettingTable()
-							local oldID = group.ID
+						self:SetValueStep(1)
+						self:SetTexts(TMW.L["UIPANEL_GROUPID"], TMW.L["UIPANEL_GROUPID_DESC"])
 
-							TMW:Group_Swap(group.Domain, oldID, newID)
-
-							-- IMPORTANT: we return the old ID since we don't want to actually change the ID of the group.
-							-- What this actually does is swap the settings between two groups. GroupIDs never actually change.
-							return oldID
-						end)
-
-						self:CScriptAdd("SettingTableRequested", function(requester)
+						self:CScriptAdd("ReloadRequested", function(requester)
 							if TMW.CI.group then
 								self:SetMinMaxValues(1, #TMW[TMW.CI.group.Domain])
+								self:SetValue(TMW.CI.group:GetID())
 							end
+						end)
 
-							return TMW.CI.group
+						self:HookScript("OnValueChanged", function(self)
+							local group = TMW.CI.group
+							local oldID = group.ID
+							local newID = self:GetValue() -- DO NOT USE the value param from the script. It won't be an integer.
+
+							TMW:Group_Swap(group.Domain, oldID, newID)
 						end)
 					</OnLoad>
 				</Scripts>
@@ -115,15 +112,13 @@
 					<Anchor point="RIGHT" x="-10" />
 				</Anchors>
 				<Scripts>
-					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_ROWS"],
-							tooltip = TMW.L["UIPANEL_TOOLTIP_ROWS"],
-							setting = "Rows",
-							min = 1,
-							max = TELLMEWHEN_MAXROWS,
-							step = 1,
-						})
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_ROWS"], TMW.L["UIPANEL_TOOLTIP_ROWS"])
+						self:SetSetting("Rows")
+						self:SetMinMaxValues(1, TELLMEWHEN_MAXROWS)
+						self:SetValueStep(1)
 					</OnLoad>
 				</Scripts>
 			</Slider>
@@ -133,15 +128,13 @@
 					<Anchor point="TOPRIGHT" relativeKey="$parent.Rows" y="-40"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>						
-						TMW:CInit(self, {
-							title = TMW.L["UIPANEL_COLUMNS"],
-							tooltip = TMW.L["UIPANEL_TOOLTIP_COLUMNS"],
-							setting = "Columns",
-							min = 1,
-							max = TELLMEWHEN_MAXROWS,
-							step = 1,
-						})
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_COLUMNS"], TMW.L["UIPANEL_TOOLTIP_COLUMNS"])
+						self:SetSetting("Columns")
+						self:SetMinMaxValues(1, TELLMEWHEN_MAXROWS)
+						self:SetValueStep(1)
 					</OnLoad>
 				</Scripts>
 			</Slider>

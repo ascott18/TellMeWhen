@@ -3,95 +3,41 @@
 	<Frame name="TellMeWhen_DurationRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="40"/>
 		<Frames>
-			<CheckButton name="$parentDurationMinEnabled" parentKey="DurationMinEnabled" inherits="TellMeWhen_CheckTemplate">
-				<Size x="26" y="26"/>
+
+			<Frame parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxWithCheckTemplate">
+				<Size x="67" y="33"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-11"/>
+					<Anchor point="TOPLEFT" x="5" y="-5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:SetLabel("")
-						self:SetTexts(ENABLE,
-							TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MIN_DESC"]:gsub("^%u", strlower)))
-						self:SetSetting("DurationMinEnabled")
-					</OnLoad>
-				</Scripts>
-			</CheckButton>
-			<CheckButton name="$parentDurationMaxEnabled" parentKey="DurationMaxEnabled" inherits="TellMeWhen_CheckTemplate">
-				<Size x="26" y="26"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentDurationMinEnabled" relativePoint="RIGHT" x="45"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
-
-						self:SetLabel("")
-						self:SetTexts(ENABLE,
-							TMW.L["GENERIC_NUMREQ_CHECK_DESC"]:format(TMW.L["ICONMENU_DURATION_MAX_DESC"]:gsub("^%u", strlower)))
-						self:SetSetting("DurationMaxEnabled")
-					</OnLoad>
-				</Scripts>
-			</CheckButton>
-			
-			<EditBox name="$parentDurationMin" parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="40" y="15"/>
-				<Anchors>
-					<Anchor point="LEFT" relativeto="$parentDurationMinEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.text:SetText(MINIMUM)
-						self.text:SetParent(self:GetParent().DurationMinEnabled) -- This is evil and lazy. So, so lazy.
-						self.text:SetPoint("LEFT", 2, 0)
-						self.text:SetPoint("RIGHT", self)
-						
-						TMW:CInit(self)
-
-						self:SetLabel("")
+						self:SetSettings("DurationMinEnabled", "DurationMin")
 						self:SetTexts(MINIMUM, TMW.L["ICONMENU_DURATION_MIN_DESC"])
-						self:SetSetting("DurationMin")
-
-						self:CScriptAdd("ReloadRequested", function()
-							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.DurationMinEnabled)
-						end)
 					</OnLoad>
 				</Scripts>
-			</EditBox>
-			<EditBox name="$parentDurationMax" parentKey="DurationMax" inherits="TellMeWhen_TimeEditBoxTemplate">
-				<Size x="40" y="15"/>
+			</Frame>
+
+			<Frame parentKey="DurationMax" inherits="TellMeWhen_TimeEditBoxWithCheckTemplate">
+				<Size x="67" y="33"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeto="$parentDurationMaxEnabled" relativePoint="RIGHT" x="1" y="0.5"/>
+					<Anchor point="LEFT" relativeKey="$parent.DurationMin" relativePoint="RIGHT" x="4"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetText(MAXIMUM)
-						self.text:SetParent(self:GetParent().DurationMaxEnabled) -- This is evil and lazy. So, so lazy.
-						self.text:SetPoint("LEFT", 2, 0)
-						self.text:SetPoint("RIGHT", self)
-						
 						TMW:CInit(self)
 
-						self:SetLabel("")
-						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_DURATION_MIN_DESC"])
-						self:SetSetting("DurationMax")
-
-						self:CScriptAdd("ReloadRequested", function()
-							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.DurationMaxEnabled)
-						end)
+						self:SetSettings("DurationMaxEnabled", "DurationMax")
+						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_DURATION_MAX_DESC"])
 					</OnLoad>
 				</Scripts>
-
-			</EditBox>
+			</Frame>
 			
 			<Slider name="$parentDurationAlpha" parentKey="DurationAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentDurationMax" relativePoint="RIGHT" x="15" />
+					<Anchor point="LEFT" relativeKey="$parent.DurationMax" relativePoint="RIGHT" x="15" />
 					<Anchor point="RIGHT" x="-10" />
 					<Anchor point="TOP" y="-13" />
 				</Anchors>

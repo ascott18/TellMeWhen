@@ -278,7 +278,7 @@ function EVENTS:LoadEventID(eventID)
 	for i, frame in ipairs(EVENTS.EventHandlerFrames) do
 		frame.selected = nil
 		frame:UnlockHighlight()
-		frame:GetHighlightTexture():SetAlpha(0.1)
+		frame:GetHighlightTexture():SetAlpha(0.07)
 	end
 
 
@@ -309,7 +309,7 @@ function EVENTS:LoadEventID(eventID)
 
 	eventFrame.selected = 1
 	eventFrame:LockHighlight()
-	eventFrame:GetHighlightTexture():SetAlpha(0.2)
+	eventFrame:GetHighlightTexture():SetAlpha(0.15)
 end
 
 function EVENTS:LoadEventSettings()
@@ -493,7 +493,7 @@ function EVENTS:ShowHandlerPickerButtons()
 	EVENTS:LoadEventID(nil)
 
 	IE.Events.AddEvent:LockHighlight()
-	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.2)
+	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.15)
 
 	IE.Events.HandlerPickers:Show()
 	IE.Events.EventPickers:Hide()
@@ -508,7 +508,7 @@ end
 
 function EVENTS:HidePickerButtons()
 	IE.Events.AddEvent:UnlockHighlight()
-	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.1)
+	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.07)
 
 	IE.Events.HandlerPickers:Hide()
 	IE.Events.EventPickers:Hide()
@@ -710,7 +710,7 @@ end
 
 
 function EVENTS:ChangeEvent_Dropdown()
-	local eventButton = self:GetParent()
+	local eventButton = self.eventButton -- This is set in XML when the dropdown is opened.
 	local eventID = eventButton:GetID()
 	local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventID)
 
@@ -898,7 +898,7 @@ function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
 			end
 			f.selected = nil
 			f:UnlockHighlight()
-			f:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+			f:GetHighlightTexture():SetAlpha(0.07)
 		end
 	end
 
@@ -909,7 +909,7 @@ function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
 
 	if subHandlerListButton then
 		subHandlerListButton:LockHighlight()
-		subHandlerListButton:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+		subHandlerListButton:GetHighlightTexture():SetAlpha(0.15)
 	end
 
 	self:SetupEventDisplay(self.currentEventID)
