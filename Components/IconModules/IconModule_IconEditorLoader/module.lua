@@ -22,10 +22,6 @@ local Module = TMW:NewClass("IconModule_IconEditorLoader", "IconModule")
 
 
 local function LoadIcon(icon)
-	if TMW.IE.ConfirmOverlay:IsShown() then
-		return
-	end
-
 	TMW.IE:LoadIcon(nil, icon)
 	TMW.IE:LoadGroup(nil, icon.group)
 end

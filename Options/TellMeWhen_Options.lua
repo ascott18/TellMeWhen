@@ -372,6 +372,9 @@ function TMW:Group_Delete(group)
 	TMW.db[domain].NumGroups = TMW.db[domain].NumGroups - 1
 
 	TMW:Update()
+
+	-- Do this again so the group list will update to reflect the missing group.
+	IE:LoadGroup(1, false)
 end
 
 function TMW:Group_Add(domain, view)
@@ -405,28 +408,21 @@ function TMW:Group_Add(domain, view)
 	return group
 end
 
-function TMW:Group_Swap(domain, groupID1, groupID2)
+function TMW:Group_Insert(group, targetDomain, targetID)
 	if InCombatLockdown() then
 		-- Error if we are in combat because TMW:Update() won't update the groups instantly if we are.
 		error("TMW: Can't swap groups while in combat")
 	end
 
-	TMW:ValidateType("domain", "TMW:GroupSwap(domain, groupID1, groupID2", domain, "string")
-	TMW:ValidateType("groupID1", "TMW:GroupSwap(domain, groupID1, groupID2", groupID1, "number")
-	TMW:ValidateType("groupID2", "TMW:GroupSwap(domain, groupID1, groupID2", groupID2, "number")
+	TMW:ValidateType("group", "TMW:Group_Insert(group, targetDomain, targetID)", group, "Group")
+	TMW:ValidateType("targetDomain", "TMW:Group_Insert(group, targetDomain, targetID)", targetDomain, "string")
+	TMW:ValidateType("targetID", "TMW:Group_Insert(group, targetDomain, targetID)", targetID, "number")
 
-	if groupID1 == groupID2 then
-		return
-	end
-
-	if type(TMW[domain]) ~= "table" then
+	if type(TMW[targetDomain]) ~= "table" then
 		error("Invalid domain to Group_Swap")
 	end
 
-	TMW:ValidateType("group 1", "TMW:GroupSwap(domain, groupID1, groupID2)", TMW[domain][groupID1], "Group")
-	TMW:ValidateType("group 2", "TMW:GroupSwap(domain, groupID1, groupID2)", TMW[domain][groupID2], "Group")
-
-	local Groups = TMW.db[domain].Groups
+	--TMW:ValidateType("group 2", "TMW:Group_Insert(group, targetDomain, targetID)", TMW[domain][targetID], "Group")
 	
 	-- The point of this is to keep the icon editor's
 	-- current icon and group the same before and after the swap.
@@ -436,77 +432,18 @@ function TMW:Group_Swap(domain, groupID1, groupID2)
 	IE:LoadGroup(1, false)
 	IE:LoadIcon(1, false)
 
-	local group1Orig, group2Orig = Groups[groupID1], Groups[groupID2]
-	Groups[groupID1], Groups[groupID2] = group2Orig, group1Orig
-
-	local success, err = TMW.safecall(function()
-		TMW:Update()
-
-		IE:LoadGroup(1, groupGUID and TMW:GetDataOwner(groupGUID))
-		IE:LoadIcon(1, iconGUID and TMW:GetDataOwner(iconGUID))
-	end)
-
-	if not success then
-		TMW:Error("There was an error while trying to swap " .. domain .. " groups " .. groupID1 .. " and " .. groupID2)
-		Groups[groupID1], Groups[groupID2] = group1Orig, group2Orig
-		TMW:Update()
-	end
-end
-
-function TMW:Group_SwapDomain(group)
-	if InCombatLockdown() then
-		-- Error if we are in combat because TMW:Update() won't update the groups instantly if we are.
-		error("TMW: Can't swap groups while in combat")
-	end
-
-	TMW:ValidateType("group", "TMW:Group_SwapDomain(group)", group, "Group")
-
 	local oldDomain = group.Domain
-	local groupID = group:GetID()
 
-	local newDomain = oldDomain == "global" and "profile" or "global"
+	local groupSettings = tremove(TMW.db[oldDomain].Groups, group.ID)
+	tinsert(TMW.db[targetDomain].Groups, targetID, groupSettings)
 
-
-	-- The point of this is to keep the icon editor's
-	-- current icon and group the same before and after the swap.
-	local iconGUID = CI.icon and CI.icon:GetGUID()
-	local groupGUID = CI.group and CI.group:GetGUID()
-
-	-- Unload the icon editor before the swap. Otherwise, weird things happen.
-	IE:LoadGroup(1, false)
-	IE:LoadIcon(1, false)
-
-
-	-- Perform the swap.
-	local gs = tremove(TMW.db[oldDomain].Groups, groupID)
-	if not gs then
-		error("The group wasn't found for some reason when swapping domains")
-	end
 	TMW.db[oldDomain].NumGroups = TMW.db[oldDomain].NumGroups - 1
-	TMW.db[newDomain].NumGroups = TMW.db[newDomain].NumGroups + 1
-	-- Don't use tinsert here - there may be orphan groups.
-	TMW.db[newDomain].Groups[TMW.db[newDomain].NumGroups] = gs
+	TMW.db[targetDomain].NumGroups = TMW.db[targetDomain].NumGroups + 1
 
+	TMW:Update()
 
-	-- Swap is done. Attempt to refresh everything.
-	local success, err = TMW.safecall(function()
-		TMW:Update()
-
-		IE:LoadGroup(1, groupGUID and TMW:GetDataOwner(groupGUID))
-		IE:LoadIcon(1, iconGUID and TMW:GetDataOwner(iconGUID))
-	end)
-
-	-- Rollback the swap if something went wrong.
-	if not success then
-		TMW:Error("There was an error while trying to swap the domain of " .. oldDomain .. " group " .. groupID)
-
-		tremove(TMW.db[newDomain].Groups, TMW.db[newDomain].NumGroups)
-		TMW.db[newDomain].NumGroups = TMW.db[newDomain].NumGroups - 1
-		TMW.db[oldDomain].NumGroups = TMW.db[oldDomain].NumGroups + 1
-		TMW.db[newDomain].Groups[groupID] = gs
-
-		TMW:Update()
-	end
+	IE:LoadGroup(1, groupGUID and TMW:GetDataOwner(groupGUID))
+	IE:LoadIcon(1, iconGUID and TMW:GetDataOwner(iconGUID))
 end
 
 ---------- Etc ----------
@@ -927,29 +864,29 @@ TMW:RegisterCallback("TMW_ON_PROFILE", function(event, arg2, arg3)
 	IE.db:SetProfile(TMW.db:GetCurrentProfile())
 end)
 
+
+function IE:DisplayPage(pageKey)
+	for _, otherPage in TMW:Vararg(TMW.IE.Pages:GetChildren()) do
+		otherPage:Hide()
+	end
+
+	-- If no key is specified, the function was probably just being called to hide all pages.
+	if not pageKey then
+		return
+	end
+
+	local page = TellMeWhen_IconEditor.Pages[pageKey]
+	if not page then
+		TMW:Error(("Couldn't find child of TellMeWhen_IconEditor.Pages with key %q"):format(pageKey))
+	end
+
+	page:Show()
+
+	return page
+end
  
 
 TMW:NewClass("IconEditorTabBase", "Button"){
-	DisplayPage = function(self, pageKey)
-		for _, otherPage in TMW:Vararg(TMW.IE.Pages:GetChildren()) do
-			otherPage:Hide()
-		end
-
-
-		-- If no key is specified, the function was probably just being called to hide all pages.
-		if not pageKey then
-			return
-		end
-
-		local page = TellMeWhen_IconEditor.Pages[pageKey]
-		if not page then
-			TMW:Error(("Couldn't find child of TellMeWhen_IconEditor with key %q"):format(pageKey))
-		end
-
-		page:Show()
-
-		return page
-	end,
 
 	AdjustWidth = function(self)
 		self:SetWidth(self.text:GetStringWidth() + 10)
@@ -1019,7 +956,7 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 
 		if not self.childrenEnabled then
 			IE.CurrentTab = nil
-			local page = self:DisplayPage(self.disabledPageKey)
+			local page = IE:DisplayPage(self.disabledPageKey)
 			page:RequestReloadChildren()
 
 		elseif self.currentTab and self.currentTab:IsShown() then
@@ -1074,7 +1011,7 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 		IE.tabs.art.sSelectedHorizontal:SetPoint("BOTTOMRIGHT", self)
 
 
-		local page = self:DisplayPage(self.pageKey)
+		local page = IE:DisplayPage(self.pageKey)
 		
 		TMW:Fire("TMW_CONFIG_TAB_CLICKED", self, oldTab)
 
@@ -1691,14 +1628,14 @@ function IE:Reset()
 end
 
 function IE:ShowConfirmation(confirmText, desc, action)
-	IE.ConfirmOverlay.Description:SetText(desc)
+	IE.Pages.Confirm.MiddleBand.Description:SetText(desc)
 
-	local AcceptButton = IE.ConfirmOverlay.AcceptButton
+	local AcceptButton = IE.Pages.Confirm.MiddleBand.AcceptButton
 	AcceptButton:SetText(confirmText)
 	AcceptButton:SetWidth(AcceptButton:GetTextWidth() + 20)
 	AcceptButton.Action = action
 
-	IE.ConfirmOverlay:Show()
+	IE:DisplayPage("Confirm")
 end
 
 
@@ -1851,7 +1788,7 @@ end
 CScriptProvider = TMW:NewClass("CScriptProvider"){
 	DEBUG_MaxDepth = 20,
 
-	CScriptCallTunnelGet = function(self, script, ...)
+	CScriptTunnelGet = function(self, script, ...)
 		for _, child in TMW:Vararg(frame:GetChildren()) do
 			local ret = tunnel(child, true, script, ...)
 			if ret then
@@ -1859,10 +1796,10 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			end
 		end
 	end,
-	CScriptCallBubbleGet = function(self, script, ...)
+	CScriptBubbleGet = function(self, script, ...)
 		return bubble(self:GetParent(), true, script, ...)
 	end,
-	CScriptCallTunnel = function(self, script, ...)
+	CScriptTunnel = function(self, script, ...)
 		CS_SDepth = CS_SDepth + 1
 
 		for _, child in TMW:Vararg(self:GetChildren()) do
@@ -1871,7 +1808,7 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 
 		CS_SDepth = CS_SDepth - 1
 	end,
-	CScriptCallBubble = function(self, script, ...)
+	CScriptBubble = function(self, script, ...)
 		CS_SDepth = CS_SDepth + 1
 
 		bubble(self:GetParent(), false, script, ...)
@@ -1976,12 +1913,12 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			CScriptProvider.DEBUG_Stack = {}
 
 			CScriptProvider.CScriptCall_ORIGINAL = CScriptProvider.CScriptCall
-			CScriptProvider.CScriptCallBubble_ORIGINAL = CScriptProvider.CScriptCallBubble
-			CScriptProvider.CScriptCallTunnel_ORIGINAL = CScriptProvider.CScriptCallTunnel
+			CScriptProvider.CScriptBubble_ORIGINAL = CScriptProvider.CScriptBubble
+			CScriptProvider.CScriptTunnel_ORIGINAL = CScriptProvider.CScriptTunnel
 
 			CScriptProvider:PostHookMethod("CScriptCall", self.DEBUG_CScriptCallBase)
-			CScriptProvider:PostHookMethod("CScriptCallBubble", self.DEBUG_CScriptCallBase)
-			CScriptProvider:PostHookMethod("CScriptCallTunnel", self.DEBUG_CScriptCallBase)
+			CScriptProvider:PostHookMethod("CScriptBubble", self.DEBUG_CScriptCallBase)
+			CScriptProvider:PostHookMethod("CScriptTunnel", self.DEBUG_CScriptCallBase)
 
 			CScriptProvider.DEBUG_Started = true
 		end
@@ -1996,8 +1933,8 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			CScriptProvider.DEBUG_Stack = nil
 
 			CScriptProvider.CScriptCall = CScriptProvider.CScriptCall_ORIGINAL
-			CScriptProvider.CScriptCallBubble = CScriptProvider.CScriptCallBubble_ORIGINAL
-			CScriptProvider.CScriptCallTunnel = CScriptProvider.CScriptCallTunnel_ORIGINAL
+			CScriptProvider.CScriptBubble = CScriptProvider.CScriptBubble_ORIGINAL
+			CScriptProvider.CScriptTunnel = CScriptProvider.CScriptTunnel_ORIGINAL
 
 			CScriptProvider.DEBUG_Started = false
 		end
@@ -2017,6 +1954,8 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			CScriptProvider.DEBUG_PrevStackFrame = nil
 			CScriptProvider.DEBUG_PrevDepth = CS_SDepth
 		else
+			-- We do this so we can get calls right before the stack depth changes,
+			-- which are usually what cause it.
 			CScriptProvider.DEBUG_PrevStackFrame = stackFrame
 		end
 
@@ -2137,16 +2076,16 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	end,
 
 	GetSettingTable = function(self)
-		return self:CScriptCallGet("SettingTableRequested") or self:CScriptCallBubbleGet("SettingTableRequested")
+		return self:CScriptCallGet("SettingTableRequested") or self:CScriptBubbleGet("SettingTableRequested")
 	end,
 
 	OnSettingSaved = function(self)
 		self:CScriptCall("SettingSaved")
-		self:CScriptCallBubble("DescendantSettingSaved", self)
+		self:CScriptBubble("DescendantSettingSaved", self)
 	end,
 
 	RequestReloadChildren = function(self)
-		self:CScriptCallTunnel("ReloadRequested")
+		self:CScriptTunnel("ReloadRequested")
 	end,
 
 	ReloadSetting = TMW.NULLFUNC
@@ -2225,7 +2164,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		end
 
 		self:CScriptCall("PanelSetup", self, panelInfo)
-		self:CScriptCallTunnel("PanelSetup", self, panelInfo)
+		self:CScriptTunnel("PanelSetup", self, panelInfo)
 
 		self:ReloadSetting()
 	end,
@@ -3435,6 +3374,37 @@ TMW:NewClass("Config_PointSelect", "Config_Frame"){
 	end,
 }
 
+
+TMW:NewClass("Config_GroupListContainer", "Config_Frame"){
+	OnNewInstance_GroupListContainer = function(self)
+		self:CScriptAdd("GetGroupListContainer", self.GetListContainer)
+	end,
+
+	ReloadSetting = function(self)
+		self:SetDraggingGroup(nil, nil, nil)
+	end,
+
+	OnHide = function(self)
+		self:SetDraggingGroup(nil, nil, nil)
+	end,
+
+	SetDraggingGroup = function(self, dragGroup, targetDomain, targetID)
+		self.dragGroup = dragGroup
+		self.targetDomain = targetDomain
+		self.targetID = targetID
+
+		self:RequestReloadChildren()
+	end,
+
+	GetDraggingGroup = function(self)
+		return self.dragGroup, self.targetDomain, self.targetID
+	end,
+
+	GetListContainer = function(self)
+		return self
+	end,
+}
+
 TMW:NewClass("Config_GroupList", "Config_Frame"){
 	padding = 1,
 	domain = "profile",
@@ -3443,7 +3413,8 @@ TMW:NewClass("Config_GroupList", "Config_Frame"){
 		self.frames = {}
 		self:SetFrameLevel(100)
 
-		self:CScriptAdd("ReloadRequested", self.ReloadRequested)
+		TMW:ConvertContainerToScrollFrame(self, true, 3, 6)
+		self.ScrollFrame.scrollStep = 30
 	end,
 
 	SetDomain = function(self, domain)
@@ -3465,16 +3436,30 @@ TMW:NewClass("Config_GroupList", "Config_Frame"){
 		return frame
 	end,
 
-	ReloadRequested = function(self)
-		for groupID = 1, TMW.db[self.domain].NumGroups do
-			local frame = self:GetFrame(groupID)
+	ReloadSetting = function(self)
+		local groupSelect = self:CScriptBubbleGet("GetGroupListContainer")
 
+		local dragGroup, targetDomain, targetID = groupSelect:GetDraggingGroup()
+
+		local groups = {}
+		for groupID = 1, TMW.db[self.domain].NumGroups do
 			local group = TMW[self.domain][groupID]
+			if group ~= dragGroup then
+				tinsert(groups, group)
+			end
+		end
+
+		if targetDomain == self.domain then
+			tinsert(groups, targetID, dragGroup)
+		end
+
+		for i, group in ipairs(groups) do
+			local frame = self:GetFrame(i)
 			
 			frame:SetGroup(group)
 		end
 
-		for i = TMW.db[self.domain].NumGroups + 1, #self.frames do
+		for i = #groups + 1, #self.frames do
 			self.frames[i].group = nil
 			self.frames[i]:Hide()
 		end
@@ -3490,6 +3475,19 @@ TMW:NewClass("Config_GroupList", "Config_Frame"){
 			end
 		end
 	end,
+
+	OnUpdate = function(self)
+		local groupSelect = self:CScriptBubbleGet("GetGroupListContainer")
+
+		local group, domain, ID = groupSelect:GetDraggingGroup()
+		
+		if group then
+			-- When the cursor enters this list for the first time, stick the group at the end.
+			if self.ScrollFrame:IsMouseOver() and self.domain ~= domain then
+				groupSelect:SetDraggingGroup(group, self.domain, TMW.db[self.domain].NumGroups + 1)
+			end
+		end
+	end,
 }
 
 TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
@@ -3497,27 +3495,27 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 		self.textures = {}
 
 		self.ID:SetText(self:GetID() .. ".")
+
+		self:RegisterForDrag("LeftButton")
 	end,
 
 	GetTexture = function(self, i)
-		if self.textures[i] then
-			self.textures[i]:Show()
-
-			if i == 1 then
-				self.textures[i]:SetPoint("RIGHT", -1, 0)
-			else
-				self.textures[i]:SetPoint("RIGHT", self.textures[i-1], "LEFT", -2, 0)
-			end
-			self.textures[i]:SetDesaturated(false)
-
-			return self.textures[i]
+		if not self.textures[i] then
+			self.textures[i] = self:CreateTexture(nil, "OVERLAY")
+			local dim = self:GetHeight() - 2
+			self.textures[i]:SetSize(dim, dim)
 		end
 
-		self.textures[i] = self:CreateTexture(nil, "OVERLAY")
-		local dim = self:GetHeight() - 2
-		self.textures[i]:SetSize(dim, dim)
+		if i == 1 then
+			self.textures[i]:SetPoint("RIGHT", -1, 0)
+		else
+			self.textures[i]:SetPoint("RIGHT", self.textures[i-1], "LEFT", -2, 0)
+		end
 
-		return self:GetTexture(i)
+		self.textures[i]:Show()
+		self.textures[i]:SetDesaturated(false)
+
+		return self.textures[i]
 	end,
 
 	SetGroup = function(self, group)
@@ -3534,6 +3532,7 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 		self.group = group
 
 		self:SetChecked(TMW.CI.group == group )
+		self:Show()
 
 		local textureIndex = 1
 		local isSpecLimited
@@ -3544,8 +3543,8 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 			textureIndex = textureIndex + 1
 
 			tex:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-			tex:SetDesaturated(true)
 			tex:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-LeaveItem-Transparent")
+			tex:SetDesaturated(true)
 		else
 			if group.Domain == "profile" then
 				-- Indicator for primary/secondary spec configuration.
@@ -3645,41 +3644,39 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 	end,
 
 	OnDragStart = function(self)
-		local list = self:GetParent()
-		local listParent = list:GetParent()
+		print("OnDragStart", self)
+		local groupSelect = self:CScriptBubbleGet("GetGroupListContainer")
 		
-		listParent.draggingFrame = self
+		groupSelect:SetDraggingGroup(self.group, self.group.Domain, self.group.ID)
 	end,
 
 	OnDragStop = function(self)
-		local list = self:GetParent()
-		local listParent = list:GetParent()
+		print("OnDragStop", self)
+		local groupSelect = self:CScriptBubbleGet("GetGroupListContainer")
 		
-		listParent.draggingFrame = nil
+		local group, domain, ID = groupSelect:GetDraggingGroup()
+		groupSelect:SetDraggingGroup(nil, nil, nil)
 
-		local SortPriorities = self:GetSettingTable()
-		local startDeleting = false
-		for i, data in ipairs(SortPriorities) do
-			if data.Method == "id" then
-				startDeleting = true
-			elseif startDeleting then
-				SortPriorities[i] = nil
-			end
-		end
+		TMW:Group_Insert(group, domain, ID)
 
-		self:OnSettingSaved()
-		IconPosition_Sortable:LoadConfig()
+		-- It will be hidden when the global update happens.
+		-- We should keep it shown, though.
+		groupSelect:Show()
 	end,
 
 	OnUpdate = function(self)
 		local list = self:GetParent()
-		local listParent = list:GetParent()
+		local groupSelect = self:CScriptBubbleGet("GetGroupListContainer")
+
+		local group, domain, ID = groupSelect:GetDraggingGroup()
 		
-		if self:IsMouseOver() and listParent.draggingFrame and self ~= listParent.draggingFrame then
+		if group then
+			if self:IsMouseOver() and self.group ~= group then
 
-			self:Swap(listParent.draggingFrame)
-
-			listParent.draggingFrame = self
+				groupSelect:SetDraggingGroup(group, list.domain, self:GetID())
+			elseif not IsMouseButtonDown() then
+				self:OnDragStop()
+			end
 		end
 	end,
 }

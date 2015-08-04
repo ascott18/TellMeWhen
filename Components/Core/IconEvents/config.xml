@@ -101,13 +101,11 @@
 				local parent = self:GetParent()
 				
 				parent.draggingFrame = self
-				parent.ScrollFrame.AllowEdgeScrolling = true
 			</OnDragStart>
 			<OnDragStop>
 				local parent = self:GetParent()
 				
 				parent.draggingFrame = nil
-				parent.ScrollFrame.AllowEdgeScrolling = false
 			</OnDragStop>
 			<OnUpdate>
 				local parent = self:GetParent()
