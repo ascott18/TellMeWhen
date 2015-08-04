@@ -158,14 +158,14 @@
 				self.Header:SetText(TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
 				
 				self.Invert:ConstrainLabel(self.BarGCD)
-				self.BarGCD:ConstrainLabel(self, "RIGHT", -1, 0)
+				self.BarGCD:ConstrainLabel(self, "RIGHT")
 
 				self.EnableColors:ConstrainLabel(self.FakeMax)
-				self.FakeMax:ConstrainLabel(self, "RIGHT", -1, 0)
+				self.FakeMax:ConstrainLabel(self, "RIGHT")
 
 				self.ColorStart:ConstrainLabel(self.ColorMiddle)
 				self.ColorMiddle:ConstrainLabel(self.ColorComplete)
-				self.ColorComplete:ConstrainLabel(self, "RIGHT", -1, 0)
+				self.ColorComplete:ConstrainLabel(self, "RIGHT")
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Invert, self.BarGCD)
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.EnableColors)

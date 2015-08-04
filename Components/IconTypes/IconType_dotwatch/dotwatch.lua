@@ -73,7 +73,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	[ 0x1 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_DOTWATCH_NOFOUND_DESC"],	},
 })
 
-local panelInfo = Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
 	self.Header:SetText(L["ICONMENU_DOTWATCH_GCREQ"])
 
 	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -86,11 +86,13 @@ local panelInfo = Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_Dotwa
 	self:SetScript("OnSizeChanged", function()
 		self:SetHeight(self.text:GetStringHeight() + 20)
 	end)
-	
+
+	self:CScriptAdd("PanelSetup", function()
+		if TMW.CI.icon:IsGroupController() then
+			self:Hide()
+		end
+	end)
 end)
-function panelInfo:ShouldShow()
-	return not TMW.CI.icon:IsGroupController()
-end
 
 -- Holds all dotwatch icons that we need to update.
 -- Since the event handling for this icon type is all done by a single handler that operates on all icons,

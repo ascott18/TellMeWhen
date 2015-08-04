@@ -40,7 +40,7 @@ TMW:RegisterDatabaseDefaults{
 CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
 	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
 	
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,
 		function(check)
 			check:SetTexts(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWTIMER_DESC"])
@@ -73,7 +73,7 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 			check:SetTexts(L["ICONMENU_SHOWTIMERTEXT_NOOCC"], L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"])
 			check:SetSetting("ShowTimerTextnoOCC")
 
-			check:CScriptAdd("ReloadRequested", function()
+			check:CScriptAdd("ReloadRequested", function()				
 				check:SetShown(IsAddOnLoaded("ElvUI"))
 				check:GetParent():AdjustHeight()
 

@@ -120,7 +120,7 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 			group:Setup()
 
 			if TMW.CI.ics ~= ics_old then
-				TMW.IE:Load(1, false)
+				TMW.IE:LoadIcon(1, false)
 			end
 		end
 	end,

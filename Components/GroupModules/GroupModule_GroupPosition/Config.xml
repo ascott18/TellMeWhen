@@ -3,6 +3,7 @@
 	<Frame name="TellMeWhen_GM_GroupPosition" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="200"/>
 		<Frames>
+			<!--  TODO: add a message underneath this box if the target can't be found, and also add one if the target is a GUID. -->
 			<EditBox parentKey="RelativeTo" inherits="TellMeWhen_InputBoxTemplate">
 				<Anchors>
 					<Anchor point="TOP" y="-16"/>
@@ -95,7 +96,7 @@
 						self:SetSetting("x")
 
 						self:SetMode(self.MODE_ADJUSTING)
-						self:SetMinMaxValues(-math.huge, math.huge)
+						self:SetMinMaxValues(-2000, 2000)
 						self:SetRange(20)
 						self:SetValueStep(0.1)
 						self:SetWheelStep(1)
@@ -118,7 +119,7 @@
 						self:SetSetting("y")
 
 						self:SetMode(self.MODE_ADJUSTING)
-						self:SetMinMaxValues(-math.huge, math.huge)
+						self:SetMinMaxValues(-2000, 2000)
 						self:SetRange(20)
 						self:SetValueStep(0.1)
 						self:SetWheelStep(1)
@@ -142,7 +143,7 @@
 						self:SetSetting("Level")
 
 						self:SetMode(self.MODE_ADJUSTING)
-						self:SetMinMaxValues(5, math.huge)
+						self:SetMinMaxValues(5, 1000)
 						self:SetRange(20)
 						self:SetValueStep(1)
 
@@ -220,7 +221,7 @@
 						self:SetSetting("Scale")
 
 						self:SetMode(self.MODE_ADJUSTING)
-						self:SetMinMaxValues(0.4, math.huge)
+						self:SetMinMaxValues(0.4, 30)
 						self:SetRange(0.5)
 						self:SetValueStep(0.01)
 
@@ -255,6 +256,7 @@
 
 						self:SetTexts(TMW.L["UIPANEL_LOCK"], TMW.L["UIPANEL_LOCK_DESC"])
 						self:SetSetting("Locked")
+						self:ConstrainLabel(self:GetParent(), "RIGHT")
 
 						self:CScriptAdd("SettingTableRequested", function(requester)
 							return TMW.CI.gs
@@ -278,7 +280,7 @@
 						TMW:TT(self, "UIPANEL_GROUPRESET", "UIPANEL_TOOLTIP_GROUPRESET")
 
 						-- Fill the "right column", or fit the text, whichever is bigger.
-						self:SetWidth(max(self:GetTextWidth()+15,  self:GetParent().Strata:GetWidth()/self:GetScale()))
+						self:SetWidth(self:GetParent().Strata:GetWidth()/self:GetScale())
 
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>

@@ -31,12 +31,12 @@ TMW.ACEOPTIONS = ACEOPTIONS
 function ACEOPTIONS:RegisterTab(parentIdentifier, order, appName, scale)
 	local tab = TMW.IE:RegisterTab(parentIdentifier, appName:upper(), "MainOptions", order)
 	
-	tab:PostHookMethod("ClickHandler", function(self)
+	tab:HookScript("OnClick", function(self)
 		TMW.ACEOPTIONS:CompileOptions()
 
 		LibStub("AceConfigDialog-3.0"):Open(appName, TMW.IE.MainOptionsWidget)
 
-		IE.Panels.MainOptions:SetScale(scale)
+		IE.Pages.MainOptions:SetScale(scale)
 	end)
 
 	return tab
@@ -44,16 +44,14 @@ end
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	IE.MainOptionsTab = ACEOPTIONS:RegisterTab("MAIN", 20, "TMWIEMain", 0.75)
-	IE.MainOptionsTab:SetTitleComponents(false, false)
 	IE.MainOptionsTab:SetText(TMW.L["UIPANEL_MAINOPT"])
 	TMW:TT(IE.MainOptionsTab, "UIPANEL_MAINOPT", "GROUPADDONSETTINGS_DESC")
 
 
 	local GroupOptionsTab = ACEOPTIONS:RegisterTab("GROUP", 1, "TMWIEGroup", 1)
-	GroupOptionsTab:SetTitleComponents(false, true)
-	GroupOptionsTab:SetText(TMW.L["GROUP"])
+	GroupOptionsTab:SetText("Legacy Ace3 Group")
 	TMW:TT(GroupOptionsTab, "GROUP", "GROUPSETTINGS_DESC")
-	GroupOptionsTab:PostHookMethod("ClickHandler", function(self)
+	GroupOptionsTab:HookScript("OnClick", function(self)
 		if TMW.CI.group then
 			ACEOPTIONS:LoadConfigGroup("TMWIEGroup", TMW.CI.group)
 		end
@@ -86,7 +84,7 @@ function ACEOPTIONS:NotifyChanges()
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMWStandalone")
 
 	-- Notify the group settings tab in the icon editor of any changes
-	if IE.MainOptionsWidget and IE.MainOptionsWidget:GetUserDataTable().appName and IE.Panels.MainOptions:IsShown() then
+	if IE.MainOptionsWidget and IE.MainOptionsWidget:GetUserDataTable().appName and IE.Pages.MainOptions:IsShown() then
 		-- :Open() is used instead of :NotifyChanges because :NotifyChanges() only works for standalone ACD windows.
 		LibStub("AceConfigDialog-3.0"):Open(IE.MainOptionsWidget:GetUserDataTable().appName, IE.MainOptionsWidget)
 	end
@@ -228,74 +226,6 @@ TMW.GroupConfigTemplate = {
 			desc = L["UIPANEL_MAIN_DESC"],
 			order = 1,
 			args = {
-				Enabled = {
-					name = L["UIPANEL_ENABLEGROUP"],
-					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP"],
-
-					type = "toggle",
-					order = 1,
-					width = "full",
-					set = function(info, val)
-						local group = FindGroupFromInfo(info)
-						
-						group:GetSettings().Enabled = val
-
-						group:Setup()
-					end,
-					get = function(info)
-						local group = FindGroupFromInfo(info)
-
-						return group:GetSettings().Enabled
-					end,
-				},
-				EnabledProfile = {
-					name = function(info)
-						local group = FindGroupFromInfo(info)
-
-						return L["UIPANEL_ENABLEGROUP_FORPROFILE"]:format(TMW.db:GetCurrentProfile())
-					end,
-					desc = L["UIPANEL_TOOLTIP_ENABLEGROUP_GLOBAL_DESC"],
-
-					type = "toggle",
-					order = 1.5,
-					width = "full",
-					set = function(info, val)
-						local group = FindGroupFromInfo(info)
-						
-						if group.Domain == "global" then
-							group:GetSettings().EnabledProfiles[TMW.db:GetCurrentProfile()] = val
-						end
-
-						group:Setup()
-					end,
-					get = function(info)
-						local group = FindGroupFromInfo(info)
-
-						if group.Domain == "global" then
-							return group:GetSettings().EnabledProfiles[TMW.db:GetCurrentProfile()]
-						end
-					end,
-
-					hidden = function(info)
-						local group = FindGroupFromInfo(info)
-
-						return group.Domain ~= "global"
-					end,
-				},
-
-
-				Name = {
-					name = L["UIPANEL_GROUPNAME"],
-					type = "input",
-					order = 2,
-					width = "full",
-					set = function(info, val)
-						local group = FindGroupFromInfo(info)
-
-						group:GetSettings().Name = strtrim(val)
-						group:Setup()
-					end,
-				},
 				
 				CheckOrder = {
 					name = L["CHECKORDER"],
@@ -325,7 +255,7 @@ TMW.GroupConfigTemplate = {
 						group:Setup()
 						TMW:Update()
 						
-						IE:Load(1)
+						IE:LoadGroup(1)
 					end,
 					args = {}
 				},
@@ -357,33 +287,6 @@ TMW.GroupConfigTemplate = {
 						return false
 					end,
 				},
-				switchDomain = {
-					name = function(info)
-						local group = FindGroupFromInfo(info)
-						if group.Domain == "global" then
-							return L["DOMAIN_PROFILE_SWITCHTO"]:format(TMW.db:GetCurrentProfile())
-						else
-							return L["DOMAIN_GLOBAL_SWITCHTO"]
-						end
-					end,
-					desc = function(info)
-						local group = FindGroupFromInfo(info)
-						if group.Domain == "profile" then
-							return L["GLOBAL_GROUP_GENERIC_DESC"]
-						end
-					end,
-					type = "execute",
-					width = "full",
-					order = 60,
-					func = function(info)
-						local group = FindGroupFromInfo(info)
-						group:SwitchDomain()
-
-						IE:Load(1)
-						TMW.ACEOPTIONS:NotifyChanges()
-					end,
-				},
-				ImportExport = importExportBoxTemplate,
 			},
 		},
 	}
@@ -914,21 +817,6 @@ function TMW.ACEOPTIONS:CompileOptions()
 		for view in pairs(TMW.Views) do
 			TMW.GroupConfigTemplate.args.main.args.View.args[view] = viewSelectToggle
 			addGroupFunctionGroup.args[view] = addGroupButton
-		end
-
-
-		-- Talent Tree group options
-		local parent = TMW.GroupConfigTemplate.args.main.args
-		
-		for i = 1, GetNumSpecializations() do
-			local _, name = GetSpecializationInfo(i)
-			parent["Tree"..i] = {
-				type = "toggle",
-				name = L["TREEf"]:format(name),
-				desc = L["UIPANEL_TREE_DESC"],
-				order = 12+i,
-				hidden = specializationSettingHidden,
-			}
 		end
 	
 

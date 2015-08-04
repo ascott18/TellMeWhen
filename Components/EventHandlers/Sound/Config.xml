@@ -1,5 +1,5 @@
 ﻿<Ui>
-	<Button name="TellMeWhen_SoundSelectButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+	<Button name="TellMeWhen_SoundSelectButton" inherits="TellMeWhen_GradientFrame" virtual="true" >
 		<Size y="13"/>
 		<Anchors>
 			<Anchor point="LEFT"/>

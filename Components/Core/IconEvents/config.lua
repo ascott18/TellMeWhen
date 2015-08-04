@@ -58,11 +58,6 @@ TMW.IconDragger:RegisterIconDragHandler(120, -- Copy Event Handlers
 	end
 )
 
--- TODO - PUT THIS IN A  BETTER PLACE, AND NARROW THE FRAME THAT IT GETS CALLED ON.
-local function Reload()
-	TMW.IE:CScriptCallTunnel("ReloadRequested")
-end
-TMW:RegisterCallback("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE", Reload)
 
 TMW:NewClass("Config_Base_Event"){
 	OnNewInstance_Base_Event = function(self, data)
@@ -318,7 +313,9 @@ function EVENTS:LoadEventSettings()
 	EventSettingsContainer.Frequency				:Hide()
 	EventSettingsContainer.IconEventWhileCondition	:Hide()
 
+	-- TODO: KILL THIS EVENT
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
+	TMW.IE.Pages.Events:RequestReloadChildren()
 
 
 	local eventData = EVENTS:GetEventData()
@@ -528,11 +525,7 @@ function EVENTS:AdjustScrollFrame()
 
 	if not eventFrame then return end
 
-	if eventFrame:GetBottom() and eventFrame:GetBottom() < ScrollFrame:GetBottom() then
-		ScrollFrame:SetVerticalScroll(ScrollFrame:GetVerticalScroll() + (ScrollFrame:GetBottom() - eventFrame:GetBottom()))
-	elseif eventFrame:GetTop() and eventFrame:GetTop() > ScrollFrame:GetTop() then
-		ScrollFrame:SetVerticalScroll(ScrollFrame:GetVerticalScroll() - (eventFrame:GetTop() - ScrollFrame:GetTop()))
-	end
+	TMW:AdjustScrollFrame(ScrollFrame, eventFrame)
 end
 
 function EVENTS:SetTabText()

@@ -241,8 +241,7 @@ ConditionCategory:RegisterCondition(0.3,  "ROLE2", {
 		DAMAGER = 	{order = 4, text=DAMAGER },
 	},
 
-	icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
-	tcoords = {GetTexCoordsForRole("DAMAGER")},
+	icon = "Interface\\Addons\\TellMeWhen\\Textures\\DAMAGER",
 	Env = {
 		UnitGroupRolesAssigned = UnitGroupRolesAssigned,
 	},

@@ -30,6 +30,17 @@
 			</Layer>
 		</Layers>
 	</Frame>
+
+	<Frame name="TellMeWhen_IE_PageTemplate" parent="TellMeWhen_IconEditorPages" enableMouse="false" virtual="true" hidden="true" setAllPoints="true">
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Page"/>
+		</KeyValues>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+			</OnLoad>
+		</Scripts>
+	</Frame>
 	
 	<Frame name="TellMeWhen_ChooseName" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<!-- <Size y="50"/> -->
@@ -107,7 +118,7 @@
 								TMW.HELP:Show{
 									code = "ICON_DURS_FIRSTSEE",
 									icon = nil,
-									relativeTo = TMW.IE.Panels.Main.Type,
+									relativeTo = TMW.IE.Pages.Main.Type,
 									x = 20,
 									y = 0,
 									text = format(TMW.L["HELP_FIRSTUCD"])
@@ -533,7 +544,7 @@
 			</OnSizeChanged>
 		</Scripts>
 		<Frames>
-			<Frame name="$parentScrollBar" parentKey="ScrollBar" hidden="true">
+			<Frame parentKey="ScrollBar" hidden="true">
 				<Size x="10"/>
 				<Anchors>
 					<Anchor point="TOP"/>
@@ -541,7 +552,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<Texture name="$parentBackdrop" setAllPoints="true" parentKey="Backdrop" >
+						<Texture setAllPoints="true" parentKey="Backdrop" >
 							<Color r="0.15" g="0.15" b="0.15" a="1"/>
 					
 							<Gradient orientation="HORIZONTAL">
@@ -553,7 +564,7 @@
 				</Layers>
 				
 				<Frames>
-					<Button name="$parentThumb" parentKey="Thumb" >
+					<Button parentKey="Thumb" >
 						<Anchors>
 							<Anchor point="LEFT"/>
 							<Anchor point="RIGHT"/>
@@ -751,12 +762,7 @@
 	</CheckButton>
 
 	<!-- Appearance Templates -->
-	<Frame name="TellMeWhen_BorderedFrame" virtual="true">
-		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
-			<EdgeSize>
-				<AbsValue val="0.5"/>
-			</EdgeSize>
-		</Backdrop>
+	<Frame name="TellMeWhen_GradientFrame" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" setAllPoints="true">
@@ -1696,7 +1702,7 @@
 		<Scripts>
 			<OnLoad>
 				self.border:SetColor(1, 0, 0)
-				self.border:SetSize(2)
+				self.border:SetBorderSize(2)
 
 				self.CloseButton:Hide()
 
@@ -1795,7 +1801,7 @@
 				self.CloseButton:Hide()
 
 				self.border:SetColor(1, 0, 0)
-				self.border:SetSize(5)
+				self.border:SetBorderSize(5)
 
 				local ignoredForSession = {}
 
@@ -2139,6 +2145,7 @@
 		</ButtonText>
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
+		<DisabledFont style="GameFontDisable"/>
 	</Button>
 
 	<Texture name="TellMeWhen_IE_Tab_PrimaryBorder" virtual="true">
@@ -2172,6 +2179,46 @@
 	</Frame>
 
 
+	<CheckButton name="TellMeWhen_GroupSelectTemplate" virtual="true">
+
+		<Size y="18" />
+		<Anchors>
+			<Anchor point="LEFT" x="0"/>
+			<Anchor point="RIGHT" x="0"/>
+		</Anchors>
+
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString parentKey="ID" inherits="GameFontNormalGraySmall" justifyH="RIGHT">
+					<Size x="20" />
+					<Anchors>
+						<Anchor point="LEFT" x="3" y="0"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="Name" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.ID" relativePoint="RIGHT" x="3"/>
+						<Anchor point="RIGHT" x="-5"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+
+		<HighlightTexture alphaMode="ADD" setAllPoints="true" alpha="0.06">
+			<Color r="1" g="1" b="1"/>
+		</HighlightTexture>
+		<CheckedTexture alphaMode="ADD" setAllPoints="true" alpha="0.13">
+			<Color r="1" g="1" b="1"/>
+		</CheckedTexture>
+
+		<Scripts>
+			<OnClick>
+				TMW.IE:LoadGroup(nil, self.group)
+			</OnClick>
+		</Scripts>
+	</CheckButton>
+
+
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG" inherits="TellMeWhen_SimpleDialog">
 		<Size x="585" y="380"/>
 		<Anchors>
@@ -2192,7 +2239,121 @@
 		</Layers>
 		
 		<Frames>
+			<Frame parentKey="ConfirmOverlay" enableMouse="true" setAllPoints="true" hidden="true">
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture setAllPoints="true">
+							<Color r="0" b="0" g="0" a="0.6" />
+						</Texture>
 
+						<Texture parentKey="MiddleBand">
+							<Size y="170"/>
+							<Anchors>
+								<Anchor point="LEFT" />
+								<Anchor point="RIGHT" />
+							</Anchors>
+							<Color r="1" g="1" b="1" a="1"/>
+							
+							<Gradient orientation="VERTICAL">
+								<MinColor r="0.1" g="0.1" b="0.1" a="1"/>
+								<MaxColor r="0.2" g="0.2" b="0.2" a="1"/>
+							</Gradient>
+						</Texture>
+
+						<FontString parentKey="Header" inherits="GameFontNormalHuge3" justifyH="LEFT" >
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.MiddleBand" x="100" y="-15"/>
+								<Anchor point="RIGHT" x="-100" />
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+
+				<Frames>
+
+					<Button parentKey="RejectButton" inherits="TellMeWhen_ButtonTemplate">
+						<Size y="15"/>
+						<Anchors>
+							<Anchor point="BOTTOM" relativeKey="$parent.MiddleBand" x="0" y="15"/>
+							<Anchor point="RIGHT" relativeKey="$parent.Header" x="0" y="0"/>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+							</Layer>
+						</Layers>
+						<Frames>
+						</Frames>
+						<Scripts>
+							<OnLoad>
+								self:SetScale(1.3)
+								self:SetText(CANCEL)
+								self:SetWidth(self:GetTextWidth() + 20)
+							</OnLoad>
+							<OnClick>
+								self:GetParent():Hide()
+							</OnClick>
+						</Scripts>
+					</Button>
+
+					<Button parentKey="AcceptButton" inherits="TellMeWhen_ButtonTemplate">
+						<Size y="15"/>
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.RejectButton" relativePoint="LEFT" x="-15" y="0"/>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+							</Layer>
+						</Layers>
+						<Frames>
+						</Frames>
+						<Scripts>
+							<OnLoad>
+								self:SetScale(1.3)
+								self:SetText(OKAY)
+								self:SetWidth(self:GetTextWidth() + 20)
+							</OnLoad>
+							<OnClick>
+								TMW.safecall(self.Action)
+								self:GetParent():Hide()
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString parentKey="Description" inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.Header" relativePoint="BOTTOMLEFT" y="-10"/>
+								<Anchor point="RIGHT" relativeKey="$parent.Header" />
+								<Anchor point="BOTTOM" relativeKey="$parent.RejectButton" relativePoint="TOP" y="10"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+
+				<Scripts>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton")
+
+						local border = CreateFrame("Frame", nil, self,  "TellMeWhen_GenericBorder")
+						border:SetAllPoints(self.MiddleBand)
+						border:SetColor(1, 0.7, 0, 1)
+						border:SetBorderSize(-2)
+
+						self.Header:SetText(TMW.L["CONFIRM_HEADER"])
+					</OnLoad>
+					<OnDragStart>
+						TMW.IE:StartMoving()
+					</OnDragStart>
+					<OnDragStop>
+						TMW.IE:StopMovingOrSizing()
+					</OnDragStop>
+					<OnShow>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 100)
+					</OnShow>
+				</Scripts>
+			</Frame>
 
 			<Button parentKey="OkayButton" inherits="TellMeWhen_ButtonTemplate" text="OKAY">
 				<Size x="60" y="15"/>
@@ -2614,8 +2775,8 @@
 				
 			</Frame>
 
-
-			<Frame name="$parentPanels" parentKey="Panels" >
+			<!-- TODO: do a mass replace to put parentKey at the beginning of tags that it is used on -->
+			<Frame name="$parentPages" parentKey="Pages" >
 				<Anchors>
 					<Anchor point="LEFT" />
 					<Anchor point="TOP" relativeKey="$parent.HeaderBackground" relativePoint="BOTTOM"/>
@@ -2624,24 +2785,24 @@
 				</Anchors>
 				
 				<Frames>
-					<Frame parentKey="Main" hidden="true" setAllPoints="true">
+					<Frame parentKey="Main" inherits="TellMeWhen_IE_PageTemplate">
 						<Frames>
 							
-							<Frame inherits="TellMeWhen_IE_PanelColumn" parentKey="PanelsLeft">
+							<Frame parentKey="PanelsLeft" inherits="TellMeWhen_IE_PanelColumn">
 								<Anchors>
 									<Anchor point="LEFT" x="7"/>
 									<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
 								</Anchors>
 							</Frame>
 							
-							<Frame inherits="TellMeWhen_IE_PanelColumn" parentKey="PanelsRight">
+							<Frame parentKey="PanelsRight" inherits="TellMeWhen_IE_PanelColumn">
 								<Anchors>
 									<Anchor point="LEFT" relativePoint="TOP" x="5"/>
 									<Anchor point="RIGHT" x="-9"/>
 								</Anchors>
 							</Frame>
 						
-							<Frame name="$parentType" inherits="TMW_DropDownMenuTemplate" parentKey="Type">
+							<Frame parentKey="Type" inherits="TMW_DropDownMenuTemplate">
 								<Anchors>
 									<Anchor point="TOP" y="-8"/>
 									<Anchor point="LEFT" relativeKey="$parent.PanelsLeft" x="7" />
@@ -2650,7 +2811,7 @@
 								<Scripts>
 									<OnLoad>
 										TMW:CInit(self)
-				
+										-- TODO: find the title and tooltip function, wherever they went. bring them back.
 										self:SetTooltip(title, tooltip)
 										self:SetFunction(TMW.IE.Type_DropDown)
 
@@ -2661,7 +2822,7 @@
 								</Scripts>
 							</Frame>
 							
-							<CheckButton name="$parentEnabled" inherits="TellMeWhen_CheckTemplate" parentKey="Enabled">
+							<CheckButton parentKey="Enabled" inherits="TellMeWhen_CheckTemplate">
 								<Anchors>
 									<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-4"/>
 									<Anchor point="LEFT" relativeKey="$parent.PanelsRight" relativePoint="LEFT" />
@@ -2676,7 +2837,7 @@
 								</Scripts>
 							</CheckButton>
 
-							<CheckButton name="$parentGroupController" inherits="TellMeWhen_CheckTemplate" parentKey="GroupController">
+							<CheckButton parentKey="GroupController" inherits="TellMeWhen_CheckTemplate">
 								<Anchors>
 									<Anchor point="TOP" relativeKey="$parent.Enabled" relativePoint="TOP"/>
 									<Anchor point="LEFT" relativeKey="$parent.PanelsRight" relativePoint="CENTER" x="-15" />
@@ -2688,7 +2849,7 @@
 										self:SetSetting("Controlled")
 		
 										self:CScriptAdd("SettingTableRequested", function()
-											return TMW.CI.gs
+											return TMW.CI.icon.group:GetSettings()
 										end)
 
 										self:CScriptAdd("ReloadRequested", function()
@@ -2703,10 +2864,11 @@
 										end)
 
 										self:CScriptAdd("SettingSaved", function()
-											TMW.CI.group:Setup()
-											TMW.IE:Load(1)
+											TMW.CI.icon.group:Setup()
+											TMW.IE:LoadIcon(1)
 										end)
 
+										self:GetParent().Enabled:ConstrainLabel(self)
 										self:ConstrainLabel(self:GetParent(), "RIGHT")
 									</OnLoad>
 								</Scripts>
@@ -2715,7 +2877,6 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.tmwClass = "Config_Frame"
 								TMW:CInit(self)
 
 								self:CScriptAdd("SettingTableRequested", function(requester)
@@ -2743,9 +2904,8 @@
 						</Scripts>
 					</Frame>
 
-					<Frame parentKey="GroupMain" hidden="true" setAllPoints="true">
+					<Frame parentKey="GroupMain" inherits="TellMeWhen_IE_PageTemplate">
 						<Frames>
-							
 							<Frame parentKey="PanelsLeft" inherits="TellMeWhen_IE_PanelColumn">
 								<Anchors>
 									<Anchor point="LEFT" x="7"/>
@@ -2758,6 +2918,176 @@
 									<Anchor point="LEFT" relativePoint="TOP" x="5"/>
 									<Anchor point="RIGHT" x="-9"/>
 								</Anchors>
+							</Frame>
+
+
+						
+							<Frame parentKey="GroupSelectDropdown" inherits="TMW_DropDownMenuTemplate">
+								<Anchors>
+									<Anchor point="TOP" y="-8"/>
+									<Anchor point="LEFT" relativeKey="$parent.PanelsLeft" x="7" />
+									<Anchor point="RIGHT" relativeKey="$parent.PanelsLeft" x="-7" />
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										TMW:CInit(self)
+
+										self:CScriptAdd("ReloadRequested", function()
+											if TMW.CI.group then
+												local name = TMW.CI.group:GetSettings().Name
+												if name == "" then
+													name = TMW.L["TEXTLAYOUTS_UNNAMED"]
+												end
+												if TMW.CI.group.Domain == "global" then
+													name = name .. " (" .. TMW.L["DOMAIN_GLOBAL"] .. ")"
+												end
+
+												self:SetText(name)
+											end
+										end)
+
+										self.Button:HookScript("OnClick", function()
+											local GroupSelect = self:GetParent().GroupSelect
+											GroupSelect:RequestReloadChildren()
+											GroupSelect:SetShown(not GroupSelect:IsShown())
+										end)
+									</OnLoad>
+								</Scripts>
+							</Frame>
+
+
+							<Frame parentKey="GroupSelect" hidden="true" enableMouse="true">
+								<Size x="400" y="300" />
+
+								<Layers>
+									<Layer level="BACKGROUND">
+										<Texture setAllPoints="true">
+											<Color r="0.03" g="0.03" b="0.03" a="1"/>
+										</Texture>
+									</Layer>
+								</Layers>
+								<Frames>
+									<Frame inherits="TellMeWhen_GenericBorder" />
+
+									<Frame parentKey="Profile" >
+										<Anchors>
+											<Anchor point="TOP" y="-15"/>
+											<Anchor point="BOTTOM" y="0"/>
+											<Anchor point="LEFT" x="5"/>
+											<Anchor point="RIGHT" relativePoint="CENTER" x="-8"/>
+										</Anchors>
+
+										<Scripts>
+											<OnLoad>
+												self.tmwClass = "Config_GroupList"
+												TMW:CInit(self)
+												self:SetDomain("profile")
+
+												TMW:ConvertContainerToScrollFrame(self, true, 3, 6)
+												self.ScrollFrame.scrollStep = 30
+											</OnLoad>
+										</Scripts>
+									</Frame>
+
+									<Frame parentKey="Global" >
+										<Anchors>
+											<Anchor point="TOP" y="-15"/>
+											<Anchor point="BOTTOM" y="0"/>
+											<Anchor point="LEFT" relativePoint="CENTER" x="8"/>
+											<Anchor point="RIGHT" x="-12"/>
+										</Anchors>
+
+										<Scripts>
+											<OnLoad>
+												self.tmwClass = "Config_GroupList"
+												TMW:CInit(self)
+												self:SetDomain("global")
+
+												TMW:ConvertContainerToScrollFrame(self, true, 3, 6)
+												self.ScrollFrame.scrollStep = 30
+											</OnLoad>
+										</Scripts>
+									</Frame>	
+								</Frames>
+
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString parentKey="ProfileHeader" inherits="GameFontNormal">
+											<Anchors>
+												<Anchor point="BOTTOM" relativeKey="$parent.Profile.$parent" relativePoint="TOP" />
+											</Anchors>
+										</FontString>
+
+										<FontString parentKey="GlobalHeader" inherits="GameFontNormal">
+											<Anchors>
+												<Anchor point="BOTTOM" relativeKey="$parent.Global.$parent" relativePoint="TOP" />
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+
+								<Scripts>
+									<OnLoad>
+										local originalParent = self:GetParent()
+
+										self.tmwClass = "Config_Frame"
+										TMW:CInit(self)
+
+										self:CScriptAdd("ReloadRequested", function()
+											if self:GetParent() == TMW.IE.Pages.GroupMain then
+												self:Hide()
+											end
+										end)
+
+										self.ProfileHeader:SetText(TMW.L["DOMAIN_PROFILE"])
+										self.GlobalHeader:SetText(TMW.L["DOMAIN_GLOBAL"])
+
+										self.border:SetBorderSize(2)
+										self.border:SetColor(.25, .25, .25, 1)
+
+										function self:SetOriginalAnchor()
+											self:SetParent(originalParent)
+											self:ClearAllPoints()
+											self:SetPoint("TOPLEFT", originalParent.GroupSelectDropdown, "BOTTOMLEFT", 2, 0)
+										end
+
+										self:SetOriginalAnchor()
+
+										self:RegisterForDrag("LeftButton")
+									</OnLoad>
+									<OnShow>
+										self.timeAway = 0
+										self:SetFrameLevel(self:GetParent():GetFrameLevel() + 100)
+
+										local height = 0
+										height = max(height, select(4, self.Profile:GetBoundsRect()))
+										height = max(height, select(4, self.Global:GetBoundsRect()))
+
+										height = height + 20
+
+										height = min(height, 400, self:GetTop() - TMW.IE:GetBottom())
+
+										self:SetHeight(height)
+									</OnShow>
+									<OnUpdate>
+										if self:IsMouseOver()
+										or self:GetParent() ~= TMW.IE.Pages.GroupMain 
+										or self:GetParent().GroupSelectDropdown:IsMouseOver() then
+											self.timeAway = 0
+										else
+											self.timeAway = (self.timeAway or 0) + elapsed
+											if self.timeAway > 1 then
+												self:Hide()
+											end
+										end
+									</OnUpdate>
+									<OnDragStart>
+										TMW.IE:StartMoving()
+									</OnDragStart>
+									<OnDragStop>
+										TMW.IE:StopMovingOrSizing()
+									</OnDragStop>
+								</Scripts>
 							</Frame>	
 							
 							<CheckButton parentKey="Enabled" inherits="TellMeWhen_CheckTemplate">
@@ -2771,6 +3101,7 @@
 
 										self:SetTexts(TMW.L["ICONMENU_ENABLE"], TMW.L["ICONMENU_ENABLE_GROUP_DESC"])
 										self:SetSetting("Enabled")
+
 									</OnLoad>
 								</Scripts>
 							</CheckButton>
@@ -2788,7 +3119,7 @@
 										self:SetSetting(TMW.db:GetCurrentProfile())
 
 										self:CScriptAdd("ReloadRequested", function()
-											self:SetShown(TMW.CI.group.domain == "global")
+											self:SetShown(TMW.CI.group and TMW.CI.group.Domain == "global")
 										end)
 
 										self:CScriptAdd("SettingTableRequested", function(requester)
@@ -2797,13 +3128,14 @@
 
 										self:CScriptAdd("SettingSaved", function()
 											TMW:Update()
-											TMW.IE:Load(1)
+											TMW.IE:LoadGroup(1)
 										end)
 
 										TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 											self:SetSetting(TMW.db:GetCurrentProfile())
 										end)
 
+										self:GetParent().Enabled:ConstrainLabel(self)
 										self:ConstrainLabel(self:GetParent(), "RIGHT")
 									</OnLoad>
 								</Scripts>
@@ -2811,7 +3143,6 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.tmwClass = "Config_Frame"
 								TMW:CInit(self)
 
 								self:CScriptAdd("SettingTableRequested", function(requester)
@@ -2821,46 +3152,43 @@
 								self:CScriptAdd("DescendantSettingSaved", function(requester)
 									return TMW.CI.group:Setup()
 								end)
-
-								self:RegisterForDrag("LeftButton")
 							</OnLoad>
-							<OnDragStart>
-								TMW.IE:StartMoving()
-							</OnDragStart>
-							<OnDragStop>
-								TMW.IE:StopMovingOrSizing()
-							</OnDragStop>
 						</Scripts>
 					</Frame>
 
-					<Frame parentKey="NotLoadedMessage" hidden="true" setAllPoints="true">
+					<Frame parentKey="IconNotLoaded" inherits="TellMeWhen_IE_PageTemplate">
 						<Frames>
-							<Frame name="$parentMessage" inherits="TellMeWhen_BorderedFrame" parentKey="Message">
+							<Frame name="$parentMessage" inherits="TellMeWhen_GradientFrame" parentKey="Message">
 								<Size y="1"/>
 								<Anchors>
-									<Anchor point="TOP" y="-35"/>
 									<Anchor point="LEFT" x="15" />
 									<Anchor point="RIGHT" x="-15" />
 
 								</Anchors>
 								<Layers>
 									<Layer level="ARTWORK">
-										<FontString name="$parentText" parentKey="text" wordwrap="true" inherits="GameFontHighlight">
+										<FontString parentKey="title" inherits="GameFontNormalHuge3">
 											<Anchors>
 												<Anchor point="TOP" y="-10"/>
+											</Anchors>
+										</FontString>
+										<FontString parentKey="text" wordwrap="true" inherits="GameFontHighlight">
+											<Anchors>
+												<Anchor point="TOP" relativeKey="$parent.title" relativePoint="BOTTOM" y="-10"/>
 											</Anchors>
 										</FontString>
 									</Layer>
 								</Layers>
 								<Scripts>
 									<OnLoad>
-										self.text:SetText(TMW.L["IE_NOLOADED"])
+										self.title:SetText(TMW.L["IE_NOLOADED_ICON"])
+										self.text:SetText(TMW.L["IE_NOLOADED_ICON_DESC"])
 										
 										self.text:SetWidth(self:GetWidth() - 25)
-										self:SetHeight(self.text:GetStringHeight() + 22)
+										self:SetHeight(self.text:GetStringHeight() + self.title:GetStringHeight() + 32)
 									</OnLoad>
 									<OnSizeChanged>
-										self:SetHeight(self.text:GetStringHeight() + 22)
+										self:SetHeight(self.text:GetStringHeight() + self.title:GetStringHeight() + 32)
 									</OnSizeChanged>
 								</Scripts>
 							</Frame>
@@ -2868,18 +3196,49 @@
 
 						<Scripts>
 							<OnLoad>
-								self:RegisterForDrag("LeftButton")
+								TMW:CInit(self)
 							</OnLoad>
-							<OnDragStart>
-								TMW.IE:StartMoving()
-							</OnDragStart>
-							<OnDragStop>
-								TMW.IE:StopMovingOrSizing()
-							</OnDragStop>
+						</Scripts>
+					</Frame>
+
+					<Frame parentKey="GroupNotLoaded" inherits="TellMeWhen_IE_PageTemplate">
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString parentKey="title" inherits="GameFontNormalHuge">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" y="-40"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+
+						<Scripts>
+							<OnLoad>
+								TMW:CInit(self)
+
+								self.title:SetText(TMW.L["IE_NOLOADED_GROUP"])
+
+								--self:RegisterForDrag("LeftButton")
+							</OnLoad>
+							<OnShow>
+								local GroupSelect = TMW.IE.Pages.GroupMain.GroupSelect
+
+								GroupSelect:SetParent(self)
+								GroupSelect:ClearAllPoints()
+								GroupSelect:SetPoint("TOPLEFT", 30, -50)
+								GroupSelect:SetPoint("BOTTOMRIGHT", -30, 30)
+								GroupSelect:Show()
+							</OnShow>
+							<OnHide>
+								local GroupMain = TMW.IE.Pages.GroupMain
+
+								GroupMain.GroupSelect:SetParent(GroupMain)
+								GroupMain.GroupSelect:SetOriginalAnchor()
+							</OnHide>
 						</Scripts>
 					</Frame>
 					
-					<Frame parentKey="MainOptions" hidden="true" setAllPoints="true" >
+					<Frame parentKey="MainOptions" inherits="TellMeWhen_IE_PageTemplate">
 						<Frames>
 							<Frame parentKey="content">
 								<Anchors>
@@ -2890,6 +3249,8 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
+								TMW:CInit(self)
+
 								local AceGUI = LibStub("AceGUI-3.0", true)
 								local Type, Version = "TMWIEAceOptions", 1
 
@@ -2957,7 +3318,7 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormal" justifyH="CENTER">
+				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormal" wordwrap="false" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="TOP" y="-8"/>
 						<Anchor point="LEFT" relativeTo="$parentForwardsButton" relativePoint="RIGHT" x="4"/>
@@ -2977,10 +3338,7 @@
 				-- TODO: get rid of this
 				TMW:NewClass(nil, "Frame", "CScriptProvider"):NewFromExisting(self, {})
 
-				-- TODO: put these in a nicer place.
-				TMW.IE:RegisterTabGroup("ICON", TMW.L["ICON"], 1)
-				TMW.IE:RegisterTabGroup("GROUP", TMW.L["GROUP"], 2)
-				TMW.IE:RegisterTabGroup("MAIN", TMW.L["MAIN"], 3)
+				TMW.IE:CreateTabGroups()
 				
 				-- Needs to go before TellMeWhen_ChangelogDialog or else it will get hidden immediately after the changelog hides.
 				tinsert(UISpecialFrames, 1, self:GetName())

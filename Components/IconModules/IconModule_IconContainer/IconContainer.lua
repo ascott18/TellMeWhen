@@ -57,7 +57,7 @@ function IconContainer:SetBorder(size, r, g, b, a)
 	end
 
 	if self.border then
-		self.border:SetSize(size)
+		self.border:SetBorderSize(size)
 		self.border:SetColor(r, g, b, a)
 	end
 end

@@ -73,7 +73,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", function(self)
 	self.Header:SetText(Type.name)
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,
 		function(check)
 			check:SetTexts(L["ICONMENU_ONLYBAGS"], L["ICONMENU_ONLYBAGS_DESC"])
@@ -99,7 +99,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", functio
 		if settings then
 			self.OnlyInBags:SetEnabled(not settings.OnlyEquipped)
 
-			if settings.OnlyEquipped then
+			if settings.OnlyEquipped and not settings.OnlyInBags then
 				settings.OnlyInBags = true
 				self:OnSettingSaved()
 			end

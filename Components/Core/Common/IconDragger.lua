@@ -375,6 +375,6 @@ function IconDragger:Handler(method)
 
 	-- then, update things
 	TMW:Update()
-	TMW.IE:Load(1)
+	TMW.IE:LoadIcon(1)
 end
 

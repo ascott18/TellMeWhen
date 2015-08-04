@@ -70,11 +70,9 @@ end
 --  })
 -- 
 --   -- Accessing supplementalData:
---  TMW:RegisterCallback("TMW_CONFIG_PANEL_SETUP", function(event, frame, panelInfo)
---    if frame:GetName() == "TellMeWhen_ConfigPanel_Example" then
---      local supplementalData = panelInfo.supplementalData
---      frame.Header:SetText(supplementalData.text)
---    end
+--  panel:CScriptAdd("PanelSetup", function(panel, panelInfo)
+--    local supplementalData = panelInfo.supplementalData
+--    panel.Header:SetText(supplementalData.text)
 --  end)
 function GenericComponent:RegisterConfigPanel_XMLTemplate(order, xmlTemplateName, supplementalData)
 
@@ -94,7 +92,7 @@ end
 --  -- Taken from the example at api/icon-type/how-to-use/
 --  Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
 --    self.Header:SetText(Type.name)
---    TMW.IE:BuildSimpleCheckSettingFrame(self, {
+--    self:BuildSimpleCheckSettingFrame({
 --      function(check)
 --          check:SetTexts(L["ICONMENU_RANGECHECK"], L["ICONMENU_RANGECHECK_DESC"])
 --          check:SetSetting("RangeCheck")

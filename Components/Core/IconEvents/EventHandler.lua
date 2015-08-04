@@ -649,7 +649,7 @@ do
 
 		useDynamicTab = true,
 		ShouldShowTab = function(self)
-			local button = TellMeWhen_IconEditor.Panels.Events.EventSettingsContainer.IconEventWhileCondition
+			local button = TellMeWhen_IconEditor.Pages.Events.EventSettingsContainer.IconEventWhileCondition
 			
 			return button and button:IsShown()
 		end,

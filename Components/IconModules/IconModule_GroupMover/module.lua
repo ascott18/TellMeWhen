@@ -26,11 +26,6 @@ local function stopMoving(group)
 	
 	local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
 	GroupModule_GroupPosition:UpdatePositionAfterMovement()
-	
-	group:Setup()
-	
-	TMW.IE:Load(1)
-	TMW.ACEOPTIONS:NotifyChanges()
 end
 
 	

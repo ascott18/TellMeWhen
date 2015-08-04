@@ -425,7 +425,7 @@ local function runeFuncstrHelper(c)
 	if str == "" then
 		return [[true]]
 	else
-		return "" .. str:trim("+ ") .. " c.Operator c.Level" 
+		return str:trim("+ ") .. " c.Operator c.Level" 
 	end
 end
 local function IsRuneLocked(runeSlot, otherSlot)

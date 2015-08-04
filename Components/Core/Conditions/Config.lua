@@ -53,16 +53,7 @@ function CNDT:LoadConfig(conditionSetName)
 			TMW.IE:RefreshTabs()
 		
 			-- Only click the tab if we are manually loading the conditionSet (should only happen on user input/hardware event)
-			CNDT.DynamicConditionTab:ClickHandler()
-			
-			if ConditionSet.parentSettingType == "profile" then
-				CNDT.DynamicConditionTab:SetTitleComponents(nil, nil)
-			elseif ConditionSet.parentSettingType == "group" then
-				CNDT.DynamicConditionTab:SetTitleComponents(nil, 1)
-			else
-				CNDT.DynamicConditionTab:SetTitleComponents(1, 1)
-			end
-			
+			CNDT.DynamicConditionTab:Click()			
 		end
 	else
 		TMW.IE:RefreshTabs()
@@ -90,7 +81,7 @@ function CNDT:LoadConfig(conditionSetName)
 		end
 	end
 	
-	local AddCondition = TellMeWhen_IconEditor.Panels.Conditions.Groups.AddCondition
+	local AddCondition = TellMeWhen_IconEditor.Pages.Conditions.Groups.AddCondition
 	AddCondition:SetPoint("TOPLEFT", CNDT[n+1])
 	AddCondition:SetPoint("TOPRIGHT", CNDT[n+1])
 	
@@ -108,7 +99,6 @@ end)
 -- Dynamic Conditions Tab handling
 
 CNDT.DynamicConditionTab = TMW.IE:RegisterTab("ICON", "CNDTDYN", "Conditions", 25)
-CNDT.DynamicConditionTab:SetTitleComponents(nil, nil)
 
 CNDT.DynamicConditionTab.ShouldShowTab = function(self)
 	local ConditionSet = CNDT.CurrentConditionSet
@@ -162,7 +152,7 @@ function CNDT:GetTabText(conditionSetName)
 		TMW.HELP:Show{
 			code = "CNDT_PARENTHESES_ERROR",
 			icon = nil,
-			relativeTo = TellMeWhen_IconEditor.Panels.Conditions,
+			relativeTo = TellMeWhen_IconEditor.Pages.Conditions,
 			x = 0,
 			y = 0,
 			text = format(errorMessage)
@@ -565,7 +555,7 @@ CNDT.colors = setmetatable(
 end})
 
 function CNDT:ColorizeParentheses()
-	if not TellMeWhen_IconEditor.Panels.Conditions:IsShown() then return end
+	if not TellMeWhen_IconEditor.Pages.Conditions:IsShown() then return end
 
 	CNDT.Parens = wipe(CNDT.Parens or {})
 
@@ -638,7 +628,7 @@ function CNDT:CreateGroups(num)
 	local start = #CNDT + 1
 
 	for i=start, num do
-		TMW.Classes.CndtGroup:New("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Panels.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
+		TMW.Classes.CndtGroup:New("Frame", "TellMeWhen_IconEditorConditionsGroupsGroup" .. i, TellMeWhen_IconEditor.Pages.Conditions.Groups, "TellMeWhen_ConditionGroup", i)
 	end
 end
 
@@ -826,14 +816,14 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	local n = CNDT.settings.n
 	
 	if ID == 1 then
-		CndtGroup.Up:Hide()
+		CndtGroup.Up:Disable()
 	else
-		CndtGroup.Up:Show()
+		CndtGroup.Up:Enable()
 	end
 	if ID == n then
-		CndtGroup.Down:Hide()
+		CndtGroup.Down:Disable()
 	else
-		CndtGroup.Down:Show()
+		CndtGroup.Down:Enable()
 	end
 end)
 

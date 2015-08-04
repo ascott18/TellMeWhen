@@ -327,6 +327,10 @@ end
 function TEXT:ResizeTextDisplayFrame(frame)
 	local height = 1
 	
+	if not frame.EditBox or not frame.Error then
+		return
+	end
+	
 	height = height + frame.EditBox:GetHeight()
 	
 	--frame.Error:SetHeight(frame.Error:GetStringHeight())
@@ -483,7 +487,7 @@ TMW.GroupConfigTemplate.args.main.args.TextLayout = {
 		
 		group:Setup()
 		
-		IE:Load(1)
+		IE:LoadIcon(1)
 	end,
 }
 

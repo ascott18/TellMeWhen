@@ -1,6 +1,6 @@
 <Ui>
 
-	<Button name="TellMeWhen_GM_IPS_IconSortTemplate" inherits="TellMeWhen_BorderedFrame" virtual="true">
+	<Button name="TellMeWhen_GM_IPS_IconSortTemplate" inherits="TellMeWhen_GradientFrame" virtual="true">
 		<Size y="18"/>
 		<Layers>
 			<Layer level="OVERLAY">

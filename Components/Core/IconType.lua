@@ -495,7 +495,7 @@ function IconType:IsAllowedByView(viewName)
 	end
 end
 
-local panelInfo = IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_IsViewAllowed", function(self)
+IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_IsViewAllowed", function(self)
 	self.Header:SetText(L["ICONMENU_VIEWREQ"])
 
 	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -508,10 +508,13 @@ local panelInfo = IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_Is
 	self:SetScript("OnSizeChanged", function()
 		self:SetHeight(self.text:GetStringHeight() + 20)
 	end)
+
+	self:CScriptAdd("PanelSetup", function()
+		if TMW.CI.icon.typeData:IsAllowedByView(TMW.CI.icon.group.View) then
+			self:Hide()
+		end
+	end)
 end)
-function panelInfo:ShouldShow()
-	return not TMW.CI.icon.typeData:IsAllowedByView(TMW.CI.group.View)
-end
 
 
 -- [REQUIRED IF USED, FALLBACK]

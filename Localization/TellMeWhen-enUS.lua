@@ -22,18 +22,23 @@ L["PROFILE_LOADED"] = "Loaded profile: %s"
 L["DOMAIN_PROFILE"] = "Profile"
 L["DOMAIN_PROFILE_SWITCHTO"] = "Move this group to profile %q"
 L["DOMAIN_GLOBAL"] = "|cff00c300Global|r"
-L["DOMAIN_GLOBAL_SWITCHTO"] = "Make this group global"
+L["DOMAIN_GLOBAL_SWITCHTO"] = "Make this group |cff00c300Global|r"
 L["GLOBAL_GROUP_GENERIC_DESC"] = "|cff00c300Global|r groups are those that are be available to all your TellMeWhen profiles on this WoW account."
 
-L["IE_NOLOADED"] = [[There isn't an icon currently loaded into the Icon Editor.
 
-To load an icon, right-click on it.
 
-If there are no icons visible on your screen, type '/tmw options' to view the settings of your groups.
+L["IE_NOLOADED_ICON"] = [[No icon loaded!]]
+L["IE_NOLOADED_ICON_DESC"] = [[To load an icon, right-click on it.
 
-From there, you can add a new group or configure an existing group to be available to your character's current class specialization.
+If there are no icons visible on your screen, click on the %s tab below.
+
+From there, you can add a new group or configure an existing group to be available.
 
 Type '/tmw' to leave configuration mode.]]
+
+L["IE_NOLOADED_GROUP"] = [[Select a group to load:]]
+
+
 
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffRight-click and drag|r to another icon to move/copy.
@@ -914,8 +919,15 @@ L["UIPANEL_DELGROUP"] = "Delete this Group"
 L["UIPANEL_DELGROUP_DESC2"] = "Hold |cff7fffffCtrl|r to bypass confirmation."
 
 
+L["CONFIRM_HEADER"] = "Are you sure?"
+
+L["CONFIRM_DELGROUP"] = "Delete Group"
+L["CONFIRM_DELGROUP_DESC"] = "Are you sure that you want to delete %s?"
+
+
 L["UIPANEL_GROUPID"] = "Group ID"
 L["UIPANEL_GROUPID_DESC"] = "Changes the ID of this group."
+L["UIPANEL_DBLOC"] = "Data Location"
 
 
 L["UIPANEL_TOOLTIP_ENABLEGROUP"] = "Show and enable this group"

@@ -74,7 +74,7 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff2", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,
 		function(check)
 			check:SetTexts("|cFF00FF00" .. L["ICONMENU_BUFF"], nil)
@@ -89,7 +89,7 @@ end)
 
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffCheckSettings", function(self)
 	self.Header:SetText(Type.name)
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
 			check:SetSetting("OnlyMine")

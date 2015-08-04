@@ -65,7 +65,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_ICDType", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_ICDTYPE"])
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 1,
 		function(check)
 			check:SetTexts(TMW.L["ICONMENU_ICDBDE"], TMW.L["ICONMENU_ICDAURA_DESC"])
@@ -84,7 +84,7 @@ end)
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ICDSettings", function(self)
 	self.Header:SetText(Type.name)
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_DONTREFRESH"], L["ICONMENU_DONTREFRESH_DESC"])
 			check:SetSetting("DontRefresh")

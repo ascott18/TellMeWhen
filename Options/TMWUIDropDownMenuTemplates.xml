@@ -376,7 +376,17 @@
 		<Size x="40" y="22"/>
 
 		<Layers>
+
 			<Layer level="ARTWORK">
+				<Texture parentKey="Background" setAllPoints="true">
+					<Color r="1" g="1" b="1" a="1"/>
+					
+					<Gradient orientation="VERTICAL">
+						<MinColor r="0.04" g="0.04" b="0.04" a="1"/>
+						<MaxColor r="0.04" g="0.04" b="0.04" a="1"/>
+					</Gradient>
+				</Texture>
+				<!-- 
 				<Texture parentKey="Left" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
 					<Size x="22" />
 					<Anchors>
@@ -399,7 +409,7 @@
 						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT"/>
 					</Anchors>
 					<TexCoords left="0.1875" right="0.8125" top="0" bottom="0.73"/>
-				</Texture>
+				</Texture> -->
 			</Layer>
 			<Layer level="OVERLAY">
 				<Texture parentKey="Icon" hidden="true">
@@ -411,10 +421,20 @@
 			</Layer>
 		</Layers>
 		<Frames>
+			<Frame parentKey="border" inherits="TellMeWhen_GenericBorder">
+				<Scripts>
+					<OnLoad inherit="prepend">
+						self:SetBorderSize(-2)
+						self:SetColor(.3, .3, .3, 1)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+
 			<Button parentKey="Button" motionScriptsWhileDisabled="true" >
-				<Size x="24" y="24"/>
+				<Size x="12" y="6"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.Right" x="0" y="0"/>
+					<Anchor point="RIGHT" x="-5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnEnter>
@@ -436,14 +456,20 @@
 						PlaySound("igMainMenuOptionCheckBoxOn");
 					</OnClick>
 				</Scripts>
-				<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
+
+				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" >
+					<TexCoords left="0" right="1" top="1" bottom="0"/>
+					<Color r="0.35" g="0.35" b="0.35" a="1"/>
 				</NormalTexture>
-				<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
-				</PushedTexture>
-				<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
-				</DisabledTexture>
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
+
+				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" alphaMode="ADD">
+					<TexCoords left="0" right="1" top="1" bottom="0"/>
+					<Color r="1" g="1" b="1" a="0.4"/>
 				</HighlightTexture>
+				<DisabledTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" >
+					<TexCoords left="0" right="1" top="1" bottom="0"/>
+					<Color r="0" g="0" b="0" a="0.35"/>
+				</DisabledTexture>
 			</Button>
 		</Frames>
 		
@@ -452,7 +478,7 @@
 				<FontString parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
 					<Size y="10"/>
 					<Anchors>
-						<Anchor point="LEFT" relativeKey="$parent.Left" x="7" y="-1"/>
+						<Anchor point="LEFT" x="7" y="-1"/>
 						<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="0" />
 					</Anchors>
 				</FontString>
@@ -498,7 +524,7 @@
 					<OnMouseUp>
 						if TMW.IE then
 							if button == "RightButton" then
-								TMW.IE:Load(nil, self.icon)
+								TMW.IE:LoadIcon(nil, self.icon)
 							end
 							TMW.IE:ScheduleIconSetup(self.icon)
 						end

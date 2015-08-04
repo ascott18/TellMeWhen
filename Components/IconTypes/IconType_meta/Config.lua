@@ -38,7 +38,7 @@ Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_MetaSortSettings", function(self)
 	self.Header:SetText(TMW.L["SORTBY"])
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)
 			check:SetTexts(TMW.L["SORTBYNONE"], TMW.L["SORTBYNONE_META_DESC"])
@@ -173,7 +173,7 @@ end
 local addedGroups = {}
 function ME:IconMenu()
 	if TMW.DD.MENU_LEVEL == 1 then
-		local currentGroupView = TMW.CI.gs.View
+		local currentGroupView = TMW.CI.icon.group:GetSettings().View
 		
 		for group in TMW:InGroups() do
 			if group:ShouldUpdateIcons() then

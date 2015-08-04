@@ -117,7 +117,7 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots", function(
 		end)
 	end
 
-	TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", data)
+	self:BuildSimpleCheckSettingFrame("Config_CheckButton_BitToggle", data)
 end)
 
 

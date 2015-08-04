@@ -31,7 +31,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				function self:SetSize(pixels)
+				function self:SetBorderSize(pixels)
 					self.size = pixels
 					self.borderTop:ClearAllPoints()
 					self.borderBottom:ClearAllPoints()
@@ -63,7 +63,7 @@
 					end
 				end
 
-				self:SetSize(1)
+				self:SetBorderSize(1)
 				self:SetColor(0, 0, 0, 1)
 			</OnLoad>
 		</Scripts>
@@ -85,7 +85,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.border:SetSize(1)
+				self.border:SetBorderSize(1)
 				self.border:SetColor(0, 0.7647, 0, 0.75)
 			</OnLoad>
 		</Scripts>

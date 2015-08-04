@@ -21,12 +21,20 @@ local print = TMW.print
 local Module = TMW:NewClass("IconModule_IconEditorLoader", "IconModule")
 
 
+local function LoadIcon(icon)
+	if TMW.IE.ConfirmOverlay:IsShown() then
+		return
+	end
+
+	TMW.IE:LoadIcon(nil, icon)
+	TMW.IE:LoadGroup(nil, icon.group)
+end
 
 local icons = {}
 local DD = TMW.C.Config_DropDownMenu_NoFrame:New()
 local function DropdownOnClick(button, self, icon)
 	icon.group:Raise()
-	TMW.IE:Load(nil, icon)
+	LoadIcon(icon)
 end
 DD:SetFunction(function(self)
 	local info = TMW.DD:CreateInfo()
@@ -72,8 +80,9 @@ Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 		if button == "RightButton" then
 			if #icons == 1 then
 				if not icon:IsControlled() then
-					TMW.IE:Load(nil, icon)
+					LoadIcon(icon)
 				end
+				
 			elseif #icons > 1 then
 				GameTooltip:Hide() -- hide the tooltip over an icon so we can see the menu
 				TMW.DD:CloseDropDownMenus()

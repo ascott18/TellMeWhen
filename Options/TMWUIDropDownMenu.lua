@@ -708,7 +708,7 @@ function DD:Toggle(level, value, anchorName, xOffset, yOffset, menuList, button,
 				if ( dropDownFrame.relativeTo ) then
 					relativeTo = dropDownFrame.relativeTo;
 				else
-					relativeTo = DD.OPEN_MENU.Left;
+					relativeTo = DD.OPEN_MENU;
 				end
 				if ( dropDownFrame.relativePoint ) then
 					relativePoint = dropDownFrame.relativePoint;
@@ -1002,13 +1002,13 @@ function DD_Frame:JustifyText(justification)
 	local text = self.Text
 	text:ClearAllPoints();
 	if ( justification == "LEFT" ) then
-		text:SetPoint("LEFT", self.Left, "LEFT", 27, 1);
+		text:SetPoint("LEFT", self.Background, "LEFT", 27, 1);
 		text:SetJustifyH("LEFT");
 	elseif ( justification == "RIGHT" ) then
-		text:SetPoint("RIGHT", self.Right, "RIGHT", -43, 1);
+		text:SetPoint("RIGHT", self.Background, "RIGHT", -43, 1);
 		text:SetJustifyH("RIGHT");
 	elseif ( justification == "CENTER" ) then
-		text:SetPoint("CENTER", self.Middle, "CENTER", -5, 1);
+		text:SetPoint("CENTER", self.Background, "CENTER", -5, 1);
 		text:SetJustifyH("CENTER");
 	end
 end
@@ -1023,7 +1023,7 @@ TMW:NewClass("Config_DropDownMenu_Icon", "Config_DropDownMenu"){
 	SetPreviewSize = function(self, size)
 		self.previewSize = size
 		self.IconPreview:SetSize(size, size)
-		self.Left:SetPoint("LEFT", -17 + size, 0)
+		self.Background:SetPoint("LEFT", size, 0)
 	end,
 
 

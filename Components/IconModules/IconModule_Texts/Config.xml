@@ -218,7 +218,7 @@
 							<OnClick>
 								local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.icon)
 								
-								TMW.IE.MainOptionsTab:ClickHandler()
+								TMW.IE.MainOptionsTab:Click()
 								
 								TMW.ACEOPTIONS:CompileOptions()
 								TMW.ACEOPTIONS:LoadConfigPath("TMWIEMain", "textlayouts", "#TextLayout " .. GUID)

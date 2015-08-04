@@ -499,8 +499,7 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE", {
 		end
 	end,
 	unit = PLAYER,
-	icon = "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
-	tcoords = {GetTexCoordsForRole("HEALER")},
+	icon = "Interface\\Addons\\TellMeWhen\\Textures\\HEALER",
 	Env = {
 		GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole,
 		SpeclizationRoles = SpeclizationRoles,

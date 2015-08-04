@@ -72,9 +72,8 @@ do	-- TMW.CNDT implementation
 	
 	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		tab = TMW.IE:RegisterTab("GROUP", "CNDTGROUP", "Conditions", 15)
-		tab:SetTitleComponents(nil, 1)
 		
-		tab:PostHookMethod("ClickHandler", function()
+		tab:HookScript("OnClick", function()
 			TMW.CNDT:LoadConfig("Group")
 		end)
 
@@ -230,25 +229,6 @@ function Group.TMW_CNDT_OBJ_PASSING_CHANGED(group, event, ConditionObject, faile
 end
 
 
-
--- [INTERNAL]
-function Group.SwitchDomain(group)
-	local gs = group:GetSettings()
-
-	tremove(TMW.db[group.Domain].Groups, group.ID)
-	TMW.db[group.Domain].NumGroups = TMW.db[group.Domain].NumGroups - 1
-
-	local newDomain = group.Domain == "global" and "profile" or "global"
-
-	TMW.db[newDomain].NumGroups = TMW.db[newDomain].NumGroups + 1
-	TMW.db[newDomain].Groups[TMW.db[newDomain].NumGroups] = gs
-
-	if newDomain == "profile" then
-		--wipe(gs.EnabledProfiles)
-	end
-
-	TMW:Update()
-end
 
 
 -- [INTERNAL]

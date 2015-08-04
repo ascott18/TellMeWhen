@@ -31,7 +31,7 @@
 						ics.Type = "cooldown"
 						ics.Name = 75
 						
-						TMW.IE:Load(1)
+						TMW.IE:LoadIcon(1)
 					</OnClick>
 				</Scripts>
 			</Button>

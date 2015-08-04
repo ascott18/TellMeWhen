@@ -226,17 +226,22 @@ function GroupPosition:UpdatePositionAfterMovement()
 	self:CalibrateAnchors()
 	
 	self:SetPos()
+	
+	self.group:Setup()
+	TMW.IE:LoadGroup(1)
 end
 
 function GroupPosition:SetNewScale(newScale)
 	local group = self.group 
 	local oldScale = group:GetScale()
-	local newX = group:GetLeft() * oldScale / newScale
-	local newY = group:GetTop() * oldScale / newScale
+
+	local p, rt, rp, oldX, oldY = group:GetPoint()
+
+	local newX = oldX * oldScale / newScale
+	local newY = oldY * oldScale / newScale
 
 
-	group:ClearAllPoints()
-	group:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
+	group:SetPoint(p, rt, rp, newX, newY)
 
 	group:GetSettings().Scale = newScale
 	group:SetScale(newScale)
@@ -334,12 +339,12 @@ function GroupPosition:Reset()
 	end
 
 	gs.Level = TMW.Group_Defaults.Level
-	gs.Scale = TMW.Group_Defaults.Scale
+	gs.Scale = 1
 	gs.Locked = TMW.Group_Defaults.Locked
 	gs.Strata = TMW.Group_Defaults.Strata
 	
 	group:Setup()
 	
-	TMW.IE:Load(1)
+	TMW.IE:LoadGroup(1)
 end
 

@@ -103,7 +103,7 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", function(self)
 	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)
 			check:SetTexts("|cFF00FF00" .. L["ICONMENU_BUFF"], nil)
@@ -122,7 +122,7 @@ end)
 
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", function(self)
 	self.Header:SetText(Type.name)
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
 			check:SetSetting("OnlyMine")
@@ -139,12 +139,12 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 
 	local function OnClick(button, arg1)
 		TMW.CI.ics.ShowTTText = arg1
-		TMW.IE:Load(1)
+		TMW.IE:LoadIcon(1)
 	end
 	self.ShowTTText = TMW.C.Config_DropDownMenu:New("Frame", "$parentShowTTText", self, "TMW_DropDownMenuTemplate")
 	self.ShowTTText:SetTexts(L["ICONMENU_SHOWTTTEXT2"], L["ICONMENU_SHOWTTTEXT_DESC2"])
 	self.ShowTTText:SetWidth(135)
-	self.ShowTTText:SetDropdownAnchor("TOPRIGHT", self.ShowTTText.Middle, "BOTTOMRIGHT")
+	--self.ShowTTText:SetDropdownAnchor("TOPRIGHT", self.ShowTTText.Middle, "BOTTOMRIGHT")
 	self.ShowTTText:SetFunction(function(self)
 		local info = TMW.DD:CreateInfo()
 		info.text = L["ICONMENU_SHOWTTTEXT_STACKS"]
@@ -197,7 +197,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_SortSettingsWithStacks", function(self)
 	self.Header:SetText(TMW.L["SORTBY"])
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)
 			check:SetTexts(TMW.L["SORTBYNONE_DURATION"], TMW.L["SORTBYNONE_DESC"])

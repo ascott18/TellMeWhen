@@ -60,19 +60,21 @@
 
 
 	<Frame name="TellMeWhen_GM_DBLoc" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="85"/>
+		<Size y="70"/>
 		<Frames>
 			<Slider parentKey="ID" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
 					<Anchor point="TOP" y="-13"/>
 					<Anchor point="LEFT" x="10" />
-					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="RIGHT" relativePoint="CENTER" x="0" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
 						TMW:CInit(self)
 
+						self:SetRange(20)
 						self:SetValueStep(1)
+						self:SetMode(self.MODE_ADJUSTING)
 						self:SetTexts(TMW.L["UIPANEL_GROUPID"], TMW.L["UIPANEL_GROUPID_DESC"])
 
 						self:CScriptAdd("ReloadRequested", function(requester)
@@ -82,7 +84,7 @@
 							end
 						end)
 
-						self:HookScript("OnValueChanged", function(self)
+						self:PostHookMethod("SaveSetting", function(self)
 							local group = TMW.CI.group
 							local oldID = group.ID
 							local newID = self:GetValue() -- DO NOT USE the value param from the script. It won't be an integer.
@@ -92,10 +94,65 @@
 					</OnLoad>
 				</Scripts>
 			</Slider>
+			<CheckButton parentKey="Global" inherits="TellMeWhen_CheckTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.ID" relativePoint="RIGHT" x="15" y="0"/>
+				</Anchors>
+
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						self:SetTexts(TMW.L["DOMAIN_GLOBAL_SWITCHTO"], TMW.L["GLOBAL_GROUP_GENERIC_DESC"])
+						self:ConstrainLabel(self:GetParent(), "RIGHT")
+
+						self:CScriptAdd("ReloadRequested", function()
+							if TMW.CI.group then
+								self:SetChecked(TMW.CI.group.Domain == "global")
+							end
+						end)
+					</OnLoad>
+					<OnClick>
+						local group = TMW.CI.group
+						if group then
+							TMW:Group_SwapDomain(group)
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
+			<Button parentKey="Delete" inherits="TellMeWhen_ButtonTemplate">
+				<Size y="15"/>
+				<Anchors>
+					<Anchor point="BOTTOM" y="10"/>
+					<Anchor point="LEFT" x="7" />
+					<Anchor point="RIGHT" x="-7" />
+				</Anchors>
+
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["UIPANEL_DELGROUP"])
+					</OnLoad>
+					<OnClick>
+						local group = TMW.CI.group
+
+						if TMW:Group_HasIconData(group) then
+							TMW.IE:ShowConfirmation(
+								TMW.L["CONFIRM_DELGROUP"],
+								TMW.L["CONFIRM_DELGROUP_DESC"]:format(group:GetGroupName()),
+								function()
+									TMW:Group_Delete(group)
+								end
+							)
+						else
+							TMW:Group_Delete(group)
+						end
+					</OnClick>
+				</Scripts>
+			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["UIPANEL_DIMENSIONS"])
+				self.Header:SetText(TMW.L["UIPANEL_DBLOC"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

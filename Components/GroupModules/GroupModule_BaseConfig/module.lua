@@ -23,12 +23,12 @@ local BaseConfig = TMW:NewClass("GroupModule_BaseConfig", "GroupModule")
 BaseConfig.DefaultPanelColumnIndex = 1
 
 
-BaseConfig:RegisterConfigPanel_XMLTemplate(1, "TellMeWhen_GM_Rename")
+BaseConfig:RegisterConfigPanel_XMLTemplate(1, "TellMeWhen_GM_Rename"):SetColumnIndex(2)
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_GS_Combat", function(self)
 	self.Header:SetText(COMBAT)
 	
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 1,
 		function(check)
 			check:SetTexts(L["UIPANEL_ONLYINCOMBAT"], L["UIPANEL_TOOLTIP_ONLYINCOMBAT"])
@@ -40,45 +40,73 @@ end)
 BaseConfig:RegisterConfigPanel_ConstructorFunc(11, "TellMeWhen_GS_Role", function(self)
 	self.Header:SetText(ROLE)
 	
-	TMW.IE:BuildSimpleCheckSettingFrame(self, "Config_CheckButton_BitToggle", {
-		numPerRow = 3,
-		function(check)
-			check:SetTexts(DAMAGER, L["UIPANEL_ROLE_DESC"])
-			check:SetSetting("Role", 1)
-		end,
-		function(check)
-			check:SetTexts(HEALER, L["UIPANEL_ROLE_DESC"])
-			check:SetSetting("Role", 2)
-		end,
-		function(check)
-			check:SetTexts(TANK, L["UIPANEL_ROLE_DESC"])
-			check:SetSetting("Role", 3)
-		end,
-	})
+	local data = {
+		numPerRow = 3
+	}	
+
+	for i, role in TMW:Vararg("TANK", "HEALER", "DAMAGER") do
+		tinsert(data, function(check)
+			check:SetLabel("")
+			check:SetTexts(_G[role], L["UIPANEL_ROLE_DESC"])
+
+			-- This subtraction is because the bit order is reversed from this.
+			-- We put the settings in this order since it is the role order in the default UI.
+			check:SetSetting("Role")
+			check:SetSettingBitID(4 - i)
+
+			local border = CreateFrame("Frame", nil, check, "TellMeWhen_GenericBorder")
+			border:ClearAllPoints()
+			border:SetPoint("LEFT", check, "RIGHT", 4, 0)
+			border:SetSize(21, 21)
+
+			local tex = border:CreateTexture(nil, "ARTWORK")
+			tex:SetTexture("Interface\\Addons\\TellMeWhen\\Textures\\" .. role)
+			tex:SetAllPoints()
+		end)
+	end
+
+	self:BuildSimpleCheckSettingFrame("Config_CheckButton_BitToggle", data)
 end)
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", function(self)
 	self.Header:SetText(SPECIALIZATION)
 	
 	local data = {
-		numPerRow = 2
+		numPerRow = GetNumSpecializations()
 	}	
 
 	for i = 1, GetNumSpecializations() do
-		local _, name = GetSpecializationInfo(i)
+		local _, name, _, texture = GetSpecializationInfo(i)
 		tinsert(data, function(check)
+			check:SetLabel("")
 			check:SetTexts(name, L["UIPANEL_TREE_DESC"])
 			check:SetSetting("Tree"..i)
+
+			local border = CreateFrame("Frame", nil, check, "TellMeWhen_GenericBorder")
+			border:ClearAllPoints()
+			border:SetPoint("LEFT", check, "RIGHT", 4, 0)
+			border:SetSize(21, 21)
+
+			local tex = border:CreateTexture(nil, "ARTWORK")
+			tex:SetTexture(texture)
+			tex:SetAllPoints()
+			tex:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 		end)
 	end
 
-	TMW.IE:BuildSimpleCheckSettingFrame(self, data)
+	self:BuildSimpleCheckSettingFrame(data)
+
+	self:CScriptAdd("PanelSetup", function()
+		if TMW.CI.group.Domain == "global" then
+			self:Hide()
+		end
+	end)
 end)
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(13, "TellMeWhen_GS_DualSpec", function(self)
 	self.Header:SetText(L["UIPANEL_SPEC"])
 	
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,
 		function(check)
 			check:SetTexts(L["UIPANEL_PRIMARYSPEC"], L["UIPANEL_TOOLTIP_PRIMARYSPEC"])
@@ -89,6 +117,12 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(13, "TellMeWhen_GS_DualSpec", fun
 			check:SetSetting("SecondarySpec")
 		end,
 	})
+
+	self:CScriptAdd("PanelSetup", function()
+		if TMW.CI.group.Domain == "global" then
+			self:Hide()
+		end
+	end)
 end)
 
 BaseConfig:RegisterConfigPanel_XMLTemplate(20, "TellMeWhen_GM_Dims")

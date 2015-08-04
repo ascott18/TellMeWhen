@@ -87,7 +87,7 @@ Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_Runes")
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_RuneSettings", function(self)
 	self.Header:SetText(Type.name)
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_RUNES_CHARGES"], L["ICONMENU_RUNES_CHARGES_DESC"])
 			check:SetSetting("RunesAsCharges")
@@ -104,7 +104,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_RuneSortSettings", function(self)
 	self.Header:SetText(TMW.L["SORTBY"])
 
-	TMW.IE:BuildSimpleCheckSettingFrame(self, {
+	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)
 			check:SetTexts(TMW.L["SORTBYNONE"], TMW.L["SORTBYNONE_DESC"])

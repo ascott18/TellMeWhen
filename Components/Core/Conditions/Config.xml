@@ -152,7 +152,7 @@
 	</CheckButton>
 	
 	
-	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_BorderedFrame" virtual="true">
+	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_GradientFrame" virtual="true">
 		<Size x="563" y="69"/>
 		<Anchors>
 			<Anchor point="TOPLEFT"/>
@@ -648,6 +648,10 @@
 					<TexCoords left="0" right="1" top="0" bottom="1"/>
 					<Color r="1" g="1" b="1" a="0.4"/>
 				</HighlightTexture>
+				<DisabledTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+					<TexCoords left="0" right="1" top="0" bottom="1"/>
+					<Color r="0" g="0" b="0" a="0.35"/>
+				</DisabledTexture>
 			</Button>
 
 			<Button parentKey="Down">
@@ -676,6 +680,10 @@
 					<TexCoords left="0" right="1" top="1" bottom="0"/>
 					<Color r="1" g="1" b="1" a="0.4"/>
 				</HighlightTexture>
+				<DisabledTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+					<TexCoords left="0" right="1" top="1" bottom="0"/>
+					<Color r="0" g="0" b="0" a="0.35"/>
+				</DisabledTexture>
 			</Button>
 
 		</Frames>
@@ -750,7 +758,7 @@
 	</Frame>
 	
 	
-	<Frame name="$parentConditions" parent="TellMeWhen_IconEditorPanels" hidden="true" setAllPoints="true" parentKey="Conditions">
+	<Frame parentKey="Conditions" name="$parentConditions" parent="TellMeWhen_IconEditorPages" inherits="TellMeWhen_IE_PageTemplate">
 		<Frames>			
 			<Frame name="$parentGroups" parentKey="Groups" >
 				<Anchors>
@@ -769,7 +777,7 @@
 					</OnLoad>
 				</Scripts>
 				<Frames>
-					<Button name="$parentAddCondition" inherits="TellMeWhen_BorderedFrame" parentKey="AddCondition">
+					<Button name="$parentAddCondition" inherits="TellMeWhen_GradientFrame" parentKey="AddCondition">
 						<Size y="30"/>
 						<Layers>
 							<Layer level="OVERLAY">

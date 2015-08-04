@@ -337,7 +337,7 @@ function IconPosition_Sortable:LoadConfig()
 			frame = TMW.C.Config_IconSortFrame:New("Button", nil, panel, "TellMeWhen_GM_IPS_IconSortTemplate")
 			sortFrames[i] = frame
 			frame:SetID(i)
-			frame.Number:SetText("" .. i .. ".")
+			frame.Number:SetText(i .. ".")
 
 			if i == 1 then
 				frame:SetPoint("TOP", panel.Add, "BOTTOM", 0, -10)

@@ -1,7 +1,7 @@
 ﻿<Ui>
 
 
-	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_GradientFrame" virtual="true" >
 		<Size y="31"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -169,7 +169,7 @@
 	</Button>
 
 
-	<Button name="TellMeWhen_HandlerPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+	<Button name="TellMeWhen_HandlerPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_GradientFrame" virtual="true" >
 		<Size y="70"/>
 		<Anchors>
 			<Anchor point="LEFT" x="2" y="0"/>
@@ -214,7 +214,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="TellMeWhen_EventPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+	<Button name="TellMeWhen_EventPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_GradientFrame" virtual="true" >
 		<Size y="18"/>
 		<Anchors>
 			<Anchor point="LEFT" x="9" y="0"/>
@@ -257,7 +257,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="TellMeWhen_EventHandler_SubHandlerListButton" inherits="TellMeWhen_BorderedFrame" virtual="true" >
+	<Button name="TellMeWhen_EventHandler_SubHandlerListButton" inherits="TellMeWhen_GradientFrame" virtual="true" >
 		<Size y="14"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -314,7 +314,7 @@
 		</Anchors>
 	</Slider>
 
-	<Frame name="TellMeWhen_EventContainer" parent="TellMeWhen_IconEditorPanelsEvents" hidden="true" virtual="true">
+	<Frame name="TellMeWhen_EventContainer" parent="TellMeWhen_IconEditorPagesEvents" hidden="true" virtual="true">
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="16" y="0"/>
 			<Anchor point="RIGHT"/>
@@ -348,7 +348,7 @@
 	</Frame>
 
 	
-	<Frame name="$parentEvents" parent="TellMeWhen_IconEditorPanels" setAllPoints="true" parentKey="Events">		
+	<Frame parentKey="Events" name="$parentEvents" inherits="TellMeWhen_IE_PageTemplate">		
 		<Frames>					
 			<Frame name="$parentEventHandlerFrames" parentKey="EventHandlerFrames">
 				<Size x="210" y="10"/>
@@ -393,7 +393,7 @@
 				</Scripts>
 			</Frame>
 
-			<Button name="$parentAddEvent" inherits="TellMeWhen_BorderedFrame" parentKey="AddEvent">
+			<Button name="$parentAddEvent" inherits="TellMeWhen_GradientFrame" parentKey="AddEvent">
 				<Size y="30"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="TOPLEFT" y="2"/>
@@ -449,7 +449,7 @@
 				</HighlightTexture>
 			</Button>
 
-			<!-- <Frame name="$parentHelpText" inherits="TellMeWhen_BorderedFrame" hidden="true" parentKey="HelpText">
+			<!-- <Frame name="$parentHelpText" inherits="TellMeWhen_GradientFrame" hidden="true" parentKey="HelpText">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="BOTTOMLEFT" y="-15"/>
 					<Anchor point="TOPRIGHT" relativeTo="$parentAddEvent" relativePoint="BOTTOMRIGHT" y="-15"/>
@@ -801,6 +801,8 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
+				TMW:CInit(self)
+				
 				self.EventListHeader:SetText(TMW.L["EVENTS_HANDLERS_HEADER"])
 				self.EventSettingsContainerHeader:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
 				

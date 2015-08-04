@@ -102,7 +102,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	local function DropdownOnClick(button, arg1)
 		TMW.CI.ics.PowerType = arg1
 		self.PowerType:SetText(button.value)
-		TMW.IE:Load(1)
+		TMW.IE:LoadIcon(1)
 	end
 	self.PowerType:SetFunction(function(self)
 		for id, name in TMW:OrderedPairs(types) do
@@ -116,7 +116,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	end)
 
 	self:SetHeight(36)
-	self.PowerType:SetDropdownAnchor("TOPRIGHT", self.PowerType.Middle, "BOTTOMRIGHT")
+	-- self.PowerType:SetDropdownAnchor("TOPRIGHT", self.PowerType.Middle, "BOTTOMRIGHT")
 	self.PowerType:SetPoint("TOPLEFT", 5, -5)
 	self.PowerType:SetPoint("RIGHT", -5, 0)
 
