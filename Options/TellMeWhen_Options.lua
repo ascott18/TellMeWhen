@@ -266,7 +266,7 @@ local ScrollContainerHook_OnSizeChanged = function(c) c.ScrollFrame:Show() end
 function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX, leftSide)
 	
 	local name = container:GetName() and container:GetName() .. "ScrollFrame"
-	local ScrollFrame = CreateFrame("ScrollFrame", name, container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
+	local ScrollFrame = TMW.C.Config_ScrollFrame:New("ScrollFrame", name, container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
 	
 	-- Make the ScrollFrame clone the container's position and size
 	local x, y = container:GetSize()
@@ -1786,7 +1786,7 @@ end
 
 
 CScriptProvider = TMW:NewClass("CScriptProvider"){
-	DEBUG_MaxDepth = 20,
+	DEBUG_MaxDepth = 25,
 
 	CScriptTunnelGet = function(self, script, ...)
 		for _, child in TMW:Vararg(frame:GetChildren()) do
@@ -1892,7 +1892,7 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 		-- If we enter 10 deep cscripts, go into emergency mode
 		-- and start recording data about what is being called.
 		CS_SDepth = CS_SDepth + 1
-		if CS_SDepth > 5 and not self.DEBUG_Started then
+		if CS_SDepth > 10 and not self.DEBUG_Started then
 			self:DEBUG_Start()
 		end
 
@@ -2008,9 +2008,11 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 
 	-- Constructor
 	OnNewInstance_Frame = function(self)
-		-- Setup callbacks that will load the settings when needed.
 
-		self:CScriptAdd("ReloadRequested", self.ReloadSetting)
+		-- Setup callbacks that will load the settings when needed.
+		if self.ReloadSetting ~= TMW.NULLFUNC then
+			self:CScriptAdd("ReloadRequested", self.ReloadSetting)
+		end
 	end,
 
 	SetSetting = function(self, key)
@@ -2316,6 +2318,128 @@ TMW:NewClass("Config_Page", "Config_Frame"){
 		self:CScriptAdd("DescendantSettingSaved", self.RequestReloadChildren)
 	end,
 }
+
+TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
+	edgeScrollEnabled = false,
+	edgeScrollMouseCursorRange = 20,
+	edgeScrollScrollDistancePerSecond = 150,
+
+	scrollPercentage = 1/2,
+	scrollStep = nil,
+
+	OnNewInstance_ScrollFrame = function(self)
+		self:EnableMouseWheel(true)
+	end,
+
+	SetEdgeScrollEnabled = function(self, enabled, range, dps)
+		self.edgeScrollEnabled = enabled
+		self.edgeScrollMouseCursorRange = range or self.edgeScrollMouseCursorRange
+		self.edgeScrollScrollDistancePerSecond = dps or self.edgeScrollScrollDistancePerSecond
+	end,
+
+	SetWheelStepPercentage = function(self, percent)
+		self.scrollPercentage = percent
+		self.scrollStep = nil
+	end,
+
+	SetWheelStepAmount = function(self, amount)
+		self.scrollStep = amount
+		self.scrollPercentage = nil
+	end,
+
+	OnScrollRangeChanged = function(self)
+		local yrange = self:GetVerticalScrollRange()
+
+		if floor(yrange) == 0 then
+			self.ScrollBar:Hide()
+		else
+			self.ScrollBar:Show()
+		end
+
+		if 0 >= self:GetVerticalScroll() then
+			self:SetVerticalScroll(0)
+		elseif self:GetVerticalScroll() > yrange then
+			self:SetVerticalScroll(yrange)
+		end
+
+		local height = self:GetHeight()
+		self.percentage = height / (yrange + height)
+
+		self.ScrollBar.Thumb:SetHeight(max(height*self.percentage, 20))
+
+		self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(self:GetVerticalScroll() * self.percentage))
+	end,
+
+	OnVerticalScroll = function(self, offset)
+		self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(offset * self.percentage))
+	end,
+
+	OnMouseWheel = function(self, delta)
+		local scrollStep = self.scrollStep or self:GetHeight() * self.scrollPercentage
+		local newScroll
+
+		if delta > 0 then
+			newScroll = self:GetVerticalScroll() - scrollStep
+		else
+			newScroll = self:GetVerticalScroll() + scrollStep
+		end
+
+		if newScroll < 0 then
+			newScroll = 0
+		elseif newScroll > self:GetVerticalScrollRange() then
+			newScroll = self:GetVerticalScrollRange()
+		end
+
+		self:SetVerticalScroll(newScroll)
+	end,
+
+	OnUpdate = function(self, elapsed)
+		local range = self.edgeScrollMouseCursorRange
+
+		if  self.edgeScrollEnabled
+		and not self.ScrollBar.Thumb:IsDragging()
+		and self:IsMouseOver(range, 0, -range, 0) -- allow the cursor to be above/below the frame, but not to the sides
+		then
+			local scale = self:GetEffectiveScale()
+			local self_top, self_bottom = self:GetTop()*scale, self:GetBottom()*scale
+
+			local _, cursorY = GetCursorPosition()
+
+			local absDistance_top = abs(self_top - cursorY)
+			local absDistance_bottom = abs(self_bottom - cursorY)
+
+			local scrollStep
+			if absDistance_top > absDistance_bottom then
+				-- We are closer to the bottom of the frame
+				if range > absDistance_bottom then
+					scrollStep = -self.edgeScrollScrollDistancePerSecond*elapsed
+				end
+			else
+				-- We are closer to the top of the frame
+				if range > absDistance_top then
+					scrollStep = self.edgeScrollScrollDistancePerSecond*elapsed
+				end
+			end
+
+			if scrollStep then
+				local newScroll = self:GetVerticalScroll() - scrollStep
+
+				if 0 > newScroll then
+					newScroll = 0
+				elseif newScroll > self:GetVerticalScrollRange() then
+					newScroll = self:GetVerticalScrollRange()
+				end
+				self:SetVerticalScroll(newScroll)
+			end
+		end
+	end,
+
+	OnSizeChanged = function(self)
+		-- container's width doesn't get adjusted as we resize. Fix this.
+		self.container:SetWidth(self:GetWidth())
+	end,
+}
+
 
 TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	-- Constructor
@@ -3441,6 +3565,10 @@ TMW:NewClass("Config_GroupList", "Config_Frame"){
 
 		local dragGroup, targetDomain, targetID = groupSelect:GetDraggingGroup()
 
+		-- If we are currently dragging a group, allow edge scrolling
+		-- so that users can easily get to groups beyond the currently visible ones.
+		self.ScrollFrame:SetEdgeScrollEnabled(not not dragGroup)
+
 		local groups = {}
 		for groupID = 1, TMW.db[self.domain].NumGroups do
 			local group = TMW[self.domain][groupID]
@@ -3534,6 +3662,8 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 		self:SetChecked(TMW.CI.group == group )
 		self:Show()
 
+		local tooltipText = ""
+
 		local textureIndex = 1
 		local isSpecLimited
 		local isUnavailable
@@ -3545,6 +3675,8 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 			tex:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 			tex:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-LeaveItem-Transparent")
 			tex:SetDesaturated(true)
+
+			tooltipText = tooltipText .. "\r\n" .. L["DISABLED"]
 		else
 			if group.Domain == "profile" then
 				-- Indicator for primary/secondary spec configuration.
@@ -3628,8 +3760,15 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 
 				tex:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 				tex:SetTexture("Interface\\PaperDollInfoFrame\\UI-GearManager-LeaveItem-Transparent")
+
+				tooltipText = tooltipText .. "\r\n" .. L["GROUP_UNAVAILABLE"]
 			end
 		end
+
+		tooltipText = tooltipText .. "\r\n\r\n" .. L["GROUPSELECT_TOOLTIP"]
+		tooltipText = tooltipText:trim(" \t\r\n")
+
+		TMW:TT(self, group:GetGroupName(1), tooltipText, 1, 1)
 
 		if textureIndex > 1 then
 			self.Name:SetPoint("RIGHT", self.textures[textureIndex-1], "LEFT", -3, 0)
@@ -3674,6 +3813,7 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 			if self:IsMouseOver() and self.group ~= group then
 
 				groupSelect:SetDraggingGroup(group, list.domain, self:GetID())
+				GameTooltip:Hide()
 			elseif not IsMouseButtonDown() then
 				self:OnDragStop()
 			end

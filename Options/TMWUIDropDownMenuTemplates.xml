@@ -1,7 +1,11 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-	<Button name="TMW_UIDropDownMenuButtonTemplate" virtual="true">
+	<Button name="TMW_UIDropDownMenuButtonTemplate" virtual="true" hidden="true">
 		<Size x="100" y="16"/>
+		<Anchors>
+			<Anchor point="LEFT" x="5"/>
+			<Anchor point="RIGHT" x="-5"/>
+		</Anchors>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Highlight" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
@@ -10,129 +14,38 @@
 				<Texture parentKey="Check" file="Interface\Common\UI-DropDownRadioChecks">
 					<Size x="16" y="16"/>
 					<Anchors>
-						<Anchor point="LEFT">
-							<Offset x="0" y="0"/>
-						</Anchor>
+						<Anchor point="LEFT"/>
 					</Anchors>
 					<TexCoords left="0" right="0.5" top="0.5" bottom="1.0"/>
 				</Texture>
 				<Texture parentKey="UnCheck" file="Interface\Common\UI-DropDownRadioChecks">
 					<Size x="16" y="16"/>
 					<Anchors>
-						<Anchor point="LEFT">
-							<Offset x="0" y="0"/>
-						</Anchor>
+						<Anchor point="LEFT"/>
 					</Anchors>
 					<TexCoords left="0.5" right="1.0" top="0.5" bottom="1.0"/>
 				</Texture>
 				<Texture parentKey="Icon" hidden="true">
 					<Size x="15" y="15"/>
 					<Anchors>
-						<Anchor point="RIGHT">
-							<Offset x="0" y="0"/>
-						</Anchor>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</Texture>
+
+				<Texture parentKey="ExpandArrow" file="Interface\ChatFrame\ChatFrameExpandArrow" hidden="true">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="RIGHT" x="4"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="ColorSwatch" hidden="true">
-				<Size>
-					<AbsDimension x="16" y="16"/>
-				</Size>
-				<Anchors>
-					<Anchor point="RIGHT">
-						<Offset>
-							<AbsDimension x="-6" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture parentKey="SwatchBg">
-							<Size>
-								<AbsDimension x="14" y="14"/>
-							</Size>
-							<Anchors>
-								<Anchor point="CENTER">
-									<Offset>
-										<AbsDimension x="0" y="0"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-							<Color r="1.0" g="1.0" b="1.0"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnClick>
-						CloseMenus();
-
-						local button = self:GetParent();
-
-						DD.MENU_VALUE = button.value;
-						OpenColorPicker(button); --remains shared through color picker frame
-					</OnClick>
-					<OnEnter>
-						local button = self:GetParent();
-
-						TMW.DD:CloseDropDownMenus(button.listFrame:GetID() + 1);
-						self.SwatchBg:SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
-						TMW.DD.StopCounting(button.listFrame);
-					</OnEnter>
-					<OnLeave>
-						local button = self:GetParent();
-
-						self.SwatchBg:SetVertexColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
-						TMW.DD.StartCounting(button.listFrame);
-					</OnLeave>
-				</Scripts>
-				<NormalTexture file="Interface\ChatFrame\ChatFrameColorSwatch"/>
-			</Button>
-			<Button parentKey="ExpandArrow" hidden="true">
-				<Size>
-					<AbsDimension x="16" y="16"/>
-				</Size>
-				<Anchors>
-					<Anchor point="RIGHT">
-						<Offset>
-							<AbsDimension x="0" y="0"/>
-						</Offset>
-					</Anchor>                   
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						local button = self:GetParent();
-
-						TMW.DD.Toggle(nil, button.listFrame:GetID() + 1, button.value, nil, nil, nil, button.menuList, self);
-					</OnClick>
-					<OnEnter>
-						local button = self:GetParent();
-
-						local level =  button.listFrame:GetID() + 1;
-						local listFrame = TMW.DD.LISTS[level]
-						if ( not listFrame or not listFrame:IsShown() or select(2, listFrame:GetPoint()) ~= self ) then
-							TMW.DD.Toggle(nil, level, button.value, nil, nil, nil, button.menuList, self);
-						end
-						TMW.DD.StopCounting(button.listFrame);
-					</OnEnter>
-					<OnLeave>
-						local button = self:GetParent();
-
-						TMW.DD.StartCounting(button.listFrame);
-					</OnLeave>
-				</Scripts>
-				<NormalTexture file="Interface\ChatFrame\ChatFrameExpandArrow"/>
-			</Button>
 			<Button parentKey="InvisibleButton" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT"/>
 					<Anchor point="BOTTOMLEFT"/>
-					<Anchor point="RIGHT" relativeKey="$parent.ColorSwatch" relativePoint="LEFT">
-						<Offset>
-							<AbsDimension x="0" y="0"/>
-						</Offset>
-					</Anchor>
+					<Anchor point="RIGHT" relativeKey="$parent.ExpandArrow" relativePoint="LEFT" />
 				</Anchors>
 				<Scripts>
 					<OnEnter>
@@ -175,7 +88,7 @@
 
 				if ( self.hasArrow ) then
 					if ( not listFrame or not listFrame:IsShown() or select(2, listFrame:GetPoint()) ~= self ) then
-						TMW.DD.Toggle(nil, listFrame:GetID() + 1, self.value, nil, nil, nil, self.menuList, self.ExpandArrow);
+						TMW.DD.Toggle(nil, listFrame:GetID() + 1, self.value, nil, nil, nil, self.menuList, self);
 					end
 				else
 					TMW.DD:CloseDropDownMenus(listFrame:GetID() + 1);
@@ -209,9 +122,7 @@
 		</Scripts>
 		<ButtonText>
 			<Anchors>
-				<Anchor point="LEFT">
-					<Offset x="-5" y="0"/>
-				</Anchor>
+				<Anchor point="LEFT"/>
 			</Anchors>
 		</ButtonText>
 		<NormalFont style="GameFontHighlightSmallLeft"/>
@@ -220,51 +131,29 @@
 	</Button>
 	
 	<Button name="TMW_UIDropDownListTemplate" hidden="true" frameStrata="DIALOG" enableMouse="true" virtual="true">
+		
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture setAllPoints="true">
+					<Color r="0.03" g="0.03" b="0.03" a="1"/>
+				</Texture>
+			</Layer>
+		</Layers>
+
 		<Frames>
-			<Frame parentKey="Backdrop" setAllPoints="true">
-				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-					<BackgroundInsets>
-						<AbsInset left="11" right="12" top="12" bottom="9"/>
-					</BackgroundInsets>
-					<TileSize>
-						<AbsValue val="32"/>
-					</TileSize>
-					<EdgeSize>
-						<AbsValue val="32"/>
-					</EdgeSize>
-				</Backdrop>
-			</Frame>
-			<Frame parentKey="MenuBackdrop" setAllPoints="true">
-				<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-					<EdgeSize>
-						<AbsValue val="16"/>
-					</EdgeSize>
-					<TileSize>
-						<AbsValue val="16"/>
-					</TileSize>
-					<BackgroundInsets>
-						<AbsInset left="5" right="5" top="5" bottom="4"/>
-					</BackgroundInsets>
-				</Backdrop>
-				<Scripts>
-					<OnLoad>
-						self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
-						self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
-					</OnLoad>
-				</Scripts>
-			</Frame>
+			<Frame inherits="TellMeWhen_GenericBorder" />
 
 			<Frame parentKey="Buttons">
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-15"/>
-					<Anchor point="BOTTOMRIGHT" y="15"/>
+					<Anchor point="TOPLEFT" y="-7"/>
+					<Anchor point="BOTTOMRIGHT" y="7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.parent = self:GetParent()
-						TMW:ConvertContainerToScrollFrame(self, false, 12, 10, true)
+						TMW:ConvertContainerToScrollFrame(self, false, 2, 10, true)
 
-						self.ScrollFrame.scrollStep = TMW.DD.BUTTON_HEIGHT * 5
+						self.ScrollFrame:SetWheelStepAmount(TMW.DD.BUTTON_HEIGHT * 5)
 
 						self.ScrollFrame:HookScript("OnHide", function(self)
 							TMW.HELP:Hide("SCROLLBAR_DROPDOWN", true)
@@ -303,6 +192,9 @@
 		<Scripts>
 			<OnLoad>
 				TMW.DD.LISTS[self:GetID()] = self
+
+				self.border:SetBorderSize(2)
+				self.border:SetColor(.3, .3, .3, 1)
 			</OnLoad>
 			<OnClick>
 				self:Hide();
@@ -325,14 +217,10 @@
 				end
 			</OnUpdate>
 			<OnShow>
-				for i=1, TMW.DD.MAXBUTTONS do
-					self[i]:SetWidth(self.maxWidth);
-				end
-
-				local addWidth = 25
+				local addWidth = 15
 				if self.shouldScroll then
 					addWidth = addWidth + 15
-					self.ScrollFrame:SetPoint("TOPLEFT", 10, -15)
+					self.ScrollFrame:SetPoint("TOPLEFT", 10, -TMW.DD.BORDER_HEIGHT)
 
 					TMW.HELP:Show{
 						code = "SCROLLBAR_DROPDOWN",
@@ -345,7 +233,7 @@
 						text = TMW.L["HELP_SCROLLBAR_DROPDOWN"]
 					}
 				else
-					self.ScrollFrame:SetPoint("TOPLEFT", 0, -15)
+					self.ScrollFrame:SetPoint("TOPLEFT", 0, -TMW.DD.BORDER_HEIGHT)
 				end
 
 				self:SetWidth(self.maxWidth + addWidth);
@@ -373,7 +261,7 @@
 			<KeyValue key="tmwClass" type="string" value="Config_DropDownMenu"/>
 		</KeyValues>
 
-		<Size x="40" y="22"/>
+		<Size x="40" y="20"/>
 
 		<Layers>
 
@@ -386,30 +274,6 @@
 						<MaxColor r="0.04" g="0.04" b="0.04" a="1"/>
 					</Gradient>
 				</Texture>
-				<!-- 
-				<Texture parentKey="Left" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Size x="22" />
-					<Anchors>
-						<Anchor point="TOPLEFT" />
-						<Anchor point="BOTTOMLEFT" />
-					</Anchors>
-					<TexCoords left="0" right="0.1875" top="0" bottom="0.73"/>
-				</Texture>
-				<Texture parentKey="Right" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Size x="22"/>
-					<Anchors>
-						<Anchor point="TOPRIGHT" />
-						<Anchor point="BOTTOMRIGHT" />
-					</Anchors>
-					<TexCoords left="0.8125" right="1" top="0" bottom="0.73"/>
-				</Texture>
-				<Texture parentKey="Middle" file="Interface\AddOns\TellMeWhen\Textures\DropdownTexture">
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT"/>
-						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT"/>
-					</Anchors>
-					<TexCoords left="0.1875" right="0.8125" top="0" bottom="0.73"/>
-				</Texture> -->
 			</Layer>
 			<Layer level="OVERLAY">
 				<Texture parentKey="Icon" hidden="true">
@@ -422,6 +286,10 @@
 		</Layers>
 		<Frames>
 			<Frame parentKey="border" inherits="TellMeWhen_GenericBorder">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Background" />
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Background" />
+				</Anchors>
 				<Scripts>
 					<OnLoad inherit="prepend">
 						self:SetBorderSize(-2)
@@ -478,7 +346,7 @@
 				<FontString parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
 					<Size y="10"/>
 					<Anchors>
-						<Anchor point="LEFT" x="7" y="-1"/>
+						<Anchor point="LEFT" relativeKey="$parent.Background" x="7" y="-1"/>
 						<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="0" />
 					</Anchors>
 				</FontString>
@@ -511,7 +379,7 @@
 			<Button parentKey="IconPreview" enableMouse="true">
 				<Size x="18" y="18"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT" x="0" y="3"/>
+					<Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT" x="0" y="0"/>
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
@@ -522,12 +390,10 @@
 				</Layers>
 				<Scripts>
 					<OnMouseUp>
-						if TMW.IE then
-							if button == "RightButton" then
-								TMW.IE:LoadIcon(nil, self.icon)
-							end
-							TMW.IE:ScheduleIconSetup(self.icon)
+						if button == "RightButton" then
+							TMW.IE:LoadIcon(nil, self.icon)
 						end
+						TMW.IE:ScheduleIconSetup(self.icon)
 					</OnMouseUp>
 				</Scripts>
 

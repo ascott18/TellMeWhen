@@ -1770,6 +1770,11 @@ L["MAKENEWGROUP_PROFILE"] = "|cff59ff59Create|r New Profile Group"
 L["MAKENEWGROUP_GLOBAL"] = "|cff59ff59Create|r New |cff00c300Global|r Group"
 
 
+L["GROUPSELECT_TOOLTIP"] = [[|cff7fffffClick|r to edit.
+|cff7fffffClick-and-drag|r to reorder or change domain.]]
+L["GROUP_UNAVAILABLE"] = "This group cannot be shown due to its overly-restrictive spec/role settings."
+
+
 --[=[L["CNDT_SLIDER_DESC_BASE"] = [[|cff7fffffMousewheel|r to adjust.
 |cff7fffffShift-Mousewheel|r to adjust x10.
 |cff7fffffCtrl-Mousewheel|r to adjust x60.

@@ -23,7 +23,7 @@ local BaseConfig = TMW:NewClass("GroupModule_BaseConfig", "GroupModule")
 BaseConfig.DefaultPanelColumnIndex = 1
 
 
-BaseConfig:RegisterConfigPanel_XMLTemplate(1, "TellMeWhen_GM_Rename"):SetColumnIndex(2)
+BaseConfig:RegisterConfigPanel_XMLTemplate(1, "TellMeWhen_GM_Rename")
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_GS_Combat", function(self)
 	self.Header:SetText(COMBAT)

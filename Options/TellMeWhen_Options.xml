@@ -453,95 +453,6 @@
 	<!-- TEMPLATES -->
 
 	<ScrollFrame name="TellMeWhen_ScrollFrameTemplate" parentKey="ScrollFrame" virtual="true">
-		<Scripts>
-			<OnLoad>
-				self.edgeScrollMouseCursorRange = 15
-				self.edgeScrollScrollDistancePerSecond = 150
-				self.scrollPercentage = 1/2
-				self.scrollStep = nil
-			</OnLoad>
-			<OnScrollRangeChanged>
-				local yrange = self:GetVerticalScrollRange()
-
-				if ( floor(yrange) == 0 ) then
-					self.ScrollBar:Hide()
-				else
-					self.ScrollBar:Show()
-				end
-
-				if 0 >= self:GetVerticalScroll() then
-					self:SetVerticalScroll(0)
-				elseif self:GetVerticalScroll() > yrange then
-					self:SetVerticalScroll(yrange)
-				end
-
-				local height = self:GetHeight()
-				self.percentage = height/(yrange+height)
-
-				self.ScrollBar.Thumb:SetHeight(max(height*self.percentage, 20))
-
-				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(self:GetVerticalScroll()*self.percentage))
-			</OnScrollRangeChanged>
-
-			<OnVerticalScroll>
-				self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(offset*self.percentage))
-			</OnVerticalScroll>
-			<OnMouseWheel>
-				local scrollStep = self.scrollStep or self:GetHeight() * self.scrollPercentage
-				local newScroll
-				if ( delta > 0 ) then
-					newScroll = self:GetVerticalScroll() - scrollStep
-				else
-					newScroll = self:GetVerticalScroll() + scrollStep
-				end
-				if 0 > newScroll then
-					newScroll = 0
-				elseif newScroll > self:GetVerticalScrollRange() then
-					newScroll = self:GetVerticalScrollRange()
-				end
-				self:SetVerticalScroll(newScroll)
-			</OnMouseWheel>
-
-			<OnUpdate>
-				if IsMouseButtonDown() and not self.ScrollBar.Thumb:IsDragging() then
-					local scale = self:GetEffectiveScale()
-					local self_top, self_bottom = self:GetTop()*scale, self:GetBottom()*scale
-
-					local _, cursorY = GetCursorPosition()
-
-					local absDistance_top = abs(self_top - cursorY)
-					local absDistance_bottom = abs(self_bottom - cursorY)
-
-					local scrollStep
-					if absDistance_top > absDistance_bottom then
-						-- We are closer to the bottom of the frame
-						if self.edgeScrollMouseCursorRange > absDistance_bottom then
-							scrollStep = -self.edgeScrollScrollDistancePerSecond*elapsed
-						end
-					else
-						-- We are closer to the top of the frame
-						if self.edgeScrollMouseCursorRange > absDistance_top then
-							scrollStep = self.edgeScrollScrollDistancePerSecond*elapsed
-						end
-					end
-
-					if scrollStep then
-						local newScroll = self:GetVerticalScroll() - scrollStep
-
-						if 0 > newScroll then
-							newScroll = 0
-						elseif newScroll > self:GetVerticalScrollRange() then
-							newScroll = self:GetVerticalScrollRange()
-						end
-						self:SetVerticalScroll(newScroll)
-					end
-				end
-			</OnUpdate>
-			<OnSizeChanged>
-				-- container's width doesn't get adjusted as we resize. Fix this.
-			    self.container:SetWidth(self:GetWidth())
-			</OnSizeChanged>
-		</Scripts>
 		<Frames>
 			<Frame parentKey="ScrollBar" hidden="true">
 				<Size x="10"/>
@@ -1866,7 +1777,7 @@
 				<Scripts>
 					<OnLoad>
 						TMW:ConvertContainerToScrollFrame(self, false, 0, 10)
-						self.ScrollFrame.scrollStep = 25
+						self.ScrollFrame:SetWheelStepAmount(25)
 						self.Code:SetWidth(self:GetWidth()-15)
 						self.Code:SetNonSpaceWrap(1)
 						self.Code:SetSpacing(2)
@@ -2066,7 +1977,7 @@
 				<Scripts>
 					<OnLoad>
 						TMW:ConvertContainerToScrollFrame(self, false, 0, 12)
-						self.ScrollFrame.scrollStep = 25
+						self.ScrollFrame:SetWheelStepAmount(25)
 					</OnLoad>
 					<OnShow>
 						self:GetScript("OnSizeChanged")(self)

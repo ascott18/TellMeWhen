@@ -227,7 +227,7 @@
 				</Scripts>
 			</Frame>
 			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
-				<Size x="120" y="17"/>
+				<Size x="120" y="18"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="10" y="0"/>
 				</Anchors>
@@ -689,57 +689,57 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentTextType" parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
+				<FontString parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentType" relativePoint="TOP" y="2"/>
+						<Anchor point="BOTTOM" relativeKey="$parent.Type" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentTextUnit" parentKey="TextUnit" inherits="GameFontNormalSmall" justifyH="CENTER">
+				<FontString parentKey="TextUnit" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentUnit" relativePoint="TOP" y="5"/>
+						<Anchor point="BOTTOM" relativeKey="$parent.Unit" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentTextIcon" parentKey="TextIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
+				<FontString parentKey="TextIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentIcon" relativePoint="TOP" y="2"/>
+						<Anchor point="BOTTOM" relativeKey="$parent.Icon" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentTextOperator" parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
+				<FontString parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOM" relativeto="$parentOperator" relativePoint="TOP" y="2"/>
+						<Anchor point="BOTTOM" relativeKey="$parent.Operator" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentTextValue" parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
+				<FontString parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeto="$parentOperator" relativePoint="TOPRIGHT" x="9" y="2"/>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.Operator" relativePoint="TOPRIGHT" x="9" y="2"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentValText" parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
+				<FontString parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" relativeto="$parentOperator" relativePoint="RIGHT" x="9" y="0"/>
+						<Anchor point="LEFT" relativeKey="$parent.Operator" relativePoint="RIGHT" x="9" y="0"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentTextUnitDef" parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
+				<FontString parentKey="TextUnitDef" inherits="GameFontNormalLarge" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="CENTER" relativeto="$parentUnit" y="-0"/>
+						<Anchor point="CENTER" relativeKey="$parent.Unit" y="-0"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentSliderMid" parentKey="SliderMid" inherits="GameFontHighlightSmall">
+				<FontString parentKey="SliderMid" inherits="GameFontHighlightSmall">
 					<Anchors>
-						<Anchor point="TOP" relativeto="$parentSlider" relativePoint="BOTTOM" y="3"/>
+						<Anchor point="TOP" relativeKey="$parent.Slider" relativePoint="BOTTOM" y="3"/>
 					</Anchors>
 				</FontString>
 
-				<FontString name="$parentDeprecated" parentKey="Deprecated" inherits="GameFontNormal" hidden="true">
+				<FontString parentKey="Deprecated" inherits="GameFontNormal" hidden="true">
 					<Size x="400"/>
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="30" y="3"/>
 						<Anchor point="BOTTOMRIGHT" x="-30" y="3"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentUnknown" parentKey="Unknown" inherits="GameFontNormal" >
+				<FontString parentKey="Unknown" inherits="GameFontNormal" >
 					<Anchors>
-						<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="12"/>
+						<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="12"/>
 						<Anchor point="RIGHT" x="-5" />
 						<Anchor point="TOP" y="-5"/>
 						<Anchor point="BOTTOM" y="5"/>
@@ -768,7 +768,7 @@
 				<Scripts>
 					<OnLoad>
 						TMW:ConvertContainerToScrollFrame(self, false, -2)
-						self.ScrollFrame.scrollStep = 40
+						self.ScrollFrame:SetWheelStepAmount(40)
 						
 						TMW.CNDT:CreateGroups(1)
 						TMW.CNDT[1].AndOr:Hide()
