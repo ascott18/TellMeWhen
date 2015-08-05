@@ -5,13 +5,13 @@
 		<Size y="31"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
+				<FontString parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="15" y="-4"/>
 						<Anchor point="RIGHT" x="-15"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentDataText" parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" justifyV="TOP" wordwrap="false">
+				<FontString parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" justifyV="TOP" wordwrap="false">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="15" y="4"/>
 						<Anchor point="RIGHT" x="-15"/>
@@ -20,10 +20,10 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="$parentDelete" parentKey="Delete">
+			<Button parentKey="Delete">
 				<Size x="20" y="20"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeto="$parent" x="-2" y="2"/>
+					<Anchor point="TOPLEFT" x="-2" y="2"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -44,7 +44,7 @@
 				<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
 
-			<Button name="$parentPlay" parentKey="Play">
+			<Button parentKey="Play">
 				<Size x="15" y="15"/>
 				<Anchors>
 					<!--Anchor point="TOPRIGHT" x="-2" y="-3"/-->
@@ -177,16 +177,16 @@
 		</Anchors>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentTitle" parentKey="Title" inherits="GameFontNormalLarge" justifyH="CENTER">
+				<FontString parentKey="Title" inherits="GameFontNormalLarge" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="7" y="-5"/>
 						<Anchor point="RIGHT" x="-7"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentDesc" parentKey="Desc" wordwrap="true" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="CENTER" >
+				<FontString parentKey="Desc" wordwrap="true" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="CENTER" >
 					<Size x="1" y="1"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentTitle" relativePoint="BOTTOMLEFT" x="0" y="-0"/>
+						<Anchor point="TOPLEFT" relativeKey="$parent.Title" relativePoint="BOTTOMLEFT" x="0" y="-0"/>
 						<Anchor point="BOTTOMRIGHT" x="-7" y="3"/>
 					</Anchors>
 				</FontString>
@@ -316,7 +316,7 @@
 
 	<Frame name="TellMeWhen_EventContainer" parent="TellMeWhen_IconEditorPagesEvents" hidden="true" virtual="true">
 		<Anchors>
-			<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="16" y="0"/>
+			<Anchor point="TOPLEFT" relativeKey="$parent.AddEvent" relativePoint="TOPRIGHT" x="16" y="0"/>
 			<Anchor point="RIGHT"/>
 			<Anchor point="BOTTOM"/>
 		</Anchors>
@@ -401,15 +401,15 @@
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
-						<Texture name="$parentPlus" file="Interface\PaperDollInfoFrame\Character-Plus">
+						<Texture parentKey="Plus" file="Interface\PaperDollInfoFrame\Character-Plus">
 							<Size x="20" y="20"/>
 							<Anchors>
 								<Anchor point="LEFT" x="5"/>
 							</Anchors>
 						</Texture>
-						<FontString name="$parentEventName" parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
+						<FontString parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
 							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentPlus" relativePoint="RIGHT" x="5"/>
+								<Anchor point="LEFT" relativeKey="$parent.Plus" relativePoint="RIGHT" x="5"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -449,38 +449,10 @@
 				</HighlightTexture>
 			</Button>
 
-			<!-- <Frame name="$parentHelpText" inherits="TellMeWhen_GradientFrame" hidden="true" parentKey="HelpText">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="BOTTOMLEFT" y="-15"/>
-					<Anchor point="TOPRIGHT" relativeTo="$parentAddEvent" relativePoint="BOTTOMRIGHT" y="-15"/>
-				</Anchors>
-				<Size y="50"/>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString name="$parentText" parentKey="text" wordwrap="true" inherits="GameFontHighlightSmall">
-							<Anchors>
-								<Anchor point="TOP" y="-10"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						self.text:SetText(TMW.L["EVENTS_INSTRUCTIONS"])
-						
-						self.text:SetWidth(self:GetWidth() - 15)
-						self:SetHeight(self.text:GetStringHeight() + 22)
-					</OnLoad>
-					<OnSizeChanged>
-						self:SetHeight(self.text:GetStringHeight() + 22)
-					</OnSizeChanged>
-				</Scripts>
-			</Frame> -->
-
 			<Frame name="$parentHandlerPickers" hidden="true" parentKey="HandlerPickers">
 				<Size y="50"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.AddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
 					<Anchor point="RIGHT" x="-15"/>
 					<Anchor point="BOTTOM" y="0"/>
 				</Anchors>
@@ -515,7 +487,7 @@
 			<Frame name="$parentEventPickers" hidden="true" parentKey="EventPickers">
 				<Size y="50"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentAddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.AddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
 					<Anchor point="RIGHT" x="-15"/>
 					<Anchor point="BOTTOM" y="0"/>
 				</Anchors>
@@ -556,7 +528,7 @@
 					<Anchor point="BOTTOM" y="0"/>
 				</Anchors>
 				<Frames>
-					<CheckButton name="$parentPassThrough" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassThrough" motionScriptsWhileDisabled="true">
+					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassThrough" motionScriptsWhileDisabled="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" y="-3"/>
 						</Anchors>
@@ -572,7 +544,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentSimplyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="SimplyShown" motionScriptsWhileDisabled="true">
+					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="SimplyShown" motionScriptsWhileDisabled="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" y="-3"/>
 						</Anchors>
@@ -588,9 +560,9 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentOnlyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="OnlyShown" motionScriptsWhileDisabled="true">
+					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="OnlyShown" motionScriptsWhileDisabled="true">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentPassThrough" relativePoint="BOTTOM" y="4"/>
+							<Anchor point="TOP" relativeKey="$parent.PassThrough" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -604,9 +576,9 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentPassingCndt" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassingCndt" motionScriptsWhileDisabled="true">
+					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassingCndt" motionScriptsWhileDisabled="true">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentOnlyShown" relativePoint="BOTTOM" y="4"/>
+							<Anchor point="TOP" relativeKey="$parent.OnlyShown" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -620,9 +592,9 @@
 						</Scripts>
 					</CheckButton>
 
-					<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
+					<Frame parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" x="105" y="3"/>
+							<Anchor point="TOP" relativeKey="$parent.PassingCndt" relativePoint="BOTTOM" x="105" y="3"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -645,14 +617,14 @@
 						</Scripts>
 					</Frame>
 
-					<EditBox name="$parentValue" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="Value" autoFocus="false">
+					<EditBox inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="Value" autoFocus="false">
 						<Size x="45" y="18"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parentOperator" relativePoint="RIGHT" x="12" y="0"/>
+							<Anchor point="LEFT" relativeKey="$parent.Operator" relativePoint="RIGHT" x="12" y="0"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
-								<FontString name="$parentValueLabel" inherits="GameFontHighlightLarge" parentKey="ValueLabel" justifyH="RIGHT">
+								<FontString inherits="GameFontHighlightLarge" parentKey="ValueLabel" justifyH="RIGHT">
 									<Anchors>
 										<Anchor point="RIGHT" relativePoint="RIGHT" x="-3" y="0"/>
 									</Anchors>
@@ -689,9 +661,9 @@
 						</Scripts>
 					</EditBox>
 
-					<CheckButton name="$parentCndtJustPassed" inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="CndtJustPassed" motionScriptsWhileDisabled="true">
+					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="CndtJustPassed" motionScriptsWhileDisabled="true">
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentPassingCndt" relativePoint="BOTTOM" y="-15" x="8"/>
+							<Anchor point="TOP" relativeKey="$parent.PassingCndt" relativePoint="BOTTOM" y="-15" x="8"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -706,10 +678,10 @@
 					</CheckButton>
 
 
-					<Button name="$parentIconEventWhileCondition" parentKey="IconEventWhileCondition" inherits="TellMeWhen_ButtonTemplate">
+					<Button parentKey="IconEventWhileCondition" inherits="TellMeWhen_ButtonTemplate">
 						<Size x="175" y="16"/>
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentSimplyShown" relativePoint="BOTTOM" y="-7"/>
+							<Anchor point="TOP" relativeKey="$parent.SimplyShown" relativePoint="BOTTOM" y="-7"/>
 							<Anchor point="LEFT" />
 							<Anchor point="RIGHT" />
 						</Anchors>
@@ -735,7 +707,7 @@
 					</Button>
 
 
-					<Slider name="$parentFrequency" parentKey="Frequency" inherits="TellMeWhen_SliderTemplate" valuestep="0.1" >
+					<Slider parentKey="Frequency" inherits="TellMeWhen_SliderTemplate" valuestep="0.1" >
 
 						<KeyValues>
 							<KeyValue key="tmwClass" type="string" value="Config_Slider_Event"/>
@@ -743,7 +715,7 @@
 
 						<Size x="170" y="17"/>
 						<Anchors>
-							<Anchor point="TOP" relativeTo="$parentIconEventWhileCondition" relativePoint="BOTTOM" y="-18"/>
+							<Anchor point="TOP" relativeKey="$parent.IconEventWhileCondition" relativePoint="BOTTOM" y="-18"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>

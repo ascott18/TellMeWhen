@@ -5,18 +5,8 @@
 			<Anchor point="LEFT"/>
 			<Anchor point="RIGHT"/>
 		</Anchors>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="LEFT" x="3"/>
-						<Anchor point="RIGHT" relativeTo="$parentPlay" relativePoint="LEFT" x="-1"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
 		<Frames>
-			<Button name="$parentPlay" parentKey="Play" virtual="true">
+			<Button parentKey="Play" virtual="true">
 				<Size x="14" y="14"/>
 				<Anchors>
 					<Anchor point="RIGHT" x="-2" y="0"/>
@@ -40,6 +30,16 @@
 				<HighlightTexture file="Interface\Common\VoiceChat-On"/>
 			</Button>
 		</Frames>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" x="3"/>
+						<Anchor point="RIGHT" relativeKey="$parent.Play" relativePoint="LEFT" x="-1"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Scripts>
 			<OnLoad>
 				self.Background:SetTexture(1, 1, 1)
@@ -79,7 +79,7 @@
 					<Anchor point="BOTTOMRIGHT" x="-30" y="15"/>
 				</Anchors>
 				<Frames>
-					<Button name="$parentNone" inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
+					<Button inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
 
 					<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
 						<Size x="17"/>
@@ -100,17 +100,17 @@
 						</Scripts>
 					</Slider>
 				</Frames>
-				<!-- <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true"/> -->
+
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+						<FontString inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
 							<Anchors>
 								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 							</Anchors>
 						</FontString>
 					</Layer>
 					<Layer level="BACKGROUND">
-						<Texture name="$parentBackground" parentKey="Background">
+						<Texture parentKey="Background">
 							<Anchors>
 								<Anchor point="TOPLEFT"/>
 							</Anchors>
@@ -125,12 +125,12 @@
 					</OnSizeChanged>
 				</Scripts>
 			</Frame>
-			<EditBox name="$parentCustom" parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
+			<EditBox parentKey="Custom" inherits="TellMeWhen_InputBoxTemplate">
 				<Size y="15"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentSoundList" x="5" />
-					<Anchor point="RIGHT" relativeTo="$parentSoundList" x="-5" />
-					<Anchor point="TOP" relativeTo="$parentSoundList" relativePoint="BOTTOM" y="-5"/>
+					<Anchor point="LEFT" relativeKey="$parent.SoundList" x="5" />
+					<Anchor point="RIGHT" relativeKey="$parent.SoundList" x="-5" />
+					<Anchor point="TOP" relativeKey="$parent.SoundList" relativePoint="BOTTOM" y="-5"/>
 				</Anchors>
 				<Frames>
 					<Button name="$parentPlay" parentKey="Play" virtual="true">

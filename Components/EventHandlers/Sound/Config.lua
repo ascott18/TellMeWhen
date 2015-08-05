@@ -71,7 +71,7 @@ function Sound:GetFrame(id)
 		return Sounds[id]
 	end
 	
-	local f = CreateFrame("Button", Sounds:GetName().."Sound"..id, Sounds, "TellMeWhen_SoundSelectButton", id)
+	local f = CreateFrame("Button", nil, Sounds, "TellMeWhen_SoundSelectButton", id)
 	Sounds[id] = f
 	f:SetPoint("TOP", Sounds[id-1], "BOTTOM", 0, 0)
 	return f

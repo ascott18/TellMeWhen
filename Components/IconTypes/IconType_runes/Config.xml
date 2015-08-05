@@ -39,66 +39,66 @@
 	<Frame name="TellMeWhen_Runes" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="70"/>
 		<Frames>
-			<Button name="$parentBlood1" parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
+			<Button parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="7" y="-6"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentBlood2" parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">
+			<Button parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.1" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentUnholy1" parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
+			<Button parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.2" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentUnholy2" parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
+			<Button parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.3" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentFrost1" parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
+			<Button parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnholy2" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.4" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentFrost2" parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
+			<Button parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.5" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
 			
-			<Button name="$parentBlood1Death" parentKey="7" inherits="TellMeWhen_TypeCheckRuneTemplate" id="7">
+			<Button parentKey="7" inherits="TellMeWhen_TypeCheckRuneTemplate" id="7">
 				<Anchors>
 					<Anchor point="LEFT" x="7"/>
-					<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM" y="-4"/>
+					<Anchor point="TOP" relativeKey="$parent.1" relativePoint="BOTTOM" y="-4"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentBlood2Death" parentKey="8" inherits="TellMeWhen_TypeCheckRuneTemplate" id="8">
+			<Button parentKey="8" inherits="TellMeWhen_TypeCheckRuneTemplate" id="8">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.7" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentUnholy1Death" parentKey="9" inherits="TellMeWhen_TypeCheckRuneTemplate" id="9">
+			<Button parentKey="9" inherits="TellMeWhen_TypeCheckRuneTemplate" id="9">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.8" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentUnholy2Death" parentKey="10" inherits="TellMeWhen_TypeCheckRuneTemplate" id="10">
+			<Button parentKey="10" inherits="TellMeWhen_TypeCheckRuneTemplate" id="10">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.9" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentFrost1Death" parentKey="11" inherits="TellMeWhen_TypeCheckRuneTemplate" id="11">
+			<Button parentKey="11" inherits="TellMeWhen_TypeCheckRuneTemplate" id="11">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnholy2Death" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.10" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			<Button name="$parentFrost2Death" parentKey="12" inherits="TellMeWhen_TypeCheckRuneTemplate" id="12">
+			<Button parentKey="12" inherits="TellMeWhen_TypeCheckRuneTemplate" id="12">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.11" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
 		</Frames>

@@ -562,7 +562,7 @@ function CNDT:ColorizeParentheses()
 	for k, v in ipairs(CNDT) do
 		if v:IsShown() then
 			if v.OpenParenthesis:IsShown() then
-				for k, v in ipairs(v.OpenParenthesis) do
+				for k, v in ipairs(v.OpenParenthesis.parens) do
 					v.text:SetText("|cff222222" .. v.type)
 					if v:GetChecked() then
 						tinsert(CNDT.Parens, v)
@@ -571,8 +571,8 @@ function CNDT:ColorizeParentheses()
 			end
 
 			if v.CloseParenthesis:IsShown() then
-				for k = #v.CloseParenthesis, 1, -1 do
-					local v = v.CloseParenthesis[k]
+				for k = #v.CloseParenthesis.parens, 1, -1 do
+					local v = v.CloseParenthesis.parens[k]
 					v.text:SetText("|cff222222" .. v.type)
 					if v:GetChecked() then
 						tinsert(CNDT.Parens, v)
@@ -621,6 +621,96 @@ function CNDT:ColorizeParentheses()
 
 	CNDT:SetTabText()
 end
+
+TMW:NewClass("Config_Conditions_Paren", "Config_CheckButton") {
+	OnNewInstance_Paren = function(self)
+		local parent = self:GetParent()
+		parent.parens = parent.parens or {}
+
+		self.text:SetFont(self.text:GetFont(), 14, "THINOUTLINE")
+
+		parent.parens[self:GetID()] = self
+
+		if self:GetID() == 1 then
+			self:Show()
+		end
+
+		self.type = parent.parenType
+
+		self.text:SetText(self.type)
+	end,
+
+	GetNext = function(self)
+		local parent = self:GetParent()
+		local paren = parent.parens[self:GetID() + 1]
+
+		if paren then
+			return paren
+		elseif self:GetID() < 13 then
+			paren = CreateFrame("CheckButton", nil, parent, "TellMeWhen_ConditionEditorParenthesisTemplate", self:GetID() + 1)
+			parent.parens[self:GetID() + 1] = paren
+
+			paren:SetPoint(parent.childPoint, self, parent.childRelativePoint, parent.childXOffs, 0)
+			paren:SetChecked(false)
+
+			return paren
+		end
+
+	end,
+
+	METHOD_EXTENSIONS  = {
+		SetChecked = function(self, checked)
+			local parent = self:GetParent()
+
+			if checked then
+				local nextParen = self:GetNext()
+				if nextParen then
+					nextParen:Show()
+				end
+			else
+				for i = self:GetID() + 1, #parent.parens do
+					parent.parens[i]:SetChecked(false)
+					parent.parens[i]:Hide()
+				end
+			end
+		end,
+	},
+
+	OnClick = function(self)
+		PlaySound("igMainMenuOptionCheckBoxOn")
+
+		TMW.HELP:Hide("CNDT_PARENTHESES_FIRSTSEE")
+
+		self:SetChecked(self:GetChecked())
+		
+		local n = 0
+		if self:GetParent():IsShown() then
+			for k, frame in ipairs(self:GetParent().parens) do
+				if frame:GetChecked() then
+					n = n + 1
+				end
+			end
+		end
+		
+		local CndtGroup = self:GetParent():GetParent()
+		if self.type == "(" then
+			CndtGroup:GetConditionSettings().PrtsBefore = n
+		else
+			CndtGroup:GetConditionSettings().PrtsAfter = n
+		end
+		CndtGroup:LoadAndDraw()
+
+		TMW.CNDT:ColorizeParentheses()
+	end,
+
+	OnEnter = function(self)
+		self.text:SetText(gsub(self.text:GetText(), "|cff%x%x%x%x%x%x", "|cffffffff"))
+	end,
+
+	OnLeave = function(self)
+		TMW.CNDT:ColorizeParentheses()
+	end,
+}
 
 
 ---------- Condition Groups ----------
@@ -777,15 +867,11 @@ end)
 -- Parentheses
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 
-	for k, frame in pairs(CndtGroup.OpenParenthesis) do
-		if type(frame) == "table" then
-			CndtGroup.OpenParenthesis[k]:SetChecked(conditionSettings.PrtsBefore >= k)
-		end
+	for k, paren in ipairs(CndtGroup.OpenParenthesis.parens) do
+		paren:SetChecked(conditionSettings.PrtsBefore >= k)
 	end
-	for k, frame in pairs(CndtGroup.CloseParenthesis) do
-		if type(frame) == "table" then
-			CndtGroup.CloseParenthesis[k]:SetChecked(conditionSettings.PrtsAfter >= k)
-		end
+	for k, paren in ipairs(CndtGroup.CloseParenthesis.parens) do
+		paren:SetChecked(conditionSettings.PrtsAfter >= k)
 	end
 	
 	if CNDT.settings.n >= 3 then

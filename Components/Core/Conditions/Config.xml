@@ -55,6 +55,10 @@
 		</Scripts>
 	</Button>
 	<CheckButton name="TellMeWhen_ConditionEditorParenthesisTemplate" hidden="true" virtual="true">
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Conditions_Paren"/>
+		</KeyValues>
+
 		<Size x="20" y="20"/>
 		<HitRectInsets>
 			<AbsInset left="4" right="4" top="0" bottom="0"/>
@@ -70,85 +74,9 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				self.text:SetFont(self.text:GetFont(), 14, "THINOUTLINE")
-
-				if strfind(self:GetParent():GetName(), "Close") then
-					self.type = ")"
-				else
-					self.type = "("
-				end
-				self.text:SetText(self.type)
-				function self:SetChecked(checked)
-					self:Show()
-					local oldstate = self.checked
-					self.checked = checked
-					if checked then
-						local next = self:GetParent()[self:GetID() + 1]
-						if next then
-							next:Show()
-						elseif self:GetID() &lt; 13 then
-							next = CreateFrame("CheckButton", self:GetParent():GetName() .. self:GetID() + 1, self:GetParent(), "TellMeWhen_ConditionEditorParenthesisTemplate", self:GetID() + 1)
-							self:GetParent()[self:GetID() + 1] = next
-							local a, _, c, d, e = self:GetPoint()
-							next:SetPoint(a, self, c, d, e)
-							next:Show()
-							next:SetChecked(nil)
-						end
-					else
-						local last = self:GetParent()[self:GetID() - 1]
-						if type(last) == "table" and not last.checked then
-							self:Hide()
-						end
-						for i = self:GetID() + 1, #self:GetParent() do
-							self:GetParent()[i]:SetChecked(nil)
-							self:GetParent()[i]:Hide()
-						end
-					end
-
-					if oldstate ~= checked then
-					--	TMW.CNDT:ColorizeParentheses()
-					end
-				end
-
-				function self:GetChecked()
-					return self.checked
-				end
-				self:GetParent()[self:GetID()] = self
+				TMW:CInit(self)
 			</OnLoad>
-			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
-
-				TMW.HELP:Hide("CNDT_PARENTHESES_FIRSTSEE")
-			
-				self:SetChecked(not self.checked)
-				
-				local n = 0
-				if self:GetParent():IsShown() then
-					for k, frame in pairs(self:GetParent()) do
-						if type(frame) == "table" and frame:GetChecked() then
-							n = n + 1
-						end
-					end
-				end
-				
-				local CndtGroup = self:GetParent():GetParent()
-				if self.type == "(" then
-					CndtGroup:GetConditionSettings().PrtsBefore = n
-				else
-					CndtGroup:GetConditionSettings().PrtsAfter = n
-				end
-				CndtGroup:LoadAndDraw()
-	
-				TMW.CNDT:ColorizeParentheses()
-			</OnClick>
-			<OnEnter>
-				self.text:SetText(gsub(self.text:GetText(), "|cff%x%x%x%x%x%x", "|cffffffff"))
-			</OnEnter>
-			<OnLeave>
-				TMW.CNDT:ColorizeParentheses()
-			</OnLeave>
 		</Scripts>
-	<!-- 	<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/> -->
 	</CheckButton>
 	
 	
@@ -158,7 +86,7 @@
 			<Anchor point="TOPLEFT"/>
 		</Anchors>
 		<Frames>
-			<Frame name="$parentType" parentKey="Type" inherits="TMW_DropDownMenuTemplate">
+			<Frame parentKey="Type" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="26" y="-15"/>
 				</Anchors>
@@ -211,9 +139,9 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<Frame name="$parentIcon" parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate" hidden="true">
+			<Frame parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate" hidden="true">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="6"/>
+					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="6"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -226,10 +154,10 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<EditBox name="$parentUnit" inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
+			<EditBox inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
 				<Size x="120" y="18"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentType" relativePoint="RIGHT" x="10" y="0"/>
+					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="10" y="0"/>
 				</Anchors>
 				
 				<Scripts>
@@ -268,9 +196,9 @@
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
-			<Frame name="$parentOperator" parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
+			<Frame parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnit" relativePoint="RIGHT" x="6" y="0"/>
+					<Anchor point="LEFT" relativeKey="$parent.Unit" relativePoint="RIGHT" x="6" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -284,7 +212,7 @@
 				</Scripts>
 			</Frame>
 			
-			<Slider name="$parentSlider" parentKey="Slider" inherits="TellMeWhen_SliderTemplate" hidden="true">
+			<Slider parentKey="Slider" inherits="TellMeWhen_SliderTemplate" hidden="true">
 				<Size x="522" y="17"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-13" y="-39"/>
@@ -319,10 +247,10 @@
 			
 			
 			
-			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+			<EditBox inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="BOTTOMLEFT" x="0" y="-9"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="0" y="-9"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -335,10 +263,10 @@
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
-			<EditBox name="$parentEditBox2" inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
+			<EditBox inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentEditBox" relativePoint="RIGHT" x="13"/>
+					<Anchor point="LEFT" relativeKey="$parent.EditBox" relativePoint="RIGHT" x="13"/>
 				</Anchors>
 				<Scripts>
 					<OnEditFocusLost>
@@ -351,10 +279,10 @@
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
-			<CheckButton name="$parentCheck" inherits="TellMeWhen_CheckTemplate" parentKey="Check">
+			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="Check">
 				<Size x="25" y="25"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentEditBox" x="5" y="0"/>
+					<Anchor point="RIGHT" relativeKey="$parent.EditBox" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -370,10 +298,10 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			<CheckButton name="$parentCheck2" inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
+			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
 				<Size x="25" y="25"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentEditBox2" x="5" y="0"/>
+					<Anchor point="RIGHT" relativeKey="$parent.EditBox2" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -390,10 +318,10 @@
 				</Scripts>
 			</CheckButton>
 
-			<Frame name="$parentRunes" parentKey="Runes" hidden="true">
+			<Frame parentKey="Runes" hidden="true">
 				<Size x="1" y="1"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="11" y="10"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="TOPRIGHT" x="11" y="10"/>
 				</Anchors>
 				<Frames>
 					<Button parentKey="rune1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
@@ -466,9 +394,9 @@
 			</Frame>
 			
 
-			<Frame name="$parentBitFlags" parentKey="BitFlags" inherits="TMW_DropDownMenuTemplate">
+			<Frame parentKey="BitFlags" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentType" relativePoint="TOPRIGHT" x="15" y="0"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="TOPRIGHT" x="15" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -503,7 +431,7 @@
 				</Scripts>
 			</CheckButton>
 
-			<Button name="$parentAndOr" parentKey="AndOr">
+			<Button parentKey="AndOr">
 				<Size x="40" y="20"/>
 				<Anchors>
 					<Anchor point="BOTTOM" relativePoint="TOP" x="1" y="-2"/>
@@ -564,44 +492,48 @@
 				</Scripts>
 			</Button>
 
-			<Frame name="$parentOpenParenthesis" parentKey="OpenParenthesis">
+			<Frame parentKey="OpenParenthesis">
+				<KeyValues>
+					<KeyValue key="parenType" type="string" value="("/>
+					<KeyValue key="childPoint" type="string" value="LEFT"/>
+					<KeyValue key="childRelativePoint" type="string" value="RIGHT"/>
+					<KeyValue key="childXOffs" type="number" value="-8"/>
+				</KeyValues>
+
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentAndOr" x="5" y="0"/>
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.AndOr" x="5" y="0"/>
 				</Anchors>
 				<Frames>
-					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
+					<CheckButton inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
 						<Anchors>
 							<Anchor point="LEFT"/>
 						</Anchors>
 					</CheckButton>
-					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
+				</Frames>
+			</Frame>
+			<Frame parentKey="CloseParenthesis">
+				<KeyValues>
+					<KeyValue key="parenType" type="string" value=")"/>
+					<KeyValue key="childPoint" type="string" value="RIGHT"/>
+					<KeyValue key="childRelativePoint" type="string" value="LEFT"/>
+					<KeyValue key="childXOffs" type="number" value="8"/>
+				</KeyValues>
+
+				<Size x="100" y="20"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.AndOr" relativePoint="LEFT" x="-5" y="0"/>
+					<Anchor point="TOP" relativePoint="BOTTOM" x="0" y="2"/>
+				</Anchors>
+				<Frames>
+					<CheckButton inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
 						<Anchors>
-							<Anchor point="LEFT" relativeTo="$parent1" relativePoint="RIGHT" x="-8"/>
+							<Anchor point="RIGHT"/>
 						</Anchors>
 					</CheckButton>
 				</Frames>
 			</Frame>
 
-			<Frame name="$parentCloseParenthesis" parentKey="CloseParenthesis">
-				<Size x="100" y="20"/>
-				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentAndOr" relativePoint="LEFT" x="-5" y="0"/>
-					<Anchor point="TOP" relativeTo="$parent" relativePoint="BOTTOM" x="0" y="2"/>
-				</Anchors>
-				<Frames>
-					<CheckButton name="$parent1" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
-						<Anchors>
-							<Anchor point="RIGHT"/>
-						</Anchors>
-					</CheckButton>
-					<CheckButton name="$parent2" inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="2">
-						<Anchors>
-							<Anchor point="RIGHT" relativeTo="$parent1" relativePoint="LEFT" x="8"/>
-						</Anchors>
-					</CheckButton>
-				</Frames>
-			</Frame>
 			<Button parentKey="DeleteButton">
 				<Size x="30" y="30"/>
 				<Anchors>
@@ -758,9 +690,9 @@
 	</Frame>
 	
 	
-	<Frame parentKey="Conditions" name="$parentConditions" parent="TellMeWhen_IconEditorPages" inherits="TellMeWhen_IE_PageTemplate">
+	<Frame parentKey="Conditions" parent="TellMeWhen_IconEditorPages" inherits="TellMeWhen_IE_PageTemplate">
 		<Frames>			
-			<Frame name="$parentGroups" parentKey="Groups" >
+			<Frame parentKey="Groups" >
 				<Anchors>
 					<Anchor point="TOPLEFT" y="-4" x="-5"/>
 					<Anchor point="BOTTOMRIGHT" y="0"/>
@@ -777,11 +709,11 @@
 					</OnLoad>
 				</Scripts>
 				<Frames>
-					<Button name="$parentAddCondition" inherits="TellMeWhen_GradientFrame" parentKey="AddCondition">
+					<Button inherits="TellMeWhen_GradientFrame" parentKey="AddCondition">
 						<Size y="30"/>
 						<Layers>
 							<Layer level="OVERLAY">
-								<FontString name="$parentText" parentKey="text" inherits="GameFontNormalSmall" justifyH="LEFT">
+								<FontString parentKey="text" inherits="GameFontNormalSmall" justifyH="LEFT">
 									<Anchors>
 										<Anchor point="CENTER"/>
 									</Anchors>
