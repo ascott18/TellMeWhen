@@ -80,7 +80,7 @@
 	</CheckButton>
 	
 	
-	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_GradientFrame" virtual="true">
+	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_FlatFrame" virtual="true">
 		<Size x="563" y="69"/>
 		<Anchors>
 			<Anchor point="TOPLEFT"/>
@@ -434,7 +434,7 @@
 			<Button parentKey="AndOr">
 				<Size x="40" y="20"/>
 				<Anchors>
-					<Anchor point="BOTTOM" relativePoint="TOP" x="1" y="-2"/>
+					<Anchor point="BOTTOM" relativePoint="TOP" x="1" y="0"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -523,7 +523,7 @@
 				<Size x="100" y="20"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.AndOr" relativePoint="LEFT" x="-5" y="0"/>
-					<Anchor point="TOP" relativePoint="BOTTOM" x="0" y="2"/>
+					<Anchor point="TOP" relativePoint="BOTTOM" x="0" y="1"/>
 				</Anchors>
 				<Frames>
 					<CheckButton inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
@@ -534,10 +534,9 @@
 				</Frames>
 			</Frame>
 
-			<Button parentKey="DeleteButton">
-				<Size x="30" y="30"/>
+			<Button parentKey="DeleteButton" inherits="TellMeWhen_DeleteButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="-3" y="5"/>
+					<Anchor point="TOPLEFT" x="1" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -549,15 +548,12 @@
 						self:GetParent():DeleteHandler()
 					</OnClick>
 				</Scripts>
-				<NormalTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
-				<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
-				<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
 
 			<Button parentKey="Up">
 				<Size x="18" y="18"/>
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.DeleteButton" relativePoint="BOTTOM" x="-1" y="0"/>
+					<Anchor point="TOP" relativeKey="$parent.DeleteButton" relativePoint="BOTTOM" x="0" y="-7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -709,7 +705,7 @@
 					</OnLoad>
 				</Scripts>
 				<Frames>
-					<Button inherits="TellMeWhen_GradientFrame" parentKey="AddCondition">
+					<Button parentKey="AddCondition" inherits="TellMeWhen_FlatFrame">
 						<Size y="30"/>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -743,13 +739,6 @@
 								TMW.CNDT[TMW.CNDT.settings.n].Type.EditBox:SetFocus()
 							</OnClick>
 						</Scripts>
-						<HighlightTexture alphaMode="ADD" alpha="0.06">
-							<Color r="1" g="1" b="1"/>
-							<Anchors>
-								<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
-								<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
-							</Anchors>
-						</HighlightTexture>
 					</Button>
 				</Frames>
 			</Frame>

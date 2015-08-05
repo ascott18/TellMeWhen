@@ -1,29 +1,29 @@
 ﻿<Ui>
 
 
-	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_GradientFrame" virtual="true" >
+	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_FlatFrame" virtual="true" >
 		<Size y="31"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="15" y="-4"/>
+						<Anchor point="TOPLEFT" x="17" y="-4"/>
 						<Anchor point="RIGHT" x="-15"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="DataText" inherits="GameFontHighlightSmall" justifyH="LEFT" justifyV="TOP" wordwrap="false">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="15" y="4"/>
+						<Anchor point="BOTTOMLEFT" x="17" y="4"/>
 						<Anchor point="RIGHT" x="-15"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="Delete">
-				<Size x="20" y="20"/>
+			<Button parentKey="Delete" inherits="TellMeWhen_DeleteButtonTemplate">
+				<Size x="14" y="14"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="-2" y="2"/>
+					<Anchor point="TOPLEFT" x="0" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -38,10 +38,6 @@
 						TMW.EVENTS:LoadConfig()
 					</OnClick>
 				</Scripts>
-
-				<NormalTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
-				<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
-				<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
 
 			<Button parentKey="Play">
@@ -169,7 +165,7 @@
 	</Button>
 
 
-	<Button name="TellMeWhen_HandlerPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_GradientFrame" virtual="true" >
+	<Button name="TellMeWhen_HandlerPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_FlatFrame" virtual="true" >
 		<Size y="70"/>
 		<Anchors>
 			<Anchor point="LEFT" x="2" y="0"/>
@@ -192,14 +188,6 @@
 				</FontString>
 			</Layer>
 		</Layers>
-		
-		<HighlightTexture alphaMode="ADD" alpha="0.1">
-			<Color r="1" g="1" b="1"/>
-			<Anchors>
-				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
-				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
-			</Anchors>
-		</HighlightTexture>
 
 		<Scripts>
 			<OnLoad>
@@ -214,7 +202,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="TellMeWhen_EventPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_GradientFrame" virtual="true" >
+	<Button name="TellMeWhen_EventPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_FlatFrame" virtual="true" >
 		<Size y="18"/>
 		<Anchors>
 			<Anchor point="LEFT" x="9" y="0"/>
@@ -236,14 +224,6 @@
 				</FontString>
 			</Layer>
 		</Layers>
-		
-		<HighlightTexture alphaMode="ADD" alpha="0.1">
-			<Color r="1" g="1" b="1"/>
-			<Anchors>
-				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
-				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
-			</Anchors>
-		</HighlightTexture>
 
 		<Scripts>
 			<OnLoad>
@@ -257,8 +237,8 @@
 		</Scripts>
 	</Button>
 
-	<Button name="TellMeWhen_EventHandler_SubHandlerListButton" inherits="TellMeWhen_GradientFrame" virtual="true" >
-		<Size y="14"/>
+	<Button name="TellMeWhen_EventHandler_SubHandlerListButton" inherits="TellMeWhen_FlatFrame" virtual="true" >
+		<Size y="15"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
@@ -276,14 +256,6 @@
 				self.EventHandler:SetSubHandler(self.subHandlerIdentifier)
 			</OnClick>
 		</Scripts>
-		
-		<HighlightTexture alphaMode="ADD" alpha="0.1">
-			<Color r="1" g="1" b="1"/>
-			<Anchors>
-				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
-				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
-			</Anchors>
-		</HighlightTexture>
 	</Button>
 
 	
@@ -393,7 +365,7 @@
 				</Scripts>
 			</Frame>
 
-			<Button name="$parentAddEvent" inherits="TellMeWhen_GradientFrame" parentKey="AddEvent">
+			<Button name="$parentAddEvent" inherits="TellMeWhen_FlatFrame" parentKey="AddEvent">
 				<Size y="30"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="TOPLEFT" y="2"/>

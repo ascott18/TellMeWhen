@@ -747,7 +747,7 @@ function CndtGroup:OnNewInstance()
 	
 	CNDT[ID] = self
 
-	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -16.5)
+	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -20)
 	
 	self:Hide()
 	

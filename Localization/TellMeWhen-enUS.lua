@@ -922,7 +922,7 @@ L["UIPANEL_DELGROUP_DESC2"] = "Hold |cff7fffffCtrl|r to bypass confirmation."
 L["CONFIRM_HEADER"] = "Are you sure?"
 
 L["CONFIRM_DELGROUP"] = "Delete Group"
-L["CONFIRM_DELGROUP_DESC"] = "Are you sure that you want to delete %s?"
+L["CONFIRM_DELGROUP_DESC"] = "%s will be deleted."
 
 
 L["UIPANEL_GROUPID"] = "Group ID"

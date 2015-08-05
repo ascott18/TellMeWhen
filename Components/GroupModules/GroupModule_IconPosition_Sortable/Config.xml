@@ -1,6 +1,6 @@
 <Ui>
 
-	<Button name="TellMeWhen_GM_IPS_IconSortTemplate" inherits="TellMeWhen_GradientFrame" virtual="true">
+	<Button name="TellMeWhen_GM_IPS_IconSortTemplate" inherits="TellMeWhen_FlatFrame" virtual="true">
 		<Size y="18"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -12,7 +12,7 @@
 				</FontString>
 				<FontString parentKey="Number" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="RIGHT" relativePoint="LEFT" x="-1"/>
+						<Anchor point="RIGHT" relativePoint="LEFT" x="-2"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -23,17 +23,8 @@
 				<Anchor point="RIGHT" x="-3"/>
 				<Anchor point="LEFT" relativePoint="CENTER" x="3"/>
 			</Anchors>
-		</ButtonText><!-- 
-		<NormalFont style="GameFontNormalSmall"/>
-		<HighlightFont style="GameFontHighlightSmall"/> -->
+		</ButtonText>
 
-		<HighlightTexture alphaMode="ADD" alpha="0.1">
-			<Color r="1" g="1" b="1"/>
-			<Anchors>
-				<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
-				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
-			</Anchors>
-		</HighlightTexture>
 	</Button>
 
 	<CheckButton name="TellMeWhen_ArrowButton_Template" virtual="true">

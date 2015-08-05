@@ -121,8 +121,8 @@ function EVENTS:LoadConfig()
 			frame = CreateFrame("Button", EventHandlerFrames:GetName().."Event"..eventID, EventHandlerFrames, "TellMeWhen_Event", eventID)
 			EventHandlerFrames[eventID] = frame
 
-			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, -0.5)
-			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, -0.5)
+			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, -2)
+			frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, -2)
 
 			local p, t, r, x, y = frame.EventName:GetPoint(1)
 			frame.EventName:SetPoint(p, t, r, x, y + yAdjustTitle)
@@ -766,8 +766,8 @@ function ColumnConfig:GetListItemFrame(frameID)
 		SubHandlerList[frameID] = frame
 
 		local previousFrame = frameID > 1 and SubHandlerList[frameID - 1] or nil
-		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, 0)
-		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, 0)
+		frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, -2)
+		frame:SetPoint("TOPRIGHT", previousFrame, "BOTTOMRIGHT", 0, -2)
 	end
 
 	frame.EventHandler = self

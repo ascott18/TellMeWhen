@@ -280,7 +280,7 @@ function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition,
 	-- Fix its size to take the full width.
 	container:ClearAllPoints()
 	ScrollFrame:SetScrollChild(container)
-	container:SetSize(x, 1)
+	container:SetSize(1, 1)
 	
 	local relPoint = leftSide and "LEFT" or "RIGHT"
 	if exteriorScrollBarPosition then
@@ -552,7 +552,7 @@ function IE:OnInitialize()
 
 	local groupMainTab = IE:RegisterTab("GROUP", "GROUPMAIN", "GroupMain", 1)
 	groupMainTab:SetText(L["GROUP"])
-	TMW:TT(groupMainTab, "GROUP", "GROUP") --TODO: this needs a real description.
+	TMW:TT(groupMainTab, "GROUP", "GROUPSETTINGS_DESC")
 	
 
 	-- Create resizer
@@ -1349,7 +1349,7 @@ function IE:PositionPanels(parentPanelName, panelList)
 			local last = panelColumn.currentPanels[#panelColumn.currentPanels]
 
 			if type(last) == "table" then
-				panel:SetPoint("TOP", last, "BOTTOM", 0, -11)
+				panel:SetPoint("TOP", last, "BOTTOM", 0, -20)
 			else
 				panel:SetPoint("TOP", 0, -11)
 			end
@@ -2102,10 +2102,8 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		if self:GetHeight() <= 0 then
 			self:SetHeight_base(1)
 		end
-		local hue = 2/3
-		
-		self.Background:SetTexture(hue, hue, hue) -- HUEHUEHUE
-		self.Background:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
+
+		self.Background:SetTexture(.66, .66, .66, 0.075)
 
 		self.height = self:GetHeight()
 	end,
@@ -2134,11 +2132,11 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 					offs = (remainingFlash/period)
 				end
 				offs = offs*0.3
-				bg:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05 + offs, 1, 1, 1, 0.10 + offs)
+				bg:SetTexture(.66, .66, .66, 0.075 + offs)
 			end
 
 			if timePassed > duration then
-				bg:SetGradientAlpha("VERTICAL", 1, 1, 1, 0.05, 1, 1, 1, 0.10)
+				bg:SetTexture(.66, .66, .66, 0.075)
 				ticker:Cancel()
 			end	
 		end)
@@ -2189,7 +2187,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 	end,
 	OnShow = function(self)
 		local p, r, t, x, y = self:GetPoint(1)
-		self:SetPoint(p, r, t, x, -11)
+		self:SetPoint(p, r, t, x, -16)
 
 		-- Restore the old height if it is still set to 1.
 		if self.__oldHeight and floor(self:GetHeight() + 0.5) == 1 then
@@ -2199,6 +2197,10 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 	end,
 
 	AdjustHeight = function(self, bottomPadding)
+		if not self:GetTop() then
+			return
+		end
+
 		local top = self:GetTop() * self:GetEffectiveScale()
 		local lowest = top
 
@@ -2368,6 +2370,14 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 		self.ScrollBar.Thumb:SetHeight(max(height*self.percentage, 20))
 
 		self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(self:GetVerticalScroll() * self.percentage))
+
+
+		-- Set the height of the container to match the content.
+		self.container:SetHeight(1)
+		local _, _, _, height = self.container:GetBoundsRect()
+		if height then
+			self.container:SetHeight(height)
+		end
 	end,
 
 	OnVerticalScroll = function(self, offset)

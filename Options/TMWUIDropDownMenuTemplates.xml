@@ -265,14 +265,9 @@
 
 		<Layers>
 
-			<Layer level="ARTWORK">
+			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" setAllPoints="true">
-					<Color r="1" g="1" b="1" a="1"/>
-					
-					<Gradient orientation="VERTICAL">
-						<MinColor r="0.04" g="0.04" b="0.04" a="1"/>
-						<MaxColor r="0.04" g="0.04" b="0.04" a="1"/>
-					</Gradient>
+					<Color r="0.04" g="0.04" b="0.04" a="1"/>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">

@@ -10,21 +10,17 @@
 			<Anchor point="LEFT" x="0"/>
 			<Anchor point="RIGHT" />
 		</Anchors>
-		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" tile="true">
-			<EdgeSize>
-				<AbsValue val="1"/>
-			</EdgeSize>
-		</Backdrop>
+
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" setAllPoints="true"/>
 			</Layer>
 			<Layer level="OVERLAY">
-				<FontString parentKey="Header" inherits="GameFontNormalSmall" justifyH="CENTER" alpha="1">
+				<FontString parentKey="Header" wordwrap="false" inherits="GameFontNormal" justifyH="CENTER" alpha="1">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="0"/>
-				<!-- 		<Anchor point="LEFT" x="1" />
-						<Anchor point="RIGHT" x="-1" /> -->
+						<Anchor point="LEFT" x="1" />
+						<Anchor point="RIGHT" x="-1" />
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -687,6 +683,20 @@
 		</Layers>
 	</Frame>
 
+	<Button name="TellMeWhen_FlatFrame" virtual="true">
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Background" setAllPoints="true">
+					<Color r="0.66" g="0.66" b="0.66" a="0.075"/>
+				</Texture>
+			</Layer>
+		</Layers>
+
+		<HighlightTexture alphaMode="ADD" alpha="0.1" setAllPoints="true">
+			<Color r="1" g="1" b="1"/>
+		</HighlightTexture>
+	</Button>
+
 	<Texture name="TellMeWhen_InputBoxTemplateBorder" virtual="true">
 		<Size x="1" y="1"/>
 		<Color r="0.4" g="0.4" b="0.4" a="1"/>
@@ -1034,6 +1044,18 @@
 		<Frames>
 			<Button inherits="TellMeWhen_clickinterceptor"/>
 		</Frames>
+	</Button>
+
+	<Button name="TellMeWhen_DeleteButtonTemplate" virtual="true">
+		<Size x="18" y="18"/>
+		<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\RedX"/>
+		<PushedTexture file="Interface\AddOns\TellMeWhen\Textures\RedX">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="-2" y="-2"/>
+				<Anchor point="BOTTOMRIGHT" x="-2" y="-2"/>
+			</Anchors>
+		</PushedTexture>
+		<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\RedX" alphaMode="ADD"/>
 	</Button>
 
 
@@ -1406,7 +1428,7 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="background">
-					<Color r="0.05" g="0.05" b="0.05" a="0.995"/>
+					<Color r="0.05" g="0.05" b="0.05" a="1"/>
 				</Texture>
 			</Layer>
 
@@ -2947,7 +2969,7 @@
 
 					<Frame parentKey="IconNotLoaded" inherits="TellMeWhen_IE_PageTemplate">
 						<Frames>
-							<Frame name="$parentMessage" inherits="TellMeWhen_GradientFrame" parentKey="Message">
+							<Frame name="$parentMessage" inherits="TellMeWhen_FlatFrame" parentKey="Message">
 								<Size y="1"/>
 								<Anchors>
 									<Anchor point="LEFT" x="15" />
@@ -3105,7 +3127,7 @@
 					<Frame parentKey="Confirm" inherits="TellMeWhen_IE_PageTemplate">
 
 						<Frames>
-							<Frame parentKey="MiddleBand" inherits="TellMeWhen_GradientFrame">
+							<Frame parentKey="MiddleBand" inherits="TellMeWhen_FlatFrame">
 								<Size y="170"/>
 								<Anchors>
 									<Anchor point="LEFT" x="15" />
