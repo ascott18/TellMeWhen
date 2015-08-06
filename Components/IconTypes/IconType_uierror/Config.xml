@@ -51,7 +51,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["ICONMENU_UIERROR"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["ICONMENU_UIERROR"])
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.CLEUDur, self.CLEUNoRefresh)
 				self.CLEUDur:SetPoint("LEFT", 8, 0)

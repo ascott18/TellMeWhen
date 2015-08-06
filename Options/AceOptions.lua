@@ -226,67 +226,6 @@ TMW.GroupConfigTemplate = {
 			desc = L["UIPANEL_MAIN_DESC"],
 			order = 1,
 			args = {
-				
-				CheckOrder = {
-					name = L["CHECKORDER"],
-					desc = L["CHECKORDER_ICONDESC"],
-					type = "select",
-					values = checkorder,
-					style = "dropdown",
-					order = 26,
-				},
-				View = {
-					name = L["UIPANEL_GROUPTYPE"],
-					desc = L["UIPANEL_GROUPTYPE_DESC"],
-					type = "group",
-					dialogInline = true,
-					guiInline = true,
-					order = 30,
-					get = function(info)
-						local group = FindGroupFromInfo(info)
-						return group:GetSettings()[info[#info-1]] == info[#info]
-					end,
-					set = function(info)
-						local group = FindGroupFromInfo(info)
-						group:GetSettings()[info[#info-1]] = info[#info]
-						
-						-- This intentional. Double setup is needed for dealing with Masque bullshit,
-						-- Second setup is addon-wide so that all icons and groups can become aware of the new view if needed.
-						group:Setup()
-						TMW:Update()
-						
-						IE:LoadGroup(1)
-					end,
-					args = {}
-				},
-				delete = {
-					name = L["UIPANEL_DELGROUP"],
-					--desc = L["UIPANEL_DELGROUP_DESC2"],
-					type = "execute",
-					order = 50,
-					func = function(info)
-						local group = FindGroupFromInfo(info)
-						local domain = group.Domain
-
-
-						if TMW[domain][group.ID-1] then
-							TMW.ACEOPTIONS:LoadConfigGroup(info, TMW[domain][group.ID-1])
-						elseif TMW[domain][group.ID] then
-							TMW.ACEOPTIONS:LoadConfigGroup(info, TMW[domain][group.ID])
-						end
-
-						TMW:Group_Delete(group)
-					end,
-					confirm = function(info)
-						--if IsControlKeyDown() then
-						--	return false
-						--else
-						if TMW:Group_HasIconData(FindGroupFromInfo(info)) then
-							return true
-						end
-						return false
-					end,
-				},
 			},
 		},
 	}
@@ -321,18 +260,6 @@ local addGroupButton = {
 				return
 			end
 		end
-	end,
-}
-local viewSelectToggle = {
-	name = function(info)
-		return TMW.Views[info[#info]].name
-	end,
-	desc = function(info)
-		return TMW.Views[info[#info]].desc
-	end,
-	type = "toggle",
-	order = function(info)
-		return TMW.Views[info[#info]].order
 	end,
 }
 
@@ -695,24 +622,7 @@ TMW.OptionsTable = {
 					},
 					order = 29,
 				},
-				CheckOrder = {
-					name = L["CHECKORDER"],
-					desc = L["CHECKORDER_GROUPDESC"],
-					type = "select",
-					values = checkorder,
-					style = "dropdown",
-					order = 30,
-				},
-				--[[resetall = {
-					name = L["UIPANEL_ALLRESET"],
-					desc = L["UIPANEL_TOOLTIP_ALLRESET"],
-					type = "execute",
-					order = 51,
-					confirm = true,
-					func = function() TMW.db:ResetProfile() end,
-				},]]
-				importexport = importExportBoxTemplate,
-
+				
 				deleteNonCurrentLocaleData = {
 					name = ("Delete non-essential cached data for non-%s locales."):format(GetLocale()),
 					desc = "TellMeWhen_Options caches some data about WoW's spells for each locale that you play in. You can safely delete that data for other locales to free up space.",
@@ -815,7 +725,6 @@ function TMW.ACEOPTIONS:CompileOptions()
 
 		-- Dynamic Icon View Settings --
 		for view in pairs(TMW.Views) do
-			TMW.GroupConfigTemplate.args.main.args.View.args[view] = viewSelectToggle
 			addGroupFunctionGroup.args[view] = addGroupButton
 		end
 	

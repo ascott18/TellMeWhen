@@ -102,6 +102,7 @@ All other icons in the group will be made unavailable for individual configurati
 
 You may wish to customize the group's layout direction and/or sorting options if you use it as a controlled group.]]
 L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"] = [[The current icon type does not have the ability to control an entire group.]]
+L["ICONMENU_CTRLGROUP_UNAVAILABLEID_DESC"] = [[Only the first icon in a group (icon ID 1) can be a group controller.]]
 
 
 
@@ -829,7 +830,7 @@ L["UIPANEL_GROUPS_GLOBAL_DESC"] = "Settings for the groups that are available to
 
 L["UIPANEL_PROFILES"] = "Profiles"
 
-L["UIPANEL_GROUPTYPE"] = "Group Display Method"
+L["UIPANEL_GROUPTYPE"] = "Display Method"
 L["UIPANEL_GROUPTYPE_DESC"] = "Choose how you would like icons within this group to be displayed."
 L["UIPANEL_GROUPTYPE_ICON"] = "Icon"
 L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the group using TellMeWhen's traditional icon display.]]

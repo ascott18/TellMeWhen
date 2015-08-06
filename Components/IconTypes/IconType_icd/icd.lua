@@ -64,7 +64,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_ICDType", function(self)
-	self.Header:SetText(TMW.L["ICONMENU_ICDTYPE"])
+	self:SetTitle(TMW.L["ICONMENU_ICDTYPE"])
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 1,
 		function(check)
@@ -83,7 +83,7 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_ICDType", function(sel
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ICDSettings", function(self)
-	self.Header:SetText(Type.name)
+	self:SetTitle(Type.name)
 	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_DONTREFRESH"], L["ICONMENU_DONTREFRESH_DESC"])

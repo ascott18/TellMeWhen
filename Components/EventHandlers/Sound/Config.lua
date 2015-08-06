@@ -41,39 +41,39 @@ TMW.HELP:NewCode("SND_INVALID_CUSTOM")
 
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()	
-	local Sounds = Sound.ConfigContainer.SoundList
+	local SoundList = Sound.ConfigContainer.SoundList
 	
-	Sounds.Header:SetText(L["SOUND_SOUNDTOPLAY"])
+	SoundList.Header:SetText(L["SOUND_SOUNDTOPLAY"])
 	
-	Sounds.None:SetPoint("TOP")
-	Sounds.None.Name:SetText(NONE)
-	Sounds.None.Play:Hide()
-	Sounds.None.soundfile = ""
-	Sounds.None.soundname = "None"
+	SoundList.None:SetPoint("TOP")
+	SoundList.None.Name:SetText(NONE)
+	SoundList.None.Play:Hide()
+	SoundList.None.soundfile = ""
+	SoundList.None.soundname = "None"
 	
-	-- This must be done explicityly because otherwise, frame #1 would try to anchor to Sounds[0], which is the frame's userdata.
-	Sound:GetFrame(1):SetPoint("TOP", Sounds.None, "BOTTOM", 0, 0)
+	-- This must be done explicityly because otherwise, frame #1 would try to anchor to SoundList[0], which is the frame's userdata.
+	Sound:GetFrame(1):SetPoint("TOP", SoundList.None, "BOTTOM", 0, 0)
 	
 	Sound:SetSoundsOffset(0)
 
-	Sounds.ScrollBar:SetValue(0)
+	SoundList.ScrollBar:SetValue(0)
 end)
 
 
 function Sound:GetNumFramesNeeded()
-	local Sounds = self.ConfigContainer.SoundList
-	return floor((Sounds:GetHeight()-5)/(Sounds.None:GetHeight())) - 1
+	local SoundList = self.ConfigContainer.SoundList
+	return floor((SoundList:GetHeight()-5)/(SoundList.None:GetHeight())) - 1
 end
 
 function Sound:GetFrame(id)
-	local Sounds = self.ConfigContainer.SoundList
-	if Sounds[id] then
-		return Sounds[id]
+	local SoundList = self.ConfigContainer.SoundList
+	if SoundList[id] then
+		return SoundList[id]
 	end
 	
-	local f = CreateFrame("Button", nil, Sounds, "TellMeWhen_SoundSelectButton", id)
-	Sounds[id] = f
-	f:SetPoint("TOP", Sounds[id-1], "BOTTOM", 0, 0)
+	local f = CreateFrame("CheckButton", nil, SoundList, "TellMeWhen_SoundSelectButton", id)
+	SoundList[id] = f
+	f:SetPoint("TOP", SoundList[id-1], "BOTTOM", 0, 0)
 	return f
 end
 
@@ -201,9 +201,8 @@ function Sound:SelectSound(name)
 		if frame:IsShown() and frame.soundname == name then
 			soundFrame = frame
 		end
-		frame.selected = nil
-		frame:UnlockHighlight()
-		frame:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+
+		frame:SetChecked(false)
 	end
 
 	Sound.selectedListID = 0
@@ -211,17 +210,15 @@ function Sound:SelectSound(name)
 	self.ConfigContainer.Custom.Background:Hide()
 	self.ConfigContainer.Custom.Background:SetVertexColor(1, 1, 1, 1)
 	self.ConfigContainer.Custom:SetText("")
-	self.ConfigContainer.SoundList.None:UnlockHighlight()
-	self.ConfigContainer.SoundList.None:GetHighlightTexture():SetVertexColor(1, 1, 1, 1)
+
+	self.ConfigContainer.SoundList.None:SetChecked(false)
 
 	if name == "None" then
 		Sound.selectedListID = -1 -- lame
-		self.ConfigContainer.SoundList.None:LockHighlight()
-		self.ConfigContainer.SoundList.None:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
+		self.ConfigContainer.SoundList.None:SetChecked(true)
 	elseif soundFrame then
+		frame:SetChecked(true)
 		Sound.selectedListID = soundFrame.listID
-		soundFrame:LockHighlight()
-		soundFrame:GetHighlightTexture():SetVertexColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 	elseif strfind(name, "%.[^\\]+$") then
 		self.ConfigContainer.Custom.selected = 1
 		self.ConfigContainer.Custom.Background:Show()

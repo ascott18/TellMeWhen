@@ -85,7 +85,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["CONFIGPANEL_CBAR_HEADER"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["CONFIGPANEL_CBAR_HEADER"])
 				
 				self.ShowCBar:ConstrainLabel(self.InvertCBar)
 				self.InvertCBar:ConstrainLabel(self.CBarOffs)

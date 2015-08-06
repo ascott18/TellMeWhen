@@ -106,7 +106,7 @@ local totemNames = {
 totemNames = totemNames[pclass] or totemNames.OTHER
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots", function(self)
-	self.Header:SetText(L["TOTEMS"])
+	self:SetTitle(L["TOTEMS"])
 
 	local data = { numPerRow = #totemNames >= 4 and #totemNames/2 or #totemNames}
 	for i, name in ipairs(totemNames) do

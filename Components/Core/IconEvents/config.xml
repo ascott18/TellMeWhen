@@ -1,7 +1,7 @@
 ﻿<Ui>
 
 
-	<Button name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_FlatFrame" virtual="true" >
+	<CheckButton name="TellMeWhen_Event" motionScriptsWhileDisabled="true" inherits="TellMeWhen_FlatFrame" virtual="true" >
 		<Size y="31"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -72,9 +72,7 @@
 						self:GetParent():LockHighlight()
 					</OnEnter>
 					<OnLeave>
-						if not self:GetParent().selected then
-							self:GetParent():UnlockHighlight()
-						end
+						self:GetParent():UnlockHighlight()
 					</OnLeave>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
@@ -162,7 +160,7 @@
 				<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
 			</Anchors>
 		</HighlightTexture>
-	</Button>
+	</CheckButton>
 
 
 	<Button name="TellMeWhen_HandlerPicker" motionScriptsWhileDisabled="true" inherits="TellMeWhen_FlatFrame" virtual="true" >
@@ -237,7 +235,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="TellMeWhen_EventHandler_SubHandlerListButton" inherits="TellMeWhen_FlatFrame" virtual="true" >
+	<CheckButton name="TellMeWhen_EventHandler_SubHandlerListButton" inherits="TellMeWhen_FlatFrame" virtual="true" >
 		<Size y="15"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -256,15 +254,11 @@
 				self.EventHandler:SetSubHandler(self.subHandlerIdentifier)
 			</OnClick>
 		</Scripts>
-	</Button>
+	</CheckButton>
 
 	
 	<CheckButton name="TellMeWhen_EventSettings_CheckTemplate" inherits="TellMeWhen_CheckTemplate" virtual="true">
 		<Size x="26" y="26"/>
-
-		<KeyValues>
-			<KeyValue key="tmwClass" type="string" value="Config_CheckButton_Event"/>
-		</KeyValues>
 	</CheckButton>
 
 	<CheckButton name="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" inherits="TellMeWhen_EventSettings_CheckTemplate" virtual="true">
@@ -274,12 +268,6 @@
 	</CheckButton>
 
 	<Slider name="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">
-
-		<KeyValues>
-			<KeyValue key="tmwClass" type="string" value="Config_Slider_Event"/>
-		</KeyValues>
-
-		<Size y="17"/>
 		<Anchors>
 			<Anchor point="LEFT" x="10" />
 			<Anchor point="RIGHT" x="-20"/>
@@ -605,31 +593,10 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
+								TMW:CInit(self)
+
+								self:SetSetting("Value")
 							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								local t = TMW:CleanString(self)
-								if strfind(t, ":") then
-									t = TMW.toSeconds(t)
-								end
-								t = tonumber(t) or 0
-								self:SetText(t)
-
-								if TMW.CI.ics then
-									TMW.EVENTS:GetEventSettings().Value = t
-									TMW.IE:ScheduleIconSetup()
-								end
-
-								self:GetScript("OnTextChanged")(self)
-							</OnEditFocusLost>
-							<OnEnable>
-								self:SetAlpha(1)
-							</OnEnable>
-							<OnDisable>
-								self:SetAlpha(.4)
-							</OnDisable>
 						</Scripts>
 					</EditBox>
 
@@ -680,11 +647,6 @@
 
 
 					<Slider parentKey="Frequency" inherits="TellMeWhen_SliderTemplate" valuestep="0.1" >
-
-						<KeyValues>
-							<KeyValue key="tmwClass" type="string" value="Config_Slider_Event"/>
-						</KeyValues>
-
 						<Size x="170" y="17"/>
 						<Anchors>
 							<Anchor point="TOP" relativeKey="$parent.IconEventWhileCondition" relativePoint="BOTTOM" y="-18"/>
@@ -746,6 +708,15 @@
 		<Scripts>
 			<OnLoad>
 				TMW:CInit(self)
+
+
+				self:CScriptAdd("SettingTableRequested", function(self)
+					return TMW.CI.ics and TMW.EVENTS:GetEventSettings()
+				end)
+
+				self:CScriptAdd("DescendantSettingSaved", function(self)
+					TMW.EVENTS:LoadConfig()
+				end)
 				
 				self.EventListHeader:SetText(TMW.L["EVENTS_HANDLERS_HEADER"])
 				self.EventSettingsContainerHeader:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])

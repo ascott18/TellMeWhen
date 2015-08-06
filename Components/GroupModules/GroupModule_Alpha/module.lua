@@ -33,6 +33,7 @@ local GroupModule_Alpha = TMW:NewClass("GroupModule_Alpha", "GroupModule"){
 	end,
 }
 
+GroupModule_Alpha:RegisterConfigPanel_XMLTemplate(35, "TellMeWhen_GM_Alpha")
 
 GroupModule_Alpha:RegisterGroupDefaults{
 	Alpha = 1,

@@ -40,7 +40,9 @@
 
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(GetSpellInfo(75))
+				TMW:CInit(self)
+				
+				self:SetTitle(GetSpellInfo(75))
 				self.Text:SetText(TMW.L["ICONTYPE_SWINGTIMER_TIP"])
 				
 				self.Text:SetWidth(self:GetWidth() - 15)

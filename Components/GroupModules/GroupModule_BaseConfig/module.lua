@@ -23,10 +23,34 @@ local BaseConfig = TMW:NewClass("GroupModule_BaseConfig", "GroupModule")
 BaseConfig.DefaultPanelColumnIndex = 1
 
 
-BaseConfig:RegisterConfigPanel_XMLTemplate(1, "TellMeWhen_GM_Rename")
+BaseConfig:RegisterConfigPanel_XMLTemplate(1, "TellMeWhen_GM_Rename"):SetColumnIndex(2)
+
+BaseConfig:RegisterConfigPanel_ConstructorFunc(2, "TellMeWhen_GM_View", function(self)
+	self:SetTitle(L["UIPANEL_GROUPTYPE"])
+	
+	local data = { numPerRow = 3, }
+
+	local function Reload()
+		TMW:Update()
+
+		-- We need to call this so that we make sure to get the correct panels
+		-- after the view changes.
+		TMW.IE:LoadGroup(1)
+	end
+
+	for view, viewData in TMW:OrderedPairs(TMW.Views, TMW.OrderSort, true) do
+		tinsert(data, function(check)
+			check:SetTexts(viewData.name, viewData.desc)
+			check:SetSetting("View", view)
+			check:CScriptAddPre("SettingSaved", Reload)
+		end)
+	end
+
+	self:BuildSimpleCheckSettingFrame(data)
+end)
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_GS_Combat", function(self)
-	self.Header:SetText(COMBAT)
+	self:SetTitle(COMBAT)
 	
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 1,
@@ -38,7 +62,7 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_GS_Combat", functi
 end)
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(11, "TellMeWhen_GS_Role", function(self)
-	self.Header:SetText(ROLE)
+	self:SetTitle(ROLE)
 	
 	local data = {
 		numPerRow = 3
@@ -69,7 +93,7 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(11, "TellMeWhen_GS_Role", functio
 end)
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", function(self)
-	self.Header:SetText(SPECIALIZATION)
+	self:SetTitle(SPECIALIZATION)
 	
 	local data = {
 		numPerRow = GetNumSpecializations()
@@ -104,7 +128,7 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", functio
 end)
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(13, "TellMeWhen_GS_DualSpec", function(self)
-	self.Header:SetText(L["UIPANEL_SPEC"])
+	self:SetTitle(L["UIPANEL_SPEC"])
 	
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,
@@ -127,4 +151,5 @@ end)
 
 BaseConfig:RegisterConfigPanel_XMLTemplate(20, "TellMeWhen_GM_Dims")
 
-BaseConfig:RegisterConfigPanel_XMLTemplate(50, "TellMeWhen_GM_DBLoc")
+BaseConfig:RegisterConfigPanel_XMLTemplate(500, "TellMeWhen_GM_Delete")
+

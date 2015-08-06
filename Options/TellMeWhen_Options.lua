@@ -865,26 +865,9 @@ TMW:RegisterCallback("TMW_ON_PROFILE", function(event, arg2, arg3)
 end)
 
 
-function IE:DisplayPage(pageKey)
-	for _, otherPage in TMW:Vararg(TMW.IE.Pages:GetChildren()) do
-		otherPage:Hide()
-	end
 
-	-- If no key is specified, the function was probably just being called to hide all pages.
-	if not pageKey then
-		return
-	end
 
-	local page = TellMeWhen_IconEditor.Pages[pageKey]
-	if not page then
-		TMW:Error(("Couldn't find child of TellMeWhen_IconEditor.Pages with key %q"):format(pageKey))
-	end
 
-	page:Show()
-
-	return page
-end
- 
 
 TMW:NewClass("IconEditorTabBase", "Button"){
 
@@ -1024,8 +1007,6 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 		return true
 	end,
 }
-
-
 
 
 IE.TabGroups = {}
@@ -1203,6 +1184,25 @@ function IE:CreateTabGroups()
 	end)
 end
 
+function IE:DisplayPage(pageKey)
+	for _, otherPage in TMW:Vararg(TMW.IE.Pages:GetChildren()) do
+		otherPage:Hide()
+	end
+
+	-- If no key is specified, the function was probably just being called to hide all pages.
+	if not pageKey then
+		return
+	end
+
+	local page = TellMeWhen_IconEditor.Pages[pageKey]
+	if not page then
+		TMW:Error(("Couldn't find child of TellMeWhen_IconEditor.Pages with key %q"):format(pageKey))
+	end
+
+	page:Show()
+
+	return page
+end
 
 
 
@@ -1351,7 +1351,7 @@ function IE:PositionPanels(parentPanelName, panelList)
 			if type(last) == "table" then
 				panel:SetPoint("TOP", last, "BOTTOM", 0, -20)
 			else
-				panel:SetPoint("TOP", 0, -11)
+				panel:SetPoint("TOP", 0, -14)
 			end
 			
 			panel:Show()
@@ -1753,7 +1753,7 @@ local function bubble(frame, get, script, ...)
 	if frame.isLibOOInstance and frame.class.inherits[CScriptProvider] then
 		if get then
 			local ret = frame:CScriptCallGet(script, ...)
-			if ret then
+			if ret ~= nil then
 				return ret
 			end
 		else
@@ -1768,7 +1768,7 @@ local function tunnel(frame, get, script, ...)
 	if frame.isLibOOInstance and frame.class.inherits[CScriptProvider] then
 		if get then
 			local ret = frame:CScriptCallGet(script, ...)
-			if ret then
+			if ret ~= nil then
 				return ret
 			end
 		else
@@ -1778,7 +1778,7 @@ local function tunnel(frame, get, script, ...)
 
 	for _, child in TMW:Vararg(frame:GetChildren()) do
 		local ret = tunnel(child, get, script, ...)
-		if get and ret then
+		if get and ret ~= nil then
 			return ret
 		end
 	end
@@ -2082,6 +2082,8 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	end,
 
 	OnSettingSaved = function(self)
+		IE:SaveSettings()
+
 		self:CScriptCall("SettingSaved")
 		self:CScriptBubble("DescendantSettingSaved", self)
 	end,
@@ -2103,7 +2105,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			self:SetHeight_base(1)
 		end
 
-		self.Background:SetTexture(.66, .66, .66, 0.075)
+		self.Background:SetTexture(.66, .66, .66, 0.09)
 
 		self.height = self:GetHeight()
 	end,
@@ -2132,11 +2134,11 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 					offs = (remainingFlash/period)
 				end
 				offs = offs*0.3
-				bg:SetTexture(.66, .66, .66, 0.075 + offs)
+				bg:SetTexture(.66, .66, .66, 0.08 + offs)
 			end
 
 			if timePassed > duration then
-				bg:SetTexture(.66, .66, .66, 0.075)
+				bg:SetTexture(.66, .66, .66, 0.08)
 				ticker:Cancel()
 			end	
 		end)
@@ -2144,6 +2146,15 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 
 	SetTitle = function(self, text)
 		self.Header:SetText(text)
+
+		local font, size, flags = self.Header:GetFont()
+		size = 12
+		self.Header:SetFont(font, size, flags)
+
+		while size > 6 and self.Header:GetStringWidth() > self:GetWidth() - 10 do
+			size = size - 1
+			self.Header:SetFont(font, size, flags)
+		end
 	end,
 
 	Setup = function(self, panelInfo)
@@ -2167,33 +2178,6 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self:CScriptTunnel("PanelSetup", self, panelInfo)
 
 		self:ReloadSetting()
-	end,
-
-	SetHeight = function(self, height)
-		if self.__oldHeight then
-			self.__oldHeight = height
-		else
-			self:SetHeight_base(height)
-		end
-	end,
-	OnHide = function(self)
-		local p, r, t, x, y = self:GetPoint(1)
-		self:SetPoint(p, r, t, x, 1)
-
-		-- Set the height to 1 so things anchored under it are positioned right.
-		-- Can't set height to 0 anymore in WoD.
-		self.__oldHeight = self:GetHeight()
-		self:SetHeight_base(1)
-	end,
-	OnShow = function(self)
-		local p, r, t, x, y = self:GetPoint(1)
-		self:SetPoint(p, r, t, x, -16)
-
-		-- Restore the old height if it is still set to 1.
-		if self.__oldHeight and floor(self:GetHeight() + 0.5) == 1 then
-			self:SetHeight_base(self.__oldHeight)
-			self.__oldHeight = nil
-		end
 	end,
 
 	AdjustHeight = function(self, bottomPadding)
@@ -2312,7 +2296,12 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self:AdjustHeight()
 		
 		return self
-	end
+	end,
+
+	OnSizeChanged = function(self)
+		-- This method does resizing of the header to make it fit without truncation.
+		self:SetTitle(self.Header:GetText())
+	end,
 }
 
 TMW:NewClass("Config_Page", "Config_Frame"){
@@ -2516,9 +2505,9 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 	
 	-- Constructor
 	OnNewInstance_EditBox = function(self)
-		TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
-
 		self.BackgroundText:SetWidth(self:GetWidth())
+
+		self:CScriptAdd("ClearFocus", self.ClearFocus)
 	end,
 
 	SetTexts = function(self, title, tooltip)
@@ -2577,6 +2566,11 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 			end
 			self:ClearFocus()
 		end
+	end,
+
+	SetAcceptsTMWLinks = function(self, accepts, desc)
+		self.acceptsTMWLinks = accepts
+		self.acceptsTMWLinksDesc = accepts and desc or nil
 	end,
 }
 
@@ -2739,6 +2733,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		return self:CalculateValueRoundedToStep(self:GetValue_base())
 	end,
 	SetValue = function(self, value)
+		TMW:ValidateType("value", "SetValue(value)", value, "number")
+
 		self.__scriptFiredOnValueChanged = nil
 
 		if value < self.min then
@@ -2841,6 +2837,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	end,
 
 	OnMouseDown = function(self, button)
+		if not self:IsEnabled() then
+			return
+		end
+
 		if button == "RightButton" then
 			self:UseEditBox()
 
@@ -2849,6 +2849,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	end,
 
 	OnMouseUp = function(self)
+		if not self:IsEnabled() then
+			return
+		end
+
 		if self.mode == self.MODE_ADJUSTING then
 			self:UpdateRange()
 		end
@@ -3081,6 +3085,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			local value = settings[self.setting]
 			value = self:CScriptCallGet("UnModifySettingValueRequested", value) or value
 
+			print(settings, self.setting, value)
 			self:SetValue(value)
 		end
 	end,
@@ -3346,7 +3351,9 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 			c = settings
 		end
 
-		if self.hasOpacity then
+		if not c then
+			return 0, 0, 0, 0
+		elseif self.hasOpacity then
 			return c[k.r], c[k.g], c[k.b], c[k.a]
 		else
 			return c[k.r], c[k.g], c[k.b], 1
@@ -3436,7 +3443,7 @@ TMW:NewClass("Config_PointSelect", "Config_Frame"){
 		assert(body:find("%%s"), "tooltip body should contain a %s that will be formatted to the point.")
 
 		for k, v in pairs(self) do
-			if type(v) == "table" and v.GetObjectType and v:GetObjectType() == "Button" then
+			if type(v) == "table" and v.GetObjectType and v:GetObjectType() == "CheckButton" then
 				TMW:TT(v, TMW.L[k], body:format(TMW.L[k]), 1, 1)
 			end
 		end
@@ -3451,14 +3458,13 @@ TMW:NewClass("Config_PointSelect", "Config_Frame"){
 			error("Invalid point " .. point .. " to Config_PointSelect:SetSelected(point)")
 		end
 
-		local old = self:GetSelectedPoint()
-		if old then
-			self[old].selected = false
-			self[old].selectedTexture:Hide()
+		for k, v in TMW:Vararg(self:GetChildren()) do
+			if v.SetChecked then
+				v:SetChecked(false)
+			end
 		end
 
-		self[point].selected = true
-		self[point].selectedTexture:Show()
+		self[point]:SetChecked(true)
 	end,
 
 	SelectChild = function(self, child)
@@ -3488,7 +3494,7 @@ TMW:NewClass("Config_PointSelect", "Config_Frame"){
 	GetSelectedPoint = function(self)
 		for k, v in pairs(self) do
 			if type(v) == "table" and v.GetObjectType and v:GetObjectType() == "Button" then
-				if v.selected then
+				if v:GetChecked() then
 					return k
 				end
 			end
@@ -3832,11 +3838,10 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 }
 
 
-function IE:SaveSettings()	
+function IE:SaveSettings()
+	IE:CScriptTunnel("ClearFocus")
+
 	TMW:Fire("TMW_CONFIG_SAVE_SETTINGS")
-	if CI.icon then
-		TMW.safecall(CI.icon.Setup, CI.icon)
-	end
 end
 
 

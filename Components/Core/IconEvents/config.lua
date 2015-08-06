@@ -59,37 +59,6 @@ TMW.IconDragger:RegisterIconDragHandler(120, -- Copy Event Handlers
 )
 
 
-TMW:NewClass("Config_Base_Event"){
-	OnNewInstance_Base_Event = function(self, data)
-		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
-		self:CScriptAdd("DescendantSettingSaved", self.DescendantSettingSaved)
-	end,
-
-	SetColumnPadding = function(self, top, bottom)
-		self.columnPaddingTop = top
-		self.columnPaddingBottom = bottom
-	end,
-
-	SettingTableRequested = function(self)
-		return TMW.CI.ics and EVENTS:GetEventSettings()
-	end,
-
-	DescendantSettingSaved = function(self)
-		EVENTS:LoadConfig()
-	end,
-}
-
-TMW:NewClass("Config_CheckButton_Event", "Config_Base_Event", "Config_CheckButton")
-
-TMW:NewClass("Config_Slider_Event", "Config_Base_Event", "Config_Slider")
-
-TMW:NewClass("Config_EditBox_Event", "Config_Base_Event", "Config_EditBox")
-
-TMW:NewClass("Config_ColorButton_Event", "Config_Base_Event", "Config_ColorButton")
-
-TMW:NewClass("Config_DropDownMenu_Event", "Config_Base_Event", "Config_DropDownMenu")
-
-
 
 function EVENTS:LoadConfig()
 	local EventHandlerFrames = EVENTS.EventHandlerFrames
@@ -118,7 +87,7 @@ function EVENTS:LoadConfig()
 		local frame = EVENTS.EventHandlerFrames[eventID]
 		if not frame then
 			-- If the frame doesn't exist, then create it.
-			frame = CreateFrame("Button", EventHandlerFrames:GetName().."Event"..eventID, EventHandlerFrames, "TellMeWhen_Event", eventID)
+			frame = CreateFrame("CheckButton", EventHandlerFrames:GetName().."Event"..eventID, EventHandlerFrames, "TellMeWhen_Event", eventID)
 			EventHandlerFrames[eventID] = frame
 
 			frame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, -2)
@@ -228,7 +197,7 @@ function EVENTS:LoadConfig()
 		EventHandlerFrames[1]:SetPoint("TOPRIGHT", EventHandlerFrames, "TOPRIGHT", 0, 0)
 	end
 
-	-- Set the height of the first 
+	-- Set the height of the container 
 	local frame1Height = EventHandlerFrames[1] and EventHandlerFrames[1]:GetHeight() or 0
 	EventHandlerFrames:SetHeight(max(TMW.CI.ics.Events.n*frame1Height, 1))
 
@@ -253,9 +222,7 @@ function EVENTS:LoadEventID(eventID)
 	EVENTS.currentEventID = eventID ~= 0 and eventID or nil
 
 	for i, frame in ipairs(EVENTS.EventHandlerFrames) do
-		frame.selected = nil
-		frame:UnlockHighlight()
-		frame:GetHighlightTexture():SetAlpha(0.1)
+		frame:SetChecked(false)
 	end
 
 
@@ -284,9 +251,7 @@ function EVENTS:LoadEventID(eventID)
 	end
 
 
-	eventFrame.selected = 1
-	eventFrame:LockHighlight()
-	eventFrame:GetHighlightTexture():SetAlpha(0.2)
+	eventFrame:SetChecked(true)
 end
 
 function EVENTS:LoadEventSettings()
@@ -762,7 +727,7 @@ function ColumnConfig:GetListItemFrame(frameID)
 	
 	local frame = SubHandlerList[frameID]
 	if not frame then
-		frame = CreateFrame("Button", SubHandlerList:GetName().."Item"..frameID, SubHandlerList, "TellMeWhen_EventHandler_SubHandlerListButton", frameID)
+		frame = CreateFrame("CheckButton", SubHandlerList:GetName().."Item"..frameID, SubHandlerList, "TellMeWhen_EventHandler_SubHandlerListButton", frameID)
 		SubHandlerList[frameID] = frame
 
 		local previousFrame = frameID > 1 and SubHandlerList[frameID - 1] or nil
@@ -869,11 +834,10 @@ function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
 		local f = self.ConfigContainer.SubHandlerList[i]
 		if f and f:IsShown() then
 			if f.subHandlerIdentifier == subHandlerIdentifier then
-				subHandlerListButton = f
+				f:SetChecked(true)
+			else
+				f:SetChecked(false)
 			end
-			f.selected = nil
-			f:UnlockHighlight()
-			f:GetHighlightTexture():SetAlpha(0.1)
 		end
 	end
 
@@ -881,11 +845,6 @@ function ColumnConfig:SelectSubHandler(subHandlerIdentifier)
 	self.currentSubHandlerData = subHandlerData
 
 	self:SetupConfig(subHandlerData)
-
-	if subHandlerListButton then
-		subHandlerListButton:LockHighlight()
-		subHandlerListButton:GetHighlightTexture():SetAlpha(0.2)
-	end
 
 	self:SetupEventDisplay(self.currentEventID)
 end
@@ -927,7 +886,7 @@ function ColumnConfig:SetupConfig(subHandlerData)
 			else
 				-- Data is the table passed to TMW:CInit(frame, data)
 				local data = frame.data
-				local yOffset = (frame.columnPaddingTop or 0) + (lastFrameBottomPadding or 0)
+				local yOffset = (frame.paddingTop or 0) + (lastFrameBottomPadding or 0)
 				
 				if lastFrame then
 					frame:SetPoint("TOP", lastFrame, "BOTTOM", 0, -yOffset)
@@ -937,7 +896,7 @@ function ColumnConfig:SetupConfig(subHandlerData)
 				frame:Show()
 				lastFrame = frame
 
-				lastFrameBottomPadding = frame.columnPaddingBottom
+				lastFrameBottomPadding = frame.paddingBottom
 			end
 		end
 	end	

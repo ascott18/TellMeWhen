@@ -180,9 +180,7 @@ local extendedTags = {
 
 local function prepareEditBox(box)
 	if not box.PreparedForDogTagInsertion then
-		box:HookScript("OnEditFocusLost", function()
-			DOGTAG.AcceptingIcon = nil
-		end)
+		box:SetAcceptsTMWLinks(true, L["DT_INSERTGUID_TOOLTIP"])
 
 		TMW.Classes.ChatEdit_InsertLink_Hook:New(box, function(self, text, linkType, linkData)
 			-- if this editbox is active
@@ -201,8 +199,6 @@ local function prepareEditBox(box)
 
 		box.PreparedForDogTagInsertion = true
 	end
-
-	DOGTAG.AcceptingIcon = box
 end
 
 -- Finds the tag that the cursor is currently in, or at the end of.

@@ -1,10 +1,18 @@
 ===v8.0.0===
- * Available Icon Sorting methods have changed slightly. Your configuration may require some manual tweaking if you notice incorrect behavior.
+====Breaking Changes====
+ * Available Icon Sorting methods have changed slightly.
+ ** Each of the pairs of Opacity and Shown methods have been merged into one.
+ ** Your configuration may require some manual tweaking if you notice incorrect behavior.
+ * The Update Order settings have been removed.
+ ** If you made use of these settings, you will need to adjust your icons.
+ ** Try replacing usages of the Expand sub-metas setting with Group Controller meta icons.
 
+====General====
+ * All TellMeWhen configuration is now done in the icon editor.
  * Bar and Vertical Bar groups now have several new options:
- ** Show/Hide Icon - A better alternative to using "none" as a custom texture.
- ** Flip Icon - Swaps the side of the bar that the icon is on.
- ** Bar & Icon Borders - Beautify your bars!
+ ** Show/Hide Icon
+ ** Flip Icon
+ ** Bar & Icon Borders
 
 ===v7.3.5===
 ====Bug Fixes====

@@ -159,7 +159,7 @@ end
 
 -- [INTERNAL]
 function Group.ScriptSort(groupA, groupB)
-	local gOrder = -TMW.db.profile.CheckOrder
+	local gOrder = 1 -- -TMW.db.profile.CheckOrder
 	return groupA.ID*gOrder < groupB.ID*gOrder
 end
 Group:UpdateTable_SetAutoSort(Group.ScriptSort)

@@ -29,7 +29,7 @@ Alpha:RegisterIconDefaults{
 
 
 Alpha:RegisterConfigPanel_ConstructorFunc(195, "TellMeWhen_AlphaModuleSettings", function(self)
-	self.Header:SetText(L["ICONALPHAPANEL_FAKEHIDDEN"])
+	self:SetTitle(L["ICONALPHAPANEL_FAKEHIDDEN"])
 	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONALPHAPANEL_FAKEHIDDEN"], L["ICONALPHAPANEL_FAKEHIDDEN_DESC"])

@@ -91,100 +91,8 @@ View:RegisterGroupDefaults{
 }
 
 
-View:RegisterConfigTable("args.main.args", View.view, {
-	type = "group",
-	order = 40,
-	name = View.name,
-	dialogInline = true,
-	guiInline = true,
+View:RegisterConfigPanel_XMLTemplate(50, "TellMeWhen_GM_Bar")
 
-	args = {
-		Icon = {
-			name = L["UIPANEL_BAR_SHOWICON"],
-			desc = L["UIPANEL_BAR_SHOWICON_DESC"],
-			type = "toggle",
-			order = 1,
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-		Flip = {
-			name = L["UIPANEL_BAR_FLIP"],
-			desc = L["UIPANEL_BAR_FLIP_DESC"],
-			type = "toggle",
-			order = 2,
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-		Padding = {
-			name = L["UIPANEL_BAR_PADDING"],
-			desc = L["UIPANEL_BAR_PADDING_DESC"],
-			type = "range",
-			order = 11,
-			softMin = -5,
-			softMax = 10,
-			step = 0.1,
-			bigStep = 0.5,
-
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-
-		BorderIcon = {
-			name = L["UIPANEL_BAR_BORDERICON"],
-			desc = L["UIPANEL_BAR_BORDERICON_DESC"],
-			type = "range",
-			order = 21,
-			min = 0,
-			max = 3,
-			step = 0.1,
-			bigStep = 0.5,
-
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-
-		BorderBar = {
-			name = L["UIPANEL_BAR_BORDERBAR"],
-			desc = L["UIPANEL_BAR_BORDERBAR_DESC"],
-			type = "range",
-			order = 22,
-			min = 0,
-			max = 3,
-			step = 0.1,
-			bigStep = 0.5,
-
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-
-		BorderColor = {
-			name = L["UIPANEL_BAR_BORDERCOLOR"],
-			desc = L["UIPANEL_BAR_BORDERCOLOR_DESC"],
-			type = "color",
-			order = 20,
-
-			hasAlpha = true,
-			set = function(info, r, g, b, a)
-				local group = TMW.FindGroupFromInfo(info)
-				local gspv = group:GetSettingsPerView()
-
-				gspv[info[#info]] = {r=r, g=g, b=b, a=a}
-
-				group:Setup()
-			end,
-			get = function(info)
-				local group = TMW.FindGroupFromInfo(info)
-				local gspv = group:GetSettingsPerView()
-
-				local c = gspv[info[#info]]
-
-				return c.r, c.g, c.b, c.a
-			end,
-		},
-
-
-	},
-})
 
 View:ImplementsModule("IconModule_IconContainer_Masque", 1, function(Module, icon)
 	local group = icon.group
@@ -205,7 +113,7 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 1, function(Module, ico
 		Module:Enable()
 
 		Module.container:SetSize(gspv.SizeY - 2*inset, gspv.SizeY - 2*inset)
-		Module.container:SetPoint(gspv.Flip and "TOPRIGHT" or "TOPLEFT", inset, -inset)
+		Module.container:SetPoint(gspv.Flip and "TOPRIGHT" or "TOPLEFT", gspv.Flip and -inset or inset, -inset)
 	end
 end)
 

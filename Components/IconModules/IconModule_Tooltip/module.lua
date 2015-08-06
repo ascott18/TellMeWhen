@@ -77,8 +77,10 @@ Module:SetScriptHandler("OnEnter", function(Module, icon)
 			GameTooltip:AddLine(TMW.get(Module.text, icon), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
 		end
 
-		if TMW.DOGTAG and TMW.DOGTAG.AcceptingIcon then
-			GameTooltip:AddLine(L["DT_INSERTGUID_TOOLTIP"], NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+		local currentFocus = GetCurrentKeyBoardFocus()
+		if currentFocus and currentFocus.acceptsTMWLinks then
+			GameTooltip:AddLine(" ")
+			GameTooltip:AddLine(currentFocus.acceptsTMWLinksDesc, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
 		end
 
 		if icon:IsGroupController() then

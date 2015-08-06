@@ -32,7 +32,7 @@
 
 								self:SetTexts(TMW.L["ANIM_DURATION"], TMW.L["ANIM_DURATION_DESC"])
 								self:SetSetting("Duration")
-								self:SetColumnPadding(13, 13)
+								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0.1, math.huge)
@@ -70,7 +70,7 @@
 
 								self:SetTexts(TMW.L["ANIM_MAGNITUDE"], TMW.L["ANIM_MAGNITUDE_DESC"])
 								self:SetSetting("Magnitude")
-								self:SetColumnPadding(13, 13)
+								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0, math.huge)
@@ -87,7 +87,7 @@
 
 								self:SetTexts(TMW.L["ANIM_PERIOD"], TMW.L["ANIM_PERIOD_DESC"])
 								self:SetSetting("Period")
-								self:SetColumnPadding(13, 13)
+								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0, math.huge)
@@ -99,10 +99,6 @@
 					
 
 					<Button name="$parentColor" inherits="TellMeWhen_ColorButtonTemplate" parentKey="Color">
-						<KeyValues>
-							<KeyValue key="tmwClass" type="string" value="Config_ColorButton_Event"/>
-						</KeyValues>
-
 						<Anchors>
 							<Anchor point="LEFT" x="15" />
 						</Anchors>
@@ -114,17 +110,13 @@
 								self:SetHasOpacity(true)
 								self:SetColorSettingKeys("r_anim", "g_anim", "b_anim", "a_anim")
 
-								self:SetColumnPadding(4, 4)
+								self.paddingTop, self.paddingBottom = 4, 4
 							</OnLoad>
 						</Scripts>
 					</Button>
 
 
 					<EditBox name="$parentImage" inherits="TellMeWhen_InputBoxTemplate" parentKey="Image" autoFocus="false">
-						<KeyValues>
-							<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event"/>
-						</KeyValues>
-
 						<Size y="15"/>
 						<Anchors>
 							<!-- <Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" x="4" y="-25"/> -->
@@ -137,7 +129,7 @@
 
 								self:SetTexts(TMW.L["ANIM_TEX"], TMW.L["ANIM_TEX_DESC"])
 								self:SetSetting("Image")
-								self:SetColumnPadding(4, 7)
+								self.paddingTop, self.paddingBottom = 4, 7
 
 								self:CScriptAdd("ModifySettingValueRequested", function(self, value)
 									return value:trim():gsub([[\\]], [[\]])
@@ -167,7 +159,7 @@
 
 								self:SetTexts(TMW.L["ANIM_ALPHASTANDALONE"], TMW.L["ANIM_ALPHASTANDALONE_DESC"])
 								self:SetSetting("a_anim")
-								self:SetColumnPadding(13, 13)
+								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMinMaxValues(0, 1)
 								self:SetValueStep(0.01)
@@ -185,7 +177,7 @@
 
 								self:SetTexts(TMW.L["ANIM_THICKNESS"], TMW.L["ANIM_THICKNESS_DESC"])
 								self:SetSetting("Thickness")
-								self:SetColumnPadding(13, 13)
+								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0.1, math.huge)
@@ -204,7 +196,7 @@
 
 								self:SetTexts(TMW.L["ANIM_SIZE_ANIM"], TMW.L["ANIM_SIZE_ANIM_DESC"])
 								self:SetSetting("Size_anim")
-								self:SetColumnPadding(13, 13)
+								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(-math.huge, math.huge)
@@ -223,7 +215,7 @@
 
 								self:SetTexts(TMW.L["ANIM_SIZEX"], TMW.L["ANIM_SIZEX_DESC"])
 								self:SetSetting("SizeX")
-								self:SetColumnPadding(13, 13)
+								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(1, math.huge)
@@ -242,7 +234,7 @@
 
 								self:SetTexts(TMW.L["ANIM_SIZEY"], TMW.L["ANIM_SIZEY_DESC"])
 								self:SetSetting("SizeY")
-								self:SetColumnPadding(13, 13)
+								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(1, math.huge)
@@ -272,15 +264,14 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								local Animations = TMW.EVENTS:GetEventHandler("Animations")
-
-								self.tmwClass = "Config_DropDownMenu_Event"
 								TMW:CInit(self)
+
+								local Animations = TMW.EVENTS:GetEventHandler("Animations")
 								
 								self:SetFunction(Animations.AnchorTo_Dropdown)
 								self:SetTexts(TMW.L["ANCHORTO"], nil)
 								self:SetSetting("Image")
-								self:SetColumnPadding(14, 4)
+								self.paddingTop, self.paddingBottom = 14, 4
 
 								self:CScriptAdd("ReloadRequested", function()
 									local settings = self:GetSettingTable()

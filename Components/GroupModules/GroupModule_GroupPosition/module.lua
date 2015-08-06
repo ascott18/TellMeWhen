@@ -45,7 +45,7 @@ TMW:RegisterUpgrade(41402, {
 GroupPosition:RegisterConfigPanel_XMLTemplate(10, "TellMeWhen_GM_GroupPosition")
 
 
-local function GetAnchoredPoints(group)
+local function GetAnchoredPoints(group, wasMove)
 	local _
 	local gs = group:GetSettings()
 	local p = gs.Point
@@ -53,7 +53,7 @@ local function GetAnchoredPoints(group)
 	local relframe = TMW.GUIDToOwner[p.relativeTo] or _G[p.relativeTo] or UIParent
 	local point, relativePoint = p.point, p.relativePoint
 
-	if relframe == UIParent then
+	if relframe == UIParent and wasMove then
 		-- use the smart anchor points provided by UIParent anchoring if it is being used
 		point, _, relativePoint = group:GetPoint(1)
 	end
@@ -222,12 +222,17 @@ function GroupPosition:DetectFrame(event, time, Locked)
 	end
 end
 
-function GroupPosition:UpdatePositionAfterMovement()
-	self:CalibrateAnchors()
+function GroupPosition:UpdatePositionAfterMovement(wasMove)
+	local group = self.group
+	
+	local gs = group:GetSettings()
+	local p = gs.Point
+
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group, wasMove)
 	
 	self:SetPos()
 	
-	self.group:Setup()
+	group:Setup()
 	TMW.IE:LoadGroup(1)
 end
 
@@ -255,12 +260,6 @@ end
 
 
 function GroupPosition:CalibrateAnchors()
-	local group = self.group
-	
-	local gs = group:GetSettings()
-	local p = gs.Point
-
-	p.point, p.relativeTo, p.relativePoint, p.x, p.y = GetAnchoredPoints(group)
 end
 
 function GroupPosition:SetPos()

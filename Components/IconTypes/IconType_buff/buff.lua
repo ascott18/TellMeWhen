@@ -102,7 +102,7 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", function(self)
-	self.Header:SetText(TMW.L["ICONMENU_BUFFTYPE"])
+	self:SetTitle(TMW.L["ICONMENU_BUFFTYPE"])
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)
@@ -121,7 +121,7 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", functio
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", function(self)
-	self.Header:SetText(Type.name)
+	self:SetTitle(Type.name)
 	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
@@ -196,7 +196,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_SortSettingsWithStacks", function(self)
-	self.Header:SetText(TMW.L["SORTBY"])
+	self:SetTitle(TMW.L["SORTBY"])
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)

@@ -23,7 +23,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["CONFIGPANEL_BACKDROP_HEADER"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["CONFIGPANEL_BACKDROP_HEADER"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

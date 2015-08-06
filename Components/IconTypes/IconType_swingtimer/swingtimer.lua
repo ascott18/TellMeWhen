@@ -67,7 +67,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(self)
-	self.Header:SetText(TMW.L["ICONMENU_WPNENCHANTTYPE"])
+	self:SetTitle(TMW.L["ICONMENU_WPNENCHANTTYPE"])
 	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(INVTYPE_WEAPONMAINHAND, nil)

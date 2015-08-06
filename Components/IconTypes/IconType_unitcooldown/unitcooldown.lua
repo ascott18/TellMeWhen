@@ -86,7 +86,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings", function(self)
-	self.Header:SetText(L["ICONMENU_ONLYSEEN_HEADER"])
+	self:SetTitle(L["ICONMENU_ONLYSEEN_HEADER"])
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,
 		function(check)
@@ -105,7 +105,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings",
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_UCDSortSettings", function(self)
-	self.Header:SetText(TMW.L["SORTBY"])
+	self:SetTitle(TMW.L["SORTBY"])
 
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,

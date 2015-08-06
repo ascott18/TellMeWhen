@@ -15,7 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "7.4.0"
+TELLMEWHEN_VERSION = "8.0.0"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -26,11 +26,11 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 74004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
-TELLMEWHEN_FORCECHANGELOG = 72008 -- if the user hasn't seen the changelog until at least this version, show it to them.
+TELLMEWHEN_FORCECHANGELOG = 80001 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 75000 or TELLMEWHEN_VERSIONNUMBER < 74000 then
+if TELLMEWHEN_VERSIONNUMBER > 81000 or TELLMEWHEN_VERSIONNUMBER < 80000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
 end
@@ -210,7 +210,7 @@ TMW.Defaults = {
 		SoundChannel	=	"SFX",
 		ReceiveComm		=	true,
 		WarnInvalids	=	false,
-		CheckOrder		=	-1,
+		--CheckOrder		=	-1,
 		--SUG_atBeginning	=	true,
 		ColorNames		=	true,
 		--AlwaysSubLinks	=	false,
@@ -234,7 +234,7 @@ TMW.Defaults = {
 				COS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting withOUT timer somtimes
 
 				NA	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting always
-				NS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting somtimes
+				NS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting sometimes
 			},
 		},
 		Groups 		= 	{
@@ -251,7 +251,7 @@ TMW.Defaults = {
 				Name			= "",
 				Rows			= 1,
 				Columns			= 4,
-				CheckOrder		= -1,
+				--CheckOrder		= -1,
 				PrimarySpec		= true,
 				SecondarySpec	= true,
 				Tree1 			= true,

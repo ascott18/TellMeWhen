@@ -39,8 +39,17 @@
 							return value
 						end)
 
+						-- Keep the group in the same place after changing this setting - modify the offsets accordingly.
+						self:CScriptAddPre("SettingSaved", function()
+							local group = TMW.CI.group
+
+							local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+							GroupModule_GroupPosition:UpdatePositionAfterMovement()
+						end)
+
 						self.headerText:SetText(TMW.L["UIPANEL_RELATIVETO"])
 
+						-- TODO: make a cool sug module for this.
 					--	TMW.SUG:EnableEditBox(self, "texture", true)
 					</OnLoad>
 				</Scripts>
@@ -58,6 +67,14 @@
 
 						self:SetTexts(TMW.L["UIPANEL_POINT"], TMW.L["UIPANEL_POINT2_DESC"])
 						self:SetSetting("point")
+
+						-- Keep the group in the same place after changing this setting - modify the offsets accordingly.
+						self:CScriptAddPre("SettingSaved", function()
+							local group = TMW.CI.group
+
+							local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+							GroupModule_GroupPosition:UpdatePositionAfterMovement()
+						end)
 
 					</OnLoad>
 				</Scripts>
@@ -77,6 +94,14 @@
 
 						self:SetTexts(TMW.L["UIPANEL_RELATIVEPOINT"], TMW.L["UIPANEL_RELATIVEPOINT2_DESC"])
 						self:SetSetting("relativePoint")
+
+						-- Keep the group in the same place after changing this setting - modify the offsets accordingly.
+						self:CScriptAddPre("SettingSaved", function()
+							local group = TMW.CI.group
+
+							local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
+							GroupModule_GroupPosition:UpdatePositionAfterMovement()
+						end)
 
 					</OnLoad>
 				</Scripts>
@@ -223,17 +248,16 @@
 						self:SetMode(self.MODE_ADJUSTING)
 						self:SetMinMaxValues(0.4, 30)
 						self:SetRange(0.5)
-						self:SetValueStep(0.01)
+						self:SetValueStep(0.0001)
+						self:SetWheelStep(0.01)
 
-						self:SetTextFormatter(TMW.C.Formatter.PERCENT100, TMW.C.Formatter.PERCENT100)
+						self:SetTextFormatter(TMW.C.Formatter.PERCENT100, TMW.C.Formatter.PERCENT100_F0)
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAddPre("SettingSaved", function()
 							local group = TMW.CI.group
 
 							local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
-							GroupModule_GroupPosition:SetNewScale(value)
-
-							return value
+							GroupModule_GroupPosition:SetNewScale(self:GetValue())
 						end)
 
 						self:CScriptAdd("SettingTableRequested", function(requester)
@@ -300,16 +324,16 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
+				self:SetTitle(TMW.L["UIPANEL_POSITION"])
+				
 				self:CScriptAdd("SettingTableRequested", function(requester)
 					return TMW.CI.gs.Point
 				end)
 
-				-- These have to go AFTER we declare GetSettingTable.
+				-- These have to go AFTER we declare SettingTableRequested.
 				-- That's why they aren't above with the sliders' OnLoads
 				self.X:UseEditBox()
 				self.Y:UseEditBox()
-
-				self.Header:SetText(TMW.L["UIPANEL_POSITION"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

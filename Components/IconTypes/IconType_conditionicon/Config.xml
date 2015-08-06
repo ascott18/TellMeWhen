@@ -86,7 +86,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["CONFIGPANEL_CNDTTIMERS_HEADER"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["CONFIGPANEL_CNDTTIMERS_HEADER"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

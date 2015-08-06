@@ -53,13 +53,15 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>		
-				self.Header:SetText(TMW.L["UIPANEL_GROUPNAME"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["UIPANEL_GROUPNAME"])
 			</OnLoad>
 		</Scripts>
 	</Frame>
 
 
-	<Frame name="TellMeWhen_GM_DBLoc" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+	<Frame name="TellMeWhen_GM_Delete" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="29"/>
 		<Frames>
 
@@ -98,12 +100,12 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(DELETE)
+				TMW:CInit(self)
+				
+				self:SetTitle(DELETE)
 			</OnLoad>
 		</Scripts>
 	</Frame>
-
-
 
 	<Frame name="TellMeWhen_GM_Dims" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="85"/>
@@ -144,7 +146,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["UIPANEL_DIMENSIONS"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["UIPANEL_DIMENSIONS"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

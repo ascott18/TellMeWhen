@@ -28,8 +28,10 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.label = TMW.L["EVENTHANDLER_LUA_CODE"]
-								TMW:TT(self, "EVENTHANDLER_LUA_CODE", "EVENTHANDLER_LUA_CODE_DESC")
+								TMW:CInit(self)
+
+								self:SetTexts(TMW.L["EVENTHANDLER_LUA_CODE"], TMW.L["EVENTHANDLER_LUA_CODE_DESC"])
+								self:SetSetting("Lua")
 								
 
 								TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
@@ -47,28 +49,10 @@
 									end
 								end)
 
-
 								self:GetParent():GetParent().Code = self
-								
-								TMW:RegisterCallback("TMW_CONFIG_SAVE_SETTINGS", self, "ClearFocus")
 							</OnLoad>
-							<OnEditFocusLost>
-								EditBox_ClearHighlight(self)
-
-								if TMW.CI.ics and TMW.EVENTS.currentEventID then
-									TMW.EVENTS:GetEventSettings().Lua = self:GetText()
-								end
-								TMW.IE:ScheduleIconSetup()
-								self:GetScript("OnTextChanged")(self)
-
-								TMW.EVENTS:LoadConfig()
-							</OnEditFocusLost>
 							<OnEnterPressed>
-								--if self:IsMultiLine() and IsModifierKeyDown() then
-									self:Insert("\r\n")
-								--else
-									--self:ClearFocus()
-								--end
+								self:Insert("\r\n")
 							</OnEnterPressed>
 							<OnTabPressed>
 								self:Insert("   ")

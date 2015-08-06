@@ -104,7 +104,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["LAYOUTDIRECTION"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["LAYOUTDIRECTION"])
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -175,8 +177,8 @@
 		<Scripts>
 			<OnLoad>
 				TMW:CInit(self)
-
-				self.Header:SetText(TMW.L["UIPANEL_GROUPSORT"])
+				
+				self:SetTitle(TMW.L["UIPANEL_GROUPSORT"])
 
 				self:CScriptAdd("ReloadRequested", function(self, panel, panelInfo)
 					TMW.C.GroupModule_IconPosition_Sortable:LoadConfig()

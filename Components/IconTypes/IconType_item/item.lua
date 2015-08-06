@@ -72,7 +72,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", function(self)
-	self.Header:SetText(Type.name)
+	self:SetTitle(Type.name)
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,
 		function(check)

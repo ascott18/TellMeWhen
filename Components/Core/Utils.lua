@@ -106,6 +106,9 @@ Formatter{
 	PERCENT100 = Formatter:New(function(value)
 		return ("%s%%"):format(value*100)
 	end),
+	PERCENT100_F0 = Formatter:New(function(value)
+		return ("%.0f%%"):format(value*100)
+	end),
 
 	PLUSPERCENT = Formatter:New("+%s%%"),
 

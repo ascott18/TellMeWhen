@@ -496,7 +496,7 @@ function IconType:IsAllowedByView(viewName)
 end
 
 IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_IsViewAllowed", function(self)
-	self.Header:SetText(L["ICONMENU_VIEWREQ"])
+	self:SetTitle(L["ICONMENU_VIEWREQ"])
 
 	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	self.text:SetWordWrap(true)

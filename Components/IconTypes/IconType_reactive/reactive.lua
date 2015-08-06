@@ -80,7 +80,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", function(self)
-	self.Header:SetText(Type.name)
+	self:SetTitle(Type.name)
 	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_USEACTIVATIONOVERLAY"], L["ICONMENU_USEACTIVATIONOVERLAY_DESC"])

@@ -28,7 +28,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["CONDITIONALPHA_METAICON"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["CONDITIONALPHA_METAICON"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

@@ -77,14 +77,6 @@ end)
 
 ---------- Interface ----------
 
-TMW:NewClass("Config_EditBox_Event_DogTags", "Config_Base_Event", "Config_EditBox_DogTags"){
-	METHOD_EXTENSIONS = {
-		SaveSetting = function(self, button)
-			EVENTS:LoadConfig()
-		end,
-	},
-}
-
 function Announcements:Location_DropDown()
 	local channelData = Announcements.currentSubHandlerData
 	if channelData and channelData.dropdown then

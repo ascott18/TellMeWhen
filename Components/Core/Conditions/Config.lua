@@ -141,7 +141,7 @@ function CNDT:GetTabText(conditionSetName)
 	local tabText = ConditionSet.tabText
 	
 	if not Conditions then
-		return tabText .. " (0)"
+		return tabText .. ": 0"
 	end
 	
 	local parenthesesAreValid, errorMessage = CNDT:CheckParentheses(Conditions)

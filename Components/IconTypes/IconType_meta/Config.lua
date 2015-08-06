@@ -37,7 +37,7 @@ if not Type then return end
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_MetaSortSettings", function(self)
-	self.Header:SetText(TMW.L["SORTBY"])
+	self:SetTitle(TMW.L["SORTBY"])
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)

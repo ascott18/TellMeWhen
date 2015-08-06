@@ -25,7 +25,7 @@ local function stopMoving(group)
 	isMoving = nil
 	
 	local GroupModule_GroupPosition = group:GetModuleOrModuleChild("GroupModule_GroupPosition")
-	GroupModule_GroupPosition:UpdatePositionAfterMovement()
+	GroupModule_GroupPosition:UpdatePositionAfterMovement(true)
 end
 
 	

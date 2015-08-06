@@ -135,7 +135,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["ICONMENU_COMPONENTICONS"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["ICONMENU_COMPONENTICONS"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

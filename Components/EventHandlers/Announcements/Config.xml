@@ -4,15 +4,17 @@
 	<Frame name="$parentAnnouncements" inherits="TellMeWhen_EventContainer" parentKey="Announcements">
 		<Frames>
 			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
+				<Size y="20"/>
+
 				<KeyValues>
-					<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event_DogTags"/>
+					<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
 				</KeyValues>
 
-				<Size y="20"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="5"/>
 					<Anchor point="RIGHT" x="-20"/>
 				</Anchors>
+
 				<Layers>
 					<Layer level="OVERLAY">
 						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
@@ -27,6 +29,7 @@
 						</FontString>
 					</Layer>
 				</Layers>
+				
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
@@ -83,14 +86,13 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								local Announcements = TMW.EVENTS:GetEventHandler("Announcements")
-
-								self.tmwClass = "Config_DropDownMenu_Event"
 								TMW:CInit(self)
+
+								local Announcements = TMW.EVENTS:GetEventHandler("Announcements")
 
 								self:SetTexts(TMW.L["ANN_SUB_CHANNEL"], nil)
 								self:SetFunction(Announcements.Location_DropDown)
-								self:SetColumnPadding(14, 4)
+								self.paddingTop, self.paddingBottom = 14, 4
 
 
 								self:CScriptAdd("ReloadRequested", function()
@@ -128,7 +130,7 @@
 
 					<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
 						<KeyValues>
-							<KeyValue key="tmwClass" type="string" value="Config_EditBox_Event_DogTags"/>
+							<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
 						</KeyValues>
 
 						<Size x="135" y="15"/>
@@ -150,7 +152,7 @@
 
 								self:SetTexts(TMW.L["ANN_WHISPERTARGET"], TMW.L["ANN_WHISPERTARGET_DESC"])
 								self:SetSetting("Location")
-								self:SetColumnPadding(14, 4)
+								self.paddingTop, self.paddingBottom = 14, 4
 
 								self.Header:SetText(TMW.L["ANN_WHISPERTARGET"])
 								TMW.SUG:EnableEditBox(self, "dogtags")
@@ -183,10 +185,6 @@
 					</CheckButton>
 
 					<Button name="$parentColor" inherits="TellMeWhen_ColorButtonTemplate" parentKey="Color">
-						<KeyValues>
-							<KeyValue key="tmwClass" type="string" value="Config_ColorButton_Event"/>
-						</KeyValues>
-
 						<Anchors>
 							<Anchor point="LEFT" x="15" />
 						</Anchors>
@@ -198,7 +196,7 @@
 								self:SetHasOpacity(false)
 								self:SetColorSettingKeys("r", "g", "b")
 
-								self:SetColumnPadding(4, 4)
+								self.paddingTop, self.paddingBottom = 4, 4
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -237,7 +235,7 @@
 
 								self:SetTexts(TMW.L["DURATION"], nil)
 								self:SetSetting("TextDuration")
-								self:SetColumnPadding(13, 0)
+								self.paddingTop, self.paddingBottom = 13, 0
 								
 								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
 								self:SetMode(self.MODE_ADJUSTING)

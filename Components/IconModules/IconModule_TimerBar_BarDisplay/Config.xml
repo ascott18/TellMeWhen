@@ -5,7 +5,7 @@
 	<Frame name="TellMeWhen_BarDisplayBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="85"/>
 		<Frames>
-			<CheckButton name="$parentInvert" inherits="TellMeWhen_CheckTemplate" parentKey="Invert">
+			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="Invert">
 				<Anchors>
 					<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 					<Anchor point="TOP" y="-1"/>
@@ -20,7 +20,7 @@
 				</Scripts>
 			</CheckButton>
 			
-			<CheckButton name="$parentBarGCD" inherits="TellMeWhen_CheckTemplate" parentKey="BarGCD">
+			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="BarGCD">
 				<!-- Anchoring is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 				<Scripts>
 					<OnLoad>
@@ -36,10 +36,10 @@
 				</Scripts>
 			</CheckButton>
 			
-			<CheckButton name="$parentEnableColors" inherits="TellMeWhen_CheckTemplate" parentKey="EnableColors">
+			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="EnableColors">
 				<Anchors>
 					<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
-					<Anchor point="TOP" relativeTo="$parentInvert" relativePoint="BOTTOM" y="3"/>
+					<Anchor point="TOP" relativeKey="$parent.Invert" relativePoint="BOTTOM" y="3"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -64,10 +64,10 @@
 				</Scripts>
 			</CheckButton>
 			
-			<EditBox name="$parentFakeMax" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="FakeMax" autoFocus="false">
+			<EditBox inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="FakeMax" autoFocus="false">
 				<Size x="45" y="15"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentBarGCD" relativePoint="BOTTOM" y="-2"/>
+					<Anchor point="TOP" relativeKey="$parent.BarGCD" relativePoint="BOTTOM" y="-2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -92,9 +92,9 @@
 				</Scripts>
 			</EditBox>
 
-			<Button name="$parentColorStart" parentKey="ColorStart" inherits="TellMeWhen_ColorButtonTemplate">
+			<Button parentKey="ColorStart" inherits="TellMeWhen_ColorButtonTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentFakeMax" relativePoint="BOTTOM" y="-10" />
+					<Anchor point="TOP" relativeKey="$parent.FakeMax" relativePoint="BOTTOM" y="-10" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -112,9 +112,9 @@
 				</Scripts>
 			</Button>
 
-			<Button name="$parentColorMiddle" parentKey="ColorMiddle" inherits="TellMeWhen_ColorButtonTemplate">
+			<Button parentKey="ColorMiddle" inherits="TellMeWhen_ColorButtonTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentColorStart" />
+					<Anchor point="TOP" relativeKey="$parent.ColorStart" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -132,9 +132,9 @@
 				</Scripts>
 			</Button>
 
-			<Button name="$parentColorComplete" parentKey="ColorComplete" inherits="TellMeWhen_ColorButtonTemplate">
+			<Button parentKey="ColorComplete" inherits="TellMeWhen_ColorButtonTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentColorStart" />
+					<Anchor point="TOP" relativeKey="$parent.ColorStart" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -155,7 +155,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
 				
 				self.Invert:ConstrainLabel(self.BarGCD)
 				self.BarGCD:ConstrainLabel(self, "RIGHT")

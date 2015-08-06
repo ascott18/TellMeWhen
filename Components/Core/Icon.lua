@@ -146,11 +146,11 @@ function Icon.__tostring(icon)
 end
 
 function Icon.ScriptSort(iconA, iconB)
-	local gOrder = -TMW.db.profile.CheckOrder
+	local gOrder = 1 -- -TMW.db.profile.CheckOrder
 	local gA = iconA.group.ID
 	local gB = iconB.group.ID
 	if gA == gB then
-		local iOrder = -iconA.group.CheckOrder
+		local iOrder = 1 -- -iconA.group.CheckOrder
 		return iconA.ID*iOrder < iconB.ID*iOrder
 	end
 	return gA*gOrder < gB*gOrder

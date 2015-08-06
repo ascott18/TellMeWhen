@@ -26,7 +26,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["LOSECONTROL_DROPDOWNLABEL"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["LOSECONTROL_DROPDOWNLABEL"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

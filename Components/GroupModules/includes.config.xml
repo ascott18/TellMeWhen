@@ -22,8 +22,8 @@
 
  
  
- <!-- <Include file="GroupModule_Alpha\Config.xml"/> -->
- <Script file="GroupModule_Alpha\Config.lua"/>
+ <Include file="GroupModule_Alpha\Config.xml"/>
+ <!-- <Script file="GroupModule_Alpha\Config.lua"/> -->
 
  
 

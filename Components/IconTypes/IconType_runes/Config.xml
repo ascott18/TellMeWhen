@@ -104,7 +104,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["RUNES"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["RUNES"])
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 6,
 					self["1"],
 					self["2"],

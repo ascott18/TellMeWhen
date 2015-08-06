@@ -70,7 +70,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", function(self)
-	self.Header:SetText(L["ICONMENU_VALUE_POWERTYPE"])
+	self:SetTitle(L["ICONMENU_VALUE_POWERTYPE"])
 
 	local types = {
 		[-2] = L["CONDITIONPANEL_POWER"],

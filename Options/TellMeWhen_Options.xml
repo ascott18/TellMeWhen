@@ -342,7 +342,7 @@
 			<OnLoad>
 				TMW:CInit(self)
 
-				self.Header:SetText(TMW.L["ICONMENU_UNITSTOWATCH"])
+				self:SetTitle(TMW.L["ICONMENU_UNITSTOWATCH"])
 
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 					local supplementalData = panelInfo.supplementalData
@@ -683,19 +683,22 @@
 		</Layers>
 	</Frame>
 
-	<Button name="TellMeWhen_FlatFrame" virtual="true">
+	<CheckButton name="TellMeWhen_FlatFrame" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" setAllPoints="true">
-					<Color r="0.66" g="0.66" b="0.66" a="0.075"/>
+					<Color r="0.66" g="0.66" b="0.66" a="0.09"/>
 				</Texture>
 			</Layer>
 		</Layers>
 
-		<HighlightTexture alphaMode="ADD" alpha="0.1" setAllPoints="true">
+		<HighlightTexture alphaMode="ADD" alpha="0.09" setAllPoints="true">
 			<Color r="1" g="1" b="1"/>
 		</HighlightTexture>
-	</Button>
+		<CheckedTexture alphaMode="ADD" alpha="0.18" setAllPoints="true">
+			<Color r="1" g="1" b="1"/>
+		</CheckedTexture>
+	</CheckButton>
 
 	<Texture name="TellMeWhen_InputBoxTemplateBorder" virtual="true">
 		<Size x="1" y="1"/>
@@ -1059,51 +1062,49 @@
 	</Button>
 
 
-	<Button name="TellMeWhen_PointTemplate" virtual="true">
-		<KeyValues>
-			<KeyValue key="isSelected" type="boolean" value="false"/>
-		</KeyValues>
-
+	<CheckButton name="TellMeWhen_PointTemplate" virtual="true">
 		<Layers>
-			<Layer level="ARTWORK" textureSubLevel="1">
-				<Texture setAllPoints="true">
-					<Color r="0.3" g="0.3" b="0.3"/>
+			<Layer level="OVERLAY">
+				<Texture parentKey="selectedTexture" hidden="true">
+					<Color r="1.0" g="0.82" b="0" a="0.8"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" x="1" y="-1"/>
 						<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
 					</Anchors>
 				</Texture>
 			</Layer>
-			<Layer level="ARTWORK" textureSubLevel="2">
-				<Texture setAllPoints="true">
-					<Color r="0.02" g="0.02" b="0.02"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="2" y="-2"/>
-						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-
-			<Layer level="OVERLAY">
-				<Texture parentKey="selectedTexture" hidden="true">
-					<Color r="1.0" g="0.82" b="0" a="0.8"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="2" y="-2"/>
-						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
-					</Anchors>
-				</Texture>
-			</Layer>
 		</Layers>
 
+		<NormalTexture >
+			<Color r="0.02" g="0.02" b="0.02"/>
+			<Anchors>
+				<Anchor point="TOPLEFT" x="1" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
+			</Anchors>
+		</NormalTexture>
+
+		<HighlightTexture alphaMode="ADD">
+			<Color r="1" g="1" b="1" a="0.03"/>
+			<Anchors>
+				<Anchor point="TOPLEFT" x="1" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
+			</Anchors>
+		</HighlightTexture>
+
+		<CheckedTexture>
+			<Color r="1.0" g="0.82" b="0" a="0.8"/>
+			<Anchors>
+				<Anchor point="TOPLEFT" x="1" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
+			</Anchors>
+		</CheckedTexture>
+
 		<Scripts>
-			<OnLoad>
-				TMW:TT(self, point, nil)
-			</OnLoad>
 			<OnClick>
 				self:GetParent():SelectChild(self)
 			</OnClick>
 		</Scripts>
-	</Button>
+	</CheckButton>
 
 	<Frame name="TellMeWhen_PointSelectTemplate" virtual="true">
 		<KeyValues>
@@ -1121,72 +1122,72 @@
 		</Layers>
 
 		<Frames>
-			<Button parentKey="CENTER" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="CENTER" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="CENTER"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 
-			<Button parentKey="TOPLEFT" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="TOPLEFT" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT"/>
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.CENTER" relativePoint="TOPLEFT"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 
-			<Button parentKey="TOPRIGHT" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="TOPRIGHT" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="TOPRIGHT"/>
 					<Anchor point="BOTTOMLEFT" relativeKey="$parent.CENTER" relativePoint="TOPRIGHT"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 
-			<Button parentKey="BOTTOMLEFT" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="BOTTOMLEFT" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="BOTTOMLEFT"/>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.CENTER" relativePoint="BOTTOMLEFT"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 
-			<Button parentKey="BOTTOMRIGHT" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="BOTTOMRIGHT" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT"/>
 					<Anchor point="TOPLEFT" relativeKey="$parent.CENTER" relativePoint="BOTTOMRIGHT"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 
 
-			<Button parentKey="LEFT" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="LEFT" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="LEFT"/>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.CENTER" relativePoint="TOPLEFT"/>
 					<Anchor point="RIGHT" relativeKey="$parent.CENTER" relativePoint="BOTTOMLEFT"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 
-			<Button parentKey="RIGHT" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="RIGHT" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="RIGHT"/>
 					<Anchor point="TOPLEFT" relativeKey="$parent.CENTER" relativePoint="TOPRIGHT"/>
 					<Anchor point="BOTTOMLEFT" relativeKey="$parent.CENTER" relativePoint="BOTTOMRIGHT"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 
-			<Button parentKey="BOTTOM" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="BOTTOM" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="BOTTOM"/>
 					<Anchor point="TOPLEFT" relativeKey="$parent.CENTER" relativePoint="BOTTOMLEFT"/>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.CENTER" relativePoint="BOTTOMRIGHT"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 
-			<Button parentKey="TOP" inherits="TellMeWhen_PointTemplate">
+			<CheckButton parentKey="TOP" inherits="TellMeWhen_PointTemplate">
 				<Anchors>
 					<Anchor point="TOP"/>
 					<Anchor point="BOTTOMLEFT" relativeKey="$parent.CENTER" relativePoint="TOPLEFT"/>
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.CENTER" relativePoint="TOPRIGHT"/>
 				</Anchors>
-			</Button>
+			</CheckButton>
 		</Frames>
 	</Frame>
 
@@ -2670,13 +2671,16 @@
 										end)
 
 										self:CScriptAdd("ReloadRequested", function()
-											self:SetShown(TMW.CI.icon.ID == 1)
-											self:SetEnabled(TMW.CI.icon.typeData.canControlGroup)
+											self:SetEnabled(TMW.CI.icon.ID == 1 and TMW.CI.icon.typeData.canControlGroup)
 
 											if self:IsEnabled() then
 												self:SetTexts(TMW.L["ICONMENU_CTRLGROUP"], TMW.L["ICONMENU_CTRLGROUP_DESC"])
 											else
-												self:SetTexts(TMW.L["ICONMENU_CTRLGROUP"], TMW.L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"])
+												if TMW.CI.icon.ID ~= 1 then
+													self:SetTexts(TMW.L["ICONMENU_CTRLGROUP"], TMW.L["ICONMENU_CTRLGROUP_UNAVAILABLEID_DESC"])
+												else
+													self:SetTexts(TMW.L["ICONMENU_CTRLGROUP"], TMW.L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"])
+												end
 											end
 										end)
 

@@ -142,12 +142,10 @@
 								Sound:TestSound(self, self:GetParent():GetText())
 							</OnClick>
 							<OnEnter>
-								self:GetParent().Background:Show()
+								self:GetParent():LockHighlight()
 							</OnEnter>
 							<OnLeave>
-								if not self:GetParent().selected then
-									self:GetParent().Background:Hide()
-								end
+								self:GetParent():UnlockHighlight()
 							</OnLeave>
 						</Scripts>
 						<Size x="20" y="20"/>

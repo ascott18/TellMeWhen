@@ -52,11 +52,11 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
+				self:SetTitle(TMW.L["UIPANEL_ICONSPACING"])
+				
 				self:CScriptAdd("SettingTableRequested", function(requester)
 					return TMW.CI.group:GetSettingsPerView()
 				end)
-
-				self.Header:SetText(TMW.L["UIPANEL_ICONSPACING"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

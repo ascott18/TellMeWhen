@@ -91,7 +91,7 @@ end
 -- @usage
 --  -- Taken from the example at api/icon-type/how-to-use/
 --  Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
---    self.Header:SetText(Type.name)
+--    self:SetTitle(Type.name)
 --    self:BuildSimpleCheckSettingFrame({
 --      function(check)
 --          check:SetTexts(L["ICONMENU_RANGECHECK"], L["ICONMENU_RANGECHECK_DESC"])

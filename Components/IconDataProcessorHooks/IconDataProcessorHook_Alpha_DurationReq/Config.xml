@@ -62,9 +62,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["DURATIONPANEL_TITLE2"])
+				TMW:CInit(self)
 				
-				--TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.DurationMinEnabled, self.DurationMaxEnabled, self.DurationAlpha)
+				self:SetTitle(TMW.L["DURATIONPANEL_TITLE2"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

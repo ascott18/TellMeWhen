@@ -113,7 +113,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(self)
-	self.Header:SetText(TMW.L["ICONMENU_WPNENCHANTTYPE"])
+	self:SetTitle(TMW.L["ICONMENU_WPNENCHANTTYPE"])
 	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(INVTYPE_WEAPONMAINHAND, nil)
@@ -127,7 +127,7 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_WpnEnchantSettings", function(self)
-	self.Header:SetText(Type.name)
+	self:SetTitle(Type.name)
 	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_HIDEUNEQUIPPED"], L["ICONMENU_HIDEUNEQUIPPED_DESC"])

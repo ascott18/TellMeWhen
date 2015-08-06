@@ -276,7 +276,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["TEXTLAYOUTS_TAB"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["TEXTLAYOUTS_TAB"])
 			</OnLoad>
 		</Scripts>
 	</Frame>	

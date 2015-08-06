@@ -90,98 +90,10 @@ View:RegisterGroupDefaults{
 }
 
 
-View:RegisterConfigTable("args.main.args", View.view, {
-	type = "group",
-	order = 40,
-	name = View.name,
-	dialogInline = true,
-	guiInline = true,
-
-	args = {
-		Icon = {
-			name = L["UIPANEL_BAR_SHOWICON"],
-			desc = L["UIPANEL_BAR_SHOWICON_DESC"],
-			type = "toggle",
-			order = 1,
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-		Flip = {
-			name = L["UIPANEL_BAR_FLIP"],
-			desc = L["UIPANEL_BAR_FLIP_DESC"],
-			type = "toggle",
-			order = 2,
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-		Padding = {
-			name = L["UIPANEL_BAR_PADDING"],
-			desc = L["UIPANEL_BAR_PADDING_DESC"],
-			type = "range",
-			order = 11,
-			softMin = -5,
-			softMax = 20,
-			step = 0.1,
-			bigStep = 0.5,
-
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-
-		BorderIcon = {
-			name = L["UIPANEL_BAR_BORDERICON"],
-			desc = L["UIPANEL_BAR_BORDERICON_DESC"],
-			type = "range",
-			order = 21,
-			min = 0,
-			max = 3,
-			step = 0.1,
-			bigStep = 0.5,
-
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-
-		BorderBar = {
-			name = L["UIPANEL_BAR_BORDERBAR"],
-			desc = L["UIPANEL_BAR_BORDERBAR_DESC"],
-			type = "range",
-			order = 22,
-			min = 0,
-			max = 3,
-			step = 0.1,
-			bigStep = 0.5,
-
-			set = "group_set_spv",
-			get = "group_get_spv",
-		},
-
-		BorderColor = {
-			name = L["UIPANEL_BAR_BORDERCOLOR"],
-			desc = L["UIPANEL_BAR_BORDERCOLOR_DESC"],
-			type = "color",
-			order = 20,
-
-			hasAlpha = true,
-			set = function(info, r, g, b, a)
-				local group = TMW.FindGroupFromInfo(info)
-				local gspv = group:GetSettingsPerView()
-
-				gspv[info[#info]] = {r=r, g=g, b=b, a=a}
-
-				group:Setup()
-			end,
-			get = function(info)
-				local group = TMW.FindGroupFromInfo(info)
-				local gspv = group:GetSettingsPerView()
-
-				local c = gspv[info[#info]]
-
-				return c.r, c.g, c.b, c.a
-			end,
-		},
-	},
-})
+if not TMW.Views.bar then
+	TMW:Error("Some configuration for " .. View.name .. " depends on the normal Bar display method, which was not found.")
+end
+View:RegisterConfigPanel_XMLTemplate(50, "TellMeWhen_GM_Bar")
 
 
 View:ImplementsModule("IconModule_IconContainer_Masque", 1, function(Module, icon)

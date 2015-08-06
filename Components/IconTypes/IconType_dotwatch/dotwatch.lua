@@ -74,7 +74,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
-	self.Header:SetText(L["ICONMENU_DOTWATCH_GCREQ"])
+	self:SetTitle(L["ICONMENU_DOTWATCH_GCREQ"])
 
 	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	self.text:SetWordWrap(true)

@@ -38,7 +38,7 @@ TMW:RegisterDatabaseDefaults{
 }
 
 CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings", function(self)
-	self.Header:SetText(L["CONFIGPANEL_TIMER_HEADER"])
+	self:SetTitle(L["CONFIGPANEL_TIMER_HEADER"])
 	
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,

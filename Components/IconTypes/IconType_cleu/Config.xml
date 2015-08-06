@@ -189,7 +189,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.Header:SetText(TMW.L["CONFIGPANEL_CLEU_HEADER"])
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["CONFIGPANEL_CLEU_HEADER"])
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.CLEUDur, self.CLEUNoRefresh)
 				self.CLEUDur:SetPoint("LEFT", 8, 0)
