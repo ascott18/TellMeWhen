@@ -2,7 +2,7 @@
 
 	<Frame name="TellMeWhen_CustomTex" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Frames>
-			<EditBox name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="CustomTex" autoFocus="false">
+			<EditBox parentKey="CustomTex" name="$parentCustomTex" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
 				<Size y="15"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="9" y="-5"/>

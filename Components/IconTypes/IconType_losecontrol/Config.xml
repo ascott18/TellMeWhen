@@ -4,7 +4,7 @@
 		<Size y="33"/>
 		<Frames>
 		
-			<Frame name="$parentLocTypes" inherits="TMW_DropDownMenuTemplate" parentKey="LocTypes">
+			<Frame parentKey="LocTypes" name="$parentLocTypes" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="7" y="-6"/>
 					<Anchor point="RIGHT" x="-7" />

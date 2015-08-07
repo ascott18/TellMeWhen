@@ -2,7 +2,7 @@
 
 	<!-- TEMPLATES -->
 
-	<Frame name="TellMeWhen_GenericBorder" virtual="true" parentKey="border" setAllPoints="true">
+	<Frame parentKey="border" name="TellMeWhen_GenericBorder" virtual="true" setAllPoints="true">
 		<Size x="1" y="1"/>
 		<Layers>
 			<Layer level="BACKGROUND">

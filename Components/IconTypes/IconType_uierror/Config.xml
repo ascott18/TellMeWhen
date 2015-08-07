@@ -5,7 +5,7 @@
 		<Frames>
 		
 			
-			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+			<EditBox parentKey="CLEUDur" name="$parentCLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" y="3"/>
 				</Anchors>
@@ -31,7 +31,7 @@
 				</Scripts>
 			</EditBox>
 
-			<CheckButton name="$parentCLEUNoRefresh" inherits="TellMeWhen_CheckTemplate" parentKey="CLEUNoRefresh">
+			<CheckButton parentKey="CLEUNoRefresh" name="$parentCLEUNoRefresh" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentCLEUDur" relativePoint="RIGHT" x="2" y="-1"/>
 				</Anchors>

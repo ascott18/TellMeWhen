@@ -4,7 +4,7 @@
 		<Size x="33" y="29"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture name="$parentCheck" parentKey="Check" file="">
+				<Texture parentKey="Check" name="$parentCheck" file="">
 					<Size x="27" y="27"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -65,7 +65,7 @@
 		</HitRectInsets>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" parentKey="text" justifyH="LEFT" inherits="GameFontHighlight">
+				<FontString parentKey="text" name="$parentText" justifyH="LEFT" inherits="GameFontHighlight">
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
@@ -156,7 +156,7 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<EditBox inherits="TellMeWhen_InputBoxTemplate" parentKey="Unit" autoFocus="false">
+			<EditBox parentKey="Unit" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 				<Size x="120" y="18"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="10" y="0"/>
@@ -251,7 +251,7 @@
 			
 			
 			
-			<EditBox inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox" autoFocus="false">
+			<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="0" y="-9"/>
@@ -269,7 +269,7 @@
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
-			<EditBox inherits="TellMeWhen_InputBoxTemplate" parentKey="EditBox2" autoFocus="false">
+			<EditBox parentKey="EditBox2" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 				<Size x="302" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.EditBox" relativePoint="RIGHT" x="13"/>
@@ -287,7 +287,7 @@
 					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
-			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="Check">
+			<CheckButton parentKey="Check" inherits="TellMeWhen_CheckTemplate">
 				<Size x="25" y="25"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.EditBox" x="5" y="0"/>
@@ -306,7 +306,7 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="Check2">
+			<CheckButton parentKey="Check2" inherits="TellMeWhen_CheckTemplate">
 				<Size x="25" y="25"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.EditBox2" x="5" y="0"/>
@@ -446,7 +446,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
-						<FontString name="$parentText" parentKey="text" justifyH="CENTER" inherits="GameFontHighlight">
+						<FontString parentKey="text" name="$parentText" justifyH="CENTER" inherits="GameFontHighlight">
 							<Anchors>
 								<Anchor point="CENTER"/>
 							</Anchors>

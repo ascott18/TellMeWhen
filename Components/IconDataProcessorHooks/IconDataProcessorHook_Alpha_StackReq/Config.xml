@@ -33,7 +33,7 @@
 				</Scripts>
 			</Frame>
 			
-			<Slider name="$parentStackAlpha" parentKey="StackAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
+			<Slider parentKey="StackAlpha" name="$parentStackAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.StackMax" relativePoint="RIGHT" x="15" />

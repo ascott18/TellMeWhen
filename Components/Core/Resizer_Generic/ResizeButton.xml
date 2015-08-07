@@ -1,6 +1,6 @@
 ﻿<Ui>
 
-	<Button name="TellMeWhen_ResizeButton" parentKey="resizeButton" virtual="true">
+	<Button parentKey="resizeButton" name="TellMeWhen_ResizeButton" virtual="true">
 		<Size x="10" y="10"/>
 		<Anchors>
 			<Anchor point="BOTTOMRIGHT" x="3" y="-3"/>

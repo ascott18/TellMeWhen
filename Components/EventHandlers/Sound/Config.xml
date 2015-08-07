@@ -70,18 +70,18 @@
 		</HighlightTexture>
 	</Button>
 	
-	<Frame name="$parentSound" inherits="TellMeWhen_EventContainer" parentKey="Sound">
+	<Frame parentKey="Sound" name="$parentSound" inherits="TellMeWhen_EventContainer">
 		<Frames>
-			<Frame name="$parentSoundList" parentKey="SoundList">
+			<Frame parentKey="SoundList" name="$parentSoundList">
 				<!-- <Size x="290" y="266"/> -->
 				<Anchors>
 					<Anchor point="TOPLEFT"/>
 					<Anchor point="BOTTOMRIGHT" x="-30" y="15"/>
 				</Anchors>
 				<Frames>
-					<Button inherits="TellMeWhen_SoundSelectButton" parentKey="None" id="0"/>
+					<Button parentKey="None" inherits="TellMeWhen_SoundSelectButton" id="0"/>
 
-					<Slider name="$parentScrollBar" inherits="MinimalScrollBarTemplate" parentKey="ScrollBar">
+					<Slider parentKey="ScrollBar" name="$parentScrollBar" inherits="MinimalScrollBarTemplate">
 						<Size x="17"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-17"/>
@@ -103,7 +103,7 @@
 
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+						<FontString parentKey="Header" inherits="GameFontNormalLarge" justifyH="LEFT" text="">
 							<Anchors>
 								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 							</Anchors>
@@ -133,7 +133,7 @@
 					<Anchor point="TOP" relativeKey="$parent.SoundList" relativePoint="BOTTOM" y="-5"/>
 				</Anchors>
 				<Frames>
-					<Button name="$parentPlay" parentKey="Play" virtual="true">
+					<Button parentKey="Play" name="$parentPlay" virtual="true">
 						<NormalTexture file="Interface\Common\VoiceChat-Speaker"/>
 						<HighlightTexture file="Interface\Common\VoiceChat-On"/>
 						<Scripts>
@@ -156,7 +156,7 @@
 				</Frames>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<Texture name="$parentBackground" parentKey="Background" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" hidden="true">
+						<Texture parentKey="Background" name="$parentBackground" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" hidden="true">
 							<Anchor point="TOPLEFT" y="-1"/>
 							<Anchor point="BOTTOMRIGHT" y="1"/>
 						</Texture>

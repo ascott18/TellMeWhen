@@ -4,7 +4,7 @@
 		<Size y="50"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" parentKey="text" wordwrap="true" inherits="GameFontHighlightSmall">
+				<FontString parentKey="text" name="$parentText" wordwrap="true" inherits="GameFontHighlightSmall">
 					<Anchors>
 						<Anchor point="TOP" y="-10"/>
 					</Anchors>

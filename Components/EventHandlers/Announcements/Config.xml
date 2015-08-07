@@ -1,9 +1,9 @@
 ﻿<Ui>
  
  
-	<Frame name="$parentAnnouncements" inherits="TellMeWhen_EventContainer" parentKey="Announcements">
+	<Frame parentKey="Announcements" name="$parentAnnouncements" inherits="TellMeWhen_EventContainer">
 		<Frames>
-			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
+			<EditBox parentKey="EditBox" name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
 				<Size y="20"/>
 
 				<KeyValues>
@@ -17,12 +17,12 @@
 
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString name="$parentHeader" inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT" text="">
+						<FontString parentKey="Header" name="$parentHeader" inherits="GameFontNormalLarge" justifyH="LEFT" text="">
 							<Anchors>
 								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 							</Anchors>
 						</FontString>
-						<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" justifyH="LEFT" >
+						<FontString parentKey="Error" name="$parentError" inherits="GameFontRed" justifyH="LEFT" >
 							<Anchors>
 								<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
 							</Anchors>
@@ -47,7 +47,7 @@
 			</EditBox>
 			
 			
-			<Frame name="$parentSubHandlerList" parentKey="SubHandlerList">
+			<Frame parentKey="SubHandlerList" name="$parentSubHandlerList">
 				<Size x="150" y="10"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentEditBoxError" relativePoint="BOTTOMLEFT" x="-5" y="-25"/>
@@ -60,7 +60,7 @@
 				</Scripts>
 			</Frame>
 
-			<Frame name="$parentConfigFrames" parentKey="ConfigFrames">
+			<Frame parentKey="ConfigFrames" name="$parentConfigFrames">
 				<KeyValues>
 					<KeyValue key="tmwClass" type="string" value="Events_ColumnConfigContainer"/>
 				</KeyValues>
@@ -70,14 +70,14 @@
 					<Anchor point="BOTTOMRIGHT" x="-0" y="0"/>
 				</Anchors>
 				<Frames>
-					<Frame name="$parentLocation" inherits="TMW_DropDownMenuTemplate" parentKey="Location">
+					<Frame parentKey="Location" name="$parentLocation" inherits="TMW_DropDownMenuTemplate">
 						<Anchors>
 							<Anchor point="LEFT" x="13" />
 							<Anchor point="RIGHT" x="-17" />
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
-								<FontString inherits="GameFontNormal" parentKey="Header" justifyH="LEFT" text="">
+								<FontString parentKey="Header" inherits="GameFontNormal" justifyH="LEFT" text="">
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 									</Anchors>
@@ -128,7 +128,7 @@
 						</Scripts>
 					</Frame>
 
-					<EditBox name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" parentKey="WhisperTarget" autoFocus="false">
+					<EditBox parentKey="WhisperTarget" name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 						<KeyValues>
 							<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
 						</KeyValues>
@@ -139,7 +139,7 @@
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
-								<FontString name="$parentHeader" inherits="GameFontNormal" parentKey="Header" justifyH="LEFT" text="">
+								<FontString parentKey="Header" name="$parentHeader" inherits="GameFontNormal" justifyH="LEFT" text="">
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 									</Anchors>
@@ -160,7 +160,7 @@
 						</Scripts>
 					</EditBox>
 
-					<CheckButton name="$parentSticky" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Sticky">
+					<CheckButton parentKey="Sticky" name="$parentSticky" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate">
 						<Size x="30" y="30"/>
 						<Scripts>
 							<OnLoad>
@@ -172,7 +172,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentShowIconTex" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="ShowIconTex">
+					<CheckButton parentKey="ShowIconTex" name="$parentShowIconTex" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate">
 						<Size x="30" y="30"/>
 						<Scripts>
 							<OnLoad>
@@ -184,7 +184,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<Button name="$parentColor" inherits="TellMeWhen_ColorButtonTemplate" parentKey="Color">
+					<Button parentKey="Color" name="$parentColor" inherits="TellMeWhen_ColorButtonTemplate">
 						<Anchors>
 							<Anchor point="LEFT" x="15" />
 						</Anchors>
@@ -201,7 +201,7 @@
 						</Scripts>
 					</Button>
 
-					<Slider name="$parentSize" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" parentKey="Size" valuestep="1">
+					<Slider parentKey="Size" name="$parentSize" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1">
 						<Size x="150" y="17"/>
 						<Anchors>
 							<Anchor point="LEFT" x="10" />
@@ -224,7 +224,7 @@
 						</Scripts>
 					</Slider>
 
-					<Slider name="$parentTextDuration" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" parentKey="TextDuration" minvalue="0" valuestep="0.5">
+					<Slider parentKey="TextDuration" name="$parentTextDuration" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" minvalue="0" valuestep="0.5">
 						<Size x="150" y="17"/>
 						<Anchors>
 							<Anchor point="LEFT" x="10" />
@@ -256,13 +256,13 @@
 
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentSubHandlerListHeader" inherits="GameFontNormalLarge" parentKey="SubHandlerListHeader" justifyH="LEFT" >
+				<FontString parentKey="SubHandlerListHeader" name="$parentSubHandlerListHeader" inherits="GameFontNormalLarge" justifyH="LEFT" >
 					<Anchors>
 						<Anchor point="BOTTOM" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOP" y="1"/>
 					</Anchors>
 				</FontString>
 				
-				<FontString name="$parentSettingsHeader" inherits="GameFontNormalLarge" parentKey="SettingsHeader" justifyH="CENTER" text="">
+				<FontString parentKey="SettingsHeader" name="$parentSettingsHeader" inherits="GameFontNormalLarge" justifyH="CENTER" text="">
 					<Anchors>
 						<Anchor point="BOTTOM" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOP" />
 						<Anchor point="LEFT" relativeTo="$parentConfigFrames"/>

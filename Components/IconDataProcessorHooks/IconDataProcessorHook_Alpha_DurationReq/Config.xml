@@ -34,7 +34,7 @@
 				</Scripts>
 			</Frame>
 			
-			<Slider name="$parentDurationAlpha" parentKey="DurationAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
+			<Slider parentKey="DurationAlpha" name="$parentDurationAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.DurationMax" relativePoint="RIGHT" x="15" />

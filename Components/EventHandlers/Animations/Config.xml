@@ -1,8 +1,8 @@
 ﻿<Ui>
 	
-	<Frame name="$parentAnimations" inherits="TellMeWhen_EventContainer" parentKey="Animations">
+	<Frame parentKey="Animations" name="$parentAnimations" inherits="TellMeWhen_EventContainer">
 		<Frames>
-			<Frame name="$parentSubHandlerList" parentKey="SubHandlerList">
+			<Frame parentKey="SubHandlerList" name="$parentSubHandlerList">
 				<Size x="150" y="10"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" />
@@ -15,7 +15,7 @@
 				</Scripts>
 			</Frame>
 			
-			<Frame name="$parentConfigFrames" parentKey="ConfigFrames">
+			<Frame parentKey="ConfigFrames" name="$parentConfigFrames">
 				<KeyValues>
 					<KeyValue key="tmwClass" type="string" value="Events_ColumnConfigContainer"/>
 				</KeyValues>
@@ -25,7 +25,7 @@
 					<Anchor point="BOTTOMRIGHT" x="-0" y="0"/>
 				</Anchors>
 				<Frames>
-					<Slider name="$parentDuration" parentKey="Duration" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
+					<Slider parentKey="Duration" name="$parentDuration" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self)
@@ -51,7 +51,7 @@
 						</Scripts>
 					</Slider>
 
-					<CheckButton name="$parentInfinite" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Infinite">
+					<CheckButton parentKey="Infinite" name="$parentInfinite" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate">
 						<Size x="30" y="30"/>
 						<Scripts>
 							<OnLoad>
@@ -63,7 +63,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<Slider name="$parentMagnitude" parentKey="Magnitude" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1">
+					<Slider parentKey="Magnitude" name="$parentMagnitude" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1">
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self)
@@ -80,7 +80,7 @@
 						</Scripts>
 					</Slider>
 
-					<Slider name="$parentPeriod" parentKey="Period" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
+					<Slider parentKey="Period" name="$parentPeriod" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="0.1" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self)
@@ -98,7 +98,7 @@
 					</Slider>
 					
 
-					<Button name="$parentColor" inherits="TellMeWhen_ColorButtonTemplate" parentKey="Color">
+					<Button parentKey="Color" name="$parentColor" inherits="TellMeWhen_ColorButtonTemplate">
 						<Anchors>
 							<Anchor point="LEFT" x="15" />
 						</Anchors>
@@ -116,7 +116,7 @@
 					</Button>
 
 
-					<EditBox name="$parentImage" inherits="TellMeWhen_InputBoxTemplate" parentKey="Image" autoFocus="false">
+					<EditBox parentKey="Image" name="$parentImage" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 						<Size y="15"/>
 						<Anchors>
 							<!-- <Anchor point="TOPLEFT" relativeTo="$parentPeriod" relativePoint="BOTTOMLEFT" x="4" y="-25"/> -->
@@ -140,7 +140,7 @@
 						</Scripts>
 					</EditBox>
 
-					<CheckButton name="$parentFade" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate" parentKey="Fade">
+					<CheckButton parentKey="Fade" name="$parentFade" inherits="TellMeWhen_EventHandler_ColumnConfig_CheckTemplate">
 						<Size x="30" y="30"/>
 						<Scripts>
 							<OnLoad>
@@ -152,7 +152,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<Slider name="$parentAlphaStandalone" parentKey="AlphaStandalone" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
+					<Slider parentKey="AlphaStandalone" name="$parentAlphaStandalone" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self)
@@ -170,7 +170,7 @@
 					</Slider>
 					
 					
-					<Slider name="$parentThickness" parentKey="Thickness" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
+					<Slider parentKey="Thickness" name="$parentThickness" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self)
@@ -189,7 +189,7 @@
 						</Scripts>
 					</Slider>
 					
-					<Slider name="$parentSize_anim" parentKey="Size_anim" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
+					<Slider parentKey="Size_anim" name="$parentSize_anim" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self)
@@ -208,7 +208,7 @@
 						</Scripts>
 					</Slider>
 
-					<Slider name="$parentSizeX" parentKey="SizeX" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
+					<Slider parentKey="SizeX" name="$parentSizeX" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self)
@@ -227,7 +227,7 @@
 						</Scripts>
 					</Slider>
 
-					<Slider name="$parentSizeY" parentKey="SizeY" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
+					<Slider parentKey="SizeY" name="$parentSizeY" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" >
 						<Scripts>
 							<OnLoad>
 								TMW:CInit(self)
@@ -246,7 +246,7 @@
 						</Scripts>
 					</Slider>
 
-					<Frame name="$parentAnchorTo" parentKey="AnchorTo" inherits="TMW_DropDownMenuTemplate">
+					<Frame parentKey="AnchorTo" name="$parentAnchorTo" inherits="TMW_DropDownMenuTemplate">
 						<Anchors>
 							<Anchor point="LEFT" x="9" />
 							<Anchor point="RIGHT" x="-12" />
@@ -296,13 +296,13 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentListHeader" inherits="GameFontNormalLarge" parentKey="ListHeader" justifyH="LEFT" text="">
+				<FontString parentKey="ListHeader" name="$parentListHeader" inherits="GameFontNormalLarge" justifyH="LEFT" text="">
 					<Anchors>
 						<Anchor point="BOTTOM" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOP" y="1"/>
 					</Anchors>
 				</FontString>
 				
-				<FontString name="$parentSettingsHeader" inherits="GameFontNormalLarge" parentKey="SettingsHeader" justifyH="CENTER" text="">
+				<FontString parentKey="SettingsHeader" name="$parentSettingsHeader" inherits="GameFontNormalLarge" justifyH="CENTER" text="">
 					<Anchors>
 						<Anchor point="BOTTOM" relativeTo="$parentSubHandlerListScrollFrame" relativePoint="TOP" />
 						<Anchor point="LEFT" relativeTo="$parentConfigFrames"/>

@@ -905,7 +905,7 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 	childrenEnabled = true,
 
 	OnNewInstance = function(self)
-		self.tabs = {}
+		self.Tabs = {}
 	end,
 
 	OnClick = function(self)
@@ -913,18 +913,18 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 
 		IE.CurrentTabGroup = self
 
-		TMW.IE.tabs.art.pSelectedHorizontal:ClearAllPoints()
-		TMW.IE.tabs.art.pSelectedHorizontal:SetPoint("TOPLEFT", self)
-		TMW.IE.tabs.art.pSelectedHorizontal:SetPoint("TOPRIGHT", self)
+		TMW.IE.Tabs.art.pSelectedHorizontal:ClearAllPoints()
+		TMW.IE.Tabs.art.pSelectedHorizontal:SetPoint("TOPLEFT", self)
+		TMW.IE.Tabs.art.pSelectedHorizontal:SetPoint("TOPRIGHT", self)
 
-		for i, tab in TMW:Vararg(TMW.IE.tabs.secondary:GetChildren()) do
+		for i, tab in TMW:Vararg(TMW.IE.Tabs.secondary:GetChildren()) do
 			tab:Hide()
 		end
 		
 		local lastTab
 		local firstShown
-		for i = 1, #self.tabs do
-			local tab = self.tabs[i]
+		for i = 1, #self.Tabs do
+			local tab = self.Tabs[i]
 
 			if tab:ShouldShowTab() then
 				if not lastTab then
@@ -961,8 +961,8 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 		end
 
 		if not IE.CurrentTab then
-			TMW.IE.tabs.art.sSelectedHorizontal:ClearAllPoints()
-			TMW.IE.tabs.art.sSelectedHorizontal:SetPoint("TOP")
+			TMW.IE.Tabs.art.sSelectedHorizontal:ClearAllPoints()
+			TMW.IE.Tabs.art.sSelectedHorizontal:SetPoint("TOP")
 		end
 
 		IE:ResizeTabs()
@@ -998,9 +998,9 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 		IE.CurrentTab = self
 		self.parent.currentTab = self
 
-		IE.tabs.art.sSelectedHorizontal:ClearAllPoints()
-		IE.tabs.art.sSelectedHorizontal:SetPoint("BOTTOMLEFT", self)
-		IE.tabs.art.sSelectedHorizontal:SetPoint("BOTTOMRIGHT", self)
+		IE.Tabs.art.sSelectedHorizontal:ClearAllPoints()
+		IE.Tabs.art.sSelectedHorizontal:SetPoint("BOTTOMLEFT", self)
+		IE.Tabs.art.sSelectedHorizontal:SetPoint("BOTTOMRIGHT", self)
 
 
 		local page = IE:DisplayPage(self.pageKey)
@@ -1032,8 +1032,8 @@ function IE:RegisterTabGroup(identifier, text, order, setupHeaderFunc)
 		error("A tab group with the identifier " .. identifier .. " is already registered.")
 	end
 	
-	local tab = TMW.C.IconEditorTabGroup:New("Button", nil, TMW.IE.tabs.primary, "TellMeWhen_IE_Tab")
-	TMW.IE.tabs.primary[identifier] = tab
+	local tab = TMW.C.IconEditorTabGroup:New("Button", nil, TMW.IE.Tabs.primary, "TellMeWhen_IE_Tab")
+	TMW.IE.Tabs.primary[identifier] = tab
 
 	tab.identifier = identifier
 	tab.order = order
@@ -1043,7 +1043,7 @@ function IE:RegisterTabGroup(identifier, text, order, setupHeaderFunc)
 
 	IE.TabGroups[identifier] = tab
 
-	for i, tab in ipairs(TMW.IE.tabs.primary) do
+	for i, tab in ipairs(TMW.IE.Tabs.primary) do
 		tab:Hide()
 	end
 	
@@ -1081,8 +1081,8 @@ function IE:RegisterTab(groupIdentifier, identifier, pageKey, order)
 		error("A tab with the identifier " .. identifier .. " is already registered to tab group " .. groupIdentifier)
 	end
 
-	local tab = TMW.C.IconEditorTab:New("Button", nil, TMW.IE.tabs.secondary, "TellMeWhen_IE_Tab")
-	TMW.IE.tabs.secondary[identifier] = tab
+	local tab = TMW.C.IconEditorTab:New("Button", nil, TMW.IE.Tabs.secondary, "TellMeWhen_IE_Tab")
+	TMW.IE.Tabs.secondary[identifier] = tab
 
 	tab.identifier = identifier
 	tab.pageKey = pageKey
@@ -1091,9 +1091,9 @@ function IE:RegisterTab(groupIdentifier, identifier, pageKey, order)
 
 	tabGroup[identifier] = tab
 
-	tabGroup.tabs[#tabGroup.tabs + 1] = tab
+	tabGroup.Tabs[#tabGroup.Tabs + 1] = tab
 
-	TMW:SortOrderedTables(tabGroup.tabs)
+	TMW:SortOrderedTables(tabGroup.Tabs)
 
 	return tab
 end
@@ -1104,13 +1104,13 @@ function IE:ResizeTabs()
 
 	local width = endPadding*2 - interPadding -- This was derived using magic.
 
-	for i, tab in TMW:Vararg(TMW.IE.tabs.secondary:GetChildren()) do
+	for i, tab in TMW:Vararg(TMW.IE.Tabs.secondary:GetChildren()) do
 		if tab:IsShown() then
 			width = width + tab:GetWidth() + interPadding
 		end
 	end
 
-	TMW.IE.tabs.secondary:SetWidth(width)
+	TMW.IE.Tabs.secondary:SetWidth(width)
 end
 
 function IE:RefreshTabs()

@@ -3,7 +3,7 @@
 		<Size x="30" y="30"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture name="$parentIcon" parentKey="texture" file="Interface\Icons\INV_Misc_QuestionMark">
+				<Texture parentKey="texture" name="$parentIcon" file="Interface\Icons\INV_Misc_QuestionMark">
 					<Size x="30" y="30"/>
 				</Texture>
 			</Layer>

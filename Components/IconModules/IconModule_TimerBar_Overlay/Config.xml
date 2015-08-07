@@ -3,7 +3,7 @@
 	<Frame name="TellMeWhen_CBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="60"/>
 		<Frames>
-			<CheckButton name="$parentShowCBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowCBar">
+			<CheckButton parentKey="ShowCBar" name="$parentShowCBar" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="TOP" y="-1"/>
 				</Anchors>
@@ -16,7 +16,7 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<CheckButton name="$parentInvertCBar" inherits="TellMeWhen_CheckTemplate" parentKey="InvertCBar">
+			<CheckButton parentKey="InvertCBar" name="$parentInvertCBar" inherits="TellMeWhen_CheckTemplate">
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
@@ -31,7 +31,7 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<EditBox name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="CBarOffs" autoFocus="false">
+			<EditBox parentKey="CBarOffs" name="$parentCBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" autoFocus="false">
 				<Size x="45" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentInvertCBar" relativePoint="RIGHT" y="1"/>
@@ -58,7 +58,7 @@
 				</Scripts>
 			</EditBox>
 			
-			<CheckButton name="$parentOverlay_BarGCD" inherits="TellMeWhen_CheckTemplate" parentKey="Overlay_BarGCD">
+			<CheckButton parentKey="Overlay_BarGCD" name="$parentOverlay_BarGCD" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentShowCBar" relativePoint="BOTTOM" y="2"/>
 				</Anchors>

@@ -3,7 +3,7 @@
 	<Frame name="TellMeWhen_PBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="30"/>
 		<Frames>
-			<CheckButton name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate" parentKey="ShowPBar">
+			<CheckButton parentKey="ShowPBar" name="$parentShowPBar" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="TOP" y="-1"/>
 				</Anchors>
@@ -16,7 +16,7 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<CheckButton name="$parentInvertPBar" inherits="TellMeWhen_CheckTemplate" parentKey="InvertPBar">
+			<CheckButton parentKey="InvertPBar" name="$parentInvertPBar" inherits="TellMeWhen_CheckTemplate">
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
@@ -31,7 +31,7 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<EditBox name="$parentPBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="PBarOffs" autoFocus="false">
+			<EditBox parentKey="PBarOffs" name="$parentPBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" autoFocus="false">
 				<Size x="45" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentInvertPBar" relativePoint="RIGHT" y="1"/>

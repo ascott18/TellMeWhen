@@ -1,9 +1,9 @@
 ﻿<Ui>
 	
-	<Frame name="$parentLua" inherits="TellMeWhen_EventContainer" parentKey="Lua">
+	<Frame parentKey="Lua" name="$parentLua" inherits="TellMeWhen_EventContainer">
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentError" inherits="GameFontRed" parentKey="Error" justifyH="LEFT">
+				<FontString parentKey="Error" name="$parentError" inherits="GameFontRed" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="5" y="0"/>
 					</Anchors>
@@ -11,7 +11,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame name="$parentCodeContainer" parentKey="CodeContainer">
+			<Frame parentKey="CodeContainer" name="$parentCodeContainer">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentError" relativePoint="BOTTOM" y="-0"/>
 					<Anchor point="LEFT" y="-20"/>
@@ -19,7 +19,7 @@
 					<!-- <Anchor point="BOTTOMRIGHT" x="-30" y="15"/> -->
 				</Anchors>
 				<Frames>
-					<EditBox name="$parentCode" parentKey="Code" inherits="TellMeWhen_InputBoxTemplate" multiline="true">
+					<EditBox parentKey="Code" name="$parentCode" inherits="TellMeWhen_InputBoxTemplate" multiline="true">
 						<Size y="15"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" x="2"/>

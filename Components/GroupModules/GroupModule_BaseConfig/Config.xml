@@ -12,7 +12,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
-						<FontString inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
+						<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="LEFT">
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="RIGHT" x="19" y="-1"/>
 							</Anchors>

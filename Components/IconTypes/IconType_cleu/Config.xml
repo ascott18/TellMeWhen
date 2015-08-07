@@ -4,7 +4,7 @@
 		<Size y="250"/>
 		<Frames>
 		
-			<Frame name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate" parentKey="CLEUEvents">
+			<Frame parentKey="CLEUEvents" name="$parentCLEUEvents" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="5" y="-5"/>
 					<Anchor point="RIGHT" x="-5" />
@@ -25,7 +25,7 @@
 				</Scripts>
 			</Frame>
 			
-			<EditBox name="$parentCLEUDur" parentKey="CLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+			<EditBox parentKey="CLEUDur" name="$parentCLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" y="-7"/>
 				</Anchors>
@@ -53,7 +53,7 @@
 				</Scripts>
 			</EditBox>
 
-			<CheckButton name="$parentCLEUNoRefresh" inherits="TellMeWhen_CheckTemplate" parentKey="CLEUNoRefresh">
+			<CheckButton parentKey="CLEUNoRefresh" name="$parentCLEUNoRefresh" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentCLEUDur" relativePoint="RIGHT" x="2" y="-1"/>
 				</Anchors>
@@ -69,7 +69,7 @@
 				</Scripts>
 			</CheckButton>
 			
-			<EditBox name="$parentSourceUnit" inherits="TellMeWhen_UnitEditBox" parentKey="SourceUnit">
+			<EditBox parentKey="SourceUnit" name="$parentSourceUnit" inherits="TellMeWhen_UnitEditBox">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentCLEUDur" relativePoint="BOTTOMLEFT" x="0" y="-10"/>
 					<Anchor point="RIGHT" x="-125"/>
@@ -105,7 +105,7 @@
 					</OnSizeChanged>
 				</Scripts>
 			</EditBox>
-			<Frame name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate" parentKey="SourceFlags">
+			<Frame parentKey="SourceFlags" name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentSourceUnit" relativePoint="RIGHT" x="3" />
 					<Anchor point="RIGHT" x="-5" />
@@ -127,7 +127,7 @@
 				</Scripts>
 			</Frame>
 
-			<EditBox name="$parentDestUnit" inherits="TellMeWhen_UnitEditBox" parentKey="DestUnit">
+			<EditBox parentKey="DestUnit" name="$parentDestUnit" inherits="TellMeWhen_UnitEditBox">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentSourceUnit" relativePoint="BOTTOM" y="-10"/>
 					<Anchor point="LEFT" relativeTo="$parentSourceUnit"/>
@@ -164,7 +164,7 @@
 					</OnSizeChanged>
 				</Scripts>
 			</EditBox>
-			<Frame name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate" parentKey="DestFlags">
+			<Frame parentKey="DestFlags" name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentDestUnit" relativePoint="RIGHT" x="3" />
 					<Anchor point="RIGHT" x="-5" />

@@ -41,7 +41,7 @@
 	<Frame name="TellMeWhen_ChooseName" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<!-- <Size y="50"/> -->
 		<Frames>
-			<EditBox inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="Name" autoFocus="false">
+			<EditBox parentKey="Name" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
 				<Size x="545" y="15"/>
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
@@ -50,7 +50,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
-						<FontString inherits="GameFontHighlightSmall" parentKey="text" justifyH="LEFT">
+						<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="LEFT">
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="RIGHT" x="19" y="-1"/>
 							</Anchors>
@@ -210,7 +210,7 @@
 
 	<Frame name="TellMeWhen_Unit" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Frames>
-			<EditBox inherits="TellMeWhen_UnitEditBox" parentKey="Unit">
+			<EditBox parentKey="Unit" inherits="TellMeWhen_UnitEditBox">
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="LEFT" x="9" />
@@ -304,7 +304,7 @@
 				</Scripts>
 			</EditBox>
 
-			<Button name="$parentUnitConditions" parentKey="UnitConditions" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="UnitConditions" name="$parentUnitConditions" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="160" y="16"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Unit" relativePoint="BOTTOM" y="-7"/>
@@ -399,7 +399,7 @@
 		<Size y="78"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString inherits="GameFontNormal" parentKey="text" justifyH="LEFT">
+				<FontString parentKey="text" inherits="GameFontNormal" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="-10" y="10"/>
 					</Anchors>
@@ -450,7 +450,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<Texture setAllPoints="true" parentKey="Backdrop" >
+						<Texture parentKey="Backdrop" setAllPoints="true" >
 							<Color r="0.15" g="0.15" b="0.15" a="1"/>
 
 							<Gradient orientation="HORIZONTAL">
@@ -925,7 +925,7 @@
 						<Anchor point="RIGHT" x="5"/>
 					</Anchors>
 				</FontString>
-				<FontString inherits="GameFontHighlightSmall" parentKey="Low" text="LOW">
+				<FontString parentKey="Low" inherits="GameFontHighlightSmall" text="LOW">
 					<Anchors>
 						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="-4" y="3"/>
 					</Anchors>
@@ -935,7 +935,7 @@
 						<Anchor point="TOP" relativePoint="BOTTOM" y="3"/>
 					</Anchors>
 				</FontString>
-				<FontString inherits="GameFontHighlightSmall" parentKey="High" text="HIGH">
+				<FontString parentKey="High" inherits="GameFontHighlightSmall" text="HIGH">
 					<Anchors>
 						<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" x="4" y="3"/>
 					</Anchors>
@@ -1194,7 +1194,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Frame name="$parentDD" inherits="TMW_DropDownMenuTemplate" propagateKeyboardInput="true" parentKey="DD">
+			<Frame parentKey="DD" name="$parentDD" inherits="TMW_DropDownMenuTemplate" propagateKeyboardInput="true">
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="-15" y="-4"/>
 				</Anchors>
@@ -1401,12 +1401,12 @@
 					</Anchors>
 				</Texture>
 
-				<FontString name="$parentTitle" parentKey="title" inherits="GameFontNormal" justifyH="CENTER">
+				<FontString parentKey="title" name="$parentTitle" inherits="GameFontNormal" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="CENTER" relativeKey="$parent.HeaderBackground" y="0"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentDesc" parentKey="desc" inherits="GameFontHighlight" justifyH="CENTER" justifyV="TOP">
+				<FontString parentKey="desc" name="$parentDesc" inherits="GameFontHighlight" justifyH="CENTER" justifyV="TOP">
 					<Anchors>
 						<Anchor point="TOP" y="-32"/>
 					</Anchors>
@@ -1418,7 +1418,7 @@
 			<Frame inherits="TellMeWhen_GenericBorder">
 			</Frame>
 
-			<Button name="$parentClose" parentKey="CloseButton" inherits="UIPanelCloseButton">
+			<Button parentKey="CloseButton" name="$parentClose" inherits="UIPanelCloseButton">
 				<Anchors>
 					<Anchor point="CENTER" relativePoint="TOPRIGHT" x="-14" y="-14"/>
 				</Anchors>
@@ -1537,7 +1537,7 @@
 		</Anchors>
 
 		<Frames>
-			<Button name="$parentExit" parentKey="Exit" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="Exit" name="$parentExit" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="5" y="5"/>
@@ -1618,7 +1618,7 @@
 		</Anchors>
 
 		<Frames>
-			<Button name="$parentFirst" parentKey="First" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="First" name="$parentFirst" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15"/>
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" y="-10"/>
@@ -1636,7 +1636,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentSecond" parentKey="Second" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="Second" name="$parentSecond" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentFirst" relativePoint="BOTTOMLEFT" y="-10"/>
@@ -1657,7 +1657,7 @@
 
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentDesc2" parentKey="desc2" inherits="GameFontHighlight" justifyH="CENTER" justifyV="TOP">
+				<FontString parentKey="desc2" name="$parentDesc2" inherits="GameFontHighlight" justifyH="CENTER" justifyV="TOP">
 					<Anchors>
 						<Anchor point="TOP" relativeTo="$parentSecond" relativePoint="BOTTOM" y="-20"/>
 					</Anchors>
@@ -1666,7 +1666,7 @@
 		</Layers>
 
 		<Frames>
-			<Button name="$parentIgnoreForSession" parentKey="IgnoreForSession" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="IgnoreForSession" name="$parentIgnoreForSession" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15"/>
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentDesc2" relativePoint="BOTTOM" y="-10"/>
@@ -1739,7 +1739,7 @@
 		</Anchors>
 
 		<Frames>
-			<Frame name="$parentScrollContainer" parentKey="ScrollContainer">
+			<Frame parentKey="ScrollContainer" name="$parentScrollContainer">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" y="-15"/>
 					<Anchor point="LEFT" x="15" />
@@ -1748,7 +1748,7 @@
 
 				<Layers>
 					<Layer level="ARTWORK">
-						<FontString name="$parentCode" parentKey="Code" inherits="GameFontHighlight" justifyH="LEFT" justifyV="TOP" >
+						<FontString parentKey="Code" name="$parentCode" inherits="GameFontHighlight" justifyH="LEFT" justifyV="TOP" >
 							<Size x="1" y="0"/>
 							<Anchors>
 								<Anchor point="TOPLEFT"/>
@@ -1787,7 +1787,7 @@
 				</Scripts>
 			</Frame>
 
-			<Button name="$parentDeny" parentKey="Deny" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="Deny" name="$parentDeny" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15" x="215"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="10" y="10"/>
@@ -1800,7 +1800,7 @@
 				</Scripts>
 			</Button>
 
-			<Button name="$parentConfirm" parentKey="Confirm" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="Confirm" name="$parentConfirm" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15" x="215"/>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" x="-10" y="10"/>
@@ -2024,7 +2024,7 @@
 
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture name="$parentIconTexture" parentKey="icontexture">
+				<Texture parentKey="icontexture" name="$parentIconTexture">
 					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
 					<Size x="18" y="18"/>
 					<Anchors>
@@ -2234,14 +2234,14 @@
 			</Button>
 
 
-			<EditBox inherits="TellMeWhen_ExportBoxTemplate" parentKey="ExportBox">
+			<EditBox parentKey="ExportBox" inherits="TellMeWhen_ExportBoxTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.RedoButton" relativePoint="RIGHT" x="10" y="1"/>
 					<Anchor point="RIGHT" relativeKey="$parent.OkayButton" relativePoint="LEFT" x="-10" y="1"/>
 				</Anchors>
 			</EditBox>
 
-			<Frame parentKey="tabs">
+			<Frame parentKey="Tabs">
 				<Size y="33" />
 				<Anchors>
 					<Anchor point="LEFT" />
@@ -2453,16 +2453,14 @@
 						</Scripts>
 					</Frame>
 				</Frames>
-
 			</Frame>
 
-			<!-- TODO: do a mass replace to put parentKey at the beginning of tags that it is used on -->
-			<Frame name="$parentPages" parentKey="Pages" >
+			<Frame parentKey="Pages" name="$parentPages" >
 				<Anchors>
 					<Anchor point="LEFT" />
 					<Anchor point="TOP" relativeKey="$parent.HeaderBackground" relativePoint="BOTTOM"/>
 					<Anchor point="RIGHT" />
-					<Anchor point="BOTTOM" relativeKey="$parent.tabs" relativePoint="TOP" y="1"/>
+					<Anchor point="BOTTOM" relativeKey="$parent.Tabs" relativePoint="TOP" y="1"/>
 				</Anchors>
 
 				<Frames>
@@ -2492,7 +2490,7 @@
 								<Scripts>
 									<OnLoad>
 										TMW:CInit(self)
-										
+
 										local title = function()
 											return TMW.Types[TMW.CI.ics.Type].name
 										end
@@ -2753,7 +2751,7 @@
 
 										height = height + 20
 
-										height = min(height, 400, self:GetTop() - TMW.IE.tabs:GetBottom() + 2)
+										height = min(height, 400, self:GetTop() - TMW.IE.Tabs:GetBottom() + 2)
 
 										self:SetHeight(height)
 									</OnShow>
@@ -2846,7 +2844,7 @@
 
 					<Frame parentKey="IconNotLoaded" inherits="TellMeWhen_IE_PageTemplate">
 						<Frames>
-							<Frame name="$parentMessage" inherits="TellMeWhen_FlatFrame" parentKey="Message">
+							<Frame parentKey="Message" name="$parentMessage" inherits="TellMeWhen_FlatFrame">
 								<Size y="1"/>
 								<Anchors>
 									<Anchor point="LEFT" x="15" />
@@ -3173,7 +3171,7 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormal" wordwrap="false" justifyH="CENTER">
+				<FontString parentKey="Header" name="$parentHeader" inherits="GameFontNormal" wordwrap="false" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="TOP" y="-8"/>
 						<Anchor point="LEFT" relativeTo="$parentForwardsButton" relativePoint="RIGHT" x="4"/>

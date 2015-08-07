@@ -9,7 +9,7 @@
 
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture name="$parentCheck" parentKey="Check" file="">
+				<Texture parentKey="Check" name="$parentCheck" file="">
 					<Size x="24" y="24"/>
 					<Anchors>
 						<Anchor point="CENTER"/>

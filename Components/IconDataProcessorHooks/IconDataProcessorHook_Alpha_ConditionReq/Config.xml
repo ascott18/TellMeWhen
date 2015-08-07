@@ -3,7 +3,7 @@
 	<Frame name="TellMeWhen_ConditionRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="40"/>
 		<Frames>
-			<Slider name="$parentConditionAlpha" parentKey="ConditionAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
+			<Slider parentKey="ConditionAlpha" name="$parentConditionAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Size y="17"/>
 				<Anchors>
 					<Anchor point="LEFT" x="10" />

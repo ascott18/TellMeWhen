@@ -5,7 +5,7 @@
 	<Frame name="TellMeWhen_BarDisplayBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="85"/>
 		<Frames>
-			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="Invert">
+			<CheckButton parentKey="Invert" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 					<Anchor point="TOP" y="-1"/>
@@ -20,7 +20,7 @@
 				</Scripts>
 			</CheckButton>
 			
-			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="BarGCD">
+			<CheckButton parentKey="BarGCD" inherits="TellMeWhen_CheckTemplate">
 				<!-- Anchoring is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 				<Scripts>
 					<OnLoad>
@@ -36,7 +36,7 @@
 				</Scripts>
 			</CheckButton>
 			
-			<CheckButton inherits="TellMeWhen_CheckTemplate" parentKey="EnableColors">
+			<CheckButton parentKey="EnableColors" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 					<Anchor point="TOP" relativeKey="$parent.Invert" relativePoint="BOTTOM" y="3"/>
@@ -64,7 +64,7 @@
 				</Scripts>
 			</CheckButton>
 			
-			<EditBox inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="FakeMax" autoFocus="false">
+			<EditBox parentKey="FakeMax" inherits="TellMeWhen_TimeEditBoxTemplate" autoFocus="false">
 				<Size x="45" y="15"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.BarGCD" relativePoint="BOTTOM" y="-2"/>

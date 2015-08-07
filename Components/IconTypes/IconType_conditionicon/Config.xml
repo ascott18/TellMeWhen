@@ -34,7 +34,7 @@
 			</Frame>
 
 			
-			<CheckButton name="$parentOnlyIfCounting" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyIfCounting">
+			<CheckButton parentKey="OnlyIfCounting" name="$parentOnlyIfCounting" inherits="TellMeWhen_CheckTemplate">
 				<Size x="28" y="28"/>
 				<Anchors>
 					<Anchor point="LEFT" x="5" />
@@ -59,7 +59,7 @@
 				</Scripts>
 			</CheckButton>
 			
-			<CheckButton name="$parentOnlyIfNotCounting" inherits="TellMeWhen_CheckTemplate" parentKey="OnlyIfNotCounting">
+			<CheckButton parentKey="OnlyIfNotCounting" name="$parentOnlyIfNotCounting" inherits="TellMeWhen_CheckTemplate">
 				<Size x="28" y="28"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.OnlyIfCounting" relativePoint="BOTTOMLEFT" x="0" y="2"/>

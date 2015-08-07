@@ -3,7 +3,7 @@
 	<Frame name="TellMeWhen_MetaGroup" virtual="true">
 		<Size y="30"/>
 		<Frames>
-			<Frame name="$parentIcon" parentKey="icon" inherits="TMW_IconDropDownMenuTemplate">
+			<Frame parentKey="icon" name="$parentIcon" inherits="TMW_IconDropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" x="7"/>
 					<Anchor point="RIGHT" x="-29"/>
@@ -59,7 +59,7 @@
 				</Scripts>
 			</Frame>
 			
-			<Button name="$parentDelete" parentKey="delete" inherits="UIPanelCloseButton">
+			<Button parentKey="delete" name="$parentDelete" inherits="UIPanelCloseButton">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-1" y="0"/>
 				</Anchors>
@@ -85,7 +85,7 @@
 	<Frame name="TellMeWhen_MetaIconOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="20"/>
 		<Frames>
-			<Button name="$parentAdd" parentKey="Add" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="Add" name="$parentAdd" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="160" y="16"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="7" y="-7"/>
@@ -110,7 +110,7 @@
 				</Scripts>
 			</Button>
 			
-			<CheckButton name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate" parentKey="CheckNext">
+			<CheckButton parentKey="CheckNext" name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<!-- <Anchor point="TOPLEFT" x="5" y="-6"/> -->
 					<Anchor point="LEFT" relativeTo="$parentAdd" relativePoint="RIGHT" x="8" />

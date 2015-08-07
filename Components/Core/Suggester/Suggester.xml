@@ -86,7 +86,7 @@
 		</HighlightTexture>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" parentKey="Background">
+				<Texture parentKey="Background" name="$parentBackground">
 					<Color r="0.5" g="0.5" b="0.5" a="0.9"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" y="-0.5"/>
@@ -95,19 +95,19 @@
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
-				<Texture name="$parentIcon" parentKey="Icon" file="Interface\Icons\INV_Misc_QuestionMark">
+				<Texture parentKey="Icon" name="$parentIcon" file="Interface\Icons\INV_Misc_QuestionMark">
 					<Size x="18" y="18"/>
 					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
 					<Anchors>
 						<Anchor point="LEFT"/>
 					</Anchors>
 				</Texture>
-				<FontString name="$parentID" parentKey="ID" inherits="GameFontHighlight" justifyH="RIGHT">
+				<FontString parentKey="ID" name="$parentID" inherits="GameFontHighlight" justifyH="RIGHT">
 					<Anchors>
 						<Anchor point="RIGHT" x="-1" y="0"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlight" justifyH="LEFT">
+				<FontString parentKey="Name" name="$parentName" inherits="GameFontHighlight" justifyH="LEFT">
 					<Size y="1"/> <!-- Fix for WoW 6.1's issues with text anchoring and wrapping -->
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="2"/>
@@ -118,7 +118,7 @@
 		</Layers>
 	</Button>
 	
-	<Frame name="$parentSuggest" parent="TellMeWhen_IconEditor" parentKey="Suggest" hidden="true" enableMouse="true">
+	<Frame parentKey="Suggest" name="$parentSuggest" parent="TellMeWhen_IconEditor" hidden="true" enableMouse="true">
 		<Size x="200"/>
 		<Anchors>
 			<Anchor point="TOP" y="-0"/> 
@@ -133,7 +133,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
-				<FontString inherits="GameFontNormalLarge" parentKey="Header" justifyH="LEFT">
+				<FontString parentKey="Header" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOP" y="-4"/>
 					</Anchors>
@@ -149,7 +149,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Slider inherits="TellMeWhen_SliderTemplate" parentKey="Speed" hidden="true">
+			<Slider parentKey="Speed" inherits="TellMeWhen_SliderTemplate" hidden="true">
 				<Size x="165" y="18"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.InfoText" relativePoint="BOTTOM" y="-25"/>
@@ -202,11 +202,11 @@
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
-						<Texture name="$parenttexture" parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
+						<Texture parentKey="texture" name="$parenttexture" file="Interface\TargetingFrame\UI-StatusBar"/>
 					</Layer>
 
 					<Layer level="OVERLAY">
-						<FontString name="$parentText" parentKey="text" inherits="GameFontHighlight">
+						<FontString parentKey="text" name="$parentText" inherits="GameFontHighlight">
 							<Anchors>
 								<Anchor point="CENTER"/>
 							</Anchors>

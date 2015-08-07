@@ -208,13 +208,13 @@
 		</Anchors>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentTitle" parentKey="Title" inherits="GameFontHighlight" justifyH="LEFT">
+				<FontString parentKey="Title" name="$parentTitle" inherits="GameFontHighlight" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="6" y="-4"/>
 						<Anchor point="RIGHT" x="-6"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentHeader" parentKey="Header" inherits="GameFontNormal" justifyH="LEFT" text="TEST">
+				<FontString parentKey="Header" name="$parentHeader" inherits="GameFontNormal" justifyH="LEFT" text="TEST">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="-9" y="1" relativePoint="TOPLEFT"/>
 						<Anchor point="RIGHT" x="0"/>
@@ -239,7 +239,7 @@
 		<Size y="15"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmall" justifyH="LEFT">
+				<FontString parentKey="Name" name="$parentName" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="LEFT" x="3"/>
 						<Anchor point="RIGHT" x="-1"/>
@@ -310,7 +310,7 @@
 	
 	<Frame parentKey="Events" name="$parentEvents" inherits="TellMeWhen_IE_PageTemplate">		
 		<Frames>					
-			<Frame name="$parentEventHandlerFrames" parentKey="EventHandlerFrames">
+			<Frame parentKey="EventHandlerFrames" name="$parentEventHandlerFrames">
 				<Size x="210" y="10"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="12" y="-55"/>
@@ -353,7 +353,7 @@
 				</Scripts>
 			</Frame>
 
-			<CheckButton inherits="TellMeWhen_FlatFrame" parentKey="AddEvent">
+			<CheckButton parentKey="AddEvent" inherits="TellMeWhen_FlatFrame">
 				<Size y="30"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="TOPLEFT" y="2"/>
@@ -400,7 +400,7 @@
 				</Scripts>
 			</CheckButton>
 
-			<Frame name="$parentHandlerPickers" hidden="true" parentKey="HandlerPickers">
+			<Frame parentKey="HandlerPickers" name="$parentHandlerPickers" hidden="true">
 				<Size y="50"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.AddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
@@ -410,7 +410,7 @@
 
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString inherits="GameFontNormalLarge" parentKey="Header" justifyH="CENTER" hidden="true" text=""/>
+						<FontString parentKey="Header" inherits="GameFontNormalLarge" justifyH="CENTER" hidden="true" text=""/>
 					</Layer>
 				</Layers>
 
@@ -435,7 +435,7 @@
 				</Scripts>
 			</Frame>
 
-			<Frame name="$parentEventPickers" hidden="true" parentKey="EventPickers">
+			<Frame parentKey="EventPickers" name="$parentEventPickers" hidden="true">
 				<Size y="50"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.AddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
@@ -445,7 +445,7 @@
 
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString inherits="GameFontNormalLarge" parentKey="Header" justifyH="CENTER" hidden="true" text=""/>
+						<FontString parentKey="Header" inherits="GameFontNormalLarge" justifyH="CENTER" hidden="true" text=""/>
 					</Layer>
 				</Layers>
 
@@ -470,7 +470,7 @@
 				</Scripts>
 			</Frame>
 
-			<Frame name="$parentEventSettingsContainer" parentKey="EventSettingsContainer">
+			<Frame parentKey="EventSettingsContainer" name="$parentEventSettingsContainer">
 				<Size x="210" y="10"/>
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="BOTTOM" y="-36"/>
@@ -479,7 +479,7 @@
 					<Anchor point="BOTTOM" y="0"/>
 				</Anchors>
 				<Frames>
-					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassThrough" motionScriptsWhileDisabled="true">
+					<CheckButton parentKey="PassThrough" inherits="TellMeWhen_EventSettings_CheckTemplate" motionScriptsWhileDisabled="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" y="-3"/>
 						</Anchors>
@@ -495,7 +495,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="SimplyShown" motionScriptsWhileDisabled="true">
+					<CheckButton parentKey="SimplyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" motionScriptsWhileDisabled="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" y="-3"/>
 						</Anchors>
@@ -511,7 +511,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="OnlyShown" motionScriptsWhileDisabled="true">
+					<CheckButton parentKey="OnlyShown" inherits="TellMeWhen_EventSettings_CheckTemplate" motionScriptsWhileDisabled="true">
 						<Anchors>
 							<Anchor point="TOP" relativeKey="$parent.PassThrough" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
@@ -527,7 +527,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="PassingCndt" motionScriptsWhileDisabled="true">
+					<CheckButton parentKey="PassingCndt" inherits="TellMeWhen_EventSettings_CheckTemplate" motionScriptsWhileDisabled="true">
 						<Anchors>
 							<Anchor point="TOP" relativeKey="$parent.OnlyShown" relativePoint="BOTTOM" y="4"/>
 						</Anchors>
@@ -549,7 +549,7 @@
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
-								<FontString name="$parentValueLabel" inherits="GameFontHighlight" parentKey="ValueLabel" justifyH="RIGHT">
+								<FontString parentKey="ValueLabel" name="$parentValueLabel" inherits="GameFontHighlight" justifyH="RIGHT">
 									<Anchors>
 										<Anchor point="RIGHT" relativePoint="LEFT" x="-5" y="0"/>
 									</Anchors>
@@ -568,14 +568,14 @@
 						</Scripts>
 					</Frame>
 
-					<EditBox inherits="TellMeWhen_TimeEditBoxTemplate" parentKey="Value" autoFocus="false">
+					<EditBox parentKey="Value" inherits="TellMeWhen_TimeEditBoxTemplate" autoFocus="false">
 						<Size x="45" y="18"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.Operator" relativePoint="RIGHT" x="12" y="0"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightLarge" parentKey="ValueLabel" justifyH="RIGHT">
+								<FontString parentKey="ValueLabel" inherits="GameFontHighlightLarge" justifyH="RIGHT">
 									<Anchors>
 										<Anchor point="RIGHT" relativePoint="RIGHT" x="-3" y="0"/>
 									</Anchors>
@@ -591,7 +591,7 @@
 						</Scripts>
 					</EditBox>
 
-					<CheckButton inherits="TellMeWhen_EventSettings_CheckTemplate" parentKey="CndtJustPassed" motionScriptsWhileDisabled="true">
+					<CheckButton parentKey="CndtJustPassed" inherits="TellMeWhen_EventSettings_CheckTemplate" motionScriptsWhileDisabled="true">
 						<Anchors>
 							<Anchor point="TOP" relativeKey="$parent.PassingCndt" relativePoint="BOTTOM" y="-15" x="8"/>
 						</Anchors>
@@ -679,17 +679,17 @@
 		
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString inherits="GameFontNormalLarge" parentKey="EventListHeader" justifyH="LEFT" text="">
+				<FontString parentKey="EventListHeader" inherits="GameFontNormalLarge" justifyH="LEFT" text="">
 					<Anchors>
 						<Anchor point="BOTTOM" relativeKey="$parent.AddEvent" relativePoint="TOP" y="1"/>
 					</Anchors>
 				</FontString>
-				<FontString hidden="true" inherits="GameFontNormalLarge" parentKey="EventSettingsContainerHeader" justifyH="CENTER">
+				<FontString parentKey="EventSettingsContainerHeader" hidden="true" inherits="GameFontNormalLarge" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="TOP" relativeTo="$parentEventSettingsContainerScrollFrame" y="30"/>
 					</Anchors>
 				</FontString>
-				<FontString inherits="GameFontDisableSmall" hidden="true" parentKey="EventSettingsContainerEventName" justifyH="CENTER">
+				<FontString parentKey="EventSettingsContainerEventName" inherits="GameFontDisableSmall" hidden="true" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="TOP" relativeKey="$parent.EventSettingsContainerHeader" relativePoint="BOTTOM" y="-3"/>
 					</Anchors>

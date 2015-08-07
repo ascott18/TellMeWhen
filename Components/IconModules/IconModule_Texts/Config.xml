@@ -17,7 +17,7 @@
 			<!--
 				Resets this text display to the default, as provided by the current text layout.
 			-->
-			<Button name="$parentDefault" parentKey="Default">
+			<Button parentKey="Default" name="$parentDefault">
 				<Size x="15" y="15"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-8" y="-2"/>
@@ -52,7 +52,7 @@
 			<!--
 				Show a list of other text displays to copy to this display.
 			-->
-			<Button name="$parentCopy" parentKey="Copy">
+			<Button parentKey="Copy" name="$parentCopy">
 				<Size x="16" y="16"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeTo="$parentDefault"  relativePoint="LEFT" x="-5" y="-0.5"/>
@@ -83,7 +83,7 @@
 			<!--
 				Set the text for this text display
 			-->
-			<EditBox name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" parentKey="EditBox" autoFocus="false">
+			<EditBox parentKey="EditBox" name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
 				<KeyValues>
 					<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
 				</KeyValues>
@@ -123,7 +123,7 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentStringNum" parentKey="StringNum" inherits="GameFontHighlight" justifyH="RIGHT">
+				<FontString parentKey="StringNum" name="$parentStringNum" inherits="GameFontHighlight" justifyH="RIGHT">
 					<!-- <Size x="25"/> -->
 					<Anchors>
 						<Anchor point="TOP" y="-5"/>
@@ -131,7 +131,7 @@
 						<Anchor point="RIGHT" x="-3" relativeTo="$parentEditBox" relativePoint="LEFT"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" justifyH="LEFT" >
+				<FontString parentKey="Error" name="$parentError" inherits="GameFontRed" justifyH="LEFT" >
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
 					</Anchors>
@@ -159,7 +159,7 @@
 					The shortcut to layout settings
 					The reset all button
 			-->
-			<Frame name="$parentLayout" parentKey="Layout">
+			<Frame parentKey="Layout" name="$parentLayout">
 				<Size y="26"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="0" y="-7"/>
@@ -236,7 +236,7 @@
 					<!--
 						Dropdown to change the text layout of the icon for the current view.
 					-->
-					<Frame inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
+					<Frame parentKey="PickLayout" inherits="TMW_DropDownMenuTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="9" y="0"/>
 							<Anchor point="RIGHT" relativeKey="$parent.LayoutSettings"  relativePoint="LEFT" x="-7" />
@@ -287,7 +287,7 @@
 	<Frame name="TellMeWhen_GM_TextLayout" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="32"/>
 		<Frames>
-			<Frame inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
+			<Frame parentKey="PickLayout" inherits="TMW_DropDownMenuTemplate">
 			<Anchors>
 				<Anchor point="TOP" y="-5"/>
 				<Anchor point="LEFT" x="9" />

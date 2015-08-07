@@ -1,16 +1,16 @@
 ﻿<Ui>
 
-	<Frame name="TellMeWhen_HelpFrame" parent="TellMeWhen_IconEditor" parentKey="Help" inherits="GlowBoxArrowTemplate" enableMouse="true" hidden="true">
+	<Frame parentKey="Help" name="TellMeWhen_HelpFrame" parent="TellMeWhen_IconEditor" inherits="GlowBoxArrowTemplate" enableMouse="true" hidden="true">
 		<Size x="21" y="53"/>
 		<Frames>
-			<Frame name="$parentBody" enableMouse="true" parentKey="body" inherits="GlowBoxTemplate" clampedToScreen="true" >
+			<Frame parentKey="body" name="$parentBody" enableMouse="true" inherits="GlowBoxTemplate" clampedToScreen="true" >
 				<Size x="250"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativePoint="TOPLEFT" x="-2"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" >
+						<FontString parentKey="text" name="$parentText" inherits="GameFontHighlightLeft" justifyV="TOP" >
 							<Size x="238"/>
 							<Anchors>
 								<Anchor point="TOPLEFT" x="10" y="-24"/>
@@ -70,11 +70,11 @@
 
 	</Frame><!-- 
 
-	<Frame name="TellMeWhen_HelpFrame" parent="TellMeWhen_IconEditor" parentKey="Help" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
+	<Frame parentKey="Help" name="TellMeWhen_HelpFrame" parent="TellMeWhen_IconEditor" inherits="GlowBoxTemplate" enableMouse="true" hidden="true" >
 		<Size x="250"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" >
+				<FontString parentKey="text" name="$parentText" inherits="GameFontHighlightLeft" justifyV="TOP" >
 					<Size x="208"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" x="10" y="-24"/>
