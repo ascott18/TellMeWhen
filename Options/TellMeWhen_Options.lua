@@ -1155,15 +1155,6 @@ function IE:CreateTabGroups()
 
 	local groupTabGroup = TMW.IE:RegisterTabGroup("GROUP", TMW.L["GROUP"], 2, function(tabGroup)
 		local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
-
-		IE.icontexture:SetTexture(nil)
-		IE.BackButton:Hide()
-		IE.ForwardsButton:Hide()
-
-		-- Setting this relative to icontexture makes it roughly centered
-		-- (it gets offset to the left by the exit button)
-		IE.Header:SetPoint("LEFT", IE.icontexture, "RIGHT", 4, 0)
-		IE.Header:SetFontObject(GameFontNormal)
 		
 		local group = CI.group
 		if group then
@@ -1172,8 +1163,6 @@ function IE:CreateTabGroups()
 				name = L["DOMAIN_GLOBAL"] .. " " .. name
 			end
 			IE.Header:SetText(titlePrepend .. " - " .. name)
-		else
-			IE.Header:SetText(titlePrepend)
 		end
 	end)
 	groupTabGroup:SetDisabledPageKey("GroupNotLoaded")
@@ -1182,7 +1171,6 @@ function IE:CreateTabGroups()
 	TMW.IE:RegisterTabGroup("MAIN", TMW.L["MAIN"], 3, function(tabGroup)
 		local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
 
-		IE.Header:SetFontObject(GameFontNormal)
 		IE.Header:SetText(titlePrepend)
 	end)
 end
@@ -1218,7 +1206,20 @@ function IE:OnUpdate()
 	-- I don't want to fill up the main addon with configuration code to notify the IE of texture changes	
 	local tabGroup = IE.CurrentTabGroup
 	if tabGroup then
+
+		IE.icontexture:SetTexture(nil)
+		IE.BackButton:Hide()
+		IE.ForwardsButton:Hide()
+
+		IE.Header:SetText(nil)
+		IE.Header:SetPoint("LEFT", IE.icontexture, "RIGHT", 4, 0)
+		IE.Header:SetFontObject(GameFontNormal)
+
 		tabGroup:SetupHeader()
+
+		if IE.Header:GetText() == "" then
+			IE.Header:SetText("TellMeWhen v" .. TELLMEWHEN_VERSION_FULL)
+		end
 	end
 	
 	
@@ -1301,7 +1302,6 @@ end)
 IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
 	if not TMW.ALLOW_LOCKDOWN_CONFIG then
 		IE:Hide()
-		LibStub("AceConfigDialog-3.0"):Close("TMWStandalone")
 	end
 end)
 
@@ -1717,7 +1717,6 @@ TMW.C.XmlConfigPanelInfo {
 	MakePanel = function(self, panelColumn)
 		local panel = CreateFrame("Frame", self:GetFrameName(), panelColumn, self.xmlTemplateName)
 
-		-- TODO: Put the CInit in the template for the panel? might break Lua panels though...
 		if not panel.isLibOOInstance then
 			TMW:CInit(panel)
 		end
@@ -2526,9 +2525,40 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 		self:GetScript("OnTextChanged")(self)
 	end,
 	
+	UpdateLabel = function(self, label)
+		local text = self:GetText()
+		if text == "" then
+			self.BackgroundText:SetText(self.label)
+		else
+			self.BackgroundText:SetText(nil)
+		end
+	end,
+
 
 	-- Scripts
+	OnEscapePressed = function(self)
+		self:ClearFocus()
+	end,
+
+	OnEnterPressed = function(self)
+		if self:IsMultiLine() and IsModifierKeyDown() then
+			self:Insert("\r\n")
+		else
+			self:ClearFocus()
+		end
+	end,
+
+	OnTextChanged = function(self)
+		self:UpdateLabel()
+	end,
+
+	OnEditFocusGained = function(self)
+		self:HighlightText()
+	end,
+
 	OnEditFocusLost = function(self, button)
+		self:HighlightText(0, 0)
+		self:UpdateLabel()
 		self:SaveSetting()
 	end,
 
@@ -2647,7 +2677,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 		-- Scripts
 		OnEditFocusLost = function(self, button)
-			local text = tonumber(self:GetText())
+			local text = tonumber(self:GetText()) or 0
 			if text then
 				self.Slider:SetValue(text)
 				self.Slider:SaveSetting()
@@ -3089,7 +3119,6 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			local value = settings[self.setting]
 			value = self:CScriptCallGet("UnModifySettingValueRequested", value) or value
 
-			print(settings, self.setting, value)
 			self:SetValue(value)
 		end
 	end,

@@ -43,7 +43,7 @@ function ACEOPTIONS:RegisterTab(parentIdentifier, order, appName, scale)
 end
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	IE.MainOptionsTab = ACEOPTIONS:RegisterTab("MAIN", 20, "TMWIEMain", 0.75)
+	IE.MainOptionsTab = ACEOPTIONS:RegisterTab("MAIN", 20, "TMWIEMain", 0.89)
 	IE.MainOptionsTab:SetText(TMW.L["UIPANEL_MAINOPT"])
 	TMW:TT(IE.MainOptionsTab, "UIPANEL_MAINOPT", "GROUPADDONSETTINGS_DESC")
 end)
@@ -55,7 +55,7 @@ function ACEOPTIONS:LoadConfigGroup(info, group)
 end
 
 function ACEOPTIONS:LoadConfigPath(info, ...)
-	-- info is a standard ACD info table, or a string that represents the appName (like TMWStandalone)
+	-- info is a standard ACD info table, or a string that represents the appName
 	-- the path (...) is a list of keys in TMW.OptionsTable that leads to the desired group
 
 	local appName = type(info) == "table" and info.appName or info
@@ -69,9 +69,6 @@ end
 
 function ACEOPTIONS:NotifyChanges()
 	-- this is used to refresh all open TMW configuration windows
-
-	-- Notify standalone options panels of a change (Blizzard, slash command, LDB)
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("TMWStandalone")
 
 	-- Notify the group settings tab in the icon editor of any changes
 	if IE.MainOptionsWidget and IE.MainOptionsWidget:GetUserDataTable().appName and IE.Pages.MainOptions:IsShown() then
@@ -589,12 +586,8 @@ function TMW.ACEOPTIONS:CompileOptions()
 				TMW.OptionsTable.args.colors.args[k] = colorIconTypeTemplate
 			end
 		end
-
 	
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("TMWIEMain", TMW.OptionsTable)
-		
-		LibStub("AceConfig-3.0"):RegisterOptionsTable("TMWStandalone", TMW.OptionsTable)
-		LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMWStandalone", 781, 512)
 
 
 		TMW.OptionsTableInitialize = true
@@ -602,39 +595,4 @@ function TMW.ACEOPTIONS:CompileOptions()
 	
 	TMW:Fire("TMW_CONFIG_MAIN_OPTIONS_COMPILE", TMW.OptionsTable)
 
-	
-	if not TMW.AddedToBlizz then
-		-- GLOBALS: INTERFACEOPTIONS_ADDONCATEGORIES, InterfaceAddOnsList_Update
-		for k, v in pairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
-			if v.name == "TellMeWhen" and not v.obj then
-				tremove(INTERFACEOPTIONS_ADDONCATEGORIES, k)
-				InterfaceAddOnsList_Update()
-				break
-			end
-		end
-
-		TMW.AddedToBlizz = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("TMWStandalone", "TellMeWhen")
-		
-		if TMW.AddedToBlizz and not TMW.ALLOW_LOCKDOWN_CONFIG then
-			local canShow = true
-			
-			IE:RegisterEvent("PLAYER_REGEN_DISABLED", function()
-				canShow = false
-				TMW.AddedToBlizz:Hide()
-			end)
-			
-			IE:RegisterEvent("PLAYER_REGEN_ENABLED", function()
-				canShow = true
-				if InterfaceOptionsFramePanelContainer.displayedPanel == TMW.AddedToBlizz then
-					TMW.AddedToBlizz:Show()
-				end
-			end)
-
-			TMW.AddedToBlizz:HookScript("OnShow", function(self)
-				if not canShow then
-					self:Hide()
-				end
-			end)
-		end
-	end
 end

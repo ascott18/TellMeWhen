@@ -27,7 +27,6 @@ TMW:NewClass("Config_EditBox_DogTags", "Config_EditBox"){
 	OnNewInstance_EditBox_DogTags = function(self, data)
 		self:CScriptAdd("ModifySettingValueRequested", self.ModifySettingValueRequested)
 
-		self.BackgroundText:SetWidth(self:GetWidth())
 		TMW.SUG:EnableEditBox(self, "dogtags")
 	end,
 
@@ -68,14 +67,7 @@ TMW:NewClass("Config_EditBox_DogTags", "Config_EditBox"){
 	end,
 
 	METHOD_EXTENSIONS_PRE = {
-		OnTextChanged = function(self, userInput)
-			local text = self:GetText()
-			if text == "" then
-				self.BackgroundText:SetText(self.label)
-			else
-				self.BackgroundText:SetText(nil)
-			end
-			
+		OnTextChanged = function(self, userInput)			
 			if userInput and (GetLocale() == "zhCN" or GetLocale() == "zhTW") then
 				-- It seems that bad things happen here while typing chinese characters
 				-- See http://wow.curseforge.com/addons/tellmewhen/tickets/641-typing-chinese-error/

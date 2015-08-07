@@ -59,8 +59,6 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						self.BackgroundText:SetWidth(self:GetWidth())
-
 						TMW:CInit(self)
 						self:SetSetting("Name")
 
@@ -155,9 +153,6 @@
 					<OnLeave>
 						GameTooltip:Hide()
 					</OnLeave>
-					<OnEditFocusGained>
-						self.BackgroundText:SetText(nil)
-					</OnEditFocusGained>
 					<OnReceiveDrag>
 						TMW.IE:SpellItemToIcon(TMW.CI.icon)
 					</OnReceiveDrag>
@@ -223,8 +218,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self)
+
 						self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
-						self.BackgroundText:SetWidth(self:GetWidth())
 
 						self.normalTooltip = TMW.L["ICONMENU_UNIT_DESC"]
 
@@ -238,6 +234,7 @@
 							end
 						end
 
+						-- TODO: kill this function. it should be replaced with Config_EditBox's SetTexts.
 						function self:SetLabels(title, text)
 							self.label = title
 							self.__title = title
@@ -246,8 +243,6 @@
 
 							self:GetScript("OnTextChanged")(self)
 						end
-
-						TMW:CInit(self)
 
 						self:SetTexts(TMW.L["ICONMENU_UNITSTOWATCH"], text)
 						self:SetSetting("Unit")
@@ -289,10 +284,8 @@
 
 						if text == "" then
 							if allowNoUnit then
-								self.BackgroundText:SetText(self.label)
 								TMW.HELP:Hide("ICON_UNIT_MISSING")
 							else
-								self.BackgroundText:SetText("|cFFFF5050" .. self.label)
 								TMW.HELP:Show{
 									code = "ICON_UNIT_MISSING",
 									icon = TMW.CI.icon,
@@ -303,7 +296,6 @@
 								}
 							end
 						else
-							self.BackgroundText:SetText(nil)
 							TMW.HELP:Hide("ICON_UNIT_MISSING")
 						end
 
@@ -761,35 +753,6 @@
 				</FontString>
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnEscapePressed>
-				EditBox_ClearFocus(self)
-				self:GetScript("OnTextChanged")(self)
-			</OnEscapePressed>
-			<OnEditFocusLost>
-				EditBox_ClearHighlight(self)
-				self:GetScript("OnTextChanged")(self)
-			</OnEditFocusLost>
-			<OnEditFocusGained>
-				EditBox_HighlightText(self)
-			--	self.BackgroundText:SetText(nil)
-			</OnEditFocusGained>
-			<OnEnterPressed>
-				if self:IsMultiLine() and IsModifierKeyDown() then
-					self:Insert("\r\n")
-				else
-					self:ClearFocus()
-				end
-			</OnEnterPressed>
-			<OnTextChanged>
-				local text = self:GetText()
-				if text == "" then
-					self.BackgroundText:SetText(self.label)
-				else
-					self.BackgroundText:SetText(nil)
-				end
-			</OnTextChanged>
-		</Scripts>
 		<FontString inherits="GameFontHighlight"/>
 	</EditBox>
 
@@ -1400,11 +1363,7 @@
 			</OnEnterPressed>
 			<OnTextChanged>
 				local text = self:GetText()
-				if text == "" then
-					self.BackgroundText:SetText(self.label)
-				else
-					self.BackgroundText:SetText(nil)
-				end
+
 				if userInput then
 					TMW.DD:CloseDropDownMenus()
 
@@ -1627,7 +1586,8 @@
 							return
 						end
 
-						LibStub("AceConfigDialog-3.0"):Open("TMWStandalone")
+						TMW.IE:Load()
+						TMW.IE.TabGroups.GROUP:Click()
 					</OnClick>
 				</Scripts>
 			</Button>

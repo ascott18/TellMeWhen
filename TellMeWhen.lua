@@ -3501,7 +3501,8 @@ function TMW:SlashCommand(str)
 				return
 			end
 
-			LibStub("AceConfigDialog-3.0"):Open("TMWStandalone")
+			TMW.IE:Load()
+			TMW.IE.MainTab:Click()
 		end
 	elseif cmd == "profile" then
 		if TMW.db.profiles[arg2] then

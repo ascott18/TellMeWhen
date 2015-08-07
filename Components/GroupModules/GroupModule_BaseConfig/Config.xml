@@ -20,9 +20,7 @@
 					</Layer>
 				</Layers>
 				<Scripts>
-					<OnLoad>
-						self.BackgroundText:SetWidth(self:GetWidth())
-						
+					<OnLoad>						
 						TMW:CInit(self)
 
 						self:SetTexts(TMW.L["UIPANEL_GROUPNAME"], nil)
@@ -33,21 +31,11 @@
 						end)
 
 					</OnLoad>
-					
-					<OnTextChanged>
-						-- TODO: this should be integrated with Config_EditBox
-						local text = self:GetText()
-						if text == "" then
-							local label = self.label
-							self.BackgroundText:SetText(label)
-						else
-							self.BackgroundText:SetText(nil)
-						end
-						
-						if self:GetParent().AdjustHeight then
-							self:GetParent():AdjustHeight()
-						end
-					</OnTextChanged>
+
+					<OnSizeChanged>
+						-- TODO: will this fail because the size changes immediately on load before the parent can be CInit'd?
+						self:GetParent():AdjustHeight()
+					</OnSizeChanged>
 				</Scripts>
 			</EditBox>
 		</Frames>

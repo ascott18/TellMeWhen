@@ -46,7 +46,7 @@ L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
 |cff7fffffDrag|r spells or items onto the icon for quick setup.]]
 L["ICON_TOOLTIP2NEWSHORT"] = [[|cff7fffffRight-click|r for icon options.]]
 L["LDB_TOOLTIP1"] = "|cff7fffffLeft-click|r to toggle the group locks"
-L["LDB_TOOLTIP2"] = "|cff7fffffRight-click|r to show the main TMW options"
+L["LDB_TOOLTIP2"] = "|cff7fffffRight-click|r to show the Icon Editor"
 L["LOADERROR"] = "TellMeWhen_Options could not be loaded: "
 L["LOADINGOPT"] = "Loading TellMeWhen_Options."
 L["ENABLINGOPT"] = "TellMeWhen_Options is disabled. Enabling..."

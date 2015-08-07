@@ -11,7 +11,6 @@
 				<Scripts>
 					<OnLoad>
 						TMW.SUG:EnableEditBox(self, "texture_withVarTex", true)	
-						self.BackgroundText:SetWidth(self:GetWidth())
 						self.label = TMW.L["ICONMENU_CUSTOMTEX"]
 						
 						self.__ttMinWidth = 300
