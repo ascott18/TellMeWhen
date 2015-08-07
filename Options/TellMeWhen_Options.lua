@@ -550,12 +550,13 @@ function IE:OnInitialize()
 
 
 	IE.MainTab = IE:RegisterTab("ICON", "MAIN", "Main", 1)
-	IE.MainTab:SetText(L["ICON"])
-	TMW:TT(IE.MainTab, "ICON", "MAIN_DESC")
+	IE.MainTab:SetTexts(L["ICON"], L["MAIN_DESC"])
 
-	local groupMainTab = IE:RegisterTab("GROUP", "GROUPMAIN", "GroupMain", 1)
-	groupMainTab:SetText(L["GROUP"])
-	TMW:TT(groupMainTab, "GROUP", "GROUPSETTINGS_DESC")
+	IE:RegisterTab("GROUP", "GROUPMAIN", "GroupMain", 1)
+		:SetTexts(L["GROUP"], L["GROUPSETTINGS_DESC"])
+
+	IE:RegisterTab("MAIN", "CHANGELOG", "Changelog", 100)
+		:SetTexts(L["CHANGELOG"], L["CHANGELOG_DESC"])
 	
 
 	-- Create resizer
@@ -874,6 +875,11 @@ end)
 
 TMW:NewClass("IconEditorTabBase", "Button"){
 
+	SetTexts = function(self, title, tooltip)
+		self:SetText(title)
+		TMW:TT(self, title, tooltip, 1, 1)
+	end,
+
 	AdjustWidth = function(self)
 		self:SetWidth(self.text:GetStringWidth() + 10)
 	end,
@@ -1019,6 +1025,12 @@ function IE:RegisterTabGroup(identifier, text, order, setupHeaderFunc)
 	TMW:ValidateType("text",            sig, text,            "string")
 	TMW:ValidateType("order",           sig, order,           "number")
 	TMW:ValidateType("setupHeaderFunc", sig, setupHeaderFunc, "function")
+
+	assert(identifier == identifier:upper(), "Tab identifiers should be all uppercase")
+
+	if IE.TabGroups[identifier] then
+		error("A tab group with the identifier " .. identifier .. " is already registered.")
+	end
 	
 	local tab = TMW.C.IconEditorTabGroup:New("Button", nil, TMW.IE.tabs.primary, "TellMeWhen_IE_Tab")
 	TMW.IE.tabs.primary[identifier] = tab
@@ -1057,10 +1069,16 @@ function IE:RegisterTab(groupIdentifier, identifier, pageKey, order)
 	TMW:ValidateType("pageKey",         sig, pageKey,         "string")
 	TMW:ValidateType("order",           sig, order,           "number")
 
+	assert(identifier == identifier:upper(), "Tab identifiers should be all uppercase")
+
 	local tabGroup = IE.TabGroups[groupIdentifier]
 
 	if not tabGroup then
 		error("Could not find tab group registered with identifier " .. groupIdentifier)
+	end
+
+	if tabGroup[identifier] then
+		error("A tab with the identifier " .. identifier .. " is already registered to tab group " .. groupIdentifier)
 	end
 
 	local tab = TMW.C.IconEditorTab:New("Button", nil, TMW.IE.tabs.secondary, "TellMeWhen_IE_Tab")
@@ -1070,6 +1088,8 @@ function IE:RegisterTab(groupIdentifier, identifier, pageKey, order)
 	tab.pageKey = pageKey
 	tab.order = order
 	tab.parent = tabGroup
+
+	tabGroup[identifier] = tab
 
 	tabGroup.tabs[#tabGroup.tabs + 1] = tab
 
@@ -1217,7 +1237,7 @@ function IE:OnUpdate()
 
 		tabGroup:SetupHeader()
 
-		if IE.Header:GetText() == "" then
+		if not IE.Header:GetText() then
 			IE.Header:SetText("TellMeWhen v" .. TELLMEWHEN_VERSION_FULL)
 		end
 	end
@@ -1536,35 +1556,21 @@ end
 function IE:Load(isRefresh)
 	TMW.ACEOPTIONS:CompileOptions()
 
-	local shouldShow = true
-	if TellMeWhen_ChangelogDialog and TellMeWhen_ChangelogDialog.showIEOnClose then
-		-- Wait for the changelog to hide before attemping to load again
-		return
-	end
-
-	if IE.db.global.LastChangelogVersion > 0 then
+	if IE.db.global.LastChangelogVersion > 0 then		
 		if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
 			if IE.db.global.LastChangelogVersion < TELLMEWHEN_FORCECHANGELOG -- forced
 			or TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
 			or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
 			then
-				IE:ShowChangelog(IE.db.global.LastChangelogVersion, true)
-				shouldShow = false
+				-- Put this in a C_Timer so that it runs after all the auto tab clicking mumbo jumbo has finished.
+				-- C_Timers with a delay of 0 will run after the current script finishes execution.
+				-- In the case of loading the IE, it is probably an OnClick.
 
-				TMW.HELP:Show{
-					code = "CHANGELOG_INFO",
-					codeOrder = 100,
-					codeOnlyOnce = false,
-
-					icon = nil,
-					parent = TellMeWhen_ChangelogDialog,
-					x = 0,
-					y = -40,
-					relativeTo = TellMeWhen_ChangelogDialog,
-					relativePoint = "TOPLEFT",
-					text = format(L["CHANGELOG_INFO"], TELLMEWHEN_VERSION_FULL)
-				}
-			
+				-- We have to upvalue this since its about to get set to the current version.l
+				local version = IE.db.global.LastChangelogVersion
+				C_Timer.NewTimer(0, function()
+					IE:ShowChangelog(version)	
+				end)		
 			else
 				TMW:Printf(L["CHANGELOG_MSG"], TELLMEWHEN_VERSION_FULL)
 			end
@@ -1575,12 +1581,8 @@ function IE:Load(isRefresh)
 		IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
 	end
 
-	if not IE:IsShown() then
-		if isRefresh then
-			return
-		elseif shouldShow then
-			IE:Show()
-		end
+	if not isRefresh then
+		IE:Show()
 	end
 	
 	if IE:GetBottom() <= 0 then
@@ -1626,8 +1628,6 @@ function IE:Reset()
 	CI.icon:Setup()
 	
 	IE:LoadIcon(1)
-	
-	IE.MainTab:Click()
 end
 
 function IE:ShowConfirmation(confirmText, desc, action)
@@ -2364,12 +2364,6 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 		self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(self:GetVerticalScroll() * self.percentage))
 
 
-		-- Set the height of the container to match the content.
-		self.container:SetHeight(1)
-		local _, _, _, height = self.container:GetBoundsRect()
-		if height then
-			self.container:SetHeight(height)
-		end
 	end,
 
 	OnVerticalScroll = function(self, offset)
@@ -4556,25 +4550,17 @@ end
 -- CHANGELOG
 -- ----------------------
 
-function IE:CreateChangelogDialog()
-	if not TellMeWhen_ChangelogDialog then
-		CreateFrame("Frame", "TellMeWhen_ChangelogDialog", UIParent, "TellMeWhen_ChangelogDialogTemplate")
-	end
-
-	return TellMeWhen_ChangelogDialog
-end
-
 local changelogEnd = "<p align='center'>|cff666666To see the changelog for versions up to v" ..
-(TMW.CHANGELOG_LASTVER or "???") .. ", type /tmw changelog.|r</p>"
-local changelogEndAll = "<p align='center'>|cff666666For older versions, visit TellMeWhen's AddOn page on Curse.com|r</p>"
+(TMW.CHANGELOG_LASTVER or "???") .. ", click the tab below again.|r</p>"
+local changelogEndAll = "<p align='center'>|cff666666For older versions, visit TellMeWhen's AddOn page on Curse.com|r</p><br/>"
 
-function IE:ShowChangelog(lastVer, showIEOnClose)
+function IE:ShowChangelog(lastVer)
+
+	IE.TabGroups.MAIN.CHANGELOG:Click()
+
 	if not lastVer then lastVer = 0 end
 
 	local CHANGELOGS = IE:ProcessChangelogData()
-
-	local dialog = IE:CreateChangelogDialog()
-	dialog.showIEOnClose = showIEOnClose
 
 	local texts = {}
 
@@ -4591,25 +4577,25 @@ function IE:ShowChangelog(lastVer, showIEOnClose)
 		end
 	end
 
+	-- The intro text, before any actual changelog entries
+	tinsert(texts, 1, "<p align='center'>|cff999999" .. L["CHANGELOG_INFO2"]:format(TELLMEWHEN_VERSION_FULL) .. "|r</p>")
+
 	if lastVer > 0 then
 		tinsert(texts, changelogEnd .. changelogEndAll)
 	else
 		tinsert(texts, changelogEndAll)
 	end
 
+	local Container = IE.Pages.Changelog.Container
+
 	local body = format("<html><body>%s</body></html>", table.concat(texts, "<br/>"))
-	dialog.scrollContainer.html:SetText(body)
+	Container.HTML:SetText(body)
 
 	-- This has to be stored because there is no GetText method.
-	dialog.scrollContainer.html.text = body
+	Container.HTML.text = body
 
-	if showIEOnClose then
-		dialog.Okay:SetText(TMW.L["CHANGELOG_OKAY_OPENIE"])
-	else
-		dialog.Okay:SetText(OKAY)
-	end
-
-	dialog:Show()
+	IE.Pages.Changelog.ScrollFrame:SetVerticalScroll(0)
+	Container:GetScript("OnSizeChanged")(Container)
 end
 
 local function htmlEscape(char)
@@ -4654,6 +4640,8 @@ function IE:ProcessChangelogData()
 	if not TMW.CHANGELOG then
 		TMW:Error("There was an error loading TMW's changelog data.")
 		TMW:Print("There was an error loading TMW's changelog data.")
+
+		return CHANGELOGS
 	end
 
 	local log = TMW.CHANGELOG
@@ -4696,6 +4684,9 @@ function IE:ProcessChangelogData()
 
 	-- Add a "General" header before the first paragraph after an h1
 	log = log:gsub("</h1>%s*<p>", "</h1><h2>General</h2><p>")
+
+	-- Make the phrase "IMPORTANT" be red.
+	log = log:gsub("IMPORTANT", "|cffff0000IMPORTANT|r")
 
 
 	local subStart, subEnd = 0, 0

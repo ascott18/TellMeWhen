@@ -126,6 +126,8 @@ L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"]  = L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"]
 
 L["ANN_FCT_DESC"]                       = L["ANN_FCT_DESC"]                         :format(FLOATING_COMBAT_SELF_LABEL)
 
+L["CHANGELOG_INFO2"]                    = L["CHANGELOG_INFO2"]                      :format("%s", L["ICON"], L["GROUP"])
+
 
 
 L["ICONMENU_DOTWATCH_GCREQ_DESC"]       = L["ICONMENU_DOTWATCH_GCREQ_DESC"]         :format(L["ICONMENU_CTRLGROUP"], L["ICONMENU_ENABLE"])

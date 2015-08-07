@@ -68,6 +68,8 @@ This backup, created from your session that began %s, has been restored.]]
 
 
 L["DIALOG_HEADER_CHANGELOG"] = "TellMeWhen Changelog"
+L["CHANGELOG"] = "Changelog"
+L["CHANGELOG_DESC"] = "Displays a list of changes made in current and past versions of TellMeWhen"
 L["CHANGELOG_LAST_VERSION"] = "Previous Installed Version"
 
 
@@ -2698,17 +2700,10 @@ You can also use your mouse wheel.]]
 L["IMPORT_ICON_DISABLED_DESC"] = "You must be editing an icon to be able to import an icon."
 
 
-L["CHANGELOG_INFO"] = [[Welcome to TellMeWhen v%s!
-
-Take a moment to check out what has changed in this version.
-
-You can view this any time with the following command:
-
-/tmw changelog
-
-Close this window when you are ready to edit your icon.]]
+L["CHANGELOG_INFO2"] = [[Welcome to TellMeWhen v%s!
+<br/><br/>
+When you're done checking out what has changed, click the %s tab or %s tab at the bottom to start configuring TellMeWhen.]]
 L["CHANGELOG_MSG"] = "Thanks for helping to test TellMeWhen %s! Type /tmw changelog to see what has changed."
-L["CHANGELOG_OKAY_OPENIE"] = "Okay, now open the Icon Editor"
 
 
 L["TOPLEFT"] = "Top Left"

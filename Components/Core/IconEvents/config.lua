@@ -31,8 +31,7 @@ EVENTS.CONST = {
 }
 
 local EventsTab = TMW.IE:RegisterTab("ICON", "ICONEVENTS", "Events", 10)
-EventsTab:SetText(TMW.L["EVENTS_TAB"])
-TMW:TT(EventsTab, "EVENTS_TAB", "EVENTS_TAB_DESC")
+EventsTab:SetTexts(L["EVENTS_TAB"], L["EVENTS_TAB_DESC"])
 
 
 

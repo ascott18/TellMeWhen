@@ -3502,7 +3502,6 @@ function TMW:SlashCommand(str)
 			end
 
 			TMW.IE:Load()
-			TMW.IE.MainTab:Click()
 		end
 	elseif cmd == "profile" then
 		if TMW.db.profiles[arg2] then
@@ -3563,7 +3562,7 @@ function TMW:SlashCommand(str)
 			end
 		end
 		if TMW.IE then
-			TMW.IE:ShowChangelog(0)
+			TMW.IE:ShowChangelog()
 		end
 	else
 		TMW:LockToggle()

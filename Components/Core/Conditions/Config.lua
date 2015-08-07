@@ -115,7 +115,7 @@ end
 
 TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED_CHANGED", function(event, icon)
 	if TMW.IE.CurrentTab == CNDT.DynamicConditionTab then
-		TMW.IE.MainTab:Click()
+		TMW.IE.TabGroups.ICON.MAIN:Click()
 	end
 end)
 

@@ -4,7 +4,7 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
 ===v8.0.0===
-====Breaking Changes====
+====IMPORTANT: Breaking Changes====
 * Available Icon Sorting methods have changed slightly.
 ** Each of the pairs of Opacity and Shown methods have been merged into one.
 ** Your configuration may require some manual tweaking if you notice incorrect behavior.

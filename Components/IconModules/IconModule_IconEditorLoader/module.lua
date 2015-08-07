@@ -22,8 +22,20 @@ local Module = TMW:NewClass("IconModule_IconEditorLoader", "IconModule")
 
 
 local function LoadIcon(icon)
+	-- If the user has hidden the icon editor before loading this icon,
+	-- or if this is the first time it is being shown (although this case doesn't matter),
+	-- go directly to the main icon tab.
+
+	-- This should help ease some users' frustration when TMW can't read their minds about what tab they want.
+	-- It should also help people who are confused about what to do 
+	local wasShown = TMW.IE:IsShown()
+
 	TMW.IE:LoadIcon(nil, icon)
 	TMW.IE:LoadGroup(nil, icon.group)
+	
+	if not wasShown then
+		TMW.IE.TabGroups.ICON.MAIN:Click()
+	end
 end
 
 local icons = {}
