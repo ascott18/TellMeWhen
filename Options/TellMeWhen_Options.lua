@@ -383,6 +383,9 @@ function TMW:Group_Add(domain, view)
 		error("TMW: Can't add groups while in combat")
 	end
 
+	TMW:ValidateType("domain", "TMW:Group_Add(domain [,view]", domain, "string")
+	TMW:ValidateType("view", "TMW:Group_Add(domain [,view]", view, "string;nil")
+
 	local groupID = TMW.db[domain].NumGroups + 1
 
 	TMW.db[domain].NumGroups = groupID
@@ -1884,8 +1887,8 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			return
 		end
 
-		local existing = self.__CScripts[script]
-		if not existing then
+		local cscript = self.__CScripts[script]
+		if not cscript then
 			return
 		end
 		
@@ -1896,11 +1899,11 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			self:DEBUG_Start()
 		end
 
-		if type(existing) == "function" then
-			existing(self, ...)
+		if type(cscript) == "function" then
+			TMW.safecall(cscript, self, ...)
 		else
-			for i = 1, #existing do
-				existing[i](self, ...)
+			for i = 1, #cscript do
+				TMW.safecall(cscript[i], self, ...)
 			end
 		end
 		CS_SDepth = CS_SDepth - 1
@@ -1911,6 +1914,7 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			print("entering cscript debug mode")
 
 			CScriptProvider.DEBUG_Stack = {}
+			CScriptProvider.DEBUG_PrevDepth = CS_SDepth - 1
 
 			CScriptProvider.CScriptCall_ORIGINAL = CScriptProvider.CScriptCall
 			CScriptProvider.CScriptBubble_ORIGINAL = CScriptProvider.CScriptBubble
@@ -3567,7 +3571,7 @@ TMW:NewClass("Config_GroupList", "Config_Frame"){
 			frame = TMW.C.Config_GroupListButton:New("CheckButton", nil, self, "TellMeWhen_GroupSelectTemplate", groupID)
 			self.frames[groupID] = frame
 			if groupID == 1 then
-				frame:SetPoint("TOP", 0, 0)
+				frame:SetPoint("TOP", self.AddGroup, "BOTTOM", 0, -4)
 			else
 				frame:SetPoint("TOP", self.frames[groupID-1], "BOTTOM", 0, 0)
 			end

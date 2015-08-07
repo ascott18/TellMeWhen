@@ -46,16 +46,6 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	IE.MainOptionsTab = ACEOPTIONS:RegisterTab("MAIN", 20, "TMWIEMain", 0.75)
 	IE.MainOptionsTab:SetText(TMW.L["UIPANEL_MAINOPT"])
 	TMW:TT(IE.MainOptionsTab, "UIPANEL_MAINOPT", "GROUPADDONSETTINGS_DESC")
-
-
-	local GroupOptionsTab = ACEOPTIONS:RegisterTab("GROUP", 1, "TMWIEGroup", 1)
-	GroupOptionsTab:SetText("Legacy Ace3 Group")
-	TMW:TT(GroupOptionsTab, "GROUP", "GROUPSETTINGS_DESC")
-	GroupOptionsTab:HookScript("OnClick", function(self)
-		if TMW.CI.group then
-			ACEOPTIONS:LoadConfigGroup("TMWIEGroup", TMW.CI.group)
-		end
-	end)
 end)
 
 function ACEOPTIONS:LoadConfigGroup(info, group)
@@ -107,10 +97,6 @@ end
 
 ---------- Data/Templates ----------
 local function FindGroupFromInfo(info)
-	if info.appName == "TMWIEGroup" then
-		return TMW.CI.group
-	end
-
 	for i = #info, 1, -1 do
 		local n, domain = strmatch(info[i], "#Group (%d+)(.+)")
 		if n and domain then
@@ -175,93 +161,6 @@ function common:group_get_spv(info)
 	return gspv[info[#info]]
 end
 
-TMW.GroupConfigTemplate = {
-	type = "group",
-	handler = common,
-	childGroups = "tab",
-	name = function(info)
-		local group = FindGroupFromInfo(info)
-		if not group then 
-			return ""
-		elseif group.Name ~= "" then
-			return group:GetGroupName(1)
-		else
-			return group:GetGroupName()
-		end
-	end,
-	order = function(info)
-		local group = FindGroupFromInfo(info)
-		if not group then
-			return 0
-		end
-
-		local offs = 0
-		if group.Domain == "profile" then
-			offs = 1000
-		end
-
-		return group:GetID() + offs
-	end,
-	set = function(info, val)
-		local group = FindGroupFromInfo(info)
-		
-		group:GetSettings()[info[#info]] = val
-		group:Setup()
-	end,
-	get = function(info)
-		local group = FindGroupFromInfo(info)
-
-		return group:GetSettings()[info[#info]]
-	end,
-	hidden = function(info)
-		local group = FindGroupFromInfo(info)
-		if not group then
-			return true
-		end
-	end,
-	args = {
-		main = {
-			type = "group",
-			name = L["MAIN"],
-			desc = L["UIPANEL_MAIN_DESC"],
-			order = 1,
-			args = {
-			},
-		},
-	}
-}
-
-local addGroupFunctionGroup = {
-	type = "group",
-	name = L["UIPANEL_ADDGROUP"],
-	dialogInline = true,
-	guiInline = true,
-	order = 40,
-	args = {},
-}
-local addGroupButton = {
-	name = function(info)
-		return TMW.Views[info[#info]].name
-	end,
-	desc = L["UIPANEL_ADDGROUP_DESC"],
-	type = "execute",
-	width = "double",
-	order = function(info)
-		return TMW.Views[info[#info]].order
-	end,
-	func = function(info)
-		for i = #info, 1, -1 do
-			local domain = strmatch(info[i], "groups_(.+)")
-
-			if domain then
-				local group = TMW:Group_Add(domain, info[#info])
-
-				TMW.ACEOPTIONS:LoadConfigGroup(info, group)
-				return
-			end
-		end
-	end,
-}
 
 local colorOrder = {
 	"CBS",
@@ -656,46 +555,6 @@ TMW.OptionsTable = {
 			childGroups = "tree",
 			args = {},
 		},
-		
-		groups_global = {
-			type = "group",
-			name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_GLOBAL"],
-			desc = L["UIPANEL_GROUPS_GLOBAL_DESC"],
-			order = 30,
-			args = {
-				addgroup = addGroupFunctionGroup,
-				importexport = importExportBoxTemplate,
-				addgroupgroup = {
-					type = "group",
-					name = L["UIPANEL_ADDGROUP"],
-					order = 2000,
-					args = {
-						addgroup = addGroupFunctionGroup,
-						importexport = importExportBoxTemplate,
-					},
-				},
-			},
-		},
-		
-		groups_profile = {
-			type = "group",
-			name = L["UIPANEL_GROUPS"] .. " - " .. L["DOMAIN_PROFILE"],
-			desc = L["UIPANEL_GROUPS_DESC"],
-			order = 31,
-			args = {
-				addgroup = addGroupFunctionGroup,
-				importexport = importExportBoxTemplate,
-				addgroupgroup = {
-					type = "group",
-					name = L["UIPANEL_ADDGROUP"],
-					order = math.huge,
-					args = {
-						addgroup = addGroupFunctionGroup,
-						importexport = importExportBoxTemplate,
-					},
-				},
-			},
-		},
 	},
 }
 
@@ -723,12 +582,6 @@ function TMW.ACEOPTIONS:CompileOptions()
 		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
 
 
-		-- Dynamic Icon View Settings --
-		for view in pairs(TMW.Views) do
-			addGroupFunctionGroup.args[view] = addGroupButton
-		end
-	
-
 		-- Dynamic Color Settings --
 		TMW.OptionsTable.args.colors.args.GLOBAL = colorIconTypeTemplate
 		for k, Type in pairs(TMW.Types) do
@@ -737,32 +590,14 @@ function TMW.ACEOPTIONS:CompileOptions()
 			end
 		end
 
-
 	
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("TMWIEMain", TMW.OptionsTable)
-		LibStub("AceConfig-3.0"):RegisterOptionsTable("TMWIEGroup", TMW.GroupConfigTemplate)
 		
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("TMWStandalone", TMW.OptionsTable)
 		LibStub("AceConfigDialog-3.0"):SetDefaultSize("TMWStandalone", 781, 512)
 
 
 		TMW.OptionsTableInitialize = true
-	end
-
-
-	-- Dynamic Group Settings --
-	for _, domain in TMW:Vararg("profile", "global") do
-		local args = TMW.OptionsTable.args["groups_"..domain].args
-
-		for k, v in pairs(args) do
-			if v == TMW.GroupConfigTemplate then
-				args[k] = nil
-			end
-		end
-
-		for g = 1, TMW.db[domain].NumGroups do
-			args["#Group " .. g .. domain] = TMW.GroupConfigTemplate
-		end
 	end
 	
 	TMW:Fire("TMW_CONFIG_MAIN_OPTIONS_COMPILE", TMW.OptionsTable)

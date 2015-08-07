@@ -2151,6 +2151,39 @@
 		</Scripts>
 	</CheckButton>
 
+	<Frame name="TellMeWhen_GroupListTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_GroupList"/>
+		</KeyValues>
+
+		<Frames>
+			<Button parentKey="AddGroup" inherits="TellMeWhen_GroupSelectTemplate" >
+				<Anchors>
+					<Anchor point="TOP" y="-4"/>
+				</Anchors>
+
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="Plus" file="Interface\PaperDollInfoFrame\Character-Plus">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="RIGHT" />
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+
+				<Scripts>
+					<OnClick>
+						local group = TMW:Group_Add(self:GetParent().domain)
+						TMW.IE:LoadIcon(1, false)
+						TMW.IE:LoadGroup(1, group)
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+
 
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG" inherits="TellMeWhen_SimpleDialog">
 		<Size x="585" y="380"/>
@@ -2753,21 +2786,10 @@
 									<OnLoad>
 										TMW:CInit(self)
 
-										self:CScriptAdd("ReloadRequested", function()
-											if TMW.CI.group then
-												local name = TMW.CI.group:GetSettings().Name
-												if name == "" then
-													name = TMW.L["TEXTLAYOUTS_UNNAMED"]
-												end
-												if TMW.CI.group.Domain == "global" then
-													name = name .. " (" .. TMW.L["DOMAIN_GLOBAL"] .. ")"
-												end
-
-												self:SetText(name)
-											end
-										end)
+										self:SetTexts(TMW.L["UIPANEL_GROUPS_DROPDOWN"], TMW.L["UIPANEL_GROUPS_DROPDOWN_DESC"])
 
 										self.Button:HookScript("OnClick", function()
+											GameTooltip:Hide()
 											local GroupSelect = self:GetParent().GroupSelect
 											GroupSelect:RequestReloadChildren()
 											GroupSelect:SetShown(not GroupSelect:IsShown())
@@ -2790,7 +2812,7 @@
 								<Frames>
 									<Frame inherits="TellMeWhen_GenericBorder" />
 
-									<Frame parentKey="Profile" >
+									<Frame parentKey="Profile" inherits="TellMeWhen_GroupListTemplate" >
 										<Anchors>
 											<Anchor point="TOP" y="-15"/>
 											<Anchor point="BOTTOM" y="0"/>
@@ -2800,14 +2822,20 @@
 
 										<Scripts>
 											<OnLoad>
-												self.tmwClass = "Config_GroupList"
 												TMW:CInit(self)
 												self:SetDomain("profile")
+
+												local domainName = TMW.L["DOMAIN_PROFILE"]
+												local title = TMW.L["UIPANEL_ADDGROUP2"]:format(domainName)
+												local tooltip = TMW.L["UIPANEL_ADDGROUP2_DESC"]:format(domainName)
+
+												self.AddGroup.Name:SetText(title)
+												TMW:TT(self.AddGroup, title, tooltip, 1, 1)
 											</OnLoad>
 										</Scripts>
 									</Frame>
 
-									<Frame parentKey="Global" >
+									<Frame parentKey="Global" inherits="TellMeWhen_GroupListTemplate" >
 										<Anchors>
 											<Anchor point="TOP" y="-15"/>
 											<Anchor point="BOTTOM" y="0"/>
@@ -2817,9 +2845,16 @@
 
 										<Scripts>
 											<OnLoad>
-												self.tmwClass = "Config_GroupList"
 												TMW:CInit(self)
 												self:SetDomain("global")
+												-- L["GLOBAL_GROUP_GENERIC_DESC"]
+
+												local domainName = TMW.L["DOMAIN_GLOBAL"]
+												local title = TMW.L["UIPANEL_ADDGROUP2"]:format(domainName)
+												local tooltip = TMW.L["UIPANEL_ADDGROUP2_DESC"]:format(domainName) .. "\r\n\r\n" .. TMW.L["GLOBAL_GROUP_GENERIC_DESC"]
+												
+												self.AddGroup.Name:SetText(title)
+												TMW:TT(self.AddGroup, title, tooltip, 1, 1)
 											</OnLoad>
 										</Scripts>
 									</Frame>

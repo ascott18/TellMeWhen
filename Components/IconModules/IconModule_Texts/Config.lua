@@ -110,6 +110,11 @@ local function layoutSort(GUID_a, GUID_b)
 	end
 end
 
+local function Layout_DropDown_OnClick(button)
+	CI.icon:GetSettingsPerView().TextLayout = button.value
+	TEXT:LoadConfig()
+	IE:ScheduleIconSetup()
+end
 function TEXT:Layout_DropDown()
 	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, layoutSort) do
 		if GUID ~= "" then
@@ -126,17 +131,67 @@ function TEXT:Layout_DropDown()
 			info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
 			info.tooltipText = L["TEXTLAYOUTS_LAYOUTDISPLAYS"]:format(displays)
 			
-			info.func = TEXT.Layout_DropDown_OnClick
+			info.func = Layout_DropDown_OnClick
 			
 			TMW.DD:AddButton(info)
 		end
 	end
 end
 
-function TEXT:Layout_DropDown_OnClick()
-	CI.icon:GetSettingsPerView().TextLayout = self.value
-	TEXT:LoadConfig()
-	IE:ScheduleIconSetup()
+
+
+
+
+local function Layout_Group_DropDown_OnClick(button)
+
+	local group = TMW.CI.group
+	local gs = group:GetSettings()
+
+	gs.SettingsPerView[gs.View].TextLayout = button.value
+	
+	-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
+	-- we do need to reset icons to nil so that they will fall back to the group setting, though.
+	for icon in group:InIcons() do
+		IE:AttemptBackup(icon)
+	end
+	
+	for ics in group:InIconSettings() do
+		local icspv = rawget(ics.SettingsPerView, gs.View)
+		if icspv then
+			icspv.TextLayout = nil
+		end
+	end
+	
+	for icon in group:InIcons() do
+		IE:AttemptBackup(icon)
+	end
+	
+	group:Setup()
+	
+	IE:LoadGroup(1)
+	IE:LoadIcon(1)
+end
+function TEXT:Layout_Group_DropDown()
+	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, layoutSort) do
+		if GUID ~= "" then
+			local info = TMW.DD:CreateInfo()
+			
+			info.text = TEXT:GetLayoutName(settings, GUID)
+			info.value = GUID
+			info.checked = GUID == CI.group:GetSettingsPerView().TextLayout
+			
+			local displays = ""
+			for i, fontStringSettings in TMW:InNLengthTable(settings) do
+				displays = displays .. "\r\n" .. TEXT:GetStringName(fontStringSettings, i)
+			end
+			info.tooltipTitle = TEXT:GetLayoutName(settings, GUID)
+			info.tooltipText = L["TEXTLAYOUTS_LAYOUTDISPLAYS"]:format(displays)
+			
+			info.func = Layout_Group_DropDown_OnClick
+			
+			TMW.DD:AddButton(info)
+		end
+	end
 end
 
 
@@ -431,65 +486,7 @@ function TEXT:Display_IsDefault(displaySettings)
 	return not not TMW:DeepCompare(DEFAULT_DISPLAY_SETTINGS, displaySettings)
 end
 
-	
-TMW.GroupConfigTemplate.args.main.args.TextLayout = {
-	name = L["TEXTLAYOUTS_SETGROUPLAYOUT"],
-	desc = L["TEXTLAYOUTS_SETGROUPLAYOUT_DESC"],
-	type = "select",
-	values = function(info)
-		local t = {}
-		for GUID, layoutSettings in pairs(TMW.db.global.TextLayouts) do
-			if GUID ~= "" then
-				t[GUID] = TEXT:GetLayoutName(layoutSettings, GUID)
-			end
-		end
-		setmetatable(t, {__index = function(t, k) 
-			if k == "%FAKEGET%" then
-				return L["TEXTLAYOUTS_SETGROUPLAYOUT_DDVALUE"]
-			end
-		end})
-		return t
-	end,
-	hidden = function(info)
-		local group = TMW.FindGroupFromInfo(info)
 
-		local viewData = group and group.viewData
-		
-		return not viewData or not viewData:DoesImplementModule("IconModule_Texts")
-	end,
-	style = "dropdown",
-	order = 29,
-	get = function(info, val)
-		return "%FAKEGET%"
-	end,
-	set = function(info, val)
-		local group = TMW.FindGroupFromInfo(info)
-
-		local gs = group:GetSettings()
-		gs.SettingsPerView[gs.View].TextLayout = val
-		
-		-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
-		-- we do need to reset icons to "" so that they will fall back to the group setting, though.
-		for icon in group:InIcons() do
-			IE:AttemptBackup(icon)
-		end
-		
-		for ics in group:InIconSettings() do
-			local icspv = rawget(ics.SettingsPerView, gs.View)
-			if icspv then
-				icspv.TextLayout = nil
-			end
-		end
-		
-		for icon in group:InIcons() do
-			IE:AttemptBackup(icon)
-		end
-		
-		group:Setup()
-		
-		IE:LoadIcon(1)
-	end,
-}
 
 local textLayoutInfo = {
 	layout = 2,
@@ -1267,7 +1264,8 @@ TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsT
 end)
 
 
-
+-- TODO: register this on the texts module itself
+TMW.C.GroupModule_BaseConfig:RegisterConfigPanel_XMLTemplate(400, "TellMeWhen_GM_TextLayout")
 
 
 

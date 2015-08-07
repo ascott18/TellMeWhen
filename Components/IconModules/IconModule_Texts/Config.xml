@@ -169,7 +169,7 @@
 					<!--
 						Resets all text displays (the editboxes) to their defaults as defined by the current layout.
 					-->
-					<Button name="$parentDefault" parentKey="Default">
+					<Button parentKey="Default">
 						<Size x="18" y="18"/>
 						<Anchors>
 							<Anchor point="TOPRIGHT" x="-5" y="-2"/>
@@ -204,10 +204,10 @@
 					<!--
 						Shortcut to the settings for the current layout (via the group settings tab, currently),
 					-->
-					<Button name="$parentLayoutSettings" parentKey="LayoutSettings">
+					<Button parentKey="LayoutSettings">
 						<Size x="17" y="17"/>
 						<Anchors>
-							<Anchor point="RIGHT" relativeTo="$parentDefault" relativePoint="LEFT" x="-5" y="0"/>
+							<Anchor point="RIGHT" relativeKey="$parent.Default" relativePoint="LEFT" x="-5" y="0"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -236,10 +236,10 @@
 					<!--
 						Dropdown to change the text layout of the icon for the current view.
 					-->
-					<Frame name="$parentPickLayout" inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
+					<Frame inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="9" y="0"/>
-							<Anchor point="RIGHT" relativeTo="$parentLayoutSettings"  relativePoint="LEFT" x="-7" />
+							<Anchor point="RIGHT" relativeKey="$parent.LayoutSettings"  relativePoint="LEFT" x="-7" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -260,7 +260,7 @@
 				</Frames>
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString name="$parentError" parentKey="Error" inherits="GameFontRed" wordwrap="true">
+						<FontString parentKey="Error" inherits="GameFontRed" wordwrap="true">
 							<Anchors>
 								<Anchor point="TOP" y="-28"/>
 							</Anchors>
@@ -282,5 +282,52 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>	
+
+
+	<Frame name="TellMeWhen_GM_TextLayout" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="32"/>
+		<Frames>
+			<Frame inherits="TMW_DropDownMenuTemplate" parentKey="PickLayout">
+			<Anchors>
+				<Anchor point="TOP" y="-5"/>
+				<Anchor point="LEFT" x="9" />
+				<Anchor point="RIGHT" x="-9" />
+			</Anchors>
+			<Scripts>
+				<OnLoad>
+					TMW:CInit(self)
+			
+					self:SetTexts(TMW.L["TEXTLAYOUTS_SETGROUPLAYOUT"], TMW.L["TEXTLAYOUTS_SETGROUPLAYOUT_DESC"])
+					self:SetFunction(TMW.TEXT.Layout_Group_DropDown)
+
+					self:SetScrollable(true)
+
+					-- Save settings before changing the layout (most notably, save the text for the text displays)
+					self.Button:HookScript("OnClick", function(self)
+						TMW.IE:SaveSettings()
+					end)
+
+					self:CScriptAdd("ReloadRequested", function()
+						local gspv = TMW.CI.group and TMW.CI.group:GetSettingsPerView()
+						if gspv and gspv.TextLayout then
+							local layoutName = TMW.TEXT:GetLayoutName(nil, gspv.TextLayout, true)
+							self:SetText("|cff666666" .. TMW.L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
+						end
+					end)
+				</OnLoad>
+			</Scripts>
+		</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>		
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["TEXTLAYOUTS_HEADER_LAYOUT"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+
+	
 
 </Ui>

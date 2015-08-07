@@ -23,7 +23,7 @@ L["DOMAIN_PROFILE"] = "Profile"
 L["DOMAIN_PROFILE_SWITCHTO"] = "Move this group to profile %q"
 L["DOMAIN_GLOBAL"] = "|cff00c300Global|r"
 L["DOMAIN_GLOBAL_SWITCHTO"] = "Make this group |cff00c300Global|r"
-L["GLOBAL_GROUP_GENERIC_DESC"] = "|cff00c300Global|r groups are those that are be available to all your TellMeWhen profiles on this WoW account."
+L["GLOBAL_GROUP_GENERIC_DESC"] = "|cff00c300Global|r groups are available to all your TellMeWhen profiles on this WoW account."
 
 
 
@@ -41,6 +41,7 @@ L["IE_NOLOADED_GROUP"] = [[Select a group to load:]]
 
 
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
+|Left-click and drag|r to move this group.
 |cff7fffffRight-click and drag|r to another icon to move/copy.
 |cff7fffffDrag|r spells or items onto the icon for quick setup.]]
 L["ICON_TOOLTIP2NEWSHORT"] = [[|cff7fffffRight-click|r for icon options.]]
@@ -824,6 +825,10 @@ When unlocked, you can move/size icon groups and right click individual icons to
 You can also type /tellmewhen or /tmw to lock/unlock.]]
 L["UIPANEL_MAINOPT"] = "Main Options"
 L["UIPANEL_GROUPS"] = "Groups"
+L["UIPANEL_GROUPS_DROPDOWN"] = "Select or Create a Group..."
+L["UIPANEL_GROUPS_DROPDOWN_DESC"] = [[Use this menu to load other groups to configure, or to create a new group.
+
+You can also |cff7fffffRight-click|r an icon on your screen to load that icon's group.]]
 L["UIPANEL_GROUPS_GLOBAL"] = "|cff00c300Global|r Groups"
 L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
 L["UIPANEL_GROUPS_GLOBAL_DESC"] = "Settings for the groups that are available to all your TellMeWhen profiles on this WoW account."
@@ -913,8 +918,9 @@ L["UIPANEL_EFFTHRESHOLD_DESC"] = "Sets the minimum number of buffs/debuffs to sw
 L["UIPANEL_ICONSPACING"] = "Icon Spacing"
 L["UIPANEL_ICONSPACINGX"] = "Horizontal"
 L["UIPANEL_ICONSPACINGY"] = "Vertical"
-L["UIPANEL_ICONSPACING_DESC"] = "Distance that icons within a group are away from each other"
-L["UIPANEL_ADDGROUP"] = "+ Add Another Group +"
+L["UIPANEL_ICONSPACING_DESC"] = "Distance between each icon within the group."
+L["UIPANEL_ADDGROUP2"] = "New %s Group"
+L["UIPANEL_ADDGROUP2_DESC"] = "|cff7fffffClick|r to add a new %s group."
 L["UIPANEL_ADDGROUP_DESC"] = "The new group will be assigned the next available groupID"
 L["UIPANEL_DELGROUP"] = "Delete this Group"
 L["UIPANEL_DELGROUP_DESC2"] = "Hold |cff7fffffCtrl|r to bypass confirmation."
