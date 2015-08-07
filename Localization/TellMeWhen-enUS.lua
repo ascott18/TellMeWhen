@@ -1803,12 +1803,11 @@ L["IconModule_TimerBar_OverlayTimerBar"] = "Timer Bar Overlay"
 L["IconModule_PowerBar_OverlayPowerBar"] = "Power Bar Overlay"
 L["IconModule_Texture_ColoredTexture"] = "Icon Texture"
 L["IconModule_CooldownSweepCooldown"] = "Cooldown Sweep"
-L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar (Bar display)"
+L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
 L["IconModule_SelfIcon"] = "Icon"
 
 
-L["GROUPADDONSETTINGS"] = "Group Settings"
-L["GROUPADDONSETTINGS_DESC"] = [[Configure settings for other groups, and all other general addon settings.]]
+L["ADDONSETTINGS_DESC"] = [[Configure all general addon settings.]]
 L["GROUPSETTINGS_DESC"] = [[Configure settings for this group.]]
 L["CONDITIONS"] = "Conditions"
 L["ICONCONDITIONS_DESC"] = "Configure conditions that allow you to fine-tune when this icon is shown."

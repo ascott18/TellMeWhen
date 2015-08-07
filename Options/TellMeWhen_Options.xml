@@ -2492,7 +2492,15 @@
 								<Scripts>
 									<OnLoad>
 										TMW:CInit(self)
-										-- TODO: find the title and tooltip function, wherever they went. bring them back.
+										
+										local title = function()
+											return TMW.Types[TMW.CI.ics.Type].name
+										end
+
+										local tooltip = function()
+											return TMW.Types[TMW.CI.ics.Type].desc
+										end
+
 										self:SetTooltip(title, tooltip)
 										self:SetFunction(TMW.IE.Type_DropDown)
 

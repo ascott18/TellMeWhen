@@ -92,8 +92,11 @@ do
 		text = L["SOUND_EVENT_ONHIDE"],
 		desc = L["SOUND_EVENT_ONHIDE_DESC"],
 		settings = {
-			OnlyShown = "FORCEDISABLED",
+			OnlyShown = false,
 		},
+		applyDefaultsToSetting = function(EventSettings)
+			EventSettings.OnlyShown = false
+		end,
 	})
 	Processor:RegisterIconEvent(13, "OnAlphaInc", {
 		category = L["EVENT_CATEGORY_VISIBILITY"],
@@ -276,8 +279,14 @@ do
 		settings = {
 			Operator = true,
 			Value = true,
-			CndtJustPassed = "FORCE",
-			PassingCndt = "FORCE",
+			CndtJustPassed = function(check)
+				check:Disable()
+				check:SetAlpha(1)
+			end,
+			PassingCndt = function(check)
+				check:Disable()
+				check:SetAlpha(1)
+			end,
 		},
 		blacklistedOperators = {
 			["~="] = true,

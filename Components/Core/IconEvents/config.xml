@@ -353,7 +353,7 @@
 				</Scripts>
 			</Frame>
 
-			<Button name="$parentAddEvent" inherits="TellMeWhen_FlatFrame" parentKey="AddEvent">
+			<CheckButton inherits="TellMeWhen_FlatFrame" parentKey="AddEvent">
 				<Size y="30"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="TOPLEFT" y="2"/>
@@ -390,8 +390,6 @@
 						-- 30 is just an arbitrarily large number.
 						self.EventName:SetHeight(30)
 						self.EventName:SetMaxLines(3)
-
-
 					</OnLoad>
 					<OnClick>
 						PlaySound("igMainMenuOptionCheckBoxOn")
@@ -400,14 +398,7 @@
 						TMW:TT_Update(self)
 					</OnClick>
 				</Scripts>
-				<HighlightTexture alphaMode="ADD" alpha="0.1">
-					<Color r="1" g="1" b="1"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="0.5" y="-0.5"/>
-						<Anchor point="BOTTOMRIGHT" x="-0.5" y="0.5"/>
-					</Anchors>
-				</HighlightTexture>
-			</Button>
+			</CheckButton>
 
 			<Frame name="$parentHandlerPickers" hidden="true" parentKey="HandlerPickers">
 				<Size y="50"/>

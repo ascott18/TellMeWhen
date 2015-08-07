@@ -266,21 +266,14 @@ function EVENTS:LoadEventSettings()
 
 	EventSettingsContainer:Show()
 
-	--hide settings
-	EventSettingsContainer.PassThrough				:Hide()
-	EventSettingsContainer.SimplyShown				:Hide()
-	EventSettingsContainer.OnlyShown				:Hide()
-	EventSettingsContainer.Operator					:Hide()
-	EventSettingsContainer.Value					:Hide()
-	EventSettingsContainer.CndtJustPassed			:Hide()
-	EventSettingsContainer.PassingCndt				:Hide()
-	EventSettingsContainer.Frequency				:Hide()
-	EventSettingsContainer.IconEventWhileCondition	:Hide()
+	-- Hide all settings frames
+	for k, v in pairs(EventSettingsContainer) do
+		if type(v) == "table" and v:GetParent() == EventSettingsContainer then
+			v:Hide()
+		end
+	end
 
-	-- TODO: KILL THIS EVENT
-	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_PRE")
 	TMW.IE.Pages.Events:RequestReloadChildren()
-
 
 	local eventData = EVENTS:GetEventData()
 
@@ -310,20 +303,13 @@ function EVENTS:LoadEventSettings()
 			if type(frame) == "table" then
 				local state = settingsUsedByEvent and settingsUsedByEvent[setting]
 
-				if state == "FORCE" then
-					frame:Disable()
-					frame:SetAlpha(1)
-				elseif state == "FORCEDISABLED" then
-					frame:Disable()
-					frame:SetAlpha(0.4)
+				if type(state) == "function" then
+					state(frame)
 				else
-					frame:SetAlpha(1)
-					if frame.Enable then
-						frame:Enable()
-					end
+					frame:Enable()
 				end
-				if state then
-					frame:Show()
+				if state ~= nil then
+					frame:SetShown(not not state)
 				end
 			end
 		end
@@ -351,7 +337,6 @@ function EVENTS:LoadEventSettings()
 		end
 	end
 
-	
 	TMW:Fire("TMW_CONFIG_EVENTS_SETTINGS_SETUP_POST")
 end
 
@@ -435,8 +420,7 @@ function EVENTS:ShowHandlerPickerButtons()
 	EVENTS:LoadHandlerPickerButtons()
 	EVENTS:LoadEventID(nil)
 
-	IE.Events.AddEvent:LockHighlight()
-	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.2)
+	IE.Events.AddEvent:SetChecked(true)
 
 	IE.Events.HandlerPickers:Show()
 	IE.Events.EventPickers:Hide()
@@ -450,8 +434,7 @@ function EVENTS:ShowEventPickerButtons()
 end 
 
 function EVENTS:HidePickerButtons()
-	IE.Events.AddEvent:UnlockHighlight()
-	IE.Events.AddEvent:GetHighlightTexture():SetAlpha(0.1)
+	IE.Events.AddEvent:SetChecked(false)
 
 	IE.Events.HandlerPickers:Hide()
 	IE.Events.EventPickers:Hide()
@@ -627,6 +610,7 @@ end
 
 function EVENTS.OperatorMenu_DropDown(frame)
 	local eventData = EVENTS.EventHandlerFrames[EVENTS.currentEventID].eventData
+	local eventSettings = EVENTS:GetEventSettings()
 
 	for k, v in pairs(TMW.operators) do
 		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
@@ -634,6 +618,7 @@ function EVENTS.OperatorMenu_DropDown(frame)
 			info.func = EVENTS.OperatorMenu_DropDown_OnClick
 			info.text = v.text
 			info.value = v.value
+			info.checked = v.value == eventSettings.Operator
 			info.tooltipTitle = v.tooltipText
 			info.arg1 = frame
 			TMW.DD:AddButton(info)

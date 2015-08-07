@@ -45,7 +45,7 @@ end
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	IE.MainOptionsTab = ACEOPTIONS:RegisterTab("MAIN", 20, "TMWIEMain", 0.89)
 	IE.MainOptionsTab:SetText(TMW.L["UIPANEL_MAINOPT"])
-	TMW:TT(IE.MainOptionsTab, "UIPANEL_MAINOPT", "GROUPADDONSETTINGS_DESC")
+	TMW:TT(IE.MainOptionsTab, "UIPANEL_MAINOPT", "ADDONSETTINGS_DESC")
 end)
 
 function ACEOPTIONS:LoadConfigGroup(info, group)
