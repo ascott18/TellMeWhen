@@ -98,17 +98,12 @@
 					<OnLoad>
 						TMW:CInit(self)
 						self:SetSetting(self:GetParent():GetID())
-
-						self:HookScript("OnEditFocusLost", function()
-							TMW.TEXT:LoadConfig()
-						end)
 		
-						-- TODO: FIgure out a better way to do this. Why is it done manually?
-						-- This is handled manually.
+						-- This is handled manually because texts use fallback settings onto the layout.
 						self:CScriptRemove("ReloadRequested")
 
 						self:CScriptAdd("SettingTableRequested", function()
-							return TMW.CI.icon and TMW.CI.icon:GetSettingsPerView().Texts
+							return TMW.CI.icon and TMW.CI.icon:GetSettingsPerView().Texts or false
 						end)
 
 						
@@ -277,6 +272,10 @@
 		<Scripts>
 			<OnLoad>
 				TMW:CInit(self)
+
+				self:CScriptAdd("ReloadRequested", function()
+					TMW.TEXT:LoadConfig()
+				end)
 				
 				self:SetTitle(TMW.L["TEXTLAYOUTS_TAB"])
 			</OnLoad>

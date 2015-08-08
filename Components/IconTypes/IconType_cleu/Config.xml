@@ -14,7 +14,7 @@
 						TMW:CInit(self)
 				
 						self:SetTexts(TMW.L["CLEU_EVENTS"], TMW.L["CLEU_EVENTS_DESC"])
-						self:SetFunction(TMW.Types.cleu.CONFIG.EventMenu)
+						self:SetFunction(TMW.Types.cleu.Config.EventMenu)
 
 						self.SHOW_TIME = 0.5
 
@@ -115,7 +115,7 @@
 						TMW:CInit(self)
 				
 						self:SetTexts(TMW.L["CLEU_FLAGS_SOURCE"], TMW.L["CLEU_FLAGS_DESC"])
-						self:SetFunction(TMW.Types.cleu.CONFIG.FlagsMenu)
+						self:SetFunction(TMW.Types.cleu.Config.FlagsMenu)
 
 						self.SHOW_TIME = 0.5
 
@@ -174,7 +174,7 @@
 						TMW:CInit(self)
 				
 						self:SetTexts(TMW.L["CLEU_FLAGS_DEST"], TMW.L["CLEU_FLAGS_DESC"])
-						self:SetFunction(TMW.Types.cleu.CONFIG.FlagsMenu)
+						self:SetFunction(TMW.Types.cleu.Config.FlagsMenu)
 
 						self.SHOW_TIME = 0.5 --TODO: make a method for this.
 
@@ -190,6 +190,10 @@
 		<Scripts>
 			<OnLoad>
 				TMW:CInit(self)
+
+				self:CScriptAdd("ReloadRequested", function()
+					TMW.Types.cleu.Config:LoadConfig()
+				end)
 				
 				self:SetTitle(TMW.L["CONFIGPANEL_CLEU_HEADER"])
 				

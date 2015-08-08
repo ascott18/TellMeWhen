@@ -264,10 +264,6 @@ end)
 
 TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, tab, oldTab)
 	HELP:ShowNext()
-end)	
-
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function(event, icon)
-	HELP:ShowNext()
 end)
 
 

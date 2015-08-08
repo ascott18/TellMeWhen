@@ -204,12 +204,11 @@ function EVENTS:LoadConfig()
 	-- hide all handler configuration panels
 	if not didLoad then
 		EVENTS:ShowHandlerPickerButtons()
-		--IE.Events.HelpText:Show()
+		--IE.Pages.Events.HelpText:Show()
 	end
 
 	EVENTS:SetTabText()
 end
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", EVENTS, "LoadConfig")
 
 function EVENTS:LoadEventID(eventID)
 
@@ -229,7 +228,7 @@ function EVENTS:LoadEventID(eventID)
 		EventHandler.ConfigContainer:Hide()
 	end
 	EVENTS.EventSettingsContainer:Hide()
-	--IE.Events.HelpText:Show()
+	--IE.Pages.Events.HelpText:Show()
 
 
 	if not eventFrame or eventID == 0 or not eventFrame:IsShown() then
@@ -273,12 +272,10 @@ function EVENTS:LoadEventSettings()
 		end
 	end
 
-	TMW.IE.Pages.Events:RequestReloadChildren()
-
 	local eventData = EVENTS:GetEventData()
 
 	if eventData then
-		IE.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
+		IE.Pages.Events.EventSettingsContainerEventName:SetText("(" .. EVENTS.currentEventID .. ") " .. eventData.text)
 
 		if eventSettings.Event == "WCSP" then
 			if EventHandler.frequencyMinimum then
@@ -346,7 +343,7 @@ function EVENTS:LoadHandlerPickerButtons()
 	local previousFrame
 
 	-- Handler pickers
-	local HandlerPickers = IE.Events.HandlerPickers
+	local HandlerPickers = IE.Pages.Events.HandlerPickers
 	for i, EventHandler in ipairs(TMW.Classes.EventHandler.orderedInstances) do
 
 		local frame = HandlerPickers[i]
@@ -376,7 +373,7 @@ function EVENTS:LoadEventPickerButtons()
 	local previousFrame
 
 	-- Event (Trigger) pickers
-	local EventPickers = IE.Events.EventPickers
+	local EventPickers = IE.Pages.Events.EventPickers
 	for i, frame in ipairs(EventPickers) do
 		frame:Hide()
 	end
@@ -420,24 +417,24 @@ function EVENTS:ShowHandlerPickerButtons()
 	EVENTS:LoadHandlerPickerButtons()
 	EVENTS:LoadEventID(nil)
 
-	IE.Events.AddEvent:SetChecked(true)
+	IE.Pages.Events.AddEvent:SetChecked(true)
 
-	IE.Events.HandlerPickers:Show()
-	IE.Events.EventPickers:Hide()
+	IE.Pages.Events.HandlerPickers:Show()
+	IE.Pages.Events.EventPickers:Hide()
 end
 
 function EVENTS:ShowEventPickerButtons()
 	EVENTS:LoadEventPickerButtons()
 
-	IE.Events.HandlerPickers:Hide()
-	IE.Events.EventPickers:Show()
+	IE.Pages.Events.HandlerPickers:Hide()
+	IE.Pages.Events.EventPickers:Show()
 end 
 
 function EVENTS:HidePickerButtons()
-	IE.Events.AddEvent:SetChecked(false)
+	IE.Pages.Events.AddEvent:SetChecked(false)
 
-	IE.Events.HandlerPickers:Hide()
-	IE.Events.EventPickers:Hide()
+	IE.Pages.Events.HandlerPickers:Hide()
+	IE.Pages.Events.EventPickers:Hide()
 end
 
 function EVENTS:PickEvent(event)
@@ -595,18 +592,6 @@ function EVENTS:GetValidEvents(EventHandler)
 end
 
 
-
-function EVENTS:UpOrDown(button, delta)
-	local ID = button:GetID()
-	local settings = TMW.CI.ics.Events
-
-	local curdata = settings[ID]
-	local destinationdata = settings[ID+delta]
-	settings[ID] = destinationdata
-	settings[ID+delta] = curdata
-
-	EVENTS:LoadConfig()
-end
 
 function EVENTS.OperatorMenu_DropDown(frame)
 	local eventData = EVENTS.EventHandlerFrames[EVENTS.currentEventID].eventData

@@ -857,8 +857,9 @@ function IE:OnProfile(event, arg2, arg3)
 		TMW.ACEOPTIONS:CompileOptions() -- redo groups in the options
 
 		-- Reload the icon editor.
-		-- TODO: figure out what should happen here.
-		IE:Load(1)
+		IE:LoadIcon(1, false)
+		IE:LoadGroup(1, false)
+
 	
 		TMW:Fire("TMW_IE_ON_PROFILE", event, arg2, arg3)
 	end
@@ -949,7 +950,7 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 		if not self.childrenEnabled then
 			IE.CurrentTab = nil
 			local page = IE:DisplayPage(self.disabledPageKey)
-			page:RequestReloadChildren()
+			page:RequestReload()
 
 		elseif self.currentTab and self.currentTab:IsShown() then
 			self.currentTab:Click()
@@ -1007,7 +1008,7 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 		
 		TMW:Fire("TMW_CONFIG_TAB_CLICKED", self, oldTab)
 
-		page:RequestReloadChildren()
+		page:RequestReload()
 
 		IE:RefreshTabs()
 	end,
@@ -1464,42 +1465,12 @@ function IE:LoadIcon(isRefresh, icon, isHistoryChange)
 	end
 	
 	if CI.icon then
-		-- This is really really important. The icon must be setup so that it has the correct components implemented
-		-- so that the correct config panels will be loaded and shown for the icon.
-		CI.icon:Setup()
-
-
-		local panelList = {}
-		for _, Component in pairs(CI.icon.Components) do
-			if Component:ShouldShowConfigPanels(CI.icon) then
-				for _, panelInfo in pairs(Component.ConfigPanels) do
-					if panelInfo.panelSet == "icon" then
-						tinsert(panelList, panelInfo)
-					end
-				end		
-			end
-		end
-		IE:PositionPanels("Main", panelList)
-		
-		if CI.ics.Type == "" then
-			IE.Pages.Main.Type:SetText(L["ICONMENU_TYPE"])
-		else
-			local Type = rawget(TMW.Types, CI.ics.Type)
-			if Type then
-				IE.Pages.Main.Type:SetText(Type.name)
-			else
-				IE.Pages.Main.Type:SetText(CI.ics.Type .. ": UNKNOWN TYPE")
-			end
-		end
-
 		-- It is intended that this happens at the end instead of the beginning.
 		-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
 		IE:AttemptBackup(CI.icon)
 
 		-- TODO: get rid of this, replace with ReloadRequested cscripts
 		TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.icon)
-
-		IE.Pages.Main:RequestReloadChildren()
 	end
 	
 	IE:UndoRedoChanged()
@@ -1529,25 +1500,6 @@ function IE:LoadGroup(isRefresh, group)
 			CI.group = nil
 			IE.TabGroups.GROUP:SetChildrenEnabled(false)
 		end
-	end
-
-	
-	if CI.group then
-		CI.group:Setup()
-
-		local panelList = {}
-		for _, Component in pairs(CI.group.Components) do
-			if Component:ShouldShowConfigPanels(CI.group) then
-				for _, panelInfo in pairs(Component.ConfigPanels) do
-					if panelInfo.panelSet == "group" then
-						tinsert(panelList, panelInfo)
-					end
-				end		
-			end
-		end
-		IE:PositionPanels("GroupMain", panelList)
-
-		IE.Pages.GroupMain:RequestReloadChildren()
 	end
 
 	IE:Load(isRefresh)
@@ -2080,6 +2032,10 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 		self.text:SetMaxLines(3)
 	end,
 
+	GetParentKey = function(self)
+		return TMW.tContains(self:GetParent(), self)
+	end,
+
 	GetSettingTable = function(self)
 		return self:CScriptCallGet("SettingTableRequested") or self:CScriptBubbleGet("SettingTableRequested")
 	end,
@@ -2089,6 +2045,11 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 
 		self:CScriptCall("SettingSaved")
 		self:CScriptBubble("DescendantSettingSaved", self)
+	end,
+
+	RequestReload = function(self)
+		self:CScriptCall("ReloadRequested")
+		self:RequestReloadChildren()
 	end,
 
 	RequestReloadChildren = function(self)
@@ -2309,7 +2270,11 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 
 TMW:NewClass("Config_Page", "Config_Frame"){
 	OnNewInstance_Page = function(self)
-		self:CScriptAdd("DescendantSettingSaved", self.RequestReloadChildren)
+		self:CScriptAdd("DescendantSettingSaved", self.RequestReload)
+
+		self:CScriptAdd("ReloadRequested", function(self)
+			print("PAGE RELOAD", self:GetParentKey())
+		end)
 	end,
 }
 
@@ -2579,9 +2544,10 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 			
 			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
 
-			settings[self.setting] = value
-
-			self:OnSettingSaved()
+			if settings[self.setting] ~= value then
+				settings[self.setting] = value
+				self:OnSettingSaved()
+			end
 		end
 	end,
 
@@ -3099,9 +3065,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			local value = self:GetValue()
 			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
 			
-			settings[self.setting] = value
-
-			self:OnSettingSaved()
+			if settings[self.setting] ~= value then
+				settings[self.setting] = value
+				self:OnSettingSaved()
+			end
 		end
 	end,
 

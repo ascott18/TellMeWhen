@@ -312,8 +312,7 @@ function TEXT:LoadConfig()
 			local display_N_stringName = L["TEXTLAYOUTS_fSTRING2"]:format(i, TEXT:GetStringName(stringSettings, i, true))
 
 			-- Set it as the tooltip title and the label text on the editbox.
-			TMW:TT(frame.EditBox, display_N_stringName, "TEXTLAYOUTS_SETTEXT_DESC", 1, nil)
-			frame.EditBox.label = display_N_stringName
+			frame.EditBox:SetTexts(display_N_stringName, L["TEXTLAYOUTS_SETTEXT_DESC"])
 
 			frame.EditBox:SetText(text)
 			
@@ -367,7 +366,6 @@ function TEXT:LoadConfig()
 	-- Set the tooltip of the button that opens the layout settings for the currently used text layout
 	TMW:TT(TellMeWhen_TextDisplayOptions.Layout.LayoutSettings, "TEXTLAYOUTS_LAYOUTSETTINGS", L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"]:format(layoutName), nil, 1)
 end
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", TEXT, "LoadConfig")
 
 
 

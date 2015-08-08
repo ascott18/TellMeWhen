@@ -88,12 +88,6 @@ function CNDT:LoadConfig(conditionSetName)
 	CNDT:ColorizeParentheses()
 end
 
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function()
-	-- This is encapsulated in a function because LoadConfig excepts arg2 to be a conditionSetName,
-	-- but it would end up being an event or an icon if CNDT.LoadConfig were registed as the callback.
-	CNDT:LoadConfig()
-end)
-
 
 
 -- Dynamic Conditions Tab handling

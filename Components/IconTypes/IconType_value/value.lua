@@ -120,7 +120,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	self.PowerType:SetPoint("TOPLEFT", 5, -5)
 	self.PowerType:SetPoint("RIGHT", -5, 0)
 
-	TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", function()
+	self:CScriptAdd("ReloadRequested", function()
 		self.PowerType:SetText(types[TMW.CI.ics.PowerType])
 	end)
 end)

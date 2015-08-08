@@ -113,65 +113,64 @@ function Type:GuessIconTexture(ics)
 end
 
 
-local ME = TMW:NewModule("MetaEditor")
-TMW.ME = ME
+local Config = {}
+Type.Config = Config
 
-function ME:LoadConfig()
+function Config:LoadConfig()
 	if not TellMeWhen_MetaIconOptions then return end
 	local settings = CI.ics.Icons
 
 	for k, GUID in pairs(settings) do
-		local mg = ME[k] or CreateFrame("Frame", "TellMeWhen_MetaIconOptions" .. k, TellMeWhen_MetaIconOptions, "TellMeWhen_MetaGroup", k)
-		ME[k] = mg
+		local mg = Config[k] or CreateFrame("Frame", "TellMeWhen_MetaIconOptions" .. k, TellMeWhen_MetaIconOptions, "TellMeWhen_MetaGroup", k)
+		Config[k] = mg
 		mg:Show()
 		if k > 1 then
-			mg:SetPoint("TOPLEFT", ME[k-1], "BOTTOMLEFT", 0, 0)
-			mg:SetPoint("TOPRIGHT", ME[k-1], "BOTTOMRIGHT", 0, 0)
+			mg:SetPoint("TOPLEFT", Config[k-1], "BOTTOMLEFT", 0, 0)
+			mg:SetPoint("TOPRIGHT", Config[k-1], "BOTTOMRIGHT", 0, 0)
 		end
 		mg:SetFrameLevel(TellMeWhen_MetaIconOptions:GetFrameLevel()+2)
 
 		mg.icon:SetGUID(GUID)
 	end
 
-	TellMeWhen_MetaIconOptions:SetHeight((#settings * ME[1]:GetHeight()) + 35)
+	TellMeWhen_MetaIconOptions:SetHeight((#settings * Config[1]:GetHeight()) + 35)
 	
-	for f=#settings+1, #ME do
-		ME[f]:Hide()
+	for f=#settings+1, #Config do
+		Config[f]:Hide()
 	end
-	ME[1]:Show()
+	Config[1]:Show()
 
 	if settings[2] then
-		ME[1].delete:Show()
+		Config[1].delete:Show()
 	else
-		ME[1].delete:Hide()
+		Config[1].delete:Hide()
 	end
 end
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", ME, "LoadConfig")
 
 
 ---------- Click Handlers ----------
-function ME:Insert(where)
+function Config:Insert(where)
 	tinsert(CI.ics.Icons, where, "")
-	ME:LoadConfig()
+	Config:LoadConfig()
 end
 
-function ME:Delete(self)
+function Config:Delete(self)
 	tremove(CI.ics.Icons, self:GetParent():GetID())
-	ME:LoadConfig()
+	Config:LoadConfig()
 end
 
-function ME:SwapIcons(id1, id2)
+function Config:SwapIcons(id1, id2)
 	local Icons = CI.ics.Icons
 	
 	Icons[id1], Icons[id2] = Icons[id2], Icons[id1]
 	
-	TMW.ME:LoadConfig()
+	TMW.Config:LoadConfig()
 end
 
 
 ---------- Dropdown ----------
 local addedGroups = {}
-function ME:IconMenu()
+function Config:IconMenu()
 	if TMW.DD.MENU_LEVEL == 1 then
 		local currentGroupView = TMW.CI.icon.group:GetSettings().View
 		
@@ -195,7 +194,7 @@ function ME:IconMenu()
 					info.hasArrow = true
 				end
 				
-				info.func = ME.IconMenuOnClick
+				info.func = Config.IconMenuOnClick
 				info.arg1 = self
 				info.checked = CI.ics.Icons[self:GetParent():GetID()] == group:GetGUID()
 
@@ -213,7 +212,7 @@ function ME:IconMenu()
 				info.tooltipText = tooltip
 
 				info.value = icon
-				info.func = ME.IconMenuOnClick
+				info.func = Config.IconMenuOnClick
 				info.arg1 = self
 				info.checked = CI.ics.Icons[self:GetParent():GetID()] == icon:GetGUID()
 
@@ -228,14 +227,14 @@ function ME:IconMenu()
 	end
 end
 
-function ME:IconMenuOnClick(frame)
+function Config:IconMenuOnClick(frame)
 	local GUID = self.value:GetGUID(true)
 
 	assert(GUID)
 
 	CI.ics.Icons[frame:GetParent():GetID()] = GUID
 
-	ME:LoadConfig()
+	Config:LoadConfig()
 	TMW.DD:CloseDropDownMenus()
 end
 

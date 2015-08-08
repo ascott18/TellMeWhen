@@ -78,6 +78,7 @@ function Timer:SetupEventDisplay(eventID)
 		str = str .. Counter
 	end
 	
+	-- TODO: all of these methods (SetupEventDisplay) should return these values, not set them directly.
 	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. L["EVENTHANDLER_TIMER_TAB"] .. ":|r " .. str)
 end
 

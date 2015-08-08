@@ -2502,6 +2502,21 @@
 										self:SetTooltip(title, tooltip)
 										self:SetFunction(TMW.IE.Type_DropDown)
 
+										self:CScriptAdd("ReloadRequested", function()
+											local ics = TMW.CI.ics
+
+											if ics.Type == "" then
+												self:SetText(TMW.L["ICONMENU_TYPE"])
+											else
+												local Type = rawget(TMW.Types, ics.Type)
+												if Type then
+													self:SetText(Type.name)
+												else
+													self:SetText(ics.Type .. ": UNKNOWN TYPE")
+												end
+											end
+										end)
+
 										self.Button:HookScript("OnClick", function(self)
 											TMW.IE:SaveSettings()
 										end)
@@ -2573,8 +2588,28 @@
 									return TMW.CI.ics
 								end)
 
-								self:CScriptAdd("DescendantSettingSaved", function(requester)
-									return TMW.IE:ScheduleIconSetup()
+								--self:CScriptAdd("DescendantSettingSaved", function(requester)
+								--	return TMW.IE:ScheduleIconSetup()
+								--end)
+
+								self:CScriptAdd("ReloadRequested", function()
+									local icon = TMW.CI.icon
+
+									if icon then
+										icon:Setup()
+
+										local panelList = {}
+										for _, Component in pairs(icon.Components) do
+											if Component:ShouldShowConfigPanels(icon) then
+												for _, panelInfo in pairs(Component.ConfigPanels) do
+													if panelInfo.panelSet == "icon" then
+														tinsert(panelList, panelInfo)
+													end
+												end		
+											end
+										end
+										TMW.IE:PositionPanels("Main", panelList)
+									end
 								end)
 
 								self:RegisterForDrag("LeftButton")
@@ -2835,9 +2870,29 @@
 									return TMW.CI.gs
 								end)
 
-								self:CScriptAdd("DescendantSettingSaved", function(requester)
-									return TMW.CI.group:Setup()
+								--self:CScriptAdd("DescendantSettingSaved", function(requester)
+								--	return TMW.CI.group:Setup()
+								--end)
+
+								self:CScriptAdd("ReloadRequested", function(requester)
+									local group = TMW.CI.group
+									if group then
+										group:Setup()
+
+										local panelList = {}
+										for _, Component in pairs(group.Components) do
+											if Component:ShouldShowConfigPanels(group) then
+												for _, panelInfo in pairs(Component.ConfigPanels) do
+													if panelInfo.panelSet == "group" then
+														tinsert(panelList, panelInfo)
+													end
+												end		
+											end
+										end
+										TMW.IE:PositionPanels("GroupMain", panelList)
+									end
 								end)
+
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -3189,7 +3244,8 @@
 				end
 
 				-- TODO: get rid of this
-				TMW:NewClass(nil, "Frame", "CScriptProvider"):NewFromExisting(self, {})
+				self.tmwClass = "Config_Frame"
+				TMW:CInit(self)
 
 				TMW.IE:CreateTabGroups()
 

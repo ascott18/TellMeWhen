@@ -14,7 +14,11 @@
 						TMW:CInit(self)
 				
 						self:SetTexts(TMW.L["LOSECONTROL_DROPDOWNLABEL"], TMW.L["LOSECONTROL_DROPDOWNLABEL_DESC"])
-						self:SetFunction(TMW.Types.losecontrol.CONFIG.DropdownMenu_SelectTypes)
+						self:SetFunction(TMW.Types.losecontrol.Config.DropdownMenu_SelectTypes)
+
+						self:CScriptAdd("ReloadRequested", function()
+							TMW.Types.losecontrol.Config:DropdownMenu_SetText()
+						end)
 						
 						self.Button:HookScript("OnClick", function(self)
 							TMW.IE:SaveSettings()

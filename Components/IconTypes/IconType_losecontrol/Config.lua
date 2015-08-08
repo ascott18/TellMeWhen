@@ -23,11 +23,11 @@ local Type = rawget(TMW.Types, "losecontrol")
 if not Type then return end
 
 
-Type.CONFIG = {}
-local CONFIG = Type.CONFIG
+Type.Config = {}
+local Config = Type.Config
 
 
-CONFIG.Types = {
+Config.Types = {
 	-- Unconfirmed:
 	[LOSS_OF_CONTROL_DISPLAY_BANISH] = { -- "Banished"
 		value = "BANISH",
@@ -127,13 +127,13 @@ CONFIG.Types = {
 		value = "FEAR",
 	},
 }
-CONFIG.TypesByValue = {}
-for k, v in pairs(CONFIG.Types) do
+Config.TypesByValue = {}
+for k, v in pairs(Config.Types) do
 	v.text = k
-	CONFIG.TypesByValue[v.value] = v
+	Config.TypesByValue[v.value] = v
 end
 
-CONFIG.schools = {
+Config.schools = {
 	[0x1 ] = "|cffFFFF00" .. SPELL_SCHOOL0_CAP,
 	[0x2 ] = "|cffFFE680" .. SPELL_SCHOOL1_CAP,
 	[0x4 ] = "|cffFF8000" .. SPELL_SCHOOL2_CAP, 
@@ -143,20 +143,14 @@ CONFIG.schools = {
 	[0x40] = "|cffFF80FF" .. SPELL_SCHOOL6_CAP,
 }
 
-function CONFIG:LoadConfig()
-	if TellMeWhen_LoseControlTypes then
-		CONFIG:DropdownMenu_SetText()
-	end
-end
-TMW:RegisterCallback("TMW_CONFIG_ICON_LOADED", CONFIG, "LoadConfig")
 
-function CONFIG.DropdownMenu_OnClick_Normal(dropDownButton, LoseControlTypes)
+function Config.DropdownMenu_OnClick_Normal(dropDownButton, LoseControlTypes)
 	LoseControlTypes[dropDownButton.value] = not LoseControlTypes[dropDownButton.value]
 	
-	CONFIG:DropdownMenu_SetText()
+	Config:DropdownMenu_SetText()
 end
 
-function CONFIG.DropdownMenu_OnClick_All(dropDownButton, LoseControlTypes)
+function Config.DropdownMenu_OnClick_All(dropDownButton, LoseControlTypes)
 	if not LoseControlTypes[dropDownButton.value] then
 		wipe(LoseControlTypes)
 		LoseControlTypes = TMW:CopyTableInPlaceWithMeta(TMW.DEFAULT_ICON_SETTINGS.LoseControlTypes, LoseControlTypes)
@@ -166,16 +160,16 @@ function CONFIG.DropdownMenu_OnClick_All(dropDownButton, LoseControlTypes)
 	
 	TMW.DD:CloseDropDownMenus()
 	
-	CONFIG:DropdownMenu_SetText()
+	Config:DropdownMenu_SetText()
 end
 
-function CONFIG.DropdownMenu_OnClick_SchoolInterrupt(dropDownButton, LoseControlTypes, schoolFlag)
+function Config.DropdownMenu_OnClick_SchoolInterrupt(dropDownButton, LoseControlTypes, schoolFlag)
 	LoseControlTypes[dropDownButton.value] = bit.bxor(LoseControlTypes[dropDownButton.value], schoolFlag)
 	
-	CONFIG:DropdownMenu_SetText()
+	Config:DropdownMenu_SetText()
 end
 
-function CONFIG.DropdownMenu_SelectTypes()
+function Config.DropdownMenu_SelectTypes()
 	local LoseControlTypes = TMW.CI.ics.LoseControlTypes
 	
 	if TMW.DD.MENU_LEVEL == 1 then
@@ -189,15 +183,16 @@ function CONFIG.DropdownMenu_SelectTypes()
 		info.value = ""
 		info.arg1 = LoseControlTypes
 		info.keepShownOnClick = true
+		info.isNotRadio = true
 		
 		info.checked = LoseControlTypes[info.value]
-		info.func = CONFIG.DropdownMenu_OnClick_All
+		info.func = Config.DropdownMenu_OnClick_All
 		
 		TMW.DD:AddButton(info)
 		
 		TMW.DD:AddSpacer()
 		
-		for text, data in TMW:OrderedPairs(CONFIG.Types) do
+		for text, data in TMW:OrderedPairs(Config.Types) do
 			local info = TMW.DD:CreateInfo()
 
 			info.text = get(text)
@@ -208,6 +203,7 @@ function CONFIG.DropdownMenu_SelectTypes()
 			info.value = data.value
 			info.arg1 = LoseControlTypes
 			info.keepShownOnClick = true
+			info.isNotRadio = true
 			
 			if data.value == "SCHOOL_INTERRUPT" then
 				info.hasArrow = true
@@ -215,7 +211,7 @@ function CONFIG.DropdownMenu_SelectTypes()
 			else
 				info.checked = LoseControlTypes[""] or LoseControlTypes[data.value]
 				info.disabled = LoseControlTypes[""]
-				info.func = CONFIG.DropdownMenu_OnClick_Normal
+				info.func = Config.DropdownMenu_OnClick_Normal
 			end
 			
 			TMW.DD:AddButton(info)
@@ -223,19 +219,20 @@ function CONFIG.DropdownMenu_SelectTypes()
 		
 	elseif TMW.DD.MENU_LEVEL == 2 then
 		if TMW.DD.MENU_VALUE == "SCHOOL_INTERRUPT" then
-			for bitFlag, name in TMW:OrderedPairs(CONFIG.schools) do
+			for bitFlag, name in TMW:OrderedPairs(Config.schools) do
 				local info = TMW.DD:CreateInfo()
 			
 				info.text = LOSS_OF_CONTROL_DISPLAY_INTERRUPT_SCHOOL:format(name .. "|r")
 				
 				info.value = TMW.DD.MENU_VALUE
 				info.keepShownOnClick = true
+				info.isNotRadio = true
 				
 				info.arg1 = LoseControlTypes
 				info.arg2 = bitFlag
 				info.checked = LoseControlTypes[""] or bit.band(LoseControlTypes[TMW.DD.MENU_VALUE], bitFlag) == bitFlag
 				info.disabled = LoseControlTypes[""]
-				info.func = CONFIG.DropdownMenu_OnClick_SchoolInterrupt
+				info.func = Config.DropdownMenu_OnClick_SchoolInterrupt
 			
 				TMW.DD:AddButton(info)
 			end
@@ -243,7 +240,7 @@ function CONFIG.DropdownMenu_SelectTypes()
 	end
 end
 
-function CONFIG:DropdownMenu_SetText()
+function Config:DropdownMenu_SetText()
 	local LoseControlTypes = TMW.CI.ics.LoseControlTypes
 	local n = 0
 	if LoseControlTypes[""] then
@@ -251,7 +248,7 @@ function CONFIG:DropdownMenu_SetText()
 	else
 		for k, v in pairs(LoseControlTypes) do
 			if k == "SCHOOL_INTERRUPT" then
-				for bitFlag in TMW:OrderedPairs(CONFIG.schools) do
+				for bitFlag in TMW:OrderedPairs(Config.schools) do
 					if bit.band(LoseControlTypes[k], bitFlag) == bitFlag then
 						n = n + 1
 					end
@@ -281,7 +278,7 @@ function Type:GetIconMenuText(ics)
 		text = L["LOSECONTROL_TYPE_ALL"]
 	else
 		for locType, v in pairs(ics.LoseControlTypes) do
-			local data = CONFIG.TypesByValue[locType]
+			local data = Config.TypesByValue[locType]
 			if locType == "SCHOOL_INTERRUPT" then
 				if v ~= 0 then
 					text = text .. ", " .. data.text

@@ -14,45 +14,51 @@
 				
 						self:RegisterForDrag("LeftButton", "RightButton")
 						self:SetTexts(TMW.L["CHOOSEICON"], TMW.L["CHOOSEICON_DESC"])
-						self:SetFunction(TMW.ME.IconMenu)
+						self:SetFunction(TMW.Config.IconMenu)
 
 						self:SetPreviewSize(21)
 					</OnLoad>
 					<OnDragStart>
-						TMW.ME.draggingFrame = self
-						TMW.ME.draggingButton = button
-						TMW.ME.draggingOriginalFrame = self
+						local Config = TMW.Types.meta.Config
+
+						Config.draggingFrame = self
+						Config.draggingButton = button
+						Config.draggingOriginalFrame = self
 					</OnDragStart>
 					<OnDragStop>
-						TMW.ME.draggingFrame = nil
-						TMW.ME.draggingButton = nil
-						TMW.ME.draggingOriginalFrame = nil
+						local Config = TMW.Types.meta.Config
+
+						Config.draggingFrame = nil
+						Config.draggingButton = nil
+						Config.draggingOriginalFrame = nil
 					</OnDragStop>
-					<OnUpdate>						
-						if self:IsMouseOver() and TMW.ME.draggingFrame and self ~= TMW.ME.draggingFrame then
-							if TMW.ME.draggingButton == "LeftButton" then
-								local sourceID = TMW.ME.draggingFrame:GetParent():GetID()
+					<OnUpdate>
+						local Config = TMW.Types.meta.Config
+
+						if self:IsMouseOver() and Config.draggingFrame and self ~= Config.draggingFrame then
+							if Config.draggingButton == "LeftButton" then
+								local sourceID = Config.draggingFrame:GetParent():GetID()
 								local destID = self:GetParent():GetID()
 								local delta = abs(sourceID - destID)
 								
 								if sourceID > destID then
 									for i = destID, sourceID - 1, 1 do
-										TMW.ME:SwapIcons(i, i + 1)
+										Config:SwapIcons(i, i + 1)
 									end
 								else
 									for i = sourceID, destID - 1, 1 do
-										TMW.ME:SwapIcons(i, i + 1)
+										Config:SwapIcons(i, i + 1)
 									end
 								end
 								
-								TMW.ME.draggingFrame = self
+								Config.draggingFrame = self
 								
-							elseif TMW.ME.draggingButton == "RightButton" then
+							elseif Config.draggingButton == "RightButton" then
 							
-								TMW.ME:SwapIcons(TMW.ME.draggingFrame:GetParent():GetID(), TMW.ME.draggingOriginalFrame:GetParent():GetID())
-								TMW.ME:SwapIcons(self:GetParent():GetID(), TMW.ME.draggingOriginalFrame:GetParent():GetID())
+								Config:SwapIcons(Config.draggingFrame:GetParent():GetID(), Config.draggingOriginalFrame:GetParent():GetID())
+								Config:SwapIcons(self:GetParent():GetID(), Config.draggingOriginalFrame:GetParent():GetID())
 								
-								TMW.ME.draggingFrame = self
+								Config.draggingFrame = self
 							end
 						end
 					</OnUpdate>
@@ -70,14 +76,14 @@
 					<OnClick>
 						PlaySound("igMainMenuOptionCheckBoxOn")
 
-						TMW.ME:Delete(self)
+						TMW.Types.meta.Config:Delete(self)
 					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				TMW.ME[self:GetID()] = self
+				TMW.Types.meta.Config[self:GetID()] = self
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -105,7 +111,7 @@
 						PlaySound("igMainMenuOptionCheckBoxOn")
 						
 						tinsert(TMW.CI.ics.Icons, "")
-						TMW.ME:LoadConfig()
+						TMW.Types.meta.Config:LoadConfig()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -136,6 +142,10 @@
 		<Scripts>
 			<OnLoad>
 				TMW:CInit(self)
+
+				self:CScriptAdd("ReloadRequested", function()
+					TMW.Types.meta.Config:LoadConfig()
+				end)
 				
 				self:SetTitle(TMW.L["ICONMENU_COMPONENTICONS"])
 			</OnLoad>

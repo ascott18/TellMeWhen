@@ -308,8 +308,8 @@
 	</Frame>
 
 	
-	<Frame parentKey="Events" name="$parentEvents" inherits="TellMeWhen_IE_PageTemplate">		
-		<Frames>					
+	<Frame parentKey="Events" name="$parentEvents" inherits="TellMeWhen_IE_PageTemplate">
+		<Frames>
 			<Frame parentKey="EventHandlerFrames" name="$parentEventHandlerFrames">
 				<Size x="210" y="10"/>
 				<Anchors>
@@ -700,30 +700,21 @@
 			<OnLoad>
 				TMW:CInit(self)
 
-
 				self:CScriptAdd("SettingTableRequested", function(self)
-					return TMW.CI.ics and TMW.EVENTS:GetEventSettings()
+					return TMW.EVENTS:GetEventSettings() or false
 				end)
 
-				self:CScriptAdd("DescendantSettingSaved", function(self)
+				self:CScriptAdd("ReloadRequested", function()
 					TMW.EVENTS:LoadConfig()
 				end)
 				
 				self.EventListHeader:SetText(TMW.L["EVENTS_HANDLERS_HEADER"])
 				self.EventSettingsContainerHeader:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
 				
-				self:RegisterForDrag("LeftButton")
-				self:Hide()
-
-				TMW.IE.Events = self
-				
 				TMW.EVENTS.EventHandlerFrames = self.EventHandlerFrames
 				TMW.EVENTS.EventSettingsContainer = self.EventSettingsContainer
 				
 			</OnLoad>
-			<OnShow>
-				TMW.EVENTS:LoadConfig()
-			</OnShow>
 		</Scripts>
 	</Frame>
 		
