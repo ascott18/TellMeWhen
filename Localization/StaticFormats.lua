@@ -12,8 +12,8 @@ local function Spell(id)
     if id == 42292 then
         tex = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1")
     end
-    --tex = tex:gsub("\\\\", "\\")
-    return spellFmt:format(tex, name)--:gsub("\\\\", "\\"):gsub("\\\\", "\\")
+
+    return spellFmt:format(tex, name)
 end
 
 -- Blizzard has a typo in the English string ("Ecplise")

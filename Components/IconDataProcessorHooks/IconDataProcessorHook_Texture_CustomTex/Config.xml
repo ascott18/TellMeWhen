@@ -20,7 +20,7 @@
 						self:SetSetting("CustomTex")
 						
 						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
-							return value:trim():gsub([[\\]], [[\]])
+							return TMW.UTIL:CleanPath(value)
 						end)
 						
 						
@@ -62,8 +62,9 @@
 							if tex then
 								-- clean off the first part of the path, it does not need to be saved
 								-- it will be appended when the texture is used.
-								tex = gsub(tex, "INTERFACE\\ICONS\\", "")
-								tex = gsub(tex, "Interface\\Icons\\", "")
+								tex = TMW.UTIL:CleanPath(tex)
+								tex = gsub(tex, "INTERFACE/ICONS/", "")
+								tex = gsub(tex, "Interface/Icons/", "")
 
 								-- set the text
 								self.editbox:SetText(tex)

@@ -23,7 +23,7 @@
 			<Button parentKey="Delete" inherits="TellMeWhen_DeleteButtonTemplate">
 				<Size x="14" y="14"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="0" y="-1"/>
+					<Anchor point="TOPLEFT" x="1" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -282,6 +282,9 @@
 		</Anchors>
 		<Scripts>
 			<OnLoad>
+				self.tmwClass = "Config_Frame"
+				TMW:CInit(self)
+
 				local EventHandler
 				for k, v in pairs(self:GetParent()) do
 					if self == v then
@@ -297,12 +300,6 @@
 				EventHandler.ConfigContainer = self
 				self:RegisterForDrag("LeftButton")
 				self:Hide()
-
-				--[[for k, v in pairs(self) do
-					if k ~= 0 then
-						EventHandler[k] = v
-					end
-				end]]
 			</OnLoad>
 		</Scripts>
 	</Frame>

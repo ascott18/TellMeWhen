@@ -990,7 +990,7 @@ L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"] = "Check to sort this attribute from l
 L["UIPANEL_GROUPSORT_SORTDESCENDING"] = "High"
 L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"] = "Check to sort this attribute from high to low values."
 
-L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|tThis sort method is disabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
+L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|tThis sort method is disabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
 
 L["UIPANEL_GROUPSORT_id"] = "Icon ID"
 L["UIPANEL_GROUPSORT_id_DESC"] = "Sorts the group by the ID numbers of its icons."
@@ -1409,7 +1409,7 @@ L["CONDITIONPANEL_UNITSPEC_DESC"] = [[This condition ONLY works for:
 |cff7fffff-|r Battleground enemies
 |cff7fffff-|r Arena enemies
 
-It does NOT work for: |TInterface\AddOns\TellMeWhen\Textures\Alert:0:2|t
+It does NOT work for: |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t
 |cff7fffff-|r Group members
 |cff7fffff-|r Any other players]]
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
@@ -2010,7 +2010,7 @@ L["SUG_INSERTERROR"] = "%s to insert error message"
 
 L["SUG_INSERTNAME_INTERFERE"] = [[%s to insert as a name
 
-|TInterface\AddOns\TellMeWhen\Textures\Alert:0:2|t|cffffa500CAUTION: |TInterface\AddOns\TellMeWhen\Textures\Alert:0:2|t|cffff1111
+|TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t|cffffa500CAUTION: |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t|cffff1111
 This spell interferes with an equivalency.
 It probably won't be tracked if inserted by name.
 You should insert by ID instead.|r]]
@@ -2143,9 +2143,9 @@ L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
 L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are some examples, where "file" is the name of your sound, and "ext" is the file's extension (ogg or mp3 only!):
 
-- "CustomSounds\file.ext": a file placed in a new folder named "CustomSounds" that is in WoW's root directory (the same location as Wow.exe, Interface and WTF folders, etc)
+- "CustomSounds/file.ext": a file placed in a new folder named "CustomSounds" that is in WoW's root directory (the same location as Wow.exe, Interface and WTF folders, etc)
 
-- "Interface\AddOns\file.ext": a loose file in the AddOns folder
+- "Interface/AddOns/file.ext": a loose file in the AddOns folder
 
 - "file.ext": a loose file in WoW's root directory
 
@@ -2232,7 +2232,7 @@ You can also change the sound channel that TellMeWhen is configured to use in Te
 L["SOUNDERROR1"] = "File must have an extension!"
 L["SOUNDERROR2"] = [[Custom WAV files are not supported by WoW 4.0+
 
-(Sounds build into WoW will still work, though)]]
+(Sounds built into WoW will still work, though)]]
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text"
@@ -2646,7 +2646,7 @@ E.g. "%s: 10"
 
 Inserting from the suggestion list automatically adds the duration from the tooltip.]]
 
-L["HELP_POCKETWATCH"] = [[|TInterface\Icons\INV_Misc_PocketWatch_01:20|t -- The pocket watch texture.
+L["HELP_POCKETWATCH"] = [[|TInterface/Icons/INV_Misc_PocketWatch_01:20|t -- The pocket watch texture.
 This texture is being used because the first valid spell being checked was entered by name and isn't in your spellbook.
 
 The correct texture will be used once you have seen the spell as you play.
@@ -2730,7 +2730,7 @@ L["IMPORT_LUA_DESC"] = [[The data you are importing contains the following Lua c
 You should be wary of importing any Lua code from untusted sources because it can be used for malicious purposes. Most of the time it is completely safe, but there are people out there who would use it to do you wrong.
 
 Review the code and confirm that it is either coming from a source that you trust or that it isn't doing things like sending mail or accepting trades on your behalf.]]
-L["IMPORT_LUA_DESC2"] = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t Be sure to review the parts of the code in red, which are common words/phrases that could indicate malicious activity. |TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t"
+L["IMPORT_LUA_DESC2"] = "|TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t Be sure to review the parts of the code in red, which are common words/phrases that could indicate malicious activity. |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t"
 L["IMPORT_LUA_CONFIRM"] = "Ok, import this"
 L["IMPORT_LUA_DENY"] = "Abort import operation"
 

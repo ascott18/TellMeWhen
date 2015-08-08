@@ -78,9 +78,12 @@ Module:SetScriptHandler("OnEnter", function(Module, icon)
 		end
 
 		local currentFocus = GetCurrentKeyBoardFocus()
-		if currentFocus and currentFocus.acceptsTMWLinks then
-			GameTooltip:AddLine(" ")
-			GameTooltip:AddLine(currentFocus.acceptsTMWLinksDesc, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+		if currentFocus and currentFocus.GetAcceptsTMWLinks then
+			local accepts, linkDesc = currentFocus:GetAcceptsTMWLinks()
+			if accepts then
+				GameTooltip:AddLine(" ")
+				GameTooltip:AddLine(linkDesc, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, false)
+			end
 		end
 
 		if icon:IsGroupController() then

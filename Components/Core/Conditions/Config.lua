@@ -1016,7 +1016,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_STATIC)
 			end
 			CndtGroup.Slider:Show()
-			CndtGroup.Slider:ReloadSetting()
+			CndtGroup.Slider:RequestReload()
 			CndtGroup.Slider:SaveSetting()
 
 			TMW:TT_Update(CndtGroup.Slider)

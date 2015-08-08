@@ -20,6 +20,8 @@ local print = TMW.print
 local UTIL = {}
 TMW.UTIL = UTIL
 
+-- TODO: STANDARDIZE THE CALLING FORMAT FOR FUNCTIONS IN THIS FILE.
+
 function TMW.approachTable(t, ...)
 	for i=1, select("#", ...) do
 		local k = select(i, ...)
@@ -41,6 +43,9 @@ function UTIL.shallowCopy(t)
 	return new
 end
 
+function UTIL:CleanPath(path)
+	return  path:trim():gsub("\\\\", "/"):gsub("\\", "/")
+end
 
 
 do	-- TMW:GetParser()

@@ -351,7 +351,7 @@ function IconPosition_Sortable:LoadConfig()
 		end
 		
 		frame:Show()
-		frame:ReloadSetting()
+		frame:RequestReload()
 	end
 
 	for i = #gs.SortPriorities + 1, #sortFrames do

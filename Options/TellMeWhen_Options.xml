@@ -1017,8 +1017,8 @@
 		<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\RedX"/>
 		<PushedTexture file="Interface\AddOns\TellMeWhen\Textures\RedX">
 			<Anchors>
-				<Anchor point="TOPLEFT" x="-2" y="-2"/>
-				<Anchor point="BOTTOMRIGHT" x="-2" y="-2"/>
+				<Anchor point="TOPLEFT" x="-1" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" x="-1" y="-1"/>
 			</Anchors>
 		</PushedTexture>
 		<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\RedX" alphaMode="ADD"/>
@@ -1443,6 +1443,9 @@
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString parentKey="text" inherits="GameFontNormalLargeOutline" justifyH="CENTER" justifyV="CENTER" setAllPoints="true">
+					<Anchors>
+						<Anchor point="CENTER" />
+					</Anchors>
 				</FontString>
 
 				<Texture parentKey="glow" setAllPoints="true" alpha="0">
@@ -3148,9 +3151,7 @@
 								self.MiddleBand.Header:SetText(TMW.L["CONFIRM_HEADER"])
 							</OnLoad>
 							<OnHide>
-								if TMW.IE.CurrentTabGroup then
-									TMW.IE.CurrentTabGroup:Click()
-								end
+								TMW.IE:RefreshTabs()
 							</OnHide>
 						</Scripts>
 					</Frame>

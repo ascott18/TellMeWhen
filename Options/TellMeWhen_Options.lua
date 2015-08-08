@@ -264,7 +264,6 @@ local ScrollContainerHook_Hide = function(c) c.ScrollFrame:Hide() end
 local ScrollContainerHook_Show = function(c) c.ScrollFrame:Show() end
 local ScrollContainerHook_OnSizeChanged = function(c) c.ScrollFrame:Show() end
 function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition, scrollBarXOffs, scrollBarSizeX, leftSide)
-	
 	local name = container:GetName() and container:GetName() .. "ScrollFrame"
 	local ScrollFrame = TMW.C.Config_ScrollFrame:New("ScrollFrame", name, container:GetParent(), "TellMeWhen_ScrollFrameTemplate")
 	
@@ -299,48 +298,7 @@ function TMW:ConvertContainerToScrollFrame(container, exteriorScrollBarPosition,
 	hooksecurefunc(container, "Hide", ScrollContainerHook_Hide)
 	hooksecurefunc(container, "Show", ScrollContainerHook_Show)
 	
-end
-
-function TMW:AdjustScrollFrame(scrollFrame, targetFrame)
-	local ScrollFrame
-	if scrollFrame.SetVerticalScroll then
-		ScrollFrame = scrollFrame
-	elseif scrollFrame.ScrollFrame then
-		ScrollFrame = scrollFrame.ScrollFrame
-	else
-		error("Couldn't find the actual scroll frame!")
-	end
-
-	if not targetFrame then return end
-
-	if not targetFrame:GetBottom() or not ScrollFrame:GetBottom() then
-		return
-	end
-
-	local targetBottom = targetFrame:GetBottom()
-	local targetTop = targetFrame:GetTop()
-
-	local scrollBottom = ScrollFrame:GetBottom()
-	local scrollTop = ScrollFrame:GetTop()
-
-	local scroll 
-	if targetBottom < scrollBottom then
-		-- It's too low. Scroll up.
-		scroll = ScrollFrame:GetVerticalScroll() + (scrollBottom - targetBottom)
-
-	elseif targetTop > scrollTop then
-		-- It's too high. Scroll down.
-		scroll = ScrollFrame:GetVerticalScroll() - (targetTop - scrollTop)
-	end
-
-
-	if scroll then
-		local yrange = ScrollFrame:GetVerticalScrollRange()
-		scroll = max(scroll, 0)
-		scroll = min(scroll, ScrollFrame:GetVerticalScrollRange())
-
-		ScrollFrame:SetVerticalScroll(scroll)
-	end
+	return ScrollFrame
 end
 
 
@@ -1009,8 +967,6 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 		TMW:Fire("TMW_CONFIG_TAB_CLICKED", self, oldTab)
 
 		page:RequestReload()
-
-		IE:RefreshTabs()
 	end,
 
 	ShouldShowTab = function(self)
@@ -2141,7 +2097,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self:CScriptCall("PanelSetup", self, panelInfo)
 		self:CScriptTunnel("PanelSetup", self, panelInfo)
 
-		self:ReloadSetting()
+		self:RequestReload()
 	end,
 
 	AdjustHeight = function(self, bottomPadding)
@@ -2306,6 +2262,47 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 		self.scrollPercentage = nil
 	end,
 
+
+
+	ScrollToFrame = function(self, targetFrame)
+		if not targetFrame then return end
+
+		if not targetFrame:GetBottom() or not self:GetBottom() then
+			return
+		end
+
+		local targetBottom = targetFrame:GetBottom()
+		local targetTop = targetFrame:GetTop()
+
+		local scrollBottom = self:GetBottom()
+		local scrollTop = self:GetTop()
+
+		-- This is added/subtracted so the thing that we scroll to ends
+		-- up in the middle of the scrollframe instead of on the edge.
+		local halfHeight = (scrollTop - scrollBottom)/2
+
+		local scroll 
+		if targetBottom < scrollBottom then
+			-- It's too low. Scroll down.
+			scroll = self:GetVerticalScroll() + (scrollBottom - targetBottom) + halfHeight
+
+		elseif targetTop > scrollTop then
+			-- It's too high. Scroll up.
+			scroll = self:GetVerticalScroll() - (targetTop - scrollTop) - halfHeight
+		end
+
+
+		if scroll then
+			local yrange = self:GetVerticalScrollRange()
+			scroll = max(scroll, 0)
+			scroll = min(scroll, self:GetVerticalScrollRange())
+
+			self:SetVerticalScroll(scroll)
+		end
+	end,
+
+
+
 	OnScrollRangeChanged = function(self)
 		local yrange = self:GetVerticalScrollRange()
 
@@ -2401,6 +2398,7 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 	end,
 }
 
+TMW:NewClass("Config_Button", "Button", "Config_Frame")
 
 TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	-- Constructor
@@ -2540,13 +2538,15 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 		local settings = self:GetSettingTable()
 
 		if settings and self.setting then
-			local value = self:GetText()
+			local value = self:GetText() or ""
 			
 			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
 
 			if settings[self.setting] ~= value then
 				settings[self.setting] = value
 				self:OnSettingSaved()
+			else
+				self:RequestReload()
 			end
 		end
 	end,
@@ -2555,16 +2555,25 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 		local settings = self:GetSettingTable()
 
 		if settings then
-			if not (eventMaybe == "TMW_CONFIG_ICON_HISTORY_STATE_CREATED" and self:HasFocus()) and self.setting then
-				self:SetText(settings[self.setting] or "")
+			if self.setting then
+				local value = settings[self.setting]
+
+				value = self:CScriptCallGet("UnModifySettingValueRequested", value) or value
+
+				self:SetText(value)
 			end
+
 			self:ClearFocus()
 		end
 	end,
 
-	SetAcceptsTMWLinks = function(self, accepts, desc)
+	SetAcceptsTMWLinks = function(self, accepts, linkDesc)
 		self.acceptsTMWLinks = accepts
-		self.acceptsTMWLinksDesc = accepts and desc or nil
+		self.acceptsTMWLinksDesc = accepts and linkDesc or nil
+	end,
+
+	GetAcceptsTMWLinks = function(self, accepts, linkDesc)
+		return self.acceptsTMWLinks, self.acceptsTMWLinksDesc
 	end,
 }
 
@@ -2838,7 +2847,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		if button == "RightButton" then
 			self:UseEditBox()
 
-			self:ReloadSetting()
+			self:RequestReload()
 		end
 	end,
 
@@ -2948,7 +2957,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			self.EditBox:Show()
 			self:Hide_base()
 
-			self:ReloadSetting()
+			self:RequestReload()
 		end
 	end,
 	UseSlider = function(self)
@@ -2967,7 +2976,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			self.EditBox:Hide()
 			self:UpdateRange()
 
-			self:ReloadSetting()
+			self:RequestReload()
 		end
 	end,
 
@@ -3064,10 +3073,12 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 			local value = self:GetValue()
 			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
-			
+
 			if settings[self.setting] ~= value then
 				settings[self.setting] = value
 				self:OnSettingSaved()
+			else
+				self:RequestReload()
 			end
 		end
 	end,
@@ -3196,8 +3207,7 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 
 	-- Script Handlers
 	OnEnable = function(self)
-		self.Check:ReloadSetting()
-		self.Alpha:ReloadSetting()
+		self:RequestReloadChildren()
 	end,
 	
 	OnDisable = function(self)
@@ -3293,7 +3303,7 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	SetHasOpacity = function(self, hasOpacity)
 		self.hasOpacity = hasOpacity
 
-		self:ReloadSetting()
+		self:RequestReload()
 	end,
 
 	-- We have to do this for these to have access to self.
@@ -3608,7 +3618,7 @@ TMW:NewClass("Config_GroupList", "Config_Frame"){
 			local frame = self.frames[i]
 
 			if TMW.CI.group == frame.group  then
-				TMW:AdjustScrollFrame(self, frame)
+				self.ScrollFrame:ScrollToFrame(frame)
 				return
 			end
 		end

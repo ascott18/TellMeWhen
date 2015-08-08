@@ -282,7 +282,7 @@ function EVENTS:LoadEventSettings()
 				EventSettingsContainer.Frequency:Show()
 
 				EventSettingsContainer.Frequency:SetMinMaxValues(EventHandler.frequencyMinimum, math.huge)
-				EventSettingsContainer.Frequency:ReloadSetting()
+				EventSettingsContainer.Frequency:RequestReload()
 			end
 		else
 			EventSettingsContainer.PassThrough:Show()
@@ -469,7 +469,7 @@ function EVENTS:AdjustScrollFrame()
 
 	if not eventFrame then return end
 
-	TMW:AdjustScrollFrame(ScrollFrame, eventFrame)
+	ScrollFrame:ScrollToFrame(eventFrame)
 end
 
 function EVENTS:SetTabText()

@@ -72,7 +72,7 @@ end
 --   -- Accessing supplementalData:
 --  panel:CScriptAdd("PanelSetup", function(panel, panelInfo)
 --    local supplementalData = panelInfo.supplementalData
---    panel.Header:SetText(supplementalData.text)
+--    panel:SetTitle(supplementalData.text)
 --  end)
 function GenericComponent:RegisterConfigPanel_XMLTemplate(order, xmlTemplateName, supplementalData)
 

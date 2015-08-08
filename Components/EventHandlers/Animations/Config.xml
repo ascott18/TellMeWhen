@@ -132,7 +132,7 @@
 								self.paddingTop, self.paddingBottom = 4, 7
 
 								self:CScriptAdd("ModifySettingValueRequested", function(self, value)
-									return value:trim():gsub([[\\]], [[\]])
+									return TMW.UTIL:CleanPath(value)
 								end)
 
 								TMW.SUG:EnableEditBox(self, "texture", true)
