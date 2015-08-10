@@ -3,7 +3,7 @@
 	<Frame parentKey="Counter" name="$parentCounter" inherits="TellMeWhen_EventContainer">
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString parentKey="Header" name="$parentHeader" inherits="GameFontNormalLarge" justifyH="LEFT" text="">
+				<FontString parentKey="Header" inherits="GameFontNormalLarge" justifyH="LEFT" text="">
 					<Anchors>
 						<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 					</Anchors>
@@ -13,16 +13,16 @@
 
 		<Frames>
 			
-			<EditBox parentKey="Counter" name="$parentCounter" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
+			<EditBox parentKey="Counter" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 				<Size x="130" y="15"/>
 
   				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="10" y="-22"/>
+					<Anchor point="TOPLEFT" x="10" y="-22"/>
 				</Anchors>
 
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString parentKey="Title" name="$parentTitle" inherits="GameFontNormalSmall" justifyH="CENTER">
+						<FontString parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
 							<Anchors>
 								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" y="2"/>
 							</Anchors>
@@ -49,14 +49,14 @@
 					</OnLoad>
 				</Scripts>
 			</EditBox>
-			<Frame parentKey="Operation" name="$parentOperation" inherits="TMW_DropDownMenuTemplate">
+			<Frame parentKey="Operation" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentCounter" relativePoint="RIGHT" x="6" y="0"/>
+					<Anchor point="LEFT" relativeKey="$parent.Counter" relativePoint="RIGHT" x="6" y="0"/>
 				</Anchors>
 
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString parentKey="Title" name="$parentTitle" inherits="GameFontNormalSmall" justifyH="CENTER">
+						<FontString parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
 							<Anchors>
 								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="20" y="0"/>
 							</Anchors>
@@ -76,16 +76,16 @@
 				</Scripts>
 			</Frame>
 
-			<EditBox parentKey="Amt" name="$parentAmt" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
+			<EditBox parentKey="Amt" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 				<Size x="55" y="15"/>
 
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentOperation" relativePoint="RIGHT" x="8" y="0"/>
+					<Anchor point="LEFT" relativeKey="$parent.Operation" relativePoint="RIGHT" x="8" y="0"/>
 				</Anchors>
 
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString parentKey="Title" name="$parentTitle" inherits="GameFontNormalSmall" justifyH="CENTER">
+						<FontString parentKey="Title" inherits="GameFontNormalSmall" justifyH="CENTER">
 							<Anchors>
 								<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" y="2"/>
 							</Anchors>
