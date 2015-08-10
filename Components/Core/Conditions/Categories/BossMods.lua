@@ -226,8 +226,12 @@ ConditionCategory:RegisterCondition(1,	 "BIGWIGS_TIMER", {
 	range = 30,
 	step = 0.1,
 	unit = false,
-	name = function(editbox) TMW:TT(editbox, "MODTIMERTOCHECK", "MODTIMERTOCHECK_DESC") editbox.label = L["MODTIMERTOCHECK"] end,
-	check = function(check) TMW:TT(check, "MODTIMER_PATTERN", "MODTIMER_PATTERN_DESC") end,
+	name = function(editbox)
+		editbox:SetTexts(L["MODTIMERTOCHECK"], L["MODTIMERTOCHECK_DESC"])
+	end,
+	check = function(check)
+		check:SetTexts(L["MODTIMER_PATTERN"], L["MODTIMER_PATTERN_DESC"])
+	end,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = function()
 		if not BigWigsLoader then
@@ -333,7 +337,9 @@ ConditionCategory:RegisterCondition(2,	 "BIGWIGS_ENGAGED", {
 	nooperator = true,
 	unit = false,
 
-	name = function(editbox) TMW:TT(editbox, "ENCOUNTERTOCHECK", "ENCOUNTERTOCHECK_DESC_BIGWIGS") editbox.label = L["ENCOUNTERTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["ENCOUNTERTOCHECK"], L["ENCOUNTERTOCHECK_DESC_BIGWIGS"])
+	end,
 	useSUG = "bossfights",
 	icon = function()
 		if not BigWigsLoader then
@@ -422,8 +428,12 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 	range = 30,
 	step = 0.1,
 	unit = false,
-	name = function(editbox) TMW:TT(editbox, "MODTIMERTOCHECK", "MODTIMERTOCHECK_DESC") editbox.label = L["MODTIMERTOCHECK"] end,
-	check = function(check) TMW:TT(check, "MODTIMER_PATTERN", "MODTIMER_PATTERN_DESC") end,
+	name = function(editbox)
+		editbox:SetTexts(L["MODTIMERTOCHECK"], L["MODTIMERTOCHECK_DESC"])
+	end,
+	check = function(check)
+		check:SetTexts(L["MODTIMER_PATTERN"], L["MODTIMER_PATTERN_DESC"])
+	end,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = function()
 		if not DBM then
@@ -528,7 +538,9 @@ ConditionCategory:RegisterCondition(11,	 "DBM_ENGAGED", {
 	nooperator = true,
 	unit = false,
 
-	name = function(editbox) TMW:TT(editbox, "ENCOUNTERTOCHECK", "ENCOUNTERTOCHECK_DESC_DBM") editbox.label = L["ENCOUNTERTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["ENCOUNTERTOCHECK"], L["ENCOUNTERTOCHECK_DESC_DBM"])
+	end,
 	useSUG = "bossfights",
 	icon = function()
 		if not DBM then

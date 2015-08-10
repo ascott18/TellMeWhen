@@ -140,9 +140,13 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"],
 	range = 30,
 	step = 0.1,
-	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["BUFFTOCHECK"], L["BUFFCNDT_DESC"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -187,9 +191,13 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 	min = 0,
 	max = 100,
 	percent = true,
-	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["BUFFTOCHECK"], L["BUFFCNDT_DESC"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	formatter = TMW.C.Formatter.PERCENT,
 	icon = "Interface\\Icons\\spell_holy_circleofrenewal",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -214,10 +222,18 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"] .. " - " .. L["COMPARISON"],
 	noslide = true,
-	name = function(editbox) TMW:TT(editbox, "BUFFTOCOMP1", "CNDT_ONLYFIRST") editbox.label = L["BUFFTOCOMP1"] end,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
-	name2 = function(editbox) TMW:TT(editbox, "BUFFTOCOMP2", "CNDT_ONLYFIRST") editbox.label = L["BUFFTOCOMP2"] end,
-	check2 = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	name = function(editbox)
+		editbox:SetTexts(L["BUFFTOCOMP1"], L["CNDT_ONLYFIRST"])
+	end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
+	name2 = function(editbox)
+		editbox:SetTexts(L["BUFFTOCOMP2"], L["CNDT_ONLYFIRST"])
+	end,
+	check2 = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	useSUG = true,
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -233,9 +249,13 @@ ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["STACKS"],
 	range = 20,
-	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["BUFFTOCHECK"], L["BUFFCNDT_DESC"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
 	icon = "Interface\\Icons\\inv_misc_herb_felblossom",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -253,9 +273,13 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	tooltip = L["TOOLTIPSCAN_DESC"],
 	range = 500,
 	--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
-	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "TOOLTIPSCAN_DESC") editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["BUFFTOCHECK"], L["TOOLTIPSCAN_DESC"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	icon = "Interface\\Icons\\inv_elemental_primal_mana",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
@@ -272,9 +296,13 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	tooltip = L["NUMAURAS_DESC"],
 	min = 0,
 	max = 20,
-	name = function(editbox) TMW:TT(editbox, "BUFFTOCHECK", "CNDT_MULTIPLEVALID") editbox.label = L["BUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["BUFFTOCHECK"], L["CNDT_MULTIPLEVALID"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	texttable = function(k) return format(L["ACTIVE"], k) end,
 	icon = "Interface\\Icons\\ability_paladin_sacredcleansing",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -316,9 +344,13 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"],
 	range = 30,
 	step = 0.1,
-	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["DEBUFFTOCHECK"], L["BUFFCNDT_DESC"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -363,9 +395,13 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 	min = 0,
 	max = 100,
 	percent = true,
-	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["DEBUFFTOCHECK"], L["BUFFCNDT_DESC"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	formatter = TMW.C.Formatter.PERCENT,
 	icon = "Interface\\Icons\\spell_priest_voidshift",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -390,10 +426,18 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 ConditionCategory:RegisterCondition(12,	 "DEBUFFDURCOMP", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"] .. " - " .. L["COMPARISON"],
 	noslide = true,
-	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCOMP1", "CNDT_ONLYFIRST") editbox.label = L["DEBUFFTOCOMP1"] end,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
-	name2 = function(editbox) TMW:TT(editbox, "DEBUFFTOCOMP2", "CNDT_ONLYFIRST") editbox.label = L["DEBUFFTOCOMP2"] end,
-	check2 = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	name = function(editbox)
+		editbox:SetTexts(L["DEBUFFTOCOMP1"], L["CNDT_ONLYFIRST"])
+	end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
+	name2 = function(editbox)
+		editbox:SetTexts(L["DEBUFFTOCOMP2"], L["CNDT_ONLYFIRST"])
+	end,
+	check2 = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	useSUG = true,
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -410,9 +454,13 @@ ConditionCategory:RegisterCondition(12,	 "DEBUFFDURCOMP", {
 ConditionCategory:RegisterCondition(13,	 "DEBUFFSTACKS", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["STACKS"],
 	range = 20,
-	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "BUFFCNDT_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["DEBUFFTOCHECK"], L["BUFFCNDT_DESC"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
 	icon = "Interface\\Icons\\ability_warrior_sunder",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -430,9 +478,13 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	tooltip = L["TOOLTIPSCAN_DESC"],
 	range = 500,
 	--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
-	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "TOOLTIPSCAN_DESC") editbox.label = L["DEBUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["DEBUFFTOCHECK"], L["TOOLTIPSCAN_DESC"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	icon = "Interface\\Icons\\spell_shadow_lifedrain",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
@@ -449,9 +501,13 @@ ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	tooltip = L["NUMAURAS_DESC"],
 	min = 0,
 	max = 20,
-	name = function(editbox) TMW:TT(editbox, "DEBUFFTOCHECK", "CNDT_MULTIPLEVALID") editbox.label = L["DEBUFFTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["DEBUFFTOCHECK"], L["CNDT_MULTIPLEVALID"])
+	end,
 	useSUG = true,
-	check = function(check) TMW:TT(check, "ONLYCHECKMINE", "ONLYCHECKMINE_DESC") end,
+	check = function(check)
+		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+	end,
 	texttable = function(k) return format(L["ACTIVE"], k) end,
 	icon = "Interface\\Icons\\spell_deathknight_frostfever",
 	tcoords = CNDT.COMMON.standardtcoords,

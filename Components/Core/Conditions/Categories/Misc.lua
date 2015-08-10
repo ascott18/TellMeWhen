@@ -240,7 +240,10 @@ ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 	max = 1,
 	formatter = TMW.C.Formatter.BOOL,
 	nooperator = true,
-	name = function(editbox) TMW:TT(editbox, "CONDITION_QUESTCOMPLETE", "CONDITION_QUESTCOMPLETE_EB_DESC") editbox.label = L["QUESTIDTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITION_QUESTCOMPLETE"], L["CONDITION_QUESTCOMPLETE_EB_DESC"])
+		editbox:SetLabel(L["QUESTIDTOCHECK"])
+	end,
 	unit = false,
 	icon = "Interface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon",
 	Env = {
@@ -279,7 +282,10 @@ ConditionCategory:RegisterCondition(30,	 "MACRO", {
 	max = 1,
 	nooperator = true,
 	noslide = true,
-	name = function(editbox) TMW:TT(editbox, "MACROCONDITION", "MACROCONDITION_EB_DESC") editbox.label = L["MACROTOEVAL"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["MACROCONDITION"], L["MACROCONDITION_EB_DESC"])
+		editbox:SetLabel(L["MACROTOEVAL"])
+	end,
 	unit = false,
 	icon = "Interface\\Icons\\inv_misc_punchcards_yellow",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -302,7 +308,10 @@ ConditionCategory:RegisterCondition(31,	 "LUA", {
 	max = 1,
 	nooperator = true,
 	noslide = true,
-	name = function(editbox) TMW:TT(editbox, "LUACONDITION", "LUACONDITION_DESC") editbox.label = L["CODETOEXE"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["LUACONDITION"], L["LUACONDITION_DESC"])
+		editbox:SetLabel(L["CODETOEXE"])
+	end,
 	unit = false,
 	icon = "Interface\\Icons\\INV_Misc_Gear_01",
 	tcoords = CNDT.COMMON.standardtcoords,

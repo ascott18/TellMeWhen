@@ -559,8 +559,9 @@
 								
 								self:SetFunction(TMW.EVENTS.OperatorMenu_DropDown)
 
+								self.Text:SetFont("Interface/Addons/TellMeWhen/Textures/OpenSans-Regular.ttf", 20, "THINOUTLINE")
+
 								self:SetWidth(63)
-								self.Text:SetFontObject(GameFontHighlightLarge)
 							</OnLoad>
 						</Scripts>
 					</Frame>

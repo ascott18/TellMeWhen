@@ -120,7 +120,9 @@ ConditionCategory:RegisterCondition(0.51,	"TIMER", {
 
 	unit = false,
 	icon = "Interface\\Icons\\spell_mage_altertime",
-	name = function(editbox) TMW:TT(editbox, "CONDITION_TIMER", "CONDITION_TIMER_EB_DESC") editbox.label = L["CONDITION_TIMER"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITION_TIMER"], L["CONDITION_TIMER_EB_DESC"])
+	end,
 	useSUG = "timerName",
 	tcoords = TMW.CNDT.COMMON.standardtcoords,
 	Env = {

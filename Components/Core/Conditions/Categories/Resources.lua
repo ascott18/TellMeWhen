@@ -214,7 +214,7 @@ ConditionCategory:RegisterCondition(13.1, "ECLIPSE", {
 	tooltip = L["CONDITIONPANEL_ECLIPSE_DESC"],
 	min = -100,
 	max = 100,
-	midt = true,
+	midt = "0",
 	texttable = setmetatable({
 		[-100] = "-100 (" .. L["MOON"] .. ")",
 		[100] = "100 (" .. L["SUN"] .. ")",
@@ -254,7 +254,33 @@ ConditionCategory:RegisterCondition(13.2, "ECLIPSE_DIRECTION", {
 
 ConditionCategory:RegisterCondition(15,	 "RUNES", {
 	old = true,
-	customDeprecated = true,
+	customDeprecated = function(conditionSettings)
+		local runes = conditionSettings.Runes
+		local str = "This condition has been replaced by the Rune Count condition.\n\n" ..
+		"This condition will still function as it did, but is no longer configurable. Here is your old configuration:\n\n"
+		if runes then
+			for k, v in pairs(runes) do
+				local slot = k
+				local death = ""
+				if slot > 6 then
+					slot = slot - 6
+					death = "Death "
+				end
+				str = str .. death
+				if slot == 1 or slot == 2 then
+					str = str .. "Blood " .. slot .. ", "
+				elseif slot == 3 or slot == 4 then
+					str = str .. "Unholy " .. slot-2 .. ", "
+				elseif slot == 5 or slot == 6 then
+					str = str .. "Frost " .. slot-4 .. ", "
+				end
+			end
+		else
+			str = str .. "<No Runes Selected>"
+		end
+
+		return str:trim(" ,")
+	end,
 
 	text = RUNES,
 	--tooltip = L["CONDITIONPANEL_RUNES_DESC"],
@@ -300,50 +326,6 @@ ConditionCategory:RegisterCondition(15,	 "RUNES", {
 	end,
 	hidden = pclass ~= "DEATHKNIGHT",
 })
-TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
-	if conditionData and conditionData.identifier == "RUNES" then
-		local runes = conditionSettings.Runes
-		local str = "This condition has been replaced by the Rune Count condition.\n\n" ..
-		"This condition will still function as it did, but is no longer configurable. Here is your old configuration:\n\n"
-		if runes then
-			for k, v in pairs(runes) do
-				local slot = k
-				local death = ""
-				if slot > 6 then
-					slot = slot - 6
-					death = "Death "
-				end
-				str = str .. death
-				if slot == 1 or slot == 2 then
-					str = str .. "Blood " .. slot .. ", "
-				elseif slot == 3 or slot == 4 then
-					str = str .. "Unholy " .. slot-2 .. ", "
-				elseif slot == 5 or slot == 6 then
-					str = str .. "Frost " .. slot-4 .. ", "
-				end
-			end
-		else
-			str = str .. "<No Runes Selected>"
-		end
-
-		CndtGroup.Deprecated:SetFormattedText(str:trim(" ,"))
-
-
-		if CndtGroup.Deprecated:IsShown() then
-			CndtGroup:SetHeight(CndtGroup:GetHeight() - CndtGroup.Deprecated:GetHeight())
-			CndtGroup.Deprecated:Hide()
-		end
-		if not CndtGroup.Deprecated:IsShown() then
-			-- Need to reset the height to 0 before calling GetStringHeight
-			-- for consistency. Causes weird behavior if we don't do this.
-			CndtGroup.Deprecated:SetHeight(0)
-			CndtGroup.Deprecated:SetHeight(CndtGroup.Deprecated:GetStringHeight())
-
-			CndtGroup:SetHeight(CndtGroup:GetHeight() + CndtGroup.Deprecated:GetHeight())
-			CndtGroup.Deprecated:Show()
-		end
-	end
-end)
 
 
 local function runeFuncstrHelper(c)

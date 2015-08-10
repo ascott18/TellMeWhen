@@ -374,7 +374,7 @@
 			<Button parentKey="IconPreview" enableMouse="true">
 				<Size x="18" y="18"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT" x="0" y="0"/>
+					<Anchor point="LEFT" />
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">

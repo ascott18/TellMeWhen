@@ -1924,6 +1924,8 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 		if self.ReloadSetting ~= TMW.NULLFUNC then
 			self:CScriptAdd("ReloadRequested", self.ReloadSetting)
 		end
+
+		self:SetAdjustHeightExclusion("Background", true)
 	end,
 
 	SetSetting = function(self, key)
@@ -1988,6 +1990,119 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 		self.text:SetMaxLines(3)
 	end,
 
+
+	SetMinAdjustHeight = function(self, minAdjustHeight)
+		self.minAdjustHeight = minAdjustHeight
+	end,
+
+	SetAdjustHeightExclusion = function(self, frame, exclude)
+		if not frame then
+			return
+		end
+
+		self.adjustHeightExclusions = self.adjustHeightExclusions or {}
+
+		TMW.tDeleteItem(self.adjustHeightExclusions, frame)
+
+		if exclude then
+			tinsert(self.adjustHeightExclusions, frame)
+		end
+	end,
+
+
+	__AdjustHeightCheckBottom = function(self, child)
+		for i = 1, child:GetNumPoints() do
+			local point, relTo, relPoint = child:GetPoint(i)
+			if relTo == self and relPoint:find("BOTTOM") then
+				error("Attempted to adjust height of a frame with a child anchored to the bottom of the frame: " 
+					.. (TMW.tContains(self, child) or child:GetName() or "???"), 3)
+			end
+		end
+	end,
+	AdjustHeight = function(self, bottomPadding)
+		if not self:GetTop() then
+			return
+		end
+
+		local top = self:GetTop() * self:GetEffectiveScale()
+		local lowest = top
+
+		if not lowest or lowest < 0 then
+			return
+		end
+
+		local highest = -math.huge
+		local exclusions = self.adjustHeightExclusions
+
+		-- Find child frames.
+		for _, child in TMW:Vararg(self:GetChildren()) do
+			if not child:GetBottom() then
+				-- If there are children that we can't get the edges of,
+				-- don't try to resize anything, because it will almost certainly be wrong.
+				return
+			end
+
+			if child:IsShown()
+			and (not exclusions or not TMW.tContains(exclusions, child))
+			then
+				self:__AdjustHeightCheckBottom(child)
+
+				local _, _, topInset, bottomInset = child:GetHitRectInsets()
+
+				local childTop = (child:GetTop() - topInset) * child:GetEffectiveScale()
+
+				-- Only look at children that have their top below the parent.
+				-- Otherwise, we'll get weird things for the highest value because
+				-- of things like header font strings.
+				if childTop < top then
+					lowest = min(lowest, (child:GetBottom() + bottomInset) * child:GetEffectiveScale())
+					highest = max(highest, childTop)
+				end
+			end
+		end
+
+		-- Find child fontstrings.
+		-- Don't look for textures - we almost always don't need them to fit within the frame.
+		-- Usually, there is a background texture that will screw everything up if it is included.
+		for _, child in TMW:Vararg(self:GetRegions()) do
+			if child:IsShown()
+			and child:GetBottom()
+			and child:GetObjectType() == "FontString"
+			and (not exclusions or not TMW.tContains(exclusions, child))
+			and child:GetText()
+			and child:GetText() ~= ""
+			then
+				self:__AdjustHeightCheckBottom(child)
+
+				local childTop = child:GetTop() * self:GetEffectiveScale()
+
+				-- Only look at children that have their top below the parent.
+				-- Otherwise, we'll get weird things for the highest value because
+				-- of things like header font strings.
+				if childTop < top then
+					lowest = min(lowest, child:GetBottom() * self:GetEffectiveScale())
+					highest = max(highest, childTop)
+				end
+			end
+		end
+
+		-- If we didn't find any children at all, stop.
+		if highest == -math.huge then
+			return
+		end
+
+		-- If a bottom padding isn't specified, calculate it using the same gap
+		-- that exists between the highest child and the top of the frame.
+		bottomPadding = bottomPadding or (top - highest)
+		bottomPadding = max(bottomPadding, 0)
+
+		local height = (top - lowest + bottomPadding) / self:GetEffectiveScale()
+		local height = max(self.minAdjustHeight or 1, height)
+
+		self:SetHeight(height)
+	end,
+
+
 	GetParentKey = function(self)
 		return TMW.tContains(self:GetParent(), self)
 	end,
@@ -2018,16 +2133,12 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 TMW:NewClass("Config_Panel", "Config_Frame"){
 	SetHeight_base = TMW.C.Config_Panel.SetHeight,
 }{
-	OnNewInstance_Frame = TMW.NULLFUNC,
-
 	OnNewInstance_Panel = function(self)
 		if self:GetHeight() <= 0 then
 			self:SetHeight_base(1)
 		end
 
 		self.Background:SetTexture(.66, .66, .66, 0.09)
-
-		self.height = self:GetHeight()
 	end,
 
 	Flash = function(self, dur)
@@ -2098,41 +2209,6 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self:CScriptTunnel("PanelSetup", self, panelInfo)
 
 		self:RequestReload()
-	end,
-
-	AdjustHeight = function(self, bottomPadding)
-		if not self:GetTop() then
-			return
-		end
-
-		local top = self:GetTop() * self:GetEffectiveScale()
-		local lowest = top
-
-		if not lowest or lowest < 0 then
-			return
-		end
-
-		local highest = -1
-
-		for _, child in TMW:Vararg(self:GetChildren()) do
-			if child:IsShown() then
-				if child:GetBottom() then
-					lowest = min(lowest, child:GetBottom() * child:GetEffectiveScale())
-					highest = max(highest, child:GetTop() * child:GetEffectiveScale())
-				end
-			end
-		end
-
-		if highest < 0 then
-			return
-		end
-
-		-- If a bottom padding isn't specified, calculate it using the same gap
-		-- that exists between the highest child and the top of the frame.
-		bottomPadding = bottomPadding or (top - highest)
-		bottomPadding = max(bottomPadding, 0)
-
-		self:SetHeight(max(1, top - lowest + bottomPadding)/self:GetEffectiveScale())
 	end,
 
 
@@ -2439,7 +2515,7 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 		if settings and self.setting then
 			if self.value == nil then
 				settings[self.setting] = checked
-			else --if checked then
+			else
 				settings[self.setting] = self.value
 				self:SetChecked(true)
 			end
@@ -2451,7 +2527,7 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	ReloadSetting = function(self)
 		local settings = self:GetSettingTable()
 
-		if settings then
+		if settings and self.setting then
 			if self.value ~= nil then
 				self:SetChecked(settings[self.setting] == self.value)
 			else
@@ -3069,7 +3145,9 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 		if settings and self.setting then
 		
-			TMW:TT_Update(self.EditBoxShowing and self.EditBox or self)
+			if self.ttData then
+				TMW:TT_Update(self.EditBoxShowing and self.EditBox or self)
+			end
 
 			local value = self:GetValue()
 			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
@@ -3844,8 +3922,6 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 
 function IE:SaveSettings()
 	IE:CScriptTunnel("ClearFocus")
-
-	TMW:Fire("TMW_CONFIG_SAVE_SETTINGS")
 end
 
 

@@ -392,8 +392,8 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 	formatter = TMW.C.Formatter.BOOL,
 	nooperator = true,
 	name = function(editbox)
-		TMW:TT(editbox, "STANCE", "STANCE_DESC")
-		editbox.label = L["STANCE_LABEL"]
+		editbox:SetTexts(L["STANCE"], L["STANCE_DESC"])
+		editbox:SetLabel(L["STANCE_LABEL"])
 	end,
 	useSUG = "stances",
 	allowMultipleSUGEntires = true,
@@ -463,7 +463,6 @@ ConditionCategory:RegisterCondition(8,	 "TREE", {
 	text = L["UIPANEL_SPECIALIZATION"],
 	min = 1,
 	max = GetNumSpecializations,
-	midt = true,
 	texttable = function(i) return select(2, GetSpecializationInfo(i)) end,
 	unit = PLAYER,
 	icon = function() return select(4, GetSpecializationInfo(1)) end,
@@ -480,31 +479,36 @@ ConditionCategory:RegisterCondition(8,	 "TREE", {
 
 
 
-local SpeclizationRoles = {
-	TANK = 1,
-	DAMAGER = 2,
-	HEALER = 3,
-}
-ConditionCategory:RegisterCondition(8.1, "TREEROLE", {
-	text = L["UIPANEL_SPECIALIZATIONROLE"],
-	tooltip = L["UIPANEL_SPECIALIZATIONROLE_DESC"],
-	min = 1,
-	max = 3,
-	midt = true,
-	texttable = function(i)
-		for k, v in pairs(SpeclizationRoles) do
-			if i == v then
-				return _G[k]
-			end
+TMW:RegisterUpgrade(80002, {
+	condition = function(self, condition)
+		if condition.Type == "TREEROLE" then
+			condition.Type = "TREEROLE2"
+			condition.Checked = false
+			CNDT:ConvertSliderCondition(condition, 1, 3, {
+				[1] = "TANK",
+				[2] = "DAMAGER",
+				[3] = "HEALER",
+			})
 		end
 	end,
+})
+ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
+	text = L["UIPANEL_SPECIALIZATIONROLE"],
+	tooltip = L["UIPANEL_SPECIALIZATIONROLE_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
+	bitFlags = {
+		TANK =    {order = 1, text=TANK, icon = "Interface/AddOns/TellMeWhen/Textures/TANK", },
+		HEALER =  {order = 2, text=HEALER, icon = "Interface/AddOns/TellMeWhen/Textures/HEALER", },
+		DAMAGER = {order = 3, text=DAMAGER, icon = "Interface/AddOns/TellMeWhen/Textures/DAMAGER", },
+	},
+
 	unit = PLAYER,
 	icon = "Interface\\Addons\\TellMeWhen\\Textures\\HEALER",
 	Env = {
 		GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole,
-		SpeclizationRoles = SpeclizationRoles,
 	},
-	funcstr = [[(SpeclizationRoles[GetCurrentSpecializationRole()] or 0) c.Operator c.Level]],
+	funcstr = [[BITFLAGSMAPANDCHECK( GetCurrentSpecializationRole() ) ]],
 	events = function(ConditionObject, c)
 		if pclass == "WARRIOR" then
 			return
@@ -538,7 +542,9 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 	formatter = TMW.C.Formatter.BOOL,
 	nooperator = true,
 	unit = PLAYER,
-	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
 	useSUG = "talents",
 	icon = function() return select(3, GetTalentInfo(1, 1, 1)) end,
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -588,7 +594,9 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	max = 1,
 	formatter = TMW.C.Formatter.BOOL,
 	unit = PLAYER,
-	name = function(editbox) TMW:TT(editbox, "GLYPHTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["GLYPHTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["GLYPHTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
 	nooperator = true,
 	useSUG = "glyphs",
 	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
@@ -628,7 +636,10 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	formatter = TMW.C.Formatter.BOOL,
 	nooperator = true,
 	unit = PET,
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_AUTOCAST", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_AUTOCAST"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
 	useSUG = true,
 	icon = "Interface\\Icons\\ability_physical_taunt",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -649,7 +660,7 @@ TMW:RegisterUpgrade(73019, {
 		if condition.Type == "PETMODE" then
 			condition.Type = "PETMODE2"
 			condition.Checked = false
-			-- We give a metatable to add one to the indexes because the indexes did shift +1 from the old to the new condition.
+
 			CNDT:ConvertSliderCondition(condition, 1, 3)
 		end
 	end,
@@ -751,7 +762,10 @@ ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 	formatter = TMW.C.Formatter.BOOL,
 	nooperator = true,
 	unit = PLAYER,
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_TRACKING", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_TRACKING"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
 	useSUG = "tracking",
 	icon = "Interface\\MINIMAP\\TRACKING\\None",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -781,7 +795,10 @@ ConditionCategory:RegisterCondition(18,	 "BLIZZEQUIPSET", {
 	formatter = TMW.C.Formatter.BOOL,
 	nooperator = true,
 	unit = PLAYER,
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_BLIZZEQUIPSET_INPUT", "CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC") editbox.label = L["EQUIPSETTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT"], L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC"])
+		editbox:SetLabel(L["EQUIPSETTOCHECK"])
+	end,
 	useSUG = "blizzequipset",
 	icon = "Interface\\Icons\\inv_box_04",
 	tcoords = CNDT.COMMON.standardtcoords,

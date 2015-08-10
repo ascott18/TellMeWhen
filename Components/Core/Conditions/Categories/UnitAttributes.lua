@@ -236,9 +236,9 @@ ConditionCategory:RegisterCondition(0.3,  "ROLE2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 		NONE = 		{order = 1, text=NONE },
-		TANK = 		{order = 2, text=TANK },
-		HEALER = 	{order = 3, text=HEALER },
-		DAMAGER = 	{order = 4, text=DAMAGER },
+		TANK = 		{order = 2, text=TANK, icon = "Interface/AddOns/TellMeWhen/Textures/TANK", },
+		HEALER = 	{order = 3, text=HEALER, icon = "Interface/AddOns/TellMeWhen/Textures/HEALER", },
+		DAMAGER = 	{order = 4, text=DAMAGER, icon = "Interface/AddOns/TellMeWhen/Textures/DAMAGER", },
 	},
 
 	icon = "Interface\\Addons\\TellMeWhen\\Textures\\DAMAGER",
@@ -272,10 +272,19 @@ ConditionCategory:RegisterCondition(0.4,  "RAIDICON2", {
 
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_RAIDICON"],
 	bitFlags = (function()
-		local t = {[0]=NONE}
+		local t = {[0]={
+			order = 0,
+			text = NONE,
+		}}
+
 		for i = 1, 8 do  -- Dont use NUM_RAID_ICONS since it is defined in Blizzard's CRF manager addon, which might not be loaded
-			t[i] = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..i..":0|t ".._G["RAID_TARGET_"..i]
+			t[i] = {
+				order = i,
+				text = _G["RAID_TARGET_"..i],
+				icon = "Interface/TargetingFrame/UI-RaidTargetingIcon_" .. i
+			}
 		end
+
 		return t
 	end)(),
 
@@ -584,7 +593,9 @@ ConditionCategory:RegisterCondition(8.95, "UNITISUNIT", {
 	min = 0,
 	max = 1,
 	nooperator = true,
-	name = function(editbox) TMW:TT(editbox, "UNITTWO", "CONDITIONPANEL_UNITISUNIT_EBDESC") editbox.label = L["UNITTWO"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["UNITTWO"], L["CONDITIONPANEL_UNITISUNIT_EBDESC"])
+	end,
 	useSUG = "units",
 	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\Icons\\spell_holy_prayerofhealing",
@@ -604,7 +615,9 @@ ConditionCategory:RegisterCondition(9,    "NAME", {
 	text = L["CONDITIONPANEL_NAME"],
 	min = 0,
 	max = 1,
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NAMETOMATCH", "CONDITIONPANEL_NAMETOOLTIP") editbox.label = L["CONDITIONPANEL_NAMETOMATCH"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_NAMETOMATCH"], L["CONDITIONPANEL_NAMETOOLTIP"])
+	end,
 	nooperator = true,
 	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
@@ -626,7 +639,9 @@ ConditionCategory:RegisterCondition(9.5,  "NPCID", {
 	min = 0,
 	max = 1,
 	defaultUnit = "target",
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_NPCIDTOMATCH", "CONDITIONPANEL_NPCIDTOOLTIP") editbox.label = L["CONDITIONPANEL_NPCIDTOMATCH"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_NPCIDTOMATCH"], L["CONDITIONPANEL_NPCIDTOOLTIP"])
+	end,
 	nooperator = true,
 	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
@@ -715,8 +730,7 @@ ConditionCategory:RegisterCondition(13,   "CREATURETYPE", {
 	max = 1,
 	defaultUnit = "target",
 	name = function(editbox)
-		TMW:TT(editbox, "CONDITIONPANEL_CREATURETYPE_LABEL", "CONDITIONPANEL_CREATURETYPE_DESC")
-		editbox.label = L["CONDITIONPANEL_CREATURETYPE_LABEL"]
+		editbox:SetTexts(L["CONDITIONPANEL_CREATURETYPE_LABEL"], L["CONDITIONPANEL_CREATURETYPE_DESC"])
 	end,
 	useSUG = "creaturetype",
 	allowMultipleSUGEntires = true,

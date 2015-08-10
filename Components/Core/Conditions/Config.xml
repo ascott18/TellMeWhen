@@ -1,15 +1,13 @@
 ﻿<Ui>
 
-	<Button name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
+	<CheckButton name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Conditions_Rune"/>
+		</KeyValues>
+
 		<Size x="33" y="29"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<Texture parentKey="Check" name="$parentCheck" file="">
-					<Size x="27" y="27"/>
-					<Anchors>
-						<Anchor point="CENTER"/>
-					</Anchors>
-				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
 				<Texture parentKey="texture">
@@ -21,39 +19,19 @@
 			</Layer>
 		</Layers>
 		<Scripts>
-			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
-
-				local CndtGroup = self:GetParent():GetParent()
-				local conditionSettings = CndtGroup:GetConditionSettings()
-				local index = self.key
-
-				TMW.CNDT:ToggleBitFlag(conditionSettings, index)
-
-				self:SetChecked(not self:GetChecked())
-
-				CndtGroup:LoadAndDraw()
-			</OnClick>
 			<OnLoad>
-				self.GetChecked = TMW.CNDT.Rune_GetChecked
-				self.SetChecked = TMW.CNDT.Rune_SetChecked
-
-				if self.death then
-					self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. self.runeType)
-				else
-					self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. self.runeType)
-				end
-
-				local title = _G["COMBAT_TEXT_RUNE_" .. (self.runeType):upper()]
-				if self.death then
-					title = COMBAT_TEXT_RUNE_DEATH .. " (" .. title .. ")"
-				end
-
-				TMW:TT(self, title, "CONDITIONPANEL_RUNES_CHECK_DESC", true, false)
-
+				TMW:CInit(self)
 			</OnLoad>
 		</Scripts>
-	</Button>
+
+		<CheckedTexture parentKey="Check" file="Interface/RAIDFRAME/ReadyCheck-Ready">
+			<Size x="27" y="27"/>
+			<Anchors>
+				<Anchor point="CENTER"/>
+			</Anchors>
+		</CheckedTexture>
+	</CheckButton>
+
 	<CheckButton name="TellMeWhen_ConditionEditorParenthesisTemplate" hidden="true" virtual="true">
 		<KeyValues>
 			<KeyValue key="tmwClass" type="string" value="Config_Conditions_Paren"/>
@@ -88,13 +66,13 @@
 		<Frames>
 			<Frame parentKey="Type" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="26" y="-15"/>
+					<Anchor point="TOPLEFT" x="28" y="-10"/>
 				</Anchors>
 				<Frames>
 					<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="4" y="-3"/>
-							<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="1" />
+							<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="-1" />
 							<Anchor point="BOTTOM" x="0" y="3"/>
 						</Anchors>
 						<FontString inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
@@ -108,7 +86,7 @@
 								self.label = TMW.L["CONDITIONPANEL_DEFAULT"],
 
 								self:HookScript("OnEditFocusLost", function(self)
-									CndtGroup:LoadAndDraw()
+									CndtGroup:RequestReload()
 								end)
 
 								self:HookScript("OnEditFocusGained", function(self)
@@ -165,39 +143,44 @@
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
+
+						self:SetSetting("Unit")
+
+						self:SetLabel("|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r")
+						self:SetTexts(TMW.L["CONDITIONPANEL_UNIT"], TMW.L["ICONMENU_UNIT_DESC_CONDITIONUNIT"])
+
+						TMW.SUG:EnableEditBox(self, "units", true)
+
+
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return TMW:CleanString(value)
+						end)
+
+						self:CScriptAdd("SettingSaved", function()
+							local unitTable = TMW.UNITS:GetOriginalUnitTable(self:GetText())
+
+							if #unitTable > 1 then
+								TMW.HELP:Show{
+									code = "CNDT_UNIT_ONLYONE",
+									icon = TMW.CI.icon,
+									relativeTo = self,
+									x = 0,
+									y = 0,
+									text = format(TMW.L["HELP_ONLYONEUNIT"], #unitTable)
+								}
+
+							elseif #unitTable == 0 then
+								TMW.HELP:Show{
+									code = "CNDT_UNIT_MISSING",
+									icon = TMW.CI.icon,
+									relativeTo = self,
+									x = 0,
+									y = 0,
+									text = format(TMW.L["HELP_NOUNIT"])
+								}
+							end
+						end)
 					</OnLoad>
-					<OnEditFocusLost>
-						TMW:CleanString(self)
-						
-						local CndtGroup = self:GetParent()
-						local unit = strtrim(self:GetText()) or "player"
-
-						CndtGroup:GetConditionSettings().Unit = unit
-						CndtGroup:LoadAndDraw()
-
-						local unitTable = TMW.UNITS:GetOriginalUnitTable(unit)
-						if #unitTable > 1 then
-							TMW.HELP:Show{
-								code = "CNDT_UNIT_ONLYONE",
-								icon = TMW.CI.icon,
-								relativeTo = self,
-								x = 0,
-								y = 0,
-								text = format(TMW.L["HELP_ONLYONEUNIT"], #unitTable)
-							}
-						end
-						
-						if self:GetText() == "" then
-							TMW.HELP:Show{
-								code = "CNDT_UNIT_MISSING",
-								icon = TMW.CI.icon,
-								relativeTo = self,
-								x = 0,
-								y = 0,
-								text = format(TMW.L["HELP_NOUNIT"])
-							}
-						end
-					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
 			<Frame parentKey="Operator" inherits="TMW_DropDownMenuTemplate">
@@ -210,7 +193,8 @@
 
 						self:SetFunction(TMW.CNDT.OperatorMenu_DropDown)
 
-						self.Text:SetFontObject(GameFontHighlightLarge)
+						self.Text:SetFont("Interface/Addons/TellMeWhen/Textures/OpenSans-Regular.ttf", 20, "THINOUTLINE")
+
 						self:SetWidth(66)
 					</OnLoad>
 				</Scripts>
@@ -219,7 +203,8 @@
 			<Slider parentKey="Slider" inherits="TellMeWhen_SliderTemplate" hidden="true">
 				<Size x="522" y="17"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-13" y="-39"/>
+					<Anchor point="TOP" relativeKey="$parent.Type" relativePoint="BOTTOM" y="-7"/>
+					<Anchor point="RIGHT" x="-13" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -229,121 +214,111 @@
 						self:SetSetting("Level")
 						self:SetExtremesColor(1)
 
-						self:HookScript("OnValueChanged", function(self)
-							local CndtGroup = self:GetParent()
-							
-							local conditionData = CndtGroup:GetConditionData()
+						-- This is needed so we can show the "right-click for manual input" tooltip.
+						self:SetTooltip(TMW.L["CONDITIONPANEL_VALUEN"], nil)
 
-							local value = self:GetValue()
-							conditionData.formatter:SetFormattedText(CndtGroup.ValText, value)
-						end)
-
-						self:CScriptAdd("SettingTableRequested", function(requester)
-							return self:GetParent():GetConditionSettings()
-						end)
-
-						self:CScriptAdd("SettingSaved", function(requester)
+						self:CScriptAdd("SettingSaved", function(self)
 							TMW.IE:ScheduleIconSetup() --TODO: there needs to be a way for condition config to intelligently run a setup on a parent object using the current ConditionSet.
 						end)
 					</OnLoad>
+					<OnValueChanged>
+						local CndtGroup = self:GetParent()
+						local conditionData = CndtGroup:GetConditionData()
+
+						if conditionData then
+							local value = self:GetValue()
+							conditionData.formatter:SetFormattedText(CndtGroup.ValText, value)
+						end
+					</OnValueChanged>
 				</Scripts>
 			</Slider>
 			
 			
 			
 			<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
-				<Size x="302" y="15"/>
+				<Size y="16"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="0" y="-9"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="-1" y="-9"/>
+					<Anchor point="RIGHT" x="-15" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
+
+						self:SetSetting("Name")
+
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return TMW:CleanString(value)
+						end)
 					</OnLoad>
-					<OnEditFocusLost>
-						TMW:CleanString(self)
-						
-						local CndtGroup = self:GetParent()
-						CndtGroup:GetConditionSettings().Name = strtrim(self:GetText()) or ""
-						CndtGroup:LoadAndDraw()
-					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
 			<EditBox parentKey="EditBox2" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
-				<Size x="302" y="15"/>
+				<Size y="16"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.EditBox" relativePoint="RIGHT" x="13"/>
+					<Anchor point="LEFT" relativeKey="$parent.EditBox" />
+					<Anchor point="RIGHT" relativeKey="$parent.EditBox" />
+					<Anchor point="TOP" relativeKey="$parent.EditBox" relativePoint="BOTTOM" Y="-10"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
+
+						self:SetSetting("Name2")
+
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return TMW:CleanString(value)
+						end)
 					</OnLoad>
-					<OnEditFocusLost>
-						TMW:CleanString(self)
-						
-						local CndtGroup = self:GetParent()
-						CndtGroup:GetConditionSettings().Name2 = strtrim(self:GetText()) or ""
-						CndtGroup:LoadAndDraw()
-					</OnEditFocusLost>
 				</Scripts>
 			</EditBox>
 			<CheckButton parentKey="Check" inherits="TellMeWhen_CheckTemplate">
-				<Size x="25" y="25"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.EditBox" x="5" y="0"/>
+					<Anchor point="LEFT" relativeKey="$parent.EditBox" relativePoint="RIGHT" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
-						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
-					</OnLoad>
-					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:CInit(self)
 
-						local CndtGroup = self:GetParent()
-						CndtGroup:GetConditionSettings().Checked = not not self:GetChecked()
-						CndtGroup:LoadAndDraw()
-					</OnClick>
+						self:SetSetting("Checked")
+						self:ConstrainLabel(self:GetParent(), "RIGHT")
+					</OnLoad>
 				</Scripts>
 			</CheckButton>
 			<CheckButton parentKey="Check2" inherits="TellMeWhen_CheckTemplate">
-				<Size x="25" y="25"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.EditBox2" x="5" y="0"/>
+					<Anchor point="LEFT" relativeKey="$parent.EditBox2" relativePoint="RIGHT" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetFrameLevel(self:GetParent().EditBox:GetFrameLevel() + 1)
-						self:GetNormalTexture():SetVertexColor(1, 0, 0, 1)
-					</OnLoad>
-					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:CInit(self)
 
-						local CndtGroup = self:GetParent()
-						CndtGroup:GetConditionSettings().Checked2 = not not self:GetChecked()
-						CndtGroup:LoadAndDraw()
-					</OnClick>
+						self:SetSetting("Checked2")
+						self:ConstrainLabel(self:GetParent(), "RIGHT")
+					</OnLoad>
 				</Scripts>
 			</CheckButton>
 
 			<Frame parentKey="Runes" hidden="true">
-				<Size x="1" y="1"/>
+				<Size x="1" y="58"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="TOPRIGHT" x="11" y="10"/>
+					<Anchor point="TOP" y="-7"/>
+					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="11" />
 				</Anchors>
 				<Frames>
-					<Button parentKey="rune1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
+					<CheckButton parentKey="rune1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
 						<KeyValues>
 							<KeyValue key="runeType" type="string" value="Blood"/>
 							<KeyValue key="key" type="number" value="1"/>
 							<KeyValue key="death" type="boolean" value="false"/>
 						</KeyValues>
 						<Anchors>
-							<Anchor point="TOPLEFT"/>
+							<Anchor point="LEFT"/>
+							<Anchor point="BOTTOM" relativePoint="CENTER"/>
 						</Anchors>
-					</Button>
+					</CheckButton>
 
-		 			<Button parentKey="rune2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
+		 			<CheckButton parentKey="rune2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
 						<KeyValues>
 							<KeyValue key="runeType" type="string" value="Frost"/>
 							<KeyValue key="key" type="number" value="3"/>
@@ -352,9 +327,9 @@
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.rune1" relativePoint="RIGHT" x="4"/>
 						</Anchors>
-					</Button>
+					</CheckButton>
 
-					<Button parentKey="rune3" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
+					<CheckButton parentKey="rune3" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
 						<KeyValues>
 							<KeyValue key="runeType" type="string" value="Unholy"/>
 							<KeyValue key="key" type="number" value="2"/>
@@ -363,10 +338,10 @@
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.rune2" relativePoint="RIGHT" x="4"/>
 						</Anchors>
-					</Button>
+					</CheckButton>
 
 
-					<Button parentKey="rune4" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
+					<CheckButton parentKey="rune4" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
 						<KeyValues>
 							<KeyValue key="runeType" type="string" value="Blood"/>
 							<KeyValue key="key" type="number" value="4"/>
@@ -375,8 +350,8 @@
 						<Anchors>
 							<Anchor point="TOP" relativeKey="$parent.rune1" relativePoint="BOTTOM"/>
 						</Anchors>
-					</Button>
-					<Button parentKey="rune5" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
+					</CheckButton>
+					<CheckButton parentKey="rune5" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
 						<KeyValues>
 							<KeyValue key="runeType" type="string" value="Frost"/>
 							<KeyValue key="key" type="number" value="6"/>
@@ -385,8 +360,8 @@
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.rune4" relativePoint="RIGHT" x="4"/>
 						</Anchors>
-					</Button>
-					<Button parentKey="rune6" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
+					</CheckButton>
+					<CheckButton parentKey="rune6" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
 						<KeyValues>
 							<KeyValue key="runeType" type="string" value="Unholy"/>
 							<KeyValue key="key" type="number" value="5"/>
@@ -395,7 +370,7 @@
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.rune5" relativePoint="RIGHT" x="4"/>
 						</Anchors>
-					</Button>
+					</CheckButton>
 
 
 				</Frames>
@@ -423,19 +398,13 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetText(TMW.L["CONDITIONPANEL_BITFLAGS_CHECK"])
-						self.text:SetPoint("RIGHT", self:GetParent(), "RIGHT")
-						self.text:SetHeight(self.text:GetHeight()*2 + 3)
-						
-						TMW:TT(self, "CONDITIONPANEL_BITFLAGS_CHECK", "CONDITIONPANEL_BITFLAGS_CHECK_DESC")
-					</OnLoad>
-					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:CInit(self)
 
-						local CndtGroup = self:GetParent()
-						CndtGroup:GetConditionSettings().Checked = not not self:GetChecked()
-						CndtGroup:LoadAndDraw()
-					</OnClick>
+						self:SetTexts(TMW.L["CONDITIONPANEL_BITFLAGS_CHECK"], TMW.L["CONDITIONPANEL_BITFLAGS_CHECK_DESC"])
+						self:ConstrainLabel(self:GetParent(), "RIGHT")
+
+						self:SetSetting("Checked")
+					</OnLoad>
 				</Scripts>
 			</CheckButton>
 
@@ -455,48 +424,13 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						local AND, OR = TMW.L["CONDITIONPANEL_AND"], TMW.L["CONDITIONPANEL_OR"]
-						local GRAY = "|cff222222"
-						local SLASH = "/"
-						local WHITE = "|r"
-						local AND_t = WHITE .. AND .. GRAY .. SLASH .. OR
-						local OR_t = GRAY .. AND .. SLASH .. WHITE .. OR
-
-						function self:SetValue(value)
-							local text
-
-							if value == "AND" then
-								text = AND_t
-							elseif value == "OR" then
-								text = OR_t
-							end
-
-							self.text:SetText(text)
-							self.value = value
-							self:SetWidth(self.text:GetWidth())
-						end
-						function self:GetValue()
-							return self.value
-						end
+						self.tmwClass = "Config_Conditions_AndOr"
+						TMW:CInit(self)
 						
+						self:SetSetting("AndOr")
+
 						TMW:TT(self, "CONDITIONPANEL_ANDOR", "CONDITIONPANEL_ANDOR_DESC")
-						self:SetValue("AND")
 					</OnLoad>
-					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
-
-						TMW.HELP:Hide("CNDT_ANDOR_FIRSTSEE")
-						
-						if self.value == "AND" then
-							self:SetValue("OR")
-						elseif self.value == "OR" then
-							self:SetValue("AND")
-						end
-						
-						local CndtGroup = self:GetParent()
-						CndtGroup:GetConditionSettings().AndOr = self:GetValue()
-						CndtGroup:LoadAndDraw()
-					</OnClick>
 				</Scripts>
 			</Button>
 
@@ -510,7 +444,7 @@
 
 				<Size x="100" y="20"/>
 				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.AndOr" x="5" y="0"/>
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.AndOr" x="5" y="1"/>
 				</Anchors>
 				<Frames>
 					<CheckButton inherits="TellMeWhen_ConditionEditorParenthesisTemplate" id="1">
@@ -625,31 +559,6 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString parentKey="TextType" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="BOTTOM" relativeKey="$parent.Type" relativePoint="TOP" y="2"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="TextUnit" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="BOTTOM" relativeKey="$parent.Unit" relativePoint="TOP" y="2"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="TextIcon" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="BOTTOM" relativeKey="$parent.Icon" relativePoint="TOP" y="2"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="TextOperator" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="BOTTOM" relativeKey="$parent.Operator" relativePoint="TOP" y="2"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="TextValue" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeKey="$parent.Operator" relativePoint="TOPRIGHT" x="9" y="2"/>
-					</Anchors>
-				</FontString>
 				<FontString parentKey="ValText" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="LEFT" relativeKey="$parent.Operator" relativePoint="RIGHT" x="9" y="0"/>
@@ -667,10 +576,10 @@
 				</FontString>
 
 				<FontString parentKey="Deprecated" inherits="GameFontNormal" hidden="true">
-					<Size x="400"/>
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="30" y="3"/>
-						<Anchor point="BOTTOMRIGHT" x="-30" y="3"/>
+						<Anchor point="TOP" relativeKey="$parent.Type" relativePoint="BOTTOM" y="-10"/>
+						<Anchor point="LEFT" x="30" />
+						<Anchor point="RIGHT" x="-30" />
 					</Anchors>
 				</FontString>
 				<FontString parentKey="Unknown" inherits="GameFontNormal" >
@@ -678,15 +587,13 @@
 						<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="12"/>
 						<Anchor point="RIGHT" x="-5" />
 						<Anchor point="TOP" y="-5"/>
-						<Anchor point="BOTTOM" y="5"/>
 					</Anchors>
 				</FontString>
 
-				<FontString parentKey="BitFlagsSelectedText" inherits="GameFontNormal" hidden="true" justifyH="LEFT" justifyV="TOP">
-					<Size x="400" y="30"/>
+				<FontString parentKey="BitFlagsSelectedText" inherits="GameFontNormal" hidden="true" justifyH="LEFT" >
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="0" y="-4"/>
-						<Anchor point="BOTTOMRIGHT" x="-30" y="0"/>
+						<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="0" y="-7"/>
+						<Anchor point="RIGHT" x="-30" />
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -708,7 +615,6 @@
 						
 						TMW.CNDT:CreateGroups(1)
 						TMW.CNDT[1].AndOr:Hide()
-						TMW.CNDT[1].CloseParenthesis:Hide()
 						TMW.CNDT[1]:SetPoint("TOPLEFT", 12, -16)
 					</OnLoad>
 				</Scripts>

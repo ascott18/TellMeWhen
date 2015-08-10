@@ -44,7 +44,11 @@ function UTIL.shallowCopy(t)
 end
 
 function UTIL:CleanPath(path)
-	return  path:trim():gsub("\\\\", "/"):gsub("\\", "/")
+	if not path then
+		return ""
+	end
+	
+	return path:trim():gsub("\\\\", "/"):gsub("\\", "/"), nil
 end
 
 

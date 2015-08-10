@@ -1381,7 +1381,7 @@ The group of the icon being checked must be shown in order to check the icon.]=]
 
 L["CONDITIONPANEL_RUNES"] = "Rune Count"
 L["CONDITIONPANEL_RUNES_DESC3"] = [=[Use this condition type to check when the desired number of runes are available.]=]
-L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Check this rune to count this rune type into the total count for the condition.]=]
+L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Check to count this rune type into the total count for the condition.]=]
 
 L["CONDITIONPANEL_RUNES_DESC_GENERIC"] = [=[Each rune is a check button. Check each rune to have it be counted into the conditions.
 
@@ -2655,7 +2655,9 @@ To see the correct texture now, change the first spell being checked into a Spel
 
 L["HELP_NOUNITS"] = [[You must enter at least one unit!]]
 L["HELP_NOUNIT"] = [[You must enter a unit!]]
-L["HELP_ONLYONEUNIT"] = [[Conditions only accept one unit, but you have entered %d |4unit:units;.]]
+L["HELP_ONLYONEUNIT"] = [[Conditions only accept one unit, but you have entered %d |4unit:units;.
+
+If you need to check many units, consider using a separate icon with an Icon Shown condition to reference that icon.]]
 L["HELP_MS_NOFOUND"] = [[The ability %q could not be found on your action bars.
 
 Ensure that the ability is on your action bars, in its default state, and that it is not only a macro that is putting the spell on your action bars. Otherwise, this icon will not function properly.]]

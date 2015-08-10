@@ -147,13 +147,14 @@
 						end)
 					</OnLoad>
 					<OnUpdate>
+						local SoundList = self:GetParent().SoundList
 						-- Keep the custom box anchored to the end of the list if the scroll frame
 						-- isn't extending to the bottom of the page.
-						if self:GetParent().SoundList.ScrollFrame:GetVerticalScrollRange() == 0 then
+						if SoundList.ScrollFrame:GetVerticalScrollRange() == 0 then
 							local Sound = TMW.EVENTS:GetEventHandler("Sound")
-							self:SetPoint("TOP", self:GetParent().SoundList[#Sound.List], "BOTTOM", 0, -20)
+							self:SetPoint("TOP", SoundList.frames[#Sound.List], "BOTTOM", 0, -20)
 						else
-							self:SetPoint("TOP", self:GetParent().SoundList.ScrollFrame, "BOTTOM", 0, -20)
+							self:SetPoint("TOP", SoundList.ScrollFrame, "BOTTOM", 0, -20)
 						end
 					</OnUpdate>
 				</Scripts>

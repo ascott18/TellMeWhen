@@ -77,7 +77,9 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	min = 0,
 	range = 30,
 	step = 0.1,
-	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
 	useSUG = "spellWithGCD",
 	unit = PLAYER,
 	formatter = TMW.C.Formatter.TIME_0USABLE,
@@ -97,8 +99,12 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 	text = L["SPELLCOOLDOWN"] .. " - " .. L["COMPARISON"],
 	noslide = true,
-	name = function(editbox) TMW:TT(editbox, "SPELLTOCOMP1", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCOMP1"] end,
-	name2 = function(editbox) TMW:TT(editbox, "SPELLTOCOMP2", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCOMP2"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCOMP1"], L["CNDT_ONLYFIRST"])
+	end,
+	name2 = function(editbox)
+		editbox:SetTexts(L["SPELLTOCOMP2"], L["CNDT_ONLYFIRST"])
+	end,
 	useSUG = "spellWithGCD",
 	unit = PLAYER,
 	icon = "Interface\\Icons\\spell_holy_divineintervention",
@@ -134,7 +140,9 @@ ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 	tooltip = L["SPELLCHARGES_DESC"],
 	min = 0,
 	range = 5,
-	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
 	useSUG = "spell",
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_monk_roll",
@@ -157,7 +165,9 @@ ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
 	min = 0,
 	range = 30,
 	step = 0.1,
-	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
 	useSUG = "spell",
 	unit = PLAYER,
 	formatter = TMW.C.Formatter:New(function(value)
@@ -202,8 +212,13 @@ ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	tooltip = L["REACTIVECNDT_DESC"],
 	min = 0,
 	max = 1,
-	name = function(editbox) TMW:TT(editbox, "ICONMENU_REACTIVE", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
-	check = function(check) TMW:TT(check, "ICONMENU_IGNORENOMANA", "ICONMENU_IGNORENOMANA_DESC") end,
+	name = function(editbox)
+		editbox:SetTexts(L["ICONMENU_REACTIVE"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
+	check = function(check)
+		check:SetTexts(L["ICONMENU_IGNORENOMANA"], L["ICONMENU_IGNORENOMANA_DESC"])
+	end,
 	useSUG = true,
 	nooperator = true,
 	unit = false,
@@ -221,7 +236,10 @@ ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	tooltip = L["CONDITIONPANEL_MANAUSABLE_DESC"],
 	min = 0,
 	max = 1,
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_MANAUSABLE", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_MANAUSABLE"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
 	useSUG = true,
 	nooperator = true,
 	unit = false,
@@ -242,7 +260,10 @@ ConditionCategory:RegisterCondition(5,	 "SPELLRANGE", {
 	text = L["CONDITIONPANEL_SPELLRANGE"],
 	min = 0,
 	max = 1,
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_SPELLRANGE", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_SPELLRANGE"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
 	useSUG = true,
 	nooperator = true,
 	texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
@@ -291,7 +312,10 @@ ConditionCategory:RegisterCondition(11,	 "ITEMCD", {
 	text = L["ITEMCOOLDOWN"],
 	range = 30,
 	step = 0.1,
-	name = function(editbox) TMW:TT(editbox, L["ITEMCOOLDOWN"], "CNDT_ONLYFIRST", 1) editbox.label = L["ITEMTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["ITEMCOOLDOWN"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["ITEMTOCHECK"])
+	end,
 	useSUG = "itemwithslots",
 	unit = PLAYER,
 	formatter = TMW.C.Formatter.TIME_0USABLE,
@@ -310,8 +334,12 @@ ConditionCategory:RegisterCondition(11,	 "ITEMCD", {
 ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
 	text = L["ITEMCOOLDOWN"] .. " - " .. L["COMPARISON"],
 	noslide = true,
-	name = function(editbox) TMW:TT(editbox, "ITEMTOCOMP1", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCOMP1"] end,
-	name2 = function(editbox) TMW:TT(editbox, "ITEMTOCOMP2", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCOMP2"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["ITEMTOCOMP1"], L["CNDT_ONLYFIRST"])
+	end,
+	name2 = function(editbox)
+		editbox:SetTexts(L["ITEMTOCOMP2"], L["CNDT_ONLYFIRST"])
+	end,
 	useSUG = "itemwithslots",
 	unit = PLAYER,
 	icon = "Interface\\Icons\\inv_jewelry_trinketpvp_01",
@@ -342,7 +370,10 @@ ConditionCategory:RegisterCondition(13,	 "ITEMRANGE", {
 	text = L["CONDITIONPANEL_ITEMRANGE"],
 	min = 0,
 	max = 1,
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_ITEMRANGE", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_ITEMRANGE"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["ITEMTOCHECK"])
+	end,
 	useSUG = "itemwithslots",
 	nooperator = true,
 	texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
@@ -358,7 +389,10 @@ ConditionCategory:RegisterCondition(14,	 "ITEMINBAGS", {
 	min = 0,
 	range = 25,
 	step = 0.1,
-	name = function(editbox) TMW:TT(editbox, "ITEMINBAGS", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["ITEMINBAGS"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["ITEMTOCHECK"])
+	end,
 	useSUG = "itemwithslots",
 	unit = false,
 	icon = "Interface\\Icons\\inv_misc_bag_08",
@@ -380,7 +414,10 @@ ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 	max = 1,
 	nooperator = true,
 	formatter = TMW.C.Formatter.BOOL,
-	name = function(editbox) TMW:TT(editbox, "ITEMEQUIPPED", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["ITEMEQUIPPED"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["ITEMTOCHECK"])
+	end,
 	useSUG = "itemwithslots",
 	unit = false,
 	icon = "Interface\\PaperDoll\\UI-PaperDoll-Slot-MainHand",
@@ -398,7 +435,10 @@ ConditionCategory:RegisterCondition(16,	 "ITEMSPELL", {
 	max = 1,
 	nooperator = true,
 	formatter = TMW.C.Formatter.BOOL,
-	name = function(editbox) TMW:TT(editbox, "ITEMSPELL", "CNDT_ONLYFIRST") editbox.label = L["ITEMTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["ITEMSPELL"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["ITEMTOCHECK"])
+	end,
 	useSUG = "itemwithslots",
 	unit = false,
 	icon = "Interface\\Icons\\inv_misc_bone_elfskull_01",
@@ -504,7 +544,10 @@ ConditionCategory:RegisterCondition(21,	 "TOTEM1", {
 	min = 0,
 	range = 60,
 	unit = false,
-	name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
+		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
+	end,
 	useSUG = true,
 	allowMultipleSUGEntires = true,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
@@ -525,7 +568,10 @@ ConditionCategory:RegisterCondition(22,	 "TOTEM2", {
 	min = 0,
 	range = 60,
 	unit = false,
-	name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
+		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
+	end,
 	useSUG = true,
 	allowMultipleSUGEntires = true,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
@@ -546,7 +592,10 @@ ConditionCategory:RegisterCondition(23,	 "TOTEM3", {
 	min = 0,
 	range = 60,
 	unit = false,
-	name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
+		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
+	end,
 	useSUG = true,
 	allowMultipleSUGEntires = true,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
@@ -567,7 +616,10 @@ ConditionCategory:RegisterCondition(24,	 "TOTEM4", {
 	min = 0,
 	range = 60,
 	unit = false,
-	name = function(editbox) TMW:TT(editbox, "CNDT_TOTEMNAME", "CNDT_TOTEMNAME_DESC") editbox.label = L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
+		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
+	end,
 	useSUG = true,
 	allowMultipleSUGEntires = true,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
@@ -632,10 +684,13 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 		[1] = L["ICONMENU_PRESENT"],
 		[2] = L["ICONMENU_ABSENT"],
 	},
-	midt = true,
+	midt = L["ICONMENU_PRESENT"],
 	icon = "Interface\\Icons\\Temp",
 	tcoords = CNDT.COMMON.standardtcoords,
-	name = function(editbox) TMW:TT(editbox, "CONDITIONPANEL_CASTTOMATCH", "CONDITIONPANEL_CASTTOMATCH_DESC") editbox.label = L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_CASTTOMATCH"], L["CONDITIONPANEL_CASTTOMATCH_DESC"])
+		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
+	end,
 	useSUG = true,
 	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameString))]], -- LOWER is some gsub magic
 	events = function(ConditionObject, c)
@@ -713,7 +768,9 @@ ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 	tooltip = L["CONDITIONPANEL_CASTCOUNT_DESC"],
 	range = 10,
 	icon = "Interface\\Icons\\spell_nature_lightningoverload",
-	name = function(editbox) TMW:TT(editbox, "SPELLTOCHECK", "CNDT_ONLYFIRST") editbox.label = L["SPELLTOCHECK"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
 	useSUG = true,
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function()

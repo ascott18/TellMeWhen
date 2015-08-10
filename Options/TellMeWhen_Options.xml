@@ -915,7 +915,7 @@
 				<AbsInset left="3" right="3" top="6" bottom="6"/>
 			</BackgroundInsets>
 		</Backdrop>
-		<HitRectInsets left="0" right="0" top="-1" bottom="-4" />
+		<HitRectInsets left="0" right="0" top="-1" bottom="-6" />
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
@@ -2591,6 +2591,7 @@
 									return TMW.CI.ics
 								end)
 
+								-- This is redundant with the icon setup below on ReloadRequested.
 								--self:CScriptAdd("DescendantSettingSaved", function(requester)
 								--	return TMW.IE:ScheduleIconSetup()
 								--end)
@@ -2873,6 +2874,7 @@
 									return TMW.CI.gs
 								end)
 
+								-- This is redundant with the group setup below on ReloadRequested.
 								--self:CScriptAdd("DescendantSettingSaved", function(requester)
 								--	return TMW.CI.group:Setup()
 								--end)

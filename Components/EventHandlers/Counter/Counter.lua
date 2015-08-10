@@ -83,7 +83,9 @@ ConditionCategory:RegisterCondition(0.5,	"COUNTER", {
 
 	unit = false,
 	icon = "Interface\\Icons\\spell_chargepositive",
-	name = function(editbox) TMW:TT(editbox, "CONDITION_COUNTER", "CONDITION_COUNTER_EB_DESC") editbox.label = L["CONDITION_COUNTER"] end,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITION_COUNTER"], L["CONDITION_COUNTER_EB_DESC"])
+	end,
 	useSUG = "counterName",
 	tcoords = TMW.CNDT.COMMON.standardtcoords,
 	Env = {

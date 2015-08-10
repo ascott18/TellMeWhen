@@ -64,17 +64,22 @@ TMW:RegisterUpgrade(42102, {
 
 -- Helper methods
 function Sound:GetSoundFile(sound)
-	if sound == "" or sound == "Interface\\Quiet.ogg" or sound == "None" then
+	sound = TMW.UTIL:CleanPath(sound)
+	local quiet = TMW.UTIL:CleanPath("Interface/Quiet.ogg")
+
+	if sound == "" or sound == quiet or sound == "None" then
 		return nil
-	elseif strfind(sound, "%.[^\\]+$") then
+
+	elseif strfind(sound, "%.[^/]+$") then
 		-- Checks to see if sound is a file name (although poorly). Checks for a period followed by non-slashes:
-		-- Good: file.ogg; path\to\file.ogg
-		-- Bad: file; path\to\file; folder.with.periods\containing\file.ogg
+		-- Good: file.ogg; path/to/file.ogg
+		-- Bad: file; path/to/file; folder.with.periods/containing/file.ogg
 		return sound
 	else
 		-- This will handle sounds from LSM.
 		local s = LSM:Fetch("sound", sound)
-		if s and s ~= "Interface\\Quiet.ogg" and s ~= "" then
+		s = TMW.UTIL:CleanPath(sound)
+		if s and s ~= quiet and s ~= "" then
 			return s
 		end
 	end
