@@ -93,21 +93,6 @@ end
 -- ------------------------------------------
 
 ---------- Data/Templates ----------
-local function FindGroupFromInfo(info)
-	for i = #info, 1, -1 do
-		local n, domain = strmatch(info[i], "#Group (%d+)(.+)")
-		if n and domain then
-			return TMW[domain][tonumber(n)]
-		end
-	end
-end TMW.FindGroupFromInfo = FindGroupFromInfo
-
-local checkorder = {
-	-- NOTE: these are actually backwards so they sort logically in AceConfig, but have their signs switched in the actual function (1 = -1; -1 = 1).
-	[-1] = L["ASCENDING"],
-	[1] = L["DESCENDING"],
-}
-
 local importExportBoxTemplate = {
 	name = L["IMPORT_EXPORT"],
 	type = "input",
@@ -119,44 +104,6 @@ local importExportBoxTemplate = {
 	--hidden = function() return IE.ExportBox:IsVisible() end,
 } TMW.importExportBoxTemplate = importExportBoxTemplate
 
-local specializationSettingHidden = function(info)
-	local group = FindGroupFromInfo(info)
-	if group.Domain == "global" then
-		return true
-	end
-	return false
-end
-
-local common = {}
-function common:group_set(info, val)
-	local group = FindGroupFromInfo(info)
-	local gspv = group:GetSettings()
-
-	gspv[info[#info]] = val
-
-	group:Setup()
-end
-function common:group_get(info)
-	local group = FindGroupFromInfo(info)
-	local gspv = group:GetSettings()
-	
-	return gspv[info[#info]]
-end
-
-function common:group_set_spv(info, val)
-	local group = FindGroupFromInfo(info)
-	local gspv = group:GetSettingsPerView()
-
-	gspv[info[#info]] = val
-
-	group:Setup()
-end
-function common:group_get_spv(info)
-	local group = FindGroupFromInfo(info)
-	local gspv = group:GetSettingsPerView()
-	
-	return gspv[info[#info]]
-end
 
 
 local colorOrder = {
@@ -367,7 +314,6 @@ end
 TMW.OptionsTable = {
 	name = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL,
 	type = "group",
-	handler = common,
 	args = {
 		main = {
 			type = "group",

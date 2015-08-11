@@ -17,8 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local FindGroupFromInfo = TMW.FindGroupFromInfo
-
 local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
 
 

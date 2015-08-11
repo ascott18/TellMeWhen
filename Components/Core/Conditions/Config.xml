@@ -424,8 +424,7 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						self.tmwClass = "Config_Conditions_AndOr"
-						TMW:CInit(self)
+						TMW:CInit(self, "Config_Conditions_AndOr")
 						
 						self:SetSetting("AndOr")
 

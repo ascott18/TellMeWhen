@@ -9,6 +9,7 @@
 		</Anchors>
 		<Scripts>
 			<OnLoad>
+
 				self:SetScale(0.9)
 				self:SetFrameLevel(self:GetParent():GetFrameLevel()+2)
 				self.Background:SetAlpha(0.7)

@@ -132,7 +132,7 @@
 								self.paddingTop, self.paddingBottom = 4, 7
 
 								self:CScriptAdd("ModifySettingValueRequested", function(self, value)
-									return TMW.UTIL:CleanPath(value)
+									return TMW:CleanPath(value)
 								end)
 
 								TMW.SUG:EnableEditBox(self, "texture", true)

@@ -44,7 +44,7 @@ end)
 
 
 ---------- Events ----------
-function Announcements:SetupEventDisplay(eventID)
+function Announcements:GetEventDisplayText(eventID)
 	if not eventID then return end
 
 	local EventSettings = EVENTS:GetEventSettings(eventID)
@@ -52,15 +52,17 @@ function Announcements:SetupEventDisplay(eventID)
 
 	if subHandlerData then
 		local chanName = subHandlerData.text
+		
 		local data = EventSettings.Text
 		if data == "" then
 			data = "|cff808080" .. L["ANN_NOTEXT"] .. "|r"
 		elseif chanName == NONE then
 			data = "|cff808080" .. chanName .. "|r"
 		end
-		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r " .. data)
+
+		return ("|cffcccccc" .. self.handlerName .. ":|r " .. data)
 	else
-		EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r UNKNOWN: " .. (subHandlerIdentifier or "?"))
+		return ("|cffcccccc" .. self.handlerName .. ":|r UNKNOWN: " .. (subHandlerIdentifier or "?"))
 	end
 end
 

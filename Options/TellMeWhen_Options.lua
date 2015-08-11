@@ -1424,9 +1424,6 @@ function IE:LoadIcon(isRefresh, icon, isHistoryChange)
 		-- It is intended that this happens at the end instead of the beginning.
 		-- Table accesses that trigger metamethods flesh out an icon's settings with new things that aren't there pre-load (usually)
 		IE:AttemptBackup(CI.icon)
-
-		-- TODO: get rid of this, replace with ReloadRequested cscripts
-		TMW:Fire("TMW_CONFIG_ICON_LOADED", CI.icon)
 	end
 	
 	IE:UndoRedoChanged()
@@ -2190,19 +2187,13 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 
 	Setup = function(self, panelInfo)
 		self.panelInfo = panelInfo
-		if panelInfo then
-			self.supplementalData = panelInfo.supplementalData
-		end
 
+		if type(panelInfo.supplementalData) == "table" then
+			local OnSetup = panelInfo.supplementalData.OnSetup
 
-		get(self.OnSetup, self, panelInfo, self.supplementalData) 
-
-		if type(self.supplementalData) == "table" then
-			self.data = self.supplementalData
-
-			-- Cheater! (We arent getting anything)
-			-- (I'm using get as a wrapper so I don't have to check if the function exists before calling it)
-			get(self.supplementalData.OnSetup, self, panelInfo, self.supplementalData) 
+			if OnSetup then
+				OnSetup(self, panelInfo, panelInfo.supplementalData)
+			end
 		end
 
 		self:CScriptCall("PanelSetup", self, panelInfo)
@@ -3268,9 +3259,7 @@ TMW:NewClass("Config_CheckButton_BitToggle", "Config_BitflagBase", "Config_Check
 TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 	-- Constructor
 	OnNewInstance_Frame_WhenChecks = function(self)
-		
-		self.Check.tmwClass = "Config_CheckButton_BitToggle"
-		TMW:CInit(self.Check)
+		TMW:CInit(self.Check, "Config_CheckButton_BitToggle")
 		self.Check:SetSetting("ShowWhen")
 				
 		TMW:CInit(self.Alpha)
@@ -4388,33 +4377,18 @@ end
 
 
 TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
-	if editbox == TMW.IE.ExportBox then	
-		
-		if IE.CurrentTab.doesGroup then	
-			import.group_overwrite = CI.group
-			export.group = CI.group
-		end
-		
-		if IE.CurrentTab.doesIcon then
+	if editbox == TMW.IE.ExportBox then
+		if IE.CurrentTabGroup.identifier == "ICON" then
 			import.icon = CI.icon
 			export.icon = CI.icon
 
 			import.group_overwrite = CI.icon.group
 			export.group = CI.icon.group
 
-		elseif IE.CurrentTab.doesGroup then	
+		elseif IE.CurrentTabGroup.identifier == "GROUP" then	
 			import.group_overwrite = CI.group
 			export.group = CI.group
 		end
-	end
-end)
-
-TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
-	if editbox.IsImportExportWidget then
-		local info = editbox.obj.userdata
-		
-		import.group_overwrite = TMW.FindGroupFromInfo(info)
-		export.group = TMW.FindGroupFromInfo(info)
 	end
 end)
 

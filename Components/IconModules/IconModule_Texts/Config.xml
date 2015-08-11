@@ -17,7 +17,7 @@
 			<!--
 				Resets this text display to the default, as provided by the current text layout.
 			-->
-			<Button parentKey="Default" name="$parentDefault">
+			<Button parentKey="Default" >
 				<Size x="15" y="15"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-8" y="-2"/>
@@ -52,17 +52,16 @@
 			<!--
 				Show a list of other text displays to copy to this display.
 			-->
-			<Button parentKey="Copy" name="$parentCopy">
+			<Button parentKey="Copy" >
 				<Size x="16" y="16"/>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentDefault"  relativePoint="LEFT" x="-5" y="-0.5"/>
+					<Anchor point="RIGHT" relativeKey="$parent.Default"  relativePoint="LEFT" x="-5" y="-0.5"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.DD = TMW.C.Config_DropDownMenu_NoFrame:New()
 						self.DD:SetFunction(TMW.TEXT.CopyString_DropDown)
 						self.DD:SetScrollable(true)
-						self.DD.wrapTooltips = false -- TODO: make a method for this
 
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 						TMW:TT(self, "TEXTLAYOUTS_STRING_COPYMENU", "TEXTLAYOUTS_STRING_COPYMENU_DESC")
@@ -83,7 +82,7 @@
 			<!--
 				Set the text for this text display
 			-->
-			<EditBox parentKey="EditBox" name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
+			<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
 				<KeyValues>
 					<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
 				</KeyValues>
@@ -92,7 +91,7 @@
 				<Anchors>
 					<Anchor point="TOP" y="-2"/>
 					<Anchor point="LEFT" x="25" />
-					<Anchor point="RIGHT" relativeTo="$parentCopy" relativePoint="LEFT" x="-5" />
+					<Anchor point="RIGHT" relativeKey="$parent.Copy" relativePoint="LEFT" x="-5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -118,17 +117,17 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString parentKey="StringNum" name="$parentStringNum" inherits="GameFontHighlight" justifyH="RIGHT">
+				<FontString parentKey="StringNum" inherits="GameFontHighlight" justifyH="RIGHT">
 					<!-- <Size x="25"/> -->
 					<Anchors>
 						<Anchor point="TOP" y="-5"/>
 						<Anchor point="LEFT" x="2" />
-						<Anchor point="RIGHT" x="-3" relativeTo="$parentEditBox" relativePoint="LEFT"/>
+						<Anchor point="RIGHT" x="-3" relativeKey="$parent.EditBox" relativePoint="LEFT"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="Error" name="$parentError" inherits="GameFontRed" justifyH="LEFT" >
+				<FontString parentKey="Error" inherits="GameFontRed" justifyH="LEFT" >
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentEditBox" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+						<Anchor point="TOPLEFT" relativeKey="$parent.EditBox" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
 					</Anchors>
 				</FontString>
 			</Layer>

@@ -318,7 +318,7 @@ function IconPosition_Sortable:AdjustIconsForModNumRowsCols(deltaRows, deltaCols
 		local rows_new = group.Rows + deltaRows
 
 		
-		local iconsCopy = TMW.UTIL.shallowCopy(group:GetSettings().Icons)
+		local iconsCopy = TMW.shallowCopy(group:GetSettings().Icons)
 		wipe(group:GetSettings().Icons)
 
 		for iconID, ics in pairs(iconsCopy) do
@@ -358,7 +358,7 @@ function IconPosition_Sortable:AdjustIconsForModNumRowsCols(deltaRows, deltaCols
 		local columns_new = group.Columns + deltaCols
 
 		
-		local iconsCopy = TMW.UTIL.shallowCopy(group:GetSettings().Icons)
+		local iconsCopy = TMW.shallowCopy(group:GetSettings().Icons)
 		wipe(group:GetSettings().Icons)
 
 		for iconID, ics in pairs(iconsCopy) do

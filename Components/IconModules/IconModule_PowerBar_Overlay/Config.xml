@@ -38,7 +38,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetText(TMW.L["ICONMENU_OFFS"]) -- TODO: standardize editbox title texts. make a method to set the position of it, and include it in SetTexts.
+						self.text:SetText(TMW.L["ICONMENU_OFFS"])
 						self.text:SetWidth(50)
 						
 						self.text:ClearAllPoints()

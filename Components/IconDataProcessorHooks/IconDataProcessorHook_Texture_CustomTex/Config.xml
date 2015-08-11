@@ -20,7 +20,7 @@
 						self:SetSetting("CustomTex")
 						
 						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
-							return TMW.UTIL:CleanPath(value)
+							return TMW:CleanPath(value)
 						end)
 						
 						
@@ -62,7 +62,7 @@
 							if tex then
 								-- clean off the first part of the path, it does not need to be saved
 								-- it will be appended when the texture is used.
-								tex = TMW.UTIL:CleanPath(tex)
+								tex = TMW:CleanPath(tex)
 								tex = gsub(tex, "INTERFACE/ICONS/", "")
 								tex = gsub(tex, "Interface/Icons/", "")
 

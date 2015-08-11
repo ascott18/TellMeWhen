@@ -56,7 +56,7 @@ function Counter:LoadSettingsForEventID(eventID)
 	self.ConfigContainer.Amt:SetText(eventSettings.CounterAmt)
 end
 
-function Counter:SetupEventDisplay(eventID)
+function Counter:GetEventDisplayText(eventID)
 	if not eventID then return end
 
 	local eventSettings = EVENTS:GetEventSettings(eventID)
@@ -73,7 +73,7 @@ function Counter:SetupEventDisplay(eventID)
 		str = str .. CounterOperation .. " " .. CounterAmt
 	end
 	
-	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. L["EVENTHANDLER_COUNTER_TAB"] .. ":|r " .. str)
+	return ("|cffcccccc" .. L["EVENTHANDLER_COUNTER_TAB"] .. ":|r " .. str)
 end
 
 
@@ -109,22 +109,14 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 function Module.Sorter_Counter(a, b)
-	--sort by name
-	
 	local special_a, special_b = strsub(a, 1, 1), strsub(b, 1, 1)
-	--local prefix_a, prefix_b = strsub(a, 1, 2), strsub(b, 1, 2)
 	
 	local haveA, haveB = special_a ~= "%", special_b ~= "%"
 	if (haveA ~= haveB) then
 		return haveA
 	end
 	
-	--[[local haveA, haveB = prefix_a == "%A", prefix_b == "%A"
-	if (haveA ~= haveB) then
-		return haveA
-	end]]
-	
-	--sort by index/alphabetical/whatever
+	--sort by alphabetical
 	return a < b
 end
 

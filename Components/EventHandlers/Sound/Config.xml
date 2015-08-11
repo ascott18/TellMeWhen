@@ -98,7 +98,7 @@
 						self.Header:SetText(TMW.L["SOUND_CUSTOM"])
 
 						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
-							return TMW.UTIL:CleanPath(value)
+							return TMW:CleanPath(value)
 						end)
 
 						self:CScriptAdd("UnModifySettingValueRequested", function(self, value)

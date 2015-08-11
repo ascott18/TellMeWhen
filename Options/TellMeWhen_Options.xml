@@ -183,27 +183,31 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				function self:SetLabels(title, text)
-					title = title or TMW.L["ICONMENU_CHOOSENAME2"]
-					text = text or TMW.L["CHOOSENAME_DIALOG"]
+				TMW:CInit(self)
 
-					self.Name.label = title
-					self.Name.__title = title
-					self.Name.__text = text
+				function self:SetTexts(title, text)
 					self:SetTitle(title)
-
-					self.Name:GetScript("OnTextChanged")(self.Name)
+					self.Name:SetLabel(title)
+					self.Name:SetTooltip(title, text)
 				end
 
-				function self:OnSetup(panelInfo, supplementalData)
+				self:CScriptAdd("PanelSetup", function(self, panelInfo)
+					local supplementalData = panelInfo.supplementalData
+
+					local title = TMW.L["ICONMENU_CHOOSENAME2"]
+					local tooltip = TMW.L["CHOOSENAME_DIALOG"]
+
 					if supplementalData then
-						self:SetLabels(supplementalData.title, supplementalData.text)
+						title = supplementalData.title or title
+						tooltip = supplementalData.text or tooltip
 
 						TMW.SUG:EnableEditBox(self.Name, supplementalData.SUGType or "spell")
 					else
 						TMW.SUG:EnableEditBox(self.Name, "spell")
 					end
-				end
+
+					self:SetTexts(title, tooltip)
+				end)
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -220,56 +224,12 @@
 					<OnLoad>
 						TMW:CInit(self)
 
-						self.label = TMW.L["ICONMENU_UNITSTOWATCH"]
+						-- Texts and tooltip are handled by the panel
 
-						self.normalTooltip = TMW.L["ICONMENU_UNIT_DESC"]
-
-						local text = function()
-							if IsModifierKeyDown() then
-								self.__noWrapTooltipText = true
-								return TMW.UNITS:GetUnitInputDetailedTooltip(self)
-							else
-								self.__noWrapTooltipText = false
-								return self.normalTooltip
-							end
-						end
-
-						-- TODO: kill this function. it should be replaced with Config_EditBox's SetTexts.
-						function self:SetLabels(title, text)
-							self.label = title
-							self.__title = title
-							self.normalTooltip = text
-							self:GetParent().Header:SetText(title)
-
-							self:GetScript("OnTextChanged")(self)
-						end
-
-						self:SetTexts(TMW.L["ICONMENU_UNITSTOWATCH"], text)
 						self:SetSetting("Unit")
 
 						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
 							return TMW:CleanString(value)
-						end)
-
-						self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
-							local supplementalData = panelInfo.supplementalData
-							self.supplementalData = supplementalData
-
-							local title, text
-
-							if supplementalData then
-								title = supplementalData.title or TMW.L["ICONMENU_UNITSTOWATCH"]
-								text = supplementalData.text or TMW.L["ICONMENU_UNIT_DESC"]
-
-								TMW.SUG:EnableEditBox(self, supplementalData.SUGType or "units")
-							else
-								title = TMW.L["ICONMENU_UNITSTOWATCH"]
-								text  = TMW.L["ICONMENU_UNIT_DESC"]
-
-								TMW.SUG:EnableEditBox(self, "units")
-							end
-
-							self:SetLabels(title, text)
 						end)
 
 						self:RegisterEvent("MODIFIER_STATE_CHANGED")
@@ -334,23 +294,46 @@
 			<OnLoad>
 				TMW:CInit(self)
 
-				self:SetTitle(TMW.L["ICONMENU_UNITSTOWATCH"])
+				local tooltip = function(self)
+					if IsModifierKeyDown() then
+						self.__noWrapTooltipText = true
+						return TMW.UNITS:GetUnitInputDetailedTooltip(self)
+					else
+						self.__noWrapTooltipText = false
+						return self.normalTooltip
+					end
+				end
+
+				function self:SetTexts(title, normalTooltip)
+					self:SetTitle(title)
+					self.Unit:SetLabel(title)
+					self.Unit.normalTooltip = normalTooltip
+					self.Unit:SetTooltip(title, tooltip)
+				end
 
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 					local supplementalData = panelInfo.supplementalData
 
-					if supplementalData then
-						if supplementalData.implementsConditions then
-							self.UnitConditions:Show()
-						else
-							self.UnitConditions:Hide()
-						end
-					else
-						self.UnitConditions:Hide()
-					end
+					self.UnitConditions:SetShown(supplementalData and supplementalData.implementsConditions)
 
 					self:AdjustHeight()
+
+
+					local title = TMW.L["ICONMENU_UNITSTOWATCH"]
+					local tooltip = TMW.L["ICONMENU_UNIT_DESC"]
+
+					if supplementalData then
+						title = supplementalData.title or title
+						tooltip = supplementalData.text or tooltip
+
+						TMW.SUG:EnableEditBox(self.Unit, supplementalData.SUGType or "units")
+					else
+						TMW.SUG:EnableEditBox(self.Unit, "units")
+					end
+
+					self:SetTexts(title, tooltip)
 				end)
+
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -440,7 +423,7 @@
 
 	<!-- TEMPLATES -->
 
-	<ScrollFrame name="TellMeWhen_ScrollFrameTemplate" parentKey="ScrollFrame" virtual="true">
+	<ScrollFrame name="TellMeWhen_ScrollFrameTemplate" virtual="true">
 		<Frames>
 			<Frame parentKey="ScrollBar" hidden="true">
 				<Size x="10"/>
@@ -2755,8 +2738,7 @@
 									<OnLoad>
 										local originalParent = self:GetParent()
 
-										self.tmwClass = "Config_GroupListContainer" -- TODO: add this as an optional param to CInit
-										TMW:CInit(self)
+										TMW:CInit(self, "Config_GroupListContainer")
 
 										self:CScriptAdd("ReloadRequested", function()
 											if self:GetParent() == TMW.IE.Pages.GroupMain then
@@ -3229,35 +3211,30 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString parentKey="Header" name="$parentHeader" inherits="GameFontNormal" wordwrap="false" justifyH="CENTER">
+				<FontString parentKey="Header" inherits="GameFontNormal" wordwrap="false" justifyH="CENTER">
 					<Anchors>
 						<Anchor point="TOP" y="-8"/>
-						<Anchor point="LEFT" relativeTo="$parentForwardsButton" relativePoint="RIGHT" x="4"/>
-						<Anchor point="RIGHT" relativeTo="$parentClose" relativePoint="LEFT"/>
+						<Anchor point="LEFT" relativeKey="$parent.ForwardsButton" relativePoint="RIGHT" x="4"/>
+						<Anchor point="RIGHT" relativeKey="$parent.Close" relativePoint="LEFT"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 		<Scripts>
 			<OnLoad>
+				TMW:CInit(self, "Config_Frame")
+
 				self:SetFrameLevel(20)
 
 				for k, v in pairs(self) do
 					TMW.IE[k] = v
 				end
 
-				-- TODO: get rid of this
-				self.tmwClass = "Config_Frame"
-				TMW:CInit(self)
-
 				TMW.IE:CreateTabGroups()
 
 				-- Needs to go before TellMeWhen_ChangelogDialog or else it will get hidden immediately after the changelog hides.
 				tinsert(UISpecialFrames, 1, self:GetName())
 			</OnLoad>
-			<OnSizeChanged>
-				--self.Help:SetHeight(self.Help.text:GetHeight() + 38)
-			</OnSizeChanged>
 			<OnDragStart>
 				TMW.IE:StartMoving()
 			</OnDragStart>

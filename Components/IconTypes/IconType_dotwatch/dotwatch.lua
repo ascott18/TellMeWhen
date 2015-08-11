@@ -60,9 +60,7 @@ Type:UsesAttributes("texture")
 
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	OnSetup = function(self, panelInfo, supplementalData)
-		self:SetLabels(L["ICONMENU_CHOOSENAME2"], nil)
-	end,
+	title = L["ICONMENU_CHOOSENAME2"],
 
 	SUGType = "buff",
 })

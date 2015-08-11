@@ -78,7 +78,7 @@ function Sound:LoadSettingsForEventID(id)
 	self.ConfigContainer:RequestReload()
 end
 
-function Sound:SetupEventDisplay(eventID)
+function Sound:GetEventDisplayText(eventID)
 	if not eventID then return end
 
 	local name = EVENTS:GetEventSettings(eventID).Sound
@@ -87,7 +87,7 @@ function Sound:SetupEventDisplay(eventID)
 		name = "|cff808080" .. NONE
 	end
 
-	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. self.handlerName .. ":|r " .. name)
+	return ("|cffcccccc" .. self.handlerName .. ":|r " .. name)
 end
 
 

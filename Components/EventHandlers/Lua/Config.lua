@@ -100,7 +100,7 @@ function Lua:SetError(code, kind, err)
 	Error:SetText(err)
 end
 
-function Lua:SetupEventDisplay(eventID)
+function Lua:GetEventDisplayText(eventID)
 	if not eventID then return end
 
 	local eventSettings = EVENTS:GetEventSettings(eventID)
@@ -118,9 +118,8 @@ function Lua:SetupEventDisplay(eventID)
 			code = "|cff808080<No Code/No Title>"
 		end
 	end
-
 	
-	EVENTS.EventHandlerFrames[eventID].DataText:SetText("|cffcccccc" .. L["EVENTHANDLER_LUA_LUA"] .. ":|r " .. code)
+	return ("|cffcccccc" .. L["EVENTHANDLER_LUA_LUA"] .. ":|r " .. code)
 end
 
 

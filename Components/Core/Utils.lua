@@ -17,8 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local UTIL = {}
-TMW.UTIL = UTIL
 
 -- TODO: STANDARDIZE THE CALLING FORMAT FOR FUNCTIONS IN THIS FILE.
 
@@ -35,7 +33,7 @@ function TMW.approachTable(t, ...)
 	return t
 end
 
-function UTIL.shallowCopy(t)
+function TMW.shallowCopy(t)
 	local new = {}
 	for k, v in pairs(t) do
 		new[k] = v
@@ -43,7 +41,7 @@ function UTIL.shallowCopy(t)
 	return new
 end
 
-function UTIL:CleanPath(path)
+function TMW:CleanPath(path)
 	if not path then
 		return ""
 	end

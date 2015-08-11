@@ -244,6 +244,7 @@ function TEXT:CopyString_DropDown()
 		
 		info.tooltipTitle = L["TEXTLAYOUTS_STRINGUSEDBY"]:format(num)
 		info.tooltipText = DogTag:ColorizeCode(text)
+		info.tooltipWrap = false
 		info.notCheckable = true
 		
 		info.arg1 = self

@@ -88,9 +88,9 @@ Type:RegisterIconDefaults{
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	OnSetup = function(self, panelInfo, supplementalData)
 		if TMW.CI.icon:IsGroupController() then
-			self:SetLabels(L["ICONMENU_CHOOSENAME2"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"], nil)
+			self:SetTexts(L["ICONMENU_CHOOSENAME2"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"], L["CHOOSENAME_DIALOG"])
 		else
-			self:SetLabels(L["ICONMENU_CHOOSENAME2"], nil)
+			self:SetTexts(L["ICONMENU_CHOOSENAME2"], L["CHOOSENAME_DIALOG"])
 		end
 	end,
 

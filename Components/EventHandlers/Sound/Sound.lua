@@ -64,8 +64,8 @@ TMW:RegisterUpgrade(42102, {
 
 -- Helper methods
 function Sound:GetSoundFile(sound)
-	sound = TMW.UTIL:CleanPath(sound)
-	local quiet = TMW.UTIL:CleanPath("Interface/Quiet.ogg")
+	sound = TMW:CleanPath(sound)
+	local quiet = TMW:CleanPath("Interface/Quiet.ogg")
 
 	if sound == "" or sound == quiet or sound == "None" then
 		return nil
@@ -78,7 +78,7 @@ function Sound:GetSoundFile(sound)
 	else
 		-- This will handle sounds from LSM.
 		local s = LSM:Fetch("sound", sound)
-		s = TMW.UTIL:CleanPath(sound)
+		s = TMW:CleanPath(sound)
 		if s and s ~= quiet and s ~= "" then
 			return s
 		end

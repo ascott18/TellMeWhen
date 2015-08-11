@@ -80,8 +80,8 @@ TMW.C = TMW.Classes -- shortcut
 function TMW:NewClass(...)
 	return TMW.Classes:NewClass(...)
 end
-function TMW:CInit(self, ...)
-	local className = self.tmwClass
+function TMW:CInit(self, className)
+	local className = className or self.tmwClass
 	if not className then
 		error("tmwClass value not defined for " .. self:GetName() or "<unnamed>.")
 	end
@@ -91,7 +91,7 @@ function TMW:CInit(self, ...)
 		error("No class found named " .. className)
 	end
 
-	class:NewFromExisting(self, ...)
+	class:NewFromExisting(self)
 end
 
 -- Callbacks to replicate the functionality of the old events
@@ -1955,6 +1955,11 @@ do
 	function TMW.generateGUID(length)
 		-- Start with the current time as a base.
 		-- octalStr will get something like "012226556045"
+		
+		-- This is suceptible to the year 2038 problem, because string.format uses 32 bit ints.
+		-- If you're still using TellMeWhen in 2038: Greetings from 2015!
+		-- Does WoW still exist? Are the servers still running? Has it gone F2P? So many questions!
+		-- My 45th birthday is coming up soon :(
 		local time = _G.time()
 		local octalStr = format("%.12o", time)
 		

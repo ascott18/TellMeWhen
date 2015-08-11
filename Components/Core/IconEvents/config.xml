@@ -282,8 +282,7 @@
 		</Anchors>
 		<Scripts>
 			<OnLoad>
-				self.tmwClass = "Config_Frame"
-				TMW:CInit(self)
+				TMW:CInit(self, "Config_Frame")
 
 				local EventHandler
 				for k, v in pairs(self:GetParent()) do
@@ -307,7 +306,7 @@
 	
 	<Frame parentKey="Events" name="$parentEvents" inherits="TellMeWhen_IE_PageTemplate">
 		<Frames>
-			<Frame parentKey="EventHandlerFrames" name="$parentEventHandlerFrames">
+			<Frame parentKey="EventHandlerFrames" >
 				<Size x="210" y="10"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="12" y="-55"/>
@@ -327,24 +326,19 @@
 						end)
 					</OnLoad>
 					<OnUpdate>
-						local numChildren = #self
 						local lastShownChild
-						for i = 1, numChildren do
-							if self[i]:IsShown() then
-								lastShownChild = self[i]
+						for i = 1, #self.frames do
+							if self.frames[i]:IsShown() then
+								lastShownChild = self.frames[i]
 							else
 								break
 							end
 						end
 						
-						if lastShownChild then
-							if lastShownChild:GetBottom() > self.ScrollFrame:GetBottom() + 5 then
-								self.originalParent.EventSettingsContainer.ScrollFrame:SetPoint("TOP", lastShownChild, "BOTTOM", 0, -36)
-							else
-								self.originalParent.EventSettingsContainer.ScrollFrame:SetPoint("TOP", self.ScrollFrame, "BOTTOM", 0, -36)
-							end		
-						else
-							self.originalParent.EventSettingsContainer.ScrollFrame:SetPoint("TOP", self.ScrollFrame, "TOP", 0, -36)						
+						self.originalParent.EventSettingsContainer.ScrollFrame:SetPoint("TOP", self.ScrollFrame, "BOTTOM", 0, -36)
+
+						if lastShownChild and lastShownChild:GetBottom() > self.ScrollFrame:GetBottom() + 5 then
+							self.originalParent.EventSettingsContainer.ScrollFrame:SetPoint("TOP", lastShownChild, "BOTTOM", 0, -36)
 						end
 					</OnUpdate>
 				</Scripts>
@@ -353,8 +347,8 @@
 			<CheckButton parentKey="AddEvent" inherits="TellMeWhen_FlatFrame">
 				<Size y="30"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="TOPLEFT" y="2"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="TOPRIGHT" y="2"/>
+					<Anchor point="BOTTOMLEFT" relativeKey="$parent.EventHandlerFrames.ScrollFrame" relativePoint="TOPLEFT" y="2"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.EventHandlerFrames.ScrollFrame" relativePoint="TOPRIGHT" y="2"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
@@ -364,7 +358,7 @@
 								<Anchor point="LEFT" x="5"/>
 							</Anchors>
 						</Texture>
-						<FontString parentKey="EventName" inherits="GameFontNormalSmall" justifyH="LEFT">
+						<FontString parentKey="Text" inherits="GameFontNormalSmall" justifyH="LEFT">
 							<Anchors>
 								<Anchor point="LEFT" relativeKey="$parent.Plus" relativePoint="RIGHT" x="5"/>
 							</Anchors>
@@ -374,7 +368,7 @@
 
 				<Scripts>
 					<OnLoad>
-						self.EventName:SetText(TMW.L["EVENTS_HANDLERS_ADD"])
+						self.Text:SetText(TMW.L["EVENTS_HANDLERS_ADD"])
 						TMW:TT(self, "EVENTS_HANDLERS_ADD", "EVENTS_HANDLERS_ADD_DESC", nil, nil, "ShouldShowTooltip")
 
 						function self:ShouldShowTooltip()
@@ -382,11 +376,11 @@
 						end
 
 						-- Fix text wrapping:
-						self.EventName:SetPoint("RIGHT", self, "RIGHT")
+						self.Text:SetPoint("RIGHT", self, "RIGHT")
 						-- Have to do this or else the text won't multiline/wordwrap when it should.
 						-- 30 is just an arbitrarily large number.
-						self.EventName:SetHeight(30)
-						self.EventName:SetMaxLines(3)
+						self.Text:SetHeight(30)
+						self.Text:SetMaxLines(3)
 					</OnLoad>
 					<OnClick>
 						PlaySound("igMainMenuOptionCheckBoxOn")
@@ -397,7 +391,7 @@
 				</Scripts>
 			</CheckButton>
 
-			<Frame parentKey="HandlerPickers" name="$parentHandlerPickers" hidden="true">
+			<Frame parentKey="HandlerPickers" hidden="true">
 				<Size y="50"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.AddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
@@ -432,7 +426,7 @@
 				</Scripts>
 			</Frame>
 
-			<Frame parentKey="EventPickers" name="$parentEventPickers" hidden="true">
+			<Frame parentKey="EventPickers" hidden="true">
 				<Size y="50"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.AddEvent" relativePoint="TOPRIGHT" x="15" y="0"/>
@@ -470,9 +464,9 @@
 			<Frame parentKey="EventSettingsContainer" name="$parentEventSettingsContainer">
 				<Size x="210" y="10"/>
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentEventHandlerFramesScrollFrame" relativePoint="BOTTOM" y="-36"/>
-					<Anchor point="LEFT" relativeTo="$parentEventHandlerFramesScrollFrame" />
-					<Anchor point="RIGHT" relativeTo="$parentEventHandlerFramesScrollFrame" />
+					<Anchor point="TOP" relativeKey="$parent.EventHandlerFrames.ScrollFrame" relativePoint="BOTTOM" y="-36"/>
+					<Anchor point="LEFT" relativeKey="$parent.EventHandlerFrames.ScrollFrame" />
+					<Anchor point="RIGHT" relativeKey="$parent.EventHandlerFrames.ScrollFrame" />
 					<Anchor point="BOTTOM" y="0"/>
 				</Anchors>
 				<Frames>
@@ -664,12 +658,12 @@
 						TMW:ConvertContainerToScrollFrame(self, true, nil, 8)
 					</OnLoad>
 					<OnHide>
-						self.originalParent.EventSettingsContainerHeader:Hide()
-						self.originalParent.EventSettingsContainerEventName:Hide()
+						self.originalParent.EventSettingsHeader:Hide()
+						self.originalParent.EventSettingsEventName:Hide()
 					</OnHide>
 					<OnShow>
-						self.originalParent.EventSettingsContainerHeader:Show()
-						self.originalParent.EventSettingsContainerEventName:Show()
+						self.originalParent.EventSettingsHeader:Show()
+						self.originalParent.EventSettingsEventName:Show()
 					</OnShow>
 				</Scripts>
 			</Frame>
@@ -682,14 +676,14 @@
 						<Anchor point="BOTTOM" relativeKey="$parent.AddEvent" relativePoint="TOP" y="1"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="EventSettingsContainerHeader" hidden="true" inherits="GameFontNormalLarge" justifyH="CENTER">
+				<FontString parentKey="EventSettingsHeader" hidden="true" inherits="GameFontNormalLarge" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="TOP" relativeTo="$parentEventSettingsContainerScrollFrame" y="30"/>
+						<Anchor point="TOP" relativeKey="$parent.EventSettingsContainer.ScrollFrame" y="30"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="EventSettingsContainerEventName" inherits="GameFontDisableSmall" hidden="true" justifyH="CENTER">
+				<FontString parentKey="EventSettingsEventName" inherits="GameFontDisableSmall" hidden="true" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="TOP" relativeKey="$parent.EventSettingsContainerHeader" relativePoint="BOTTOM" y="-3"/>
+						<Anchor point="TOP" relativeKey="$parent.EventSettingsHeader" relativePoint="BOTTOM" y="-3"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -707,7 +701,7 @@
 				end)
 				
 				self.EventListHeader:SetText(TMW.L["EVENTS_HANDLERS_HEADER"])
-				self.EventSettingsContainerHeader:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
+				self.EventSettingsHeader:SetText(TMW.L["EVENTS_SETTINGS_HEADER"])
 				
 				TMW.EVENTS.EventHandlerFrames = self.EventHandlerFrames
 				TMW.EVENTS.EventSettingsContainer = self.EventSettingsContainer
