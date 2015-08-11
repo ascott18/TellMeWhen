@@ -123,7 +123,7 @@ local function parseSpellsString(setting, doLower, keepDurations)
 		if (tonumber(spell) or 0) >= 2^31 or duration >= 2^31 then
 			-- Invalid spellID or duration. Remove it to prevent integer overflow errors.
 			tremove(buffNames, k)
-			TMW.Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
+			TMW:Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
 		end
 	end
 

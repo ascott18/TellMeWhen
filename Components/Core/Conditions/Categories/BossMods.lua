@@ -155,7 +155,7 @@ local function BigWigs_timer_init()
 	BigWigs_timer_init = nil
 
 	if not BigWigsLoader then
-		TMW.Warn("BigWigsLoader wasn't loaded when BigWigs timer conditions tried to initialize.")
+		TMW:Warn("BigWigsLoader wasn't loaded when BigWigs timer conditions tried to initialize.")
 		function Env.BigWigs_GetTimeRemaining()
 			return 0, 0
 		end
@@ -292,7 +292,7 @@ local function BigWigs_engaged_init()
 	BigWigs_engaged_init = nil
 
 	if not BigWigsLoader then
-		TMW.Warn("BigWigsLoader wasn't loaded when BigWigs engaged conditions tried to initialize.")
+		TMW:Warn("BigWigsLoader wasn't loaded when BigWigs engaged conditions tried to initialize.")
 
 		function Env.BigWigs_IsBossEngaged()
 			return false
@@ -380,7 +380,7 @@ ConditionCategory:RegisterSpacer(9)
 local function DBM_timer_init()
 	DBM_timer_init = nil
 	if not DBM then
-		TMW.Warn("DBM wasn't loaded when DBM timer conditions tried to initialize.")
+		TMW:Warn("DBM wasn't loaded when DBM timer conditions tried to initialize.")
 		
 		function Env.DBM_GetTimeRemaining()
 			return 0, 0
@@ -493,7 +493,7 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 local function DBM_engaged_init()
 	DBM_engaged_init = nil
 	if not DBM then
-		TMW.Warn("DBM wasn't loaded when DBM engaged conditions tried to initialize.")
+		TMW:Warn("DBM wasn't loaded when DBM engaged conditions tried to initialize.")
 		
 		function Env.DBM_IsBossEngaged()
 			return false

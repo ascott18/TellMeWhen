@@ -18,61 +18,26 @@ local L = TMW.L
 local print = TMW.print
 
 
--- TODO: STANDARDIZE THE CALLING FORMAT FOR FUNCTIONS IN THIS FILE.
+local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, next, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, unpack =
+	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, next, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, unpack
+local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin =
+	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin
+local math, max, ceil, floor, random, abs =
+	  math, max, ceil, floor, random, abs
+local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler =
+	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler
 
-function TMW.approachTable(t, ...)
-	for i=1, select("#", ...) do
-		local k = select(i, ...)
-		if type(k) == "function" then
-			t = k(t)
-		else
-			t = t[k]
-		end
-		if not t then return end
-	end
-	return t
-end
+local UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate =
+      UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate
 
-function TMW.shallowCopy(t)
-	local new = {}
-	for k, v in pairs(t) do
-		new[k] = v
-	end
-	return new
-end
-
-function TMW:CleanPath(path)
-	if not path then
-		return ""
-	end
-	
-	return path:trim():gsub("\\\\", "/"):gsub("\\", "/"), nil
-end
+local debugprofilestop = debugprofilestop_SAFE
 
 
-do	-- TMW:GetParser()
-	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
-	function TMW:GetParser()
-		if not Parser then
-			Parser = CreateFrame("GameTooltip")
-
-			LT1 = Parser:CreateFontString()
-			RT1 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT1, RT1)
-
-			LT2 = Parser:CreateFontString()
-			RT2 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT2, RT2)
-
-			LT3 = Parser:CreateFontString()
-			RT3 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT3, RT3)
-		end
-		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
-	end
-end
 
 
+---------------------------------
+-- TMW.Class.Formatter
+---------------------------------
 
 local Formatter = TMW:NewClass("Formatter"){
 	OnNewInstance = function(self, fmt)
@@ -83,7 +48,7 @@ local Formatter = TMW:NewClass("Formatter"){
 		local type = type(self.fmt)
 
 		if type == "string" then
-			return string.format(self.fmt, value)
+			return format(self.fmt, value)
 		elseif type == "table" then
 			return self.fmt[value]
 		elseif type == "function" then
@@ -248,6 +213,518 @@ Formatter{
 
 
 
+
+
+
+---------------------------------
+-- Function Caching
+---------------------------------
+
+local cacheMetatable = {
+	__mode == 'kv'
+}
+
+function TMW:MakeFunctionCached(obj, method)
+	local func
+	if type(obj) == "table" and type(method) == "string" then
+		func = obj[method]
+	elseif type(obj) == "function" then
+		func = obj
+	else
+		error("Usage: TMW:MakeFunctionCached(object/function [, method])")
+	end
+
+	local cache = setmetatable({}, cacheMetatable)
+	local wrapper = function(...)
+		local cachestring = strjoin("\031", tostringall(...))
+		
+		if cache[cachestring] then
+			return cache[cachestring]
+		end
+
+		local arg1, arg2 = func(...)
+		if arg2 ~= nil then
+			error("Cannot cache functions with more than 1 return arg")
+		end
+
+		cache[cachestring] = arg1
+
+		return arg1
+	end
+
+	if type(obj) == "table" then
+		obj[method] = wrapper
+	end
+
+	return wrapper, cache
+end
+
+function TMW:MakeSingleArgFunctionCached(obj, method)
+	-- MakeSingleArgFunctionCached is MUCH more efficient than MakeFunctionCached
+	-- and should be used whenever there is only 1 input arg
+	local func, firstarg
+	if type(obj) == "table" and type(method) == "string" then
+		func = obj[method]
+		firstarg = obj
+	elseif type(obj) == "function" then
+		func = obj
+	else
+		error("Usage: TMW:MakeFunctionCached(object/function [, method])", 2)
+	end
+
+	local cache = setmetatable({}, cacheMetatable)
+	local wrapper = function(arg1In, arg2In)
+		local param1, param2 = arg1In, arg2In
+		if firstarg and firstarg == arg1In then
+			param1 = arg1In
+			arg1In = arg2In
+		elseif arg2In ~= nil then
+			error("Cannot MakeSingleArgFunctionCached functions with more than 1 arg", 2)
+		end
+		
+		if cache[arg1In] then
+			return cache[arg1In]
+		end
+
+		local arg1Out, arg2Out = func(param1, param2)
+		if arg2Out ~= nil then
+			error("Cannot cache functions with more than 1 return arg", 2)
+		end
+
+		cache[arg1In] = arg1Out
+
+		return arg1Out
+	end
+
+	if type(obj) == "table" then
+		obj[method] = wrapper
+	end
+
+	return wrapper
+end
+
+
+
+
+
+
+
+---------------------------------
+-- Output & Errors
+---------------------------------
+
+local warn = {}
+function TMW:ResetWarn()
+	for k, v in pairs(warn) do
+		-- reset warnings so they can happen again
+		if type(k) == "string" then
+			warn[k] = nil
+		end
+	end
+end
+function TMW:DoInitialWarn()
+	for k, v in ipairs(warn) do
+		TMW:Print(v)
+		warn[k] = true
+	end
+	
+	TMW.Warned = true
+	TMW.DoInitialWarn = TMW.NULLFUNC
+end
+
+function TMW:Warn(text)
+	if warn[text] then
+		return
+	elseif TMW.Warned then
+		TMW:Print(text)
+		warn[text] = true
+	elseif not TMW.tContains(warn, text) then
+		tinsert(warn, text)
+	end
+end
+
+function TMW:Debug(...)
+	if TMW.debug or not TMW.Initialized then
+		TMW.print(format(...))
+	end
+end
+
+function TMW:Error(text, ...)
+	text = text or ""
+	local success, result = pcall(format, text, ...)
+	if success then
+		text = result
+	end
+	geterrorhandler()("TellMeWhen: " .. text)
+end
+
+function TMW:Assert(statement, text, ...)
+	if not statement then
+		text = text or "Assertion Failed!"
+		local success, result = pcall(format, text, ...)
+		if success then
+			text = result
+		end
+		geterrorhandler()("TellMeWhen: " .. text)
+	end
+end
+
+
+
+
+
+
+
+---------------------------------
+-- Generic String Utilities
+---------------------------------
+
+local mult = {
+	1,						-- seconds per second
+	60,						-- seconds per minute
+	60*60,					-- seconds per hour
+	60*60*24,				-- seconds per day
+	60*60*24*365.242199,	-- seconds per year
+}
+function TMW.toSeconds(str)
+	-- converts a string (e.g. "1:45:37") into the number of seconds that it represents (eg. 6337)
+	str = ":" .. str:trim(": ") -- a colon is needed at the beginning so that gmatch will catch the first unit of time in the string (minutes, hours, etc)
+	local _, numcolon = str:gsub(":", ":") -- count the number of colons in the string so that we can keep track of what multiplier we are on (since we start with the highest unit of time)
+	local seconds = 0
+	
+	for num in str:gmatch(":([0-9%.]*)") do -- iterate over all units of time and their value
+		if tonumber(num) and mult[numcolon] then -- make sure that it is valid (there is a number and it isnt a unit of time higher than a year)
+			seconds = seconds + mult[numcolon]*num -- multiply the number of units by the number of seconds in that unit and add the appropriate amount of time to the running count
+		end
+		numcolon = numcolon - 1 -- decrease the current unit of time that is being worked with (even if it was an invalid unit and failed the above check)
+	end
+	
+	return seconds
+end
+
+local function replace(text, find, rep)
+	-- using this allows for the replacement of ";	   " to "; " in one external call
+	assert(not strfind(rep, find), "RECURSION DETECTED: FIND=".. find.. " REP=".. rep)
+	while strfind(text, find) do
+		text = gsub(text, find, rep)
+	end
+	return text
+end
+function TMW:CleanString(text)
+	local frame
+	if type(text) == "table" and text.GetText then
+		frame = text
+		text = text:GetText()
+	end
+	if not text then error("No text to clean!") end
+	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
+	text = replace(text, "[^:] ;", "; ") -- remove all spaces before semicolons
+	text = replace(text, "; ", ";") -- remove all spaces after semicolons
+	text = replace(text, ";;", ";") -- remove all double semicolons
+	text = replace(text, " :", ":") -- remove all single spaces before colons
+	text = replace(text, ":  ", ": ") -- remove all double spaces after colons (DONT REMOVE ALL DOUBLE SPACES EVERYWHERE, SOME SPELLS HAVE TYPO'd NAMES WITH 2 SPACES!)
+	text = gsub(text, ";", "; ") -- add spaces after all semicolons. Never used to do this, but it just looks so much better (DONT USE replace!).
+	if frame then
+		frame:SetText(text)
+	end
+	return text
+end
+
+function TMW:CleanPath(path)
+	if not path then
+		return ""
+	end
+	
+	return path:trim():gsub("\\\\", "/"):gsub("\\", "/"), nil
+end
+
+function TMW:SplitNames(input)
+	input = TMW:CleanString(input)
+	local tbl = { strsplit(";", input) }
+	if #tbl == 1 and tbl[1] == "" then
+		tbl[1] = nil
+	end
+
+	for a, b in ipairs(tbl) do
+		local new = strtrim(b) --remove spaces from the beginning and end of each name
+		tbl[a] = tonumber(new) or new -- turn it into a number if it is one
+	end
+	return tbl
+end
+
+TMW.SplitNamesCached = TMW.SplitNames
+TMW:MakeSingleArgFunctionCached(TMW, "SplitNamesCached")
+
+
+function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
+	local ret = ""
+
+	if abs(seconds) == math.huge then
+		return tostring(seconds)
+	elseif seconds < 0 then
+		ret = "-"
+		seconds = -seconds
+	end
+
+	local y =  seconds / 31556926
+	local d = (seconds % 31556926) / 86400
+	local h = (seconds % 31556926  % 86400) / 3600
+	local m = (seconds % 31556926  % 86400  % 3600) / 60
+	local s = (seconds % 31556926  % 86400  % 3600  % 60)
+
+	local ns
+	if skipSmall then
+		ns = format("%d", s)
+	else
+		ns = format("%.1f", s)
+		if not keepTrailing then
+			ns = tonumber(ns)
+		end
+	end
+	if s < 10 and seconds >= 60 then
+		ns = "0" .. ns
+	end
+
+	if y >= 0x7FFFFFFE then
+		ret = ret .. format("OVERFLOW:%d:%02d:%02d:%s", d, h, m, ns)
+	elseif y >= 1 then
+		ret = ret .. format("%d:%d:%02d:%02d:%s", y, d, h, m, ns)
+	elseif d >= 1 then
+		ret = ret .. format("%d:%02d:%02d:%s", d, h, m, ns)
+	elseif h >= 1 then
+		ret = ret .. format("%d:%02d:%s", h, m, ns)
+	elseif m >= 1 then
+		ret = ret .. format("%d:%s", m, ns)
+	else
+		ret = ret .. ns
+	end
+
+	return ret
+end
+
+function TMW:GetTexturePathFromSetting(setting)
+	setting = tonumber(setting) or setting
+		
+	if setting and setting ~= "" then
+
+		if TMW.GetSpellTexture(setting) then
+			return TMW.GetSpellTexture(setting)
+		end
+
+		-- If there is a slash in it, then it is probably a full path
+		if strfind(setting, "[\\/]") then 
+			return setting
+		else
+			-- If there isn't a slash in it, then it is probably be a wow icon in interface\icons.
+			-- it still might be a file in wow's root directory, but there is no way to tell for sure
+			return "Interface/Icons/" .. setting
+		end			
+	end
+end
+
+
+
+
+
+
+
+---------------------------------
+-- Table Utilities
+---------------------------------
+
+function TMW.approachTable(t, ...)
+	for i=1, select("#", ...) do
+		local k = select(i, ...)
+		if type(k) == "function" then
+			t = k(t)
+		else
+			t = t[k]
+		end
+		if not t then return end
+	end
+	return t
+end
+
+function TMW.shallowCopy(t)
+	local new = {}
+	for k, v in pairs(t) do
+		new[k] = v
+	end
+	return new
+end
+
+function TMW.tContains(table, item, returnNum)
+	local firstkey
+	local num = 0
+	for k, v in pairs(table) do
+		if v == item then
+			if not returnNum then
+				-- Return only the key of the first match
+				return k
+			else
+				num = num + 1
+				firstkey = firstkey or k
+			end
+		end
+	end
+
+	-- Return the key of the first match and also the total number of matches
+	return firstkey, num
+end
+
+function TMW.tDeleteItem(table, item, onlyOne)
+	local i = 1
+	local removed
+	while table[i] do
+		if item == table[i] then
+			tremove(table, i)
+			if onlyOne then
+				return true
+			end
+			removed = true
+		else
+			i = i + 1
+		end
+	end
+
+	return removed
+end
+
+function TMW.tRemoveDuplicates(table)
+
+	local offs = 0
+
+	-- Start at the end of the table so that we don't remove duplicates from the beginning
+	for k = #table, 1, -1 do
+
+		-- offs is adjusted each time something is removed so that we don't waste time
+		-- searching for nil values when the table is shifted by a duplicate removal
+		k = k + offs
+
+		-- If we have reached the beginning of the table, we are done.
+		if k <= 0 then
+			return table
+		end
+		
+		-- item is the value being searched for
+		local item = table[k]
+
+		-- prevIndex tracks the last index where the searched-for value was found
+		local prevIndex
+
+		-- Once again start the iteration from the end because we don't want to have to 
+		-- deal with index shifting when we remove a value
+		for i = #table, 1, -1 do
+			if table[i] == item then
+
+				-- We found a match. If there has already been another match, remove that match 
+				-- and record this match as being the first one (closes to index 0) in the table.
+				if prevIndex then
+					tremove(table, prevIndex)
+					offs = offs - 1
+				end
+
+				-- Queue this match for removal should we find another match closer to the beginning.
+				prevIndex = i
+			end
+		end
+	end
+
+	-- Done. Return the table for ease-of-use.
+	return table
+end
+
+function TMW.OrderSort(a, b)
+	a = a.Order or a.order
+	b = b.Order or b.order
+	if a and b then
+		return a < b
+	else
+		error("Missing 'order' or 'Order' key for values of OrderedTable")
+	end
+end
+function TMW:SortOrderedTables(parentTable)
+	sort(parentTable, TMW.OrderSort)
+	return parentTable
+end
+
+function TMW:CopyWithMetatable(source)
+	-- This is basically deepcopy without recursion prevention
+	
+	local dest = {}
+	for k, v in pairs(source) do
+		if type(v) == "table" then
+			dest[k] = TMW:CopyWithMetatable(v)
+		else
+			dest[k] = v
+		end
+	end
+	return setmetatable(dest, getmetatable(source))
+end
+
+function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
+	--src and dest must have congruent data structure, otherwise shit will blow up. There are no safety checks to prevent this.
+	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
+	setmetatable(src, getmetatable(dest))
+	for k in pairs(src) do
+		if type(dest[k]) == "table" and type(src[k]) == "table" then
+			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
+		elseif allowUnmatchedSourceTables and type(dest[k]) ~= "table" and type(src[k]) == "table" then
+			dest[k] = {}
+			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
+		elseif type(src[k]) ~= "table" then
+			dest[k] = src[k]
+		end
+	end
+	setmetatable(src, metatemp) -- restore the old metatable
+	return dest -- not really needed, but what the hell why not
+end
+
+function TMW:DeepCompare(t1, t2, ...)
+	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
+
+	-- attempt direct comparison
+	if t1 == t2 then
+		return true, ...
+	end
+
+	-- if the values are not the same (they made it through the check above) AND they are not both tables, then they cannot be the same, so exit.
+	local ty1 = type(t1)
+	if ty1 ~= "table" or ty1 ~= type(t2) then
+		return false, ...
+	end
+
+	-- compare table values
+
+	-- compare table 1 with table 2
+	for k1, v1 in pairs(t1) do
+		local v2 = t2[k1]
+
+		-- don't bother calling DeepCompare on the values if they are the same - it will just return true.
+		-- Only call it if the values are different (they are either 2 tables, or they actually are different non-table values)
+		-- by adding the (v1 ~= v2) check, efficiency is increased by about 300%.
+		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k1, ...) then
+
+			-- it only reaches this point if there is a difference between the 2 tables somewhere
+			-- so i dont feel bad about calling DeepCompare with the same args again
+			-- i need to because the key of the setting that changed is in there, and AttemptBackup needs that key
+			return TMW:DeepCompare(v1, v2, k1, ...)
+		end
+	end
+
+	-- compare table 2 with table 1
+	for k2, v2 in pairs(t2) do
+		local v1 = t1[k2]
+
+		-- see comments for t1
+		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k2, ...) then
+			return TMW:DeepCompare(v1, v2, k2, ...)
+		end
+	end
+
+	return true, ...
+end
+
 do	-- TMW.shellsortDeferred
 	-- From http://lua-users.org/wiki/LuaSorting - shellsort
 	-- Written by Rici Lake. The author disclaims all copyright and offers no warranty.
@@ -338,8 +815,9 @@ do	-- TMW.shellsortDeferred
 		coroutines[t] = nil
 	end
 	
-	local f = CreateFrame("Frame")
-	function f:OnUpdate()
+	local timer
+
+	local function OnUpdate()
 		local table, co = next(coroutines)
 
 		if table then
@@ -359,10 +837,10 @@ do	-- TMW.shellsortDeferred
 		end
 
 		if not next(coroutines) then
-			f:SetScript("OnUpdate", nil)
+			timer:Cancel()
+			timer = nil
 		end
 	end
-
 
 	-- The purpose of shellSortDeferred is to have a sort that won't
 	-- lock up the game when we sort huge things.
@@ -370,7 +848,404 @@ do	-- TMW.shellsortDeferred
 		local co = coroutine.create(shellsort)
 		coroutines[t] = co
 		start = debugprofilestop()
-		f:SetScript("OnUpdate", f.OnUpdate)
+
+		if not timer then
+			timer = C_Timer.NewTicker(0.001, OnUpdate)
+		end
+
 		assert(coroutine.resume(co, t, before, n, callback, callbackArg, progressCallback, progressCallbackArg))
 	end
+end
+
+
+
+
+
+
+
+---------------------------------
+-- Iterator Functions
+---------------------------------
+
+do -- InNLengthTable
+	local states = {}
+	local function getstate(k, t)
+		local state = wipe(tremove(states) or {})
+
+		state.k = k
+		state.t = t
+
+		return state
+	end
+
+	local function iter(state)
+		state.k = state.k + 1
+
+		if state.k > (state.t.n or #state.t) then -- #t enables iteration over tables that have not yet been upgraded with an n key (i.e. imported data from old versions)
+			tinsert(states, state)
+			return
+		end
+	--	return state.t[state.k], state.k --OLD, STUPID IMPLEMENTATION
+		return state.k, state.t[state.k]
+	end
+
+	--- Iterates over an array-style table that has a key "n" to indicate the length of the table.
+	-- Returns (key, value) pairs for each iteration.
+	function TMW:InNLengthTable(arg)
+		if arg then
+			return iter, getstate(0, arg)
+		else
+			error("Bad argument #1 to 'TMW:InNLengthTable(arg)'. Expected table, got nil.", 2)
+		end
+	end
+end
+
+do -- ordered pairs
+
+	local tables = {}
+	local unused = {}
+
+	local sortByValues, compareFunc, reverse
+
+	-- An alternative comparison function that can handle mismatched types.
+	local function betterCompare(a, b)
+		local ta, tb = type(a), type(b)
+		if ta ~= tb then
+			if reverse then
+				return ta > tb
+			end
+			return ta < tb
+		elseif ta == "number" or ta == "string" then
+			if reverse then
+				return a > b
+			end
+			return a < b
+		elseif ta == "boolean" then
+			if reverse then
+				return b == true
+			end
+			return a == true
+		else
+			if reverse then
+				return tostring(a) > tostring(b)
+			end
+			return tostring(a) < tostring(b)
+		end
+	end
+
+	local function sorter(a, b)
+		if sortByValues then
+			a, b = sortByValues[a], sortByValues[b]
+		end
+
+		if compareFunc then
+			return compareFunc(a, b)
+		end
+
+		if reverse then
+			return a > b
+		end
+		return a < b
+
+		--return compare(a, b)
+	end
+
+	local function orderedNext(t, state)
+		local orderedIndex = tables[t]
+		
+		if state == nil then
+			local key = orderedIndex[1]
+			return key, t[key]
+		end
+
+		local key
+		for i = 1, #orderedIndex do
+			if orderedIndex[i] == state then
+				key = orderedIndex[i+1]
+				break
+			end
+		end
+
+		if key then
+			return key, t[key]
+		end
+
+		unused[#unused+1] = wipe(orderedIndex)
+		tables[t] = nil
+		return
+	end
+
+	--- Iterates over the table in an ordered fashion, without modifying the table.
+	-- @param t [table] The table to iterate over
+	-- @param compare [function|nil] The comparison function that will be used for sorting the keys or values of the table. Defaults to regular ascending order.
+	-- @param byValues [boolean|nil] True to have the iteration order based on values (values will be passed to the compare function if defined), false/nil to sort by keys.
+	-- @param rev [boolean|nil] True to reverse the sorted order of the iteration.
+	-- @return Iterator that will return (key, value) for each iteration.
+	function TMW:OrderedPairs(t, compare, byValues, rev)
+		if not next(t) then
+			return TMW.NULLFUNC
+		end
+
+		local orderedIndex = tremove(unused) or {}
+		local type_comparand = nil
+		for key, value in pairs(t) do
+			orderedIndex[#orderedIndex + 1] = key
+
+			-- Determine the types of what we're comparing by.
+			-- If we find more than one type, use betterCompare since it handles type mismatches.
+			if compare == nil then
+				local oldType = type_comparand
+				if byValues then
+					type_comparand = type(value)
+				else
+					type_comparand = type(key)
+				end
+				if oldType ~= type_comparand then
+					compare = compare or betterCompare
+				end
+			end
+		end
+
+		reverse = rev
+		compareFunc = compare
+
+		if byValues then
+			sortByValues = t
+		else
+			sortByValues = nil
+		end
+
+		sort(orderedIndex, sorter)
+		tables[t] = orderedIndex
+
+		return orderedNext, t
+	end
+end
+
+
+
+
+
+
+
+---------------------------------
+-- Tooltips
+---------------------------------
+
+local function TTOnEnter(self)
+	if  (not self.__ttshowchecker or TMW.get(self[self.__ttshowchecker], self))
+	and (self.__title or self.__text)
+	then
+		TMW:TT_Anchor(self)
+		if self.__ttMinWidth then
+			GameTooltip:SetMinimumWidth(self.__ttMinWidth)
+		end
+		GameTooltip:AddLine(TMW.get(self.__title, self), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+		local text = TMW.get(self.__text, self)
+		if text then
+			GameTooltip:AddLine(text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
+		end
+		GameTooltip:Show()
+	end
+end
+local function TTOnLeave(self)
+	GameTooltip:Hide()
+end
+
+function TMW:TT_Anchor(f)
+	GameTooltip:SetOwner(f, "ANCHOR_NONE")
+	GameTooltip:SetPoint("TOPLEFT", f, "BOTTOMRIGHT", 0, 0)
+end
+
+function TMW:TT(f, title, text, actualtitle, actualtext, showchecker)
+	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
+	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
+	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
+
+	TMW:ValidateType(2, "TMW:TT()", f, "frame")
+	
+	f.__title = TMW:TT_Parse(title, actualtitle)
+	f.__text = TMW:TT_Parse(text, actualtext)
+	
+	f.__ttshowchecker = showchecker
+
+	if not f.__ttHooked then
+		f.__ttHooked = 1
+		f:HookScript("OnEnter", TTOnEnter)
+		f:HookScript("OnLeave", TTOnLeave)
+	else
+		if not f:GetScript("OnEnter") then
+			f:HookScript("OnEnter", TTOnEnter)
+		end
+		if not f:GetScript("OnLeave") then
+			f:HookScript("OnLeave", TTOnLeave)
+		end
+	end
+end
+
+function TMW:TT_Parse(text, literal)
+	if text then
+		return (literal and text) or _G[text] or L[text]
+	else
+		return text
+	end
+end
+
+function TMW:TT_Copy(src, dest)
+	TMW:TT(dest, src.__title, src.__text, 1, 1, src.__ttshowchecker)
+end
+
+function TMW:TT_Update(f)
+	if GetMouseFocus() == f and f:IsMouseOver() and f:IsVisible() then
+		f:GetScript("OnLeave")(f)
+		if not f.IsEnabled or f:IsEnabled() or (f:IsObjectType("Button") and f:GetMotionScriptsWhileDisabled()) then
+			f:GetScript("OnEnter")(f)
+		end
+	end
+end
+
+
+
+
+
+
+
+---------------------------------
+-- Misc. Utilities
+---------------------------------
+
+function TMW.get(value, ...)
+	local type = type(value)
+	if type == "function" then
+		return value(...)
+	elseif type == "table" then
+		return value[...]
+	else
+		return value
+	end
+end
+
+function TMW.NULLFUNC()
+	-- Do nothing
+end
+
+function TMW.oneUpString(string)
+	if string:find("%d+") then
+		local num = tonumber(string:match("(%d+)"))
+		if num then
+			string = string:gsub(("(%d+)"), num + 1, 1)
+			return string
+		end
+	end
+	return string .. " 2"
+end
+
+TMW.CompareFuncs = {
+	-- more efficient than a big elseif chain.
+	["=="] = function(a, b) return a == b  end,
+	["~="] = function(a, b) return a ~= b end,
+	[">="] = function(a, b) return a >= b end,
+	["<="] = function(a, b) return a <= b  end,
+	["<"] = function(a, b) return a < b  end,
+	[">"] = function(a, b) return a > b end,
+}
+
+
+
+
+
+
+
+---------------------------------
+-- WoW API Helpers
+---------------------------------
+
+function TMW.SpellHasNoMana(spell)
+	-- TODO: in warlords, you can't determine spell costs anymore. Thanks, blizzard!
+	-- This function used to get the spell cost, and determine usability from that, 
+	-- but we can't do that anymore. It was a more reliable method because IsUsableSpell
+	-- was broken for some abilities (like Jab)
+
+	local _, nomana = IsUsableSpell(spell)
+	return nomana
+end
+
+local GLADIATOR_STANCE = GetSpellInfo(156291)
+function TMW.GetCurrentSpecializationRole()
+	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
+	-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
+	local currentSpec = GetSpecialization()
+	if not currentSpec then
+		return nil
+	end
+
+	local _, _, _, _, _, role = GetSpecializationInfo(currentSpec)
+	if role == "TANK" and UnitAura("player", GLADIATOR_STANCE) then
+		return "DAMAGER"
+	end
+	return role
+end
+
+do	-- TMW:GetParser()
+	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
+	function TMW:GetParser()
+		if not Parser then
+			Parser = CreateFrame("GameTooltip")
+
+			LT1 = Parser:CreateFontString()
+			RT1 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT1, RT1)
+
+			LT2 = Parser:CreateFontString()
+			RT2 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT2, RT2)
+
+			LT3 = Parser:CreateFontString()
+			RT3 = Parser:CreateFontString()
+			Parser:AddFontStrings(LT3, RT3)
+		end
+		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
+	end
+end
+
+
+
+
+
+
+
+---------------------------------
+-- User-Defined Lua Import Detection
+---------------------------------
+
+local detectors = {}
+function TMW:RegisterLuaImportDetector(func)
+	detectors[func] = true
+end
+
+local function recursivelyDetectLua(results, table, ...)
+	if type(table) == "table" then
+		for func in pairs(detectors) do
+			local success, code, name = TMW.safecall(func, table, ...)
+
+			if success and code then
+				tinsert(results, {code = code, name = name})
+			end
+		end
+
+        for a, b in pairs(table) do
+            recursivelyDetectLua(results, b, a, ...)
+        end
+    end
+end
+function TMW:DetectImportedLua(table)
+	local results = {}
+
+	recursivelyDetectLua(results, table)
+
+	if #results == 0 then
+		return nil
+	end
+
+	return results
 end

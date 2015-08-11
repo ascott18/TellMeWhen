@@ -131,7 +131,7 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
 		if err and err:find("stack overflow") then
 			local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
 			TMW:Error(err)
-			TMW.Warn(err)
+			TMW:Warn(err)
 		end
 	end
 end)

@@ -133,7 +133,6 @@ local tostringall = tostringall
 ---------- Locals ----------
 local Locked
 local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
-local GCD = 0
 local LastUpdate = 0
 
 local time = GetTime() TMW.time = time
@@ -179,6 +178,8 @@ TMW.CONST = {
 TMW.IconsToUpdate, TMW.GroupsToUpdate = {}, {}
 local IconsToUpdate = TMW.IconsToUpdate
 local GroupsToUpdate = TMW.GroupsToUpdate
+
+
 
 
 
@@ -323,6 +324,8 @@ end
 
 
 
+
+
 ---------------------------------
 -- Equivalencies & Dispel Types
 ---------------------------------
@@ -460,45 +463,35 @@ end
 
 
 
+
+
 ---------------------------------
 -- Global Cooldown Data
 ---------------------------------
 
-TMW.GCDSpells = {
-	ROGUE		= 1752,		-- sinister strike
-	PRIEST		= 585,		-- smite
-	DRUID		= 5176,		-- wrath
-	WARRIOR		= 5308,		-- execute
-	MAGE		= 44614,	-- frostfire bolt
-	WARLOCK		= 686,		-- shadow bolt
-	PALADIN		= 105361,	-- seal of command
-	SHAMAN		= 403,		-- lightning bolt
-	HUNTER		= 3044,		-- arcane shot
-	DEATHKNIGHT = 47541,	-- death coil
-	MONK		= 100780,	-- jab
-}
-
-local GCDSpell = TMW.GCDSpells[pclass]
+-- Rogue's Backstab. We don't need class spells anymore - any GCD spell works fine.
+local GCDSpell = 53
 TMW.GCDSpell = GCDSpell
+local GCD = 0
 TMW.GCD = 0
 
 function TMW.OnGCD(d)
-	if d == 0.001 then
+	if d <= 0.1 then
 		-- A cd of 0.001 is Blizzard's terrible way of indicating that something's cooldown hasn't started,
 		-- but is still unusable, and has a cooldown pending. It should not be considered a GCD.
+		-- In general, anything less than 0.1 isn't a GCD.
 		return false
 	elseif d <= 1 then
 		-- A cd of 1 (or less) is always a GCD (or at least isn't worth showing)
 		return true
-	elseif GCD > 1.7 then
-		-- Weed out a cooldown on the GCD spell that might be an interupt (counterspell, mind freeze, etc)
-		return false
 	else
 		-- If the duration passed in is the same as the GCD spell,
 		-- and the duration isnt zero, then it is a GCD
 		return GCD == d and d > 0 
 	end
 end
+
+
 
 
 
@@ -559,314 +552,34 @@ local GetSpellTexture = TMW.GetSpellTexture
 
 
 
----------------------------------
--- Function Caching
----------------------------------
-
-local cacheMetatable = {
-	__mode == 'kv'
-}
-
-function TMW:MakeFunctionCached(obj, method)
-	local func
-	if type(obj) == "table" and type(method) == "string" then
-		func = obj[method]
-	elseif type(obj) == "function" then
-		func = obj
-	else
-		error("Usage: TMW:MakeFunctionCached(object/function [, method])")
-	end
-
-	local cache = setmetatable({}, cacheMetatable)
-	local wrapper = function(...)
-		local cachestring = strjoin("\031", tostringall(...))
-		
-		if cache[cachestring] then
-			return cache[cachestring]
-		end
-
-		local arg1, arg2 = func(...)
-		if arg2 ~= nil then
-			error("Cannot cache functions with more than 1 return arg")
-		end
-
-		cache[cachestring] = arg1
-
-		return arg1
-	end
-
-	if type(obj) == "table" then
-		obj[method] = wrapper
-	end
-
-	return wrapper, cache
-end
-
-function TMW:MakeSingleArgFunctionCached(obj, method)
-	-- MakeSingleArgFunctionCached is MUCH more efficient than MakeFunctionCached
-	-- and should be used whenever there is only 1 input arg
-	local func, firstarg
-	if type(obj) == "table" and type(method) == "string" then
-		func = obj[method]
-		firstarg = obj
-	elseif type(obj) == "function" then
-		func = obj
-	else
-		error("Usage: TMW:MakeFunctionCached(object/function [, method])", 2)
-	end
-
-	local cache = setmetatable({}, cacheMetatable)
-	local wrapper = function(arg1In, arg2In)
-		local param1, param2 = arg1In, arg2In
-		if firstarg and firstarg == arg1In then
-			param1 = arg1In
-			arg1In = arg2In
-		elseif arg2In ~= nil then
-			error("Cannot MakeSingleArgFunctionCached functions with more than 1 arg", 2)
-		end
-		
-		if cache[arg1In] then
-			return cache[arg1In]
-		end
-
-		local arg1Out, arg2Out = func(param1, param2)
-		if arg2Out ~= nil then
-			error("Cannot cache functions with more than 1 return arg", 2)
-		end
-
-		cache[arg1In] = arg1Out
-
-		return arg1Out
-	end
-
-	if type(obj) == "table" then
-		obj[method] = wrapper
-	end
-
-	return wrapper
-end
-
-
 
 
 
 ---------------------------------
--- Table Utilities
----------------------------------
-
-function TMW.tContains(table, item, returnNum)
-	local firstkey
-	local num = 0
-	for k, v in pairs(table) do
-		if v == item then
-			if not returnNum then
-				-- Return only the key of the first match
-				return k
-			else
-				num = num + 1
-				firstkey = firstkey or k
-			end
-		end
-	end
-
-	-- Return the key of the first match and also the total number of matches
-	return firstkey, num
-end local tContains = TMW.tContains
-
-function TMW.tDeleteItem(table, item, onlyOne)
-	local i = 1
-	local removed
-	while table[i] do
-		if item == table[i] then
-			tremove(table, i)
-			if onlyOne then
-				return true
-			end
-			removed = true
-		else
-			i = i + 1
-		end
-	end
-
-	return removed
-end local tDeleteItem = TMW.tDeleteItem
-
-function TMW.tRemoveDuplicates(table)
-
-	local offs = 0
-
-	-- Start at the end of the table so that we don't remove duplicates from the beginning
-	for k = #table, 1, -1 do
-
-		-- offs is adjusted each time something is removed so that we don't waste time
-		-- searching for nil values when the table is shifted by a duplicate removal
-		k = k + offs
-
-		-- If we have reached the beginning of the table, we are done.
-		if k <= 0 then
-			return table
-		end
-		
-		-- item is the value being searched for
-		local item = table[k]
-
-		-- prevIndex tracks the last index where the searched-for value was found
-		local prevIndex
-
-		-- Once again start the iteration from the end because we don't want to have to 
-		-- deal with index shifting when we remove a value
-		for i = #table, 1, -1 do
-			if table[i] == item then
-
-				-- We found a match. If there has already been another match, remove that match 
-				-- and record this match as being the first one (closes to index 0) in the table.
-				if prevIndex then
-					tremove(table, prevIndex)
-					offs = offs - 1
-				end
-
-				-- Queue this match for removal should we find another match closer to the beginning.
-				prevIndex = i
-			end
-		end
-	end
-
-	-- Done. Return the table for ease-of-use.
-	return table
-end
-
-function TMW.OrderSort(a, b)
-	a = a.Order or a.order
-	b = b.Order or b.order
-	if a and b then
-		return a < b
-	else
-		error("Missing 'order' or 'Order' key for values of OrderedTable")
-	end
-end
-function TMW:SortOrderedTables(parentTable)
-	sort(parentTable, TMW.OrderSort)
-	return parentTable
-end
-
-function TMW:CopyWithMetatable(source)
-	-- This is basically deepcopy without recursion prevention
-	
-	local dest = {}
-	for k, v in pairs(source) do
-		if type(v) == "table" then
-			dest[k] = TMW:CopyWithMetatable(v)
-		else
-			dest[k] = v
-		end
-	end
-	return setmetatable(dest, getmetatable(source))
-end
-
-function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
-	--src and dest must have congruent data structure, otherwise shit will blow up. There are no safety checks to prevent this.
-	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
-	setmetatable(src, getmetatable(dest))
-	for k in pairs(src) do
-		if type(dest[k]) == "table" and type(src[k]) == "table" then
-			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
-		elseif allowUnmatchedSourceTables and type(dest[k]) ~= "table" and type(src[k]) == "table" then
-			dest[k] = {}
-			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
-		elseif type(src[k]) ~= "table" then
-			dest[k] = src[k]
-		end
-	end
-	setmetatable(src, metatemp) -- restore the old metatable
-	return dest -- not really needed, but what the hell why not
-end
-
-function TMW:DeepCompare(t1, t2, ...)
-	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
-
-	-- attempt direct comparison
-	if t1 == t2 then
-		return true, ...
-	end
-
-	-- if the values are not the same (they made it through the check above) AND they are not both tables, then they cannot be the same, so exit.
-	local ty1 = type(t1)
-	if ty1 ~= "table" or ty1 ~= type(t2) then
-		return false, ...
-	end
-
-	-- compare table values
-
-	-- compare table 1 with table 2
-	for k1, v1 in pairs(t1) do
-		local v2 = t2[k1]
-
-		-- don't bother calling DeepCompare on the values if they are the same - it will just return true.
-		-- Only call it if the values are different (they are either 2 tables, or they actually are different non-table values)
-		-- by adding the (v1 ~= v2) check, efficiency is increased by about 300%.
-		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k1, ...) then
-
-			-- it only reaches this point if there is a difference between the 2 tables somewhere
-			-- so i dont feel bad about calling DeepCompare with the same args again
-			-- i need to because the key of the setting that changed is in there, and AttemptBackup needs that key
-			return TMW:DeepCompare(v1, v2, k1, ...)
-		end
-	end
-
-	-- compare table 2 with table 1
-	for k2, v2 in pairs(t2) do
-		local v1 = t1[k2]
-
-		-- see comments for t1
-		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k2, ...) then
-			return TMW:DeepCompare(v1, v2, k2, ...)
-		end
-	end
-
-	return true, ...
-end
-
-
-
-
----------------------------------
--- Output & Errors
+-- Core Utilities
 ---------------------------------
 
 TMW.Print = TMW.Print or _G.print
-TMW.Warn = setmetatable(
-{}, {
-	__call = function(tbl, text)
-		if tbl[text] then
-			return
-		elseif TMW.Warned then
-			TMW:Print(text)
-			tbl[text] = true
-		elseif not TMW.tContains(tbl, text) then
-			tinsert(tbl, text)
+
+local function linenum(l, includeFile)
+	local t = debugstack(l or 2)
+	local file, num = strmatch(t, "([%w_%.%(%)%;%,]+)[%w_%.\"%(%)%]%[]-:(%d+):")
+	if not num then
+		return "ERR_LINE_NUM"
+	elseif includeFile then
+		if not file then
+			file = "???"
+		else
+			return file..":"..num
 		end
-end})
-
-function TMW:DoInitialWarn()
-	for k, v in ipairs(TMW.Warn) do
-		TMW:Print(v)
-		TMW.Warn[k] = true
+	else
+		return num
 	end
-	
-	TMW.Warned = true
-	TMW.DoInitialWarn = TMW.NULLFUNC
 end
-
 function TMW.print(...)
 	if TMW.debug or not TMW.Initialized or TELLMEWHEN_VERSION_MINOR == "dev" then
-		local prefix = "|cffff0000TMW"
-		-- GLOBALS: linenum
-		if linenum then
-		--	prefix = prefix..format(" %4.0f", linenum(3))
-			prefix = format("|cffff0000 %s", linenum(3, 1))
-		end
+		local prefix = format("|cffff0000 %s", linenum(3, true)) .. ":|r "
 
-		prefix = prefix..":|r "
 		local func = TMW.debug and TMW.debug.print or _G.print
 		if ... == TMW then
 			prefix = "s" .. prefix
@@ -879,31 +592,59 @@ function TMW.print(...)
 end
 local print = TMW.print
 
-function TMW:Debug(...)
-	if TMW.debug or not TMW.Initialized then
-		TMW.print(format(...))
-	end
-end
 
-function TMW:Error(text, ...)
-	text = text or ""
-	local success, result = pcall(format, text, ...)
-	if success then
-		text = result
-	end
-	geterrorhandler()("TellMeWhen: " .. text)
-end
+do	-- TMW.safecall
+	--[[
+		xpcall safecall implementation
+	]]
+	local xpcall = xpcall
 
-function TMW:Assert(statement, text, ...)
-	if not statement then
-		text = text or "Assertion Failed!"
-		local success, result = pcall(format, text, ...)
-		if success then
-			text = result
-		end
-		geterrorhandler()("TellMeWhen: " .. text)
+	local function errorhandler(err)
+		return geterrorhandler()(err)
+	end
+
+	local function CreateDispatcher(argCount)
+		local code = [[
+			local xpcall, eh = ...
+			local method, ARGS
+			local function call() return method(ARGS) end
+		
+			local function dispatch(func, ...)
+				method = func
+				if not method then return end
+				ARGS = ...
+				return xpcall(call, eh)
+			end
+		
+			return dispatch
+		]]
+		
+		local ARGS = {}
+		for i = 1, argCount do ARGS[i] = "arg"..i end
+		ARGS = table.concat(ARGS, ", ")
+		code = code:gsub("ARGS", ARGS)
+		return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
+	end
+
+	local Dispatchers = setmetatable({}, {__index=function(self, argCount)
+		local dispatcher = CreateDispatcher(argCount)
+		rawset(self, argCount, dispatcher)
+		return dispatcher
+	end})
+	Dispatchers[0] = function(func)
+		return xpcall(func, errorhandler)
+	end
+
+	function TMW.safecall(func, ...)
+		-- I don't check if func is a function here because i hope that whoever calls it
+		-- is smart enough not to do stupid shit. If they arent, they will figure it out when it errors.
+		--  if type(func) == "function" then
+			return Dispatchers[select('#', ...)](func, ...)
+		-- end
 	end
 end
+local safecall = TMW.safecall
+
 
 function TMW:ValidateType(argN, methodName, var, reqType)
 	local varType = type(var)
@@ -968,104 +709,6 @@ function TMW:ValidateType(argN, methodName, var, reqType)
 	end
 end
 
-
-
-
-
----------------------------------
--- Misc. Utilities
----------------------------------
-
-function TMW.get(value, ...)
-	local type = type(value)
-	if type == "function" then
-		return value(...)
-	elseif type == "table" then
-		return value[...]
-	else
-		return value
-	end
-end
-
-function TMW.NULLFUNC()
-	-- Do nothing
-end
-
-function TMW.oneUpString(string)
-	if string:find("%d+") then
-		local num = tonumber(string:match("(%d+)"))
-		if num then
-			string = string:gsub(("(%d+)"), num + 1, 1)
-			return string
-		end
-	end
-	return string .. " 2"
-end
-
-TMW.CompareFuncs = {
-	-- actually more efficient than a big elseif chain.
-	["=="] = function(a, b) return a == b  end,
-	["~="] = function(a, b) return a ~= b end,
-	[">="] = function(a, b) return a >= b end,
-	["<="] = function(a, b) return a <= b  end,
-	["<"] = function(a, b) return a < b  end,
-	[">"] = function(a, b) return a > b end,
-}
-
-do	-- TMW.safecall
-	--[[
-		xpcall safecall implementation
-	]]
-	local xpcall = xpcall
-
-	local function errorhandler(err)
-		return geterrorhandler()(err)
-	end
-
-	local function CreateDispatcher(argCount)
-		local code = [[
-			local xpcall, eh = ...
-			local method, ARGS
-			local function call() return method(ARGS) end
-		
-			local function dispatch(func, ...)
-				method = func
-				if not method then return end
-				ARGS = ...
-				return xpcall(call, eh)
-			end
-		
-			return dispatch
-		]]
-		
-		local ARGS = {}
-		for i = 1, argCount do ARGS[i] = "arg"..i end
-		ARGS = table.concat(ARGS, ", ")
-		code = code:gsub("ARGS", ARGS)
-		return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
-	end
-
-	local Dispatchers = setmetatable({}, {__index=function(self, argCount)
-		local dispatcher = CreateDispatcher(argCount)
-		rawset(self, argCount, dispatcher)
-		return dispatcher
-	end})
-	Dispatchers[0] = function(func)
-		return xpcall(func, errorhandler)
-	end
-
-	function TMW.safecall(func, ...)
-		-- I don't check if func is a function here because i hope that whoever calls it
-		-- is smart enough not to do stupid shit. If they arent, they will figure it out when it errors.
-		--  if type(func) == "function" then
-			return Dispatchers[select('#', ...)](func, ...)
-		-- end
-	end
-end
-local safecall = TMW.safecall
-
-
-
 -- This code is here to prevent other addons from resetting
 -- the high-precision timer. It isn't fool-proof (if someone upvalues debugprofilestart
 -- then this won't have an effect on calls to that upvalue), but it helps.
@@ -1082,336 +725,6 @@ function _G.debugprofilestop_SAFE()
 end
 local debugprofilestop = debugprofilestop_SAFE
 
-
-
-
-
----------------------------------
--- Iterator Functions
----------------------------------
-
-do -- InNLengthTable
-	local states = {}
-	local function getstate(k, t)
-		local state = wipe(tremove(states) or {})
-
-		state.k = k
-		state.t = t
-
-		return state
-	end
-
-	local function iter(state)
-		state.k = state.k + 1
-
-		if state.k > (state.t.n or #state.t) then -- #t enables iteration over tables that have not yet been upgraded with an n key (i.e. imported data from old versions)
-			tinsert(states, state)
-			return
-		end
-	--	return state.t[state.k], state.k --OLD, STUPID IMPLEMENTATION
-		return state.k, state.t[state.k]
-	end
-
-	--- Iterates over an array-style table that has a key "n" to indicate the length of the table.
-	-- Returns (key, value) pairs for each iteration.
-	function TMW:InNLengthTable(arg)
-		if arg then
-			return iter, getstate(0, arg)
-		else
-			error("Bad argument #1 to 'TMW:InNLengthTable(arg)'. Expected table, got nil.", 2)
-		end
-	end
-end
-
-do -- InIconSettings
-	local states = {}
-	local function getstate(domain, groupID)
-		local state = wipe(tremove(states) or {})
-
-		if not (domain and groupID) then
-			state.gsIter, state.gsState = TMW:InGroupSettings()
-			state.groupSettings, state.domain, state.groupID = state.gsIter(state.gsState)
-		else
-			state.groupSettings, state.domain, state.groupID = TMW.db[domain].Groups[groupID], domain, groupID
-		end
-
-		state.iconID = 0
-
-		state.maxIconID = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
-
-		return state
-	end
-
-	local function iter(state)
-		local iconID = state.iconID
-		iconID = iconID + 1	-- at least increment the icon
-
-		while true do
-			if not state.groupSettings then
-				-- if there isnt another group, then stop
-				tinsert(states, state)
-				return
-			elseif iconID <= state.maxIconID and not rawget(state.groupSettings.Icons, iconID) then
-				-- if the icon settings dont exist and there is another icon, move to the next icon
-				iconID = iconID + 1
-			elseif iconID > state.maxIconID then
-				if state.gsIter then
-					state.groupSettings, state.domain, state.groupID = state.gsIter(state.gsState)
-					iconID = 0
-				else
-					state.groupSettings = nil
-				end
-			else
-				-- we finally found something valid, so use it
-				break
-			end
-		end
-
-		state.iconID = iconID
-		local gs = state.groupSettings
-		return gs.Icons[iconID], gs, state.domain, state.groupID, iconID -- ics, gs, domain, groupID, iconID
-	end
-
-	--- Iterates over icon settings in the current profile
-	-- @param domain [string|nil] If groupID is also defined, it will restrict this iteration to a single group.
-	-- @param groupID [number|nil] If domain is also defined, it will restrict this iteration to a single group.
-	-- @return Iterator that will return (iconSettings, groupSettings, domain, groupID, iconID) for each iteration.
-	function TMW:InIconSettings(domain, groupID)
-		return iter, getstate(domain, groupID)
-	end
-end
-
-do -- InGroupSettings
-	local states = {}
-	local function getstate(cg, mg)
-		local state = wipe(tremove(states) or {})
-
-		state.domain = "global"
-		state.cg = 0
-		state.mg = TMW.db[state.domain].NumGroups
-
-		return state
-	end
-
-	local function iter(state)
-		state.cg = state.cg + 1
-
-		if state.cg > state.mg then
-			if state.domain == "global" then
-				state.domain = "profile"
-				state.cg = 0
-				state.mg = TMW.db[state.domain].NumGroups
-
-				return iter(state)
-			end
-
-			tinsert(states, state)
-			return
-		end
-
-		return TMW.db[state.domain].Groups[state.cg], state.domain, state.cg -- group settings, domain, groupID
-	end
-
-	--- Iterates over group settings in the current profile
-	-- @return Iterator that will return (groupSettings, domain, groupID) for each iteration.
-	function TMW:InGroupSettings()
-		return iter, getstate()
-	end
-end
-
-do -- InGroups
-	local states = {}
-	local function getstate(cg, mg)
-		local state = wipe(tremove(states) or {})
-
-		state.domain = "global"
-		state.cg = 0
-		state.mg = #TMW[state.domain]
-
-		return state
-	end
-
-	local function iter(state)
-		state.cg = state.cg + 1
-
-		if state.cg > state.mg then
-			if state.domain == "global" then
-				state.domain = "profile"
-				state.cg = 0
-				state.mg = #TMW[state.domain]
-
-				return iter(state)
-			end
-
-			tinsert(states, state)
-			return
-		end
-
-		return TMW[state.domain][state.cg], state.domain, state.cg -- group, domain, groupID
-	end
-
-	--- Iterates over all groups that have been created by TellMeWhen.
-	-- @return Iterator that will return (group, domain, groupID) for each iteration.
-	function TMW:InGroups()
-		return iter, getstate()
-	end
-end
-
-do -- vararg
-	local states = {}
-	local function getstate(...)
-		local state = wipe(tremove(states) or {})
-
-		state.i = 0
-		state.l = select("#", ...)
-
-		for n = 1, state.l do
-			state[n] = select(n, ...)
-		end
-
-		return state
-	end
-
-	local function iter(state)
-		local i = state.i
-		i = i + 1
-		if i > state.l then
-			tinsert(states, state)
-			return
-		end
-		state.i = i
-
-		return i, state[i], state.l
-	end
-
-	--- Iterates over each variable in a vararg.
-	-- @return Iterator that will return (i, var, totalNumVars) for each iteration.
-	function TMW:Vararg(...)
-		return iter, getstate(...)
-	end
-end
-
-do -- ordered pairs
-
-	local tables = {}
-	local unused = {}
-
-	local sortByValues, compareFunc, reverse
-
-	-- An alternative comparison function that can handle mismatched types.
-	local function betterCompare(a, b)
-		local ta, tb = type(a), type(b)
-		if ta ~= tb then
-			if reverse then
-				return ta > tb
-			end
-			return ta < tb
-		elseif ta == "number" or ta == "string" then
-			if reverse then
-				return a > b
-			end
-			return a < b
-		elseif ta == "boolean" then
-			if reverse then
-				return b == true
-			end
-			return a == true
-		else
-			if reverse then
-				return tostring(a) > tostring(b)
-			end
-			return tostring(a) < tostring(b)
-		end
-	end
-
-	local function sorter(a, b)
-		if sortByValues then
-			a, b = sortByValues[a], sortByValues[b]
-		end
-
-		if compareFunc then
-			return compareFunc(a, b)
-		end
-
-		if reverse then
-			return a > b
-		end
-		return a < b
-
-		--return compare(a, b)
-	end
-
-	local function orderedNext(t, state)
-		local orderedIndex = tables[t]
-		
-		if state == nil then
-			local key = orderedIndex[1]
-			return key, t[key]
-		end
-
-		local key
-		for i = 1, #orderedIndex do
-			if orderedIndex[i] == state then
-				key = orderedIndex[i+1]
-				break
-			end
-		end
-
-		if key then
-			return key, t[key]
-		end
-
-		unused[#unused+1] = wipe(orderedIndex)
-		tables[t] = nil
-		return
-	end
-
-	--- Iterates over the table in an ordered fashion, without modifying the table.
-	-- @param t [table] The table to iterate over
-	-- @param compare [function|nil] The comparison function that will be used for sorting the keys or values of the table. Defaults to regular ascending order.
-	-- @param byValues [boolean|nil] True to have the iteration order based on values (values will be passed to the compare function if defined), false/nil to sort by keys.
-	-- @param rev [boolean|nil] True to reverse the sorted order of the iteration.
-	-- @return Iterator that will return (key, value) for each iteration.
-	function TMW:OrderedPairs(t, compare, byValues, rev)
-		if not next(t) then
-			return TMW.NULLFUNC
-		end
-
-		local orderedIndex = tremove(unused) or {}
-		local type_comparand = nil
-		for key, value in pairs(t) do
-			orderedIndex[#orderedIndex + 1] = key
-
-			-- Determine the types of what we're comparing by.
-			-- If we find more than one type, use betterCompare since it handles type mismatches.
-			if compare == nil then
-				local oldType = type_comparand
-				if byValues then
-					type_comparand = type(value)
-				else
-					type_comparand = type(key)
-				end
-				if oldType ~= type_comparand then
-					compare = compare or betterCompare
-				end
-			end
-		end
-
-		reverse = rev
-		compareFunc = compare
-
-		if byValues then
-			sortByValues = t
-		else
-			sortByValues = nil
-		end
-
-		sort(orderedIndex, sorter)
-		tables[t] = orderedIndex
-
-		return orderedNext, t
-	end
-end
 
 
 
@@ -1655,81 +968,181 @@ end
 
 
 
+
+
 ---------------------------------
--- Tooltips
+-- Iterator Functions
 ---------------------------------
 
-local function TTOnEnter(self)
-	if  (not self.__ttshowchecker or TMW.get(self[self.__ttshowchecker], self))
-	and (self.__title or self.__text)
-	then
-		TMW:TT_Anchor(self)
-		if self.__ttMinWidth then
-			GameTooltip:SetMinimumWidth(self.__ttMinWidth)
+do -- InIconSettings
+	local states = {}
+	local function getstate(domain, groupID)
+		local state = wipe(tremove(states) or {})
+
+		if not (domain and groupID) then
+			state.gsIter, state.gsState = TMW:InGroupSettings()
+			state.groupSettings, state.domain, state.groupID = state.gsIter(state.gsState)
+		else
+			state.groupSettings, state.domain, state.groupID = TMW.db[domain].Groups[groupID], domain, groupID
 		end
-		GameTooltip:AddLine(TMW.get(self.__title, self), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
-		local text = TMW.get(self.__text, self)
-		if text then
-			GameTooltip:AddLine(text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, not self.__noWrapTooltipText)
+
+		state.iconID = 0
+
+		state.maxIconID = TELLMEWHEN_MAXROWS*TELLMEWHEN_MAXROWS
+
+		return state
+	end
+
+	local function iter(state)
+		local iconID = state.iconID
+		iconID = iconID + 1	-- at least increment the icon
+
+		while true do
+			if not state.groupSettings then
+				-- if there isnt another group, then stop
+				tinsert(states, state)
+				return
+			elseif iconID <= state.maxIconID and not rawget(state.groupSettings.Icons, iconID) then
+				-- if the icon settings dont exist and there is another icon, move to the next icon
+				iconID = iconID + 1
+			elseif iconID > state.maxIconID then
+				if state.gsIter then
+					state.groupSettings, state.domain, state.groupID = state.gsIter(state.gsState)
+					iconID = 0
+				else
+					state.groupSettings = nil
+				end
+			else
+				-- we finally found something valid, so use it
+				break
+			end
 		end
-		GameTooltip:Show()
+
+		state.iconID = iconID
+		local gs = state.groupSettings
+		return gs.Icons[iconID], gs, state.domain, state.groupID, iconID -- ics, gs, domain, groupID, iconID
+	end
+
+	--- Iterates over icon settings in the current profile
+	-- @param domain [string|nil] If groupID is also defined, it will restrict this iteration to a single group.
+	-- @param groupID [number|nil] If domain is also defined, it will restrict this iteration to a single group.
+	-- @return Iterator that will return (iconSettings, groupSettings, domain, groupID, iconID) for each iteration.
+	function TMW:InIconSettings(domain, groupID)
+		return iter, getstate(domain, groupID)
 	end
 end
-local function TTOnLeave(self)
-	GameTooltip:Hide()
-end
 
-function TMW:TT_Anchor(f)
-	GameTooltip:SetOwner(f, "ANCHOR_NONE")
-	GameTooltip:SetPoint("TOPLEFT", f, "BOTTOMRIGHT", 0, 0)
-end
+do -- InGroupSettings
+	local states = {}
+	local function getstate(cg, mg)
+		local state = wipe(tremove(states) or {})
 
-function TMW:TT(f, title, text, actualtitle, actualtext, showchecker)
-	-- setting actualtitle or actualtext true cause it to use exactly what is passed in for title or text as the text in the tooltip
-	-- if these variables arent set, then it will attempt to see if the string is a global variable (e.g. "MAXIMUM")
-	-- if they arent set and it isnt a global, then it must be a TMW localized string, so use that
+		state.domain = "global"
+		state.cg = 0
+		state.mg = TMW.db[state.domain].NumGroups
 
-	TMW:ValidateType(2, "TMW:TT()", f, "frame")
-	
-	f.__title = TMW:TT_Parse(title, actualtitle)
-	f.__text = TMW:TT_Parse(text, actualtext)
-	
-	f.__ttshowchecker = showchecker
+		return state
+	end
 
-	if not f.__ttHooked then
-		f.__ttHooked = 1
-		f:HookScript("OnEnter", TTOnEnter)
-		f:HookScript("OnLeave", TTOnLeave)
-	else
-		if not f:GetScript("OnEnter") then
-			f:HookScript("OnEnter", TTOnEnter)
+	local function iter(state)
+		state.cg = state.cg + 1
+
+		if state.cg > state.mg then
+			if state.domain == "global" then
+				state.domain = "profile"
+				state.cg = 0
+				state.mg = TMW.db[state.domain].NumGroups
+
+				return iter(state)
+			end
+
+			tinsert(states, state)
+			return
 		end
-		if not f:GetScript("OnLeave") then
-			f:HookScript("OnLeave", TTOnLeave)
-		end
+
+		return TMW.db[state.domain].Groups[state.cg], state.domain, state.cg -- group settings, domain, groupID
+	end
+
+	--- Iterates over group settings in the current profile
+	-- @return Iterator that will return (groupSettings, domain, groupID) for each iteration.
+	function TMW:InGroupSettings()
+		return iter, getstate()
 	end
 end
 
-function TMW:TT_Parse(text, literal)
-	if text then
-		return (literal and text) or _G[text] or L[text]
-	else
-		return text
+do -- InGroups
+	local states = {}
+	local function getstate(cg, mg)
+		local state = wipe(tremove(states) or {})
+
+		state.domain = "global"
+		state.cg = 0
+		state.mg = #TMW[state.domain]
+
+		return state
 	end
-end
 
-function TMW:TT_Copy(src, dest)
-	TMW:TT(dest, src.__title, src.__text, 1, 1, src.__ttshowchecker)
-end
+	local function iter(state)
+		state.cg = state.cg + 1
 
-function TMW:TT_Update(f)
-	if GetMouseFocus() == f and f:IsMouseOver() and f:IsVisible() then
-		f:GetScript("OnLeave")(f)
-		if not f.IsEnabled or f:IsEnabled() or (f:IsObjectType("Button") and f:GetMotionScriptsWhileDisabled()) then
-			f:GetScript("OnEnter")(f)
+		if state.cg > state.mg then
+			if state.domain == "global" then
+				state.domain = "profile"
+				state.cg = 0
+				state.mg = #TMW[state.domain]
+
+				return iter(state)
+			end
+
+			tinsert(states, state)
+			return
 		end
+
+		return TMW[state.domain][state.cg], state.domain, state.cg -- group, domain, groupID
+	end
+
+	--- Iterates over all groups that have been created by TellMeWhen.
+	-- @return Iterator that will return (group, domain, groupID) for each iteration.
+	function TMW:InGroups()
+		return iter, getstate()
 	end
 end
+
+do -- vararg
+	local states = {}
+	local function getstate(...)
+		local state = wipe(tremove(states) or {})
+
+		state.i = 0
+		state.l = select("#", ...)
+
+		for n = 1, state.l do
+			state[n] = select(n, ...)
+		end
+
+		return state
+	end
+
+	local function iter(state)
+		local i = state.i
+		i = i + 1
+		if i > state.l then
+			tinsert(states, state)
+			return
+		end
+		state.i = i
+
+		return i, state[i], state.l
+	end
+
+	--- Iterates over each variable in a vararg.
+	-- @return Iterator that will return (i, var, totalNumVars) for each iteration.
+	function TMW:Vararg(...)
+		return iter, getstate(...)
+	end
+end
+
+
 
 
 
@@ -1955,7 +1368,7 @@ do
 	function TMW.generateGUID(length)
 		-- Start with the current time as a base.
 		-- octalStr will get something like "012226556045"
-		
+
 		-- This is suceptible to the year 2038 problem, because string.format uses 32 bit ints.
 		-- If you're still using TellMeWhen in 2038: Greetings from 2015!
 		-- Does WoW still exist? Are the servers still running? Has it gone F2P? So many questions!
@@ -3430,6 +2843,8 @@ end
 
 
 
+
+
 ---------------------------------
 -- Configuration
 ---------------------------------
@@ -3459,12 +2874,7 @@ function TMW:LockToggle()
 		return
 	end
 	
-	for k, v in pairs(TMW.Warn) do
-		-- reset warnings so they can happen again
-		if type(k) == "string" then
-			TMW.Warn[k] = nil
-		end
-	end
+	TMW:ResetWarn()
 	TMW.db.profile.Locked = not TMW.db.profile.Locked
 
 	TMW.Locked = TMW.db.profile.Locked
@@ -3808,24 +3218,6 @@ end
 
 
 
-
-
-
-
--- -------------------------------------------------------------------------------------------------
--- |                                                                                               |
--- |                            SPECIALIZED UTILITY AND HELPER FUNCTIONS                           |
--- |                                                                                               |
--- -------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
 ---------------------------------
 -- Icon/Group Helper Functions
 ---------------------------------
@@ -3911,13 +3303,12 @@ function TMW:DoValidityCheck()
 		message = message .. " " .. L["VALIDITY_ISINVALID"]
 		
 		if shouldWarn then
-			TMW.Warn(message)
+			TMW:Warn(message)
 		end
 	end
 	
 	wipe(TMW.ValidityCheckQueue)
 end
-
 
 function TMW:GetGroupName(name, groupID, short)
 	if (not name) or name == "" then
@@ -3932,245 +3323,4 @@ function TMW:GetGroupName(name, groupID, short)
 	end
 
 	return name .. " (" .. format(L["fGROUP"], groupID) .. ")"
-end
-
-
-
-
-
----------------------------------
--- WoW API Helpers
----------------------------------
-
-function TMW.SpellHasNoMana(spell)
-	-- TODO: in warlords, you can't determine spell costs anymore. Thanks, blizzard!
-	-- This function used to get the spell cost, and determine usability from that, 
-	-- but we can't do that anymore. It was a more reliable method because IsUsableSpell
-	-- was broken for some abilities (like Jab)
-
-	local _, nomana = IsUsableSpell(spell)
-	return nomana
-end
-
-local GLADIATOR_STANCE = GetSpellInfo(156291)
-function TMW.GetCurrentSpecializationRole()
-	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
-	-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
-	local currentSpec = GetSpecialization()
-	if not currentSpec then
-		return nil
-	end
-
-	local _, _, _, _, _, role = GetSpecializationInfo(currentSpec)
-	if role == "TANK" and UnitAura("player", GLADIATOR_STANCE) then
-		return "DAMAGER"
-	end
-	return role
-end
-
-
-
----------------------------------
--- Generic String Utilities
----------------------------------
-
-local mult = {
-	1,						-- seconds per second
-	60,						-- seconds per minute
-	60*60,					-- seconds per hour
-	60*60*24,				-- seconds per day
-	60*60*24*365.242199,	-- seconds per year
-}
-function TMW.toSeconds(str)
-	-- converts a string (e.g. "1:45:37") into the number of seconds that it represents (eg. 6337)
-	str = ":" .. str:trim(": ") -- a colon is needed at the beginning so that gmatch will catch the first unit of time in the string (minutes, hours, etc)
-	local _, numcolon = str:gsub(":", ":") -- count the number of colons in the string so that we can keep track of what multiplier we are on (since we start with the highest unit of time)
-	local seconds = 0
-	
-	for num in str:gmatch(":([0-9%.]*)") do -- iterate over all units of time and their value
-		if tonumber(num) and mult[numcolon] then -- make sure that it is valid (there is a number and it isnt a unit of time higher than a year)
-			seconds = seconds + mult[numcolon]*num -- multiply the number of units by the number of seconds in that unit and add the appropriate amount of time to the running count
-		end
-		numcolon = numcolon - 1 -- decrease the current unit of time that is being worked with (even if it was an invalid unit and failed the above check)
-	end
-	
-	return seconds
-end
-
-local function replace(text, find, rep)
-	-- using this allows for the replacement of ";	   " to "; " in one external call
-	assert(not strfind(rep, find), "RECURSION DETECTED: FIND=".. find.. " REP=".. rep)
-	while strfind(text, find) do
-		text = gsub(text, find, rep)
-	end
-	return text
-end
-function TMW:CleanString(text)
-	local frame
-	if type(text) == "table" and text.GetText then
-		frame = text
-		text = text:GetText()
-	end
-	if not text then error("No text to clean!") end
-	text = strtrim(text, "; \t\r\n")-- remove all leading and trailing semicolons, spaces, tabs, and newlines
-	text = replace(text, "[^:] ;", "; ") -- remove all spaces before semicolons
-	text = replace(text, "; ", ";") -- remove all spaces after semicolons
-	text = replace(text, ";;", ";") -- remove all double semicolons
-	text = replace(text, " :", ":") -- remove all single spaces before colons
-	text = replace(text, ":  ", ": ") -- remove all double spaces after colons (DONT REMOVE ALL DOUBLE SPACES EVERYWHERE, SOME SPELLS HAVE TYPO'd NAMES WITH 2 SPACES!)
-	text = gsub(text, ";", "; ") -- add spaces after all semicolons. Never used to do this, but it just looks so much better (DONT USE replace!).
-	if frame then
-		frame:SetText(text)
-	end
-	return text
-end
-
-function TMW:SplitNames(input)
-	input = TMW:CleanString(input)
-	local tbl = { strsplit(";", input) }
-	if #tbl == 1 and tbl[1] == "" then
-		tbl[1] = nil
-	end
-
-	for a, b in ipairs(tbl) do
-		local new = strtrim(b) --remove spaces from the beginning and end of each name
-		tbl[a] = tonumber(new) or new -- turn it into a number if it is one
-	end
-	return tbl
-end
-
-TMW.SplitNamesCached = TMW.SplitNames
-TMW:MakeSingleArgFunctionCached(TMW, "SplitNamesCached")
-
-
-
-function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
-	local ret = ""
-
-	if abs(seconds) == math.huge then
-		return tostring(seconds)
-	elseif seconds < 0 then
-		ret = "-"
-		seconds = -seconds
-	end
-
-	local y =  seconds / 31556926
-	local d = (seconds % 31556926) / 86400
-	local h = (seconds % 31556926  % 86400) / 3600
-	local m = (seconds % 31556926  % 86400  % 3600) / 60
-	local s = (seconds % 31556926  % 86400  % 3600  % 60)
-
-	local ns
-	if skipSmall then
-		ns = format("%d", s)
-	else
-		ns = format("%.1f", s)
-		if not keepTrailing then
-			ns = tonumber(ns)
-		end
-	end
-	if s < 10 and seconds >= 60 then
-		ns = "0" .. ns
-	end
-
-	if y >= 0x7FFFFFFE then
-		ret = ret .. format("OVERFLOW:%d:%02d:%02d:%s", d, h, m, ns)
-	elseif y >= 1 then
-		ret = ret .. format("%d:%d:%02d:%02d:%s", y, d, h, m, ns)
-	elseif d >= 1 then
-		ret = ret .. format("%d:%02d:%02d:%s", d, h, m, ns)
-	elseif h >= 1 then
-		ret = ret .. format("%d:%02d:%s", h, m, ns)
-	elseif m >= 1 then
-		ret = ret .. format("%d:%s", m, ns)
-	else
-		ret = ret .. ns
-	end
-
-	return ret
-end
-
-
-
-
-
-
-
-
-
---TMW.TestTex = TMW:CreateTexture()
-function TMW:GetTexturePathFromSetting(setting)
-	setting = tonumber(setting) or setting
-		
-	if setting and setting ~= "" then
-		-- See http://us.battle.net/wow/en/forum/topic/5977979895#1 for the resoning behind this stupid shit right here.
-		if GetSpellTexture(setting) then
-			return GetSpellTexture(setting)
-		end
-		if strfind(setting, "[\\/]") then -- if there is a slash in it, then it is probably a full path
-			return setting:gsub("/", "\\")
-		else
-			-- if there isn't a slash in it, then it is probably be a wow icon in interface\icons.
-			-- it still might be a file in wow's root directory, but fuck, there is no way to tell for sure
-			return "Interface\\Icons\\" .. setting
-		end
-		
-		--[[
-		-- Pre-MOP code for testing valid textures.
-		-- Kept here in a comment for ease of restoring it should it ever start working again.
-		
-		TMW.TestTex:SetTexture(GetSpellTexture(setting))
-		if not TMW.TestTex:GetTexture() then
-			TMW.TestTex:SetTexture(setting)
-		end
-		if not TMW.TestTex:GetTexture() then
-			TMW.TestTex:SetTexture("Interface\\Icons\\" .. setting)
-		end
-		return TMW.TestTex:GetTexture()
-		]]
-			
-	end
-end
-
-
-
-
-
-
-
-
----------------------------------
--- User-Defined Lua Import Detection
----------------------------------
-
-local detectors = {}
-function TMW:RegisterLuaImportDetector(func)
-	detectors[func] = true
-end
-
-local function recursivelyDetectLua(results, table, ...)
-	if type(table) == "table" then
-		for func in pairs(detectors) do
-			local success, code, name = TMW.safecall(func, table, ...)
-
-			if success and code then
-				tinsert(results, {code = code, name = name})
-			end
-		end
-
-        for a, b in pairs(table) do
-            recursivelyDetectLua(results, b, a, ...)
-        end
-    end
-end
-function TMW:DetectImportedLua(table)
-	local results = {}
-
-	recursivelyDetectLua(results, table)
-
-	if #results == 0 then
-		return nil
-	end
-
-	return results
 end

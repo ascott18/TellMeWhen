@@ -314,7 +314,7 @@ TMW:RegisterUpgrade(51019, {
 		-- I don't know why this layout exists, but I know it was my fault, so I am going to delete it.
 		if GUID == "icon" and settings.GUID == "" then
 			TMW.db.global.TextLayouts[GUID] = nil
-			TMW.Warn("TMW has deleted the invalid text layout keyed as 'icon' that was probably causing errors for you. If you were using it on any of your icons, then I apologize, but you probably weren't because it probably wasn't even named")
+			TMW:Warn("TMW has deleted the invalid text layout keyed as 'icon' that was probably causing errors for you. If you were using it on any of your icons, then I apologize, but you probably weren't because it probably wasn't even named")
 		end
 	end,
 })

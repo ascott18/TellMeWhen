@@ -168,7 +168,7 @@ local function GetAnchorOrWarn(icon, anchorTo)
 	local frame = _G[name]
 	
 	if not frame then
-		TMW.Warn(L["ANIM_ANCHOR_NOT_FOUND"]:format(name))
+		TMW:Warn(L["ANIM_ANCHOR_NOT_FOUND"]:format(name))
 		if TMW.debug then
 			TMW:Error(L["ANIM_ANCHOR_NOT_FOUND"]:format(name))
 		end

@@ -519,7 +519,7 @@ function Type:Setup(icon)
 	-- Tell the user if they have an icon that is going to respond to every fucking thing that happens.
 	if icon.AllowAnyEvents and not icon.SourceUnits and not icon.DestUnits and icon.Name == "" and not icon.SourceFlags and not icon.DestFlags then
 		if TMW.Locked and icon.Enabled then
-			TMW.Warn(L["CLEU_NOFILTERS"]:format(icon:GetIconName(true)))
+			TMW:Warn(L["CLEU_NOFILTERS"]:format(icon:GetIconName(true)))
 		end
 		return
 	end

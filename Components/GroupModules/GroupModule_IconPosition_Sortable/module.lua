@@ -283,7 +283,7 @@ function IconPosition_Sortable.IconSorter(iconA, iconB)
 					return ret
 				end
 			else
-				TMW.Warn("Missing icon sorter with identifier " .. method)
+				TMW:Warn("Missing icon sorter with identifier " .. method)
 			end
 		end
 	end
