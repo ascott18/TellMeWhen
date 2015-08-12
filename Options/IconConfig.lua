@@ -153,7 +153,7 @@ end)
 ---------- Icon Utilities ----------
 function TMW:GetIconMenuText(ics)
 	local Type = ics.Type or ""
-	local typeData = Types[Type]
+	local typeData = TMW.Types[Type]
 
 	local text, tooltip, dontShorten = typeData:GetIconMenuText(ics)
 	text = tostring(text)
@@ -202,20 +202,20 @@ end
 ---------- Dropdowns ----------
 function IE:IconType_DropDown()
 	for _, typeData in ipairs(TMW.OrderedTypes) do
-		if CI.ics.Type == typeData.type or not get(typeData.hidden) then
+		if CI.ics.Type == typeData.type or not TMW.get(typeData.hidden) then
 			if typeData.menuSpaceBefore then
 				TMW.DD:AddSpacer()
 			end
 
 			local info = TMW.DD:CreateInfo()
 			
-			info.text = get(typeData.name)
+			info.text = TMW.get(typeData.name)
 			info.value = typeData.type
 			
 			local allowed = typeData:IsAllowedByView(CI.icon.viewData.view)
 			info.disabled = not allowed
 
-			local desc = get(typeData.desc)
+			local desc = TMW.get(typeData.desc)
 				
 			if not allowed then
 				desc = (desc and desc .. "\r\n\r\n" or "") .. L["ICONMENU_TYPE_DISABLED_BY_VIEW"]:format(CI.icon.viewData.name)
@@ -235,7 +235,7 @@ function IE:IconType_DropDown()
 			info.func = IE.IconType_DropDown_OnClick
 			info.arg1 = typeData
 			
-			info.icon = get(typeData.menuIcon)
+			info.icon = TMW.get(typeData.menuIcon)
 			info.tCoordLeft = 0.07
 			info.tCoordRight = 0.93
 			info.tCoordTop = 0.07
@@ -281,7 +281,7 @@ function IE:GetRealNames(Name)
 
 	local text = TMW:CleanString(Name)
 	
-	local CI_typeData = Types[CI.ics.Type]
+	local CI_typeData = TMW.Types[CI.ics.Type]
 	local checksItems = CI_typeData.checksItems
 	
 	-- Note 11/12/12 (WoW 5.0.4) - caching causes incorrect results with "replacement spells" after switching specs like the corruption/immolate pair 
@@ -303,6 +303,7 @@ function IE:GetRealNames(Name)
 			name = v:GetName() or v.what or ""
 			texture = v:GetIcon()
 		else
+			local _
 			name, _, texture = GetSpellInfo(v)
 			texture = texture or GetSpellTexture(name or v)
 			

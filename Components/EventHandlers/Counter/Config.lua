@@ -77,26 +77,27 @@ function Counter:GetEventDisplayText(eventID)
 end
 
 
-function Counter:OperationMenu_DropDown()
+
+local function OperationMenu_DropDown_OnClick(button, dropdown)
+	dropdown:SetUIDropdownText(button.value, operations)
+	
+	local eventSettings = EVENTS:GetEventSettings()
+	eventSettings.CounterOperation = button.value
+
+	dropdown:OnSettingSaved()
+end
+function Counter.OperationMenu_DropDown(dropdown)
 	for k, v in pairs(operations) do
 		local info = TMW.DD:CreateInfo()
-		info.func = Counter.OperationMenu_DropDown_OnClick
+		info.func = OperationMenu_DropDown_OnClick
 		info.text = v.text
 		info.value = v.value
 		info.checked = v.value == EVENTS:GetEventSettings().CounterOperation
-		info.arg1 = self
+		info.arg1 = dropdown
 		TMW.DD:AddButton(info)
 	end
 end
 
-function Counter:OperationMenu_DropDown_OnClick(frame)
-	frame:SetUIDropdownText(self.value, operations)
-	
-	local eventSettings = EVENTS:GetEventSettings()
-	eventSettings.CounterOperation = self.value
-
-	TMW.EVENTS:LoadConfig()
-end
 
 
 

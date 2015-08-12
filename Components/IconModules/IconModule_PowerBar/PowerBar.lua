@@ -53,6 +53,7 @@ function PowerBar:OnNewInstance(icon)
 	self.texture:SetAllPoints()
 	bar:SetStatusBarTexture(self.texture)
 	
+	-- TODO: share the PowerBarColor table with the value icon type.
 	local colorinfo = PowerBarColor[defaultPowerType]
 	if not colorinfo then
 		error("No PowerBarColor was found for class " .. pclass .. "! Is the defaultPowerType for the class not defined?")

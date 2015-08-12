@@ -26,11 +26,19 @@ TimerBar_BarDisplay:RegisterIconDefaults{
 	BarDisplay_Invert			= false,
 	BarDisplay_BarGCD			= false,
 	BarDisplay_FakeMax			= 0,
-	BarDisplay_StartColor		= { r=1, g=0, b=0, a=1 },
-	BarDisplay_MiddleColor		= { r=1, g=1, b=0, a=1 },
-	BarDisplay_CompleteColor	= { r=0, g=1, b=0, a=1 },
+	BarDisplay_StartColor		= "ffff0000",
+	BarDisplay_MiddleColor		= "ffffff00",
+	BarDisplay_CompleteColor	= "ff00ff00",
 	BarDisplay_EnableColors		= false,
 }
+
+TMW:RegisterUpgrade(80003, {
+	icon = function(self, ics)
+		ics.BarDisplay_StartColor    = TMW:RGBATableToStringWithFallback(ics.BarDisplay_StartColor, "ffff0000")
+		ics.BarDisplay_MiddleColor   = TMW:RGBATableToStringWithFallback(ics.BarDisplay_MiddleColor, "ffffff00")
+		ics.BarDisplay_CompleteColor = TMW:RGBATableToStringWithFallback(ics.BarDisplay_CompleteColor, "ff00ff00")
+	end,
+})
 
 TimerBar_BarDisplay:RegisterConfigPanel_XMLTemplate(210, "TellMeWhen_BarDisplayBarOptions")
 
@@ -121,9 +129,9 @@ function TimerBar_BarDisplay:SetupColors(icon, valueColor)
 		end
 	else
 		self:SetColors(
-			icon.typeData.Colors.CBS,
-			icon.typeData.Colors.CBM,
-			icon.typeData.Colors.CBC)
+			icon.typeData.Colors.CBS.Color,
+			icon.typeData.Colors.CBM.Color,
+			icon.typeData.Colors.CBC.Color)
 	end
 end
 

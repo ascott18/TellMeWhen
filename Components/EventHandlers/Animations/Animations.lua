@@ -49,14 +49,28 @@ Animations:RegisterEventDefaults{
 	Thickness	  	= 2,
 	Fade	  		= true,
 	Infinite  		= false,
-	r_anim	  		= 1,
-	g_anim	  		= 0,
-	b_anim	  		= 0,
-	a_anim	  		= 0.5,
+	AnimColor	  	= "7fff0000",
+	Alpha		= 0.5,
 	Image			= "",
 	AnchorTo		= "IconModule_SelfIcon",
 }
 
+TMW:RegisterUpgrade(80003, {
+	iconEventHandler = function(self, eventSettings)
+		eventSettings.AnimColor = TMW:RGBAToString(
+			eventSettings.r_anim or 1,
+			eventSettings.g_anim or 0,
+			eventSettings.b_anim or 0,
+			eventSettings.a_anim or 0.5)
+
+		eventSettings.Alpha = eventSettings.a_anim or 0.5
+
+		eventSettings.r_anim = nil
+		eventSettings.g_anim = nil
+		eventSettings.b_anim = nil
+		eventSettings.a_anim = nil
+	end,
+})
 TMW:RegisterUpgrade(61224, {
 	iconEventHandler = function(self, eventSettings)
 		if eventSettings.Size_anim ~= 0 then
@@ -270,6 +284,7 @@ Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 			UIParent.TMWFlashAnim = TMW.Classes.AnimatedObject:New()
 		end
 
+		local r, g, b, a = TMW:StringToRGBA(eventSettings.AnimColor)
 		UIParent.TMWFlashAnim:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
@@ -277,10 +292,10 @@ Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = eventSettings.a_anim,
-			r = eventSettings.r_anim,
-			g = eventSettings.g_anim,
-			b = eventSettings.b_anim,
+			Alpha = a,
+			r = r,
+			g = g,
+			b = b,
 		}
 	end,
 	
@@ -395,6 +410,7 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 			end
 		end
 
+		local r, g, b, a = TMW:StringToRGBA(eventSettings.AnimColor)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
@@ -402,10 +418,10 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = eventSettings.a_anim,
-			r = eventSettings.r_anim,
-			g = eventSettings.g_anim,
-			b = eventSettings.b_anim,
+			Alpha = a,
+			r = r,
+			g = g,
+			b = b,
 			
 			AnchorTo = eventSettings.AnchorTo,
 		}
@@ -483,6 +499,7 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 			end
 		end
 
+		local r, g, b, a = TMW:StringToRGBA(eventSettings.AnimColor)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
@@ -490,10 +507,10 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = eventSettings.a_anim,
-			r = eventSettings.r_anim,
-			g = eventSettings.g_anim,
-			b = eventSettings.b_anim,
+			Alpha = a,
+			r = r,
+			g = g,
+			b = b,
 			Thickness = eventSettings.Thickness,
 			Size = eventSettings.Size_anim,
 			
@@ -601,6 +618,7 @@ Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 			end
 		end
 
+		local _, _, _, a = TMW:StringToRGBA(eventSettings.AnimColor)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
@@ -608,7 +626,7 @@ Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = eventSettings.a_anim,
+			Alpha = eventSettings.Alpha,
 			SizeX = eventSettings.SizeX,
 			SizeY = eventSettings.SizeY,
 			Image = TMW:GetTexturePathFromSetting(eventSettings.Image),

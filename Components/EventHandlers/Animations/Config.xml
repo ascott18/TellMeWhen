@@ -108,7 +108,7 @@
 
 								self:SetTexts(TMW.L["ANIM_COLOR"], TMW.L["ANIM_COLOR_DESC"])
 								self:SetHasOpacity(true)
-								self:SetColorSettingKeys("r_anim", "g_anim", "b_anim", "a_anim")
+								self:SetSetting("AnimColor")
 
 								self.paddingTop, self.paddingBottom = 4, 4
 							</OnLoad>
@@ -158,7 +158,7 @@
 								TMW:CInit(self)
 
 								self:SetTexts(TMW.L["ANIM_ALPHASTANDALONE"], TMW.L["ANIM_ALPHASTANDALONE_DESC"])
-								self:SetSetting("a_anim")
+								self:SetSetting("Alpha")
 								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMinMaxValues(0, 1)

@@ -2704,7 +2704,6 @@ L["IMPORT_ICON_DISABLED_DESC"] = "You must be editing an icon to be able to impo
 L["CHANGELOG_INFO2"] = [[Welcome to TellMeWhen v%s!
 <br/><br/>
 When you're done checking out what has changed, click the %s tab or %s tab at the bottom to start configuring TellMeWhen.]]
-L["CHANGELOG_MSG"] = "Thanks for helping to test TellMeWhen %s! Type /tmw changelog to see what has changed."
 
 
 L["TOPLEFT"] = "Top Left"

@@ -82,28 +82,29 @@ function Timer:GetEventDisplayText(eventID)
 end
 
 
-function Timer:OperationMenu_DropDown()
+local function OperationMenu_DropDown_OnClick(button, dropdown)
+	dropdown:SetUIDropdownText(button.value, operations)
+	
+	local eventSettings = EVENTS:GetEventSettings()
+	eventSettings.TimerOperation = button.value
+
+	dropdown:OnSettingSaved()
+end
+function Timer.OperationMenu_DropDown(dropdown)
 	for k, v in pairs(operations) do
 		local info = TMW.DD:CreateInfo()
-		info.func = Timer.OperationMenu_DropDown_OnClick
+		info.func = OperationMenu_DropDown_OnClick
 		info.text = v.text
 		info.tooltipTitle = v.text
 		info.tooltipText = v.tooltip
 		info.checked = v.value == EVENTS:GetEventSettings().TimerOperation
 		info.value = v.value
-		info.arg1 = self
+		info.arg1 = dropdown
 		TMW.DD:AddButton(info)
 	end
 end
 
-function Timer:OperationMenu_DropDown_OnClick(frame)
-	frame:SetUIDropdownText(self.value, operations)
-	
-	local eventSettings = EVENTS:GetEventSettings()
-	eventSettings.TimerOperation = self.value
 
-	TMW.EVENTS:LoadConfig()
-end
 
 
 

@@ -243,14 +243,14 @@ function TMW:MakeFunctionCached(obj, method)
 			return cache[cachestring]
 		end
 
-		local arg1, arg2 = func(...)
-		if arg2 ~= nil then
+		local ret1, ret2 = func(...)
+		if ret2 ~= nil then
 			error("Cannot cache functions with more than 1 return arg")
 		end
 
-		cache[cachestring] = arg1
+		cache[cachestring] = ret1
 
-		return arg1
+		return ret1
 	end
 
 	if type(obj) == "table" then
@@ -277,7 +277,6 @@ function TMW:MakeSingleArgFunctionCached(obj, method)
 	local wrapper = function(arg1In, arg2In)
 		local param1, param2 = arg1In, arg2In
 		if firstarg and firstarg == arg1In then
-			param1 = arg1In
 			arg1In = arg2In
 		elseif arg2In ~= nil then
 			error("Cannot MakeSingleArgFunctionCached functions with more than 1 arg", 2)
@@ -287,14 +286,14 @@ function TMW:MakeSingleArgFunctionCached(obj, method)
 			return cache[arg1In]
 		end
 
-		local arg1Out, arg2Out = func(param1, param2)
-		if arg2Out ~= nil then
+		local ret1, ret2 = func(param1, param2)
+		if ret2 ~= nil then
 			error("Cannot cache functions with more than 1 return arg", 2)
 		end
 
-		cache[arg1In] = arg1Out
+		cache[arg1In] = ret1
 
-		return arg1Out
+		return ret1
 	end
 
 	if type(obj) == "table" then
@@ -530,6 +529,67 @@ end
 
 
 ---------------------------------
+-- Color Utilities
+---------------------------------
+
+function TMW:RGBATableToString(table)
+	if type(table) == "string" then
+		return table
+	end
+
+	return format("%02x%02x%02x%02x", (table.a or 1) * 0xFF, table.r * 0xFF, table.g * 0xFF, table.b * 0xFF)
+end
+
+function TMW:RGBATableToStringWithFallback(table, fallbackStr)
+	if type(table) == "string" then
+		return table
+	end
+
+	local r, g, b, a = TMW:StringToRGBA(fallbackStr)
+	
+	return format("%02x%02x%02x%02x", (table.a or a) * 0xFF, (table.r or r) * 0xFF, (table.g or g) * 0xFF, (table.b or b) * 0xFF)
+end
+
+function TMW:RGBAToString(r, g, b, a)
+	return format("%02x%02x%02x%02x", (a or 1) * 0xFF, r * 0xFF, g * 0xFF, b * 0xFF)
+end
+
+function TMW:StringToRGBA(str)
+	local a, r, g, b = str:match("(%x%x)(%x%x)(%x%x)(%x%x)")
+	return tonumber(r, 0x10) / 0xFF, tonumber(g, 0x10) / 0xFF, tonumber(b, 0x10) / 0xFF, tonumber(a, 0x10) / 0xFF
+end
+
+function TMW:StringToRGB(str)
+	local a, r, g, b = str:match("(%x%x)(%x%x)(%x%x)(%x%x)")
+	return tonumber(r, 0x10) / 0xFF, tonumber(g, 0x10) / 0xFF, tonumber(b, 0x10) / 0xFF
+end
+
+function TMW:StringToCachedRGBATable(str)
+	if type(str) == "table" then
+		return str
+	end
+
+	local r, g, b, a = TMW:StringToRGBA(str)
+	return {r=r,g=g,b=b,a=a}
+end
+TMW:MakeFunctionCached(TMW, "StringToCachedRGBATable")
+
+function TMW:StringToCachedRGBTable(str)
+	if type(str) == "table" then
+		return str
+	end
+
+	local r, g, b = TMW:StringToRGBA(str)
+	return {r=r,g=g,b=b}
+end
+TMW:MakeFunctionCached(TMW, "StringToCachedRGBTable")
+
+
+
+
+
+
+---------------------------------
 -- Table Utilities
 ---------------------------------
 
@@ -669,7 +729,7 @@ end
 
 function TMW:CopyInPlaceWithMetatable(source, dest, blocker)
 	setmetatable(dest, getmetatable(source))
-	
+
 	for key in pairs(source) do
 		local keyBlocker = blocker and blocker[key]
 

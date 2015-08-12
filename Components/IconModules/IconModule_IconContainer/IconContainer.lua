@@ -44,21 +44,21 @@ function IconContainer:OnEnable()
 end
 
 function IconContainer:OnDisable()
-	self:SetBorder(0, 1, 1, 1, 1)
+	self:SetBorder(0, "ffffffff")
 end
 
 function IconContainer:OnDisableDelayed()
 	self.container:Hide()
 end
 
-function IconContainer:SetBorder(size, r, g, b, a)
+function IconContainer:SetBorder(size, color)
 	if not self.border and size ~= 0 then
 		self.border = CreateFrame("Frame", nil, self.container, "TellMeWhen_GenericBorder")
 	end
 
 	if self.border then
 		self.border:SetBorderSize(size)
-		self.border:SetColor(r, g, b, a)
+		self.border:SetColor(TMW:StringToRGBA(color))
 	end
 end
 

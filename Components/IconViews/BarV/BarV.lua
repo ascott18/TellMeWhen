@@ -82,12 +82,18 @@ View:RegisterGroupDefaults{
 			Icon = true,
 			Flip = false,
 			Padding = 0,
-			BorderColor = {r=0, g=0, b=0, a=1},
+			BorderColor = "ff000000",
 			BorderBar = 0,
 			BorderIcon = 0,
 		}
 	}
 }
+
+TMW:RegisterUpgrade(80003, {
+	group = function(self, gs)
+		gs.SettingsPerView.barv.BorderColor = TMW:RGBATableToStringWithFallback(gs.SettingsPerView.barv.BorderColor, "ff000000")
+	end,
+})
 
 
 if not TMW.Views.bar then
@@ -102,12 +108,7 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 1, function(Module, ico
 	
 	Module.container:ClearAllPoints()
 
-	Module:SetBorder(
-		gspv.BorderIcon,
-		gspv.BorderColor.r,
-		gspv.BorderColor.g,
-		gspv.BorderColor.b,
-		gspv.BorderColor.a)
+	Module:SetBorder(gspv.BorderIcon, gspv.BorderColor)
 
 	local inset = gspv.BorderIcon
 
@@ -190,12 +191,7 @@ View:ImplementsModule("IconModule_Backdrop", 51, function(Module, icon)
 	local group = icon.group
 	local gspv = group:GetSettingsPerView()
 
-	Module:SetBorder(
-		gspv.BorderBar,
-		gspv.BorderColor.r,
-		gspv.BorderColor.g,
-		gspv.BorderColor.b,
-		gspv.BorderColor.a)
+	Module:SetBorder(gspv.BorderBar, gspv.BorderColor)
 	
 	Module.container:ClearAllPoints()
 	Module.container:SetAllPoints(icon.Modules.IconModule_TimerBar_BarDisplay.bar)

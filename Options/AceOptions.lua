@@ -160,18 +160,15 @@ local colorTemplate = {
 			set = function(info, r, g, b, a)
 				local c = TMW.db.profile.Colors[info[#info-2]][info[#info-1]]
 
-				c.r = r c.g = g c.b = b c.a = a
+				c.Color = TMW:RGBAToString(r, g, b, a)
 				c.Override = true
+
 				TMW.Types[info[#info-2]]:UpdateColors()
 			end,
 			get = function(info)
-				local base = TMW.db.profile.Colors[info[#info-2]][info[#info-1]]
-				local c = base
-				if not base.Override then
-				--	c = TMW.db.profile.Colors["GLOBAL"][info[#info-1]] -- i don't like this. too confusing to see the color change when checking and unchecking the setting
-				end
+				local c = TMW.db.profile.Colors[info[#info-2]][info[#info-1]]
 
-				return c.r, c.g, c.b, c.a
+				return TMW:StringToRGBA(c.Color)
 			end,
 			disabled = function(info)
 				return not TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"

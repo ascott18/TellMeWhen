@@ -68,10 +68,7 @@ TMW.IE:RegisterRapidSetting("Thickness")
 TMW.IE:RegisterRapidSetting("Size_anim")
 TMW.IE:RegisterRapidSetting("SizeX")
 TMW.IE:RegisterRapidSetting("SizeY")
-TMW.IE:RegisterRapidSetting("r_anim")
-TMW.IE:RegisterRapidSetting("g_anim")
-TMW.IE:RegisterRapidSetting("b_anim")
-TMW.IE:RegisterRapidSetting("a_anim")
+TMW.IE:RegisterRapidSetting("AnimColor")
 
 
 function Animations:AnchorTo_Dropdown()

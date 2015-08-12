@@ -23,7 +23,6 @@ local CI = TMW.CI
 
 local Module = TMW.Classes.IconModule_TimerBar_BarDisplay
 
-
 TMW.IconDragger:RegisterIconDragHandler(250, -- Copy Bar Colors
 	function(IconDragger, info)
 		local srcicon = IconDragger.srcicon

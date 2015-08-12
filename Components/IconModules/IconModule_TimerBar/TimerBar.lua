@@ -47,8 +47,6 @@ function TimerBar:OnNewInstance(icon)
 	self.Max = 1
 	bar:SetMinMaxValues(0, self.Max)
 	
-	self:SetColors(TMW.Types[""].CBS, TMW.Types[""].CBM, TMW.Types[""].CBC)
-	
 	self.start = 0
 	self.duration = 0
 	self.Offset = 0
@@ -173,9 +171,9 @@ function TimerBar:SetCooldown(start, duration)
 end
 
 function TimerBar:SetColors(startColor, halfColor, completeColor)
-	self.startColor = startColor
-	self.halfColor = halfColor
-	self.completeColor = completeColor
+	self.startColor    = startColor and TMW:StringToCachedRGBATable(startColor)
+	self.halfColor     = halfColor and TMW:StringToCachedRGBATable(halfColor)
+	self.completeColor = completeColor and TMW:StringToCachedRGBATable(completeColor)
 end
 
 function TimerBar:DURATION(icon, start, duration)

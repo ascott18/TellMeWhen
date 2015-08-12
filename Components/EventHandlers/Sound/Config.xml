@@ -104,7 +104,7 @@
 						self:CScriptAdd("UnModifySettingValueRequested", function(self, value)
 							local Sound = TMW.EVENTS:GetEventHandler("Sound")
 
-							local listID = TMW.tContains(Sound.List, value)
+							local listID = Sound.List and TMW.tContains(Sound.List, value)
 
 							-- If the sound is found in the LSM sounds, dont display it in this editbox.
 							if listID then

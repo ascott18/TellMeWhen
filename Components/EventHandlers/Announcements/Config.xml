@@ -194,7 +194,7 @@
 
 								self:SetTexts(TMW.L["FONTCOLOR"], nil)
 								self:SetHasOpacity(false)
-								self:SetColorSettingKeys("r", "g", "b")
+								self:SetSetting("TextColor")
 
 								self.paddingTop, self.paddingBottom = 4, 4
 							</OnLoad>

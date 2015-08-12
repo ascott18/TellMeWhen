@@ -31,6 +31,7 @@ EVENTS.CONST = {
 }
 
 local EventsTab = TMW.IE:RegisterTab("ICON", "ICONEVENTS", "Events", 10)
+EventsTab:SetHistorySet(TMW.C.HistorySet:GetHistorySet("ICON"))
 EventsTab:SetTexts(L["EVENTS_TAB"], L["EVENTS_TAB_DESC"])
 
 
@@ -455,19 +456,24 @@ function EVENTS:PickEvent(event)
 	local eventID = TMW.CI.ics.Events.n
 	local eventSettings = EVENTS:GetEventSettings(eventID)
 
-	eventSettings.Event = event
 	eventSettings.Type = handlerIdentifier
+
+	EVENTS:SetEvent(eventID, event)
+
+	EVENTS:LoadEventID(eventID)
+end
+
+function EVENTS:SetEvent(eventID, event)
+	local eventSettings = EVENTS:GetEventSettings(eventID)
+
+	eventSettings.Event = event
 
 	local eventData = TMW.EventList[event]
 	if eventData and eventData.applyDefaultsToSetting then
 		eventData.applyDefaultsToSetting(eventSettings)
 	end
 
-	EVENTS:LoadConfig()
-
-	EVENTS:LoadEventID(eventID)
-
-	TMW.DD:CloseDropDownMenus()
+	IE.Pages.Events:OnSettingSaved()
 end
 
 
@@ -495,8 +501,8 @@ TMW:RegisterCallback("TMW_CONFIG_LOADED", EVENTS, "SetTabText")
 
 
 
-function EVENTS:IsEventIDValid(id)
-	local eventSettings = EVENTS:GetEventSettings(id)
+function EVENTS:IsEventIDValid(eventID)
+	local eventSettings = EVENTS:GetEventSettings(eventID)
 
 	local EventHandler = EVENTS:GetEventHandlerForEventSettings(eventSettings)
 
@@ -525,12 +531,15 @@ function EVENTS:IsEventIDValid(id)
 		-- The event is not valid for the current icon configuration
 		return false, EVENTS.CONST.EVENT_INVALID_REASON_MISSINGCOMPONENT
 	end
-
 end
 
 function EVENTS:GetEventSettings(eventID)
+	eventID = eventID or EVENTS.currentEventID
+	local Events = TMW.CI.ics and TMW.CI.ics.Events
 
-	return TMW.CI.ics and TMW.CI.ics.Events[eventID or EVENTS.currentEventID]
+	if Events and eventID and eventID <= Events.n then
+		return Events[eventID]
+	end
 end
 
 function EVENTS:GetEventData(event)
@@ -602,15 +611,22 @@ function EVENTS:GetValidEvents(EventHandler)
 end
 
 
+local function OperatorMenu_DropDown_OnClick(button, dropdown)
+	dropdown:SetUIDropdownText(button.value)
 
-function EVENTS.OperatorMenu_DropDown(frame)
+	EVENTS:GetEventSettings().Operator = button.value
+	TMW:TT(dropdown, button.tooltipTitle, nil, 1)
+
+	dropdown:OnSettingSaved()
+end
+function EVENTS.OperatorMenu_DropDown(dropdown)
 	local eventData = EVENTS.EventHandlerFrames.frames[EVENTS.currentEventID].eventData
 	local eventSettings = EVENTS:GetEventSettings()
 
 	for k, v in pairs(TMW.operators) do
 		if not eventData.blacklistedOperators or not eventData.blacklistedOperators[v.value] then
 			local info = TMW.DD:CreateInfo()
-			info.func = EVENTS.OperatorMenu_DropDown_OnClick
+			info.func = OperatorMenu_DropDown_OnClick
 			info.text = v.text
 			info.value = v.value
 			info.checked = v.value == eventSettings.Operator
@@ -620,14 +636,28 @@ function EVENTS.OperatorMenu_DropDown(frame)
 		end
 	end
 end
-function EVENTS.OperatorMenu_DropDown_OnClick(button, frame)
-	frame:SetUIDropdownText(button.value)
 
-	EVENTS:GetEventSettings().Operator = button.value
-	TMW:TT(frame, button.tooltipTitle, nil, 1)
+
+local function ChangeEvent_Dropdown_OnClick(button, eventID, event)
+	TMW.DD:CloseDropdownMenus()
+
+	EVENTS:SetEvent(eventID, event)
 end
+local function ChangeEvent_Dropdown_OnClick_Clone(button, eventID)
+	local eventSettings = EVENTS:GetEventSettings(eventID)
 
+	local n = TMW.CI.ics.Events.n + 1
+	TMW:CopyTableInPlaceUsingDestinationMeta(eventSettings, TMW.CI.ics.Events[n])
+	TMW.CI.ics.Events.n = n
 
+	TMW.DD:CloseDropdownMenus()
+
+	IE.Pages.Events:OnSettingSaved()
+
+	if EVENTS:IsEventIDValid(n) then
+		EVENTS:LoadEventID(n)
+	end
+end
 function EVENTS:ChangeEvent_Dropdown()
 	local eventButton = self.eventButton -- This is set in XML when the dropdown is opened.
 	local eventID = eventButton:GetID()
@@ -637,7 +667,7 @@ function EVENTS:ChangeEvent_Dropdown()
 		local info = TMW.DD:CreateInfo()
 		info.text = L["EVENTS_CLONEHANDLER"]
 		info.arg1 = eventID
-		info.func = EVENTS.ChangeEvent_Dropdown_OnClick_Clone
+		info.func = ChangeEvent_Dropdown_OnClick_Clone
 		info.keepShownOnClick = false
 		info.notCheckable = true
 		TMW.DD:AddButton(info)
@@ -660,42 +690,16 @@ function EVENTS:ChangeEvent_Dropdown()
 
 			info.value = eventData.event
 			info.checked = eventData.event == eventButton.event
-			info.func = EVENTS.ChangeEvent_Dropdown_OnClick
+			info.func = ChangeEvent_Dropdown_OnClick
 			info.keepShownOnClick = false
-			info.arg1 = eventButton
+			info.arg1 = eventButton:GetID()
 			info.arg2 = eventData.event
 
 			TMW.DD:AddButton(info)
 		end
 	end
 end
-function EVENTS:ChangeEvent_Dropdown_OnClick(eventButton, event)
-	local eventID = eventButton:GetID()
-	local eventSettings = EVENTS:GetEventSettings(eventID)
 
-	eventSettings.Event = event
-
-	local eventData = TMW.EventList[event]
-	if eventData and eventData.applyDefaultsToSetting then
-		eventData.applyDefaultsToSetting(eventSettings)
-	end
-
-	EVENTS:LoadConfig()
-end
-function EVENTS:ChangeEvent_Dropdown_OnClick_Clone(eventID)
-	local eventSettings = EVENTS:GetEventSettings(eventID)
-
-	local n = TMW.CI.ics.Events.n + 1
-	TMW:CopyTableInPlaceUsingDestinationMeta(eventSettings, TMW.CI.ics.Events[n])
-	TMW.CI.ics.Events.n = n
-	--EVENTS.currentEventID = n
-
-	EVENTS:LoadConfig()
-
-	if EVENTS:IsEventIDValid(n) then
-		EVENTS:LoadEventID(n)
-	end
-end
 
 
 

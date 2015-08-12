@@ -23,21 +23,31 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local Backdrop = TMW:NewClass("IconModule_Backdrop", "IconModule")
 
 Backdrop:RegisterIconDefaults{
-	BackdropColor		= { r=0.2, g=0.2, b=0.2, a=0.5 },
+	BackdropColor		= "7f333333",
 }
+
+TMW:RegisterUpgrade(80003, {
+	icon = function(self, ics)
+		ics.BackdropColor = TMW:RGBATableToStringWithFallback(ics.BackdropColor, "7f333333")
+	end,
+})
 
 TMW:RegisterUpgrade(72411, {
 	icon = function(self, ics)
-		-- These values were accidentally switched in code.
-		-- Swap them when upgrading to keep the user's old color.
-		ics.BackdropColor.g, ics.BackdropColor.b =
-		ics.BackdropColor.b, ics.BackdropColor.g
+		if type(ics.BackdropColor) == "table" then
+			-- These values were accidentally switched in code.
+			-- Swap them when upgrading to keep the user's old color.
+			ics.BackdropColor.g, ics.BackdropColor.b =
+			ics.BackdropColor.b, ics.BackdropColor.g
+		end
 	end,
 })
 
 TMW:RegisterUpgrade(72330, {
 	icon = function(self, ics)
-		ics.BackdropColor.a = ics.BackdropAlpha or 0.5
+		if type(ics.BackdropColor) == "table" then
+			ics.BackdropColor.a = ics.BackdropAlpha or 0.5
+		end
 	end,
 })
 
@@ -59,25 +69,25 @@ function Backdrop:OnEnable()
 end
 function Backdrop:OnDisable()
 	self.container:Hide()
-	self:SetBorder(0, 1, 1, 1, 1)
+	self:SetBorder(0, "ffffffff")
 end
 
-function Backdrop:SetBorder(size, r, g, b, a)
+function Backdrop:SetBorder(size, color)
 	if not self.border and size ~= 0 then
 		self.border = CreateFrame("Frame", nil, self.container, "TellMeWhen_GenericBorder")
 	end
 
 	if self.border then
 		self.border:SetBorderSize(size)
-		self.border:SetColor(r, g, b, a)
+		self.border:SetColor(TMW:StringToRGBA(color))
 	end
 end
 
 function Backdrop:SetupForIcon(icon)
 	self.backdrop:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
 	
-	local c = icon.BackdropColor
-	self.backdrop:SetVertexColor(c.r, c.g, c.b, 1)
-	self.backdrop:SetAlpha(c.a)
+	local r, g, b, a = TMW:StringToRGBA(icon.BackdropColor)
+	self.backdrop:SetVertexColor(r, g, b, 1)
+	self.backdrop:SetAlpha(a)
 end
 	

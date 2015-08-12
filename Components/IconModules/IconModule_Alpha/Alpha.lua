@@ -79,7 +79,7 @@ Alpha:RegisterEventHandlerData("Animations", 40, "ICONALPHAFLASH", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = eventSettings.a_anim,
+			Alpha = eventSettings.Alpha,
 		}
 	end,
 

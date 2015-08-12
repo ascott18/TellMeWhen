@@ -35,10 +35,8 @@ function Texture_Colored:SetupForIcon(icon)
 end
 
 local COLOR_UNLOCKED = {
-	r=1,
-	b=1,
-	g=1,
-	Gray=false,
+	Color = "ffffffff",
+	Gray = false,
 }
 function Texture_Colored:UPDATE(icon)
 	local attributes = icon.attributes
@@ -97,14 +95,14 @@ function Texture_Colored:UPDATE(icon)
 	end
 	
 	local texture = self.texture
-	local r, g, b, d = color.r, color.g, color.b, color.Gray
+	local r, g, b = TMW:StringToRGB(color.Color)
 	
 	if not (LMB and OnlyMSQ) then
 		texture:SetVertexColor(r, g, b, 1)
 	else
 		texture:SetVertexColor(1, 1, 1, 1)
 	end
-	texture:SetDesaturated(d)
+	texture:SetDesaturated(color.Gray)
 	
 	if LMB and ColorMSQ then
 		local iconnt = icon.normaltex

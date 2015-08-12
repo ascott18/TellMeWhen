@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80001 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -221,23 +221,26 @@ TMW.Defaults = {
 
 		Colors = {
 			["**"] = {
-				CBC = 	{r=0,	g=1,	b=0,	Override = false,	a=1,	},	-- cooldown bar complete
-				CBS = 	{r=1,	g=0,	b=0,	Override = false,	a=1,	},	-- cooldown bar start
-				CBM = 	{r=1,	g=1,	b=0,	Override = false,	a=1,	},	-- cooldown bar middle
+				["**"] = {Color="ffffffff", Override = false, Gray = false, },
 
-				OOR	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of range
-				OOM	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of mana
-				OORM=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- out of range and mana
+				CBC = 	{ Color="ff00ff00", },	-- cooldown bar complete
+				CBS = 	{ Color="ffff0000", },	-- cooldown bar start
+				CBM = 	{ Color="ffffff00", },	-- cooldown bar middle
 
-				CTA	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting with timer always
-				COA	=	{r=0.5,	g=0.5,	b=0.5,	Override = false,			},	-- counting withOUT timer always
-				CTS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting with timer somtimes
-				COS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- counting withOUT timer somtimes
+				OOR	=	{ Color="ff7f7f7f", },	-- out of range
+				OOM	=	{ Color="ff7f7f7f", },	-- out of mana
+				OORM=	{ Color="ff7f7f7f", },	-- out of range and mana
 
-				NA	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting always
-				NS	=	{r=1,	g=1,	b=1,	Override = false,			},	-- not counting sometimes
+				CTA	=	{ Color="ffffffff", },	-- counting with timer always
+				COA	=	{ Color="ff7f7f7f", },	-- counting withOUT timer always
+				CTS	=	{ Color="ffffffff", },	-- counting with timer somtimes
+				COS	=	{ Color="ffffffff", },	-- counting withOUT timer somtimes
+
+				NA	=	{ Color="ffffffff", },	-- not counting always
+				NS	=	{ Color="ffffffff", },	-- not counting sometimes
 			},
 		},
+
 		Groups 		= 	{
 			["**"] = {
 				GUID			= "",
@@ -1539,6 +1542,27 @@ TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 
+		[80003] = {
+			profile = function(self, profile)
+				-- This is a key from a very, very early concept of the color system that showed up in TMW v4.0.0 beta8.
+				-- It stayed commented out in the setting defaults until it was removed in 4.5.0 (7e9d180).
+				-- It was the only color setting that has a place in AceConfig hardcoded in, but that line was never uncommented.
+				-- I don't think I ever released it, but evidently I did play around with it because it is still in my profile.
+				profile.Colors.AOA = nil
+
+				for k, colorSet in pairs(profile.Colors) do
+					for _, color in pairs(colorSet) do
+						color.Color = TMW:RGBATableToStringWithFallback(color, color.Color)
+
+						color.r = nil
+						color.g = nil
+						color.b = nil
+						color.a = nil
+					end
+				end
+			end,
+		},
+
 		[71020] = {
 			icon = function(self, ics)
 				ics.Name = ics.Name:gsub("IncreasedPhysHaste", "IncreasedHaste")
@@ -1632,6 +1656,19 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		[62304] = {
 			profile = function(self)
 				for k, v in pairs(TMW.db.profile.Colors) do
+
+					-- This is here to maintain compatability after colors started being stored in strings (in v 80003).
+					-- The old defaults are gone, so we have to restore any of them that might be missing.
+					v.CBC.r = v.CBC.r or 0
+					v.CBC.g = v.CBC.g or 1
+					v.CBC.b = v.CBC.b or 0
+					v.CBC.a = v.CBC.a or 1
+
+					v.CBS.r = v.CBS.r or 1
+					v.CBS.g = v.CBS.g or 0
+					v.CBS.b = v.CBS.b or 0
+					v.CBS.a = v.CBS.a or 1
+
 					if not (
 						(v.CBC.r == 0 and v.CBC.g == 1 and v.CBC.b == 0 and 
 						 v.CBS.r == 1 and v.CBS.g == 0 and v.CBS.b == 0)  
@@ -2966,19 +3003,6 @@ function TMW:SlashCommand(str)
 			TMW:Print("Bad syntax. Usage: /tmw [enable||disable||toggle] [profile||global] groupID iconID")
 		end
 
-	elseif cmd == "changelog" then
-		if not TMW.IE then
-			if TMW:CheckCanDoLockedAction() then
-				TMW:LoadOptions()
-
-				if TMW:AssertOptionsInitialized() then
-					return
-				end
-			end
-		end
-		if TMW.IE then
-			TMW.IE:ShowChangelog()
-		end
 	else
 		TMW:LockToggle()
 	end

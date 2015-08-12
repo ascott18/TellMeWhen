@@ -812,31 +812,6 @@ end
 function IE:Load(isRefresh)
 	TMW.ACEOPTIONS:CompileOptions()
 
-	if IE.db.global.LastChangelogVersion > 0 then		
-		if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
-			if IE.db.global.LastChangelogVersion < TELLMEWHEN_FORCECHANGELOG -- forced
-			or TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
-			or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
-			then
-				-- Put this in a C_Timer so that it runs after all the auto tab clicking mumbo jumbo has finished.
-				-- C_Timers with a delay of 0 will run after the current script finishes execution.
-				-- In the case of loading the IE, it is probably an OnClick.
-
-				-- We have to upvalue this since its about to get set to the current version.l
-				local version = IE.db.global.LastChangelogVersion
-				C_Timer.After(0, function()
-					IE:ShowChangelog(version)	
-				end)		
-			else
-				TMW:Printf(L["CHANGELOG_MSG"], TELLMEWHEN_VERSION_FULL)
-			end
-
-			IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
-		end
-	else
-		IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
-	end
-
 	if not isRefresh then
 		IE:Show()
 	end
@@ -1636,6 +1611,10 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 TMW:NewClass("Config_Page", "Config_Frame"){
 	OnNewInstance_Page = function(self)
 		self:CScriptAdd("SettingSaved", self.RequestReload)
+
+		-- TODO: this is excessive for panel-based pages.
+		-- Consider lowering this down to the panel?
+		-- Be careful of breaking the PageReloadRequested cscript.
 		self:CScriptAdd("DescendantSettingSaved", self.RequestReload)
 
 		self:CScriptAdd("ReloadRequested", self.ReloadRequested)
@@ -2684,13 +2663,6 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	hasOpacity = false,
 
-	colorSettingKeys = {
-		r = "r",
-		g = "g",
-		b = "b",
-		a = "a",
-	},
-
 	OnNewInstance_ColorButton = function(self)
 		assert(self.background1 and self.text and self.swatch, 
 			"This setting frame doesn't inherit from TellMeWhen_ColorButtonTemplate")
@@ -2722,8 +2694,15 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 
 	SetHasOpacity = function(self, hasOpacity)
 		self.hasOpacity = hasOpacity
+	end,
 
-		self:RequestReload()
+	OnSettingSavedDelayed = function(self)
+		if not self.saveTimer then
+			self.saveTimer = C_Timer.NewTimer(0.1, function()
+				self.saveTimer = nil
+				self:OnSettingSaved()
+			end)
+		end
 	end,
 
 	-- We have to do this for these to have access to self.
@@ -2733,8 +2712,9 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 			local a = 1 - OpacitySliderFrame:GetValue()
 
 			self:SetRGBA(r, g, b, a)
+			self.swatch:SetTexture(self:GetRGBA())
 			
-			self:OnSettingSaved()
+			self:OnSettingSavedDelayed()
 		end
 
 		self.cancelFunc = function()
@@ -2754,51 +2734,33 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		end
 	end,
 
-	SetColorSettingKeys = function(self, r, g, b, a)
-		self.colorSettingKeysSet = true
-		self.colorSettingKeys = {
-			r = r or "r",
-			g = g or "g",
-			b = b or "b",
-			a = a or "a",
-		}
-	end,
-
 	GetRGBA = function(self)
 		local settings = self:GetSettingTable()
-		local k = self.colorSettingKeys
 
-		local c
-		if self.setting then
-			c = settings[self.setting]
-		elseif self.colorSettingKeysSet then
-			c = settings
-		end
+		if settings and self.setting then
+			IE:RegisterRapidSetting(self.setting)
+			
+			local r, g, b, a = TMW:StringToRGBA(settings[self.setting])
 
-		if not c then
-			return 0, 0, 0, 0
-		elseif self.hasOpacity then
-			return c[k.r], c[k.g], c[k.b], c[k.a]
+			if self.hasOpacity then
+				return r, g, b, a
+			else
+				return r, g, b, 1
+			end
 		else
-			return c[k.r], c[k.g], c[k.b], 1
-		end
+			return 0, 0, 0, 0
+		end		
 	end,
 
 	SetRGBA = function(self, r, g, b, a)
-		local settings = self:GetSettingTable()
-		local k = self.colorSettingKeys
-
-		local c
-		if self.setting then
-			c = settings[self.setting]
-		elseif self.colorSettingKeysSet then
-			c = settings
+		if not self.hasOpacity then
+			a = 1
 		end
 
-		c[k.r], c[k.g], c[k.b] = r, g, b
+		local settings = self:GetSettingTable()
 
-		if self.hasOpacity then
-			c[k.a] = a
+		if settings and self.setting then
+			settings[self.setting] = TMW:RGBAToString(r, g, b, a)
 		end
 	end,
 }
@@ -3508,21 +3470,18 @@ end)
 IE.RapidSettings = {
 	-- settings that can be changed very rapidly, i.e. via mouse wheel or in a color picker
 	-- consecutive changes of these settings will be ignored by the undo/redo module
-	r = true,
-	g = true,
-	b = true,
-	a = true,
 	Size = true,
 	Level = true,
 	Alpha = true,
 	UnAlpha = true,
 	GUID = true,
+	Color = true,
 }
+
 function IE:RegisterRapidSetting(setting)
 	IE.RapidSettings[setting] = true
 end
 
----------- Comparison ----------
 function IE:GetCompareResultsPath(match, ...)
 	if match then
 		return true
@@ -3538,8 +3497,6 @@ function IE:GetCompareResultsPath(match, ...)
 	return path, setting
 end
 
-
----------- DoStuff ----------
 local function DeepCompareWithBlocker(table1, table2, blocker, ...)
 	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
 
@@ -3651,42 +3608,42 @@ TMW:NewClass("HistorySet") {
 		end
 
 		if not location.history then
-			-- create the needed infrastructure for storing history if it does not exist.
-			-- this includes creating the first history point
+			-- Create the needed infrastructure for storing history if it does not exist.
+			-- This includes creating the first history point
 			location.history = {TMW:CopyWithMetatable(settings, self.blocker)}
 			location.historyState = #location.history
 
 		else
-			-- the needed stuff for undo and redo already exists, so lets delve into the meat of the process.
+			-- The needed stuff for undo and redo already exists, so lets delve into the meat of the process.
 
-			-- compare the current settings with what we have in the currently used history point
-			-- the currently used history point may or may not be the most recent settings, but we want to check ics against what is being used.
-			-- result is either (true) if there were no changes in the settings, or a string representing the key path to the first setting change that was detected.
-			--(it was likely only one setting that changed, but not always)
+			-- Compare the current settings with what we have in the currently used history point.
+			-- The currently used history point may or may not be the most recent settings, but we want to check ics against what is being used.
+			-- Result is either (true) if there were no changes in the settings, or a string representing the key path to the first setting change that was detected.
+			-- (it was likely only one setting that changed, but not always)
 			local result, changedSetting = IE:GetCompareResultsPath(DeepCompareWithBlocker(location.history[location.historyState], settings, self.blocker))
 			if type(result) == "string" then
 
-				-- if we are using an old history point (i.e. we hit undo a few times and then made a change),
+				-- If we are using an old history point (i.e. we hit undo a few times and then made a change),
 				-- delete all history points from the current one forward so that we dont jump around wildly when undoing and redoing
 				for i = location.historyState + 1, #location.history do
 					location.history[i] = nil
 				end
 
-				-- if the last setting that was changed is the same as the most recent setting that was changed,
-				-- and if the setting is one that can be changed very rapidly,
-				-- delete the previous history point so that we dont murder our memory usage and piss off the user as they undo a number from 1 to 10, 0.1 per click.
+				-- If the last setting that was changed is the same as the most recent setting that was changed,
+				-- and if the setting is one that can be changed very rapidly, delete the previous history point.
+				-- This improves memory usage and user experience.
 				if location.lastChangePath == result and IE.RapidSettings[changedSetting] and location.historyState > 1 then
 					location.history[#location.history] = nil
 					location.historyState = #location.history
 				end
 				location.lastChangePath = result
 
-				-- finally, create the newest history point.
-				-- we copy with with the metatable so that when doing comparisons against the current settings, we can invoke metamethods.
-				-- this is needed because otherwise an empty event table will not match a fleshed out one that has no non-default data in it.
+				-- Finally, create the newest history point.
+				-- We copy with with the metatable so that when doing comparisons against the current settings, we can invoke metamethods.
+				-- This is needed because otherwise an empty event table will not match a fleshed out one that has no non-default data in it.
 				location.history[#location.history + 1] = TMW:CopyWithMetatable(settings, self.blocker)
 
-				-- set the history state to the latest point
+				-- Set the history state to the latest point
 				location.historyState = #location.history
 
 			end
@@ -3795,183 +3752,5 @@ end
 
 
 
-
-
-
-
--- ----------------------
--- CHANGELOG
--- ----------------------
-
-local changelogEnd = "<p align='center'>|cff666666To see the changelog for versions up to v" ..
-(TMW.CHANGELOG_LASTVER or "???") .. ", click the tab below again.|r</p>"
-local changelogEndAll = "<p align='center'>|cff666666For older versions, visit TellMeWhen's AddOn page on Curse.com|r</p><br/>"
-
-function IE:ShowChangelog(lastVer)
-
-	IE.TabGroups.MAIN.CHANGELOG:Click()
-
-	if not lastVer then lastVer = 0 end
-
-	local CHANGELOGS = IE:ProcessChangelogData()
-
-	local texts = {}
-
-	for version, text in TMW:OrderedPairs(CHANGELOGS, nil, nil, true) do
-		if lastVer >= version then
-			if lastVer > 0 then
-				text = text:gsub("</h1>", " (" .. L["CHANGELOG_LAST_VERSION"] .. ")</h1>")
-			end
-				
-			tinsert(texts, text)
-			break
-		else
-			tinsert(texts, text)
-		end
-	end
-
-	-- The intro text, before any actual changelog entries
-	tinsert(texts, 1, "<p align='center'>|cff999999" .. L["CHANGELOG_INFO2"]:format(TELLMEWHEN_VERSION_FULL) .. "|r</p>")
-
-	if lastVer > 0 then
-		tinsert(texts, changelogEnd .. changelogEndAll)
-	else
-		tinsert(texts, changelogEndAll)
-	end
-
-	local Container = IE.Pages.Changelog.Container
-
-	local body = format("<html><body>%s</body></html>", table.concat(texts, "<br/>"))
-	Container.HTML:SetText(body)
-
-	-- This has to be stored because there is no GetText method.
-	Container.HTML.text = body
-
-	IE.Pages.Changelog.Container.ScrollFrame:SetVerticalScroll(0)
-	Container:GetScript("OnSizeChanged")(Container)
-end
-
-local function htmlEscape(char)
-	if char == "&" then
-		return "&amp;"
-	elseif char == "<" then
-		return "&lt;"
-	elseif char == ">" then
-		return "&gt;"
-	end
-end
-
-local bulletColors = {
-	"4FD678",
-	"2F99FF",
-	"F62FAD",
-}
-
-local function bullets(b, text)
-	local numDashes = #b 
-	
-	if numDashes <= 0 then
-		return "><p>" .. text .. "</p><"
-	end
-
-	local color = bulletColors[(numDashes-1) % #bulletColors + 1]
-	
-	-- This is not a regular space. It is U+2002 - EN SPACE
-	local dashes = (" "):rep(numDashes) .. "•"
-
-	return "><p>|cFF" .. color .. dashes .. " |r" .. text .. "</p><"
-end
-
-local CHANGELOGS
-function IE:ProcessChangelogData()
-	if CHANGELOGS then
-		return CHANGELOGS
-	end
-
-	CHANGELOGS = {}
-
-	if not TMW.CHANGELOG then
-		TMW:Error("There was an error loading TMW's changelog data.")
-		TMW:Print("There was an error loading TMW's changelog data.")
-
-		return CHANGELOGS
-	end
-
-	local log = TMW.CHANGELOG
-
-	log = log:gsub("([&<>])", htmlEscape)        
-	log = log:trim(" \t\r\n")
-
-	-- Replace 4 equals with h2
-	log = log:gsub("[ \t]*====(.-)====[ \t]*", "<h2>%1</h2>")
-
-	-- Replace 3 equals with h1, formatting as a version name
-	log = log:gsub("[ \t]*===(.-)===[ \t]*", "<h1>TellMeWhen %1</h1>")
-
-	-- Remove extra space after closing header tags
-	log = log:gsub("(</h.>)%s*", "%1")
-
-	-- Remove extra space before opening header tags.
-	log = log:gsub("%s*(<h.>)", "%1")
-
-	-- Convert newlines to <br/>
-	log = log:gsub("\r\n", "<br/>")
-	log = log:gsub("\n", "<br/>")
-
-	-- Put a break at the end for the next gsub - it relies on a tag of some kind
-	-- being at the end of each line.
-	log = log .. "<br/>"
-
-	-- Convert asterisks to colored dashes
-	log = log:gsub(">%s*(*+)%s*(.-)<", bullets)
-
-	-- Remove double breaks 
-	log = log:gsub("<br/><br/>", "<br/>")
-
-	-- Remove breaks between paragraphs
-	log = log:gsub("</p><br/><p>", "</p><p>")
-
-	-- Add breaks between paragraphs and h2ss
-	-- Put an empty paragraph in since they are smaller than a full break.
-	log = log:gsub("</p>%s*<h2>", "</p><p> </p><h2>")
-
-	-- Add a "General" header before the first paragraph after an h1
-	log = log:gsub("</h1>%s*<p>", "</h1><h2>General</h2><p>")
-
-	-- Make the phrase "IMPORTANT" be red.
-	log = log:gsub("IMPORTANT", "|cffff0000IMPORTANT|r")
-
-
-	local subStart, subEnd = 0, 0
-	repeat
-		local done
-
-		-- Find the start of a version
-		subStart, endH1 = log:find("<h1>", subEnd)
-
-		-- Find the start of the next version
-		subEnd = log:find("<h1>", endH1)
-
-		if not subEnd then
-			-- We're at the end of the data. Set the length of the data as the end position.
-			subEnd = #log
-			done = true
-		else
-			-- We want to end just before the start of the next version.
-			subEnd = subEnd - 1
-		end
-
-		local versionString = log:match("TellMeWhen v([0-9%.]+)", subStart):gsub("%.", "")
-		local versionNumber = tonumber(versionString) * 100
-		
-		-- A full version's changelog is between subStart and subEnd. Store it.
-		CHANGELOGS[versionNumber] = log:sub(subStart, subEnd)
-	until done
-
-	-- Send this out to the garbage collector
-	TMW.CHANGELOG = nil
-
-	return CHANGELOGS
-end
 
 

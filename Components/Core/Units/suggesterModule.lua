@@ -76,7 +76,7 @@ function Module:Entry_AddToList_1(f, index)
 				if color.colorStr then
 					color = "|c" .. color.colorStr
 				else
-					color = ("|cff%02x%02x%02x"):format(color.r * 0xFF, color.g * 0xFF, color.b * 0xFF)
+					color = "|c" .. TMW:RGBATableToString(color)
 				end
 			end
 	
