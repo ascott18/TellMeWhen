@@ -1215,7 +1215,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	local defaults = CNDT.Condition_Defaults
 	if data.modifiedDefaults then
 		defaults = CopyTable(defaults)
-		TMW:CopyTableInPlaceWithMeta(data.modifiedDefaults, defaults["**"], true)
+		TMW:CopyInPlaceWithMetatable(data.modifiedDefaults, defaults["**"])
 		TMW:RegisterCallback("TMW_CNDT_DEFAULTS_NEWVAL", function(event, k, v)
 			defaults["**"][k] = v
 		end)

@@ -153,7 +153,7 @@ end
 function Config.DropdownMenu_OnClick_All(dropDownButton, LoseControlTypes)
 	if not LoseControlTypes[dropDownButton.value] then
 		wipe(LoseControlTypes)
-		LoseControlTypes = TMW:CopyTableInPlaceWithMeta(TMW.DEFAULT_ICON_SETTINGS.LoseControlTypes, LoseControlTypes)
+		LoseControlTypes = TMW:CopyTableInPlaceUsingDestinationMeta(TMW.DEFAULT_ICON_SETTINGS.LoseControlTypes, LoseControlTypes)
 	end
 	
 	LoseControlTypes[dropDownButton.value] = not LoseControlTypes[dropDownButton.value]

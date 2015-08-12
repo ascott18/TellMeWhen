@@ -25,6 +25,15 @@
 <Include file="TellMeWhen_Options.xml"/>
 <Include file="Bindings.xml"/>
 
+<Script file="MainConfig.lua"/>
+<Include file="MainConfig.xml"/>
+
+<Script file="GroupConfig.lua"/>
+<Include file="GroupConfig.xml"/>
+
+<Script file="IconConfig.lua"/>
+<Include file="IconConfig.xml"/>
+
 <Include file="..\Components\includes.config.xml"/>
 
 </Ui>

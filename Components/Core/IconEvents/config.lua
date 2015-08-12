@@ -686,7 +686,7 @@ function EVENTS:ChangeEvent_Dropdown_OnClick_Clone(eventID)
 	local eventSettings = EVENTS:GetEventSettings(eventID)
 
 	local n = TMW.CI.ics.Events.n + 1
-	TMW:CopyTableInPlaceWithMeta(eventSettings, TMW.CI.ics.Events[n])
+	TMW:CopyTableInPlaceUsingDestinationMeta(eventSettings, TMW.CI.ics.Events[n])
 	TMW.CI.ics.Events.n = n
 	--EVENTS.currentEventID = n
 
@@ -791,17 +791,13 @@ function ColumnConfig:SetSubHandler(subHandlerIdentifier)
 		if old ~= subHandlerIdentifier then
 
 			TMW.EVENTS:GetEventSettings()[self.subHandlerSettingKey] = subHandlerIdentifier
-			TMW.IE:ScheduleIconSetup()
 
-
-			TMW.EVENTS:LoadConfig()
 			local eventSettings = EVENTS:GetEventSettings()
 			if subHandlerData.applyDefaultsToSetting then
 				subHandlerData.applyDefaultsToSetting(eventSettings)
 			end
-
-
-			self:SelectSubHandler(subHandlerIdentifier)
+			
+			TMW.IE.Pages.Events:OnSettingSaved()
 		end
 	end
 end

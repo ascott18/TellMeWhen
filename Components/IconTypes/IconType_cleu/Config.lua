@@ -258,7 +258,20 @@ function Config:Menus_SetTexts()
 end
 
 
-function Config:EventMenu()
+local function EventMenu_OnClick(button, dropdown)
+	if button.value == "" and not TMW.CI.ics.CLEUEvents[""] then -- if we are checking "Any Event" then uncheck all others
+		wipe(TMW.CI.ics.CLEUEvents)
+		TMW.DD:CloseDropDownMenus()
+	elseif button.value ~= "" and TMW.CI.ics.CLEUEvents[""] then -- if we are checking a specific event then uncheck "Any Event"
+		TMW.CI.ics.CLEUEvents[""] = false
+		TMW.DD:CloseDropDownMenus()
+	end
+
+	TMW.CI.ics.CLEUEvents[button.value] = not TMW.CI.ics.CLEUEvents[button.value]
+	
+	dropdown:OnSettingSaved()
+end
+function Config.EventMenu(dropdown)
 	local currentCategory
 	for _, event in ipairs(Config.Events) do
 		if event:find("^CAT_") then --and event ~= currentCategory then
@@ -291,8 +304,8 @@ function Config:EventMenu()
 				info.checked = TMW.CI.ics.CLEUEvents[event]
 				info.keepShownOnClick = true
 				info.isNotRadio = true
-				info.func = Config.EventMenu_OnClick
-				info.arg1 = self
+				info.func = EventMenu_OnClick
+				info.arg1 = dropdown
 
 				TMW.DD:AddButton(info)
 			end
@@ -300,23 +313,14 @@ function Config:EventMenu()
 	end
 end
 
-function Config:EventMenu_OnClick(frame)
-	if self.value == "" and not TMW.CI.ics.CLEUEvents[""] then -- if we are checking "Any Event" then uncheck all others
-		wipe(TMW.CI.ics.CLEUEvents)
-		TMW.DD:CloseDropDownMenus()
-	elseif self.value ~= "" and TMW.CI.ics.CLEUEvents[""] then -- if we are checking a specific event then uncheck "Any Event"
-		TMW.CI.ics.CLEUEvents[""] = false
-		TMW.DD:CloseDropDownMenus()
-	end
 
-	TMW.CI.ics.CLEUEvents[self.value] = not TMW.CI.ics.CLEUEvents[self.value]
 
-	Config:Menus_SetTexts()
-	TMW.IE:ScheduleIconSetup()
+local function FlagsMenu_OnClick(button, dropdown)
+	TMW.CI.ics[dropdown.flagSet] = bit.bxor(TMW.CI.ics[dropdown.flagSet], _G[button.value])
+
+	dropdown:OnSettingSaved()
 end
-
-
-function Config:FlagsMenu()
+function Config.FlagsMenu(dropdown)
 	Config:CheckMasks()
 
 	for _, flag in ipairs(Config.Flags) do
@@ -331,25 +335,17 @@ function Config:FlagsMenu()
 			info.tooltipText = L["CLEU_" .. flag .. "_DESC"]
 
 			info.value = flag
-			info.checked = bit.band(TMW.CI.ics[self.flagSet], _G[flag]) ~= _G[flag]
+			info.checked = bit.band(TMW.CI.ics[dropdown.flagSet], _G[flag]) ~= _G[flag]
 			info.keepShownOnClick = true
 			info.isNotRadio = true
-			info.func = Config.FlagsMenu_OnClick
-			info.arg1 = self
+			info.func = FlagsMenu_OnClick
+			info.arg1 = dropdown
 
 			TMW.DD:AddButton(info)
 		end
 	end
 end
 
-function Config:FlagsMenu_OnClick(frame)
-	TMW.CI.ics[frame.flagSet] = bit.bxor(TMW.CI.ics[frame.flagSet], _G[self.value])
-
-	Config:CheckMasks()
-
-	Config:Menus_SetTexts()
-	TMW.IE:ScheduleIconSetup()
-end
 
 
 

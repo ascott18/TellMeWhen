@@ -274,7 +274,7 @@ local function Split(IconDragger, domain)
 		-- nullify it (we don't want to copy it)
 		IconDragger.srcicon.group:GetSettings().Icons = nil
 	
-		TMW:CopyTableInPlaceWithMeta(IconDragger.srcicon.group:GetSettings(), group:GetSettings())
+		TMW:CopyTableInPlaceUsingDestinationMeta(IconDragger.srcicon.group:GetSettings(), group:GetSettings())
 	end)
 
 	-- restore the icon data of the source group
@@ -367,8 +367,8 @@ function IconDragger:Handler(method)
 	TMW.IE:SaveSettings()
 
 	-- attempt to create a backup before doing anything
-	TMW.IE:AttemptBackup(IconDragger.srcicon)
-	TMW.IE:AttemptBackup(IconDragger.desticon)
+	IconDragger.srcicon:SaveBackup()
+	IconDragger.desticon:SaveBackup()
 
 	-- finally, invoke the method to handle the operation.
 	method(IconDragger)

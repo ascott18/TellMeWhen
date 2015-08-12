@@ -285,7 +285,7 @@ function codesnippet:Import_ImportData(Item, domain)
 	
 	local snippet = SNIPPETS:AddSnippet(domain)
 	
-	TMW:CopyTableInPlaceWithMeta(Item.Settings, snippet, true)
+	TMW:CopyTableInPlaceUsingDestinationMeta(Item.Settings, snippet, true)
 
 	local version = Item.Version
 	if version then

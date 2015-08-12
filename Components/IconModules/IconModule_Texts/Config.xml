@@ -24,6 +24,8 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self, "Config_Button")
+
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
@@ -34,9 +36,8 @@
 							
 							TMW.CI.icon:GetSettingsPerView().Texts[id] = nil
 							
-							TMW.IE:ScheduleIconSetup()
+							self:OnSettingSaved()
 						end
-						TMW.TEXT:LoadConfig()
 					</OnClick>
 				</Scripts>
 				<NormalTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
@@ -170,19 +171,17 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
+								TMW:CInit(self, "Config_Button")
+
 								self:SetFrameLevel(self:GetFrameLevel()+2)
 								TMW:TT(self, "TEXTLAYOUTS_LAYOUT_SETDEFAULTS", "TEXTLAYOUTS_LAYOUT_SETDEFAULTS_DESC")
 							</OnLoad>
 							<OnClick>							
 								if TMW.CI.icon then
-									PlaySound("igMainMenuOptionCheckBoxOn")
-
 									wipe(TMW.CI.icon:GetSettingsPerView().Texts)
+
+									self:OnSettingSaved()
 								end
-							
-								TMW.IE:ScheduleIconSetup()
-								
-								TMW.TEXT:LoadConfig()
 							</OnClick>
 						</Scripts>
 						<NormalTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">

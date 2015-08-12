@@ -110,12 +110,12 @@ local function layoutSort(GUID_a, GUID_b)
 	end
 end
 
-local function Layout_DropDown_OnClick(button)
+local function Layout_DropDown_OnClick(button, dropdown)
 	CI.icon:GetSettingsPerView().TextLayout = button.value
-	TEXT:LoadConfig()
-	IE:ScheduleIconSetup()
+
+	dropdown:OnSettingSaved()
 end
-function TEXT:Layout_DropDown()
+function TEXT.Layout_DropDown(dropdown)
 	for GUID, settings in TMW:OrderedPairs(TMW.db.global.TextLayouts, layoutSort) do
 		if GUID ~= "" then
 			local info = TMW.DD:CreateInfo()
@@ -123,6 +123,7 @@ function TEXT:Layout_DropDown()
 			info.text = TEXT:GetLayoutName(settings, GUID)
 			info.value = GUID
 			info.checked = GUID == TEXT:GetTextLayoutForIcon(CI.icon)
+			info.arg1 = dropdown
 			
 			local displays = ""
 			for i, fontStringSettings in TMW:InNLengthTable(settings) do
@@ -152,7 +153,7 @@ local function Layout_Group_DropDown_OnClick(button)
 	-- the group setting is a fallback for icons, so there is no reason to set the layout for individual icons
 	-- we do need to reset icons to nil so that they will fall back to the group setting, though.
 	for icon in group:InIcons() do
-		IE:AttemptBackup(icon)
+		icon:SaveBackup()
 	end
 	
 	for ics in group:InIconSettings() do
@@ -163,7 +164,7 @@ local function Layout_Group_DropDown_OnClick(button)
 	end
 	
 	for icon in group:InIcons() do
-		IE:AttemptBackup(icon)
+		icon:SaveBackup()
 	end
 	
 	group:Setup()
@@ -228,7 +229,15 @@ function TEXT:CacheUsedStrings()
 	TEXT.usedStrings[""] = nil
 end
 
-function TEXT:CopyString_DropDown()
+
+local function CopyString_DropDown_OnClick(button, dropdown)
+	local id = dropdown:GetParent():GetParent():GetID()
+	
+	CI.icon:GetSettingsPerView().Texts[id] = self.value
+	
+	dropdown:OnSettingSaved()
+end
+function TEXT.CopyString_DropDown(dropdown)
 	TEXT:CacheUsedStrings()
 	
 	for text, num in TMW:OrderedPairs(TEXT.usedStrings, nil, true, true) do
@@ -247,20 +256,13 @@ function TEXT:CopyString_DropDown()
 		info.tooltipWrap = false
 		info.notCheckable = true
 		
-		info.arg1 = self
-		info.func = TEXT.CopyString_DropDown_OnClick
+		info.arg1 = dropdown
+		info.func = CopyString_DropDown_OnClick
 		
 		TMW.DD:AddButton(info)
 	end
 end
 
-function TEXT:CopyString_DropDown_OnClick(frame)
-	local id = frame:GetParent():GetParent():GetID()
-	
-	CI.icon:GetSettingsPerView().Texts[id] = self.value
-	TEXT:LoadConfig()
-	IE:ScheduleIconSetup()
-end
 
 
 
@@ -1281,7 +1283,7 @@ function textlayout:Import_ImportData(Item, GUID)
 	
 	TMW.db.global.TextLayouts[GUID] = nil -- restore defaults
 	local textlayout = TMW.db.global.TextLayouts[GUID]
-	TMW:CopyTableInPlaceWithMeta(Item.Settings, textlayout, true)
+	TMW:CopyTableInPlaceUsingDestinationMeta(Item.Settings, textlayout, true)
 	textlayout.GUID = GUID
 
 	-- We might have imported a default layout. Set it to be editable.

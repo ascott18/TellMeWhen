@@ -1,5 +1,7 @@
 ﻿<Ui>
 
+<Include file="Resizer_Generic\includes.config.xml"/>
+
 <Include file="Help\includes.config.xml"/>
 
 <Include file="Spells\includes.config.xml"/>
@@ -13,8 +15,6 @@
 <Include file="Units\includes.config.xml"/>
 
 <Include file="IconEvents\includes.config.xml"/>
-
-<Include file="Resizer_Generic\includes.config.xml"/>
 
 <Include file="Snippets\includes.config.xml"/>
 

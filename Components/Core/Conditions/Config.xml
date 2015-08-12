@@ -217,9 +217,6 @@
 						-- This is needed so we can show the "right-click for manual input" tooltip.
 						self:SetTooltip(TMW.L["CONDITIONPANEL_VALUEN"], nil)
 
-						self:CScriptAdd("SettingSaved", function(self)
-							TMW.IE:ScheduleIconSetup() --TODO: there needs to be a way for condition config to intelligently run a setup on a parent object using the current ConditionSet.
-						end)
 					</OnLoad>
 					<OnValueChanged>
 						local CndtGroup = self:GetParent()
@@ -647,9 +644,9 @@
 							<OnClick>
 								PlaySound("igMainMenuOptionCheckBoxOn")
 								
-								TMW.CNDT:AddCondition(TMW.CNDT.settings)
+								TMW.CNDT:AddCondition(TMW.CNDT:GetSettings())
 								TMW.CNDT:LoadConfig()
-								TMW.CNDT[TMW.CNDT.settings.n].Type.EditBox:SetFocus()
+								TMW.CNDT[TMW.CNDT:GetSettings().n].Type.EditBox:SetFocus()
 							</OnClick>
 						</Scripts>
 					</Button>

@@ -220,7 +220,7 @@
 				local addWidth = 15
 				if self.shouldScroll then
 					addWidth = addWidth + 15
-					self.ScrollFrame:SetPoint("TOPLEFT", 10, -TMW.DD.BORDER_HEIGHT)
+					self.Buttons.ScrollFrame:SetPoint("TOPLEFT", 10, -TMW.DD.BORDER_HEIGHT)
 
 					TMW.HELP:Show{
 						code = "SCROLLBAR_DROPDOWN",
@@ -233,7 +233,7 @@
 						text = TMW.L["HELP_SCROLLBAR_DROPDOWN"]
 					}
 				else
-					self.ScrollFrame:SetPoint("TOPLEFT", 0, -TMW.DD.BORDER_HEIGHT)
+					self.Buttons.ScrollFrame:SetPoint("TOPLEFT", 0, -TMW.DD.BORDER_HEIGHT)
 				end
 
 				self:SetWidth(self.maxWidth + addWidth);
@@ -355,7 +355,7 @@
 				self.Button:UnlockHighlight()
 			</OnLeave>
 			<OnHide>
-				TMW.DD:CloseDropDownMenus()
+				--TMW.DD:CloseDropDownMenus()
 			</OnHide>
 			<OnMouseUp>				
 				self.Button:Click()
@@ -388,7 +388,6 @@
 						if button == "RightButton" then
 							TMW.IE:LoadIcon(nil, self.icon)
 						end
-						TMW.IE:ScheduleIconSetup(self.icon)
 					</OnMouseUp>
 				</Scripts>
 

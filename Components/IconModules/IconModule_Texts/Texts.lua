@@ -161,7 +161,7 @@ TMW:RegisterUpgrade(70010, {
 					-- The layout doesn't already exist, so just put it straight in.
 
 					layout.Name = (layout.Name or L["TEXTLAYOUTS_DEFAULTS_NOLAYOUT"]) .. " (" .. FROM .. " " .. profileName .. ")"
-					TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
+					TMW:CopyTableInPlaceUsingDestinationMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
 
 					-- Make sure we upgrade the copy of the layout, not the old one that will be discarded
 					layout = TMW.db.global.TextLayouts[layout.GUID]
@@ -183,7 +183,7 @@ TMW:RegisterUpgrade(70010, {
 					-- Check to see if it is exactly the same as the existing layout.
 					-- In order to properly compare, we have to copy the old layout 
 					-- into a new table so that all the database metatables will be in place.
-					local layoutWithMetatables = TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts["\000"])
+					local layoutWithMetatables = TMW:CopyTableInPlaceUsingDestinationMeta(layout, TMW.db.global.TextLayouts["\000"])
 					TMW.db.global.TextLayouts["\000"] = nil
 
 
@@ -202,7 +202,7 @@ TMW:RegisterUpgrade(70010, {
 						layout.GUID = newGUID
 						layout.Name = layout.Name .. " (" .. FROM .. " " .. profileName .. ")"
 
-						TMW:CopyTableInPlaceWithMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
+						TMW:CopyTableInPlaceUsingDestinationMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
 
 						-- See above for an explanation of this upgrade.
 						TMW:DoUpgrade("textlayout", profile.Version, layout, layout.GUID)

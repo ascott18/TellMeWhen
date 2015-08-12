@@ -24,8 +24,8 @@ local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlow
 	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin
 local math, max, ceil, floor, random, abs =
 	  math, max, ceil, floor, random, abs
-local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler =
-	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler
+local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer =
+	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer
 
 local UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate =
       UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate
@@ -135,6 +135,7 @@ Formatter{
 		return format("%d:%s", m, s)
 	end),
 
+	-- GLOBALS: DAY_ONELETTER_ABBR, HOUR_ONELETTER_ABBR, MINUTE_ONELETTER_ABBR, SECOND_ONELETTER_ABBR, SECONDS_ABBR
 	TIME_YDHMS = Formatter:New(function(seconds)
 		if abs(seconds) == math.huge then
 			return tostring(seconds)
@@ -648,50 +649,81 @@ function TMW:SortOrderedTables(parentTable)
 	return parentTable
 end
 
-function TMW:CopyWithMetatable(source)
-	-- This is basically deepcopy without recursion prevention
-	
+function TMW:CopyWithMetatable(source, blocker)	
 	local dest = {}
+	
 	for k, v in pairs(source) do
-		if type(v) == "table" then
-			dest[k] = TMW:CopyWithMetatable(v)
-		else
-			dest[k] = v
+		local keyBlocker = blocker and blocker[k]
+
+		if keyBlocker ~= true then
+			if type(v) == "table" then
+				dest[k] = TMW:CopyWithMetatable(v, keyBlocker)
+			else
+				dest[k] = v
+			end
 		end
 	end
+
 	return setmetatable(dest, getmetatable(source))
 end
 
-function TMW:CopyTableInPlaceWithMeta(src, dest, allowUnmatchedSourceTables)
-	--src and dest must have congruent data structure, otherwise shit will blow up. There are no safety checks to prevent this.
-	local metatemp = getmetatable(src) -- lets not go overwriting random metatables
+function TMW:CopyInPlaceWithMetatable(source, dest, blocker)
+	setmetatable(dest, getmetatable(source))
+	
+	for key in pairs(source) do
+		local keyBlocker = blocker and blocker[key]
+
+		if keyBlocker ~= true then
+			if type(source[key]) == "table" then
+				if type(dest[key]) ~= "table" then
+					dest[key] = {}
+				end
+
+				TMW:CopyInPlaceWithMetatable(source[key], dest[key], keyBlocker)
+			else
+				dest[key] = source[key]
+			end
+		end
+	end
+end
+
+function TMW:CopyTableInPlaceUsingDestinationMeta(src, dest, allowUnmatchedSourceTables)
+	-- src and dest must have congruent data structure.
+	-- There are no safety checks to ensure this.
+
+	-- Save the original metatable so it doesn't get overwritten.
+	local metatemp = getmetatable(src) 
 	setmetatable(src, getmetatable(dest))
+
 	for k in pairs(src) do
 		if type(dest[k]) == "table" and type(src[k]) == "table" then
-			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
+			TMW:CopyTableInPlaceUsingDestinationMeta(src[k], dest[k], allowUnmatchedSourceTables)
 		elseif allowUnmatchedSourceTables and type(dest[k]) ~= "table" and type(src[k]) == "table" then
 			dest[k] = {}
-			TMW:CopyTableInPlaceWithMeta(src[k], dest[k], allowUnmatchedSourceTables)
+			TMW:CopyTableInPlaceUsingDestinationMeta(src[k], dest[k], allowUnmatchedSourceTables)
 		elseif type(src[k]) ~= "table" then
 			dest[k] = src[k]
 		end
 	end
-	setmetatable(src, metatemp) -- restore the old metatable
-	return dest -- not really needed, but what the hell why not
+
+	-- Restore the old metatable
+	setmetatable(src, metatemp) 
+
+	return dest
 end
 
-function TMW:DeepCompare(t1, t2, ...)
+function TMW:DeepCompare(t1, t2)
 	-- heavily modified version of http://snippets.luacode.org/snippets/Deep_Comparison_of_Two_Values_3
 
 	-- attempt direct comparison
 	if t1 == t2 then
-		return true, ...
+		return true
 	end
 
 	-- if the values are not the same (they made it through the check above) AND they are not both tables, then they cannot be the same, so exit.
 	local ty1 = type(t1)
 	if ty1 ~= "table" or ty1 ~= type(t2) then
-		return false, ...
+		return false
 	end
 
 	-- compare table values
@@ -703,12 +735,8 @@ function TMW:DeepCompare(t1, t2, ...)
 		-- don't bother calling DeepCompare on the values if they are the same - it will just return true.
 		-- Only call it if the values are different (they are either 2 tables, or they actually are different non-table values)
 		-- by adding the (v1 ~= v2) check, efficiency is increased by about 300%.
-		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k1, ...) then
-
-			-- it only reaches this point if there is a difference between the 2 tables somewhere
-			-- so i dont feel bad about calling DeepCompare with the same args again
-			-- i need to because the key of the setting that changed is in there, and AttemptBackup needs that key
-			return TMW:DeepCompare(v1, v2, k1, ...)
+		if v1 ~= v2 and not TMW:DeepCompare(v1, v2) then
+			return false
 		end
 	end
 
@@ -717,12 +745,12 @@ function TMW:DeepCompare(t1, t2, ...)
 		local v1 = t1[k2]
 
 		-- see comments for t1
-		if v1 ~= v2 and not TMW:DeepCompare(v1, v2, k2, ...) then
-			return TMW:DeepCompare(v1, v2, k2, ...)
+		if v1 ~= v2 and not TMW:DeepCompare(v1, v2) then
+			return false
 		end
 	end
 
-	return true, ...
+	return true
 end
 
 do	-- TMW.shellsortDeferred
@@ -1033,6 +1061,8 @@ end
 ---------------------------------
 
 local function TTOnEnter(self)
+	-- GLOBALS: GameTooltip, HIGHLIGHT_FONT_COLOR, NORMAL_FONT_COLOR
+
 	if  (not self.__ttshowchecker or TMW.get(self[self.__ttshowchecker], self))
 	and (self.__title or self.__text)
 	then
@@ -1040,6 +1070,7 @@ local function TTOnEnter(self)
 		if self.__ttMinWidth then
 			GameTooltip:SetMinimumWidth(self.__ttMinWidth)
 		end
+
 		GameTooltip:AddLine(TMW.get(self.__title, self), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
 		local text = TMW.get(self.__text, self)
 		if text then

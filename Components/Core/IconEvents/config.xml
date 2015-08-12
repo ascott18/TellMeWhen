@@ -26,16 +26,16 @@
 					<Anchor point="TOPLEFT" x="1" y="-1"/>
 				</Anchors>
 				<Scripts>
+					<OnLoad>
+						TMW:CInit(self, "Config_Button")
+					</OnLoad>
 					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
-
 						local Events = TMW.CI.ics.Events
+
 						tremove(Events, self:GetParent():GetID())
 						Events.n = Events.n - 1
 						
-						TMW.IE:ScheduleIconSetup()
-
-						TMW.EVENTS:LoadConfig()
+						self:OnSettingSaved()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -85,6 +85,8 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
+				TMW:CInit(self, "Config_CheckButton")
+
 				self.DD = TMW.C.Config_DropDownMenu_NoFrame:New()
 				self.DD:SetFunction(TMW.EVENTS.ChangeEvent_Dropdown)
 
@@ -113,7 +115,8 @@
 					TMW.CI.ics.Events[self:GetID()] = dragSettings
 					TMW.CI.ics.Events[parent.draggingFrame:GetID()] = selfSettings
 					parent.draggingFrame = self
-					TMW.EVENTS:LoadConfig()
+					
+					self:OnSettingSaved()
 				end
 			</OnUpdate>
 			

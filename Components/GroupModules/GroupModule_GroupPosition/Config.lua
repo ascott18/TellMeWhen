@@ -35,7 +35,7 @@ TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(Item_g
 		-- Setting it nil won't recreate it like other settings tables, so re-copy from defaults.
 		destgs.Point = CopyTable(TMW.Group_Defaults.Point)
 		
-		TMW:CopyTableInPlaceWithMeta(gs.Point, destgs.Point, true)
+		TMW:CopyTableInPlaceUsingDestinationMeta(gs.Point, destgs.Point, true)
 
 		destgs.Scale = gs.Scale or TMW.Group_Defaults.Scale
 		destgs.Level = gs.Level or TMW.Group_Defaults.Level

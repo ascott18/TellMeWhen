@@ -321,7 +321,7 @@ function profile:Import_ImportData(Item, profileName)
 		TMW.db:SetProfile(profileName)
 	else
 		TMW.db:ResetProfile()
-		TMW:CopyTableInPlaceWithMeta(Item.Settings, TMW.db.profile, true)
+		TMW:CopyTableInPlaceUsingDestinationMeta(Item.Settings, TMW.db.profile, true)
 	end
 
 	if Item.Version then
@@ -540,7 +540,7 @@ function group:Import_ImportData(Item_group, domain, createNewGroup, oldgroupID,
 
 	TMW.db[domain].Groups[group.ID] = nil -- restore defaults, table recreated when passed in to CTIPWM
 	local gs = group:GetSettings()
-	TMW:CopyTableInPlaceWithMeta(Item_group.Settings, gs, true)
+	TMW:CopyTableInPlaceUsingDestinationMeta(Item_group.Settings, gs, true)
 
 	if version < 70000 then
 		gs.__UPGRADEHELPER_OLDGROUPID = oldgroupID
@@ -767,7 +767,7 @@ function icon:Import_ImportData(Item)
 
 	gs.Icons[icon.ID] = nil -- restore defaults
 	local ics = icon:GetSettings()
-	TMW:CopyTableInPlaceWithMeta(Item.Settings, ics, true)
+	TMW:CopyTableInPlaceUsingDestinationMeta(Item.Settings, ics, true)
 
 
 	local version = Item.Version

@@ -35,6 +35,10 @@ TMW.HELP:NewCode("CNDT_UNIT_ONLYONE", 20, false)
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
 
+--TODO: there needs to be a way for condition config to intelligently run a setup on a parent object using the current ConditionSet.
+--TODO: try to get rid of all manual calls to LoadConfig (on other TMW modules too), and have these functions only be called from ReloadRequsted.
+
+
 
 ---------- Interface/Data ----------
 function CNDT:LoadConfig(conditionSetName)
@@ -60,22 +64,23 @@ function CNDT:LoadConfig(conditionSetName)
 	end
 	
 	
-	CNDT.settings = ConditionSet:GetSettings()	
-	if not CNDT.settings then return end
+	if not CNDT:GetSettings() then
+		return
+	end
 	
 	
 	TMW.HELP:Hide("CNDT_UNIT_MISSING")
 	
-	local n = CNDT.settings.n
+	local n = CNDT:GetSettings().n
 	
 	for i = n + 1, #CNDT do
 		CNDT[i]:Hide()
 	end
 		
 	if n > 0 then
-		CNDT:CreateGroups(n+1)
+		CNDT:CreateGroups(n)
 
-		for i in TMW:InNLengthTable(CNDT.settings) do
+		for i in TMW:InNLengthTable(CNDT:GetSettings()) do
 			CNDT[i]:Show()
 			CNDT[i]:RequestReload()
 		end
@@ -88,7 +93,13 @@ function CNDT:LoadConfig(conditionSetName)
 	CNDT:ColorizeParentheses()
 end
 
+function CNDT:GetSettings()
+	if not CNDT.CurrentConditionSet then
+		return nil
+	end
 
+	return CNDT.CurrentConditionSet:GetSettings()
+end
 
 -- Dynamic Conditions Tab handling
 
@@ -185,7 +196,7 @@ local function TypeMenu_DropDown_OnClick(button, dropdown, conditionData)
 end
 local function AddConditionToDropDown(dropdown, conditionData)
 	local CndtGroup = dropdown:GetParent()
-	local conditionSettings = CndtGroup:GetConditionSettings()
+	local conditionSettings = CndtGroup:GetSettingTable()
 
 	local append = TMW.debug and not conditionData:ShouldList() and "(DBG)" or ""
 	
@@ -353,7 +364,7 @@ end
 function CNDT.OperatorMenu_DropDown(dropdown)
 	local CndtGroup = dropdown:GetParent()
 	local conditionData = CndtGroup:GetConditionData()
-	local conditionSettings = CndtGroup:GetConditionSettings()
+	local conditionSettings = CndtGroup:GetSettingTable()
 
 	for k, v in pairs(TMW.operators) do
 		if (not conditionData.specificOperators or conditionData.specificOperators[v.value]) then
@@ -381,7 +392,7 @@ end
 function CNDT.BitFlags_DropDown(dropdown)
 	local CndtGroup = dropdown:GetParent()
 	local conditionData = CndtGroup:GetConditionData()
-	local conditionSettings = CndtGroup:GetConditionSettings()
+	local conditionSettings = CndtGroup:GetSettingTable()
 
 	for index, data in CNDT:InBitflags(conditionData.bitFlags) do
 		local info = TMW.DD:CreateInfo()
@@ -707,12 +718,18 @@ function CndtGroup:OnNewInstance()
 end
 
 function CndtGroup:SettingTableRequested()
-	return self:GetConditionSettings() or false
+	local settings = CNDT:GetSettings()
+	if settings and self:GetID() <= settings.n then
+		return settings[self:GetID()]
+	end
+
+	-- Needed to stop propagation of the CScript.
+	return false
 end
 
 function CndtGroup:LoadAndDraw()
 	local conditionData = self:GetConditionData()
-	local conditionSettings = self:GetConditionSettings()
+	local conditionSettings = self:GetSettingTable()
 
 	self.prevRowFrame = self.Type
 
@@ -731,7 +748,7 @@ end
 
 function CndtGroup:UpOrDown(delta)
 	local ID = self:GetID()
-	local settings = CNDT.settings
+	local settings = CNDT:GetSettings()
 
 	local curdata = settings[ID]
 	local destinationdata = settings[ID+delta]
@@ -743,18 +760,12 @@ function CndtGroup:UpOrDown(delta)
 end
 
 function CndtGroup:DeleteHandler()
-	CNDT:DeleteCondition(CNDT.settings, self:GetID())
+	CNDT:DeleteCondition(CNDT:GetSettings(), self:GetID())
 	CNDT:LoadConfig()
 end
 
-function CndtGroup:GetConditionSettings()
-	if CNDT.settings then
-		return CNDT.settings[self:GetID()]
-	end
-end
-
 function CndtGroup:GetConditionData()
-	local conditionSettings = self:GetConditionSettings()
+	local conditionSettings = self:GetSettingTable()
 	if conditionSettings then
 		return CNDT.ConditionsByType[conditionSettings.Type]
 	end
@@ -873,7 +884,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		paren:SetChecked(conditionSettings.PrtsAfter >= k)
 	end
 	
-	if CNDT.settings.n >= 3 then
+	if CNDT:GetSettings().n >= 3 then
 		CndtGroup.CloseParenthesis:Show()
 		CndtGroup.OpenParenthesis:Show()
 	else
@@ -898,7 +909,7 @@ TMW.HELP:NewCode("CNDT_PARENTHESES_FIRSTSEE", 101, true)
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 
 	local ID = CndtGroup:GetID()
-	local numConditions = CNDT.settings.n
+	local numConditions = CNDT:GetSettings().n
 	
 	CndtGroup.Up:SetEnabled(ID ~= 1)
 	CndtGroup.Down:SetEnabled(ID ~= numConditions)

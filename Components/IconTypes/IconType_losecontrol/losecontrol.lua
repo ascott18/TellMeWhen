@@ -62,7 +62,7 @@ TMW:RegisterUpgrade(71038, {
 	icon = function(self, ics)
 		-- Fix the misspelled setting name "LoseContolTypes" to "LoseControlTypes"
 		if ics.LoseContolTypes then
-			TMW:CopyTableInPlaceWithMeta(ics.LoseContolTypes, ics.LoseControlTypes)
+			TMW:CopyTableInPlaceUsingDestinationMeta(ics.LoseContolTypes, ics.LoseControlTypes)
 		end
 		ics.LoseContolTypes = nil
 	end,
