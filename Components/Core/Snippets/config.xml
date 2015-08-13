@@ -44,7 +44,7 @@
 		<Frames>
 			<Button parentKey="Add" inherits="TellMeWhen_SnippetListItem_Template" >
 				<Anchors>
-					<Anchor point="TOP" y="-4"/>
+					<Anchor point="TOP" y="0"/>
 				</Anchors>
 
 				<Scripts>
@@ -70,20 +70,30 @@
 	<Frame parentKey="Snippets" inherits="TellMeWhen_IE_PageTemplate">
 		<Frames>
 			<Frame parentKey="SnippetSelect">
-				<Size x="150"  />
+				<Size y="110"  />
 
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-5"/>
-					<Anchor point="BOTTOMLEFT"  y="5"/>
+					<Anchor point="TOP" y="-10"/>
+					<Anchor point="LEFT" x="12"/>
+					<Anchor point="RIGHT" x="-12"/>
 				</Anchors>
 
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture setAllPoints="true">
+							<Color r="0.03" g="0.03" b="0.03" a="1"/>
+						</Texture>
+					</Layer>
+				</Layers>
 				<Frames>
+					<Frame inherits="TellMeWhen_GenericBorder" />
+
 					<Frame parentKey="Profile" inherits="TellMeWhen_SnippetList_Template">
 						<Anchors>
 							<Anchor point="TOP" y="-15"/>
-							<Anchor point="BOTTOM" relativePoint="LEFT" />
-							<Anchor point="LEFT" x="5" />
-							<Anchor point="RIGHT" x="0" />
+							<Anchor point="BOTTOM" />
+							<Anchor point="LEFT" x="15" />
+							<Anchor point="RIGHT" relativePoint="TOP" x="-15" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -103,10 +113,10 @@
 
 					<Frame parentKey="Global" inherits="TellMeWhen_SnippetList_Template">
 						<Anchors>
-							<Anchor point="TOP" relativePoint="LEFT" y="-15"/>
+							<Anchor point="TOP" relativeKey="$parent.Profile"/>
 							<Anchor point="BOTTOM" />
-							<Anchor point="LEFT" relativeKey="$parent.Profile" />
-							<Anchor point="RIGHT" relativeKey="$parent.Profile" />
+							<Anchor point="LEFT" relativePoint="TOP" x="15" />
+							<Anchor point="RIGHT" x="-15" />
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -145,16 +155,19 @@
 					<OnLoad>
 						self.ProfileHeader:SetText(TMW.L["DOMAIN_PROFILE"])
 						self.GlobalHeader:SetText(TMW.L["DOMAIN_GLOBAL"])
+
+						self.border:SetBorderSize(2)
+						self.border:SetColor(.25, .25, .25, 1)
 					</OnLoad>
 				</Scripts>
 			</Frame>
 
 			<Frame parentKey="Config">
 				<Anchors>
-					<Anchor point="TOP" />
+					<Anchor point="TOP" relativeKey="$parent.SnippetSelect" relativePoint="BOTTOM" />
 					<Anchor point="BOTTOM" />
-					<Anchor point="LEFT" relativeKey="$parent.SnippetSelect" relativePoint="RIGHT" x="10"/>
-					<Anchor point="RIGHT" x="-10" y="0"/>
+					<Anchor point="LEFT"  x="10"/>
+					<Anchor point="RIGHT" x="-10"/>
 				</Anchors>
 
 				<Frames>
@@ -162,7 +175,7 @@
 						<Size x="100" y="15"/>
 						<Anchors>
 							<Anchor point="TOP" y="-20"/>
-							<Anchor point="RIGHT" x="-10"/>
+							<Anchor point="RIGHT" />
 						</Anchors>
 
 						<Layers>
@@ -223,7 +236,7 @@
 						<Size y="15"/>
 						<Anchors>
 							<Anchor point="TOP" relativeKey="$parent.Order" relativePoint="BOTTOM" y="-10"/>
-							<Anchor point="RIGHT" x="-10"/>
+							<Anchor point="RIGHT" />
 						</Anchors>
 
 						<Scripts>
@@ -316,7 +329,6 @@
 					</CheckButton>
 				</Frames>
 
-
 				<Layers>
 					<Layer level="ARTWORK">
 						<FontString parentKey="Error" inherits="GameFontRed" justifyH="LEFT">
@@ -341,7 +353,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self)
+								TMW:CInit(self, "Config_EditBox_Lua")
 
 								self:MakeScrollable(true, 2, 7)
 
@@ -354,26 +366,15 @@
 
 									self.ScrollFrame:GetParent().Error:SetText(error)
 								end)
-
-								self:SetAcceptsTMWLinks(true, TMW.L["LUA_INSERTGUID_TOOLTIP"])
-								TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
-									-- if this editbox is active,
-									-- attempt to insert a reference to the linked icon by GUID
-
-									if linkType == "TMW" then
-										-- Reconstruct the GUID
-										local GUID = linkType .. ":" .. linkData
-
-										self.editbox:Insert(("TMW:GetDataOwner(%q)"):format(GUID))
-
-										-- notify success
-										return true
-									end
-								end)
 							</OnLoad>
-							<OnTabPressed>
-								self:Insert("    ")
-							</OnTabPressed>
+							<OnCursorChanged>
+								local CodeLineNum = self.ScrollFrame:GetParent().CodeLineNum
+								if self:HasFocus() then
+									CodeLineNum:SetText(self:GetCursorLineNumber())
+								else
+									CodeLineNum:SetText(nil)
+								end
+							</OnCursorChanged>
 						</Scripts>
 					</EditBox>
 				</Frames>
@@ -383,6 +384,12 @@
 						<FontString parentKey="CodeTitle" inherits="GameFontNormalSmall" justifyH="CENTER">
 							<Anchors>
 								<Anchor point="BOTTOMLEFT" relativeKey="$parent.Code.ScrollFrame" relativePoint="TOPLEFT" y="2"/>
+							</Anchors>
+						</FontString>
+
+						<FontString parentKey="CodeLineNum" inherits="GameFontNormal" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.Code.ScrollFrame" relativePoint="TOP" y="2"/>
 							</Anchors>
 						</FontString>
 					</Layer>
@@ -398,8 +405,9 @@
 			<Frame parentKey="NoSnippetsMessage" hidden="true" inherits="TellMeWhen_FlatFrame">
 				<Size y="1"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.SnippetSelect" relativePoint="RIGHT" x="15" />
-					<Anchor point="RIGHT" x="-15" />
+					<Anchor point="TOP" relativeKey="$parent.SnippetSelect" relativePoint="BOTTOM" y="-30" />
+					<Anchor point="LEFT"  x="30" />
+					<Anchor point="RIGHT" x="-30" />
 
 				</Anchors>
 				<Layers>

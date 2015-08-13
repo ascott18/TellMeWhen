@@ -8,6 +8,8 @@
 <Include file="..\Lib\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
 <!--@end-no-lib-strip@-->
 
+<Script file="FAIAP.lua"/>
+
 
 
 <Script file="widget-importexport.lua"/>

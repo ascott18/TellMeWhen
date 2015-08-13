@@ -52,6 +52,8 @@ TMW:NewClass("Config_SnippetListItem", "Config_CheckButton") {
 
 			self.Name:SetText(name)
 
+			self:SetTooltip(name, L["CODESNIPPET_EDIT_DESC"])
+
 			self.Texture:SetDesaturated(false)
 			self.Texture:SetTexture(nil)
 			if not snippet.Enabled then
@@ -80,7 +82,7 @@ TMW:NewClass("Config_SnippetList", "Config_Frame") {
 	OnNewInstance = function(self)
 		self.frames = {}
 
-		local ScrollFrame = TMW:ConvertContainerToScrollFrame(self, true, 3, 6)
+		local ScrollFrame = TMW:ConvertContainerToScrollFrame(self, true, 3, 9)
 		ScrollFrame:SetWheelStepAmount(30)
 
 		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
@@ -125,9 +127,13 @@ TMW:NewClass("Config_SnippetList", "Config_Frame") {
 				SNIPPETS.selectedID = id
 			end
 
+			frame:Show()
+
 			frame:SetChecked(SNIPPETS.selectedDomain == self:GetDomain() and SNIPPETS.selectedID == id)
 
-			frame:Show()
+			if frame:GetChecked() then
+				self.ScrollFrame:ScrollToFrame(frame)
+			end
 		end
 
 		for id = settings.n + 1, #self.frames do
@@ -163,7 +169,7 @@ function SNIPPETS:TestForErrors(code)
 			lineText = lineText:sub(1, 35) .. "..."
 		end
 		
-		return "|cffee0000" .. err:gsub("line:(%d+):", "line %1 (\"" .. lineText .. "\"):\r\n")
+		return "|cffee0000" .. err:gsub("line:(%d+):", "line %1:  " .. lineText .. "\r\n")
 	end
 end
 

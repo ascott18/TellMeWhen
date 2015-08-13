@@ -47,7 +47,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 local LibOO = LibStub("LibOO-1.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
-LSM:Register("font", "Open Sans Regular", [[Interface\Addons\TellMeWhen\Textures\OpenSans-Regular.ttf]])
+LSM:Register("font", "Open Sans Regular", "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf")
+LSM:Register("font", "Vera Mono", "Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf")
 
 _G.TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
 _G.TellMeWhen = _G.TMW

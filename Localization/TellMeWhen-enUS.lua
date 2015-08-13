@@ -1739,6 +1739,8 @@ To insert a reference to a TellMeWhen icon in your code, |cff7fffffshift-click|r
 L["CODESNIPPET_GLOBAL"] = "Global Snippets"
 L["CODESNIPPET_PROFILE"] = "Profile Snippets"
 
+L["CODESNIPPET_EDIT_DESC"] = "|cff7fffffClick|r to edit this snippet."
+
 L["CODESNIPPET_ADD2"] = "New %s Snippet"
 L["CODESNIPPET_ADD2_DESC"] = "|cff7fffffClick|r to add a new %s snippet."
 L["CODESNIPPET_DELETE"] = "Delete Snippet"

@@ -91,7 +91,7 @@
 
 						<Layers>
 							<Layer level="OVERLAY">
-								<Texture parentKey="tick1">
+				<!-- 				<Texture parentKey="tick1">
 									<Color r="0.2" g="0.2" b="0.2"/>
 									<Size y="1"/>
 
@@ -119,7 +119,7 @@
 										<Anchor point="RIGHT" x="-1"/>
 										<Anchor point="TOP" relativeKey="$parent.tick1" relativePoint="BOTTOM" y="-2"/>
 									</Anchors>
-								</Texture>
+								</Texture> -->
 							</Layer>
 						</Layers>
 						<Scripts>

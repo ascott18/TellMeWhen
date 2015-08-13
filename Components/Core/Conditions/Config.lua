@@ -583,7 +583,7 @@ TMW:NewClass("Config_Conditions_Paren", "Config_CheckButton") {
 		local parent = self:GetParent()
 		parent.parens = parent.parens or {}
 
-		self.text:SetFont("Interface/Addons/TellMeWhen/Textures/OpenSans-Regular.ttf", 16, "THINOUTLINE")
+		self.text:SetFont("Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf", 16, "THINOUTLINE")
 
 		parent.parens[self:GetID()] = self
 

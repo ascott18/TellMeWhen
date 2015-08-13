@@ -259,7 +259,7 @@ IE.CONST = {
 
 function IE:OnInitialize()
 	-- if the file IS required for gross functionality
-	if not IE.TabGroups.ICON then
+	if not IE.TabGroups.ICON or not IndentationLib then
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMWOPT_RESTARTNEEDED"] = {
 			text = L["ERROR_MISSINGFILE_OPT"], 
@@ -271,7 +271,7 @@ function IE:OnInitialize()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMWOPT_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen_Options/IconConfig.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMWOPT_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, L["ERROR_MISSINGFILE_REQFILE"]) -- arg3 could also be "TellMeWhen_Options/IconConfig.lua"
 		return
 
 	-- if the file is NOT required for gross functionality
@@ -1869,6 +1869,8 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 	
 	-- Constructor
 	OnNewInstance_EditBox = function(self)
+		self:SetSpacing(2)
+
 		self.BackgroundText:SetWidth(self:GetWidth())
 
 		self:CScriptAdd("ClearFocus", self.ClearFocus)
@@ -1888,7 +1890,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 	
 	UpdateLabel = function(self, label)
 		local text = self:GetText()
-		if text == "" then
+		if text and text:trim(" \t\r\n") == "" then
 			self.BackgroundText:SetText(self.label)
 		else
 			self.BackgroundText:SetText(nil)
@@ -1939,7 +1941,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 
 	OnEnterPressed = function(self)
 		if self:IsMultiLine() and self.newlineOnEnter then
-			self:Insert("\r\n")
+			self:Insert("\n")
 		else
 			self:ClearFocus()
 		end
@@ -1947,10 +1949,6 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 
 	OnTextChanged = function(self)
 		self:UpdateLabel()
-	end,
-
-	OnEditFocusGained = function(self)
-		self:HighlightText()
 	end,
 
 	OnEditFocusLost = function(self, button)
@@ -2016,6 +2014,80 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 		return self.acceptsTMWLinks, self.acceptsTMWLinksDesc
 	end,
 }
+
+TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
+	GetText_original = TMW.C.Config_EditBox_Lua.GetText,
+
+	ColorTable = (function()
+		local colorTable = {}
+		local tokens = IndentationLib.tokens
+		local function set(color, ...)
+			for i, v in TMW:Vararg(...) do
+				colorTable[v] = "|c00" .. color
+			end
+		end
+		set('208CD6', tokens.TOKEN_KEYWORD)
+		set('208CD6', tokens.TOKEN_SPECIAL)
+		set('888888', tokens.TOKEN_STRING)
+		set('FF8040', tokens.TOKEN_NUMBER)
+		set('608B4E', tokens.TOKEN_COMMENT_SHORT, tokens.TOKEN_COMMENT_LONG)
+		set('208CD6', "+","-","/","*","%","==","<","<=",">",">=","~=","and","or","not","..","=")
+		set('ffffff', "(",")","{","}","[","]",",",".",":")
+		set('f95f53', "function")
+		set('93C763', "...","true","false","nil")
+
+		return colorTable
+	end)(),
+
+	OnNewInstance_EditBox_Lua = function(self)
+		IndentationLib.enable(self, self.ColorTable, 4)
+
+		self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 9)
+
+		self:SetNewlineOnEnter(true)
+
+		self:SetAcceptsTMWLinks(true, TMW.L["LUA_INSERTGUID_TOOLTIP"])
+		TMW.Classes.ChatEdit_InsertLink_Hook:New(self, self.InsertLinkHook)
+	end,
+
+	OnTabPressed = function(self)
+		self:Insert("    ")
+	end,
+
+	GetCursorLineNumber = function(self)
+		local text = self:GetText_original()
+		local curPos = self:GetCursorPosition()
+
+		if curPos == 0 then
+			return 1
+		end
+
+		local pos = 0
+		for lineNum, line in TMW:Vararg(strsplit("\n", text)) do
+			pos = pos + #line
+			if pos >= curPos then
+				return lineNum
+			end
+			pos = pos + 1
+		end
+	end,
+
+	InsertLinkHook = function(self, text, linkType, linkData)
+		-- if this editbox is active,
+		-- attempt to insert a reference to the linked icon by GUID
+
+		if linkType == "TMW" then
+			-- Reconstruct the GUID
+			local GUID = linkType .. ":" .. linkData
+
+			self.editbox:Insert(("TMW:GetDataOwner(%q)"):format(GUID))
+
+			-- notify success
+			return true
+		end
+	end,
+}
+
 
 TMW:NewClass("Config_TimeEditBox", "Config_EditBox"){
 	

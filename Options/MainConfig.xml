@@ -19,7 +19,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								local font = "Interface/Addons/TellMeWhen/Textures/OpenSans-Regular.ttf"
+								local font = "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf"
 
 								-- Just incase they haven't restarted after installing the version
 								-- that first included this font (v7.3.5)
