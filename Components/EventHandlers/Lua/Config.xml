@@ -32,6 +32,7 @@
 
 								self:SetTexts(TMW.L["EVENTHANDLER_LUA_CODE"], TMW.L["EVENTHANDLER_LUA_CODE_DESC"])
 								self:SetSetting("Lua")
+								self:SetNewlineOnEnter(true)
 								
 
 								TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
@@ -51,9 +52,6 @@
 
 								self:GetParent():GetParent().Code = self
 							</OnLoad>
-							<OnEnterPressed>
-								self:Insert("\r\n")
-							</OnEnterPressed>
 							<OnTabPressed>
 								self:Insert("   ")
 							</OnTabPressed>

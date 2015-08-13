@@ -41,7 +41,7 @@ L["IE_NOLOADED_GROUP"] = [[Select a group to load:]]
 
 
 L["ICON_TOOLTIP2NEW"] = [[|cff7fffffRight-click|r for icon options.
-|Left-click and drag|r to move this group.
+|cff7fffffLeft-click and drag|r to move this group.
 |cff7fffffRight-click and drag|r to another icon to move/copy.
 |cff7fffffDrag|r spells or items onto the icon for quick setup.]]
 L["ICON_TOOLTIP2NEWSHORT"] = [[|cff7fffffRight-click|r for icon options.]]
@@ -69,7 +69,7 @@ This backup, created from your session that began %s, has been restored.]]
 
 L["DIALOG_HEADER_CHANGELOG"] = "TellMeWhen Changelog"
 L["CHANGELOG"] = "Changelog"
-L["CHANGELOG_DESC"] = "Displays a list of changes made in current and past versions of TellMeWhen"
+L["CHANGELOG_DESC"] = "Displays a list of changes made in current and past versions of TellMeWhen."
 L["CHANGELOG_LAST_VERSION"] = "Previous Installed Version"
 
 
@@ -1708,7 +1708,7 @@ L["CNDT_RANGE_PRECISE"] = "%d yds. (|cff00c322Precise|r)"
 L["CNDT_RANGE_IMPRECISE"] = "%d yds. (|cffff1300Imprecise|r)"
 
 
-L["CODESNIPPET_RENAME"] = "Code Snippet Name"
+L["CODESNIPPET_RENAME"] = "Snippet Name"
 L["CODESNIPPET_RENAME_DESC"] = [[Choose a name for this snippet so it can be easily identified by you.
 
 Names don't have to be unique.]]
@@ -1722,34 +1722,35 @@ L["CODESNIPPET_CODE"] = "Lua Code to Run"
 L["CODESNIPPET_CODE_DESC"] = [[Set the Lua code that will be ran by this snippet when TellMeWhen is intialized.]]
 
 L["CODESNIPPET_AUTORUN"] = "Auto-run at login"
+L["CODESNIPPET_AUTORUN_DESC"] = "If enabled, this snippet will be run when TMW_INITIALIZE fires (which happens during PLAYER_LOGIN, but before any icons or groups are created)."
 
 L["CODESNIPPETS"] = "Lua Code Snippets"
-L["CODESNIPPETS_TITLE"] = "Lua Snippets (Advanced)"
+L["CODESNIPPETS_TITLE"] = "Lua Snippets"
+L["CODESNIPPETS_DESC_SHORT"] = "Write chunks of Lua code that will be ran when TellMeWhen is being initialized."
 L["CODESNIPPETS_DESC"] = [[This feature allows you to write chunks of Lua code that will be ran when TellMeWhen is being initialized.
 
 It is an advanced feature for those who have experience with Lua (or for those who have been given a snippet by another TellMeWhen user).
 
-Uses might include writing custom functions for use in Lua conditions (be sure to define those in TMW.CNDT.Env).
+Uses might include writing custom functions for use in Lua conditions.
 
-Snippets can be defined either per-profile or globally (global snippets will run for all profiles).]]
+Snippets can be defined either per-profile or globally (global snippets will run for all profiles).
+
+To insert a reference to a TellMeWhen icon in your code, |cff7fffffshift-click|r that icon.]]
 L["CODESNIPPET_GLOBAL"] = "Global Snippets"
 L["CODESNIPPET_PROFILE"] = "Profile Snippets"
 
-L["CODESNIPPET_ADD"] = "Create new Snippet"
+L["CODESNIPPET_ADD2"] = "New %s Snippet"
+L["CODESNIPPET_ADD2_DESC"] = "|cff7fffffClick|r to add a new %s snippet."
 L["CODESNIPPET_DELETE"] = "Delete Snippet"
-L["CODESNIPPET_DELETE_DESC"] = [[Click to delete this code snippet.
-
-Hold |cff7fffffCtrl|r to bypass confirmation.]]
 L["CODESNIPPET_DELETE_CONFIRM"] = "Are you sure you want to delete the code snippet %q?"
+
 L["CODESNIPPET_RUNNOW"] = "Run Snippet Now"
-L["CODESNIPPET_RUNNOW_DESC"] = [[Click to run this code snippet.
+L["CODESNIPPET_RUNNOW_DESC"] = "|cff7fffffClick|r to run this snippet's code."
 
-Hold |cff7fffffCtrl|r to bypass confirmation if the snippet has already been ran.]]
-L["CODESNIPPET_RUNNOW_CONFIRM"] = [[Are you sure you want to run the code snippet %s again?
+L["CODESNIPPET_RUNAGAIN"] = "Run Snippet Again"
+L["CODESNIPPET_RUNAGAIN_DESC"] = [[This snippet has already run once this session.
 
-(It has already been run at least once this session)
-
-You can hold |cff7fffffCtrl|r when clicking the %s button to bypass confirmation.]]
+|cff7fffffClick|r to run it again.]]
 
 L["CODESNIPPETS_DEFAULTNAME"] = "New Snippet"
 
@@ -2343,6 +2344,8 @@ L["EVENTHANDLER_LUA_LUAEVENTf"] = "Lua Event: %s"
 L["EVENTHANDLER_LUA_LUA"] = "Lua"
 L["EVENTHANDLER_LUA_CODE"] = "Lua Code to Execute"
 L["EVENTHANDLER_LUA_CODE_DESC"] = "Type the Lua code that should be executed when the event is triggered here."
+
+L["LUA_INSERTGUID_TOOLTIP"] = "|cff7fffffShift-click|r to insert a reference to this icon into your code."
 
 L["CONDITIONPANEL_COUNTER_DESC"] = "Check the value of a counter that has been established and modified by the \"Counter\" Notification handler"
 L["CONDITION_COUNTER"] = "Counter to check"

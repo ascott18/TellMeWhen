@@ -68,6 +68,8 @@
 					<OnLoad>
 						TMW:CInit(self)
 						
+						self.Title:SetText(TMW.L["EVENTS_SETTINGS_COUNTER_OP"])
+						
 						self:SetTexts(TMW.L["EVENTS_SETTINGS_COUNTER_OP"], TMW.L["EVENTS_SETTINGS_COUNTER_OP_DESC"])
 						self:SetFunction(TMW.EVENTS:GetEventHandler("Counter").OperationMenu_DropDown)
 

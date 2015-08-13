@@ -17,254 +17,172 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local IE = TMW.IE
 local SNIPPETS = TMW.SNIPPETS
 
 
 
-local function getSnippetSettings(info)
-	for i = #info, 1, -1 do
-		local n = strmatch(info[i], "#Snippet (%d+)")
-		n = tonumber(n)
-		
-		if n then
-			local db = TMW.db[info[i-1]].CodeSnippets			
-			
-			return db[n], info[i-1], n
+
+
+local SnippetsTab = IE:RegisterTab("MAIN", "SNIPPETS", "Snippets", 50)
+SnippetsTab:SetTexts(L["CODESNIPPETS_TITLE"], L["CODESNIPPETS_DESC_SHORT"])
+
+
+
+SNIPPETS.selectedDomain = "profile"
+SNIPPETS.selectedID = 0
+
+
+
+TMW:NewClass("Config_SnippetListItem", "Config_CheckButton") {
+	OnNewInstance = function(self)
+
+	end,
+
+	ReloadSetting = function(self)
+		local settings = self:GetSettingTable()
+
+		if settings and self:GetID() <= settings.n then
+			local snippet = settings[self:GetID()]
+
+			local name = snippet.Name
+			if name:trim() == "" then
+				name = TMW.L["TEXTLAYOUTS_UNNAMED"]
+			end
+
+			self.Name:SetText(name)
+
+			self.Texture:SetDesaturated(false)
+			self.Texture:SetTexture(nil)
+			if not snippet.Enabled then
+				self.Texture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+				self.Texture:SetTexture("Interface/PaperDollInfoFrame/UI-GearManager-LeaveItem-Transparent")
+				self.Texture:SetDesaturated(true)
+			elseif SNIPPETS:TestForErrors(snippet.Code) then
+				self.Texture:SetTexCoord(1/64, 40/64, 0, 1)
+				self.Texture:SetTexture("Interface/AddOns/TellMeWhen/Textures/Alert")
+			end
 		end
+	end,
+
+	OnClick = function(self)
+		TMW.IE:SaveSettings()
+
+		SNIPPETS.selectedDomain = self:GetParent():GetDomain()
+		SNIPPETS.selectedID = self:GetID()
+
+		self:OnSettingSaved()
+	end,
+}
+
+TMW:NewClass("Config_SnippetList", "Config_Frame") {
+	
+	OnNewInstance = function(self)
+		self.frames = {}
+
+		local ScrollFrame = TMW:ConvertContainerToScrollFrame(self, true, 3, 6)
+		ScrollFrame:SetWheelStepAmount(30)
+
+		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
+	end,
+
+	SetDomain = function(self, domain)
+		if domain ~= "global" and domain ~= "profile" then
+			error("invalid domain to SetDomain")
+		end
+
+		self.domain = domain
+	end,
+
+	GetDomain = function(self)
+		return self.domain
+	end,
+
+	GetListItem = function(self, id)
+		local frame = self.frames[id]
+		if not frame then
+			frame = TMW.C.Config_SnippetListItem:New("CheckButton", nil, self, "TellMeWhen_SnippetListItem_Template", id)
+			self.frames[id] = frame
+
+			if id == 1 then
+				frame:SetPoint("TOP", self.Add, "BOTTOM", 0, -5)
+			else
+				frame:SetPoint("TOP", self.frames[id - 1], "BOTTOM", 0, 0)
+			end
+		end
+
+		return frame
+	end,
+
+	ReloadSetting = function(self)
+		local settings = self:GetSettingTable()
+
+		for id, snippet in TMW:InNLengthTable(settings) do
+			local frame = self:GetListItem(id)
+
+			if SNIPPETS.selectedID == 0 then
+				SNIPPETS.selectedDomain = self:GetDomain()
+				SNIPPETS.selectedID = id
+			end
+
+			frame:SetChecked(SNIPPETS.selectedDomain == self:GetDomain() and SNIPPETS.selectedID == id)
+
+			frame:Show()
+		end
+
+		for id = settings.n + 1, #self.frames do
+			self.frames[id]:Hide()
+		end
+
+		local page = IE.Pages.Snippets
+		page.Config:SetShown(SNIPPETS.selectedID ~= 0)
+		page.NoSnippetsMessage:SetShown(SNIPPETS.selectedID == 0)
+	end,
+
+	SettingTableRequested = function(self)
+		return self.domain and TMW.db[self.domain].CodeSnippets or false
+	end,
+}
+
+
+
+function SNIPPETS:TestForErrors(code)
+	local func, err = loadstring(code, "")
+
+	if func then
+		return nil
+	else
+		err = err:gsub("%[string \"\"%]", "line")
+		local line = tonumber(err:match("line:(%d+):"))
+		
+		code = code:gsub("\r\n", "\n"):gsub("\r", "\n")
+		local lineText = select(line, strsplit("\n", code)) or ""
+		
+		lineText = lineText:trim(" \t\r\n")
+		if #lineText > 35 then
+			lineText = lineText:sub(1, 35) .. "..."
+		end
+		
+		return "|cffee0000" .. err:gsub("line:(%d+):", "line %1 (\"" .. lineText .. "\"):\r\n")
 	end
 end
 
-
-local snippetTemplate = {
-	type = "group",
-	name = function(info)
-		local snippet = getSnippetSettings(info)
-		return snippet.Name
-	end,
-	order = function(info)
-		local snippet = getSnippetSettings(info)
-		return snippet.Order
-	end,
-	set = function(info, val)
-		local snippet = getSnippetSettings(info)
-		snippet[info[#info]] = val
-	end,
-	get = function(info)
-		local snippet = getSnippetSettings(info)
-		return snippet[info[#info]]
-	end,
-	args = {
-		Enabled = {
-			name = L["CODESNIPPET_AUTORUN"],
-			type = "toggle",
-			order = 1,
-			width = "full",
-		},
-		Name = {
-			name = L["CODESNIPPET_RENAME"],
-			desc = L["CODESNIPPET_RENAME_DESC"],
-			type = "input",
-			--width = "double",
-			order = 2,
-			set = function(info, val)
-				local snippet = getSnippetSettings(info)
-				snippet.Name = strtrim(val)
-			end,
-		},
-		Order = {
-			name = L["CODESNIPPET_ORDER"],
-			desc = L["CODESNIPPET_ORDER_DESC"],
-			type = "input",
-			--width = "half",
-			order = 3,
-			set = function(info, val)
-				val = tonumber(val)
-				if not val then
-					return
-				end
-				
-				local snippet = getSnippetSettings(info)
-				snippet.Order = val
-			end,
-			get = function(info)
-				local snippet = getSnippetSettings(info)
-				return tostring(snippet[info[#info]])
-			end,
-		},
-		
-		runnow = {
-			name = L["CODESNIPPET_RUNNOW"],
-			desc = L["CODESNIPPET_RUNNOW_DESC"],
-			type = "execute",
-			order = 4,
-			func = function(info)
-				local snippet, scope, id = getSnippetSettings(info)
-				
-				SNIPPETS:RunSnippet(snippet)
-			end,
-			confirm = function(info)
-				local snippet = getSnippetSettings(info)
-				
-				if IsControlKeyDown() then
-					return false
-				elseif SNIPPETS:HasRanSnippet(snippet) then
-					return L["CODESNIPPET_RUNNOW_CONFIRM"]:format(snippet.Name)
-				end
-				
-				return false
-			end,
-		},
-		
-		error = {
-			order = 10,
-			type = "description",
-			name = function(info)
-				local snippet = getSnippetSettings(info)
-				
-				local func, err = loadstring(snippet.Code, "")
-				
-				if func then
-					return ""
-				else
-					err = err:gsub("%[string \"\"%]", "line")
-					local line = tonumber(err:match("line:(%d+):"))
-					
-					local code = snippet.Code
-					code = code:gsub("\r\n", "\n"):gsub("\r", "\n")
-					local lineText = select(line, strsplit("\n", code)) or ""
-					
-					lineText = lineText:trim(" \t\r\n")
-					if #lineText > 25 then
-						lineText = lineText:sub(1, 25) .. "..."
-					end
-					
-					return "|cffee0000ERROR: " .. err:gsub("line:(%d+):", "line %1 (\"" .. lineText .. "\"):")
-				end
-			end,
-		},
-		
-		Code = {
-			name = L["CODESNIPPET_CODE"],
-			desc = L["CODESNIPPET_CODE_DESC"],
-			type = "input",
-			width = "full",
-			multiline = 20,
-			order = 11,
-		},
-		
-		delete = {
-			name = L["CODESNIPPET_DELETE"],
-			desc = L["CODESNIPPET_DELETE_DESC"],
-			type = "execute",
-			order = 20,
-			func = function(info)
-				local snippet, scope, id = getSnippetSettings(info)
-				
-				SNIPPETS:DeleteSnippet(scope, id)
-				
-				TMW.ACEOPTIONS:LoadConfigPath(info, "snippets", scope) -- might need to happen before we delete the snippet?
-				
-				TMW.ACEOPTIONS:CompileOptions()
-				TMW:Update()
-			end,
-			confirm = function(info)
-				local snippet = getSnippetSettings(info)
-			
-				if snippet.Code:trim() == "" then
-					return false
-				elseif IsControlKeyDown() then
-					return false
-				end
-				
-				return L["CODESNIPPET_DELETE_CONFIRM"]:format(snippet.Name)
-			end,
-		},
-		
-		ImportExport = TMW.importExportBoxTemplate,
-	},
-}
-
-local addSnippetButton = {
-	name = L["CODESNIPPET_ADD"],
-	type = "execute",
-	width = "full",
-	order = 1,
-	func = function(info)
-		local scope = info[#info-1]
-		
-		SNIPPETS:AddSnippet(scope)
-		
-		TMW.ACEOPTIONS:LoadConfigPath(info, "snippets", scope) -- might need to happen before we add the snippet?
-		
-		TMW.ACEOPTIONS:CompileOptions()
-		TMW:Update()
-	end,
-}
-local snippetDesc = {
-	order = 0,
-	type = "description",
-	name = L["CODESNIPPETS_DESC"] .. "\r\n\r\n",
-}
-
-local allSnippets = {
-	type = "group",
-	name = L["CODESNIPPETS_TITLE"],
-	order = 50,
-	args = {
-		desc = snippetDesc,
-		
-		global = {
-			type = "group",
-			name = L["CODESNIPPET_GLOBAL"],
-			order = 1,
-			args = {
-				desc = snippetDesc,
-				addSnippet = addSnippetButton,
-			},
-		},
-		profile = {
-			type = "group",
-			name = L["CODESNIPPET_PROFILE"],
-			order = 2,
-			args = {
-				desc = snippetDesc,
-				addSnippet = addSnippetButton,
-			},
-		},
-	},
-}
-
-
-TMW:RegisterCallback("TMW_CONFIG_MAIN_OPTIONS_COMPILE", function(event, OptionsTable)
-	OptionsTable.args.snippets = allSnippets
-		
-	for n, scope in TMW:Vararg("global", "profile") do
-		local settingsParent = allSnippets.args[scope]
-		
-		for k, v in pairs(settingsParent.args) do
-			if v == snippetTemplate then
-				settingsParent.args[k] = nil
-			end
-		end
-		
-		for k = 1, TMW.db[scope].CodeSnippets.n do
-			settingsParent.args["#Snippet " .. k] = snippetTemplate
-		end
-	end
-	
-end)
-
-function SNIPPETS:AddSnippet(scope)
-	local parent = TMW.db[scope].CodeSnippets
+function SNIPPETS:AddSnippet(domain)
+	local parent = TMW.db[domain].CodeSnippets
 	parent.n = parent.n + 1
+
+	SNIPPETS.selectedDomain = domain
+	SNIPPETS.selectedID = parent.n
 	
 	return parent[parent.n]
 end
 
-function SNIPPETS:DeleteSnippet(scope, id)
-	local parent = TMW.db[scope].CodeSnippets
+function SNIPPETS:DeleteSnippet(domain, id)
+	local parent = TMW.db[domain].CodeSnippets
 	
 	tremove(parent, id)
+
+	SNIPPETS.selectedID = 0
 	
 	parent.n = parent.n - 1
 end
@@ -295,6 +213,8 @@ function codesnippet:Import_ImportData(Item, domain)
 			TMW:DoUpgrade("codesnippet", version, snippet)
 		end
 	end
+
+	IE.Pages.Snippets:OnSettingSaved()
 	
 	TMW:Update()
 end

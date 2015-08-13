@@ -248,8 +248,9 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 						isUnavailable = true
 					else
 						local spec1 = GetSpecialization(false, false, 1)
+						local tex
 						if spec1 then
-							local tex = self:GetTexture(textureIndex)
+							tex = self:GetTexture(textureIndex)
 							textureIndex = textureIndex + 1
 
 							local _, name, _, texture = GetSpecializationInfo(spec1)

@@ -1794,6 +1794,11 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 }
 
 TMW:NewClass("Config_Button", "Button", "Config_Frame"){
+	SetTexts = function(self, title, tooltip)
+		self:SetText(title)
+		self:SetTooltip(title, tooltip)
+	end,
+
 	OnClick = function(self)
 		PlaySound("igMainMenuOptionCheckBoxOn")
 	end,
@@ -1890,14 +1895,50 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 		end
 	end,
 
+	SetNewlineOnEnter = function(self, enable)
+		self.newlineOnEnter = enable
+	end,
+
+	MakeScrollable = function(self, ...)
+		local ScrollFrame = TMW:ConvertContainerToScrollFrame(self, ...)
+
+		ScrollFrame:SetWheelStepAmount(30)
+
+		self.border:SetParent(ScrollFrame)
+		self.border:ClearAllPoints()
+		self.border:SetAllPoints(ScrollFrame)
+		self.border:SetBorderSize(1)
+
+		self.background:SetParent(ScrollFrame)
+		self.background:ClearAllPoints()
+		self.background:SetAllPoints(ScrollFrame)
+
+		self.BackgroundText:SetPoint("LEFT", ScrollFrame)
+		self.BackgroundText:SetPoint("RIGHT", ScrollFrame)
+
+		self.clickInterceptor = CreateFrame("Button", nil, ScrollFrame)
+		self.clickInterceptor:SetAllPoints(ScrollFrame)
+		self.clickInterceptor:SetScript("OnClick", function()
+			self:SetFocus()
+		end)
+	end,
+
 
 	-- Scripts
+	OnCursorChanged = function(self)
+		if self.ScrollFrame and self:HasFocus() then
+			local cursor = select(5, self:GetRegions())
+
+			self.ScrollFrame:ScrollToFrame(cursor)
+		end
+	end,
+
 	OnEscapePressed = function(self)
 		self:ClearFocus()
 	end,
 
 	OnEnterPressed = function(self)
-		if self:IsMultiLine() and IsModifierKeyDown() then
+		if self:IsMultiLine() and self.newlineOnEnter then
 			self:Insert("\r\n")
 		else
 			self:ClearFocus()

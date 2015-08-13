@@ -100,10 +100,7 @@
 								TMW.SUG:EnableEditBox(self, "conditions", true, nil)
 								
 								self.background:Hide()
-								self.borderTop:Hide()
-								self.borderBottom:Hide()
-								self.borderLeft:Hide()
-								self.borderRight:Hide()
+								self.border:Hide()
 							</OnLoad>
 						</Scripts>
 					</EditBox>

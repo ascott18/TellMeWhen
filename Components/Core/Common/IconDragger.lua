@@ -368,7 +368,9 @@ function IconDragger:Handler(method)
 
 	-- attempt to create a backup before doing anything
 	IconDragger.srcicon:SaveBackup()
-	IconDragger.desticon:SaveBackup()
+	if IconDragger.desticon then
+		IconDragger.desticon:SaveBackup()
+	end
 
 	-- finally, invoke the method to handle the operation.
 	method(IconDragger)

@@ -723,32 +723,26 @@ function DD:Toggle(level, value, anchorName, xOffset, yOffset, menuList, button,
 		else
 			-- Determine whether the menu is off the screen or not
 			local offscreenY, offscreenX;
-			if ( (y - listFrame:GetHeight()/2) < 0 ) then
-				offscreenY = 1;
+			if (y - listFrame:GetHeight()/2) < 0 then
+				offscreenY = true;
 			end
-			if ( listFrame:GetRight() > GetScreenWidth() ) then
-				offscreenX = 1;	
+			if listFrame:GetRight() > GetScreenWidth() then
+				offscreenX = true;	
 			end
-			if ( offscreenY and offscreenX ) then
-				point = gsub(point, "TOP(.*)", "BOTTOM%1");
-				point = gsub(point, "(.*)LEFT", "%1RIGHT");
-				relativePoint = gsub(relativePoint, "TOP(.*)", "BOTTOM%1");
-				relativePoint = gsub(relativePoint, "(.*)RIGHT", "%1LEFT");
-				xOffset = -11;
-				yOffset = -14;
-			elseif ( offscreenY ) then
+
+			xOffset = 3;
+			yOffset = 6;
+
+			if offscreenY then
 				point = gsub(point, "TOP(.*)", "BOTTOM%1");
 				relativePoint = gsub(relativePoint, "TOP(.*)", "BOTTOM%1");
-				xOffset = 0;
-				yOffset = -14;
-			elseif ( offscreenX ) then
+				yOffset = -6;
+			end
+
+			if offscreenX then
 				point = gsub(point, "(.*)LEFT", "%1RIGHT");
 				relativePoint = gsub(relativePoint, "(.*)RIGHT", "%1LEFT");
-				xOffset = -11;
-				yOffset = 14;
-			else
-				xOffset = 0;
-				yOffset = 14;
+				xOffset = -8;
 			end
 			
 			listFrame:ClearAllPoints();

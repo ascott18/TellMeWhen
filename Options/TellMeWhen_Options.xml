@@ -186,7 +186,7 @@
 	</ScrollFrame>
 
 
-	<Button name="TellMeWhen_clickinterceptor" virtual="true">
+	<Button name="TellMeWhen_ClickInterceptor" virtual="true">
 		<Scripts>
 			<OnLoad>
 				self.parent = self:GetParent()
@@ -237,7 +237,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button inherits="TellMeWhen_clickinterceptor"/>
+			<Button inherits="TellMeWhen_ClickInterceptor"/>
 		</Frames>
 		<Scripts>
 			<OnEnable>
@@ -293,10 +293,7 @@
 		</CheckedTexture>
 	</CheckButton>
 
-	<Texture name="TellMeWhen_InputBoxTemplateBorder" virtual="true">
-		<Size x="1" y="1"/>
-		<Color r="0.4" g="0.4" b="0.4" a="1"/>
-	</Texture>
+	
 	<EditBox name="TellMeWhen_InputBoxTemplate" enableMouse="true" virtual="true" autoFocus="false">
 		<Size y="15"/>
 
@@ -308,40 +305,20 @@
 		<TextInsets>
 			<AbsInset left="4" right="2" top="2" bottom="2"/>
 		</TextInsets>
+		<Frames>
+			<Frame inherits="TellMeWhen_GenericBorder" >
+				<Scripts>
+					<OnLoad inherit="prepend">
+						self:SetBorderSize(-1)
+						self:SetColor(.4, .4, .4, 1)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
 		<Layers>
 			<Layer level="BACKGROUND">
-
-				<Texture parentKey="borderTop" inherits="TellMeWhen_InputBoxTemplateBorder">
-					<Anchors>
-						<Anchor point="TOPLEFT" />
-						<Anchor point="TOPRIGHT"/>
-					</Anchors>
-				</Texture>
-				<Texture parentKey="borderBottom" inherits="TellMeWhen_InputBoxTemplateBorder">
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" />
-						<Anchor point="BOTTOMRIGHT"/>
-					</Anchors>
-				</Texture>
-				<Texture parentKey="borderLeft" inherits="TellMeWhen_InputBoxTemplateBorder">
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.borderTop" relativePoint="BOTTOMLEFT"/>
-						<Anchor point="BOTTOMLEFT" relativeKey="$parent.borderBottom" relativePoint="TOPLEFT"/>
-					</Anchors>
-				</Texture>
-				<Texture parentKey="borderRight" inherits="TellMeWhen_InputBoxTemplateBorder">
-					<Anchors>
-						<Anchor point="TOPRIGHT" relativeKey="$parent.borderTop" relativePoint="BOTTOMRIGHT"/>
-						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.borderBottom" relativePoint="TOPRIGHT"/>
-					</Anchors>
-				</Texture>
-
-				<Texture parentKey="background">
+				<Texture parentKey="background" setAllPoints="true">
 					<Color r="0" g="0" b="0" a="1"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.borderLeft" relativePoint="TOPRIGHT"/>
-						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.borderRight" relativePoint="BOTTOMLEFT"/>
-					</Anchors>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
@@ -367,39 +344,22 @@
 		<NormalFont style="GameFontNormal"/>
 		<HighlightFont style="GameFontHighlight"/>
 		<DisabledFont style="GameFontDisable"/>
+
+		<Frames>
+			<Frame inherits="TellMeWhen_GenericBorder" >
+				<Scripts>
+					<OnLoad inherit="prepend">
+						self:SetBorderSize(-1)
+						self:SetColor(.4, .4, .4, 1)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
+
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="borderTop" inherits="TellMeWhen_InputBoxTemplateBorder">
-					<Anchors>
-						<Anchor point="TOPLEFT" x="0" y="1"/>
-						<Anchor point="TOPRIGHT" y="1"/>
-					</Anchors>
-				</Texture>
-				<Texture parentKey="borderBottom" inherits="TellMeWhen_InputBoxTemplateBorder">
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="0" y="0"/>
-						<Anchor point="BOTTOMRIGHT" y="0"/>
-					</Anchors>
-				</Texture>
-				<Texture parentKey="borderLeft" inherits="TellMeWhen_InputBoxTemplateBorder">
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.borderTop" relativePoint="BOTTOMLEFT"/>
-						<Anchor point="BOTTOMLEFT" relativeKey="$parent.borderBottom" relativePoint="TOPLEFT"/>
-					</Anchors>
-				</Texture>
-				<Texture parentKey="borderRight" inherits="TellMeWhen_InputBoxTemplateBorder">
-					<Anchors>
-						<Anchor point="TOPRIGHT" relativeKey="$parent.borderTop" relativePoint="BOTTOMRIGHT"/>
-						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.borderBottom" relativePoint="TOPRIGHT"/>
-					</Anchors>
-				</Texture>
-
-				<Texture parentKey="Background">
+				<Texture parentKey="Background" setAllPoints="true">
 					<Color r="0.15" g="0.15" b="0.15" a="0.5"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.borderLeft" relativePoint="TOPRIGHT"/>
-						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.borderRight" relativePoint="BOTTOMLEFT"/>
-					</Anchors>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -609,7 +569,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button inherits="TellMeWhen_clickinterceptor"/>
+			<Button inherits="TellMeWhen_ClickInterceptor"/>
 		</Frames>
 	</Button>
 
@@ -761,9 +721,10 @@
 		<Frames>
 
 			<Button parentKey="Button" inherits="TellMeWhen_ButtonTemplate" >
-				<Size x="100" y="15"/>
 				<Anchors>
-					<Anchor point="RIGHT" x="0" y="-1"/>
+					<Anchor point="TOP" y="0"/>
+					<Anchor point="BOTTOM" y="0"/>
+					<Anchor point="RIGHT" x="0" />
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
@@ -804,6 +765,7 @@
 						TMW:CInit(self)
 
 						self:SetFunction(TMW.IE.ImportExport_DropDown)
+						self:SetDropdownAnchor("BOTTOMRIGHT", nil, "TOPRIGHT", -2, 1)
 
 						self:SetScrollable(true)
 						self:Hide()
@@ -907,9 +869,11 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-			--	self.label = TMW.L["IMPORT_EXPORT"]
-				TMW:TT(self, "IMPORT_EXPORT", "IMPORT_EXPORT_DESC")
-				self:SetTextInsets(0, self.Button:GetTextWidth()+5 + 2, 0, 0)
+				TMW:CInit(self)
+				self:SetLabel("")
+				self:SetTexts(TMW.L["IMPORT_EXPORT"], TMW.L["IMPORT_EXPORT_DESC"])
+
+				self:SetTextInsets(3, self.Button:GetWidth() + 5, 0, 0)
 
 				function self.callback(nAndMaxN, soFar, total)
 					self.Status:Set(soFar, total, nAndMaxN)
@@ -953,11 +917,7 @@
 					self.Button.Glow.Anim:Finish()
 				end
 			</OnUpdate>
-			<OnEditFocusLost>
-				EditBox_ClearHighlight(self)
-				TMW:CleanString(self)
-				self:GetScript("OnTextChanged")(self)
-			</OnEditFocusLost>
+
 			<OnEnterPressed>
 				self:ClearFocus()
 				self.DD:Toggle(1)
@@ -1725,8 +1685,8 @@
 
 			<EditBox parentKey="ExportBox" inherits="TellMeWhen_ExportBoxTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.RedoButton" relativePoint="RIGHT" x="10" y="1"/>
-					<Anchor point="RIGHT" relativeKey="$parent.OkayButton" relativePoint="LEFT" x="-10" y="1"/>
+					<Anchor point="LEFT" relativeKey="$parent.RedoButton" relativePoint="RIGHT" x="10" y="0"/>
+					<Anchor point="RIGHT" relativeKey="$parent.OkayButton" relativePoint="LEFT" x="-10" y="0"/>
 				</Anchors>
 			</EditBox>
 
