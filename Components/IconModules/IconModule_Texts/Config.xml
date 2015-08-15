@@ -395,7 +395,7 @@
 							<Layer level="OVERLAY">
 								<FontString parentKey="Usage" inherits="GameFontHighlight" justifyH="LEFT">
 									<Anchors>
-										<Anchor point="TOP" relativeKey="$parent.Clone" relativePoint="BOTTOM" y="-15"/>
+										<Anchor point="TOP" relativeKey="$parent.Clone" relativePoint="BOTTOM" y="-10"/>
 										<Anchor point="LEFT" relativeKey="$parent.Name" />
 										<Anchor point="RIGHT" relativeKey="$parent.Name" />
 									</Anchors>
@@ -407,7 +407,7 @@
 							<Button parentKey="AddDisplay" inherits="TellMeWhen_ButtonTemplate">
 								<Size y="15"/>
 								<Anchors>
-									<Anchor point="TOP" relativeKey="$parent.Usage" relativePoint="BOTTOM" y="-15"/>
+									<Anchor point="TOP" relativeKey="$parent.Usage" relativePoint="BOTTOM" y="0"/>
 									<Anchor point="LEFT" x="25" />
 									<Anchor point="RIGHT" x="-25" />
 								</Anchors>
@@ -452,21 +452,8 @@
 										self:Hide()
 									end
 
-									local layoutSettings = self:GetSettingTable()
-									if layoutSettings then
-										if layoutSettings.NoEdit then
-											self.Usage:SetText(TMW.L["TEXTLAYOUTS_NOEDIT_DESC"])
-										else
-											local text = TMW.TEXT:GetNumTimesUsed(layoutSettings.GUID)
-
-											if text ~= "" then
-												text =  TMW.L["TEXTLAYOUTS_USEDBY_HEADER"] .. "\n\n" .. text
-											else
-												text = TMW.L["TEXTLAYOUTS_USEDBY_NONE"]
-											end
-
-											self.Usage:SetText(text)
-										end
+									if layoutSettings and layoutSettings.NoEdit then
+										self.Usage:SetText(TMW.L["TEXTLAYOUTS_NOEDIT_DESC"] .. "\n\n")
 									else
 										self.Usage:SetText(nil)
 									end
@@ -985,53 +972,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	<!--
 		A single text display in the icon editor.
 		Contains the editbox, the copy menu, and the rest to default button.
@@ -1237,11 +1177,8 @@
 							<OnClick>
 								local GUID, layoutSettings = TMW.TEXT:GetTextLayoutForIcon(TMW.CI.icon)
 								
-								TMW.IE.MainOptionsTab:Click()
-								
-								TMW.ACEOPTIONS:CompileOptions()
-								TMW.ACEOPTIONS:LoadConfigPath("TMWIEMain", "textlayouts", "#TextLayout " .. GUID)
-								LibStub("AceConfigDialog-3.0"):Open("TMWIEMain", TMW.IE.MainOptionsWidget)
+								TMW.TEXT.LayoutTab:Click()
+								TMW.TEXT:SetCurrentLayout(GUID)
 								
 							</OnClick>
 						</Scripts>

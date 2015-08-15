@@ -47,7 +47,7 @@ if not TEXT then return end
 
 local Tab = IE:RegisterTab("MAIN", "TEXTLAYOUTS", "TextLayouts", 100)
 Tab:SetTexts(L["TEXTLAYOUTS"], nil)
-
+TEXT.LayoutTab = Tab
 
 local HistorySet = TMW.C.HistorySet:New("TEXTLAYOUTS")
 local layoutHistories = setmetatable({}, {
@@ -169,18 +169,41 @@ TMW:NewClass("Config_TextLayout_ListItem", "Config_Frame") {
 		return frame
 	end,
 
+	tooltipFunction = function(Layout)
+		local self = Layout:GetParent()
+		local layoutSettings = self:GetSettingTable()
+
+		if not layoutSettings then
+			return ""
+		end
+
+		if layoutSettings.NoEdit then
+			return L["TEXTLAYOUTS_NOEDIT_DESC"]
+		else
+			local tooltip = TEXT:GetNumTimesUsed(layoutSettings.GUID)
+			if tooltip ~= "" then
+				return TMW.L["TEXTLAYOUTS_USEDBY_HEADER"] .. "\n\n" .. tooltip .. "\n\n" .. L["CLICK_TO_EDIT"]
+			else
+				return TMW.L["TEXTLAYOUTS_USEDBY_NONE"] .. "\n\n" .. L["CLICK_TO_EDIT"]
+			end
+		end
+	end,
 
 	ReloadSetting = function(self)
 		local layoutSettings = self:GetSettingTable()
 
-		local layoutGUID, displayID = TEXT:GetCurrentLayoutAndDisplay()
-		self.Layout:SetChecked(layoutGUID == self.setting)
+		local currentLayoutGUID, currentDisplayID = TEXT:GetCurrentLayoutAndDisplay()
+		self.Layout:SetChecked(currentLayoutGUID == self.setting)
 
 		local numShown = 0
 		if layoutSettings then
 			local name = TEXT:GetLayoutName(layoutSettings)
 			self.Layout.Name:SetText(name)
 
+			TMW:TT(self.Layout, name, self.tooltipFunction, 1, 1)
+
+
+			-- Setup text display frames
 			if self.Layout:GetChecked() then
 				for id, displaySettings in TMW:InNLengthTable(layoutSettings) do
 					local frame = self:GetTextDisplayFrame(id)
@@ -192,20 +215,21 @@ TMW:NewClass("Config_TextLayout_ListItem", "Config_Frame") {
 			end
 		end
 
-		local layoutGUID, displayID = TEXT:GetCurrentLayoutAndDisplay()
-		if numShown > 0 and not displayID then
+		-- Load the first display if there isn't one already loaded.
+		if numShown > 0 and not currentDisplayID then
 			TEXT:SetCurrentDisplay(1)
 		end
 
+		-- Hide all the extra frames.
 		for i = numShown + 1, #self.frames do
 			self.frames[i]:Hide()
 		end
 
+		-- Adjust the height to fit all the text displays.
 		local bottomPadding = 0
 		if numShown > 0 then
 			bottomPadding = 10
 		end
-
 		self:AdjustHeight(bottomPadding)
 	end,
 
@@ -224,6 +248,8 @@ TMW:NewClass("Config_TextDisplay_ListItem", "Config_CheckButton") {
 			local name = TEXT:GetStringName(layoutSettings[self:GetID()], self:GetID())
 
 			self.Name:SetText(name)
+
+			self:SetTooltip(name, not layoutSettings.NoEdit and L["CLICK_TO_EDIT"] or nil)
 		end
 
 		local layoutGUID, displayID = TEXT:GetCurrentLayoutAndDisplay()

@@ -1789,8 +1789,10 @@ L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
 L["MAKENEWGROUP_PROFILE"] = "|cff59ff59Create|r New Profile Group"
 L["MAKENEWGROUP_GLOBAL"] = "|cff59ff59Create|r New |cff00c300Global|r Group"
 
+L["CLICK_TO_EDIT"] = [[|cff7fffffClick|r to edit.]]
 
 L["GROUPSELECT_TOOLTIP"] = [[|cff7fffffClick|r to edit.
+
 |cff7fffffClick-and-drag|r to reorder or change domain.]]
 L["GROUP_UNAVAILABLE"] = "This group cannot be shown due to its overly-restrictive spec/role settings."
 
