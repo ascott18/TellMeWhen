@@ -91,7 +91,7 @@
 
 						<Layers>
 							<Layer level="OVERLAY">
-				<!-- 				<Texture parentKey="tick1">
+								<!-- <Texture parentKey="tick1">
 									<Color r="0.2" g="0.2" b="0.2"/>
 									<Size y="1"/>
 
@@ -139,6 +139,9 @@
 								self:SetButtonState("NORMAL")
 								self:UnlockHighlight()
 							</OnDragStop>
+							<OnHide>
+								self:GetScript("OnDragStop")(self)
+							</OnHide>
 							<OnUpdate>
 								if self.IsScrolling then
 									local _, currentY = GetCursorPosition()
@@ -583,6 +586,14 @@
 			</Anchors>
 		</PushedTexture>
 		<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\RedX" alphaMode="ADD"/>
+		<Scripts>
+			<OnEnable>
+				self:GetNormalTexture():SetDesaturated(false)
+			</OnEnable>
+			<OnDisable>
+				self:GetNormalTexture():SetDesaturated(true)
+			</OnDisable>
+		</Scripts>
 	</Button>
 
 
@@ -1443,11 +1454,14 @@
 	</Texture>
 
 	<Frame name="TellMeWhen_IE_PanelColumn" virtual="true">
+		<KeyValues>
+			<KeyValue key="scrollbarOffset" type="number" value="1" />
+			<KeyValue key="scrollbarWidth" type="number" value="7" />
+		</KeyValues>
+		
 		<Anchors>
-			<Anchor point="LEFT" x="7"/>
 			<Anchor point="TOP" y="-35"/>
 			<Anchor point="BOTTOM" y="0"/>
-			<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
 		</Anchors>
 		<Scripts>
 			<OnLoad>
@@ -1456,7 +1470,7 @@
 				self.currentPanels = {}
 				tinsert(parent.panelColumns, self)
 
-				TMW:ConvertContainerToScrollFrame(self, true, 1, 7)
+				TMW:ConvertContainerToScrollFrame(self, true, self.scrollbarOffset, self.scrollbarWidth)
 				self.ScrollFrame.scrollPercentage = 1/3
 			</OnLoad>
 		</Scripts>

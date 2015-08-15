@@ -152,7 +152,7 @@ info.tooltipWrap = [nil, BOOLEAN] -- Set whether the tooltip text should wrap or
 info.justifyH = [nil, "CENTER"] -- Justify button text
 info.arg1 = [ANYTHING] -- This is the first argument used by info.func
 info.arg2 = [ANYTHING] -- This is the second argument used by info.func
-info.fontObject = [FONT] -- font object replacement for Normal and Highlight
+info.font = [STRING] -- font file replacement
 info.padding = [nil, NUMBER] -- Number of pixels to pad the text on the right side
 info.minWidth = [nil, NUMBER] -- Minimum width for this line
 ]]
@@ -285,13 +285,13 @@ function DD:AddButton(info, level)
 		if ( width > listFrame.maxWidth ) then
 			listFrame.maxWidth = width;
 		end
+
 		-- Check to see if there is a replacement font
-		if ( info.fontObject ) then
-			button:SetNormalFontObject(info.fontObject);
-			button:SetHighlightFontObject(info.fontObject);
+		local font, size, flags = GameFontHighlightSmallLeft:GetFont()
+		if ( info.font ) then
+			button:GetFontString():SetFont(info.font, size, flags);
 		else
-			button:SetNormalFontObject(GameFontHighlightSmallLeft);
-			button:SetHighlightFontObject(GameFontHighlightSmallLeft);
+			button:GetFontString():SetFont(font, size, flags);
 		end
 	else
 		button:SetText("");
@@ -409,85 +409,6 @@ end
 
 
 
-function DD:Refresh(useValue, dropdownLevel)
-	local button, checked, checkImage, uncheckImage, normalText, width;
-	local maxWidth = 0;
-	local somethingChecked = nil; 
-	if ( not dropdownLevel ) then
-		dropdownLevel = DD.MENU_LEVEL;
-	end
-
-	local listFrame = DD.LISTS[dropdownLevel];
-	listFrame.numButtons = listFrame.numButtons or 0;
-	-- Just redraws the existing menu
-	for i=1, DD.MAXBUTTONS do
-		button = listFrame[i];
-		checked = nil;
-
-		if (button.checked and type(button.checked) == "function") then
-			checked = button.checked(button);
-		end
-
-		if not button.notCheckable and button:IsShown() then	
-			-- If checked show check image
-			checkImage = button.Check;
-			uncheckImage = button.UnCheck;
-			if ( checked ) then
-				somethingChecked = true;
-				local icon = self.Icon;
-				if ( useValue ) then
-					DD.SetText(self, button.value);
-					icon:Hide();
-				else
-					DD.SetText(self, button:GetText());
-					icon:Hide();
-				end
-				button:LockHighlight();
-				checkImage:Show();
-				uncheckImage:Hide();
-			else
-				button:UnlockHighlight();
-				checkImage:Hide();
-				uncheckImage:Show();
-			end
-		end
-
-		if ( button:IsShown() ) then
-			normalText = button:GetFontString();
-			width = normalText:GetWidth() + 35;
-
-			-- Add padding if has and expand arrow or color swatch
-			if ( button.hasArrow ) then
-				width = width + 17;
-			end
-			if ( button.notCheckable ) then
-				width = width - 30;
-			end
-			if ( button.padding ) then
-				width = width + button.padding;
-			end
-			if ( width > maxWidth ) then
-				maxWidth = width;
-			end
-		end
-	end
-
-	if(somethingChecked == nil) then
-		self:SetText(VIDEO_QUALITY_LABEL6);
-	end
-
-end
-
-function DD:RefreshAll(useValue)
-	for dropdownLevel = DD.MENU_LEVEL, 2, -1 do
-		local listFrame = DD.LISTS[dropdownLevel]
-		if ( listFrame:IsShown() ) then
-			self:Refresh(nil, dropdownLevel);
-		end
-	end
-	-- useValue is the text on the dropdown, only needs to be set once
-	self:Refresh(useValue, 1);
-end
 
 function DD:SetIconImage(icon, texture, info)
 	icon:SetTexture(texture);
@@ -767,25 +688,6 @@ function DD:CloseDropDownMenus(level)
 	end
 end
 
-function DD:ClearAll()
-	-- Previous code refreshed the menu quite often and was a performance bottleneck
-	self.selectedID = nil;
-	self.selectedName = nil;
-	self.selectedValue = nil;
-	self:SetText("");
-
-	local button, checkImage, uncheckImage;
-	for i=1, DD.MAXBUTTONS do
-		button = DD.LISTS[DD.MENU_LEVEL][i];
-		button:UnlockHighlight();
-
-		checkImage = button.Check;
-		checkImage:Hide();
-		uncheckImage = button.UnCheck;
-		uncheckImage:Hide();
-	end
-end
-
 function DD:SetDropdownAnchor(point, relativeTo, relativePoint, xOffset, yOffset)
 	self.xOffset = xOffset;
 	self.yOffset = yOffset;
@@ -814,6 +716,9 @@ function DD:GetScrollable()
 	
 	return self.scrollable
 end
+
+
+
 
 
 
@@ -879,6 +784,96 @@ function DD_Frame:JustifyText(justification)
 		text:SetJustifyH("CENTER");
 	end
 end
+
+
+
+
+--------------------------
+-- Easy Functions
+--------------------------
+
+
+local function EasyFunction_OnClick(button, dropdown)
+	local settings = dropdown:GetSettingTable()
+	if not settings or not dropdown.setting then
+		error("couldn't get setting or settings table for easy function dropdown " .. (dropdown:GetParentKey() or dropdown:GetName() or "???"))
+	end
+
+	settings[dropdown.setting] = button.value
+
+	dropdown:CloseDropDownMenus()
+	dropdown:OnSettingSaved()
+end
+local function EasyFunction(self)
+	local settings = self:GetSettingTable()
+	if not settings or not self.setting then
+		error("couldn't get setting or settings table for easy function dropdown " .. (self:GetParentKey() or self:GetName() or "???"))
+	end
+
+	for k, v in self.dataGenerator() do
+		local info = self:CreateInfo()
+
+		self.buttonGenerator(info, k, v)
+
+		if info.checked == nil then
+			info.checked = settings[self.setting] == info.value
+		end
+		info.arg1 = self
+		info.func = EasyFunction_OnClick
+
+		self:AddButton(info)
+	end
+end
+
+function DD_Frame:SetEasyTitlePrepend(easyTitlePrepend)
+	self.easyTitlePrepend = easyTitlePrepend
+end
+
+function DD_Frame:SetEasyFunctions(dataGenerator, buttonGenerator)
+	self.dataGenerator = dataGenerator
+	self.buttonGenerator = buttonGenerator
+
+	self:SetFunction(EasyFunction)
+end
+
+function DD_Frame:ReloadSetting()
+	local settings = self:GetSettingTable()
+
+	if settings
+	and self.setting
+	and self.dataGenerator
+	and self.buttonGenerator
+	then
+		for k, v in self.dataGenerator() do
+			local info = self:CreateInfo()
+			self.buttonGenerator(info, k, v)
+
+			if info.value == settings[self.setting] then
+
+				local text = info.text
+				if self.easyTitlePrepend then
+					text = "|cff666666" .. self.easyTitlePrepend .. ": |r" .. text
+				end
+				self:SetText(text)
+
+				if info.font then
+					local oldFont, size, flags = self.Text:GetFont()
+					self.Text:SetFont(info.font or oldFont, size, flags)
+				end
+
+				return
+			end
+		end
+		
+		self:SetText(settings[self.setting])
+	end
+end
+
+
+
+
+
+
 
 TMW:NewClass("Config_DropDownMenu_Icon", "Config_DropDownMenu"){
 	previewSize = 18,

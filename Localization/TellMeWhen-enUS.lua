@@ -931,7 +931,7 @@ L["UIPANEL_DELGROUP_DESC2"] = "Hold |cff7fffffCtrl|r to bypass confirmation."
 L["CONFIRM_HEADER"] = "Are you sure?"
 
 L["CONFIRM_DELGROUP"] = "Delete Group"
-L["CONFIRM_DELGROUP_DESC"] = "%s will be deleted."
+L["CONFIRM_DELETE_GENERIC_DESC"] = "%s will be deleted."
 
 
 L["UIPANEL_GROUPID"] = "Group ID"
@@ -1129,11 +1129,11 @@ L["UIPANEL_MAIN_DESC"] = "Contains the main settings for the group."
 L["UIPANEL_FONTFACE"] = "Font Face"
 L["UIPANEL_FONT_DESC"] = "Chose the font to be used by the stack text on icons."
 L["UIPANEL_FONT_SIZE"] = "Font Size"
-L["UIPANEL_FONT_SIZE_DESC"] = "Change the size of the font used for stack text on icons. If Masque is used and the set skin has a font size defined, then this value will be ignored."
+L["UIPANEL_FONT_SIZE_DESC2"] = "Change the size of the font."
 L["UIPANEL_FONT_SHADOW"] = "Shadow Offset"
 L["UIPANEL_FONT_SHADOW_DESC"] = "Change the offset amount of the shadow behind the text. Set to zero to disable the shadow."
 L["UIPANEL_FONT_OUTLINE"] = "Font Outline"
-L["UIPANEL_FONT_OUTLINE_DESC"] = "Sets the outline style for the stack text on icons."
+L["UIPANEL_FONT_OUTLINE_DESC2"] = "Sets the outline style of the text display."
 L["OUTLINE_NO"] = "No Outline"
 L["OUTLINE_THIN"] = "Thin Outline"
 L["OUTLINE_THICK"] = "Thick Outline"
@@ -1200,7 +1200,7 @@ L["LAYOUTDIRECTION_SECONDARY_DESC"] = "Make successive rows/columns of icons exp
 L["TEXTLAYOUTS"] = "Text Layouts"
 L["TEXTLAYOUTS_TAB"] = "Text Displays"
 L["TEXTLAYOUTS_HEADER_LAYOUT"] = "Text Layout"
---L["TEXTLAYOUTS_HEADER_DISPLAY"] = "Text Display"
+L["TEXTLAYOUTS_HEADER_DISPLAY"] = "Text Display"
 L["TEXTLAYOUTS_fSTRING"] = "Display %s"
 L["TEXTLAYOUTS_fSTRING2"] = "Display %d: %s"
 L["TEXTLAYOUTS_fSTRING3"] = "Text Display: %s"
@@ -1234,9 +1234,7 @@ L["TEXTLAYOUTS_CHOOSELAYOUT_DESC"] = "Pick the text layout to use for this icon.
 L["TEXTLAYOUTS_ADDLAYOUT"] = "Create New Layout"
 L["TEXTLAYOUTS_ADDLAYOUT_DESC"] = "Create a new text layout that you can configure and apply to your icons."
 L["TEXTLAYOUTS_DELETELAYOUT"] = "Delete Layout"
-L["TEXTLAYOUTS_DELETELAYOUT_DESC"] = [[Click to delete this text layout.
-
-Hold |cff7fffffCtrl|r to bypass confirmation.]]
+L["TEXTLAYOUTS_DELETELAYOUT_DESC2"] = [[Click to delete this text layout.]]
 L["TEXTLAYOUTS_ADDANCHOR"] = "Add Anchor"
 L["TEXTLAYOUTS_ADDANCHOR_DESC"] = [[Click to add another text anchor.]]
 L["TEXTLAYOUTS_DELANCHOR"] = "Delete Anchor"
@@ -1246,17 +1244,15 @@ L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"] = "Are you sure you want to delete th
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM2"] = "|cFFFF2929The following profiles use this layout in their icons. If you delete this layout, they will fall back on using a default layout:|r"
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_LISTING"] = "%s: ~%d |4icon:icons;"
 
-L["TEXTLAYOUTS_USEDBY_HEADER"] = "The following profiles use this layout in their icons:"
-L["TEXTLAYOUTS_USEDBY_NONE"] = "This layout is not used by any TellMeWhen profiles on this WoW account."
+L["TEXTLAYOUTS_USEDBY_HEADER"] = "The following profiles use this layout:"
+L["TEXTLAYOUTS_USEDBY_NONE"] = "This layout is not used by any of your TellMeWhen profiles."
 
 L["TEXTLAYOUTS_LAYOUTDISPLAYS"] = [[Displays:
 %s]]
 L["TEXTLAYOUTS_ADDSTRING"] = "Add Text Display"
 L["TEXTLAYOUTS_ADDSTRING_DESC"] = "Adds a new text display to this text layout."
 L["TEXTLAYOUTS_DELETESTRING"] = "Delete Text Display"
-L["TEXTLAYOUTS_DELETESTRING_DESC"] = [[Deletes this text display from this text layout.
-
-Hold |cff7fffffCtrl|r to bypass confirmation.]]
+L["TEXTLAYOUTS_DELETESTRING_DESC2"] = [[Deletes this text display from this text layout.]]
 L["TEXTLAYOUTS_STRINGUSEDBY"] = "Used %d |4time:times;."
 L["TEXTLAYOUTS_CLONELAYOUT"] = "Clone layout"
 L["TEXTLAYOUTS_CLONELAYOUT_DESC"] = "Click to create a copy of this layout that you can edit separately."
@@ -1297,7 +1293,10 @@ L["TEXTLAYOUTS_SKINAS_DESC"] = [[Choose the Masque element that you wish to skin
 L["TEXTLAYOUTS_SKINAS_NONE"] = "None"
 L["TEXTLAYOUTS_SKINAS_COUNT"] = "Stack Text"
 L["TEXTLAYOUTS_SKINAS_HOTKEY"] = "Binding Text"
-L["TEXTLAYOUTS_DISABLEDBYSKIN"] = "This setting cannot be changed if you have a Masque skin set for this text display."
+
+L["TEXTLAYOUTS_SKINAS_SKINNEDINFO"] = [[This text display is set to be skinned by Masque.
+
+As a result, none of the settings below will have any effect when this layout is used on TellMeWhen icons that are skinned by Masque.]]
 
 L["TEXTLAYOUTS_SETGROUPLAYOUT"] = "Text Layout"
 L["TEXTLAYOUTS_SETGROUPLAYOUT_DESC"] = [[Set the text layout that all icons of this group will use.
@@ -1310,15 +1309,24 @@ L["TEXTLAYOUTS_POSITIONSETTINGS"] = "Position Settings"
 L["TEXTLAYOUTS_RESETSKINAS"] = "The %q setting has been reset for font string %q in order to prevent conflicts with the new setting for font string %q."
 
 
-L["TEXTLAYOUTS_POINT_DESC"] = "The point on the text display that will be anchored to the object"
-L["TEXTLAYOUTS_RELATIVEPOINT_DESC"] = "The point on the object that will be anchored to"
 L["TEXTLAYOUTS_RELATIVETO_DESC"] = "The object that the text will be anchored to"
+L["TEXTLAYOUTS_POINT2"] = "Text Point"
+L["TEXTLAYOUTS_POINT2_DESC"] = "Anchor the %s of the text display to the anchor target."
+L["TEXTLAYOUTS_RELATIVEPOINT2_DESC"] = "Anchor the text display to the %s of the anchor target."
+
+
+L["TEXTLAYOUTS_SIZE_AUTO"] = "Auto"
+L["TEXTLAYOUTS_DEGREES"] = "%d Degrees"
 
 
 L["TEXTLAYOUTS_ERR_ANCHOR_BADINDEX"] = "Layout error: Text display #%d is trying to anchor to text display #%d, but #%d doesn't exist, so text display #%d won't work."
 L["TEXTLAYOUTS_ERR_ANCHOR_BADANCHOR"] = "This text layout doesn't work with this group's display method. Choose a different text layout. (Missing anchor: %s)"
 
 L["UIPANEL_ANCHORNUM"] = "Anchor %d"
+
+L["CONFIRM_DELLAYOUT"] = "Delete Layout"
+
+
 
 -- -------------
 -- CONDITION PANEL

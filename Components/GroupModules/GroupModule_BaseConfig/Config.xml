@@ -3,22 +3,13 @@
 	<Frame name="TellMeWhen_GM_Rename" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<!-- <Size y="50"/> -->
 		<Frames>
-			<EditBox parentKey="Name" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
-				<Size x="545" y="15"/>
+			<EditBox parentKey="Name" inherits="TellMeWhen_InputBoxTemplate" >
+				<Size y="15"/>
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="LEFT" x="9" />
 					<Anchor point="RIGHT" x="-9" />
 				</Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="LEFT">
-							<Anchors>
-								<Anchor point="LEFT" relativePoint="RIGHT" x="19" y="-1"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
 				<Scripts>
 					<OnLoad>						
 						TMW:CInit(self)
@@ -27,7 +18,7 @@
 						self:SetSetting("Name")
 						
 						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
-							return TMW:CleanString(value)
+							return strtrim(value)
 						end)
 
 					</OnLoad>
@@ -73,7 +64,7 @@
 						if TMW:Group_HasIconData(group) then
 							TMW.IE:ShowConfirmation(
 								TMW.L["CONFIRM_DELGROUP"],
-								TMW.L["CONFIRM_DELGROUP_DESC"]:format(group:GetGroupName()),
+								TMW.L["CONFIRM_DELETE_GENERIC_DESC"]:format(group:GetGroupName()),
 								function()
 									TMW:Group_Delete(group)
 								end

@@ -6,10 +6,6 @@
 			<EditBox parentKey="EditBox" name="$parentEditBox" inherits="TellMeWhen_InputBoxTemplate" multiline="true" autoFocus="false">
 				<Size y="20"/>
 
-				<KeyValues>
-					<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
-				</KeyValues>
-
 				<Anchors>
 					<Anchor point="TOPLEFT" x="5"/>
 					<Anchor point="RIGHT" x="-20"/>
@@ -32,7 +28,7 @@
 				
 				<Scripts>
 					<OnLoad>
-						TMW:CInit(self)
+						TMW:CInit(self, "Config_EditBox_DogTags")
 
 						self:SetLabel("|cFFFF5050" .. TMW.L["ANN_EDITBOX_WARN"], nil)
 						self:SetTexts(TMW.L["ANN_EDITBOX"], TMW.L["ANN_EDITBOX_DESC"])
@@ -129,10 +125,6 @@
 					</Frame>
 
 					<EditBox parentKey="WhisperTarget" name="$parentWhisperTarget" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
-						<KeyValues>
-							<KeyValue key="tmwClass" type="string" value="Config_EditBox_DogTags"/>
-						</KeyValues>
-
 						<Size x="135" y="15"/>
 						<Anchors>
 							<Anchor point="LEFT" x="30"/>
@@ -148,7 +140,7 @@
 						</Layers>
 						<Scripts>
 							<OnLoad>
-								TMW:CInit(self)
+								TMW:CInit(self, "Config_EditBox_DogTags")
 
 								self:SetTexts(TMW.L["ANN_WHISPERTARGET"], TMW.L["ANN_WHISPERTARGET_DESC"])
 								self:SetSetting("Location")

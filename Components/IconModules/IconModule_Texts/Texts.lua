@@ -34,7 +34,7 @@ TMW.TEXT = TEXT
 
 TEXT.MasqueSkinnableTexts = {
 	-- A list of available SkinAs settings,
-	-- paired with their localized name (for easy use in Ace3ConfigDialog dropdown)
+	-- paired with their localized name (for easy use in dropdowns)
 	
 	[""] = L["TEXTLAYOUTS_SKINAS_NONE"],
 	

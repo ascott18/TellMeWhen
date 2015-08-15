@@ -229,6 +229,8 @@ function EVENTS:LoadEventID(eventID)
 		frame:SetChecked(false)
 	end
 
+	eventFrame:SetChecked(true)
+
 
 	for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 		EventHandler.ConfigContainer:Hide()
@@ -253,9 +255,6 @@ function EVENTS:LoadEventID(eventID)
 		EventHandler:LoadSettingsForEventID(eventID)
 		EVENTS:LoadEventSettings()
 	end
-
-
-	eventFrame:SetChecked(true)
 end
 
 function EVENTS:LoadEventSettings()

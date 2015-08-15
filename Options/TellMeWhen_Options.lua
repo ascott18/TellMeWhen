@@ -730,7 +730,7 @@ end
 
 ---------- Interface ----------
 
-function IE:PositionPanels(parentPageName, panelList)	
+function IE:PositionPanels(parentPageName, panelList)
 	TMW:SortOrderedTables(panelList)
 	
 
@@ -745,9 +745,9 @@ function IE:PositionPanels(parentPageName, panelList)
 	local IE_FL = IE:GetFrameLevel()
 
 	for i, panelInfo in ipairs(panelList) do
-		local frameName = panelInfo:GetFrameName()
 
 		if not panelInfo.columnIndex or panelInfo.columnIndex < 1 or panelInfo.columnIndex > #panelColumns then	
+			local frameName = panelInfo:GetFrameName()
 			error("columnIndex out of bounds for panel " .. frameName)
 		end
 		
@@ -766,6 +766,8 @@ function IE:PositionPanels(parentPageName, panelList)
 			panel:Show()
 			panel:SetFrameLevel(IE_FL + 3)
 
+			-- Panel made be hidden in this function, so we check after calling
+			-- to see if the panel is still shown.
 			panel:Setup(panelInfo)
 
 			if panel:IsShown() then
@@ -963,6 +965,32 @@ TMW.C.LuaConfigPanelInfo {
 		self.constructor = nil
 
 		return panel
+	end,
+}
+
+TMW:NewClass("StaticConfigPanelInfo", "ConfigPanelInfo"){
+	OnNewInstance_Static = function(self, order, frameKey)
+		TMW:ValidateType(2, "LuaConfigPanelInfo:New()", order, "number")
+		TMW:ValidateType(3, "StaticConfigPanelInfo:New()", frameKey, "string")
+
+		self.order = order
+		self.frameKey = frameKey
+	end,
+
+	GetFrameName = function(self)
+		error("don't try to get the frame name of static config panels")
+	end,
+
+	GetPanel = function(self, panelColumn)
+		if not self.panel then
+			self.panel = panelColumn[self.frameKey]
+		end
+
+		if not self.panel then
+			error("Couldnt find static config panel with key " .. self.frameKey)
+		end
+
+		return self.panel
 	end,
 }
 
@@ -1368,7 +1396,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 				-- Only look at children that have their top below the parent.
 				-- Otherwise, we'll get weird things for the highest value because
 				-- of things like header font strings.
-				if childTop < top then
+				if childTop <= top then
 					lowest = min(lowest, (child:GetBottom() + bottomInset) * child:GetEffectiveScale())
 					highest = max(highest, childTop)
 				end
@@ -1942,6 +1970,8 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 	OnEnterPressed = function(self)
 		if self:IsMultiLine() and self.newlineOnEnter then
 			self:Insert("\n")
+		elseif self:IsMultiLine() and IsModifierKeyDown() then
+			self:Insert("\n")
 		else
 			self:ClearFocus()
 		end
@@ -2030,7 +2060,7 @@ TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
 		set('208CD6', tokens.TOKEN_SPECIAL)
 		set('888888', tokens.TOKEN_STRING)
 		set('FF8040', tokens.TOKEN_NUMBER)
-		set('608B4E', tokens.TOKEN_COMMENT_SHORT, tokens.TOKEN_COMMENT_LONG)
+		set('207128', tokens.TOKEN_COMMENT_SHORT, tokens.TOKEN_COMMENT_LONG)
 		set('208CD6', "+","-","/","*","%","==","<","<=",">",">=","~=","and","or","not","..","=")
 		set('ffffff', "(",")","{","}","[","]",",",".",":")
 		set('f95f53', "function")

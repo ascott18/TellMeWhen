@@ -70,7 +70,7 @@ end
 --  })
 -- 
 --   -- Accessing supplementalData:
---  panel:CScriptAdd("PanelSetup", function(panel, panelInfo)
+--  panel:CScriptAdd("PanelSetup", function(panel, panel, panelInfo)
 --    local supplementalData = panelInfo.supplementalData
 --    panel:SetTitle(supplementalData.text)
 --  end)

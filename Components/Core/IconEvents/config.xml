@@ -137,6 +137,8 @@
 					TMW.IE:SaveSettings()
 					
 					TMW.EVENTS:LoadEventID(self:GetID())
+
+					self:OnSettingSaved()
 				end
 			</OnClick>
 			<OnDisable>
@@ -674,7 +676,7 @@
 		
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString parentKey="EventListHeader" inherits="GameFontNormalLarge" justifyH="LEFT" text="">
+				<FontString parentKey="EventListHeader" inherits="GameFontNormalLarge" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="BOTTOM" relativeKey="$parent.AddEvent" relativePoint="TOP" y="1"/>
 					</Anchors>

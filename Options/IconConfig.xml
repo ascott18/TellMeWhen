@@ -154,7 +154,7 @@
 					self.Name:SetTooltip(title, text)
 				end
 
-				self:CScriptAdd("PanelSetup", function(self, panelInfo)
+				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 					local supplementalData = panelInfo.supplementalData
 
 					local title = TMW.L["ICONMENU_CHOOSENAME2"]

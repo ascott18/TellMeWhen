@@ -36,8 +36,8 @@
 <!-- <Script file="IconModule_PowerBar_Overlay\Config.lua"/> -->
 
 
-<Include file="IconModule_Texts\Config.xml"/>
 <Script file="IconModule_Texts\Config.lua"/>
+<Include file="IconModule_Texts\Config.xml"/>
 
 
 <Include file="IconModule_Backdrop\Config.xml"/>
