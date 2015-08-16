@@ -268,6 +268,8 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 	end,
 
 	OnHide = function(self)
+		local parent = self:GetParent()
+		
 		if parent.draggingFrame then
 			self:OnDragStop()
 		end

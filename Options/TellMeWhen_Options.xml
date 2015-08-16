@@ -1545,17 +1545,17 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetText(TMW.L["UNDO_ICON"])
+						self:SetText(TMW.L["UNDO"])
 
 						local textfunc = function()
-							local ret = TMW.L["UNDO_ICON_DESC"]
+							local ret = TMW.L["UNDO_DESC"]
 							local binding = GetBindingKey("TELLMEWHEN_ICONEDITOR_UNDO")
 							if binding then
 								ret = ret .. "\r\n\r\n(|cff7fffff" .. binding .. "|r)"
 							end
 							return ret
 						end
-						TMW:TT(self, "UNDO_ICON", textfunc, nil, 1)
+						TMW:TT(self, "UNDO", textfunc, nil, 1)
 
 						self:SetWidth(self:GetTextWidth()+15)
 						self:SetFrameLevel(self:GetFrameLevel()+2)
@@ -1574,17 +1574,17 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetText(TMW.L["REDO_ICON"])
+						self:SetText(TMW.L["REDO"])
 
 						local textfunc = function()
-							local ret = TMW.L["REDO_ICON_DESC"]
+							local ret = TMW.L["REDO_DESC"]
 							local binding = GetBindingKey("TELLMEWHEN_ICONEDITOR_REDO")
 							if binding then
 								ret = ret .. "\r\n\r\n(|cff7fffff" .. binding .. "|r)"
 							end
 							return ret
 						end
-						TMW:TT(self, "REDO_ICON", textfunc, nil, 1)
+						TMW:TT(self, "REDO", textfunc, nil, 1)
 
 						self:SetWidth(self:GetTextWidth()+15)
 						self:SetFrameLevel(self:GetFrameLevel()+2)

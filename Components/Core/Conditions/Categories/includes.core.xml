@@ -5,6 +5,8 @@
 <Script file="Spells.lua"/>
 <Script file="BuffsDebuffs.lua"/>
 
+<Script file="Talents.lua"/>
+<Script file="Location.lua"/>
 <Script file="PlayerAttributes.lua"/>
 <Script file="UnitAttributes.lua"/>
 

@@ -22,7 +22,7 @@ local CI = TMW.CI
 
 
 
-local TabGroup = IE:RegisterTabGroup("GROUP", TMW.L["GROUP"], 2, function(tabGroup)
+local TabGroup = IE:RegisterTabGroup("GROUP", L["GROUP"], 2, function(tabGroup)
 	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
 
 	local group = CI.group
@@ -34,6 +34,7 @@ local TabGroup = IE:RegisterTabGroup("GROUP", TMW.L["GROUP"], 2, function(tabGro
 		IE.Header:SetText(titlePrepend .. " - " .. name)
 	end
 end)
+TabGroup:SetTexts(L["GROUP"], L["TABGROUP_GROUP_DESC"])
 TabGroup:SetDisabledPageKey("GroupNotLoaded")
 TabGroup:SetChildrenEnabled(false)
 
@@ -204,6 +205,7 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 
 		self.textures[i]:Show()
 		self.textures[i]:SetDesaturated(false)
+		self.textures[i]:SetAlpha(1)
 
 		return self.textures[i]
 	end,
@@ -257,6 +259,7 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 							tex:SetTexCoord(0.07, 0.07, 0.07, 0.93, 0.93, 0.07, 1000, -1000) -- topleft triangle of the square
 							tex:SetTexture(texture)
 							tex:SetDesaturated(not gs.PrimarySpec)
+							tex:SetAlpha(gs.PrimarySpec and 1 or 0.5)
 						end
 
 						local spec2 = GetSpecialization(false, false, 2)
@@ -268,6 +271,7 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 							tex2:SetTexCoord(1000, -1000, 0.07, 0.93, 0.93, 0.07, 0.93, 0.93) -- bottomright triangle of the square
 							tex2:SetTexture(texture)
 							tex2:SetDesaturated(not gs.SecondarySpec)
+							tex2:SetAlpha(gs.SecondarySpec and 1 or 0.5)
 						end
 					end
 				end

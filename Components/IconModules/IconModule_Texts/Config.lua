@@ -46,7 +46,7 @@ if not TEXT then return end
 -------------------------------
 
 local Tab = IE:RegisterTab("MAIN", "TEXTLAYOUTS", "TextLayouts", 100)
-Tab:SetTexts(L["TEXTLAYOUTS"], nil)
+Tab:SetTexts(L["TEXTLAYOUTS"], L["TEXTLAYOUTS_DESC"])
 TEXT.LayoutTab = Tab
 
 local HistorySet = TMW.C.HistorySet:New("TEXTLAYOUTS")

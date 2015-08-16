@@ -210,7 +210,6 @@ function EVENTS:LoadConfig()
 	-- hide all handler configuration panels
 	if not didLoad then
 		EVENTS:ShowHandlerPickerButtons()
-		--IE.Pages.Events.HelpText:Show()
 	end
 
 	EVENTS:SetTabText()
@@ -220,28 +219,27 @@ function EVENTS:LoadEventID(eventID)
 
 	TMW.IE:SaveSettings()
 	
-	-- Loads the configuration for the specified eventID
-	local eventFrame = eventID and EVENTS.EventHandlerFrames.frames[eventID]
-	
 	EVENTS.currentEventID = eventID ~= 0 and eventID or nil
 
 	for i, frame in ipairs(EVENTS.EventHandlerFrames.frames) do
 		frame:SetChecked(false)
 	end
 
-	eventFrame:SetChecked(true)
-
 
 	for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 		EventHandler.ConfigContainer:Hide()
 	end
 	EVENTS.EventSettingsContainer:Hide()
-	--IE.Pages.Events.HelpText:Show()
 
+
+	local eventFrame = eventID and EVENTS.EventHandlerFrames.frames[eventID]
 
 	if not eventFrame or eventID == 0 or not eventFrame:IsShown() then
 		return
 	end
+
+	eventFrame:SetChecked(true)
+	
 
 	EVENTS:HidePickerButtons()
 	

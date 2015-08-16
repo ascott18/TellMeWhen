@@ -22,7 +22,7 @@ local CI = TMW.CI
 
 
 
-local TabGroup = TMW.IE:RegisterTabGroup("ICON", TMW.L["ICON"], 1, function(tabGroup)
+local TabGroup = TMW.IE:RegisterTabGroup("ICON", L["ICON"], 1, function(tabGroup)
 	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
 	local icon = CI.icon
 
@@ -59,6 +59,7 @@ local TabGroup = TMW.IE:RegisterTabGroup("ICON", TMW.L["ICON"], 1, function(tabG
 		IE.icontexture:SetTexture(icon.attributes.texture)
 	end
 end)
+TabGroup:SetTexts(L["ICON"], L["TABGROUP_ICON_DESC"])
 TabGroup:SetDisabledPageKey("IconNotLoaded")
 TabGroup:SetChildrenEnabled(false)
 

@@ -128,6 +128,7 @@ end)
 TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event, currentTab, oldTab)
 	if oldTab == CNDT.DynamicConditionTab and currentTab ~= CNDT.DynamicConditionTab then
 		CNDT.CurrentConditionSet = nil
+		TMW.IE:RefreshTabs()
 	end
 end)
 

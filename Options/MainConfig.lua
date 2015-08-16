@@ -22,11 +22,12 @@ local CI = TMW.CI
 
 
 
-local TabGroup = IE:RegisterTabGroup("MAIN", TMW.L["MAIN"], 3, function(tabGroup)
+local TabGroup = IE:RegisterTabGroup("MAIN", L["MAIN"], 3, function(tabGroup)
 	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
 
 	IE.Header:SetText(titlePrepend)
 end)
+TabGroup:SetTexts(L["MAIN"], L["TABGROUP_MAIN_DESC"])
 
 
 

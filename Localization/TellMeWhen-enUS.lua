@@ -1103,10 +1103,10 @@ L["ALPHA"] = "Opacity"
 
 L["RESET_ICON"] = "Reset"
 L["RESET_ICON_DESC"] = "Resets all of this icon's settings to default values."
-L["UNDO_ICON"] = "Undo"
-L["UNDO_ICON_DESC"] = "Undo the last change made to this icon's settings."
-L["REDO_ICON"] = "Redo"
-L["REDO_ICON_DESC"] = "Redo the last change made to this icon's settings."
+L["UNDO"] = "Undo"
+L["UNDO_DESC"] = "Undo the last change made to these settings."
+L["REDO"] = "Redo"
+L["REDO_DESC"] = "Redo the last change made to these settings."
 L["BACK_IE"] = "Back"
 L["BACK_IE_DESC"] = "Load the last icon that was edited\r\n\r\n%s |T%s:0|t."
 L["FORWARDS_IE"] = "Forwards"
@@ -1186,6 +1186,7 @@ L["LAYOUTDIRECTION_SECONDARY_DESC"] = "Make successive rows/columns of icons exp
 
 
 L["TEXTLAYOUTS"] = "Text Layouts"
+L["TEXTLAYOUTS_DESC"] = "Define text layouts that can be applied to any of your icons."
 L["TEXTLAYOUTS_TAB"] = "Text Displays"
 L["TEXTLAYOUTS_HEADER_LAYOUT"] = "Text Layout"
 L["TEXTLAYOUTS_HEADER_DISPLAY"] = "Text Display"
@@ -1666,6 +1667,8 @@ L["CNDTCAT_RESOURCES"] = "Resources"
 L["CNDTCAT_CURRENCIES"] = "Currencies"
 L["CNDTCAT_ARCHFRAGS"] = "Archaeology Fragments"
 L["CNDTCAT_MISC"] = "Miscellaneous"
+L["CNDTCAT_TALENTS"] = "Class and Talents"
+L["CNDTCAT_LOCATION"] = "Group and Location"
 
 L["CONDITIONPANEL_MOUNTED"] = "Mounted"
 L["CONDITIONPANEL_EQUALS"] = "Equals"
@@ -1768,7 +1771,7 @@ L["ICONGROUP"] = "Icon: %s (Group: %s)"
 L["fGROUP"] = "Group: %s"
 L["fICON"] = "Icon: %s"
 L["ICON"] = "Icon"
-L["GROUP"] = "Group" --TODO: add translations for this to all locales
+L["GROUP"] = "Group"
 L["DISABLED"] = "Disabled"
 L["COPYPOSSCALE"] = "Copy position/scale only"
 L["COPYGROUP"] = "Copy Group"
@@ -1776,6 +1779,12 @@ L["OVERWRITEGROUP"] = "|cFFFF5959Overwrite|r Group: %s"
 L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
 L["MAKENEWGROUP_PROFILE"] = "|cff59ff59Create|r New Profile Group"
 L["MAKENEWGROUP_GLOBAL"] = "|cff59ff59Create|r New |cff00c300Global|r Group"
+
+
+L["TABGROUP_ICON_DESC"] = "Configure TellMeWhen Icons."
+L["TABGROUP_GROUP_DESC"] = "Configure TellMeWhen Groups."
+L["TABGROUP_MAIN_DESC"] = "Configure general TellMeWhen settings."
+
 
 L["CLICK_TO_EDIT"] = [[|cff7fffffClick|r to edit.]]
 

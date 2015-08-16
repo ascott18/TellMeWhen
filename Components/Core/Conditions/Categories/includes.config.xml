@@ -8,6 +8,7 @@
 <Script file="BuffsDebuffs_config.lua"/>
 
 -->
+<Script file="Talents_config.lua"/>
 <Script file="PlayerAttributes_config.lua"/>
 <Script file="UnitAttributes_config.lua"/>
 
