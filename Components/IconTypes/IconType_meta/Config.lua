@@ -164,7 +164,7 @@ function Config:SwapIcons(id1, id2)
 	
 	Icons[id1], Icons[id2] = Icons[id2], Icons[id1]
 	
-	TMW.Config:LoadConfig()
+	Config:LoadConfig()
 end
 
 

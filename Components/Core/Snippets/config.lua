@@ -348,10 +348,8 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	import.codesnippet_global = true
 	import.codesnippet_profile = true
 	
-	if editbox.IsImportExportWidget then
-		local info = editbox.obj.userdata
-		
-		export.codesnippet = getSnippetSettings(info)
+	if IE.CurrentTab == SnippetsTab and SNIPPETS.selectedID > 0 then
+		export.codesnippet = TMW.db[SNIPPETS.selectedDomain].CodeSnippets[SNIPPETS.selectedID]
 	end
 end)
 

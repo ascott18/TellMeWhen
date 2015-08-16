@@ -14,7 +14,7 @@
 				
 						self:RegisterForDrag("LeftButton", "RightButton")
 						self:SetTexts(TMW.L["CHOOSEICON"], TMW.L["CHOOSEICON_DESC"])
-						self:SetFunction(TMW.Config.IconMenu)
+						self:SetFunction(TMW.Types.meta.Config.IconMenu)
 
 						self:SetPreviewSize(21)
 					</OnLoad>

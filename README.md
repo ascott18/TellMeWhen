@@ -8,7 +8,7 @@ External Links
 
 A full description, downloads, and other resources for the AddOn may be found at the following locations:
 
-* [Curse](http://wow.curse.com/downloads/wow-addons/details/tellmewhen.aspx) (main public page)
+* [Curse](http://www.curse.com/addons/wow/tellmewhen) (main public page)
 * [CurseForge](http://wow.curseforge.com/addons/tellmewhen/) (development site)
 
 Packaged versions that include all libraries and are ready to be installed in WoW can be found [here](http://wow.curseforge.com/addons/tellmewhen/files/).

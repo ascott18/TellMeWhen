@@ -78,7 +78,8 @@ function CNDT:LoadConfig(conditionSetName)
 	end
 		
 	if n > 0 then
-		CNDT:CreateGroups(n)
+		-- We create an extra so we can anchor the AddCondition button to it.
+		CNDT:CreateGroups(n+1)
 
 		for i in TMW:InNLengthTable(CNDT:GetSettings()) do
 			CNDT[i]:Show()
