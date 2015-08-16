@@ -246,7 +246,9 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 		SortPriorities[self:GetID()] = otherSettings
 		SortPriorities[other:GetID()] = selfSettings
 
-		self:OnSettingSaved()
+		-- Don't notify of a setting save here - it will cause the panel to be hidden,
+		-- which in turn will prevent OnDragStop from firing. We will call this when the dragging stops.
+		--self:OnSettingSaved()
 		IconPosition_Sortable:LoadConfig()
 	end,
 
@@ -264,6 +266,12 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 		local parent = self:GetParent()
 		
 		parent.draggingFrame = self
+	end,
+
+	OnHide = function(self)
+		if parent.draggingFrame then
+			self:OnDragStop()
+		end
 	end,
 
 	OnDragStop = function(self)

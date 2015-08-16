@@ -646,8 +646,6 @@ function IE:OnUpdate()
 	if tabGroup then
 
 		IE.icontexture:SetTexture(nil)
-		IE.BackButton:Hide()
-		IE.ForwardsButton:Hide()
 
 		IE.Header:SetText(nil)
 		IE.Header:SetPoint("LEFT", IE.icontexture, "RIGHT", 4, 0)
@@ -3856,42 +3854,6 @@ TMW:NewClass("HistorySet") {
 		IE.CurrentTab:GetPage():OnSettingSaved()
 	end
 }
-
-
-
-
- 
-
-
----------- Back/Fowards ----------
-function IE:DoBackForwards(direction)
-	if not IE.history[IE.historyState + direction] then return end -- not valid, so don't try
-
-	IE.historyState = IE.historyState + direction
-
-	TMW.DD:CloseDropDownMenus()
-	IE:LoadIcon(nil, IE.history[IE.historyState], true)
-
-	IE:BackFowardsChanged()
-end
-
-function IE:BackFowardsChanged()
-	if IE.historyState - 1 < 1 then
-		IE.BackButton:Disable()
-		IE.CanBack = false
-	else
-		IE.BackButton:Enable()
-		IE.CanBack = true
-	end
-
-	if IE.historyState + 1 > #IE.history then
-		IE.ForwardsButton:Disable()
-		IE.CanFowards = false
-	else
-		IE.ForwardsButton:Enable()
-		IE.CanFowards = true
-	end
-end
 
 
 

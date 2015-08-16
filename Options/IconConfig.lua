@@ -57,10 +57,6 @@ local TabGroup = TMW.IE:RegisterTabGroup("ICON", TMW.L["ICON"], 1, function(tabG
 		end
 
 		IE.icontexture:SetTexture(icon.attributes.texture)
-		IE.BackButton:Show()
-		IE.ForwardsButton:Show()
-
-		IE.Header:SetPoint("LEFT", IE.ForwardsButton, "RIGHT", 4, 0)
 	end
 end)
 TabGroup:SetDisabledPageKey("IconNotLoaded")
@@ -89,7 +85,13 @@ MainTab:SetHistorySet(HistorySet)
 
 
 
-function IE:LoadIcon(isRefresh, icon, isHistoryChange)
+
+
+----------------------
+-- Icon Loading
+----------------------
+
+function IE:LoadIcon(isRefresh, icon)
 	if icon ~= nil then
 
 		local ic_old = CI.icon
@@ -99,21 +101,6 @@ function IE:LoadIcon(isRefresh, icon, isHistoryChange)
 			IE:SaveSettings()
 			
 			CI.icon = icon
-
-			if IE.history[#IE.history] ~= icon and not isHistoryChange then
-				-- if we are using an old history point (i.e. we hit back a few times and then loaded a new icon),
-				-- delete all history points from the current one forward so that we dont jump around wildly when backing and forwarding
-				for i = IE.historyState + 1, #IE.history do
-					IE.history[i] = nil
-				end
-
-				IE.history[#IE.history + 1] = icon
-
-				-- set the history state to the latest point
-				IE.historyState = #IE.history
-				-- notify the back and forwards buttons that there was a change so they can :Enable() or :Disable()
-				IE:BackFowardsChanged()
-			end
 			
 			if ic_old ~= CI.icon then
 				IE.Pages.IconMain.PanelsLeft.ScrollFrame:SetVerticalScroll(0)
@@ -150,7 +137,12 @@ end)
 
 
 
----------- Icon Utilities ----------
+
+
+
+----------------------
+-- Icon Utilities
+----------------------
 function TMW:GetIconMenuText(ics)
 	local Type = ics.Type or ""
 	local typeData = TMW.Types[Type]
@@ -199,7 +191,12 @@ end
 
 
 
----------- Dropdowns ----------
+
+
+
+----------------------
+-- Dropdowns
+----------------------
 function IE:IconType_DropDown()
 	for _, typeData in ipairs(TMW.OrderedTypes) do
 		if CI.ics.Type == typeData.type or not TMW.get(typeData.hidden) then
@@ -272,7 +269,12 @@ end
 
 
 
----------- Tooltips ----------
+
+
+
+----------------------
+-- Tooltips
+----------------------
 --local cachednames = {}
 function IE:GetRealNames(Name)
 	-- gets a table of all of the spells names in the name box in the IE. Splits up equivalancies and turns IDs into names
@@ -388,7 +390,13 @@ end
 
 
 
----------- Drag handling ----------
+
+
+
+----------------------
+-- Drag handling
+----------------------
+
 function IE:SpellItemToIcon(icon, func, arg1)
 	if not icon.IsIcon then
 		return
