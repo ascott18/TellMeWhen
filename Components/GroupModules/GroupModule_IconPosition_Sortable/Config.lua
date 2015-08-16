@@ -20,7 +20,6 @@ local print = TMW.print
 local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
 
 
--- TODO: ICON SORTING THINGS GET STUCK TO THE CURSOR SOMETIMES WHEN DRAGGING
 
 ---------------------
 -- Layout Direction

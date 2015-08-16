@@ -1300,17 +1300,17 @@ end})
 --    nil
 --  )
 -- 
---  -- From IconTypes/IconType_multistate:
+--  -- From IconTypes/IconType_reactive:
 --  icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
---    icon.UnAlpha,
---    GetActionTexture(Slot) or "Interface\\Icons\\INV_Misc_QuestionMark",
+--    icon.Alpha,
+--    GetSpellTexture(iName),
 --    start, duration,
 --    charges, maxCharges,
 --    stack, stack,
---    spellID,
+--    iName,
 --    inrange,
---    nomana
---  )
+--    nomana			
+-- )
 function Icon.SetInfo(icon, signature, ...)
 	SetInfoFuncs[signature](icon, ...)
 end

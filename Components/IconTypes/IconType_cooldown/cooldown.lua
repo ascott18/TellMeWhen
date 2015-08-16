@@ -67,14 +67,20 @@ Type:RegisterIconDefaults{
 	IgnoreRunes				= false,
 }
 
+TMW:RegisterUpgrade(80004, {
+	icon = function(self, ics)
+		-- Multistate cooldown icon type has been removed (no longer needed)
+		-- We added a flag to icon settings that used to be multistate cooldowns in case an emergency rollback was needed.
+		-- It never ended up being needed, so now we can remove this flag.
+		ics.wasmscd = nil
+	end,
+})
 TMW:RegisterUpgrade(72022, {
 	icon = function(self, ics)
 		-- Multistate cooldown icon type has been removed (no longer needed)
 		if ics.Type == "multistate" then
 			ics.Type = "cooldown"
 			ics.IgnoreRunes = false -- mscd icons didnt have this setting. Make sure it is disabled.
-			ics.wasmscd = true -- flag this so we can undo this change if we need to. TODO: remove this flag from all icons when we're sure this is an OK change.
-			-- also TODO: remove static formats and localization strings for things that were used for mscd.
 		end
 	end,
 })

@@ -433,8 +433,8 @@ if TMW.C.IconType then
 end
 TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 	-- Register the WCSP event on IconType itself.
-	-- God, this is a awful hack.
-	-- TODO: Make this not a hack.
+	-- This allows it to be available to all icon types, 
+	-- since it is independent of all modules.
 	if class.className == "IconType" then
 		class:RegisterIconEvent(2, "WCSP", {
 			category = L["EVENT_CATEGORY_CONDITION"],

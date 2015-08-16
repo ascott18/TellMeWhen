@@ -342,11 +342,6 @@ L["ICONMENU_RUNEOFPOWER_DESC"] = [[Tracks the runes from the %s talent.]]
 L["ICONMENU_MUSHROOMS"] = "%s"
 L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 
-L["ICONMENU_MULTISTATECD"] = "Multi-state Ability"
-L["ICONMENU_MULTISTATECD_DESC"] = [[Tracks an ability with multiple states.
-
-This should be used when you want to track the multiple states and textures of a cooldown such as %s or %s.]]
-
 
 L["ICONMENU_UNITCOOLDOWN"] = "Unit Cooldown"
 L["ICONMENU_UNITCOOLDOWN_DESC"] = [[Tracks the cooldowns of someone else.
@@ -1991,7 +1986,6 @@ L["SUG_DISPELTYPES"] = "Dispel Types"
 L["SUG_BUFFEQUIVS"] = "Buff Equivalencies"
 L["SUG_DEBUFFEQUIVS"] = "Debuff Equivalencies"
 L["SUG_OTHEREQUIVS"] = "Other Equivalencies"
-L["SUG_MSCDONBARS"] = "Valid multi-state cooldowns"
 L["SUG_PLAYERSPELLS"] = "Your spells"
 L["SUG_CLASSSPELLS"] = "Known PC/pet spells"
 L["SUG_NPCAURAS"] = "Known NPC buffs/debuffs"

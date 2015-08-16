@@ -27,7 +27,6 @@ L["ICONMENU_RUNEOFPOWER_DESC"]          = L["ICONMENU_RUNEOFPOWER_DESC"]        
 L["ICONMENU_MUSHROOMS"]                 = L["ICONMENU_MUSHROOMS"]                   :format(GetSpellInfo(88747))
 L["ICONMENU_MUSHROOMS_DESC"]            = L["ICONMENU_MUSHROOMS_DESC"]              :format(Spell(88747))
 L["ICONMENU_UNITCOOLDOWN_DESC"]         = L["ICONMENU_UNITCOOLDOWN_DESC"]           :format(Spell(42292), GetSpellInfo(42292))
-L["ICONMENU_MULTISTATECD_DESC"]         = L["ICONMENU_MULTISTATECD_DESC"]           :format(Spell(77606), Spell(119898))
 L["CLEU_DAMAGE_SHIELD_DESC"]            = L["CLEU_DAMAGE_SHIELD_DESC"]              :format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]     = L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]       :format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_SPELL_STOLEN_DESC"]             = L["CLEU_SPELL_STOLEN_DESC"]               :format(Spell(30449))
