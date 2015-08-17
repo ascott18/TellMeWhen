@@ -1591,6 +1591,16 @@ L["ENCOUNTERTOCHECK_DESC_BIGWIGS"] = "Enter all or part of the name of the encou
 L["ENCOUNTERTOCHECK_DESC_DBM"] = "Enter all or part of the name of the encounter. This is displayed in chat on pull/wipe/kill, and also in the Encounter Journal."
 
 
+L["CONDITIONPANEL_LOC_CONTINENT"] = "Continent"
+L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_CONTINENT"] = "Choose Continents..."
+L["CONDITIONPANEL_LOC_ZONE"] = "Zone"
+L["CONDITIONPANEL_LOC_ZONE_LABEL"] = "Enter Zones to check"
+L["CONDITIONPANEL_LOC_ZONE_DESC"] = "Enter the zones that you would like to check for. Separate multiple zones with semicolons."
+L["CONDITIONPANEL_LOC_SUBZONE"] = "Sub-Zone"
+L["CONDITIONPANEL_LOC_SUBZONE_LABEL"] = "Enter Sub-Zones to check"
+L["CONDITIONPANEL_LOC_SUBZONE_DESC"] = "Checks your current sub-zone. Note that sometimes, you may not be in a aub-zone."
+L["CONDITIONPANEL_LOC_SUBZONE_BOXDESC"] = "Enter the sub-zones that you would like to check for. Separate multiple sub-zones with semicolons."
+
 
 L["AURA"] = "Aura"
 L["SEAL"] = "Seal"

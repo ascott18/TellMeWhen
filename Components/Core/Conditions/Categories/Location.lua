@@ -27,7 +27,7 @@ local IsInInstance, GetInstanceDifficulty, GetInstanceInfo =
 	  IsInInstance, GetInstanceDifficulty, GetInstanceInfo
 
 
-local ConditionCategory = CNDT:GetCategory("LOCATION", 1.4, L["CNDTCAT_LOCATION"], true, false)
+local ConditionCategory = CNDT:GetCategory("LOCATION", 1.5, L["CNDTCAT_LOCATION"], false, true)
 
 
 
@@ -261,3 +261,132 @@ ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 })
 
 
+
+ConditionCategory:RegisterSpacer(10)
+
+
+
+ConditionCategory:RegisterCondition(13,   "LOC_CONTINENT", {
+	text = L["CONDITIONPANEL_LOC_CONTINENT"],
+
+	unit = false,
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_CONTINENT"],
+	bitFlags = (function()
+		local t = GetContinentMaps()
+		for continentID in pairs(t) do
+			t[continentID] = GetContinentName(continentID)
+		end
+
+		return t
+	end)(),
+
+	nooperator = true,
+	icon = "Interface\\Icons\\inv_misc_map02",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetCurrentMapContinent = GetCurrentMapContinent,
+	},
+	funcstr = [[BITFLAGSMAPANDCHECK( GetCurrentMapContinent() )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("WORLD_MAP_UPDATE")
+	end,
+})
+
+ConditionCategory:RegisterCondition(14,   "LOC_ZONE", {
+	text = L["CONDITIONPANEL_LOC_ZONE"],
+
+	min = 0,
+	max = 1,
+	unit = false,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_LOC_ZONE_LABEL"], L["CONDITIONPANEL_LOC_ZONE_DESC"])
+	end,
+	useSUG = "zone",
+	allowMultipleSUGEntires = true,
+
+	nooperator = true,
+	formatter = TMW.C.Formatter.BOOL,
+	icon = "Interface\\Icons\\inv_misc_map09",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetZoneText = GetZoneText,
+	},
+	funcstr = [[BOOLCHECK(MULTINAMECHECK(  GetZoneText()  ))]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("ZONE_CHANGED"),
+			ConditionObject:GenerateNormalEventString("ZONE_CHANGED_NEW_AREA")
+	end,
+})
+
+ConditionCategory:RegisterCondition(15,   "LOC_SUBZONE", {
+	text = L["CONDITIONPANEL_LOC_SUBZONE"],
+	tooltip = L["CONDITIONPANEL_LOC_SUBZONE_DESC"],
+
+	min = 0,
+	max = 1,
+	unit = false,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_LOC_SUBZONE_LABEL"], L["CONDITIONPANEL_LOC_SUBZONE_BOXDESC"])
+	end,
+	useSUG = "subzone",
+	allowMultipleSUGEntires = true,
+
+	nooperator = true,
+	formatter = TMW.C.Formatter.BOOL,
+	icon = "Interface\\Icons\\inv_misc_map07",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetSubZoneText = GetSubZoneText,
+	},
+	funcstr = [[BOOLCHECK(MULTINAMECHECK(  GetSubZoneText()  ))]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("ZONE_CHANGED"),
+			ConditionObject:GenerateNormalEventString("ZONE_CHANGED_NEW_AREA")
+	end,
+})
+
+local zoneTextCache = {[GetZoneText() or ""] = true}
+local subZoneTextCache = {[GetZoneText() or ""] = true}
+local function zoneCacher()
+	zoneTextCache[GetZoneText() or ""] = true
+	subZoneTextCache[GetSubZoneText() or ""] = true
+end
+CNDT:RegisterEvent("ZONE_CHANGED", zoneCacher)
+CNDT:RegisterEvent("ZONE_CHANGED_NEW_AREA", zoneCacher)
+
+TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+	local SUG = TMW.SUG
+
+	local Module = SUG:NewModule("zoneBase", SUG:GetModule("default"))
+	Module.noMin = true
+	Module.noTexture = true
+	Module.showColorHelp = false
+
+	function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+		local lastName = SUG.lastName
+
+		for name in pairs(tbl) do
+			if name ~= "" and strfind(strlower(name), lastName) then
+				suggestions[#suggestions + 1] = name
+			end
+		end
+	end
+	function Module:Entry_AddToList_1(f, name)
+		f.Name:SetText(name)
+		f.tooltiptitle = name
+		f.insert = name
+	end
+
+
+	local Module = SUG:NewModule("zone", SUG:GetModule("zoneBase"))
+	function Module:Table_Get()
+		return zoneTextCache
+	end
+	local Module = SUG:NewModule("subzone", SUG:GetModule("zoneBase"))
+	function Module:Table_Get()
+		return subZoneTextCache
+	end
+end)

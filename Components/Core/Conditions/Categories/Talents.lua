@@ -30,7 +30,7 @@ local GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationI
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
       GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec
 
-local ConditionCategory = CNDT:GetCategory("TALENTS", 1.5, L["CNDTCAT_TALENTS"], false, false)
+local ConditionCategory = CNDT:GetCategory("TALENTS", 1.4, L["CNDTCAT_TALENTS"], true, false)
 
 
 

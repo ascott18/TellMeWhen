@@ -18,6 +18,7 @@ TMW.CHANGELOG = [==[
 ** Show/Hide Icon
 ** Flip Icon
 ** Bar & Icon Borders
+* New conditions have been added for checking your current location.
 
 ===v7.3.5===
 ====Bug Fixes====

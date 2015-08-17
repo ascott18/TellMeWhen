@@ -721,6 +721,11 @@ CNDT.Substitutions = {
 		end
 	end,
 },
+{	src = "MULTINAMECHECK(%b())",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return [[ (not not strfind(c.Name, SemicolonConcatCache[%1])) ]]
+	end,
+},
 
 {	src = "c.Level",
 	rep = function(conditionData, conditionSettings, name, name2)
@@ -1225,7 +1230,7 @@ function CNDT:RegisterConditionSet(identifier, conditionSetData)
 	ConditionSets[identifier] = data
 	
 	if not data.useDynamicTab then
-		TMW:RegisterCallback("TMW_CONFIG_LOADED", function(event, icon)
+		TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", function(event)
 			CNDT:SetTabText(identifier)
 		end)
 	end

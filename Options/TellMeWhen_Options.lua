@@ -3835,6 +3835,8 @@ TMW:NewClass("HistorySet") {
 	end,
 
 	DoUndoRedo = function(self, direction)
+		IE:SaveSettings()
+
 		local location = self:GetCurrentLocation()
 		local settings = self:GetCurrentSettings()
 
@@ -3851,7 +3853,7 @@ TMW:NewClass("HistorySet") {
 		-- Copy everything in the backup that isn't blocked into the original settings.
 		TMW:CopyInPlaceWithMetatable(location.history[location.historyState], settings, self.blocker)
 
-		IE.CurrentTab:GetPage():OnSettingSaved()
+		IE:RefreshTabs()
 	end
 }
 

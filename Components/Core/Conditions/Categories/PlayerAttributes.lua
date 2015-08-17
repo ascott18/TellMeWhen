@@ -188,7 +188,7 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 			end
 		end
 	},
-	funcstr = [[BOOLCHECK( (strfind(c.Name, SemicolonConcatCache[GetShapeshiftForm() or ""]) and 1) )]],
+	funcstr = [[BOOLCHECK(MULTINAMECHECK(  GetShapeshiftForm() or ""  ))]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")
