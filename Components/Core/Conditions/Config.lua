@@ -994,30 +994,28 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		else
 			local step = get(conditionData.step) or 1
 			local min = get(conditionData.min) or 0
-			local max = get(conditionData.max)
+			local max = get(conditionData.max)		
 
-			-- First, set up the slider, even if we might not be using it.
-			-- We do this because its a really easy way to make sure that the
-			-- actual Level setting conforms to our min/max/step constraints.
-
-			-- Don't try and format text while changing parameters because we might get some errors trying
-			-- to format unexpected values
-			CndtGroup.Slider:SetTextFormatter(nil)
-
-			CndtGroup.Slider:SetValueStep(step)
-			CndtGroup.Slider:SetMinMaxValues(min, max)
-
-			if get(conditionData.range) then
-				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_ADJUSTING)
-				CndtGroup.Slider:SetRange(get(conditionData.range))
+			-- Constrain the level to the min/max/step of the condition.
+			local level = conditionSettings.Level
+			if max and level > max then
+				conditionSettings.Level = max
+			elseif level < min then
+				conditionSettings.Level = min
 			else
-				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_STATIC)
+				-- If we just set the value to the min or the max, the step can't possibly be wrong,
+				-- so we only need to check the step for error if the level was already within min/max.
+				local stepErrorAmount = conditionSettings.Level % step
+
+				-- If the step error amount is greater than half the step
+				-- (ie it is closer to the next value than the previous value),
+				-- we should round up instead of down.
+				if stepErrorAmount > step/2 then
+					stepErrorAmount = -(step - stepErrorAmount)
+				end
+
+				conditionSettings.Level = conditionSettings.Level - stepErrorAmount
 			end
-			CndtGroup.Slider:RequestReload()
-
-			-- We perform this save here in order to constrain the level to the min/max/step of the condition.
-			CndtGroup.Slider:SaveSetting()
-
 
 			if conditionData.levelChecks then
 				local LevelChecks = CndtGroup.LevelChecks
@@ -1051,6 +1049,22 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			else
 				CndtGroup.LevelChecks:Hide()
 				CndtGroup.Slider:Show()
+
+
+				-- Don't try and format text while changing parameters because we might get some errors trying
+				-- to format unexpected values
+				CndtGroup.Slider:SetTextFormatter(nil)
+
+				CndtGroup.Slider:SetValueStep(step)
+				CndtGroup.Slider:SetMinMaxValues(min, max)
+
+				if get(conditionData.range) then
+					CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_ADJUSTING)
+					CndtGroup.Slider:SetRange(get(conditionData.range))
+				else
+					CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_STATIC)
+				end
+
 
 				CndtGroup.Slider:SetWidth(522)
 				CndtGroup:AddRow(CndtGroup.Slider, -7)
