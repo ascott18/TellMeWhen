@@ -100,11 +100,11 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", functio
 	}	
 
 	for i = 1, GetNumSpecializations() do
-		local _, name, _, texture = GetSpecializationInfo(i)
+		local specID, name, _, texture = GetSpecializationInfo(i)
 		tinsert(data, function(check)
 			check:SetLabel("")
 			check:SetTexts(name, L["UIPANEL_TREE_DESC"])
-			check:SetSetting("Tree"..i)
+			check:SetSetting(specID)
 
 			local border = CreateFrame("Frame", nil, check, "TellMeWhen_GenericBorder")
 			border:ClearAllPoints()
@@ -120,27 +120,9 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", functio
 
 	self:BuildSimpleCheckSettingFrame(data)
 
-	self:CScriptAdd("PanelSetup", function()
-		if TMW.CI.group.Domain == "global" then
-			self:Hide()
-		end
+	self:CScriptAdd("SettingTableRequested", function()
+		return TMW.CI.gs and TMW.CI.gs.EnabledSpecs or false
 	end)
-end)
-
-BaseConfig:RegisterConfigPanel_ConstructorFunc(13, "TellMeWhen_GS_DualSpec", function(self)
-	self:SetTitle(L["UIPANEL_SPEC"])
-	
-	self:BuildSimpleCheckSettingFrame({
-		numPerRow = 2,
-		function(check)
-			check:SetTexts(L["UIPANEL_PRIMARYSPEC"], L["UIPANEL_TOOLTIP_PRIMARYSPEC"])
-			check:SetSetting("PrimarySpec")
-		end,
-		function(check)
-			check:SetTexts(L["UIPANEL_SECONDARYSPEC"], L["UIPANEL_TOOLTIP_SECONDARYSPEC"])
-			check:SetSetting("SecondarySpec")
-		end,
-	})
 
 	self:CScriptAdd("PanelSetup", function()
 		if TMW.CI.group.Domain == "global" then
@@ -148,6 +130,7 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(13, "TellMeWhen_GS_DualSpec", fun
 		end
 	end)
 end)
+
 
 BaseConfig:RegisterConfigPanel_XMLTemplate(20, "TellMeWhen_GM_Dims")
 

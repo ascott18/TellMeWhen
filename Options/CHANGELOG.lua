@@ -5,12 +5,12 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = [==[
 ===v8.0.0===
 ====IMPORTANT: Breaking Changes====
-* Available Icon Sorting methods have changed slightly.
-** Each of the pairs of Opacity and Shown methods have been merged into one.
-** Your configuration may require some manual tweaking if you notice incorrect behavior.
+* The Primary/Secondary spec group settings are gone.
+
+* Each of the pairs of Opacity and Shown Icon Sorting methods have been merged.
+
 * The Update Order settings have been removed.
-** If you made use of these settings, you will need to adjust your icons.
-** Try replacing usages of the Expand sub-metas setting with Group Controller meta icons.
+** Try replacing usages of the Expand sub-metas setting with Group Controller meta icons if you experience issues.
 
 ====General====
 * All TellMeWhen configuration is now done in the icon editor.

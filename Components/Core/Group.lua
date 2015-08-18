@@ -338,17 +338,19 @@ end
 function Group.ShouldUpdateIcons(group)
 	local gs = group:GetSettings()
 
-	if	(group:GetID() > TMW.db[group.Domain].NumGroups) or
-		(not group.viewData) or
-		(not group:IsEnabled()) or 
-		(not helper_currentSpecMatchesRole(group.Role))
-	then return false
+	if	(group:GetID() > TMW.db[group.Domain].NumGroups)
+		or (not group.viewData)
+		or (not group:IsEnabled())
+		or (not helper_currentSpecMatchesRole(group.Role))
+	then
+		return false
 
-	elseif group.Domain == "profile" and (
-		(GetActiveSpecGroup() == 1 and not gs.PrimarySpec) or
-		(GetActiveSpecGroup() == 2 and not gs.SecondarySpec) or
-		(GetSpecialization() and not gs["Tree" .. GetSpecialization()]))
-	then return false
+	elseif
+		group.Domain == "profile"
+		and GetSpecialization()
+		and not gs.EnabledSpecs[GetSpecializationInfo(GetSpecialization())]
+	then
+		return false
 	
 	end
 

@@ -241,54 +241,25 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 			tex:SetDesaturated(true)
 
 			tooltipText = tooltipText .. "\r\n" .. L["DISABLED"]
+			
 		else
 			if group.Domain == "profile" then
-				-- Indicator for primary/secondary spec configuration.
-				-- The massive numbers seen in SetTexCoord here are to create triangular textures.
-				if not gs.PrimarySpec or not gs.SecondarySpec then
-					if not gs.PrimarySpec and not gs.SecondarySpec then
-						isUnavailable = true
-					else
-						local spec1 = GetSpecialization(false, false, 1)
-						local tex
-						if spec1 then
-							tex = self:GetTexture(textureIndex)
-							textureIndex = textureIndex + 1
-
-							local _, name, _, texture = GetSpecializationInfo(spec1)
-							tex:SetTexCoord(0.07, 0.07, 0.07, 0.93, 0.93, 0.07, 1000, -1000) -- topleft triangle of the square
-							tex:SetTexture(texture)
-							tex:SetDesaturated(not gs.PrimarySpec)
-							tex:SetAlpha(gs.PrimarySpec and 1 or 0.5)
-						end
-
-						local spec2 = GetSpecialization(false, false, 2)
-						if spec2 then
-							local tex2 = self:GetTexture(textureIndex)
-							textureIndex = textureIndex + 1
-							tex2:SetPoint("RIGHT", tex)
-							local _, name, _, texture = GetSpecializationInfo(spec2)
-							tex2:SetTexCoord(1000, -1000, 0.07, 0.93, 0.93, 0.07, 0.93, 0.93) -- bottomright triangle of the square
-							tex2:SetTexture(texture)
-							tex2:SetDesaturated(not gs.SecondarySpec)
-							tex2:SetAlpha(gs.SecondarySpec and 1 or 0.5)
-						end
-					end
-				end
-
 				-- Indicator for talent tree (specialization) configuration.
 				for i = 1, GetNumSpecializations() do
-					if not gs["Tree" .. i] then
+					local specID = GetSpecializationInfo(i)
+					if not gs.EnabledSpecs[specID] then
 						isSpecLimited = true
 						break
 					end
 				end
+
 				if isSpecLimited then
 					-- Iterate backwards so they appear in the correct order
 					-- (since they are positioned from right to left, not left to right)
 					local foundOne
 					for i = GetNumSpecializations(), 1, -1 do
-						if gs["Tree" .. i] then
+						local specID = GetSpecializationInfo(i)
+						if gs.EnabledSpecs[specID] then
 							local _, name, _, texture = GetSpecializationInfo(i)
 
 							local tex = self:GetTexture(textureIndex)

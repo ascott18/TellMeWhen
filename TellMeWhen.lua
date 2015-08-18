@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80003 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80001 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -257,12 +257,9 @@ TMW.Defaults = {
 				Rows			= 1,
 				Columns			= 4,
 				--CheckOrder		= -1,
-				PrimarySpec		= true,
-				SecondarySpec	= true,
-				Tree1 			= true,
-				Tree2 			= true,
-				Tree3 			= true,
-				Tree4 			= true,
+				EnabledSpecs	= {
+					["*"]		= true,
+				},
 				Role 			= 0x7,
 				SettingsPerView	= {
 					["**"] = {
@@ -1542,6 +1539,75 @@ TMW.UpgradeTableByVersions = {}
 
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+
+		[80005] = {
+			group = function(self, gs, domain, groupID)
+				if domain == "profile" then
+					local expectedProfileName = UnitName("player") .. " - " .. GetRealmName()
+					if expectedProfileName == TMW.db:GetCurrentProfile() or TMW.db.profile.Version > 70001 then
+						-- If the current profile is named after the current character,
+						-- or if the version is after 70001 (which is the all-profiles upgrade)
+						-- we can safely pull the player's current talents to get rid of these settings.
+
+						-- If neither of these things are the case, then just kill the settings without trying to upgrade.
+						-- The user will have to re-configure those groups that will now be showing when they shouldn't be.
+
+
+						-- Normalize these with their old default values to make this easier.
+						if gs.PrimarySpec == nil then
+							gs.PrimarySpec = true
+						end
+						if gs.SecondarySpec == nil then
+							gs.SecondarySpec = true
+						end
+
+						-- Only do anything if only one of these was enabled.
+						-- If both were enabled, don't disable anything (duh),
+						-- and if both were disabled, then.... why? Silly user!
+						if (gs.PrimarySpec and not gs.SecondarySpec)
+						or (not gs.PrimarySpec and gs.SecondarySpec)
+						then
+							local enabledSpec 
+							if gs.PrimarySpec then
+								enabledSpec = GetSpecialization(false, false, 1)
+							else
+								enabledSpec = GetSpecialization(false, false, 2)
+							end
+
+							-- Disable any specs that aren't the one that was enabled.
+							for i = 1, 4 do
+								if i ~= enabledSpec then
+									gs["Tree" .. i] = false
+								end
+							end
+						end
+
+
+						-- Now, upgrade the Tree settings. These are moving from being stored in one key per tree
+						-- to a table that stores specIDs. This prevents the crap we had to go through for this upgrade:
+						-- the old settings we context-sensitive (on the player's class), while the new settings are not.
+
+						for treeID = 1, GetNumSpecializations() do
+							local specID = GetSpecializationInfo(treeID)
+							local specEnabled = gs["Tree" .. treeID]
+							if specEnabled == nil then
+								specEnabled = true
+							end
+
+							gs.EnabledSpecs[specID] = specEnabled
+						end
+					end
+				end
+
+				-- We're done with these now. Goodbye!
+				gs.PrimarySpec = nil
+				gs.SecondarySpec = nil
+
+				for i = 1, 4 do
+					gs["Tree" .. i] = false
+				end
+			end,
+		},
 
 		[80003] = {
 			profile = function(self, profile)
