@@ -214,22 +214,19 @@ L["FROMNEWERVERSION"] = "You have imported data that was created in a newer vers
 -- ICONMENU
 -- -------------
 
-L["ICONMENU_CHOOSENAME2"] = "Choose spell(s) to check"
+L["ICONMENU_CHOOSENAME3"] = "What to track"
 
-L["ICONMENU_CHOOSENAME_WPNENCH"] = "Choose imbue(s) to check"
 L["ICONMENU_CHOOSENAME_WPNENCH_DESC"] = [=[Enter the name(s) the weapon imbues you want this icon to monitor. You can add multiple entries by separating them with semicolons (;).
 
 |cFFFF5959IMPORTANT|r: Imbue names must be entered exactly as they appear on the tooltip of your weapon while the imbue is active (e.g. "%s", not "%s").]=]
 
-L["ICONMENU_CHOOSENAME_ITEMSLOT2"] = "Choose item(s) to check"
 L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"] = [=[Enter the Name, ID, or equipment slot of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equipment slots) by separating them with semicolons (;).
 
 Equipment slots are numbered indexes that correspond to an equipped item. If you change the item equipped in that slot, the icon will reflect that.
 
 |cff7fffffShift-click|r items and chat links or drag items to insert them into this editbox.]=]
 
-L["ICONMENU_CHOOSENAME_MULTISTATE"] = "Choose spell to check"
-L["ICONMENU_CHOOSENAME_ORBLANK"] = "|cff7fffffOR|r leave blank to track all"
+L["ICONMENU_CHOOSENAME_ORBLANK"] = "(leave |cff7fffffblank|r to track all)"
 L["ICONMENU_ENABLE"] = "Enabled"
 L["ICONMENU_ENABLE_DESC"] = "Icons will only function when they are enabled."
 L["ICONMENU_ENABLE_GROUP_DESC"] = "Groups will only function when they are enabled."
@@ -339,7 +336,6 @@ L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon imbues.]=]
 L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
 L["ICONMENU_RUNEOFPOWER_DESC"] = [[Tracks the runes from the %s talent.]]
-L["ICONMENU_MUSHROOMS"] = "%s"
 L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 
 
@@ -450,9 +446,9 @@ L["ICONMENU_DEBUFF"] = "Debuff"
 L["ICONMENU_BOTH"] = "Either"
 
 L["ICONMENU_CHECKNEXT"] = "Expand sub-metas"
-L["ICONMENU_CHECKNEXT_DESC"] = [[Checking this box will cause this icon to expand all the icons of any meta icons that it might be checking at any level instead of just checking sub-meta icons as if they were just another normal icon.
+L["ICONMENU_CHECKNEXT_DESC"] = [[Checking this box will cause any meta icons being checked to be expanded into their component icons, repeating until no meta icons remain.
 
-In addition, this icon will not show any icons that have already been shown by another meta icon that updates before this one. Update order can be changed in the main and group options.]]
+In addition, this icon will not show any icons that have already been shown by another meta icon that updates before this one.]]
 
 L["ICONMENU_DISPEL"] = "Dispel Type"
 L["ICONMENU_CASTS"] = "Spell Casts"
@@ -483,7 +479,7 @@ L["ICONMENU_CUSTOMTEX_MOPAPPEND_DESC"] = [[|cff00d1ffTroubleshooting|r
 L["ICONMENU_COMPONENTICONS"] = "Component Icons & Groups"
 
 
-L["ICONMENU_UNITSTOWATCH"] = "Unit(s) to watch"
+L["ICONMENU_UNITSTOWATCH"] = "Who to watch"
 L["ICONMENU_UNITS"] = "Units"
 L["ICONMENU_UNIT_DESC"] = [[Enter the units to watch in this box. Units can be inserted from the suggestion list at the right, or advanced users can type in their own units.
 

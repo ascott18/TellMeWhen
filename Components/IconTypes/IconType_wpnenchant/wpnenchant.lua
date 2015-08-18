@@ -101,7 +101,7 @@ TMW:RegisterUpgrade(62008, {
 
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	title = L["ICONMENU_CHOOSENAME_WPNENCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
+	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	text = L["ICONMENU_CHOOSENAME_WPNENCH_DESC"],
 	SUGType = "wpnenchant",
 })

@@ -3,10 +3,10 @@
 	<Frame name="TellMeWhen_MetaGroup" virtual="true">
 		<Size y="30"/>
 		<Frames>
-			<Frame parentKey="icon" name="$parentIcon" inherits="TMW_IconDropDownMenuTemplate">
+			<Frame parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" x="7"/>
-					<Anchor point="RIGHT" x="-29"/>
+					<Anchor point="RIGHT" x="-26"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -65,9 +65,9 @@
 				</Scripts>
 			</Frame>
 			
-			<Button parentKey="delete" name="$parentDelete" inherits="UIPanelCloseButton">
+			<Button parentKey="Delete" inherits="TellMeWhen_DeleteButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT" x="-1" y="0"/>
+					<Anchor point="LEFT" relativeKey="$parent.Icon" relativePoint="RIGHT" x="5" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -91,7 +91,7 @@
 	<Frame name="TellMeWhen_MetaIconOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="20"/>
 		<Frames>
-			<Button parentKey="Add" name="$parentAdd" inherits="TellMeWhen_ButtonTemplate">
+			<Button parentKey="Add" inherits="TellMeWhen_ButtonTemplate">
 				<Size x="160" y="16"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="7" y="-7"/>
@@ -116,10 +116,10 @@
 				</Scripts>
 			</Button>
 			
-			<CheckButton parentKey="CheckNext" name="$parentCheckNext" inherits="TellMeWhen_CheckTemplate">
+			<CheckButton parentKey="CheckNext" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<!-- <Anchor point="TOPLEFT" x="5" y="-6"/> -->
-					<Anchor point="LEFT" relativeTo="$parentAdd" relativePoint="RIGHT" x="8" />
+					<Anchor point="LEFT" relativeKey="$parent.Add" relativePoint="RIGHT" x="8" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
@@ -133,7 +133,7 @@
 			
 			<Frame name="$parent1" inherits="TellMeWhen_MetaGroup" id="1">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="$parentCheckNext" relativePoint="BOTTOM" y="1"/>
+					<Anchor point="TOP" relativeKey="$parent.CheckNext" relativePoint="BOTTOM" y="1"/>
 					<Anchor point="LEFT" />
 					<Anchor point="RIGHT" />
 				</Anchors>

@@ -60,7 +60,7 @@ Type:UsesAttributes("texture")
 
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	title = L["ICONMENU_CHOOSENAME2"],
+	title = L["ICONMENU_CHOOSENAME3"],
 
 	SUGType = "buff",
 })

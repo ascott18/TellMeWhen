@@ -157,7 +157,7 @@
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 					local supplementalData = panelInfo.supplementalData
 
-					local title = TMW.L["ICONMENU_CHOOSENAME2"]
+					local title = TMW.L["ICONMENU_CHOOSENAME3"]
 					local tooltip = TMW.L["CHOOSENAME_DIALOG"]
 
 					if supplementalData then
@@ -195,20 +195,10 @@
 							return TMW:CleanString(value)
 						end)
 
-						self:RegisterEvent("MODIFIER_STATE_CHANGED")
-					</OnLoad>
-					<OnEvent>
-						TMW:TT_Update(self)
-					</OnEvent>
-					<OnTextChanged>
-						local text = self:GetText()
+						self:CScriptAdd("SettingSaved", function()
+							local unitTable = TMW.UNITS:GetOriginalUnitTable(self:GetText())
 
-						local allowNoUnit = self.supplementalData and self.supplementalData.allowNoUnit
-
-						if text == "" then
-							if allowNoUnit then
-								TMW.HELP:Hide("ICON_UNIT_MISSING")
-							else
+							if #unitTable == 0 then
 								TMW.HELP:Show{
 									code = "ICON_UNIT_MISSING",
 									icon = TMW.CI.icon,
@@ -217,11 +207,17 @@
 									y = 0,
 									text = format(TMW.L["HELP_NOUNITS"])
 								}
+							else
+								TMW.HELP:Hide("ICON_UNIT_MISSING")
 							end
-						else
-							TMW.HELP:Hide("ICON_UNIT_MISSING")
-						end
+						end)
 
+						self:RegisterEvent("MODIFIER_STATE_CHANGED")
+					</OnLoad>
+					<OnEvent>
+						TMW:TT_Update(self)
+					</OnEvent>
+					<OnTextChanged>
 						self:GetParent():AdjustHeight()
 					</OnTextChanged>
 				</Scripts>

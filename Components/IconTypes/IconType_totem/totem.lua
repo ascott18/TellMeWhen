@@ -30,7 +30,7 @@ local _, pclass = UnitClass("Player")
 local Type = TMW.Classes.IconType:New("totem")
 if pclass == "DRUID" then
 	-- Druid totems are wild mushrooms
-	Type.name = L["ICONMENU_MUSHROOMS"]
+	Type.name = GetSpellInfo(88747)
 	Type.desc = L["ICONMENU_MUSHROOMS_DESC"]
 	Type.menuIcon = "Interface\\ICONS\\druid_ability_wildmushroom_b"
 elseif pclass == "MAGE" then
@@ -75,7 +75,7 @@ if pclass ~= "DRUID" and pclass ~= "MAGE" then
 	-- since their totems only have one possible name.
 
 	Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-		title = L["ICONMENU_CHOOSENAME2"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
+		title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	})
 end
 
@@ -106,7 +106,7 @@ local totemNames = {
 totemNames = totemNames[pclass] or totemNames.OTHER
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots", function(self)
-	self:SetTitle(L["TOTEMS"])
+	self:SetTitle(L["ICONMENU_CHOOSENAME3"])
 
 	local data = { numPerRow = #totemNames >= 4 and #totemNames/2 or #totemNames}
 	for i, name in ipairs(totemNames) do

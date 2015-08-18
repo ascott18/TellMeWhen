@@ -60,7 +60,7 @@ Type:RegisterIconDefaults{
 
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	title = L["ICONMENU_CHOOSENAME_ITEMSLOT2"],
+	title = L["ICONMENU_CHOOSENAME3"],
 	text = L["ICONMENU_CHOOSENAME_ITEMSLOT_DESC"],
 	SUGType = "itemwithslots",
 })

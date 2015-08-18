@@ -130,7 +130,7 @@ function Config:LoadConfig()
 		end
 		mg:SetFrameLevel(TellMeWhen_MetaIconOptions:GetFrameLevel()+2)
 
-		mg.icon:SetGUID(GUID)
+		mg.Icon:SetGUID(GUID)
 	end
 
 	TellMeWhen_MetaIconOptions:SetHeight((#settings * Config[1]:GetHeight()) + 35)
@@ -141,9 +141,9 @@ function Config:LoadConfig()
 	Config[1]:Show()
 
 	if settings[2] then
-		Config[1].delete:Show()
+		Config[1].Delete:Show()
 	else
-		Config[1].delete:Hide()
+		Config[1].Delete:Hide()
 	end
 end
 
