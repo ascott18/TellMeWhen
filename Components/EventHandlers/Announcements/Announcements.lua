@@ -507,7 +507,6 @@ Announcements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	end,
 	handler = function(icon, eventSettings, Text)
 		if SCT then
-			-- TODO: test this to make sure it works. it used to have a special table passed in as the color.
 			local color = TMW:StringToCachedRGBTable(eventSettings.TextColor)
 			SCT:DisplayCustomEvent(Text, color, eventSettings.Sticky, eventSettings.Location, nil, eventSettings.ShowIconTex and icon.attributes.texture)
 		end

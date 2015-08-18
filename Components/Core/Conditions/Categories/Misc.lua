@@ -150,10 +150,9 @@ ConditionCategory:RegisterCondition(1.3,	"ICONHIDDENTME", {
 ConditionCategory:RegisterCondition(3,	 "MOUSEOVER", {
 	text = L["MOUSEOVERCONDITION"],
 	tooltip = L["MOUSEOVERCONDITION_DESC"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+	
+	bool = true,
+
 	unit = false,
 	icon = "Interface\\Icons\\Ability_Marksmanship",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -236,10 +235,9 @@ ConditionCategory:RegisterSpacer(19.5)
 ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 	text = L["CONDITION_QUESTCOMPLETE"],
 	tooltip = L["CONDITION_QUESTCOMPLETE_DESC"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITION_QUESTCOMPLETE"], L["CONDITION_QUESTCOMPLETE_EB_DESC"])
 		editbox:SetLabel(L["QUESTIDTOCHECK"])

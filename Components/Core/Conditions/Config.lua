@@ -983,21 +983,29 @@ end)
 
 -- Slider
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	CndtGroup.LevelChecks:Hide()
+	CndtGroup.ValText:Hide()
+
 	if conditionData then
 		if conditionData.noslide then
 			CndtGroup.Slider:Hide()
-			
-			CndtGroup.ValText:Hide()
+			CndtGroup.LevelChecks:Hide()
+
 		else
-			CndtGroup.Slider:SetWidth(522)
-			CndtGroup:AddRow(CndtGroup.Slider, -7)
+			local step = get(conditionData.step) or 1
+			local min = get(conditionData.min) or 0
+			local max = get(conditionData.max)
+
+			-- First, set up the slider, even if we might not be using it.
+			-- We do this because its a really easy way to make sure that the
+			-- actual Level setting conforms to our min/max/step constraints.
 
 			-- Don't try and format text while changing parameters because we might get some errors trying
 			-- to format unexpected values
 			CndtGroup.Slider:SetTextFormatter(nil)
 
-			CndtGroup.Slider:SetValueStep(get(conditionData.step) or 1)
-			CndtGroup.Slider:SetMinMaxValues(get(conditionData.min) or 0, get(conditionData.max))
+			CndtGroup.Slider:SetValueStep(step)
+			CndtGroup.Slider:SetMinMaxValues(min, max)
 
 			if get(conditionData.range) then
 				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_ADJUSTING)
@@ -1005,24 +1013,59 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			else
 				CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_STATIC)
 			end
-			CndtGroup.Slider:Show()
 			CndtGroup.Slider:RequestReload()
 
 			-- We perform this save here in order to constrain the level to the min/max/step of the condition.
 			CndtGroup.Slider:SaveSetting()
 
 
-			CndtGroup.Slider:SetTextFormatter(conditionData.formatter)
-			CndtGroup.Slider:SetStaticMidText(get(conditionData.midt) or "")
+			if conditionData.levelChecks then
+				local LevelChecks = CndtGroup.LevelChecks
 
-			local val = CndtGroup.Slider:GetValue()
+				CndtGroup.Slider:Hide()
+				LevelChecks:Show()
+
+				CndtGroup:AddRow(LevelChecks, -7)
+
+				if step ~= 1 then
+					error("levelChecks doesn't support value steps that arent 1")
+				end
+
+				local frameID = 0
+				for level = min, max do
+					frameID = frameID + 1
+					local frame = LevelChecks.frames[frameID]
+					if not frame then
+						frame = TMW.C.Config_CheckButton:New("CheckButton", nil, LevelChecks, "TellMeWhen_CheckTemplate", frameID)
+						LevelChecks.frames[frameID] = frame
+						frame:SetPoint("TOP", 0, 5)
+					end
+
+					frame:SetSetting("Level", level)
+					local text = conditionData.formatter:Format(level)
+					frame:SetTexts(text, nil)
+					frame:SetLabel(text)
+				end
+
+				TMW.IE:DistributeCheckAnchorsEvenly(LevelChecks, unpack(LevelChecks.frames, 1, frameID))
+			else
+				CndtGroup.LevelChecks:Hide()
+				CndtGroup.Slider:Show()
+
+				CndtGroup.Slider:SetWidth(522)
+				CndtGroup:AddRow(CndtGroup.Slider, -7)
+
+				CndtGroup.Slider:SetTextFormatter(conditionData.formatter)
+				CndtGroup.Slider:SetStaticMidText(get(conditionData.midt) or "")
+			end
+
+			local val = conditionSettings.Level
 			conditionData.formatter:SetFormattedText(CndtGroup.ValText, val)
 			CndtGroup.ValText:Show()
 		end
 
 	else
 		CndtGroup.Slider:Hide()
-		CndtGroup.ValText:Hide()
 	end
 end)
 

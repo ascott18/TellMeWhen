@@ -110,6 +110,10 @@ The funcstr field is the only one that is required. Errors may happen with the o
 ** The dropdown defaults to being shown if this value is undefined/nil.
 ** Operator's value is stored in the condition settings as a string in the "Operator" setting.
 
+* bool
+** [Boolean] True if this condition has boolean configuration.
+** Shorthand for {min = 0, max = 1, formatter = TMW.C.Formatter.BOOL, nooperator = true, levelChecks = true}
+
 * isicon
 ** [Boolean] Set true to show the icon selection dropdown.
 ** The dropdown defaults to being hidden if this value is undefined/nil.
@@ -241,5 +245,8 @@ end<</code>>
 
 * "BOOLCHECK(...)"
 ** A preprocessor function that will check that the vararg evaulates to true if c.Level == 0, or false if c.Level == 1.
+
+* "MULTINAMECHECK(...)"
+** A preprocessor function that will check that the vararg is contained within c.Name if c.Name is a semicolon-delimited string and the vararg is a lowercase, trimmed string.
 
 	

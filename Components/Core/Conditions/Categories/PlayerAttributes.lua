@@ -41,10 +41,9 @@ local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_AT
 
 ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
 	text = L["CONDITIONPANEL_MOUNTED"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Ability_Mount_Charger",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -55,10 +54,9 @@ ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
 })
 ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
 	text = L["CONDITIONPANEL_SWIMMING"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Spell_Shadow_DemonBreath",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -70,10 +68,9 @@ ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
 })
 ConditionCategory:RegisterCondition(5,	 "RESTING", {
 	text = L["CONDITIONPANEL_RESTING"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
 	icon = "Interface\\CHARACTERFRAME\\UI-StateIcon",
 	tcoords = {0.0625, 0.453125, 0.046875, 0.421875},
@@ -89,10 +86,9 @@ ConditionCategory:RegisterCondition(5,	 "RESTING", {
 })
 ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
 	text = L["CONDITIONPANEL_INPETBATTLE"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
 	icon = "Interface\\Icons\\pet_type_critter",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -110,10 +106,9 @@ ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
 ConditionCategory:RegisterCondition(5.3, "OVERRBAR", {
 	text = L["CONDITIONPANEL_OVERRBAR"],
 	tooltip = L["CONDITIONPANEL_OVERRBAR_DESC"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -154,10 +149,9 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 			--pclass == "WARRIOR" and L["STANCE"] or
 			--pclass == "MONK" and L["STANCE"] or
 			L["STANCE"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["STANCE"], L["STANCE_DESC"])
 		editbox:SetLabel(L["STANCE_LABEL"])
@@ -204,10 +198,9 @@ ConditionCategory:RegisterSpacer(6.5)
 ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	text = L["CONDITIONPANEL_AUTOCAST"],
 	tooltip = L["CONDITIONPANEL_AUTOCAST_DESC"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PET,
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_AUTOCAST"], L["CNDT_ONLYFIRST"])
@@ -330,10 +323,9 @@ end
 ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 	text = L["CONDITIONPANEL_TRACKING"],
 	tooltip = L["CONDITIONPANEL_TRACKING_DESC"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_TRACKING"], L["CNDT_ONLYFIRST"])
@@ -363,10 +355,9 @@ ConditionCategory:RegisterSpacer(17)
 ConditionCategory:RegisterCondition(18,	 "BLIZZEQUIPSET", {
 	text = L["CONDITIONPANEL_BLIZZEQUIPSET"],
 	tooltip = L["CONDITIONPANEL_BLIZZEQUIPSET_DESC"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT"], L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC"])

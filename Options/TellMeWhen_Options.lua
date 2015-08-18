@@ -807,6 +807,40 @@ function IE:DistributeFrameAnchorsLaterally(parent, numPerRow, ...)
 	end
 end
 
+function IE:DistributeCheckAnchorsEvenly(parent, ...)
+	local numChildFrames = select("#", ...)
+	
+	local widthPerFrame = parent:GetWidth()/(numChildFrames + 1)
+	
+	local lastChild
+	for i = 1, numChildFrames do
+		local child = select(i, ...)
+
+		TMW:ValidateType("...", "DistributeCheckAnchorsEvenly(parent, ...)", child, "Config_CheckButton")
+		
+		local xOffs = widthPerFrame - (child:GetWidth() / 2)
+
+		if lastChild then
+			child:SetPoint("LEFT", lastChild, "LEFT", widthPerFrame, 0)
+
+			-- Constrain the label of the last check to this check.
+			lastChild:ConstrainLabel(child)
+		else
+			-- Offset the first one by half of its width so that things stay nice and centered.
+			child:SetPoint("LEFT", widthPerFrame - (child:GetWidth() / 2), 0)
+		end
+
+		-- Reposition the click interceptor so that users can click on either side of the check.
+		-- Normally, it is only on the right side, but this feels really strange.
+		child.ClickInterceptor:ClearAllPoints()
+		child.ClickInterceptor:SetPoint("TOP")
+		child.ClickInterceptor:SetPoint("BOTTOM")
+		child.ClickInterceptor:SetWidth(widthPerFrame)
+
+		lastChild = child
+	end
+end
+
 
 
 function IE:Load(isRefresh)

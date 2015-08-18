@@ -272,6 +272,7 @@ ConditionCategory:RegisterCondition(7,	 "SPEC", {
 	tooltip = L["UIPANEL_SPEC"],
 	min = 1,
 	max = 2,
+	levelChecks = true,
 	texttable = {
 		[1] = L["UIPANEL_PRIMARYSPEC"],
 		[2] = L["UIPANEL_SECONDARYSPEC"],
@@ -371,10 +372,9 @@ function CNDT:PLAYER_TALENT_UPDATE()
 end
 ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 	text = L["UIPANEL_TALENTLEARNED"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
 	name = function(editbox)
 		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
@@ -424,14 +424,13 @@ end
 ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	text = L["UIPANEL_GLYPH"],
 	tooltip = L["UIPANEL_GLYPH_DESC"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
+
+	bool = true,
+	
 	unit = PLAYER,
 	name = function(editbox)
 		editbox:SetTexts(L["GLYPHTOCHECK"], L["CNDT_ONLYFIRST"])
 	end,
-	nooperator = true,
 	useSUG = "glyphs",
 	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
 	tcoords = CNDT.COMMON.standardtcoords,

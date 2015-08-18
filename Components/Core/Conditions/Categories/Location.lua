@@ -296,8 +296,8 @@ ConditionCategory:RegisterCondition(13,   "LOC_CONTINENT", {
 ConditionCategory:RegisterCondition(14,   "LOC_ZONE", {
 	text = L["CONDITIONPANEL_LOC_ZONE"],
 
-	min = 0,
-	max = 1,
+	bool = true,
+
 	unit = false,
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_LOC_ZONE_LABEL"], L["CONDITIONPANEL_LOC_ZONE_DESC"])
@@ -305,8 +305,6 @@ ConditionCategory:RegisterCondition(14,   "LOC_ZONE", {
 	useSUG = "zone",
 	allowMultipleSUGEntires = true,
 
-	nooperator = true,
-	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\Icons\\inv_misc_map09",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
@@ -324,9 +322,8 @@ ConditionCategory:RegisterCondition(15,   "LOC_SUBZONE", {
 	text = L["CONDITIONPANEL_LOC_SUBZONE"],
 	tooltip = L["CONDITIONPANEL_LOC_SUBZONE_DESC"],
 
-	min = 0,
-	max = 1,
-	unit = false,
+	bool = true,
+
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_LOC_SUBZONE_LABEL"], L["CONDITIONPANEL_LOC_SUBZONE_BOXDESC"])
 	end,
@@ -334,7 +331,6 @@ ConditionCategory:RegisterCondition(15,   "LOC_SUBZONE", {
 	allowMultipleSUGEntires = true,
 
 	nooperator = true,
-	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\Icons\\inv_misc_map07",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {

@@ -189,7 +189,7 @@
 	</ScrollFrame>
 
 
-	<Button name="TellMeWhen_ClickInterceptor" virtual="true">
+	<Button name="TellMeWhen_ClickInterceptor" virtual="true" parentKey="ClickInterceptor">
 		<Scripts>
 			<OnLoad>
 				self.parent = self:GetParent()

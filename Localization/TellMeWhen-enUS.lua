@@ -1598,7 +1598,7 @@ L["CONDITIONPANEL_LOC_ZONE_LABEL"] = "Enter Zones to check"
 L["CONDITIONPANEL_LOC_ZONE_DESC"] = "Enter the zones that you would like to check for. Separate multiple zones with semicolons."
 L["CONDITIONPANEL_LOC_SUBZONE"] = "Sub-Zone"
 L["CONDITIONPANEL_LOC_SUBZONE_LABEL"] = "Enter Sub-Zones to check"
-L["CONDITIONPANEL_LOC_SUBZONE_DESC"] = "Checks your current sub-zone. Note that sometimes, you may not be in a aub-zone."
+L["CONDITIONPANEL_LOC_SUBZONE_DESC"] = "Checks your current sub-zone. Note that sometimes, you may not be in a sub-zone."
 L["CONDITIONPANEL_LOC_SUBZONE_BOXDESC"] = "Enter the sub-zones that you would like to check for. Separate multiple sub-zones with semicolons."
 
 

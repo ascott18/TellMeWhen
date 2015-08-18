@@ -331,10 +331,7 @@ ConditionCategory:RegisterCondition(2,	 "BIGWIGS_ENGAGED", {
 	text = L["CONDITIONPANEL_BIGWIGS_ENGAGED"],
 	tooltip = L["CONDITIONPANEL_BIGWIGS_ENGAGED_DESC"],
 
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+	bool = true,
 	unit = false,
 
 	name = function(editbox)
@@ -532,10 +529,7 @@ ConditionCategory:RegisterCondition(11,	 "DBM_ENGAGED", {
 	text = L["CONDITIONPANEL_DBM_ENGAGED"],
 	tooltip = L["CONDITIONPANEL_DBM_ENGAGED_DESC"],
 
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+	bool = true,
 	unit = false,
 
 	name = function(editbox)

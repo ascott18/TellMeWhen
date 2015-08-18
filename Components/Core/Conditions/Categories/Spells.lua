@@ -210,8 +210,9 @@ end
 ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	text = L["SPELLREACTIVITY"],
 	tooltip = L["REACTIVECNDT_DESC"],
-	min = 0,
-	max = 1,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["ICONMENU_REACTIVE"], L["CNDT_ONLYFIRST"])
 		editbox:SetLabel(L["SPELLTOCHECK"])
@@ -220,7 +221,6 @@ ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 		check:SetTexts(L["ICONMENU_IGNORENOMANA"], L["ICONMENU_IGNORENOMANA_DESC"])
 	end,
 	useSUG = true,
-	nooperator = true,
 	unit = false,
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
 	icon = "Interface\\Icons\\ability_warrior_revenge",
@@ -234,14 +234,14 @@ ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	text = L["CONDITIONPANEL_MANAUSABLE"],
 	tooltip = L["CONDITIONPANEL_MANAUSABLE_DESC"],
-	min = 0,
-	max = 1,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_MANAUSABLE"], L["CNDT_ONLYFIRST"])
 		editbox:SetLabel(L["SPELLTOCHECK"])
 	end,
 	useSUG = true,
-	nooperator = true,
 	unit = false,
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
 	icon = "Interface\\Icons\\inv_potion_137",
@@ -278,11 +278,10 @@ ConditionCategory:RegisterCondition(5,	 "SPELLRANGE", {
 })
 ConditionCategory:RegisterCondition(6,	 "GCD", {
 	text = L["GCD_ACTIVE"],
-	min = 0,
-	max = 1,
-	nooperator = true,
+
+	bool = true,
+	
 	unit = PLAYER,
-	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\Icons\\ability_hunter_steadyshot",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[BOOLCHECK( (TMW.GCD > 0 and TMW.GCD < 1.7) )]],
@@ -368,8 +367,9 @@ ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
 })
 ConditionCategory:RegisterCondition(13,	 "ITEMRANGE", {
 	text = L["CONDITIONPANEL_ITEMRANGE"],
-	min = 0,
-	max = 1,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_ITEMRANGE"], L["CNDT_ONLYFIRST"])
 		editbox:SetLabel(L["ITEMTOCHECK"])
@@ -410,10 +410,9 @@ ConditionCategory:RegisterCondition(14,	 "ITEMINBAGS", {
 })
 ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 	text = L["ITEMEQUIPPED"],
-	min = 0,
-	max = 1,
-	nooperator = true,
-	formatter = TMW.C.Formatter.BOOL,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["ITEMEQUIPPED"], L["CNDT_ONLYFIRST"])
 		editbox:SetLabel(L["ITEMTOCHECK"])
@@ -431,10 +430,9 @@ ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 })
 ConditionCategory:RegisterCondition(16,	 "ITEMSPELL", {
 	text = L["ITEMSPELL"],
-	min = 0,
-	max = 1,
-	nooperator = true,
-	formatter = TMW.C.Formatter.BOOL,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["ITEMSPELL"], L["CNDT_ONLYFIRST"])
 		editbox:SetLabel(L["ITEMTOCHECK"])
@@ -678,6 +676,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
 	min = 0,
 	max = 2,
+	levelChecks = true,
 	nooperator = true,
 	texttable = {
 		[0] = L["CONDITIONPANEL_INTERRUPTIBLE"],

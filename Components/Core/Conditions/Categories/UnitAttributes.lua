@@ -82,10 +82,9 @@ ConditionCategory:RegisterSpacer(0.8)
 
 ConditionCategory:RegisterCondition(1,    "EXISTS", {
 	text = L["CONDITIONPANEL_EXISTS"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	icon = "Interface\\Icons\\ABILITY_SEAL",
 	tcoords = CNDT.COMMON.standardtcoords,
 	defaultUnit = "target",
@@ -114,10 +113,9 @@ ConditionCategory:RegisterCondition(1,    "EXISTS", {
 ConditionCategory:RegisterCondition(2,    "ALIVE", {
 	text = L["CONDITIONPANEL_ALIVE"],
 	tooltip = L["CONDITIONPANEL_ALIVE_DESC"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	icon = "Interface\\Icons\\Ability_Vanish",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
@@ -133,10 +131,9 @@ ConditionCategory:RegisterCondition(2,    "ALIVE", {
 
 ConditionCategory:RegisterCondition(3,    "COMBAT", {
 	text = L["CONDITIONPANEL_COMBAT"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	icon = "Interface\\CharacterFrame\\UI-StateIcon",
 	tcoords = {0.53, 0.92, 0.05, 0.42},
 	Env = {
@@ -158,10 +155,9 @@ ConditionCategory:RegisterCondition(3,    "COMBAT", {
 
 ConditionCategory:RegisterCondition(4,    "VEHICLE", {
 	text = L["CONDITIONPANEL_VEHICLE"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
@@ -179,10 +175,9 @@ ConditionCategory:RegisterCondition(4,    "VEHICLE", {
 
 ConditionCategory:RegisterCondition(5,    "PVPFLAG", {
 	text = L["CONDITIONPANEL_PVPFLAG"],
-	min = 0,
-	max = 1,
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+
+	bool = true,
+	
 	icon = "Interface\\TargetingFrame\\UI-PVP-" .. UnitFactionGroup("player"),
 	tcoords = {0.046875, 0.609375, 0.015625, 0.59375},
 	Env = {
@@ -200,6 +195,7 @@ ConditionCategory:RegisterCondition(6,    "REACT", {
 	text = L["ICONMENU_REACT"],
 	min = 1,
 	max = 2,
+	levelChecks = true,
 	defaultUnit = "target",
 	texttable = {[1] = L["ICONMENU_HOSTILE"], [2] = L["ICONMENU_FRIEND"]},
 	nooperator = true,
@@ -220,11 +216,10 @@ ConditionCategory:RegisterCondition(6,    "REACT", {
 
 ConditionCategory:RegisterCondition(6.2,  "ISPLAYER", {
 	text = L["ICONMENU_ISPLAYER"],
-	min = 0,
-	max = 1,
+
+	bool = true,
 	defaultUnit = "target",
-	formatter = TMW.C.Formatter.BOOL,
-	nooperator = true,
+	
 	icon = "Interface\\Icons\\INV_Misc_Head_Human_02",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
@@ -364,14 +359,13 @@ ConditionCategory:RegisterSpacer(8.9)
 ConditionCategory:RegisterCondition(8.95, "UNITISUNIT", {
 	text = L["CONDITIONPANEL_UNITISUNIT"],
 	tooltip = L["CONDITIONPANEL_UNITISUNIT_DESC"],
-	min = 0,
-	max = 1,
-	nooperator = true,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["UNITTWO"], L["CONDITIONPANEL_UNITISUNIT_EBDESC"])
 	end,
 	useSUG = "units",
-	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\Icons\\spell_holy_prayerofhealing",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
@@ -387,13 +381,12 @@ ConditionCategory:RegisterCondition(8.95, "UNITISUNIT", {
 
 ConditionCategory:RegisterCondition(9,    "NAME", {
 	text = L["CONDITIONPANEL_NAME"],
-	min = 0,
-	max = 1,
+
+	bool = true,
+	
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_NAMETOMATCH"], L["CONDITIONPANEL_NAMETOOLTIP"])
 	end,
-	nooperator = true,
-	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
@@ -410,14 +403,13 @@ ConditionCategory:RegisterCondition(9,    "NAME", {
 ConditionCategory:RegisterCondition(9.5,  "NPCID", {
 	text = L["CONDITIONPANEL_NPCID"],
 	tooltip = L["CONDITIONPANEL_NPCID_DESC"],
-	min = 0,
-	max = 1,
+
+	bool = true,
+	
 	defaultUnit = "target",
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_NPCIDTOMATCH"], L["CONDITIONPANEL_NPCIDTOOLTIP"])
 	end,
-	nooperator = true,
-	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
@@ -500,16 +492,15 @@ ConditionCategory:RegisterCondition(12.1, "CLASSIFICATION2", {
 
 ConditionCategory:RegisterCondition(13,   "CREATURETYPE", {
 	text = L["CONDITIONPANEL_CREATURETYPE"],
-	min = 0,
-	max = 1,
+
+	bool = true,
+	
 	defaultUnit = "target",
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_CREATURETYPE_LABEL"], L["CONDITIONPANEL_CREATURETYPE_DESC"])
 	end,
 	useSUG = "creaturetype",
 	allowMultipleSUGEntires = true,
-	nooperator = true,
-	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\Icons\\spell_shadow_summonfelhunter",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {

@@ -116,7 +116,7 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<Frame parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate" hidden="true">
+			<Frame parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="6"/>
 				</Anchors>
@@ -131,7 +131,7 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<EditBox parentKey="Unit" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
+			<EditBox parentKey="Unit" inherits="TellMeWhen_InputBoxTemplate">
 				<Size x="120" y="18"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="10" y="0"/>
@@ -197,7 +197,7 @@
 				</Scripts>
 			</Frame>
 			
-			<Slider parentKey="Slider" inherits="TellMeWhen_SliderTemplate" hidden="true">
+			<Slider parentKey="Slider" inherits="TellMeWhen_SliderTemplate">
 				<Size x="522" y="17"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Type" relativePoint="BOTTOM" y="-7"/>
@@ -227,12 +227,23 @@
 				</Scripts>
 			</Slider>
 			
+			<Frame parentKey="LevelChecks" >
+				<Size y="20"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.Type" />
+					<Anchor point="RIGHT" x="-15" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self.frames = {}
+					</OnLoad>
+				</Scripts>
+			</Frame>
 			
-			
-			<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
+			<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate">
 				<Size y="16"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="BOTTOMLEFT" x="-1" y="-9"/>
+					<Anchor point="LEFT" relativeKey="$parent.Type"/>
 					<Anchor point="RIGHT" x="-15" />
 				</Anchors>
 				<Scripts>
@@ -247,7 +258,7 @@
 					</OnLoad>
 				</Scripts>
 			</EditBox>
-			<EditBox parentKey="EditBox2" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
+			<EditBox parentKey="EditBox2" inherits="TellMeWhen_InputBoxTemplate">
 				<Size y="16"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.EditBox" />
