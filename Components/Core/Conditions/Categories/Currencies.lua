@@ -177,15 +177,13 @@ end
 -- We used to cache currencies, but this isn't needed anymore.
 -- Currency data is always queryable for all currencies.
 TMW:RegisterCallback("TMW_OPTIONS_LOADING", function()
-	TMW.IE:RegisterUpgrade(62217, {
-		global = function(self)
-			TMW.IE.db.global.Currencies = nil
-		end,
-	})
-
 	-- This used to happen at version 70021, but I realized now in 72310 that
 	-- the locale upgrade was broken, so we will run it again.
 	TMW.IE:RegisterUpgrade(72310, {
+		global = function(self)
+			TMW.IE.db.global.Currencies = nil
+		end,
+		
 		locale = function(self, locale)
 			locale.Currencies = nil
 		end,

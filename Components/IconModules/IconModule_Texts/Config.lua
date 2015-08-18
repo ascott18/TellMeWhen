@@ -537,8 +537,14 @@ function TEXT:GetLayoutName(settings, GUID, noDefaultWrapper)
 	if GUID and not settings then
 		assert(type(GUID) == "string")
 		settings = TEXT:GetTextLayoutSettings(GUID)
+		
+		if not settings then
+			return L["UNKNOWN_UNKNOWN"]
+		end
+
 	elseif settings and not GUID then
 		GUID = settings.GUID
+
 	elseif not settings and not GUID then
 		error("You need to specify either settings or GUID for GetLayoutName")
 	end
