@@ -389,8 +389,14 @@ local function DBM_timer_init()
 	local Timers = {}
 
 
-	DBM:RegisterCallback("DBM_TimerStart", function(_, id, text, timeShitty)
-		local duration = tonumber(timeShitty:match("%d+"))
+	DBM:RegisterCallback("DBM_TimerStart", function(_, id, text, timerRaw)
+		-- Older versions of DBM return this value as a string:
+		local duration
+		if type(timerRaw) == "string" then
+			duration = tonumber(timerRaw:match("%d+"))
+		else
+			duration = timerRaw
+		end
 
 		Timers[id] = {text = text:lower(), start = TMW.time, duration = duration}
 
