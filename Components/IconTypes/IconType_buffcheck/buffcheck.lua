@@ -99,8 +99,8 @@ end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONANY"],		tooltipText = L["ICONMENU_ABSENTONANY_DESC"],	},
-	[0x1] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONALL"],	tooltipText = L["ICONMENU_PRESENTONALL_DESC"], 	},
+	[1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONANY"],		tooltipText = L["ICONMENU_ABSENTONANY_DESC"],	},
+	[2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONALL"],	tooltipText = L["ICONMENU_PRESENTONALL_DESC"], 	},
 })
 
 

@@ -543,6 +543,8 @@ end
 function TMW:RGBATableToStringWithFallback(table, fallbackStr)
 	if type(table) == "string" then
 		return table
+	elseif not table then
+		return fallbackStr
 	end
 
 	local r, g, b, a = TMW:StringToRGBA(fallbackStr)

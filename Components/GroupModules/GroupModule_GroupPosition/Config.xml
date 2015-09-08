@@ -109,7 +109,7 @@
 
 			<Slider parentKey="X" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Point" y="2"/>
+					<Anchor point="TOP" relativeKey="$parent.Point" y="-1"/>
 					<Anchor point="LEFT" relativeKey="$parent.RelativePoint" relativePoint="RIGHT" x="10" />
 					<Anchor point="RIGHT" x="-10" />
 				</Anchors>
@@ -134,7 +134,7 @@
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.X"/>
 					<Anchor point="RIGHT" relativeKey="$parent.X"/>
-					<Anchor point="BOTTOM" relativeKey="$parent.Point" y="4"/>
+					<Anchor point="BOTTOM" relativeKey="$parent.Point" y="1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
@@ -154,39 +154,11 @@
 				</Scripts>
 			</Slider>
 
-			<Slider parentKey="Level" inherits="TellMeWhen_SliderTemplate">
+			<Slider parentKey="Strata" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Point" relativePoint="BOTTOM"  y="-17"/>
 					<Anchor point="LEFT" x="10" />
 					<Anchor point="RIGHT" relativeKey="$parent.RelativePoint" x="-5" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>						
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["UIPANEL_LEVEL"], nil)
-						self:SetSetting("Level")
-
-						self:SetMode(self.MODE_ADJUSTING)
-						self:SetMinMaxValues(5, 1000)
-						self:SetRange(20)
-						self:SetValueStep(1)
-
-						self:CScriptAdd("SettingTableRequested", function(requester)
-							return TMW.CI.gs
-						end)
-
-						self:SetTextFormatter(TMW.C.Formatter:New(UNIT_LEVEL_TEMPLATE), TMW.C.Formatter.PASS)
-					</OnLoad>
-				</Scripts>
-			</Slider>
-
-
-			<Slider parentKey="Strata" inherits="TellMeWhen_SliderTemplate">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Level" />
-					<Anchor point="LEFT" relativeKey="$parent.Y" />
-					<Anchor point="RIGHT" relativeKey="$parent.Y" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -232,11 +204,38 @@
 				</Scripts>
 			</Slider>
 
+			<Slider parentKey="Level" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.Strata"/>
+					<Anchor point="LEFT" relativeKey="$parent.Y" />
+					<Anchor point="RIGHT" relativeKey="$parent.Y" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_LEVEL"], nil)
+						self:SetSetting("Level")
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetMinMaxValues(5, 1000)
+						self:SetRange(20)
+						self:SetValueStep(1)
+
+						self:CScriptAdd("SettingTableRequested", function(requester)
+							return TMW.CI.gs
+						end)
+
+						-- self:SetTextFormatter(TMW.C.Formatter:New(UNIT_LEVEL_TEMPLATE), TMW.C.Formatter.PASS)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
 			<Slider parentKey="Scale" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Level" relativePoint="BOTTOM"  y="-24"/>
-					<Anchor point="LEFT" relativeKey="$parent.Level" />
-					<Anchor point="RIGHT" relativeKey="$parent.Level" />
+					<Anchor point="TOP" relativeKey="$parent.Strata" relativePoint="BOTTOM"  y="-25"/>
+					<Anchor point="LEFT" relativeKey="$parent.Strata" />
+					<Anchor point="RIGHT" relativeKey="$parent.Strata" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
@@ -272,7 +271,7 @@
 							
 			<CheckButton parentKey="Locked" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.Strata" relativePoint="BOTTOMLEFT" x="-4" y="-7"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Level" relativePoint="BOTTOMLEFT" x="-6" y="-7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -304,7 +303,7 @@
 						TMW:TT(self, "UIPANEL_GROUPRESET", "UIPANEL_TOOLTIP_GROUPRESET")
 
 						-- Fill the "right column", or fit the text, whichever is bigger.
-						self:SetWidth(self:GetParent().Strata:GetWidth()/self:GetScale())
+						self:SetWidth(self:GetParent().Level:GetWidth()/self:GetScale())
 
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
@@ -332,8 +331,8 @@
 
 				-- These have to go AFTER we declare SettingTableRequested.
 				-- That's why they aren't above with the sliders' OnLoads
-				self.X:UseEditBox()
-				self.Y:UseEditBox()
+				--self.X:UseEditBox()
+				--self.Y:UseEditBox()
 			</OnLoad>
 		</Scripts>
 	</Frame>

@@ -1577,6 +1577,15 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self:CScriptTunnel("PanelSetup", self, panelInfo)
 
 		self:RequestReload()
+
+		if self.autoAdjustHeight then
+			self:AdjustHeight(tonumber(self.autoAdjustHeight))
+		end
+	end,
+
+	SetAutoAdjustHeight = function(self, enabled)
+		-- If enabled is a number, it will be used as the bottom padding passed to AdjustHeight(bottomPadding)
+		self.autoAdjustHeight = enabled
 	end,
 
 
@@ -1868,6 +1877,11 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 	-- Constructor
 	OnNewInstance_CheckButton = function(self)
 		self:SetMotionScriptsWhileDisabled(true)
+
+		if self.text then
+			self.text:SetHeight(30)
+			self.text:SetMaxLines(3)
+		end
 	end,
 
 	SetTexts = function(self, title, tooltip)
@@ -2152,7 +2166,14 @@ TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
 
 
 TMW:NewClass("Config_TimeEditBox", "Config_EditBox"){
-	
+	OnNewInstance_TimeEditBox = function(self)
+		self:CScriptAdd("ModifySettingValueRequested", self.ModifySettingValueRequested)
+	end,
+
+	ModifySettingValueRequested = function(self, value)
+		return tonumber(value) or 0
+	end,
+
 	OnEditFocusLost = function(self, button)
 		local t = TMW:CleanString(self)
 		if strfind(t, ":") then
@@ -2160,7 +2181,6 @@ TMW:NewClass("Config_TimeEditBox", "Config_EditBox"){
 		end
 		t = tonumber(t) or 0
 		self:SetText(t)
-		self:GetScript("OnTextChanged")(self)
 
 		self:SaveSetting()
 	end,
@@ -2284,7 +2304,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 
 	SetTexts = function(self, title, tooltip)
-		self.text:SetText(title)
+		self.text:SetText(title .. ":")
 		self:SetTooltip(title, tooltip)
 	end,
 
@@ -2508,8 +2528,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			self.EditBox = self.Config_EditBox_Slider:New("EditBox", name, self:GetParent(), "TellMeWhen_InputBoxTemplate", nil, {})
 			self.EditBox.Slider = self
 
-			self.EditBox:SetPoint("TOP", self, "TOP", 0, -4)
-			self.EditBox:SetPoint("LEFT", self, "LEFT", 2, 0)
+			self.EditBox:SetPoint("LEFT", self)
 			self.EditBox:SetPoint("RIGHT", self)
 
 			self.EditBox:SetText(self:GetValue())
@@ -2524,9 +2543,9 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			
 			self.EditBoxShowing = true
 			
-			if self.text:GetParent() == self then
-				self.text:SetParent(self.EditBox)
-			end
+			--if self.text:GetParent() == self then
+			--	self.text:SetParent(self.EditBox)
+			--end
 
 			self.EditBox:Show()
 			self:Hide_base()
@@ -2540,9 +2559,9 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 			self.EditBoxShowing = false
 
-			if self.text:GetParent() == self.EditBox then
-				self.text:SetParent(self)
-			end
+			--if self.text:GetParent() == self.EditBox then
+			--	self.text:SetParent(self)
+			--end
 
 			if self.EditBox:IsShown() then
 				self:Show_base()
@@ -2617,8 +2636,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 		local minValue, maxValue = self:GetMinMaxValues()
 		
-		self.extremesFormatter:SetFormattedText(self.Low, minValue)
-		self.extremesFormatter:SetFormattedText(self.High, maxValue)
+		--self.extremesFormatter:SetFormattedText(self.Low, minValue)
+		--self.extremesFormatter:SetFormattedText(self.High, maxValue)
 	end,
 
 
@@ -2677,23 +2696,15 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	OnNewInstance_Slider_Alpha = function(self)
 		self:SetMinMaxValues(0, 1)
 		self:SetValueStep(0.01)
-	end,
+		self:SetWheelStep(0.1)
 
-
-	-- Script Handlers
-	OnMinMaxChanged = function(self)
-		local minValue, maxValue = self:GetMinMaxValues()
-		
-		self.Low:SetText(minValue * 100 .. "%")
-		self.High:SetText(maxValue * 100 .. "%")
-		
 		self:UpdateTexts()
 	end,
 
 	METHOD_EXTENSIONS = {
 		OnDisable = function(self)
 			self:SetValue(0)
-			self:UpdateTexts() -- For the initial disable, so text doesn't go orange
+			self:UpdateTexts()
 		end,
 	},
 	
@@ -2702,18 +2713,22 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	SetOrangeValue = function(self, value)
 		self.setOrangeAtValue = value
 	end,
+
+	Formatter = TMW.C.Formatter:New(function(value)
+		if value == 0 then
+			return L["CONDITIONPANEL_ICON_HIDDEN"]
+		else
+			return TMW.C.Formatter.PERCENT100:Format(value)
+		end
+	end),
 	
 	UpdateTexts = function(self)
 		local value = self:GetValue()
 				
-		if value and self:IsEnabled() then
-			if value == self.setOrangeAtValue then
-				self.Mid:SetText("|cffff7400" .. value * 100 .. "%")
-			else
-				self.Mid:SetText(value * 100 .. "%")
-			end
+		if self:IsEnabled() and value == self.setOrangeAtValue then
+			self.Mid:SetText("|cffff7400" .. self.Formatter:Format(value))
 		else
-			self.Mid:SetText(value * 100 .. "%")
+			self.Formatter:SetFormattedText(self.Mid, value)
 		end
 	end,
 }
@@ -2765,16 +2780,10 @@ TMW:NewClass("Config_CheckButton_BitToggle", "Config_BitflagBase", "Config_Check
 
 TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 	-- Constructor
-	OnNewInstance_Frame_WhenChecks = function(self)
-		TMW:CInit(self.Check, "Config_CheckButton_BitToggle")
-		self.Check:SetSetting("ShowWhen")
-				
-		TMW:CInit(self.Alpha)
-		self.Alpha:SetOrangeValue(0)
-		self.Alpha:CScriptAdd("ReloadRequested", self.AlphaReloadRequested)
 
-		-- Reparent the label text on the slider so that it will be at full opacity even while disabled.
-		self.Alpha.text:SetParent(self)
+
+	OnNewInstance_Frame_WhenChecks = function(self)				
+		TMW:CInit(self.Alpha)
 
 		self:CScriptAdd("PanelSetup", self.PanelSetup)
 	end,
@@ -2785,17 +2794,13 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 	end,
 	
 	OnDisable = function(self)
-		self.Check:Disable()
 		self.Alpha:Disable()
 	end,
 	
 
 	-- Methods	
-	SetSettings = function(self, alphaSettingName, bit)
+	SetSettings = function(self, alphaSettingName)
 		self.Alpha:SetSetting(alphaSettingName)
-		self.Check:SetSettingBit(bit)
-
-		self.bit = bit
 	end,
 
 	PanelSetup = function(self, panel, panelInfo)
@@ -2806,28 +2811,17 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 		-- Set the title for the frame
 		panel.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
 		
-		-- Numeric keys in supplementalData point to the tables that have the data for that specified bit toggle
-		local supplementalDataForBit = supplementalData[self.bit]
-		if supplementalDataForBit then
-			self.Check:SetTooltip(
-				L["ICONMENU_SHOWWHEN_SHOWWHEN_WRAP"]:format(supplementalDataForBit.text),
-				supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_SHOW_GENERIC_DESC"]
-			)
-			
-			self.Alpha.text:SetText(supplementalDataForBit.text)
+		local dataForFrame = supplementalData[self:GetID()]
+		if dataForFrame then
+			self.Alpha:SetTexts(dataForFrame.text)
 			self.Alpha:SetTooltip(
-				L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(supplementalDataForBit.text),
-				supplementalDataForBit.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
+				L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(dataForFrame.text),
+				dataForFrame.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
 			)
 			self:Show()
 		else
 			self:Hide()
 		end
-	end,
-
-	AlphaReloadRequested = function(slider)
-		local self = slider:GetParent()
-		slider:SetEnabled(self.Check:GetChecked())
 	end,
 
 	ReloadSetting = function(self)
@@ -2841,6 +2835,9 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	OnNewInstance_ColorButton = function(self)
 		assert(self.background1 and self.text and self.swatch, 
 			"This setting frame doesn't inherit from TellMeWhen_ColorButtonTemplate")
+
+		self.text:SetHeight(30)
+		self.text:SetMaxLines(3)
 	end,
 
 	SetTexts = function(self, title, tooltip)

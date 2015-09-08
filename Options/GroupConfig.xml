@@ -381,6 +381,24 @@
 								end		
 							end
 						end
+
+						-- Pull any group config panels that are registered on icon modules
+						local modules = group.viewData.ModuleImplementors
+						for _, implementationData in pairs(modules) do
+							local class = TMW.C[implementationData.moduleName]
+							
+							if class
+								and class.inherits[TMW.C.IconModule]
+								and group.viewData:DoesImplementModule(class.className)
+							then
+								for _, panelInfo in pairs(class.ConfigPanels) do
+									if panelInfo.panelSet == "group" then
+									   tinsert(panelList, panelInfo) 
+									end
+								end
+							end
+						end
+
 						TMW.IE:PositionPanels("GroupMain", panelList)
 					end
 				end)

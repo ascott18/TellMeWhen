@@ -81,8 +81,8 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
+	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings", function(self)

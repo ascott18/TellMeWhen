@@ -68,7 +68,7 @@
 						self:SetTexts(TMW.L["UIPANEL_BAR_PADDING"], TMW.L["UIPANEL_BAR_PADDING_DESC"])
 						self:SetSetting("Padding")
 						
-						self:SetMinMaxValues(-math.huge, math.huge)
+						self:SetMinMaxValues(0, math.huge)
 						self:SetRange(10)
 						self:SetMode(self.MODE_ADJUSTING)
 						self:SetValueStep(0.1)
@@ -100,8 +100,8 @@
 						self:SetSetting("BorderIcon")
 
 						self:SetMinMaxValues(0, 5)
-						self:SetRange(3)
-						self:SetMode(self.MODE_ADJUSTING)
+						--self:SetRange(3)
+						--self:SetMode(self.MODE_ADJUSTING)
 						self:SetValueStep(0.1)
 						self:SetWheelStep(0.5)
 
@@ -131,8 +131,8 @@
 						self:SetSetting("BorderBar")
 
 						self:SetMinMaxValues(0, 5)
-						self:SetRange(3)
-						self:SetMode(self.MODE_ADJUSTING)
+						--self:SetRange(3)
+						--self:SetMode(self.MODE_ADJUSTING)
 						self:SetValueStep(0.1)
 						self:SetWheelStep(0.5)
 

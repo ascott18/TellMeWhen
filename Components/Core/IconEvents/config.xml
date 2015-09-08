@@ -274,7 +274,7 @@
 
 	<Slider name="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">
 		<Anchors>
-			<Anchor point="LEFT" x="10" />
+			<Anchor point="LEFT" x="15" />
 			<Anchor point="RIGHT" x="-20"/>
 		</Anchors>
 	</Slider>
@@ -635,9 +635,10 @@
 
 
 					<Slider parentKey="Frequency" inherits="TellMeWhen_SliderTemplate" valuestep="0.1" >
-						<Size x="170" y="17"/>
 						<Anchors>
 							<Anchor point="TOP" relativeKey="$parent.IconEventWhileCondition" relativePoint="BOTTOM" y="-18"/>
+							<Anchor point="LEFT"/>
+							<Anchor point="RIGHT"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>

@@ -52,6 +52,8 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 		[0] = L["CONDITIONPANEL_ICON_SHOWN"],
 		[1] = L["CONDITIONPANEL_ICON_HIDDEN"],
 	},
+	levelChecks = true,
+	
 	isicon = true,
 	nooperator = true,
 	unit = false,

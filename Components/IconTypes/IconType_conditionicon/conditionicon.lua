@@ -83,8 +83,8 @@ TMW:RegisterUpgrade(45013, {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED2"],			},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_FAIL2"],			},
+	[1] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED2"],			},
+	[2] = { text = "|cFFFF0000" .. L["ICONMENU_FAIL2"],			},
 })
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")

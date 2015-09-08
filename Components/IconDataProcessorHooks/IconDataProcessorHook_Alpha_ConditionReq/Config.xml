@@ -4,7 +4,6 @@
 		<Size y="40"/>
 		<Frames>
 			<Slider parentKey="ConditionAlpha" name="$parentConditionAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
-				<Size y="17"/>
 				<Anchors>
 					<Anchor point="LEFT" x="10" />
 					<Anchor point="RIGHT" x="-10" />

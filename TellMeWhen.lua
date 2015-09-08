@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80001 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -224,21 +224,9 @@ TMW.Defaults = {
 			["**"] = {
 				["**"] = {Color="ffffffff", Override = false, Gray = false, },
 
-				CBC = 	{ Color="ff00ff00", },	-- cooldown bar complete
-				CBS = 	{ Color="ffff0000", },	-- cooldown bar start
-				CBM = 	{ Color="ffffff00", },	-- cooldown bar middle
-
 				OOR	=	{ Color="ff7f7f7f", },	-- out of range
 				OOM	=	{ Color="ff7f7f7f", },	-- out of mana
 				OORM=	{ Color="ff7f7f7f", },	-- out of range and mana
-
-				CTA	=	{ Color="ffffffff", },	-- counting with timer always
-				COA	=	{ Color="ff7f7f7f", },	-- counting withOUT timer always
-				CTS	=	{ Color="ffffffff", },	-- counting with timer somtimes
-				COS	=	{ Color="ffffffff", },	-- counting withOUT timer somtimes
-
-				NA	=	{ Color="ffffffff", },	-- not counting always
-				NS	=	{ Color="ffffffff", },	-- not counting sometimes
 			},
 		},
 
@@ -273,7 +261,7 @@ TMW.Defaults = {
 						Name				= "",
 						Type				= "",
 						Alpha				= 1,
-						UnAlpha				= 1,
+						UnAlpha				= 0,
 						SettingsPerView		= {
 							["**"] = {
 							}
@@ -371,10 +359,14 @@ TMW.BE = {
 		
 		ImmuneToStun		= "642;45438;48792;1022;33786;710;46924;_19263;6615",
 		ImmuneToMagicCC		= "642;45438;48707;33786;710;46924;_19263;31224;8178;23920;49039;114028",
-		DefensiveBuffs		= "48707;30823;33206;47585;871;48792;498;22812;61336;5277;74001;47788;_19263;6940;31850;31224;42650;86657;118038;115176;115308;120954;115295;51271;12975;97463;102342;114039",
 		MiscHelpfulBuffs	= "10060;23920;68992;2983;1850;53271;1044;31821;45182;114028",
 		SpeedBoosts			= "54861;121557;_2983;_61684;68992;108843;65081;118922;137573;2379;58875;133278;85499;96268;137452;111400;116841;119085;7840;5118;13159;2645;_77761",
 		DamageBuffs			= "1719;12292;50334;5217;3045;77801;31884;51713;12472;57933;51271;_107574;114050;114051;113858;113861;113860;112071",
+		
+		-- By G3sch4n (http://wow.curseforge.com/addons/tellmewhen/tickets/1153-defensive-cooldowns/):
+		DefensiveBuffsSingle="155835;22812;102342;61336;48707;48792;48982;_19263;157913;113862;45438;122278;122783;115203;115176;31850;498;642;86659;1022;114039;6940;47585;47788;33206;31224;74001;5277;108271;30823;110913;104773;118038;114029;871;23920;114030;",
+		DefensiveBuffsAOE   = "_51052;_31821;_62618;_76577;_114028;",
+
 	},
 	casts = {
 		--prefixing with _ doesnt really matter here since casts only match by name,
@@ -385,6 +377,9 @@ TMW.BE = {
 		Tier12Interrupts	= "_97202;_100094",
 	},
 }
+
+TMW.BE.buffs.DefensiveBuffs	= TMW.BE.buffs.DefensiveBuffsSingle .. ";" .. TMW.BE.buffs.DefensiveBuffsAOE
+
 
 TMW.DS = {
 	Magic 	= "Interface\\Icons\\spell_fire_immolation",
@@ -1540,6 +1535,31 @@ TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 
+		[80008] = {
+			icon = function(self, ics)
+				if ics.ShowWhen == 0x1 then
+					ics.Alpha = 0
+				elseif ics.ShowWhen == 0x2 or ics.ShowWhen == nil then
+					ics.UnAlpha = 0
+				end
+
+				ics.ShowWhen = nil
+			end,
+		},
+
+		[80007] = {
+			profile = function(self, profile)
+				for _, v in pairs(profile.Colors) do
+					v.CTA = nil
+					v.COA = nil
+					v.CTS = nil
+					v.COS = nil
+					v.NA = nil
+					v.NS = nil
+				end
+			end,
+		},
+
 		[80005] = {
 			group = function(self, gs, domain, groupID)
 				if domain == "profile" then
@@ -1720,41 +1740,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			end,
 		},
 
-		[62304] = {
-			profile = function(self)
-				for k, v in pairs(TMW.db.profile.Colors) do
-
-					-- This is here to maintain compatability after colors started being stored in strings (in v 80003).
-					-- The old defaults are gone, so we have to restore any of them that might be missing.
-					v.CBC.r = v.CBC.r or 0
-					v.CBC.g = v.CBC.g or 1
-					v.CBC.b = v.CBC.b or 0
-					v.CBC.a = v.CBC.a or 1
-
-					v.CBS.r = v.CBS.r or 1
-					v.CBS.g = v.CBS.g or 0
-					v.CBS.b = v.CBS.b or 0
-					v.CBS.a = v.CBS.a or 1
-
-					if not (
-						(v.CBC.r == 0 and v.CBC.g == 1 and v.CBC.b == 0 and 
-						 v.CBS.r == 1 and v.CBS.g == 0 and v.CBS.b == 0)  
-					or	(v.CBC.r == 1 and v.CBC.g == 0 and v.CBC.b == 0 and 
-						 v.CBS.r == 0 and v.CBS.g == 1 and v.CBS.b == 0))
-					then
-						v.CBM.r = (v.CBC.r + v.CBS.r) / 2
-						v.CBM.g = (v.CBC.g + v.CBS.g) / 2
-						v.CBM.b = (v.CBC.b + v.CBS.b) / 2
-					end
-
-					v.CBM.a = (v.CBC.a + v.CBS.a) / 2
-
-					if v.CBC.Override and v.CBS.Override then
-						v.CBM.Override = true
-					end
-				end
-			end
-		},
 		[60027] = {
 			icon = function(self, ics)
 				ics.Name = ics.Name:gsub("IncreasedSPsix", "IncreasedSP")
@@ -1834,8 +1819,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		},
 		[47002] = {
 			map = {
-				CBS = "CDSTColor",
-				CBC = "CDCOColor",
 				OOR = "OORColor",
 				OOM = "OOMColor",
 				OORM = "OORColor",
@@ -2542,6 +2525,34 @@ function TMW:RawUpgrade()
 				end
 			end
 		end
+
+		if TellMeWhenDB.Version < 80008 then
+			local function UpgradeGroup(gs)
+				if gs.Icons then
+					for iconID, ics in pairs(gs.Icons) do
+						if ics.UnAlpha == nil then
+							ics.UnAlpha = 1
+						end
+					end
+				end
+			end
+
+			for _, p in pairs(TellMeWhenDB.profiles) do
+				if p.Groups then
+					for groupID, gs in pairs(p.Groups) do
+						UpgradeGroup(gs)
+					end
+				end
+			end
+
+			if TellMeWhenDB.global and TellMeWhenDB.global.Groups then
+				for groupID, gs in pairs(TellMeWhenDB.global.Groups) do
+					UpgradeGroup(gs)
+				end
+			end
+		end
+
+		
 	end
 	
 	TMW:Fire("TMW_DB_PRE_DEFAULT_UPGRADES")
@@ -3200,10 +3211,14 @@ TMW:NewClass("ConfigPanelInfo"){
 
 	SetColumnIndex = function(self, columnIndex)
 		self.columnIndex = columnIndex
+
+		return self
 	end,
 
 	SetPanelSet = function(self, panelSet)
 		self.panelSet = panelSet
+
+		return self
 	end,
 }
 
@@ -3414,4 +3429,37 @@ function TMW:GetGroupName(name, groupID, short)
 	end
 
 	return name .. " (" .. format(L["fGROUP"], groupID) .. ")"
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- TODO: MOVE THIS TO ITS OWN FILE
+
+
+local temp = {}
+function TMW:GetColors(colorSettings, enableSetting, ...)
+	for n, settings, length in TMW:Vararg(...) do
+		if n == length or settings[enableSetting] then
+			if type(colorSettings) == "table" then
+				for i = 1, #colorSettings do
+					temp[i] = settings[colorSettings[i]]
+				end
+
+				return unpack(temp, 1, #colorSettings)
+			else
+				return settings[colorSettings]
+			end
+		end
+	end
 end

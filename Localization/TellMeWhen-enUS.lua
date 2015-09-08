@@ -561,12 +561,12 @@ L["ICONMENU_ALLOWGCD"] = "Allow Global Cooldown"
 L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the global cooldown instead of simply ignoring it.]]
 
 
-L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar that is overlaid across the top half of the icon that will indicate the power still needed to cast the spell (or the power that you have when 'Fill bars up' is checked)"
-L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar that is overlaid across the bottom half of the icon that will indicate the cooldown/duration remaining (or the time that has passed if 'Fill bars up' is checked)"
+L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar across the top half of the icon that will display the power still needed to cast the spell."
+L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar across the bottom half of the icon that will display the icon's timer."
 L["ICONMENU_INVERTBARS"] = "Fill bar up"
-L["ICONMENU_INVERTCBAR_DESC"] = "Check this option to cause the overlay bar to fill up to cover the whole width of the icon as duration reaches zero."
-L["ICONMENU_INVERTPBAR_DESC"] = "Check this option to cause the overlay bar to fill up to cover the whole width of the icon as power become sufficient."
-L["ICONMENU_INVERTBARDISPLAYBAR_DESC"] = "Check this option to cause the bar to fill up to cover its whole width as duration reaches zero."
+L["ICONMENU_INVERTCBAR_DESC"] = "Causes the bar to fill up as duration reaches zero."
+L["ICONMENU_INVERTPBAR_DESC"] = "Causes the bar to fill up as power become sufficient."
+L["ICONMENU_INVERTBARDISPLAYBAR_DESC"] = "Causes the bar to fill up as its value reaches zero."
 L["ICONMENU_OFFS"] = "Offset"
 L["ICONMENU_FAKEMAX"] = "Artificial Maximum"
 L["ICONMENU_FAKEMAX_DESC"] = [[Set an artificial maximum value for the timer.
@@ -578,7 +578,7 @@ L["ICONMENU_BAROFFS"] = [[This amount will be added to the bar in order to offse
 
 Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt.]]
 
-L["ICONMENU_BAR_COLOR_BACKDROP"] = "Backdrop Color/Opacity"
+L["ICONMENU_BAR_COLOR_BACKDROP"] = "Backdrop Color"
 L["ICONMENU_BAR_COLOR_BACKDROP_DESC"] = "Configure the color and opacity of the backdrop beind the bar."
 
 L["ICONMENU_BAR_COLOR_START"] = "Start Color"
@@ -591,9 +591,6 @@ L["ICONMENU_ENABLECOLORS"] = "Enable Color Overrides"
 L["ICONMENU_ENABLECOLORS_DESC"] = [[Check this setting to allow the configuration and usage of the three color settings below.
 
 If left unchecked, the color settings in TellMeWhen's main options will be used.]]
-L["ICONMENU_ENABLECOLORS_HELP"] = [[Hey there!
-
-I just wanted to let you know that you can easily copy these colors to other bar-style icons by |cff7fffffright-clicking and dragging|r this icon to another.]]
 L["ICONMENU_COPYCOLORS_BARDISPLAY"] = "Copy Bar Colors"
 L["ICONMENU_COPYCOLORS_BARDISPLAY_DESC"] = "Copies the three bar colors of %s to %s."
 
@@ -1035,13 +1032,6 @@ L["COLOR_DESATURATE_DESC"] = "Check to desaturate the icon when this color is us
 L["COLOR_COLOR"] = "Color"
 
 
-L["COLOR_CBC"] 		 = "Cooldown Bar - Complete"	-- cooldown bar complete
-L["COLOR_CBC_DESC"]  = "Color of the cooldown/duration overlay bar when the cooldown/duration is complete"	-- cooldown bar complete
-L["COLOR_CBM"] 		 = "Cooldown Bar - Half"	-- cooldown bar middle
-L["COLOR_CBM_DESC"]  = "Color of the cooldown/duration overlay bar when the cooldown/duration is half complete"	-- cooldown bar middle
-L["COLOR_CBS"] 		 = "Cooldown Bar - Start"	-- cooldown bar start
-L["COLOR_CBS_DESC"]  = "Color of the cooldown/duration overlay bar when the cooldown/duration has just begun"	-- cooldown bar start
-
 L["COLOR_OOR"]		 = "Out of Range"	-- out of range
 L["COLOR_OOR_DESC"]	 = "Color of the icon when you are not in range to use an ability."	-- out of range
 L["COLOR_OOM"]		 = "Out of Mana"	-- out of mana
@@ -1088,6 +1078,14 @@ L["COLOR_NS_DESC"]	 = [[Color of the icon when:
 
 The timer is finished (usable/absent),
 Only one %q setting is checked]]
+
+
+L["COLOR_OVERRIDE_GROUP"] = "Override Group Color"
+L["COLOR_OVERRIDE_GROUP_DESC"] = [[Check to configure color independent of the color specified for the icon's group.]]
+
+L["COLOR_OVERRIDE_GLOBAL"] = "Override Global Color"
+L["COLOR_OVERRIDE_GLOBAL_DESC"] = [[Check to configure colors independent of the globally defined colors.]]
+
 
 
 L["FONTCOLOR"] = "Font Color"
@@ -1164,7 +1162,7 @@ L["DESCENDING"] = "Descending"
 L["UIPANEL_SCALE"] = "Scale"
 L["UIPANEL_LEVEL"] = "Frame Level"
 L["UIPANEL_LEVEL_DESC"] = "The level within the group's strata that it should be drawn on."
-L["UIPANEL_STRATA"] = "Frame Strata"
+L["UIPANEL_STRATA"] = "Strata"
 L["UIPANEL_STRATA_DESC"] = "The layer of the UI that the group should be drawn on."
 L["UIPANEL_LOCK"] = "Lock Position"
 L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by dragging the group or the scale tab."
@@ -1191,7 +1189,7 @@ L["TEXTLAYOUTS_fSTRING2"] = "Display %d: %s"
 L["TEXTLAYOUTS_fSTRING3"] = "Text Display: %s"
 L["TEXTLAYOUTS_fLAYOUT"] = "Text Layout: %s"
 L["TEXTLAYOUTS_UNNAMED"] = "<no name>"
-L["TEXTLAYOUTS_DEFAULTS_WRAPPER"] = "Default: %s"
+L["TEXTLAYOUTS_DEFAULTS_WRAPPER"] = "|cff666666Default:|r %s"
 L["TEXTLAYOUTS_LAYOUTSETTINGS"] = "Layout Settings"
 L["TEXTLAYOUTS_LAYOUTSETTINGS_DESC"] = "Click to configure the text layout %q."
 
@@ -2290,8 +2288,8 @@ L["ANIM_TAB_DESC"] = [[Configure an animation to be played. Some will affect thi
 L["ANIM_ANIMTOUSE"] = "Animation To Use"
 L["ANIM_ANIMSETTINGS"] = "Settings"
 
-L["ANIM_SECONDS"] = "%s Seconds"
-L["ANIM_PIXELS"] = "%s Pixels"
+L["ANIM_SECONDS"] = "%s sec."
+L["ANIM_PIXELS"] = "%s px."
 L["ANIM_DURATION"] = "Animation Duration"
 L["ANIM_DURATION_DESC"] = "Set how long the animation should last after it is triggered."
 L["ANIM_PERIOD"] = "Flash Period"
@@ -2739,7 +2737,7 @@ L["STRATA_MEDIUM"] = "Medium"
 L["STRATA_HIGH"] = "High"
 L["STRATA_DIALOG"] = "Dialog"
 L["STRATA_FULLSCREEN"] = "Fullscreen"
-L["STRATA_FULLSCREEN_DIALOG"] = "Fullscreen Dialog"
+L["STRATA_FULLSCREEN_DIALOG"] = "Full Dialog"
 L["STRATA_TOOLTIP"] = "Tooltip"
 
 
@@ -2780,6 +2778,8 @@ L["DamageShield"] = "Damage Shield"
 L["BonusStamina"] = "Increased Stamina"
 L["ReducedHealing"] = "Reduced Healing"
 L["DefensiveBuffs"] = "Defensive Buffs"
+L["DefensiveBuffsSingle"] = "Targeted Defensive Buffs"
+L["DefensiveBuffsAOE"] = "AOE Defensive Buffs"
 L["MiscHelpfulBuffs"] = "Misc. Helpful Buffs"
 L["SpeedBoosts"] = "Speed Boosts"
 L["DamageBuffs"] = "Damage Buffs"

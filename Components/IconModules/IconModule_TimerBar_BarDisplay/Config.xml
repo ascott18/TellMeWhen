@@ -3,7 +3,7 @@
 
 
 	<Frame name="TellMeWhen_BarDisplayBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="85"/>
+		<Size y="90"/>
 		<Frames>
 			<CheckButton parentKey="Invert" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
@@ -16,6 +16,44 @@
 
 						self:SetTexts(TMW.L["ICONMENU_INVERTBARS"], TMW.L["ICONMENU_INVERTBARDISPLAYBAR_DESC"])
 						self:SetSetting("BarDisplay_Invert")
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<EditBox parentKey="FakeMax" inherits="TellMeWhen_TimeEditBoxTemplate" autoFocus="false">
+				<Size x="45" y="15"/>
+				<Scripts>
+					<OnLoad>
+						self.text:SetText(TMW.L["ICONMENU_FAKEMAX"])
+						--self.text:SetWidth(50)
+						self.text:ClearAllPoints()
+						self.text:SetPoint("LEFT", self, "RIGHT", 2, 0)
+						self.text:SetPoint("RIGHT", self:GetParent(), "RIGHT", -5, 0)
+						
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_FAKEMAX"], TMW.L["ICONMENU_FAKEMAX_DESC"])
+						self:SetSetting("BarDisplay_FakeMax")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetEnabled(not settings.BarDisplay_Invert)
+						end)
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+			
+			<CheckButton parentKey="EnableColors" inherits="TellMeWhen_CheckTemplate">
+				<Anchors>
+					<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
+					<Anchor point="TOP" relativeKey="$parent.Invert" relativePoint="BOTTOM" y="3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["COLOR_OVERRIDE_GROUP"], TMW.L["COLOR_OVERRIDE_GROUP_DESC"])
+						self:SetSetting("TimerBar_EnableColors")
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
@@ -35,122 +73,19 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			
-			<CheckButton parentKey="EnableColors" inherits="TellMeWhen_CheckTemplate">
-				<Anchors>
-					<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
-					<Anchor point="TOP" relativeKey="$parent.Invert" relativePoint="BOTTOM" y="3"/>
-				</Anchors>
+
+			<Frame inherits="TellMeWhen_TimerBarColorsTemplate">
 				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["ICONMENU_ENABLECOLORS"], TMW.L["ICONMENU_ENABLECOLORS_DESC"])
-						self:SetSetting("BarDisplay_EnableColors")
-
-						self:CScriptAdd("SettingSaved", function()
-							if self:GetChecked() then
-								TMW.HELP:Show{
-									code = "COLOR_COPY_DRAG",
-									icon = nil,
-									relativeTo = self,
-									x = 0,
-									y = 0,
-									text = format(TMW.L["ICONMENU_ENABLECOLORS_HELP"])
-								}
-							end
-						end)
-					</OnLoad>
-				</Scripts>
-			</CheckButton>
-			
-			<EditBox parentKey="FakeMax" inherits="TellMeWhen_TimeEditBoxTemplate" autoFocus="false">
-				<Size x="45" y="15"/>
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.BarGCD" relativePoint="BOTTOM" y="-2"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.text:SetText(TMW.L["ICONMENU_FAKEMAX"])
-						--self.text:SetWidth(50)
-						self.text:ClearAllPoints()
-						self.text:SetPoint("LEFT", self, "RIGHT", 2, 0)
-						self.text:SetPoint("RIGHT", self:GetParent(), "RIGHT", -5, 0)
-						
-						self:SetPoint("LEFT", self:GetParent().BarGCD, "LEFT", 8, 0)
-						
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["ICONMENU_FAKEMAX"], TMW.L["ICONMENU_FAKEMAX_DESC"])
-						self:SetSetting("BarDisplay_FakeMax")
-
+					<OnLoad inherit="prepend">
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()
-							self:SetEnabled(not settings.BarDisplay_Invert)
+							self:SetShown(settings.TimerBar_EnableColors)
+
+							self:GetParent():AdjustHeight()
 						end)
 					</OnLoad>
 				</Scripts>
-			</EditBox>
-
-			<Button parentKey="ColorStart" inherits="TellMeWhen_ColorButtonTemplate">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.FakeMax" relativePoint="BOTTOM" y="-10" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["ICONMENU_BAR_COLOR_START"], TMW.L["ICONMENU_BAR_COLOR_START_DESC"])
-						self:SetSetting("BarDisplay_StartColor")
-						self:SetHasOpacity(true)
-
-						self:CScriptAdd("ReloadRequested", function()
-							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.BarDisplay_EnableColors)
-						end)
-					</OnLoad>
-				</Scripts>
-			</Button>
-
-			<Button parentKey="ColorMiddle" inherits="TellMeWhen_ColorButtonTemplate">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.ColorStart" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["ICONMENU_BAR_COLOR_MIDDLE"], TMW.L["ICONMENU_BAR_COLOR_MIDDLE_DESC"])
-						self:SetSetting("BarDisplay_MiddleColor")
-						self:SetHasOpacity(true)
-
-						self:CScriptAdd("ReloadRequested", function()
-							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.BarDisplay_EnableColors)
-						end)
-					</OnLoad>
-				</Scripts>
-			</Button>
-
-			<Button parentKey="ColorComplete" inherits="TellMeWhen_ColorButtonTemplate">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.ColorStart" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["ICONMENU_BAR_COLOR_COMPLETE"], TMW.L["ICONMENU_BAR_COLOR_COMPLETE_DESC"])
-						self:SetSetting("BarDisplay_CompleteColor")
-						self:SetHasOpacity(true)
-
-						self:CScriptAdd("ReloadRequested", function()
-							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.BarDisplay_EnableColors)
-						end)
-					</OnLoad>
-				</Scripts>
-			</Button>
+			</Frame>
 
 		</Frames>
 		<Scripts>
@@ -159,19 +94,14 @@
 				
 				self:SetTitle(TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
 				
-				self.Invert:ConstrainLabel(self.BarGCD)
+				self.Invert:ConstrainLabel(self.FakeMax)
 				self.BarGCD:ConstrainLabel(self, "RIGHT")
 
-				self.EnableColors:ConstrainLabel(self.FakeMax)
+				self.EnableColors:ConstrainLabel(self.BarGCD)
 				self.FakeMax:ConstrainLabel(self, "RIGHT")
-
-				self.ColorStart:ConstrainLabel(self.ColorMiddle)
-				self.ColorMiddle:ConstrainLabel(self.ColorComplete)
-				self.ColorComplete:ConstrainLabel(self, "RIGHT")
 				
-				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Invert, self.BarGCD)
-				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.EnableColors)
-				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ColorStart, self.ColorMiddle, self.ColorComplete)
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Invert, self.FakeMax)
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.EnableColors, self.BarGCD)
 			</OnLoad>
 		</Scripts>
 	</Frame>

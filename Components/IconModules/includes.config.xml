@@ -52,12 +52,12 @@
 <!-- <Script file="IconModule_Texture_Colored\Config.lua"/> -->
 
 
-<!-- <Include file="IconModule_TimerBar\Config.xml"/> -->
+<Include file="IconModule_TimerBar\Config.xml"/>
 <!-- <Script file="IconModule_TimerBar\Config.lua"/> -->
 
 
 <Include file="IconModule_TimerBar_BarDisplay\Config.xml"/>
-<Script file="IconModule_TimerBar_BarDisplay\Config.lua"/>
+<!-- <Script file="IconModule_TimerBar_BarDisplay\Config.lua"/> -->
 
 
 <Include file="IconModule_TimerBar_Overlay\Config.xml"/>

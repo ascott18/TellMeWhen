@@ -29,7 +29,6 @@ local Texture_Colored = TMW:NewClass("IconModule_Texture_Colored", "IconModule_T
 
 function Texture_Colored:SetupForIcon(icon)
 	self.Colors = icon.typeData.Colors
-	self.ShowWhen = icon.ShowWhen
 	self.ShowTimer = icon.ShowTimer
 	self:UPDATE(icon)
 end
@@ -44,15 +43,7 @@ function Texture_Colored:UPDATE(icon)
 --[[
 	OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
 	OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
-	OORM=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range and mana
-
-	CTA	=	{r=1,	g=1,	b=1		},	-- counting with timer always
-	COA	=	{r=1,	g=1,	b=1		},	-- counting withOUT timer always
-	CTS	=	{r=1,	g=1,	b=1		},	-- counting with timer somtimes
-	COS	=	{r=1,	g=1,	b=1		},	-- counting withOUT timer somtimes
-
-	NA	=	{r=1,	g=1,	b=1		},	-- not counting always
-	NS	=	{r=1,	g=1,	b=1		},	-- not counting somtimes]]
+	OORM=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range and mana]]
 
 	local color
 	if not TMW.Locked then
@@ -65,33 +56,7 @@ function Texture_Colored:UPDATE(icon)
 		color = self.Colors.OOM
 	else
 
-		local s
-
-		
-		if not duration or duration == 0 or (ColorGCD and icon:OnGCD(duration)) or (charges and charges > 0) then
-			s = "N" -- Not counting
-		else
-			s = "C" -- Counting
-			
-			--if s == "C" then
-				if self.ShowTimer then
-					s = s .. "T" -- Timer
-				else
-					s = s .. "O" -- nOtimer
-				end
-			--end
-		end
-		
-		--if (self.ShowWhen or "always") == "always" then
-		if (bitband(self.ShowWhen or 0x3, 0x3)) == 0x3 then
-			s = s .. "A" -- Always
-		else
-			s = s .. "S" -- Sometimes
-		end
-		
-		--assert(self.Colors[s])
-		
-		color = self.Colors[s]
+		color = COLOR_UNLOCKED
 	end
 	
 	local texture = self.texture

@@ -107,21 +107,9 @@ local importExportBoxTemplate = {
 
 
 local colorOrder = {
-	"CBS",
-	"CBM",
-	"CBC",
-
 	"OOR",
 	"OOM",
 	"OORM",
-
-	"CTA",
-	"COA",
-	"CTS",
-	"COS",
-
-	"NA",
-	"NS",
 }
 local colorTemplate = {
 	type = "group",

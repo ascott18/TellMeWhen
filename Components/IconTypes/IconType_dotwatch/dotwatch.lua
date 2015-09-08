@@ -67,8 +67,8 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[ 0x2 ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_DOTWATCH_AURASFOUND_DESC"],	},
-	[ 0x1 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_DOTWATCH_NOFOUND_DESC"],	},
+	[ 1 ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_DOTWATCH_AURASFOUND_DESC"],	},
+	[ 2 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_DOTWATCH_NOFOUND_DESC"],	},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)

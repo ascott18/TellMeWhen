@@ -198,9 +198,9 @@
 			</Frame>
 			
 			<Slider parentKey="Slider" inherits="TellMeWhen_SliderTemplate">
-				<Size x="522" y="17"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Type" relativePoint="BOTTOM" y="-7"/>
+					<Anchor point="LEFT" relativeKey="$parent.Type" x="2"/>
 					<Anchor point="RIGHT" x="-13" />
 				</Anchors>
 				<Scripts>

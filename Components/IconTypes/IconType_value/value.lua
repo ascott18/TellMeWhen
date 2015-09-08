@@ -65,8 +65,8 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_VALUE_HASUNIT"],			},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_VALUE_NOUNIT"],		},
+	[1] = { text = "|cFF00FF00" .. L["ICONMENU_VALUE_HASUNIT"],			},
+	[2] = { text = "|cFFFF0000" .. L["ICONMENU_VALUE_NOUNIT"],		},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", function(self)

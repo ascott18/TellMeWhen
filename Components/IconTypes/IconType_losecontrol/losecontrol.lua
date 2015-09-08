@@ -73,8 +73,8 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_LoseControlTypes")
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x1] = { text = "|cFF00FF00" .. L["LOSECONTROL_INCONTROL"],		},
-	[0x2] = { text = "|cFFFF0000" .. L["LOSECONTROL_CONTROLLOST"],		},
+	[1] = { text = "|cFF00FF00" .. L["LOSECONTROL_INCONTROL"],		},
+	[2] = { text = "|cFFFF0000" .. L["LOSECONTROL_CONTROLLOST"],		},
 })
 
 

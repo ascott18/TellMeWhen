@@ -125,8 +125,8 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"], 	},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	},
+	[1] = { text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"], 	},
+	[2] = { text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_DRSettings", function(self)

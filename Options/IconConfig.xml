@@ -305,20 +305,9 @@
 		</KeyValues>
 
 		<Frames>
-			<CheckButton parentKey="Check" inherits="TellMeWhen_CheckTemplate">
-				<Anchors>
-					<Anchor point="LEFT" x="5" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.text:SetWidth(self:GetParent():GetWidth()-7)
-					</OnLoad>
-				</Scripts>
-			</CheckButton>
 			<Slider parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
-				<Size y="17"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.Check" relativePoint="RIGHT" x="5" />
+					<Anchor point="LEFT" x="11" />
 					<Anchor point="RIGHT" x="-11" />
 				</Anchors>
 				<Scripts>
@@ -349,7 +338,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame parentKey="Alpha" inherits="TellMeWhen_WhenCheckSet">
+			<Frame parentKey="Alpha" inherits="TellMeWhen_WhenCheckSet" id="1">
 				<Anchors>
 					<Anchor point="TOP" y="-2"/>
 					<Anchor point="LEFT" />
@@ -359,11 +348,11 @@
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:SetSettings("Alpha", 0x2)
+						self:SetSettings("Alpha")
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			<Frame parentKey="UnAlpha" inherits="TellMeWhen_WhenCheckSet">
+			<Frame parentKey="UnAlpha" inherits="TellMeWhen_WhenCheckSet" id="2">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Alpha" relativePoint="BOTTOM"/>
 					<Anchor point="LEFT" />
@@ -373,7 +362,7 @@
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:SetSettings("UnAlpha", 0x1)
+						self:SetSettings("UnAlpha")
 					</OnLoad>
 				</Scripts>
 			</Frame>

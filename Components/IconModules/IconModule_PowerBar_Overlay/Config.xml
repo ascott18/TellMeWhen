@@ -26,7 +26,7 @@
 						
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.ShowPBar)
+							self:SetShown(settings.ShowPBar)
 						end)
 					</OnLoad>
 				</Scripts>
@@ -51,7 +51,7 @@
 						
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.ShowPBar)
+							self:SetShown(settings.ShowPBar)
 						end)
 					</OnLoad>
 				</Scripts>

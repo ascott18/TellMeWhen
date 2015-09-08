@@ -26,17 +26,20 @@ TimerBar_BarDisplay:RegisterIconDefaults{
 	BarDisplay_Invert			= false,
 	BarDisplay_BarGCD			= false,
 	BarDisplay_FakeMax			= 0,
-	BarDisplay_StartColor		= "ffff0000",
-	BarDisplay_MiddleColor		= "ffffff00",
-	BarDisplay_CompleteColor	= "ff00ff00",
-	BarDisplay_EnableColors		= false,
 }
 
-TMW:RegisterUpgrade(80003, {
+TMW:RegisterUpgrade(80006, {
 	icon = function(self, ics)
-		ics.BarDisplay_StartColor    = TMW:RGBATableToStringWithFallback(ics.BarDisplay_StartColor, "ffff0000")
-		ics.BarDisplay_MiddleColor   = TMW:RGBATableToStringWithFallback(ics.BarDisplay_MiddleColor, "ffffff00")
-		ics.BarDisplay_CompleteColor = TMW:RGBATableToStringWithFallback(ics.BarDisplay_CompleteColor, "ff00ff00")
+		ics.TimerBar_StartColor    = TMW:RGBATableToStringWithFallback(ics.BarDisplay_StartColor,    "ffff0000")
+		ics.TimerBar_MiddleColor   = TMW:RGBATableToStringWithFallback(ics.BarDisplay_MiddleColor,   "ffffff00")
+		ics.TimerBar_CompleteColor = TMW:RGBATableToStringWithFallback(ics.BarDisplay_CompleteColor, "ff00ff00")
+
+		ics.TimerBar_EnableColors  = ics.BarDisplay_EnableColors or ics.TimerBar_EnableColors
+
+		ics.BarDisplay_StartColor    = nil
+		ics.BarDisplay_MiddleColor   = nil
+		ics.BarDisplay_CompleteColor = nil
+		ics.BarDisplay_EnableColors  = nil
 	end,
 })
 
@@ -109,16 +112,24 @@ function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
 end
 TimerBar_BarDisplay:SetDataListner("VALUE")
 
+local colorSettingNames = {
+	"TimerBar_StartColor",
+	"TimerBar_MiddleColor",
+	"TimerBar_CompleteColor",
+}
+
 function TimerBar_BarDisplay:SetupColors(icon, valueColor)
 	icon = icon or self.icon
 
-	if icon.BarDisplay_EnableColors then
+	if icon.TimerBar_EnableColors then
 		self:SetColors(
-			icon.BarDisplay_StartColor,
-			icon.BarDisplay_MiddleColor,
-			icon.BarDisplay_CompleteColor)
+			icon.TimerBar_StartColor,
+			icon.TimerBar_MiddleColor,
+			icon.TimerBar_CompleteColor)
 
 	elseif valueColor then
+		-- TODO: add a setting to the value icon type called "use color", and don't ever pass this value color if they disable that setting?
+		-- This will make color overriding much more intuitive, since the icon.TimerBar_EnableColors is labeled as "Override group colors".
 		if type(valueColor) == "table" and #valueColor == 3 then
 			self:SetColors(unpack(valueColor))
 		else
@@ -129,9 +140,9 @@ function TimerBar_BarDisplay:SetupColors(icon, valueColor)
 		end
 	else
 		self:SetColors(
-			icon.typeData.Colors.CBS.Color,
-			icon.typeData.Colors.CBM.Color,
-			icon.typeData.Colors.CBC.Color)
+			TMW:GetColors(colorSettingNames, "TimerBar_EnableColors",
+			              icon.group:GetSettings(), TMW.db.global)
+		)
 	end
 end
 

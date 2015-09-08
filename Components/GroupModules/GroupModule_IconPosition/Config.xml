@@ -1,11 +1,11 @@
 <Ui>
 
 	<Frame name="TellMeWhen_GM_IconPosition" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="40"/>
+		<Size y="38"/>
 		<Frames>
 			<Slider parentKey="X" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="10" y="-13"/>
+					<Anchor point="TOPLEFT" x="10" y="-10"/>
 					<Anchor point="RIGHT" relativePoint="TOP" x="-10" />
 				</Anchors>
 				<Scripts>

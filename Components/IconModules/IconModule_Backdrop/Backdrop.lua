@@ -23,12 +23,27 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local Backdrop = TMW:NewClass("IconModule_Backdrop", "IconModule")
 
 Backdrop:RegisterIconDefaults{
-	BackdropColor		= "7f333333",
+	BackdropColor        = "7f333333",
+	BackdropColor_Enable = false,
 }
+
+TMW:MergeDefaultsTables({
+	BackdropColor        = "7f333333",
+	BackdropColor_Enable = false,
+}, TMW.Group_Defaults)
+
+TMW:MergeDefaultsTables({
+	BackdropColor        = "7f333333",
+}, TMW.Defaults.global)
+
 
 TMW:RegisterUpgrade(80003, {
 	icon = function(self, ics)
 		ics.BackdropColor = TMW:RGBATableToStringWithFallback(ics.BackdropColor, "7f333333")
+
+		if ics.BackdropColor ~= "7f333333" then
+			ics.BackdropColor_Enable = true
+		end
 	end,
 })
 
@@ -52,7 +67,19 @@ TMW:RegisterUpgrade(72330, {
 })
 
 
-Backdrop:RegisterConfigPanel_XMLTemplate(216, "TellMeWhen_BackdropOptions")
+Backdrop:RegisterConfigPanel_XMLTemplate(216, "TellMeWhen_BackdropOptions_Icon")
+
+Backdrop:RegisterConfigPanel_XMLTemplate(53, "TellMeWhen_BackdropOptions_Group")
+	:SetPanelSet("group")
+	:SetColumnIndex(1)
+
+
+-- TODO: this doesnt do anything
+Backdrop:RegisterConfigPanel_XMLTemplate(53, "TellMeWhen_BackdropOptions_Group")
+	:SetPanelSet("main")
+	:SetColumnIndex(1)
+
+
 
 --Backdrop:RegisterAnchorableFrame("Backdrop")
 
@@ -86,7 +113,10 @@ end
 function Backdrop:SetupForIcon(icon)
 	self.backdrop:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
 	
-	local r, g, b, a = TMW:StringToRGBA(icon.BackdropColor)
+	local color = TMW:GetColors("BackdropColor", "BackdropColor_Enable",
+		                        icon:GetSettings(), icon.group:GetSettings(), TMW.db.global)
+
+	local r, g, b, a = TMW:StringToRGBA(color)
 	self.backdrop:SetVertexColor(r, g, b, 1)
 	self.backdrop:SetAlpha(a)
 end

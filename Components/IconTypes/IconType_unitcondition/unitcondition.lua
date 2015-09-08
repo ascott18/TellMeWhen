@@ -67,8 +67,8 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_UNITSUCCEED"],			},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNITFAIL"],			},
+	[1] = { text = "|cFF00FF00" .. L["ICONMENU_UNITSUCCEED"],			},
+	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNITFAIL"],			},
 })
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")

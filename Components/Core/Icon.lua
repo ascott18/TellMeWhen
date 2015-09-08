@@ -875,17 +875,6 @@ function Icon.Setup(icon)
 			icon[k] = nil
 		end
 	end
-
-
-	-- Set icon.Alpha and icon.UnAlpha based on the icon.ShowWhen setting.
-	-- TODO: Overhaul the alpha system so this isn't hardcoded in.
-	if icon.ShowWhen then
-		if bitband(icon.ShowWhen, 0x1) == 0 then
-			icon.UnAlpha = 0
-		elseif bitband(icon.ShowWhen, 0x2) == 0 then
-			icon.Alpha = 0
-		end
-	end
 	
 
 	-- Non-controlled icons should always show if they're used.

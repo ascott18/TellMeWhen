@@ -194,7 +194,6 @@
 					</Button>
 
 					<Slider parentKey="Size" name="$parentSize" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" valuestep="1">
-						<Size x="150" y="17"/>
 						<Anchors>
 							<Anchor point="LEFT" x="10" />
 						</Anchors>
@@ -217,7 +216,6 @@
 					</Slider>
 
 					<Slider parentKey="TextDuration" name="$parentTextDuration" inherits="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" minvalue="0" valuestep="0.5">
-						<Size x="150" y="17"/>
 						<Anchors>
 							<Anchor point="LEFT" x="10" />
 						</Anchors>

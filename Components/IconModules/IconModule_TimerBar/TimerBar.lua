@@ -35,6 +35,46 @@ local StatusBarTexture
 local TimerBar = TMW:NewClass("IconModule_TimerBar", "IconModule", "UpdateTableManager")
 TimerBar:UpdateTable_Set(BarsToUpdate)
 
+
+local settings = {
+	TimerBar_StartColor    = "ffff0000",
+	TimerBar_MiddleColor   = "ffffff00",
+	TimerBar_CompleteColor = "ff00ff00",
+	TimerBar_EnableColors  = false,
+}
+
+TimerBar:RegisterIconDefaults(settings)
+
+
+TMW:MergeDefaultsTables(settings, TMW.Group_Defaults)
+
+
+settings.TimerBar_EnableColors = nil
+TMW:MergeDefaultsTables(settings, TMW.Defaults.global)
+
+TMW:RegisterUpgrade(80006, {
+	profile = function(self, profile)
+		for _, v in pairs(profile.Colors) do
+			v.CBC = nil
+			v.CBS = nil
+			v.CBM = nil
+		end
+	end,
+})
+
+
+TimerBar:RegisterConfigPanel_XMLTemplate(52, "TellMeWhen_TimerBar_GroupColors")
+	:SetPanelSet("group")
+	:SetColumnIndex(1)
+
+
+-- TODO: this doesnt do anything
+TimerBar:RegisterConfigPanel_XMLTemplate(52, "TellMeWhen_TimerBar_GlobalColors")
+	:SetPanelSet("main")
+	:SetColumnIndex(1)
+
+
+
 TimerBar:RegisterAnchorableFrame("TimerBar")
 
 function TimerBar:OnNewInstance(icon)	

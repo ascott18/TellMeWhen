@@ -67,8 +67,8 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
 	text = L["ICONMENU_SHOWWHEN"],
-	[0x2] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
-	[0x1] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
+	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", function(self)
@@ -101,7 +101,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", functio
 
 			if settings.OnlyEquipped and not settings.OnlyInBags then
 				settings.OnlyInBags = true
-				self:OnSettingSaved()
+				self:RequestReload()
 			end
 		end
 	end)

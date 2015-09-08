@@ -64,11 +64,12 @@ function TimerBar_Overlay:SetupForIcon(sourceIcon)
 	if not sourceIcon.typeData then
 		error("sourceIcon.typeData was nil. Why did this happen? (Please tell Cybeloras)")
 	end
-	self:SetColors(
-		sourceIcon.typeData.Colors.CBS.Color,
-		sourceIcon.typeData.Colors.CBM.Color,
-		sourceIcon.typeData.Colors.CBC.Color)
+	
 
+	self:SetColors(
+		TMW:GetColors(colorSettingNames, "TimerBar_EnableColors",
+		              sourceIcon:GetSettings(), sourceIcon.group:GetSettings(), TMW.db.global)
+	)
 	
 	self:UpdateValue(true)
 end

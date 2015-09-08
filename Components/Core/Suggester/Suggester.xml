@@ -150,17 +150,16 @@
 		</Layers>
 		<Frames>
 			<Slider parentKey="Speed" inherits="TellMeWhen_SliderTemplate" hidden="true">
-				<Size x="165" y="18"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.InfoText" relativePoint="BOTTOM" y="-25"/>
+					<Anchor point="LEFT" x="17"/>
+					<Anchor point="RIGHT" x="-17"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self.exponent = 4
 						self.max = 5000
 						self.text:SetText(TMW.L["CACHINGSPEED"])
-						self.Low:SetText(1)
-						self.High:SetText(self.max)
 						
 						self.SpellCache = TMW:GetModule("SpellCache")
 						

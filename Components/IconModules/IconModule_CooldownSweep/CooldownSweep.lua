@@ -64,7 +64,6 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 
 			check:CScriptAdd("ReloadRequested", function()
 				check:SetShown(not TMW.CI.icon.typeData.hasNoGCD)
-				check:GetParent():AdjustHeight()
 
 				check:SetEnabled(TMW.CI.ics.ShowTimer or TMW.CI.ics.ShowTimerText or TMW.CI.ics.ShowTimerTextnoOCC)
 			end)
@@ -75,12 +74,13 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 
 			check:CScriptAdd("ReloadRequested", function()				
 				check:SetShown(IsAddOnLoaded("ElvUI"))
-				check:GetParent():AdjustHeight()
 
 				check:SetEnabled(TMW.CI.ics.ShowTimer)
 			end)
 		end,
 	})
+
+	self:SetAutoAdjustHeight(true)
 end)
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()

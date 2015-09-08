@@ -1,7 +1,7 @@
 ﻿<Ui>
 
 	<Frame name="TellMeWhen_CBarOptions" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="60"/>
+		<Size y="90"/>
 		<Frames>
 			<CheckButton parentKey="ShowCBar" name="$parentShowCBar" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
@@ -26,7 +26,7 @@
 						
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.ShowCBar)
+							self:SetShown(settings.ShowCBar)
 						end)
 					</OnLoad>
 				</Scripts>
@@ -52,16 +52,34 @@
 						
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.ShowCBar)
+							self:SetShown(settings.ShowCBar)
 						end)
 					</OnLoad>
 				</Scripts>
 			</EditBox>
 			
-			<CheckButton parentKey="Overlay_BarGCD" name="$parentOverlay_BarGCD" inherits="TellMeWhen_CheckTemplate">
+
+			<CheckButton parentKey="EnableColors" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeTo="$parentShowCBar" relativePoint="BOTTOM" y="2"/>
 				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["COLOR_OVERRIDE_GROUP"], TMW.L["COLOR_OVERRIDE_GROUP_DESC"])
+						self:SetSetting("TimerBar_EnableColors")
+						
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetShown(settings.ShowCBar)
+						end)
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+			
+			<CheckButton parentKey="Overlay_BarGCD" name="$parentOverlay_BarGCD" inherits="TellMeWhen_CheckTemplate">
+				<!-- Left anchor is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
@@ -70,18 +88,25 @@
 						self:SetSetting("Overlay_BarGCD")
 						
 						self:CScriptAdd("ReloadRequested", function()
-							self:SetEnabled(TMW.CI.ics.ShowCBar)
-							self:SetShown(not TMW.CI.icon.typeData.hasNoGCD)
+							local settings = self:GetSettingTable()
+
+							self:SetShown(settings.ShowCBar and not TMW.CI.icon.typeData.hasNoGCD)
 						end)
 					</OnLoad>
-					<OnHide>
-						self:GetParent():SetHeight(30)
-					</OnHide>
-					<OnShow>
-						self:GetParent():SetHeight(60)
-					</OnShow>
 				</Scripts>
 			</CheckButton>
+
+
+			<Frame inherits="TellMeWhen_TimerBarColorsTemplate">
+				<Scripts>
+					<OnLoad inherit="prepend">
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetShown(settings.ShowCBar and settings.TimerBar_EnableColors)
+						end)
+					</OnLoad>
+				</Scripts>
+			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -91,9 +116,14 @@
 				
 				self.ShowCBar:ConstrainLabel(self.InvertCBar)
 				self.InvertCBar:ConstrainLabel(self.CBarOffs)
+
+				self.EnableColors:ConstrainLabel(self.Overlay_BarGCD)
+				self.Overlay_BarGCD:ConstrainLabel(self, "RIGHT")
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.ShowCBar, self.InvertCBar, self.CBarOffs)
-				TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.Overlay_BarGCD)
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.EnableColors, self.Overlay_BarGCD)
+
+				self:SetAutoAdjustHeight(true)
 			</OnLoad>
 		</Scripts>
 	</Frame>
