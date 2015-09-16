@@ -14,11 +14,13 @@ TMW.CHANGELOG = [==[
 
 ====General====
 * All TellMeWhen configuration is now done in the icon editor.
+* New conditions have been added for checking your current location.
+
+===v7.4.0===
 * Bar and Vertical Bar groups now have several new options:
 ** Show/Hide Icon
 ** Flip Icon
 ** Bar & Icon Borders
-* New conditions have been added for checking your current location.
 
 ===v7.3.5===
 ====Bug Fixes====
