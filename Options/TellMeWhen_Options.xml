@@ -461,67 +461,62 @@
 		</Frames>
 	</Frame>
 
-	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true" drawLayer="BACKGROUND">
-		<Size y="16"/>
+	<Slider name="TellMeWhen_SliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
+		<Size y="20"/>
 
 		<KeyValues>
 			<KeyValue key="tmwClass" type="string" value="Config_Slider"/>
 		</KeyValues>
 
-		<HitRectInsets left="0" right="0" top="-3" bottom="-3" />
+		<HitRectInsets left="0" right="0" top="-2" bottom="-3" />
 
 		<ThumbTexture parentKey="thumb">
-			<Size x="15" y="20"/>
-			<Color r="0.45" g="0.45" b="0.45" a="1"/>
+			<Size x="14" y="20"/>
 		</ThumbTexture>
-
-	<!-- 	<Frames>
-			<Frame inherits="TellMeWhen_GenericBorder" >
-				<Scripts>
-					<OnLoad inherit="prepend">
-						self:SetBorderSize(1)
-						local c = 0.03
-						self:SetColor(c, c, c, 1)
-					</OnLoad>
-				</Scripts>
-			</Frame>
-		</Frames> -->
 
 		<Layers>
 			<Layer level="ARTWORK">
-
-				<Texture parentKey="Background" setAllPoints="true">
+				<Texture parentKey="Background" >
+					<Size y="10"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="-3"/>
-						<Anchor point="BOTTOMRIGHT" x="3"/>
+						<Anchor point="BOTTOMLEFT" />
+						<Anchor point="BOTTOMRIGHT" />
 					</Anchors>
 					<Color r="0.03" g="0.03" b="0.03" a="0.95"/>
 				</Texture>
 			</Layer>
 
 			<Layer level="OVERLAY">
-				<FontString parentKey="Low" inherits="GameFontHighlightSmall">
+				<Texture parentKey="ThumbTexture">
+					<Size x="5" y="14"/>
+					<Color r="0.45" g="0.45" b="0.45" a="1"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="-4" y="-1"/>
+						<!-- This anchor has to be set again in Config_Slider because it doesn't actually work here. -->
+						<Anchor point="BOTTOM" relativeKey="$parent.thumb" y="-2"/>
 					</Anchors>
-				</FontString>
-				<FontString parentKey="High" inherits="GameFontHighlightSmall" >
+				</Texture>
+
+
+
+				<FontString parentKey="Center" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
 					<Anchors>
-						<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" x="4" y="-1"/>
+						<Anchor point="BOTTOM" relativeKey="$parent.Background" relativePoint="TOP" y="2"/>
 					</Anchors>
 				</FontString>
 
-				<FontString parentKey="Mid" inherits="GameFontHighlightSmall" text="">
+				<FontString parentKey="Right" inherits="GameFontHighlightSmall" justifyH="RIGHT" justifyV="BOTTOM">
 					<Anchors>
+						<Anchor point="BOTTOM"  relativeKey="$parent.Center"/>
 						<Anchor point="RIGHT" x="-3" />
 					</Anchors>
 				</FontString>
 
-				<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="LEFT" justifyV="MIDDLE" >
+				<FontString parentKey="Left" inherits="GameFontHighlightSmall" justifyH="LEFT" justifyV="BOTTOM" >
 					<Size y="30" />
 					<Anchors>
+						<Anchor point="BOTTOM"  relativeKey="$parent.Center"/>
 						<Anchor point="LEFT" x="3" />
-						<Anchor point="RIGHT" relativeKey="$parent.Mid" relativePoint="LEFT" x="-5"/>
+						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="LEFT" x="-5"/>
 					</Anchors>
 				</FontString>
 			</Layer>

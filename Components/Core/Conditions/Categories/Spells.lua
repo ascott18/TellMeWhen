@@ -683,7 +683,6 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 		[1] = L["ICONMENU_PRESENT"],
 		[2] = L["ICONMENU_ABSENT"],
 	},
-	midt = L["ICONMENU_PRESENT"],
 	icon = "Interface\\Icons\\Temp",
 	tcoords = CNDT.COMMON.standardtcoords,
 	name = function(editbox)

@@ -36,14 +36,12 @@
 			
 			<Slider parentKey="DurationAlpha" name="$parentDurationAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.DurationMax" relativePoint="RIGHT" x="15" />
+					<Anchor point="LEFT" relativeKey="$parent.DurationMax" relativePoint="RIGHT" x="10" />
 					<Anchor point="RIGHT" x="-10" />
 					<Anchor point="TOP" y="-13" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetWidth(self:GetWidth())
-						
 						TMW:CInit(self)
 
 						self:SetTexts(TMW.L["REQFAILED_ALPHA"], TMW.L["DURATIONALPHA_DESC"])
@@ -54,7 +52,7 @@
 							self:SetEnabled(settings.DurationMinEnabled or settings.DurationMaxEnabled)
 						end)
 
-						self:SetOrangeValue(1)
+						self:SetTextFormatter(self.OrangeAt100Formatter)
 					</OnLoad>
 				</Scripts>
 			</Slider>

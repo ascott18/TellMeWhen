@@ -34,9 +34,6 @@ The funcstr field is the only one that is required. Errors may happen with the o
 * texttable 
 ** [Function>|Table>|String] Older method to map numeric slider values with the text that should be displayed for it. Will be wrapped with a formatter. You should not define both a formatter and a texttable.
 
-* midt
-** [String] Set to a label that will be displayed in the middle of the slider. By default, no middle label is used unless this field is set.
-
 
 == Slider & Value - Behavior & Range
 * step

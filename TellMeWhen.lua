@@ -84,7 +84,7 @@ end
 function TMW:CInit(self, className)
 	local className = className or self.tmwClass
 	if not className then
-		error("tmwClass value not defined for " .. self:GetName() or "<unnamed>.")
+		error("tmwClass value not defined for " .. (self:GetName() or "<unnamed>."))
 	end
 
 	local class = TMW.Classes[className]

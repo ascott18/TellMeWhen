@@ -59,9 +59,10 @@
 	
 	
 	<Frame name="TellMeWhen_ConditionGroup" inherits="TellMeWhen_FlatFrame" virtual="true">
-		<Size x="563" y="69"/>
+		<Size y="69"/>
 		<Anchors>
-			<Anchor point="TOPLEFT"/>
+			<Anchor point="LEFT"/>
+			<Anchor point="RIGHT"/>
 		</Anchors>
 		<Frames>
 			<Frame parentKey="Type" inherits="TMW_DropDownMenuTemplate">
@@ -209,7 +210,8 @@
 
 						TMW:CInit(self)
 						self:SetSetting("Level")
-						self:SetExtremesColor(1)
+						self:SetExtremesColor(0.6)
+						self:SetTextMode(self.TEXT_MODE_MINMAX)
 
 						-- This is needed so we can show the "right-click for manual input" tooltip.
 						self:SetTooltip(TMW.L["CONDITIONPANEL_VALUEN"], nil)
@@ -609,17 +611,17 @@
 		<Frames>			
 			<Frame parentKey="Groups" >
 				<Anchors>
-					<Anchor point="TOPLEFT" y="-4" x="-5"/>
-					<Anchor point="BOTTOMRIGHT" y="0"/>
+					<Anchor point="TOPLEFT" y="-4" x="12"/>
+					<Anchor point="BOTTOMRIGHT" y="0" x="-12"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						TMW:ConvertContainerToScrollFrame(self, false, -2)
+						TMW:ConvertContainerToScrollFrame(self, true, 3, 7)
 						self.ScrollFrame:SetWheelStepAmount(40)
 						
 						TMW.CNDT:CreateGroups(1)
 						TMW.CNDT[1].AndOr:Hide()
-						TMW.CNDT[1]:SetPoint("TOPLEFT", 12, -16)
+						TMW.CNDT[1]:SetPoint("TOP", 0, -16)
 					</OnLoad>
 				</Scripts>
 				<Frames>

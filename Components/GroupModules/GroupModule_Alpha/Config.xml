@@ -1,11 +1,10 @@
 ﻿<Ui>
 
 	<Frame name="TellMeWhen_GM_Alpha" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="40"/>
+		<Size y="34"/>
 		<Frames>
-			<Slider parentKey="Alpha" inherits="TellMeWhen_SliderTemplate">
+			<Slider parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha">
 				<Anchors>
-					<Anchor point="TOP" y="-13"/>
 					<Anchor point="LEFT" x="10" />
 					<Anchor point="RIGHT" x="-10" />
 				</Anchors>
@@ -15,8 +14,6 @@
 
 						self:SetTexts(TMW.L["UIPANEL_GROUPALPHA"], TMW.L["UIPANEL_GROUPALPHA_DESC"])
 						self:SetSetting("Alpha")
-						self:SetMinMaxValues(0, 1)
-						self:SetValueStep(0.01)
 					</OnLoad>
 				</Scripts>
 			</Slider>

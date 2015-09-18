@@ -159,7 +159,7 @@
 					<OnLoad>
 						self.exponent = 4
 						self.max = 5000
-						self.text:SetText(TMW.L["CACHINGSPEED"])
+						self.Left:SetText(TMW.L["CACHINGSPEED"])
 						
 						self.SpellCache = TMW:GetModule("SpellCache")
 						
@@ -178,13 +178,13 @@
 						
 						self:SetMinMaxValues(1, self.max^(1/self.exponent))
 						
-						self.Mid:SetText(self.SpellCache:GetNumCachePerFrame())
+						self.Right:SetText(self.SpellCache:GetNumCachePerFrame())
 						self:SetActualValue(self.SpellCache:GetNumCachePerFrame())
 					</OnLoad>
 					<OnValueChanged>
 						local value = self:GetActualValue()
 						self.SpellCache:SetNumCachePerFrame(value)
-						self.Mid:SetText(value)
+						self.Right:SetText(value)
 					</OnValueChanged>
 					<OnShow>
 						self:GetParent().InfoText:Show()

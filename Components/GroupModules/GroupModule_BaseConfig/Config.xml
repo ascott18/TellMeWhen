@@ -86,11 +86,10 @@
 	</Frame>
 
 	<Frame name="TellMeWhen_GM_Dims" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="38"/>
+		<Size y="34"/>
 		<Frames>
 			<Slider parentKey="Rows" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOP" y="-10"/>
 					<Anchor point="LEFT" x="10" />
 					<Anchor point="RIGHT" relativePoint="CENTER" x="-10" />
 				</Anchors>
@@ -107,7 +106,6 @@
 			</Slider>
 			<Slider parentKey="Columns" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Rows"/>
 					<Anchor point="LEFT" relativePoint="CENTER" x="10" />
 					<Anchor point="RIGHT" X="-10"/>
 				</Anchors>

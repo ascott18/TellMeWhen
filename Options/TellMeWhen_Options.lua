@@ -2285,6 +2285,10 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	MODE_STATIC = 1,
 	MODE_ADJUSTING = 2,
 
+	TEXT_MODE_TITLEVAL = 1,
+	TEXT_MODE_MINMAX = 2,
+	TEXT_MODE_MINMIDMAX = 3,
+
 	FORCE_EDITBOX_THRESHOLD = 10e5,
 
 	range = 10,
@@ -2297,6 +2301,9 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		self.min, self.max = self:GetMinMaxValues()
 
 		self:SetMode(self.MODE_STATIC)
+		self:SetTextMode(self.TEXT_MODE_TITLEVAL)
+
+		self.ThumbTexture:SetPoint("BOTTOM", self.thumb, 0, -2)
 		
 		self:EnableMouseWheel(true)
 		self:SetExtremesColor(0.25)
@@ -2304,13 +2311,19 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 
 	SetTexts = function(self, title, tooltip)
-		self.text:SetText(title .. ":")
+		self.title = title
+		self:UpdateTexts()
 		self:SetTooltip(title, tooltip)
 	end,
 
 	SetExtremesColor = function(self, color)
-		self.Low:SetTextColor(color, color, color, 1)
-		self.High:SetTextColor(color, color, color, 1)
+		self.extremesColor = color
+		self:UpdateTexts()
+	end,
+
+	UseLightColor = function(self)
+		local c = 0.13
+		self.Background:SetTexture(c, c, c, 0.95)
 	end,
 
 	-- Blizzard Overrides
@@ -2528,8 +2541,13 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			self.EditBox = self.Config_EditBox_Slider:New("EditBox", name, self:GetParent(), "TellMeWhen_InputBoxTemplate", nil, {})
 			self.EditBox.Slider = self
 
-			self.EditBox:SetPoint("LEFT", self)
-			self.EditBox:SetPoint("RIGHT", self)
+			self.EditBox.title = self.EditBox:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+			self.EditBox.title:SetPoint("LEFT", self.EditBox)
+			self.EditBox.title:SetPoint("RIGHT", self.EditBox)
+			self.EditBox.title:SetPoint("BOTTOM", self.EditBox, "TOP")
+
+			self.EditBox:SetPoint("BOTTOMLEFT", self, 0, -2)
+			self.EditBox:SetPoint("BOTTOMRIGHT", self, 0, -2)
 
 			self.EditBox:SetText(self:GetValue())
 
@@ -2537,6 +2555,8 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 				self:SetTooltip(unpack(self.ttData))
 			end
 		end
+
+		self.EditBox.title:SetText(self.title)
 
 		if not self.EditBoxShowing then
 			PlaySound("igMainMenuOptionCheckBoxOn")
@@ -2584,12 +2604,6 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		self:UpdateTexts()
 	end,
 
-	SetStaticMidText = function(self, text)
-		self.staticMidText = text
-
-		self:UpdateTexts()
-	end,
-
 	TT_textFunc = function(self)
 		local text = self.ttData[2]
 
@@ -2628,18 +2642,42 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	end,
 
 	UpdateTexts = function(self)
-		if self.staticMidText then
-			self.Mid:SetText(self.staticMidText)
-		else
-			self.formatter:SetFormattedText(self.Mid, self:GetValue())
-		end
 
-		local minValue, maxValue = self:GetMinMaxValues()
-		
-		--self.extremesFormatter:SetFormattedText(self.Low, minValue)
-		--self.extremesFormatter:SetFormattedText(self.High, maxValue)
+		self.Center:SetText("")
+		if self.textMode == self.TEXT_MODE_TITLEVAL then
+			if self.title then
+				self.Left:SetText(self.title .. ":")
+			else
+				self.Left:SetText("")
+			end
+
+			self.formatter:SetFormattedText(self.Right, self:GetValue())
+
+			local color = 1
+			self.Left:SetTextColor(color, color, color, 1)
+			self.Right:SetTextColor(color, color, color, 1)
+		else
+			local minValue, maxValue = self:GetMinMaxValues()
+
+			self.extremesFormatter:SetFormattedText(self.Left, minValue)
+			self.extremesFormatter:SetFormattedText(self.Right, maxValue)
+
+			local color = self.extremesColor or 1
+			self.Left:SetTextColor(color, color, color, 1)
+			self.Center:SetTextColor(color, color, color, 1)
+			self.Right:SetTextColor(color, color, color, 1)
+
+			if self.textMode == self.TEXT_MODE_MINMIDMAX then
+				self.formatter:SetFormattedText(self.Center, self:GetValue())
+			end
+		end
 	end,
 
+	SetTextMode = function(self, mode)
+		self.textMode = mode
+
+		self:UpdateTexts()
+	end,
 
 	UpdateRange = function(self, value)
 		if self.mode == self.MODE_ADJUSTING then
@@ -2698,6 +2736,8 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 		self:SetValueStep(0.01)
 		self:SetWheelStep(0.1)
 
+		self:SetTextFormatter(self.Formatter)
+
 		self:UpdateTexts()
 	end,
 
@@ -2708,12 +2748,6 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 		end,
 	},
 	
-
-	-- Methods
-	SetOrangeValue = function(self, value)
-		self.setOrangeAtValue = value
-	end,
-
 	Formatter = TMW.C.Formatter:New(function(value)
 		if value == 0 then
 			return L["CONDITIONPANEL_ICON_HIDDEN"]
@@ -2722,15 +2756,16 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 		end
 	end),
 	
-	UpdateTexts = function(self)
-		local value = self:GetValue()
-				
-		if self:IsEnabled() and value == self.setOrangeAtValue then
-			self.Mid:SetText("|cffff7400" .. self.Formatter:Format(value))
+	OrangeAt100Formatter = TMW.C.Formatter:New(function(value)
+		if value == 0 then
+			return L["CONDITIONPANEL_ICON_HIDDEN"]
 		else
-			self.Formatter:SetFormattedText(self.Mid, value)
+			if value == 1 then
+				return "|cffff7400" .. TMW.C.Formatter.PERCENT100:Format(value)
+			end
+			return TMW.C.Formatter.PERCENT100:Format(value)
 		end
-	end,
+	end),
 }
 
 TMW:NewClass("Config_BitflagBase"){

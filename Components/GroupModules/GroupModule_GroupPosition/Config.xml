@@ -1,7 +1,7 @@
 <Ui>
 
 	<Frame name="TellMeWhen_GM_GroupPosition" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="200"/>
+		<Size y="196"/>
 		<Frames>
 			<!--  TODO: add a message underneath this box if the target can't be found, and also add one if the target is a GUID. -->
 			<EditBox parentKey="RelativeTo" inherits="TellMeWhen_InputBoxTemplate">
@@ -156,7 +156,7 @@
 
 			<Slider parentKey="Strata" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Point" relativePoint="BOTTOM"  y="-17"/>
+					<Anchor point="TOP" relativeKey="$parent.Point" relativePoint="BOTTOM"  y="-13"/>
 					<Anchor point="LEFT" x="10" />
 					<Anchor point="RIGHT" relativeKey="$parent.RelativePoint" x="-5" />
 				</Anchors>
@@ -233,7 +233,7 @@
 
 			<Slider parentKey="Scale" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Strata" relativePoint="BOTTOM"  y="-25"/>
+					<Anchor point="TOP" relativeKey="$parent.Strata" relativePoint="BOTTOM"  y="-20"/>
 					<Anchor point="LEFT" relativeKey="$parent.Strata" />
 					<Anchor point="RIGHT" relativeKey="$parent.Strata" />
 				</Anchors>

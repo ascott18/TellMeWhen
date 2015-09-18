@@ -51,7 +51,7 @@
 							self:SetEnabled(settings.StackMinEnabled or settings.StackMaxEnabled)
 						end)
 
-						self:SetOrangeValue(1)
+						self:SetTextFormatter(self.OrangeAt100Formatter)
 					</OnLoad>
 				</Scripts>
 			</Slider>

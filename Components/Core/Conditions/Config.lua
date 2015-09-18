@@ -706,7 +706,7 @@ function CndtGroup:OnNewInstance()
 	local ID = self:GetID()
 	CNDT[ID] = self
 
-	self:SetPoint("TOPLEFT", CNDT[ID-1], "BOTTOMLEFT", 0, -20)
+	self:SetPoint("TOP", CNDT[ID-1], "BOTTOM", 0, -20)
 	self:Hide()
 
 	self:SetMinAdjustHeight(68)
@@ -1070,7 +1070,6 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				CndtGroup:AddRow(CndtGroup.Slider, -7)
 
 				CndtGroup.Slider:SetTextFormatter(conditionData.formatter)
-				CndtGroup.Slider:SetStaticMidText(get(conditionData.midt) or "")
 			end
 
 			local val = conditionSettings.Level

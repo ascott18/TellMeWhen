@@ -1,7 +1,7 @@
 <Ui>
 
 	<Frame name="TellMeWhen_GM_Bar" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="112"/>
+		<Size y="100"/>
 		<Frames>
 
 			<CheckButton parentKey="Icon" inherits="TellMeWhen_CheckTemplate">
@@ -42,7 +42,7 @@
 
 			<Button parentKey="BorderColor" inherits="TellMeWhen_ColorButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.Icon" relativePoint="BOTTOMLEFT" x="4" y="-8" />
+					<Anchor point="TOPLEFT" relativeKey="$parent.Icon" relativePoint="BOTTOMLEFT" x="4" y="-6" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -57,7 +57,7 @@
 
 			<Slider parentKey="Padding" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Flip" relativePoint="BOTTOM" y="-10"/>
+					<Anchor point="TOP" relativeKey="$parent.BorderColor" />
 					<Anchor point="LEFT" relativePoint="CENTER" x="10" />
 					<Anchor point="RIGHT" x="-10" />
 				</Anchors>
@@ -89,7 +89,7 @@
 			<Slider parentKey="BorderIcon" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
 					<Anchor point="LEFT" x="10" />
-					<Anchor point="TOP" relativeKey="$parent.BorderColor" relativePoint="BOTTOM" y="-22"/>
+					<Anchor point="TOP" relativeKey="$parent.BorderColor" relativePoint="BOTTOM" y="-14"/>
 					<Anchor point="RIGHT" relativePoint="CENTER" x="-10" />
 				</Anchors>
 				<Scripts>

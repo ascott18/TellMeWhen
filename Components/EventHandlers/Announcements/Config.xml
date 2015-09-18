@@ -211,6 +211,7 @@
 								end)
 								self:SetTextFormatter(formatter, formatter)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -225,13 +226,13 @@
 
 								self:SetTexts(TMW.L["DURATION"], nil)
 								self:SetSetting("TextDuration")
-								self.paddingTop, self.paddingBottom = 13, 0
 								
 								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0, math.huge)
 								self:SetRange(10)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>

@@ -1,18 +1,15 @@
 ﻿<Ui>
 
 	<Frame name="TellMeWhen_ConditionRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="40"/>
+		<Size y="34"/>
 		<Frames>
 			<Slider parentKey="ConditionAlpha" name="$parentConditionAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Anchors>
 					<Anchor point="LEFT" x="10" />
 					<Anchor point="RIGHT" x="-10" />
-					<Anchor point="TOP" y="-13" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.text:SetWidth(self:GetWidth())
-						
 						TMW.IE:RegisterRapidSetting("ConditionAlpha")
 
 						TMW:CInit(self)
@@ -20,7 +17,7 @@
 						self:SetTexts(TMW.L["REQFAILED_ALPHA"], TMW.L["CONDITIONALPHA_METAICON_DESC"])
 						self:SetSetting("ConditionAlpha")
 
-						self:SetOrangeValue(1)
+						self:SetTextFormatter(self.OrangeAt100Formatter)
 					</OnLoad>
 				</Scripts>
 			</Slider>

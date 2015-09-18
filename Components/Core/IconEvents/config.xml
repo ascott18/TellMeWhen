@@ -273,6 +273,10 @@
 	</CheckButton>
 
 	<Slider name="TellMeWhen_EventHandler_ColumnConfig_SliderTemplate" inherits="TellMeWhen_SliderTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="paddingTop" type="number" value="8"/>
+			<KeyValue key="paddingBottom" type="number" value="8"/>
+		</KeyValues>
 		<Anchors>
 			<Anchor point="LEFT" x="15" />
 			<Anchor point="RIGHT" x="-20"/>
@@ -652,6 +656,7 @@
 								self:SetMinMaxValues(0.1, math.huge)
 								self:SetRange(2)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>

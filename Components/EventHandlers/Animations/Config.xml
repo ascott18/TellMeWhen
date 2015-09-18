@@ -32,7 +32,6 @@
 
 								self:SetTexts(TMW.L["ANIM_DURATION"], TMW.L["ANIM_DURATION_DESC"])
 								self:SetSetting("Duration")
-								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0.1, math.huge)
@@ -47,6 +46,7 @@
 									end
 								end)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -70,12 +70,13 @@
 
 								self:SetTexts(TMW.L["ANIM_MAGNITUDE"], TMW.L["ANIM_MAGNITUDE_DESC"])
 								self:SetSetting("Magnitude")
-								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0, math.huge)
 								self:SetRange(10)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
+
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -87,12 +88,13 @@
 
 								self:SetTexts(TMW.L["ANIM_PERIOD"], TMW.L["ANIM_PERIOD_DESC"])
 								self:SetSetting("Period")
-								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0, math.huge)
 								self:SetRange(10)
 								self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
+
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -159,12 +161,12 @@
 
 								self:SetTexts(TMW.L["ANIM_ALPHASTANDALONE"], TMW.L["ANIM_ALPHASTANDALONE_DESC"])
 								self:SetSetting("Alpha")
-								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMinMaxValues(0, 1)
 								self:SetValueStep(0.01)
 								self:SetTextFormatter(TMW.C.Formatter.PERCENT100)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -177,7 +179,6 @@
 
 								self:SetTexts(TMW.L["ANIM_THICKNESS"], TMW.L["ANIM_THICKNESS_DESC"])
 								self:SetSetting("Thickness")
-								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(0.1, math.huge)
@@ -185,6 +186,7 @@
 								self:SetRange(10)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_1)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -196,7 +198,6 @@
 
 								self:SetTexts(TMW.L["ANIM_SIZE_ANIM"], TMW.L["ANIM_SIZE_ANIM_DESC"])
 								self:SetSetting("Size_anim")
-								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(-math.huge, math.huge)
@@ -204,6 +205,7 @@
 								self:SetRange(10)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_1)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -215,7 +217,6 @@
 
 								self:SetTexts(TMW.L["ANIM_SIZEX"], TMW.L["ANIM_SIZEX_DESC"])
 								self:SetSetting("SizeX")
-								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(1, math.huge)
@@ -223,6 +224,7 @@
 								self:SetRange(100)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
@@ -234,7 +236,6 @@
 
 								self:SetTexts(TMW.L["ANIM_SIZEY"], TMW.L["ANIM_SIZEY_DESC"])
 								self:SetSetting("SizeY")
-								self.paddingTop, self.paddingBottom = 13, 13
 								
 								self:SetMode(self.MODE_ADJUSTING)
 								self:SetMinMaxValues(1, math.huge)
@@ -242,14 +243,15 @@
 								self:SetRange(100)
 								self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.PASS)
 
+								self:UseLightColor()
 							</OnLoad>
 						</Scripts>
 					</Slider>
 
 					<Frame parentKey="AnchorTo" name="$parentAnchorTo" inherits="TMW_DropDownMenuTemplate">
 						<Anchors>
-							<Anchor point="LEFT" x="9" />
-							<Anchor point="RIGHT" x="-12" />
+							<Anchor point="LEFT" x="15" />
+							<Anchor point="RIGHT" x="-20" />
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">

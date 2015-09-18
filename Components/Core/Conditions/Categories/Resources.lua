@@ -214,7 +214,6 @@ ConditionCategory:RegisterCondition(13.1, "ECLIPSE", {
 	tooltip = L["CONDITIONPANEL_ECLIPSE_DESC"],
 	min = -100,
 	max = 100,
-	midt = "0",
 	texttable = setmetatable({
 		[-100] = "-100 (" .. L["MOON"] .. ")",
 		[100] = "100 (" .. L["SUN"] .. ")",
