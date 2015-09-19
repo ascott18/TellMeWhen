@@ -70,14 +70,6 @@ L["HELP_BUFF_NOSOURCERPPM"]             = L["HELP_BUFF_NOSOURCERPPM"]           
 
 L["CODESNIPPET_ORDER_DESC"]             = L["CODESNIPPET_ORDER_DESC"]               :format(L["CODESNIPPET_GLOBAL"], L["CODESNIPPET_PROFILE"])
 
-
-L["COLOR_CTA_DESC"]                     = L["COLOR_CTA_DESC"]                       :format(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWWHEN"])
-L["COLOR_COA_DESC"]                     = L["COLOR_COA_DESC"]                       :format(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWWHEN"])
-L["COLOR_CTS_DESC"]                     = L["COLOR_CTS_DESC"]                       :format(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWWHEN"])
-L["COLOR_COS_DESC"]                     = L["COLOR_COS_DESC"]                       :format(L["ICONMENU_SHOWTIMER"], L["ICONMENU_SHOWWHEN"])
-L["COLOR_NA_DESC"]                      = L["COLOR_NA_DESC"]                        :format(L["ICONMENU_SHOWWHEN"])
-L["COLOR_NS_DESC"]                      = L["COLOR_NS_DESC"]                        :format(L["ICONMENU_SHOWWHEN"])
-
 L["COLOR_HEADER"]                       = L["COLOR_HEADER"]                         :format("%s", L["COLOR_OVERRIDEDEFAULT"])
 
 L["CLEU_NOFILTERS"]                     = L["CLEU_NOFILTERS"]                       :format(L["ICONMENU_CLEU"], "%s")

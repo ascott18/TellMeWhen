@@ -297,20 +297,52 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="TellMeWhen_WhenCheckSet" virtual="true">
+	<Frame name="TellMeWhen_IconStateSet" virtual="true">
 		<Size y="34"/>
 
 		<KeyValues>
-			<KeyValue key="tmwClass" type="string" value="Config_Frame_WhenChecks"/>
+			<KeyValue key="tmwClass" type="string" value="Config_Frame_IconStateSet"/>
 		</KeyValues>
 
+		<Anchors>
+			<Anchor point="LEFT" />
+			<Anchor point="RIGHT" />
+		</Anchors>
+
 		<Frames>
+
+			<Button parentKey="Color" inherits="TellMeWhen_ColorButtonTemplate">
+				<Size x="20" y="20"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(nil, nil)
+						self:SetTooltip(TMW.L["ICONMENU_STATECOLOR"], TMW.L["ICONMENU_STATECOLOR_DESC"])
+						self:SetHasOpacity(false)
+						self:SetSetting("Color")
+					</OnLoad>
+				</Scripts>
+			</Button>
+
+
 			<Slider parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Anchors>
 					<Anchor point="LEFT" x="11" />
-					<Anchor point="RIGHT" x="-11" />
+					<Anchor point="RIGHT" relativeKey="$parent.Color" relativePoint="LEFT" x="-10" />
 				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetSetting("Alpha")
+					</OnLoad>
+				</Scripts>
 			</Slider>
+
 		</Frames>
 		<Scripts>
 			<OnShow>
@@ -321,47 +353,42 @@
 			</OnHide>
 		</Scripts>
 	</Frame>
-	<Frame name="TellMeWhen_WhenChecks" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+	<Frame name="TellMeWhen_IconStates" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="68"/>
-		<Layers>
-			<Layer level="ARTWORK">
-				<FontString parentKey="text" inherits="GameFontNormal" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-10" y="10"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Frames>
-			<Frame parentKey="Alpha" inherits="TellMeWhen_WhenCheckSet" id="1">
-				<Anchors>
-					<Anchor point="TOP"/>
-					<Anchor point="LEFT" />
-					<Anchor point="RIGHT" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
 
-						self:SetSettings("Alpha")
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Frame parentKey="UnAlpha" inherits="TellMeWhen_WhenCheckSet" id="2">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Alpha" relativePoint="BOTTOM"/>
-					<Anchor point="LEFT" />
-					<Anchor point="RIGHT" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
+				self.frames = {}
 
-						self:SetSettings("UnAlpha")
-					</OnLoad>
-				</Scripts>
-			</Frame>
-		</Frames>
+				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
+					local supplementalData = panelInfo.supplementalData
+					
+					assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_IconStates!")
+					
+					-- Set the title for the frame
+					panel.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
+					
+					for i, data in ipairs(supplementalData) do
+						if not self.frames[i] then
+							self.frames[i] = TMW.C.Config_Frame_IconStateSet:New("Frame", nil, self, "TellMeWhen_IconStateSet", i)
+
+							if i == 1 then
+								self.frames[i]:SetPoint("TOP")
+							else
+								self.frames[i]:SetPoint("TOP", self.frames[i-1], "BOTTOM")
+							end
+						end
+
+						self.frames[i]:Show()
+					end
+
+					for i = #supplementalData + 1, #self.frames do
+						self.frames[i]:Hide()
+					end
+				end)
+			</OnLoad>
+		</Scripts>
 	</Frame>
 
 

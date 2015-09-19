@@ -46,12 +46,14 @@ Type.DurationSyntax = 1
 Type.unitType = "unitid"
 Type.canControlGroup = true
 
+local STATE_USABLE = 1
+local STATE_UNUSABLE = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -79,10 +81,9 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 	implementsConditions = true,
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
+	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings", function(self)
@@ -401,8 +402,10 @@ local BLANKTABLE = {}
 local function UnitCooldown_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local Alpha, NameArray, OnlySeen, Sort, Durations, Units =
-	icon.Alpha, icon.Spells.Array, icon.OnlySeen, icon.Sort, icon.Spells.Durations, icon.Units
+	local NameArray, OnlySeen, Sort, Durations, Units =
+	icon.Spells.Array, icon.OnlySeen, icon.Sort, icon.Spells.Durations, icon.Units
+	
+	local usableAlpha = icon.States[STATE_USABLE].Alpha
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
@@ -482,7 +485,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 							unUnit = unit
 
 							-- We DONT care about usable cooldowns, so stop looking
-							if Alpha == 0 then 
+							if usableAlpha == 0 then 
 								dobreak = 1
 								break
 							end
@@ -492,7 +495,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 							useUnit = unit
 
 							-- We care about usable cooldowns, so stop looking
-							if Alpha ~= 0 then 
+							if usableAlpha ~= 0 then 
 								dobreak = 1
 								break
 							end
@@ -506,9 +509,9 @@ local function UnitCooldown_OnUpdate(icon, time)
 		end
 	end
 	
-	if usename and Alpha > 0 then
-		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
-			icon.Alpha,
+	if usename and usableAlpha > 0 then
+		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
+			STATE_USABLE,
 			GetSpellTexture(usename) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			0, 0,
 			usename,
@@ -516,8 +519,8 @@ local function UnitCooldown_OnUpdate(icon, time)
 		)
 
 	elseif unname then
-		icon:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
-			icon.UnAlpha,
+		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
+			STATE_UNUSABLE,
 			GetSpellTexture(unname),
 			unstart, unduration,
 			unname,
@@ -525,16 +528,19 @@ local function UnitCooldown_OnUpdate(icon, time)
 		)
 
 	else
-		icon:SetInfo("alpha", 0)
+		icon:SetInfo("state", 0)
 	end
 end
 
 local function UnitCooldown_OnUpdate_Controller(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local Alpha, UnAlpha, NameArray, OnlySeen, Durations, Units =
-	icon.Alpha, icon.UnAlpha, icon.Spells.Array, icon.OnlySeen, icon.Spells.Durations, icon.Units
-		
+	local NameArray, OnlySeen, Durations, Units =
+	icon.Spells.Array, icon.OnlySeen, icon.Spells.Durations, icon.Units
+	
+	local usableAlpha = icon.States[STATE_USABLE].Alpha
+	local unusableAlpha = icon.States[STATE_UNUSABLE].Alpha
+
 	for u = 1, #Units do
 		local unit = Units[u]
 		local GUID = UnitGUID(unit)
@@ -579,13 +585,13 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 					if remaining < 0 then remaining = 0 end
 
 					if remaining ~= 0 then
-						if UnAlpha > 0 and not icon:YieldInfo(true, iName, start, duration, unit, GUID, UnAlpha) then
+						if unusableAlpha > 0 and not icon:YieldInfo(true, iName, start, duration, unit, GUID, STATE_UNUSABLE) then
 							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 							return
 						end
 
 					else
-						if Alpha > 0 and not icon:YieldInfo(true, iName, 0, 0, unit, GUID, Alpha) then
+						if usableAlpha > 0 and not icon:YieldInfo(true, iName, 0, 0, unit, GUID, STATE_USABLE) then
 							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 							return
 						end
@@ -598,17 +604,17 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 	-- Signal the group controller that we are at the end of our data harvesting.
 	icon:YieldInfo(false)
 end
-function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GUID, alpha)
+function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GUID, state)
 	if name then
-		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID",
-			alpha,
+		iconToSet:SetInfo("state; texture; start, duration; spell; unit, GUID",
+			state,
 			GetSpellTexture(name) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			start, duration,
 			name,
 			unit, GUID
 		)
 	else
-		iconToSet:SetInfo("alpha", 0)
+		iconToSet:SetInfo("state", 0)
 	end
 
 end

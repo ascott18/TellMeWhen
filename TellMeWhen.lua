@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80001 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -256,12 +256,18 @@ TMW.Defaults = {
 				Icons = {
 					["**"] = {
 						GUID				= "",
-						ShowWhen			= 0x2, -- bit order: x, x, alpha, unalpha
 						Enabled				= false,
 						Name				= "",
 						Type				= "",
-						Alpha				= 1,
-						UnAlpha				= 0,
+						States              = {
+							["**"] = {
+								Alpha = 0,
+								Color = "ffffffff",
+							},
+							[1] = {
+								Alpha = 1,
+							}
+						},
 						SettingsPerView		= {
 							["**"] = {
 							}
@@ -1535,14 +1541,28 @@ TMW.UpgradeTableByVersions = {}
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 
-		[80008] = {
+		[80009] = {
 			icon = function(self, ics)
-				if ics.ShowWhen == 0x1 then
+				ics.Alpha = ics.Alpha or 1 -- the old default.
+				ics.UnAlpha = ics.UnAlpha or 1 -- the old default.
+				ics.ShowWhen = ics.ShowWhen or 0x2 -- the old default.
+
+				if ics.ShowWhen == 0x0 then
 					ics.Alpha = 0
-				elseif ics.ShowWhen == 0x2 or ics.ShowWhen == nil then
+					ics.UnAlpha = 0
+
+				elseif ics.ShowWhen == 0x1 then
+					ics.Alpha = 0
+
+				elseif ics.ShowWhen == 0x2 then
 					ics.UnAlpha = 0
 				end
 
+				ics.States[1].Alpha = ics.Alpha
+				ics.States[2].Alpha = ics.UnAlpha
+
+				ics.Alpha = nil
+				ics.UnAlpha = nil
 				ics.ShowWhen = nil
 			end,
 		},
@@ -2525,34 +2545,6 @@ function TMW:RawUpgrade()
 				end
 			end
 		end
-
-		if TellMeWhenDB.Version < 80008 then
-			local function UpgradeGroup(gs)
-				if gs.Icons then
-					for iconID, ics in pairs(gs.Icons) do
-						if ics.UnAlpha == nil then
-							ics.UnAlpha = 1
-						end
-					end
-				end
-			end
-
-			for _, p in pairs(TellMeWhenDB.profiles) do
-				if p.Groups then
-					for groupID, gs in pairs(p.Groups) do
-						UpgradeGroup(gs)
-					end
-				end
-			end
-
-			if TellMeWhenDB.global and TellMeWhenDB.global.Groups then
-				for groupID, gs in pairs(TellMeWhenDB.global.Groups) do
-					UpgradeGroup(gs)
-				end
-			end
-		end
-
-		
 	end
 	
 	TMW:Fire("TMW_DB_PRE_DEFAULT_UPGRADES")

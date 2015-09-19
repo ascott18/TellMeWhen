@@ -33,13 +33,15 @@ Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
 Type.hasNoGCD = true
 
+local STATE_USABLE = 1
+local STATE_UNUSABLE = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("charges, maxCharges")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -95,10 +97,9 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_RuneSettings", functio
 	})
 end)
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],		},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],	},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
+	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_RuneSortSettings", function(self)
@@ -213,8 +214,8 @@ local function Runes_OnUpdate(icon, time)
 		-- We found a rune that is ready. Show it.
 
 		if icon.RunesAsCharges and unslot then
-			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
-				icon.Alpha,
+			icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+				STATE_USABLE,
 				textures[readyslotType],
 				unstart, unduration,
 				usableCount, icon.RuneSlotsUsed,
@@ -222,8 +223,8 @@ local function Runes_OnUpdate(icon, time)
 				runeNames[readyslotType] 
 			)
 		else
-			icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
-				icon.Alpha,
+			icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+				STATE_USABLE,
 				textures[readyslotType],
 				0, 0,
 				nil, nil,
@@ -233,8 +234,8 @@ local function Runes_OnUpdate(icon, time)
 		end
 	elseif unslot then
 		-- We didn't find any ready runes. Show a cooling down rune.
-		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
-			icon.UnAlpha,
+		icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+			STATE_UNUSABLE,
 			textures[unslotType],
 			unstart, unduration,
 			0, 0,
@@ -244,8 +245,8 @@ local function Runes_OnUpdate(icon, time)
 	else
 		-- We didn't find any runes. This might mean that the types of runes being tracked are death runes,
 		-- or if tracking death runes, those death runes aren't death runes.
-		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell",
-			icon.UnAlpha,
+		icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+			STATE_UNUSABLE,
 			textures[icon.FirstSlot],
 			0, 0,
 			0, 0,

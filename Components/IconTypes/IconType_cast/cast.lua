@@ -34,13 +34,15 @@ Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
+local STATE_PRESENT = 1
+local STATE_ABSENT = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -68,10 +70,10 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 	implementsConditions = true,
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 	--text = L["ICONMENU_CASTSHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 	},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 		},
+	[STATE_PRESENT] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], },
+	[STATE_ABSENT]  = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],  },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CastSettings", function(self)
@@ -167,8 +169,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, spell, unit, texture, start, du
 	if spell then
 		-- There was a spellcast or channel present on one of the icon's units.
 		iconToSet:SetInfo(
-			"alpha; texture; start, duration; reverse; spell; unit, GUID",
-			icon.Alpha,
+			"state; texture; start, duration; reverse; spell; unit, GUID",
+			STATE_PRESENT,
 			texture,
 			start, duration,
 			reverse,
@@ -178,8 +180,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, spell, unit, texture, start, du
 	else
 		-- There were no casts detected.
 		iconToSet:SetInfo(
-			"alpha; start, duration; spell; unit, GUID",
-			icon.UnAlpha,
+			"state; start, duration; spell; unit, GUID",
+			STATE_ABSENT,
 			0, 0,
 			icon.Spells.First,
 			icon.Units[1], nil

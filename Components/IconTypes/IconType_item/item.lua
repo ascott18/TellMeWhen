@@ -32,13 +32,15 @@ Type.desc = L["ICONMENU_ITEMCOOLDOWN_DESC"]
 Type.menuIcon = "Interface\\Icons\\inv_jewelry_trinketpvp_01"
 Type.checksItems = true
 
+local STATE_USABLE = 1
+local STATE_UNUSABLE = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("inRange")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -65,10 +67,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "itemwithslots",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
+	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", function(self)
@@ -141,8 +142,8 @@ local function ItemCooldown_OnUpdate(icon, time)
 			if equipped and inrange and (duration == 0 or OnGCD(duration)) then
 				-- This item is usable. Set the attributes and then stop.
 
-				icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
-					icon.Alpha,
+				icon:SetInfo("state; texture; start, duration; stack, stackText; spell; inRange",
+					STATE_USABLE,
 					item:GetIcon() or "Interface\\Icons\\INV_Misc_QuestionMark",
 					start, duration,
 					count, icon.EnableStacks and count,
@@ -165,7 +166,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 			end
 		end
 		if not item2 then
-			icon:SetInfo("alpha", 0)
+			icon:SetInfo("state", 0)
 			return
 		end
 	else
@@ -187,8 +188,8 @@ local function ItemCooldown_OnUpdate(icon, time)
 	end
 
 	if duration then
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; spell; inRange",
-			icon.UnAlpha,
+		icon:SetInfo("state; texture; start, duration; stack, stackText; spell; inRange",
+			STATE_UNUSABLE,
 			item2:GetIcon(),
 			start, duration,
 			count, icon.EnableStacks and count,
@@ -196,7 +197,7 @@ local function ItemCooldown_OnUpdate(icon, time)
 			inrange
 		)
 	else
-		icon:SetInfo("alpha", 0)
+		icon:SetInfo("state", 0)
 	end
 end
 

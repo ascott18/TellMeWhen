@@ -40,11 +40,13 @@ Type.unitType = "name"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
+local STATE_RUNNING = 1
+local STATE_EXPIRED = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("sourceUnit, sourceGUID")
 Type:UsesAttributes("spell")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("destUnit, destGUID")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("start, duration")
@@ -89,10 +91,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "cleu",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_COUNTING"], 	 },
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_NOTCOUNTING"],  },
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_RUNNING] = { text = "|cFF00FF00" .. L["ICONMENU_COUNTING"],    },
+	[STATE_EXPIRED] = { text = "|cFFFF0000" .. L["ICONMENU_NOTCOUNTING"], },
 })
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_CLEUOptions")
@@ -440,24 +441,21 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 	end
 end
 
-
 local function CLEU_OnUpdate(icon, time)
 	local attributes = icon.attributes
 	local start = attributes.start
 	local duration = attributes.duration
 
 	if time - start > duration then
-		-- The timer is not running. Use the timer-not-running alpha value.
 		icon:SetInfo(
-			"alpha; start, duration",
-			icon.UnAlpha,
+			"state; start, duration",
+			STATE_EXPIRED,
 			0, 0
 		)
 	else
-		-- The timer is running. Use the timer-is-running alpha value.
 		icon:SetInfo(
-			"alpha; start, duration",
-			icon.Alpha,
+			"state; start, duration",
+			STATE_RUNNING,
 			start, duration
 		)
 	end
@@ -487,14 +485,14 @@ end
 function Type:HandleYieldedInfo(icon, iconToSet, capturedEvent)
 	if capturedEvent then
 		iconToSet:SetInfo(
-			"alpha; start, duration; texture; spell; extraSpell; unit, GUID; sourceUnit, sourceGUID; destUnit, destGUID",
-			icon.Alpha,
+			"state; start, duration; texture; spell; extraSpell; unit, GUID; sourceUnit, sourceGUID; destUnit, destGUID",
+			STATE_RUNNING,
 			unpack(capturedEvent)
 		)
 	else
 		iconToSet:SetInfo(
-			"alpha; start, duration",
-			icon.UnAlpha,
+			"state; start, duration",
+			STATE_EXPIRED,
 			0, 0
 		)
 	end

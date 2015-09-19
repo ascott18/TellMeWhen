@@ -50,12 +50,14 @@ Type.usePocketWatch = 1
 Type.hidden = pclass == "PRIEST" -- priest totems are lightwells, which is tracked with the "lightwell" icon type
 Type.hasNoGCD = true
 
+local STATE_PRESENT = 1
+local STATE_ABSENT = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -122,10 +124,9 @@ end)
 
 
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"],		},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_PRESENT] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], },
+	[STATE_ABSENT] =  { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],  },
 })
 
 TMW:RegisterUpgrade(48017, {
@@ -151,8 +152,8 @@ local function Totem_OnUpdate(icon, time)
 
 			if start ~= 0 and totemName and (NameFirst == "" or NameStringHash[strlowerCache[totemName]]) then
 				-- The totem is present. Display it and stop.
-				icon:SetInfo("alpha; texture; start, duration; spell",
-					icon.Alpha,
+				icon:SetInfo("state; texture; start, duration; spell",
+					STATE_PRESENT,
 					totemIcon,
 					start, duration,
 					totemName
@@ -163,8 +164,8 @@ local function Totem_OnUpdate(icon, time)
 	end
 	
 	-- No totems were found. Display a blank state.
-	icon:SetInfo("alpha; texture; start, duration; spell",
-		icon.UnAlpha,
+	icon:SetInfo("state; texture; start, duration; spell",
+		STATE_ABSENT,
 		icon.FirstTexture,
 		0, 0,
 		NameFirst

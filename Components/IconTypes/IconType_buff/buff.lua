@@ -37,6 +37,8 @@ Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
+local STATE_PRESENT = 1
+local STATE_ABSENT = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("unit, GUID")
@@ -45,7 +47,7 @@ Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("auraSourceUnit, auraSourceGUID")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -189,10 +191,9 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 	self.HideIfNoUnits:ConstrainLabel(self.ShowTTText)
 end)
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[ 1 ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
-	[ 2 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[ STATE_PRESENT ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
+	[ STATE_ABSENT  ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"],  tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_SortSettingsWithStacks", function(self)
@@ -485,8 +486,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, buffName, iconTexture, co
 			end
 		end
 
-		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-			icon.Alpha,
+		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			STATE_PRESENT,
 			iconTexture,
 			expirationTime - duration, duration,
 			count, count,
@@ -496,7 +497,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, buffName, iconTexture, co
 		)
 
 	elseif not Units[1] and icon.HideIfNoUnits then
-		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			0,
 			icon.FirstTexture,
 			0, 0,
@@ -507,8 +508,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, buffName, iconTexture, co
 		)
 
 	else
-		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-			icon.UnAlpha,
+		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			STATE_ABSENT,
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,

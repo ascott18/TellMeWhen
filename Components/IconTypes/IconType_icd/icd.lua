@@ -32,11 +32,13 @@ Type.usePocketWatch = 1
 Type.DurationSyntax = 1
 Type.hasNoGCD = true
 
+local STATE_USABLE = 1
+local STATE_UNUSABLE = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("spell")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -57,10 +59,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "spellwithduration",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
+	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_ICDType", function(self)
@@ -154,15 +155,13 @@ local function ICD_OnUpdate(icon, time)
 	local ICDDuration = icon.ICDDuration
 
 	if time - ICDStartTime > ICDDuration then
-		-- If the timer has expire, used the timer-expired alpha.
-		icon:SetInfo("alpha; start, duration",
-			icon.Alpha,
+		icon:SetInfo("state; start, duration",
+			STATE_USABLE,
 			0, 0
 		)
 	else
-		-- If the timer is still running, use the timer-running alpha.
-		icon:SetInfo("alpha; start, duration",
-			icon.UnAlpha,
+		icon:SetInfo("state; start, duration",
+			STATE_UNUSABLE,
 			ICDStartTime, ICDDuration
 		)
 	end

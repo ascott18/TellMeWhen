@@ -39,12 +39,14 @@ Type.menuIcon = "Interface\\Icons\\inv_fishingpole_02"
 Type.AllowNoName = true
 Type.menuSpaceAfter = true
 
+local STATE_PRESENT = 1
+local STATE_ABSENT = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -106,10 +108,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "wpnenchant",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 		 },
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			 },
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_PRESENT] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], },
+	[STATE_ABSENT] =  { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],  },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(self)
@@ -201,14 +202,14 @@ local function WpnEnchant_OnUpdate(icon, time)
 
 		local start = floor(time - duration + expiration)
 
-		icon:SetInfo("alpha; start, duration; spell",
-			icon.Alpha,
+		icon:SetInfo("state; start, duration; spell",
+			STATE_PRESENT,
 			start, duration,
 			EnchantName
 		)
 	else
-		icon:SetInfo("alpha; start, duration; spell",
-			icon.UnAlpha,
+		icon:SetInfo("state; start, duration; spell",
+			STATE_ABSENT,
 			0, 0,
 			nil
 		)
@@ -257,7 +258,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 			if not wpnTexture then
 				-- If we should hide when there's no weapon, and there's no weapon,
 				-- then hide the icon and remove the update function.
-				icon:SetInfo("alpha", 0)
+				icon:SetInfo("state", 0)
 				icon:SetUpdateFunction(nil)
 				return
 			end
@@ -268,7 +269,7 @@ local function WpnEnchant_OnEvent(icon, event, unit)
 				if invType == "INVTYPE_HOLDABLE" or invType == "INVTYPE_RELIC" or invType == "INVTYPE_SHIELD" then
 					-- These item types can't have weapon enchants (because they aren't weapons).
 					-- Hide the icon and remove the update function.
-					icon:SetInfo("alpha", 0)
+					icon:SetInfo("state", 0)
 					icon:SetUpdateFunction(nil)
 					return
 				end

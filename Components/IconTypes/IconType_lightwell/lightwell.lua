@@ -32,13 +32,15 @@ Type.hidden = pclass ~= "PRIEST"
 Type.menuIcon = "Interface\\Icons\\Spell_Holy_SummonLightwell"
 Type.hasNoGCD = true
 
+local STATE_PRESENT = 1
+local STATE_ABSENT = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -47,10 +49,9 @@ Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], 		},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"], 			},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_PRESENT] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], },
+	[STATE_ABSENT] =  { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],  },
 })
 
 
@@ -139,15 +140,15 @@ local function LW_OnUpdate(icon, time)
 
 	if have then
 		-- We have a lightwell, so show info about it.
-		icon:SetInfo("alpha; start, duration; stack, stackText",
-			icon.Alpha,
+		icon:SetInfo("state; start, duration; stack, stackText",
+			STATE_PRESENT,
 			start, duration,
 			CurrentCharges, CurrentCharges
 		)
 	else
 		-- No lightwell.
-		icon:SetInfo("alpha; start, duration; stack, stackText",
-			icon.UnAlpha,
+		icon:SetInfo("state; start, duration; stack, stackText",
+			STATE_ABSENT,
 			0, 0,
 			nil, nil
 		)

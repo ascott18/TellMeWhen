@@ -34,13 +34,16 @@ Type.hasNoGCD = true
 Type.canControlGroup = true
 Type.menuSpaceBefore = true
 
+local STATE_UNITFOUND = 1
+local STATE_NOUNIT = 2
+
 Type:SetAllowanceForView("icon", false)
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("value, maxValue, valueColor")
 Type:UsesAttributes("unit, GUID")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -63,10 +66,9 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 	implementsConditions = true,
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_VALUE_HASUNIT"],			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_VALUE_NOUNIT"],		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_UNITFOUND] = { text = "|cFF00FF00" .. L["ICONMENU_VALUE_HASUNIT"], },
+	[STATE_NOUNIT]    = { text = "|cFFFF0000" .. L["ICONMENU_VALUE_NOUNIT"],  },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", function(self)
@@ -201,14 +203,14 @@ end
 
 function Type:HandleYieldedInfo(icon, iconToSet, unit, value, maxValue, valueColor)
 	if unit then
-		iconToSet:SetInfo("alpha; value, maxValue, valueColor; unit, GUID",
-			icon.Alpha,
+		iconToSet:SetInfo("state; value, maxValue, valueColor; unit, GUID",
+			STATE_UNITFOUND,
 			value, maxValue, valueColor,
 			unit, nil
 		)
 	else
-		iconToSet:SetInfo("alpha; value, maxValue, valueColor; unit, GUID",
-			icon.UnAlpha,
+		iconToSet:SetInfo("state; value, maxValue, valueColor; unit, GUID",
+			STATE_NOUNIT,
 			0, 0, nil,
 			nil, nil
 		)

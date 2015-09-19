@@ -38,6 +38,8 @@ Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
 
+local STATE_USABLE = 1
+local STATE_UNUSABLE = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
@@ -90,10 +92,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_USABLE]   = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
+	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", function(self)
@@ -145,16 +146,16 @@ local function AutoShot_OnUpdate(icon, time)
 
 	if ready and inrange then
 		icon:SetInfo(
-			"alpha; start, duration; spell; inRange",
-			icon.Alpha,
+			"state; start, duration; spell; inRange",
+			STATE_USABLE,
 			0, 0,
 			NameString,
 			inrange
 		)
 	else
 		icon:SetInfo(
-			"alpha; start, duration; spell; inRange",
-			icon.UnAlpha,
+			"state; start, duration; spell; inRange",
+			STATE_UNUSABLE,
 			icon.asStart, asDuration,
 			NameString,
 			inrange
@@ -162,13 +163,14 @@ local function AutoShot_OnUpdate(icon, time)
 	end
 end
 
-
 local usableData = {}
 local unusableData = {}
 local function SpellCooldown_OnUpdate(icon, time)    
 	-- Upvalue things that will be referenced a lot in our loops.
 	local IgnoreRunes, RangeCheck, ManaCheck, NameArray, NameStringArray =
 	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.Spells.Array, icon.Spells.StringArray
+
+	local usableAlpha = icon.States[STATE_USABLE].Alpha
 
 	local usableFound, unusableFound
 
@@ -221,7 +223,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			if inrange and not nomana and (duration == 0 or (charges and charges > 0) or OnGCD(duration)) then --usable
 				if not usableFound then
 					wipe(usableData)
-					usableData.alpha = icon.Alpha
+					usableData.state = STATE_USABLE
 					usableData.tex = GetSpellTexture(iName)
 					usableData.inrange = inrange
 					usableData.nomana = nomana
@@ -234,13 +236,13 @@ local function SpellCooldown_OnUpdate(icon, time)
 					
 					usableFound = true
 					
-					if icon.Alpha > 0 then
+					if usableAlpha > 0 then
 						break
 					end
 				end
 			elseif not unusableFound then
 				wipe(unusableData)
-				unusableData.alpha = icon.UnAlpha
+				unusableData.state = STATE_UNUSABLE
 				unusableData.tex = GetSpellTexture(iName)
 				unusableData.inrange = inrange
 				unusableData.nomana = nomana
@@ -253,7 +255,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				
 				unusableFound = true
 				
-				if icon.Alpha == 0 then
+				if usableAlpha == 0 then
 					break
 				end
 			end
@@ -261,19 +263,18 @@ local function SpellCooldown_OnUpdate(icon, time)
 	end
 	
 	local dataToUse
-	if usableFound and icon.Alpha > 0 then
+	if usableFound and usableAlpha > 0 then
 		dataToUse = usableData
 	elseif unusableFound then
 		dataToUse = unusableData
 	elseif usableFound then
-		usableData.Alpha = 0
 		dataToUse = usableData
 	end
 	
 	if dataToUse then
 		icon:SetInfo(
-			"alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
-			dataToUse.alpha,
+			"state; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
+			dataToUse.state,
 			dataToUse.tex,
 			dataToUse.start, dataToUse.duration,
 			dataToUse.charges, dataToUse.maxCharges,
@@ -283,7 +284,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			dataToUse.nomana
 		)
 	else
-		icon:SetInfo("alpha", 0)
+		icon:SetInfo("state", 0)
 	end
 end
 

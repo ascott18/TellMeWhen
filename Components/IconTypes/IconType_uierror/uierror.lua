@@ -26,10 +26,12 @@ Type.menuIcon = "Interface\\Icons\\spell_shadow_darksummoning"
 Type.AllowNoName = true
 Type.hasNoGCD = true
 
+local STATE_RUNNING = 1
+local STATE_EXPIRED = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
@@ -57,10 +59,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "uierror",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_COUNTING"], 	 },
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_NOTCOUNTING"],  },
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_RUNNING] = { text = "|cFF00FF00" .. L["ICONMENU_COUNTING"],    },
+	[STATE_EXPIRED] = { text = "|cFFFF0000" .. L["ICONMENU_NOTCOUNTING"], },
 })
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_UIErrorOptions")
@@ -124,17 +125,15 @@ local function UIError_OnUpdate(icon, time)
 	local duration = attributes.duration
 
 	if time - start > duration then
-		-- The timer is not running. Use the timer-not-running alpha value.
 		icon:SetInfo(
-			"alpha; start, duration",
-			icon.UnAlpha,
+			"state; start, duration",
+			STATE_EXPIRED,
 			0, 0
 		)
 	else
-		-- The timer is running. Use the timer-is-running alpha value.
 		icon:SetInfo(
-			"alpha; start, duration",
-			icon.Alpha,
+			"state; start, duration",
+			STATE_RUNNING,
 			start, duration
 		)
 	end

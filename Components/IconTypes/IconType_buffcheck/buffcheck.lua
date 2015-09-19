@@ -34,6 +34,8 @@ Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
+local STATE_PRESENT = 1
+local STATE_ABSENT = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
@@ -42,7 +44,7 @@ Type:UsesAttributes("reverse")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("auraSourceUnit, auraSourceGUID")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -97,10 +99,9 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffCheckSettings", fu
 	})
 end)
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONANY"],		tooltipText = L["ICONMENU_ABSENTONANY_DESC"],	},
-	[2] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONALL"],	tooltipText = L["ICONMENU_PRESENTONALL_DESC"], 	},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_ABSENT] =  { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONANY"],		tooltipText = L["ICONMENU_ABSENTONANY_DESC"],	},
+	[STATE_PRESENT] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONALL"],	tooltipText = L["ICONMENU_PRESENTONALL_DESC"], 	},
 })
 
 
@@ -128,6 +129,8 @@ local function BuffCheck_OnUpdate(icon, time)
 	local Units, NameArray, NameStringArray, NameHash, Filter
 	= icon.Units, icon.Spells.Array, icon.Spells.StringArray, icon.Spells.Hash, icon.Filter
 	
+	local AbsentAlpha = icon.States[STATE_ABSENT].Alpha
+
 	-- These variables will hold all the attributes that we pass to YieldInfo().
 	local iconTexture, id, count, duration, expirationTime, caster, useUnit, _
 	
@@ -173,7 +176,7 @@ local function BuffCheck_OnUpdate(icon, time)
 				iconTexture, id, count, duration, expirationTime, caster, useUnit =
 				_iconTexture, _id, _count, _duration, _expirationTime, _caster, unit
 
-			elseif not _id and icon.Alpha > 0 and not icon:YieldInfo(true, unit) then
+			elseif not _id and AbsentAlpha > 0 and not icon:YieldInfo(true, unit) then
 				-- If we didn't find a matching aura, and the icon is set to show when we don't find something
 				-- then report what unit it was. This is the primary point of the icon - to find units that are missing everything.
 				-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
@@ -190,7 +193,7 @@ end
 function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, caster, id)
 	if not unit then
 		-- Unit is nil if the icon didn't check any living units.
-		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			0,
 			icon.FirstTexture,
 			0, 0,
@@ -201,8 +204,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 		)
 	elseif not id then
 		-- ID is nil if we found a unit that is missing all of the auras that are being checked for.
-		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-			icon.Alpha,
+		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			STATE_ABSENT,
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
@@ -213,8 +216,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 	elseif id then
 		-- ID is defined if we didn't find any units that are missing all the auras being checked for.
 		-- In this case, the data is for the first matching aura found on the first unit checked.
-		iconToSet:SetInfo("alpha; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-			icon.UnAlpha,
+		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+			STATE_PRESENT,
 			iconTexture,
 			expirationTime - duration, duration,
 			count, count,

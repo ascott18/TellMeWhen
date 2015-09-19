@@ -40,10 +40,12 @@ Type.desc = L["ICONMENU_SWINGTIMER_DESC"]
 Type.menuIcon = "Interface\\Icons\\INV_Gauntlets_04"
 Type.hasNoGCD = true
 
+local STATE_NOTREADY = 1
+local STATE_READY = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -59,10 +61,9 @@ if pclass == "HUNTER" then
 	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip")
 end
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_SWINGTIMER_SWINGING"],			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_SWINGTIMER_NOTSWINGING"],		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_NOTREADY] = { text = "|cFF00FF00" .. L["ICONMENU_SWINGTIMER_SWINGING"],    },
+	[STATE_READY]    = { text = "|cFFFF0000" .. L["ICONMENU_SWINGTIMER_NOTSWINGING"], },
 })
 
 
@@ -102,15 +103,15 @@ local function SwingTimer_OnUpdate(icon, time)
 	if time - SwingTimer.startTime > SwingTimer.duration then
 		-- Weapon swing is not on cooldown.
 		icon:SetInfo(
-			"alpha; start, duration",
-			icon.UnAlpha,
+			"state; start, duration",
+			STATE_READY,
 			0, 0
 		)
 	else
 		-- Weapon swing is on cooldown
 		icon:SetInfo(
-			"alpha; start, duration",
-			icon.Alpha,
+			"state; start, duration",
+			STATE_NOTREADY,
 			SwingTimer.startTime, SwingTimer.duration
 		)
 	end

@@ -425,13 +425,16 @@ Change the group's display method or create a new group to use this icon type.]]
 
 
 
-L["ICONMENU_SHOWWHEN"] = "Show States & Opacity"
-L["ICONMENU_SHOWWHEN_SHOWWHEN_WRAP"] = "Show when %s|r"
+L["ICONMENU_SHOWWHEN"] = "Opacity & Color"
 L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"] = "Opacity when %s|r"
-L["ICONMENU_SHOWWHEN_SHOW_GENERIC_DESC"] = "Set whether this icon should show for this icon state."
 L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"] = "Set the opacity level that the icon should show at in this icon state."
 L["ICONMENU_USABLE"] = "Usable"
 L["ICONMENU_UNUSABLE"] = "Unusable"
+
+L["ICONMENU_STATECOLOR"] = "Icon Tint"
+L["ICONMENU_STATECOLOR_DESC"] = [[Set the tint of the icon's texture in this icon state.
+
+White is normal. Any other color will tint the texture to that color.]]
 
 
 L["ICONMENU_COUNTING"] = "Timer running"
@@ -1038,46 +1041,6 @@ L["COLOR_OOM"]		 = "Out of Mana"	-- out of mana
 L["COLOR_OOM_DESC"]	 = "Color of the icon when you lack the power to use an ability."	-- out of mana
 L["COLOR_OORM"] 	 = "Out of Range & Mana"	-- out of range and mana
 L["COLOR_OORM_DESC"] = "Color of the icon when you lack the power and are not in range to use an ability."	-- out of range and mana
-
-L["COLOR_CTA"]		 = "Counting, Timer Shown, Always Shown"	-- counting with timer always
-L["COLOR_CTA_DESC"]	 = [[Color of the icon when:
-
-The timer is active (unusable/present),
-%q is enabled,
-Both %q settings are checked]]
-
-L["COLOR_COA"]		 = "Counting, Timer Hidden, Always Shown"	-- counting withOUT timer always
-L["COLOR_COA_DESC"]	 = [[Color of the icon when:
-
-The timer is active (unusable/present),
-%q is disabled,
-Both %q settings are checked]]
-
-L["COLOR_CTS"]		 = "Counting, Timer Shown, Sometimes Shown"	-- counting with timer somtimes
-L["COLOR_CTS_DESC"]	 = [[Color of the icon when:
-
-The timer is active (unusable/present),
-%q is enabled,
-Only one %q setting is checked]]
-
-L["COLOR_COS"]		 = "Counting, Timer Hidden, Sometimes Shown"	-- counting withOUT timer somtimes
-L["COLOR_COS_DESC"]	 = [[Color of the icon when:
-
-The timer is active (unusable/present),
-%q is disabled,
-Only one %q setting is checked]]
-
-L["COLOR_NA"]		 = "Finished, Always Shown"	-- not counting always
-L["COLOR_NA_DESC"]	 = [[Color of the icon when:
-
-The timer is finished (usable/absent),
-Both %q settings are checked]]
-
-L["COLOR_NS"]		 = "Finished, Sometimes Shown"	-- not counting somtimes
-L["COLOR_NS_DESC"]	 = [[Color of the icon when:
-
-The timer is finished (usable/absent),
-Only one %q setting is checked]]
 
 
 L["COLOR_OVERRIDE_GROUP"] = "Override Group Color"

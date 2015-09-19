@@ -38,8 +38,7 @@ local RelevantToAll = {
 		Events = true,
 		Conditions = true,
 		UnitConditions = true,
-		Alpha = true,
-		UnAlpha = true,
+		States = true,
 	}
 }
 

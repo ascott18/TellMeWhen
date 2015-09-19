@@ -1283,15 +1283,15 @@ end})
 -- @usage icon:SetInfo("texture", "Interface\\AddOns\\TellMeWhen\\Textures\\Disabled")
 --  
 --  -- From IconTypes/IconType_wpnenchant:
---  icon:SetInfo("alpha; start, duration; spell",
---    icon.UnAlpha,
+--  icon:SetInfo("state; start, duration; spell",
+--    STATE_ABSENT,
 --    0, 0,
 --    nil
 --  )
 -- 
 --  -- From IconTypes/IconType_reactive:
---  icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
---    icon.Alpha,
+--  icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
+--    STATE_USABLE,
 --    GetSpellTexture(iName),
 --    start, duration,
 --    charges, maxCharges,

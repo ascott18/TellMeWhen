@@ -50,13 +50,15 @@ Type.usePocketWatch = 1
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 
+local STATE_UNDIMINISHED = 1
+local STATE_DIMINISHED = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -123,10 +125,9 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 	implementsConditions = true,
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"], 	},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], 	},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_UNDIMINISHED] = { text = "|cFF00FF00" .. L["ICONMENU_DRABSENT"],  },
+	[STATE_DIMINISHED]   = { text = "|cFFFF0000" .. L["ICONMENU_DRPRESENT"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_DRSettings", function(self)
@@ -239,7 +240,10 @@ end
 
 local function DR_OnUpdate(icon, time)
 	-- Upvalue things that will be referenced a lot in our loops.
-	local Alpha, UnAlpha, Units = icon.Alpha, icon.UnAlpha, icon.Units
+	local Units = icon.Units
+
+	local undimAlpha = icon.States[STATE_UNDIMINISHED].Alpha
+	local dimAlpha = icon.States[STATE_DIMINISHED].Alpha
 
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -250,42 +254,42 @@ local function DR_OnUpdate(icon, time)
 			if dr.start + dr.duration <= time then
 				-- The timer is expired.
 
-				icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
-					icon.Alpha,
+				icon:SetInfo("state; texture; start, duration; stack, stackText; unit, GUID",
+					STATE_UNDIMINISHED,
 					dr.tex,
 					0, 0,
 					nil, nil,
 					unit, GUID
 				)
 				
-				if Alpha > 0 then
+				if undimAlpha > 0 then
 					return
 				end
 			else
 				-- The timer is not expired.
 
 				local amt = dr.amt
-				icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
-					icon.UnAlpha,
+				icon:SetInfo("state; texture; start, duration; stack, stackText; unit, GUID",
+					STATE_DIMINISHED,
 					dr.tex,
 					dr.start, dr.duration,
 					amt, amt .. "%",
 					unit, GUID
 				)
-				if UnAlpha > 0 then
+				if dimAlpha > 0 then
 					return
 				end
 			end
 		else
 			-- The unit doesn't have any DR.
-			icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
-				icon.Alpha,
+			icon:SetInfo("state; texture; start, duration; stack, stackText; unit, GUID",
+				STATE_UNDIMINISHED,
 				icon.FirstTexture,
 				0, 0,
 				nil, nil,
 				unit, GUID
 			)
-			if Alpha > 0 then
+			if undimAlpha > 0 then
 				return
 			end
 		end
@@ -293,15 +297,15 @@ local function DR_OnUpdate(icon, time)
 	
 	if icon.ShowWhenNone then
 		-- Nothing found. Show default state of the icon.
-		icon:SetInfo("alpha; texture; start, duration; stack, stackText; unit, GUID",
-			icon.Alpha,
+		icon:SetInfo("state; texture; start, duration; stack, stackText; unit, GUID",
+			STATE_UNDIMINISHED,
 			icon.FirstTexture,
 			0, 0,
 			nil, nil,
 			Units[1], nil
 		)
 	else
-		icon:SetInfo("alpha", 0)
+		icon:SetInfo("state", 0)
 	end
 end
 

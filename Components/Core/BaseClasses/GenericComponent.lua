@@ -59,7 +59,7 @@ end
 
 --- Register an Icon Editor config panel using an XML template as a source
 -- @param order [number] The order of the config panel relative to other panels in the Icon Editor.
--- @param xmlTemplateName [string] The name of an XML template. This template must inherit from the XML template {{{TellMeWhen_OptionsModuleContainer}}}. The frame will be created once it is needed, and it will be named after the template it is based on (the string passed as this param). Some XML templates for commonly used settings are built into TMW, like {{{TellMeWhen_ChooseName}}} and {{{TellMeWhen_WhenChecks}}}.
+-- @param xmlTemplateName [string] The name of an XML template. This template must inherit from the XML template {{{TellMeWhen_OptionsModuleContainer}}}. The frame will be created once it is needed, and it will be named after the template it is based on (the string passed as this param). Some XML templates for commonly used settings are built into TMW, like {{{TellMeWhen_ChooseName}}} and {{{TellMeWhen_IconStates}}}.
 -- @param supplementalData [.*] Any data that will be associated with the created frame when it is used for this specific {{{TellMeWhen.Classes.GenericComponent}}} implementation. This data can be accessed through the 2nd arg of event {{{TMW_CONFIG_PANEL_SETUP}}} as can be seen in the usage example below.
 -- @usage
 --  -- Registering an XML Template config panel:

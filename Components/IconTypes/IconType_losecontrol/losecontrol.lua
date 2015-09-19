@@ -36,13 +36,15 @@ Type.usePocketWatch = 1
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
+local INCONTROL = 1
+local CONTROLLOST = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("locCategory")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -71,10 +73,9 @@ TMW:RegisterUpgrade(71038, {
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_LoseControlTypes")
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["LOSECONTROL_INCONTROL"],		},
-	[2] = { text = "|cFFFF0000" .. L["LOSECONTROL_CONTROLLOST"],		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[INCONTROL] =   { text = "|cFF00FF00" .. L["LOSECONTROL_INCONTROL"],   },
+	[CONTROLLOST] = { text = "|cFFFF0000" .. L["LOSECONTROL_CONTROLLOST"], },
 })
 
 
@@ -117,16 +118,16 @@ end
 
 function Type:HandleYieldedInfo(icon, iconToSet, category, texture, start, duration, spellID)
 	if category then
-		iconToSet:SetInfo("alpha; texture; start, duration; spell; locCategory",
-			icon.Alpha,
+		iconToSet:SetInfo("state; texture; start, duration; spell; locCategory",
+			INCONTROL,
 			texture,
 			start, duration,
 			spellID,
 			category
 		)
 	else
-		iconToSet:SetInfo("alpha; start, duration; spell; locCategory",
-			icon.UnAlpha,
+		iconToSet:SetInfo("state; start, duration; spell; locCategory",
+			CONTROLLOST,
 			0, 0,
 			nil,
 			nil

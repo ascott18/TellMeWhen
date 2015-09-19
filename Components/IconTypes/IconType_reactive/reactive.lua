@@ -30,6 +30,8 @@ Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
 Type.menuIcon = "Interface\\Icons\\ability_warrior_revenge"
 
+local STATE_USABLE = 1
+local STATE_UNUSABLE = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("noMana")
@@ -38,7 +40,7 @@ Type:UsesAttributes("charges, maxCharges")
 Type:UsesAttributes("inRange")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -73,10 +75,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], 			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], 		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
+	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", function(self)
@@ -191,8 +192,8 @@ local function Reactive_OnUpdate(icon, time)
 
 			usable = forceUsable or usable
 			if usable and not CD and not nomana and inrange then --usable
-				icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
-					icon.Alpha,
+				icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
+					STATE_USABLE,
 					GetSpellTexture(iName),
 					start, duration,
 					charges, maxCharges,
@@ -243,8 +244,8 @@ local function Reactive_OnUpdate(icon, time)
 	end
 	
 	if duration then
-		icon:SetInfo("alpha; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
-			icon.UnAlpha,
+		icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
+			STATE_UNUSABLE,
 			icon.FirstTexture,
 			start, duration,
 			charges, maxCharges,
@@ -254,7 +255,7 @@ local function Reactive_OnUpdate(icon, time)
 			nomana
 		)
 	else
-		icon:SetInfo("alpha", 0)
+		icon:SetInfo("state", 0)
 	end
 end
 

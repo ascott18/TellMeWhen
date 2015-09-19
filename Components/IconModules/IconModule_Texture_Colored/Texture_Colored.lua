@@ -39,35 +39,47 @@ local COLOR_UNLOCKED = {
 }
 function Texture_Colored:UPDATE(icon)
 	local attributes = icon.attributes
-	local duration, inrange, nomana, charges = attributes.duration, attributes.inRange, attributes.noMana, attributes.charges
+	local inrange, nomana = attributes.inRange, attributes.noMana
+	local state = attributes.state
+
 --[[
 	OOR	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range
 	OOM	=	{r=0.5,	g=0.5,	b=0.5	},	-- out of mana
 	OORM=	{r=0.5,	g=0.5,	b=0.5	},	-- out of range and mana]]
 
-	local color
+	local color, gray
 	if not TMW.Locked then
-		color = COLOR_UNLOCKED
+		color = "ffffffff"
+		gray = false
 	elseif inrange == false and nomana then
-		color = self.Colors.OORM
+		local c = self.Colors.OORM
+		color = c.Color
+		gray = c.Gray
 	elseif inrange == false then
-		color = self.Colors.OOR
+		local c = self.Colors.OOR
+		color = c.Color
+		gray = c.Gray
 	elseif nomana then
-		color = self.Colors.OOM
-	else
-
-		color = COLOR_UNLOCKED
+		local c = self.Colors.OOM
+		color = c.Color
+		gray = c.Gray
+	elseif state == 0 or not state then
+		color = "ffffffff"
+		gray = false
+	elseif state then
+		color = icon.States[state].Color
+		gray = false
 	end
 	
 	local texture = self.texture
-	local r, g, b = TMW:StringToRGB(color.Color)
+	local r, g, b = TMW:StringToRGB(color)
 	
 	if not (LMB and OnlyMSQ) then
 		texture:SetVertexColor(r, g, b, 1)
 	else
 		texture:SetVertexColor(1, 1, 1, 1)
 	end
-	texture:SetDesaturated(color.Gray)
+	texture:SetDesaturated(gray)
 	
 	if LMB and ColorMSQ then
 		local iconnt = icon.normaltex
@@ -79,8 +91,7 @@ end
 
 Texture_Colored:SetDataListner("INRANGE", Texture_Colored.UPDATE)
 Texture_Colored:SetDataListner("NOMANA", Texture_Colored.UPDATE)
-Texture_Colored:SetDataListner("DURATION", Texture_Colored.UPDATE)
-Texture_Colored:SetDataListner("SPELLCHARGES", Texture_Colored.UPDATE)
+Texture_Colored:SetDataListner("STATE", Texture_Colored.UPDATE)
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()

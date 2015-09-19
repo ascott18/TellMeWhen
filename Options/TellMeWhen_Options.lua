@@ -2813,14 +2813,18 @@ TMW:NewClass("Config_BitflagBase"){
 
 TMW:NewClass("Config_CheckButton_BitToggle", "Config_BitflagBase", "Config_CheckButton")
 
-TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
+TMW:NewClass("Config_Frame_IconStateSet", "Config_Frame"){
 	-- Constructor
 
 
-	OnNewInstance_Frame_WhenChecks = function(self)				
-		TMW:CInit(self.Alpha)
-
+	OnNewInstance_Frame_IconStateSet = function(self)
 		self:CScriptAdd("PanelSetup", self.PanelSetup)
+
+		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
+	end,
+
+	SettingTableRequested = function(self)
+		return TMW.CI.ics and TMW.CI.ics.States[self:GetID()] or false
 	end,
 
 	-- Script Handlers
@@ -2833,18 +2837,11 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 	end,
 	
 
-	-- Methods	
-	SetSettings = function(self, alphaSettingName)
-		self.Alpha:SetSetting(alphaSettingName)
-	end,
-
+	-- Methods
 	PanelSetup = function(self, panel, panelInfo)
 		local supplementalData = panelInfo.supplementalData
 		
-		assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_WhenChecks!")
-		
-		-- Set the title for the frame
-		panel.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
+		assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_IconStates!")
 		
 		local dataForFrame = supplementalData[self:GetID()]
 		if dataForFrame then
@@ -2853,9 +2850,6 @@ TMW:NewClass("Config_Frame_WhenChecks", "Config_Frame"){
 				L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(dataForFrame.text),
 				dataForFrame.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
 			)
-			self:Show()
-		else
-			self:Hide()
 		end
 	end,
 
@@ -2901,6 +2895,11 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 
 	SetHasOpacity = function(self, hasOpacity)
 		self.hasOpacity = hasOpacity
+
+		self.background1:SetShown(hasOpacity)
+		self.background2:SetShown(hasOpacity)
+		self.background3:SetShown(hasOpacity)
+		self.background4:SetShown(hasOpacity)
 	end,
 
 	OnSettingSavedDelayed = function(self)
@@ -3677,10 +3676,11 @@ end)
 IE.RapidSettings = {
 	-- settings that can be changed very rapidly, i.e. via mouse wheel or in a color picker
 	-- consecutive changes of these settings will be ignored by the undo/redo module
+
+	-- TODO: auto register these when they are used by a slider, and kill this table.
 	Size = true,
 	Level = true,
 	Alpha = true,
-	UnAlpha = true,
 	GUID = true,
 	Color = true,
 }

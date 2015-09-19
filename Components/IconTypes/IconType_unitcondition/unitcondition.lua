@@ -27,11 +27,12 @@ Type.hasNoGCD = true
 Type.canControlGroup = true
 Type.menuSpaceAfter = true
 
+local STATE_SUCCEED = 1
+local STATE_FAIL = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("alpha_conditionFailed")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -65,10 +66,9 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 	implementsConditions = true,
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_UNITSUCCEED"],			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNITFAIL"],			},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_SUCCEED] = { text = "|cFF00FF00" .. L["ICONMENU_UNITSUCCEED"], },
+	[STATE_FAIL] =    { text = "|cFFFF0000" .. L["ICONMENU_UNITFAIL"],    },
 })
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")
@@ -96,7 +96,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 			local succeeded = not Conditions or not Conditions[u].Failed
 			local status = unitStatus[unit]
 
-			local alpha = succeeded and icon.Alpha or icon.UnAlpha
+			local state = succeeded and STATE_SUCCEED or STATE_FAIL
 			if succeeded and not status.succeeded and icon.ConditionDurEnabled then
 				-- Start the timer on the icon if the conditions just began succeeding.
 				d = icon.ConditionDur
@@ -124,16 +124,16 @@ local function ConditionIcon_OnUpdate(icon, time)
 			status.duration = duration
 
 			if icon.OnlyIfCounting and d <= 0 then
-				-- Set the alpha of the icon to 0 if the timer is not running
+				-- Set the state of the icon to 0 if the timer is not running
 				-- and the icon is configured to only show while it is running.
-				alpha = 0
+				state = 0
 			elseif icon.OnlyIfNotCounting and d > 0 then
-				-- Set the alpha of the icon to 0 if the timer is running
+				-- Set the state of the icon to 0 if the timer is running
 				-- and the icon is configured to only show while it isn't running.
-				alpha = 0
+				state = 0
 			end
 
-			if not icon:YieldInfo(true, alpha, start, duration, unit) then
+			if not icon:YieldInfo(true, state, start, duration, unit) then
 				return
 			end
 		end
@@ -143,9 +143,9 @@ local function ConditionIcon_OnUpdate(icon, time)
 		return
 	end
 end
-function Type:HandleYieldedInfo(icon, iconToSet, alpha, start, duration, unit)
-	iconToSet:SetInfo("alpha; start, duration; unit, GUID",
-		alpha,
+function Type:HandleYieldedInfo(icon, iconToSet, state, start, duration, unit)
+	iconToSet:SetInfo("state; start, duration; unit, GUID",
+		state,
 		start, duration,
 		unit, nil
 	)

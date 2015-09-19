@@ -34,7 +34,7 @@ Type.menuSpaceBefore = true
 In order to make sure that the appropriate IconDataProcessors get implemented into an icon that uses our IT, ITs must explicitly declare what attributes are used in their icon:SetInfo() calls:
 
 <<code lua>>
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("spell")
@@ -66,10 +66,12 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],		},
+local STATE_USABLE = 1
+local STATE_UNUSABLE = 2
+
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
+	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
@@ -91,7 +93,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", fun
 end)
 <</code>>
 
-Here, we registered two XML template config panels that are used throughout TMW (TellMeWhen_ChooseName and TellMeWhen_WhenChecks) and one constructor function that contains both checkboxes for some default settings and a checkbox for a setting that is specific to the IT we are creating.
+Here, we registered two XML template config panels that are used throughout TMW (TellMeWhen_ChooseName and TellMeWhen_IconStates) and one constructor function that contains both checkboxes for some default settings and a checkbox for a setting that is specific to the IT we are creating.
 
 === Making an Update Function
 The Update function is what interacts with the WoW API, processes it, and then spits it out to the IconDataProcessors. This function is named OnUpdate in all existing ITs in TMW because all ITs used to be OnUpdate driven. If there are events that respond to all possible state changes for the icon, you can build an IT that is OnEvent-driven instead of OnUpdate-driven.
@@ -136,19 +138,31 @@ local function TestType_OnUpdate(icon, time)
 			-- Usable
 			
 			icon:SetInfo(
-				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				icon.Alpha, GetSpellTexture(NameFirst), start, duration, NameFirst, inrange, nomana, stack, stackText
+				"state; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				STATE_USABLE,
+				GetSpellTexture(NameFirst),
+				start, duration,
+				NameFirst,
+				inrange,
+				nomana,
+				stack, stackText
 			)
 		else
 			-- Unusable
 			
 			icon:SetInfo(
-				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				icon.UnAlpha, GetSpellTexture(NameFirst), start, duration, NameFirst, inrange, nomana, stack, stackText
+				"state; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				STATE_UNUSABLE,
+				GetSpellTexture(NameFirst),
+				start, duration,
+				NameFirst,
+				inrange,
+				nomana,
+				stack, stackText
 			)
 		end
 	else
-		icon:SetInfo("alpha", 0)
+		icon:SetInfo("state", 0)
 	end
 end
 <</code>>
@@ -218,7 +232,7 @@ Type.desc = "An Icon Type created to demonstrate the TMW IconType API"
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
 Type.menuSpaceBefore = true
 
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("spell")
@@ -237,10 +251,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],		},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
+	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
@@ -297,19 +310,31 @@ local function TestType_OnUpdate(icon, time)
 			-- Usable
 			
 			icon:SetInfo(
-				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				icon.Alpha, GetSpellTexture(NameFirst), start, duration, NameFirst, inrange, nomana, stack, stackText
+				"state; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				STATE_USABLE,
+				GetSpellTexture(NameFirst),
+				start, duration,
+				NameFirst,
+				inrange,
+				nomana,
+				stack, stackText
 			)
 		else
 			-- Unusable
 			
 			icon:SetInfo(
-				"alpha; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				icon.UnAlpha, GetSpellTexture(NameFirst), start, duration, NameFirst, inrange, nomana, stack, stackText
+				"state; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				STATE_UNUSABLE,
+				GetSpellTexture(NameFirst),
+				start, duration,
+				NameFirst,
+				inrange,
+				nomana,
+				stack, stackText
 			)
 		end
 	else
-		icon:SetInfo("alpha", 0)
+		icon:SetInfo("state", 0)
 	end
 end
 

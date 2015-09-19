@@ -26,11 +26,14 @@ Type.menuSpaceBefore = true
 Type.AllowNoName = true
 Type.hasNoGCD = true
 
+local STATE_SUCCEED = 1
+local STATE_FAIL = 2
+
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("alpha_conditionFailed")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -81,10 +84,9 @@ TMW:RegisterUpgrade(45013, {
 })
 
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[1] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED2"],			},
-	[2] = { text = "|cFFFF0000" .. L["ICONMENU_FAIL2"],			},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[STATE_SUCCEED] = { text = "|cFF00FF00" .. L["ICONMENU_SUCCEED2"], },
+	[STATE_FAIL] =    { text = "|cFFFF0000" .. L["ICONMENU_FAIL2"],    },
 })
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")
@@ -96,7 +98,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 	if ConditionObject then
 		local succeeded = not ConditionObject.Failed
 		
-		local alpha = succeeded and icon.Alpha or icon.UnAlpha
+		local state = succeeded and STATE_SUCCEED or STATE_FAIL
 
 		local d, start, duration
 
@@ -124,28 +126,28 @@ local function ConditionIcon_OnUpdate(icon, time)
 		end
 
 		if icon.OnlyIfCounting and d <= 0 then
-			-- Set the alpha of the icon to 0 if the timer is not running
+			-- Set the state of the icon to 0 if the timer is not running
 			-- and the icon is configured to only show while it is running.
-			alpha = 0
+			state = 0
 		elseif icon.OnlyIfNotCounting and d > 0 then
-			-- Set the alpha of the icon to 0 if the timer is running
+			-- Set the state of the icon to 0 if the timer is running
 			-- and the icon is configured to only show while it isn't running.
-			alpha = 0
+			state = 0
 		end
 		
 		-- We set alpha_conditionFailed to override the automatic alpha handling of ConditionObjects.
-		-- We want to set the alpha on our own.
+		-- We want to set the alpha on our own (though the state).
 		icon:SetInfo(
-			"alpha_conditionFailed; alpha; start, duration",
+			"alpha_conditionFailed; state; start, duration",
 			nil,
-			alpha,
+			state,
 			start, duration
 		)
 
 		-- Record the passing state of the icon's condition object so we can detect when it changes.
 		icon.__succeeded = succeeded
 	else
-		icon:SetInfo("alpha_conditionFailed; alpha", nil, 1)
+		icon:SetInfo("alpha_conditionFailed; state", nil, STATE_SUCCEED)
 	end
 end
 

@@ -45,12 +45,14 @@ Type.usePocketWatch = 1
 Type.unitType = "name"
 Type.canControlGroup = true
 
+local STATE_PRESENT = 1
+local STATE_ABSENT = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
+Type:UsesAttributes("state")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -65,10 +67,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "buff",
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_WhenChecks", {
-	text = L["ICONMENU_SHOWWHEN"],
-	[ 1 ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], 	tooltipText = L["ICONMENU_DOTWATCH_AURASFOUND_DESC"],	},
-	[ 2 ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"], 	tooltipText = L["ICONMENU_DOTWATCH_NOFOUND_DESC"],	},
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
+	[ STATE_PRESENT ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], tooltipText = L["ICONMENU_DOTWATCH_AURASFOUND_DESC"], },
+	[ STATE_ABSENT  ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"],  tooltipText = L["ICONMENU_DOTWATCH_NOFOUND_DESC"],    },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
@@ -432,8 +433,8 @@ end
 local function Dotwatch_OnUpdate_Controller(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local Alpha, UnAlpha, NameArray =
-	icon.Alpha, icon.UnAlpha, icon.Spells.Array
+	local NameArray = icon.Spells.Array
+	local presentAlpha = icon.States[STATE_PRESENT].Alpha
 		
 	for GUID, auras in pairs(Auras) do
 		local unit = nil
@@ -454,7 +455,7 @@ local function Dotwatch_OnUpdate_Controller(icon, time)
 				local remaining = duration - (time - start)
 
 				if remaining > 0 then
-					if Alpha > 0 and not icon:YieldInfo(true, iName, start, duration, aura.unitName, GUID, Alpha, aura.stacks) then
+					if presentAlpha > 0 and not icon:YieldInfo(true, iName, start, duration, aura.unitName, GUID, aura.stacks) then
 						-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 						return
 					end
@@ -470,10 +471,10 @@ local function Dotwatch_OnUpdate_Controller(icon, time)
 	icon:YieldInfo(false)
 end
 
-function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GUID, alpha, stacks)
+function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GUID, stacks)
 	if name then
-		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID; stack, stackText",
-			alpha,
+		iconToSet:SetInfo("state; texture; start, duration; spell; unit, GUID; stack, stackText",
+			STATE_PRESENT,
 			GetSpellTexture(name) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			start, duration,
 			name,
@@ -481,8 +482,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GU
 			stacks, stacks
 		)
 	else
-		iconToSet:SetInfo("alpha; texture; start, duration; spell; unit, GUID; stack, stackText",
-			icon.UnAlpha,
+		iconToSet:SetInfo("state; texture; start, duration; spell; unit, GUID; stack, stackText",
+			STATE_ABSENT,
 			icon.FirstTexture,
 			0, 0,
 			icon.Spells.First,
