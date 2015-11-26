@@ -180,35 +180,30 @@ TMW:RegisterCallback("TMW_ICON_UPDATED", function(event, icon)
 	for i = 1, #Icons do
 		local icon_meta = Icons[i]
 
-		if icon_meta == icon or (not icon_meta:IsControlled() and icon_meta.IconsLookup[GUID]) then
+		-- Table lookup is faster than function call. Put it first for short circuiting.
+		if icon_meta == icon or (icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled()) then
 			icon_meta.metaUpdateQueued = true
 		end
 	end
 end)
 
--- Performs a type setup on a meta icon when an icon it's checking is setup.
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
+
+-- Performs a type setup on a meta icon when an icon/group it's checking is setup.
+local function SETUP_POST(event, iconOrGroup)
+	local GUID = iconOrGroup:GetGUID()
+
 	local Icons = Type.Icons
 	for i = 1, #Icons do
 		local icon_meta = Icons[i]
 
-		if (not icon_meta:IsControlled() and icon_meta.IconsLookup[icon:GetGUID()]) then
+		-- Table lookup is faster than function call. Put it first for short circuiting.
+		if (icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled()) then
 			Type:Setup(icon_meta)
 		end
 	end
-end)
-
--- Performs a type setup on a meta icon when an group it's checking is setup.
-TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
-	local Icons = Type.Icons
-	for i = 1, #Icons do
-		local icon_meta = Icons[i]
-
-		if (not icon_meta:IsControlled() and icon_meta.IconsLookup[group:GetGUID()]) then
-			Type:Setup(icon_meta)
-		end
-	end
-end)
+end	
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", SETUP_POST)
+TMW:RegisterCallback("TMW_GROUP_SETUP_POST", SETUP_POST)
 
 
 
