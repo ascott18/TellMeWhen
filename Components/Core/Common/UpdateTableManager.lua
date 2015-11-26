@@ -44,9 +44,12 @@ function UpdateTableManager:UpdateTable_Register(target)
 	local oldLength = #self.UpdateTable_UpdateTable
 
 	if not TMW.tContains(self.UpdateTable_UpdateTable, target) then
-		tinsert(self.UpdateTable_UpdateTable, target)
-		
-		self:UpdateTable_PerformAutoSort()
+
+		if self.UpdateTable_DoAutoSort then
+			TMW.binaryInsert(self.UpdateTable_UpdateTable, target, self.UpdateTable_AutoSortFunc)
+		else
+			tinsert(self.UpdateTable_UpdateTable, target)
+		end
 		
 		if oldLength == 0 and self.UpdateTable_OnUsed then
 			self:UpdateTable_OnUsed()
@@ -66,7 +69,6 @@ function UpdateTableManager:UpdateTable_Unregister(target)
 	TMW.tDeleteItem(self.UpdateTable_UpdateTable, target, true)
 	
 	if oldLength ~= #self.UpdateTable_UpdateTable then
-		self:UpdateTable_PerformAutoSort()
 		
 		if oldLength > 0 and #self.UpdateTable_UpdateTable == 0 and self.UpdateTable_OnUnused then
 			self:UpdateTable_OnUnused()

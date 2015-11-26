@@ -697,6 +697,27 @@ function TMW.tRemoveDuplicates(table)
 	return table
 end
 
+local comp_default = function(a,b) return a < b end
+function TMW.binaryInsert(table, value, comp)
+	-- http://lua-users.org/wiki/BinaryInsert
+	comp = comp or comp_default
+
+	local iStart, iEnd, iMid, iState =
+	      1, #table, 1, 0
+
+	while iStart <= iEnd do
+		iMid = floor((iStart+iEnd) / 2)
+
+		if comp(value, table[iMid]) then
+			iEnd, iState = iMid-1, 0
+		else
+			iStart, iState = iMid+1, 1
+		end
+	end
+	tinsert(table, iMid + iState, value)
+	return (iMid+iState)
+end
+
 function TMW.OrderSort(a, b)
 	a = a.Order or a.order
 	b = b.Order or b.order
