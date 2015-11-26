@@ -2867,6 +2867,8 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 
 		self.text:SetHeight(30)
 		self.text:SetMaxLines(3)
+
+		self.swatch:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 	end,
 
 	SetTexts = function(self, title, tooltip)
@@ -2918,7 +2920,7 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 			local a = 1 - OpacitySliderFrame:GetValue()
 
 			self:SetRGBA(r, g, b, a)
-			self.swatch:SetTexture(self:GetRGBA())
+			self:UpdateSwatchTexture()
 			
 			self:OnSettingSavedDelayed()
 		end
@@ -2932,11 +2934,25 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		self.GenerateMethods = TMW.NULLFUNC
 	end,
 
+	SetSwatchTexture = function(self, texture)
+		self.swatchTexture = texture
+		self:UpdateSwatchTexture()
+	end,
+
+	UpdateSwatchTexture = function(self)
+		if self.swatchTexture and self.swatchTexture ~= "" then
+			self.swatch:SetTexture(self.swatchTexture)
+			self.swatch:SetVertexColor(self:GetRGBA())
+		else
+			self.swatch:SetTexture(self:GetRGBA())
+		end
+	end,
+
 	ReloadSetting = function(self)
 		local settings = self:GetSettingTable()
 
 		if settings then
-			self.swatch:SetTexture(self:GetRGBA())
+			self:UpdateSwatchTexture()
 		end
 	end,
 

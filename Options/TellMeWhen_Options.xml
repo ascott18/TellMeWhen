@@ -586,6 +586,10 @@
 		<Frames>
 			<Button inherits="TellMeWhen_ClickInterceptor"/>
 		</Frames>
+
+		<HighlightTexture alphaMode="ADD" alpha="0.15" setAllPoints="true">
+			<Color r="1" g="1" b="1"/>
+		</HighlightTexture>
 	</Button>
 
 	<Button name="TellMeWhen_DeleteButtonTemplate" virtual="true">

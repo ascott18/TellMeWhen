@@ -325,6 +325,9 @@
 						self:SetHasOpacity(false)
 						self:SetSetting("Color")
 					</OnLoad>
+					<OnUpdate>
+						self:SetSwatchTexture(TMW.CI.icon.attributes.texture)
+					</OnUpdate>
 				</Scripts>
 			</Button>
 
@@ -340,6 +343,12 @@
 
 						self:SetSetting("Alpha")
 					</OnLoad>
+					<OnValueChanged>
+						local alpha = self:GetValue()
+						local colorButton = self:GetParent().Color
+						colorButton:SetAlpha(alpha)
+						colorButton:SetShown(alpha > 0)
+					</OnValueChanged>
 				</Scripts>
 			</Slider>
 
