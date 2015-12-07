@@ -3124,6 +3124,209 @@ TMW:NewClass("Config_PointSelect", "Config_Frame"){
 
 
 
+TMW:NewClass("Config_ColorPicker", "Config_Frame"){
+
+	h = 0,
+	s = 1,
+	v = 0.5,
+
+	HUE_SEGMENTS = 6,
+
+	MakeTexture = function(self, i, iMax, slider)
+		local tex = self.hueSlider:CreateTexture()
+		slider[i] = tex
+		tex:SetPoint("TOP", slider.Background, "TOP", 0, 0)
+		tex:SetPoint("BOTTOM", slider.Background, "BOTTOM", 0, 0)
+		tex:SetTexture(1, 1, 1)
+
+		if i > 1 then
+			tex:SetPoint("LEFT", slider[i-1], "RIGHT", 0, 0)
+		else
+			tex:SetPoint("LEFT")
+		end
+
+		return tex
+	end,
+
+	HueFormatter = TMW.C.Formatter:New(function(value)
+		return ("%.1f"):format(value*360)
+	end),
+
+	OnNewInstance = function(self)
+		self.RecentColors = {}
+
+		self:AddRecentColor("ff345678")
+		self:AddRecentColor("ffffffff")
+		self:AddRecentColor("ff000000")
+		self:AddRecentColor("ffff0000")
+
+		self.swatchLabel:SetText(L["COLORPICKER_SWATCH"])
+		self.RecentColorFrame.header:SetText(L["COLORPICKER_RECENT"])
+
+		self:CScriptAdd("SettingTableRequested", function() return self end)
+
+		for i, slider in TMW:Vararg(self.hueSlider, self.saturationSlider, self.valueSlider) do
+			slider:SetMinMaxValues(0, 1)
+			slider:SetValueStep(0.001)
+
+			-- Set the setting to h, s, or b
+			slider:SetSetting(slider:GetParentKey():sub(1, 1))
+
+			slider:PostHookMethod("UpdateTexts", self.Slider_UpdateTextsHook)
+		end
+
+		self.hueSlider.Background:Hide()
+		self.hueSlider:SetValueStep(0.0005)
+		self.hueSlider:SetMinMaxValues(0, 0.9995)
+		self.hueSlider:SetTextFormatter(self.HueFormatter)
+		for i = 1, self.HUE_SEGMENTS do
+			self:MakeTexture(i, self.HUE_SEGMENTS, self.hueSlider)
+		end
+
+		self.saturationSlider.Background:SetTexture(1, 1, 1)
+		self.saturationSlider:SetTextFormatter(TMW.C.Formatter.PERCENT100)
+		self.valueSlider.Background:SetTexture(1, 1, 1)
+		self.valueSlider:SetTextFormatter(TMW.C.Formatter.PERCENT100)
+
+		self:OnSizeChanged()
+		self:RequestReload()
+
+		self:CScriptAdd("DescendantSettingSaved", self.SaveSetting)
+	end,
+
+	OnSizeChanged = function(self)
+		for i = 1, self.HUE_SEGMENTS do
+			if not self.hueSlider[i] then break end
+		    self.hueSlider[i]:SetWidth(self.hueSlider.Background:GetWidth()/self.HUE_SEGMENTS)
+		end
+	end,
+
+	OnUpdate = function(self)
+		self:OnSizeChanged()
+
+		if self.hueSlider[i] and self.hueSlider[i]:GetWidth() > 5 then
+			self:SetScript("OnUpdate", nil)
+		end
+	end,
+
+	Slider_UpdateTextsHook = function(slider)
+		local self = slider:GetParent()
+		self:LiveUpdate()
+	end,
+
+	RECENT_COLOR_COLUMNS = 3,
+	RecentColor_OnClick = function(recentColorButton)
+		local self = recentColorButton:GetParent():GetParent()
+
+		-- This must be upvalued because it is about to get overwritten when we
+		-- add the current color as a recent color.
+		local string = recentColorButton.string
+
+		self:AddRecentColor(self:GetColorString())
+		self:AddRecentColor(string)
+
+		self:SetColorString(string)
+	end,
+	AddRecentColor = function(self, colorString)
+		-- TODO: store these in options saved variables instead of in memory.
+		for i, v in ipairs(self.RecentColors) do
+			if v == colorString then
+				tremove(self.RecentColors, i)
+				break
+			end
+		end
+
+		tinsert(self.RecentColors, 1, colorString)
+
+		local padding = 5
+		for i, color in ipairs(self.RecentColors) do
+			local f = self.RecentColorFrame[i]
+			if not f then
+				f = CreateFrame("Button", nil, self.RecentColorFrame, "TellMeWhen_ColorButtonTemplate")
+				f:SetScript("OnClick", self.RecentColor_OnClick)
+				local dim = (self.RecentColorFrame:GetWidth() - padding*(1+self.RECENT_COLOR_COLUMNS)) / self.RECENT_COLOR_COLUMNS
+				f:SetSize(dim, dim)
+				self.RecentColorFrame[i] = f
+				if i == 1 then
+					f:SetPoint("TOPLEFT")
+				elseif (i-1) % self.RECENT_COLOR_COLUMNS == 0 then
+					f:SetPoint("TOPLEFT", self.RecentColorFrame[i-self.RECENT_COLOR_COLUMNS], "BOTTOMLEFT", 0, -padding)
+				else
+					f:SetPoint("LEFT", self.RecentColorFrame[i-1], "RIGHT", padding, 0)
+				end
+			end
+			f.string = color
+			f.swatch:SetTexture(TMW:StringToRGB(color))
+		end
+	end,
+
+	LiveUpdate = function(self)
+		if not self.hueSlider[1] then
+			return
+		end
+
+		-- TODO: HANDLE ALPHA
+		local a = 1
+		local h, s, v = self.hueSlider:GetValue(), self.saturationSlider:GetValue(), self.valueSlider:GetValue()
+
+		self.StringEditbox:SetText(TMW:HSVAToRGBAString(h, s, v, a))
+
+		local r,g,b=TMW:HSVToRGB(h, 0, v)
+		self.saturationSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, 1, v))
+
+		local r,g,b=TMW:HSVToRGB(h, s, 0)
+		self.valueSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, s, 1))
+
+		for i = 1, self.HUE_SEGMENTS do
+			local r,g,b=TMW:HSVToRGB((i-1)/self.HUE_SEGMENTS, s, v)
+			self.hueSlider[i]:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(i/self.HUE_SEGMENTS, s, v))
+		end
+
+		self.swatch:SetTexture(TMW:HSVToRGB(h, s, v))
+		local tex = CI.icon and CI.icon.attributes.texture
+
+		self.iconTexture:SetTexture(tex)
+
+		self.iconTexture:SetVertexColor(TMW:HSVToRGB(h, s, v))
+	end,
+
+	SaveSetting = function(self)
+		local settings = self:GetSettingTable()
+
+		if settings and self.setting then
+
+			local value = TMW:HSVAToRGBAString(self.h, self.s, self.v, self.a)
+
+			if settings[self.setting] ~= value then
+				settings[self.setting] = value
+				self:OnSettingSaved()
+			else
+				self:RequestReload()
+			end
+		end
+	end,
+
+	SetColorString = function(self, value)
+		local c = TMW:RGBAStringToCachedHSVATable(value)
+
+		self.h, self.s, self.v, self.a = c.h, c.s, c.v, c.a
+
+		self:RequestReloadChildren()
+	end,
+
+	GetColorString = function(self, value)
+		return TMW:HSVAToRGBAString(self.h, self.s, self.v, self.a)
+	end,
+
+	LoadColorString = function(self, value)
+		local c = TMW:RGBAStringToCachedHSVATable(value)
+
+		self:SetColorString(value)
+		self:AddRecentColor(value)
+
+		self.previousSwatch:SetTexture(TMW:StringToRGB(value))
+	end,
+}
 
 
 

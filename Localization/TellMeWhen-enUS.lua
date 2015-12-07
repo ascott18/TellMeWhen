@@ -1273,6 +1273,20 @@ L["UIPANEL_ANCHORNUM"] = "Anchor %d"
 L["CONFIRM_DELLAYOUT"] = "Delete Layout"
 
 
+L["COLORPICKER_HUE"] = "Hue"
+L["COLORPICKER_HUE_DESC"] = "Set the color's hue."
+L["COLORPICKER_SATURATION"] = "Saturation"
+L["COLORPICKER_SATURATION_DESC"] = "Set the color's saturation."
+L["COLORPICKER_BRIGHTNESS"] = "Brightness"
+L["COLORPICKER_BRIGHTNESS_DESC"] = "Set the color's brightness."
+
+L["COLORPICKER_SWATCH"] = "Color"
+L["COLORPICKER_ICON_UNCOLORED"] = "Normal"
+L["COLORPICKER_ICON_CURRENT"] = "Chosen"
+L["COLORPICKER_ICON_PREVIOUS"] = "Original"
+
+L["COLORPICKER_RECENT"] = "Recent Colors"
+
 
 -- -------------
 -- CONDITION PANEL

@@ -28,7 +28,7 @@ local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_
 	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer
 
 local UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate =
-      UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate
+	  UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate
 
 local debugprofilestop = debugprofilestop_SAFE
 
@@ -587,6 +587,144 @@ end
 TMW:MakeFunctionCached(TMW, "StringToCachedRGBTable")
 
 
+-- Adapted from https://github.com/mjackson/mjijackson.github.com/blob/master/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript.txt
+function TMW:RGBToHSL(r, g, b)
+	local max = max(r, g, b)
+	local min = min(r, g, b)
+	local h, s, l = (max + min) / 2
+
+	if max == min then
+		h, s = 0, 0 -- achromatic
+	else
+		local d = max - min
+		local s
+		if l > 0.5 then
+			s = d / (2 - max - min)
+		else
+			s = d / (max + min)
+		end
+
+		if max == r then
+			h = (g - b) / d
+			if g < b then h = h + 6 end
+		elseif max == g then
+			h = (b - r) / d + 2
+		elseif max == b then
+			h = (r - g) / d + 4
+		end
+
+		h = h / 6
+	end
+
+	return h, s, l
+end
+
+local function hue2rgb(p, q, t)
+	if t < 0   then t = t + 1 end
+	if t > 1   then t = t - 1 end
+	if t < 1/6 then return p + (q - p) * 6 * t end
+	if t < 1/2 then return q end
+	if t < 2/3 then return p + (q - p) * (2/3 - t) * 6 end
+	return p
+end
+function TMW:HSLToRGB(h, s, l)
+	local r, g, b
+
+	if s == 0 then
+		r, g, b = l, l, l -- achromatic
+	else
+		local q
+		if l < 0.5 then
+			q = l * (1 + s)
+		else
+			q = l + s - l * s
+		end
+		local p = 2 * l - q
+
+		r = hue2rgb(p, q, h + 1/3)
+		g = hue2rgb(p, q, h)
+		b = hue2rgb(p, q, h - 1/3)
+	end
+
+	return r, g, b
+end
+
+function TMW:RGBToHSV(r, g, b)
+	local max, min = max(r, g, b), min(r, g, b)
+	local h, s, v
+	v = max
+
+	local d = max - min
+	if max == 0 then
+		s = 0 else s = d / max
+	end
+
+	if max == min then
+		h = 0 -- achromatic
+	else
+		if max == r then
+			h = (g - b) / d
+			if g < b then
+				h = h + 6
+			end
+		elseif max == g then
+			h = (b - r) / d + 2
+		elseif max == b then
+			h = (r - g) / d + 4
+		end
+		h = h / 6
+	end
+
+	return h, s, v
+end
+
+function TMW:HSVToRGB(h, s, v)
+	local r, g, b
+
+	local i = floor(h * 6)
+	local f = h * 6 - i
+	local p = v * (1 - s)
+	local q = v * (1 - f * s)
+	local t = v * (1 - (1 - f) * s)
+
+	i = i % 6
+
+	if i == 0 then r, g, b = v, t, p
+	elseif i == 1 then r, g, b = q, v, p
+	elseif i == 2 then r, g, b = p, v, t
+	elseif i == 3 then r, g, b = p, q, v
+	elseif i == 4 then r, g, b = t, p, v
+	elseif i == 5 then r, g, b = v, p, q
+	end
+
+	return r, g, b
+end
+
+
+
+function TMW:RGBAStringToCachedHSLATable(str)
+	local r, g, b, a = TMW:StringToRGBA(str)
+	local h, s, l = TMW:RGBToHSL(r, g, b)
+	return {h=h, s=s, l=l, a=a}
+end
+TMW:MakeFunctionCached(TMW, "RGBStringToCachedHSLATable")
+
+function TMW:RGBAStringToCachedHSVATable(str)
+	local r, g, b, a = TMW:StringToRGBA(str)
+	local h, s, v = TMW:RGBToHSV(r, g, b)
+	return {h=h, s=s, v=v, a=a}
+end
+TMW:MakeFunctionCached(TMW, "RGBAStringToCachedHSVATable")
+
+function TMW:HSLAToRGBAString(h, s, l, a)
+	local r, g, b = TMW:HSLToRGB(h, s, l)
+	return TMW:RGBAToString(r, g, b, a)
+end
+function TMW:HSVAToRGBAString(h, s, b, a)
+	local r, g, b = TMW:HSVToRGB(h, s, b)
+	return TMW:RGBAToString(r, g, b, a)
+end
+
 
 
 
@@ -703,7 +841,7 @@ function TMW.binaryInsert(table, value, comp)
 	comp = comp or comp_default
 
 	local iStart, iEnd, iMid, iState =
-	      1, #table, 1, 0
+		  1, #table, 1, 0
 
 	while iStart <= iEnd do
 		iMid = floor((iStart+iEnd) / 2)
@@ -1347,10 +1485,10 @@ local function recursivelyDetectLua(results, table, ...)
 			end
 		end
 
-        for a, b in pairs(table) do
-            recursivelyDetectLua(results, b, a, ...)
-        end
-    end
+		for a, b in pairs(table) do
+			recursivelyDetectLua(results, b, a, ...)
+		end
+	end
 end
 function TMW:DetectImportedLua(table)
 	local results = {}

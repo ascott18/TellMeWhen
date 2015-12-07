@@ -1025,6 +1025,193 @@
 	</Frame>
 
 
+	<Frame name="TellMeWhen_ColorPickerTemplate" hidden="false" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG" parent="UIParent" virtual="true" >
+		<Size x="320" y="190"/>
+
+		<!-- Enables the whole frame for dragging -->
+		<TitleRegion setAllPoints="true"/>
+
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_ColorPicker"/>
+		</KeyValues>
+
+		<Frames>
+			<Frame inherits="TellMeWhen_GenericBorder">
+			</Frame>
+
+			<Slider parentKey="hueSlider" inherits="TellMeWhen_SliderTemplate">
+				<Size x="210" y="20"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="10" y="-10"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						self:SetTexts(TMW.L["COLORPICKER_HUE"], TMW.L["COLORPICKER_HUE_DESC"])
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+			<Slider parentKey="saturationSlider" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.hueSlider" relativePoint="BOTTOMLEFT" y="-10"/>
+					<Anchor point="RIGHT" relativeKey="$parent.hueSlider" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						self:SetTexts(TMW.L["COLORPICKER_SATURATION"], TMW.L["COLORPICKER_SATURATION_DESC"])
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+			<Slider parentKey="valueSlider" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.saturationSlider" relativePoint="BOTTOMLEFT" y="-10"/>
+					<Anchor point="RIGHT" relativeKey="$parent.saturationSlider" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						self:SetTexts(TMW.L["COLORPICKER_BRIGHTNESS"], TMW.L["COLORPICKER_BRIGHTNESS_DESC"])
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+			<EditBox parentKey="StringEditbox" inherits="TellMeWhen_InputBoxTemplate">
+				<Size x="95" y="16"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.valueSlider" relativePoint="BOTTOMLEFT" x="115" y="-15"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						function self:SaveSetting()
+							local value = self:GetText()
+							if value and value ~= "" then
+								self:GetParent():SetColorString(value)
+							else
+								self:RequestReload()
+							end
+						end
+
+						self:CScriptAdd("ReloadRequested", function()
+							self:SetText(self:GetParent():GetColorString())
+						end)
+
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+
+			<Button parentKey="Okay" inherits="TellMeWhen_ButtonTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.hueSlider" />
+					<Anchor point="BOTTOM" y="5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText(OKAY)
+						self:SetWidth(self:GetTextWidth()+15)
+					</OnLoad>
+					<OnClick>
+						error("Handle me!")
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<Button parentKey="Cancel" inherits="TellMeWhen_ButtonTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.hueSlider" />
+					<Anchor point="BOTTOM" y="5"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText(CANCEL)
+						self:SetWidth(self:GetTextWidth()+15)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():Hide()
+						error("Handle me!")
+					</OnClick>
+				</Scripts>
+			</Button>
+
+
+			<Frame parentKey="RecentColorFrame" >
+				<Size x="85"/>
+				<Anchors>
+					<Anchor point="TOP" y="-21"/>
+					<Anchor point="LEFT" relativeKey="$parent.hueSlider" relativePoint="RIGHT" x="15"/>
+					<Anchor point="BOTTOM" y="10"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString parentKey="header" inherits="GameFontHighlightSmall" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
+								<Anchor point="LEFT" />
+								<Anchor point="RIGHT"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+		</Frames>
+
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="background">
+					<Color r="0.05" g="0.05" b="0.05" a="1"/>
+				</Texture>
+			</Layer>
+
+			<Layer level="OVERLAY">
+				<Texture parentKey="swatch" >
+					<Size x="35" y="35"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.valueSlider" relativePoint="BOTTOMLEFT" x="0" y="-30"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="iconTexture">
+					<Size x="40" y="40"/>
+					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeKey="$parent.swatch" x="25"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="swatchPrevious" >
+					<Size x="35" y="35"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.swatch" x="5" y="5"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString parentKey="swatchLabel" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeKey="$parent.swatch" y="7"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Frame>
+
+
+<!-- TODO: get rid of this (or at least dont name it "F") -->
+	<Frame name="F" inherits="TellMeWhen_ColorPickerTemplate" hidden="false">
+		<Anchors>
+			<Anchor point="CENTER" />
+		</Anchors>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+
 	<!-- END TEMPLATES -->
 
 	<Frame name="TellMeWhen_GroupImportFlash" frameStrata="FULLSCREEN" parent="UIParent" hidden="true">
