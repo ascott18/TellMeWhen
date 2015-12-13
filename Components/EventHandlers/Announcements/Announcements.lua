@@ -507,7 +507,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(81, "SCT", {
 	end,
 	handler = function(icon, eventSettings, Text)
 		if SCT then
-			local color = TMW:StringToCachedRGBTable(eventSettings.TextColor)
+			local color = TMW:StringToCachedRGBATable(eventSettings.TextColor)
 			SCT:DisplayCustomEvent(Text, color, eventSettings.Sticky, eventSettings.Location, nil, eventSettings.ShowIconTex and icon.attributes.texture)
 		end
 	end,
@@ -548,8 +548,8 @@ Announcements:RegisterEventHandlerDataNonSpecific(83, "MSBT", {
 			local Size = eventSettings.Size
 			if Size == 0 then Size = nil end
 
-			local r, g, b = TMW:StringToRGBA(eventSettings.TextColor)
-			MikSBT.DisplayMessage(Text, eventSettings.Location, eventSettings.Sticky, r*0xFF, g*0xFF, b*0xFF, Size, nil, nil, eventSettings.ShowIconTex and icon.attributes.texture)
+			local c = TMW:StringToCachedRGBATable(eventSettings.TextColor)
+			MikSBT.DisplayMessage(Text, eventSettings.Location, eventSettings.Sticky, c.r*0xFF, c.g*0xFF, c.b*0xFF, Size, nil, nil, eventSettings.ShowIconTex and icon.attributes.texture)
 		end
 	end,
 })
@@ -589,8 +589,8 @@ Announcements:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 			local Size = eventSettings.Size
 			if Size == 0 then Size = nil end
 
-			local r, g, b = TMW:StringToRGBA(eventSettings.TextColor)
-			Parrot:ShowMessage(Text, eventSettings.Location, eventSettings.Sticky, r, g, b, nil, Size, nil, eventSettings.ShowIconTex and icon.attributes.texture)
+			local c = TMW:StringToCachedRGBATable(eventSettings.TextColor)
+			Parrot:ShowMessage(Text, eventSettings.Location, eventSettings.Sticky, c.r, c.g, c.b, nil, Size, nil, eventSettings.ShowIconTex and icon.attributes.texture)
 		end
 	end,
 })
@@ -615,8 +615,8 @@ Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 				UIParentLoadAddOn("Blizzard_CombatText")
 			end
 
-			local r, g, b = TMW:StringToRGBA(eventSettings.TextColor)
-			CombatText_AddMessage(Text, CombatText_StandardScroll, r, g, b, eventSettings.Sticky and "crit" or nil, false)
+			local c = TMW:StringToCachedRGBATable(eventSettings.TextColor)
+			CombatText_AddMessage(Text, CombatText_StandardScroll, c.r, c.g, c.b, eventSettings.Sticky and "crit" or nil, false)
 		end
 	end,
 })

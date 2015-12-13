@@ -1290,15 +1290,13 @@ end})
 --  )
 -- 
 --  -- From IconTypes/IconType_reactive:
---  icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
+--  icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
 --    STATE_USABLE,
 --    GetSpellTexture(iName),
 --    start, duration,
 --    charges, maxCharges,
 --    stack, stack,
---    iName,
---    inrange,
---    nomana			
+--    iName			
 -- )
 function Icon.SetInfo(icon, signature, ...)
 	SetInfoFuncs[signature](icon, ...)

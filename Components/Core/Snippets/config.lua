@@ -216,7 +216,7 @@ function codesnippet:Import_ImportData(Item, domain)
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("codesnippet", version, snippet)
+			TMW:StartUpgrade("codesnippet", version, snippet)
 		end
 	end
 

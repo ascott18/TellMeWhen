@@ -34,8 +34,8 @@ Type.hasNoGCD = true
 Type.canControlGroup = true
 Type.menuSpaceBefore = true
 
-local STATE_UNITFOUND = 1
-local STATE_NOUNIT = 2
+local STATE_UNITFOUND = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_NOUNIT = TMW.CONST.STATE.DEFAULT_HIDE
 
 Type:SetAllowanceForView("icon", false)
 

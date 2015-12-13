@@ -33,8 +33,8 @@ Type.hidden = pclass ~= "DEATHKNIGHT"
 Type.AllowNoName = true
 Type.hasNoGCD = true
 
-local STATE_USABLE = 1
-local STATE_UNUSABLE = 2
+local STATE_USABLE = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_UNUSABLE = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

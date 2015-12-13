@@ -26,8 +26,8 @@ Type.menuSpaceBefore = true
 Type.AllowNoName = true
 Type.hasNoGCD = true
 
-local STATE_SUCCEED = 1
-local STATE_FAIL = 2
+local STATE_SUCCEED = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_FAIL = TMW.CONST.STATE.DEFAULT_HIDE
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

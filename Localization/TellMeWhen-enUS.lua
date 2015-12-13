@@ -431,6 +431,13 @@ L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"] = "Set the opacity level that the ic
 L["ICONMENU_USABLE"] = "Usable"
 L["ICONMENU_UNUSABLE"] = "Unusable"
 
+L["ICONMENU_READY"] = "Ready"
+L["ICONMENU_NOTREADY"] = "Not Ready"
+L["ICONMENU_ONCOOLDOWN"] = "On Cooldown"
+L["ICONMENU_OORANGE"] = "Out of Range"
+L["ICONMENU_OOPOWER"] = "Out of Power"
+L["ICONMENU_OO_F"] = "Out of %s"
+
 L["ICONMENU_STATECOLOR"] = "Icon Tint"
 L["ICONMENU_STATECOLOR_DESC"] = [[Set the tint of the icon's texture in this icon state.
 
@@ -1278,7 +1285,11 @@ L["COLORPICKER_HUE_DESC"] = "Set the color's hue."
 L["COLORPICKER_SATURATION"] = "Saturation"
 L["COLORPICKER_SATURATION_DESC"] = "Set the color's saturation."
 L["COLORPICKER_BRIGHTNESS"] = "Brightness"
-L["COLORPICKER_BRIGHTNESS_DESC"] = "Set the color's brightness."
+L["COLORPICKER_BRIGHTNESS_DESC"] = "Set the color's brightness (sometimes referred to as the value)."
+L["COLORPICKER_OPACITY"] = "Opacity"
+L["COLORPICKER_OPACITY_DESC"] = "Set the color's opacity (sometimes referred to as the alpha)."
+L["COLORPICKER_DESATURATE"] = "Desaturate"
+L["COLORPICKER_DESATURATE_DESC"] = "Desaturate the texture before applying the color, allowing you to recolor the texture instead of tinting it."
 
 L["COLORPICKER_SWATCH"] = "Color"
 L["COLORPICKER_ICON_UNCOLORED"] = "Normal"
@@ -1697,7 +1708,7 @@ L["CODESNIPPET_ORDER_DESC"] = [[Set the order in which this snippet should be ru
 
 %s and %s will be mixed together based on this value when they are run.
 
-Decimal amounts are valid. Consistent order is not guarenteed if two snippets share the same order.]]
+Decimal amounts are valid. Consistent order is not guaranteed if two snippets share the same order.]]
 L["CODESNIPPET_CODE"] = "Lua Code to Run"
 L["CODESNIPPET_CODE_DESC"] = [[Set the Lua code that will be ran by this snippet when TellMeWhen is intialized.]]
 

@@ -39,8 +39,8 @@ Type.menuIcon = "Interface\\Icons\\inv_fishingpole_02"
 Type.AllowNoName = true
 Type.menuSpaceAfter = true
 
-local STATE_PRESENT = 1
-local STATE_ABSENT = 2
+local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

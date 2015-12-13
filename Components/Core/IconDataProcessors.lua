@@ -533,40 +533,6 @@ end
 
 
 
-
--- NOMANA: "noMana"
-do
-	local Processor = TMW.Classes.IconDataProcessor:New("NOMANA", "noMana")
-	-- Processor:CompileFunctionSegment(t) is default.
-
-	TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
-		if not TMW.Locked then
-			icon:SetInfo("noMana", nil)
-		end
-	end)
-end
-
-
-
-
-
-
--- INRANGE: "inRange"
-do
-	local Processor = TMW.Classes.IconDataProcessor:New("INRANGE", "inRange")
-
-	TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
-		if not TMW.Locked then
-			icon:SetInfo("inRange", nil)
-		end
-	end)
-end
-
-
-
-
-
-
 -- REVERSE: "reverse"
 do
 	local Processor = TMW.Classes.IconDataProcessor:New("REVERSE", "reverse")

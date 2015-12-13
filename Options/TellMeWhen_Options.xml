@@ -544,28 +544,28 @@
 						<Anchor point="TOPLEFT"/>
 						<Anchor point="BOTTOMRIGHT" relativePoint="CENTER"/>
 					</Anchors>
-					<Color r="1.0" g="1.0" b="1.0"/>
+					<Color r="0.65" g="0.65" b="0.65"/>
 				</Texture>
 				<Texture parentKey="background2">
 					<Anchors>
 						<Anchor point="TOPRIGHT"/>
 						<Anchor point="BOTTOMLEFT" relativePoint="CENTER"/>
 					</Anchors>
-					<Color r="0" g="0" b="0"/>
+					<Color r="0.35" g="0.35" b="0.35"/>
 				</Texture>
 				<Texture parentKey="background3">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT"/>
 						<Anchor point="TOPRIGHT" relativePoint="CENTER"/>
 					</Anchors>
-					<Color r="0" g="0" b="0"/>
+					<Color r="0.35" g="0.35" b="0.35"/>
 				</Texture>
 				<Texture parentKey="background4">
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT"/>
 						<Anchor point="TOPLEFT" relativePoint="CENTER"/>
 					</Anchors>
-					<Color r="1.0" g="1.0" b="1.0"/>
+					<Color r="0.65" g="0.65" b="0.65"/>
 				</Texture>
 
 				<FontString parentKey="text" justifyH="LEFT" inherits="GameFontHighlightSmall">
@@ -1039,7 +1039,7 @@
 			<Frame inherits="TellMeWhen_GenericBorder">
 			</Frame>
 
-			<Slider parentKey="hueSlider" inherits="TellMeWhen_SliderTemplate">
+			<Slider parentKey="HueSlider" inherits="TellMeWhen_SliderTemplate">
 				<Size x="210" y="20"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="10" y="-10"/>
@@ -1048,64 +1048,116 @@
 					<OnLoad>
 						TMW:CInit(self)
 						self:SetTexts(TMW.L["COLORPICKER_HUE"], TMW.L["COLORPICKER_HUE_DESC"])
+						self:SetTextFormatter(TMW.C.Formatter:New(function(value)
+							return ("%.1f"):format(value*360)
+						end))
+						self:SetValueStep(0.0005)
+						self:SetMinMaxValues(0, 0.9995)
+
+						self.Background:Hide()
+
+						self.SEGMENTS = 6
+
+						function self:MakeTexture(i, iMax)
+							local tex = self:CreateTexture()
+							self[i] = tex
+							tex:SetPoint("TOP", self.Background, "TOP", 0, 0)
+							tex:SetPoint("BOTTOM", self.Background, "BOTTOM", 0, 0)
+							tex:SetTexture(1, 1, 1)
+							tex:SetWidth(self:GetWidth()/self.SEGMENTS)
+							if i > 1 then
+								tex:SetPoint("LEFT", self[i-1], "RIGHT", 0, 0)
+							else
+								tex:SetPoint("LEFT")
+							end
+
+							return tex
+						end
+
+						for i = 1, self.SEGMENTS do
+							self:MakeTexture(i, self.SEGMENTS, self)
+						end
 					</OnLoad>
 				</Scripts>
 			</Slider>
 
-			<Slider parentKey="saturationSlider" inherits="TellMeWhen_SliderTemplate">
+			<Slider parentKey="SaturationSlider" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.hueSlider" relativePoint="BOTTOMLEFT" y="-10"/>
-					<Anchor point="RIGHT" relativeKey="$parent.hueSlider" />
+					<Anchor point="TOPLEFT" relativeKey="$parent.HueSlider" relativePoint="BOTTOMLEFT" y="-10"/>
+					<Anchor point="RIGHT" relativeKey="$parent.HueSlider" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
 						self:SetTexts(TMW.L["COLORPICKER_SATURATION"], TMW.L["COLORPICKER_SATURATION_DESC"])
+						self:SetTextFormatter(TMW.C.Formatter.PERCENT100)
+						self:SetMinMaxValues(0, 1)
+						self:SetValueStep(0.001)
+						self.Background:SetTexture(1, 1, 1)
 					</OnLoad>
 				</Scripts>
 			</Slider>
 
-			<Slider parentKey="valueSlider" inherits="TellMeWhen_SliderTemplate">
+			<Slider parentKey="ValueSlider" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.saturationSlider" relativePoint="BOTTOMLEFT" y="-10"/>
-					<Anchor point="RIGHT" relativeKey="$parent.saturationSlider" />
+					<Anchor point="TOPLEFT" relativeKey="$parent.SaturationSlider" relativePoint="BOTTOMLEFT" y="-10"/>
+					<Anchor point="RIGHT" relativeKey="$parent.SaturationSlider" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
 						self:SetTexts(TMW.L["COLORPICKER_BRIGHTNESS"], TMW.L["COLORPICKER_BRIGHTNESS_DESC"])
+						self:SetTextFormatter(TMW.C.Formatter.PERCENT100)
+						self:SetMinMaxValues(0, 1)
+						self:SetValueStep(0.001)
+						self.Background:SetTexture(1, 1, 1)
 					</OnLoad>
 				</Scripts>
 			</Slider>
 
-			<EditBox parentKey="StringEditbox" inherits="TellMeWhen_InputBoxTemplate">
-				<Size x="95" y="16"/>
+			<Slider parentKey="AlphaSlider" inherits="TellMeWhen_SliderTemplate">
+				<Size x="210" y="20"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.valueSlider" relativePoint="BOTTOMLEFT" x="115" y="-15"/>
+					<Anchor point="TOP" relativeKey="$parent.ValueSlider" relativePoint="BOTTOM" y="-10"/>
+					<Anchor point="LEFT" relativeKey="$parent.ValueSlider"/>
+					<Anchor point="RIGHT" relativeKey="$parent.ValueSlider" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
-						function self:SaveSetting()
-							local value = self:GetText()
-							if value and value ~= "" then
-								self:GetParent():SetColorString(value)
-							else
-								self:RequestReload()
+						self:SetTexts(TMW.L["COLORPICKER_OPACITY"], TMW.L["COLORPICKER_OPACITY_DESC"])
+						self:SetTextFormatter(TMW.C.Formatter.PERCENT100)
+						self:SetMinMaxValues(0, 1)
+						self:SetValueStep(0.001)
+						self.Background:SetTexture(1, 1, 1)
+
+						local w = self:GetWidth()
+						local h = self.Background:GetHeight()
+
+						local squareSize = 5
+
+						for x = 1, ceil(w/squareSize) do
+							for y = 1, h/squareSize do
+								local tex = self:CreateTexture(nil, "BACKGROUND")
+								tex:SetPoint("TOPLEFT", self.Background, "TOPLEFT", (x-1)*squareSize, -(y-1)*squareSize)
+								tex:SetSize(squareSize, squareSize)
+								local c = (x+y)%2 == 0 and 0.35 or 0.65
+								tex:SetTexture(c, c, c)
 							end
 						end
-
-						self:CScriptAdd("ReloadRequested", function()
-							self:SetText(self:GetParent():GetColorString())
-						end)
-
 					</OnLoad>
+					<OnShow>
+						self:GetParent():SetHeight(self:GetParent():GetHeight() + self:GetHeight() + 10)
+					</OnShow>
+					<OnHide>
+						self:GetParent():SetHeight(self:GetParent():GetHeight() - self:GetHeight() - 10)
+					</OnHide>
 				</Scripts>
-			</EditBox>
+			</Slider>
 
 			<Button parentKey="Okay" inherits="TellMeWhen_ButtonTemplate">
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.hueSlider" />
+					<Anchor point="RIGHT" relativeKey="$parent.HueSlider" />
 					<Anchor point="BOTTOM" y="5"/>
 				</Anchors>
 				<Scripts>
@@ -1114,14 +1166,14 @@
 						self:SetWidth(self:GetTextWidth()+15)
 					</OnLoad>
 					<OnClick>
-						error("Handle me!")
+						self:GetParent():SaveSetting()
 					</OnClick>
 				</Scripts>
 			</Button>
 
 			<Button parentKey="Cancel" inherits="TellMeWhen_ButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.hueSlider" />
+					<Anchor point="LEFT" relativeKey="$parent.HueSlider" />
 					<Anchor point="BOTTOM" y="5"/>
 				</Anchors>
 				<Scripts>
@@ -1131,17 +1183,40 @@
 					</OnLoad>
 					<OnClick>
 						self:GetParent():Hide()
-						error("Handle me!")
 					</OnClick>
 				</Scripts>
 			</Button>
+
+			<Frame parentKey="swatch" inherits="TellMeWhen_ColorButtonTemplate">
+				<Size x="33" y="33"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativeKey="$parent.Cancel" relativePoint="TOPLEFT" x="0" y="10"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<Frame parentKey="swatchPrevious" inherits="TellMeWhen_ColorButtonTemplate">
+				<Size x="33" y="33"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.swatch" x="7" y="7"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().swatch:GetFrameLevel() - 2)
+					</OnLoad>
+				</Scripts>
+			</Frame>
 
 
 			<Frame parentKey="RecentColorFrame" >
 				<Size x="85"/>
 				<Anchors>
 					<Anchor point="TOP" y="-21"/>
-					<Anchor point="LEFT" relativeKey="$parent.hueSlider" relativePoint="RIGHT" x="15"/>
+					<Anchor point="LEFT" relativeKey="$parent.HueSlider" relativePoint="RIGHT" x="15"/>
 					<Anchor point="BOTTOM" y="10"/>
 				</Anchors>
 				<Layers>
@@ -1166,41 +1241,71 @@
 			</Layer>
 
 			<Layer level="OVERLAY">
-				<Texture parentKey="swatch" >
-					<Size x="35" y="35"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.valueSlider" relativePoint="BOTTOMLEFT" x="0" y="-30"/>
-					</Anchors>
-				</Texture>
 				<Texture parentKey="iconTexture">
 					<Size x="40" y="40"/>
 					<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeKey="$parent.swatch" x="25"/>
+						<Anchor point="BOTTOM" relativeKey="$parent.swatch"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.swatchPrevious" x="20"/>
 					</Anchors>
 				</Texture>
 			</Layer>
-			<Layer level="ARTWORK">
-				<Texture parentKey="swatchPrevious" >
-					<Size x="35" y="35"/>
-					<Anchors>
-						<Anchor point="TOPRIGHT" relativeKey="$parent.swatch" x="5" y="5"/>
-					</Anchors>
-				</Texture>
-			</Layer>
+
 			<Layer level="OVERLAY">
 				<FontString parentKey="swatchLabel" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeKey="$parent.swatch" y="7"/>
+						<Anchor point="LEFT" relativeKey="$parent.swatch" />
+						<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.swatchPrevious" y="2"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
+
+		<Frames>
+			<EditBox parentKey="StringEditbox" inherits="TellMeWhen_InputBoxTemplate">
+				<Size x="95" y="16"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.iconTexture" relativePoint="TOPRIGHT" x="15"/>
+					<Anchor point="RIGHT" relativeKey="$parent.AlphaSlider" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						function self:SaveSetting()
+							local value = self:GetText()
+							if value and value ~= "" then
+								self:GetParent():SetColorString(value)
+							else
+								self:RequestReload()
+							end
+						end
+
+						self:CScriptAdd("ReloadRequested", function()
+							self:SetText(self:GetParent():GetColorString())
+						end)
+
+					</OnLoad>
+				</Scripts>
+			</EditBox>
+
+			<CheckButton parentKey="Desaturate" inherits="TellMeWhen_CheckTemplate">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.StringEditbox" relativePoint="BOTTOMLEFT" x="-5" y="-2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						self:SetTexts(TMW.L["COLORPICKER_DESATURATE"], TMW.L["COLORPICKER_DESATURATE_DESC"])
+						self:SetSetting("desaturate")
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+		</Frames>
 	</Frame>
 
 
-<!-- TODO: get rid of this (or at least dont name it "F") -->
-	<Frame name="F" inherits="TellMeWhen_ColorPickerTemplate" hidden="false">
+	<Frame name="TellMeWhen_ColorPicker" inherits="TellMeWhen_ColorPickerTemplate" hidden="true">
 		<Anchors>
 			<Anchor point="CENTER" />
 		</Anchors>

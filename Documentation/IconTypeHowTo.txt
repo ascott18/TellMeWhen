@@ -30,6 +30,17 @@ Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
 Type.menuSpaceBefore = true
 <</code>>
 
+=== Upvalue States Used
+To increase efficiency, you should upvalue all of the states that your icon type uses. Use those from TMW.CONST.STATE whenever possible. If you need custom states for your icon type,
+use values above 100 to avoid future conflicts with built-in states.
+
+<<code lua>>
+local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE
+local STATE_UNUSABLE_NORANGE = TMW.CONST.STATE.DEFAULT_NORANGE
+local STATE_UNUSABLE_NOMANA  = TMW.CONST.STATE.DEFAULT_NOMANA
+<</code>>
+
 === Declaring Attributes Used
 In order to make sure that the appropriate IconDataProcessors get implemented into an icon that uses our IT, ITs must explicitly declare what attributes are used in their icon:SetInfo() calls:
 
@@ -39,8 +50,6 @@ Type:UsesAttributes("start, duration")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("texture")
-Type:UsesAttributes("inRange")
-Type:UsesAttributes("noMana")
 Type:UsesAttributes("reverse")
 <</code>>
 
@@ -66,12 +75,11 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
 })
 
-local STATE_USABLE = 1
-local STATE_UNUSABLE = 2
-
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
-	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_READY"],   },
+	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_NOTREADY"], },
+	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck" },
+	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck" },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
@@ -138,26 +146,22 @@ local function TestType_OnUpdate(icon, time)
 			-- Usable
 			
 			icon:SetInfo(
-				"state; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				"state; texture; start, duration; spell; stack, stackText",
 				STATE_USABLE,
 				GetSpellTexture(NameFirst),
 				start, duration,
 				NameFirst,
-				inrange,
-				nomana,
 				stack, stackText
 			)
 		else
 			-- Unusable
 			
 			icon:SetInfo(
-				"state; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				STATE_UNUSABLE,
+				"state; texture; start, duration; spell; stack, stackText",
+				not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_DEFAULT_NOMANA or STATE_UNUSABLE,
 				GetSpellTexture(NameFirst),
 				start, duration,
 				NameFirst,
-				inrange,
-				nomana,
 				stack, stackText
 			)
 		end
@@ -232,13 +236,16 @@ Type.desc = "An Icon Type created to demonstrate the TMW IconType API"
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
 Type.menuSpaceBefore = true
 
+local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE
+local STATE_UNUSABLE_NORANGE = TMW.CONST.STATE.DEFAULT_NORANGE
+local STATE_UNUSABLE_NOMANA  = TMW.CONST.STATE.DEFAULT_NOMANA
+
 Type:UsesAttributes("state")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("texture")
-Type:UsesAttributes("inRange")
-Type:UsesAttributes("noMana")
 Type:UsesAttributes("reverse")
 
 Type:RegisterIconDefaults{
@@ -252,8 +259,10 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
-	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_READY"],   },
+	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_NOTREADY"], },
+	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck" },
+	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck" },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_TestTypeSettings", function(self)
@@ -310,26 +319,22 @@ local function TestType_OnUpdate(icon, time)
 			-- Usable
 			
 			icon:SetInfo(
-				"state; texture; start, duration; spell; inRange; noMana; stack, stackText",
+				"state; texture; start, duration; spell; stack, stackText",
 				STATE_USABLE,
 				GetSpellTexture(NameFirst),
 				start, duration,
 				NameFirst,
-				inrange,
-				nomana,
 				stack, stackText
 			)
 		else
 			-- Unusable
 			
 			icon:SetInfo(
-				"state; texture; start, duration; spell; inRange; noMana; stack, stackText",
-				STATE_UNUSABLE,
+				"state; texture; start, duration; spell; stack, stackText",
+				not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_DEFAULT_NOMANA or STATE_UNUSABLE,
 				GetSpellTexture(NameFirst),
 				start, duration,
 				NameFirst,
-				inrange,
-				nomana,
 				stack, stackText
 			)
 		end

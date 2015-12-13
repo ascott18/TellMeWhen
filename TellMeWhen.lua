@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80009 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80001 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -50,7 +50,9 @@ local LSM = LibStub("LibSharedMedia-3.0")
 LSM:Register("font", "Open Sans Regular", "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf")
 LSM:Register("font", "Vera Mono", "Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf")
 
-_G.TMW = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", "TMW", UIParent), "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
+
+local TMW = LibOO:GetNamespace("TellMeWhen"):NewClass("TMW", "Frame"):New("Frame", "TMW", UIParent)
+_G.TMW = LibStub("AceAddon-3.0"):NewAddon(TMW, "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
 _G.TellMeWhen = _G.TMW
 local TMW = _G.TMW
 
@@ -174,6 +176,13 @@ TMW.COMMON = {}
 
 TMW.CONST = {
 	GUID_SIZE = 12,
+
+	STATE = {
+		DEFAULT_SHOW = 1,
+		DEFAULT_HIDE = 2,
+		DEFAULT_NORANGE = 3,
+		DEFAULT_NOMANA = 4,
+	}
 }
 
 TMW.IconsToUpdate, TMW.GroupsToUpdate = {}, {}
@@ -218,7 +227,6 @@ TMW.Defaults = {
 		--AlwaysSubLinks	=	false,
 		ColorMSQ	 	= false,
 		OnlyMSQ		 	= false,
-		ColorGCD		= true,
 
 		Colors = {
 			["**"] = {
@@ -264,8 +272,16 @@ TMW.Defaults = {
 								Alpha = 0,
 								Color = "ffffffff",
 							},
-							[1] = {
+							[TMW.CONST.STATE.DEFAULT_SHOW] = {
 								Alpha = 1,
+							},
+							[TMW.CONST.STATE.DEFAULT_NOMANA] = {
+								Alpha = 0.5,
+								Color = "ff7f7f7f",
+							},
+							[TMW.CONST.STATE.DEFAULT_NORANGE] = {
+								Alpha = 0.5,
+								Color = "ff7f7f7f",
 							}
 						},
 						SettingsPerView		= {
@@ -1535,12 +1551,145 @@ end
 -- Upgrade Functions
 ---------------------------------
 
-TMW.UpgradeTable = {}
-TMW.UpgradeTableByVersions = {}
+TMW:NewClass("Core_Upgrades"){
+	UpgradeTable = {},
+	UpgradeTableByVersions = {},
+
+	OnClassInherit = function(self, newClass)
+		newClass:InheritTable(self, "UpgradeTable")
+		newClass:InheritTable(self, "UpgradeTableByVersions")
+	end,
+
+	RegisterUpgrade = function(self, version, data)
+		assert(not data.Version, "Upgrade data cannot store a value with key 'Version' because it is a reserved key.")
+		
+		if self.HaveUpgradedOnce then
+			error("Upgrades are being registered too late. They need to be registered before any upgrades occur.", 2)
+		end
+		
+		local upgradeSet = self.UpgradeTableByVersions[version]
+		if upgradeSet then
+			-- An upgrade set already exists for this version, so we need to merge the two.
+			for k, v in pairs(data) do
+				if upgradeSet[k] ~= nil then
+					if type(v) == "function" then
+						-- If we already have a function with the same key (E.g. 'icon' or 'group')
+						-- then hook the existing function so that both run
+						hooksecurefunc(upgradeSet, k, v)
+					else
+						-- If we already have data with the same key (some kind of helper data for the upgrade)
+						-- then raise an error because there will certainly be conflicts.
+						error(("A value with key %q already exists for upgrades for version %d. Please choose a different key to store it in to prevent conflicts.")
+						:format(k, version), 2)
+					end
+				else
+					-- There was nothing already in place, so just stick it in the upgrade set as-is.
+					upgradeSet[k] = v
+				end
+			end
+		else
+			-- An upgrade set doesn't exist for this version,
+			-- so just use the table that was passed in and process it as a new upgrade set.
+			data.Version = version
+			self.UpgradeTableByVersions[version] = data
+			tinsert(self.UpgradeTable, data)
+		end
+	end,
+
+	UpgradeTableSorter = function(a, b)
+		if a.priority or b.priority then
+			if a.priority and b.priority then
+				return a.priority < b.priority
+			else
+				return a.priority
+			end
+		end
+		return a.Version < b.Version
+	end,
+
+	SortUpgradeTable = function(self)
+		sort(self.UpgradeTable, self.UpgradeTableSorter)
+	end,
+
+	GetUpgradeTable = function(self)	
+		if self.GetBaseUpgrades then		
+			for version, data in pairs(self:GetBaseUpgrades()) do
+				self:RegisterUpgrade(version, data)
+			end
+			
+			self.GetBaseUpgrades = nil
+		end
+		
+		self:SortUpgradeTable()
+		
+		return self.UpgradeTable
+	end,
+
+	StartUpgrade = function(self, type, originalVersion, ...)
+		assert(_G.type(type) == "string")
+		assert(_G.type(originalVersion) == "number")
+		
+		-- upgrade the actual requested setting
+		for k, v in ipairs(self:GetUpgradeTable()) do
+			if v.Version > originalVersion then
+				self:Upgrade(type, v, ...)
+			end
+		end
+		
+		self.HaveUpgradedOnce = true
+	end,
+
+	Upgrade = function(self, type, upgradeData, ...)
+		if upgradeData[type] then
+
+			upgradeData[type](upgradeData, ...)
+		end
+
+		TMW:Fire(self.performedEvent, type, upgradeData, ...)
+	end,
+
+	SetUpgradePerformedEvent = function(self, event)
+		self.performedEvent = event
+	end,
+}
+TMW.C.TMW:Inherit("Core_Upgrades")
 
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 
+		[80011] = {
+			profile = function(self, profile)
+				profile.Colors = nil
+			end,
+		},
+		[80010] = {
+			convertColor = function(self, ics, state, oldColorKey)
+				ics.States[state].Alpha = ics.States[TMW.CONST.STATE.DEFAULT_HIDE].Alpha
+
+				local oldColor = TMW.approachTable(TMW.db.profile, "Colors", ics.Type, oldColorKey)
+
+				if oldColor and not oldColor.Override then
+					oldColor = nil
+				end
+				oldColor = oldColor or TMW.approachTable(TMW.db.profile, "Colors", "GLOBAL", oldColorKey)
+
+				if oldColor then
+					local color = oldColor.Color or "ff7f7f7f"
+					if oldColor.Gray then color = color .. "d" end
+
+					ics.States[state].Color = color
+				end
+			end,
+			icon = function(self, ics)
+				if ics.RangeCheck then
+					self:convertColor(ics, TMW.CONST.STATE.DEFAULT_NORANGE, "OOR")
+				end
+
+				if ics.ManaCheck then
+					self:convertColor(ics, TMW.CONST.STATE.DEFAULT_NOMANA, "OOM")
+				end
+			end,
+		},
 		[80009] = {
 			icon = function(self, ics)
 				ics.Alpha = ics.Alpha or 1 -- the old default.
@@ -1558,25 +1707,12 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 					ics.UnAlpha = 0
 				end
 
-				ics.States[1].Alpha = ics.Alpha
-				ics.States[2].Alpha = ics.UnAlpha
+				ics.States[TMW.CONST.STATE.DEFAULT_SHOW].Alpha = ics.Alpha
+				ics.States[TMW.CONST.STATE.DEFAULT_HIDE].Alpha = ics.UnAlpha
 
 				ics.Alpha = nil
 				ics.UnAlpha = nil
 				ics.ShowWhen = nil
-			end,
-		},
-
-		[80007] = {
-			profile = function(self, profile)
-				for _, v in pairs(profile.Colors) do
-					v.CTA = nil
-					v.COA = nil
-					v.CTS = nil
-					v.COS = nil
-					v.NA = nil
-					v.NS = nil
-				end
 			end,
 		},
 
@@ -1651,6 +1787,10 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 
 		[80003] = {
 			profile = function(self, profile)
+				if not profile.Colors then
+					return
+				end
+
 				-- This is a key from a very, very early concept of the color system that showed up in TMW v4.0.0 beta8.
 				-- It stayed commented out in the setting defaults until it was removed in 4.5.0 (7e9d180).
 				-- It was the only color setting that has a place in AceConfig hardcoded in, but that line was never uncommented.
@@ -1838,36 +1978,12 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 			end,
 		},
 		[47002] = {
-			map = {
-				OOR = "OORColor",
-				OOM = "OOMColor",
-				OORM = "OORColor",
-
-				-- i didn't upgrade these 2 because they suck
-				--PRESENTColor =	{r=1, g=1, b=1, a=1},
-				--ABSENTColor	 =	{r=1, g=0.35, b=0.35, a=1},
-			},
-			
 			profile = function(self)
-				for newKey, oldKey in pairs(self.map) do
-					local old = TMW.db.profile[oldKey]
-					local new = TMW.db.profile.Colors.GLOBAL[newKey]
-
-					if old then
-						for k, v in pairs(old) do
-							new[k] = v
-						end
-
-						TMW.db.profile[oldKey] = nil
-					end
-				end
-
 				TMW.db.profile.PRESENTColor = nil
 				TMW.db.profile.ABSENTColor = nil
 
 				TMW.db.profile.Color = nil
 				TMW.db.profile.UnColor = nil
-
 			end,
 		},
 		[46605] = {
@@ -2354,127 +2470,48 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 	}
 end
 
-function TMW:RegisterUpgrade(version, data)
-	assert(not data.Version, "Upgrade data cannot store a value with key 'Version' because it is a reserved key.")
-	
-	if TMW.HaveUpgradedOnce then
-		error("Upgrades are being registered too late. They need to be registered before any upgrades occur.", 2)
-	end
-	
-	local upgradeSet = TMW.UpgradeTableByVersions[version]
-	if upgradeSet then
-		-- An upgrade set already exists for this version, so we need to merge the two.
-		for k, v in pairs(data) do
-			if upgradeSet[k] ~= nil then
-				if type(v) == "function" then
-					-- If we already have a function with the same key (E.g. 'icon' or 'group')
-					-- then hook the existing function so that both run
-					hooksecurefunc(upgradeSet, k, v)
-				else
-					-- If we already have data with the same key (some kind of helper data for the upgrade)
-					-- then raise an error because there will certainly be conflicts.
-					error(("A value with key %q already exists for upgrades for version %d. Please choose a different key to store it in to prevent conflicts.")
-					:format(k, version), 2)
-				end
-			else
-				-- There was nothing already in place, so just stick it in the upgrade set as-is.
-				upgradeSet[k] = v
-			end
-		end
-	else
-		-- An upgrade set doesn't exist for this version,
-		-- so just use the table that was passed in and process it as a new upgrade set.
-		data.Version = version
-		TMW.UpgradeTableByVersions[version] = data
-		tinsert(TMW.UpgradeTable, data)
-	end
-end
 
-function TMW.UpgradeTableSorter(a, b)
-	if a.priority or b.priority then
-		if a.priority and b.priority then
-			return a.priority < b.priority
-		else
-			return a.priority
-		end
-	end
-	return a.Version < b.Version
-end
-function TMW:SortUpgradeTable()
-	sort(TMW.UpgradeTable, TMW.UpgradeTableSorter)
-end
+TMW:SetUpgradePerformedEvent("TMW_UPGRADE_PERFORMED")
 
-function TMW:GetUpgradeTable()	
-	if TMW.GetBaseUpgrades then		
-		for version, data in pairs(TMW:GetBaseUpgrades()) do
-			TMW:RegisterUpgrade(version, data)
-		end
-		
-		TMW.GetBaseUpgrades = nil
-	end
-	
-	TMW:SortUpgradeTable()
-	
-	return TMW.UpgradeTable
-end
-
-
-function TMW:DoUpgrade(type, version, ...)
-	assert(_G.type(type) == "string")
-	assert(_G.type(version) == "number")
-	
-	-- upgrade the actual requested setting
-	for k, v in ipairs(TMW:GetUpgradeTable()) do
-		if v.Version > version then
-			if v[type] then
-				v[type](v, ...)
-			end
-		end
-	end
-	
-	TMW:Fire("TMW_UPGRADE_REQUESTED", type, version, ...)
-
-	-- delegate out to sub-types
+TMW:RegisterCallback("TMW_UPGRADE_PERFORMED", function(event, type, upgradeData, ...)
 	if type == "global" then
 		-- delegate to locale
 		if TMW.db.sv.locale then
 			for locale, ls in pairs(TMW.db.sv.locale) do
-				TMW:DoUpgrade("locale", version, ls, locale)
+				TMW:Upgrade("locale", upgradeData, ls, locale)
 			end
 		end
 
 		-- delegate to groups
 		for gs, domain, groupID in TMW:InGroupSettings() do
 			if domain == type then
-				TMW:DoUpgrade("group", version, gs, domain, groupID)
+				TMW:Upgrade("group", upgradeData, gs, domain, groupID)
 			end
 		end
-	
-		--All Global Upgrades Complete
-		TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER
+	end
+end)
 
-	elseif type == "profile" then
+TMW:RegisterCallback("TMW_UPGRADE_PERFORMED", function(event, type, upgradeData, ...)
+	if type == "profile" then
 		-- delegate to groups
 		for gs, domain, groupID in TMW:InGroupSettings() do
 			if domain == type then
-				TMW:DoUpgrade("group", version, gs, domain, groupID)
+				TMW:Upgrade("group", upgradeData, gs, domain, groupID)
 			end
 		end
-		
-		--All Profile Upgrades Complete
-		TMW.db.profile.Version = TELLMEWHEN_VERSIONNUMBER
+	end
+end)
 
-	elseif type == "group" then
+TMW:RegisterCallback("TMW_UPGRADE_PERFORMED", function(event, type, upgradeData, ...)
+	if type == "group" then
 		local gs, domain, groupID = ...
 		
 		-- delegate to icons
 		for ics, gs, domain, groupID, iconID in TMW:InIconSettings(domain, groupID) do
-			TMW:DoUpgrade("icon", version, ics, gs, iconID)
+			TMW:Upgrade("icon", upgradeData, ics, gs, iconID)
 		end
 	end
-	
-	TMW.HaveUpgradedOnce = true
-end
+end)
 
 
 function TMW:RawUpgrade()
@@ -2553,7 +2590,9 @@ end
 
 function TMW:UpgradeGlobal()
 	if TellMeWhenDB.Version < TELLMEWHEN_VERSIONNUMBER then
-		TMW:DoUpgrade("global", TellMeWhenDB.Version, TMW.db.global)
+		TMW:StartUpgrade("global", TellMeWhenDB.Version, TMW.db.global)
+
+		TellMeWhenDB.Version = TELLMEWHEN_VERSIONNUMBER
 	end
 end
 
@@ -2568,7 +2607,9 @@ function TMW:UpgradeProfile()
 	end
 	
 	if TMW.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
-		TMW:DoUpgrade("profile", TMW.db.profile.Version, TMW.db.profile, TMW.db:GetCurrentProfile())
+		TMW:StartUpgrade("profile", TMW.db.profile.Version, TMW.db.profile, TMW.db:GetCurrentProfile())
+
+		TMW.db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 	end
 end
 
@@ -2719,11 +2760,6 @@ function TMW:UpdateNormally()
 	TMW.UPD_INTV = UPD_INTV
 	
 	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
-
-	for key, Type in pairs(TMW.Types) do
-		Type:UpdateColors(true)
-	end
-
 
 
 	for groupID = 1, max(TMW.db.profile.NumGroups, #TMW.profile) do
@@ -3441,6 +3477,9 @@ end
 
 local temp = {}
 function TMW:GetColors(colorSettings, enableSetting, ...)
+	if not colorSettings then
+		error("colorSettings missing")
+	end
 	for n, settings, length in TMW:Vararg(...) do
 		if n == length or settings[enableSetting] then
 			if type(colorSettings) == "table" then

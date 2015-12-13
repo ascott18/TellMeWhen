@@ -121,7 +121,7 @@ function NAMES:UpdateClassColors()
 		if color.colorStr then
 			self.ClassColors[class] = "|c" .. color.colorStr
 		else
-			self.ClassColors[class] = "|c" .. TMW:RGBATableToString(color)
+			self.ClassColors[class] = "|c" .. TMW:RGBATableToStringWithoutFlags(color)
 		end
 	end
 end

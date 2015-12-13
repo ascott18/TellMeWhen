@@ -44,7 +44,7 @@ IconDataProcessor.ProcessorsByName = {}
 -- @param attributes [string] A comma-delimited string of attributes that will be passed as part of the first param to [[api/icon/api-documentation/|Icon]]{{{:SetInfo(attributesString, ...)}}}. If multiple attributes are given, they must always be passed to :SetInfo together, and always in the same order. Each attribute token may only be used in one IconDataProcessor across TellMeWhen.
 -- @return [[[api/icon-data-processor/api-documentation/|IconDataProcessor]]] An instance of a new IconDataProcessor.
 -- @usage
--- local Processor = TMW.Classes.IconDataProcessor:New("NOMANA", "noMana")
+-- local Processor = TMW.Classes.IconDataProcessor:New("STATE", "state")
 -- 
 -- local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration")
 function IconDataProcessor:OnNewInstance(name, attributes)
@@ -116,21 +116,6 @@ end
 -- * Any other local variables that have been set through [[api/base-classes/icon-data-processor-component/|IconDataProcessorComponent]]{{{:DeclareUpValue()}}}.
 -- @param t [table] An array of strings that will be concatenated together to form the body of the :SetInfo() method.
 -- @usage
--- -- Example usage in the INRANGE IconDataProcessor:
---	function Processor:CompileFunctionSegment(t)
---		t[#t+1] = [[
---		
---		if attributes.inRange ~= inRange then
---			if inRange ~= nil and inRange ~= 1 and inRange ~= 0 then
---				error("Icon attribute inRange must be 0, 1, or nil!", 3)
---			end
---			attributes.inRange = inRange
---	
---			TMW:Fire(INRANGE.changedEvent, icon, inRange)
---			doFireIconUpdated = true
---		end
---		]]
---	end
 -- 
 -- -- Example usage in the SPELL IconDataProcessor:
 --	function Processor:CompileFunctionSegment(t)

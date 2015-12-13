@@ -21,6 +21,7 @@ local IE = TMW.IE
 
 
 local LSM = LibStub("LibSharedMedia-3.0")
+local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 
 
@@ -104,197 +105,6 @@ local importExportBoxTemplate = {
 	--hidden = function() return IE.ExportBox:IsVisible() end,
 } TMW.importExportBoxTemplate = importExportBoxTemplate
 
-
-
-local colorOrder = {
-	"OOR",
-	"OOM",
-	"OORM",
-}
-local colorTemplate = {
-	type = "group",
-	name = "",
-	guiInline = true,
-	dialogInline = true,
-	width = "full",
-	order = function(info)
-		local this = info[#info]
-		for order, key in pairs(colorOrder) do
-			if key == this then
-				return order + 10
-			end
-		end
-	end,
-
-	args = {
-		header = {
-			order = 0,
-			type = "header",
-			name = function(info)
-				return L["COLOR_" .. info[#info-1]]
-			end,
-		},
-		color = {
-			name = L["COLOR_COLOR"],
-			desc = function(info)
-				return L["COLOR_" .. info[#info-1] .. "_DESC"]
-			end,
-			type = "color",
-			order = 2,
-			--width = "double",
-			hasAlpha = function(info)
-				return strsub(info[#info-1], 1, 2) == "CB"
-			end,
-			set = function(info, r, g, b, a)
-				local c = TMW.db.profile.Colors[info[#info-2]][info[#info-1]]
-
-				c.Color = TMW:RGBAToString(r, g, b, a)
-				c.Override = true
-
-				TMW.Types[info[#info-2]]:UpdateColors()
-			end,
-			get = function(info)
-				local c = TMW.db.profile.Colors[info[#info-2]][info[#info-1]]
-
-				return TMW:StringToRGBA(c.Color)
-			end,
-			disabled = function(info)
-				return not TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"
-			end
-		},
-		override = {
-			name = L["COLOR_OVERRIDEDEFAULT"],
-			desc = L["COLOR_OVERRIDEDEFAULT_DESC"],
-			type = "toggle",
-			width = "half",
-			order = 1,
-			set = function(info, val)
-				TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override = val
-				TMW.Types[info[#info-2]]:UpdateColors()
-			end,
-			get = function(info)
-				return TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override
-			end,
-			hidden = function(info)
-				return info[#info-2] == "GLOBAL"
-			end,
-		},
-		gray = {
-			name = L["COLOR_DESATURATE"],
-			desc = L["COLOR_DESATURATE_DESC"],
-			type = "toggle",
-			width = "half",
-			order = 3,
-			set = function(info, val)
-				TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Gray = val
-				TMW.Types[info[#info-2]]:UpdateColors()
-			end,
-			get = function(info)
-				return TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Gray
-			end,
-			disabled = function(info)
-				return strsub(info[#info-1], 1, 2) == "CB" or (not TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL")
-			end
-		},
-		reset = {
-			name = RESET,
-			desc = L["COLOR_RESET_DESC"],
-			type = "execute",
-			width = "half",
-			order = 10,
-			func = function(info)
-				TMW.db.profile.Colors[info[#info-2]][info[#info-1]] = CopyTable(TMW.Defaults.profile.Colors["**"][info[#info-1]])
-			end,
-		--[=[	disabled = function(info)
-				return not TMW.db.profile.Colors[info[#info-2]][info[#info-1]].Override and info[#info-2] ~= "GLOBAL"
-			end]=]
-		},
-	},
-}
-local colorIconTypeTemplate = {
-	type = "group",
-	name = function(info)
-		if info[#info] == "GLOBAL" then
-			return L["COLOR_DEFAULT"]
-		end
-		return TMW.Types[info[#info]].name
-	end,
-	order = function(info)
-		local this = info[#info]
-
-		if this == "GLOBAL" then
-			return 0
-		end
-
-		for order, type in ipairs(TMW.OrderedTypes) do
-			if type.type == this then
-				return order
-			end
-		end
-	end,
-
-	--only inherited by ColorMSQ and OnlyMSQ:
-	set = function(info, val)
-		TMW.db.profile[info[#info]] = val
-		TMW:Update()
-	end,
-	get = function(info)
-		return TMW.db.profile[info[#info]]
-	end,
-
-	args = {
-		desc = {
-			order = 0,
-			type = "description",
-			name = function(info)
-				local this = info[#info-1]
-				local t
-
-				if this == "GLOBAL" then
-					t = L["COLOR_HEADER_DEFAULT"]
-				else
-					t = L["COLOR_HEADER"]:format(TMW.Types[this].name, "?")-- 2nd param is to prevent errors incase StaticFormats errors
-				end
-				return t .. "\r\n"
-			end,
-		},
-
-		ColorMSQ = {
-			name = L["COLOR_MSQ_COLOR"],
-			desc = L["COLOR_MSQ_COLOR_DESC"],
-			type = "toggle",
-			order = 1,
-			hidden = function(info)
-				return not LMB or info[#info-1] ~= "GLOBAL"
-			end,
-		},
-		OnlyMSQ = {
-			name = L["COLOR_MSQ_ONLY"],
-			desc = L["COLOR_MSQ_ONLY_DESC"],
-			type = "toggle",
-			width = "double",
-			order = 2,
-			hidden = function(info)
-				return not LMB or info[#info-1] ~= "GLOBAL"
-			end,
-			disabled = function(info)
-				return not TMW.db.profile.ColorMSQ
-			end,
-		},
-		ColorGCD = {
-			name = L["COLOR_IGNORE_GCD"],
-			desc = L["COLOR_IGNORE_GCD_DESC"],
-			type = "toggle",
-			order = 3,
-			hidden = function(info)
-				return not LMB or info[#info-1] ~= "GLOBAL"
-			end,
-		},
-	}
-}
-for k, v in pairs(colorOrder) do
-	colorIconTypeTemplate.args[v] = colorTemplate
-end
 
 TMW.OptionsTable = {
 	name = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL,
@@ -417,20 +227,35 @@ TMW.OptionsTable = {
 							name = L["ALLOWVERSIONWARN"],
 							type = "toggle",
 							order = 52,
-							set = function(info, val)
-								TMW.db.global[info[#info]] = val
-							end,
-							get = function(info) return TMW.db.global[info[#info]] end,
 						},
 						ShowGUIDs = {
 							name = L["SHOWGUIDS_OPTION"],
 							desc = L["SHOWGUIDS_OPTION_DESC"],
 							type = "toggle",
 							order = 52,
-							set = function(info, val)
-								TMW.db.global[info[#info]] = val
+						},
+
+						ColorMSQ = {
+							name = L["COLOR_MSQ_COLOR"],
+							desc = L["COLOR_MSQ_COLOR_DESC"],
+							type = "toggle",
+							order = 1,
+							hidden = function(info)
+								return not LMB
 							end,
-							get = function(info) return TMW.db.global[info[#info]] end,
+						},
+						OnlyMSQ = {
+							name = L["COLOR_MSQ_ONLY"],
+							desc = L["COLOR_MSQ_ONLY_DESC"],
+							type = "toggle",
+							width = "double",
+							order = 2,
+							hidden = function(info)
+								return not LMB
+							end,
+							disabled = function(info)
+								return not TMW.db.profile.ColorMSQ
+							end,
 						},
 					},
 				},
@@ -474,15 +299,6 @@ TMW.OptionsTable = {
 				},
 			},
 		},
-
-		colors = {
-			type = "group",
-			name = L["UIPANEL_COLORS"],
-			desc = L["UIPANEL_COLORS_DESC"],
-			order = 10,
-			childGroups = "tree",
-			args = {},
-		},
 	},
 }
 
@@ -509,14 +325,6 @@ function TMW.ACEOPTIONS:CompileOptions()
 		}
 		TMW.OptionsTable.args.profiles.args.importexport = importExportBoxTemplate
 
-
-		-- Dynamic Color Settings --
-		TMW.OptionsTable.args.colors.args.GLOBAL = colorIconTypeTemplate
-		for k, Type in pairs(TMW.Types) do
-			if not Type.NoColorSettings then
-				TMW.OptionsTable.args.colors.args[k] = colorIconTypeTemplate
-			end
-		end
 	
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("TMWIEMain", TMW.OptionsTable)
 

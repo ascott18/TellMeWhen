@@ -30,14 +30,14 @@ Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
 Type.menuIcon = "Interface\\Icons\\ability_warrior_revenge"
 
-local STATE_USABLE = 1
-local STATE_UNUSABLE = 2
+local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE
+local STATE_UNUSABLE_NORANGE = TMW.CONST.STATE.DEFAULT_NORANGE
+local STATE_UNUSABLE_NOMANA  = TMW.CONST.STATE.DEFAULT_NOMANA
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("noMana")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("charges, maxCharges")
-Type:UsesAttributes("inRange")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("state")
@@ -76,8 +76,10 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
-	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_READY"],   },
+	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_NOTREADY"], },
+	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck" },
+	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck" },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", function(self)
@@ -192,15 +194,13 @@ local function Reactive_OnUpdate(icon, time)
 
 			usable = forceUsable or usable
 			if usable and not CD and not nomana and inrange then --usable
-				icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
+				icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
 					STATE_USABLE,
 					GetSpellTexture(iName),
 					start, duration,
 					charges, maxCharges,
 					stack, stack,
-					iName,
-					inrange,
-					nomana			
+					iName		
 				)
 				return
 			end
@@ -244,15 +244,13 @@ local function Reactive_OnUpdate(icon, time)
 	end
 	
 	if duration then
-		icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
-			STATE_UNUSABLE,
+		icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+			not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_DEFAULT_NOMANA or STATE_UNUSABLE,
 			icon.FirstTexture,
 			start, duration,
 			charges, maxCharges,
 			stack, stack,
-			NameFirst,
-			inrange,
-			nomana
+			NameFirst
 		)
 	else
 		icon:SetInfo("state", 0)

@@ -284,7 +284,7 @@ Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 			UIParent.TMWFlashAnim = TMW.Classes.AnimatedObject:New()
 		end
 
-		local r, g, b, a = TMW:StringToRGBA(eventSettings.AnimColor)
+		local c = TMW:StringToCachedRGBATable(eventSettings.AnimColor)
 		UIParent.TMWFlashAnim:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
@@ -292,10 +292,10 @@ Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = a,
-			r = r,
-			g = g,
-			b = b,
+			Alpha = c.a,
+			r = c.r,
+			g = c.g,
+			b = c.b,
 		}
 	end,
 	
@@ -410,7 +410,7 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 			end
 		end
 
-		local r, g, b, a = TMW:StringToRGBA(eventSettings.AnimColor)
+		local c = TMW:StringToCachedRGBATable(eventSettings.AnimColor)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
@@ -418,10 +418,10 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = a,
-			r = r,
-			g = g,
-			b = b,
+			Alpha = c.a,
+			r = c.r,
+			g = c.g,
+			b = c.b,
 			
 			AnchorTo = eventSettings.AnchorTo,
 		}
@@ -499,7 +499,7 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 			end
 		end
 
-		local r, g, b, a = TMW:StringToRGBA(eventSettings.AnimColor)
+		local c = TMW:StringToCachedRGBATable(eventSettings.AnimColor)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,
@@ -507,10 +507,10 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 
 			Period = Period,
 			Fade = eventSettings.Fade,
-			Alpha = a,
-			r = r,
-			g = g,
-			b = b,
+			Alpha = c.a,
+			r = c.r,
+			g = c.g,
+			b = c.b,
 			Thickness = eventSettings.Thickness,
 			Size = eventSettings.Size_anim,
 			
@@ -618,7 +618,6 @@ Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 			end
 		end
 
-		local _, _, _, a = TMW:StringToRGBA(eventSettings.AnimColor)
 		icon:Animations_Start{
 			eventSettings = eventSettings,
 			Start = TMW.time,

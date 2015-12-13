@@ -249,7 +249,8 @@ end
 -- ICON EDITOR
 -- ----------------------
 
-IE = TMW:NewModule("IconEditor", "AceEvent-3.0", "AceTimer-3.0") TMW.IE = IE
+IE = TMW:NewClass("IE", "Frame", "Core_Upgrades"):New("Frame")
+IE = TMW:NewModule("IconEditor", IE, "AceEvent-3.0", "AceTimer-3.0") TMW.IE = IE
 IE.Tabs = {}
 
 IE.CONST = {
@@ -294,9 +295,9 @@ function IE:OnInitialize()
 
 	-- Make TMW.IE be the same as IE.
 	-- IE[0] = TellMeWhen_IconEditor[0] (already done in .xml)
-	local meta = CopyTable(getmetatable(IE))
-	meta.__index = getmetatable(TellMeWhen_IconEditor).__index
-	setmetatable(IE, meta)
+	-- local meta = CopyTable(getmetatable(IE))
+	-- meta.__index = getmetatable(TellMeWhen_IconEditor).__index
+	-- setmetatable(IE, meta)
 
 
 	hooksecurefunc("PickupSpellBookItem", function(...) IE.DraggingInfo = {...} end)
@@ -353,11 +354,10 @@ IE.Defaults = {
 		EditorHeight	= 600,
 		ConfigWarning	= true,
 		ConfigWarningN	= 0,
+
+		RecentColors = {},
 	},
 }
-
-IE.UpgradeTable = {}
-IE.UpgradeTableByVersions = {}
 
 function IE:RegisterDatabaseDefaults(defaults)
 	assert(type(defaults) == "table", "arg1 to RegisterProfileDefaults must be a table")
@@ -391,100 +391,19 @@ function IE:GetBaseUpgrades()			-- upgrade functions
 	}
 end
 
-function IE:RegisterUpgrade(version, data)
-	assert(not data.Version, "Upgrade data cannot store a value with key 'Version' because it is a reserved key.")
-	
-	if IE.HaveUpgradedOnce then
-		error("Upgrades are being registered too late. They need to be registered before any upgrades occur.", 2)
-	end
-	
-	local upgradeSet = IE.UpgradeTableByVersions[version]
-	if upgradeSet then
-		-- An upgrade set already exists for this version, so we need to merge the two.
-		for k, v in pairs(data) do
-			if upgradeSet[k] ~= nil then
-				if type(v) == "function" then
-					-- If we already have a function with the same key (E.g. 'icon' or 'group')
-					-- then hook the existing function so that both run
-					hooksecurefunc(upgradeSet, k, v)
-				else
-					-- If we already have data with the same key (some kind of helper data for the upgrade)
-					-- then raise an error because there will certainly be conflicts.
-					error(("A value with key %q already exists for upgrades for version %d. Please choose a different key to store it in to prevent conflicts.")
-					:format(k, version), 2)
-				end
-			else
-				-- There was nothing already in place, so just stick it in the upgrade set as-is.
-				upgradeSet[k] = v
-			end
-		end
-	else
-		-- An upgrade set doesn't exist for this version,
-		-- so just use the table that was passed in and process it as a new upgrade set.
-		data.Version = version
-		IE.UpgradeTableByVersions[version] = data
-		tinsert(IE.UpgradeTable, data)
-	end
-end
 
-function IE:SortUpgradeTable()
-	sort(IE.UpgradeTable, TMW.UpgradeTableSorter)
-end
+TMW:SetUpgradePerformedEvent("TMW_IE_UPGRADE_PERFORMED")
 
-function IE:GetUpgradeTable()	
-	if IE.GetBaseUpgrades then		
-		for version, data in pairs(IE:GetBaseUpgrades()) do
-			IE:RegisterUpgrade(version, data)
-		end
-		
-		IE.GetBaseUpgrades = nil
-	end
-	
-	IE:SortUpgradeTable()
-	
-	return IE.UpgradeTable
-end
-
-
-function IE:DoUpgrade(type, version, ...)
-	assert(_G.type(type) == "string")
-	assert(_G.type(version) == "number")
-	
-	-- upgrade the actual requested setting
-	for k, v in ipairs(IE:GetUpgradeTable()) do
-		if v.Version > version then
-			if v[type] then
-				v[type](v, ...)
-			end
-		end
-	end
-	
-	TMW:Fire("TMW_IE_UPGRADE_REQUESTED", type, version, ...)
-
-	-- delegate out to sub-types
+TMW:RegisterCallback("TMW_IE_UPGRADE_PERFORMED", function(event, type, upgradeData, ...)
 	if type == "global" then
-	
 		-- delegate to locale
 		if IE.db.sv.locale then
 			for locale, ls in pairs(IE.db.sv.locale) do
-				IE:DoUpgrade("locale", version, ls, locale)
+				IE:Upgrade("locale", upgradeData, ls, locale)
 			end
 		end
-	
-		--All Global Upgrades Complete
-		TMWOptDB.Version = TELLMEWHEN_VERSIONNUMBER
-	elseif type == "profile" then
-		
-		-- Put any sub-type upgrade delegation here...
-		
-
-		
-		--All Profile Upgrades Complete
-		IE.db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 	end
-	
-	IE.HaveUpgradedOnce = true
-end
+end)
 
 
 function IE:RawUpgrade()
@@ -515,7 +434,9 @@ end
 
 function IE:UpgradeGlobal()
 	if TMWOptDB.Version < TELLMEWHEN_VERSIONNUMBER then
-		IE:DoUpgrade("global", TMWOptDB.Version, IE.db.global)
+		IE:StartUpgrade("global", TMWOptDB.Version, IE.db.global)
+
+		TMWOptDB.Version = TELLMEWHEN_VERSIONNUMBER
 	end
 
 	-- This function isn't needed anymore
@@ -525,15 +446,14 @@ end
 function IE:UpgradeProfile()
 	-- Set the version for the current profile to the current version if it is a new profile.
 	IE.db.profile.Version = IE.db.profile.Version or TELLMEWHEN_VERSIONNUMBER
-		
-	if TMWOptDB.Version < TELLMEWHEN_VERSIONNUMBER then
-		IE:DoUpgrade("global", TMWOptDB.Version, IE.db.global)
-	end
 	
 	if IE.db.profile.Version < TELLMEWHEN_VERSIONNUMBER then
-		IE:DoUpgrade("profile", IE.db.profile.Version, IE.db.profile)
+		IE:StartUpgrade("profile", IE.db.profile.Version, IE.db.profile)
+
+		IE.db.profile.Version = TELLMEWHEN_VERSIONNUMBER
 	end
 end
+
 
 
 function IE:InitializeDatabase()
@@ -2860,6 +2780,7 @@ TMW:NewClass("Config_Frame_IconStateSet", "Config_Frame"){
 
 TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	hasOpacity = false,
+	hasDesaturate = false,
 
 	OnNewInstance_ColorButton = function(self)
 		assert(self.background1 and self.text and self.swatch, 
@@ -2879,20 +2800,11 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	OnClick = function(self, button)
 		local settings = self:GetSettingTable()
 
-		local prevRGBA = {self:GetRGBA()}
-		self.prevRGBA = prevRGBA
-
-		self:GenerateMethods()
-
-		ColorPickerFrame.func = self.colorFunc
-		ColorPickerFrame.opacityFunc = self.colorFunc
-		ColorPickerFrame.cancelFunc = self.cancelFunc
-
-		ColorPickerFrame:SetColorRGB(unpack(prevRGBA))
-		ColorPickerFrame.hasOpacity = self.hasOpacity
-		ColorPickerFrame.opacity = 1 - prevRGBA[4]
-
-		ColorPickerFrame:Show()
+		if settings and self.setting then
+			IE:RegisterRapidSetting(self.setting)
+			
+			TellMeWhen_ColorPicker:Load(self, "PickerCallback", settings[self.setting], self.swatchTexture, self.hasOpacity, self.hasDesaturate)
+		end
 	end,
 
 	SetHasOpacity = function(self, hasOpacity)
@@ -2904,34 +2816,8 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		self.background4:SetShown(hasOpacity)
 	end,
 
-	OnSettingSavedDelayed = function(self)
-		if not self.saveTimer then
-			self.saveTimer = C_Timer.NewTimer(0.1, function()
-				self.saveTimer = nil
-				self:OnSettingSaved()
-			end)
-		end
-	end,
-
-	-- We have to do this for these to have access to self.
-	GenerateMethods = function(self)
-		self.colorFunc = function()
-			local r, g, b = ColorPickerFrame:GetColorRGB()
-			local a = 1 - OpacitySliderFrame:GetValue()
-
-			self:SetRGBA(r, g, b, a)
-			self:UpdateSwatchTexture()
-			
-			self:OnSettingSavedDelayed()
-		end
-
-		self.cancelFunc = function()
-			self:SetRGBA(unpack(self.prevRGBA))
-			
-			self:OnSettingSaved()
-		end
-
-		self.GenerateMethods = TMW.NULLFUNC
+	SetHasDesaturate = function(self, hasDesaturate)
+		self.hasDesaturate = hasDesaturate
 	end,
 
 	SetSwatchTexture = function(self, texture)
@@ -2940,11 +2826,15 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	end,
 
 	UpdateSwatchTexture = function(self)
+		local r, g, b, a, flags = self:GetRGBA()
 		if self.swatchTexture and self.swatchTexture ~= "" then
 			self.swatch:SetTexture(self.swatchTexture)
-			self.swatch:SetVertexColor(self:GetRGBA())
+			self.swatch:SetVertexColor(r, g, b)
+			self.swatch:SetAlpha(a)
+			self.swatch:SetDesaturated(flags and flags.desaturate)
 		else
-			self.swatch:SetTexture(self:GetRGBA())
+			self.swatch:SetTexture(r, g, b, a)
+			self.swatch:SetDesaturated(false)
 		end
 	end,
 
@@ -2956,34 +2846,28 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		end
 	end,
 
+	PickerCallback = function(self, colorString)
+		local settings = self:GetSettingTable()
+
+		if settings and self.setting then
+			settings[self.setting] = colorString
+			self:OnSettingSaved()
+		end
+	end,
+
 	GetRGBA = function(self)
 		local settings = self:GetSettingTable()
 
 		if settings and self.setting then
 			IE:RegisterRapidSetting(self.setting)
 			
-			local r, g, b, a = TMW:StringToRGBA(settings[self.setting])
+			local c = TMW:StringToCachedRGBATable(settings[self.setting])
+			local a = self.hasOpacity and c.a or 1
 
-			if self.hasOpacity then
-				return r, g, b, a
-			else
-				return r, g, b, 1
-			end
+			return c.r, c.g, c.b, a, c.flags
 		else
-			return 0, 0, 0, 0
+			return 0, 0, 0, 0, nil
 		end		
-	end,
-
-	SetRGBA = function(self, r, g, b, a)
-		if not self.hasOpacity then
-			a = 1
-		end
-
-		local settings = self:GetSettingTable()
-
-		if settings and self.setting then
-			settings[self.setting] = TMW:RGBAToString(r, g, b, a)
-		end
 	end,
 }
 
@@ -3122,91 +3006,32 @@ TMW:NewClass("Config_PointSelect", "Config_Frame"){
 	end,
 }
 
-
-
 TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 
 	h = 0,
 	s = 1,
 	v = 0.5,
-
-	HUE_SEGMENTS = 6,
-
-	MakeTexture = function(self, i, iMax, slider)
-		local tex = self.hueSlider:CreateTexture()
-		slider[i] = tex
-		tex:SetPoint("TOP", slider.Background, "TOP", 0, 0)
-		tex:SetPoint("BOTTOM", slider.Background, "BOTTOM", 0, 0)
-		tex:SetTexture(1, 1, 1)
-
-		if i > 1 then
-			tex:SetPoint("LEFT", slider[i-1], "RIGHT", 0, 0)
-		else
-			tex:SetPoint("LEFT")
-		end
-
-		return tex
-	end,
-
-	HueFormatter = TMW.C.Formatter:New(function(value)
-		return ("%.1f"):format(value*360)
-	end),
-
+	a = 0.5,
+	desaturate = false,
+	
 	OnNewInstance = function(self)
 		self.RecentColors = {}
-
-		self:AddRecentColor("ff345678")
-		self:AddRecentColor("ffffffff")
-		self:AddRecentColor("ff000000")
-		self:AddRecentColor("ffff0000")
 
 		self.swatchLabel:SetText(L["COLORPICKER_SWATCH"])
 		self.RecentColorFrame.header:SetText(L["COLORPICKER_RECENT"])
 
 		self:CScriptAdd("SettingTableRequested", function() return self end)
 
-		for i, slider in TMW:Vararg(self.hueSlider, self.saturationSlider, self.valueSlider) do
-			slider:SetMinMaxValues(0, 1)
-			slider:SetValueStep(0.001)
-
-			-- Set the setting to h, s, or b
-			slider:SetSetting(slider:GetParentKey():sub(1, 1))
+		for i, slider in TMW:Vararg(self.HueSlider, self.SaturationSlider, self.ValueSlider, self.AlphaSlider) do
+			-- Set the setting to h, s, v, or a
+			slider:SetSetting(slider:GetParentKey():sub(1, 1):lower())
 
 			slider:PostHookMethod("UpdateTexts", self.Slider_UpdateTextsHook)
 		end
 
-		self.hueSlider.Background:Hide()
-		self.hueSlider:SetValueStep(0.0005)
-		self.hueSlider:SetMinMaxValues(0, 0.9995)
-		self.hueSlider:SetTextFormatter(self.HueFormatter)
-		for i = 1, self.HUE_SEGMENTS do
-			self:MakeTexture(i, self.HUE_SEGMENTS, self.hueSlider)
-		end
-
-		self.saturationSlider.Background:SetTexture(1, 1, 1)
-		self.saturationSlider:SetTextFormatter(TMW.C.Formatter.PERCENT100)
-		self.valueSlider.Background:SetTexture(1, 1, 1)
-		self.valueSlider:SetTextFormatter(TMW.C.Formatter.PERCENT100)
-
-		self:OnSizeChanged()
 		self:RequestReload()
 
-		self:CScriptAdd("DescendantSettingSaved", self.SaveSetting)
-	end,
-
-	OnSizeChanged = function(self)
-		for i = 1, self.HUE_SEGMENTS do
-			if not self.hueSlider[i] then break end
-		    self.hueSlider[i]:SetWidth(self.hueSlider.Background:GetWidth()/self.HUE_SEGMENTS)
-		end
-	end,
-
-	OnUpdate = function(self)
-		self:OnSizeChanged()
-
-		if self.hueSlider[i] and self.hueSlider[i]:GetWidth() > 5 then
-			self:SetScript("OnUpdate", nil)
-		end
+		self:CScriptAdd("DescendantSettingSaved", self.LiveUpdate)
 	end,
 
 	Slider_UpdateTextsHook = function(slider)
@@ -3225,21 +3050,36 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		self:AddRecentColor(self:GetColorString())
 		self:AddRecentColor(string)
 
-		self:SetColorString(string)
+		self:SetColorString(string, false)
 	end,
+
 	AddRecentColor = function(self, colorString)
 		-- TODO: store these in options saved variables instead of in memory.
-		for i, v in ipairs(self.RecentColors) do
+		-- TODO: limit the height of the container (or add a scrollbar)
+
+		-- Don't include flags with recent colors.
+		colorString = colorString:sub(1, 8)
+
+		local RecentColors = IE.db.global.RecentColors
+
+		for i, v in ipairs(RecentColors) do
 			if v == colorString then
-				tremove(self.RecentColors, i)
+				tremove(RecentColors, i)
 				break
 			end
 		end
 
-		tinsert(self.RecentColors, 1, colorString)
+		tinsert(RecentColors, 1, colorString)
+		if #RecentColors > self.RECENT_COLOR_COLUMNS * 7 then
+			tremove(RecentColors, #RecentColors)
+		end
 
+		self:UpdateRecentColors()
+	end,
+
+	UpdateRecentColors = function(self)
 		local padding = 5
-		for i, color in ipairs(self.RecentColors) do
+		for i, color in ipairs(IE.db.global.RecentColors) do
 			local f = self.RecentColorFrame[i]
 			if not f then
 				f = CreateFrame("Button", nil, self.RecentColorFrame, "TellMeWhen_ColorButtonTemplate")
@@ -3256,80 +3096,101 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 				end
 			end
 			f.string = color
-			f.swatch:SetTexture(TMW:StringToRGB(color))
+			f.swatch:SetTexture(TMW:StringToRGBA(color))
 		end
 	end,
 
 	LiveUpdate = function(self)
-		if not self.hueSlider[1] then
+		if not self.HueSlider[1] then
 			return
 		end
 
 		-- TODO: HANDLE ALPHA
-		local a = 1
-		local h, s, v = self.hueSlider:GetValue(), self.saturationSlider:GetValue(), self.valueSlider:GetValue()
+		local h = self.HueSlider:GetValue()
+		local s = self.SaturationSlider:GetValue()
+		local v = self.ValueSlider:GetValue()
+		local a = self.AlphaSlider:GetValue()
 
-		self.StringEditbox:SetText(TMW:HSVAToRGBAString(h, s, v, a))
+		self.StringEditbox:SetText(TMW:HSVAToColorString(h, s, v, a))
 
 		local r,g,b=TMW:HSVToRGB(h, 0, v)
-		self.saturationSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, 1, v))
+		self.SaturationSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, 1, v))
 
 		local r,g,b=TMW:HSVToRGB(h, s, 0)
-		self.valueSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, s, 1))
+		self.ValueSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, s, 1))
 
-		for i = 1, self.HUE_SEGMENTS do
-			local r,g,b=TMW:HSVToRGB((i-1)/self.HUE_SEGMENTS, s, v)
-			self.hueSlider[i]:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(i/self.HUE_SEGMENTS, s, v))
+		for i = 1, self.HueSlider.SEGMENTS do
+			local r,g,b=TMW:HSVToRGB((i-1)/self.HueSlider.SEGMENTS, s, v)
+			self.HueSlider[i]:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(i/self.HueSlider.SEGMENTS, s, v))
 		end
 
-		self.swatch:SetTexture(TMW:HSVToRGB(h, s, v))
-		local tex = CI.icon and CI.icon.attributes.texture
+		local r,g,b=TMW:HSVToRGB(h, s, v)
+		self.AlphaSlider.Background:SetGradientAlpha("HORIZONTAL", r, g, b, 0, r, g, b, 1)
 
-		self.iconTexture:SetTexture(tex)
+		self.swatch.swatch:SetTexture(r,g,b)
+		self.swatch.swatch:SetAlpha(a)
 
 		self.iconTexture:SetVertexColor(TMW:HSVToRGB(h, s, v))
+		self.iconTexture:SetDesaturated(self.desaturate)
 	end,
 
 	SaveSetting = function(self)
-		local settings = self:GetSettingTable()
+		self:AddRecentColor(self:GetColorString())
 
-		if settings and self.setting then
-
-			local value = TMW:HSVAToRGBAString(self.h, self.s, self.v, self.a)
-
-			if settings[self.setting] ~= value then
-				settings[self.setting] = value
-				self:OnSettingSaved()
-			else
-				self:RequestReload()
-			end
+		if self.callbackObj and self.callback then
+			self.callbackObj[self.callback](self.callbackObj, self:GetColorString())
 		end
+
+		self:Hide()
 	end,
 
-	SetColorString = function(self, value)
-		local c = TMW:RGBAStringToCachedHSVATable(value)
+	SetColorString = function(self, value, loadFlags)
+		if #value == 6 then
+			value = "ff" .. value
+		end
 
-		self.h, self.s, self.v, self.a = c.h, c.s, c.v, c.a
+		local c = TMW:ColorStringToCachedHSVATable(value)
+
+		self.h, self.s, self.v = c.h, c.s, c.v
+
+		self.a = self.hasOpacity and c.a or 1
+		if loadFlags then
+			self.desaturate = self.hasDesaturate and c.flags and c.flags.desaturate or false
+		end
 
 		self:RequestReloadChildren()
+		self:LiveUpdate()
 	end,
 
 	GetColorString = function(self, value)
-		return TMW:HSVAToRGBAString(self.h, self.s, self.v, self.a)
+		return TMW:HSVAToColorString(self.h, self.s, self.v, self.a, {desaturate=self.desaturate})
 	end,
 
-	LoadColorString = function(self, value)
-		local c = TMW:RGBAStringToCachedHSVATable(value)
+	Load = function(self, callbackObj, callback, value, texture, hasOpacity, hasDesaturate)
+		self.hasOpacity = hasOpacity
+		self.hasDesaturate = hasDesaturate
+		self.callbackObj = callbackObj
+		self.callback = callback
 
-		self:SetColorString(value)
-		self:AddRecentColor(value)
+		self.AlphaSlider:SetShown(hasOpacity)
+		self.Desaturate:SetShown(hasDesaturate)
 
-		self.previousSwatch:SetTexture(TMW:StringToRGB(value))
+		self.iconTexture:SetTexture(texture)
+
+		self:SetColorString(value, true)
+		--self:AddRecentColor(value)
+		self:UpdateRecentColors()
+
+		self:Show()
+
+		local c = TMW:StringToCachedRGBATable(value)
+		self.swatchPrevious.swatch:SetTexture(c.r, c.g, c.b, c.a)
 	end,
 }
 
 
 
+TMW.C.IE:Inherit("Config_Frame")
 
 ---------------------------------
 -- Icon Editor Tabs

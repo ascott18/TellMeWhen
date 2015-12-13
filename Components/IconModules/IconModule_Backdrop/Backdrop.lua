@@ -116,8 +116,8 @@ function Backdrop:SetupForIcon(icon)
 	local color = TMW:GetColors("BackdropColor", "BackdropColor_Enable",
 		                        icon:GetSettings(), icon.group:GetSettings(), TMW.db.global)
 
-	local r, g, b, a = TMW:StringToRGBA(color)
-	self.backdrop:SetVertexColor(r, g, b, 1)
-	self.backdrop:SetAlpha(a)
+	local c = TMW:StringToCachedRGBATable(color)
+	self.backdrop:SetVertexColor(c.r, c.g, c.b, 1)
+	self.backdrop:SetAlpha(c.a)
 end
 	

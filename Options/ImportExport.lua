@@ -594,7 +594,7 @@ function group:Import_ImportData(Item_group, domain, createNewGroup, oldgroupID,
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("group", version, gs, domain, group.ID)
+			TMW:StartUpgrade("group", version, gs, domain, group.ID)
 		end
 	end
 
@@ -797,7 +797,7 @@ function icon:Import_ImportData(Item)
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("icon", version, ics, gs, icon.ID)
+			TMW:StartUpgrade("icon", version, ics, gs, icon.ID)
 		end
 	end
 end

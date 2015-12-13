@@ -38,16 +38,16 @@ Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
 
-local STATE_USABLE = 1
-local STATE_UNUSABLE = 2
+local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE
+local STATE_UNUSABLE_NORANGE = TMW.CONST.STATE.DEFAULT_NORANGE
+local STATE_UNUSABLE_NOMANA  = TMW.CONST.STATE.DEFAULT_NOMANA
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
 Type:UsesAttributes("charges, maxCharges")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
-Type:UsesAttributes("noMana")
-Type:UsesAttributes("inRange")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("texture")
@@ -93,8 +93,10 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE]   = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
-	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_READY"],   },
+	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_NOTREADY"], },
+	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck" },
+	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck" },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", function(self)
@@ -146,19 +148,17 @@ local function AutoShot_OnUpdate(icon, time)
 
 	if ready and inrange then
 		icon:SetInfo(
-			"state; start, duration; spell; inRange",
+			"state; start, duration; spell",
 			STATE_USABLE,
 			0, 0,
-			NameString,
-			inrange
+			NameString
 		)
 	else
 		icon:SetInfo(
-			"state; start, duration; spell; inRange",
-			STATE_UNUSABLE,
+			"state; start, duration; spell",
+			not inrange and STATE_UNUSABLE_NORANGE or STATE_UNUSABLE,
 			icon.asStart, asDuration,
-			NameString,
-			inrange
+			NameString
 		)
 	end
 end
@@ -225,8 +225,6 @@ local function SpellCooldown_OnUpdate(icon, time)
 					wipe(usableData)
 					usableData.state = STATE_USABLE
 					usableData.tex = GetSpellTexture(iName)
-					usableData.inrange = inrange
-					usableData.nomana = nomana
 					usableData.iName = iName
 					usableData.stack = stack
 					usableData.charges = charges
@@ -242,10 +240,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 			elseif not unusableFound then
 				wipe(unusableData)
-				unusableData.state = STATE_UNUSABLE
+				unusableData.state = not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE
 				unusableData.tex = GetSpellTexture(iName)
-				unusableData.inrange = inrange
-				unusableData.nomana = nomana
 				unusableData.iName = iName
 				unusableData.stack = stack
 				unusableData.charges = charges
@@ -273,15 +269,13 @@ local function SpellCooldown_OnUpdate(icon, time)
 	
 	if dataToUse then
 		icon:SetInfo(
-			"state; texture; start, duration; charges, maxCharges; stack, stackText; spell; inRange; noMana",
+			"state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
 			dataToUse.state,
 			dataToUse.tex,
 			dataToUse.start, dataToUse.duration,
 			dataToUse.charges, dataToUse.maxCharges,
 			dataToUse.stack, dataToUse.stack,
-			dataToUse.iName,
-			dataToUse.inrange,
-			dataToUse.nomana
+			dataToUse.iName
 		)
 	else
 		icon:SetInfo("state", 0)

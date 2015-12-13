@@ -52,6 +52,12 @@ TMW:RegisterUpgrade(51022, {
 })
 
 
+local colorSettingNames = {
+	"TimerBar_StartColor",
+	"TimerBar_MiddleColor",
+	"TimerBar_CompleteColor",
+}
+
 function TimerBar_Overlay:SetupForIcon(sourceIcon)
 	self.Invert = sourceIcon.InvertCBar
 	self.Offset = sourceIcon.CBarOffs or 0

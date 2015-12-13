@@ -40,8 +40,8 @@ Type.unitType = "name"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
-local STATE_RUNNING = 1
-local STATE_EXPIRED = 2
+local STATE_RUNNING = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_EXPIRED = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("sourceUnit, sourceGUID")

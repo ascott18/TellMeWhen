@@ -27,8 +27,8 @@ Type.hasNoGCD = true
 Type.canControlGroup = true
 Type.menuSpaceAfter = true
 
-local STATE_SUCCEED = 1
-local STATE_FAIL = 2
+local STATE_SUCCEED = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_FAIL = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("start, duration")

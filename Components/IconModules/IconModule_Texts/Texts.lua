@@ -171,7 +171,7 @@ TMW:RegisterUpgrade(70010, {
 					-- version number. When we are upgrading a profile, global upgrades have already
 					-- happened, so the layout we are sticking into global.TextLayouts will never get
 					-- old upgrades.
-					TMW:DoUpgrade("textlayout", profile.Version, layout, layout.GUID)
+					TMW:StartUpgrade("textlayout", profile.Version, layout, layout.GUID)
 				else
 					-- The layout does already exist.
 
@@ -205,7 +205,7 @@ TMW:RegisterUpgrade(70010, {
 						TMW:CopyTableInPlaceUsingDestinationMeta(layout, TMW.db.global.TextLayouts[layout.GUID])
 
 						-- See above for an explanation of this upgrade.
-						TMW:DoUpgrade("textlayout", profile.Version, layout, layout.GUID)
+						TMW:StartUpgrade("textlayout", profile.Version, layout, layout.GUID)
 					end
 
 				end
@@ -534,12 +534,12 @@ TMW:RegisterUpgrade(51002, {
 	end,
 })
 
-TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
+TMW:RegisterCallback("TMW_UPGRADE_PERFORMED", function(event, type, upgradeData, ...)
 	-- When a global settings upgrade is requested, update all text layouts.
 	
 	if type == "global" then
 		for GUID, settings in pairs(TMW.db.global.TextLayouts) do
-			TMW:DoUpgrade("textlayout", version, settings, GUID)
+			TMW:Upgrade("textlayout", upgradeData, settings, GUID)
 		end
 	end
 end)

@@ -32,8 +32,8 @@ Type.hidden = pclass ~= "PRIEST"
 Type.menuIcon = "Interface\\Icons\\Spell_Holy_SummonLightwell"
 Type.hasNoGCD = true
 
-local STATE_PRESENT = 1
-local STATE_ABSENT = 2
+local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

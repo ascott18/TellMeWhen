@@ -26,7 +26,6 @@ Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
 Type.menuIcon = "Interface\\Icons\\LevelUpIcon-LFD"
 Type.AllowNoName = true
-Type.NoColorSettings = true
 Type.canControlGroup = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

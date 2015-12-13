@@ -172,13 +172,13 @@ TMW:RegisterCallback("TMW_DB_PRE_DEFAULT_UPGRADES", function()
 end)
 
 
-TMW:RegisterCallback("TMW_UPGRADE_REQUESTED", function(event, type, version, ...)
+TMW:RegisterCallback("TMW_UPGRADE_PERFORMED", function(event, type, upgradeData, ...)
 	if type == "icon" then
 		local ics, gs, iconID = ...
 		
 		-- Delegate the upgrade to eventSettings.
 		for eventID, eventSettings in TMW:InNLengthTable(ics.Events) do
-			TMW:DoUpgrade("iconEventHandler", version, eventSettings, eventID, ics)
+			TMW:Upgrade("iconEventHandler", upgradeData, eventSettings, eventID, ics)
 		end
 	end
 end)

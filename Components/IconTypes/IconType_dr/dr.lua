@@ -50,8 +50,8 @@ Type.usePocketWatch = 1
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 
-local STATE_UNDIMINISHED = 1
-local STATE_DIMINISHED = 2
+local STATE_UNDIMINISHED = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_DIMINISHED = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

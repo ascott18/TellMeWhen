@@ -32,12 +32,12 @@ Type.desc = L["ICONMENU_ITEMCOOLDOWN_DESC"]
 Type.menuIcon = "Interface\\Icons\\inv_jewelry_trinketpvp_01"
 Type.checksItems = true
 
-local STATE_USABLE = 1
-local STATE_UNUSABLE = 2
+local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE
+local STATE_UNUSABLE_NORANGE = TMW.CONST.STATE.DEFAULT_NORANGE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")
-Type:UsesAttributes("inRange")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("state")
@@ -68,8 +68,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
-	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_READY"],   },
+	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_NOTREADY"], },
+	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck" },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", function(self)
@@ -142,13 +143,12 @@ local function ItemCooldown_OnUpdate(icon, time)
 			if equipped and inrange and (duration == 0 or OnGCD(duration)) then
 				-- This item is usable. Set the attributes and then stop.
 
-				icon:SetInfo("state; texture; start, duration; stack, stackText; spell; inRange",
+				icon:SetInfo("state; texture; start, duration; stack, stackText; spell",
 					STATE_USABLE,
 					item:GetIcon() or "Interface\\Icons\\INV_Misc_QuestionMark",
 					start, duration,
 					count, icon.EnableStacks and count,
-					item:GetID(),
-					inrange
+					item:GetID()
 				)
 				return
 			end
@@ -188,13 +188,12 @@ local function ItemCooldown_OnUpdate(icon, time)
 	end
 
 	if duration then
-		icon:SetInfo("state; texture; start, duration; stack, stackText; spell; inRange",
-			STATE_UNUSABLE,
+		icon:SetInfo("state; texture; start, duration; stack, stackText; spell",
+			not inrange and STATE_UNUSABLE_NORANGE or STATE_UNUSABLE,
 			item2:GetIcon(),
 			start, duration,
 			count, icon.EnableStacks and count,
-			item2:GetID(),
-			inrange
+			item2:GetID()
 		)
 	else
 		icon:SetInfo("state", 0)

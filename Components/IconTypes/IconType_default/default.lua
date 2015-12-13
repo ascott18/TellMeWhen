@@ -23,7 +23,6 @@ local GetSpellInfo, GetSpellBookItemInfo, GetSpellBookItemName =
 local Type = TMW.Classes.IconType:New("")
 Type.name = L["ICONMENU_TYPE"]
 Type.menuSpaceAfter = true
-Type.NoColorSettings = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

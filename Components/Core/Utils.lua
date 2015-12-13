@@ -532,12 +532,43 @@ end
 -- Color Utilities
 ---------------------------------
 
-function TMW:RGBATableToString(table)
+local flagMap = {
+	d = "desaturate"
+}
+
+local function parseFlagString(flagString)
+	if not flagString or #flagString == 0 then
+		return nil
+	end
+	
+	local ret = {}
+	for i = 1, #flagString do
+		local f = flagString:sub(i,i)
+		ret[flagMap[f] or f] = true
+	end
+	return ret
+end
+
+local function parseFlagTable(tbl)
+	if not tbl then return "" end
+	local ret = ""
+	for k, v in pairs(tbl) do
+		if v then
+			local f = TMW.tContains(flagMap, k)
+			if f or #k == 1 then
+				ret = ret .. (f or k)
+			end
+		end
+	end
+	return ret
+end
+
+function TMW:RGBATableToStringWithoutFlags(table)
 	if type(table) == "string" then
 		return table
 	end
 
-	return format("%02x%02x%02x%02x", (table.a or 1) * 0xFF, table.r * 0xFF, table.g * 0xFF, table.b * 0xFF)
+	return TMW:RGBAToString(table.r, table.g, table.b, table.a)
 end
 
 function TMW:RGBATableToStringWithFallback(table, fallbackStr)
@@ -547,23 +578,22 @@ function TMW:RGBATableToStringWithFallback(table, fallbackStr)
 		return fallbackStr
 	end
 
-	local r, g, b, a = TMW:StringToRGBA(fallbackStr)
+	local r, g, b, a, flags = TMW:StringToRGBA(fallbackStr)
 	
-	return format("%02x%02x%02x%02x", (table.a or a) * 0xFF, (table.r or r) * 0xFF, (table.g or g) * 0xFF, (table.b or b) * 0xFF)
+	return TMW:RGBAToString(table.r or r, table.g or g, table.b or b, table.a or a, table.flags or flags)
 end
 
-function TMW:RGBAToString(r, g, b, a)
-	return format("%02x%02x%02x%02x", (a or 1) * 0xFF, r * 0xFF, g * 0xFF, b * 0xFF)
+local function to8Bit(v)
+	return floor(v * 0xFF + 0.5)
+end
+function TMW:RGBAToString(r, g, b, a, flags)
+	return format("%02x%02x%02x%02x%s", to8Bit(a or 1), to8Bit(r), to8Bit(g), to8Bit(b), parseFlagTable(flags))
 end
 
 function TMW:StringToRGBA(str)
-	local a, r, g, b = str:match("(%x%x)(%x%x)(%x%x)(%x%x)")
-	return tonumber(r, 0x10) / 0xFF, tonumber(g, 0x10) / 0xFF, tonumber(b, 0x10) / 0xFF, tonumber(a, 0x10) / 0xFF
-end
+	local a, r, g, b, flagString = str:match("(%x%x)(%x%x)(%x%x)(%x%x)(.*)")
 
-function TMW:StringToRGB(str)
-	local a, r, g, b = str:match("(%x%x)(%x%x)(%x%x)(%x%x)")
-	return tonumber(r, 0x10) / 0xFF, tonumber(g, 0x10) / 0xFF, tonumber(b, 0x10) / 0xFF
+	return tonumber(r, 0x10) / 0xFF, tonumber(g, 0x10) / 0xFF, tonumber(b, 0x10) / 0xFF, tonumber(a, 0x10) / 0xFF, parseFlagString(flagString)
 end
 
 function TMW:StringToCachedRGBATable(str)
@@ -571,84 +601,13 @@ function TMW:StringToCachedRGBATable(str)
 		return str
 	end
 
-	local r, g, b, a = TMW:StringToRGBA(str)
-	return {r=r,g=g,b=b,a=a}
+	local r, g, b, a, flags = TMW:StringToRGBA(str)
+	return {r=r,g=g,b=b,a=a, flags=flags}
 end
 TMW:MakeFunctionCached(TMW, "StringToCachedRGBATable")
 
-function TMW:StringToCachedRGBTable(str)
-	if type(str) == "table" then
-		return str
-	end
-
-	local r, g, b = TMW:StringToRGBA(str)
-	return {r=r,g=g,b=b}
-end
-TMW:MakeFunctionCached(TMW, "StringToCachedRGBTable")
-
 
 -- Adapted from https://github.com/mjackson/mjijackson.github.com/blob/master/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript.txt
-function TMW:RGBToHSL(r, g, b)
-	local max = max(r, g, b)
-	local min = min(r, g, b)
-	local h, s, l = (max + min) / 2
-
-	if max == min then
-		h, s = 0, 0 -- achromatic
-	else
-		local d = max - min
-		local s
-		if l > 0.5 then
-			s = d / (2 - max - min)
-		else
-			s = d / (max + min)
-		end
-
-		if max == r then
-			h = (g - b) / d
-			if g < b then h = h + 6 end
-		elseif max == g then
-			h = (b - r) / d + 2
-		elseif max == b then
-			h = (r - g) / d + 4
-		end
-
-		h = h / 6
-	end
-
-	return h, s, l
-end
-
-local function hue2rgb(p, q, t)
-	if t < 0   then t = t + 1 end
-	if t > 1   then t = t - 1 end
-	if t < 1/6 then return p + (q - p) * 6 * t end
-	if t < 1/2 then return q end
-	if t < 2/3 then return p + (q - p) * (2/3 - t) * 6 end
-	return p
-end
-function TMW:HSLToRGB(h, s, l)
-	local r, g, b
-
-	if s == 0 then
-		r, g, b = l, l, l -- achromatic
-	else
-		local q
-		if l < 0.5 then
-			q = l * (1 + s)
-		else
-			q = l + s - l * s
-		end
-		local p = 2 * l - q
-
-		r = hue2rgb(p, q, h + 1/3)
-		g = hue2rgb(p, q, h)
-		b = hue2rgb(p, q, h - 1/3)
-	end
-
-	return r, g, b
-end
-
 function TMW:RGBToHSV(r, g, b)
 	local max, min = max(r, g, b), min(r, g, b)
 	local h, s, v
@@ -702,27 +661,17 @@ end
 
 
 
-function TMW:RGBAStringToCachedHSLATable(str)
-	local r, g, b, a = TMW:StringToRGBA(str)
-	local h, s, l = TMW:RGBToHSL(r, g, b)
-	return {h=h, s=s, l=l, a=a}
-end
-TMW:MakeFunctionCached(TMW, "RGBStringToCachedHSLATable")
 
-function TMW:RGBAStringToCachedHSVATable(str)
-	local r, g, b, a = TMW:StringToRGBA(str)
+function TMW:ColorStringToCachedHSVATable(str)
+	local r, g, b, a, flags = TMW:StringToRGBA(str)
 	local h, s, v = TMW:RGBToHSV(r, g, b)
-	return {h=h, s=s, v=v, a=a}
+	return {h=h, s=s, v=v, a=a, flags=flags}
 end
-TMW:MakeFunctionCached(TMW, "RGBAStringToCachedHSVATable")
+TMW:MakeFunctionCached(TMW, "ColorStringToCachedHSVATable")
 
-function TMW:HSLAToRGBAString(h, s, l, a)
-	local r, g, b = TMW:HSLToRGB(h, s, l)
-	return TMW:RGBAToString(r, g, b, a)
-end
-function TMW:HSVAToRGBAString(h, s, b, a)
-	local r, g, b = TMW:HSVToRGB(h, s, b)
-	return TMW:RGBAToString(r, g, b, a)
+function TMW:HSVAToColorString(h, s, v, a, flags)
+	local r, g, b = TMW:HSVToRGB(h, s, v)
+	return TMW:RGBAToString(r, g, b, a, flags)
 end
 
 

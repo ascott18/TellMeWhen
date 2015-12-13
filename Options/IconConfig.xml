@@ -323,6 +323,7 @@
 						self:SetTexts(nil, nil)
 						self:SetTooltip(TMW.L["ICONMENU_STATECOLOR"], TMW.L["ICONMENU_STATECOLOR_DESC"])
 						self:SetHasOpacity(false)
+						self:SetHasDesaturate(true)
 						self:SetSetting("Color")
 					</OnLoad>
 					<OnUpdate>
@@ -371,29 +372,50 @@
 				self.frames = {}
 
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
+					local settings = self:GetSettingTable()
 					local supplementalData = panelInfo.supplementalData
 					
 					assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_IconStates!")
 					
 					-- Set the title for the frame
 					panel.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
-					
-					for i, data in ipairs(supplementalData) do
-						if not self.frames[i] then
-							self.frames[i] = TMW.C.Config_Frame_IconStateSet:New("Frame", nil, self, "TellMeWhen_IconStateSet", i)
 
+					for i, set in pairs(self.frames) do
+						set.doHide = true
+					end
+					
+					for i, data in TMW:OrderedPairs(supplementalData) do
+						local set = self.frames[i]
+						if not set then
+							set = TMW.C.Config_Frame_IconStateSet:New("Frame", nil, self, "TellMeWhen_IconStateSet", i)
+							self.frames[i] = set
 							if i == 1 then
-								self.frames[i]:SetPoint("TOP")
+								set:SetPoint("TOP")
 							else
-								self.frames[i]:SetPoint("TOP", self.frames[i-1], "BOTTOM")
+								set:SetPoint("TOP", self.frames[i-1], "BOTTOM")
 							end
 						end
+						set.doHide = nil
 
-						self.frames[i]:Show()
+						if not data.requires or settings[data.requires] then
+							set:Show()
+							if i == 1 then
+								set:SetPoint("TOP")
+							else
+								set:SetPoint("TOP", self.frames[i-1], "BOTTOM")
+							end
+						else
+							set:Hide()
+							if i == 1 then
+								set:SetPoint("BOTTOM", self, "TOP")
+							else
+								set:SetPoint("TOP", self.frames[i-1], "TOP")
+							end
+						end
 					end
 
-					for i = #supplementalData + 1, #self.frames do
-						self.frames[i]:Hide()
+					for i, set in pairs(self.frames) do
+						if set.doHide then set:Hide() end
 					end
 				end)
 			</OnLoad>

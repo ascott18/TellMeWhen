@@ -940,7 +940,7 @@ function textlayout:Import_ImportData(Item, GUID)
 		if version > TELLMEWHEN_VERSIONNUMBER then
 			TMW:Print(L["FROMNEWERVERSION"])
 		else
-			TMW:DoUpgrade("textlayout", version, textlayout, GUID)
+			TMW:StartUpgrade("textlayout", version, textlayout, GUID)
 		end
 	end
 

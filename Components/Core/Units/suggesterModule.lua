@@ -76,7 +76,7 @@ function Module:Entry_AddToList_1(f, index)
 				if color.colorStr then
 					color = "|c" .. color.colorStr
 				else
-					color = "|c" .. TMW:RGBATableToString(color)
+					color = "|c" .. TMW:RGBATableToStringWithoutFlags(color)
 				end
 			end
 	

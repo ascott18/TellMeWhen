@@ -40,8 +40,8 @@ Type.desc = L["ICONMENU_SWINGTIMER_DESC"]
 Type.menuIcon = "Interface\\Icons\\INV_Gauntlets_04"
 Type.hasNoGCD = true
 
-local STATE_NOTREADY = 1
-local STATE_READY = 2
+local STATE_NOTREADY = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_READY = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("start, duration")

@@ -45,8 +45,8 @@ Type.usePocketWatch = 1
 Type.unitType = "name"
 Type.canControlGroup = true
 
-local STATE_PRESENT = 1
-local STATE_ABSENT = 2
+local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

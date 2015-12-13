@@ -43,24 +43,15 @@ local settings = {
 	TimerBar_EnableColors  = false,
 }
 
+-- Icon defaults
 TimerBar:RegisterIconDefaults(settings)
 
-
+-- Group defaults
 TMW:MergeDefaultsTables(settings, TMW.Group_Defaults)
 
-
+-- Global defaults (global doesn't have the Enable_Colors setting)
 settings.TimerBar_EnableColors = nil
 TMW:MergeDefaultsTables(settings, TMW.Defaults.global)
-
-TMW:RegisterUpgrade(80006, {
-	profile = function(self, profile)
-		for _, v in pairs(profile.Colors) do
-			v.CBC = nil
-			v.CBS = nil
-			v.CBM = nil
-		end
-	end,
-})
 
 
 TimerBar:RegisterConfigPanel_XMLTemplate(52, "TellMeWhen_TimerBar_GroupColors")

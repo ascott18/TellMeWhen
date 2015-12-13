@@ -86,29 +86,11 @@ function IconType:OnNewInstance(type)
 	self.type = type
 	self.Icons = {}
 	self.UsedProcessors = {}
-	self.Colors = {}
 
 	self.ViewAllowances = {}
 	self.defaultAllowanceForViews = true
 	
 	self:InheritTable(self.class, "UsedAttributes")
-end
-
--- [INTERNAL] - Updates self.Colors to the current settings in TMW.db.profile.Colors
-function IconType:UpdateColors(dontSetupIcons)
-	self:AssertSelfIsInstance()
-	
-	for k, v in pairs(TMW.db.profile.Colors[self.type]) do
-		if v.Override then
-			self.Colors[k] = v
-		else
-			self.Colors[k] = TMW.db.profile.Colors.GLOBAL[k]
-		end
-	end
-	
-	if not dontSetupIcons then
-		self:SetupIcons()
-	end
 end
 
 --- Performs TMW.Classes.Icon:Setup() on all icons that use this icon type.
@@ -318,13 +300,6 @@ function IconType:Register(order)
 	
 	-- Listen for any new processors, too, and update when they are created.
 	TMW:RegisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", self, "UpdateUsedProcessors")
-	
-	-- Covers the case of creating a type after login
-	-- (mainly used while debugging). Calling UpdateColors here prevents 
-	-- errors when types are created without performing a full TMW:Update() immediately afterwords.
-	if TMW.InitializedDatabase then
-		self:UpdateColors(true)
-	end
 	
 	return self -- why not?
 end
