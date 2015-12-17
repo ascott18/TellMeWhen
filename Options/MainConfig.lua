@@ -41,6 +41,10 @@ TabGroup:SetTexts(L["MAIN"], L["TABGROUP_MAIN_DESC"])
 -- CHANGELOG
 -- ----------------------
 
+local MainTab = IE:RegisterTab("MAIN", "MAIN", "Main", 1)
+MainTab:SetTexts(L["UIPANEL_MAINOPT"], L["ADDONSETTINGS_DESC"])
+
+
 local ChangelogTab = IE:RegisterTab("MAIN", "CHANGELOG", "Changelog", 100)
 ChangelogTab:SetTexts(L["CHANGELOG"], L["CHANGELOG_DESC"])
 

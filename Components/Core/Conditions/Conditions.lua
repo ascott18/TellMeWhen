@@ -436,11 +436,15 @@ TMW:RegisterUpgrade(40080, {
 	end,
 })
 TMW:RegisterUpgrade(22010, {
-	icon = function(self, ics)
+	icon = function(self, ics, ...)
 		for k, condition in ipairs(ics.Conditions) do
-			if type(k) == "number" then
-				for k, v in pairs(condition) do
-					condition[k] = nil
+			local old = condition
+
+			-- Recreate the condition
+			ics.Conditions[k] = nil
+			condition = ics.Conditions[k]
+			for k, v in pairs(old) do
+				if k:find("Condition") then
 					condition[k:gsub("Condition", "")] = v
 				end
 			end

@@ -115,7 +115,7 @@
 		<Frames>
 			<Frame inherits="TellMeWhen_TimerBarColorsTemplate">
 				<Anchors>
-					<Anchor point="TOP" />
+					<Anchor point="TOP" y="-5"/>
 				</Anchors>
 			</Frame>
 		</Frames>

@@ -89,7 +89,7 @@ function Module:Entry_AddToList_1(f, spellID)
 
 		f.Name:SetText(name)
 
-		f.tooltipmethod = "SetSpellByID"
+		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
 		f.tooltiparg = spellID
 
 		f.insert = name

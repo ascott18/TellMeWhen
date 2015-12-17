@@ -53,6 +53,8 @@ racial_no_class_req = [
 max_retries = 3
 
 def try_scrape_url(url, regex, id, tries = 0):
+	print("getting " + str(id))
+
 	response = urllib.request.urlopen(url)
 
 	content = response.read().decode()
@@ -61,11 +63,13 @@ def try_scrape_url(url, regex, id, tries = 0):
 
 	if not match:
 		if tries < max_retries:
+			print("retrying " + str(id))
 			return try_scrape_url(url, regex, id, tries + 1)
 		else:
 			raise Exception("no match for " + str(id))
 
 	data = match.group(1)
+	data = re.sub(r"frommerge:1", r'"frommerge":1', data)
 	data = json.loads(data)
 
 	return data;
@@ -79,7 +83,8 @@ def scrape_class_spells(classID):
 	ids = []
 	for spell in data:
 		id = spell["id"]
-		if spell["cat"] in spell_cat_whitelist and id not in spell_id_blacklist:
+		# wowhead uses spellIds above 1 million for "unreleased spells".
+		if spell["cat"] in spell_cat_whitelist and id not in spell_id_blacklist and id < 1000000:
 			ids.append(id)
 
 	return ids
@@ -132,7 +137,7 @@ if __name__ == '__main__':
 	pool = multiprocessing.Pool(processes = num_classes)
 	results = pool.map(scrape_class_spells, range(1, num_classes + 1))
 	keyed_results = {k+1: v for k, v in enumerate(results)}
-
+	
 
 	results = pool.map(scrape_pet_spells, pet_classes)
 
@@ -151,4 +156,4 @@ if __name__ == '__main__':
 	output = re.sub(r"\n\t\t(.*?) = ", r'\1=', output)
 	open('CSC.lua', 'w').write(output)
 
-	print("complete")
+	print("complete. written to CSC.lua.")

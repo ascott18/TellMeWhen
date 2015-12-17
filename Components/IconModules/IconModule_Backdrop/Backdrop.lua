@@ -74,10 +74,9 @@ Backdrop:RegisterConfigPanel_XMLTemplate(53, "TellMeWhen_BackdropOptions_Group")
 	:SetColumnIndex(1)
 
 
--- TODO: this doesnt do anything
-Backdrop:RegisterConfigPanel_XMLTemplate(53, "TellMeWhen_BackdropOptions_Group")
+Backdrop:RegisterConfigPanel_XMLTemplate(53, "TellMeWhen_BackdropOptions_Global")
 	:SetPanelSet("main")
-	:SetColumnIndex(1)
+	:SetColumnIndex(2)
 
 
 

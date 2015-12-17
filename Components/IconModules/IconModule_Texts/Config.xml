@@ -217,7 +217,12 @@
 
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 					local layoutSettings, displaySettings = TMW.TEXT:GetCurrentLayoutAndDisplaySettings()
-					if not displaySettings or not layoutSettings or layoutSettings.NoEdit then
+					if
+						not displaySettings
+						or not layoutSettings
+						or layoutSettings.NoEdit
+						or self:GetID() > displaySettings.Anchors.n
+					then
 						self:Hide()
 					end
 				end)

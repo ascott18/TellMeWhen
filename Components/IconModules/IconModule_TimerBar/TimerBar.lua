@@ -59,10 +59,9 @@ TimerBar:RegisterConfigPanel_XMLTemplate(52, "TellMeWhen_TimerBar_GroupColors")
 	:SetColumnIndex(1)
 
 
--- TODO: this doesnt do anything
 TimerBar:RegisterConfigPanel_XMLTemplate(52, "TellMeWhen_TimerBar_GlobalColors")
 	:SetPanelSet("main")
-	:SetColumnIndex(1)
+	:SetColumnIndex(2)
 
 
 

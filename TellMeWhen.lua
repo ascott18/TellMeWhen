@@ -2483,10 +2483,8 @@ TMW:RegisterCallback("TMW_UPGRADE_PERFORMED", function(event, type, upgradeData,
 		end
 
 		-- delegate to groups
-		for gs, domain, groupID in TMW:InGroupSettings() do
-			if domain == type then
-				TMW:Upgrade("group", upgradeData, gs, domain, groupID)
-			end
+		for groupID, gs in pairs(TMW.db.global.Groups) do
+			TMW:Upgrade("group", upgradeData, gs, "global", groupID)
 		end
 	end
 end)
@@ -2494,10 +2492,8 @@ end)
 TMW:RegisterCallback("TMW_UPGRADE_PERFORMED", function(event, type, upgradeData, ...)
 	if type == "profile" then
 		-- delegate to groups
-		for gs, domain, groupID in TMW:InGroupSettings() do
-			if domain == type then
-				TMW:Upgrade("group", upgradeData, gs, domain, groupID)
-			end
+		for groupID, gs in pairs(TMW.db.profile.Groups) do
+			TMW:Upgrade("group", upgradeData, gs, "profile", groupID)
 		end
 	end
 end)

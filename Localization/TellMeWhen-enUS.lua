@@ -1292,11 +1292,14 @@ L["COLORPICKER_DESATURATE"] = "Desaturate"
 L["COLORPICKER_DESATURATE_DESC"] = "Desaturate the texture before applying the color, allowing you to recolor the texture instead of tinting it."
 
 L["COLORPICKER_SWATCH"] = "Color"
-L["COLORPICKER_ICON_UNCOLORED"] = "Normal"
-L["COLORPICKER_ICON_CURRENT"] = "Chosen"
-L["COLORPICKER_ICON_PREVIOUS"] = "Original"
+L["COLORPICKER_ICON"] = "Preview"
+
+L["COLORPICKER_STRING"] = "Hex String"
+L["COLORPICKER_STRING_DESC"] = "Get or set the (A)RGB hexadecimal representation of the current color."
 
 L["COLORPICKER_RECENT"] = "Recent Colors"
+L["COLORPICKER_RECENT_DESC"] = [[|cff7fffffClick|r to load this color.
+|cff7fffffRight-Click|r to remove from this list.]]
 
 
 -- -------------

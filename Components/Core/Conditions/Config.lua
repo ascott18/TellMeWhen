@@ -1073,6 +1073,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			end
 
 			local val = conditionSettings.Level
+			print(CndtGroup:GetID(), conditionSettings, val)
 			conditionData.formatter:SetFormattedText(CndtGroup.ValText, val)
 			CndtGroup.ValText:Show()
 		end

@@ -1056,26 +1056,22 @@
 
 						self.Background:Hide()
 
-						self.SEGMENTS = 6
+						self.NUM_SEGMENTS = 6
 
-						function self:MakeTexture(i, iMax)
+						self.textures = {}
+
+						for i = 1, self.NUM_SEGMENTS do
 							local tex = self:CreateTexture()
-							self[i] = tex
+							self.textures[i] = tex
 							tex:SetPoint("TOP", self.Background, "TOP", 0, 0)
 							tex:SetPoint("BOTTOM", self.Background, "BOTTOM", 0, 0)
 							tex:SetTexture(1, 1, 1)
-							tex:SetWidth(self:GetWidth()/self.SEGMENTS)
+							tex:SetWidth(self:GetWidth()/self.NUM_SEGMENTS)
 							if i > 1 then
-								tex:SetPoint("LEFT", self[i-1], "RIGHT", 0, 0)
+								tex:SetPoint("LEFT", self.textures[i-1], "RIGHT", 0, 0)
 							else
 								tex:SetPoint("LEFT")
 							end
-
-							return tex
-						end
-
-						for i = 1, self.SEGMENTS do
-							self:MakeTexture(i, self.SEGMENTS, self)
 						end
 					</OnLoad>
 				</Scripts>
@@ -1215,7 +1211,7 @@
 			<Frame parentKey="RecentColorFrame" >
 				<Size x="85"/>
 				<Anchors>
-					<Anchor point="TOP" y="-21"/>
+					<Anchor point="TOP" y="-20"/>
 					<Anchor point="LEFT" relativeKey="$parent.HueSlider" relativePoint="RIGHT" x="15"/>
 					<Anchor point="BOTTOM" y="10"/>
 				</Anchors>
@@ -1230,6 +1226,11 @@
 						</FontString>
 					</Layer>
 				</Layers>
+				<Scripts>
+					<OnLoad>
+						TMW:ConvertContainerToScrollFrame(self, false, -2, 5)
+					</OnLoad>
+				</Scripts>
 			</Frame>
 		</Frames>
 
@@ -1259,6 +1260,15 @@
 					</Anchors>
 				</FontString>
 			</Layer>
+
+			<Layer level="OVERLAY">
+				<FontString parentKey="iconLabel" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.iconTexture" />
+						<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.iconTexture" y="2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
 		</Layers>
 
 		<Frames>
@@ -1271,6 +1281,7 @@
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
+						self:SetTexts(TMW.L["COLORPICKER_STRING"], TMW.L["COLORPICKER_STRING_DESC"])
 						function self:SaveSetting()
 							local value = self:GetText()
 							if value and value ~= "" then
@@ -1305,6 +1316,8 @@
 	</Frame>
 
 
+	<!-- END TEMPLATES -->
+
 	<Frame name="TellMeWhen_ColorPicker" inherits="TellMeWhen_ColorPickerTemplate" hidden="true">
 		<Anchors>
 			<Anchor point="CENTER" />
@@ -1315,9 +1328,6 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
-
-
-	<!-- END TEMPLATES -->
 
 	<Frame name="TellMeWhen_GroupImportFlash" frameStrata="FULLSCREEN" parent="UIParent" hidden="true">
 		<Layers>
@@ -1773,6 +1783,8 @@
 		</Anchors>
 		<Scripts>
 			<OnLoad>
+				TMW:CInit(self, "Config_Frame")
+
 				local parent = self:GetParent()
 				parent.panelColumns = parent.panelColumns or {}
 				self.currentPanels = {}

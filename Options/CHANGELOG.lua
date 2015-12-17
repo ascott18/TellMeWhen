@@ -6,8 +6,10 @@ TMW.CHANGELOG = [==[
 ===v8.0.0===
 ====IMPORTANT: Breaking Changes====
 * The Primary/Secondary spec group settings are gone.
-
 * Each of the pairs of Opacity and Shown Icon Sorting methods have been merged.
+* You may need to reconfigure the spec and tree settings on all your groups.
+* Color configuration has been completely revamped.
+
 
 * The Update Order settings have been removed.
 ** Try replacing usages of the Expand sub-metas setting with Group Controller meta icons if you experience issues.

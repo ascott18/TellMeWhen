@@ -66,4 +66,71 @@
 	</Frame>
 
 
+	<Frame parentKey="Main" inherits="TellMeWhen_IE_PageTemplate">
+		<Frames>
+			<Frame parentKey="PanelsLeft" inherits="TellMeWhen_IE_PanelColumn">
+				<Anchors>
+					<Anchor point="LEFT" x="7"/>
+					<Anchor point="RIGHT" relativePoint="TOP" x="-6"/>
+				</Anchors>
+			</Frame>
+
+			<Frame parentKey="PanelsRight" inherits="TellMeWhen_IE_PanelColumn">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="TOP" x="5"/>
+					<Anchor point="RIGHT" x="-9"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad inherit="prepend">
+						self:CScriptAdd("SettingTableRequested", function()
+							return TMW.db.global
+						end)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<CheckButton parentKey="Locked" inherits="TellMeWhen_CheckTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-4"/>
+					<Anchor point="LEFT" relativeKey="$parent.PanelsRight" relativePoint="LEFT" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_LOCKUNLOCK"], TMW.L["UIPANEL_SUBTEXT2"])
+						self:SetSetting("Locked")
+
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+
+				self:CScriptAdd("SettingTableRequested", function(requester)
+					return TMW.db.profile
+				end)
+
+				self:CScriptAdd("ReloadRequested", function(requester)
+
+					local panelList = {}
+					for ComponentClass in pairs(TMW.C.GenericComponent.inheritedBy) do
+						for _, panelInfo in pairs(ComponentClass.ConfigPanels) do
+							if panelInfo.panelSet == "main" then
+								tinsert(panelList, panelInfo)
+							end
+						end		
+					end
+
+					TMW.tRemoveDuplicates(panelList)
+
+					TMW.IE:PositionPanels("Main", panelList)
+				end)
+
+			</OnLoad>
+		</Scripts>
+	</Frame>
 </Ui>

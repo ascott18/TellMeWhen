@@ -684,7 +684,7 @@ function IE:PositionPanels(parentPageName, panelList)
 			panel:Show()
 			panel:SetFrameLevel(IE_FL + 3)
 
-			-- Panel made be hidden in this function, so we check after calling
+			-- Panel may be hidden by calling :Setup(), so we check after calling
 			-- to see if the panel is still shown.
 			panel:Setup(panelInfo)
 
@@ -3015,9 +3015,10 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 	desaturate = false,
 	
 	OnNewInstance = function(self)
-		self.RecentColors = {}
+		self.RecentColorFrame.frames = {}
 
 		self.swatchLabel:SetText(L["COLORPICKER_SWATCH"])
+		self.iconLabel:SetText(L["COLORPICKER_ICON"])
 		self.RecentColorFrame.header:SetText(L["COLORPICKER_RECENT"])
 
 		self:CScriptAdd("SettingTableRequested", function() return self end)
@@ -3040,17 +3041,30 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 	end,
 
 	RECENT_COLOR_COLUMNS = 3,
-	RecentColor_OnClick = function(recentColorButton)
-		local self = recentColorButton:GetParent():GetParent()
+	RecentColor_OnClick = function(recentColorButton, button)
+		local self = recentColorButton:GetParent().ScrollFrame:GetParent()
 
 		-- This must be upvalued because it is about to get overwritten when we
 		-- add the current color as a recent color.
 		local string = recentColorButton.string
 
-		self:AddRecentColor(self:GetColorString())
-		self:AddRecentColor(string)
+		if button == "RightButton" then
+			local RecentColors = IE.db.global.RecentColors
 
-		self:SetColorString(string, false)
+			for i, v in ipairs(RecentColors) do
+				if v == string then
+					tremove(RecentColors, i)
+					break
+				end
+			end
+
+			self:UpdateRecentColors()
+		else
+			self:AddRecentColor(self:GetColorString())
+			self:AddRecentColor(string)
+
+			self:SetColorString(string, false)
+		end
 	end,
 
 	AddRecentColor = function(self, colorString)
@@ -3070,7 +3084,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		end
 
 		tinsert(RecentColors, 1, colorString)
-		if #RecentColors > self.RECENT_COLOR_COLUMNS * 7 then
+		if #RecentColors > self.RECENT_COLOR_COLUMNS * 14 then
 			tremove(RecentColors, #RecentColors)
 		end
 
@@ -3080,28 +3094,35 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 	UpdateRecentColors = function(self)
 		local padding = 5
 		for i, color in ipairs(IE.db.global.RecentColors) do
-			local f = self.RecentColorFrame[i]
+			local f = self.RecentColorFrame.frames[i]
 			if not f then
 				f = CreateFrame("Button", nil, self.RecentColorFrame, "TellMeWhen_ColorButtonTemplate")
 				f:SetScript("OnClick", self.RecentColor_OnClick)
+				f:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 				local dim = (self.RecentColorFrame:GetWidth() - padding*(1+self.RECENT_COLOR_COLUMNS)) / self.RECENT_COLOR_COLUMNS
 				f:SetSize(dim, dim)
-				self.RecentColorFrame[i] = f
+				self.RecentColorFrame.frames[i] = f
 				if i == 1 then
 					f:SetPoint("TOPLEFT")
 				elseif (i-1) % self.RECENT_COLOR_COLUMNS == 0 then
-					f:SetPoint("TOPLEFT", self.RecentColorFrame[i-self.RECENT_COLOR_COLUMNS], "BOTTOMLEFT", 0, -padding)
+					f:SetPoint("TOPLEFT", self.RecentColorFrame.frames[i-self.RECENT_COLOR_COLUMNS], "BOTTOMLEFT", 0, -padding)
 				else
-					f:SetPoint("LEFT", self.RecentColorFrame[i-1], "RIGHT", padding, 0)
+					f:SetPoint("LEFT", self.RecentColorFrame.frames[i-1], "RIGHT", padding, 0)
 				end
 			end
+			f:Show()
+			TMW:TT(f, color, "COLORPICKER_RECENT_DESC", 1, nil)
 			f.string = color
 			f.swatch:SetTexture(TMW:StringToRGBA(color))
+		end
+
+		for i = #IE.db.global.RecentColors, #self.RecentColorFrame.frames do
+			self.RecentColorFrame.frames[i]:Hide()
 		end
 	end,
 
 	LiveUpdate = function(self)
-		if not self.HueSlider[1] then
+		if not self.HueSlider.textures then
 			return
 		end
 
@@ -3119,9 +3140,9 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		local r,g,b=TMW:HSVToRGB(h, s, 0)
 		self.ValueSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, s, 1))
 
-		for i = 1, self.HueSlider.SEGMENTS do
-			local r,g,b=TMW:HSVToRGB((i-1)/self.HueSlider.SEGMENTS, s, v)
-			self.HueSlider[i]:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(i/self.HueSlider.SEGMENTS, s, v))
+		for i = 1, self.HueSlider.NUM_SEGMENTS do
+			local r,g,b=TMW:HSVToRGB((i-1)/self.HueSlider.NUM_SEGMENTS, s, v)
+			self.HueSlider.textures[i]:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(i/self.HueSlider.NUM_SEGMENTS, s, v))
 		end
 
 		local r,g,b=TMW:HSVToRGB(h, s, v)
@@ -3176,12 +3197,14 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		self.Desaturate:SetShown(hasDesaturate)
 
 		self.iconTexture:SetTexture(texture)
+		self.iconLabel:SetShown(not not texture)
 
 		self:SetColorString(value, true)
-		--self:AddRecentColor(value)
+		self:AddRecentColor(value)
 		self:UpdateRecentColors()
 
 		self:Show()
+		self:Raise()
 
 		local c = TMW:StringToCachedRGBATable(value)
 		self.swatchPrevious.swatch:SetTexture(c.r, c.g, c.b, c.a)
