@@ -913,13 +913,18 @@ L["UIPANEL_PERFORMANCE"] = "Performance"
 L["UIPANEL_UPDATEINTERVAL"] = "Update Interval"
 L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = [[Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc.
 
-Zero is as fast as possible. Lower values may have a slight impact on framerate for low-end computers.]]
+Zero is as fast as possible (every frame). Lower values may have a slight impact on framerate for low-end computers.]]
 L["UIPANEL_EFFTHRESHOLD"] = "Buff Efficiency Threshold"
-L["UIPANEL_EFFTHRESHOLD_DESC"] = [[Sets a threshold of the number of buffs/debuffs being checked by an icon.
+L["UIPANEL_EFFTHRESHOLD_DESC"] = [[Sets a threshold based on the number of buffs/debuffs configured to be checked by buff/debuff icons.
 
-When this threshold is surpassed, the icon will switch to a scanning method that is faster for high amounts of data.
+When this threshold is surpassed by an icon's configuration, two things will happen:
 
-Once the number of auras being checked exceeds this number, older auras will be prioritized instead of priority based on the order in which they were entered.]]
+|cff7fffff1)|r The icon will switch to a scanning method that is faster for high amounts of data (but slower for low amounts).
+
+|cff7fffff2)|r As a consequence of #1, scanning order will be based on the order of buffs/debuff as they are shown on unit frames, instead of priority based on the order in which they were entered in configuration.
+
+The default for this setting is 15. ]]
+
 L["UIPANEL_ICONSPACING"] = "Icon Spacing"
 L["UIPANEL_ICONSPACINGX"] = "Horizontal"
 L["UIPANEL_ICONSPACINGY"] = "Vertical"
@@ -1891,7 +1896,7 @@ L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"
 L["CONFIGPANEL_COMM_HEADER"] = "Communication"
 L["ALLOWCOMM"] = "Allow in-game sharing"
 L["ALLOWCOMM_DESC"] = "Allow other TellMeWhen users to send you data."
-L["ALLOWVERSIONWARN"] = "Notify of new version"
+L["ALLOWVERSIONWARN"] = "Notify of new versions"
 L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
 L["PLAYER_DESC"] = "The 'player' unit is you."
 

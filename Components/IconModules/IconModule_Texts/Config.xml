@@ -232,7 +232,6 @@
 
 
 
-
 	<Frame parentKey="TextLayouts" inherits="TellMeWhen_IE_PageTemplate">
 		<Frames>
 			<CheckButton parentKey="AddLayout" inherits="TellMeWhen_FlatFrame">
@@ -965,15 +964,6 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
-
-
-
-
-
-
-
-
-
 
 
 

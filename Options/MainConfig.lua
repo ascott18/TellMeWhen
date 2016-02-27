@@ -51,7 +51,8 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_Main_CommSettings"
 	})
 end):SetPanelSet("global")
 
-BaseConfig:RegisterConfigPanel_XMLTemplate(10, "TellMeWhen_Main_Media")
+BaseConfig:RegisterConfigPanel_XMLTemplate(30, "TellMeWhen_Main_Media")
+BaseConfig:RegisterConfigPanel_XMLTemplate(50, "TellMeWhen_Main_Efficiency")
 
 
 -- ----------------------

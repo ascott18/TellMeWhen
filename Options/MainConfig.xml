@@ -188,10 +188,11 @@
 
 
 	<Frame name="TellMeWhen_Main_Efficiency" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="34"/>
+		<Size y="45"/>
 		<Frames>
 			<Slider parentKey="Interval" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
+					<Anchor point="BOTTOM" y="7"/>
 					<Anchor point="LEFT" x="10"/>
 					<Anchor point="RIGHT" relativePoint="CENTER" x="-10" />
 				</Anchors>
@@ -210,6 +211,7 @@
 			</Slider>
 			<Slider parentKey="EffThreshold" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
+					<Anchor point="BOTTOM" y="7"/>
 					<Anchor point="RIGHT" x="-10" />
 					<Anchor point="LEFT" relativePoint="CENTER" x="10" />
 				</Anchors>
