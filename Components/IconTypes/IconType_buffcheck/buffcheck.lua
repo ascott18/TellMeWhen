@@ -34,8 +34,8 @@ Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
-local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
-local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
+local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_HIDE
+local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_SHOW
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("spell")

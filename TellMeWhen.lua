@@ -203,12 +203,13 @@ TMW.Defaults = {
 	global = {
 		HelpSettings = {
 		},
-		HasImported			= false,
-		VersionWarning		= true,
-		AllowCombatConfig	= false,
-		ShowGUIDs			= false,
+		HasImported       = false,
+		VersionWarning    = true,
+		ReceiveComm       = true,
+		AllowCombatConfig = false,
+		ShowGUIDs         = false,
 
-		NumGroups			=	0,
+		NumGroups         = 0,
 		-- Groups = {} -- this will be set to the profile group defaults in a second.
 	},
 	profile = {
@@ -219,14 +220,7 @@ TMW.Defaults = {
 		EffThreshold	=	15,
 		TextureName		= 	"Blizzard",
 		SoundChannel	=	"SFX",
-		ReceiveComm		=	true,
 		WarnInvalids	=	false,
-		--CheckOrder		=	-1,
-		--SUG_atBeginning	=	true,
-		ColorNames		=	true,
-		--AlwaysSubLinks	=	false,
-		ColorMSQ	 	= false,
-		OnlyMSQ		 	= false,
 
 		Colors = {
 			["**"] = {
@@ -1274,7 +1268,7 @@ function TMW:PLAYER_LOGIN()
 	--------------- Communications ---------------
 	-- Channel TMW is used for sharing data.
 	-- ReceiveComm is a setting that allows users to disable receiving shared data.
-	if TMW.db.profile.ReceiveComm then
+	if TMW.db.global.ReceiveComm then
 		TMW:RegisterComm("TMW")
 	end
 	
@@ -3284,7 +3278,7 @@ TMW:NewClass("LuaConfigPanelInfo", "ConfigPanelInfo"){
 
 function TMW:PLAYER_ENTERING_WORLD()
 	-- Don't send version broadcast messages in developer mode.
-	if TELLMEWHEN_VERSION_MINOR ~= "dev" then
+	if TELLMEWHEN_VERSION_MINOR ~= "dev" and TMW.db.global.VersionWarning then
 		local versionCommString = "M:" .. TELLMEWHEN_VERSION .. "^m:" .. TELLMEWHEN_VERSION_MINOR .. "^R:" .. TELLMEWHEN_VERSIONNUMBER .. "^"
 		
 		if IsInGuild() then
@@ -3327,7 +3321,7 @@ function TMW:OnCommReceived(prefix, text, channel, who)
 		TMW:Printf(L["NEWVERSION"], major .. minor)
 		
 	-- Handles data transmission (icons, groups, profiles, etc)
-	elseif prefix == "TMW" and TMW.db.profile.ReceiveComm then
+	elseif prefix == "TMW" and TMW.db.global.ReceiveComm then
 		TMW.Received = TMW.Received or {}
 		TMW.Received[text] = who or true
 

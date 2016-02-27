@@ -359,13 +359,14 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 
 CNDT.Env.TalentMap = {}
 function CNDT:PLAYER_TALENT_UPDATE()
+	wipe(Env.TalentMap)
 	for tier = 1, MAX_TALENT_TIERS do
 		for column = 1, NUM_TALENT_COLUMNS do
 			local id, name, _, selected = GetTalentInfo(tier, column, GetActiveSpecGroup())
 			local lower = name and strlowerCache[name]
 			if lower then
-				Env.TalentMap[lower] = selected and 1 or nil
-				Env.TalentMap[id] = selected and 1 or nil
+				Env.TalentMap[lower] = selected
+				Env.TalentMap[id] = selected
 			end
 		end
 	end

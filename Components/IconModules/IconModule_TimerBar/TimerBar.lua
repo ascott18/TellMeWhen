@@ -60,8 +60,7 @@ TimerBar:RegisterConfigPanel_XMLTemplate(52, "TellMeWhen_TimerBar_GroupColors")
 
 
 TimerBar:RegisterConfigPanel_XMLTemplate(52, "TellMeWhen_TimerBar_GlobalColors")
-	:SetPanelSet("main")
-	:SetColumnIndex(2)
+	:SetPanelSet("global")
 
 
 

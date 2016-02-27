@@ -436,6 +436,10 @@
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
+
+						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+							return tonumber(value) or 0
+						end)
 					</OnLoad>
 				</Scripts>
 
@@ -1217,13 +1221,6 @@
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
-						<FontString parentKey="header" inherits="GameFontHighlightSmall" justifyH="CENTER">
-							<Anchors>
-								<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
-								<Anchor point="LEFT" />
-								<Anchor point="RIGHT"/>
-							</Anchors>
-						</FontString>
 					</Layer>
 				</Layers>
 				<Scripts>
@@ -1266,6 +1263,14 @@
 					<Anchors>
 						<Anchor point="LEFT" relativeKey="$parent.iconTexture" />
 						<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.iconTexture" y="2"/>
+					</Anchors>
+				</FontString>
+
+				<FontString parentKey="recentHeader" inherits="GameFontHighlightSmall" justifyH="CENTER">
+					<Anchors>
+						<Anchor relativeKey="$parent.RecentColorFrame.ScrollFrame" point="BOTTOM" relativePoint="TOP" y="2"/>
+						<Anchor relativeKey="$parent.RecentColorFrame.ScrollFrame" point="LEFT" />
+						<Anchor relativeKey="$parent.RecentColorFrame.ScrollFrame" point="RIGHT"/>
 					</Anchors>
 				</FontString>
 			</Layer>

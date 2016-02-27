@@ -75,7 +75,7 @@ Backdrop:RegisterConfigPanel_XMLTemplate(53, "TellMeWhen_BackdropOptions_Group")
 
 
 Backdrop:RegisterConfigPanel_XMLTemplate(53, "TellMeWhen_BackdropOptions_Global")
-	:SetPanelSet("main")
+	:SetPanelSet("global")
 	:SetColumnIndex(2)
 
 

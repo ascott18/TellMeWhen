@@ -89,6 +89,49 @@
 				</Scripts>
 			</Frame>
 
+			<Frame parentKey="Profile" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="TOP" y="-8"/>
+					<Anchor point="LEFT" relativeKey="$parent.PanelsLeft" x="7" />
+					<Anchor point="RIGHT" relativeKey="$parent.PanelsLeft" x="-7" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						local title = function()
+							return TMW.Types[TMW.CI.ics.Type].name
+						end
+
+						local tooltip = function()
+							return TMW.Types[TMW.CI.ics.Type].desc
+						end
+
+						self:SetTooltip(title, tooltip)
+						self:SetFunction(TMW.IE.IconType_DropDown)
+
+						self:CScriptAdd("ReloadRequested", function()
+							local ics = TMW.CI.ics
+
+							if ics.Type == "" then
+								self:SetText(TMW.L["ICONMENU_TYPE"])
+							else
+								local Type = rawget(TMW.Types, ics.Type)
+								if Type then
+									self:SetText(Type.name)
+								else
+									self:SetText(ics.Type .. ": UNKNOWN TYPE")
+								end
+							end
+						end)
+
+						self.Button:HookScript("OnClick", function(self)
+							TMW.IE:SaveSettings()
+						end)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
 			<CheckButton parentKey="Locked" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-4"/>
@@ -114,12 +157,20 @@
 					return TMW.db.profile
 				end)
 
+				self:CScriptAdd("DescendantSettingSaved", function(requester)
+					TMW:ScheduleUpdate(0.1)
+				end)
+
 				self:CScriptAdd("ReloadRequested", function(requester)
 
 					local panelList = {}
 					for ComponentClass in pairs(TMW.C.GenericComponent.inheritedBy) do
 						for _, panelInfo in pairs(ComponentClass.ConfigPanels) do
-							if panelInfo.panelSet == "main" then
+							if panelInfo.panelSet == "profile" then
+								panelInfo:SetColumnIndex(1)
+								tinsert(panelList, panelInfo)
+							elseif panelInfo.panelSet == "global" then
+								panelInfo:SetColumnIndex(2)
 								tinsert(panelList, panelInfo)
 							end
 						end		
@@ -130,6 +181,139 @@
 					TMW.IE:PositionPanels("Main", panelList)
 				end)
 
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+
+
+	<Frame name="TellMeWhen_Main_Efficiency" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="34"/>
+		<Frames>
+			<Slider parentKey="Interval" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="LEFT" x="10"/>
+					<Anchor point="RIGHT" relativePoint="CENTER" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_UPDATEINTERVAL"], TMW.L["UIPANEL_TOOLTIP_UPDATEINTERVAL"])
+						self:SetSetting("Interval")
+
+						self:SetMinMaxValues(0, 0.5)
+						self:SetValueStep(0.01)
+						self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+			<Slider parentKey="EffThreshold" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="LEFT" relativePoint="CENTER" x="10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_EFFTHRESHOLD"], TMW.L["UIPANEL_EFFTHRESHOLD_DESC"])
+						self:SetSetting("EffThreshold")
+
+						self:SetMinMaxValues(1, 40)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["UIPANEL_PERFORMANCE"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Frame name="TellMeWhen_Main_Media" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="34"/>
+		<Frames>
+			<Frame parentKey="SoundChannel" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="LEFT" x="10"/>
+					<Anchor point="RIGHT" relativePoint="CENTER" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						self:SetTexts(TMW.L["SOUND_CHANNEL"], TMW.L["SOUND_CHANNEL_DESC"])
+
+						local values = {
+							SFX = SOUND_VOLUME,
+							Music = MUSIC_VOLUME,
+							Ambience = AMBIENCE_VOLUME,
+							Dialog = DIALOG_VOLUME,
+							Master = TMW.L["SOUND_CHANNEL_MASTER"],
+						}
+
+						self:SetSetting("SoundChannel")
+						self:SetEasyFunctions(
+							function()
+								return TMW:OrderedPairs(values, nil, true)
+							end,
+							function(info, id, name)
+								info.text = name
+								info.tooltipTitle = name
+								info.value = id
+							end
+						)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
+			<Frame parentKey="Texture" inherits="TMW_DropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="LEFT" relativePoint="CENTER" x="10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						self:SetWidth(200)
+						self:SetTexts(TMW.L["UIPANEL_BARTEXTURE"])
+						self.BUTTON_HEIGHT = 20
+
+						local values = {
+							SFX = SOUND_VOLUME,
+							Music = MUSIC_VOLUME,
+							Ambience = AMBIENCE_VOLUME,
+							Dialog = DIALOG_VOLUME,
+							Master = TMW.L["SOUND_CHANNEL_MASTER"],
+						}
+
+						local LSM = LibStub("LibSharedMedia-3.0")
+						self:SetSetting("TextureName")
+						self:SetEasyFunctions(
+							function()
+								return pairs(LSM:List("statusbar"))
+							end,
+							function(info, id, name)
+								info.text = name
+								info.tooltipTitle = name
+								info.texture = LSM:Fetch("statusbar", name)
+								info.value = name
+							end
+						)
+
+						self:SetScrollable(true)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["CONFIGPANEL_MEDIA_HEADER"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

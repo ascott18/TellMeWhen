@@ -27,6 +27,36 @@ local ColorMSQ, OnlyMSQ
 
 local Texture_Colored = TMW:NewClass("IconModule_Texture_Colored", "IconModule_Texture")
 
+TMW:RegisterDatabaseDefaults({
+	profile = {
+		ColorMSQ = false,
+		OnlyMSQ  = false,
+	}
+})
+
+if LMB then
+	Texture_Colored:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_Main_Texture_Colored", function(self)
+		self:SetTitle("Masque")
+		
+		self:BuildSimpleCheckSettingFrame({
+			numPerRow = 1,
+			function(check)
+				check:SetTexts(L["COLOR_MSQ_COLOR"], L["COLOR_MSQ_COLOR_DESC"])
+				check:SetSetting("ColorMSQ")
+			end,
+			function(check)
+				check:SetTexts(L["COLOR_MSQ_ONLY"], L["COLOR_MSQ_ONLY_DESC"])
+				check:SetSetting("OnlyMSQ")
+
+				check:CScriptAdd("ReloadRequested", function()
+					check:SetEnabled(TMW.db.profile.ColorMSQ)
+				end)
+			end,
+		})
+	end):SetPanelSet("profile")
+end
+
+
 function Texture_Colored:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
 	self:UPDATE(icon)

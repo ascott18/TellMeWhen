@@ -83,30 +83,26 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 	self:SetAutoAdjustHeight(true)
 end)
 
-TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
-	TMW.OptionsTable.args.main.args.checks.args.DrawEdge = {
-		name = TMW.L["UIPANEL_DRAWEDGE"],
-		desc = TMW.L["UIPANEL_DRAWEDGE_DESC"],
-		type = "toggle",
-		order = 60,
-	}
+CooldownSweep:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_TimerSettings_Main", function(self)
+	self:SetTitle(L["CONFIGPANEL_TIMER_HEADER"])
+	
+	self:BuildSimpleCheckSettingFrame({
+		numPerRow = 1,
+		function(check)
+			check:SetTexts(L["UIPANEL_DRAWEDGE"], L["UIPANEL_DRAWEDGE_DESC"])
+			check:SetSetting("DrawEdge")
+		end,
+		function(check)
+			check:SetTexts(L["UIPANEL_FORCEDISABLEBLIZZ"], L["UIPANEL_FORCEDISABLEBLIZZ_DESC"])
+			check:SetSetting("ForceNoBlizzCC")
+		end,
+		function(check)
+			check:SetTexts(L["UIPANEL_HIDEBLIZZCDBLING"], L["UIPANEL_HIDEBLIZZCDBLING_DESC"])
+			check:SetSetting("HideBlizzCDBling")
+		end,
+	})
+end):SetPanelSet("profile")
 
-	TMW.OptionsTable.args.main.args.checks.args.ForceNoBlizzCC = {
-		name = TMW.L["UIPANEL_FORCEDISABLEBLIZZ"],
-		desc = TMW.L["UIPANEL_FORCEDISABLEBLIZZ_DESC"],
-		width = "double",
-		type = "toggle",
-		order = 61,
-	}
-
-	TMW.OptionsTable.args.main.args.checks.args.HideBlizzCDBling = {
-		name = TMW.L["UIPANEL_HIDEBLIZZCDBLING"],
-		desc = TMW.L["UIPANEL_HIDEBLIZZCDBLING_DESC"],
-		width = "double",
-		type = "toggle",
-		order = 62,
-	}
-end)
 
 TMW:RegisterUpgrade(60436, {
 	icon = function(self, ics)

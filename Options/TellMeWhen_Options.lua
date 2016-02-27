@@ -3019,7 +3019,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 
 		self.swatchLabel:SetText(L["COLORPICKER_SWATCH"])
 		self.iconLabel:SetText(L["COLORPICKER_ICON"])
-		self.RecentColorFrame.header:SetText(L["COLORPICKER_RECENT"])
+		self.recentHeader:SetText(L["COLORPICKER_RECENT"])
 
 		self:CScriptAdd("SettingTableRequested", function() return self end)
 

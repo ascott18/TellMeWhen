@@ -297,6 +297,20 @@ function DD:AddButton(info, level)
 		button:SetText("");
 		icon:Hide();
 	end
+
+	if info.texture then
+		if not button.texture then
+			button.texture = button:CreateTexture(nil, "BACKGROUND")
+			button.texture:SetPoint("TOP", 0, -1)
+			button.texture:SetPoint("BOTTOM", 0, 1)
+			button.texture:SetPoint("RIGHT")
+			button.texture:SetPoint("LEFT", button:GetFontString(), "LEFT", -3, 0)
+		end
+		button.texture:Show()
+		button.texture:SetTexture(info.texture)
+	elseif button.texture then
+		button.texture:Hide()
+	end
 	
 	button.icon = nil;
 	button.iconInfo = nil;
@@ -334,7 +348,7 @@ function DD:AddButton(info, level)
 	
 	-- If not checkable move everything over to the left to fill in the gap where the check would be
 	local xPos = 0;
-	local yPos = -((button:GetID() - 1) * DD.BUTTON_HEIGHT) -- - DD.BORDER_HEIGHT;
+	local yPos = -((button:GetID() - 1) * self.BUTTON_HEIGHT) -- - DD.BORDER_HEIGHT;
 	local displayInfo = normalText;
 	
 	displayInfo:ClearAllPoints();
@@ -351,6 +365,7 @@ function DD:AddButton(info, level)
 		displayInfo:SetPoint("LEFT", button, "LEFT", 20, 0);
 	end
 	
+	button:SetHeight(self.BUTTON_HEIGHT)
 	button:SetPoint("TOPLEFT", button:GetParent(), "TOPLEFT", xPos, yPos);
 
 
@@ -754,6 +769,10 @@ function DD_Frame:SetText(text)
 	self.Text:SetText(text)
 end
 
+function DD_Frame:SetTexture(...)
+	self.Background:SetTexture(...)
+end
+
 function DD_Frame:GetText()
 	return self.Text:GetText()
 end
@@ -813,13 +832,14 @@ local function EasyFunction(self)
 	for k, v in self.dataGenerator() do
 		local info = self:CreateInfo()
 
+		info.arg1 = self
+		info.func = EasyFunction_OnClick
+
 		self.buttonGenerator(info, k, v)
 
 		if info.checked == nil then
 			info.checked = settings[self.setting] == info.value
 		end
-		info.arg1 = self
-		info.func = EasyFunction_OnClick
 
 		self:AddButton(info)
 	end
@@ -859,6 +879,9 @@ function DD_Frame:ReloadSetting()
 				if info.font then
 					local oldFont, size, flags = self.Text:GetFont()
 					self.Text:SetFont(info.font or oldFont, size, flags)
+				end
+				if info.texture then
+					self:SetTexture(info.texture)
 				end
 
 				return

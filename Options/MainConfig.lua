@@ -30,11 +30,28 @@ end)
 TabGroup:SetTexts(L["MAIN"], L["TABGROUP_MAIN_DESC"])
 
 
+local BaseConfig = TMW:NewClass("Main_BaseConfig", "GenericComponent")
+BaseConfig.DefaultPanelSet = "profile"
 
 
 
+BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_Main_CommSettings", function(self)
+	self:SetTitle(L["CONFIGPANEL_COMM_HEADER"])
+	
+	self:BuildSimpleCheckSettingFrame({
+		numPerRow = 1,
+		function(check)
+			check:SetTexts(L["ALLOWCOMM"], L["ALLOWCOMM_DESC"])
+			check:SetSetting("ReceiveComm")
+		end,
+		function(check)
+			check:SetTexts(L["ALLOWVERSIONWARN"])
+			check:SetSetting("VersionWarning")
+		end,
+	})
+end):SetPanelSet("global")
 
-
+BaseConfig:RegisterConfigPanel_XMLTemplate(10, "TellMeWhen_Main_Media")
 
 
 -- ----------------------

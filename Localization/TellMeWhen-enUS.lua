@@ -909,12 +909,17 @@ L["UIPANEL_BARIGNOREGCD"] = "Bars Ignore GCD"
 L["UIPANEL_BARIGNOREGCD_DESC"] = "If checked, cooldown bars will not change values if the cooldown triggered is a global cooldown"
 L["UIPANEL_CLOCKIGNOREGCD"] = "Timers Ignore GCD"
 L["UIPANEL_CLOCKIGNOREGCD_DESC"] = "If checked, timers and the cooldown clock will not trigger from a global cooldown"
+L["UIPANEL_PERFORMANCE"] = "Performance"
 L["UIPANEL_UPDATEINTERVAL"] = "Update Interval"
 L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = [[Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc.
 
 Zero is as fast as possible. Lower values may have a slight impact on framerate for low-end computers.]]
 L["UIPANEL_EFFTHRESHOLD"] = "Buff Efficiency Threshold"
-L["UIPANEL_EFFTHRESHOLD_DESC"] = "Sets the minimum number of buffs/debuffs to switch to a more efficient mode of checking them when there are a high number. Note that once the number of auras being checked exceeds this number, older auras will be prioritized instead of priority based on the order in which they were entered."
+L["UIPANEL_EFFTHRESHOLD_DESC"] = [[Sets a threshold of the number of buffs/debuffs being checked by an icon.
+
+When this threshold is surpassed, the icon will switch to a scanning method that is faster for high amounts of data.
+
+Once the number of auras being checked exceeds this number, older auras will be prioritized instead of priority based on the order in which they were entered.]]
 L["UIPANEL_ICONSPACING"] = "Icon Spacing"
 L["UIPANEL_ICONSPACINGX"] = "Horizontal"
 L["UIPANEL_ICONSPACINGY"] = "Vertical"
@@ -1012,13 +1017,6 @@ L["UIPANEL_GROUPSORT_fakehidden"] = "%s"
 L["UIPANEL_GROUPSORT_fakehidden_DESC"] = "Sorts the group by the state of the %q setting."
 L["UIPANEL_GROUPSORT_fakehidden_1"] = "Not always hidden first"
 L["UIPANEL_GROUPSORT_fakehidden_-1"] = "Always hidden first"
-
-
-
-L["COLORNAMES"] = "Class Colored Names"
-L["COLORNAMES_DESC"] = "Check in order to attempt to color the names of units in text displays and text icon event handlers."
-L["ALWAYSSUBLINKS"] = "Always Substitute Links"
-L["ALWAYSSUBLINKS_DESC"] = "By default, spell/item links will only be substituted into text event outputs. Check this setting to cause links to be substituted everywhere, including icon bind/label text."
 
 
 L["COLOR_DEFAULT"] = "*Global Colors*"
@@ -1890,6 +1888,7 @@ L["DT_INSERTGUID_GENERIC_DESC"] = [[If you would like one icon to display inform
 L["SENDSUCCESSFUL"] = "Sent successfully"
 L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this data into TellMeWhen using the %q button, located at the bottom of the icon editor."
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"
+L["CONFIGPANEL_COMM_HEADER"] = "Communication"
 L["ALLOWCOMM"] = "Allow in-game sharing"
 L["ALLOWCOMM_DESC"] = "Allow other TellMeWhen users to send you data."
 L["ALLOWVERSIONWARN"] = "Notify of new version"
@@ -2212,6 +2211,8 @@ If left unchecked, the icon will not process any more events after this event if
 Exeptions may apply, see individual event descriptions for details.]]
 
 
+
+L["CONFIGPANEL_MEDIA_HEADER"] = "Media"
 
 L["SOUND_CHANNEL"] = "Sound Channel"
 L["SOUND_CHANNEL_DESC"] = [[Choose the sound channel and volume setting that you would like to use to play sounds.

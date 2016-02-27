@@ -133,47 +133,7 @@ TMW.OptionsTable = {
 					end,
 					get = function(info) return TMW.db.global[info[#info]] end,
 				},
-				Locked = {
-					name = L["UIPANEL_LOCKUNLOCK"],
-					desc = L["UIPANEL_SUBTEXT2"],
-					type = "toggle",
-					order = 2,
-				},
-				TextureName = {
-					name = L["UIPANEL_BARTEXTURE"],
-					type = "select",
-					order = 3,
-					dialogControl = 'LSM30_Statusbar',
-					values = LSM:HashTable("statusbar"),
-				},
-				sliders = {
-					type = "group",
-					order = 9,
-					name = "",
-					guiInline = true,
-					dialogInline = true,
-					args = {
-						Interval = {
-							name = L["UIPANEL_UPDATEINTERVAL"],
-							desc = L["UIPANEL_TOOLTIP_UPDATEINTERVAL"],
-							type = "range",
-							order = 9,
-							min = 0,
-							max = 0.5,
-							step = 0.01,
-							bigStep = 0.01,
-						},
-						EffThreshold = {
-							name = L["UIPANEL_EFFTHRESHOLD"],
-							desc = L["UIPANEL_EFFTHRESHOLD_DESC"],
-							type = "range",
-							order = 10,
-							min = 0,
-							max = 40,
-							step = 1,
-						},
-					},
-				},
+
 				checks = {
 					type = "group",
 					order = 21,
@@ -181,52 +141,11 @@ TMW.OptionsTable = {
 					guiInline = true,
 					dialogInline = true,
 					args = {
-						DEBUG_ForceAutoUpdate = {
-							name = "DEBUG: FORCE AUTO UPDATES",
-							desc = "TMW v5 introduced new code that manages updates much more efficiently, only updating icons when they need to be updated. Check this to disable this feature in order to compare between the old method and the new method to see if there are any discrepancies that may be indicative of a bug.",
-							type = "toggle",
-							order = 1,
-							hidden = true,
-						},
-						--[[ColorNames = {
-							name = L["COLORNAMES"],
-							desc = L["COLORNAMES_DESC"],
-							type = "toggle",
-							order = 42,
-						},]]
-						--[[AlwaysSubLinks = {
-							-- unused
-							name = L["ALWAYSSUBLINKS"],
-							desc = L["ALWAYSSUBLINKS_DESC"],
-							type = "toggle",
-							order = 43,
-						},]]
-						--[[SUG_atBeginning = {
-							-- I really doubt that anyone uses this setting at all.
-							-- Going to hide it and see if anyone complains.
-							
-							name = L["SUG_ATBEGINING"],
-							desc = L["SUG_ATBEGINING_DESC"],
-							width = "double",
-							type = "toggle",
-							order = 44,
-						},]]
-						ReceiveComm = {
-							name = L["ALLOWCOMM"],
-							desc = L["ALLOWCOMM_DESC"],
-							type = "toggle",
-							order = 50,
-						},
 						WarnInvalids = {
 							name = L["UIPANEL_WARNINVALIDS"],
 							type = "toggle",
 							width = "double",
 							order = 51,
-						},
-						VersionWarning = {
-							name = L["ALLOWVERSIONWARN"],
-							type = "toggle",
-							order = 52,
 						},
 						ShowGUIDs = {
 							name = L["SHOWGUIDS_OPTION"],
@@ -234,45 +153,7 @@ TMW.OptionsTable = {
 							type = "toggle",
 							order = 52,
 						},
-
-						ColorMSQ = {
-							name = L["COLOR_MSQ_COLOR"],
-							desc = L["COLOR_MSQ_COLOR_DESC"],
-							type = "toggle",
-							order = 1,
-							hidden = function(info)
-								return not LMB
-							end,
-						},
-						OnlyMSQ = {
-							name = L["COLOR_MSQ_ONLY"],
-							desc = L["COLOR_MSQ_ONLY_DESC"],
-							type = "toggle",
-							width = "double",
-							order = 2,
-							hidden = function(info)
-								return not LMB
-							end,
-							disabled = function(info)
-								return not TMW.db.profile.ColorMSQ
-							end,
-						},
 					},
-				},
-
-				SoundChannel = {
-					name = L["SOUND_CHANNEL"],
-					desc = L["SOUND_CHANNEL_DESC"],
-					type = "select",
-					values = {
-						-- GLOBALS: SOUND_VOLUME, MUSIC_VOLUME, AMBIENCE_VOLUME
-						SFX = SOUND_VOLUME,
-						Music = MUSIC_VOLUME,
-						Ambience = AMBIENCE_VOLUME,
-						Dialog = DIALOG_VOLUME,
-						Master = L["SOUND_CHANNEL_MASTER"],
-					},
-					order = 29,
 				},
 				
 				deleteNonCurrentLocaleData = {
@@ -331,7 +212,4 @@ function TMW.ACEOPTIONS:CompileOptions()
 
 		TMW.OptionsTableInitialize = true
 	end
-	
-	TMW:Fire("TMW_CONFIG_MAIN_OPTIONS_COMPILE", TMW.OptionsTable)
-
 end
