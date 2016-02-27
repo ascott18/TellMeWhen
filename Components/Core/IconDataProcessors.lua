@@ -45,7 +45,6 @@ end
 -- STATE: "state"
 do
 	local Processor = TMW.Classes.IconDataProcessor:New("STATE", "state")
-	Processor.dontInherit = true
 	Processor:DeclareUpValue("stateDataNone", {Alpha = 0, Color = "ffffffff"})
 
 	-- Processor:CompileFunctionSegment(t) is default.
@@ -53,14 +52,16 @@ do
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: state
 		t[#t+1] = [[
-		if state ~= nil and attributes.stateData ~= state then
-			attributes.state = state
+		if state ~= nil then
+			local stateData = type(state) == 'table' and state or (state == 0 and stateDataNone or icon.States[state])
+			if attributes.state ~= stateData then
+				attributes.state = stateData
 
-			local stateData = state == 0 and stateDataNone or icon.States[state]
-			icon:SetInfo_INTERNAL("alpha", stateData.Alpha)
+				icon:SetInfo_INTERNAL("alpha", stateData.Alpha)
 
-			TMW:Fire(STATE.changedEvent, icon, state)
-			doFireIconUpdated = true
+				TMW:Fire(STATE.changedEvent, icon, stateData, state)
+				doFireIconUpdated = true
+			end
 		end
 		--]]
 	end

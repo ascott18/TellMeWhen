@@ -83,7 +83,7 @@ CooldownSweep:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_TimerSettings
 	self:SetAutoAdjustHeight(true)
 end)
 
-CooldownSweep:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_TimerSettings_Main", function(self)
+CooldownSweep:RegisterConfigPanel_ConstructorFunc(8, "TellMeWhen_TimerSettings_Main", function(self)
 	self:SetTitle(L["CONFIGPANEL_TIMER_HEADER"])
 	
 	self:BuildSimpleCheckSettingFrame({

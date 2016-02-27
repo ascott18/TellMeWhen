@@ -59,22 +59,19 @@ end
 
 function Texture_Colored:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
-	self:UPDATE(icon)
+	self:STATE(icon, icon.attributes.state)
 end
 
 local COLOR_UNLOCKED = {
 	Color = "ffffffff",
 	Gray = false,
 }
-function Texture_Colored:UPDATE(icon)
-	local state = icon.attributes.state
-
-
+function Texture_Colored:STATE(icon, stateData)
 	local color
-	if not TMW.Locked or state == 0 or not state then
+	if not TMW.Locked or not stateData then
 		color = "ffffffff"
-	elseif state then
-		color = icon.States[state].Color
+	else
+		color = stateData.Color
 	end
 	
 	local texture = self.texture
@@ -89,14 +86,15 @@ function Texture_Colored:UPDATE(icon)
 	texture:SetDesaturated(c.flags and c.flags.desaturate or false)
 	
 	if LMB and ColorMSQ then
-		local iconnt = icon.normaltex
-		if iconnt then
-			iconnt:SetVertexColor(c.r, c.g, c.b, 1)
+		-- This gets set by IconModule_IconContainer_Masque
+		local normaltex = icon.normaltex
+		if normaltex then
+			normaltex:SetVertexColor(c.r, c.g, c.b, 1)
 		end
 	end
 end
 
-Texture_Colored:SetDataListner("STATE", Texture_Colored.UPDATE)
+Texture_Colored:SetDataListner("STATE", Texture_Colored.STATE)
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()

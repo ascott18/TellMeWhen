@@ -97,16 +97,6 @@ function IconContainer_Masque:OnNewInstance_IconContainer_Masque(icon)
 	self.lmbGroup = GetLMBGroup(icon)
 end
 
-function IconContainer_Masque:SetupForIcon(icon)
-	if icon ~= self.icon then
-		local icnt = icon.normaltex
-		local iconnt = self.icon.normaltex
-		if icnt and iconnt then
-			iconnt:SetVertexColor(icnt:GetVertexColor())
-		end
-	end
-end
-
 
 function IconContainer_Masque:DoSkin()
 
