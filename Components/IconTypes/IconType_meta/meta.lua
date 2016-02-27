@@ -315,7 +315,11 @@ function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 		end
 
 	elseif iconToSet.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then
-		iconToSet:SetInfo("alpha; alpha_metaChild", 0, nil)
+		iconToSet:SetInfo("alpha; alpha_metaChild; start, duration",
+			0,
+			nil,
+			0, 0
+		)
 	end
 end
 
