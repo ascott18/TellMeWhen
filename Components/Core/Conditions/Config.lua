@@ -981,6 +981,17 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	end		
 end)
 
+-- Runes
+TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
+	if conditionData and conditionData.runesConfig then
+		CndtGroup.prevRowFrame = CndtGroup.Runes
+		CndtGroup.Runes:Show()
+		CndtGroup.Slider:SetWidth(217)
+	else
+		CndtGroup.Runes:Hide()
+	end
+end)
+
 -- Slider
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 	CndtGroup.LevelChecks:Hide()
@@ -1044,6 +1055,9 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 					frame:SetTexts(text, nil)
 					frame:SetLabel(text)
 				end
+				for i = frameID + 1, #LevelChecks.frames do
+					LevelChecks.frames[i]:Hide()
+				end
 
 				TMW.IE:DistributeCheckAnchorsEvenly(LevelChecks, unpack(LevelChecks.frames, 1, frameID))
 			else
@@ -1080,16 +1094,6 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 	else
 		CndtGroup.Slider:Hide()
-	end
-end)
-
--- Runes
-TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
-	if conditionData and conditionData.runesConfig then
-		CndtGroup.Runes:Show()
-		CndtGroup.Slider:SetWidth(217)
-	else
-		CndtGroup.Runes:Hide()
 	end
 end)
 

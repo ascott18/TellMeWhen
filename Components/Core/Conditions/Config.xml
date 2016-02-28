@@ -73,7 +73,7 @@
 					<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="4" y="-3"/>
-							<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="-1" />
+							<Anchor point="RIGHT" relativeKey="$parent.Button" relativePoint="LEFT" x="-8" />
 							<Anchor point="BOTTOM" x="0" y="3"/>
 						</Anchors>
 						<FontString inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
