@@ -40,11 +40,11 @@ local INCONTROL = 1
 local CONTROLLOST = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("state")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
-Type:UsesAttributes("locCategory")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("state")
+Type:UsesAttributes("locCategory")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

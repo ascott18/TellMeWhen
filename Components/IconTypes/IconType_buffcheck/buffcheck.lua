@@ -38,13 +38,13 @@ local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_HIDE
 local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_SHOW
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("state")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("reverse")
-Type:UsesAttributes("stack, stackText")
-Type:UsesAttributes("start, duration")
 Type:UsesAttributes("auraSourceUnit, auraSourceGUID")
-Type:UsesAttributes("state")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

@@ -31,9 +31,9 @@ local STATE_FAIL = TMW.CONST.STATE.DEFAULT_HIDE
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("alpha_conditionFailed")
-Type:UsesAttributes("start, duration")
 Type:UsesAttributes("state")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("alpha_conditionFailed")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

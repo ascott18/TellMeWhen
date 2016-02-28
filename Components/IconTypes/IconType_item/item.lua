@@ -37,10 +37,10 @@ local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE
 local STATE_UNUSABLE_NORANGE = TMW.CONST.STATE.DEFAULT_NORANGE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("spell")
-Type:UsesAttributes("stack, stackText")
-Type:UsesAttributes("start, duration")
 Type:UsesAttributes("state")
+Type:UsesAttributes("spell")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

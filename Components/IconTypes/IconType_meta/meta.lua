@@ -30,6 +30,7 @@ Type.canControlGroup = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("alpha_metaChild")
+Type:UsesAttributes("start, duration")
 Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
@@ -37,7 +38,6 @@ Type:UsesAttributes("texture")
 
 -- Not automatically generated. We need these declared so that the meta icon will
 -- still have things like stack and duration min/max settings.
-Type:UsesAttributes("start, duration")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("stack, stackText")

@@ -108,16 +108,6 @@ L["ICONMENU_CTRLGROUP_UNAVAILABLE_DESC"] = [[The current icon type does not have
 L["ICONMENU_CTRLGROUP_UNAVAILABLEID_DESC"] = [[Only the first icon in a group (icon ID 1) can be a group controller.]]
 
 
-
-L["UIPANEL_GROUP_QUICKSORT_DEFAULT"] = "Sort by ID"
-L["UIPANEL_GROUP_QUICKSORT_DEFAULT_DESC"] = "Quickly apply settings to sort the group by iconID. This is the default behavior."
-L["UIPANEL_GROUP_QUICKSORT_DURATION"] = "Sort by Duration"
-L["UIPANEL_GROUP_QUICKSORT_DURATION_DESC"] = "Quickly apply settings to sort the group by duration."
-L["UIPANEL_GROUP_QUICKSORT_SHOWN"] = "Shown icons first"
-L["UIPANEL_GROUP_QUICKSORT_SHOWN_DESC"] = "Quickly apply settings to place shown icons first."
-
-
-
 L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:
 
@@ -986,14 +976,6 @@ L["UIPANEL_GROUPSORT_ADD_DESC"] = "Add a new icon sorting priority to this group
 L["UIPANEL_GROUPSORT_ADD_NOMORE"] = "No Available Priorities"
 L["UIPANEL_GROUPSORT_PRESETS"] = "Choose Preset..."
 L["UIPANEL_GROUPSORT_PRESETS_DESC"] = "Choose from a list of preset sorting priorities to apply to this icon."
-L["UIPANEL_GROUPSORT_METHODNAME"] = "Icon Sort Priority %d"
-L["UIPANEL_GROUPSORT_METHODNAME_DESC"] = "This will be used as the number %d priority when sorting icons to be positioned within a group."
-L["UIPANEL_GROUPSORT_SORTASCENDING"] = "Low"
-L["UIPANEL_GROUPSORT_SORTASCENDING_DESC"] = "Check to sort this attribute from low to high values."
-L["UIPANEL_GROUPSORT_SORTDESCENDING"] = "High"
-L["UIPANEL_GROUPSORT_SORTDESCENDING_DESC"] = "Check to sort this attribute from high to low values."
-
-L["UIPANEL_GROUPSORT_METHODDISABLED_DESC"] = "|TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|tThis sort method is disabled because a method above it is sorting by Icon ID, so this method will never be reached and used in sorting."
 
 L["UIPANEL_GROUPSORT_id"] = "Icon ID"
 L["UIPANEL_GROUPSORT_id_DESC"] = "Sorts the group by the ID numbers of its icons."
@@ -1026,8 +1008,13 @@ L["UIPANEL_GROUPSORT_fakehidden_1"] = "Always hidden last"
 L["UIPANEL_GROUPSORT_fakehidden_-1"] = "Always hidden first"
 
 
-L["COLOR_DEFAULT"] = "*Global Colors*"
-L["COLOR_RESET_DESC"] = "Reset this setting to default values"
+L["UIPANEL_GROUP_QUICKSORT_DEFAULT"] = "Sort by ID"
+L["UIPANEL_GROUP_QUICKSORT_DURATION"] = "Sort by Duration"
+L["UIPANEL_GROUP_QUICKSORT_SHOWN"] = "Shown icons first"
+
+
+
+
 L["COLOR_MSQ_COLOR"] = "Color Masque border"
 L["COLOR_MSQ_COLOR_DESC"] = "Checking this will cause the border of a Masque skin (if the skin you are using has a border) to be colored."
 L["COLOR_MSQ_ONLY"] = "Only color Masque border"

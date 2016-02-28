@@ -36,9 +36,9 @@ local STATE_USABLE = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_UNUSABLE = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("start, duration")
-Type:UsesAttributes("spell")
 Type:UsesAttributes("state")
+Type:UsesAttributes("spell")
+Type:UsesAttributes("start, duration")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

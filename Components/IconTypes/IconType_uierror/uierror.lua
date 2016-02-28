@@ -30,9 +30,9 @@ local STATE_RUNNING = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_EXPIRED = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("spell")
 Type:UsesAttributes("state")
 Type:UsesAttributes("start, duration")
+Type:UsesAttributes("spell")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

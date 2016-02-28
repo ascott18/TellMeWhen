@@ -42,8 +42,8 @@ Type:SetAllowanceForView("icon", false)
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("value, maxValue, valueColor")
-Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("state")
+Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

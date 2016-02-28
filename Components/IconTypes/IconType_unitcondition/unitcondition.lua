@@ -31,8 +31,9 @@ local STATE_SUCCEED = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_FAIL = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("start, duration")
 Type:UsesAttributes("state")
+Type:UsesAttributes("start, duration")
+Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

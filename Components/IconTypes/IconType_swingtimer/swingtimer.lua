@@ -44,8 +44,8 @@ local STATE_NOTREADY = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_READY = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("start, duration")
 Type:UsesAttributes("state")
+Type:UsesAttributes("start, duration")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 

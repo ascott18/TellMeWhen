@@ -44,11 +44,11 @@ local STATE_UNUSABLE_NORANGE = TMW.CONST.STATE.DEFAULT_NORANGE
 local STATE_UNUSABLE_NOMANA  = TMW.CONST.STATE.DEFAULT_NOMANA
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
+Type:UsesAttributes("state")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("charges, maxCharges")
-Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
 Type:UsesAttributes("reverse")
+Type:UsesAttributes("start, duration")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
