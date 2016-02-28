@@ -373,8 +373,11 @@
 						self:SetTexts(TMW.L["PROFILES_NEW"], TMW.L["PROFILES_NEW_DESC"])
 					</OnLoad>
 					<OnEnterPressed>
-						TMW.db:SetProfile(self:GetText():trim())
-						self:SetText("")
+						local name = self:GetText():trim()
+						if name ~= "" then
+							TMW.db:SetProfile()
+							self:SetText("")
+						end
 					</OnEnterPressed>
 				</Scripts>
 			</EditBox>
