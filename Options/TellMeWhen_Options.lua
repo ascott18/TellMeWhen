@@ -392,14 +392,22 @@ function IE:GetBaseUpgrades()			-- upgrade functions
 end
 
 
-TMW:SetUpgradePerformedEvent("TMW_IE_UPGRADE_PERFORMED")
+IE:SetUpgradePerformedEvent("TMW_IE_UPGRADE_PERFORMED")
 
 TMW:RegisterCallback("TMW_IE_UPGRADE_PERFORMED", function(event, type, upgradeData, ...)
 	if type == "global" then
 		-- delegate to locale
 		if IE.db.sv.locale then
+			local currentLocale = GetLocale():lower()
+
 			for locale, ls in pairs(IE.db.sv.locale) do
-				IE:Upgrade("locale", upgradeData, ls, locale)
+				-- Delete non-current locale data. It doesn't contain anything useful.
+				if locale ~= currentLocale then
+					TMW.IE.db.sv.locale[locale] = nil
+					TMW:Printf("Deleted cache for locale %s", locale)
+				else
+					IE:Upgrade("locale", upgradeData, ls, locale)
+				end
 			end
 		end
 	end
@@ -534,7 +542,6 @@ end
 function IE:OnProfile(event, arg2, arg3)
 
 	if IE.Initialized then
-		TMW.ACEOPTIONS:CompileOptions() -- redo groups in the options
 
 		-- Reload the icon editor.
 		IE:LoadIcon(1, false)
@@ -764,8 +771,6 @@ end
 
 
 function IE:Load(isRefresh)
-	TMW.ACEOPTIONS:CompileOptions()
-
 	if not isRefresh then
 		IE:Show()
 	end
@@ -1313,16 +1318,17 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 			end
 		end
 	end,
-	AdjustHeight = function(self, bottomPadding)
+
+	CalculateAutoHeight = function(self, bottomPadding)
 		if not self:GetTop() then
-			return
+			return -1
 		end
 
 		local top = self:GetTop() * self:GetEffectiveScale()
 		local lowest = top
 
 		if not lowest or lowest < 0 then
-			return
+			return -1
 		end
 
 		local highest = -math.huge
@@ -1333,7 +1339,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 			if not child:GetBottom() then
 				-- If there are children that we can't get the edges of,
 				-- don't try to resize anything, because it will almost certainly be wrong.
-				return
+				return -1
 			end
 
 			if child:IsShown()
@@ -1382,7 +1388,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 
 		-- If we didn't find any children at all, stop.
 		if highest == -math.huge then
-			return
+			return -1
 		end
 
 		-- If a bottom padding isn't specified, calculate it using the same gap
@@ -1391,9 +1397,23 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 		bottomPadding = max(bottomPadding, 0)
 
 		local height = (top - lowest + bottomPadding) / self:GetEffectiveScale()
-		local height = max(self.minAdjustHeight or 1, height)
+		return max(self.minAdjustHeight or 1, height)
+	end,
+
+	AdjustHeight = function(self, bottomPadding)
+		local height = self:CalculateAutoHeight(bottomPadding)
+
+		if height == -1 then return end
 
 		self:SetHeight(height)
+	end,
+
+	AdjustHeightAnimated = function(self, bottomPadding, duration)
+		local height = self:CalculateAutoHeight(bottomPadding)
+
+		if height == -1 then return end
+
+		TMW:AnimateHeightChange(self, height, duration or 0.1)
 	end,
 
 
@@ -2654,7 +2674,7 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 	OnNewInstance_Slider_Alpha = function(self)
 		self:SetMinMaxValues(0, 1)
 		self:SetValueStep(0.01)
-		self:SetWheelStep(0.1)
+		-- self:SetWheelStep(0.1)
 
 		self:SetTextFormatter(self.Formatter)
 
@@ -3560,9 +3580,6 @@ function TMW:Import(SettingsItem, ...)
 	end
 
 	TMW:Fire("TMW_IMPORT_POST", SettingsItem, ...)
-	
-	TMW.ACEOPTIONS:CompileOptions()
-	TMW.ACEOPTIONS:NotifyChanges()
 end
 
 function TMW:ImportPendingConfirmation(SettingsItem, luaDetections, callArgsAfterSuccess)
@@ -3594,13 +3611,13 @@ function TMW:DeserializeDatum(string)
 
 	if spaceControl then
 		if spaceControl:find("`|") then
-			-- EVERYTHING is fucked up. try really hard to salvage it. It probably won't be completely successful
+			-- EVERYTHING is broken. try really hard to salvage it. It probably won't be completely successful
 			return TMW:DeserializeDatum(string:gsub("`", "~`"):gsub("~`|", "~`~|"))
 		elseif spaceControl:find("`") then
-			-- if spaces have become corrupt, then reformat them and... re-deserialize (lol)
+			-- if spaces have become corrupt, then reformat them and... re-deserialize
 			return TMW:DeserializeDatum(string:gsub("`", "~`"))
 		elseif spaceControl:find("~|") then
-			-- if pipe characters have been screwed up by blizzard's cute little method of escaping things combined with AS-3.0's cute way of escaping things, try to fix them.
+			-- if pipe characters have been screwed up by blizzard's method of escaping things combined with AS-3.0's way of escaping things, try to fix them.
 			return TMW:DeserializeDatum(string:gsub("~||", "~|"))
 		end
 	end

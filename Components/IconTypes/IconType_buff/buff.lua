@@ -611,7 +611,7 @@ function Type:Setup(icon)
 	-- Sorting is only handled if this value is true.
 	-- EffThreshold is a value that determines if we will switch to iterating by index instead of
 	-- iterating by spell if we are checking a large number of spells.
-	if icon.DurationSort or icon.StackSort or #icon.Spells.Array > TMW.db.profile.EffThreshold then
+	if icon.DurationSort or icon.StackSort or #icon.Spells.Array > TMW.db.global.EffThreshold then
 		icon.buffdebuff_iterateByAuraIndex = true
 	end
 

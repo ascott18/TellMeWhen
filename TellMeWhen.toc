@@ -22,7 +22,7 @@
 # The per character settings are the old settings, but we still need them to upgrade to the new ones. If they aren't defined, then they will be deleted immediately
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB
-## X-Embeds: LibStub, Ace3, AceGUI-3.0-SharedMediaWidgets, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0
+## X-Embeds: LibStub, Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0
 ## X-Category: Combat
 
 #@no-lib-strip@

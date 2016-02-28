@@ -1351,7 +1351,36 @@ TMW.CompareFuncs = {
 	[">"] = function(a, b) return a > b end,
 }
 
+local animator = CreateFrame("Frame")
+animator.frames = {}
+animator.OnUpdate = function()
+	for f in pairs(animator.frames) do
+		if TMW.time - f.__animateHeight_startTime > f.__animateHeight_duration then
+			animator.frames[f] = nil
+			f:SetHeight(f.__animateHeight_end)
+		else
+			local pct = (TMW.time - f.__animateHeight_startTime)/f.__animateHeight_duration
+			
+			f:SetHeight((pct*f.__animateHeight_delta)+f.__animateHeight_start)
+		end
+	end
 
+	if not next(animator.frames) then
+		animator:SetScript("OnUpdate", nil)
+	end
+end
+
+function TMW:AnimateHeightChange(f, endHeight, duration)
+	f.__animateHeight_start = f:GetHeight()
+	f.__animateHeight_end = endHeight
+	f.__animateHeight_delta = f.__animateHeight_end - f.__animateHeight_start
+	f.__animateHeight_startTime = TMW.time
+	f.__animateHeight_duration = duration
+
+	animator.frames[f] = true
+
+	animator:SetScript("OnUpdate", animator.OnUpdate)
+end
 
 
 

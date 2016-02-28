@@ -26,15 +26,22 @@ local function LoadIcon(icon)
 	-- or if this is the first time it is being shown (although this case doesn't matter),
 	-- go directly to the main icon tab.
 
+	-- Also, if the icon was already loaded, take them at least to the icon tab group,
+	-- so if the user sits there spam loading the icon when they're on the groups tab
+	-- they will get to the icon options that they so depserately want.
+
 	-- This should help ease some users' frustration when TMW can't read their minds about what tab they want.
 	-- It should also help people who are confused about what to do 
 	local wasShown = TMW.IE:IsShown()
+	local wasLoaded = TMW.CI.icon == icon
 
 	TMW.IE:LoadIcon(nil, icon)
 	TMW.IE:LoadGroup(nil, icon.group)
 	
 	if not wasShown then
 		TMW.IE.TabGroups.ICON.MAIN:Click()
+	elseif wasLoaded then
+		TMW.IE.TabGroups.ICON:Click()
 	end
 end
 

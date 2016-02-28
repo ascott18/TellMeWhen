@@ -45,7 +45,7 @@ if not TEXT then return end
 -- Layout Configuration
 -------------------------------
 
-local Tab = IE:RegisterTab("MAIN", "TEXTLAYOUTS", "TextLayouts", 100)
+local Tab = IE:RegisterTab("MAIN", "TEXTLAYOUTS", "TextLayouts", 90)
 Tab:SetTexts(L["TEXTLAYOUTS"], L["TEXTLAYOUTS_DESC"])
 TEXT.LayoutTab = Tab
 
@@ -230,7 +230,8 @@ TMW:NewClass("Config_TextLayout_ListItem", "Config_Frame") {
 		if numShown > 0 then
 			bottomPadding = 10
 		end
-		self:AdjustHeight(bottomPadding)
+
+		self:AdjustHeightAnimated(bottomPadding, 0.1)
 	end,
 
 	LayoutOnClick = function(Layout)

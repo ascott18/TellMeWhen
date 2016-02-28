@@ -35,6 +35,29 @@ BaseConfig.DefaultPanelSet = "profile"
 
 
 
+BaseConfig:RegisterConfigPanel_ConstructorFunc(2, "TellMeWhen_Main_General", function(self)
+	self:SetTitle(GENERAL)
+	
+	self:BuildSimpleCheckSettingFrame({
+		numPerRow = 1,
+		function(check)
+			check:SetTexts(L["UIPANEL_COMBATCONFIG"], L["UIPANEL_COMBATCONFIG_DESC"])
+			check:SetSetting("AllowCombatConfig")
+			check:CScriptAdd("SettingTableRequested", function()
+				return TMW.db.global
+			end)
+		end,
+		function(check)
+			check:SetTexts(L["UIPANEL_WARNINVALIDS"])
+			check:SetSetting("WarnInvalids")
+		end,
+		function(check)
+			check:SetTexts(L["SHOWGUIDS_OPTION"], L["SHOWGUIDS_OPTION_DESC"])
+			check:SetSetting("ShowGUIDs")
+		end,
+	})
+end)
+
 BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_Main_CommSettings", function(self)
 	self:SetTitle(L["CONFIGPANEL_COMM_HEADER"])
 	
@@ -52,7 +75,8 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_Main_CommSettings"
 end):SetPanelSet("global")
 
 BaseConfig:RegisterConfigPanel_XMLTemplate(30, "TellMeWhen_Main_Media")
-BaseConfig:RegisterConfigPanel_XMLTemplate(50, "TellMeWhen_Main_Efficiency")
+BaseConfig:RegisterConfigPanel_XMLTemplate(50, "TellMeWhen_Main_Efficiency"):SetPanelSet("global")
+BaseConfig:RegisterConfigPanel_XMLTemplate(1, "TellMeWhen_Main_Profiles")
 
 
 -- ----------------------

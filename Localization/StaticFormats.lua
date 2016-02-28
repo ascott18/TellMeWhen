@@ -37,6 +37,8 @@ L["ICONMENU_SHOWTTTEXT_FIRST_DESC"]     = L["ICONMENU_SHOWTTTEXT_FIRST_DESC"]   
 L["ICONMENU_ICD_DESC"]                  = L["ICONMENU_ICD_DESC"]                    :format(L["ICONMENU_ICDTYPE"])
 L["MESSAGERECIEVE"]                     = L["MESSAGERECIEVE"]                       :format("%s", L["IMPORT_EXPORT"]) -- keep the first "%s" as "%s"
 L["TEXTLAYOUTS_NOEDIT_DESC"]            = L["TEXTLAYOUTS_NOEDIT_DESC"]              :format(L["IMPORT_EXPORT"])
+L["PROFILES_COPY_DESC"]                 = L["PROFILES_COPY_DESC"]                   :format(L["IMPORT_FROMBACKUP"], L["IMPORT_EXPORT"])
+L["PROFILES_DELETE_DESC"]               = L["PROFILES_DELETE_DESC"]                 :format(L["IMPORT_FROMBACKUP"], L["IMPORT_EXPORT"])
 
 
 L["ICONMENU_UNIT_DESC"]                 = L["ICONMENU_UNIT_DESC"]                   :format(pname)

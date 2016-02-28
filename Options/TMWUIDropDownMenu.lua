@@ -824,20 +824,15 @@ local function EasyFunction_OnClick(button, dropdown)
 	dropdown:OnSettingSaved()
 end
 local function EasyFunction(self)
-	local settings = self:GetSettingTable()
-	if not settings or not self.setting then
-		error("couldn't get setting or settings table for easy function dropdown " .. (self:GetParentKey() or self:GetName() or "???"))
-	end
-
 	for k, v in self.dataGenerator() do
 		local info = self:CreateInfo()
 
 		info.arg1 = self
-		info.func = EasyFunction_OnClick
+		info.func = self.clickFunction or EasyFunction_OnClick
 
 		self.buttonGenerator(info, k, v)
 
-		if info.checked == nil then
+		if info.checked == nil and settings and self.setting ~= nil then
 			info.checked = settings[self.setting] == info.value
 		end
 
@@ -849,9 +844,10 @@ function DD_Frame:SetEasyTitlePrepend(easyTitlePrepend)
 	self.easyTitlePrepend = easyTitlePrepend
 end
 
-function DD_Frame:SetEasyFunctions(dataGenerator, buttonGenerator)
+function DD_Frame:SetEasyFunctions(dataGenerator, buttonGenerator, clickFunction)
 	self.dataGenerator = dataGenerator
 	self.buttonGenerator = buttonGenerator
+	self.clickFunction = clickFunction
 
 	self:SetFunction(EasyFunction)
 end

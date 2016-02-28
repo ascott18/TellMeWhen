@@ -219,6 +219,11 @@ do
 					return a*order < b*order
 				end
 			end)
+
+			IconPosition_Sortable:RegisterIconSortPreset(L["UIPANEL_GROUP_QUICKSORT_SHOWN"], {
+				{ Method = "shown", Order = -1 },
+				{ Method = "id", Order = 1 }
+			})
 		end
 	end)
 

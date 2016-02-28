@@ -80,8 +80,6 @@ TMW:NewClass("GroupModule_Resizer", "GroupModule", "Resizer_Generic"){
 		GroupModule_GroupPosition:UpdatePositionAfterMovement()
 		
 		group:Setup()
-		
-		TMW.ACEOPTIONS:NotifyChanges()
 	end,
 
 	SizeUpdate_RightButton = function(resizeButton)

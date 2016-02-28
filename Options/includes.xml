@@ -1,25 +1,16 @@
 ﻿<Ui>
 
 <!--@no-lib-strip@--> 
-<Include file="..\Lib\AceHook-3.0\AceHook-3.0.xml"/>
-<Include file="..\Lib\AceGUI-3.0\AceGUI-3.0.xml"/>
-<Include file="..\Lib\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
-<Include file="..\Lib\AceConfig-3.0\AceConfig-3.0.xml"/>
-<Include file="..\Lib\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
 <!--@end-no-lib-strip@-->
 
 <Script file="FAIAP.lua"/>
 
-
-
-<Script file="widget-importexport.lua"/>
 
 <Script file="CHANGELOG.lua"/>
 
 
 <Script file="TellMeWhen_Options.lua"/>
 <Script file="ImportExport.lua"/>
-<Script file="AceOptions.lua"/>
 
 <Script file="TMWUIDropDownMenu.lua"/>
 <Include file="TMWUIDropDownMenuTemplates.xml"/>

@@ -458,9 +458,6 @@ function TMW:Group_Add(domain, view)
 
 	local group = TMW[domain][groupID]
 
-	TMW.ACEOPTIONS:CompileOptions()
-	TMW.ACEOPTIONS:NotifyChanges()
-
 	return group
 end
 

@@ -110,9 +110,11 @@ L["ICONMENU_CTRLGROUP_UNAVAILABLEID_DESC"] = [[Only the first icon in a group (i
 
 
 L["UIPANEL_GROUP_QUICKSORT_DEFAULT"] = "Sort by ID"
-L["UIPANEL_GROUP_QUICKSORT_DEFAULT_DESC"] = "Quickly apply settings to sort the group by iconID. This is the default group behavior."
+L["UIPANEL_GROUP_QUICKSORT_DEFAULT_DESC"] = "Quickly apply settings to sort the group by iconID. This is the default behavior."
 L["UIPANEL_GROUP_QUICKSORT_DURATION"] = "Sort by Duration"
 L["UIPANEL_GROUP_QUICKSORT_DURATION_DESC"] = "Quickly apply settings to sort the group by duration."
+L["UIPANEL_GROUP_QUICKSORT_SHOWN"] = "Shown icons first"
+L["UIPANEL_GROUP_QUICKSORT_SHOWN_DESC"] = "Quickly apply settings to place shown icons first."
 
 
 
@@ -1020,7 +1022,7 @@ L["UIPANEL_GROUPSORT_stacks_-1"] = "High stacks first"
 
 L["UIPANEL_GROUPSORT_fakehidden"] = "%s"
 L["UIPANEL_GROUPSORT_fakehidden_DESC"] = "Sorts the group by the state of the %q setting."
-L["UIPANEL_GROUPSORT_fakehidden_1"] = "Not always hidden first"
+L["UIPANEL_GROUPSORT_fakehidden_1"] = "Always hidden last"
 L["UIPANEL_GROUPSORT_fakehidden_-1"] = "Always hidden first"
 
 
@@ -1779,6 +1781,29 @@ L["MAKENEWGROUP_PROFILE"] = "|cff59ff59Create|r New Profile Group"
 L["MAKENEWGROUP_GLOBAL"] = "|cff59ff59Create|r New |cff00c300Global|r Group"
 
 
+
+L["PROFILES_SET"] = "Change Profile..."
+L["PROFILES_SET_LABEL"] = "Current Profile"
+L["PROFILES_SET_DESC"] = "Select another profile to switch to."
+
+L["PROFILES_NEW"] = "New Profile"
+L["PROFILES_NEW_DESC"] = "Enter the name of a new profile, and press enter to create it."
+L["PROFILES_COPY"] = "Copy a Profile..."
+L["PROFILES_COPY_DESC"] = [[Select another profile to copy from. The current profile will be overwritten by the chosen profile.
+
+You can undo this action up until the next time you log out or reload by using the %q option in the %q menu below.]]
+L["PROFILES_COPY_CONFIRM"] = "Copy Profile"
+L["PROFILES_COPY_CONFIRM_DESC"] = "The profile %q will be overwritten by a copy of the profile %q."
+L["PROFILES_DELETE"] = "Delete a Profile..."
+L["PROFILES_DELETE_DESC"] = [[Select a profile to be deleted.
+
+You can undo this action up until the next time you log out or reload by using the %q option in the %q menu below.]]
+L["PROFILES_DELETE_CONFIRM"] = "Delete Profile"
+L["PROFILES_DELETE_CONFIRM_DESC"] = "The profile %q will be deleted."
+
+
+
+
 L["TABGROUP_ICON_DESC"] = "Configure TellMeWhen Icons."
 L["TABGROUP_GROUP_DESC"] = "Configure TellMeWhen Groups."
 L["TABGROUP_MAIN_DESC"] = "Configure general TellMeWhen settings."
@@ -1789,7 +1814,8 @@ L["CLICK_TO_EDIT"] = [[|cff7fffffClick|r to edit.]]
 L["GROUPSELECT_TOOLTIP"] = [[|cff7fffffClick|r to edit.
 
 |cff7fffffClick-and-drag|r to reorder or change domain.]]
-L["GROUP_UNAVAILABLE"] = "This group cannot be shown due to its overly-restrictive spec/role settings."
+
+L["GROUP_UNAVAILABLE"] = "|TInterface/PaperDollInfoFrame/UI-GearManager-LeaveItem-Transparent:20|t This group cannot be shown due to its overly-restrictive spec/role settings."
 
 
 --[=[L["CNDT_SLIDER_DESC_BASE"] = [[|cff7fffffMousewheel|r to adjust.

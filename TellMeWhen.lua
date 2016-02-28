@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80011 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80012 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80001 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -208,6 +208,8 @@ TMW.Defaults = {
 		ReceiveComm       = true,
 		AllowCombatConfig = false,
 		ShowGUIDs         = false,
+		Interval          = UPD_INTV,
+		EffThreshold      = 15,
 
 		NumGroups         = 0,
 		-- Groups = {} -- this will be set to the profile group defaults in a second.
@@ -216,8 +218,6 @@ TMW.Defaults = {
 	--	Version			= 	TELLMEWHEN_VERSIONNUMBER,  -- DO NOT DEFINE VERSION AS A DEFAULT, OTHERWISE WE CANT TRACK IF A USER HAS AN OLD VERSION BECAUSE IT WILL ALWAYS DEFAULT TO THE LATEST
 		Locked			= 	false,
 		NumGroups		=	1,
-		Interval		=	UPD_INTV,
-		EffThreshold	=	15,
 		TextureName		= 	"Blizzard",
 		SoundChannel	=	"SFX",
 		WarnInvalids	=	false,
@@ -1651,11 +1651,23 @@ TMW.C.TMW:Inherit("Core_Upgrades")
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 
+		[80012] = {
+			global = function(self, profile)
+				TMW.db.global.Interval = TMW.db.profile.Interval or TMW.db.global.Interval
+				TMW.db.global.EffThreshold = TMW.db.profile.EffThreshold or TMW.db.global.EffThreshold
+			end,
+			profile = function(self, profile)
+				TMW.db.profile.Interval = nil
+				TMW.db.profile.EffThreshold = nil
+			end,
+		},
+
 		[80011] = {
 			profile = function(self, profile)
 				profile.Colors = nil
 			end,
 		},
+
 		[80010] = {
 			convertColor = function(self, ics, state, oldColorKey)
 				ics.States[state].Alpha = ics.States[TMW.CONST.STATE.DEFAULT_HIDE].Alpha
@@ -2746,7 +2758,7 @@ function TMW:UpdateNormally()
 	
 	-- Add a very small amount so that we don't call the same icon multiple times
 	-- in the same frame if the interval has been set 0.
-	UPD_INTV = TMW.db.profile.Interval + 0.001
+	UPD_INTV = TMW.db.global.Interval + 0.001
 	TMW.UPD_INTV = UPD_INTV
 	
 	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
@@ -3216,7 +3228,6 @@ function TMW:LoadOptions(recursed)
 			TMW:Error(err) -- non breaking error
 		end
 	else
-		TMW.ACEOPTIONS:CompileOptions()
 		collectgarbage()
 	end
 end
