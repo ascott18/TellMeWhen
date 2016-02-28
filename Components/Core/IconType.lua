@@ -505,7 +505,6 @@ IconType:RegisterIconEvent(100, "OnEventsRestored", {
 	desc = L["SOUND_EVENT_ONEVENTSRESTORED_DESC"],
 })
 
-IconType:UsesAttributes("alpha")
 IconType:UsesAttributes("alphaOverride")
 IconType:UsesAttributes("realAlpha") -- this is implied by the mere existance of IconAlphaManager
 IconType:UsesAttributes("conditionFailed")

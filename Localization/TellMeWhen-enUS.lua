@@ -145,24 +145,9 @@ L["ERROR_ANCHOR_CYCLICALDEPS"] = "%s was trying to anchor to %s, but the positio
 L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options' to access this option)."
 L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options' to access this option)."
 
-L["ERROR_NOTLOADED_ERROR"] = "TellMeWhen has failed to load! Are you missing a required library?"
 L["ERROR_NOTINITIALIZED_NO_LOAD"] = "TellMeWhen_Options cannot be loaded if TellMeWhen failed to initialize!"
 L["ERROR_NOTINITIALIZED_NO_ACTION"] = "TellMeWhen cannot perform that action if the addon failed to initialize!"
 L["ERROR_NOTINITIALIZED_OPT_NO_ACTION"] = "TellMeWhen_Options cannot perform that action if the addon failed to initialize!"
-L["ERROR_NOOPTIONSLOAD_INCOMBAT"] = [[Cannot load TellMeWhen's options while in combat if the %q option isn't enabled.
-
-They will automatically be loaded when you leave combat if this window is still open.]]
-L["ERROR_NOTINITIALIZED_INTERFACEPANEL_EXPLANATION"] = [[It looks like TellMeWhen or TellMeWhen_Options has failed to initialize.
-
-Because of this, TellMeWhen may not be able to function, and you will not be able to configure any of its settings.
-
-If you saw a message that said that a complete restart of WoW is required to use TMW, then please do so.
-
-If you did not see that message, then please enable Lua errors (%s > %s > %s) if you have not already, reload your UI, and post any errors that you get that mention TellMeWhen to a ticket at |cff7fffffhttp://wow.curseforge.com/addons/tellmewhen/create-ticket/|r
-
-I apologize for the inconvenience, but this is a rare occurrence, and any information about it that you can provide will help to get it fixed right away!
-
-Thank you for using TellMeWhen!]]
 
 
 
@@ -879,7 +864,6 @@ L["UIPANEL_ICONSPACINGY"] = "Vertical"
 L["UIPANEL_ICONSPACING_DESC"] = "Distance between each icon within the group."
 L["UIPANEL_ADDGROUP2"] = "New %s Group"
 L["UIPANEL_ADDGROUP2_DESC"] = "|cff7fffffClick|r to add a new %s group."
-L["UIPANEL_ADDGROUP_DESC"] = "The new group will be assigned the next available groupID"
 L["UIPANEL_DELGROUP"] = "Delete this Group"
 
 
@@ -993,8 +977,6 @@ L["BACK_IE_DESC"] = "Load the last icon that was edited\r\n\r\n%s |T%s:0|t."
 L["FORWARDS_IE"] = "Forwards"
 L["FORWARDS_IE_DESC"] = "Load the next icon that was edited\r\n\r\n%s |T%s:0|t."
 
-L["UIPANEL_MAIN_DESC"] = "Contains the main settings for the group."
-
 L["UIPANEL_FONTFACE"] = "Font Face"
 L["UIPANEL_FONT_DESC"] = "Chose the font to be used by the stack text on icons."
 L["UIPANEL_FONT_SIZE"] = "Font Size"
@@ -1033,7 +1015,6 @@ L["UIPANEL_FONT_JUSTIFYV"] = "Vertical Justification"
 L["UIPANEL_FONT_JUSTIFYV_DESC"] = "Set the vertical justification (Top/Center/Bottom) for this text display."
 L["UIPANEL_POSITION"] = "Position"
 L["UIPANEL_POINT"] = "Group Point"
-L["UIPANEL_POINT_DESC"] = "The point on the group that will be anchored"
 L["UIPANEL_POINT2_DESC"] = "Anchor the %s of the group to the anchor target."
 L["UIPANEL_RELATIVETO"] = "Anchor Target"
 L["UIPANEL_RELATIVETO_DESC"] = "Type '/framestack' to toggle a tooltip that contains a list of all the frames that your mouse is over, and their names, to put into this dialog."
@@ -1105,7 +1086,6 @@ L["TEXTLAYOUTS_ADDANCHOR_DESC"] = [[Click to add another text anchor.]]
 L["TEXTLAYOUTS_DELANCHOR"] = "Delete Anchor"
 L["TEXTLAYOUTS_DELANCHOR_DESC"] = [[Click to delete this text anchor.]]
 
-L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_BASE"] = "Are you sure you want to delete the layout %q?"
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM2"] = "|cFFFF2929The following profiles use this layout in their icons. If you delete this layout, they will fall back on using a default layout:|r"
 L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_LISTING"] = "%s: ~%d |4icon:icons;"
 

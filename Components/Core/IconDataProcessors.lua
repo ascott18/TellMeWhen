@@ -65,6 +65,10 @@ do
 		end
 		--]]
 	end
+
+	TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(event, icon)
+		icon:SetInfo("state", 0)
+	end)
 end
 
 
@@ -79,12 +83,6 @@ do
 
 	TMW.IconAlphaManager:AddHandler(100, "ALPHA")
 	-- Processor:CompileFunctionSegment(t) is default.
-
-	TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
-		if not TMW.Locked then
-			icon:SetInfo("alpha", 0)
-		end
-	end)
 end
 
 

@@ -26,7 +26,6 @@ Type.menuSpaceAfter = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -50,7 +49,7 @@ function Type:Setup(icon)
 	else
 		icon:SetInfo("texture", "")
 	end
-	icon:SetInfo("alpha", 0)
+	icon:SetInfo("state", 0)
 end
 
 function Type:DragReceived(icon, t, data, subType, param4)

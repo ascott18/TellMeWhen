@@ -31,7 +31,6 @@ Type.canControlGroup = true
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("alpha_metaChild")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -315,7 +314,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 		end
 
 	elseif iconToSet.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then
-		iconToSet:SetInfo("alpha; alpha_metaChild; start, duration",
+		iconToSet:SetInfo("state; alpha_metaChild; start, duration",
 			0,
 			nil,
 			0, 0
@@ -445,15 +444,16 @@ function Type:Setup(icon)
 		end
 	end]]
 
-	icon:SetInfo("texture", "Interface\\Icons\\LevelUpIcon-LFD")
+	icon:SetInfo("state; texture", 
+		0, 
+		"Interface\\Icons\\LevelUpIcon-LFD"
+	)
 	
 	-- DONT DO THIS! (manual updates) ive tried for many hours to get it working,
 	-- but there is no possible way because meta icons update
 	-- the icons they are checking from within them to check for changes,
 	-- so everything will be delayed by at least one update cycle if we do manual updating.
 	-- icon:SetUpdateMethod("manual") 
-	
-	icon:SetInfo("alpha", 0)
 
 	if icon:IsGroupController() then
 		icon.Sort = false

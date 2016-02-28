@@ -35,7 +35,9 @@ function processFile(path)
 	local contents = io.open(path):read("*all")
 
 	--for match in string.gmatch(contents, "L%[\"(.-)\".-%]") do -- this line wont detect TMW:TT() calls
-	for match in string.gmatch(contents, "\"(.-)\".-") do
+	-- the gsub here is to get rid of escaped quotes that interfere with our rudimentary method of finding string literals.
+	-- do it twice to get rid of places where there is one right after another.
+	for match in string.gmatch(contents:gsub("([^\\])\\\"","%1"):gsub("([^\\])\\\"","%1"), "\"(.-)\".-") do
 		if( not localizedKeys[match] ) then keys = keys + 1 end
 		localizedKeys[match] = true
 	end
