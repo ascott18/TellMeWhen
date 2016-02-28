@@ -71,7 +71,6 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	--text = L["ICONMENU_CASTSHOWWHEN"],
 	[STATE_PRESENT] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], },
 	[STATE_ABSENT]  = { text = "|cFFFF0000" .. L["ICONMENU_ABSENT"],  },
 })

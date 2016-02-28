@@ -20,9 +20,7 @@ L["CMD_PROFILE_INVALIDPROFILE_SPACES"] = "Tip: If the profile name contains spac
 L["PROFILE_LOADED"] = "Loaded profile: %s"
 
 L["DOMAIN_PROFILE"] = "Profile"
-L["DOMAIN_PROFILE_SWITCHTO"] = "Move this group to profile %q"
 L["DOMAIN_GLOBAL"] = "|cff00c300Global|r"
-L["DOMAIN_GLOBAL_SWITCHTO"] = "Make this group |cff00c300Global|r"
 L["GLOBAL_GROUP_GENERIC_DESC"] = "|cff00c300Global|r groups are available to all your TellMeWhen profiles on this WoW account."
 
 
@@ -67,7 +65,6 @@ TellMeWhen_Options maintains a backup of your database in case this happens sinc
 This backup, created from your session that began %s, has been restored.]]
 
 
-L["DIALOG_HEADER_CHANGELOG"] = "TellMeWhen Changelog"
 L["CHANGELOG"] = "Changelog"
 L["CHANGELOG_DESC"] = "Displays a list of changes made in current and past versions of TellMeWhen."
 L["CHANGELOG_LAST_VERSION"] = "Previous Installed Version"
@@ -167,14 +164,6 @@ I apologize for the inconvenience, but this is a rare occurrence, and any inform
 
 Thank you for using TellMeWhen!]]
 
-L["ERROR_GAMEMENU_INTERFACE_OPTIONS_FUCKED"] = [[TellMeWhen's options have successfully loaded, but something happened that is preventing them from being displayed here correctly.
-
-Try closing the interface options (this window) and reopening them.
-
-If that doesn't work, then you can still access TellMeWhen's options by typing "/tmw options"
-
-Sorry about the inconvenience!]]
-
 
 
 L["ERROR_INVALID_SPELLID2"] = "An icon is checking an invalid spellID: %s. Please remove it to avoid undesired icon behavior."
@@ -195,8 +184,6 @@ L["RESIZE_TOOLTIP_CHANGEDIMS"] = [[|cff7fffffRight-Click-and-drag|r to change nu
 
 L["RESIZE_GROUP_CLOBBERWARN"] = [[When shrinking a group using |cff7fffffRight-Click-and-drag|r, you may clobber some icons. These icons have been saved temporarily and will be restored if you increase the size again via |cff7fffffRight-Click-and-drag|r, but will be lost forever if you log out or reload your UI. ]]
 
-L["CONDITIONORMETA_CHECKINGINVALID"] = "Warning! Group %d, Icon %d is checking an invalid icon (Group %d, Icon %d)"
-L["CONDITIONORMETA_CHECKINGINVALID_GROUP"] = "Warning! Group %d is checking an invalid icon (Group %d, Icon %d)"
 L["WARN_DRMISMATCH"] = [[Warning! You are checking the diminishing returns on spells from two different known categories.
 
 All spells must be from the same diminishing returns category for the icon to function properly. The following categories and spells were detected:]]
@@ -225,15 +212,12 @@ L["ICONMENU_ENABLE_GROUP_DESC"] = "Groups will only function when they are enabl
 L["ICONMENU_ENABLE_PROFILE"] = "Enabled for profile"
 L["ICONMENU_ENABLE_PROFILE_DESC"] = "Uncheck to disable the |cff00c300global|r group for the current profile."
 
---L["CHOOSENAME_EQUIVS_TOOLTIP"] = [[You can select predefined sets of buffs, debuffs, spell casts, diminishing returns, or dispel types (Magic, Curse, etc.) from this menu to insert into the "%s" editbox.]]
-L["CHOOSENAME_DIALOG_DDDEFAULT"] = "Predefined Spell Sets/Dispel Types"
 L["CHOOSENAME_DIALOG"] = [=[Enter the Name or ID of what you want this icon to monitor. You can add multiple entries (any combination of names, IDs, and equivalencies) by separating them with semicolons (;).
 
 You can omit a spell from an equivalency that you used by prefixing it with a dash, e.g. "Slowed; -Dazed".
 
 You can |cff7fffffShift-click|r spells/items/chat links or drag spells/items to insert them into this editbox.]=]
 L["CHOOSENAME_DIALOG_PETABILITIES"] = "|cFFFF5959PET ABILITIES|r must use SpellIDs."
-L["CHOOSENAME_DIALOG_MSCD"] = [=[Enter the Name or ID of what you want this icon to monitor. Only the first spell/item will be checked - semicolon-delimited lists are not valid for this icon type.]=]
 
 L["CHOOSEICON"] = "Choose an icon to check"
 L["CHOOSEICON_DESC"] = [=[|cff7fffffClick|r to choose an icon/group.
@@ -437,9 +421,7 @@ White is normal. Any other color will tint the texture to that color.]]
 
 
 L["ICONMENU_COUNTING"] = "Timer running"
-L["ICONMENU_COUNTING_DESC"] = "Show the icon when the icon's timer is active."
 L["ICONMENU_NOTCOUNTING"] = "Timer not running"
-L["ICONMENU_NOTCOUNTING_DESC"] = "Show the icon when the icon's timer is not active."
 
 
 L["ICONMENU_BUFFTYPE"] = "Buff or Debuff"
@@ -453,7 +435,6 @@ L["ICONMENU_CHECKNEXT_DESC"] = [[Checking this box will cause any meta icons bei
 In addition, this icon will not show any icons that have already been shown by another meta icon that updates before this one.]]
 
 L["ICONMENU_DISPEL"] = "Dispel Type"
-L["ICONMENU_CASTS"] = "Spell Casts"
 L["ICONMENU_DRS"] = "Diminishing Returns"
 
 L["ICONMENU_CUSTOMTEX"] = "Custom Texture"
@@ -530,13 +511,11 @@ L["ICONMENU_PRESENTONANY_DESC"] = "Set the icon opacity level for when any unit 
 L["ICONMENU_ABSENTONALL"] = "All Absent"
 L["ICONMENU_ABSENTONALL_DESC"] = "Set the icon opacity level for when all units being checked are missing all of the buffs/debuffs being checked."
 
-L["ICONMENU_CNDTSHOWWHEN"] = "Show when conditions"
 L["ICONMENU_FAIL2"] = "Conditions Fail"
 L["ICONMENU_SUCCEED2"] = "Conditions Succeed"
 L["ICONMENU_ONFAIL"] = "On Fail"
 L["ICONMENU_ONSUCCEED"] = "On Succeed"
 
-L["ICONMENU_CASTSHOWWHEN"] = "Show when a cast is"
 L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
 L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts that are interruptible"
 
@@ -589,12 +568,6 @@ L["ICONMENU_BAR_COLOR_MIDDLE"] = "Halfway Color"
 L["ICONMENU_BAR_COLOR_MIDDLE_DESC"] = "Color of the bar when the cooldown/duration is halfway complete."
 L["ICONMENU_BAR_COLOR_COMPLETE"] = "Completion Color"
 L["ICONMENU_BAR_COLOR_COMPLETE_DESC"] = "Color of the bar when the cooldown/duration is complete."
-L["ICONMENU_ENABLECOLORS"] = "Enable Color Overrides"
-L["ICONMENU_ENABLECOLORS_DESC"] = [[Check this setting to allow the configuration and usage of the three color settings below.
-
-If left unchecked, the color settings in TellMeWhen's main options will be used.]]
-L["ICONMENU_COPYCOLORS_BARDISPLAY"] = "Copy Bar Colors"
-L["ICONMENU_COPYCOLORS_BARDISPLAY_DESC"] = "Copies the three bar colors of %s to %s."
 
 L["ICONMENU_REACT"] = "Unit Reaction"
 L["ICONMENU_FRIEND"] = "Friendly"
@@ -639,9 +612,7 @@ L["FIRE"] = "Fire"
 L["EARTH"] = "Earth"
 L["WATER"] = "Water"
 L["AIR"] = "Air"
-L["MUSHROOMS"] = "Mushrooms to check"
 L["MUSHROOM"] = "Mushroom %d"
-L["RUNESOFPOWER"] = "Runes to check"
 L["RUNEOFPOWER"] = "Rune %d"
 L["GENERICTOTEM"] = "Totem %d"
 L["RUNES"] = "Rune(s) to check"
@@ -822,13 +793,10 @@ L["UIPANEL_GROUPS_DROPDOWN_DESC"] = [[Use this menu to load other groups to conf
 
 You can also |cff7fffffRight-click|r an icon on your screen to load that icon's group.]]
 L["UIPANEL_GROUPS_GLOBAL"] = "|cff00c300Global|r Groups"
-L["UIPANEL_GROUPS_DESC"] = "Settings for each group in this TellMeWhen profile."
-L["UIPANEL_GROUPS_GLOBAL_DESC"] = "Settings for the groups that are available to all your TellMeWhen profiles on this WoW account."
 
 L["UIPANEL_PROFILES"] = "Profiles"
 
 L["UIPANEL_GROUPTYPE"] = "Display Method"
-L["UIPANEL_GROUPTYPE_DESC"] = "Choose how you would like icons within this group to be displayed."
 L["UIPANEL_GROUPTYPE_ICON"] = "Icon"
 L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the group using TellMeWhen's traditional icon display.]]
 L["UIPANEL_GROUPTYPE_BAR"] = "Bar"
@@ -851,10 +819,6 @@ L["UIPANEL_BAR_BORDERCOLOR_DESC"] = "Change the color of the icon and bar border
 
 
 L["UIPANEL_ICONS"] = "Icons"
-L["UIPANEL_COLORS"] = "Colors"
-L["UIPANEL_COLORS_DESC"] = "Settings that control the coloring/tinting of icons based on their attributes."
-L["UIPANEL_ENABLEGROUP"] = "Enable Group"
-L["UIPANEL_ENABLEGROUP_FORPROFILE"] = "Enable Group for profile %s"
 L["UIPANEL_GROUPNAME"] = "Rename Group"
 L["UIPANEL_DIMENSIONS"] = "Dimensions"
 L["UIPANEL_ROWS"] = "Rows"
@@ -868,12 +832,10 @@ Set this setting to 0 if you want to hide the entire group will still allowing i
 
 L["UIPANEL_ONLYINCOMBAT"] = "Only show in combat"
 L["UIPANEL_SPEC"] = "Dual Spec"
-L["UIPANEL_SPEC_DESC"] = "Checks whether you are in your primary or secondary specialization."
-L["UIPANEL_TREE"] = "Talent Tree"
 L["UIPANEL_SPECIALIZATION"] = "Talent Specialization"
 L["UIPANEL_SPECIALIZATIONROLE"] = "Specialization Role"
 L["UIPANEL_SPECIALIZATIONROLE_DESC"] = "Checks the role (tank, heal, or DPS) that your current talent specialization fulfils."
-L["UIPANEL_TREE_DESC"] = "Check to allow this group to show when this talent tree is active, or uncheck to cause it to hide when it is not active."
+L["UIPANEL_TREE_DESC"] = "Check to allow this group to show when this specialization is active, or uncheck to cause it to hide when it is not active."
 L["TREEf"] = "Tree: %s"
 L["UIPANEL_ROLE_DESC"] = "Check to allow this group to show when your current specialization serves this role."
 L["ROLEf"] = "Role: %s"
@@ -885,8 +847,6 @@ L["UIPANEL_PRIMARYSPEC"] = "Primary Spec"
 L["UIPANEL_SECONDARYSPEC"] = "Secondary Spec"
 L["UIPANEL_GROUPRESET"] = "Reset Position"
 L["UIPANEL_TOOLTIP_GROUPRESET"] = "Reset this group's position and scale"
-L["UIPANEL_ALLRESET"] = "Reset all"
-L["UIPANEL_TOOLTIP_ALLRESET"] = "Reset ALL SETTINGS of ALL ICONS AND GROUPS, as well as any other settings."
 L["UIPANEL_LOCKUNLOCK"] = "Lock/Unlock AddOn"
 L["UIPANEL_COMBATCONFIG"] = "Allow config in combat"
 L["UIPANEL_COMBATCONFIG_DESC"] = [[Enable this to allow configuration of TellMeWhen while in combat.
@@ -897,10 +857,6 @@ This option is account-wide: all of your profiles will share this setting.
 
 |cffff5959Changes will only be reflected after you |cff7fffffreload your UI|cffff5959.|r]]
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
-L["UIPANEL_BARIGNOREGCD"] = "Bars Ignore GCD"
-L["UIPANEL_BARIGNOREGCD_DESC"] = "If checked, cooldown bars will not change values if the cooldown triggered is a global cooldown"
-L["UIPANEL_CLOCKIGNOREGCD"] = "Timers Ignore GCD"
-L["UIPANEL_CLOCKIGNOREGCD_DESC"] = "If checked, timers and the cooldown clock will not trigger from a global cooldown"
 L["UIPANEL_PERFORMANCE"] = "Performance"
 L["UIPANEL_UPDATEINTERVAL"] = "Update Interval"
 L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = [[Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc.
@@ -925,7 +881,6 @@ L["UIPANEL_ADDGROUP2"] = "New %s Group"
 L["UIPANEL_ADDGROUP2_DESC"] = "|cff7fffffClick|r to add a new %s group."
 L["UIPANEL_ADDGROUP_DESC"] = "The new group will be assigned the next available groupID"
 L["UIPANEL_DELGROUP"] = "Delete this Group"
-L["UIPANEL_DELGROUP_DESC2"] = "Hold |cff7fffffCtrl|r to bypass confirmation."
 
 
 L["CONFIRM_HEADER"] = "Are you sure?"
@@ -934,18 +889,9 @@ L["CONFIRM_DELGROUP"] = "Delete Group"
 L["CONFIRM_DELETE_GENERIC_DESC"] = "%s will be deleted."
 
 
-L["UIPANEL_GROUPID"] = "Group ID"
-L["UIPANEL_GROUPID_DESC"] = "Changes the ID of this group."
-L["UIPANEL_DBLOC"] = "Data Location"
-
-
-L["UIPANEL_TOOLTIP_ENABLEGROUP"] = "Show and enable this group"
-L["UIPANEL_TOOLTIP_ENABLEGROUP_GLOBAL_DESC"] = "Show and enable this group for this profile. Changing this setting will not affect your other profiles."
 L["UIPANEL_TOOLTIP_ROWS"] = "Set the number of rows in this group"
 L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"
 L["UIPANEL_TOOLTIP_ONLYINCOMBAT"] = "Check to cause this group to only be shown in combat"
-L["UIPANEL_TOOLTIP_PRIMARYSPEC"] = "Check to show this group while your primary spec is active"
-L["UIPANEL_TOOLTIP_SECONDARYSPEC"] = "Check to show this group while your secondary spec is active"
 
 
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
@@ -964,7 +910,6 @@ L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
 
 
 L["UIPANEL_GROUPSORT"] = "Icon Sorting"
-L["UIPANEL_GROUPSORT_DESC"] = "Contains settings for sorting an positioning icons within a group based on their atributes."
 
 L["UIPANEL_GROUPSORT_ALLDESC"] = [[|cff7fffffClick|r to change the direction of this sort priority.
 |cff7fffffClick-and-drag|r to rearrange.
@@ -1019,27 +964,7 @@ L["COLOR_MSQ_COLOR"] = "Color Masque border"
 L["COLOR_MSQ_COLOR_DESC"] = "Checking this will cause the border of a Masque skin (if the skin you are using has a border) to be colored."
 L["COLOR_MSQ_ONLY"] = "Only color Masque border"
 L["COLOR_MSQ_ONLY_DESC"] = "Checking this will cause ONLY the border of a Masque skin (if the skin you are using has a border) to colored. Icons will NOT be colored"
-L["COLOR_IGNORE_GCD"] = "Colors ignore GCD"
-L["COLOR_IGNORE_GCD_DESC"] = "Checking this will prevent icon colors from changing simply because of the global cooldown."
-L["COLOR_OVERRIDEDEFAULT"] = "Use"
-L["COLOR_OVERRIDEDEFAULT_DESC"] = "Check this to override the *Global Colors* settings and use this setting instead."
-L["COLOR_HEADER_DEFAULT"] = [[These colors will be used for any icon type that does not override them in the type's color settings.
 
-Solid white causes no change in the texture. Solid black will cause the texture to be sold black. Any gray or color in between will tint the icon.]]
-L["COLOR_HEADER"] = [[These colors will be used for %s icons if their %q settings are checked.
-
-Solid white causes no change in the texture. Solid black will cause the texture to be sold black. Any gray or color in between will tint the icon.]]
-L["COLOR_DESATURATE"] = "Grey"
-L["COLOR_DESATURATE_DESC"] = "Check to desaturate the icon when this color is used, removing all color and making the icon grayscale."
-L["COLOR_COLOR"] = "Color"
-
-
-L["COLOR_OOR"]		 = "Out of Range"	-- out of range
-L["COLOR_OOR_DESC"]	 = "Color of the icon when you are not in range to use an ability."	-- out of range
-L["COLOR_OOM"]		 = "Out of Mana"	-- out of mana
-L["COLOR_OOM_DESC"]	 = "Color of the icon when you lack the power to use an ability."	-- out of mana
-L["COLOR_OORM"] 	 = "Out of Range & Mana"	-- out of range and mana
-L["COLOR_OORM_DESC"] = "Color of the icon when you lack the power and are not in range to use an ability."	-- out of range and mana
 
 
 L["COLOR_OVERRIDE_GROUP"] = "Override Group Color"
@@ -1107,7 +1032,6 @@ L["UIPANEL_FONT_JUSTIFY_DESC"] = "Set the horizontal justification (Left/Center/
 L["UIPANEL_FONT_JUSTIFYV"] = "Vertical Justification"
 L["UIPANEL_FONT_JUSTIFYV_DESC"] = "Set the vertical justification (Top/Center/Bottom) for this text display."
 L["UIPANEL_POSITION"] = "Position"
-L["UIPANEL_POSITION_DESC"] = "Contains settings that control the position of the group on your screen."
 L["UIPANEL_POINT"] = "Group Point"
 L["UIPANEL_POINT_DESC"] = "The point on the group that will be anchored"
 L["UIPANEL_POINT2_DESC"] = "Anchor the %s of the group to the anchor target."
@@ -1116,9 +1040,6 @@ L["UIPANEL_RELATIVETO_DESC"] = "Type '/framestack' to toggle a tooltip that cont
 L["UIPANEL_RELATIVETO_DESC_GUIDINFO"] = "The current value is the unique identifier of another group. It was set when this group was right-click dragged to another group and the Anchor To option was chosen."
 L["UIPANEL_RELATIVEPOINT"] = "Target Point"
 L["UIPANEL_RELATIVEPOINT2_DESC"] = "Anchor the group to the %s of the anchor target."
-L["CHECKORDER"] = "Update Order"
-L["CHECKORDER_ICONDESC"] = "Sets the order in which icons within this group will be updated. This really only matters if you are using the feature of meta icons to check sub-metas."
-L["CHECKORDER_GROUPDESC"] = "Sets the order in which groups will be updated. This really only matters if you are using the feature of meta icons to check sub-metas."
 L["ASCENDING"] = "Ascending"
 L["DESCENDING"] = "Descending"
 L["UIPANEL_SCALE"] = "Scale"
@@ -1130,7 +1051,6 @@ L["UIPANEL_LOCK"] = "Lock Position"
 L["UIPANEL_LOCK_DESC"] = "Lock this group, preventing movement or sizing by dragging the group or the scale tab."
 
 L["LAYOUTDIRECTION"] = "Layout Direction"
-L["LAYOUTDIRECTION_DESC"] = "Sets the direction that icons will layout in the group."
 
 L["UP"] = "Up"
 L["DOWN"] = "Down"
@@ -1705,7 +1625,6 @@ L["CODESNIPPET_ORDER_DESC"] = [[Set the order in which this snippet should be ru
 
 Decimal amounts are valid. Consistent order is not guaranteed if two snippets share the same order.]]
 L["CODESNIPPET_CODE"] = "Lua Code to Run"
-L["CODESNIPPET_CODE_DESC"] = [[Set the Lua code that will be ran by this snippet when TellMeWhen is intialized.]]
 
 L["CODESNIPPET_AUTORUN"] = "Auto-run at login"
 L["CODESNIPPET_AUTORUN_DESC"] = "If enabled, this snippet will be run when TMW_INITIALIZE fires (which happens during PLAYER_LOGIN, but before any icons or groups are created)."
@@ -1762,8 +1681,6 @@ L["GROUP"] = "Group"
 L["DISABLED"] = "Disabled"
 L["COPYPOSSCALE"] = "Copy position/scale only"
 L["COPYGROUP"] = "Copy Group"
-L["OVERWRITEGROUP"] = "|cFFFF5959Overwrite|r Group: %s"
-L["MAKENEWGROUP"] = "|cff59ff59Create|r New Group"
 L["MAKENEWGROUP_PROFILE"] = "|cff59ff59Create|r New Profile Group"
 L["MAKENEWGROUP_GLOBAL"] = "|cff59ff59Create|r New |cff00c300Global|r Group"
 
@@ -1857,7 +1774,6 @@ L["UNITCONDITIONS_STATICUNIT_TARGET_DESC"] = "Causes the condition to check the 
 L["VALIDITY_CONDITION_DESC"] = "A target of a condition of"
 L["VALIDITY_CONDITION2_DESC"] = "The #%d condition of"
 L["VALIDITY_META_DESC"] = "The #%d icon checked by meta icon"
-L["VALIDITY_ONICONSHOWHIDE_DESC"] = "The target of the #%d icon event of"
 L["VALIDITY_ISINVALID"] = "is invalid."
 
 L["MAIN"] = "Main"
@@ -1919,7 +1835,6 @@ L["IMPORT_EXPORT_DESC"] = [[Click the button to the right to import and export i
 
 Importing to or from a string, or exporting to another player, will require the use of this editbox. See the tooltips within the dropdown menu for details.]]
 L["IMPORT_EXPORT_BUTTON_DESC"] = "Click this button to import and export icons, groups, and profiles."
-L["IMPORT_EXPORT_DESC_INLINE"] = "Import and Export profiles, groups, icons to or from strings, other players, other profiles, or a backup of your settings."
 
 L["IMPORT_HEADING"] = "Import"
 L["IMPORT_FROMLOCAL"] = "From Profile"
@@ -1961,7 +1876,6 @@ L["IMPORT_NEWGUIDS"] = [[The data you just imported conflicted with the unique i
 New unique identifiers have been assigned to the imported data. Icons that you import in the future that are supposed to reference the new data may not function as desired - they will instead reference the old icons that conflicted with the new data.
 
 If you intended to replace existing data, please re-import it to the correct location.]]
-L["IMPORT_NEWGUIDS_ICON"] = "Text Layout: %s"
 
 
 L["CONFIGPANEL_TIMER_HEADER"] = "Timer Sweep"
@@ -1972,8 +1886,6 @@ L["CONFIGPANEL_CLEU_HEADER"] = "Combat Events"
 L["CONFIGPANEL_CNDTTIMERS_HEADER"] = "Condition Timers"
 
 L["CONFIGPANEL_BACKDROP_HEADER"] = "Backdrop"
-L["CONFIGPANEL_BACKDROP_ALPHA"] = "Backdrop Opacity"
-L["CONFIGPANEL_BACKDROP_ALPHA_DESC"] = "Set the opacity of the backdrop underneath the bar."
 
 
 
@@ -2040,8 +1952,6 @@ L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- en
 L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"
 L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
 
-L["SUG_ATBEGINING"] = "Suggester: Match beginning"
-L["SUG_ATBEGINING_DESC"] = "If checked, the suggestion list will only display spells that start with the same name as the spell that is being typed in. Otherwise, it will match any part of a spell."
 
 L["SUG_FIRSTHELP_DESC"] = [[The suggestion list speeds up configuration.
 
@@ -2119,16 +2029,6 @@ L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when the icon processes a c
 L["SOUND_EVENT_ONUIERROR"] = "On Combat Error Event"
 L["SOUND_EVENT_ONUIERROR_DESC"] = [[This event triggers when the icon processes a combat event error.]]
 
-L["SOUND_EVENT_ONICONSHOW"] = "On Other Icon Show"
-L["SOUND_EVENT_ONICONSHOW_DESC"] = [[This event triggers when another icon (not this icon) is shown.
-
-Configure the icon that should be watched using the event settings below.]]
-
-L["SOUND_EVENT_ONICONHIDE"] = "On Other Icon Hide"
-L["SOUND_EVENT_ONICONHIDE_DESC"] = [[This event triggers when another icon (not this icon) is hidden.
-
-Configure the icon that should be watched using the event settings below.]]
-
 L["SOUND_EVENT_ONLEFTCLICK"] = "On Left Click"
 L["SOUND_EVENT_ONLEFTCLICK_DESC"] = [[This event triggers when you |cff7fffffLeft-click|r the icon while icons are locked.]]
 
@@ -2147,7 +2047,6 @@ This may also be thought of as a "soft reset" of the icon.
 
 This event may be useful in creating a default state for the icon.]]
 
-L["SOUND_EVENT_GLOBALDESC"] = "Events are checked from top to bottom in this list. If an event is triggered that has a sound to play, no events below that event will play a sound."
 L["SOUND_EVENT_NOEVENT"] = "Unconfigured Event"
 L["SOUND_EVENT_DISABLEDFORTYPE"] = "Not available"
 L["SOUND_EVENT_DISABLEDFORTYPE_DESC2"] = [[This event is not available for the current icon configuration.
@@ -2194,16 +2093,6 @@ L["EVENTS_CHANGETRIGGER"] = "Change Trigger"
 
 
 L["EVENTS_SETTINGS_HEADER"] = "Trigger Settings"
-
-L["EVENTS_INSTRUCTIONS"] = [[In this tab, you can configure extra functionality for this icon with notifications that include sounds, animations, and text outputs.
-
-These effects are triggered by an event of your choosing. Most events are triggered in response to a change in the icon's status, but there are other events too.
-
-There are also notifications that will persist while a condition set evalutes to true.
-
-To get started configuring these notifications, click the button to the left and chose the combination of trigger and effect that you would like.
-
-The settings for the trigger and the effect will then appear, and you can configure them as desired.]]
 
 L["EVENTS_SETTINGS_ONLYSHOWN"] = "Only handle if icon is shown"
 L["EVENTS_SETTINGS_ONLYSHOWN_DESC"] = "Prevents the notification from being handled if the icon is not shown."
@@ -2683,9 +2572,6 @@ L["HELP_NOUNIT"] = [[You must enter a unit!]]
 L["HELP_ONLYONEUNIT"] = [[Conditions only accept one unit, but you have entered %d |4unit:units;.
 
 If you need to check many units, consider using a separate icon with an Icon Shown condition to reference that icon.]]
-L["HELP_MS_NOFOUND"] = [[The ability %q could not be found on your action bars.
-
-Ensure that the ability is on your action bars, in its default state, and that it is not only a macro that is putting the spell on your action bars. Otherwise, this icon will not function properly.]]
 
 L["HELP_BUFF_NOSOURCERPPM"] = [[It looks like you are trying to track %s, which is a buff that uses the RPPM system.
 

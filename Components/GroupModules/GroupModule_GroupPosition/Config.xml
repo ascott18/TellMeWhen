@@ -214,7 +214,7 @@
 					<OnLoad>						
 						TMW:CInit(self)
 
-						self:SetTexts(TMW.L["UIPANEL_LEVEL"], nil)
+						self:SetTexts(TMW.L["UIPANEL_LEVEL"], TMW.L["UIPANEL_LEVEL_DESC"])
 						self:SetSetting("Level")
 
 						self:SetMode(self.MODE_ADJUSTING)

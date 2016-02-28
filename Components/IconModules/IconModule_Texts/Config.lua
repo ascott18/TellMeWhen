@@ -407,7 +407,11 @@ local function deepRecScanTableForLayout(domainTable, GUID, table, ...)
 			local parentTableKey = select(4, ...)
 
 			if parentTableKey == "Icons" then
-				n = n + 1
+				local groupID = select(5, ...)
+				local gs = domainTable.Groups[groupID]
+				if not TEXT.TextLayout_NumTimesUsedTemp[gs] then
+					n = n + 1
+				end
 			elseif parentTableKey == "Groups" then
 				local groupID = select(3, ...)
 
@@ -416,7 +420,7 @@ local function deepRecScanTableForLayout(domainTable, GUID, table, ...)
 				if not TEXT.TextLayout_NumTimesUsedTemp[gs] then
 					TEXT.TextLayout_NumTimesUsedTemp[gs] = true
 
-					n = n + ((gs.Rows or 1) * (gs.Columns or 4))
+					n = n + ((gs.Rows or TMW.Group_Defaults.Rows) * (gs.Columns or TMW.Group_Defaults.Columns))
 				end
 			end
 		end

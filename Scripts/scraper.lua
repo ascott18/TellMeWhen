@@ -1,14 +1,63 @@
-﻿
-local AUTO_FIND_TOC = nil--"./"
-local FILE_BLACKLIST = {"^localization", "^lib"}
 
-local PATH_TO_ADDONS = "B:/Games/World Of Warcraft/Interface/AddOns/"
+local AUTO_FIND_TOC = nil--"./"
+local FILE_BLACKLIST = {"localization[/\\]tellmewhen", "^lib"}
+
+local PATH_TO_ADDONS = "C:/Games/World Of Warcraft/Interface/AddOns/"
 local ADDONS = {
 	"TellMeWhen",
 	"TellMeWhen_Options",
 }
 
 local localizedKeys = {}
+
+function processFile(path)
+	-- Make sure it's a valid file
+	for _, check in pairs(FILE_BLACKLIST) do
+		if( string.match(string.lower(path), check) ) then
+			return
+		end
+	end
+
+	-- Fix slashes
+	if( OS_TYPE == "linux" ) then
+		path = string.gsub(path, "\\", "/")
+	end
+
+	local keys = 0
+	--print(path)
+
+	local file = io.open(path)
+	if not file then
+		print("couldn't read file", path)
+		return
+	end
+
+	local contents = io.open(path):read("*all")
+
+	--for match in string.gmatch(contents, "L%[\"(.-)\".-%]") do -- this line wont detect TMW:TT() calls
+	for match in string.gmatch(contents, "\"(.-)\".-") do
+		if( not localizedKeys[match] ) then keys = keys + 1 end
+		localizedKeys[match] = true
+	end
+
+	if string.match(path, "%.xml$") then
+		local folderPath = string.gsub(path, "[/\\][^/\\]-$", "")
+
+		contents, count = string.gsub(contents, "<!%-%-.-%-%->", "")
+		-- print("removed ", count, "comments from", path)
+		
+
+		for match in string.gmatch(contents, "Script file=\"(.-)\"") do
+			processFile(folderPath .. "/" .. match)
+		end
+
+		for match in string.gmatch(contents, "Include file=\"(.-)\"") do
+			processFile(folderPath .. "/" .. match)
+		end
+	end
+	
+	print(string.format("%s (%d keys)", path:gsub(PATH_TO_ADDONS, ""), keys))
+end
 
 for _, ADDON_NAME in pairs(ADDONS) do
 	local PATH_TO_ADDON_FOLDER = PATH_TO_ADDONS .. ADDON_NAME .. "/"
@@ -59,7 +108,7 @@ for _, ADDON_NAME in pairs(ADDONS) do
 	print(string.format("Using TOC file %s", TOC_FILE:gsub(PATH_TO_ADDONS, "")))
 	print("")
 
-	-- Parse through the TOC file so we know what to scan
+	-- Parse through the TOC file so we know what to scan 
 	local ignore
 	for line in io.lines(TOC_FILE) do
 		line = string.gsub(line, "\r", "")
@@ -70,35 +119,9 @@ for _, ADDON_NAME in pairs(ADDONS) do
 			ignore = nil
 		end
 			
-		if( not ignore and (string.match(line, "%.lua") or string.match(line, "%.xml")) ) then
-			-- Make sure it's a valid file
-			local blacklist
-			for _, check in pairs(FILE_BLACKLIST) do
-				if( string.match(string.lower(line), check) ) then
-					blacklist = true
-					break
-				end
-			end
-		
-			-- File checks out, scrap everything
-			if( not blacklist ) then
-				-- Fix slashes
-				if( OS_TYPE == "linux" ) then
-					line = string.gsub(line, "\\", "/")
-				end
-				line = PATH_TO_ADDON_FOLDER .. line
-				local keys = 0
-				
-				local contents = io.open(line):read("*all")
+		if not ignore and (string.match(line, "%.lua") or string.match(line, "%.xml")) and not string.match(line, "%s-#")  then
 			
-				--for match in string.gmatch(contents, "L%[\"(.-)\".-%]") do -- this line wont detect TMW:TT() calls
-				for match in string.gmatch(contents, "\"(.-)\".-") do
-					if( not localizedKeys[match] ) then keys = keys + 1 end
-					localizedKeys[match] = true
-				end
-				
-				print(string.format("%s (%d keys)", line:gsub(PATH_TO_ADDONS, ""), keys))
-			end
+			processFile(PATH_TO_ADDON_FOLDER .. line)
 		end
 	end
 end
@@ -139,13 +162,14 @@ for k, v in pairs(L) do
 		not strfind(k, "%l") and
 		not strfind(k, "STRATA")
 	then
-		unused[k] = true
+		tinsert(unused, k)
 	end
 end
 
 local unusedString = ""
 local totalUnusedStrings = 0
-for key in pairs(unused) do
+sort(unused)
+for _, key in pairs(unused) do
 	unusedString = string.format("%s\n%s", unusedString, key)
 	totalUnusedStrings = totalUnusedStrings + 1
 end
@@ -156,6 +180,6 @@ print(string.format("Found %d unused keys total", totalUnusedStrings))
 print("")
 print("")
 
-io.open(PATH_TO_ADDONS .. "TellMeWhen/Scripts/UNUSEDLOCALE.lua", "w"):write(unusedString)
+io.open(PATH_TO_ADDONS .. "TellMeWhen/Scripts/UNUSEDLOCALE.txt", "w"):write(unusedString)
 
 

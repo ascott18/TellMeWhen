@@ -806,7 +806,8 @@ function IE:Reset()
 end
 
 function IE:ShowConfirmation(confirmText, desc, action)
-	IE.Pages.Confirm.MiddleBand.Description:SetText(desc)
+	local Description = IE.Pages.Confirm.MiddleBand.Description
+	Description:SetText(desc)
 
 	local AcceptButton = IE.Pages.Confirm.MiddleBand.AcceptButton
 	AcceptButton:SetText(confirmText)

@@ -358,7 +358,7 @@
 								self:MakeScrollable(true, 2, 7)
 
 								self:SetSetting("Code")
-								self:SetLabel(TMW.L["EVENTHANDLER_LUA_CODE"])
+								self:SetLabel(TMW.L["CODESNIPPET_CODE"])
 								self:SetNewlineOnEnter(true)
 
 								self:CScriptAdd("ReloadRequested", function()
@@ -397,7 +397,7 @@
 
 				<Scripts>
 					<OnLoad>
-						self.CodeTitle:SetText(TMW.L["EVENTHANDLER_LUA_CODE"])
+						self.CodeTitle:SetText(TMW.L["CODESNIPPET_CODE"])
 					</OnLoad>
 				</Scripts>
 			</Frame>

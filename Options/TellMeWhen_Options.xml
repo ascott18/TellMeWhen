@@ -2162,6 +2162,7 @@
 								<Anchors>
 									<Anchor point="LEFT" x="15" />
 									<Anchor point="RIGHT" x="-15" />
+									<Anchor point="TOP" y="-50" />
 								</Anchors>
 
 								<Layers>
@@ -2172,6 +2173,13 @@
 												<Anchor point="RIGHT" x="-100" />
 											</Anchors>
 										</FontString>
+
+										<FontString parentKey="Description" inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE">
+											<Anchors>
+												<Anchor point="TOPLEFT" relativeKey="$parent.Header" relativePoint="BOTTOMLEFT" y="-10"/>
+												<Anchor point="RIGHT" relativeKey="$parent.Header" />
+											</Anchors>
+										</FontString>
 									</Layer>
 								</Layers>
 
@@ -2179,7 +2187,7 @@
 									<Button parentKey="RejectButton" inherits="TellMeWhen_ButtonTemplate">
 										<Size y="15"/>
 										<Anchors>
-											<Anchor point="BOTTOM" relativeKey="$parent.MiddleBand" x="0" y="15"/>
+											<Anchor point="TOP" relativeKey="$parent.Description" relativePoint="BOTTOM" x="0" y="-15"/>
 											<Anchor point="RIGHT" relativeKey="$parent.Header" x="0" y="0"/>
 										</Anchors>
 										<Layers>
@@ -2227,26 +2235,31 @@
 										</Scripts>
 									</Button>
 								</Frames>
+							</Frame>
 
-								<Layers>
-									<Layer level="ARTWORK">
-										<FontString parentKey="Description" inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE">
-											<Anchors>
-												<Anchor point="TOPLEFT" relativeKey="$parent.Header" relativePoint="BOTTOMLEFT" y="-10"/>
-												<Anchor point="RIGHT" relativeKey="$parent.Header" />
-												<Anchor point="BOTTOM" relativeKey="$parent.RejectButton" relativePoint="TOP" y="10"/>
-											</Anchors>
-										</FontString>
-									</Layer>
-								</Layers>
+							<!-- Dummy frame so that the scrolling goes below the bottom and looks nice -->
+							<Frame>
+								<Size x="1" y="50"/>
+								<Anchors>
+									<Anchor point="TOP" relativeKey="$parent.MiddleBand" relativePoint="BOTTOM"/>
+								</Anchors>
 							</Frame>
 						</Frames>
 
 
 						<Scripts>
 							<OnLoad>
+								TMW:CInit(self.MiddleBand, "Config_Frame")
 								self.MiddleBand.Header:SetText(TMW.L["CONFIRM_HEADER"])
+								TMW:ConvertContainerToScrollFrame(self)
 							</OnLoad>
+							<OnSizeChanged>
+								self.MiddleBand.Description:SetHeight(self.MiddleBand.Description:GetStringHeight())
+								self.MiddleBand:AdjustHeight()
+							</OnSizeChanged>
+							<OnShow>
+								self:GetScript("OnSizeChanged")(self)
+							</OnShow>
 							<OnHide>
 								TMW.IE:RefreshTabs()
 							</OnHide>

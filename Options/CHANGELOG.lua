@@ -7,7 +7,6 @@ TMW.CHANGELOG = [==[
 ====IMPORTANT: Breaking Changes====
 * The Primary/Secondary spec group settings are gone, and the way that spec settings were stored has changed.
 ** There is a small chance you will need to reconfigure the spec and tree settings on all your groups.
-** If you really need to distinguish between primary and secondary specs, use group conditions.
 * Color configuration has been completely revamped. It is now done on each icon.
 ** Most of your old color settings were lost.
 

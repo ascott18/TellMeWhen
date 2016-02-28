@@ -72,8 +72,6 @@ L["HELP_BUFF_NOSOURCERPPM"]             = L["HELP_BUFF_NOSOURCERPPM"]           
 
 L["CODESNIPPET_ORDER_DESC"]             = L["CODESNIPPET_ORDER_DESC"]               :format(L["CODESNIPPET_GLOBAL"], L["CODESNIPPET_PROFILE"])
 
-L["COLOR_HEADER"]                       = L["COLOR_HEADER"]                         :format("%s", L["COLOR_OVERRIDEDEFAULT"])
-
 L["CLEU_NOFILTERS"]                     = L["CLEU_NOFILTERS"]                       :format(L["ICONMENU_CLEU"], "%s")
 L["CLEU_SPELL_DAMAGE_CRIT_DESC"]        = L["CLEU_SPELL_DAMAGE_CRIT_DESC"]          :format(L["CLEU_SPELL_DAMAGE"])
 L["CLEU_SPELL_DAMAGE_NONCRIT_DESC"]     = L["CLEU_SPELL_DAMAGE_NONCRIT_DESC"]       :format(L["CLEU_SPELL_DAMAGE"])

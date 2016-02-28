@@ -380,13 +380,19 @@
 										local layoutGUID = TMW.TEXT:GetCurrentLayoutAndDisplay()
 										local layoutSettings = self:GetSettingTable()
 
+										local usageString = TMW.TEXT:GetNumTimesUsed(layoutGUID)
+
+										local confirm = TMW.L["CONFIRM_DELETE_GENERIC_DESC"]:format(TMW.TEXT:GetLayoutName(layoutSettings))
+										if usageString ~= "" then
+											confirm = confirm .. "\r\n\r\n" .. TMW.L["TEXTLAYOUTS_DELETELAYOUT_CONFIRM_NUM2"] .. "\r\n\r\n" .. usageString
+
+										end
 
 										TMW.IE:ShowConfirmation(
 											TMW.L["CONFIRM_DELLAYOUT"],
-											TMW.L["CONFIRM_DELETE_GENERIC_DESC"]:format(TMW.TEXT:GetLayoutName(layoutSettings)),
+											confirm,
 											function()
 												TMW.db.global.TextLayouts[layoutGUID] = nil
-
 												TMW.TEXT:SetCurrentLayout(nil)
 											end
 										)
