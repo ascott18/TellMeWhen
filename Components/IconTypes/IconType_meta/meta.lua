@@ -29,7 +29,7 @@ Type.AllowNoName = true
 Type.canControlGroup = true
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
-Type:UsesAttributes("alpha_metaChild")
+Type:UsesAttributes("state_metaChild")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
@@ -92,12 +92,12 @@ TMW:RegisterUpgrade(24100, {
 
 
 -- IDP that works with TMW's alpha manager to inherit the real alpha of the icon that it is replicating.
-local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_METACHILD", "alpha_metaChild")
+local Processor = TMW.Classes.IconDataProcessor:New("STATE_METACHILD", "state_metaChild")
 Processor.dontInherit = true
-TMW.IconAlphaManager:AddHandler(50, "ALPHA_METACHILD", true)
+Processor:RegisterAsStateArbitrator(50, nil, true)
 
 Processor:PostHookMethod("OnUnimplementFromIcon", function(self, icon)
-	icon:SetInfo("alpha_metaChild", nil)
+	icon:SetInfo("state_metaChild", nil)
 end)
 
 
@@ -308,13 +308,13 @@ function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 
 			-- Inherit the alpha of the icon. Don't SetInfo_INTERNAL here because the
 			-- call to :InheritDataFromIcon might not call TMW_ICON_UPDATED
-			iconToSet:SetInfo("alpha_metaChild", dataSource.attributes.realAlpha)
+			iconToSet:SetInfo("state_metaChild", dataSource.attributes.calculatedState)
 
 			iconToSet:InheritDataFromIcon(dataSource)
 		end
 
 	elseif iconToSet.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then
-		iconToSet:SetInfo("state; alpha_metaChild; start, duration",
+		iconToSet:SetInfo("state; state_metaChild; start, duration",
 			0,
 			nil,
 			0, 0

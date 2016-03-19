@@ -17,42 +17,29 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+
+TMW.CONST.STATE.DEFAULT_STACKSFAILED = 101
+local STATE = TMW.CONST.STATE.DEFAULT_STACKSFAILED
+
 local floor = floor
 
--- Create an IconDataProcessor that will store the result of the stack test
-local Processor = TMW.Classes.IconDataProcessor:New("ALPHA_STACKSFAILED", "alpha_stackFailed")
-Processor.dontInherit = true
+local Hook = TMW.Classes.IconDataProcessorHook:New("STATE_STACKREQ", "STACK")
 
-TMW.IconAlphaManager:AddHandler(30, "ALPHA_STACKSFAILED")
-
-local Hook = TMW.Classes.IconDataProcessorHook:New("ALPHA_STACKREQ", "STACK")
-
-Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
-	-- GLOBALS: stack
-	t[#t+1] = [[
-	
-	local alpha_stackFailed = nil
-	if
-		stack and ((icon.StackMinEnabled and icon.StackMin > stack) or (icon.StackMaxEnabled and stack > icon.StackMax))
-	then
-		alpha_stackFailed = icon.StackAlpha
-	end
-	
-	if attributes.alpha_stackFailed ~= alpha_stackFailed then
-		icon:SetInfo_INTERNAL("alpha_stackFailed", alpha_stackFailed)
-		doFireIconUpdated = true
-	end
-	--]]
-end)
+Hook:RegisterConfigPanel_XMLTemplate(225, "TellMeWhen_StackRequirements")
 
 Hook:RegisterIconDefaults{
 	StackMin				= 0,
 	StackMax				= 0,
 	StackMinEnabled			= false,
 	StackMaxEnabled			= false,
-	StackAlpha				= 0,
 }
-Hook:RegisterConfigPanel_XMLTemplate(225, "TellMeWhen_StackRequirements")
+
+TMW:RegisterUpgrade(80013, {
+	icon = function(self, ics)
+		ics.States[STATE].Alpha = ics.StackAlpha or 0
+		ics.StackAlpha = nil
+	end,
+})
 TMW:RegisterUpgrade(60000, {
 	icon = function(self, ics)
 		ics.StackMin = floor(tonumber(ics.StackMin)) or 0
@@ -74,3 +61,49 @@ TMW:RegisterUpgrade(60010, {
 		ics.StackAlpha = ics.ConditionAlpha
 	end,
 })
+
+
+
+-- Create an IconDataProcessor that will store the result of the stack test
+local Processor = TMW.Classes.IconDataProcessor:New("STATE_STACKSFAILED", "state_stackFailed")
+Processor.dontInherit = true
+Processor:RegisterAsStateArbitrator(30, Hook, false, function(icon)
+	local ics = icon:GetSettings()
+	if not ics.StackMinEnabled and not ics.StackMaxEnabled then
+		return nil
+	end
+
+	local text = ""
+	if ics.StackMinEnabled then
+		text = L["STACKS"] .. " < " .. ics.StackMin
+	end
+	if ics.StackMaxEnabled then
+		if ics.StackMinEnabled then
+			text = text .. " " .. L["CONDITIONPANEL_OR"]:lower() .. " "
+		end
+		text = text .. L["STACKS"] .. " > " .. ics.StackMax
+	end
+	
+	return {
+		[STATE] = { text = text, tooltipText = L["STACKALPHA_DESC"]},
+	}
+end)
+
+Hook:DeclareUpValue("STATE_DEFAULT_STACKSFAILED",  STATE)
+Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
+	-- GLOBALS: stack
+	t[#t+1] = [[
+	
+	local state_stackFailed = nil
+	if
+		stack and ((icon.StackMinEnabled and icon.StackMin > stack) or (icon.StackMaxEnabled and stack > icon.StackMax))
+	then
+		state_stackFailed = icon.States[STATE_DEFAULT_STACKSFAILED]
+	end
+	
+	if attributes.state_stackFailed ~= state_stackFailed then
+		icon:SetInfo_INTERNAL("state_stackFailed", state_stackFailed)
+		doFireIconUpdated = true
+	end
+	--]]
+end)

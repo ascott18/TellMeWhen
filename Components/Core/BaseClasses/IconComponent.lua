@@ -217,6 +217,11 @@ function IconComponent:ImplementIntoIcon(icon)
 end
 
 -- [INTERNAL]
+function IconComponent:ShouldShowConfigPanels(icon)
+	return icon.ComponentsLookup[self] 
+end
+
+-- [INTERNAL]
 function IconComponent:UnimplementFromIcon(icon)
 	if icon.ComponentsLookup[self] then
 	

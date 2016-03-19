@@ -46,23 +46,25 @@ end
 do
 	local Processor = TMW.Classes.IconDataProcessor:New("STATE", "state")
 	Processor:DeclareUpValue("stateDataNone", {Alpha = 0, Color = "ffffffff"})
+	Processor.dontInherit = true
+	Processor:RegisterAsStateArbitrator(100, nil, false, function(icon, panelInfo)
+		return panelInfo.supplementalData
+	end)
 
 	-- Processor:CompileFunctionSegment(t) is default.
 
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: state
 		t[#t+1] = [[
-		if state ~= nil then
+		--if state ~= nil then
 			local stateData = type(state) == 'table' and state or (state == 0 and stateDataNone or icon.States[state])
 			if attributes.state ~= stateData then
 				attributes.state = stateData
 
-				icon:SetInfo_INTERNAL("alpha", stateData.Alpha)
-
 				TMW:Fire(STATE.changedEvent, icon, stateData, state)
 				doFireIconUpdated = true
 			end
-		end
+		--end
 		--]]
 	end
 
@@ -72,17 +74,10 @@ do
 end
 
 
-
-
-
-
--- ALPHA: "alpha"
+-- CALCULATEDSTATE: "calculatedState"
 do
-	local Processor = TMW.Classes.IconDataProcessor:New("ALPHA", "alpha")
+	local Processor = TMW.Classes.IconDataProcessor:New("CALCULATEDSTATE", "calculatedState")
 	Processor.dontInherit = true
-
-	TMW.IconAlphaManager:AddHandler(100, "ALPHA")
-	-- Processor:CompileFunctionSegment(t) is default.
 end
 
 
@@ -93,8 +88,31 @@ end
 -- ALPHAOVERRIDE: "alphaOverride"
 do
 	local Processor = TMW.Classes.IconDataProcessor:New("ALPHAOVERRIDE", "alphaOverride")
-	TMW.IconAlphaManager:AddHandler(0, "ALPHAOVERRIDE", true)
+	Processor:RegisterAsStateArbitrator(0, nil, true)
 	Processor.dontInherit = true
+
+	Processor:DeclareUpValue("alphaOverrideStates", setmetatable({}, {
+		__index = function(self, k)
+			if not k then return nil end
+			self[k] = {Alpha = k, Color = "ffffffff"}
+			return self[k]
+		end
+	}))
+
+	-- Processor:CompileFunctionSegment(t) is default.
+
+	function Processor:CompileFunctionSegment(t)
+		-- GLOBALS: alphaOverride
+		t[#t+1] = [[
+			local stateData = type(alphaOverride) == 'table' and alphaOverride or alphaOverrideStates[alphaOverride]
+			if attributes.alphaOverride ~= stateData then
+				attributes.alphaOverride = stateData
+
+				TMW:Fire(STATE.changedEvent, icon, stateData, alphaOverride)
+				doFireIconUpdated = true
+			end
+		--]]
+	end
 end
 
 

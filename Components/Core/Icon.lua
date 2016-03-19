@@ -1034,35 +1034,31 @@ function Icon.SetModulesToEnabledStateOfIcon(icon, sourceIcon)
 end
 
 
--- not worth documenting. If you want me to explain wtf this is, send me (Cybeloras) a PM on CurseForge.
-TMW.IconAlphaManager = {
-	AlphaHandlers = {},
-	
-	HandlerSorter = function(a, b)
-		return a.order < b.order
-	end,
+-- If you want me to explain wtf this is, send me (Cybeloras) a PM on CurseForge.
+TMW.IconStateArbitrator = {
+	StateHandlers = {},
 	
 	UPDATE = function(self, event, icon)
 		local attributes = icon.attributes
-		local AlphaHandlers = self.AlphaHandlers
+		local StateHandlers = self.StateHandlers
 		
 		local handlerToUse
 		
-		for i = 1, #AlphaHandlers do
-			local handler = AlphaHandlers[i]
+		for i = 1, #StateHandlers do
+			local handler = StateHandlers[i]
 			
-			local alpha = attributes[handler.attribute]
+			local stateData = attributes[handler.attribute]
 			
-			if alpha == 0 then
+			if stateData and stateData.Alpha == 0 then
 				-- If an alpha is set to 0, then the icon should be hidden no matter what, 
 				-- so use it as the final alpha value and stop looking for more.
 				-- This functionality has existed in TMW since practically day one, by the way. So don't be clever and remove it.
 				handlerToUse = handler
 				break
-			elseif alpha ~= nil then
+			elseif stateData ~= nil then
 				if not handlerToUse then
-					-- If we found an alpha value that isn't nil and we haven't figured out
-					-- an alpha value to use yet, use this one, but keep looking for 0 values.
+					-- If we found a state that isn't nil and we haven't figured out
+					-- a state to use yet, use this one, but keep looking for 0 values.
 					handlerToUse = handler
 				end
 				if handler.haltImmediatelyIfFound then
@@ -1072,50 +1068,60 @@ TMW.IconAlphaManager = {
 		end
 		
 		if handlerToUse then			
-			-- realAlpha stores the alpha that the icon should be showing, before FakeHidden.
-			icon:SetInfo_INTERNAL("realAlpha", attributes[handlerToUse.attribute])
-		end
-	end,
-	
-	SetupHandler = function(handler)
-		local self = handler.self
-		
-		local IconDataProcessor = TMW.Classes.IconDataProcessor.ProcessorsByName[handler.processorName]
-		if IconDataProcessor then
-			if IconDataProcessor.NumAttributes ~= 1 then
-				error("IconModule_Alpha handlers cannot check IconDataProcessors that have more than one attribute!")
-			end
-			
-			handler.attribute = IconDataProcessor.attributesStringNoSpaces
-			
-			TMW:RegisterCallback(IconDataProcessor.changedEvent, self, "UPDATE")
-			
-			TMW:UnregisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", self.SetupHandler, handler)
+			-- calculatedState stores the state that the icon should be showing, before FakeHidden.
+			-- realAlpha does the same for the alpha. We use it on top of calculatedState in favor of backwards compatibility.
+			local state = attributes[handlerToUse.attribute]
+			icon:SetInfo_INTERNAL("realAlpha", state.Alpha)
+			icon:SetInfo_INTERNAL("calculatedState", state)
 		end
 	end,
 
+	GetConfigData = function(handler, icon, panelInfo)
+		if not handler.configGetter then
+			return nil
+		end
+
+		local configData = handler.configGetter(icon, panelInfo)
+		if not configData then
+			return nil
+		end
+
+		local icon = TMW.CI.icon
+		local dependant = handler.dependant
+		if dependant and not dependant:ShouldShowConfigPanels(icon) then
+			return nil
+		end
+
+		return configData
+	end,
+
 	-- PUBLIC METHOD (ish)
-	AddHandler = function(self, order, processorName, haltImmediatelyIfFound)
-		TMW:ValidateType(2, "IconAlphaManager:AddHandler()", order, "number")
-		TMW:ValidateType(3, "IconAlphaManager:AddHandler()", processorName, "string")
+	AddHandler = function(self, IconDataProcessor, order, dependant, haltImmediatelyIfFound, configGetter)
+		TMW:ValidateType(1, "IconStateArbitrator:AddHandler()", IconDataProcessor, "IconDataProcessor")
+		TMW:ValidateType(2, "IconStateArbitrator:AddHandler()", order, "number")
+		TMW:ValidateType(3, "IconStateArbitrator:AddHandler()", dependant, "IconDataProcessorComponent;nil")
+		TMW:ValidateType(4, "IconStateArbitrator:AddHandler()", haltImmediatelyIfFound, "boolean;nil")
+		TMW:ValidateType(5, "IconStateArbitrator:AddHandler()", configGetter, "function;nil")
 		
+
+		if IconDataProcessor.NumAttributes ~= 1 then
+			error("IconStateArbitrator handlers cannot check IconDataProcessors that have more than one attribute!")
+		end
+
 		local handler = {
-			self = self,
 			order = order,
-			processorName = processorName,
+			processor = IconDataProcessor,
+			attribute = IconDataProcessor.attributesStringNoSpaces,
+			dependant = dependant,
 			haltImmediatelyIfFound = haltImmediatelyIfFound,
+			configGetter = configGetter,
+			GetConfigData = self.GetConfigData,
 		}
 		
-		tinsert(self.AlphaHandlers, handler)
+		tinsert(self.StateHandlers, handler)
+		sort(self.StateHandlers, TMW.OrderSort)
 		
-		sort(self.AlphaHandlers, self.HandlerSorter)
-		
-		if TMW.Classes.IconDataProcessor.ProcessorsByName[processorName] then
-			self.SetupHandler(handler)
-		else
-			TMW:RegisterCallback("TMW_CLASS_IconDataProcessor_INSTANCE_NEW", self.SetupHandler, handler)
-		end
-		
+		TMW:RegisterCallback(IconDataProcessor.changedEvent, self, "UPDATE")
 	end,	
 }
 

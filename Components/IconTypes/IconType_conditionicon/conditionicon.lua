@@ -33,7 +33,7 @@ local STATE_FAIL = TMW.CONST.STATE.DEFAULT_HIDE
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("state")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("alpha_conditionFailed")
+Type:UsesAttributes("state_conditionFailed")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -135,10 +135,10 @@ local function ConditionIcon_OnUpdate(icon, time)
 			state = 0
 		end
 		
-		-- We set alpha_conditionFailed to override the automatic alpha handling of ConditionObjects.
-		-- We want to set the alpha on our own (though the state).
+		-- We set state_conditionFailed to override the automatic state handling of ConditionObjects.
+		-- We want to set the alpha on our own (though the icon's state).
 		icon:SetInfo(
-			"alpha_conditionFailed; state; start, duration",
+			"state_conditionFailed; state; start, duration",
 			nil,
 			state,
 			start, duration
@@ -147,7 +147,7 @@ local function ConditionIcon_OnUpdate(icon, time)
 		-- Record the passing state of the icon's condition object so we can detect when it changes.
 		icon.__succeeded = succeeded
 	else
-		icon:SetInfo("alpha_conditionFailed; state", nil, STATE_SUCCEED)
+		icon:SetInfo("state_conditionFailed; state", nil, STATE_SUCCEED)
 	end
 end
 

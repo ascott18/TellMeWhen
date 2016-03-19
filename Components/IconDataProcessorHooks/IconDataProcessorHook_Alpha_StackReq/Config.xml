@@ -6,7 +6,8 @@
 			<Frame parentKey="StackMin" inherits="TellMeWhen_EditBoxWithCheckTemplate">
 				<Size x="67" y="33"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-5"/>
+					<Anchor point="TOPLEFT" x="6" y="-5"/>
+					<Anchor point="RIGHT" relativePoint="CENTER" x="-7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -21,7 +22,9 @@
 			<Frame parentKey="StackMax" inherits="TellMeWhen_EditBoxWithCheckTemplate">
 				<Size x="67" y="33"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.StackMin" relativePoint="RIGHT" x="4"/>
+					<Anchor point="TOP" relativeKey="$parent.StackMin"/>
+					<Anchor point="LEFT" relativePoint="CENTER" x="7"/>
+					<Anchor point="RIGHT" x="-10"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -33,7 +36,7 @@
 				</Scripts>
 			</Frame>
 			
-			<Slider parentKey="StackAlpha" name="$parentStackAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
+			<!-- <Slider parentKey="StackAlpha" name="$parentStackAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.StackMax" relativePoint="RIGHT" x="10" />
 					<Anchor point="RIGHT" x="-10" />
@@ -54,7 +57,7 @@
 						self:SetTextFormatter(self.OrangeAt100Formatter)
 					</OnLoad>
 				</Scripts>
-			</Slider>
+			</Slider> -->
 		</Frames>
 		<Scripts>
 			<OnLoad>

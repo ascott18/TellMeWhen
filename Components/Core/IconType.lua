@@ -506,7 +506,8 @@ IconType:RegisterIconEvent(100, "OnEventsRestored", {
 })
 
 IconType:UsesAttributes("alphaOverride")
-IconType:UsesAttributes("realAlpha") -- this is implied by the mere existance of IconAlphaManager
+IconType:UsesAttributes("realAlpha")
+IconType:UsesAttributes("calculatedState")
 IconType:UsesAttributes("conditionFailed")
 
 doneImplementingDefaults = true

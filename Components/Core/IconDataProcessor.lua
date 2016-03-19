@@ -105,6 +105,11 @@ function IconDataProcessor:CompileFunctionHooks(t, orderRequested)
 	end
 end
 
+--- Wrapper method around TMW.IconStateArbitrator:AddHandler().
+function IconDataProcessor:RegisterAsStateArbitrator(...)
+	TMW.IconStateArbitrator:AddHandler(self, ...)
+end
+
 --- Compiles the segment of the [[api/icon/api-documentation/|Icon]]{{{:SetInfo()}}} method that will be used to process the data for this [[api/icon-data-processor/api-documentation/|IconDataProcessor]]. This method should be overridden for any IconDataProcessors that process more than one attribute, or any IconDataProcessors that do more than simply record and notify changes to a single attribute. If changes are many to any attributes, the processor's {{{.changedEvent}}} should be fired (see usage below), and doFireIconUpdated should be set true. IconDataProcessors are also commonly used to trigger icon events (seen in the second usage example below).
 -- 
 -- Local variables are provided for:

@@ -94,7 +94,7 @@ function Texture_Colored:STATE(icon, stateData)
 	end
 end
 
-Texture_Colored:SetDataListner("STATE", Texture_Colored.STATE)
+Texture_Colored:SetDataListner("CALCULATEDSTATE", Texture_Colored.STATE)
 
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()

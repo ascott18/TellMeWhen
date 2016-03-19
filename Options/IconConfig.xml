@@ -375,6 +375,18 @@
 					local settings = self:GetSettingTable()
 					local supplementalData = panelInfo.supplementalData
 					
+					local configData = {}
+					for _, stateManager in pairs(TMW.IconStateArbitrator.StateHandlers) do
+						local managerConfigData = stateManager:GetConfigData(TMW.CI.icon, panelInfo)
+
+						if managerConfigData then
+							for state, data in TMW:OrderedPairs(managerConfigData) do
+								data.state = state
+								tinsert(configData, data)
+							end
+						end
+					end
+
 					assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_IconStates!")
 					
 					-- Set the title for the frame
@@ -384,7 +396,7 @@
 						set.doHide = true
 					end
 					
-					for i, data in TMW:OrderedPairs(supplementalData) do
+					for i, data in pairs(configData) do
 						local set = self.frames[i]
 						if not set then
 							set = TMW.C.Config_Frame_IconStateSet:New("Frame", nil, self, "TellMeWhen_IconStateSet", i)
@@ -395,6 +407,10 @@
 								set:SetPoint("TOP", self.frames[i-1], "BOTTOM")
 							end
 						end
+
+						set:SetSetting(data.state)
+						set:SetConfigData(data)
+
 						set.doHide = nil
 
 						if not data.requires or settings[data.requires] then

@@ -7,7 +7,8 @@
 			<Frame parentKey="DurationMin" inherits="TellMeWhen_TimeEditBoxWithCheckTemplate">
 				<Size x="67" y="33"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-5"/>
+					<Anchor point="TOPLEFT" x="6" y="-5"/>
+					<Anchor point="RIGHT" relativePoint="CENTER" x="-7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -22,7 +23,9 @@
 			<Frame parentKey="DurationMax" inherits="TellMeWhen_TimeEditBoxWithCheckTemplate">
 				<Size x="67" y="33"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.DurationMin" relativePoint="RIGHT" x="4"/>
+					<Anchor point="TOP" relativeKey="$parent.DurationMin"/>
+					<Anchor point="LEFT" relativePoint="CENTER" x="7"/>
+					<Anchor point="RIGHT" x="-10"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -33,29 +36,6 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			
-			<Slider parentKey="DurationAlpha" name="$parentDurationAlpha" inherits="TellMeWhen_SliderTemplate_Alpha" valuestep="1">
-				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.DurationMax" relativePoint="RIGHT" x="10" />
-					<Anchor point="RIGHT" x="-10" />
-					<Anchor point="TOP" y="-13" />
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["REQFAILED_ALPHA"], TMW.L["DURATIONALPHA_DESC"])
-						self:SetSetting("DurationAlpha")
-
-						self:CScriptAdd("ReloadRequested", function()
-							local settings = self:GetSettingTable()
-							self:SetEnabled(settings.DurationMinEnabled or settings.DurationMaxEnabled)
-						end)
-
-						self:SetTextFormatter(self.OrangeAt100Formatter)
-					</OnLoad>
-				</Scripts>
-			</Slider>
 		</Frames>
 		<Scripts>
 			<OnLoad>

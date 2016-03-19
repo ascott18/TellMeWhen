@@ -223,17 +223,17 @@ L["REQFAILED_ALPHA"] = "Opacity when failed"
 L["CONDITIONALPHA_METAICON"] = "Failed Conditions"
 L["CONDITIONALPHA_METAICON_DESC"] = [[This opacity will be used when conditions fail.
 
-This setting will be ignored if the icon is already hidden due to its %s settings.
+This setting will be ignored if the icon is already hidden due to another %s setting.
 
 Conditions can be configured in the %q tab.]]
 
 
-L["DURATIONALPHA_DESC"] = [[Set the opacity level that the icon should display at when these duration requirements fail.
+L["DURATIONALPHA_DESC"] = [[Set the opacity level that the icon should display at when the duration requirements fail.
 
-This setting will be ignored if the icon is already hidden due to its %s settings.]]
-L["STACKALPHA_DESC"] = [[Set the opacity level that the icon should display at when these stack requirements fail.
+This setting will be ignored if the icon is already hidden due to another %s setting.]]
+L["STACKALPHA_DESC"] = [[Set the opacity level that the icon should display at when the stack requirements fail.
 
-This setting will be ignored if the icon is already hidden due to its %s settings.]]
+This setting will be ignored if the icon is already hidden due to another %s setting.]]
 
 
 

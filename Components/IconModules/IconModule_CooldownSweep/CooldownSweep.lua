@@ -272,6 +272,8 @@ function CooldownSweep:UpdateCooldown()
 		cd:Show()
 	elseif icon.attributes.realAlpha == 0 or icon.group:GetEffectiveAlpha() == 0 then
 		cd:Hide()
+	else
+		cd:SetCooldown(0, 0)
 	end
 end
 

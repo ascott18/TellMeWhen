@@ -2759,13 +2759,11 @@ TMW:NewClass("Config_Frame_IconStateSet", "Config_Frame"){
 
 
 	OnNewInstance_Frame_IconStateSet = function(self)
-		self:CScriptAdd("PanelSetup", self.PanelSetup)
-
 		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
 	end,
 
 	SettingTableRequested = function(self)
-		return TMW.CI.ics and TMW.CI.ics.States[self:GetID()] or false
+		return TMW.CI.ics and TMW.CI.ics.States[self.setting] or false
 	end,
 
 	-- Script Handlers
@@ -2779,19 +2777,13 @@ TMW:NewClass("Config_Frame_IconStateSet", "Config_Frame"){
 	
 
 	-- Methods
-	PanelSetup = function(self, panel, panelInfo)
-		local supplementalData = panelInfo.supplementalData
-		
-		assert(supplementalData, "Supplemental data (arg5 to RegisterConfigPanel_XMLTemplate) must be provided for TellMeWhen_IconStates!")
-		
-		local dataForFrame = supplementalData[self:GetID()]
-		if dataForFrame then
-			self.Alpha:SetTexts(dataForFrame.text)
-			self.Alpha:SetTooltip(
-				L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(dataForFrame.text),
-				dataForFrame.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
-			)
-		end
+
+	SetConfigData = function(self, configData)
+		self.Alpha:SetTexts(configData.text)
+		self.Alpha:SetTooltip(
+			L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(configData.text),
+			configData.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
+		)
 	end,
 
 	ReloadSetting = function(self)
