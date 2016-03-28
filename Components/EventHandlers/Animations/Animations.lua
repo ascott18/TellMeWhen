@@ -628,7 +628,7 @@ Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 			Alpha = eventSettings.Alpha,
 			SizeX = eventSettings.SizeX,
 			SizeY = eventSettings.SizeY,
-			Image = TMW:GetTexturePathFromSetting(eventSettings.Image),
+			Image = TMW.COMMON.Textures:GetTexturePathFromSetting(eventSettings.Image),
 			
 			AnchorTo = eventSettings.AnchorTo,
 		}

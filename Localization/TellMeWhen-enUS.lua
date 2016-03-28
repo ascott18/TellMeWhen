@@ -423,7 +423,7 @@ L["ICONMENU_DISPEL"] = "Dispel Type"
 L["ICONMENU_DRS"] = "Diminishing Returns"
 
 L["ICONMENU_CUSTOMTEX"] = "Custom Texture"
-L["ICONMENU_CUSTOMTEX_DESC"] = [[You may override the texture shown by this icon on the following ways:
+L["ICONMENU_CUSTOMTEX_DESC"] = [[You may override the texture shown by this icon in the following ways:
 
 |cff00d1ffSpell Texture|r
 Enter the Name or ID of the spell that has the texture that you want to use.

@@ -118,7 +118,7 @@
 		</Layers>
 	</Button>
 	
-	<Frame parentKey="Suggest" name="$parentSuggest" parent="TellMeWhen_IconEditor" hidden="true" enableMouse="true">
+	<Frame parentKey="Suggest" name="$parentSuggest" parent="TellMeWhen_IconEditor" hidden="true" enableMouse="true" toplevel="true">
 		<Size x="200"/>
 		<Anchors>
 			<Anchor point="TOP" y="-0"/> 
@@ -327,6 +327,11 @@
 				--	self.SetPoint = TMW.NULLFUNC
 				--self.ClearAllPoints = TMW.NULLFUNC
 			</OnLoad>
+			<OnUpdate>
+				if TMW.SUG.Box then
+					self:SetFrameLevel(TMW.SUG.Box:GetFrameLevel() + 50)
+				end
+			</OnUpdate>
 			<OnSizeChanged>						
 				if TMW.SUG:GetNumFramesNeeded() ~= #TMW.SUG and self:IsShown() then
 					TMW.SUG:SuggestingComplete()

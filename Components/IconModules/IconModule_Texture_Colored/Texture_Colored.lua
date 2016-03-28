@@ -59,7 +59,12 @@ end
 
 function Texture_Colored:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
-	self:STATE(icon, icon.attributes.state)
+	self:STATE(icon, icon.attributes.calculatedState)
+end
+
+function Texture_Colored:VarTexChanged()
+	local icon = self.icon
+	self:STATE(icon, icon.attributes.calculatedState)
 end
 
 local COLOR_UNLOCKED = {
@@ -73,17 +78,24 @@ function Texture_Colored:STATE(icon, stateData)
 	else
 		color = stateData.Color
 	end
+
+	local texture = stateData.Texture
+	if texture and texture ~= "" then
+		texture = TMW.COMMON.Textures:EvaluateTexturePath(texture, self, "VarTexChanged")
+		self.texture:SetTexture(texture)
+	else
+		self.texture:SetTexture(icon.attributes.texture)
+	end
 	
-	local texture = self.texture
 	local c = TMW:StringToCachedRGBATable(color)
 	
 	if not (LMB and OnlyMSQ) then
-		texture:SetVertexColor(c.r, c.g, c.b, 1)
+		self.texture:SetVertexColor(c.r, c.g, c.b, 1)
 	else
-		texture:SetVertexColor(1, 1, 1, 1)
+		self.texture:SetVertexColor(1, 1, 1, 1)
 	end
 
-	texture:SetDesaturated(c.flags and c.flags.desaturate or false)
+	self.texture:SetDesaturated(c.flags and c.flags.desaturate or false)
 	
 	if LMB and ColorMSQ then
 		-- This gets set by IconModule_IconContainer_Masque
@@ -96,6 +108,11 @@ end
 
 Texture_Colored:SetDataListner("CALCULATEDSTATE", Texture_Colored.STATE)
 
+
+function Texture_Colored:TEXTURE(icon, texture)
+	self:STATE(icon, icon.attributes.calculatedState)
+end
+Texture_Colored:SetDataListner("TEXTURE")
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	ColorMSQ = TMW.db.profile.ColorMSQ

@@ -1155,6 +1155,49 @@
 				</Scripts>
 			</Slider>
 
+			<EditBox parentKey="Texture" inherits="TellMeWhen_InputBoxTemplate">
+				<Size x="95" y="16"/>
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.AlphaSlider" relativePoint="BOTTOM" y="-10"/>
+					<Anchor point="LEFT" relativeKey="$parent.AlphaSlider"/>
+					<Anchor point="RIGHT" relativeKey="$parent.AlphaSlider" />
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString parentKey="Left" inherits="GameFontHighlightSmall" justifyH="LEFT" justifyV="BOTTOM" >
+							<Size y="30" />
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP"/>
+								<Anchor point="LEFT" x="3" />
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+						self.__ttMinWidth = 300
+
+						self:SetSetting("textureValue")
+
+
+						self.Left:SetText(TMW.L["ICONMENU_CUSTOMTEX"])
+						self:SetTexts(TMW.L["ICONMENU_CUSTOMTEX"], TMW.L["ICONMENU_CUSTOMTEX_DESC"])
+					</OnLoad>
+					<OnShow>
+						self:GetParent():SetHeight(self:GetParent():GetHeight() + self:GetHeight() + 10)
+						if self:GetParent().AlphaSlider:IsShown() then
+							self:SetPoint("TOP", self:GetParent().AlphaSlider, "BOTTOM", 0, -17)
+						else
+							self:SetPoint("TOP", self:GetParent().ValueSlider, "BOTTOM", 0, -17)
+						end
+					</OnShow>
+					<OnHide>
+						self:GetParent():SetHeight(self:GetParent():GetHeight() - self:GetHeight() - 10)
+					</OnHide>
+				</Scripts>
+			</EditBox>
+
 			<Button parentKey="Okay" inherits="TellMeWhen_ButtonTemplate">
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.HueSlider" />

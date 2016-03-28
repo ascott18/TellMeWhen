@@ -255,6 +255,7 @@ TMW.Defaults = {
 							["**"] = {
 								Alpha = 0,
 								Color = "ffffffff",
+								Texture = "",
 							},
 							[TMW.CONST.STATE.DEFAULT_SHOW] = {
 								Alpha = 1,

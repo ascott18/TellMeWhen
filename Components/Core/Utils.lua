@@ -502,26 +502,6 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	return ret
 end
 
-function TMW:GetTexturePathFromSetting(setting)
-	setting = tonumber(setting) or setting
-		
-	if setting and setting ~= "" then
-
-		if TMW.GetSpellTexture(setting) then
-			return TMW.GetSpellTexture(setting)
-		end
-
-		-- If there is a slash in it, then it is probably a full path
-		if strfind(setting, "[\\/]") then 
-			return setting
-		else
-			-- If there isn't a slash in it, then it is probably be a wow icon in interface\icons.
-			-- it still might be a file in wow's root directory, but there is no way to tell for sure
-			return "Interface/Icons/" .. setting
-		end			
-	end
-end
-
 
 
 

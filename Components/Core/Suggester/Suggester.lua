@@ -39,6 +39,8 @@ local SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerial
 TMW.SUG = SUG
 
 
+local DEBOUNCE_TIMER = 0.15
+
 TMW.IE:RegisterUpgrade(62217, {
 	global = function(self)
 		-- These are both old and unused. Kill them.
@@ -484,7 +486,7 @@ local EditBoxHooks = {
 		if self.SUGTimer then
 			self.SUGTimer:Cancel()
 		end
-		self.SUGTimer = C_Timer.NewTimer(0.2, function()
+		self.SUGTimer = C_Timer.NewTimer(DEBOUNCE_TIMER, function()
 			if userInput and self.SUG_Enabled then
 				SUG.redoIfSame = nil
 				SUG:NameOnCursor()
@@ -593,8 +595,7 @@ function SUG:SetStyle(inline)
 		List.Header:Hide()
 		List.Help:Hide()
 
-		List:SetFrameLevel(100)
-		List:SetScale(0.85)
+		List:SetScale(0.95)
 		List:ClearAllPoints()
 		List:SetPoint("TOPLEFT", SUG.Box, "BOTTOMLEFT", 0, -2)
 		--List:SetPoint("TOPRIGHT", SUG.Box, "BOTTOMRIGHT", 0, -2)
@@ -604,7 +605,6 @@ function SUG:SetStyle(inline)
 	else
 		firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
 
-		List:SetFrameLevel(TMW.IE:GetFrameLevel() + 1)
 		List:SetScale(1)
 		List:ClearAllPoints()
 		List:SetPoint("TOPLEFT", TMW.IE, "TOPRIGHT", 1, 0)

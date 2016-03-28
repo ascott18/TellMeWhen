@@ -324,11 +324,20 @@
 						self:SetTooltip(TMW.L["ICONMENU_STATECOLOR"], TMW.L["ICONMENU_STATECOLOR_DESC"])
 						self:SetHasOpacity(false)
 						self:SetHasDesaturate(true)
+						self:SetHasTextureConfig(true, "Texture")
 						self:SetSetting("Color")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local textureSetting = self:GetSettingTable().Texture
+							local base = TMW.CI.icon.attributes.texture
+							if textureSetting ~= "" then
+								local texture = TMW.COMMON.Textures:EvaluateTexturePath(textureSetting, TMW.NULLFUNC)
+								self:SetSwatchTexture(base, texture)
+							else
+								self:SetSwatchTexture(base, nil)
+							end
+						end)
 					</OnLoad>
-					<OnUpdate>
-						self:SetSwatchTexture(TMW.CI.icon.attributes.texture)
-					</OnUpdate>
 				</Scripts>
 			</Button>
 

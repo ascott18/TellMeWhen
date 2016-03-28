@@ -2109,21 +2109,19 @@ TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
 TMW:NewClass("Config_TimeEditBox", "Config_EditBox"){
 	OnNewInstance_TimeEditBox = function(self)
 		self:CScriptAdd("ModifySettingValueRequested", self.ModifySettingValueRequested)
+		self:CScriptAdd("UnModifySettingValueRequested", self.UnModifySettingValueRequested)
 	end,
 
 	ModifySettingValueRequested = function(self, value)
-		return tonumber(value) or 0
-	end,
-
-	OnEditFocusLost = function(self, button)
 		local t = TMW:CleanString(self)
 		if strfind(t, ":") then
 			t = TMW.toSeconds(t)
 		end
-		t = tonumber(t) or 0
-		self:SetText(t)
+		return tonumber(t) or 0
+	end,
 
-		self:SaveSetting()
+	UnModifySettingValueRequested = function(self, value)
+		return TMW.C.Formatter.TIME_COLONS_FORCEMINS:Format(value)
 	end,
 }
 
@@ -2816,7 +2814,14 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		if settings and self.setting then
 			IE:RegisterRapidSetting(self.setting)
 			
-			TellMeWhen_ColorPicker:Load(self, "PickerCallback", settings[self.setting], self.swatchTexture, self.hasOpacity, self.hasDesaturate)
+			TellMeWhen_ColorPicker:Load(
+				self,
+				"PickerCallback",
+				settings[self.setting],
+				self.swatchTexture,
+				self.hasOpacity,
+				self.hasDesaturate,
+				self.hasTexture and settings[self.textureSetting] or nil)
 		end
 	end,
 
@@ -2833,15 +2838,29 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		self.hasDesaturate = hasDesaturate
 	end,
 
-	SetSwatchTexture = function(self, texture)
-		self.swatchTexture = texture
+	SetHasTextureConfig = function(self, hasTexture, textureSetting)
+		self.hasTexture = hasTexture
+		self.textureSetting = textureSetting
+	end,
+
+	SetSwatchTexture = function(self, baseTexture, overrideTexture)
+		self.swatchTexture = baseTexture
+		self.swatchOverrideTexture = overrideTexture
 		self:UpdateSwatchTexture()
 	end,
 
 	UpdateSwatchTexture = function(self)
 		local r, g, b, a, flags = self:GetRGBA()
-		if self.swatchTexture and self.swatchTexture ~= "" then
-			self.swatch:SetTexture(self.swatchTexture)
+
+		local texture
+		if self.swatchOverrideTexture and self.swatchOverrideTexture ~= "" then
+			texture = self.swatchOverrideTexture
+		elseif self.swatchTexture then
+			texture = self.swatchTexture
+		end
+
+		if texture then
+			self.swatch:SetTexture(texture)
 			self.swatch:SetVertexColor(r, g, b)
 			self.swatch:SetAlpha(a)
 			self.swatch:SetDesaturated(flags and flags.desaturate)
@@ -2859,11 +2878,14 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		end
 	end,
 
-	PickerCallback = function(self, colorString)
+	PickerCallback = function(self, colorString, texture)
 		local settings = self:GetSettingTable()
 
 		if settings and self.setting then
 			settings[self.setting] = colorString
+			if self.hasTexture then
+				settings[self.textureSetting] = texture
+			end
 			self:OnSettingSaved()
 		end
 	end,
@@ -3025,6 +3047,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 	s = 1,
 	v = 0.5,
 	a = 0.5,
+	textureValue = "",
 	desaturate = false,
 	
 	OnNewInstance = function(self)
@@ -3164,6 +3187,16 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		self.swatch.swatch:SetTexture(r,g,b)
 		self.swatch.swatch:SetAlpha(a)
 
+
+		self.iconTexture:SetTexture(self.originalTexture)
+		if self.hasTexture then
+			local textureValue = self.textureValue
+			if textureValue and textureValue ~= "" then
+				textureValue = TMW.COMMON.Textures:EvaluateTexturePath(textureValue, TMW.NULLFUNC)
+
+				self.iconTexture:SetTexture(textureValue)
+			end
+		end		
 		self.iconTexture:SetVertexColor(TMW:HSVToRGB(h, s, v))
 		self.iconTexture:SetDesaturated(self.desaturate)
 	end,
@@ -3172,7 +3205,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		self:AddRecentColor(self:GetColorString())
 
 		if self.callbackObj and self.callback then
-			self.callbackObj[self.callback](self.callbackObj, self:GetColorString())
+			self.callbackObj[self.callback](self.callbackObj, self:GetColorString(), self.textureValue)
 		end
 
 		self:Hide()
@@ -3200,19 +3233,26 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		return TMW:HSVAToColorString(self.h, self.s, self.v, self.a, {desaturate=self.desaturate})
 	end,
 
-	Load = function(self, callbackObj, callback, value, texture, hasOpacity, hasDesaturate)
+	Load = function(self, callbackObj, callback, value, texture, hasOpacity, hasDesaturate, textureValue)
 		self.hasOpacity = hasOpacity
 		self.hasDesaturate = hasDesaturate
+		self.hasTexture = not not textureValue
+		self.originalTexture = texture
 		self.callbackObj = callbackObj
 		self.callback = callback
 
 		self.AlphaSlider:SetShown(hasOpacity)
 		self.Desaturate:SetShown(hasDesaturate)
 
+		self.Texture:SetShown(self.hasTexture)
+		TMW.SUG:EnableEditBox(self.Texture, "texture_withVarTex", true, true)
+
 		self.iconTexture:SetTexture(texture)
 		self.iconLabel:SetShown(not not texture)
 
+		self.textureValue = textureValue or ""
 		self:SetColorString(value, true)
+
 		self:AddRecentColor(value)
 		self:UpdateRecentColors()
 

@@ -91,7 +91,7 @@ TMW:RegisterUpgrade(24100, {
 
 
 
--- IDP that works with TMW's alpha manager to inherit the real alpha of the icon that it is replicating.
+-- IDP that works with TMW's state arbitrator to inherit the state of the icon that it is replicating.
 local Processor = TMW.Classes.IconDataProcessor:New("STATE_METACHILD", "state_metaChild")
 Processor.dontInherit = true
 Processor:RegisterAsStateArbitrator(50, nil, true)
@@ -305,7 +305,6 @@ function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 		dataSource.__lastMetaCheck = TMW.time
 
 		if needUpdate or icon.metaUpdateQueued then
-
 			-- Inherit the alpha of the icon. Don't SetInfo_INTERNAL here because the
 			-- call to :InheritDataFromIcon might not call TMW_ICON_UPDATED
 			iconToSet:SetInfo("state_metaChild", dataSource.attributes.calculatedState)

@@ -2,8 +2,7 @@
 ====IMPORTANT: Breaking Changes====
 * The Primary/Secondary spec group settings are gone, and the way that spec settings were stored has changed.
 ** There is a small chance you will need to reconfigure the spec and tree settings on all your groups.
-* Color configuration has been completely revamped. It is now done on each icon.
-** Most of your old color settings were lost.
+* Most of your old color settings were lost.
 
 * The Update Order settings have been removed.
 ** Try replacing usages of the Expand sub-metas setting with Group Controller meta icons if you experience issues.
@@ -12,6 +11,12 @@
 
 ====General====
 * All TellMeWhen configuration is now done in the icon editor.
+
+* Color configuration has been completely revamped. It is now done on each icon.
+** Duration Requirements, Stack Requirements, and Conditions Failed opacities now use Opactiy & Color settings.
+** Out of Range & Out Of Power settings now use Opactiy & Color settings.
+** You can also set a custom texture for each of your Opacity & Color settings.
+
 * New conditions have been added for checking your current location.
 
 ===v7.4.0===

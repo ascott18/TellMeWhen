@@ -171,7 +171,7 @@ function TMW:GuessIconTexture(ics)
 	local tex
 
 	if ics.CustomTex then
-		tex = TMW:GetTexturePathFromSetting(ics.CustomTex)
+		tex = TMW.COMMON.Textures:GetTexturePathFromSetting(ics.CustomTex)
 	end
 	
 	if not tex then

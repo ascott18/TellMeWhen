@@ -1,5 +1,7 @@
 ﻿<Ui>
 
+<Script file="Textures.lua"/>
+
 <Script file="SwingTimerMonitor.lua"/>
 
 <Script file="UpdateTableManager.lua"/>
