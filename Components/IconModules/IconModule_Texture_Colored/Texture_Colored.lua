@@ -69,6 +69,7 @@ end
 
 local COLOR_UNLOCKED = {
 	Color = "ffffffff",
+	Texture = "",
 	Gray = false,
 }
 function Texture_Colored:STATE(icon, stateData)

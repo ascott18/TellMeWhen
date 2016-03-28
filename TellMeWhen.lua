@@ -2947,15 +2947,6 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 end
 
 function TMW:OnProfile(event, arg2, arg3)
-
-	for group, domain in TMW:InGroups() do
-		if domain == "profile" then
-			for icon in group:InIcons() do
-				icon:SetInfo("texture", "")
-			end
-		end
-	end
-	
 	TMW:UpgradeProfile()
 
 	TMW:Update()

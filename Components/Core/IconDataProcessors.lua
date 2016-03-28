@@ -45,7 +45,7 @@ end
 -- STATE: "state"
 do
 	local Processor = TMW.Classes.IconDataProcessor:New("STATE", "state")
-	Processor:DeclareUpValue("stateDataNone", {Alpha = 0, Color = "ffffffff"})
+	Processor:DeclareUpValue("stateDataNone", {Alpha = 0, Color = "ffffffff", Texture=""})
 	Processor.dontInherit = true
 	Processor:RegisterAsStateArbitrator(100, nil, false, function(icon, panelInfo)
 		return panelInfo.supplementalData
@@ -94,7 +94,7 @@ do
 	Processor:DeclareUpValue("alphaOverrideStates", setmetatable({}, {
 		__index = function(self, k)
 			if not k then return nil end
-			self[k] = {Alpha = k, Color = "ffffffff"}
+			self[k] = {Alpha = k, Color = "ffffffff", Texture=""}
 			return self[k]
 		end
 	}))
