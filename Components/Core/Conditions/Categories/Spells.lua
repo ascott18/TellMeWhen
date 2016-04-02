@@ -258,8 +258,7 @@ ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 })
 ConditionCategory:RegisterCondition(5,	 "SPELLRANGE", {
 	text = L["CONDITIONPANEL_SPELLRANGE"],
-	min = 0,
-	max = 1,
+	bool = true,
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_SPELLRANGE"], L["CNDT_ONLYFIRST"])
 		editbox:SetLabel(L["SPELLTOCHECK"])
@@ -278,9 +277,7 @@ ConditionCategory:RegisterCondition(5,	 "SPELLRANGE", {
 })
 ConditionCategory:RegisterCondition(6,	 "GCD", {
 	text = L["GCD_ACTIVE"],
-
 	bool = true,
-	
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_hunter_steadyshot",
 	tcoords = CNDT.COMMON.standardtcoords,

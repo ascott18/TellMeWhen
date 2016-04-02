@@ -514,6 +514,51 @@ ConditionCategory:RegisterCondition(13,   "CREATURETYPE", {
 })
 
 
+ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
+	text = L["CONDITIONPANEL_UNITRACE"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSERACE"],
+	bitFlags = (function()
+		local LBRace = LibStub("LibBabble-Race-3.0"):GetLookupTable()
+		local bitFlags = {
+			["Human"] = {order = 1, text = LBRace["Human"]},
+			["Dwarf"] = {order = 2, text = LBRace["Dwarf"]},
+			["NightElf"] = {order = 3, text = LBRace["Night Elf"]},
+			["Gnome"] = {order = 4, text = LBRace["Gnome"]},
+			["Draenei"] = {order = 5, text = LBRace["Draenei"]},
+			["Worgen"] = {order = 6, text = LBRace["Worgen"], space = true},
+			["Orc"] = {order = 7, text = LBRace["Orc"]},
+			["Scourge"] = {order = 8, text = LBRace["Undead"]},
+			["Tauren"] = {order = 9, text = LBRace["Tauren"]},
+			["Troll"] = {order = 10, text = LBRace["Troll"]},
+			["BloodElf"] = {order = 11, text = LBRace["Blood Elf"]},
+			["Goblin"] = {order = 12, text = LBRace["Goblin"], space = true},
+			["Pandaren"] = {order = 13, text = LBRace["Pandaren"]},
+		}
+
+		for token, data in pairs(bitFlags) do
+			data.icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-RACES"
+			data.tcoords = TMW:GetRaceIconCoords(token)
+		end
+
+		return bitFlags
+	end)(),
+
+	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-RACES",
+	tcoords = TMW:GetRaceIconCoords(select(2, UnitRace("player"))),
+	
+	defaultUnit = "target",
+	Env = {
+		UnitRace = UnitRace,
+	},
+	funcstr = [[BITFLAGSMAPANDCHECK( select(2, UnitRace(c.Unit)) )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
+	end,
+})
+
+
 
 ConditionCategory:RegisterSpacer(13.5)
 

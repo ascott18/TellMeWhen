@@ -19,15 +19,35 @@ local print = TMW.print
 
 local SUG = TMW.SUG
 
+local BableCT = LibStub("LibBabble-CreatureType-3.0"):GetLookupTable()
+
 local Module = SUG:NewModule("creaturetype", SUG:GetModule("default"))
 Module.noMin = true
 Module.noTexture = true
-Module.NUM_CREATURE_TYPES = 14
 Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
+Module.ENGLISH_TYPES = {
+	"Aberration",
+	"Beast",
+	"Critter",
+	"Demon",
+	"Dragonkin",
+	"Elemental",
+	"Gas Cloud",
+	"Giant",
+	"Humanoid",
+	"Mechanical",
+	"Non-combat Pet",
+	"Not specified",
+	"Totem",
+	"Undead",
+	"Wild Pet",
+}
+
 function Module:Entry_AddToList_1(f, index)
-	local creaturetypeLocalized = L["CREATURETYPE_" .. index]
+	local creaturetypeEnglish = Module.ENGLISH_TYPES[index]
+	local creaturetypeLocalized = BableCT[creaturetypeEnglish]
 	
 	f.tooltiptitle = creaturetypeLocalized
 	
@@ -38,8 +58,9 @@ end
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	local lastName = SUG.lastName
 
-	for index = 1, self.NUM_CREATURE_TYPES do
-		local creaturetypeLocalized = L["CREATURETYPE_" .. index]
+
+	for index, creaturetypeEnglish in pairs(self.ENGLISH_TYPES) do
+		local creaturetypeLocalized = BableCT[creaturetypeEnglish]
 	
 		if strfind(strlower(creaturetypeLocalized), lastName) then
 			suggestions[#suggestions + 1] = index

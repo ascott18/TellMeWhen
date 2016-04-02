@@ -83,7 +83,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	    [SPELL_POWER_FOCUS] = FOCUS,
 	    [SPELL_POWER_ENERGY] = ENERGY,
 	    [4] = L["CONDITIONPANEL_COMBO"],
-	    [SPELL_POWER_RUNES] = RUNES,
+	    -- [SPELL_POWER_RUNES] = RUNES, -- TODO: can we add this back with the changes to runes in Legion?
 	    [SPELL_POWER_RUNIC_POWER] = RUNIC_POWER,
 	    [SPELL_POWER_SOUL_SHARDS] = SOUL_SHARDS,
 	    [SPELL_POWER_ECLIPSE] = L["ECLIPSE"],

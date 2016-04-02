@@ -399,10 +399,12 @@ L["ICONMENU_OORANGE"] = "Out of Range"
 L["ICONMENU_OOPOWER"] = "Out of Power"
 L["ICONMENU_OO_F"] = "Out of %s"
 
-L["ICONMENU_STATECOLOR"] = "Icon Tint"
+L["ICONMENU_STATECOLOR"] = "Icon Tint & Texture"
 L["ICONMENU_STATECOLOR_DESC"] = [[Set the tint of the icon's texture in this icon state.
 
-White is normal. Any other color will tint the texture to that color.]]
+White is normal. Any other color will tint the texture to that color.
+
+You can also override the texture displayed on the icon while in this state.]]
 
 
 L["ICONMENU_COUNTING"] = "Timer running"
@@ -1276,6 +1278,7 @@ L["CONDITIONPANEL_RUNESLOCK_DESC"] = [=[Use this condition type to check when th
 L["CONDITIONPANEL_PVPFLAG"] = "Unit is PvP Flagged"
 L["CONDITIONPANEL_LEVEL"] = "Unit Level"
 L["CONDITIONPANEL_CLASS"] = "Unit Class"
+L["CONDITIONPANEL_UNITRACE"] = "Unit Race"
 L["CONDITIONPANEL_UNITSPEC"] = "Unit Specialization"
 L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"] = "Choose Specs..."
 L["CONDITIONPANEL_UNITSPEC_DESC"] = [[This condition ONLY works for:
@@ -1382,7 +1385,7 @@ If more help is needed (but not help about how to write Lua code), open a ticket
 L["CONDITIONPANEL_OLD"] = "<|cffff1300OLD|r>"
 L["CONDITIONPANEL_OLD_DESC"] = "<|cffff1300OLD|r> - There is a newer/better version of this condition available."
 L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"] = "Choose Types..."
-L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
+L["CONDITIONPANEL_BITFLAGS_CHOOSERACE"] = "Choose Races..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
 L["CONDITIONPANEL_BITFLAGS_SELECTED"] = "|cff7fffffSelected|r:"
 L["CONDITIONPANEL_BITFLAGS_NOT"] = "Not"
@@ -1804,7 +1807,9 @@ L["MESSAGERECIEVE"] = "%s has sent you some TellMeWhen data! You can import this
 L["MESSAGERECIEVE_SHORT"] = "%s has sent you some TellMeWhen data!"
 L["CONFIGPANEL_COMM_HEADER"] = "Communication"
 L["ALLOWCOMM"] = "Allow in-game sharing"
-L["ALLOWCOMM_DESC"] = "Allow other TellMeWhen users to send you data."
+L["ALLOWCOMM_DESC"] = [[Allow other TellMeWhen users to send you data.
+
+You will need to reload your UI or log out before you will be able to receive any data.]]
 L["ALLOWVERSIONWARN"] = "Notify of new versions"
 L["NEWVERSION"] = "A new version of TellMeWhen is available: %s"
 L["PLAYER_DESC"] = "The 'player' unit is you."
@@ -2731,18 +2736,3 @@ Creature types must be typed exactly as they appear in the creature's tooltip.
 
 The condition will pass if any types are matched.]]
 
-
-L["CREATURETYPE_1"] = "Beast"
-L["CREATURETYPE_2"] = "Dragonkin"
-L["CREATURETYPE_3"] = "Demon"
-L["CREATURETYPE_4"] = "Elemental"
-L["CREATURETYPE_5"] = "Giant"
-L["CREATURETYPE_6"] = "Undead"
-L["CREATURETYPE_7"] = "Humanoid"
-L["CREATURETYPE_8"] = "Critter"
-L["CREATURETYPE_9"] = "Mechanical"
-L["CREATURETYPE_10"] = "Not specified"
-L["CREATURETYPE_11"] = "Totem"
-L["CREATURETYPE_12"] = "Non-combat Pet"
-L["CREATURETYPE_13"] = "Gas Cloud"
-L["CREATURETYPE_14"] = "Wild Pet"

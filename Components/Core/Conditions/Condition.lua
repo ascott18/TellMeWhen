@@ -47,6 +47,11 @@ function Condition:OnNewInstance(category, order, identifier)
 	self.identifier = identifier
 	self.order = order
 
+	if self.texttable and not self.formatter then
+		self.formatter = TMW.C.Formatter:New(self.texttable)
+		self.texttable = nil
+	end
+	
 	if self.bool then
 		self.min = 0
 		self.max = 1
@@ -55,10 +60,7 @@ function Condition:OnNewInstance(category, order, identifier)
 		self.levelChecks = true
 	end
 
-	if self.texttable and not self.formatter then
-		self.formatter = TMW.C.Formatter:New(self.texttable)
-		self.texttable = nil
-	elseif not self.formatter then
+	if not self.formatter then
 		self.formatter = TMW.C.Formatter.COMMANUMBER
 	end
 

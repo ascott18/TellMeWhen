@@ -1419,6 +1419,52 @@ do	-- TMW:GetParser()
 end
 
 
+-- From Interface/GlueXML/CharacterCreate
+local RACE_ICON_TCOORDS = {
+	["HUMAN_MALE"]		= {0, 0.125, 0, 0.25},
+	["DWARF_MALE"]		= {0.125, 0.25, 0, 0.25},
+	["GNOME_MALE"]		= {0.25, 0.375, 0, 0.25},
+	["NIGHTELF_MALE"]	= {0.375, 0.5, 0, 0.25},
+	
+	["TAUREN_MALE"]		= {0, 0.125, 0.25, 0.5},
+	["SCOURGE_MALE"]	= {0.125, 0.25, 0.25, 0.5},
+	["TROLL_MALE"]		= {0.25, 0.375, 0.25, 0.5},
+	["ORC_MALE"]		= {0.375, 0.5, 0.25, 0.5},
+
+	["HUMAN_FEMALE"]	= {0, 0.125, 0.5, 0.75},  
+	["DWARF_FEMALE"]	= {0.125, 0.25, 0.5, 0.75},
+	["GNOME_FEMALE"]	= {0.25, 0.375, 0.5, 0.75},
+	["NIGHTELF_FEMALE"]	= {0.375, 0.5, 0.5, 0.75},
+	
+	["TAUREN_FEMALE"]	= {0, 0.125, 0.75, 1.0},   
+	["SCOURGE_FEMALE"]	= {0.125, 0.25, 0.75, 1.0}, 
+	["TROLL_FEMALE"]	= {0.25, 0.375, 0.75, 1.0}, 
+	["ORC_FEMALE"]		= {0.375, 0.5, 0.75, 1.0}, 
+
+	["BLOODELF_MALE"]	= {0.5, 0.625, 0.25, 0.5},
+	["BLOODELF_FEMALE"]	= {0.5, 0.625, 0.75, 1.0}, 
+
+	["DRAENEI_MALE"]	= {0.5, 0.625, 0, 0.25},
+	["DRAENEI_FEMALE"]	= {0.5, 0.625, 0.5, 0.75}, 
+
+	["GOBLIN_MALE"]		= {0.625, 0.750, 0.25, 0.5},
+	["GOBLIN_FEMALE"]	= {0.625, 0.750, 0.75, 1.0},
+
+	["WORGEN_MALE"]		= {0.625, 0.750, 0, 0.25},
+	["WORGEN_FEMALE"]	= {0.625, 0.750, 0.5, 0.75},
+	
+	["PANDAREN_MALE"]	= {0.750, 0.875, 0, 0.25},
+	["PANDAREN_FEMALE"]	= {0.750, 0.875, 0.5, 0.75},
+}
+function TMW:GetRaceIconCoords(race)
+	local token = race:upper() .. "_" .. (UnitSex('player') == 2 and "MALE" or "FEMALE")
+	return {
+	(RACE_ICON_TCOORDS[token][1]+.01),
+	(RACE_ICON_TCOORDS[token][2]-.01),
+	(RACE_ICON_TCOORDS[token][3]+.02),
+	(RACE_ICON_TCOORDS[token][4]-.02) }
+end
+TMW:MakeSingleArgFunctionCached(TMW, "GetRaceIconCoords")
 
 
 

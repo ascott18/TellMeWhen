@@ -3077,6 +3077,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 	end,
 
 	RECENT_COLOR_COLUMNS = 3,
+	RECENT_COLOR_ROWS = 7,
 	RecentColor_OnClick = function(recentColorButton, button)
 		local self = recentColorButton:GetParent().ScrollFrame:GetParent()
 
@@ -3104,9 +3105,6 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 	end,
 
 	AddRecentColor = function(self, colorString)
-		-- TODO: store these in options saved variables instead of in memory.
-		-- TODO: limit the height of the container (or add a scrollbar)
-
 		-- Don't include flags with recent colors.
 		colorString = colorString:sub(1, 8)
 
@@ -3120,7 +3118,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		end
 
 		tinsert(RecentColors, 1, colorString)
-		if #RecentColors > self.RECENT_COLOR_COLUMNS * 14 then
+		while #RecentColors > self.RECENT_COLOR_COLUMNS * self.RECENT_COLOR_ROWS do
 			tremove(RecentColors, #RecentColors)
 		end
 

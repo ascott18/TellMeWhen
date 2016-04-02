@@ -50,6 +50,9 @@ local LSM = LibStub("LibSharedMedia-3.0")
 LSM:Register("font", "Open Sans Regular", "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf")
 LSM:Register("font", "Vera Mono", "Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf")
 
+-- Standalone versions of these libs are LoD
+LoadAddOn("LibBabble-Race-3.0") 
+LoadAddOn("LibBabble-CreatureType-3.0")
 
 local TMW = LibOO:GetNamespace("TellMeWhen"):NewClass("TMW", "Frame"):New("Frame", "TMW", UIParent)
 _G.TMW = LibStub("AceAddon-3.0"):NewAddon(TMW, "TellMeWhen", "AceEvent-3.0", "AceTimer-3.0", "AceConsole-3.0", "AceComm-3.0", "AceSerializer-3.0")
@@ -1222,7 +1225,7 @@ function TMW:PLAYER_LOGIN()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Common/DogTags/DogTags.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Lib/LibBabble-CreatureType-3.0/LibBabble-CreatureType-3.0.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 	end
 	
 

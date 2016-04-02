@@ -1071,6 +1071,11 @@ TMW.IconStateArbitrator = {
 			-- calculatedState stores the state that the icon should be showing, before FakeHidden.
 			-- realAlpha does the same for the alpha. We use it on top of calculatedState in favor of backwards compatibility.
 			local state = attributes[handlerToUse.attribute]
+
+			if not state.Alpha then
+				-- Attempting to catch an elusive bug. Remove this if it doesn't seem to be happening anymore.
+				print("NO ALPHA ON STATE:", handlerToUse.attribute, icon, icon:GetName(), state.Alpha, state)
+			end
 			icon:SetInfo_INTERNAL("realAlpha", state.Alpha)
 			icon:SetInfo_INTERNAL("calculatedState", state)
 		end

@@ -10,17 +10,6 @@
 -- Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
 -- --------------------
 
--- This code is inspiried by Whammy! by Olidaine/Oddjorb [Argent Dawn]
-
---[[
-
--- To use the module, access SwingTimerMonitor.SwingTimers[weaponSlot]
--- where weaponSlot is either MAINHAND_SLOT or OFFHAND_SLOT (currently 16 or 17)
--- to get a SwingTimer object. Use the SwingTimer.duration and SwingTimer.startTime
--- to get data about it, and use event TMW_COMMON_SWINGTIMER_CHANGED to listen for swing time starts
-
-]]
-
 if not TMW then return end
 
 local TMW = TMW
