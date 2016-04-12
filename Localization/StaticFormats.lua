@@ -88,6 +88,10 @@ L["CLEU_SPELL_PERIODIC_HEAL_MULTISTRIKE_DESC"]  = L["CLEU_SPELL_PERIODIC_HEAL_MU
 
 
 
+L["UIPANEL_GROUPSORT_value_DESC"]       = L["UIPANEL_GROUPSORT_value_DESC"]         :format(L["ICONMENU_VALUE"])
+L["UIPANEL_GROUPSORT_valuep_DESC"]      = L["UIPANEL_GROUPSORT_valuep_DESC"]        :format(L["ICONMENU_VALUE"])
+
+
 L["IE_NOLOADED_ICON_DESC"]              = L["IE_NOLOADED_ICON_DESC"]                :format(L["GROUP"])
 
 L["SOUND_CHANNEL_DESC"]                 = L["SOUND_CHANNEL_DESC"]                   :format(L["SOUND_CHANNEL_MASTER"])

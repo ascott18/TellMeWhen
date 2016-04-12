@@ -685,6 +685,37 @@ do
 		icon:SetInfo("value, maxValue, valueColor", nil, nil, nil)
 	end)
 		
+
+	TMW:RegisterCallback("TMW_INITIALIZE", function()
+		local IconPosition_Sortable = TMW.C.GroupModule_IconPosition_Sortable
+		if IconPosition_Sortable then
+			IconPosition_Sortable:RegisterIconSorter("value", {
+				DefaultOrder = -1,
+				[1] = L["UIPANEL_GROUPSORT_value_1"],
+				[-1] = L["UIPANEL_GROUPSORT_value_-1"],
+			}, function(iconA, iconB, attributesA, attributesB, order)
+				local a, b = attributesA.value, attributesB.value
+				if a ~= b then
+					return a*order < b*order
+				end
+			end)
+
+			IconPosition_Sortable:RegisterIconSorter("valuep", {
+				DefaultOrder = -1,
+				[1] = L["UIPANEL_GROUPSORT_valuep_1"],
+				[-1] = L["UIPANEL_GROUPSORT_valuep_-1"],
+			}, function(iconA, iconB, attributesA, attributesB, order)
+				if attributesA.maxValue == 0 or attributesB.maxValue == 0 then
+					return false
+				end
+				local a, b = attributesA.value / attributesA.maxValue, attributesB.value / attributesB.maxValue
+				if a ~= b then
+					return a*order < b*order
+				end
+			end)
+		end
+	end)
+
 	Processor:RegisterDogTag("TMW", "Value", {
 		code = function(icon)
 			icon = TMW.GUIDToOwner[icon]

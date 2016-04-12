@@ -557,7 +557,8 @@ function UNITS:SubstituteSpecialUnit(oldunit)
 		else
 			local oldnumber = tonumber(strmatch(oldunit, "(%d+)")) -- the old number (1)
 			if oldnumber == 1 then
-				return "player"
+				newunit = gsub(oldunit, "group", "player") -- the new unit (party1) (number not changed yet)
+				newunit = gsub(newunit, oldnumber, "", 1)
 			else
 				newunit = gsub(oldunit, "group", "party") -- the new unit (party1) (number not changed yet)
 				newunit = gsub(newunit, oldnumber, oldnumber - 1, 1)

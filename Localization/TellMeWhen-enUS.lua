@@ -392,6 +392,12 @@ L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"] = "Set the opacity level that the ic
 L["ICONMENU_USABLE"] = "Usable"
 L["ICONMENU_UNUSABLE"] = "Unusable"
 
+L["ICONMENU_ALLSPELLS"] = "All Spells Usable"
+L["ICONMENU_ALLSPELLS_DESC"] = "This state is active when all of the spells being tracked by this icon are ready on a particular unit."
+L["ICONMENU_ANYSPELLS"] = "Any Spells Usable"
+L["ICONMENU_ANYSPELLS_DESC"] = "This state is active when at least one of the spells being tracked by this icon is ready on a particular unit."
+L["ICONMENU_UNUSABLE_DESC"] = "This state is active when the above states are also not active. States with an opacity of 0% will never be active."
+
 L["ICONMENU_READY"] = "Ready"
 L["ICONMENU_NOTREADY"] = "Not Ready"
 L["ICONMENU_ONCOOLDOWN"] = "On Cooldown"
@@ -922,6 +928,16 @@ L["UIPANEL_GROUPSORT_alpha"] = "Opacity"
 L["UIPANEL_GROUPSORT_alpha_DESC"] = "Sorts the group by the opacity of its icons."
 L["UIPANEL_GROUPSORT_alpha_1"] = "Low opacity first"
 L["UIPANEL_GROUPSORT_alpha_-1"] = "High opacity first"
+
+L["UIPANEL_GROUPSORT_value"] = "Value"
+L["UIPANEL_GROUPSORT_value_DESC"] = "Sorts the group by progress bar value. This is the value that the %s icon type provides."
+L["UIPANEL_GROUPSORT_value_1"] = "Low value first"
+L["UIPANEL_GROUPSORT_value_-1"] = "High value first"
+
+L["UIPANEL_GROUPSORT_valuep"] = "Value Percent"
+L["UIPANEL_GROUPSORT_valuep_DESC"] = "Sorts the group by progress bar value percentage. This is the value that the %s icon type provides."
+L["UIPANEL_GROUPSORT_valuep_1"] = "Low value % first"
+L["UIPANEL_GROUPSORT_valuep_-1"] = "High value % first"
 
 L["UIPANEL_GROUPSORT_shown"] = "Shown"
 L["UIPANEL_GROUPSORT_shown_DESC"] = "Sorts the group by whether or not an icon is shown."

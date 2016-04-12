@@ -47,6 +47,7 @@ Type.unitType = "unitid"
 Type.canControlGroup = true
 
 local STATE_USABLE = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_USABLE_ALL = 10
 local STATE_UNUSABLE = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
@@ -82,8 +83,9 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE] =   { text = "|cFF00FF00" .. L["ICONMENU_USABLE"],   },
-	[STATE_UNUSABLE] = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], },
+	[STATE_USABLE_ALL] = { text = "|cFF00FF00" .. L["ICONMENU_ALLSPELLS"], tooltipText = L["ICONMENU_ALLSPELLS_DESC"], order = 1},
+	[STATE_USABLE] =     { text = "|cFF00FF00" .. L["ICONMENU_ANYSPELLS"], tooltipText = L["ICONMENU_ANYSPELLS_DESC"], order = 2},
+	[STATE_UNUSABLE] =   { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"],  tooltipText = L["ICONMENU_UNUSABLE_DESC"], order = 3},
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_UnitCooldownSettings", function(self)
@@ -406,6 +408,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	icon.Spells.Array, icon.OnlySeen, icon.Sort, icon.Spells.Durations, icon.Units
 	
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
+	local usableAllAlpha = icon.States[STATE_USABLE_ALL].Alpha
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
 	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
@@ -485,7 +488,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 							unUnit = unit
 
 							-- We DONT care about usable cooldowns, so stop looking
-							if usableAlpha == 0 then 
+							if usableAlpha == 0 and usableAllAlpha == 0 then 
 								dobreak = 1
 								break
 							end
@@ -494,8 +497,8 @@ local function UnitCooldown_OnUpdate(icon, time)
 							usename = iName
 							useUnit = unit
 
-							-- We care about usable cooldowns, so stop looking
-							if usableAlpha ~= 0 then 
+							-- We care about usable cooldowns (but not all of them), so stop looking
+							if usableAlpha > 0 and usableAllAlpha == 0 then 
 								dobreak = 1
 								break
 							end
@@ -509,7 +512,16 @@ local function UnitCooldown_OnUpdate(icon, time)
 		end
 	end
 	
-	if usename and usableAlpha > 0 then
+	if usename and usableAllAlpha > 0 and not unname then
+		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
+			STATE_USABLE_ALL,
+			GetSpellTexture(usename) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			0, 0,
+			usename,
+			useUnit, nil
+		)
+
+	elseif usename and usableAlpha > 0 then
 		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
 			STATE_USABLE,
 			GetSpellTexture(usename) or "Interface\\Icons\\INV_Misc_PocketWatch_01",

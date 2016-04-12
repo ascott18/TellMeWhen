@@ -389,9 +389,16 @@
 						local managerConfigData = stateManager:GetConfigData(TMW.CI.icon, panelInfo)
 
 						if managerConfigData then
-							for state, data in TMW:OrderedPairs(managerConfigData) do
-								data.state = state
-								tinsert(configData, data)
+							local compFunction = nil
+							if next(managerConfigData) and select(2, next(managerConfigData)).order then
+								compFunction = TMW.OrderSort
+							end
+
+							for state, data in TMW:OrderedPairs(managerConfigData, compFunction, not not compFunction) do
+								if not data.requires or settings[data.requires] then
+									data.state = state
+									tinsert(configData, data)
+								end
 							end
 						end
 					end
@@ -402,10 +409,10 @@
 					panel.Header:SetText(supplementalData.text or TMW.L["ICONMENU_SHOWWHEN"])
 
 					for i, set in pairs(self.frames) do
-						set.doHide = true
+						set:Hide()
 					end
 					
-					for i, data in pairs(configData) do
+					for i, data in ipairs(configData) do
 						local set = self.frames[i]
 						if not set then
 							set = TMW.C.Config_Frame_IconStateSet:New("Frame", nil, self, "TellMeWhen_IconStateSet", i)
@@ -420,27 +427,7 @@
 						set:SetSetting(data.state)
 						set:SetConfigData(data)
 
-						set.doHide = nil
-
-						if not data.requires or settings[data.requires] then
-							set:Show()
-							if i == 1 then
-								set:SetPoint("TOP")
-							else
-								set:SetPoint("TOP", self.frames[i-1], "BOTTOM")
-							end
-						else
-							set:Hide()
-							if i == 1 then
-								set:SetPoint("BOTTOM", self, "TOP")
-							else
-								set:SetPoint("TOP", self.frames[i-1], "TOP")
-							end
-						end
-					end
-
-					for i, set in pairs(self.frames) do
-						if set.doHide then set:Hide() end
+						set:Show()
 					end
 				end)
 			</OnLoad>

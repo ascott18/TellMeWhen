@@ -220,8 +220,8 @@
 					<OnValueChanged>
 						local CndtGroup = self:GetParent()
 						local conditionData = CndtGroup:GetConditionData()
-
-						if conditionData and self:IsShown() then
+						
+						if conditionData and (self:IsShown() or (self.EditBox and self.EditBox:IsShown())) then
 							local value = self:GetValue()
 							conditionData.formatter:SetFormattedText(CndtGroup.ValText, value)
 						end
