@@ -3147,7 +3147,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 			f:Show()
 			TMW:TT(f, color, "COLORPICKER_RECENT_DESC", 1, nil)
 			f.string = color
-			f.swatch:SetTexture(TMW:StringToRGBA(color))
+			f.swatch:SetColorTexture(TMW:StringToRGBA(color))
 		end
 
 		for i = #IE.db.global.RecentColors, #self.RecentColorFrame.frames do
