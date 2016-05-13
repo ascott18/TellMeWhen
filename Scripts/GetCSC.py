@@ -5,7 +5,9 @@ import multiprocessing
 
 from slpp import slpp as lua
 
-num_classes = 11
+base_url = "http://legion.wowhead.com"
+
+num_classes = 12
 
 spell_id_blacklist = [
 	165201,
@@ -76,7 +78,7 @@ def try_scrape_url(url, regex, id, tries = 0):
 
 def scrape_class_spells(classID):
 	data = try_scrape_url(
-		url = "http://www.wowhead.com/class=" + str(classID),
+		url = base_url + "/class=" + str(classID),
 		regex = r"name: LANG.tab_spells.*?data: (\[.*\]).*?\}\);",
 		id = "class " + str(classID))
 
@@ -93,7 +95,7 @@ def scrape_class_spells(classID):
 
 def scrape_pet_spells(classID):
 	data = try_scrape_url(
-		url = "http://www.wowhead.com/spells=-3." + str(classID),
+		url = base_url + "/spells=-3." + str(classID),
 		regex = r"var listviewspells = (\[.*\]);",
 		id = "pet class " + str(classID))
 
@@ -107,7 +109,7 @@ def scrape_pet_spells(classID):
 
 def scrape_racial_spells():
 	data = try_scrape_url(
-		url = "http://www.wowhead.com/spells=-4",
+		url = base_url + "/spells=-4",
 		regex = r"var listviewspells = (\[.*\]);",
 		id = "racials")
 

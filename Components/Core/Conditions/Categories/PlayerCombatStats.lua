@@ -155,6 +155,8 @@ ConditionCategory:RegisterCondition(8,	 "MASTERY", {
 ConditionCategory:RegisterCondition(9,	 "EXPERTISE", {		-- DEPRECATED
 	text = _G["COMBAT_RATING_NAME"..CR_EXPERTISE],
 	funcstr = "DEPRECATED",
+	min = 0, 
+	range = 100,
 })
 
 

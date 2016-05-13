@@ -47,6 +47,7 @@ function Condition:OnNewInstance(category, order, identifier)
 	self.identifier = identifier
 	self.order = order
 
+
 	if self.texttable and not self.formatter then
 		self.formatter = TMW.C.Formatter:New(self.texttable)
 		self.texttable = nil
@@ -78,6 +79,10 @@ function Condition:OnNewInstance(category, order, identifier)
 		self.nooperator = true
 		self.noslide = true
 	end
+
+	if not self.noslide and not self.range and not self.max then
+		error("max must be specified if range is not for condition " .. identifier)
+	end	
 
 	CNDT.ConditionsByType[identifier] = self
 end

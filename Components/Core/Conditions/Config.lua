@@ -1005,7 +1005,8 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		else
 			local step = get(conditionData.step) or 1
 			local min = get(conditionData.min) or 0
-			local max = get(conditionData.max)		
+			local max = get(conditionData.max)
+			local range = get(conditionData.range)
 
 			-- Constrain the level to the min/max/step of the condition.
 			local level = conditionSettings.Level
@@ -1072,9 +1073,9 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 				CndtGroup.Slider:SetValueStep(step)
 				CndtGroup.Slider:SetMinMaxValues(min, max)
 
-				if get(conditionData.range) then
+				if range then
 					CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_ADJUSTING)
-					CndtGroup.Slider:SetRange(get(conditionData.range))
+					CndtGroup.Slider:SetRange(range)
 				else
 					CndtGroup.Slider:SetMode(CndtGroup.Slider.MODE_STATIC)
 				end

@@ -281,16 +281,7 @@ ConditionCategory:RegisterCondition(7,	 "SPEC", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\achievement_general",
 	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetActiveSpecGroup = GetActiveSpecGroup,
-	},
-	funcstr = [[c.Level == GetActiveSpecGroup()]],
-	events = function(ConditionObject, c)
-		return
-			--ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
-			--ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED", "player"),
-			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
-	end,
+	funcstr = "DEPRECATED",
 })
 
 ConditionCategory:RegisterCondition(8,	 "TREE", {
@@ -401,6 +392,8 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	text = L["UIPANEL_PTSINTAL"],
 	funcstr = "DEPRECATED",
+	min = 0,
+	max = 5,
 })
 
 
@@ -424,6 +417,15 @@ function CNDT:GLYPH_UPDATED()
 end
 ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	text = L["UIPANEL_GLYPH"],
+	tooltip = L["UIPANEL_GLYPH_DESC"],
+
+	bool = true,
+	
+	unit = PLAYER,
+	name = function(editbox)
+		editbox:SetTexts(L["GLYPHTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = "glyphs",
 	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = "DEPRECATED",
