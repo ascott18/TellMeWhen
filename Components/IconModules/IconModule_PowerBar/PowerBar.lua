@@ -14,6 +14,7 @@
 if not TMW then return end
 
 local TMW = TMW
+local print = TMW.print
 local L = TMW.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local _, pclass = UnitClass("Player")
@@ -124,7 +125,6 @@ function PowerBar:UpdateCost()
 	
 	if spell then
 		local cost, costData = TMW.GetSpellCost(spell)
-		print(spell, cost)
 		
 		if cost then
 			local powerType = costData.type
