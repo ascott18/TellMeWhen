@@ -1380,6 +1380,48 @@ function TMW.SpellHasNoMana(spell)
 	return nomana
 end
 
+local function spellCostSorter(a, b)
+	local hasA = a.requiredAuraID ~= 0 and a.hasRequiredAura
+	local hasB = b.requiredAuraID ~= 0 and b.hasRequiredAura
+	if hasA ~= hasB then
+		return hasA
+	end
+
+	hasA = a.hasRequiredAura
+	hasB = b.hasRequiredAura
+	if hasA ~= hasB then
+		return hasA
+	end
+
+	return a.requiredAuraId == 0
+end
+
+function TMW.GetSpellCost(spell)
+	local costs = GetSpellPowerCost(spell)
+	if not costs or #costs == 0 then
+		return nil, nil
+	end
+
+	local cost
+	if #costs == 1 then
+		cost = costs[1]
+	else
+		sort(costs, spellCostSorter)
+
+		cost = costs[1]
+	end
+
+	if cost.requiredAuraID ~= 0 and not cost.hasRequiredAura then
+		return nil, cost
+	end
+
+	if cost.cost == 0 and cost.costPercent > 0 then
+		return UnitPower("player", cost.type) * cost.costPercent / 100, cost
+	else
+		return cost.cost, cost
+	end
+end
+
 local GLADIATOR_STANCE = GetSpellInfo(156291)
 function TMW.GetCurrentSpecializationRole()
 	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to

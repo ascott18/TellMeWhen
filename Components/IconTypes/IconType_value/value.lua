@@ -145,16 +145,6 @@ for k, v in pairs(PowerBarColor) do
 	v.a = 1
 end
 PowerBarColor[-1] = {{r=1, g=0, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=0, g=1, b=0, a=1}}
-PowerBarColor[SPELL_POWER_SHADOW_ORBS] = {r=116/255, g= 9/255, b=191/255, a=1}
-PowerBarColor[SPELL_POWER_BURNING_EMBERS] = PowerBarColor["BURNING_EMBERS"]
-PowerBarColor[SPELL_POWER_DEMONIC_FURY] = PowerBarColor["DEMONIC_FURY"]
-PowerBarColor[SPELL_POWER_ECLIPSE].negative.a = 1
-PowerBarColor[SPELL_POWER_ECLIPSE].positive.a = 1
-
-local hasParts = {
-	[SPELL_POWER_SOUL_SHARDS] = true,
-	[SPELL_POWER_BURNING_EMBERS] = true,
-}
 
 local function Value_OnUpdate(icon, time)
 	local PowerType = icon.PowerType
@@ -176,20 +166,7 @@ local function Value_OnUpdate(icon, time)
 					unit = "player"
 				end
 				
-				local hasParts = hasParts[PowerType]
-				value, maxValue, valueColor = UnitPower(unit, PowerType, hasParts), UnitPowerMax(unit, PowerType, hasParts), PowerBarColor[PowerType]
-				if PowerType == SPELL_POWER_ECLIPSE then
-					if GetEclipseDirection() == "none" then
-						value = 0
-					end
-					if value < 0 then
-						valueColor = valueColor.negative
-					else
-						valueColor = valueColor.positive
-					end
-					value = value + 100
-					maxValue = maxValue + 100
-				end
+				value, maxValue, valueColor = UnitPower(unit, PowerType), UnitPowerMax(unit, PowerType), PowerBarColor[PowerType]
 			end
 
 			if not icon:YieldInfo(true, unit, value, maxValue, valueColor) then

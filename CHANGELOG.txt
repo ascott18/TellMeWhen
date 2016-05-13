@@ -1,4 +1,9 @@
 ===v8.0.0===
+====IMPORTANT: Legion Beta====
+* Welcome to the TellMeWhen, Legion edition!
+* Known issues:
+** The Icon Editor looks pretty bad. Something's changed with Blizzard's frame system that I haven't had time to look at yet.
+
 ====IMPORTANT: Breaking Changes====
 * The Primary/Secondary spec group settings are gone, and the way that spec settings were stored has changed.
 ** There is a small chance you will need to reconfigure the spec and tree settings on all your groups.

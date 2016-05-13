@@ -11,7 +11,6 @@
 <Script file="IconType_dr\dr.lua"/>
 <Script file="IconType_icd\icd.lua"/>
 <Script file="IconType_item\item.lua"/>
-<Script file="IconType_lightwell\lightwell.lua"/>
 <Script file="IconType_losecontrol\losecontrol.lua"/>
 <Script file="IconType_meta\meta.lua"/>
 <Script file="IconType_reactive\reactive.lua"/>

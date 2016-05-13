@@ -45,10 +45,6 @@
 <Script file="IconType_item\Config.lua"/>
 
 
-<!-- <Include file="IconType_lightwell\Config.xml"/> -->
-<!-- <Script file="IconType_lightwell\Config.lua"/> -->
-
-
 <Include file="IconType_losecontrol\Config.xml"/>
 <Script file="IconType_losecontrol\Config.lua"/>
 

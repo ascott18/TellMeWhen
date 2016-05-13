@@ -424,38 +424,7 @@ function CNDT:GLYPH_UPDATED()
 end
 ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	text = L["UIPANEL_GLYPH"],
-	tooltip = L["UIPANEL_GLYPH_DESC"],
-
-	bool = true,
-	
-	unit = PLAYER,
-	name = function(editbox)
-		editbox:SetTexts(L["GLYPHTOCHECK"], L["CNDT_ONLYFIRST"])
-	end,
-	useSUG = "glyphs",
 	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function(ConditionObject, c)
-		-- this is handled externally because GlyphLookup is so extensive a process,
-		-- and if it does get stuck in an OnUpdate condition, it could be very bad.
-		CNDT:RegisterEvent("GLYPH_ADDED", 	 "GLYPH_UPDATED")
-		CNDT:RegisterEvent("GLYPH_DISABLED", "GLYPH_UPDATED")
-		CNDT:RegisterEvent("GLYPH_ENABLED",  "GLYPH_UPDATED")
-		CNDT:RegisterEvent("GLYPH_REMOVED",  "GLYPH_UPDATED")
-		CNDT:RegisterEvent("GLYPH_UPDATED",  "GLYPH_UPDATED")
-		CNDT:GLYPH_UPDATED()
-	
-		return [[BOOLCHECK( GlyphLookup[c.NameFirst] )]]
-	end,
-	Env = {
-		GlyphLookup = {},
-	},
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("GLYPH_ADDED"),
-			ConditionObject:GenerateNormalEventString("GLYPH_DISABLED"),
-			ConditionObject:GenerateNormalEventString("GLYPH_ENABLED"),
-			ConditionObject:GenerateNormalEventString("GLYPH_REMOVED"),
-			ConditionObject:GenerateNormalEventString("GLYPH_UPDATED")
-	end,
+	funcstr = "DEPRECATED",
 })

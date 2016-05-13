@@ -179,7 +179,10 @@ TMW:RegisterCallback("TMW_ICON_UPDATED", function(event, icon)
 		local icon_meta = Icons[i]
 
 		-- Table lookup is faster than function call. Put it first for short circuiting.
-		if icon_meta == icon or (icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled()) then
+		-- We check that icon_meta.IconsLookup exists because after turning off the group controller setting
+		-- on a meta icon, there will be some icons in Type.Icons that aren't really meta icons,
+		-- but are still reporting as not being controlled since that has already been disabled.
+		if icon_meta == icon or (icon_meta.IconsLookup and icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled()) then
 			icon_meta.metaUpdateQueued = true
 		end
 	end
@@ -195,7 +198,7 @@ local function SETUP_POST(event, iconOrGroup)
 		local icon_meta = Icons[i]
 
 		-- Table lookup is faster than function call. Put it first for short circuiting.
-		if (icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled()) then
+		if (icon_meta.IconsLookup and icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled()) then
 			Type:Setup(icon_meta)
 		end
 	end
