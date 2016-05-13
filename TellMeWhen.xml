@@ -59,7 +59,7 @@
 					a = a or 1
 
 					for i, tex in TMW:Vararg(self:GetRegions()) do
-						tex:SetTexture(r, g, b, a)
+						tex:SetColorTexture(r, g, b, a)
 					end
 				end
 

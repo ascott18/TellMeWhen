@@ -1453,7 +1453,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 			self:SetHeight_base(1)
 		end
 
-		self.Background:SetTexture(.66, .66, .66, 0.09)
+		self.Background:SetColorTexture(.66, .66, .66, 0.09)
 	end,
 
 	Flash = function(self, dur)
@@ -1480,11 +1480,11 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 					offs = (remainingFlash/period)
 				end
 				offs = offs*0.3
-				bg:SetTexture(.66, .66, .66, 0.08 + offs)
+				bg:SetColorTexture(.66, .66, .66, 0.08 + offs)
 			end
 
 			if timePassed > duration then
-				bg:SetTexture(.66, .66, .66, 0.08)
+				bg:SetColorTexture(.66, .66, .66, 0.08)
 				ticker:Cancel()
 			end	
 		end)
@@ -2262,7 +2262,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 
 	UseLightColor = function(self)
 		local c = 0.13
-		self.Background:SetTexture(c, c, c, 0.95)
+		self.Background:SetColorTexture(c, c, c, 0.95)
 	end,
 
 	-- Blizzard Overrides
@@ -2865,7 +2865,7 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 			self.swatch:SetAlpha(a)
 			self.swatch:SetDesaturated(flags and flags.desaturate)
 		else
-			self.swatch:SetTexture(r, g, b, a)
+			self.swatch:SetColorTexture(r, g, b, a)
 			self.swatch:SetDesaturated(false)
 		end
 	end,
@@ -3182,7 +3182,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		local r,g,b=TMW:HSVToRGB(h, s, v)
 		self.AlphaSlider.Background:SetGradientAlpha("HORIZONTAL", r, g, b, 0, r, g, b, 1)
 
-		self.swatch.swatch:SetTexture(r,g,b)
+		self.swatch.swatch:SetColorTexture(r,g,b)
 		self.swatch.swatch:SetAlpha(a)
 
 
@@ -3258,7 +3258,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		self:Raise()
 
 		local c = TMW:StringToCachedRGBATable(value)
-		self.swatchPrevious.swatch:SetTexture(c.r, c.g, c.b, c.a)
+		self.swatchPrevious.swatch:SetColorTexture(c.r, c.g, c.b, c.a)
 	end,
 }
 

@@ -601,7 +601,7 @@ function SUG:SetStyle(inline)
 		--List:SetPoint("TOPRIGHT", SUG.Box, "BOTTOMRIGHT", 0, -2)
 		--List:SetParent(SUG.Box)
 		List:SetHeight(SUG:GetHeightForFrames(INLINE_MAX_FRAMES))
-		List.Background:SetTexture(0.02, 0.02, 0.02, 0.970)
+		List.Background:SetColorTexture(0.02, 0.02, 0.02, 0.970)
 	else
 		firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
 
@@ -613,7 +613,7 @@ function SUG:SetStyle(inline)
 
 		List.Header:Show()
 		List.Help:Show()
-		List.Background:SetTexture(0.05, 0.05, 0.05, 0.970)
+		List.Background:SetColorTexture(0.05, 0.05, 0.05, 0.970)
 	end
 end
 

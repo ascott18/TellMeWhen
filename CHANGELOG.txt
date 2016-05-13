@@ -3,7 +3,6 @@
 * Welcome to the TellMeWhen, Legion edition!
 * Known issues:
 ** External resources (fonts, textures, sounds) are currently disabled by Blizzard. As a result, some things (like the changelog) will look pretty bad.
-** The Icon Editor looks pretty bad. Something's changed with Blizzard's frame system that I haven't had time to look at yet.
 
 ====IMPORTANT: Breaking Changes====
 * The Primary/Secondary spec group settings are gone, and the way that spec settings were stored has changed.

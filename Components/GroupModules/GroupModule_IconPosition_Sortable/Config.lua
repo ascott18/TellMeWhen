@@ -231,7 +231,7 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 		self:RegisterForDrag("LeftButton", "RightButton")
 		self:EnableMouse(true)
 
-		self.Background:SetTexture(0.05, 0.05, 0.05, 0.9)
+		self.Background:SetColorTexture(0.05, 0.05, 0.05, 0.9)
 		
 		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
 	end,

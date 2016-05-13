@@ -336,7 +336,7 @@ Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 		end
 
 		animation_flasher:Show()
-		animation_flasher:SetTexture(table.r, table.g, table.b, 1)
+		animation_flasher:SetColorTexture(table.r, table.g, table.b, 1)
 	end,
 	OnStop = function(TMWFlashAnim, table)
 		TMWFlashAnim.animation_flasher:Hide()
@@ -463,7 +463,7 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 		animation_flasher:SetAllPoints(GetAnchorOrWarn(icon, table.AnchorTo))
 
 		animation_flasher:Show()
-		animation_flasher:SetTexture(table.r, table.g, table.b, 1)
+		animation_flasher:SetColorTexture(table.r, table.g, table.b, 1)
 	end,
 	OnStop = function(icon, table)
 		icon.animation_flasher:Hide()
@@ -580,7 +580,7 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		for _, pos in TMW:Vararg("TOP", "BOTTOM", "LEFT", "RIGHT") do
 			local tex = animation_border[pos]
 
-			tex:SetTexture(table.r, table.g, table.b, 1)
+			tex:SetColorTexture(table.r, table.g, table.b, 1)
 			tex:SetSize(table.Thickness, table.Thickness)
 		end
 	end,
