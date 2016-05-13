@@ -54,6 +54,8 @@ NAMES.CONST = {
 	pettarget;
 	pettargettarget;
 	
+	nameplate1-30;
+	
 	arena1-5;
 	arena1-5target;
 	arena1-5targettarget;

@@ -137,6 +137,8 @@ local AllUnits = TMW:GetUnits(nil, [[
 	pet;
 	pettarget;
 	pettargettarget;
+	
+	nameplate1-30;
 
 	arena1-5;
 	arena1-5target;

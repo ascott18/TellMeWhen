@@ -55,6 +55,7 @@ UNITS.Units = {
 	{ value = "mouseover",			text = L["ICONMENU_MOUSEOVER"]										},
 	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]								},
 	{ value = "vehicle",			text = L["ICONMENU_VEHICLE"]										},
+	{ value = "nameplate",			text = L["ICONMENU_NAMEPLATE"],	range = 30							},
 	{ value = "party",				text = PARTY,				range = MAX_PARTY_MEMBERS				},
 	{ value = "raid",				text = RAID,				range = MAX_RAID_MEMBERS				},
 	{ value = "group",				text = GROUP,				range = MAX_RAID_MEMBERS,	desc = L["ICONMENU_GROUPUNIT_DESC"]	},
@@ -181,6 +182,16 @@ local UnitSet = TMW:NewClass("UnitSet"){
 			elseif unit:find("^arena%d+") then -- the unit as a base, with something else tacked onto it.
 				self.updateEvents.ARENA_OPPONENT_UPDATE = true
 				UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(arena%d+)")
+				self.allUnitsChangeOnEvent = false
+
+			elseif unit:find("^nameplate%d+$") then -- the unit exactly
+				self.updateEvents.NAME_PLATE_UNIT_ADDED = true
+				self.updateEvents.NAME_PLATE_UNIT_REMOVED = true
+				UNITS.unitsWithExistsEvent[unit] = true
+			elseif unit:find("^nameplate%d+") then -- the unit as a base, with something else tacked onto it.
+				self.updateEvents.NAME_PLATE_UNIT_ADDED = true
+				self.updateEvents.NAME_PLATE_UNIT_REMOVED = true
+				UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(nameplate%d+)")
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^maintank") or unit:find("^mainassist") then

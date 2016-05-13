@@ -8,6 +8,7 @@ TMW.CHANGELOG = [==[
 * Welcome to the TellMeWhen, Legion edition!
 * Known issues:
 ** External resources (fonts, textures, sounds) are currently disabled by Blizzard. As a result, some things (like the changelog) will look pretty bad.
+** Buff/Debuff equivalancies have not yet been updated.
 
 ====IMPORTANT: Breaking Changes====
 * The Primary/Secondary spec group settings are gone, and the way that spec settings were stored has changed.

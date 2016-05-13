@@ -479,6 +479,7 @@ L["ICONMENU_PETTARGET"] = "Pet's target"
 L["ICONMENU_MOUSEOVER"] = "Mouseover"
 L["ICONMENU_MOUSEOVERTARGET"] = "Mouseover's target"
 L["ICONMENU_VEHICLE"] = "Vehicle"
+L["ICONMENU_NAMEPLATE"] = "Nameplate"
 L["ICONMENU_GROUPUNIT_DESC"] = [[Group is a special unit in TellMeWhen that will track raid members if you are in a raid, or party members if you are in a party.
 
 There will never be any duplicated units if you are in a raid (whereas tracking "player; party; raid" has overlap when in a raid, causing party members to be checked twice.)]]
