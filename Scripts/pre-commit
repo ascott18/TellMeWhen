@@ -7,7 +7,7 @@ OUTPUT="Options/CHANGELOG.lua"
 echo -e "if not TMW then return end\n\nTMW.CHANGELOG_LASTVER=\"$LAST_VERSION\"\n\nTMW.CHANGELOG = [==[" > $OUTPUT;
 
 while read line; do
-	if [ "$line" == "===v$LAST_VERSION===" ]; then
+	if [[ "$line" == *"===v$LAST_VERSION==="* ]]; then
 		break;
 	fi
 
