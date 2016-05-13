@@ -276,7 +276,7 @@ function IconType:Register(order)
 	
 	TMW:ValidateType("2 (order)", "IconType:Register(order)", order, "number")
 	
-	local typekey = self.type
+	local typekey = self.type 
 	
 	self.order = order
 	
