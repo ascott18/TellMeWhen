@@ -36,6 +36,7 @@ local defaultPowerTypes = {
 	HUNTER		= SPELL_POWER_FOCUS,
 	DEATHKNIGHT = SPELL_POWER_RUNIC_POWER,
 	MONK 		= SPELL_POWER_ENERGY,
+	DEMONHUNTER = SPELL_POWER_FURY,
 }
 local defaultPowerType = defaultPowerTypes[pclass]
 
