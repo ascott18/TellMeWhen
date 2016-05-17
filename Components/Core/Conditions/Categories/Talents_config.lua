@@ -35,15 +35,13 @@ end
 function Module:Table_Get()
 	wipe(self.table)
 
-	for spec = 1, MAX_TALENT_GROUPS do
-		for tier = 1, MAX_TALENT_TIERS do
-			for column = 1, NUM_TALENT_COLUMNS do
-				local id, name = GetTalentInfo(tier, column, spec)
-				
-				local lower = name and strlowerCache[name]
-				if lower then
-					self.table[id] = lower
-				end
+	for tier = 1, MAX_TALENT_TIERS do
+		for column = 1, NUM_TALENT_COLUMNS do
+			local id, name = GetTalentInfo(tier, column, 1)
+			
+			local lower = name and strlowerCache[name]
+			if lower then
+				self.table[id] = lower
 			end
 		end
 	end

@@ -348,12 +348,13 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 })
 
 
+-- TODO: add a pvp talent condition
 CNDT.Env.TalentMap = {}
 function CNDT:PLAYER_TALENT_UPDATE()
 	wipe(Env.TalentMap)
 	for tier = 1, MAX_TALENT_TIERS do
 		for column = 1, NUM_TALENT_COLUMNS do
-			local id, name, _, selected = GetTalentInfo(tier, column, GetActiveSpecGroup())
+			local id, name, _, selected = GetTalentInfo(tier, column, 1)
 			local lower = name and strlowerCache[name]
 			if lower then
 				Env.TalentMap[lower] = selected

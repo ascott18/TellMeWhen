@@ -478,7 +478,8 @@ local EditBoxHooks = {
 			SUG.Box = self
 			SUG.CurrentModule = newModule
 			SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
-			SUG:SetStyle(self.SUG_inline)
+			SUG:SetInline(self.SUG_inline)
+			SUG.SuggestionList:SetParent(self.SUG_parent or TellMeWhen_IconEditor)
 			SUG:NameOnCursor()
 		end
 	end,
@@ -515,7 +516,8 @@ local EditBoxHooks = {
 -- @param inputType [string] The name of the suggestion list module to use.
 -- @param onlyOneEntry [boolean|nil] True to have the suggestion list hide after inserting an entry.
 -- @param inline [boolean|nil] True to cause the suggestion list to display underneath the editbox. Otherwise, will be attached to the IconEditor.
-function SUG:EnableEditBox(editbox, inputType, onlyOneEntry, inline)
+-- @param parent [Frame|nil] A frame to reparent the suggestion list to when active. Defaults to TellMeWhen_IconEditor
+function SUG:EnableEditBox(editbox, inputType, onlyOneEntry, inline, parent)
 	editbox.SUG_Enabled = 1
 
 	inputType = TMW.get(inputType)
@@ -526,6 +528,7 @@ function SUG:EnableEditBox(editbox, inputType, onlyOneEntry, inline)
 	editbox.SUG_type = inputType
 	editbox.SUG_inline = inline
 	editbox.SUG_onlyOneEntry = onlyOneEntry
+	editbox.SUG_parent = parent
 
 	if not editbox.SUG_hooked then
 		for k, v in pairs(EditBoxHooks) do
@@ -583,11 +586,15 @@ function SUG:GetHeightForFrames(numFrames)
 	return (numFrames * TMW.SUG[1]:GetHeight()) + 6
 end
 
-function SUG:SetStyle(inline)
+function SUG:SetInline(inline)
 	local firstItem = TMW.SUG:GetFrame(1)
 	self.inline = inline
 
 	local List = SUG.SuggestionList
+
+	if List.fixLevelTimer then
+		List.fixLevelTimer:Cancel()
+	end
 
 	if inline then
 
@@ -602,6 +609,10 @@ function SUG:SetStyle(inline)
 		--List:SetParent(SUG.Box)
 		List:SetHeight(SUG:GetHeightForFrames(INLINE_MAX_FRAMES))
 		List.Background:SetColorTexture(0.02, 0.02, 0.02, 0.970)
+
+		List.fixLevelTimer = C_Timer.NewTicker(0.01, function() 
+			List:SetFrameLevel(SUG.Box:GetFrameLevel() + 5)
+		end)
 	else
 		firstItem:SetPoint("TOP", 0, -6 - TMW.SUG[1]:GetHeight())
 

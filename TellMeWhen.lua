@@ -120,8 +120,8 @@ end)
 ---------- Upvalues ----------
 local GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell =
 	  GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell
-local InCombatLockdown, GetTalentInfo, GetActiveSpecGroup =
-	  InCombatLockdown, GetTalentInfo, GetActiveSpecGroup
+local InCombatLockdown, GetTalentInfo =
+	  InCombatLockdown, GetTalentInfo
 local UnitPower, UnitClass, UnitName, UnitAura =
 	  UnitPower, UnitClass, UnitName, UnitAura
 local IsInGuild, IsInGroup, IsInInstance =
@@ -2915,7 +2915,7 @@ function TMW:UpdateTalentTextureCache()
 	for spec = 1, MAX_TALENT_GROUPS do
 		for tier = 1, MAX_TALENT_TIERS do
 			for column = 1, NUM_TALENT_COLUMNS do
-				local id, name, tex = GetTalentInfo(tier, column, GetActiveSpecGroup())
+				local id, name, tex = GetTalentInfo(tier, column, 1)
 
 				local lower = name and strlowerCache[name]
 				

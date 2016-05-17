@@ -1309,7 +1309,7 @@ It does NOT work for: |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
 L["CONDITIONPANEL_CLASSIFICATION_DESC"] = "Checks the rare/elite/world boss status of a unit."
 L["CONDITIONPANEL_ROLE"] = "Unit Group Role"
-L["CONDITIONPANEL_ROLE_DESC"] = "Checks the assigned role of the player in your group/raid"
+L["CONDITIONPANEL_ROLE_DESC"] = "Checks the assigned role of a player in your group/raid"
 L["CONDITIONPANEL_RAIDICON"] = "Unit Raid Icon"
 L["CONDITIONPANEL_RAIDICON_DESC"] = "Checks the raid marker icon assigned to a unit."
 L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_RAIDICON"] = "Choose Icons..."

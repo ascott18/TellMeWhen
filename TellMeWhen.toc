@@ -1,5 +1,9 @@
-﻿# Originally by Nephthys of Hyjal
+# Originally by Nephthys of Hyjal
 # Major Updates by Oozebull of Twisting Nether, Xenyr of Aszune, and Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
+## X-Curse-Packaged-Version: 7.4.0-85-g5bcf9c1
+## X-Curse-Project-Name: TellMeWhen
+## X-Curse-Project-ID: tellmewhen
+## X-Curse-Repository-ID: wow/tellmewhen/legion4
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
 ## Interface: 70000
@@ -18,11 +22,11 @@
 ## Notes-ruRU: Визуальные, звуковые и текстовые оповещения о готовности заклинаний, способностей, наличии баффов/дебаффов и многого другого.
 ## Notes-esES: Proporciona notificaciones visuales, auditivas y textuales sobre tiempos de reutilización, ventajas y básicamente cualquier otra cosa. 
 
-## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, ElvUI, Tukui, DBM-Core, BigWigs
+## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0, ElvUI, Tukui, DBM-Core, BigWigs
 # The per character settings are the old settings, but we still need them to upgrade to the new ones. If they aren't defined, then they will be deleted immediately
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB
-## X-Embeds: LibStub, Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0
+## X-Embeds: LibStub, Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0
 ## X-Category: Combat
 
 #@no-lib-strip@
@@ -45,8 +49,8 @@ Lib\LibDogTag-Unit-3.0\lib.xml
 Lib\LibDogTag-Stats-3.0\lib.xml
 Lib\LibSpellRange-1.0\lib.xml
 Lib\LibRangeCheck-2.0\LibRangeCheck-2.0.lua
-Lib\LibBabble-CreatureType-3.0\LibBabble-CreatureType-3.0.lua
-Lib\LibBabble-Race-3.0\LibBabble-Race-3.0.lua
+Lib\LibBabble-CreatureType-3.0\lib.xml
+Lib\LibBabble-Race-3.0\lib.xml
 #@end-no-lib-strip@
 
 Localization\TellMeWhen-enUS.lua

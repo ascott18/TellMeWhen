@@ -3243,7 +3243,7 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 		self.Desaturate:SetShown(hasDesaturate)
 
 		self.Texture:SetShown(self.hasTexture)
-		TMW.SUG:EnableEditBox(self.Texture, "texture_withVarTex", true, true)
+		TMW.SUG:EnableEditBox(self.Texture, "texture_withVarTex", true, true, self)
 
 		self.iconTexture:SetTexture(texture)
 		self.iconLabel:SetShown(not not texture)

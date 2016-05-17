@@ -19,8 +19,8 @@ local print = TMW.print
 
 local sort, type, pairs
 	= sort, type, pairs
-local UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
-	= UnitAffectingCombat, GetActiveSpecGroup, GetSpecialization
+local UnitAffectingCombat, GetSpecialization
+	= UnitAffectingCombat, GetSpecialization
 
 local GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole
 
