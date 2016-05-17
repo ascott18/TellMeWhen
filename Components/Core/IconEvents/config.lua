@@ -636,7 +636,7 @@ end
 
 
 local function ChangeEvent_Dropdown_OnClick(button, eventID, event)
-	TMW.DD:CloseDropdownMenus()
+	TMW.DD:CloseDropDownMenus()
 
 	EVENTS:SetEvent(eventID, event)
 end
@@ -647,7 +647,7 @@ local function ChangeEvent_Dropdown_OnClick_Clone(button, eventID)
 	TMW:CopyTableInPlaceUsingDestinationMeta(eventSettings, TMW.CI.ics.Events[n])
 	TMW.CI.ics.Events.n = n
 
-	TMW.DD:CloseDropdownMenus()
+	TMW.DD:CloseDropDownMenus()
 
 	IE.Pages.Events:OnSettingSaved()
 
