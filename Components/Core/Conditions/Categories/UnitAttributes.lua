@@ -468,10 +468,11 @@ ConditionCategory:RegisterCondition(12.1, "CLASSIFICATION2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 		normal    = {order = 1, text = L["normal"]},
-		rare      = {order = 2, text = L["rare"]},
-		elite     = {order = 3, text = L["elite"]},
-		rareelite = {order = 4, text = L["rareelite"]},
-		worldboss = {order = 5, text = L["worldboss"]},
+		minus     = {order = 2, text = L["minus"]},
+		rare      = {order = 3, text = L["rare"]},
+		elite     = {order = 4, text = L["elite"]},
+		rareelite = {order = 5, text = L["rareelite"]},
+		worldboss = {order = 6, text = L["worldboss"]},
 	},
 
 	defaultUnit = "target",

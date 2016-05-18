@@ -2713,6 +2713,7 @@ L["Poison"] = "Poison"
 L["Enraged"] = "Enrage"
 
 L["normal"] = "Normal"
+L["minus"] = "Minion"
 L["rare"] = "Rare"
 L["elite"] = "Elite"
 L["rareelite"] = "Rare Elite"

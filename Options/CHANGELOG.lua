@@ -5,7 +5,7 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = [==[
 ===v8.0.0===
 ====IMPORTANT: Legion Beta====
-* Welcome to the TellMeWhen, Legion edition!
+* Welcome to TellMeWhen, Legion edition!
 * Known issues:
 ** External resources (fonts, textures, sounds) are currently disabled by Blizzard. As a result, some things (like the changelog) will look pretty bad.
 ** Buff/Debuff equivalancies have not yet been updated.
