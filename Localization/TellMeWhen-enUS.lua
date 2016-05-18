@@ -2073,7 +2073,7 @@ L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are s
 
 NOTE: WoW must be restarted before it will recognize files that did not exist when it was started up.]]
 L["SOUND_TAB"] = "Sound"
-L["SOUND_TAB_DESC"] = "Configure a sound to be played. You can use a LibSharedMedia sound, or a custom sound file that you specify."
+L["SOUND_TAB_DESC"] = "Plays a LibSharedMedia sound or a custom sound file that you specify."
 
 L["EVENTS_TAB"] = "Notifications"
 L["EVENTS_TAB_DESC"] = "Configure triggers for sounds, text ouput, and animations."
@@ -2150,7 +2150,7 @@ L["SOUNDERROR2"] = [[Custom WAV files are not supported by WoW 4.0+
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
 
 L["ANN_TAB"] = "Text"
-L["ANN_TAB_DESC"] = [[Configure text to be outputted. Destinations include Blizzard text channels, UI frames, and other AddOns.]]
+L["ANN_TAB_DESC"] = [[Outputs text to chat channels, UI frames, or other AddOns.]]
 L["HELP_ANN_LINK_INSERTED"] = [[The link you just inserted might look strange, but this is how it must be formatted with DogTag.
 
 Changing the color code if you are outputting to a Blizzard channel will break the link.]]
@@ -2185,7 +2185,7 @@ L["ERRORS_FRAME_DESC"] = "Outputs the text to the standard errors frame that nor
 
 
 L["ANIM_TAB"] = "Animation"
-L["ANIM_TAB_DESC"] = [[Configure an animation to be played. Some will affect this icon while others will affect your entire screen.]]
+L["ANIM_TAB_DESC"] = [[Animate this icon or your entire screen.]]
 L["ANIM_ANIMTOUSE"] = "Animation To Use"
 L["ANIM_ANIMSETTINGS"] = "Settings"
 
@@ -2251,8 +2251,8 @@ L["ANIM_ICONCLEAR_DESC"] = "Stops all animations that are playing on the current
 L["ANIM_ANCHOR_NOT_FOUND"] = "Couldn't find frame named %q to anchor an animation to. Is this frame not used by the icon's current view?"
 
 
-L["EVENTHANDLER_LUA_TAB"] = "Lua (Advanced)"
-L["EVENTHANDLER_LUA_TAB_DESC"] = [[Configure a Lua script to be executed. This is an advanced feature for those who have knowledge of the Lua programming language.]]
+L["EVENTHANDLER_LUA_TAB"] = "Lua"
+L["EVENTHANDLER_LUA_TAB_DESC"] = [[Advanced users with Lua programming experience can write a script to be executed.]]
 L["EVENTHANDLER_LUA_LUAEVENTf"] = "Lua Event: %s"
 L["EVENTHANDLER_LUA_LUA"] = "Lua"
 L["EVENTHANDLER_LUA_CODE"] = "Lua Code to Execute"
@@ -2287,10 +2287,10 @@ L["OPERATION_TSTOP"] = "Stop"
 L["OPERATION_TSTOP_DESC"] = "Stops and resets the timer to 0."
 
 L["EVENTHANDLER_COUNTER_TAB"] = "Counter"
-L["EVENTHANDLER_COUNTER_TAB_DESC"] = "Configure a numerical counter to be modified or set. This counter can be checked in Conditions and displayed as text with DogTags."
+L["EVENTHANDLER_COUNTER_TAB_DESC"] = "Set, increment, or decrement a counter. You can check it in Conditions and display it with DogTags."
 
 L["EVENTHANDLER_TIMER_TAB"] = "Timer"
-L["EVENTHANDLER_TIMER_TAB_DESC"] = "Configure a stopwatch-style timer. This timer can be checked in Conditions and displayed as text with DogTags."
+L["EVENTHANDLER_TIMER_TAB_DESC"] = "Start or stop a stopwatch-style timer. You can check it in Conditions and display it with DogTags."
 
 L["EVENTS_SETTINGS_COUNTER_HEADER"] = "Counter Settings"
 L["EVENTS_SETTINGS_TIMER_HEADER"] = "Timer Settings"

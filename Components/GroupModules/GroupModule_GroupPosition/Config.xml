@@ -34,8 +34,23 @@
 							if value == "" then
 								value = "UIParent"
 								self:SetText("UIParent")
+							elseif value:match("|H") then
+								value = value:match("|H(.-)|h.*|h")
 							end
 
+							return value
+						end)
+
+						self:CScriptAdd("UnModifySettingValueRequested", function(self, value)
+							if TMW:ParseGUID(value) then
+								local group = TMW.GUIDToOwner[value]
+								local groupName = group and group.GetGroupName and group:GetGroupName() or value
+
+								-- Strip out the color reset after "Global" so the "link" stays pretty
+								groupName = groupName:gsub("|r", "|cff7fffff")
+
+								return "|H" .. value .. "|h|cff7fffff[" .. groupName .. "]|r|h"
+							end
 							return value
 						end)
 
