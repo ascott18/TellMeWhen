@@ -1276,10 +1276,6 @@ L["CONDITIONPANEL_RUNES"] = "Rune Count"
 L["CONDITIONPANEL_RUNES_DESC3"] = [=[Use this condition type to check when the desired number of runes are available.]=]
 L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Check to count this rune type into the total count for the condition.]=]
 
-L["CONDITIONPANEL_RUNES_DESC_GENERIC"] = [=[Each rune is a check button. Check each rune to have it be counted into the conditions.
-
-The runes in the first row will not match death runes. The runes in the second row are the death rune version of each rune above.]=]
-
 
 L["CONDITIONPANEL_RUNESRECH"] = "Recharging Rune Count"
 L["CONDITIONPANEL_RUNESRECH_DESC"] = [=[Use this condition type to check when the desired number of runes are recharging.]=]
@@ -1503,7 +1499,6 @@ L["AURA"] = "Aura"
 L["SEAL"] = "Seal"
 L["ASPECT"] = "Aspect"
 L["SHAPESHIFT"] = "Shapeshift"
-L["PRESENCE"] = "Presence"
 L["SPEED"] = "Unit Speed"
 L["SPEED_DESC"] = [[This refers to the current movement speed of the unit. If the unit is not moving, it is zero.  If you wish to track the maximum run speed of the unit, use the 'Unit Run Speed' condition instead.]]
 L["RUNSPEED"] = "Unit Run Speed"
@@ -2073,7 +2068,7 @@ L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are s
 
 NOTE: WoW must be restarted before it will recognize files that did not exist when it was started up.]]
 L["SOUND_TAB"] = "Sound"
-L["SOUND_TAB_DESC"] = "Plays a LibSharedMedia sound or a custom sound file that you specify."
+L["SOUND_TAB_DESC"] = "Plays a LibSharedMedia sound or a custom sound file."
 
 L["EVENTS_TAB"] = "Notifications"
 L["EVENTS_TAB_DESC"] = "Configure triggers for sounds, text ouput, and animations."

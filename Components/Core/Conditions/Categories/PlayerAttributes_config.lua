@@ -44,9 +44,6 @@ Module.stances = {
 		[33891] = 	GetSpellInfo(33891), 	-- Incarnation: Tree of Life
 		[171745] = 	GetSpellInfo(171745), 	-- Claws of Shirvallah	
 	},
-	PRIEST = {
-		[15473] = 	GetSpellInfo(15473), 	-- Shadowform	
-	},
 	ROGUE = {
 		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
 	},

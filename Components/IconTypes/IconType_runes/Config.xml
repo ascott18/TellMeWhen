@@ -37,7 +37,7 @@
 		</Scripts>
 	</Button>
 	<Frame name="TellMeWhen_Runes" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="70"/>
+		<Size y="39.5"/>
 		<Frames>
 			<Button parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
 				<Anchors>
@@ -69,38 +69,6 @@
 					<Anchor point="LEFT" relativeKey="$parent.5" relativePoint="RIGHT"/>
 				</Anchors>
 			</Button>
-			
-			<Button parentKey="7" inherits="TellMeWhen_TypeCheckRuneTemplate" id="7">
-				<Anchors>
-					<Anchor point="LEFT" x="7"/>
-					<Anchor point="TOP" relativeKey="$parent.1" relativePoint="BOTTOM" y="-4"/>
-				</Anchors>
-			</Button>
-			<Button parentKey="8" inherits="TellMeWhen_TypeCheckRuneTemplate" id="8">
-				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.7" relativePoint="RIGHT"/>
-				</Anchors>
-			</Button>
-			<Button parentKey="9" inherits="TellMeWhen_TypeCheckRuneTemplate" id="9">
-				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.8" relativePoint="RIGHT"/>
-				</Anchors>
-			</Button>
-			<Button parentKey="10" inherits="TellMeWhen_TypeCheckRuneTemplate" id="10">
-				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.9" relativePoint="RIGHT"/>
-				</Anchors>
-			</Button>
-			<Button parentKey="11" inherits="TellMeWhen_TypeCheckRuneTemplate" id="11">
-				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.10" relativePoint="RIGHT"/>
-				</Anchors>
-			</Button>
-			<Button parentKey="12" inherits="TellMeWhen_TypeCheckRuneTemplate" id="12">
-				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.11" relativePoint="RIGHT"/>
-				</Anchors>
-			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -114,15 +82,6 @@
 					self["4"],
 					self["5"],
 					self["6"]
-				)
-				
-				TMW.IE:DistributeFrameAnchorsLaterally(self, 6,
-					self["7"],
-					self["8"],
-					self["9"],
-					self["10"],
-					self["11"],
-					self["12"]
 				)
 				
 			</OnLoad>

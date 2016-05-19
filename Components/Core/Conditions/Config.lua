@@ -441,55 +441,6 @@ end
 
 
 
----------- Runes ----------
-TMW:NewClass("Config_Conditions_Rune", "Config_CheckButton") {
-	OnNewInstance = function(self)
-		if self.death then
-			self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. self.runeType)
-		else
-			self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. self.runeType)
-		end
-
-		local title = _G["COMBAT_TEXT_RUNE_" .. (self.runeType):upper()]
-		if self.death then
-			title = COMBAT_TEXT_RUNE_DEATH .. " (" .. title .. ")"
-		end
-
-		TMW:TT(self, title, "CONDITIONPANEL_RUNES_CHECK_DESC", true, false)
-	end,
-
-	OnClick = function(self, button)
-		local settings = self:GetSettingTable()
-
-		local checked = self:GetChecked()
-
-		if checked then
-			PlaySound("igMainMenuOptionCheckBoxOn")
-		else
-			PlaySound("igMainMenuOptionCheckBoxOff")
-		end
-
-		local index = self.key
-
-		if settings and index then
-			TMW.CNDT:ToggleBitFlag(settings, index)
-			
-			self:OnSettingSaved()
-		end
-	end,
-
-	ReloadSetting = function(self)
-		local settings = self:GetSettingTable()
-
-		local index = self.key
-
-		if settings and index then
-			self:SetChecked(CNDT:GetBitFlag(settings, index))
-		end
-	end,
-}
-
-
 ---------- Parentheses ----------
 local parenthesisColors = setmetatable(
 	{ -- hardcode the first few colors to make sure they look good
@@ -981,17 +932,6 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	end		
 end)
 
--- Runes
-TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
-	if conditionData and conditionData.runesConfig then
-		CndtGroup.prevRowFrame = CndtGroup.Runes
-		CndtGroup.Runes:Show()
-		CndtGroup.Slider:SetWidth(217)
-	else
-		CndtGroup.Runes:Hide()
-	end
-end)
-
 -- Slider
 TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, conditionData, conditionSettings)
 	CndtGroup.LevelChecks:Hide()
@@ -1198,7 +1138,11 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		local text
 
 		if conditionData.funcstr == "DEPRECATED" then
-			text = TMW.L["CNDT_DEPRECATED_DESC"]:format(conditionData.text)
+			if conditionData.customDeprecated then
+				text = conditionData.customDeprecated(conditionSettings)
+			else
+				text = TMW.L["CNDT_DEPRECATED_DESC"]:format(conditionData.text)
+			end
 		elseif conditionData.customDeprecated then
 			text = conditionData.customDeprecated(conditionSettings)
 		end

@@ -2908,11 +2908,6 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 
 TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
 	-- Constructor
-	Runes = {
-		"Blood",
-		"Unholy",
-		"Frost",
-	},
 
 	OnNewInstance_Button_Rune = function(self)
 		if not self:GetRuneNumber() then
@@ -2927,15 +2922,7 @@ TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame
 	SetRuneNumber = function(self, runeNumber)
 		self.runeNumber = runeNumber
 
-		-- detect what texture should be used
-		local runeType = ((self.runeNumber-1)%6)+1 -- gives 1, 2, 3, 4, 5, 6
-		local runeName = self.Runes[ceil(runeType/2)] -- Gives "Blood", "Unholy", "Frost"
-		
-		if self.runeNumber > 6 then
-			self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeName)
-		else
-			self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeName)
-		end
+		self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-SingleRune")
 
 		self:SetSettingBitID(self.runeNumber)
 	end,

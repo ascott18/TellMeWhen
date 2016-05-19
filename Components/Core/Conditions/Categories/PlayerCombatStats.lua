@@ -185,14 +185,7 @@ ConditionCategory:RegisterCondition(13, "MULTISTRIKE", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Ability_UpgradeMoonGlaive",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GetMultistrike() c.Operator c.Level]],
-	Env = {
-		GetMultistrike = GetMultistrike,
-	},
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("MULTISTRIKE_UPDATE")
-	end,
+	funcstr = "DEPRECATED",
 })
 ConditionCategory:RegisterCondition(14, "LIFESTEAL", {
 	text = STAT_LIFESTEAL,
