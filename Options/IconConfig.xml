@@ -25,7 +25,7 @@
 						TMW:CInit(self)
 						self:SetSetting("Name")
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanString(value)
 						end)
 
@@ -191,7 +191,7 @@
 
 						self:SetSetting("Unit")
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanString(value)
 						end)
 

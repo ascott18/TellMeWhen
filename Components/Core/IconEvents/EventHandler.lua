@@ -431,7 +431,7 @@ conditions are passing (EventHandler_WhileConditions_Repetitive)
 if TMW.C.IconType then
 	error("Bad load order! TMW.C.IconType shouldn't exist at this point!")
 end
-TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
+TMW:RegisterSelfDestructingCallback("TMW_CLASS_NEW", function(event, class)
 	-- Register the WCSP event on IconType itself.
 	-- This allows it to be available to all icon types, 
 	-- since it is independent of all modules.
@@ -446,7 +446,7 @@ TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
 			}
 		})
 
-		TMW:UnregisterThisCallback()
+		return true -- Signal callback destruction
 	end
 end)
 

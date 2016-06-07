@@ -132,19 +132,11 @@ end)
 ConditionCategory:RegisterSpacer(5.5)
 
 local FirstStances = {
-	WARRIOR = 2457, 	-- Battle Stance
 	DRUID = 5487, 		-- Bear Form
 	ROGUE = 1784, 		-- Stealth
-	PALADIN = 105361, 	-- Seal of Command
-	WARLOCK = 103958, 	-- Metamorphosis
-	MONK = 103985, 		-- Fierce Tiger
 }
 ConditionCategory:RegisterCondition(6,	 "STANCE", {
-	text = 	pclass == "PALADIN" and L["SEAL"] or
-			pclass == "DRUID" and L["SHAPESHIFT"] or
-			-- pclass == "HUNTER" and L["ASPECT"] or -- aspects aren't stances anymore.
-			--pclass == "WARRIOR" and L["STANCE"] or
-			--pclass == "MONK" and L["STANCE"] or
+	text = 	pclass == "DRUID" and L["SHAPESHIFT"] or
 			L["STANCE"],
 
 	bool = true,

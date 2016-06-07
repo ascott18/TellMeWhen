@@ -336,7 +336,7 @@ ConditionCategory:RegisterCondition(16,	 "COMBO", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_COMBO_POINTS", "player")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "COMBO_POINTS")
 	end,
 })
 

@@ -178,7 +178,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	local Messages = {}
 	function Module:OnInitialize()
 		for k, v in pairs(_G) do
-			if type(k) == "string" and strfind(k, "^ERR_") and type(v) == "string" and #v >= 5 then
+			if type(v) == "string" and type(k) == "string" and strfind(k, "^ERR_") and #v >= 5 then
 				Messages[k] = strlower(v)
 			end
 		end

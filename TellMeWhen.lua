@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80018 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80019 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80014 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -735,7 +735,7 @@ local debugprofilestop = debugprofilestop_SAFE
 do
 	-- because quite frankly, i hate the way CallbackHandler-1.0 works.
 	local callbackregistry = {}
-	local firingsInProgress = 0
+	local firingsInProgress = false
 	TMW.callbackregistry=callbackregistry
 	
 	local function removeNils(table)
@@ -777,17 +777,34 @@ do
 		return func, arg1
 	end
 
+	local function cleanup(event, funcIndex, args)
+		if not firingsInProgress then
+			removeNils(args)
+			if args.n == 0 then
+				wipe(args)
+				local funcs = callbackregistry[event]
+				tremove(funcs, funcIndex)
+				if #funcs == 0 then
+					callbackregistry[event] = nil
+				end
+			end
+		end
+	end
+
+
 	--- Register a callback that will automatically unregister itself after it runs.
-	function TMW:RegisterRunonceCallback(event, func, arg1)
-		TMW:ValidateType("2 (event)", "TMW:RegisterRunonceCallback(event, func, arg1)", event, "string")
-		TMW:ValidateType("3 (func)", "TMW:RegisterRunonceCallback(event, func, arg1)", func, "function;table")
-		TMW:ValidateType("4 (arg1)", "TMW:RegisterRunonceCallback(event, func, arg1)", arg1, "!boolean")
+	-- The callback should return true when the callback should be unregistered.
+	function TMW:RegisterSelfDestructingCallback(event, func, arg1)
+		TMW:ValidateType("2 (event)", "TMW:RegisterSelfDestructingCallback(event, func, arg1)", event, "string")
+		TMW:ValidateType("3 (func)", "TMW:RegisterSelfDestructingCallback(event, func, arg1)", func, "function;table")
+		TMW:ValidateType("4 (arg1)", "TMW:RegisterSelfDestructingCallback(event, func, arg1)", arg1, "!boolean")
 
 		func, arg1 = DetermineFuncAndArg(event, func, arg1)	
 
 		local function RunonceWrapper(...)
-			safecall(func, ...)
-			TMW:UnregisterCallback(event, RunonceWrapper, arg1)
+			if func(...) then
+				TMW:UnregisterCallback(event, RunonceWrapper, arg1)
+			end
 		end
 
 		TMW:RegisterCallback(event, RunonceWrapper, arg1)
@@ -819,12 +836,27 @@ do
 		local args
 		for i = 1, #funcsForEvent do
 			local tbl = funcsForEvent[i]
-			if tbl.func == func then
+			if tbl == func then
+				if arg1 == true then
+					return
+				else
+					funcsForEvent[i] = {func = func, n = 2, arg1, true}
+				end
+			elseif tbl.func == func then
 				args = tbl
-				local found
+				local found, needCleanup
 				for i = 1, args.n do
-					if args[i] == arg1 then
+					if args[i] == nil then
+						needCleanup = true
+					elseif args[i] == arg1 then
 						found = true
+						break
+					end
+				end
+				if needCleanup then
+					cleanup(event, i, args)
+					if not args.n then 
+						args = nil
 						break
 					end
 				end
@@ -836,11 +868,9 @@ do
 			end
 		end
 		if not args then
-			args = {func = func, n = 1, arg1}
-			funcsForEvent[#funcsForEvent + 1] = args
+			funcsForEvent[#funcsForEvent + 1] = {func = func, n = 1, arg1}
 		end
 	end
-
 	--- Unregister a callback from TMW.
 	-- Call signature should be the same as how TMW:RegisterCallback() was called to register the callback. 
 	function TMW:UnregisterCallback(event, func, arg1)
@@ -855,23 +885,22 @@ do
 		local funcs = callbackregistry[event]
 		if funcs then
 			for t = 1, #funcs do
-				local tbl = funcs[t]
-				if tbl and tbl.func == func then
-					for i = 1, tbl.n do
-						if tbl[i] == arg1 then
-							tbl[i] = nil
+				local args = funcs[t]
+				if args == func then
+					tremove(funcs, t)
+					return
+				elseif args and args.func == func then
+					for i = 1, args.n do
+						if args[i] == arg1 then
+							args[i] = nil
 						end
 					end
 					
-					if firingsInProgress == 0 then
-						removeNils(tbl)
-						if tbl.n == 0 then
-							wipe(tbl)
-							tremove(funcs, t)
-						end
+					if not firingsInProgress then
+						cleanup(event, t, args)
 					end
 					
-					break
+					return
 				end
 			end
 		end
@@ -891,7 +920,6 @@ do
 		end
 	end
 	
-	local curEvent, curFunc, curArg1
 	--- Fires an event, calling all relevant callbacks
 	-- @param event [string] A string, beginning with "TMW_", that represents the event.
 	-- @param ... [...] The parameters to be passed to the callbacks.
@@ -899,65 +927,42 @@ do
 		local funcs = callbackregistry[event]
 
 		if funcs then
-			local oldFiringsInProgress = firingsInProgress
-			firingsInProgress = firingsInProgress + 1
+			local wasInProgress = firingsInProgress
+			firingsInProgress = true
 			
 			local funcsNeedsFix
 			for t = 1, #funcs do
-				local tbl = funcs[t]
-				local method = tbl and tbl.func
+				local args = funcs[t]
+				local method = args and args.func
 				
 				if method then
-					local tblNeedsFix
-					
-					for index = 1, tbl.n do
-						local arg1 = tbl[index]
-						
-						local old_curEvent, old_curFunc, old_curArg1 = curEvent, curFunc, curArg1
-
-						curEvent, curFunc, curArg1 = event, method, nil
+					for index = 1, args.n do
+						local arg1 = args[index]
 
 						if arg1 == nil then
-							tblNeedsFix = true
-						elseif arg1 ~= true then
-							curArg1 = arg1
-							safecall(method, arg1, event, ...)
-						else
-							safecall(method, event, ...)
-						end
-
-						-- Restore previous values so that UnregisterThisCallback still works after a nested callback call
-						curEvent, curFunc, curArg1 = old_curEvent, old_curFunc, old_curArg1
-					end
-					
-					if tblNeedsFix then
-						removeNils(tbl)
-						if tbl.n == 0 then
 							funcsNeedsFix = true
+						else
+							if arg1 ~= true then
+								curArg1 = arg1
+								safecall(method, arg1, event, ...)
+							else
+								safecall(method, event, ...)
+							end
 						end
 					end
 				end
 			end
 			
-			if funcsNeedsFix then
-				for t = #funcs, 1, -1 do
-					if funcs[t].n == 0 then
-						wipe(funcs[t])
-						tremove(funcs, t)
+			if not wasInProgress then
+				firingsInProgress = false
+
+				if funcsNeedsFix then
+					for i = #funcs, 1, -1 do
+						cleanup(event, i, funcs[i])
 					end
 				end
-				if #funcs == 0 then
-					callbackregistry[event] = nil
-				end
 			end
-			
-			firingsInProgress = oldFiringsInProgress
 		end
-	end
-
-	--- Unregisters the currently firing callback. Works with nested callbacks.
-	function TMW:UnregisterThisCallback()
-		TMW:UnregisterCallback(curEvent, curFunc, curArg1)
 	end
 end
 
@@ -2874,16 +2879,14 @@ do -- TMW:UpdateViaCoroutine()
 		end
 	end)
 
-	do
-		-- Auto-loads options if AllowCombatConfig is enabled.
-		TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-			if TMW.db.global.AllowCombatConfig then
-				TMW:UnregisterThisCallback()
-				TMW.ALLOW_LOCKDOWN_CONFIG = true
-				TMW:LoadOptions()
-			end
-		end)
-	end
+	-- Auto-loads options if AllowCombatConfig is enabled.
+	TMW:RegisterSelfDestructingCallback("TMW_GLOBAL_UPDATE", function()
+		if TMW.db.global.AllowCombatConfig and not TMW.ALLOW_LOCKDOWN_CONFIG then
+			TMW.ALLOW_LOCKDOWN_CONFIG = true
+			TMW:LoadOptions()
+			return true -- Signal callback destruction
+		end
+	end)
 end
 
 -- TMW:Update() sets up all groups, icons, and anything else.

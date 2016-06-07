@@ -11,8 +11,7 @@ TMW.CHANGELOG = [==[
 ** Buff/Debuff equivalancies have not yet been updated.
 
 ====IMPORTANT: Breaking Changes====
-* The Primary/Secondary spec group settings are gone, and the way that spec settings were stored has changed.
-** There is a small chance you will need to reconfigure the spec and tree settings on all your groups.
+* There is a small chance you will need to reconfigure the spec and tree settings on all your groups.
 * Most of your old color settings were lost.
 
 * The Update Order settings have been removed.

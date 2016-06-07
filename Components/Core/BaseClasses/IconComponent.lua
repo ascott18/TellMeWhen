@@ -92,7 +92,7 @@ function IconComponent:RegisterEventHandlerData(identifier, ...)
 		tinsert(self.EventHandlerData, eventHandlerData)
 	else
 		local data = {...}
-		TMW:RegisterCallback("TMW_CLASS_EventHandler_INSTANCE_NEW", function(event, class, EventHandler)
+		TMW:RegisterSelfDestructingCallback("TMW_CLASS_EventHandler_INSTANCE_NEW", function(event, class, EventHandler)
 			if EventHandler.identifier == identifier then
 				eventHandlerData.eventHandler = EventHandler
 	
@@ -100,8 +100,7 @@ function IconComponent:RegisterEventHandlerData(identifier, ...)
 				
 				tinsert(self.EventHandlerData, eventHandlerData)
 
-
-				TMW:UnregisterThisCallback()
+				return true -- Signal callback destruction
 			end
 		end)
 	end

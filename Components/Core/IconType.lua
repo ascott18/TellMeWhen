@@ -407,12 +407,12 @@ function IconType:SetModuleAllowance(moduleName, allow)
 		IconModule:SetAllowanceForType(self.type, allow)
 
 	elseif not IconModule then
-		TMW:RegisterCallback("TMW_CLASS_NEW", function(event, class)
+		TMW:RegisterSelfDestructingCallback("TMW_CLASS_NEW", function(event, class)
 			if class.className == moduleName and class.SetAllowanceForType then
 				local IconModule = class
 				IconModule:SetAllowanceForType(self.type, allow)
 
-				TMW:UnregisterThisCallback()
+				return true -- Signal callback destruction
 			end
 		end)
 	end

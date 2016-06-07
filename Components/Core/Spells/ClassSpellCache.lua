@@ -341,8 +341,10 @@ function ClassSpellCache:TMW_DB_INITIALIZED()
 	end
 
 	CacheIsReady = true
+	
+	return true -- Signal callback destruction
 end
-TMW:RegisterRunonceCallback("TMW_DB_INITIALIZED", ClassSpellCache)
+TMW:RegisterSelfDestructingCallback("TMW_DB_INITIALIZED", ClassSpellCache)
 
 
 -- END PRIVATE

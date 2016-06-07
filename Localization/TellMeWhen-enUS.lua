@@ -369,12 +369,12 @@ L["ICONMENU_META_ICONMENUTOOLTIP"] = "(%d |4Icon:Icons;)"
 
 
 L["ICONTYPE_DEFAULT_HEADER"] = "Instructions"
-L["ICONTYPE_DEFAULT_INSTRUCTIONS"] = [[To get started configuring this icon, select an icon type from the %q dropdown menu above.
+L["ICONTYPE_DEFAULT_INSTRUCTIONS"] = [[To get started, select an icon type from the %q dropdown menu above.
 
-Remember that icons will only work when TellMeWhen is in its locked state, so type '/tmw' when you are finished with configuration.
+Icons only work when TellMeWhen is locked, so type '/tmw' when you are finished.
 
 
-As you configure TellMeWhen, make sure to read the tooltips for each setting. These tooltips often contain important information about the how the setting works!]]
+As you configure TellMeWhen, make sure to read the tooltips for each setting. These tooltips contain important information about the how the setting works!]]
 
 
 L["ICONMENU_VIEWREQ"] = "Incompatible Group Display Method"
@@ -1253,7 +1253,7 @@ L["CONDITIONPANEL_ICON_DESC"] = [=[The condition checks whether the icon specifi
 
 If you don't want to display the icon being checked, check %q in the icon editor of that icon.
 
-The group of the icon being checked must be shown in order to check the icon, even if the condition is set to false.]=]
+The group of the icon being checked must be shown in order to check the icon, even if the condition is set to hidden.]=]
 
 L["CONDITIONPANEL_ICONSHOWNTIME"] = "Icon Shown Time"
 L["CONDITIONPANEL_ICONSHOWNTIME_DESC"] = [=[The condition checks how long the icon specified has been shown.
@@ -2413,33 +2413,6 @@ L["CLEU_UNIT_DESTROYED_DESC"] = "Occurs when a unit such as a totem is destroyed
 L["CLEU_UNIT_DIED"] = "Unit Died"
 L["CLEU_PARTY_KILL"] = "Party Kill"
 L["CLEU_PARTY_KILL_DESC"] = "Occurs when someone in your party kills something."
-
-
--- Multistrike strings
-L["CLEU_RANGE_DAMAGE_MULTISTRIKE"] = "Ranged Damage Multistrike" -- custom event
-L["CLEU_RANGE_DAMAGE_MULTISTRIKE_DESC"] = [[Occurs when your auto shot multistrikes.
-
-This will occur at the same time as the %q event.]]
-L["CLEU_SWING_DAMAGE_MULTISTRIKE"] = "Swing Damage Multistrike" -- custom event
-L["CLEU_SWING_DAMAGE_MULTISTRIKE_DESC"] = [[Occurs when your normal melee attacks multistrike.
-
-This will occur at the same time as the %q event.]]
-L["CLEU_SPELL_DAMAGE_MULTISTRIKE"] = "Spell Damage Multistrike" -- custom event
-L["CLEU_SPELL_DAMAGE_MULTISTRIKE_DESC"] = [[Occurs when a spell multistrikes.
-
-This will occur at the same time as the %q event.]]
-L["CLEU_SPELL_PERIODIC_DAMAGE_MULTISTRIKE"] = "Periodic Damage Multistrike" -- custom event
-L["CLEU_SPELL_PERIODIC_DAMAGE_MULTISTRIKE_DESC"] = [[Occurs when a DoT multistrikes.
-
-This will occur at the same time as the %q event.]]
-L["CLEU_SPELL_HEAL_MULTISTRIKE"] = "Heal Multistrike" -- custom event
-L["CLEU_SPELL_HEAL_MULTISTRIKE_DESC"] = [[Occurs when a heal multistrikes.
-
-This will occur at the same time as the %q event.]]
-L["CLEU_SPELL_PERIODIC_HEAL_MULTISTRIKE"] = "Periodic Heal Multistrike" -- custom event
-L["CLEU_SPELL_PERIODIC_HEAL_MULTISTRIKE_DESC"] = [[Occurs when a HoT multistrikes.
-
-This will occur at the same time as the %q event.]]
 
 
 

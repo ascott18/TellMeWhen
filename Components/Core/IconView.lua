@@ -179,11 +179,11 @@ function IconView:SetTypeAllowance(typeName, allow)
 		IconType:SetViewAllowance(self.view, allow)
 		
 	elseif not IconType then
-		TMW:RegisterCallback("TMW_CLASS_IconType_INTANCE_NEW", function(event, instance)
+		TMW:RegisterSelfDestructingCallback("TMW_CLASS_IconType_INTANCE_NEW", function(event, instance)
 			if instance.type == typeName and instance.SetViewAllowance then
 				instance:SetViewAllowance(self.view, allow)
 
-				TMW:UnregisterThisCallback()
+				return true -- Signal callback destruction
 			end
 		end)
 	end

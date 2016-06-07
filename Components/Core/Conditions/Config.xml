@@ -118,7 +118,7 @@
 						TMW.SUG:EnableEditBox(self, "units", true)
 
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanString(value)
 						end)
 
@@ -222,7 +222,7 @@
 
 						self:SetSetting("Name")
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanString(value)
 						end)
 					</OnLoad>
@@ -241,7 +241,7 @@
 
 						self:SetSetting("Name2")
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanString(value)
 						end)
 					</OnLoad>

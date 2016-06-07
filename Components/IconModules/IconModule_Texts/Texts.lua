@@ -679,6 +679,7 @@ end
 
 local function reSetup(self, event, icon)
 	self:SetupForIcon(icon)
+	return true -- Signal RegisterSelfDestructingCallback to unregister.
 end
 
 local function rotate(self, degrees)
@@ -752,7 +753,7 @@ function Texts:GetAnchor(layoutSettings, anchorSettings, fontStringID)
 			else
 				-- Run the text setup again after the icon is updated if we were missing an anchor frame.
 				-- It might just be an issue with the module implementation order, although IconModule_Texts should always be last.
-				TMW:RegisterRunonceCallback("TMW_ICON_SETUP_POST", reSetup, self)
+				TMW:RegisterSelfDestructingCallback("TMW_ICON_SETUP_POST", reSetup, self)
 
 				-- Temporarily anchor to the icon.
 				relativeTo = icon

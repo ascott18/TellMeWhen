@@ -132,9 +132,8 @@ end)
 
 TMW:RegisterUpgrade(72011, {
 	icon = function(self, ics)
-		-- Apparently UnitPower("player", 4) now tracks combo points.
 		if ics.PowerType == 100 then
-			ics.PowerType = 4
+			ics.PowerType = SPELL_POWER_COMBO_POINTS
 		end
 	end,
 })

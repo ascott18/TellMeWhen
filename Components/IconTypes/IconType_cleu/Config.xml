@@ -87,7 +87,7 @@
 							end
 						end)
 						
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanString(value)
 						end)
 
@@ -146,7 +146,7 @@
 							end
 						end)
 						
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanString(value)
 						end)
 

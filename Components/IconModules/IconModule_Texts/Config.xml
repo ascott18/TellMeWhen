@@ -319,7 +319,7 @@
 										self:SetTexts(TMW.L["TEXTLAYOUTS_RENAME"], TMW.L["TEXTLAYOUTS_RENAME_DESC"])
 										self:SetSetting("Name")
 										
-										self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+										self:CScriptAdd("ModifyValueForSave", function(self, value)
 											return strtrim(value)
 										end)
 

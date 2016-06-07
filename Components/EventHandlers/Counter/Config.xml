@@ -39,7 +39,7 @@
 						self:SetTexts(TMW.L["EVENTS_SETTINGS_COUNTER_NAME"], TMW.L["EVENTS_SETTINGS_COUNTER_NAME_DESC"])
 						self:SetSetting("Counter")
 						
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							local Counter = TMW.EVENTS:GetEventHandler("Counter")
 							return Counter:SanitizeCounterName(value)
 						end)
@@ -104,7 +104,7 @@
 						self:SetTexts(TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT"], TMW.L["EVENTS_SETTINGS_COUNTER_AMOUNT_DESC"])
 						self:SetSetting("CounterAmt")
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							local Counter = TMW.EVENTS:GetEventHandler("Counter")
 							return tonumber(self:GetText():trim()) or 0
 						end)

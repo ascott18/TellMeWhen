@@ -437,7 +437,7 @@
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return tonumber(value) or 0
 						end)
 					</OnLoad>

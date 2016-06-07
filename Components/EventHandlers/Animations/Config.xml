@@ -133,7 +133,7 @@
 								self:SetSetting("Image")
 								self.paddingTop, self.paddingBottom = 4, 7
 
-								self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+								self:CScriptAdd("ModifyValueForSave", function(self, value)
 									return TMW:CleanPath(value)
 								end)
 

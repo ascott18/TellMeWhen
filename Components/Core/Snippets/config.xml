@@ -196,7 +196,7 @@
 								self:SetTexts(TMW.L["CODESNIPPET_ORDER"], TMW.L["CODESNIPPET_ORDER_DESC"])
 								self.Title:SetText(TMW.L["CODESNIPPET_ORDER"])
 
-								self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+								self:CScriptAdd("ModifyValueForSave", function(self, value)
 									return tonumber(value) or 1
 								end)
 							</OnLoad>

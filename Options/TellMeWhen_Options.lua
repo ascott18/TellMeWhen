@@ -1118,6 +1118,28 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 		CS_SDepth = CS_SDepth - 1
 	end,
 
+	CScriptCallGet = function(self, script, ...)
+		if not self.__CScripts then
+			return
+		end
+
+		local existing = self.__CScripts[script]
+		if not existing then
+			return
+		end
+
+		if type(existing) == "function" then
+			return existing(self, ...)
+		else
+			for i = 1, #existing do
+				local ret = existing[i](self, ...)
+				if ret then
+					return ret
+				end
+			end
+		end
+	end,
+
 	DEBUG_Start = function(self)
 		if not CScriptProvider.DEBUG_Started then
 			print("entering cscript debug mode")
@@ -1190,28 +1212,6 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			CScriptProvider:DEBUG_Stop()
 
 			error("TellMeWhen: CScript Overflow: " .. str)
-		end
-	end,
-
-	CScriptCallGet = function(self, script, ...)
-		if not self.__CScripts then
-			return
-		end
-
-		local existing = self.__CScripts[script]
-		if not existing then
-			return
-		end
-
-		if type(existing) == "function" then
-			return existing(self, ...)
-		else
-			for i = 1, #existing do
-				local ret = existing[i](self, ...)
-				if ret then
-					return ret
-				end
-			end
 		end
 	end,
 }
@@ -1995,7 +1995,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 		if settings and self.setting then
 			local value = self:GetText() or ""
 			
-			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
+			value = self:CScriptCallGet("ModifyValueForSave", value) or value
 
 			if settings[self.setting] ~= value then
 				settings[self.setting] = value
@@ -2013,7 +2013,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 			if self.setting then
 				local value = settings[self.setting]
 
-				value = self:CScriptCallGet("UnModifySettingValueRequested", value) or value
+				value = self:CScriptCallGet("ModifyValueForLoad", value) or value
 
 				self:SetText(value)
 			end
@@ -2108,11 +2108,11 @@ TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
 
 TMW:NewClass("Config_TimeEditBox", "Config_EditBox"){
 	OnNewInstance_TimeEditBox = function(self)
-		self:CScriptAdd("ModifySettingValueRequested", self.ModifySettingValueRequested)
-		self:CScriptAdd("UnModifySettingValueRequested", self.UnModifySettingValueRequested)
+		self:CScriptAdd("ModifyValueForSave", self.ModifyValueForSave)
+		self:CScriptAdd("ModifyValueForLoad", self.ModifyValueForLoad)
 	end,
 
-	ModifySettingValueRequested = function(self, value)
+	ModifyValueForSave = function(self, value)
 		local t = TMW:CleanString(self)
 		if strfind(t, ":") then
 			t = TMW.toSeconds(t)
@@ -2120,7 +2120,7 @@ TMW:NewClass("Config_TimeEditBox", "Config_EditBox"){
 		return tonumber(t) or 0
 	end,
 
-	UnModifySettingValueRequested = function(self, value)
+	ModifyValueForLoad = function(self, value)
 		return TMW.C.Formatter.TIME_COLONS_FORCEMINS:Format(value)
 	end,
 }
@@ -2644,7 +2644,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 			end
 
 			local value = self:GetValue()
-			value = self:CScriptCallGet("ModifySettingValueRequested", value) or value
+			value = self:CScriptCallGet("ModifyValueForSave", value) or value
 
 			if settings[self.setting] ~= value then
 				settings[self.setting] = value
@@ -2661,7 +2661,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		if settings and self.setting then
 
 			local value = settings[self.setting]
-			value = self:CScriptCallGet("UnModifySettingValueRequested", value) or value
+			value = self:CScriptCallGet("ModifyValueForLoad", value) or value
 
 			self:SetValue(value)
 		end

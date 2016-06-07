@@ -152,7 +152,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 		-- Fire it in addition to, not in place of, SPELL_INTERRUPT
 		CLEU_OnEvent(icon, _, t, "SPELL_INTERRUPT_SPELL", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 	elseif event == "SPELL_DAMAGE" then
-		local _, _, _, _, critical, _, _, _, multistrike = ...
+		local _, _, _, _, critical = ...
 		if critical then
 			-- Fake an event that fires if there was a crit. Fire mages like this.
 			-- Fire it in addition to, not in place of, SPELL_DAMAGE.
@@ -161,22 +161,6 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			-- Fake an event that fires if there was not a crit. Fire mages don't like this.
 			-- Fire it in addition to, not in place of, SPELL_DAMAGE.
 			CLEU_OnEvent(icon, _, t, "SPELL_DAMAGE_NONCRIT", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
-		end
-	end
-
-	if event == "SPELL_DAMAGE" or event == "SPELL_PERIODIC_DAMAGE" or event == "SWING_DAMAGE" or event == "RANGE_DAMAGE" then
-		local _, _, _, _, critical, _, _, _, multistrike = ...
-		if multistrike then
-			-- Fake an event that fires if there was a multistrike.
-			-- Fire it in addition to, not in place of, SPELL_DAMAGE.
-			CLEU_OnEvent(icon, _, t, event .. "_MULTISTRIKE", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
-		end
-	elseif event == "SPELL_HEAL" or  event == "SPELL_PERIODIC_HEAL" then
-		local _, critical, multistrike = ...
-		if multistrike then
-			-- Fake an event that fires if there was a multistrike.
-			-- Fire it in addition to, not in place of, SPELL_HEAL.
-			CLEU_OnEvent(icon, _, t, event .. "_MULTISTRIKE", h, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4, arg5, ...)
 		end
 	end
 
@@ -340,18 +324,10 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			--"SPELL_ENERGIZE", -- normal
 			--"SPELL_DRAIN", -- normal
 			--"SPELL_LEECH", -- normal
+			--"SPELL_IMMUNE", -- normal
 			--"SPELL_AURA_APPLIED", -- normal
 			--"SPELL_AURA_REFRESH", -- normal
 			--"SPELL_AURA_REMOVED", -- normal
-
-
-			-- "RANGE_DAMAGE_MULTISTRIKE", -- normal BUT NOT ACTUALLY AN EVENT
-			-- "SWING_DAMAGE_MULTISTRIKE", -- normal BUT NOT ACTUALLY AN EVENT
-			-- "SPELL_DAMAGE_MULTISTRIKE", -- normal BUT NOT ACTUALLY AN EVENT
-			-- "SPELL_PERIODIC_DAMAGE_MULTISTRIKE", -- normal BUT NOT ACTUALLY AN EVENT
-			-- "SPELL_HEAL_MULTISTRIKE", -- normal BUT NOT ACTUALLY AN EVENT
-			-- "SPELL_PERIODIC_HEAL_MULTISTRIKE", -- normal BUT NOT ACTUALLY AN EVENT
-
 
 			--"SPELL_PERIODIC_DAMAGE", -- normal
 			--"SPELL_PERIODIC_DRAIN", -- normal

@@ -34,18 +34,15 @@ Config.Events = {
 
 	"CAT_SWING",
 		"SWING_DAMAGE", -- normal
-		"SWING_DAMAGE_MULTISTRIKE", -- normal (fake event)
 		"SWING_MISSED", -- normal
 		"SPELL_EXTRA_ATTACKS", -- normal
 	"SPACE",
 		"RANGE_DAMAGE", -- normal
-		"RANGE_DAMAGE_MULTISTRIKE", -- normal (fake event)
 		"RANGE_MISSED", -- normal
 
 
 	"CAT_SPELL",
 		"SPELL_DAMAGE", -- normal
-		"SPELL_DAMAGE_MULTISTRIKE", -- normal (fake event)
 		"SPELL_DAMAGE_CRIT", -- normal (fake event)
 		"SPELL_DAMAGE_NONCRIT", -- normal (fake event)
 		"SPELL_MISSED", -- normal
@@ -56,7 +53,6 @@ Config.Events = {
 		"SPELL_SUMMON", -- normal
 	"SPACE",
 		"SPELL_HEAL", -- normal
-		"SPELL_HEAL_MULTISTRIKE", -- normal (fake event)
 		"SPELL_RESURRECT", -- normal
 	"SPACE",
 		"SPELL_ENERGIZE", -- normal
@@ -82,12 +78,10 @@ Config.Events = {
 		"SPELL_AURA_BROKEN_SPELL",-- extraSpellID/name
 	"SPACE",
 		"SPELL_PERIODIC_DAMAGE",
-		"SPELL_PERIODIC_DAMAGE_MULTISTRIKE", -- normal (fake event)
 		"SPELL_PERIODIC_DRAIN",
 		"SPELL_PERIODIC_ENERGIZE",
 		"SPELL_PERIODIC_LEECH",
 		"SPELL_PERIODIC_HEAL",
-		"SPELL_PERIODIC_HEAL_MULTISTRIKE", -- normal (fake event)
 		"SPELL_PERIODIC_MISSED",
 
 

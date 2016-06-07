@@ -448,7 +448,8 @@ local function UnitCooldown_OnUpdate(icon, time)
 				elseif OnlySeen == "class" then
 					local _, class = UnitClass(unit)
 
-					if classSpellNameCache[class][baseName] then
+					-- we allow (not classSpellNameCache[class]) because of ticket 1144
+					if not classSpellNameCache[class] or classSpellNameCache[class][baseName] then
 						start = cooldowns[iName] or 0
 					end
 				else

@@ -39,7 +39,7 @@
 						self:SetTexts(TMW.L["EVENTS_SETTINGS_TIMER_NAME"], TMW.L["EVENTS_SETTINGS_TIMER_NAME_DESC"])
 						self:SetSetting("Counter")
 						
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							local Timer = TMW.EVENTS:GetEventHandler("Timer")
 							return Timer:SanitizeTimerName(value)
 						end)

@@ -1126,7 +1126,8 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 end)
 
 
-TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, type, settings)
+-- This function is recursive. Don't inline it with the RegisterCallback call.
+local function GetTextLayouts(event, strings, type, settings)
 	if type == "icon" or type == "group" then
 		for view, settingsPerView in pairs(settings.SettingsPerView) do
 			local GUID = settingsPerView.TextLayout
@@ -1151,4 +1152,5 @@ TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, t
 			GetTextLayouts(event, strings, "group", gs)
 		end
 	end
-end)
+end
+TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", GetTextLayouts)

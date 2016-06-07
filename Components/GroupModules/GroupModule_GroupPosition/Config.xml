@@ -28,7 +28,7 @@
 						self:SetTexts(TMW.L["UIPANEL_RELATIVETO"], TMW.L["UIPANEL_RELATIVETO_DESC"])
 						self:SetSetting("relativeTo")
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							value = value:trim()
 
 							if value == "" then
@@ -41,7 +41,7 @@
 							return value
 						end)
 
-						self:CScriptAdd("UnModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForLoad", function(self, value)
 							if TMW:ParseGUID(value) then
 								local group = TMW.GUIDToOwner[value]
 								local groupName = group and group.GetGroupName and group:GetGroupName() or value
@@ -196,11 +196,11 @@
 						self:SetMinMaxValues(1, #stratas)
 						self:SetValueStep(1)
 
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return stratas[value]
 						end)
 
-						self:CScriptAdd("UnModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForLoad", function(self, value)
 							return TMW.tContains(stratas, value)
 						end)
 

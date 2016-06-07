@@ -19,7 +19,7 @@
 						self:SetTexts(TMW.L["ICONMENU_CUSTOMTEX"], TMW.L["ICONMENU_CUSTOMTEX_DESC"])
 						self:SetSetting("CustomTex")
 						
-						self:CScriptAdd("ModifySettingValueRequested", function(self, value)
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanPath(value)
 						end)
 						
