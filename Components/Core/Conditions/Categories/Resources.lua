@@ -43,7 +43,7 @@ local ConditionCategory = CNDT:GetCategory("RESOURCES", 1, L["CNDTCAT_RESOURCES"
 
 
 ConditionCategory:RegisterCondition(1.0, "HEALTH", {
-	text = L["CONDITIONPANEL_PERCENT"] .. " " .. HEALTH,
+	text = HEALTH .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
@@ -59,7 +59,7 @@ ConditionCategory:RegisterCondition(1.0, "HEALTH", {
 	end,
 })
 ConditionCategory:RegisterCondition(1.1, "HEALTH_ABS", {
-	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. HEALTH,
+	text = HEALTH .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 1000000,
@@ -73,7 +73,7 @@ ConditionCategory:RegisterCondition(1.1, "HEALTH_ABS", {
 	end,
 })
 ConditionCategory:RegisterCondition(1.2, "HEALTH_MAX", {
-	text = L["CONDITIONPANEL_MAX"] .. " " .. HEALTH,
+	text = HEALTH .. " - " .. L["CONDITIONPANEL_MAX"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 1000000,
@@ -90,7 +90,7 @@ ConditionCategory:RegisterCondition(1.2, "HEALTH_MAX", {
 ConditionCategory:RegisterSpacer(1.9)
 
 ConditionCategory:RegisterCondition(2.0, "DEFAULT", {
-	text = L["CONDITIONPANEL_PERCENT"] .. " " .. L["CONDITIONPANEL_POWER"],
+	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
@@ -108,7 +108,7 @@ ConditionCategory:RegisterCondition(2.0, "DEFAULT", {
 	end,
 })
 ConditionCategory:RegisterCondition(2.1, "DEFAULT_ABS", {
-	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_POWER"],
+	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
@@ -124,7 +124,7 @@ ConditionCategory:RegisterCondition(2.1, "DEFAULT_ABS", {
 	end,
 })
 ConditionCategory:RegisterCondition(2.2, "DEFAULT_MAX", {
-	text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_POWER"],
+	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_MAX"],
 	tooltip = L["CONDITIONPANEL_POWER_DESC"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
@@ -332,7 +332,7 @@ ConditionCategory:RegisterSpacer(100)
 S = 50
 offset = TMW.tContains({"PALADIN", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID", "MONK"}, pclass) and S or 0
 ConditionCategory:RegisterCondition(103.0 - offset, "MANA", {
-	text = L["CONDITIONPANEL_PERCENT"] .. " " .. MANA,
+	text = MANA .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
@@ -348,7 +348,7 @@ ConditionCategory:RegisterCondition(103.0 - offset, "MANA", {
 	end,
 })
 ConditionCategory:RegisterCondition(103.1 - offset, "MANA_ABS", {
-	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. MANA,
+	text = MANA .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 40000,
@@ -362,7 +362,7 @@ ConditionCategory:RegisterCondition(103.1 - offset, "MANA_ABS", {
 	end,
 })
 ConditionCategory:RegisterCondition(103.2 - offset, "MANA_MAX", {
-	text = L["CONDITIONPANEL_MAX"] .. " " .. MANA,
+	text = MANA .. " - " .. L["CONDITIONPANEL_MAX"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 40000,
@@ -378,7 +378,7 @@ ConditionCategory:RegisterCondition(103.2 - offset, "MANA_MAX", {
 
 offset = TMW.tContains({"ROGUE", "DRUID"}, pclass) and S or 0
 ConditionCategory:RegisterCondition(104.0 - offset, "ENERGY", {
-	text = L["CONDITIONPANEL_PERCENT"] .. " " .. ENERGY,
+	text = ENERGY .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
@@ -394,7 +394,7 @@ ConditionCategory:RegisterCondition(104.0 - offset, "ENERGY", {
 	end,
 })
 ConditionCategory:RegisterCondition(104.1 - offset, "ENERGY_ABS", {
-	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. ENERGY,
+	text = ENERGY .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
@@ -408,7 +408,7 @@ ConditionCategory:RegisterCondition(104.1 - offset, "ENERGY_ABS", {
 	end,
 })
 ConditionCategory:RegisterCondition(104.2 - offset, "ENERGY_MAX", {
-	text = L["CONDITIONPANEL_MAX"] .. " " .. ENERGY,
+	text = ENERGY .. " - " .. L["CONDITIONPANEL_MAX"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
@@ -424,7 +424,7 @@ ConditionCategory:RegisterCondition(104.2 - offset, "ENERGY_MAX", {
 
 offset = TMW.tContains({"WARRIOR", "DRUID"}, pclass) and S or 0
 ConditionCategory:RegisterCondition(105.0 - offset, "RAGE", {
-	text = L["CONDITIONPANEL_PERCENT"] .. " " .. RAGE,
+	text = RAGE .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
@@ -440,7 +440,7 @@ ConditionCategory:RegisterCondition(105.0 - offset, "RAGE", {
 	end,
 })
 ConditionCategory:RegisterCondition(105.1 - offset, "RAGE_ABS", {
-	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RAGE,
+	text = RAGE .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
@@ -454,7 +454,7 @@ ConditionCategory:RegisterCondition(105.1 - offset, "RAGE_ABS", {
 	end,
 })
 ConditionCategory:RegisterCondition(105.2 - offset, "RAGE_MAX", {
-	text = L["CONDITIONPANEL_MAX"] .. " " .. RAGE,
+	text = RAGE .. " - " .. L["CONDITIONPANEL_MAX"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
@@ -470,7 +470,7 @@ ConditionCategory:RegisterCondition(105.2 - offset, "RAGE_MAX", {
 
 offset = pclass == "HUNTER" and S or 0
 ConditionCategory:RegisterCondition(106.0 - offset, "FOCUS", {
-	text = L["CONDITIONPANEL_PERCENT"] .. " " .. FOCUS,
+	text = FOCUS .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
@@ -486,7 +486,7 @@ ConditionCategory:RegisterCondition(106.0 - offset, "FOCUS", {
 	end,
 })
 ConditionCategory:RegisterCondition(106.1 - offset, "FOCUS_ABS", {
-	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. FOCUS,
+	text = FOCUS .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
@@ -500,7 +500,7 @@ ConditionCategory:RegisterCondition(106.1 - offset, "FOCUS_ABS", {
 	end,
 })
 ConditionCategory:RegisterCondition(106.2 - offset, "FOCUS_MAX", {
-	text = L["CONDITIONPANEL_MAX"] .. " " .. FOCUS,
+	text = FOCUS .. " - " .. L["CONDITIONPANEL_MAX"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
@@ -516,7 +516,7 @@ ConditionCategory:RegisterCondition(106.2 - offset, "FOCUS_MAX", {
 
 offset = pclass == "DEATHKNIGHT" and S or 0
 ConditionCategory:RegisterCondition(107.0 - offset, "RUNIC_POWER", {
-	text = L["CONDITIONPANEL_PERCENT"] .. " " .. RUNIC_POWER,
+	text = RUNIC_POWER .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
@@ -532,7 +532,7 @@ ConditionCategory:RegisterCondition(107.0 - offset, "RUNIC_POWER", {
 	end,
 })
 ConditionCategory:RegisterCondition(107.1 - offset, "RUNIC_POWER_ABS", {
-	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. RUNIC_POWER,
+	text = RUNIC_POWER .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
@@ -546,7 +546,7 @@ ConditionCategory:RegisterCondition(107.1 - offset, "RUNIC_POWER_ABS", {
 	end,
 })
 ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
-	text = L["CONDITIONPANEL_MAX"] .. " " .. RUNIC_POWER,
+	text = RUNIC_POWER .. " - " .. L["CONDITIONPANEL_MAX"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
 	range = 200,
@@ -565,7 +565,7 @@ ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
 ConditionCategory:RegisterSpacer(200)
 
 ConditionCategory:RegisterCondition(208.0, "ALTPOWER", {
-	text = L["CONDITIONPANEL_PERCENT"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
+	text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
 	percent = true,
 	formatter = TMW.C.Formatter.PERCENT,
@@ -584,7 +584,7 @@ ConditionCategory:RegisterCondition(208.0, "ALTPOWER", {
 	end,
 })
 ConditionCategory:RegisterCondition(208.1, "ALTPOWER_ABS", {
-	text = L["CONDITIONPANEL_ABSOLUTE"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
+	text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
@@ -601,7 +601,7 @@ ConditionCategory:RegisterCondition(208.1, "ALTPOWER_ABS", {
 	end,
 })
 ConditionCategory:RegisterCondition(208.2, "ALTPOWER_MAX", {
-	text = L["CONDITIONPANEL_MAX"] .. " " .. L["CONDITIONPANEL_ALTPOWER"],
+	text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_MAX"],
 	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	min = 0,
