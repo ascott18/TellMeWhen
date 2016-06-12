@@ -1508,8 +1508,13 @@ function TMW:GetRaceIconCoords(race)
 end
 TMW:MakeSingleArgFunctionCached(TMW, "GetRaceIconCoords")
 
-
-
+function TMW:TryGetNPCName(id)
+    local tooltip, LT1 = TMW:GetParser()
+    tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+    tooltip:SetHyperlink( string.format( "unit:Creature-0-0-0-0-%d:0000000000", id))
+    
+    return LT1:GetText()
+end
 
 
 ---------------------------------

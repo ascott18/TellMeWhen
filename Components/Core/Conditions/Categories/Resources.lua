@@ -89,56 +89,6 @@ ConditionCategory:RegisterCondition(1.2, "HEALTH_MAX", {
 
 ConditionCategory:RegisterSpacer(1.9)
 
-ConditionCategory:RegisterCondition(2.0, "DEFAULT", {
-	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_PERCENT"],
-	tooltip = L["CONDITIONPANEL_POWER_DESC"],
-	percent = true,
-	formatter = TMW.C.Formatter.PERCENT,
-	min = 0,
-	max = 100,
-	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPower(c.Unit)/(UnitPowerMax(c.Unit)+epsilon) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_DISPLAYPOWER", CNDT:GetUnit(c.Unit))
-	end,
-})
-ConditionCategory:RegisterCondition(2.1, "DEFAULT_ABS", {
-	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
-	tooltip = L["CONDITIONPANEL_POWER_DESC"],
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	min = 0,
-	range = 40000,
-	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPower(c.Unit) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_DISPLAYPOWER", CNDT:GetUnit(c.Unit))
-	end,
-})
-ConditionCategory:RegisterCondition(2.2, "DEFAULT_MAX", {
-	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_MAX"],
-	tooltip = L["CONDITIONPANEL_POWER_DESC"],
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	min = 0,
-	range = 40000,
-	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPowerMax(c.Unit) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXHEALTH", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_DISPLAYPOWER", CNDT:GetUnit(c.Unit))
-	end,
-})
 
 
 
@@ -206,10 +156,10 @@ ConditionCategory:RegisterCondition(26, "CHI", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_monk_chiwave",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPower("player", 12) c.Operator c.Level]],
+	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_CHI),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "CHI")
 	end,
 	hidden = pclass ~= "MONK",
 })
@@ -224,7 +174,7 @@ ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
 	Env = {
 		UnitPower = UnitPower,
 	},
-	funcstr = [[UnitPower("player", 4) c.Operator c.Level]],
+	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_COMBO_POINTS),
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "COMBO_POINTS")
@@ -257,10 +207,11 @@ ConditionCategory:RegisterCondition(90.0 - offset, "INSANITY", {
 	max = 100,
 	icon = "Interface\\Icons\\spell_shadow_painandsuffering",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPower("player", 13) c.Operator c.Level]],
+	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_INSANITY),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "INSANITY")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "INSANITY"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "INSANITY")
 	end,
 })
 
@@ -274,7 +225,8 @@ ConditionCategory:RegisterCondition(91.0 - offset, "FURY", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_FURY),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "FURY")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "FURY"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "FURY")
 	end,
 })
 ConditionCategory:RegisterCondition(92.0 - offset, "PAIN", {
@@ -286,41 +238,38 @@ ConditionCategory:RegisterCondition(92.0 - offset, "PAIN", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_PAIN),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "PAIN")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "PAIN"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "PAIN")
 	end,
 })
 
 offset = pclass == "SHAMAN" and S or 0
 ConditionCategory:RegisterCondition(93 - offset, "MAELSTROM", {
 	text = MAELSTROM_POWER,
-	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\spell_shaman_maelstromweapon",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPower(c.Unit, 11)/(UnitPowerMax(c.Unit, 11)+epsilon) c.Operator c.Level]],
+	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_MAELSTROM),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "MAELSTROM"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "MAELSTROM")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "MAELSTROM"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "MAELSTROM")
 	end,
 })
 
 offset = pclass == "DRUID" and S or 0
 ConditionCategory:RegisterCondition(94 - offset, "LUNAR_POWER", {
 	text = LUNAR_POWER,
-	formatter = TMW.C.Formatter.PERCENT,
 	min = 0,
 	max = 100,
 	icon = "Interface\\Icons\\talentspec_druid_balance",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitPower(c.Unit, 11)/(UnitPowerMax(c.Unit, 11)+epsilon) c.Operator c.Level]],
+	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_LUNAR_POWER),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "LUNAR_POWER"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "LUNAR_POWER")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "LUNAR_POWER"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "LUNAR_POWER")
 	end,
 })
 
@@ -330,6 +279,57 @@ ConditionCategory:RegisterSpacer(100)
 -- Resources with Percent, Abs, and Max conditions.
 
 S = 50
+ConditionCategory:RegisterCondition(102.0, "DEFAULT", {
+	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_PERCENT"],
+	tooltip = L["CONDITIONPANEL_POWER_DESC"],
+	percent = true,
+	formatter = TMW.C.Formatter.PERCENT,
+	min = 0,
+	max = 100,
+	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[UnitPower(c.Unit)/(UnitPowerMax(c.Unit)+epsilon) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_DISPLAYPOWER", CNDT:GetUnit(c.Unit))
+	end,
+})
+ConditionCategory:RegisterCondition(102.1, "DEFAULT_ABS", {
+	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
+	tooltip = L["CONDITIONPANEL_POWER_DESC"],
+	formatter = TMW.C.Formatter.COMMANUMBER,
+	min = 0,
+	range = 40000,
+	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[UnitPower(c.Unit) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_DISPLAYPOWER", CNDT:GetUnit(c.Unit))
+	end,
+})
+ConditionCategory:RegisterCondition(102.2, "DEFAULT_MAX", {
+	text = L["CONDITIONPANEL_POWER"] .. " - " .. L["CONDITIONPANEL_MAX"],
+	tooltip = L["CONDITIONPANEL_POWER_DESC"],
+	formatter = TMW.C.Formatter.COMMANUMBER,
+	min = 0,
+	range = 40000,
+	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[UnitPowerMax(c.Unit) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXHEALTH", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_DISPLAYPOWER", CNDT:GetUnit(c.Unit))
+	end,
+})
+
 offset = TMW.tContains({"PALADIN", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID", "MONK"}, pclass) and S or 0
 ConditionCategory:RegisterCondition(103.0 - offset, "MANA", {
 	text = MANA .. " - " .. L["CONDITIONPANEL_PERCENT"],
@@ -358,7 +358,7 @@ ConditionCategory:RegisterCondition(103.1 - offset, "MANA_ABS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "MANA")
 	end,
 })
 ConditionCategory:RegisterCondition(103.2 - offset, "MANA_MAX", {
@@ -404,7 +404,7 @@ ConditionCategory:RegisterCondition(104.1 - offset, "ENERGY_ABS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "ENERGY")
 	end,
 })
 ConditionCategory:RegisterCondition(104.2 - offset, "ENERGY_MAX", {
@@ -418,7 +418,7 @@ ConditionCategory:RegisterCondition(104.2 - offset, "ENERGY_MAX", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "ENERGY")
 	end,
 })
 
@@ -450,7 +450,7 @@ ConditionCategory:RegisterCondition(105.1 - offset, "RAGE_ABS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "RAGE")
 	end,
 })
 ConditionCategory:RegisterCondition(105.2 - offset, "RAGE_MAX", {
@@ -464,7 +464,7 @@ ConditionCategory:RegisterCondition(105.2 - offset, "RAGE_MAX", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "RAGE")
 	end,
 })
 
@@ -496,7 +496,7 @@ ConditionCategory:RegisterCondition(106.1 - offset, "FOCUS_ABS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "FOCUS")
 	end,
 })
 ConditionCategory:RegisterCondition(106.2 - offset, "FOCUS_MAX", {
@@ -510,7 +510,7 @@ ConditionCategory:RegisterCondition(106.2 - offset, "FOCUS_MAX", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "FOCUS")
 	end,
 })
 
@@ -542,7 +542,7 @@ ConditionCategory:RegisterCondition(107.1 - offset, "RUNIC_POWER_ABS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "RUNIC_POWER")
 	end,
 })
 ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
@@ -556,7 +556,7 @@ ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "RUNIC_POWER")
 	end,
 })
 
@@ -595,7 +595,7 @@ ConditionCategory:RegisterCondition(208.1, "ALTPOWER_ABS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "ALTERNATE"),
 			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", CNDT:GetUnit(c.Unit))
 	end,
@@ -612,7 +612,7 @@ ConditionCategory:RegisterCondition(208.2, "ALTPOWER_MAX", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "ALTERNATE"),
 			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", CNDT:GetUnit(c.Unit))
 	end,

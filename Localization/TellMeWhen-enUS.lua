@@ -295,8 +295,9 @@ L["ICONMENU_WPNENCHANT"] = "Weapon Imbue"
 L["ICONMENU_WPNENCHANT_DESC"] = [=[Tracks temporary weapon imbues.]=]
 
 L["ICONMENU_TOTEM"] = "Totem"
+L["ICONMENU_STATUE"] = "Monk Statue"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
-L["ICONMENU_RUNEOFPOWER_DESC"] = [[Tracks the runes from the %s talent.]]
+L["ICONMENU_TOTEM_GENERIC_DESC"] = [[Tracks your %s.]]
 L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 
 

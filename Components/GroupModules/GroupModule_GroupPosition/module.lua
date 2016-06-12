@@ -194,8 +194,17 @@ function TMW_CursorAnchor:CheckState()
 	end
 end
 
+local warnedFstack = false
 function TMW_CursorAnchor:OnUpdate()
 	local x, y = GetCursorPosition()
+	if FrameStackTooltip and FrameStackTooltip:IsShown() then
+		x = x + 1
+		y = y - 1
+		if not warnedFstack then
+			warnedFstack = true
+			TMW:Print("Framestack detected. Shifting cursor anchor by 1px while fstack is up so it isn't in the way.")
+		end
+	end
 	local scale = self:GetEffectiveScale()
 
 	self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x/scale, y/scale)

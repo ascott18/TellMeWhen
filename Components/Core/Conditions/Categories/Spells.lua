@@ -16,6 +16,7 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+local get = TMW.get
 
 local _, pclass = UnitClass("player")
 
@@ -500,33 +501,8 @@ ConditionCategory:RegisterCondition(19.5,	 "OHSWING", {
 
 ConditionCategory:RegisterSpacer(20)
 
-local totems = {}
-local totemtex = {}
-if pclass == "SHAMAN" then
-	totems = {
-		L["ICONMENU_TOTEM"] .. " - " .. L["FIRE"],
-		L["ICONMENU_TOTEM"] .. " - " .. L["EARTH"],
-		L["ICONMENU_TOTEM"] .. " - " .. L["WATER"],
-		L["ICONMENU_TOTEM"] .. " - " .. L["AIR"],
-	}
-	totemtex = {
-		GetSpellTexture(8227),	-- flametongue
-		GetSpellTexture(78222),	-- stoneskin
-		GetSpellTexture(5675),	-- mana spring
-		GetSpellTexture(3738),	-- wrath of air
-	}
-elseif pclass == "DRUID" then
-	totems = {
-		format(L["MUSHROOM"], 1),
-		format(L["MUSHROOM"], 2),
-		format(L["MUSHROOM"], 3),
-	}
-	totemtex = {
-		GetSpellTexture(88747),
-		GetSpellTexture(88747),
-		GetSpellTexture(88747),
-	}
-end
+local totemData = TMW.COMMON.CurrentClassTotems
+
 function Env.TotemHelper(slot, nameString)
 	local have, name, start, duration = GetTotemInfo(slot)
 	if nameString and nameString ~= "" and nameString ~= ";" and name and not strfind(nameString, Env.SemicolonConcatCache[name or ""]) then
@@ -534,102 +510,36 @@ function Env.TotemHelper(slot, nameString)
 	end
 	return duration and duration ~= 0 and (duration - (TMW.time - start)) or 0
 end
-ConditionCategory:RegisterCondition(21,	 "TOTEM1", {
-	text = totems[1],
-	min = 0,
-	range = 60,
-	unit = false,
-	name = function(editbox)
-		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
-		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
-	end,
-	useSUG = true,
-	allowMultipleSUGEntires = true,
-	formatter = TMW.C.Formatter.TIME_0ABSENT,
-	icon = totemtex[1],
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[TotemHelper(1, c.Name) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
-	end,
-	anticipate = function(c)
-		return [[local VALUE = time + TotemHelper(1) - c.Level]]
-	end,
-	hidden = not totems[1],
-})
-ConditionCategory:RegisterCondition(22,	 "TOTEM2", {
-	text = totems[2],
-	min = 0,
-	range = 60,
-	unit = false,
-	name = function(editbox)
-		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
-		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
-	end,
-	useSUG = true,
-	allowMultipleSUGEntires = true,
-	formatter = TMW.C.Formatter.TIME_0ABSENT,
-	icon = totemtex[2],
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[TotemHelper(2, c.Name) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
-	end,
-	anticipate = function(c)
-		return [[local VALUE = time + TotemHelper(2) - c.Level]]
-	end,
-	hidden = not totems[2],
-})
-ConditionCategory:RegisterCondition(23,	 "TOTEM3", {
-	text = totems[3],
-	min = 0,
-	range = 60,
-	unit = false,
-	name = function(editbox)
-		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
-		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
-	end,
-	useSUG = true,
-	allowMultipleSUGEntires = true,
-	formatter = TMW.C.Formatter.TIME_0ABSENT,
-	icon = totemtex[3],
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[TotemHelper(3, c.Name) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
-	end,
-	anticipate = function(c)
-		return [[local VALUE = time + TotemHelper(3) - c.Level]]
-	end,
-	hidden = not totems[3],
-})
-ConditionCategory:RegisterCondition(24,	 "TOTEM4", {
-	text = totems[4],
-	min = 0,
-	range = 60,
-	unit = false,
-	name = function(editbox)
-		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
-		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
-	end,
-	useSUG = true,
-	allowMultipleSUGEntires = true,
-	formatter = TMW.C.Formatter.TIME_0ABSENT,
-	icon = totemtex[4],
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[TotemHelper(4, c.Name) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
-	end,
-	anticipate = function(c)
-		return [[local VALUE = time + TotemHelper(4) - c.Level]]
-	end,
-	hidden = not totems[4],
-})
+
+for i = 1, 4 do
+	local totem = totemData[i]
+	ConditionCategory:RegisterCondition(20 + i,	 "TOTEM" .. i, {
+		text = totem and totem.name or L["GENERICTOTEM"]:format(i),
+		tooltip = totemData.desc or L["ICONMENU_TOTEM_DESC"],
+		min = 0,
+		range = 60,
+		unit = false,
+		name = (not totem or totem.hasVariableNames) and function(editbox)
+			editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
+			editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
+		end,
+		useSUG = true,
+		allowMultipleSUGEntires = true,
+		formatter = TMW.C.Formatter.TIME_0ABSENT,
+		icon = totem and totem.texture or "Interface\\ICONS\\ability_shaman_tranquilmindtotem",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = [[TotemHelper(]] .. i .. ((not totem or totem.hasVariableNames) and [[, c.Name]] or "") .. [[) c.Operator c.Level]],
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
+		end,
+		anticipate = function(c)
+			return [[local VALUE = time + TotemHelper(]] .. i .. [[) - c.Level]]
+		end,
+		hidden = not totem,
+	})
+end
+
 
 ConditionCategory:RegisterSpacer(30)
 

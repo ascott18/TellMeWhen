@@ -486,7 +486,7 @@
 							else
 								local Type = rawget(TMW.Types, ics.Type)
 								if Type then
-									self:SetText(Type.name)
+									self:SetText(TMW.get(Type.name))
 								else
 									self:SetText(ics.Type .. ": UNKNOWN TYPE")
 								end

@@ -14,6 +14,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
+local get = TMW.get
 local print = TMW.print
 
 local format, type, tonumber, wipe, bit =
@@ -28,22 +29,11 @@ local _, pclass = UnitClass("Player")
 
 
 local Type = TMW.Classes.IconType:New("totem")
-if pclass == "DRUID" then
-	-- Druid totems are wild mushrooms
-	Type.name = GetSpellInfo(88747)
-	Type.desc = L["ICONMENU_MUSHROOMS_DESC"]
-	Type.menuIcon = "Interface\\ICONS\\druid_ability_wildmushroom_b"
-elseif pclass == "MAGE" then
-	-- Mage totems are runes of power
-	Type.name = GetSpellInfo(116011)
-	Type.desc = L["ICONMENU_RUNEOFPOWER_DESC"]
-	Type.menuIcon = GetSpellTexture(116011)
-else
-	-- Name it "Totem" for everyone else.
-	Type.name = L["ICONMENU_TOTEM"]
-	Type.desc = L["ICONMENU_TOTEM_DESC"]
-	Type.menuIcon = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
-end
+local totemData = TMW.COMMON.CurrentClassTotems
+
+Type.name = totemData.name
+Type.desc = totemData.desc
+Type.menuIcon = totemData.texture or totemData[1].texture
 
 Type.AllowNoName = true
 Type.usePocketWatch = 1
@@ -72,55 +62,42 @@ Type:RegisterIconDefaults{
 	TotemSlots				= 0xF, --(1111)
 }
 
-if pclass ~= "DRUID" and pclass ~= "MAGE" then
-	-- Druids and mages shouldn't be able to filter by name,
-	-- since their totems only have one possible name.
-
+local hasNameConfig = false
+local numSlots = 0
+for i = 1, 4 do
+	if totemData[i] then
+		numSlots = numSlots + 1
+		if totemData[i].hasNameConfig then
+			hasNameConfig = true
+			break
+		end
+	end
+end
+if hasNameConfig then
 	Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 		title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	})
 end
 
 
-local totemNames = {
-	SHAMAN = {
-		L["FIRE"],
-		L["EARTH"],
-		L["WATER"],
-		L["AIR"],
-	},
-	DRUID = {
-		L["MUSHROOM"]:format(1),
-		L["MUSHROOM"]:format(2),
-		L["MUSHROOM"]:format(3),
-	},
-	MAGE = {
-		L["RUNEOFPOWER"]:format(1),
-		L["RUNEOFPOWER"]:format(2),
-	},
-	OTHER = {
-		L["GENERICTOTEM"]:format(1),
-		L["GENERICTOTEM"]:format(2),
-		L["GENERICTOTEM"]:format(3),
-		L["GENERICTOTEM"]:format(4),
-	}
-}
-totemNames = totemNames[pclass] or totemNames.OTHER
+if numSlots > 1 then
+	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots", function(self)
+		self:SetTitle(L["ICONMENU_CHOOSENAME3"])
 
-Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots", function(self)
-	self:SetTitle(L["ICONMENU_CHOOSENAME3"])
+		local data = { numPerRow = numSlots >= 4 and numSlots/2 or numSlots}
+		for i = 1, 4 do
+			if totemData[i] then
+				tinsert(data, function(check)
+					check:SetTexts(totemData[i].name, nil)
+					check:SetSetting("TotemSlots")
+					check:SetSettingBitID(i)
+				end)
+			end
+		end
 
-	local data = { numPerRow = #totemNames >= 4 and #totemNames/2 or #totemNames}
-	for i, name in ipairs(totemNames) do
-		tinsert(data, function(check)
-			check:SetTexts(name, nil)
-			check:SetSetting("TotemSlots")
-			check:SetSettingBitID(check:GetID())
-		end)
-	end
-
-	self:BuildSimpleCheckSettingFrame("Config_CheckButton_BitToggle", data)
-end)
+		self:BuildSimpleCheckSettingFrame("Config_CheckButton_BitToggle", data)
+	end)
+end
 
 
 
@@ -146,7 +123,7 @@ local function Totem_OnUpdate(icon, time)
 	
 	-- Be careful here. Slots that are explicitly disabled by the user are set false.
 	-- Slots that are disabled internally are set nil (which could change table length).
-	for iSlot = 1, #Slots do
+	for iSlot = 1, 4 do
 		if Slots[iSlot] then
 			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 
@@ -179,28 +156,34 @@ function Type:Setup(icon)
 	icon.Slots = wipe(icon.Slots or {})
 	for i=1, 4 do
 		local settingBit = bit.lshift(1, i - 1)
-		icon.Slots[i] = bit.band(icon.TotemSlots, settingBit) == settingBit
+
+		if totemData[i] then
+			icon.Slots[i] = bit.band(icon.TotemSlots, settingBit) == settingBit
+
+			-- If there's only one valid totem slot, configuration of slots isn't allowed.
+			-- Force the only slot. This might not be the first slot.
+			if numSlots == 1 then
+				icon.Slots[i] = true
+			end
+		end
 	end
+
+	
 
 	icon.FirstTexture = nil
 	local name = icon.Name
 
-	-- Force the name for classes that can't configure a name.
-	if pclass == "MAGE" then
-		name = 116011
-		icon.Slots[3] = nil -- there is no rune 3
-		icon.Slots[4] = nil -- there is no rune 4
-	elseif pclass == "DRUID" then
-		name = 88747
-		icon.Slots[4] = nil -- there is no mushroom 4
+	-- Force the icon to allow all totems if the class doesn't have totem name configuration.
+	if not hasNameConfig then
+		name = ""
 	end
 
 	icon.Spells = TMW:GetSpells(name, true)
 
-	icon.FirstTexture = icon.Spells.FirstString and GetSpellTexture(icon.Spells.FirstString)
+	icon.FirstTexture = icon.Spells.FirstString and GetSpellTexture(icon.Spells.FirstString) or Type.menuIcon
 	icon:SetInfo("reverse; texture; spell",
 		true,
-		Type:GetConfigIconTexture(icon),
+		icon.FirstTexture,
 		icon.Spells.FirstString
 	)
 

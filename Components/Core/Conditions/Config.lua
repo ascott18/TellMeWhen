@@ -204,11 +204,12 @@ local function AddConditionToDropDown(dropdown, conditionData)
 	
 	local info = TMW.DD:CreateInfo()
 	
+	local text = get(conditionData.text)
 	info.func = TypeMenu_DropDown_OnClick
-	info.text = (conditionData.text or "??") .. append
+	info.text = (text or "??") .. append
 	
-	info.tooltipTitle = conditionData.text
-	info.tooltipText = conditionData.tooltip
+	info.tooltipTitle = text
+	info.tooltipText = get(conditionData.tooltip)
 	
 	info.value = conditionData.identifier
 	info.arg1 = dropdown
@@ -781,8 +782,8 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	CndtGroup.Type:Show()
 
 
-	local text = conditionData and conditionData.text or conditionSettings.Type
-	local tooltip = conditionData and conditionData.tooltip
+	local text = conditionData and get(conditionData.text) or conditionSettings.Type
+	local tooltip = conditionData and get(conditionData.tooltip)
 
 	if not conditionData or conditionData.identifier ~= "" then
 		CndtGroup.Type.EditBox:SetText(text)
@@ -1141,7 +1142,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			if conditionData.customDeprecated then
 				text = conditionData.customDeprecated(conditionSettings)
 			else
-				text = TMW.L["CNDT_DEPRECATED_DESC"]:format(conditionData.text)
+				text = TMW.L["CNDT_DEPRECATED_DESC"]:format(get(conditionData.text))
 			end
 		elseif conditionData.customDeprecated then
 			text = conditionData.customDeprecated(conditionSettings)
@@ -1242,7 +1243,7 @@ function Module:Table_Get()
 end
 
 function Module.Sorter_ByName(a, b)
-	local nameA, nameB = CNDT.ConditionsByType[a].text, CNDT.ConditionsByType[b].text
+	local nameA, nameB = get(CNDT.ConditionsByType[a].text), get(CNDT.ConditionsByType[b].text)
 	if nameA == nameB then
 		--sort identical names by ID
 		return a < b
@@ -1258,7 +1259,7 @@ end
 
 function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	for identifier, conditionData in pairs(tbl) do
-		local text = conditionData.text
+		local text = get(conditionData.text)
 		text = text and text:lower()
 		if conditionData:ShouldList() and text and (strfindsug(text) or strfind(text, SUG.lastName)) then
 			suggestions[#suggestions + 1] = identifier
@@ -1269,14 +1270,14 @@ end
 function Module:Entry_AddToList_1(f, identifier)
 	local conditionData = CNDT.ConditionsByType[identifier]
 
-	f.Name:SetText(conditionData.text)
+	f.Name:SetText(get(conditionData.text))
 
 	f.insert = identifier
 
-	f.tooltiptitle = conditionData.text
+	f.tooltiptitle = get(conditionData.text)
 	f.tooltiptext = conditionData.category.name
 	if conditionData.tooltip then
-		f.tooltiptext = f.tooltiptext .. "\r\n\r\n" .. conditionData.tooltip
+		f.tooltiptext = f.tooltiptext .. "\r\n\r\n" .. get(conditionData.tooltip)
 	end
 
 	f.Icon:SetTexture(get(conditionData.icon))

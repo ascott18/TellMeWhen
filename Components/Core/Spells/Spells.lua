@@ -25,6 +25,7 @@ local GetSpellInfo =
 
 local strlowerCache = TMW.strlowerCache
 
+local _, pclass = UnitClass("player")
 
 
 
@@ -487,3 +488,137 @@ function TMW:EquivToTable(name)
 	return tbl
 end
 TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------
+-- Constant spell data
+---------------------------------
+
+
+if pclass == "SHAMAN" then
+	TMW.COMMON.CurrentClassTotems = {
+		name = L["ICONMENU_TOTEM"],
+		desc = L["ICONMENU_TOTEM_DESC"],
+		{
+			hasVariableNames = true,
+			name = L["ICONMENU_TOTEM"] .. " - " .. L["FIRE"],
+			texture = GetSpellTexture(8227), --flametongue
+		},
+		{
+			hasVariableNames = true,
+			name = L["ICONMENU_TOTEM"] .. " - " .. L["EARTH"],
+			texture = GetSpellTexture(78222), --stoneskin
+		},
+		{
+			hasVariableNames = true,
+			name = L["ICONMENU_TOTEM"] .. " - " .. L["WATER"],
+			texture = GetSpellTexture(5675), --mana spring
+		},
+		{
+			hasVariableNames = true,
+			name = L["ICONMENU_TOTEM"] .. " - " .. L["AIR"],
+			texture = GetSpellTexture(3738), --wrath of air
+		},
+	}
+elseif pclass == "MAGE" then
+	TMW.COMMON.CurrentClassTotems = {
+		name = GetSpellInfo(145205),
+		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(145205)),
+		{
+			hasVariableNames = false,
+			name = GetSpellInfo(145205),
+			texture = GetSpellTexture(145205)
+		}
+	}
+elseif pclass == "DRUID" then
+	TMW.COMMON.CurrentClassTotems = {
+		name = GetSpellInfo(116011),
+		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(116011)),
+		{
+			hasVariableNames = false,
+			name = GetSpellInfo(116011),
+			texture = GetSpellTexture(116011)
+		}
+	}
+
+elseif pclass == "PALADIN" then
+	TMW.COMMON.CurrentClassTotems = {
+		name = GetSpellInfo(26573),
+		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(26573)),
+		{
+			hasVariableNames = false,
+			name = GetSpellInfo(26573),
+			texture = GetSpellTexture(26573)
+		}
+	}
+elseif pclass == "MONK" then
+	TMW.COMMON.CurrentClassTotems = {
+		name = L["ICONMENU_STATUE"],
+		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(L["ICONMENU_STATUE"]),
+		{
+			hasVariableNames = false,
+			name = L["ICONMENU_STATUE"],
+			texture = function()
+				if GetSpecialization() == 1 then
+					return GetSpellTexture(163177) -- black ox
+				else
+					return GetSpellTexture(115313) -- jade serpent
+				end
+			end,
+		}
+	}
+elseif pclass == "DEATHKNIGHT" then
+	local cachedName = TMW:TryGetNPCName(27829)
+	local name = function()
+		if cachedName then return cachedName end
+		cachedName = TMW:TryGetNPCName(27829)
+		return cachedName
+	end
+
+	TMW.COMMON.CurrentClassTotems = {
+		name = name,
+		desc = function() return L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name()) end,
+		texture = GetSpellTexture(49206),
+		[3] = { -- wow blizzard, so nice. put the gargoyle in slot 3 why dontcha.
+			hasVariableNames = false,
+			name = name,
+			texture = GetSpellTexture(49206),
+		}
+	}
+else
+	TMW.COMMON.CurrentClassTotems = {
+		name = L["ICONMENU_TOTEM"],
+		desc = L["ICONMENU_TOTEM_DESC"],
+		{
+			hasVariableNames = true,
+			name = L["GENERICTOTEM"]:format(1),
+			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+		},
+		{
+			hasVariableNames = true,
+			name = L["GENERICTOTEM"]:format(2),
+			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+		},
+		{
+			hasVariableNames = true,
+			name = L["GENERICTOTEM"]:format(3),
+			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+		},
+		{
+			hasVariableNames = true,
+			name = L["GENERICTOTEM"]:format(4),
+			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+		},
+	}
+end
