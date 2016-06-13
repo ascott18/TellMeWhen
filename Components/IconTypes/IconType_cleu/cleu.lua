@@ -85,6 +85,11 @@ Type:RegisterIconDefaults{
 	},
 }
 
+Type.RelevantSettings = {
+	SourceConditions = true,
+	DestConditions = true,
+}
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
@@ -478,8 +483,23 @@ function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
 
 	-- only define units if there are any units. we dont want to waste time iterating an empty table.
-	icon.SourceUnits = icon.SourceUnit ~= "" and TMW:GetUnits(icon, icon.SourceUnit)
-	icon.DestUnits = icon.DestUnit ~= "" and TMW:GetUnits(icon, icon.DestUnit)
+	icon.SourceUnits = nil
+	if icon.SourceUnit ~= "" then
+		local conditionSet
+		icon.SourceUnits, conditionSet = TMW:GetUnits(icon, icon.SourceUnit, icon.SourceConditions)
+		if conditionSet.mightHaveWackyUnitRefs then
+			icon.SourceUnits = TMW:GetUnits(icon, icon.SourceUnit)
+		end
+	end
+
+	icon.DestUnits = nil
+	if icon.DestUnit ~= "" then
+		local conditionSet
+		icon.DestUnits, conditionSet = TMW:GetUnits(icon, icon.DestUnit, icon.SourceConditions)
+		if conditionSet.mightHaveWackyUnitRefs then
+			icon.DestUnits = TMW:GetUnits(icon, icon.DestUnit)
+		end
+	end
 
 	-- nil out flags if they are set to default (0xFFFFFFFF)
 	icon.SourceFlags = icon.SourceFlags ~= 0xFFFFFFFF and icon.SourceFlags
@@ -635,3 +655,83 @@ Processor:RegisterDogTag("TMW", "Extra", {
 	example = ('[Extra] => %q; [Extra(link=true)] => %q; [Extra(icon="TMW:icon:1I7MnrXDCz8T")] => %q; [Extra(icon="TMW:icon:1I7MnrXDCz8T", link=true)] => %q'):format(GetSpellInfo(5782), GetSpellLink(5782), GetSpellInfo(5308), GetSpellLink(5308)),
 	category = L["ICON"],
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+for _, key in TMW:Vararg("Source", "Dest") do
+	local CNDT = TMW.CNDT
+
+	local ConditionSet = {
+		parentSettingType = "icon",
+		parentDefaults = TMW.Icon_Defaults,
+		modifiedDefaults = {
+			Unit = "unit",
+		},
+		
+		settingKey = key .. "Conditions",
+		GetSettings = function(self)
+			return TMW.CI.ics and TMW.CI.ics[key .. "Conditions"]
+		end,
+		
+		iterFunc = TMW.InIconSettings,
+		iterArgs = {
+			[1] = TMW,
+		},
+
+		useDynamicTab = true,
+		ShouldShowTab = function(self)
+			return TellMeWhen_CLEUOptions and TellMeWhen_CLEUOptions:IsShown()
+		end,
+		tabText = L["CLEU_CONDITIONS_" .. key:upper()],
+		tabTooltip = L["CLEU_CONDITIONS_DESC"],
+		
+		ConditionTypeFilter = function(self, conditionData)
+			if conditionData.unit == nil then
+				return true
+			elseif conditionData.identifier == "LUA" then
+				return true
+			end
+		end,
+		TMW_CNDT_GROUP_DRAWGROUP = function(self, event, conditionGroup, conditionData, conditionSettings)
+			if CNDT.CurrentConditionSet == self then
+				TMW.SUG:EnableEditBox(conditionGroup.Unit, "unitconditionunits", true)
+				TMW:TT(conditionGroup.Unit, "CONDITIONPANEL_UNIT", "ICONMENU_UNIT_DESC_UNITCONDITIONUNIT")
+			end
+		end,
+	}
+	CNDT:RegisterConditionSet("CLEU" .. key, ConditionSet)
+
+	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+		-- This can't happen until after TMW_OPTIONS_LOADED because it has to be registered
+		-- after the default callbacks are registered
+		TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", ConditionSet)
+	end)
+end

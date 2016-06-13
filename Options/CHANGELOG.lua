@@ -7,7 +7,6 @@ TMW.CHANGELOG = [==[
 ====IMPORTANT: Legion Beta====
 * Welcome to TellMeWhen, Legion edition!
 * Known issues:
-** External resources (fonts, textures, sounds) are currently disabled by Blizzard. As a result, some things (like the changelog) will look pretty bad.
 ** Buff/Debuff equivalancies have not yet been updated.
 
 ====IMPORTANT: Breaking Changes====
@@ -27,6 +26,7 @@ TMW.CHANGELOG = [==[
 ** Out of Range & Out Of Power settings now use Opactiy & Color settings.
 ** You can also set a custom texture for each of your Opacity & Color settings.
 
+* Combat Log Source and Destination units may now have unit conditions when filtered by unitID.
 * New conditions have been added for checking your current location.
 
 ===v7.4.0===

@@ -2494,6 +2494,13 @@ L["CLEU_DESTUNITS_DESC"] = "Choose the destination units that you would like the
 --L["CLEU_FLAGS_DEST"] = "Destination Exclusions"
 L["CLEU_FLAGS_SOURCE"] = "Exclusions"
 L["CLEU_FLAGS_DEST"] = "Exclusions"
+L["CLEU_HEADER_SOURCE"] = "Source Unit(s)"
+L["CLEU_HEADER_DEST"] = "Destination Unit(s)"
+L["CLEU_CONDITIONS_SOURCE"] = "Source Conditions"
+L["CLEU_CONDITIONS_DEST"] = "Destination Conditions"
+L["CLEU_CONDITIONS_DESC"] = [[Configure conditions that each unit will have to pass in order to be checked.
+
+These conditions are only available when you entered units to check and all those units entered are unitIDs - names cannot be used with these conditions.]]
 L["CLEU_FLAGS_DESC"] = "Contains a list of attributes that can be used to exclude certain units from triggering the icon. If an exclusion is checked, and a unit has that attribute, the icon will not process the event that the unit was part of."
 
 L["CLEU_TIMER"] = "Timer to set on event"

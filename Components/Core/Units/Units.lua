@@ -220,6 +220,16 @@ local UnitSet = TMW:NewClass("UnitSet"){
 					self.allUnitsChangeOnEvent = false
 					UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(group%d+)")
 				end
+
+			elseif unit:find("^vehicle") then
+				-- TODO: This isn't strictly true.
+				-- There might actually be events that work, but I don't feel like finding them at the moment.
+				self.allUnitsChangeOnEvent = false
+
+			elseif unit:find("^mouseover") then
+				-- There is a unit when you gain a mouseover, but there isn't one when you lose it, so we can't have events for this one.
+				self.allUnitsChangeOnEvent = false
+				
 			else
 				-- we found a unit and we dont really know what the fuck it is.
 				-- it MIGHT be a player name (or a derrivative thereof),
