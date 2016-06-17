@@ -324,6 +324,7 @@ ConditionCategory:RegisterCondition(15,   "LOC_SUBZONE", {
 
 	bool = true,
 
+	unit = false,
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_LOC_SUBZONE_LABEL"], L["CONDITIONPANEL_LOC_SUBZONE_BOXDESC"])
 	end,

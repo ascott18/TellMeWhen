@@ -506,32 +506,7 @@ TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 ---------------------------------
 
 
-if pclass == "SHAMAN" then
-	TMW.COMMON.CurrentClassTotems = {
-		name = L["ICONMENU_TOTEM"],
-		desc = L["ICONMENU_TOTEM_DESC"],
-		{
-			hasVariableNames = true,
-			name = L["ICONMENU_TOTEM"] .. " - " .. L["FIRE"],
-			texture = GetSpellTexture(8227), --flametongue
-		},
-		{
-			hasVariableNames = true,
-			name = L["ICONMENU_TOTEM"] .. " - " .. L["EARTH"],
-			texture = GetSpellTexture(78222), --stoneskin
-		},
-		{
-			hasVariableNames = true,
-			name = L["ICONMENU_TOTEM"] .. " - " .. L["WATER"],
-			texture = GetSpellTexture(5675), --mana spring
-		},
-		{
-			hasVariableNames = true,
-			name = L["ICONMENU_TOTEM"] .. " - " .. L["AIR"],
-			texture = GetSpellTexture(3738), --wrath of air
-		},
-	}
-elseif pclass == "MAGE" then
+if pclass == "MAGE" then
 	TMW.COMMON.CurrentClassTotems = {
 		name = GetSpellInfo(145205),
 		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(145205)),
@@ -597,6 +572,7 @@ elseif pclass == "DEATHKNIGHT" then
 		}
 	}
 else
+	-- This includes shamans now in Legion - the elements of totems is no longer a notion.
 	TMW.COMMON.CurrentClassTotems = {
 		name = L["ICONMENU_TOTEM"],
 		desc = L["ICONMENU_TOTEM_DESC"],

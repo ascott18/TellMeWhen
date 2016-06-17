@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80021 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80022 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80014 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -836,19 +836,14 @@ do
 		local args
 		for i = 1, #funcsForEvent do
 			local tbl = funcsForEvent[i]
-			if tbl == func then
-				if arg1 == true then
-					return
-				else
-					funcsForEvent[i] = {func = func, n = 2, arg1, true}
-				end
-			elseif tbl.func == func then
+			if tbl.func == func then
 				args = tbl
 				local found, needCleanup
 				for i = 1, args.n do
-					if args[i] == nil then
+					local arg = args[i]
+					if arg == nil then
 						needCleanup = true
-					elseif args[i] == arg1 then
+					elseif arg == arg1 then
 						found = true
 						break
 					end
@@ -886,10 +881,7 @@ do
 		if funcs then
 			for t = 1, #funcs do
 				local args = funcs[t]
-				if args == func then
-					tremove(funcs, t)
-					return
-				elseif args and args.func == func then
+				if args and args.func == func then
 					for i = 1, args.n do
 						if args[i] == arg1 then
 							args[i] = nil
@@ -933,21 +925,18 @@ do
 			local funcsNeedsFix
 			for t = 1, #funcs do
 				local args = funcs[t]
-				local method = args and args.func
 				
-				if method then
+				if args then
+					local method = args.func
 					for index = 1, args.n do
 						local arg1 = args[index]
 
 						if arg1 == nil then
 							funcsNeedsFix = true
+						elseif arg1 ~= true then
+							safecall(method, arg1, event, ...)
 						else
-							if arg1 ~= true then
-								curArg1 = arg1
-								safecall(method, arg1, event, ...)
-							else
-								safecall(method, event, ...)
-							end
+							safecall(method, event, ...)
 						end
 					end
 				end
