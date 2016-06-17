@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80022 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80023 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80014 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1784,12 +1784,14 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 
 				for k, colorSet in pairs(profile.Colors) do
 					for _, color in pairs(colorSet) do
-						color.Color = TMW:RGBATableToStringWithFallback(color, color.Color)
+						if color.Color then
+							color.Color = TMW:RGBATableToStringWithFallback(color, color.Color)
 
-						color.r = nil
-						color.g = nil
-						color.b = nil
-						color.a = nil
+							color.r = nil
+							color.g = nil
+							color.b = nil
+							color.a = nil
+						end
 					end
 				end
 			end,

@@ -114,6 +114,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		self.Conditions = Conditions
 		self.parent = parent
 		
+		self.UnitsLookup = {}
 		self.unitSettings = unitSettings
 		self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
 		self.updateEvents = {PLAYER_ENTERING_WORLD = true,}
@@ -124,6 +125,8 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		-- determine the operations that the set needs to stay updated
 		for k, unit in ipairs(self.originalUnits) do
 			unit = tostring(unit)
+			self.UnitsLookup[unit] = true
+
 			if unit == "player" then
 			--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
 			-- if someone legitimately entered "playertarget" then they probably dont deserve to have increased eficiency... dont bother handling player as a base unit
@@ -290,7 +293,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 	end,
 
 	Update = function(self)
-		local originalUnits, exposedUnits, translatedUnits =
+		local originalUnits,      exposedUnits,      translatedUnits =
 		      self.originalUnits, self.exposedUnits, self.translatedUnits
 		local hasSpecialUnitRefs = self.hasSpecialUnitRefs
 		local mightHaveWackyUnitRefs = self.mightHaveWackyUnitRefs

@@ -107,16 +107,10 @@ local events = {
 
 
 local function Cast_OnEvent(icon, event, arg1)
-	if events[event] then
+	if events[event] and icon.UnitSet.UnitsLookup[arg1] then
 		-- A UNIT_SPELLCAST_ event
-		-- See if the icon is checking the unit. If so, schedule an update for the icon.
-		local Units = icon.Units
-		for u = 1, #Units do
-			if arg1 == Units[u] then
-				icon.NextUpdateTime = 0
-				return
-			end
-		end
+		-- If the icon is checking the unit, schedule an update for the icon.
+		icon.NextUpdateTime = 0
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0

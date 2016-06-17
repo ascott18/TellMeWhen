@@ -419,14 +419,8 @@ end
 And your OnEvent function should include the following handling for {{{TMW_UNITSET_UPDATED}}}, in addition to any other event handling (like the handling here for {{{UNIT_AURA}}}) needed in the function for your IT (again, this is taken directly from the Buff/Debuff IT):
 <<code lua>>
 local function Buff_OnEvent(icon, event, arg1)
-	if event == "UNIT_AURA" then
-		local Units = icon.Units
-		for u = 1, #Units do
-			if arg1 == Units[u] then
-				icon.NextUpdateTime = 0
-				return
-			end
-		end
+	if event == "UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
+		icon.NextUpdateTime = 0
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		icon.NextUpdateTime = 0
 	end

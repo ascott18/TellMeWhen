@@ -77,10 +77,7 @@ Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_ConditionIconSettings")
 
 
 local function ConditionIcon_OnEvent(icon, event, arg1)
---	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
-		-- A unit was just added or removed from icon.Units, so schedule an update.
-		icon.NextUpdateTime = 0
---	end
+	icon.NextUpdateTime = 0
 end
 
 local function ConditionIcon_OnUpdate(icon, time)
