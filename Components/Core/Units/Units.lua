@@ -292,7 +292,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		end
 	end,
 
-	Update = function(self)
+	Update = function(self, forceNoExists)
 		local originalUnits,      exposedUnits,      translatedUnits =
 		      self.originalUnits, self.exposedUnits, self.translatedUnits
 		local hasSpecialUnitRefs = self.hasSpecialUnitRefs
@@ -345,6 +345,9 @@ local UnitSet = TMW:NewClass("UnitSet"){
 					-- If it was subbed, its a string, and if it didnt need to be subbed, it will be nil.
 					subbedUnit ~= false
 
+					-- Don't expose the unit if the caller knows that this unit actually doesn't exist.
+				and forceNoExists ~= unit
+				
 					-- Don't expose the unit if it has conditions and those conditions failed
 				and (not ConditionObjects or not ConditionObjects[k] or not ConditionObjects[k].Failed)
 
@@ -548,7 +551,7 @@ function UNITS:UpdateGroupedPlayersMap()
 	end
 end
 
-function UNITS:OnEvent(event, ...)
+function UNITS:OnEvent(event, arg1)
 
 	if (event == "GROUP_ROSTER_UPDATE" or event == "RAID_ROSTER_UPDATE") and UNITS.doTankAndAssistMap then
 		UNITS:UpdateTankAndAssistMap()
@@ -563,13 +566,18 @@ function UNITS:OnEvent(event, ...)
 		UNITS:UpdateGroupedPlayersMap()
 	end
 
+	-- NAME_PLATE_UNIT_REMOVED fires while UnitExists is still true for the unit.
+	-- We will pass this to Update() to force it to be treated as not existing.
+	local forceNoExists = event == "NAME_PLATE_UNIT_REMOVED" and arg1
+
 	local instances = UnitSet.instances
 	for i = 1, #instances do
 		local unitSet = instances[i]
 		if unitSet.updateEvents[event] then
-			unitSet:Update()
+			unitSet:Update(forceNoExists)
 		end
 	end
+	forceNoExists = nil
 end
 
 function UNITS:SubstituteSpecialUnit(oldunit)
