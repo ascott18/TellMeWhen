@@ -3301,11 +3301,6 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 		TMW.IE.Tabs.art.pSelectedHorizontal:SetPoint("TOPLEFT", self)
 		TMW.IE.Tabs.art.pSelectedHorizontal:SetPoint("TOPRIGHT", self)
 
-		-- These will be re-enabled by the tab when its page is reloaded
-		-- if the tab has a HistorySet.
-		IE.UndoButton:Disable()
-		IE.RedoButton:Disable()
-
 		for i, tab in TMW:Vararg(TMW.IE.Tabs.secondary:GetChildren()) do
 			tab:Hide()
 		end
@@ -3387,6 +3382,9 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 				self.historySet:AttemptAutoBackup()
 				self.historySet:UpdateButtons()
 			end)
+		else
+			IE.UndoButton:Disable()
+			IE.RedoButton:Disable()
 		end
 	end,
 

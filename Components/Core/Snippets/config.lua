@@ -27,7 +27,27 @@ local SNIPPETS = TMW.SNIPPETS
 local SnippetsTab = IE:RegisterTab("MAIN", "SNIPPETS", "Snippets", 50)
 SnippetsTab:SetTexts(L["CODESNIPPETS_TITLE"], L["CODESNIPPETS_DESC_SHORT"])
 
+TMW.C.HistorySet:GetHistorySet("MAIN"):AddBlocker({
+	profile = { CodeSnippets = true},
+	global = { CodeSnippets = true}
+})
+local HistorySet = TMW.C.HistorySet:New("SNIPPETS")
+local snippetHistories = setmetatable({}, {
+	__index = function(self, key)
+		self[key] = {}
+		return self[key]
+	end
+})
 
+function HistorySet:GetCurrentLocation()
+	local identifier = SNIPPETS.selectedDomain .. SNIPPETS.selectedID
+	return identifier and snippetHistories[identifier]
+end
+function HistorySet:GetCurrentSettings()
+	return SNIPPETS.selectedID > 0 and TMW.db[SNIPPETS.selectedDomain].CodeSnippets[SNIPPETS.selectedID]
+end
+
+SnippetsTab:SetHistorySet(HistorySet)
 
 SNIPPETS.selectedDomain = "profile"
 SNIPPETS.selectedID = 0

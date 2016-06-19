@@ -86,6 +86,36 @@ BaseConfig:RegisterConfigPanel_XMLTemplate(1, "TellMeWhen_Main_Profiles")
 local MainTab = IE:RegisterTab("MAIN", "MAIN", "Main", 1)
 MainTab:SetTexts(L["UIPANEL_MAINOPT"], L["ADDONSETTINGS_DESC"])
 
+local HistorySet = TMW.C.HistorySet:New("MAIN")
+profileHistories = setmetatable({}, {
+	__index = function(self, key)
+		self[key] = {}
+		return self[key]
+	end
+})
+HistorySet:AddBlocker({
+	profile = {
+		Groups = true,
+		NumGroups = true,
+		Version = true,
+		Locked = true,
+	},
+	global = {
+		AuraCache = true,
+		Groups = true,
+		NumGroups = true,
+		HelpSettings = true,
+	}
+})
+function HistorySet:GetCurrentLocation()
+	return profileHistories[TMW.db:GetCurrentProfile()]
+end
+function HistorySet:GetCurrentSettings()
+	-- Proxy into AceDB settings. Can't give it TMW.db or everything will blow up - even with appropriate blockers.
+	return {profile = TMW.db.profile, global = TMW.db.global}
+end
+
+MainTab:SetHistorySet(HistorySet)
 
 local ChangelogTab = IE:RegisterTab("MAIN", "CHANGELOG", "Changelog", 100)
 ChangelogTab:SetTexts(L["CHANGELOG"], L["CHANGELOG_DESC"])

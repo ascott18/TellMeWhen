@@ -49,6 +49,9 @@ local Tab = IE:RegisterTab("MAIN", "TEXTLAYOUTS", "TextLayouts", 90)
 Tab:SetTexts(L["TEXTLAYOUTS"], L["TEXTLAYOUTS_DESC"])
 TEXT.LayoutTab = Tab
 
+TMW.C.HistorySet:GetHistorySet("MAIN"):AddBlocker({
+	global = { TextLayouts = true}
+})
 local HistorySet = TMW.C.HistorySet:New("TEXTLAYOUTS")
 local layoutHistories = setmetatable({}, {
 	__index = function(self, key)

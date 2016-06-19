@@ -386,7 +386,7 @@
 				<Anchors>
 					<Anchor point="LEFT" x="10"/>
 					<Anchor point="TOP" relativeKey="$parent.New" relativePoint="BOTTOM" y="-10"/>
-					<Anchor point="RIGHT" relativePoint="CENTER" x="-10" />
+					<Anchor point="RIGHT" relativePoint="CENTER" x="-5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad >
@@ -435,7 +435,7 @@
 				<Anchors>
 					<Anchor point="RIGHT" x="-10"/>
 					<Anchor point="TOP" relativeKey="$parent.Copy" relativePoint="TOP"/>
-					<Anchor point="LEFT" relativePoint="CENTER" x="10" />
+					<Anchor point="LEFT" relativePoint="CENTER" x="5" />
 				</Anchors>
 				<Scripts>
 					<OnLoad >

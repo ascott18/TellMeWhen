@@ -1772,7 +1772,7 @@ L["VALIDITY_CONDITION2_DESC"] = "The #%d condition of"
 L["VALIDITY_META_DESC"] = "The #%d icon checked by meta icon"
 L["VALIDITY_ISINVALID"] = "is invalid."
 
-L["MAIN"] = "Main"
+L["MAIN"] = "General"
 L["MAIN_DESC"] = "Contains the main options for this icon."
 L["UNNAMED"] = "(Unnamed)"
 L["NOTYPE"] = "<No Icon Type>"
