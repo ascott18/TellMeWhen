@@ -210,7 +210,7 @@ ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 		UnitClass = UnitClass,
 	},
 	funcstr = function(c)
-		return [[ BITFLAGSMAPANDCHECK( select(3, UnitClass(c.Unit)) ) ]]
+		return [[ BITFLAGSMAPANDCHECK( select(3, UnitClass(c.Unit)) or 0 ) ]]
 	end,
 	events = function(ConditionObject, c)
 		return
