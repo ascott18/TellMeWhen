@@ -78,7 +78,7 @@ function Sound:GetSoundFile(sound)
 	else
 		-- This will handle sounds from LSM.
 		local s = LSM:Fetch("sound", sound)
-		s = TMW:CleanPath(sound)
+		s = TMW:CleanPath(s)
 		if s and s ~= quiet and s ~= "" then
 			return s
 		end
