@@ -2059,7 +2059,9 @@ L["SOUND_EVENT_WHILECONDITION_DESC"] = "This notification will trigger for as lo
 
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
-L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. Here are some examples, where "file" is the name of your sound, and "ext" is the file's extension (ogg or mp3 only!):
+L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. You can also input a numeric Sound Kit ID.
+
+Here are some examples, where "file" is the name of your sound, and "ext" is the file's extension (ogg or mp3 only!):
 
 - "CustomSounds/file.ext": a file placed in a new folder named "CustomSounds" that is in WoW's root directory (the same location as Wow.exe, Interface and WTF folders, etc)
 

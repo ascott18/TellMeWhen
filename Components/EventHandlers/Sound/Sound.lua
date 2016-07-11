@@ -70,8 +70,10 @@ function Sound:GetSoundFile(sound)
 	if sound == "" or sound == quiet or sound == "None" then
 		return nil
 
-	elseif strfind(sound, "%.[^/]+$") then
+	elseif strfind(sound, "%.[^/]+$") or tonumber(sound) then
+
 		-- Checks to see if sound is a file name (although poorly). Checks for a period followed by non-slashes:
+		-- Also allows numbers to pass through for PlaySoundKitID
 		-- Good: file.ogg; path/to/file.ogg
 		-- Bad: file; path/to/file; folder.with.periods/containing/file.ogg
 		return sound
@@ -95,7 +97,11 @@ function Sound:HandleEvent(icon, eventSettings)
 	local Sound = self:GetSoundFile(eventSettings.Sound)
 	
 	if Sound then
-		PlaySoundFile(Sound, TMW.db.profile.SoundChannel)
+		if tonumber(Sound) then
+			PlaySoundKitID(Sound)
+		else
+			PlaySoundFile(Sound, TMW.db.profile.SoundChannel)
+		end
 		
 		return true
 	end
