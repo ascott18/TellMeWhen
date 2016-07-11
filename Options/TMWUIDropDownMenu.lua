@@ -288,10 +288,9 @@ function DD:AddButton(info, level)
 
 		-- Check to see if there is a replacement font
 		local font, size, flags = GameFontHighlightSmallLeft:GetFont()
+		button:GetFontString():SetFont(font, size, flags);
 		if ( info.font ) then
 			button:GetFontString():SetFont(info.font, size, flags);
-		else
-			button:GetFontString():SetFont(font, size, flags);
 		end
 	else
 		button:SetText("");
@@ -824,6 +823,7 @@ local function EasyFunction_OnClick(button, dropdown)
 	dropdown:OnSettingSaved()
 end
 local function EasyFunction(self)
+	local settings = self:GetSettingTable()
 	for k, v in self.dataGenerator() do
 		local info = self:CreateInfo()
 

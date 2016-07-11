@@ -2277,6 +2277,13 @@
 											</OnClick>
 										</Scripts>
 									</Button>
+
+									<Frame>
+										<Size x="1" y="10"/>
+										<Anchors>
+											<Anchor point="TOP" relativeKey="$parent.AcceptButton" relativePoint="BOTTOM"/>
+										</Anchors>
+									</Frame>
 								</Frames>
 							</Frame>
 
@@ -2296,13 +2303,11 @@
 								self.MiddleBand.Header:SetText(TMW.L["CONFIRM_HEADER"])
 								TMW:ConvertContainerToScrollFrame(self)
 							</OnLoad>
-							<OnSizeChanged>
-								self.MiddleBand.Description:SetHeight(self.MiddleBand.Description:GetStringHeight())
+							<OnUpdate>
+								local h = self.MiddleBand.Description:GetStringHeight() + 50
+								self.MiddleBand.Description:SetHeight(h)
 								self.MiddleBand:AdjustHeight()
-							</OnSizeChanged>
-							<OnShow>
-								self:GetScript("OnSizeChanged")(self)
-							</OnShow>
+							</OnUpdate>
 							<OnHide>
 								TMW.IE:RefreshTabs()
 							</OnHide>

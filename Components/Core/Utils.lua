@@ -1422,7 +1422,6 @@ function TMW.GetSpellCost(spell)
 	end
 end
 
-local GLADIATOR_STANCE = GetSpellInfo(156291)
 function TMW.GetCurrentSpecializationRole()
 	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
 	-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
@@ -1432,9 +1431,6 @@ function TMW.GetCurrentSpecializationRole()
 	end
 
 	local _, _, _, _, _, role = GetSpecializationInfo(currentSpec)
-	if role == "TANK" and UnitAura("player", GLADIATOR_STANCE) then
-		return "DAMAGER"
-	end
 	return role
 end
 
