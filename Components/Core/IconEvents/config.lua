@@ -494,7 +494,7 @@ function EVENTS:SetTabText()
 		EventsTab:SetText(L["EVENTS_TAB"] .. ": 0")
 	end
 end
-TMW:RegisterCallback("TMW_CONFIG_LOADED", EVENTS, "SetTabText")
+TMW:RegisterCallback("TMW_CONFIG_TAB_CLICKED", EVENTS, "SetTabText")
 
 
 

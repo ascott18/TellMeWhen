@@ -568,8 +568,6 @@
 					local icon = TMW.CI.icon
 
 					if icon then
-						icon:Setup()
-
 						local panelList = {}
 						for _, Component in pairs(icon.Components) do
 							if Component:ShouldShowConfigPanels(icon) then

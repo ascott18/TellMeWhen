@@ -1026,14 +1026,17 @@
 				</Scripts>
 			</Button>
 		</Frames>
+		<Scripts>
+			<OnShow>
+				-- WoW Legion bugfix - TitleRegions don't work until you poke them: http://www.wowinterface.com/forums/showthread.php?p=316445#post316445
+				self:GetTitleRegion():GetCenter()
+			</OnShow>
+		</Scripts>
 	</Frame>
 
 
-	<Frame name="TellMeWhen_ColorPickerTemplate" hidden="false" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG" parent="UIParent" virtual="true" >
-		<Size x="320" y="190"/>
-
-		<!-- Enables the whole frame for dragging -->
-		<TitleRegion setAllPoints="true"/>
+	<Frame name="TellMeWhen_ColorPickerTemplate" hidden="false" virtual="true" inherits="TellMeWhen_SimpleDialog">
+		<Size x="320" y="214"/>
 
 		<KeyValues>
 			<KeyValue key="tmwClass" type="string" value="Config_ColorPicker"/>
@@ -1046,7 +1049,7 @@
 			<Slider parentKey="HueSlider" inherits="TellMeWhen_SliderTemplate">
 				<Size x="210" y="20"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="10" y="-10"/>
+					<Anchor point="TOPLEFT" x="10" y="-10" relativeKey="$parent.HeaderBackground" relativePoint="BOTTOMLEFT"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1258,7 +1261,7 @@
 			<Frame parentKey="RecentColorFrame" >
 				<Size x="85"/>
 				<Anchors>
-					<Anchor point="TOP" y="-20"/>
+					<Anchor point="TOP" y="-20" relativeKey="$parent.HeaderBackground" relativePoint="BOTTOM"/>
 					<Anchor point="LEFT" relativeKey="$parent.HueSlider" relativePoint="RIGHT" x="15"/>
 					<Anchor point="BOTTOM" y="10"/>
 				</Anchors>
@@ -1361,6 +1364,7 @@
 				</Scripts>
 			</CheckButton>
 		</Frames>
+
 	</Frame>
 
 
@@ -1373,6 +1377,16 @@
 		<Scripts>
 			<OnLoad>
 				TMW:CInit(self)
+				self.title:SetText("TellMeWhen")
+				self.CloseButton:Hide()
+
+				TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+					-- Create resizer
+					self.resizer = TMW.Classes.Resizer_Generic:New(self)
+					self.resizer:Show()
+					self.resizer.scale_min = 0.8
+					self.resizer:SetModes(self.resizer.MODE_SCALE, self.resizer.MODE_SCALE)
+				end)
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -1458,7 +1472,8 @@
 				self.desc:SetWidth(self:GetWidth() - 30)
 				self:SetHeight(self.desc:GetHeight() + 65)
 			</OnLoad>
-			<OnShow>
+			<OnShow inherit="prepend">
+
 				TMW.IE.db.global.ConfigWarningN = TMW.IE.db.global.ConfigWarningN + 1
 				if TMW.IE.db.global.ConfigWarningN > 3 then
 					self.NeverAgain:Show()
@@ -1501,7 +1516,6 @@
 				self.CloseButton:Hide()
 				local alert = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t"
 				self.title:SetText(alert .. "  TellMeWhen  " .. alert)
-				self:SetScale(0.95)
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -1723,8 +1737,6 @@
 
 				self.Confirm:SetText(TMW.L["IMPORT_LUA_CONFIRM"])
 				self.Deny:SetText(TMW.L["IMPORT_LUA_DENY"])
-
-				self:SetScale(0.95)
 
 				local flags = {
 					"sendmail", "accepttrade", "guildcontrol", "guilddisband", "guildpromote",
@@ -2344,12 +2356,12 @@
 				-- Needs to go before TellMeWhen_ChangelogDialog or else it will get hidden immediately after the changelog hides.
 				tinsert(UISpecialFrames, 1, self:GetName())
 			</OnLoad>
-			<OnDragStart>
+			<!-- <OnDragStart>
 				TMW.IE:StartMoving()
 			</OnDragStart>
 			<OnDragStop>
 				TMW.IE:StopMovingOrSizing()
-			</OnDragStop>
+			</OnDragStop> -->
 		</Scripts>
 	</Frame>
 

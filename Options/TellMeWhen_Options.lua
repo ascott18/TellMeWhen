@@ -1620,13 +1620,15 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 
 TMW:NewClass("Config_Page", "Config_Frame"){
 	OnNewInstance_Page = function(self)
+		-- This one is admittedly pretty pointless - pages shouldn't have settings themselves,
+		-- but we'll do it anyway to avoid unexpected behavior.
 		self:CScriptAdd("SettingSaved", self.RequestReload)
 
-		-- TODO: this is excessive for panel-based pages.
-		-- Consider lowering this down to the panel?
-		-- Be careful of breaking the PageReloadRequested cscript.
+		-- Whenever a setting on a page has been saved, reload the whole page.
+		-- (RequestReload tunnels a ReloadRequested to all children.)
 		self:CScriptAdd("DescendantSettingSaved", self.RequestReload)
 
+		-- Whenever a page is reloaded, notify the page's tab that its page was reloaded.
 		self:CScriptAdd("ReloadRequested", self.ReloadRequested)
 	end,
 
@@ -3374,6 +3376,10 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 	end,
 
 	PageReloadRequested = function(self, page)
+		-- Also notify the tab group one of its pages was reloaded
+		-- so that generic actions that apply to a whole tab group (like re-setting up an icon) can happen.
+		self.parent:CScriptCall("PageReloadRequested")
+
 		if self.historySet then
 
 			-- Because some settings can get changed when we're reloading,

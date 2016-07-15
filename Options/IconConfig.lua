@@ -62,7 +62,12 @@ end)
 TabGroup:SetTexts(L["ICON"], L["TABGROUP_ICON_DESC"])
 TabGroup:SetDisabledPageKey("IconNotLoaded")
 TabGroup:SetChildrenEnabled(false)
-
+TabGroup:CScriptAdd("PageReloadRequested", function()
+	local icon = TMW.CI.icon
+	if icon then
+		icon:Setup()
+	end
+end)
 
 local MainTab = IE:RegisterTab("ICON", "MAIN", "IconMain", 1)
 MainTab:SetTexts(L["ICON"], L["MAIN_DESC"])
