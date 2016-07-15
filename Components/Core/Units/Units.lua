@@ -125,7 +125,6 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		-- determine the operations that the set needs to stay updated
 		for k, unit in ipairs(self.originalUnits) do
 			unit = tostring(unit)
-			self.UnitsLookup[unit] = true
 
 			if unit == "player" then
 			--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
@@ -295,6 +294,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 	Update = function(self, forceNoExists)
 		local originalUnits,      exposedUnits,      translatedUnits =
 		      self.originalUnits, self.exposedUnits, self.translatedUnits
+		local UnitsLookup = self.UnitsLookup
 		local hasSpecialUnitRefs = self.hasSpecialUnitRefs
 		local mightHaveWackyUnitRefs = self.mightHaveWackyUnitRefs
 
@@ -358,6 +358,8 @@ local UnitSet = TMW:NewClass("UnitSet"){
 			then
 				if exposedUnits[exposed_len+1] ~= unit then
 					exposedUnits[exposed_len+1] = unit
+
+					UnitsLookup[unit] = true
 					changed = true
 				end
 				exposed_len = exposed_len + 1
@@ -366,6 +368,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 		-- Clear out the rest of the table.
 		for k = exposed_len+1, #exposedUnits do
+			UnitsLookup[exposedUnits[k]] = nil
 			exposedUnits[k] = nil
 		end
 
