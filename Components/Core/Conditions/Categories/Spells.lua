@@ -594,7 +594,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_CASTTOMATCH"], L["CONDITIONPANEL_CASTTOMATCH_DESC"])
-		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
+		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"])
 	end,
 	useSUG = true,
 	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameString))]], -- LOWER is some gsub magic
@@ -617,6 +617,9 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
 	end,
 })
+
+
+
 
 
 local CastCounts

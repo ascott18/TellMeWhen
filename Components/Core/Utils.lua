@@ -1128,8 +1128,8 @@ do -- ordered pairs
 		--return compare(a, b)
 	end
 
-	local function orderedNext(t, state)
-		local orderedIndex = tables[t]
+	local function orderedNext(orderedIndex, state)
+		local t = tables[orderedIndex]
 		
 		if state == nil then
 			local key = orderedIndex[1]
@@ -1149,7 +1149,7 @@ do -- ordered pairs
 		end
 
 		unused[#unused+1] = wipe(orderedIndex)
-		tables[t] = nil
+		tables[orderedIndex] = nil
 		return
 	end
 
@@ -1194,9 +1194,9 @@ do -- ordered pairs
 		end
 
 		sort(orderedIndex, sorter)
-		tables[t] = orderedIndex
+		tables[orderedIndex] = t
 
-		return orderedNext, t
+		return orderedNext, orderedIndex
 	end
 end
 

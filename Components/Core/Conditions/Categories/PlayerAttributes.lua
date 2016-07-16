@@ -180,6 +180,46 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 })
 
 
+ConditionCategory:RegisterCondition(6.2, "LASTCAST", {
+	text = L["CONDITIONPANEL_LASTCAST"],
+	bool = true,
+	nooperator = true,
+	unit = PLAYER,
+	texttable = {
+		[0] = L["CONDITIONPANEL_LASTCAST_ISSPELL"],
+		[1] = L["CONDITIONPANEL_LASTCAST_ISNTSPELL"],
+	},
+	icon = "Interface\\Icons\\Temp",
+	tcoords = CNDT.COMMON.standardtcoords,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = true,
+	funcstr = function(c)
+		local module = CNDT:GetModule("LASTCAST", true)
+		if not module then
+			module = CNDT:NewModule("LASTCAST", "AceEvent-3.0")
+
+			module:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", function(event, unit, spellName, _, _, spellID)
+				if unit == "player" then
+					Env.LastPlayerCastName = strlower(spellName)
+					Env.LastPlayerCastID = strlower(spellName)
+				end
+			end)
+		end
+
+		if c.Level == 1 then
+			return [[LastPlayerCastName ~= LOWER(c.NameString) and LastPlayerCastID ~= c.Name]] 
+		end
+		return [[LastPlayerCastName == LOWER(c.NameString) or LastPlayerCastID == c.Name]] 
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_SUCCEEDED", "player")
+	end,
+})
+
 ConditionCategory:RegisterSpacer(6.5)
 
 

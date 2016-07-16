@@ -2,7 +2,7 @@
 local AUTO_FIND_TOC = nil--"./"
 local FILE_BLACKLIST = {"localization[/\\]tellmewhen", "^lib"}
 
-local PATH_TO_ADDONS = "C:/Games/World Of Warcraft/Interface/AddOns/"
+local PATH_TO_ADDONS = "B:/Games/World Of Warcraft Beta/Interface/AddOns/"
 local ADDONS = {
 	"TellMeWhen",
 	"TellMeWhen_Options",

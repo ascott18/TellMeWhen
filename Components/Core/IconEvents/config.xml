@@ -569,7 +569,7 @@
 						</Scripts>
 					</Frame>
 
-					<EditBox parentKey="Value" inherits="TellMeWhen_TimeEditBoxTemplate" autoFocus="false">
+					<EditBox parentKey="Value" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 						<Size x="45" y="18"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.Operator" relativePoint="RIGHT" x="12" y="0"/>
@@ -588,6 +588,10 @@
 								TMW:CInit(self)
 
 								self:SetSetting("Value")
+
+								self:CScriptAdd("ModifyValueForSave", function(self, value)
+									return tonumber(value) or 0
+								end)
 							</OnLoad>
 						</Scripts>
 					</EditBox>

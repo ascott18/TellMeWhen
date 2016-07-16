@@ -738,23 +738,22 @@ function IE:DistributeCheckAnchorsEvenly(parent, ...)
 	local numChildFrames = select("#", ...)
 	
 	local widthPerFrame = parent:GetWidth()/(numChildFrames + 1)
-	
+	local leftClickArea = 25
+
 	local lastChild
 	for i = 1, numChildFrames do
 		local child = select(i, ...)
 
 		TMW:ValidateType("...", "DistributeCheckAnchorsEvenly(parent, ...)", child, "Config_CheckButton")
 		
-		local xOffs = widthPerFrame - (child:GetWidth() / 2)
+		local xOffs = widthPerFrame - (child:GetWidth() / 1)
 
+		child:ConstrainLabel(child, "RIGHT", min(widthPerFrame - child:GetWidth() - leftClickArea, 200), 0)
 		if lastChild then
 			child:SetPoint("LEFT", lastChild, "LEFT", widthPerFrame, 0)
-
-			-- Constrain the label of the last check to this check.
-			lastChild:ConstrainLabel(child)
 		else
 			-- Offset the first one by half of its width so that things stay nice and centered.
-			child:SetPoint("LEFT", widthPerFrame - (child:GetWidth() / 2), 0)
+			child:SetPoint("LEFT", xOffs, 0)
 		end
 
 		-- Reposition the click interceptor so that users can click on either side of the check.
@@ -762,7 +761,8 @@ function IE:DistributeCheckAnchorsEvenly(parent, ...)
 		child.ClickInterceptor:ClearAllPoints()
 		child.ClickInterceptor:SetPoint("TOP")
 		child.ClickInterceptor:SetPoint("BOTTOM")
-		child.ClickInterceptor:SetWidth(widthPerFrame)
+		child.ClickInterceptor:SetPoint("RIGHT", child.text)
+		child.ClickInterceptor:SetPoint("LEFT", child, "LEFT", -leftClickArea, 0)
 
 		lastChild = child
 	end
@@ -3313,14 +3313,6 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 			local tab = self.Tabs[i]
 
 			if tab:ShouldShowTab() then
-				if not lastTab then
-					tab:SetPoint("LEFT", tab.endPadding, 0, 0)
-				else
-					tab:SetPoint("LEFT", lastTab, "RIGHT", tab.interPadding, 0)
-				end
-				tab:SetPoint("TOP")
-				tab:SetPoint("BOTTOM")
-
 				lastTab = tab
 
 				tab:Show()
@@ -3330,7 +3322,6 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 				firstShown = firstShown or tab
 			end
 		end
-
 
 		if not self.childrenEnabled then
 			IE.CurrentTab = nil
@@ -3426,6 +3417,8 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 		TMW:Fire("TMW_CONFIG_TAB_CLICKED", self, oldTab)
 
 		page:RequestReload()
+
+		IE:ResizeTabs()
 	end,
 
 	GetPage = function(self)
@@ -3467,16 +3460,6 @@ function IE:RegisterTabGroup(identifier, text, order, setupHeaderFunc)
 	end
 	
 
-	local prevTabGroup
-	for identifier, tabGroup in TMW:OrderedPairs(IE.TabGroups, TMW.OrderSort, true) do
-		if prevTabGroup then
-			prevTabGroup:SetPoint("RIGHT", tabGroup, "LEFT", -5, 0)
-		end
-		tabGroup:Show()
-
-		prevTabGroup = tabGroup
-	end
-	prevTabGroup:SetPoint("RIGHT", -5)
 
 	return tab
 end
@@ -3521,15 +3504,109 @@ function IE:ResizeTabs()
 	local endPadding = TMW.C.IconEditorTab.endPadding
 	local interPadding = TMW.C.IconEditorTab.interPadding
 
-	local width = endPadding*2 - interPadding -- This was derived using magic.
+	-- First, resize the primary tabs (the tab groups) so that we can figure out their exact width
+	local primaryWidth = -interPadding
+	local prevTabGroup
+	for identifier, tabGroup in TMW:OrderedPairs(IE.TabGroups, TMW.OrderSort, true) do
+		if prevTabGroup then
+			prevTabGroup:SetPoint("RIGHT", tabGroup, "LEFT", -interPadding, 0)
+		end
+		primaryWidth = primaryWidth + tabGroup:GetWidth() + interPadding
 
-	for i, tab in TMW:Vararg(TMW.IE.Tabs.secondary:GetChildren()) do
+		prevTabGroup = tabGroup
+	end
+	prevTabGroup:SetPoint("RIGHT", -interPadding)
+	-- Adjust the conatiner width to fit the tabs exactly so calculations are easy.
+	TMW.IE.Tabs.primary:SetWidth(primaryWidth)
+
+
+	-- Next, figure out how much room we we will have for the secondary tabs.
+	-- Subtract an additional 10 here because it just isn't quite right without it. Not sure why it ends up off like that.
+	local availableWidth = TMW.IE.Tabs.primary:GetLeft() - TMW.IE.Tabs.secondary:GetLeft() - 20
+
+	-- Now, divide the tabs up into rows so that no rows are overflowing.
+	-- As we gather them into rows, position the tabs within that row.
+	-- We will determine the positioning of the rows once we're all done.
+	-- We don't do any fancy packing of them - just place them in the order that they're defined in.
+	local rows = {}
+	local currentRow = 1
+	rows[currentRow] = {width = endPadding - interPadding }
+	for i, tab in TMW:OrderedPairs({TMW.IE.Tabs.secondary:GetChildren()}, TMW.OrderSort, true) do
 		if tab:IsShown() then
-			width = width + tab:GetWidth() + interPadding
+			local newWidth = rows[currentRow].width + tab:GetWidth() + interPadding
+
+			tab:ClearAllPoints()
+			if newWidth > availableWidth and rows[currentRow][1] then
+				-- No more room in the current row. Start a new row.
+				-- We check that there is at least one tab in the row already so the first row doesn't end up empty
+				-- when we're stress testing the text widths with massive strings.
+				-- Anchor the tab to the far left.
+				currentRow = currentRow + 1
+				rows[currentRow] = {width = endPadding + tab:GetWidth(), [1] = tab }
+				tab:SetPoint("LEFT", tab.endPadding, 0, 0)
+			else
+				-- There's room in an existing row. Put this tab in it.
+				rows[currentRow].width = newWidth
+
+				local numTabs = #rows[currentRow]
+				if numTabs == 0 then
+					-- This is the very first tab that we've looked at. It also goes on the left.
+					tab:SetPoint("LEFT", tab.endPadding, 0, 0)
+				else
+					-- There are other tabs in this row. Place the tab next to the last one.
+					tab:SetPoint("LEFT", rows[currentRow][numTabs], "RIGHT", tab.interPadding, 0)
+				end
+				rows[currentRow][numTabs + 1] = tab
+			end
 		end
 	end
 
-	TMW.IE.Tabs.secondary:SetWidth(width)
+	-- Figure out the width of the widest row, 
+	-- and figure out which row the current tab is in (if there is a current tab).
+	local width = 0
+	local selectedRow = nil
+	for k, row in ipairs(rows) do
+		width = max(width, row.width)
+
+		for i, tab in ipairs(row) do
+			if IE.CurrentTab == tab then
+				selectedRow = row
+				break
+			end
+		end
+	end
+
+	-- Position the rows amongst themselves.
+	-- The row with the currently selected tab gets popped to the top.
+	-- The rest of the rows are placed in their natural order from bottom to top.
+	if #rows == 1 then
+		rows[1][1]:SetPoint("BOTTOM")
+	else
+
+		local previousRow = nil
+		for k, row in ipairs(rows) do
+			if row == selectedRow then
+				-- do nothing. The selected row gets placed last.
+			else
+				if previousRow then
+					row[1]:SetPoint("BOTTOM", previousRow[1], "TOP")
+				else
+					row[1]:SetPoint("BOTTOM")
+				end
+				previousRow = row
+			end
+		end
+
+		if selectedRow then
+			-- If there wasn't actually a selected tab,
+			-- don't do this. The row will have been positioned normally above.
+			selectedRow[1]:SetPoint("BOTTOM", previousRow[1], "TOP")
+		end
+	end
+
+	-- All done!
+	TMW.IE.Tabs:SetHeight(8 + (25 * #rows))
+	TMW.IE.Tabs.secondary:SetWidth(width + endPadding)
 end
 
 function IE:RefreshTabs()

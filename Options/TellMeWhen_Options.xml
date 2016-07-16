@@ -1805,10 +1805,9 @@
 
 
 	<Button name="TellMeWhen_IE_Tab" virtual="true">
-		<Size x="50"/>
+		<Size x="50" y="25"/>
 		<HitRectInsets left="0" right="0" top="-5" bottom="0" />
 		<Anchors>
-			<Anchor point="TOP"/>
 			<Anchor point="BOTTOM"/>
 		</Anchors>
 		<ButtonText parentKey="text" justifyH="CENTER">

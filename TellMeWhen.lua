@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80029 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80030 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80014 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -64,7 +64,7 @@ local DogTag = LibStub("LibDogTag-3.0", true)
 if false then
 	 -- stress testing for text widths
 	local s = ""
-	for i = 1, 20 do
+	for i = 1, 10 do
 		s = s .. i .. ", "
 	end
 	L = setmetatable({}, {__index = function() return s end})

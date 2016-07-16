@@ -298,7 +298,6 @@ L["ICONMENU_TOTEM"] = "Totem"
 L["ICONMENU_STATUE"] = "Monk Statue"
 L["ICONMENU_TOTEM_DESC"] = [[Tracks your totems.]]
 L["ICONMENU_TOTEM_GENERIC_DESC"] = [[Tracks your %s.]]
-L["ICONMENU_MUSHROOMS_DESC"] = [[Tracks a %s.]]
 
 
 L["ICONMENU_UNITCOOLDOWN"] = "Unit Cooldown"
@@ -704,12 +703,10 @@ L["ICONMENU_STACKS_MIN_DESC"] = "Minimum number of stacks needed to show the ico
 L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks allowed to show the icon"
 
 L["DURATION"] = "Duration"
-L["DURATIONPERC"] = "Duration Percentage"
 L["DURATIONPANEL_TITLE2"] = "Duration Requirements"
 L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon, in seconds"
 L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon, in seconds"
 
-L["CONDITION_TIMERS_HEADER"] = "Timers"
 L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of a timer to set on the icon when conditions begin succeeding"
 L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of a timer to set on the icon when conditions begin failing"
 
@@ -1330,6 +1327,11 @@ L["CONDITIONPANEL_CASTTOMATCH"] = "Spell to Match"
 L["CONDITIONPANEL_CASTTOMATCH_DESC"] = [[Enter a spell name here to make the condition only pass if the spell cast matches it exactly.
 
 You can leave this blank to check for any and all spell casts/channels]]
+
+L["CONDITIONPANEL_LASTCAST"] = "Last Ability Used"
+L["CONDITIONPANEL_LASTCAST_ISSPELL"] = "Matches"
+L["CONDITIONPANEL_LASTCAST_ISNTSPELL"] = "Doesn't Match"
+
 L["CONDITIONPANEL_INTERRUPTIBLE"] = "Interruptible"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOMATCH"] = "Name to Match"
@@ -1371,7 +1373,6 @@ L["CONDITIONPANEL_AUTOCAST_DESC"] = "Checks if the specified pet spell is autoca
 L["CONDITIONPANEL_PETMODE"] = "Pet attack mode"
 L["CONDITIONPANEL_PETMODE_DESC"] = "Checks the attack mode of your current pet."
 L["CONDITIONPANEL_PETMODE_NONE"] = "No Pet"
-L["CONDITIONPANEL_PETTREE"] = "Pet talent tree"
 L["CONDITIONPANEL_PETSPEC"] = "Pet specialization"
 L["CONDITIONPANEL_PETSPEC_DESC"] = "Checks the specialization of your current pet."
 L["CONDITIONPANEL_TRACKING"] = "Tracking active"

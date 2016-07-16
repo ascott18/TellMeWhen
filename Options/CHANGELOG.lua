@@ -27,7 +27,10 @@ TMW.CHANGELOG = [==[
 ** You can also set a custom texture for each of your Opacity & Color settings.
 
 * Combat Log Source and Destination units may now have unit conditions when filtered by unitID.
-* New conditions have been added for checking your current location.
+* New conditions have been added for:
+** Checking your current location
+** Checking your last spell cast (for Windwalker Monk mastery)
+* And much, much more! Dig in to check it all out!
 
 ===v7.4.0===
 * Bar and Vertical Bar groups now have several new options:

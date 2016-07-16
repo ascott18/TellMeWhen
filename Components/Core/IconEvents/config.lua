@@ -314,6 +314,7 @@ function EVENTS:LoadEventSettings()
 			end
 		end
 
+		EventSettingsContainer.PassingCndt:RequestReload()
 		if EventSettingsContainer.PassingCndt				:GetChecked() then
 			EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
 			EventSettingsContainer.Operator					:Enable()
@@ -628,7 +629,7 @@ function EVENTS.OperatorMenu_DropDown(dropdown)
 			info.value = v.value
 			info.checked = v.value == eventSettings.Operator
 			info.tooltipTitle = v.tooltipText
-			info.arg1 = frame
+			info.arg1 = dropdown
 			TMW.DD:AddButton(info)
 		end
 	end

@@ -1114,9 +1114,14 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	if IE.CurrentTabGroup.identifier == "ICON" then
 		-- The user is editing an icon. Work with the current icon's layout.
 		local GUID = TEXT:GetTextLayoutForIcon(CI.icon)
+		local settings = TMW.TEXT:GetTextLayoutSettings(GUID)
 		
 		import.textlayout_overwrite = GUID
-		export.textlayout = GUID
+
+		-- Don't list default text layouts since so many people get so confused by them for some reason.
+		if not settings.NoEdit then
+			export.textlayout = GUID
+		end
 
 	elseif IE.CurrentTab == Tab then	
 		-- The user is editing a text layout. Work with that layout.

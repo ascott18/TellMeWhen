@@ -68,7 +68,7 @@
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:SetTexts(TMW.L["EVENTS_SETTINGS_COUNTER_OP"], TMW.L["EVENTS_SETTINGS_COUNTER_OP_DESC"])
+						self:SetTexts(TMW.L["EVENTS_SETTINGS_COUNTER_OP"], TMW.L["EVENTS_SETTINGS_TIMER_OP_DESC"])
 						self:SetFunction(TMW.EVENTS:GetEventHandler("Timer").OperationMenu_DropDown)
 
 						self:SetWidth(163)
