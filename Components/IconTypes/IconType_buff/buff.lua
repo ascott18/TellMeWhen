@@ -290,7 +290,7 @@ local function Buff_OnUpdate(icon, time)
 				local useFilter = Filter
 
 				while true do
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _v1, _v2, _v3 = UnitAura(unit, index, useFilter)
+					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _, _, _v1, _v2, _v3 = UnitAura(unit, index, useFilter)
 					index = index + 1
 					
 					-- Bugfix: Enraged is an empty string.
@@ -348,9 +348,9 @@ local function Buff_OnUpdate(icon, time)
 				for i = 1, #NameArray do
 					local iName = NameArray[i]
 
-					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, NameStringArray[i], nil, Filter)
+					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, NameStringArray[i], nil, Filter)
 					if Filterh and not buffName then
-						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, NameStringArray[i], nil, Filterh)
+						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, NameStringArray[i], nil, Filterh)
 					end
 
 					if buffName and id ~= iName and isNumber[iName] then
@@ -361,7 +361,7 @@ local function Buff_OnUpdate(icon, time)
 						local useFilter = Filter
 
 						while true do
-							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, index, useFilter)
+							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, index, useFilter)
 							index = index + 1
 
 							if not id then
@@ -419,7 +419,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 			local filter = Filter
 
 			while true do
-				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, caster, canSteal, _, id, _, _, _, v1, v2, v3 = UnitAura(unit, index, filter)
+				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, index, filter)
 				index = index + 1
 				
 				-- Bugfix: Enraged is an empty string.
@@ -654,10 +654,6 @@ function Type:Setup(icon)
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		
-		for event in pairs(icon.UnitSet.updateEvents) do
-			icon:RegisterSimpleUpdateEvent(event)
-		end
-	
 		icon:RegisterEvent("UNIT_AURA")
 	
 		icon:SetScript("OnEvent", Buff_OnEvent)

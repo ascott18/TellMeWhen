@@ -404,10 +404,6 @@ In order to implement units correctly into an IT, code like this should be found
 <<code lua>>
 if icon.UnitSet.allUnitsChangeOnEvent then
 	icon:SetUpdateMethod("manual")
-	
-	for event in pairs(icon.UnitSet.updateEvents) do
-		icon:RegisterSimpleUpdateEvent(event)
-	end
 
 	icon:RegisterEvent("UNIT_AURA") -- this is specific to the Buff/Debuff icon type
 

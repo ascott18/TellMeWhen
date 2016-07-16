@@ -1598,6 +1598,9 @@ L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not 
 L["TOOLTIPSCAN"] = "Aura Variable"
 L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first variable associated with an aura. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarantee that a number will be obtained for an aura. In most practical cases, though, the correct number will be checked."
 
+L["TOOLTIPSCAN2"] = "Tooltip Number #%d"
+L["TOOLTIPSCAN2_DESC"] = "This condition type will allow you to check a number found in the tooltip of an aura."
+
 L["INCHEALS"] = "Unit Incoming heals"
 L["INCHEALS_DESC"] = [[Checks the total amount of healing that is incoming to the unit (HoTs and casts in progress).
 

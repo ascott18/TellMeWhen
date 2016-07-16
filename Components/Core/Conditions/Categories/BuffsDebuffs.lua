@@ -105,13 +105,13 @@ function Env.AuraPercent(unit, name, nameString, filter)
 	end
 end
 
-function Env.AuraTooltipNumber(unit, name, nameString, filter)
+function Env.AuraVariableNumber(unit, name, nameString, filter)
 	local isID = isNumber[name]
 	
-	local _, _, _, _, _, _, _, _, _, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, nameString, nil, filter)
+	local _, _, _, _, _, _, _, _, _, _, id, _, _, _, _, _, v1, v2, v3, v4 = UnitAura(unit, nameString, nil, filter)
 	if isID and id and id ~= isID then
 		for z = 1, 60 do
-			_, _, _, _, _, _, _, _, _, _, id, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, filter)
+			_, _, _, _, _, _, _, _, _, _, id, _, _, _, _, _, v1, v2, v3, v4 = UnitAura(unit, z, filter)
 			if not id or id == isID then
 				break
 			end
@@ -132,6 +132,102 @@ function Env.AuraTooltipNumber(unit, name, nameString, filter)
 	return 0
 end
 
+
+function Env.AuraTooltipNumber(...)
+	local Parser, LT1, LT2 = TMW:GetParser()
+	local module = CNDT:NewModule("TooltipParser", "AceEvent-3.0")
+
+	local watchedUnits = {}
+	local unitSets = {}
+	local cache = setmetatable({}, {
+		__mode = 'kv',
+		__index = function(s, k)
+			s[k] = {}
+			return s[k]
+		end
+	})
+
+	function module:UNIT_AURA(_, unit)
+		local unitCache = rawget(cache, unit)
+		if unitCache then wipe(unitCache) end
+	end
+	module:RegisterEvent("UNIT_AURA")
+
+	local function TMW_UNITSET_UPDATED(event, UnitSet)
+		local unit = unitSets[UnitSet]
+		if unit and UnitSet.allUnitsChangeOnEvent then
+			wipe(cache[unit])
+		end
+	end
+	TMW:RegisterCallback("TMW_UNITSET_UPDATED", TMW_UNITSET_UPDATED)
+
+	function Env.AuraTooltipNumber(unit, name, filter, requestedIndex)
+		requestedIndex = requestedIndex or 1
+
+		local UnitSet = watchedUnits[unit]
+		if not UnitSet then
+			-- You're supposed to use TMW:GetUnits(), but this is much faster and is sufficient for our needs.
+			UnitSet = TMW.UNITS:GetUnitSet(unit)
+			unitSets[UnitSet] = unit
+			watchedUnits[unit] = UnitSet
+		end
+
+		local cacheable = UnitSet.allUnitsChangeOnEvent
+		local cachestr = name .. filter
+
+		if cacheable and cache[unit][cachestr] then
+			return isNumber[select(requestedIndex, strsplit(";", cache[unit][cachestr]))] or 0
+		end
+
+		local n
+		for i = 1, 60 do
+			local buffName, _, _, _, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
+			if not buffName then 
+				break
+			elseif id == name or strlowerCache[buffName] == strlowerCache[name] then
+				n = i
+				break
+			end
+		end
+
+		if n then
+			local index = 0
+		    Parser:SetOwner(UIParent, "ANCHOR_NONE")
+		    Parser:SetUnitAura(unit, n, filter)
+			local text = LT2:GetText() or ""
+			Parser:Hide()
+
+			local number
+			local ret
+			local allNumbers = ""
+			repeat
+				number, text = (text):match("(%d+)(.*)$")
+
+				if number then
+					index = index + 1
+					if index == requestedIndex then
+						ret = isNumber[number]
+					end
+					allNumbers = allNumbers .. (index == 1 and "" or ";") .. number
+				end
+			until not number
+
+			if cacheable then
+				cache[unit][cachestr] = allNumbers
+			end
+
+			return ret or 0
+		else
+			if cacheable then
+				cache[unit][cachestr] = ""
+			end
+		end
+
+		return 0
+	end
+
+	return Env.AuraTooltipNumber(...)
+end
 
 
 local ConditionCategory = CNDT:GetCategory("BUFFSDEBUFFS", 5, L["CNDTCAT_BUFFSDEBUFFS"], false, false)
@@ -283,7 +379,7 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	icon = "Interface\\Icons\\inv_elemental_primal_mana",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraTooltipNumber(c.Unit, c.NameFirst, c.NameString, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraVariableNumber(c.Unit, c.NameFirst, c.NameString, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -291,6 +387,31 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
 	end,
 })
+for i = 1, 3 do -- BUFFTOOLTIPSCAN
+	ConditionCategory:RegisterCondition(4 + 0.1*i,	 "BUFFTOOLTIPSCAN" .. i, {
+		text = L["ICONMENU_BUFF"] .. " - " .. L["TOOLTIPSCAN2"]:format(i),
+		tooltip = L["TOOLTIPSCAN2_DESC"],
+		range = 500,
+		--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
+		name = function(editbox)
+			editbox:SetTexts(L["BUFFTOCHECK"], L["TOOLTIPSCAN2_DESC"])
+		end,
+		useSUG = true,
+		check = function(check)
+			check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+		end,
+		icon = "Interface\\Icons\\ability_priest_clarityofwill",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(c)
+			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+		end,
+	})
+end
 ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"],
 	tooltip = L["NUMAURAS_DESC"],
@@ -488,7 +609,7 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	icon = "Interface\\Icons\\spell_shadow_lifedrain",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraTooltipNumber(c.Unit, c.NameFirst, c.NameString, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraVariableNumber(c.Unit, c.NameFirst, c.NameString, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -496,6 +617,31 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
 	end,
 })
+for i = 1, 3 do -- BUFFTOOLTIPSCAN
+	ConditionCategory:RegisterCondition(14 + 0.1*i,	 "DEBUFFTOOLTIPSCAN" .. i, {
+		text = L["ICONMENU_DEBUFF"] .. " - " .. L["TOOLTIPSCAN2"]:format(i),
+		tooltip = L["TOOLTIPSCAN2_DESC"],
+		range = 500,
+		--texttable = {[0] = "0 ("..L["ICONMENU_ABSENT"]..")"},
+		name = function(editbox)
+			editbox:SetTexts(L["DEBUFFTOCHECK"], L["TOOLTIPSCAN2_DESC"])
+		end,
+		useSUG = true,
+		check = function(check)
+			check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
+		end,
+		icon = "Interface\\Icons\\spell_fire_flameshock",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(c)
+			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+		end,
+	})
+end
 ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"],
 	tooltip = L["NUMAURAS_DESC"],

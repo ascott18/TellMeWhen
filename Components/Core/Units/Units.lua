@@ -380,6 +380,8 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		if changed then
 			TMW:Fire("TMW_UNITSET_UPDATED", self)
 		end
+
+		return changed
 	end,
 }
 
@@ -577,7 +579,11 @@ function UNITS:OnEvent(event, arg1)
 	for i = 1, #instances do
 		local unitSet = instances[i]
 		if unitSet.updateEvents[event] then
-			unitSet:Update(forceNoExists)
+			if not unitSet:Update(forceNoExists) then
+				-- If the units in the UnitSet didn't change, still fire a TMW_UNITSET_UPDATED to signal that they may have shuffled around a bit
+				-- (for example, the player changed target, or raid members moved around)
+				TMW:Fire("TMW_UNITSET_UPDATED", unitSet)
+			end
 		end
 	end
 	forceNoExists = nil

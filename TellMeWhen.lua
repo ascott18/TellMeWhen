@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80030 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80031 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80014 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -122,8 +122,6 @@ local GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell =
 	  GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell
 local InCombatLockdown, GetTalentInfo =
 	  InCombatLockdown, GetTalentInfo
-local UnitPower, UnitClass, UnitName, UnitAura =
-	  UnitPower, UnitClass, UnitName, UnitAura
 local IsInGuild, IsInGroup, IsInInstance =
 	  IsInGuild, IsInGroup, IsInInstance
 local GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn, GetBuildInfo =

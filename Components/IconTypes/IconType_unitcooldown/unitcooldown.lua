@@ -656,10 +656,6 @@ function Type:Setup(icon)
 		icon:SetUpdateMethod("manual")
 		ManualIconsManager:UpdateTable_Register(icon)
 		
-		for event in pairs(icon.UnitSet.updateEvents) do
-			icon:RegisterSimpleUpdateEvent(event)
-		end
-		
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", UnitCooldown_OnEvent, icon)
 	end
 

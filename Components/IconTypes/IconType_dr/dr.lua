@@ -424,9 +424,6 @@ function Type:Setup(icon)
 	-- Setup events and update functions
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-		for event in pairs(icon.UnitSet.updateEvents) do
-			icon:RegisterSimpleUpdateEvent(event)
-		end
 		
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", DR_OnEvent, icon)
 	end
