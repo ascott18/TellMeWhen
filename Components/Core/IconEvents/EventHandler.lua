@@ -339,10 +339,11 @@ end
 
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
-	wipe(icon.EventHandlersSet)
+	if not TMW.Locked then
+		return
+	end
 	
 	-- Setup all of an icon's events.
-
 	wipe(icon.EventHandlersSet)
 
 	for _, eventSettings in TMW:InNLengthTable(icon.Events) do

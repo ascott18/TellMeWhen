@@ -28,8 +28,9 @@ TMW.CHANGELOG = [==[
 
 * Combat Log Source and Destination units may now have unit conditions when filtered by unitID.
 * New conditions have been added for:
-** Checking your current location
-** Checking your last spell cast (for Windwalker Monk mastery)
+** Checking your current location.
+** Checking your last spell cast (for Windwalker Monk mastery).
+** The old buff/debuff Tooltip Number conditions have returned as well.
 * And much, much more! Dig in to check it all out!
 
 ===v7.4.0===

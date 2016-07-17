@@ -833,6 +833,7 @@ L["UIPANEL_ROLE_DESC"] = "Check to allow this group to show when your current sp
 L["ROLEf"] = "Role: %s"
 L["UIPANEL_PTSINTAL"] = "Points in talent"
 L["UIPANEL_TALENTLEARNED"] = "Talent learned"
+L["UIPANEL_PVPTALENTLEARNED"] = "PvP Talent learned"
 L["UIPANEL_GLYPH"] = "Glyph active"
 L["UIPANEL_GLYPH_DESC"] = "Checks if you have a particular glyph active."
 L["UIPANEL_PRIMARYSPEC"] = "Primary Spec"
@@ -970,6 +971,9 @@ L["COLOR_MSQ_ONLY_DESC"] = "Checking this will cause ONLY the border of a Masque
 
 L["COLOR_OVERRIDE_GROUP"] = "Override Group Color"
 L["COLOR_OVERRIDE_GROUP_DESC"] = [[Check to configure color independent of the color specified for the icon's group.]]
+
+L["COLOR_USECLASS"] = "Use Class Colors"
+L["COLOR_USECLASS_DESC"] = [[Check to color the bar using the class colors of the unit being checked.]]
 
 L["COLOR_OVERRIDE_GLOBAL"] = "Override Global Color"
 L["COLOR_OVERRIDE_GLOBAL_DESC"] = [[Check to configure colors independent of the globally defined colors.]]

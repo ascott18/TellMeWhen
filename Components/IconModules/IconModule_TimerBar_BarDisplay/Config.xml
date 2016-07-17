@@ -73,13 +73,42 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
+			
+			<CheckButton parentKey="ClassColor" inherits="TellMeWhen_CheckTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.EnableColors" relativePoint="BOTTOM" y="3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["COLOR_USECLASS"], TMW.L["COLOR_USECLASS_DESC"])
+						self:SetSetting("BarDisplay_ClassColor")
+						
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							self:SetShown(settings.TimerBar_EnableColors)
+							local hasUnits = TMW.CI.icon.typeData.UsedProcessors[TMW.C.IconDataProcessor.ProcessorsByName.UNIT]
+							self:SetEnabled(hasUnits)
+							if not hasUnits then
+								settings[self.setting] = false
+							end
+
+							self:GetParent():AdjustHeight()
+						end)
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
 
 			<Frame inherits="TellMeWhen_TimerBarColorsTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.ClassColor" relativePoint="BOTTOM" y="-3" />
+				</Anchors>
 				<Scripts>
 					<OnLoad inherit="prepend">
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()
-							self:SetShown(settings.TimerBar_EnableColors)
+							self:SetShown(settings.TimerBar_EnableColors and not settings.BarDisplay_ClassColor)
 
 							self:GetParent():AdjustHeight()
 						end)

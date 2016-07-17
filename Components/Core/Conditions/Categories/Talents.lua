@@ -23,8 +23,8 @@ local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("Player")
 
-local GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo = 
-      GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo
+local GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo = 
+      GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo
 local GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetClassInfoByID, GetNumClasses, GetClassInfo = 
       GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetClassInfoByID, GetNumClasses, GetClassInfo
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
@@ -350,6 +350,7 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 
 -- TODO: add a pvp talent condition
 CNDT.Env.TalentMap = {}
+CNDT.Env.PvpTalentMap = {}
 function CNDT:PLAYER_TALENT_UPDATE()
 	wipe(Env.TalentMap)
 	for tier = 1, MAX_TALENT_TIERS do
@@ -359,6 +360,19 @@ function CNDT:PLAYER_TALENT_UPDATE()
 			if lower then
 				Env.TalentMap[lower] = selected
 				Env.TalentMap[id] = selected
+			end
+		end
+	end
+
+
+	wipe(Env.PvpTalentMap)
+	for tier = 1, MAX_PVP_TALENT_TIERS do
+		for column = 1, MAX_PVP_TALENT_TIERS do
+			local id, name, icon, selected, available, _, unlocked = GetPvpTalentInfo(tier, column, 1)
+			local lower = name and strlowerCache[name]
+			if lower then
+				Env.PvpTalentMap[lower] = selected
+				Env.PvpTalentMap[id] = selected
 			end
 		end
 	end
@@ -390,6 +404,7 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end,
 })
+
 ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	text = L["UIPANEL_PTSINTAL"],
 	funcstr = "DEPRECATED",
@@ -397,6 +412,34 @@ ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	max = 5,
 })
 
+
+ConditionCategory:RegisterCondition(10,	 "PVPTALENTLEARNED", {
+	text = L["UIPANEL_PVPTALENTLEARNED"],
+
+	bool = true,
+	
+	unit = PLAYER,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = "pvptalents",
+	icon = function() return select(3, GetPvpTalentInfo(1, 1, 1)) end,
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(ConditionObject, c)
+		-- this is handled externally because PvpTalentMap is so extensive a process,
+		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
+		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+		CNDT:PLAYER_TALENT_UPDATE()
+	
+		return [[BOOLCHECK( PvpTalentMap[LOWER(c.NameFirst)] )]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+	end,
+})
 
 local GetGlyphSocketInfo = GetGlyphSocketInfo
 function CNDT:GLYPH_UPDATED()

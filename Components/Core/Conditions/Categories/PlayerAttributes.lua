@@ -28,8 +28,6 @@ local wow_502 = clientVersion >= 50200
 
 local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
-local GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo = 
-	  GetTalentInfo, GetNumTalentTabs, GetNumTalents, GetGlyphLink, GetSpellInfo
 local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo = 
 	  GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo
 	  

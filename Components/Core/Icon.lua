@@ -853,16 +853,6 @@ function Icon.Setup(icon)
 
 	-- Perform a soft reset on the icon.
 	icon:DisableIcon(true)
-
-
-	-- Associate the icon's GUID with the icon in a global context
-	-- so that it can be referred to by GUID.
-	TMW:DeclareDataOwner(iconGUID, icon)
-	
-
-	-- Store these on the icon for convenience
-	icon.typeData = typeData
-	icon.viewData = viewData
 	
 
 	-- Store all of the icon's relevant settings on the icon,
@@ -875,26 +865,37 @@ function Icon.Setup(icon)
 			icon[k] = nil
 		end
 	end
-	
-
-	-- Non-controlled icons should always show if they're used.
-	-- Controlled icons are shown/hidden based on whether or not they're used
-	-- (this is handled by the icon controller system, so don't manually show controller icons here)
-	if not icon:IsControlled() then
-		icon:Show()
-	end
-
-
-	-- Lame framelevel fix: Sometimes, icons end up with dramatically different frame levels than their group.
-	icon:SetFrameLevel(group:GetFrameLevel() + 1)
-
-
-	-- Notify that we've begun setting up this icon (we're past all the basic stuff now,
-	-- and at the point where other parties might be interested in doing anything before we go further)
-	TMW:Fire("TMW_ICON_SETUP_PRE", icon)
 
 	
 	if icon.Enabled or not TMW.Locked then
+
+		-- Store these on the icon for convenience
+		icon.typeData = typeData
+		icon.viewData = viewData
+		
+
+		-- Associate the icon's GUID with the icon in a global context
+		-- so that it can be referred to by GUID.
+		TMW:DeclareDataOwner(iconGUID, icon)
+	
+
+		-- Non-controlled icons should always show if they're used.
+		-- Controlled icons are shown/hidden based on whether or not they're used
+		-- (this is handled by the icon controller system, so don't manually show controller icons here)
+		if not icon:IsControlled() then
+			icon:Show()
+		end
+
+
+		-- Lame framelevel fix: Sometimes, icons end up with dramatically different frame levels than their group.
+		icon:SetFrameLevel(group:GetFrameLevel() + 1)
+
+
+		-- Notify that we've begun setting up this icon (we're past all the basic stuff now,
+		-- and at the point where other parties might be interested in doing anything before we go further)
+		TMW:Fire("TMW_ICON_SETUP_PRE", icon)
+
+
 
 		------------ Icon View ------------
 		viewData:Icon_Setup(icon)
@@ -929,8 +930,14 @@ function Icon.Setup(icon)
 			end
 		end
 	else
+		local iconGUID = icon:GetGUID()
+		if iconGUID then
+			TMW:DeclareDataOwner(iconGUID, nil)
+		end
+
+		icon:Hide()
 		-- Disable icons that aren't enabled when we're locked.
-		icon:DisableIcon()
+		--icon:DisableIcon()
 	end
 
 
