@@ -113,6 +113,8 @@ function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
 		-- Force an update here since it won't get updated if the color changes and the value doesnt.
 		-- This is harmless, because 99% of the the time, the value has changed, so an update would be performed anyway.
 		self:UpdateValue(true)
+	else
+		self.value = value
 	end
 end
 TimerBar_BarDisplay:SetDataListner("VALUE")

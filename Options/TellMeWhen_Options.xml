@@ -1212,6 +1212,7 @@
 						self:SetWidth(self:GetTextWidth()+15)
 					</OnLoad>
 					<OnClick>
+						self:GetParent():CScriptTunnel("ClearFocus")
 						self:GetParent():SaveSetting()
 					</OnClick>
 				</Scripts>

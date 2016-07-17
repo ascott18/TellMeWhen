@@ -2855,13 +2855,17 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 		local r, g, b, a, flags = self:GetRGBA()
 
 		local texture
-		if self.swatchOverrideTexture and self.swatchOverrideTexture ~= "" then
+		if self.swatchOverrideTexture then
 			texture = self.swatchOverrideTexture
 		elseif self.swatchTexture then
 			texture = self.swatchTexture
 		end
 
 		if texture then
+			-- We have to set the texture to nil first in case the (texture == "").
+			-- In Legion, calling SetTexture("") seems to have no effect, so if the swatch was previously
+			-- set to a color texture, it will stay that way unless we explicitly nil it out.
+			self.swatch:SetTexture(nil)
 			self.swatch:SetTexture(texture)
 			self.swatch:SetVertexColor(r, g, b)
 			self.swatch:SetAlpha(a)

@@ -65,7 +65,11 @@ TabGroup:SetChildrenEnabled(false)
 TabGroup:CScriptAdd("PageReloadRequested", function()
 	local icon = TMW.CI.icon
 	if icon then
-		icon:Setup()
+		if icon:IsGroupController() then
+			icon.group:Setup()
+		else
+			icon:Setup()
+		end
 	end
 end)
 

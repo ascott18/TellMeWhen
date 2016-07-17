@@ -50,7 +50,7 @@ local function UpdateTexture(icon)
 end
 
 function Hook:OnImplementIntoIcon(icon)
-	if icon:IsControlled() then
+	if icon:IsControlled() and not TMW.Locked then
 		icon.CustomTex_OverrideTex = nil
 		return
 	end

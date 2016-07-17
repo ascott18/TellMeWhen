@@ -495,6 +495,10 @@ L["ICONMENU_PRESENT"] = "Present"
 L["ICONMENU_ABSENT"] = "Absent"
 --L["ICONMENU_ALWAYS"] = "Always"
 
+L["ICONMENU_ABSENTEACH"] = "Absent for Each Unit"
+L["ICONMENU_ABSENTEACH_DESC"] = [[Set the icon opacity level for each unit that does not have a spell cast present.
+
+If this is not set to Hidden and at least one unit being checked exists, the %s setting won't be used.]]
 L["ICONMENU_ABSENTONANY"] = "Any Absent"
 L["ICONMENU_ABSENTONANY_DESC"] = "Set the icon opacity level for when any unit being checked is missing all of the buffs/debuffs being checked."
 L["ICONMENU_PRESENTONALL"] = "All Present"
@@ -512,6 +516,9 @@ L["ICONMENU_ONSUCCEED"] = "On Succeed"
 
 L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
 L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts that are interruptible"
+
+L["ICONMENU_NOPOCKETWATCH"] = "Blank Texture for Unknown"
+L["ICONMENU_NOPOCKETWATCH_DESC"] = "Check this box to show no texture instead of the Pocketwatch texture."
 
 L["ICONMENU_ONLYMINE"] = "Only cast by me"
 L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for buffs/debuffs that you cast"
