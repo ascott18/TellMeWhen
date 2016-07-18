@@ -176,7 +176,8 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 			local k = myCategories[category]
 
 			if k then
-				dr[k] = (dr[k] and (dr[k] .. ";" .. spellID)) or tostring(spellID)
+				dr[k] = dr[k] or {}
+				tinsert(dr[k], spellID)
 			elseif TMW.debug and not ignored[category] then
 				TMW:Error("The DR category %q is undefined!", category)
 			end

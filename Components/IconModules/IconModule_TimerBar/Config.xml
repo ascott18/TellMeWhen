@@ -124,7 +124,7 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
-				self:SetTitle(TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
+				self:SetTitle(TMW.L["DOMAIN_GLOBAL_NC"] .. ": " .. TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

@@ -1,5 +1,7 @@
 ﻿<Ui>
 
+<Script file="Equivalencies.lua"/>
+
 <Script file="Spells.lua"/>
 
 

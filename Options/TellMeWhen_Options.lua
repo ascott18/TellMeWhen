@@ -93,32 +93,6 @@ TMW.operators = {
 	{ tooltipText = L["CONDITIONPANEL_GREATEREQUAL"], 	value = ">=", 	text = ">=" },
 }
 
-TMW.EquivOriginalLookup = {}
-TMW.EquivFullIDLookup = {}
-TMW.EquivFullNameLookup = {}
-TMW.EquivFirstIDLookup = {}
-for category, b in pairs(TMW.OldBE) do
-	for equiv, str in pairs(b) do
-		TMW.EquivOriginalLookup[equiv] = str
-
-		-- remove underscores
-		str = gsub(str, "_", "")
-
-		-- create the lookup tables first, so that we can have the first ID even if it will be turned into a name
-		TMW.EquivFirstIDLookup[equiv] = strsplit(";", str) -- this is used to display them in the list (tooltip, name, id display)
-
-		TMW.EquivFullIDLookup[equiv] = ";" .. str
-		local tbl = TMW:SplitNames(str)
-		for k, v in pairs(tbl) do
-			tbl[k] = GetSpellInfo(v) or v
-		end
-		TMW.EquivFullNameLookup[equiv] = ";" .. table.concat(tbl, ";")
-	end
-end
-for dispeltype, texture in pairs(TMW.DS) do
-	TMW.EquivFirstIDLookup[dispeltype] = texture
-end
-
 
 
 
@@ -326,7 +300,6 @@ function IE:OnInitialize()
 	self.resizer.scale_min = 0.4
 	self.resizer.y_min = 400
 	self.resizer.y_max = 1200
-	self.resizer:SetModes(self.resizer.MODE_SCALE, self.resizer.MODE_SIZE)
 	function self.resizer:SizeUpdated()
 		TMW.IE.db.global.EditorHeight = IE:GetHeight()
 		TMW.IE.db.global.EditorScale = IE:GetScale()
@@ -350,7 +323,8 @@ IE.Defaults = {
 	global = {
 		LastChangelogVersion = 0,
 		TellMeWhenDBBackupDate = 0,
-		EditorScale		= 0.9,
+		ScaleIE			= false,
+		EditorScale		= 1,
 		EditorHeight	= 600,
 		ConfigWarning	= true,
 		ConfigWarningN	= 0,
@@ -372,6 +346,12 @@ end
 
 function IE:GetBaseUpgrades()			-- upgrade functions
 	return {
+		[80035] = {
+			global = function(self)
+				IE.db.global.EditorScale = 1
+				IE.db.global.ScaleIE = false
+			end,
+		},
 		[62218] = {
 			global = function(self)
 				IE.db.global.EditorScale = TMW.db.global.EditorScale or 0.9
@@ -783,7 +763,11 @@ function IE:Load(isRefresh)
 	IE:RefreshTabs()
 	
 
-	IE:SetScale(IE.db.global.EditorScale)
+	IE.resizer:SetModes(
+		IE.db.global.ScaleIE and IE.resizer.MODE_SCALE or IE.resizer.MODE_STATIC,
+		IE.resizer.MODE_SIZE)
+
+	IE:SetScale(IE.db.global.ScaleIE and IE.db.global.EditorScale or 1)
 	IE:SetHeight(IE.db.global.EditorHeight)
 
 	TMW:Fire("TMW_CONFIG_LOADED")
@@ -825,7 +809,7 @@ end
 ---------- Equivalancies ----------
 function IE:Equiv_GenerateTips(equiv)
 	local IDs = TMW:SplitNames(TMW.EquivFullIDLookup[equiv])
-	local original = TMW:SplitNames(TMW.EquivOriginalLookup[equiv])
+	local original = TMW.EquivOriginalLookup[equiv]
 
 	for k, v in pairs(IDs) do
 		local name, _, texture = GetSpellInfo(v)
@@ -840,8 +824,8 @@ function IE:Equiv_GenerateTips(equiv)
 		end
 
 		-- If this spell is tracked only by ID, add the ID in parenthesis
-		local originalSpell = tostring(original[k])
-		if originalSpell:sub(1, 1) ~= "_" then
+		local originalSpell = original[k]
+		if originalSpell > 0 then
 			name = format("%s |cff7f6600(%d)|r", name, originalSpell)
 		end
 
@@ -2061,7 +2045,7 @@ TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
 	OnNewInstance_EditBox_Lua = function(self)
 		IndentationLib.enable(self, self.ColorTable, 4)
 
-		self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 9)
+		self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 11)
 
 		self:SetNewlineOnEnter(true)
 
@@ -3274,19 +3258,11 @@ TMW:NewClass("IconEditorTabBase", "Config_Button"){
 		self:SetWidth(self.text:GetStringWidth() + 10)
 	end,
 
-	OnShow = function(self)
-		self:AdjustWidth()
-	end,
-	
-	OnSizeChanged = function(self)
-		self:AdjustWidth()
-
-		IE:ResizeTabs()
-	end,
-
 	METHOD_EXTENSIONS = {
 		SetText = function(self, text)
-			self:AdjustWidth()
+			if self:IsVisible() then
+				IE:ResizeTabs()
+			end
 		end,
 	},
 }
@@ -3512,6 +3488,7 @@ function IE:ResizeTabs()
 	local primaryWidth = -interPadding
 	local prevTabGroup
 	for identifier, tabGroup in TMW:OrderedPairs(IE.TabGroups, TMW.OrderSort, true) do
+		tabGroup:AdjustWidth()
 		if prevTabGroup then
 			prevTabGroup:SetPoint("RIGHT", tabGroup, "LEFT", -interPadding, 0)
 		end
@@ -3536,6 +3513,7 @@ function IE:ResizeTabs()
 	local currentRow = 1
 	rows[currentRow] = {width = endPadding - interPadding }
 	for i, tab in TMW:OrderedPairs({TMW.IE.Tabs.secondary:GetChildren()}, TMW.OrderSort, true) do
+		tab:AdjustWidth()
 		if tab:IsShown() then
 			local newWidth = rows[currentRow].width + tab:GetWidth() + interPadding
 

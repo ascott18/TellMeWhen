@@ -1859,7 +1859,7 @@
 
 
 	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG" inherits="TellMeWhen_SimpleDialog">
-		<Size x="585" y="380"/>
+		<Size x="586" y="380"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
 			<Anchor point="TOP" relativeTo="UIParent" y="-60"/>
@@ -2356,6 +2356,9 @@
 				-- Needs to go before TellMeWhen_ChangelogDialog or else it will get hidden immediately after the changelog hides.
 				tinsert(UISpecialFrames, 1, self:GetName())
 			</OnLoad>
+			<OnSizeChanged>
+				TMW.IE:ResizeTabs()
+			</OnSizeChanged>
 			<!-- <OnDragStart>
 				TMW.IE:StartMoving()
 			</OnDragStart>

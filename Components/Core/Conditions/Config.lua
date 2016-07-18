@@ -373,8 +373,9 @@ function CNDT.OperatorMenu_DropDown(dropdown)
 		if (not conditionData.specificOperators or conditionData.specificOperators[v.value]) then
 			local info = TMW.DD:CreateInfo()
 			info.func = OperatorMenu_DropDown_OnClick
-			info.text = v.text
+			info.text = v.text .. strrep("  ", 2 - #v.text) .. "    " .. v.tooltipText
 			info.value = v.value
+			info.font = "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf"
 			info.checked = conditionSettings.Operator == v.value
 			info.tooltipTitle = v.tooltipText
 			info.arg1 = dropdown

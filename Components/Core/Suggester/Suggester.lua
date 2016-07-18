@@ -1113,7 +1113,7 @@ end
 function Module:Entry_AddToList_2(f, id)
 	if TMW.BE.casts[id] then
 		-- the entry is an equivalacy
-		-- id is the equivalency name (e.g. Tier11Interrupts)
+		-- id is the equivalency name (e.g. Stunned)
 		local equiv = id
 		id = TMW.EquivFirstIDLookup[equiv]
 

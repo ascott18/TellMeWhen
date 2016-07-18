@@ -516,8 +516,6 @@ function DD:Toggle(level, value, anchorName, xOffset, yOffset, menuList, button,
 			uiScale = uiParentScale;
 		end
 
-		listFrame:SetScale(uiScale);
-		
 		-- Hide the listframe anyways since it is redrawn OnShow() 
 		listFrame:Hide();
 		
@@ -528,6 +526,13 @@ function DD:Toggle(level, value, anchorName, xOffset, yOffset, menuList, button,
 		-- Level specific stuff
 		if ( level == 1 ) then	
 			DD.OPEN_MENU = dropDownFrame
+			TMWDropDowns:SetScale(1)
+			for _, frame in TMW:Vararg(dropDownFrame, anchorName) do
+				if type(frame) == "table" and frame.GetEffectiveScale then
+					TMWDropDowns:SetScale(frame:GetEffectiveScale())
+					break
+				end
+			end
 
 			listFrame:ClearAllPoints();
 			-- If there's no specified anchorName then use left side of the dropdown menu
@@ -553,8 +558,8 @@ function DD:Toggle(level, value, anchorName, xOffset, yOffset, menuList, button,
 			elseif ( anchorName == "cursor" ) then
 				relativeTo = nil;
 				local cursorX, cursorY = GetCursorPosition();
-				cursorX = cursorX/uiScale;
-				cursorY =  cursorY/uiScale;
+				cursorX = cursorX/TMWDropDowns:GetScale();
+				cursorY = cursorY/TMWDropDowns:GetScale();
 
 				if ( not xOffset ) then
 					xOffset = 0;

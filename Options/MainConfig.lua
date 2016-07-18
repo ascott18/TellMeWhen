@@ -36,30 +36,45 @@ BaseConfig.DefaultPanelSet = "profile"
 
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(2, "TellMeWhen_Main_General", function(self)
-	self:SetTitle(GENERAL)
+	self:SetTitle(L["DOMAIN_PROFILE"] .. ": " .. GENERAL)
+	
+	self:BuildSimpleCheckSettingFrame({
+		numPerRow = 1,
+		function(check)
+			check:SetTexts(L["UIPANEL_WARNINVALIDS"], L["UIPANEL_WARNINVALIDS_DESC"])
+			check:SetSetting("WarnInvalids")
+		end,
+	})
+end)
+
+BaseConfig:RegisterConfigPanel_ConstructorFunc(2, "TellMeWhen_Main_GeneralGlobal", function(self)
+	self:SetTitle(L["DOMAIN_GLOBAL_NC"] .. ": " .. GENERAL)
 	
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 1,
 		function(check)
 			check:SetTexts(L["UIPANEL_COMBATCONFIG"], L["UIPANEL_COMBATCONFIG_DESC"])
 			check:SetSetting("AllowCombatConfig")
-			check:CScriptAdd("SettingTableRequested", function()
-				return TMW.db.global
-			end)
-		end,
-		function(check)
-			check:SetTexts(L["UIPANEL_WARNINVALIDS"])
-			check:SetSetting("WarnInvalids")
 		end,
 		function(check)
 			check:SetTexts(L["SHOWGUIDS_OPTION"], L["SHOWGUIDS_OPTION_DESC"])
 			check:SetSetting("ShowGUIDs")
 		end,
+		function(check)
+			check:SetTexts(L["UIPANEL_ALLOWSCALEIE"], L["UIPANEL_ALLOWSCALEIE_DESC"])
+			check:SetSetting("ScaleIE")
+			check:CScriptAdd("SettingTableRequested", function()
+				return TMW.IE.db.global
+			end)
+			check:CScriptAdd("SettingSaved", function()
+				IE:Load(1)
+			end)
+		end,
 	})
-end)
+end):SetPanelSet("global")
 
 BaseConfig:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_Main_CommSettings", function(self)
-	self:SetTitle(L["CONFIGPANEL_COMM_HEADER"])
+	self:SetTitle(L["DOMAIN_GLOBAL_NC"] .. ": " .. L["CONFIGPANEL_COMM_HEADER"])
 	
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 1,

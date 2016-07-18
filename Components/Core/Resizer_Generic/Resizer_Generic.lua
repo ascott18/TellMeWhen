@@ -24,6 +24,7 @@ TMW:NewClass("Resizer_Generic"){
 	tooltipTitle = L["RESIZE"],
 	tooltipText = L["RESIZE_TOOLTIP"],
 
+	MODE_STATIC = 0,
 	MODE_SIZE = 1,
 	MODE_SCALE = 2,
 

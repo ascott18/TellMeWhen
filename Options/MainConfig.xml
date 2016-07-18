@@ -228,7 +228,7 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
-				self:SetTitle(TMW.L["UIPANEL_PERFORMANCE"])
+				self:SetTitle(TMW.L["DOMAIN_GLOBAL_NC"] .. ": " .. TMW.L["UIPANEL_PERFORMANCE"])
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -312,7 +312,7 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
-				self:SetTitle(TMW.L["CONFIGPANEL_MEDIA_HEADER"])
+				self:SetTitle(TMW.L["DOMAIN_PROFILE"] .. ": " .. TMW.L["CONFIGPANEL_MEDIA_HEADER"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

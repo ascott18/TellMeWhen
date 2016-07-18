@@ -1,6 +1,9 @@
 ﻿
+local function PRINT(...)
+    DEFAULT_CHAT_FRAME:AddMessage(strjoin(" ", ...))
+end
 
-local match = "finishes"
+local match = "silenc"
 print("RESULTS FOR MATCH ", match)
 
 local Parser = GameTooltip
@@ -19,7 +22,7 @@ for class, spells in pairs(CSC) do
                 if text then
                     text = text:lower()
                     if text:find(match) then
-                        print(class, spellID, text)
+                        PRINT(class, GetSpellInfo(spellID), spellID, text)
                         tinsert(results, spellID)
                     end
                 end
@@ -31,5 +34,5 @@ end
 sort(results)
 for k, v in pairs(results) do
 
-    print(v, GetSpellInfo(v), nil)
+    PRINT(v, GetSpellInfo(v), nil)
 end

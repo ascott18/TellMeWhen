@@ -905,7 +905,15 @@ L["UIPANEL_HIDEBLIZZCDBLING_DESC"] = [[Disables Blizzard's pulse effect on coold
 This effect was added by Blizzard in patch 6.2.]]
 
 
+L["UIPANEL_ALLOWSCALEIE"] = "Allow Icon Editor Scaling"
+L["UIPANEL_ALLOWSCALEIE_DESC"] = [[By default, resizing the Icon Editor is disabled in order to achieve a clean, pixel-perfect layout.
+
+If you don't care about this and would rather be able to resize it yourself, enable this setting.]]
+
 L["UIPANEL_WARNINVALIDS"] = "Warn about invalid icons"
+L["UIPANEL_WARNINVALIDS_DESC"] = [[If this setting is enabled, TellMeWhen when warn you when it detects invalid configurations in your icons.
+
+It is HIGHLY RECOMMENDED that you keep this setting enabled, as some of these configuration errors can cause particularly poor performance]]
 
 
 L["UIPANEL_GROUPSORT"] = "Icon Sorting"
@@ -1898,7 +1906,7 @@ L["CONFIGPANEL_PBAR_HEADER"] = "Power Bar Overlay"
 L["CONFIGPANEL_CLEU_HEADER"] = "Combat Events"
 L["CONFIGPANEL_CNDTTIMERS_HEADER"] = "Condition Timers"
 
-L["CONFIGPANEL_BACKDROP_HEADER"] = "Backdrop"
+L["CONFIGPANEL_BACKDROP_HEADER"] = "Bar Backdrop"
 
 
 
@@ -2694,8 +2702,6 @@ L["DamageBuffs"] = "Damage Buffs"
 
 L["Heals"] = "Player Heals"
 L["PvPSpells"] = "PvP Crowd Control, etc."
-L["Tier11Interrupts"] = "Tier 11 Interruptibles"
-L["Tier12Interrupts"] = "Tier 12 Interruptibles"
 
 L["GCD"] = "Global Cooldown"
 

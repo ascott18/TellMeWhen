@@ -167,7 +167,7 @@ local offset = TMW.tContains({"ROGUE", "DRUID"}, pclass) and 0 or 62
 ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
 	text = L["CONDITIONPANEL_COMBO"],
 	min = 0,
-	max = 6,
+	max = 8,
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_rogue_eviscerate",
 	tcoords = CNDT.COMMON.standardtcoords,

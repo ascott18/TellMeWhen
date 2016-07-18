@@ -447,7 +447,7 @@ function TMW:EquivToTable(name)
 	-- If there was a duration, then replace the old name with the actual name without the duration attached
 	name = eqname or name 
 
-	local names
+	local tbl
 
 	-- Iterate over all of TMW.BE's sub-categories ('buffs', 'debuffs', 'casts', etc)
 	for k, v in pairs(TMW.BE) do
@@ -455,18 +455,15 @@ function TMW:EquivToTable(name)
 		for equiv, str in pairs(v) do
 			if strlowerCache[equiv] == name then
 				-- We found a matching equivalency, so stop searching.
-				names = str
+				tbl = str
 				break
 			end
 		end
-		if names then break end
+		if tbl then break end
 	end
 
 	-- If we didnt find an equivalency string then get out
-	if not names then return end
-
-	-- Split the string into a table of spells.
-	local tbl = { strsplit(";", names) }
+	if not tbl then return end
 
 	-- For each spell in the equivalency:
 	for a, b in pairs(tbl) do

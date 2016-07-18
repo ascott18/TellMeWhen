@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80033 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80035 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80014 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -221,7 +221,7 @@ TMW.Defaults = {
 		NumGroups		=	1,
 		TextureName		= 	"Blizzard",
 		SoundChannel	=	"SFX",
-		WarnInvalids	=	false,
+		WarnInvalids	=	true,
 
 		Groups 		= 	{
 			["**"] = {
@@ -316,144 +316,6 @@ function TMW:MergeDefaultsTables(src, dest)
 	
 	return dest -- not really needed, but what the hell why not
 end
-
-
-
-
-
-
-
----------------------------------
--- Equivalencies & Dispel Types
----------------------------------
-
-TMW.BE = {
-	--Most of these are thanks to Malazee @ US-Dalaran's chart: http://forums.wow-petopia.com/download/file.php?mode=view&id=4979 and spreadsheet https://spreadsheets.google.com/ccc?key=0Aox2ZHZE6e_SdHhTc0tZam05QVJDU0lONnp0ZVgzdkE&hl=en#gid=18
-	--Major credit to Wowhead (http://www.wowhead.com/guide=1100) for MoP spells
-	--Also credit to Damien of Icy Veins (http://www.icy-veins.com/forums/topic/512-mists-of-pandaria-raid-buffs-and-debuffs/) for some MoP spells
-	--Many more new spells/corrections were provided by Catok of Curse
-
-	--NOTE: any id prefixed with "_" will have its localized name substituted in instead of being forced to match as an ID
-	debuffs = {
-		Silenced			= "_47476;_78675;_15487;_1330;_25046;31935;31117",
-		ReducedHealing		= "115804",
-
-	Stunned				= "_1833;_408;_91800;5211;22570;19577;24394;_853;_20549;46968;132168;_30283;_7922;64044;91797;_25;_89766;_131402;108194;221562;117526;118905;119381;118345;132169;163505;179057;200166;211881;207171;207165;196958;199804;226943;200200",
-		Incapacitated		= "99;3355;_19386;20066;_118;1776;_6770;115078;115268;107079;31661;82691;;88625;_51514",
-		Rooted				= "_339;_122;_64695;_19387;33395;16979;45334;102359;_128405;116706;107566;96294;105771;53148;_114404;170996;200108;195645;135299",
-		Shatterable			= "122;33395;_82691", -- by algus2
-		Disoriented			= "31661;_2094;_51514;99",
-	Slowed				= "_116;_120;_13810;_5116;_196840;_3600;_1715;_12323;116095;_31589;45524;51490;_15407;_3409;26679;_58180;61391;44614;_7302;_7321;_7992;123586;211831;222775;160065;160067;35346;206930;209786;185763;206760;194279;206755;191397;201142;194858;50433;204263;183218;6343;2120;157981;205021;147732;211793;212764;190780;208278;121253;205320;169733;196723;198813;204843;102793", 
-		Feared				= "_5782;5246;_8122;_5484;_6789;_87204",
-		Bleeding			= "_1822;_1079;1943;_703;_115767;_11977;106830;77758;155722;16511",
-		
-		CrowdControl		= "_118;33786;_187650;_19386;20066;_9484;_6770;_2094;_51514;_710;_5782;_6358;_605;_82691;115078;115268;107079", -- originally by calico0 of Curse
-		
-	},
-	buffs = {
-		BurstHaste			= "2825;32182;80353;90355;146555;160452",
-		
-		-- From l337g0g0 of Curse:
-		DamageShield		= "_17;_11426;116849;114908;108416;108008;1463;108366;77535;145441;152118;173260;169373",
-		
-		ImmuneToStun		= "642;45438;48792;1022;33786;710;46924;_19263;6615",
-		ImmuneToMagicCC		= "642;45438;48707;33786;710;46924;_19263;31224;8178;23920;49039;114028",
-		MiscHelpfulBuffs	= "10060;23920;68992;2983;1850;53271;1044;31821;45182;114028",
-		SpeedBoosts			= "54861;121557;_186257;_2983;_61684;68992;108843;65081;118922;137573;2379;58875;85499;137452;111400;116841;119085;7840;2645;_77761",
-		DamageBuffs			= "1719;12292;5217;3045;31884;12472;51271;_107574;114050;114051",
-		
-		-- By G3sch4n (http://wow.curseforge.com/addons/tellmewhen/tickets/1153-defensive-cooldowns/):
-		DefensiveBuffsSingle="155835;22812;102342;61336;48707;48792;_19263;157913;113862;45438;122278;122783;115203;115176;31850;498;642;86659;1022;6940;47585;47788;33206;31224;74001;5277;108271;104773;118038;871;23920;114030;",
-		DefensiveBuffsAOE   = "_51052;_31821;_62618;_76577;_114028;",
-
-	},
-	casts = {
-		--prefixing with _ doesnt really matter here since casts only match by name,
-		-- but it may prevent confusion if people try and use these as buff/debuff equivs
-		Heals				= "5185;8936;740;2060;2061;32546;596;64843;82326;19750;77472;8004;1064;73920;124682;115175;116694;33076;120517;48438;116670;114163;85222",
-		PvPSpells			= "33786;339;20484;982;_605;5782;5484;51514;118;12051;20066",
-		Tier11Interrupts	= "_83703;_82752;_82636;_83070;_79710;_77896;_77569;_80734;_82411",
-		Tier12Interrupts	= "_97202;_100094",
-	},
-}
-
-TMW.BE.buffs.DefensiveBuffs	= TMW.BE.buffs.DefensiveBuffsSingle .. ";" .. TMW.BE.buffs.DefensiveBuffsAOE
-
-
-TMW.DS = {
-	Magic 	= "Interface\\Icons\\spell_fire_immolation",
-	Curse 	= "Interface\\Icons\\spell_shadow_curseofsargeras",
-	Disease = "Interface\\Icons\\spell_nature_nullifydisease",
-	Poison 	= "Interface\\Icons\\spell_nature_corrosivebreath",
-	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
-}
-
-function TMW:ProcessEquivalencies()
-	for dispeltype, icon in pairs(TMW.DS) do
-	--	SpellTexturesMetaIndex[dispeltype] = icon
-		TMW.SpellTexturesMetaIndex[strlower(dispeltype)] = icon
-	end
-	
-	TMW:Fire("TMW_EQUIVS_PROCESSING")
-	
-	TMW:UnregisterAllCallbacks("TMW_EQUIVS_PROCESSING")
-	TMW.ProcessEquivalencies = nil
-
-	-- TMW.OldBE is used by TellMeWhen_Options.lua to create some tables to allow reverse-lookups
-	-- of equavalancies for things like the suggestion list.
-	TMW.OldBE = CopyTable(TMW.BE)
-	
-	for category, b in pairs(TMW.OldBE) do
-		for equiv, str in pairs(b) do
-
-			-- turn all IDs prefixed with "_" into their localized name.
-			-- When defining equavalancies, dont put a _ on every single one,
-			-- but do use it for spells that do not have any other spells with the same name and different effects.
-			
-			while strfind(str, "_") do
-				local idWithUnderscore = strmatch(str, "_%d+")
-				local idWithoutUnderscore = tonumber(strmatch(str, "_(%d+)"))
-				
-				if idWithUnderscore then
-					local name, _, tex = GetSpellInfo(idWithoutUnderscore)
-					
-					-- name will be nil if the ID isn't a valid spell (possibly the spell was removed in a patch).
-					if name then
-						-- this will insert the spell name into the table of spells for capitalization restoration.
-						TMW:LowerNames(name) 
-						
-						-- replace the underscored spellID with the name substitution
-						str = gsub(str, idWithUnderscore, name, 1)
-						
-						-- map the spell's name and ID to its texture for the spell texture cache
-						TMW.SpellTexturesMetaIndex[idWithoutUnderscore] = tex
-						TMW.SpellTexturesMetaIndex[TMW.strlowerCache[name]] = tex
-
-					else
-						
-						if clientVersion >= addonVersion then -- only warn for newer clients using older versions
-							TMW:Debug("Invalid spellID found: %s (%s - %s)!",
-							idWithoutUnderscore, category, equiv)
-						end
-						
-						-- substitute it back in without the underscore to prevent recusion
-						str = gsub(str, idWithUnderscore, idWithoutUnderscore, 1)
-					end
-				end
-			end
-			local t = TMW:SplitNames(str)
-			for _, spell in pairs(t) do
-				if type(spell) == "number" and not GetSpellInfo(spell) then
-					TMW:Debug("Invalid spellID found: %s (%s - %s)!",
-						spell, category, equiv)
-				end
-			end
-
-			TMW.BE[category][equiv] = str
-		end
-	end
-end
-
 
 
 
@@ -1180,7 +1042,7 @@ function TMW:PLAYER_LOGIN()
 		return
 
 	-- if the file IS required for gross functionality
-	elseif not TMW.Classes or not TMW.Classes.IconDataProcessor or not TMW.Classes.IconDataProcessor.ProcessorsByName.SHOWN then
+	elseif not TMW.BE then
 		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
@@ -1193,7 +1055,7 @@ function TMW:PLAYER_LOGIN()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/IconDataProcessors.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Spells/Equivalencies.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 		return
 
 	-- if the file is NOT required for gross functionality
@@ -1214,7 +1076,6 @@ function TMW:PLAYER_LOGIN()
 
 
 	TMW:UpdateTalentTextureCache()
-	TMW:ProcessEquivalencies()
 
 
 	

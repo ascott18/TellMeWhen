@@ -323,7 +323,7 @@
 								self:SetTexts(TMW.L["CODESNIPPET_AUTORUN"], TMW.L["CODESNIPPET_AUTORUN_DESC"])
 								self:SetSetting("Enabled")
 
-								self:ConstrainLabel(self:GetParent().Delete)
+								self:ConstrainLabel(self, "RIGHT", 120, 0)
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

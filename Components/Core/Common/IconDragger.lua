@@ -125,7 +125,7 @@ function IconDragger:CompleteDrag(script, icon)
 			IconDragger.desticon = nil
 			IconDragger.destFrame = icon -- not actually an icon. just some frame.
 			local cursorX, cursorY = GetCursorPosition()
-			local UIScale = UIParent:GetScale()
+			local UIScale = 1 -- UIParent:GetScale()
 			Dropdown:SetDropdownAnchor(nil, UIParent, "BOTTOMLEFT", cursorX/UIScale, cursorY/UIScale)
 		end
 

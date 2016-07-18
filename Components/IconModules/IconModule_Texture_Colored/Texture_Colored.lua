@@ -36,7 +36,7 @@ TMW:RegisterDatabaseDefaults({
 
 if LMB then
 	Texture_Colored:RegisterConfigPanel_ConstructorFunc(9, "TellMeWhen_Main_Texture_Colored", function(self)
-		self:SetTitle("Masque")
+		self:SetTitle(L["DOMAIN_PROFILE"] .. ": " .. "Masque")
 		
 		self:BuildSimpleCheckSettingFrame({
 			numPerRow = 1,

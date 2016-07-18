@@ -469,7 +469,6 @@ ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	name = function(editbox)
 		editbox:SetTexts(L["GLYPHTOCHECK"], L["CNDT_ONLYFIRST"])
 	end,
-	useSUG = "glyphs",
 	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = "DEPRECATED",

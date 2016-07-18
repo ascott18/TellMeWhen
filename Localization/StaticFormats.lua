@@ -19,6 +19,8 @@ end
 -- Blizzard has a typo in the English string ("Ecplise")
 L["ECLIPSE"] = (locale == "enUS" or locale == "enGB") and "Eclipse" or ECLIPSE
 
+L["DOMAIN_GLOBAL_NC"] = L["DOMAIN_GLOBAL"]:gsub("|cff00c300", ""):gsub("|r", "")
+
 L["HELP_FIRSTUCD"]                      = L["HELP_FIRSTUCD"]                        :format(L["ICONMENU_CHOOSENAME3"], GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618))
 L["HELP_MISSINGDURS"]                   = L["HELP_MISSINGDURS"]                     :format("%s", GetSpellInfo(1766)) -- keep the first "%s" as "%s"
 L["ICONMENU_IGNORENOMANA_DESC"]         = L["ICONMENU_IGNORENOMANA_DESC"]           :format(Spell(85288), Spell(5308))
