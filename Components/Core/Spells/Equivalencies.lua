@@ -92,7 +92,7 @@ TMW.BE = {
 			 115268, -- Mesmerize
 			 -51514, -- Hex (also 211004, 210873, 211015, 211010)
 			  20066, -- Repentance
-			  88625, -- Holy Word: Chastise
+			 200196, -- Holy Word: Chastise
 			  82691, -- Ring of Frost
 			   1776, -- Gouge
 			  -6358, -- Seduction
@@ -101,7 +101,7 @@ TMW.BE = {
 			  31661, -- Dragon's Breath
 			 107079, -- Quaking Palm
 			 198909, -- Song of Chi-ji (mistweaver monk talent)
-			 203126, -- Maim (with blood trauma deral pvp talent)
+			 203126, -- Maim (with blood trauma feral pvp talent)
 		},
 		Disoriented = {
 			  -2094, -- Blind
@@ -127,30 +127,23 @@ TMW.BE = {
 		Rooted = {
 			   -339, -- Entangling Roots
 			   -122, -- Frost Nova
-			  16979, -- Wild Charge
 			  33395, -- Freeze (frost mage water elemental)
-			  45334, -- Immobilized
+			  45334, -- Immobilized (wild charge, bear form)
 			  53148, -- Charge
 			  96294, -- Chains of Ice
-			 -19387, -- Entrapment
 			 -64695, -- Earthgrab
 			  91807, -- Shambling Rush (DK ghoul)
 			 102359, -- Mass Entanglement
 			 105771, -- Charge
-			 107566, -- Staggering Shout
-			-114404, -- Void Tendril's Grasp
 			 116706, -- Disable
-			-128405, -- Narrow Escape
 			 157997, -- Ice Nova (frost mage talent)
 			 162480, -- Steel Trap (hunter talent)
-			 170996, -- Debilitate
 			 190927, -- harpoon (survival hunter)
-			 195645, -- Wing Clip
 			 199042, -- Thunderstruck (Warrior PVP)
 			 200108, -- Ranger's Net (Hunter talent)
 			 201158, -- Super Sticky Tar (Expert Trapper, Hunter talent, Tar Trap effect)
 			 204085, -- Deathchill (DK PVP)
-			 212638, -- tracker's net (hunter PvPSpellsq)
+			 212638, -- tracker's net (hunter PvP )
 			 228600, -- glacial spike (frost mage talent)
 		},
 		Slowed = {
@@ -169,6 +162,7 @@ TMW.BE = {
 			  35346, -- Warp Time
 			  44614, -- Flurry
 			  45524, -- Chains of Ice
+			  50259, -- Dazed (Wild Charge, druid talent, cat form)
 			  50433, -- Ankle Crack
 			  51490, -- Thunderstorm
 			  61391, -- Typhoon
@@ -193,6 +187,7 @@ TMW.BE = {
 			 191397, -- Bestial Cunning
 			 194279, -- Caltrops
 			 194858, -- Dragonsfire Grenade
+			 195645, -- Wing Clip
 			 196723, -- Dizzying Kicks
 			-196840, -- Frost Shock
 			 198813, -- Vengeful Retreat
@@ -222,16 +217,15 @@ TMW.BE = {
 			   -853, -- Hammer of Justice
 			   5211, -- Mighty Bash
 			  -7922, -- Warbringer
-			  19577, -- Intimidation
 			  24394, -- Intimidation
-			  46968, -- Shockwave
 			  64044, -- Psychic Horror
 			  91797, -- Monstrous Blow
 			 -20549, -- War Stomp
+			  22703, -- Summon Infernal
 			 -30283, -- Shadowfury
 			 -89766, -- Axe Toss
 			 -91800, -- Gnaw
-			 108194, -- Asphyxiate
+			 108194, -- Asphyxiate (death knight, talent for unholy)
 			 117526, -- Binding Shot
 			 118345, -- Pulverize
 			 118905, -- Static Charge
@@ -245,15 +239,15 @@ TMW.BE = {
 			 199804, -- Between the Eyes
 			 200166, -- Metamorphosis
 			 200200, -- Holy Word: Chastise
-		     203123, -- Maim
+			 203123, -- Maim
+			 204399, -- Earthfury (enhancement shaman pvp talent)
 			 205630, -- Illidan's Grasp (demon hunter vengeance pvp talent - primary effect)
 			 208618, -- Illidan's Grasp (demon hunter vengeance pvp talent - throw effect)
 			 207165, -- Abomination's Might
 			 207171, -- Winter is Coming
 			 211881, -- Fel Eruption
-			 221562, -- Asphyxiate
+			 221562, -- Asphyxiate (death knight, baseline for blood)
 			 226943, -- Mind Bomb
-			 204399, -- Earthfury (enhancement shaman pvp talent)
 		},
 	},
 	buffs = {

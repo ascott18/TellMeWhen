@@ -4,11 +4,6 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
 ===v8.0.0===
-====IMPORTANT: Legion Beta====
-* Welcome to TellMeWhen, Legion edition!
-* Known issues:
-** Buff/Debuff equivalancies have not yet been updated.
-
 ====IMPORTANT: Breaking Changes====
 * There is a small chance you will need to reconfigure the spec and tree settings on all your groups.
 * Most of your old color settings were lost.
@@ -17,6 +12,7 @@ TMW.CHANGELOG = [==[
 ** Try replacing usages of the Expand sub-metas setting with Group Controller meta icons if you experience issues.
 
 * Each of the pairs of Opacity and Shown Icon Sorting methods have been merged.
+* You can no longer resize the Icon Editor by default. You can turn this back on in the General options.
 
 ====General====
 * All TellMeWhen configuration is now done in the icon editor.
