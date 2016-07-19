@@ -866,12 +866,12 @@ function Icon.Setup(icon)
 		end
 	end
 
+	-- Store these on the icon for convenience
+	icon.typeData = typeData
+	icon.viewData = viewData
+
 	
 	if icon.Enabled or not TMW.Locked then
-
-		-- Store these on the icon for convenience
-		icon.typeData = typeData
-		icon.viewData = viewData
 		
 
 		-- Associate the icon's GUID with the icon in a global context

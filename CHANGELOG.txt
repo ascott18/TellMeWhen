@@ -1,3 +1,11 @@
+===v8.0.2===
+====Bug Fixes====
+* Fixed attempt to index field 'typeData' (a nil value) error
+
+===v8.0.1===
+====Bug Fixes====
+* Fixed Maelstrom condition - correct maximum is 150.
+
 ===v8.0.0===
 ====Breaking Changes====
 * There is a small chance you will need to reconfigure the spec settings on all your groups.
