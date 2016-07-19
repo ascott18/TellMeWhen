@@ -503,7 +503,7 @@ TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 ---------------------------------
 
 
-if pclass == "MAGE" then
+if pclass == "DRUID" then
 	TMW.COMMON.CurrentClassTotems = {
 		name = GetSpellInfo(145205),
 		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(145205)),
@@ -513,7 +513,7 @@ if pclass == "MAGE" then
 			texture = GetSpellTexture(145205)
 		}
 	}
-elseif pclass == "DRUID" then
+elseif pclass == "MAGE" then
 	TMW.COMMON.CurrentClassTotems = {
 		name = GetSpellInfo(116011),
 		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(116011)),
