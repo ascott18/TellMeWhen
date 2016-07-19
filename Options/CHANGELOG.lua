@@ -5,7 +5,7 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = [==[
 ===v8.0.0===
 ====Breaking Changes====
-* There is a small chance you will need to reconfigure the spec and tree settings on all your groups.
+* There is a small chance you will need to reconfigure the spec settings on all your groups.
 * Most of your old color settings were lost.
 
 * You can no longer scale the Icon Editor by default. You can turn this back on in the General options.

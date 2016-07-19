@@ -247,7 +247,7 @@ offset = pclass == "SHAMAN" and S or 0
 ConditionCategory:RegisterCondition(93 - offset, "MAELSTROM", {
 	text = MAELSTROM_POWER,
 	min = 0,
-	max = 100,
+	max = 150,
 	icon = "Interface\\Icons\\spell_shaman_maelstromweapon",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_MAELSTROM),
