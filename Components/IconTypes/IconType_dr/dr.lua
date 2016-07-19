@@ -338,9 +338,9 @@ do	-- CheckCategories
 		local append = ""
 
 		for i, IDorName in ipairs(NameArray) do
-			for category, str in pairs(TMW.BE.dr) do
+			for category, tbl in pairs(TMW.BE.dr) do
 
-				local Names = TMW:GetSpells(str)
+				local Names = TMW:GetSpells(category)
 
 				-- Check if the spell being checked by the icon is in the DR category that we are looking at.
 				if Names.Hash[IDorName] or Names.StringHash[IDorName] then

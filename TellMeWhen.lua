@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80037 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80038 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80037 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -2791,6 +2791,15 @@ end
 
 function TMW:OnProfile(event, arg2, arg3)
 	TMW:UpgradeProfile()
+
+	-- Clear out the state since state tables are saved in an icon's attributes.
+	-- When we change profiles, the defaults get cleared out, which means that we 
+	-- no longer have a complete state table stored in some icons' attributes.
+	for group in TMW:InGroups() do
+		for icon in group:InIcons() do
+			icon:SetInfo("state", 0)
+		end
+	end
 
 	TMW:Update()
 	

@@ -71,7 +71,7 @@
 
 						TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 							-- Warnings for missing durations and first-time instructions for duration syntax
-							if icon.typeData.DurationSyntax and icon:IsBeingEdited() == "MAIN" then
+							if icon.typeData and icon.typeData.DurationSyntax and icon:IsBeingEdited() == "MAIN" then
 								TMW.HELP:Show{
 									code = "ICON_DURS_FIRSTSEE",
 									icon = nil,
@@ -109,7 +109,7 @@
 						GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
 						GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 
-						TMW.IE:ToolitpAddSpellBreakdown(TMW.IE:GetRealNames(self:GetText()))
+						TMW.IE:TooltipAddSpellBreakdown(TMW.IE:GetRealNames(self:GetText()))
 
 						GameTooltip:Show()
 					</OnEnter>
@@ -151,7 +151,8 @@
 				function self:SetTexts(title, text)
 					self:SetTitle(title)
 					self.Name:SetLabel(title)
-					self.Name:SetTooltip(title, text)
+					self.Name.__title = title
+					self.Name.__text = text
 				end
 
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)

@@ -452,10 +452,10 @@ function TMW:EquivToTable(name)
 	-- Iterate over all of TMW.BE's sub-categories ('buffs', 'debuffs', 'casts', etc)
 	for k, v in pairs(TMW.BE) do
 		-- Iterate over each equivalency in the category
-		for equiv, str in pairs(v) do
+		for equiv, t in pairs(v) do
 			if strlowerCache[equiv] == name then
 				-- We found a matching equivalency, so stop searching.
-				tbl = str
+				tbl = t
 				break
 			end
 		end

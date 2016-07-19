@@ -408,29 +408,36 @@ TMW.BE = {
 	},
 	casts = {
 		Heals = {
-			  33076, -- Prayer of Mending
-			    596, -- Prayer of Healing
-			   8004, -- Healing Surge
-			   2060, -- Heal
-			    740, -- Tranquility
-			 124682, -- Enveloping Mist
-			  73920, -- Healing Rain
-			   5185, -- Healing Touch
-			 116670, -- Vivify
-			  82326, -- Holy Light
-			  32546, -- Binding Heal
-			   1064, -- Chain Heal
-			   8936, -- Regrowth
-			  64843, -- Divine Hymn
-			  19750, -- Flash of Light
-			 116694, -- Effuse
-			  85222, -- Light of Dawn
 			   2061, -- Flash Heal
-			 114163, -- Eternal Flame
-			 115175, -- Soothing Mist
-			 120517, -- Halo
+			    596, -- Prayer of Healing
+			    740, -- Tranquility
+			   1064, -- Chain Heal
+			   2060, -- Heal
+			   5185, -- Healing Touch
+			   8004, -- Healing Surge
+			   8936, -- Regrowth
+			  19750, -- Flash of Light
+			  32546, -- Binding Heal
+			  33076, -- Prayer of Mending
 			  48438, -- Wild Growth
+			  64843, -- Divine Hymn
+			  73920, -- Healing Rain
 			  77472, -- Healing Wave
+			  82326, -- Holy Light
+			 114163, -- Eternal Flame
+			 116670, -- Vivify
+			 116694, -- Effuse
+			 120517, -- Halo
+			 124682, -- Enveloping Mist
+			 152118, -- Clarity of Will
+			 186263, -- Shadow Mend
+			 191837, -- Esssence Font
+			 194509, -- Power Word: Radiance
+			 200652, -- Tyr's Deliverance
+			 204065, -- Shadow Covenant
+			 205406, -- Sheilun's Gift
+			 209525, -- Soothing Mist
+			 207778, -- Gift of the Queen
 		},
 		PvPSpells = {
 			    339, -- Entangling Roots
@@ -507,14 +514,17 @@ local function ProcessEquivalencies()
 						TMW.SpellTexturesMetaIndex[realSpellID] = tex
 						TMW.SpellTexturesMetaIndex[TMW.strlowerCache[name]] = tex
 
+						tbl[i] = name
 					else
 						
 						if clientVersion >= addonVersion then -- only warn for newer clients using older versions
 							TMW:Debug("Invalid spellID found: %s (%s - %s)!",
 							realSpellID, category, equiv)
 						end
+
+						tbl[i] = realSpellID
 					end
-						
+				else
 					tbl[i] = realSpellID
 				end
 			end

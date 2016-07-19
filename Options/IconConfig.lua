@@ -355,7 +355,7 @@ function IE:GetRealNames(Name)
 	return outTable
 end
 
-function IE:ToolitpAddSpellBreakdown(tbl)
+function IE:TooltipAddSpellBreakdown(tbl)
 	if #tbl <= 0 then
 		return
 	end
