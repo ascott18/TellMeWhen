@@ -1,6 +1,10 @@
+===v8.0.3===
+====Bug Fixes====
+* Fixed creation of new profiles
+
 ===v8.0.2===
 ====Bug Fixes====
-* Fixed attempt to index field 'typeData' (a nil value) error
+* Fixed: TellMeWhen\Components\Core\Icon.lua:491 attempt to index field 'typeData' (a nil value)
 
 ===v8.0.1===
 ====Bug Fixes====

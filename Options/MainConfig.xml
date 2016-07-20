@@ -375,7 +375,7 @@
 					<OnEnterPressed>
 						local name = self:GetText():trim()
 						if name ~= "" then
-							TMW.db:SetProfile()
+							TMW.db:SetProfile(name)
 							self:SetText("")
 						end
 					</OnEnterPressed>

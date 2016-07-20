@@ -3,9 +3,13 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.0.3===
+====Bug Fixes====
+* Fixed creation of new profiles
+
 ===v8.0.2===
 ====Bug Fixes====
-* Fixed attempt to index field 'typeData' (a nil value) error
+* Fixed: TellMeWhenComponentsCoreIcon.lua:491 attempt to index field 'typeData' (a nil value)
 
 ===v8.0.1===
 ====Bug Fixes====
