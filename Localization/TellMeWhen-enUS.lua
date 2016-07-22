@@ -161,6 +161,7 @@ L["LOCKED"] = "Locked"
 L["LOCKED2"] = "Position Locked."
 L["RESIZE"] = "Resize"
 L["RESIZE_TOOLTIP"] = [[|cff7fffffClick-and-drag|r to resize]] -- keep this like this, used by the icon editor
+L["RESIZE_TOOLTIP_IEEXTRA"] = [[Enable scaling in the General options.]]
 L["RESIZE_TOOLTIP_SCALEXY"] = [[|cff7fffffClick-and-drag|r to scale
 |cff7fffffHold Control|r to invert scale axis]]
 L["RESIZE_TOOLTIP_SCALEY_SIZEX"] = [[|cff7fffffClick-and-drag|r to scale]]

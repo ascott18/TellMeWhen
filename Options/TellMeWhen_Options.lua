@@ -296,6 +296,11 @@ function IE:OnInitialize()
 
 	-- Create resizer
 	self.resizer = TMW.Classes.Resizer_Generic:New(self)
+
+	TMW:TT(self.resizer.resizeButton, self.resizer.tooltipTitle, function()
+		return L["RESIZE_TOOLTIP"] .. (not TMW.IE.db.global.ScaleIE and "\r\n\r\n" .. L["RESIZE_TOOLTIP_IEEXTRA"] or "")
+	end, 1, 1)
+	self.resizer.tooltipText = L["RESIZE_TOOLTIP"] .. ("\r\n\r\n" .. L["RESIZE_TOOLTIP_IEEXTRA"])
 	self.resizer:Show()
 	self.resizer.scale_min = 0.4
 	self.resizer.y_min = 400
