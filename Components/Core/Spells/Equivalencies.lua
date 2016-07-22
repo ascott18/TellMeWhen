@@ -27,6 +27,11 @@ local _, pclass = UnitClass("Player")
 -- NEGATIVE SPELLIDS WILL BE REPLACED BY THEIR SPELL NAME
 ---------------------------------------------------------
 
+--[[ TODO: add the following:
+	Tremble before me
+	heart strike's snare
+	
+	]]
 TMW.BE = {
 	debuffs = {
 		ReducedHealing = {
