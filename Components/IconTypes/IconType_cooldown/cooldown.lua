@@ -25,6 +25,7 @@ local pairs, wipe, strlower =
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
 local GetSpellTexture = TMW.GetSpellTexture
+local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local _, pclass = UnitClass("Player")
 
@@ -171,6 +172,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.Spells.Array, icon.Spells.StringArray
 
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
+	local runeCD = IgnoreRunes and GetRuneCooldownDuration()
 
 	local usableFound, unusableFound
 
@@ -195,11 +197,11 @@ local function SpellCooldown_OnUpdate(icon, time)
 		end
 		
 		if duration then
-			if IgnoreRunes and duration == 10 then
+			if IgnoreRunes and duration == runeCD then
 				-- DK abilities that are on cooldown because of runes are always reported
-				-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
-				-- We used to have to make sure the ability being checked wasn't Mind Freeze before doing this,
-				-- but Mind Freeze has a 15 second cooldown now (instead of 10), so we don't have to worry.
+				-- as having a cooldown duration equal to the current rune cooldown duration.
+				-- We use this fact to filter out rune cooldowns. GetSpellCooldown reports with a precision of 
+				-- 3 digits past the decimal, so we need to trim off extra trailing digits from GetRuneCooldown.
 				start, duration = 0, 0
 			end
 

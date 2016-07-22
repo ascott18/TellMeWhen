@@ -23,6 +23,7 @@ local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
+local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 
 local Type = TMW.Classes.IconType:New("reactive")
@@ -139,6 +140,8 @@ local function Reactive_OnUpdate(icon, time)
 	local inrange, nomana, start, duration, CD, usable, charges, maxCharges, stack, start_charge, duration_charge
 
 	local numChecked = 1
+	local runeCD = IgnoreRunes and GetRuneCooldownDuration()
+	
 
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
@@ -181,7 +184,7 @@ local function Reactive_OnUpdate(icon, time)
 			end
 
 			if CooldownCheck then
-				if IgnoreRunes and duration == 10 then
+				if IgnoreRunes and duration == runeCD then
 					-- DK abilities that are on cooldown because of runes are always reported
 					-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
 					-- We used to have to make sure the ability being checked wasn't Mind Freeze before doing this,
@@ -225,7 +228,7 @@ local function Reactive_OnUpdate(icon, time)
 			stack = GetSpellCount(NameFirst)
 		end
 		
-		if IgnoreRunes and duration == 10 then
+		if IgnoreRunes and duration == runeCD then
 			start, duration = 0, 0
 		end
 
