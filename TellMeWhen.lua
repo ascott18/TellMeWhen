@@ -30,7 +30,7 @@ TELLMEWHEN_VERSIONNUMBER = 81001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS AL
 
 TELLMEWHEN_FORCECHANGELOG = 80039 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 81000 or TELLMEWHEN_VERSIONNUMBER < 80000 then
+if TELLMEWHEN_VERSIONNUMBER > 82000 or TELLMEWHEN_VERSIONNUMBER < 81000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
 end
