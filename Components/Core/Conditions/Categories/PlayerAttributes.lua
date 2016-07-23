@@ -198,23 +198,29 @@ ConditionCategory:RegisterCondition(6.2, "LASTCAST", {
 		if not module then
 			module = CNDT:NewModule("LASTCAST", "AceEvent-3.0")
 
-			module:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", function(event, unit, spellName, _, _, spellID)
-				if unit == "player" then
+			local pGUID = UnitGUID("player")
+			assert(pGUID, "pGUID was null when func string was generated!")
+
+			module:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED",
+			function(_, _, e, _, sourceGuid, _, _, _, _, _, _, _, spellID, spellName)
+				if e == "SPELL_CAST_SUCCESS" and sourceGuid == pGUID then
 					Env.LastPlayerCastName = strlower(spellName)
-					Env.LastPlayerCastID = strlower(spellName)
+					Env.LastPlayerCastID = spellID
 				end
 			end)
 		end
 
 		if c.Level == 1 then
-			return [[LastPlayerCastName ~= LOWER(c.NameString) and LastPlayerCastID ~= c.Name]] 
+			return [[LastPlayerCastName ~= LOWER(c.NameFirst) and LastPlayerCastID ~= c.NameFirst]] 
 		end
-		return [[LastPlayerCastName == LOWER(c.NameString) or LastPlayerCastID == c.Name]] 
+		return [[LastPlayerCastName == LOWER(c.NameFirst) or LastPlayerCastID == c.NameFirst]] 
 	end,
 	events = function(ConditionObject, c)
+		local pGUID = UnitGUID("player")
+		assert(pGUID, "pGUID was null when event string was generated!")
 		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_SUCCEEDED", "player")
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit("player")),
+			ConditionObject:GenerateNormalEventString("COMBAT_LOG_EVENT_UNFILTERED", nil, "SPELL_CAST_SUCCESS", nil, pGUID)
 	end,
 })
 
