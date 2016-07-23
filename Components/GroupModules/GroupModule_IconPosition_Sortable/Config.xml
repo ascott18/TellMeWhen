@@ -61,7 +61,7 @@
 			<Layer level="OVERLAY">
 				<FontString parentKey="Header" inherits="GameFontHighlightSmall" justifyH="CENTER">
 					<Anchors>
-						<Anchor point="TOPRIGHT" relativePoint="TOPLEFT" x="6" y="0"/>
+						<Anchor point="BOTTOM" relativePoint="TOP" x="0" y="3"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -70,7 +70,7 @@
 
 
 	<Frame name="TellMeWhen_GM_IconPosition_Sortable_Dir" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="60"/>
+		<Size y="73"/>
 
 		<KeyValues>
 			<KeyValue key="tmwClass" type="string" value="TellMeWhen_GM_IconPosition_Sortable_Dir"/>
@@ -79,7 +79,8 @@
 		<Frames>
 			<Frame parentKey="Primary" inherits="TellMeWhen_ArrowButtonSet_Template">
 				<Anchors>
-					<Anchor point="RIGHT" relativePoint="CENTER" x="-30" />
+					<Anchor point="TOP" y="-18" />
+					<Anchor point="LEFT" relativePoint="LEFT" x="25" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -91,7 +92,7 @@
 			</Frame>
 			<Frame parentKey="Secondary" inherits="TellMeWhen_ArrowButtonSet_Template">
 				<Anchors>
-					<Anchor point="RIGHT" relativePoint="RIGHT" x="-30" />
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.Primary" x="30" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -101,6 +102,22 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
+
+			<CheckButton parentKey="ShrinkGroup" inherits="TellMeWhen_CheckTemplate">
+				<Anchors>
+					<Anchor point="TOP" y="-12" />
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.Secondary" x="25" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_SHRINKGROUP"], TMW.L["ICONMENU_SHRINKGROUP_DESC"])
+						self:SetSetting("ShrinkGroup")
+						self:ConstrainLabel(self:GetParent(), "RIGHT")
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
 		</Frames>
 		<Scripts>
 			<OnLoad>

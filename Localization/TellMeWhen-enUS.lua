@@ -1075,6 +1075,13 @@ L["DOWN"] = "Down"
 L["LEFT"] = "Left"
 L["RIGHT"] = "Right"
 
+L["ICONMENU_SHRINKGROUP"] = "Shrink Group"
+L["ICONMENU_SHRINKGROUP_DESC"] = [[If this setting is enabled, the bounding box of the group will be dynamically adjusted so that it will exactly fit all of the visible icons within.
+
+The origin of the group's layout direction will form one corner of the group, and the edges of the icon furthest from that point will form the other.
+
+When used in conjunction with both the Shown icon sorting rule and fine-tuned Position settings above, you can create a group that is dynamically centered.]]
+
 L["LAYOUTDIRECTION_PRIMARY_DESC"] = "Make the primary layout direction of icons expand in the %s direction."
 L["LAYOUTDIRECTION_SECONDARY_DESC"] = "Make successive rows/columns of icons expand in the %s direction."
 

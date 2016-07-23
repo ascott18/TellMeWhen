@@ -3,7 +3,8 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
-===v8.0.4===
+===v8.1.0===
+* New group layout option: Shrink Group. For dynamically centering groups.
 * Added new Notification triggers for stacks increased/decreased
 
 ====Bug Fixes====

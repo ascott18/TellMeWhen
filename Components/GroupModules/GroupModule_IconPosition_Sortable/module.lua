@@ -24,6 +24,7 @@ local IconPosition_Sortable = TMW:NewClass("GroupModule_IconPosition_Sortable", 
 
 IconPosition_Sortable:RegisterGroupDefaults{
 	LayoutDirection = 1,
+	ShrinkGroup = false,
 	
 	SortPriorities = {
 		[1] = {
@@ -173,7 +174,6 @@ IconPosition_Sortable:RegisterIconSortPreset(L["UIPANEL_GROUP_QUICKSORT_DEFAULT"
 
 
 function IconPosition_Sortable:OnNewInstance_IconPosition_Sortable()
-
 	self.SortedIcons = {}
 	self.SortedIconsManager = TMW.Classes.UpdateTableManager:New()
 	self.SortedIconsManager:UpdateTable_Set(self.SortedIcons)
@@ -182,7 +182,8 @@ end
 function IconPosition_Sortable:OnEnable()
 	local group = self.group
 	
-	if group.SortPriorities[1].Method ~= "id" and group.numIcons > 1 then
+	self.ShrinkGroup = group.ShrinkGroup
+	if (self.ShrinkGroup or group.SortPriorities[1].Method ~= "id") and group.numIcons > 1 then
 		TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", self)
 		TMW:RegisterCallback("TMW_ICON_UPDATED", self)
 	end
@@ -256,7 +257,9 @@ function IconPosition_Sortable:Icon_SetPoint(icon, positionID)
 	position.x, position.y = x, y
 	
 	icon:ClearAllPoints()
-	icon:SetPoint(position.point, position.relativeTo, position.relativePoint, position.x, position.y)
+	icon:SetPoint(point, group, point, x, y)
+
+	return x, y
 end
 
 function IconPosition_Sortable.IconSorter(iconA, iconB)
@@ -293,9 +296,22 @@ function IconPosition_Sortable:PositionIcons()
 	local SortedIcons = self.SortedIcons
 	sort(SortedIcons, self.IconSorter)
 
+	local maxX, maxY = 0, 0
+	local ShrinkGroup = self.ShrinkGroup
 	for positionID = 1, #SortedIcons do
 		local icon = SortedIcons[positionID]
-		self:Icon_SetPoint(icon, positionID)
+		local x, y = self:Icon_SetPoint(icon, positionID)
+		if ShrinkGroup and icon.attributes.shown and icon.attributes.realAlpha > 0 then
+			maxX = max(maxX, abs(x))
+			maxY = max(maxY, abs(y))
+		end
+	end
+
+	if ShrinkGroup then
+		local group = self.group
+		local sizeX, sizeY = group.viewData:Icon_GetSize(group[1])
+
+		group:SetSize(maxX + sizeX, maxY + sizeY)
 	end
 end
 
