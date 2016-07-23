@@ -4,6 +4,8 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
 ===v8.0.4===
+* Added new Notification triggers for stacks increased/decreased
+
 ====Bug Fixes====
 * Fixed the behavior of the Ignore Runes setting.
 * Fixed Soul Shards condition - correct maximum is 6.

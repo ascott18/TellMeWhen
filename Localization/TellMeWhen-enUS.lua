@@ -2036,6 +2036,8 @@ L["SOUND_EVENT_ONSPELL"] = "On Spell Changed"
 L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that that the icon is displaying information for has changed.]]
 
 L["SOUND_EVENT_ONSTACK"] = "On Stacks Changed"
+L["SOUND_EVENT_ONSTACKINC"] = "On Stacks Increased"
+L["SOUND_EVENT_ONSTACKDEC"] = "On Stacks Decreased"
 L["SOUND_EVENT_ONSTACK_DESC"] = [[This event triggers when the stacks of whatever the icon is tracking has changed.
 
 This includes the amount of diminishment for %s icons.]]

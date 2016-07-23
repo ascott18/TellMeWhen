@@ -766,11 +766,17 @@ do
 		--GLOBALS: stack, stackText
 		t[#t+1] = [[
 		if attributes.stack ~= stack or attributes.stackText ~= stackText then
+			local old = attributes.stack
 			attributes.stack = stack
 			attributes.stackText = stackText
 
 			if EventHandlersSet.OnStack then
 				icon:QueueEvent("OnStack")
+			end
+			if (not old or (stack and stack > old)) and EventHandlersSet.OnStackIncrease then
+				icon:QueueEvent("OnStackIncrease")
+			elseif (not stack or (old and stack < old)) and EventHandlersSet.OnStackDecrease then
+				icon:QueueEvent("OnStackDecrease")
 			end
 
 			TMW:Fire(STACK.changedEvent, icon, stack, stackText)
@@ -782,6 +788,40 @@ do
 	Processor:RegisterIconEvent(51, "OnStack", {
 		category = L["EVENT_CATEGORY_CHANGED"],
 		text = L["SOUND_EVENT_ONSTACK"],
+		desc = L["SOUND_EVENT_ONSTACK_DESC"],
+		settings = {
+			Operator = true,
+			Value = true,
+			CndtJustPassed = true,
+			PassingCndt = true,
+		},
+		valueName = L["STACKS"],
+		conditionChecker = function(icon, eventSettings)
+			local count = icon.attributes.stack or 0
+			return TMW.CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
+		end,
+	})
+
+	Processor:RegisterIconEvent(51.1, "OnStackIncrease", {
+		category = L["EVENT_CATEGORY_CHANGED"],
+		text = L["SOUND_EVENT_ONSTACKINC"],
+		desc = L["SOUND_EVENT_ONSTACK_DESC"],
+		settings = {
+			Operator = true,
+			Value = true,
+			CndtJustPassed = true,
+			PassingCndt = true,
+		},
+		valueName = L["STACKS"],
+		conditionChecker = function(icon, eventSettings)
+			local count = icon.attributes.stack or 0
+			return TMW.CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
+		end,
+	})
+
+	Processor:RegisterIconEvent(51.2, "OnStackDecrease", {
+		category = L["EVENT_CATEGORY_CHANGED"],
+		text = L["SOUND_EVENT_ONSTACKDEC"],
 		desc = L["SOUND_EVENT_ONSTACK_DESC"],
 		settings = {
 			Operator = true,

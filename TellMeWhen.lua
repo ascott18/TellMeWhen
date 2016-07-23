@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 80404 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 80405 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80039 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -434,7 +434,7 @@ local function linenum(l, includeFile)
 	end
 end
 function TMW.print(...)
-	if TMW.debug or not TMW.Initialized or TELLMEWHEN_VERSION_MINOR == "dev" then
+	if TMW.debug or TELLMEWHEN_VERSION_MINOR == "dev" then
 		local prefix = format("|cffff0000 %s", linenum(3, true)) .. ":|r "
 
 		local func = TMW.debug and TMW.debug.print or _G.print

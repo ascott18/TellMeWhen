@@ -475,7 +475,6 @@ TMW.DS = {
 }
 
 local function ProcessEquivalencies()
-	print("processing")
 	TMW.EquivOriginalLookup = {}
 	TMW.EquivFullIDLookup = {}
 	TMW.EquivFullNameLookup = {}
