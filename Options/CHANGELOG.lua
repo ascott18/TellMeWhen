@@ -11,6 +11,7 @@ TMW.CHANGELOG = [==[
 * Fixed the behavior of the Ignore Runes setting.
 * Fixed Soul Shards condition - correct maximum is 6.
 * Made the Last Ability Used condition not suck.
+* Totem icon configuration should be back to its former glory.
 
 ===v8.0.3===
 ====Bug Fixes====

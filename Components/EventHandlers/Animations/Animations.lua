@@ -50,7 +50,7 @@ Animations:RegisterEventDefaults{
 	Fade	  		= true,
 	Infinite  		= false,
 	AnimColor	  	= "7fff0000",
-	Alpha		= 0.5,
+	Alpha			= 0.5,
 	Image			= "",
 	AnchorTo		= "IconModule_SelfIcon",
 }

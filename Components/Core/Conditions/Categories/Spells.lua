@@ -511,7 +511,7 @@ function Env.TotemHelper(slot, nameString)
 	return duration and duration ~= 0 and (duration - (TMW.time - start)) or 0
 end
 
-for i = 1, 4 do
+for i = 1, 5 do
 	local totem = totemData[i]
 	ConditionCategory:RegisterCondition(20 + i,	 "TOTEM" .. i, {
 		text = totem and totem.name or L["GENERICTOTEM"]:format(i),

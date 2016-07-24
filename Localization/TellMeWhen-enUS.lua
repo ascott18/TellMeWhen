@@ -106,9 +106,9 @@ L["ICONMENU_CTRLGROUP_UNAVAILABLEID_DESC"] = [[Only the first icon in a group (i
 
 
 L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
-L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s:
+L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s.
 
-%s was not found.
+%s was not found. See your chat for more details.
 
 Would you like to restart WoW now?]]
 L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fully use TellMeWhen %s:
@@ -2594,7 +2594,7 @@ Please disable this setting if you want this buff to be tracked properly.]]
 
 L["HELP_COOLDOWN_VOIDBOLT"] = [[|TInterface/Icons/ability_ironmaidens_convulsiveshadows:20|t It looks like you are trying to track the cooldown of %s.
 
-Unfortunately, due to the way that Blizzard made that spell, it won't work.
+Unfortunately, due to the way Blizzard made this spell, it won't work.
 
 |T1386548:20|t Instead, you need to track the cooldown of %s.
 

@@ -593,5 +593,10 @@ else
 			name = L["GENERICTOTEM"]:format(4),
 			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
 		},
+		{
+			hasVariableNames = true,
+			name = L["GENERICTOTEM"]:format(5),
+			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+		},
 	}
 end

@@ -59,17 +59,18 @@ Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 Type:RegisterIconDefaults{
 	-- Bitfield for the totem slots being tracked by the icon.
-	TotemSlots				= 0xF, --(1111)
+	-- I added another F to make it 8 slots so that additional slots are checked by default when they're added.
+	-- Legion added a 5th slot.
+	TotemSlots				= 0xFF, --(11111)
 }
 
 local hasNameConfig = false
 local numSlots = 0
-for i = 1, 4 do
+for i = 1, 5 do
 	if totemData[i] then
 		numSlots = numSlots + 1
-		if totemData[i].hasNameConfig then
+		if totemData[i].hasVariableNames then
 			hasNameConfig = true
-			break
 		end
 	end
 end
@@ -79,13 +80,12 @@ if hasNameConfig then
 	})
 end
 
-
 if numSlots > 1 then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_TotemSlots", function(self)
 		self:SetTitle(L["ICONMENU_CHOOSENAME3"])
 
-		local data = { numPerRow = numSlots >= 4 and numSlots/2 or numSlots}
-		for i = 1, 4 do
+		local data = { numPerRow = numSlots >= 4 and 2 or numSlots}
+		for i = 1, 5 do
 			if totemData[i] then
 				tinsert(data, function(check)
 					check:SetTexts(totemData[i].name, nil)
@@ -123,7 +123,7 @@ local function Totem_OnUpdate(icon, time)
 	
 	-- Be careful here. Slots that are explicitly disabled by the user are set false.
 	-- Slots that are disabled internally are set nil (which could change table length).
-	for iSlot = 1, 4 do
+	for iSlot = 1, 5 do
 		if Slots[iSlot] then
 			local _, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
 
@@ -154,7 +154,7 @@ function Type:Setup(icon)
 
 	-- Put the enabled slots into a table so we don't have to do bitmagic in the OnUpdate function.
 	icon.Slots = wipe(icon.Slots or {})
-	for i=1, 4 do
+	for i=1, 5 do
 		local settingBit = bit.lshift(1, i - 1)
 
 		if totemData[i] then
