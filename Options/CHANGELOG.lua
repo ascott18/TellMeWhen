@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.1.1===
+====Bug Fixes====
+* IconType_cooldowncooldown.lua:295: attempt to index field 'HELP' (a nil value)
+
 ===v8.1.0===
 * New group layout option: Shrink Group. For dynamically centering groups.
 * Added new Notification triggers for stacks increased/decreased

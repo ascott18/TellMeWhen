@@ -1,3 +1,7 @@
+===v8.1.1===
+====Bug Fixes====
+* IconType_cooldown\cooldown.lua:295: attempt to index field 'HELP' (a nil value)
+
 ===v8.1.0===
 * New group layout option: Shrink Group. For dynamically centering groups.
 * Added new Notification triggers for stacks increased/decreased

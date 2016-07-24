@@ -292,7 +292,7 @@ function Type:Setup(icon)
 		icon.IgnoreRunes =  nil
 	end
 	
-	TMW.HELP:Hide("ICONTYPE_COOLDOWN_VOIDBOLT")
+	if TMW.HELP then TMW.HELP:Hide("ICONTYPE_COOLDOWN_VOIDBOLT") end
 	if icon.Spells.FirstString == strlower(GetSpellInfo(75)) and not icon.Spells.Array[2] then
 		-- Auto shot needs special handling - it isn't a regular cooldown, so it gets its own update function.
 		icon:SetInfo("texture", GetSpellTexture(75))
