@@ -75,7 +75,7 @@ L["NOGROUPS_DIALOG_BODY"] = [[Your current TellMeWhen configuration and/or playe
 If you would like to change the settings of an existing group or create a new group, open TellMeWhen's group options by typing '/tmw options' or click the button below.
 
 Type '/tmw' to leave configuration mode.]]
-L["MAINOPTIONS_SHOW"] = "Group Options"
+L["MAINOPTIONS_SHOW"] = "Show Main Options"
 
 L["GUIDCONFLICT_DESC_PART1"] = [[TellMeWhen has detected that the following things have the same globally-unique identifier (GUID). This can cause quite a few issues if you want to reference either one from another icon or group (E.g. making one the target of a meta icon).
 

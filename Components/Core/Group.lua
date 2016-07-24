@@ -72,6 +72,7 @@ do	-- TMW.CNDT implementation
 	
 	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		tab = TMW.IE:RegisterTab("GROUP", "CNDTGROUP", "Conditions", 15)
+		tab:SetText(L["GROUPCONDITIONS"])
 		tab:SetHistorySet(TMW.C.HistorySet:GetHistorySet("GROUP"))
 		
 		tab:HookScript("OnClick", function()

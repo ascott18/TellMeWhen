@@ -776,6 +776,8 @@ function IE:Load(isRefresh)
 	IE:SetHeight(IE.db.global.EditorHeight)
 
 	TMW:Fire("TMW_CONFIG_LOADED")
+
+	IE:ResizeTabs()
 end
 
 
@@ -3508,6 +3510,7 @@ function IE:ResizeTabs()
 
 	-- Next, figure out how much room we we will have for the secondary tabs.
 	-- Subtract an additional 10 here because it just isn't quite right without it. Not sure why it ends up off like that.
+	if not TMW.IE.Tabs.primary:GetLeft() then return end
 	local availableWidth = TMW.IE.Tabs.primary:GetLeft() - TMW.IE.Tabs.secondary:GetLeft() - 20
 
 	-- Now, divide the tabs up into rows so that no rows are overflowing.

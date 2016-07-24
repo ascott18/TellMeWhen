@@ -83,6 +83,7 @@ do
 	
 	TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		tab = TMW.IE:RegisterTab("ICON", "CNDTICON", "Conditions", 5)
+		tab:SetText(L["CONDITIONS"])
 		tab:SetHistorySet(TMW.C.HistorySet:GetHistorySet("ICON"))
 		
 		tab:HookScript("OnClick", function()

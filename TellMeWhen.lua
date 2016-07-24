@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 81001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 81002 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80039 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1027,11 +1027,11 @@ function TMW:PLAYER_LOGIN()
 	TMW.PLAYER_LOGIN = nil
 
 	-- Check for wrong WoW version
-	if select(4, GetBuildInfo()) < 60000 then
+	if select(4, GetBuildInfo()) < 70000 then
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		local version = GetBuildInfo()
 		StaticPopupDialogs["TMW_BADWOWVERSION"] = {
-			text = "TellMeWhen %s is not compatible with WoW %s. Please downgrade TellMeWhen or wait for a patch to WoW 6.0.2.", 
+			text = "TellMeWhen %s is not compatible with WoW %s. Please downgrade TellMeWhen or wait for a patch to WoW 7.0.3.", 
 			button1 = OKAY,
 			timeout = 0,
 			showAlert = true,
@@ -1043,20 +1043,49 @@ function TMW:PLAYER_LOGIN()
 
 	-- if the file IS required for gross functionality
 	elseif not TMW.BE then
-		-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
-		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
-		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			text = L["ERROR_MISSINGFILE"], 
-			button1 = EXIT_GAME,
-			button2 = CANCEL,
-			OnAccept = ForceQuit,
-			timeout = 0,
-			showAlert = true,
-			whileDead = true,
-			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
-		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Spells/Equivalencies.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
-		return
+		-- Ok, so this check clearly has some problems. For years now,
+		-- i've been getting occasional reports that this isn't detecting things properly,
+		-- and that it just continually pops up no matter what people do.
+		-- So, instead of forcing a restart on people, i'm going to take out the early return and instead,
+		-- output a ton of debug information.
+
+		local classCount = 0
+		for k, v in pairs(TMW.C) do classCount = classCount + 1 end
+		local fileName = "TellMeWhen/Components/Core/Spells/Equivalencies.lua"
+		TMW:Print("There was an issue during TMW's Initialization. A required file, " .. fileName .. " didn't seem to load." )
+		TMW:Print("If you haven't restarted WoW since last updating it, please do so now." )
+		TMW:Print("If you have restarted and this error keeps happening, please report the following information to the addon page at Curse.com (a screenshot of this would work best):" )
+		TMW:Print(
+			"v", TELLMEWHEN_VERSIONNUMBER, 
+			"TMW.C count", classCount,
+			"TMW.BE", TMW.BE,
+			"TMW.DS", TMW.DS, 
+			"TMW.CNDT", TMW.CNDT, 
+			"toc v",  GetAddOnMetadata("TellMeWhen", "Version"),
+			"xcpv",  GetAddOnMetadata("TellMeWhen", "X-Curse-Packaged-Version"),
+			"xinterface",  GetAddOnMetadata("TellMeWhen", "X-Interface"),
+			"dbvar", TellMeWhenDB,
+			"dbver", TellMeWhenDB and TellMeWhenDB.Version,
+			"mac?", IsMacClient(),
+			"wowb", select(2, GetBuildInfo()),
+			"types", TMW.approachTable and #(TMW.approachTable(TMW, "C", "IconType", "instances") or {}) or "noapproach"
+		)
+
+
+		-- -- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
+		-- -- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
+		-- StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
+		-- 	text = L["ERROR_MISSINGFILE"], 
+		-- 	button1 = EXIT_GAME,
+		-- 	button2 = CANCEL,
+		-- 	OnAccept = ForceQuit,
+		-- 	timeout = 0,
+		-- 	showAlert = true,
+		-- 	whileDead = true,
+		-- 	preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+		-- }
+		-- StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Spells/Equivalencies.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		-- return
 
 	-- if the file is NOT required for gross functionality
 	elseif not TMW.DOGTAG then
