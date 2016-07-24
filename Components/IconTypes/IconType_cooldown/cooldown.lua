@@ -292,6 +292,7 @@ function Type:Setup(icon)
 		icon.IgnoreRunes =  nil
 	end
 	
+	TMW.HELP:Hide("ICONTYPE_COOLDOWN_VOIDBOLT")
 	if icon.Spells.FirstString == strlower(GetSpellInfo(75)) and not icon.Spells.Array[2] then
 		-- Auto shot needs special handling - it isn't a regular cooldown, so it gets its own update function.
 		icon:SetInfo("texture", GetSpellTexture(75))
@@ -307,6 +308,26 @@ function Type:Setup(icon)
 		
 		icon:SetUpdateFunction(AutoShot_OnUpdate)
 	else
+		local voidBolt = GetSpellInfo(228266)
+		if icon.Spells.FirstString == strlower(voidBolt)
+			and not icon.Spells.Array[2]
+			and icon:IsBeingEdited() == "MAIN"
+			and TellMeWhen_ChooseName
+		then
+			-- Tracking the CD of void bolt doesn't work - you have to check void eruption.
+			local voidEruption = GetSpellInfo(228260)
+			local voidForm = GetSpellInfo(228264)
+			TMW.HELP:Show{
+				code = "ICONTYPE_COOLDOWN_VOIDBOLT",
+				codeOrder = 2,
+				icon = icon,
+				relativeTo = TellMeWhen_ChooseName,
+				x = 0,
+				y = 0,
+				text = format(L["HELP_COOLDOWN_VOIDBOLT"], voidBolt, voidEruption, voidForm, voidBolt)
+			}
+		end
+
 		icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 		
 		icon:SetInfo("texture; reverse; spell", Type:GetConfigIconTexture(icon), false, icon.Spells.First)

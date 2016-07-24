@@ -2592,6 +2592,14 @@ Due to a Blizzard bug, this buff can't be tracked if you have the %q setting ena
 
 Please disable this setting if you want this buff to be tracked properly.]]
 
+L["HELP_COOLDOWN_VOIDBOLT"] = [[|TInterface/Icons/ability_ironmaidens_convulsiveshadows:20|t It looks like you are trying to track the cooldown of %s.
+
+Unfortunately, due to the way that Blizzard made that spell, it won't work.
+
+|T1386548:20|t Instead, you need to track the cooldown of %s.
+
+Add a condition to check for the %s buff if you only want the icon while it is actually %s.]]
+
 L["HELP_IMPORT_CURRENTPROFILE"] = [[Trying to move or copy an icon from this profile to another icon slot?
 
 You can do so easily by |cff7fffffRight-clicking and dragging|r the icon (hold down the mouse button) to another slot. When you release the mouse button, a menu will appear with many options.
