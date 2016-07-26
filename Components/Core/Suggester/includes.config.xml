@@ -1,7 +1,0 @@
-﻿<Ui>
-
-<Script file="Suggester.lua"/>
-
-<Include file="Suggester.xml"/>
-
-</Ui>

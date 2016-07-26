@@ -1,7 +1,0 @@
-﻿<Ui>
-
-<Script file="Icon\Icon.lua"/>
-<Script file="Bar\Bar.lua"/>
-<Script file="BarV\BarV.lua"/>
-
-</Ui>

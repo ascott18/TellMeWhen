@@ -41,6 +41,9 @@ function processFile(path)
 		if( not localizedKeys[match] ) then keys = keys + 1 end
 		localizedKeys[match] = true
 	end
+	
+
+	--print(path:gsub(PATH_TO_ADDONS, "") .. "")
 
 	if string.match(path, "%.xml$") then
 		local folderPath = string.gsub(path, "[/\\][^/\\]-$", "")
@@ -49,11 +52,8 @@ function processFile(path)
 		-- print("removed ", count, "comments from", path)
 		
 
-		for match in string.gmatch(contents, "Script file=\"(.-)\"") do
-			processFile(folderPath .. "/" .. match)
-		end
-
-		for match in string.gmatch(contents, "Include file=\"(.-)\"") do
+		-- Handle scripts and includes in order, instead of one after the other.
+		for match in string.gmatch(contents, "[SI][cn][rc][il][pu][td]e? file=\"(.-)\"") do
 			processFile(folderPath .. "/" .. match)
 		end
 	end

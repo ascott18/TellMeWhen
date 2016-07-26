@@ -1,7 +1,0 @@
-﻿<Ui>
-
-<!-- <Include file="Icon\Config.xml"/> -->
-<Include file="Bar\Config.xml"/>
-<!-- <Include file="BarV\Config.xml"/> -->
-
-</Ui>

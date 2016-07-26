@@ -1,8 +1,0 @@
-﻿<Ui>
-
-<Script file="IconDataProcessorHook_Alpha_ConditionReq\Alpha_ConditionReq.lua"/>
-<Script file="IconDataProcessorHook_Alpha_DurationReq\Alpha_DurationReq.lua"/>
-<Script file="IconDataProcessorHook_Alpha_StackReq\Alpha_StackReq.lua"/>
-<Script file="IconDataProcessorHook_Texture_CustomTex\Texture_CustomTex.lua"/>
-
-</Ui>
