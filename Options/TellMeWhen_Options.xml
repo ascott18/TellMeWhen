@@ -1369,49 +1369,6 @@
 
 
 	<!-- END TEMPLATES -->
-	
-	<Frame name="TellMeWhen_InterfaceOptionsPanel">
-		<Layers>
-
-			<Layer level="ARTWORK">
-				<FontString parentKey="title" inherits="GameFontNormalHuge" justifyH="CENTER" text="TellMeWhen">
-					<Anchors>
-						<Anchor point="TOP" y="-150"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Frames>
-			<Button parentKey="Button" inherits="TellMeWhen_ButtonTemplate" >
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.title" relativePoint="BOTTOM" y="-10"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						TMW:TT(self, "MAINOPTIONS_SHOW")
-						self:SetText(TMW.L["MAINOPTIONS_SHOW"])
-						self:SetWidth(self:GetTextWidth() + 10)
-						self:SetFrameLevel(self:GetFrameLevel() + 2)
-						self:SetScale(2)
-					</OnLoad>
-					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
-
-						TMW:SlashCommand("options")
-					</OnClick>
-				</Scripts>
-			</Button>
-		</Frames>
-
-		<Scripts>
-			<OnLoad>
-				self.name = "TellMeWhen"
-				self.title:SetText("TellMeWhen v" .. TELLMEWHEN_VERSION_FULL)
-				self.title:SetFont("Fonts\\FRIZQT__.TTF", 40, "THINOUTLINE")
-				InterfaceOptions_AddCategory(self);
-			</OnLoad>
-		</Scripts>
-	</Frame>
 
 	<Frame name="TellMeWhen_ColorPicker" inherits="TellMeWhen_ColorPickerTemplate" hidden="true">
 		<Anchors>

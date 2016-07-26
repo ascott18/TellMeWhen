@@ -108,6 +108,76 @@
 			</OnLoad>
 		</Scripts>
 	</Cooldown>
+	
+	<Frame name="TellMeWhen_InterfaceOptionsPanel">
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="title" inherits="GameFontNormalHuge" justifyH="CENTER" text="TellMeWhen">
+					<Size y="150"/>
+					<Anchors>
+						<Anchor point="TOP" y="-50"/>
+						<Anchor point="LEFT" x="20"/>
+						<Anchor point="RIGHT" x="-20"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<!-- Much of this is copied from TellMeWhen_ButtonTemplate because that template is defined in the options. -->
+			<Button parentKey="Button">
+				<Size x="144" y="15"/>
+	
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.title" relativePoint="BOTTOM" y="-10"/>
+				</Anchors>
+
+				<NormalFont style="GameFontNormal"/>
+				<HighlightFont style="GameFontHighlight"/>
+
+				<Frames>
+					<Frame inherits="TellMeWhen_GenericBorder" >
+						<Scripts>
+							<OnLoad inherit="prepend">
+								self:SetBorderSize(-1)
+								self:SetColor(.4, .4, .4, 1)
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="Background" setAllPoints="true">
+							<Color r="0.15" g="0.15" b="0.15" a="0.5"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						TMW:TT(self, "MAINOPTIONS_SHOW")
+						self:SetText(TMW.L["MAINOPTIONS_SHOW"])
+						self:SetWidth(self:GetTextWidth() + 10)
+						self:SetFrameLevel(self:GetFrameLevel() + 2)
+						self:SetScale(2)
+					</OnLoad>
+					<OnClick>
+						PlaySound("igMainMenuOptionCheckBoxOn")
+
+						TMW:SlashCommand("options")
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+
+		<Scripts>
+			<OnLoad>
+				self.name = "TellMeWhen"
+				self.title:SetText("TellMeWhen v" .. TELLMEWHEN_VERSION_FULL)
+				self.title:SetFont("Fonts\\FRIZQT__.TTF", 40, "THINOUTLINE")
+				InterfaceOptions_AddCategory(self);
+			</OnLoad>
+		</Scripts>
+	</Frame>
 </Ui>
 
 
