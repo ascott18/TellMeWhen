@@ -266,6 +266,8 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 })
 ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 	--[[
+	NEVERMIND. STILL HAS APPLICATION FOR ROGUE DOTS WHOSE DURATION DEPENDS ON COMBO PTS USED
+
 		The percent conditions are being deprecated because a lot of people are
 		misusing them. In Warlords of Draenor, the point at which you can refresh
 		a buff/debuff without clipping any of the original duration is at 30% of
@@ -279,9 +281,9 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 		are checking things that they aren't able to check, so lets just disable them
 		from being chosen.
 	]]
-	hidden = true,
-	old = true,
-	tooltip = L["PERCENTAGE_DEPRECATED_DESC"],
+	--hidden = true,
+	--old = true,
+	--tooltip = L["PERCENTAGE_DEPRECATED_DESC"],
 
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"] .. " - " .. L["PERCENTAGE"],
 	min = 0,
@@ -495,6 +497,8 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 })
 ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 	--[[
+	NEVERMIND. STILL HAS APPLICATION FOR ROGUE DOTS WHOSE DURATION DEPENDS ON COMBO PTS USED
+
 		The percent conditions are being deprecated because a lot of people are
 		misusing them. In Warlords of Draenor, the point at which you can refresh
 		a buff/debuff without clipping any of the original duration is at 30% of
@@ -508,9 +512,9 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 		are checking things that they aren't able to check, so lets just disable them
 		from being chosen.
 	]]
-	hidden = true,
-	old = true,
-	tooltip = L["PERCENTAGE_DEPRECATED_DESC"],
+	--hidden = true,
+	--old = true,
+	--tooltip = L["PERCENTAGE_DEPRECATED_DESC"],
 
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"] .. " - " .. L["PERCENTAGE"],
 	min = 0,
