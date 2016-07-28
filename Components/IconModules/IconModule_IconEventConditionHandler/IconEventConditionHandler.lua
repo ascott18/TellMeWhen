@@ -71,7 +71,7 @@ function Module:OnEnable()
 					matches = {}
 					MapConditionObjectToEventSettings[ConditionObject] = matches
 				end
-				matches[eventSettings] = icon
+				matches[TMW.C.EventHandler:Proxy(eventSettings, icon)] = icon
 				
 				TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED)
 			end

@@ -337,6 +337,36 @@ function EventHandler:TestEvent(eventID)
 	return self:HandleEvent(TMW.CI.icon, eventSettings)
 end
 
+
+local eventSettingsProxies = setmetatable({}, {
+	__mode = 'k',
+})
+
+--- Generates a unique reference to an eventSettings for the given icon.
+function EventHandler:Proxy(eventSettings, icon)
+	if eventSettings.__proxyRef then
+		eventSettings = eventSettings.__proxyRef
+	end
+	
+	if eventSettingsProxies[eventSettings] then
+		return eventSettingsProxies[eventSettings][icon]
+	end
+
+	eventSettingsProxies[eventSettings] = setmetatable({}, {
+		__index = function(self, k)
+			self[k] = setmetatable({
+				__proxyRef = eventSettings
+			}, {
+				__index = eventSettings,
+				__newindex = eventSettings
+			})
+
+			return self[k]
+		end,
+	})
+
+	return eventSettingsProxies[eventSettings][icon]
+end
 	
 TMW:RegisterCallback("TMW_ICON_SETUP_PRE", function(_, icon)
 	if not TMW.Locked then
@@ -471,9 +501,15 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 			for eventSettings, ic in pairs(matches) do
 				if ic == icon then
 					ConditionObject:RequestAutoUpdates(eventSettings, false)
-					matches[eventSettings] = nil
-					self.EventSettingsToConditionObject[eventSettings] = nil
+
+					local eventSettingsProxy = self:Proxy(eventSettings, icon)
+					matches[eventSettingsProxy] = nil
+					self.EventSettingsToConditionObject[eventSettingsProxy] = nil
 				end
+			end
+
+			if not next(matches) then
+				self.MapConditionObjectToEventSettings[ConditionObject] = nil
 			end
 		end
 	end,
@@ -507,10 +543,10 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 				matches = {}
 				self.MapConditionObjectToEventSettings[ConditionObject] = matches
 			end
-			matches[eventSettings] = icon
+			matches[self:Proxy(eventSettings, icon)] = icon
 
 			-- Allow backwards lookups of this, too.
-			self.EventSettingsToConditionObject[eventSettings] = ConditionObject
+			self.EventSettingsToConditionObject[self:Proxy(eventSettings, icon)] = ConditionObject
 
 			
 			-- Listen for changes in condition state so that we can ask
@@ -548,6 +584,7 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 		if TMW.Locked and matches then
 			-- If TMW is locked, and there are eventSettings that are using this ConditionObject,
 			-- then have the event handler do what needs to be done for all of the matching eventSettings.
+
 			self:HandleConditionStateChange(matches, ConditionObject.Failed)
 		end
 	end,

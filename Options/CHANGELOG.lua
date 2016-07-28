@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ===v8.1.2===
 ====Bug Fixes====
 * Attempted a permanant fix to very rare and very old bug where some users' includes.*.xml files were getting scrambled around in their TMW install, leading to the problem of most of the addon not getting loaded.
+* Fixed an issue with Condition-triggered animations not working consistently in controlled groups.
 
 ===v8.1.1===
 ====Bug Fixes====
