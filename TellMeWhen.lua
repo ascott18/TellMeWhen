@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 81205 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 81206 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80039 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1519,6 +1519,15 @@ TMW.C.TMW:Inherit("Core_Upgrades")
 
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+
+		[81206] = {
+			group = function(self, gs, domain, groupID)
+				-- the old upgrade accidentaly set these to false instead of nil
+				for i = 1, 4 do
+					gs["Tree" .. i] = nil
+				end
+			end,
+		},
 
 		[80012] = {
 			global = function(self, profile)

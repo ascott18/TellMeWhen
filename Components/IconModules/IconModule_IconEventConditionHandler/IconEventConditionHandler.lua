@@ -48,7 +48,7 @@ local function TMW_CNDT_OBJ_PASSING_CHANGED(event, ConditionObject, failed)
 		local matches = MapConditionObjectToEventSettings[ConditionObject]
 		if matches then
 			for eventSettings, icon in pairs(matches) do
-				icon:QueueEvent(eventSettings)
+				icon:QueueEvent(eventSettings.__proxyRef)
 				icon:ProcessQueuedEvents()
 			end
 		end
