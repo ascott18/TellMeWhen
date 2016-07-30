@@ -997,6 +997,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 					local text = conditionData.formatter:Format(level)
 					frame:SetTexts(text, nil)
 					frame:SetLabel(text)
+					frame:Show()
 				end
 				for i = frameID + 1, #LevelChecks.frames do
 					LevelChecks.frames[i]:Hide()
