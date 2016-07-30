@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 81206 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 81207 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 80039 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -2830,6 +2830,13 @@ function TMW:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 end
 
 function TMW:OnProfile(event, arg2, arg3)
+
+	-- It is possible to change your profile in combat using slash commands.
+	-- If this is done, don't go straight into config mode.
+	if InCombatLockdown() then
+		TMW.db.profile.Locked = true
+	end
+
 	TMW:UpgradeProfile()
 
 	-- Clear out the state since state tables are saved in an icon's attributes.
@@ -3341,31 +3348,3 @@ end
 
 
 
-
-
-
-
-
-
--- TODO: MOVE THIS TO ITS OWN FILE
-
-
-local temp = {}
-function TMW:GetColors(colorSettings, enableSetting, ...)
-	if not colorSettings then
-		error("colorSettings missing")
-	end
-	for n, settings, length in TMW:Vararg(...) do
-		if n == length or settings[enableSetting] then
-			if type(colorSettings) == "table" then
-				for i = 1, #colorSettings do
-					temp[i] = settings[colorSettings[i]]
-				end
-
-				return unpack(temp, 1, #colorSettings)
-			else
-				return settings[colorSettings]
-			end
-		end
-	end
-end

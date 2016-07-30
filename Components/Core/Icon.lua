@@ -373,7 +373,7 @@ end
 --      -- See IconModule_IconEventConditionHandler's code for complete implementation.
 --      if matches then
 --        for eventSettings, icon in pairs(matches) do
---          icon:QueueEvent(eventSettings)
+--          icon:QueueEvent(eventSettings.__proxyRef)
 --          icon:ProcessQueuedEvents()
 --        end
 --      end

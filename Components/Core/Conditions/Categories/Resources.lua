@@ -339,7 +339,7 @@ ConditionCategory:RegisterCondition(103.0 - offset, "MANA", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_126",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_MANA),
+	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_MANA, SPELL_POWER_MANA),
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -385,7 +385,7 @@ ConditionCategory:RegisterCondition(104.0 - offset, "ENERGY", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_125",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_ENERGY),
+	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_ENERGY, SPELL_POWER_ENERGY),
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -431,7 +431,7 @@ ConditionCategory:RegisterCondition(105.0 - offset, "RAGE", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_120",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_RAGE),
+	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_RAGE, SPELL_POWER_RAGE),
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -477,7 +477,7 @@ ConditionCategory:RegisterCondition(106.0 - offset, "FOCUS", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_124",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_FOCUS),
+	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_FOCUS, SPELL_POWER_FOCUS),
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -523,7 +523,7 @@ ConditionCategory:RegisterCondition(107.0 - offset, "RUNIC_POWER", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_128",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_RUNIC_POWER),
+	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_RUNIC_POWER, SPELL_POWER_RUNIC_POWER),
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -573,7 +573,7 @@ ConditionCategory:RegisterCondition(208.0, "ALTPOWER", {
 	max = 100,
 	icon = "Interface\\Icons\\spell_shadow_mindflay",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_ALTERNATE_POWER),
+	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(SPELL_POWER_ALTERNATE_POWER, SPELL_POWER_ALTERNATE_POWER),
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),

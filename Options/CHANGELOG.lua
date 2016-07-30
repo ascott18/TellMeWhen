@@ -11,6 +11,7 @@ TMW.CHANGELOG = [==[
 * Fixed an issue with Condition-triggered animations not working consistently in controlled groups.
 * Buff/Debuff Duration conditions should once again work properly with effects that have no duration.
 * Fixed an issue with occasional missing checkboxes in condition configuration
+* Fixed resource percentage conditions
 
 ===v8.1.1===
 ====Bug Fixes====

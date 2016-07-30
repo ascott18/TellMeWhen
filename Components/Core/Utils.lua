@@ -639,8 +639,25 @@ function TMW:HSVToRGB(h, s, v)
 	return r, g, b
 end
 
+local getColorsTemp = {}
+function TMW:GetColors(colorSettings, enableSetting, ...)
+	if not colorSettings then
+		error("colorSettings missing")
+	end
+	for n, settings, length in TMW:Vararg(...) do
+		if n == length or settings[enableSetting] then
+			if type(colorSettings) == "table" then
+				for i = 1, #colorSettings do
+					getColorsTemp[i] = settings[colorSettings[i]]
+				end
 
-
+				return unpack(getColorsTemp, 1, #colorSettings)
+			else
+				return settings[colorSettings]
+			end
+		end
+	end
+end
 
 function TMW:ColorStringToCachedHSVATable(str)
 	local r, g, b, a, flags = TMW:StringToRGBA(str)
