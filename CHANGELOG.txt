@@ -7,6 +7,7 @@
 * Buff/Debuff Duration conditions should once again work properly with effects that have no duration.
 * Fixed an issue with occasional missing checkboxes in condition configuration
 * Fixed resource percentage conditions
+* Fixed a rare bug that would cause cooldown sweep animations to totally glitch out, usually in meta icons.
 
 ===v8.1.1===
 ====Bug Fixes====
