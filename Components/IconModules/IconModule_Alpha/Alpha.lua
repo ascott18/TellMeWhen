@@ -214,4 +214,4 @@ function Alpha:REALALPHA(icon, realAlpha)
 	end
 end
 
-Alpha:SetDataListner("REALALPHA")
+Alpha:SetDataListener("REALALPHA")

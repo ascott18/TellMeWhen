@@ -942,4 +942,4 @@ function Texts:DOGTAGUNIT(icon, dogTagUnit)
 		self:OnKwargsUpdated()
 	end
 end
-Texts:SetDataListner("DOGTAGUNIT")
+Texts:SetDataListener("DOGTAGUNIT")

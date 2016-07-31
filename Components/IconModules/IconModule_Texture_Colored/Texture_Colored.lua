@@ -107,13 +107,13 @@ function Texture_Colored:STATE(icon, stateData)
 	end
 end
 
-Texture_Colored:SetDataListner("CALCULATEDSTATE", Texture_Colored.STATE)
+Texture_Colored:SetDataListener("CALCULATEDSTATE", Texture_Colored.STATE)
 
 
 function Texture_Colored:TEXTURE(icon, texture)
 	self:STATE(icon, icon.attributes.calculatedState)
 end
-Texture_Colored:SetDataListner("TEXTURE")
+Texture_Colored:SetDataListener("TEXTURE")
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	ColorMSQ = TMW.db.profile.ColorMSQ

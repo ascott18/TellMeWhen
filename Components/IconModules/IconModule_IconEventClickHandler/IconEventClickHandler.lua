@@ -64,7 +64,7 @@ function Module:REALALPHA(icon, realAlpha)
 		icon:EnableMouse(realAlpha > 0)
 	end
 end
-Module:SetDataListner("REALALPHA")
+Module:SetDataListener("REALALPHA")
 
 Module:SetScriptHandler("OnClick", function(Module, icon, button)
 	if TMW.Locked then

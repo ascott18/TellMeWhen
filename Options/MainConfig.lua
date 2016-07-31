@@ -70,6 +70,18 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(2, "TellMeWhen_Main_GeneralGlobal
 				IE:Load(1)
 			end)
 		end,
+		function(check)
+			check:SetTexts(L["UIPANEL_SHOWCONFIGWARNING"])
+			check:SetSetting("ConfigWarning")
+			check:CScriptAdd("SettingTableRequested", function()
+				return TMW.IE.db.global
+			end)
+			check:CScriptAdd("SettingSaved", function()
+				-- If someone manually toggles this setting, 
+				-- get rid of the "dont show again" button.
+				TMW.IE.db.global.ConfigWarningN = -10e6
+			end)
+		end,
 	})
 end):SetPanelSet("global")
 

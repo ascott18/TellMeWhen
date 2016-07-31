@@ -1446,6 +1446,7 @@
 					<OnClick>
 						TMW.IE.db.global.ConfigWarning = false
 						self:GetParent():Hide()
+						TMW.wIE:Load(1)
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -1460,6 +1461,7 @@
 					<OnClick>
 						TMW:LockToggle()
 						TMW:Print(TMW.L["CONFIGMODE_EXITED"])
+						TMW.IE:Load(1)
 					</OnClick>
 				</Scripts>
 			</Button>

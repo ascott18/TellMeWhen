@@ -203,7 +203,7 @@ end
 function PowerBar:SPELL(icon, spellChecked)
 	self:SetSpell(spellChecked)
 end
-PowerBar:SetDataListner("SPELL")
+PowerBar:SetDataListener("SPELL")
 
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)

@@ -117,7 +117,7 @@ function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
 		self.value = value
 	end
 end
-TimerBar_BarDisplay:SetDataListner("VALUE")
+TimerBar_BarDisplay:SetDataListener("VALUE")
 
 function TimerBar_BarDisplay:UNIT(icon, unit)
 	if unit then
@@ -127,7 +127,7 @@ function TimerBar_BarDisplay:UNIT(icon, unit)
 		self:UpdateValue(true)
 	end
 end
-TimerBar_BarDisplay:SetDataListner("UNIT")
+TimerBar_BarDisplay:SetDataListener("UNIT")
 
 local colorSettingNames = {
 	"TimerBar_StartColor",

@@ -163,8 +163,8 @@ end
 --	function IconModule_Texture:TEXTURE(icon, texture)
 --		self.texture:SetTexture(texture)
 --	end
---	IconModule_Texture:SetDataListner("TEXTURE")
-function IconModule:SetDataListner(processorName, func)
+--	IconModule_Texture:SetDataListener("TEXTURE")
+function IconModule:SetDataListener(processorName, func)
 	-- func: false to remove the data listner; nil to search for it 
 	self:AssertSelfIsClass()
 	

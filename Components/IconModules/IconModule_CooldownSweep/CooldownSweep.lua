@@ -302,7 +302,7 @@ function CooldownSweep:DURATION(icon, start, duration)
 		NeedsUpdate[self] = true
 	end
 end
-CooldownSweep:SetDataListner("DURATION")
+CooldownSweep:SetDataListener("DURATION")
 
 function CooldownSweep:SPELLCHARGES(icon, charges, maxCharges)
 	local cd = self.cooldown
@@ -314,7 +314,7 @@ function CooldownSweep:SPELLCHARGES(icon, charges, maxCharges)
 		NeedsUpdate[self] = true
 	end
 end
-CooldownSweep:SetDataListner("SPELLCHARGES")
+CooldownSweep:SetDataListener("SPELLCHARGES")
 
 function CooldownSweep:REVERSE(icon, reverse)
 	if self.InvertTimer then
@@ -323,12 +323,12 @@ function CooldownSweep:REVERSE(icon, reverse)
 
 	self.cooldown:SetReverse(reverse)
 end
-CooldownSweep:SetDataListner("REVERSE")
+CooldownSweep:SetDataListener("REVERSE")
 
 function CooldownSweep:REALALPHA(icon, realAlpha)
 	NeedsUpdate[self] = true
 end
-CooldownSweep:SetDataListner("REALALPHA")
+CooldownSweep:SetDataListener("REALALPHA")
 
 
 

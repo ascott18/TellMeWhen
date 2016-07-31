@@ -208,7 +208,7 @@ end
 function TimerBar:DURATION(icon, start, duration)
 	self:SetCooldown(start, duration)
 end
-TimerBar:SetDataListner("DURATION")
+TimerBar:SetDataListener("DURATION")
 
 
 

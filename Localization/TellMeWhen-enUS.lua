@@ -108,22 +108,22 @@ L["ICONMENU_CTRLGROUP_UNAVAILABLEID_DESC"] = [[Only the first icon in a group (i
 L["ERROR_MISSINGFILE_REQFILE"] = "A required file"
 L["ERROR_MISSINGFILE"] = [[A complete restart of WoW is required to use TellMeWhen %s.
 
-%s was not found. 
+%s was not loaded. 
 
 Would you like to restart WoW now?]]
 L["ERROR_MISSINGFILE_NOREQ"] = [[A complete restart of WoW may be required to fully use TellMeWhen %s:
 
-%s was not found.
+%s was not loaded.
 
 Would you like to restart WoW now?]]
 L["ERROR_MISSINGFILE_OPT"] = [[A complete restart of WoW is required to configure TellMeWhen %s:
 
-%s was not found.
+%s was not loaded.
 
 Would you like to restart WoW now?]]
 L["ERROR_MISSINGFILE_OPT_NOREQ"] = [[A complete restart of WoW may be required to fully configure TellMeWhen %s:
 
-%s was not found.
+%s was not loaded.
 
 Would you like to restart WoW now?]]
 
@@ -905,6 +905,8 @@ L["UIPANEL_HIDEBLIZZCDBLING_DESC"] = [[Disables Blizzard's pulse effect on coold
 
 This effect was added by Blizzard in patch 6.2.]]
 
+
+L["UIPANEL_SHOWCONFIGWARNING"] = "Show config mode warning"
 
 L["UIPANEL_ALLOWSCALEIE"] = "Allow Icon Editor Scaling"
 L["UIPANEL_ALLOWSCALEIE_DESC"] = [[By default, resizing the Icon Editor is disabled in order to achieve a clean, pixel-perfect layout.
