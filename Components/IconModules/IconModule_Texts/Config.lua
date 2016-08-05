@@ -270,6 +270,8 @@ TEXT.currentLayout = nil
 TEXT.currentDisplay = nil
 
 function TEXT:SetCurrentLayout(layoutGUID)
+	IE:SaveSettings()
+	
 	TEXT.currentLayout = layoutGUID
 
 	IE.Pages.TextLayouts:RequestReload()

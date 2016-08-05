@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.1.3===
+====Bug Fixes====
+* Fixed an issue that would cause unintentional renaming of text layouts. 
+
 ===v8.1.2===
 * Restored the old Buff/Debuff duration percentage conditions, since they still have applications for variable-duration effects like Rogue DoTs.
 
