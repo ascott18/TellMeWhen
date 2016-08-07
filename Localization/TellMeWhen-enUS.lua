@@ -1838,6 +1838,7 @@ L["DT_DOC_LocType"] = "Returns the type of the control loss effect that the icon
 L["DT_DOC_IsShown"] = "Returns whether or not an icon is shown."
 L["DT_DOC_Opacity"] = "Returns the opacity of an icon. Return value is between 0 and 1."
 L["DT_DOC_Duration"] = "Returns the current duration remaining on the icon. It is recommended that you format this with [TMWFormatDuration]"
+L["DT_DOC_MaxDuration"] = "Returns the maximum duration of the icon. This is the duration when the timer started, not the current duration."
 L["DT_DOC_Spell"] = "Returns the spell or item that the icon is showing data for."
 L["DT_DOC_Stacks"] = "Returns the current stacks of the icon"
 L["DT_DOC_Unit"] = "Returns the unit or the name of the unit that the icon is checking. Best use in conjunction with the [Name] tag."

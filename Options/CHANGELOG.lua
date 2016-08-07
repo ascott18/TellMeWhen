@@ -4,6 +4,8 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
 ===v8.1.3===
+* New DogTag: MaxDuration
+
 ====Bug Fixes====
 * Fixed an issue that would cause unintentional renaming of text layouts. 
 

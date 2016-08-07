@@ -53,7 +53,10 @@ SpellCache.CONST = {
 		["Interface\\Icons\\Trade_Alchemy"] = true,
 		["Interface\\Icons\\Trade_BlackSmithing"] = true,
 		["Interface\\Icons\\Trade_BrewPoison"] = true,
+		
 		["Interface\\Icons\\Trade_Engineering"] = true,
+		[136243] = true,
+
 		["Interface\\Icons\\Trade_Engraving"] = true,
 		["Interface\\Icons\\Trade_Fishing"] = true,
 		["Interface\\Icons\\Trade_Herbalism"] = true,

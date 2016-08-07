@@ -543,6 +543,33 @@ do
 		example = '[Duration] => "1.435"; [Duration(gcd=false)] => "0"; [Duration:TMWFormatDuration] => "1.4"; [Duration(icon="TMW:icon:1I7MnrXDCz8T")] => "97.32156"; [Duration(icon="TMW:icon:1I7MnrXDCz8T"):TMWFormatDuration] => "1:37"',
 		category = L["ICON"],
 	})
+	
+	Processor:RegisterDogTag("TMW", "MaxDuration", {
+		code = function(icon)
+			icon = TMW.GUIDToOwner[icon]
+
+			if icon then
+				local duration = icon.attributes.duration
+				
+				if duration <= 0 then
+					return 0
+				end
+
+				-- cached version of tonumber()
+				return isNumber[format("%.1f", duration)] or 0
+			else
+				return 0
+			end
+		end,
+		arg = {
+			'icon', 'string', '@req',
+		},
+		events = "FastUpdate",
+		ret = "number",
+		doc = L["DT_DOC_MaxDuration"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+		example = '[MaxDuration] => "3"; [MaxDuration:TMWFormatDuration] => "3.0"; [MaxDuration(icon="TMW:icon:1I7MnrXDCz8T")] => "60"',
+		category = L["ICON"],
+	})
 
 	TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 		if not TMW.Locked then
