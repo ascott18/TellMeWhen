@@ -1113,7 +1113,7 @@ TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", functio
 	
 	import.textlayout_new = true
 
-	if IE.CurrentTabGroup.identifier == "ICON" then
+	if IE.CurrentTabGroup.identifier == "ICON" and CI.icon then
 		-- The user is editing an icon. Work with the current icon's layout.
 		local GUID = TEXT:GetTextLayoutForIcon(CI.icon)
 		local settings = TMW.TEXT:GetTextLayoutSettings(GUID)

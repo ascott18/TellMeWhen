@@ -3857,14 +3857,14 @@ end
 ---------- Dropdown ----------
 TMW:RegisterCallback("TMW_CONFIG_REQUEST_AVAILABLE_IMPORT_EXPORT_TYPES", function(event, editbox, import, export)
 	if editbox == TMW.IE.ExportBox then
-		if IE.CurrentTabGroup.identifier == "ICON" then
+		if IE.CurrentTabGroup.identifier == "ICON" and CI.icon then
 			import.icon = CI.icon
 			export.icon = CI.icon
 
 			import.group_overwrite = CI.icon.group
 			export.group = CI.icon.group
 
-		elseif IE.CurrentTabGroup.identifier == "GROUP" then	
+		elseif IE.CurrentTabGroup.identifier == "GROUP" and CI.group then	
 			import.group_overwrite = CI.group
 			export.group = CI.group
 		end
