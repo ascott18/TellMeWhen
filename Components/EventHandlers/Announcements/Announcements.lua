@@ -423,7 +423,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 	end,
 })
 
-local bullshitTable = {}
+local empty = {}
 Announcements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 	text = L["RAID_WARNING_FAKE"],
 	desc = L["RAID_WARNING_FAKE_DESC"],
@@ -444,9 +444,10 @@ Announcements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 		-- GLOBALS: RaidWarningFrame, RaidNotice_AddMessage
 		
 		-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
-		Text = "|c" .. eventSettings.TextColor .. Text .. "|r"
+		-- The gsub here is so that text that appears after a link of some kind will be the correct color instead of black (caused by the |r at the end of the link).
+		Text = "|c" .. eventSettings.TextColor .. Text:gsub("|r", "|c" .. eventSettings.TextColor) .. "|r"
 
-		RaidNotice_AddMessage(RaidWarningFrame, Text, bullshitTable, eventSettings.TextDuration) -- arg3 still demands a valid table for the color info, even if it is empty
+		RaidNotice_AddMessage(RaidWarningFrame, Text, empty, eventSettings.TextDuration) -- arg3 still demands a valid table for the color info, even if it is empty
 		
 	end,
 })

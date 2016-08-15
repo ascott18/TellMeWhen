@@ -224,7 +224,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			-- use until we've found one of each. 
 			if inrange and not nomana and (duration == 0 or (charges and charges > 0) or OnGCD(duration)) then --usable
 				if not usableFound then
-					wipe(usableData)
+					--wipe(usableData)
 					usableData.state = STATE_USABLE
 					usableData.tex = GetSpellTexture(iName)
 					usableData.iName = iName
@@ -241,7 +241,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 					end
 				end
 			elseif not unusableFound then
-				wipe(unusableData)
+				--wipe(unusableData)
 				unusableData.state = not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE
 				unusableData.tex = GetSpellTexture(iName)
 				unusableData.iName = iName
