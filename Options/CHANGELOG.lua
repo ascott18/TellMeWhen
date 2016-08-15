@@ -9,6 +9,7 @@ TMW.CHANGELOG = [==[
 ====Bug Fixes====
 * Fixed an issue that would cause unintentional renaming of text layouts. 
 * Fixed an issue with text colors after a chat link in Raid Warning (Fake) text notification handlers.
+* Fixed an issue with timer/status bars briefly showing their old value when they are first shown.
 
 ===v8.1.2===
 * Restored the old Buff/Debuff duration percentage conditions, since they still have applications for variable-duration effects like Rogue DoTs.

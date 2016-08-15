@@ -644,6 +644,9 @@ function CNDT:AddCondition(Conditions)
 end
 
 function CNDT:DeleteCondition(Conditions, n)
+	TMW.DD:CloseDropDownMenus()
+	TMW.IE:SaveSettings()
+
 	Conditions.n = Conditions.n - 1
 	
 	TMW:Fire("TMW_CNDT_CONDITION_DELETED", n)
