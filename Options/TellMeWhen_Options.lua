@@ -2114,6 +2114,9 @@ TMW:NewClass("Config_TimeEditBox", "Config_EditBox"){
 	end,
 
 	ModifyValueForLoad = function(self, value)
+		if value < 0 then
+			return value
+		end
 		return TMW.C.Formatter.TIME_COLONS_FORCEMINS:Format(value)
 	end,
 }

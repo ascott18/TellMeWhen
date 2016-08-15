@@ -98,6 +98,14 @@ function Backdrop:OnDisable()
 	self:SetBorder(0, "ffffffff")
 end
 
+function Backdrop:SetOrientation(orientation)
+	if orientation == "HORIZONTAL" then
+		self.backdrop:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
+	elseif orientation == "VERTICAL" then
+		self.backdrop:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
+	end
+end
+
 function Backdrop:SetBorder(size, color)
 	if not self.border and size ~= 0 then
 		self.border = CreateFrame("Frame", nil, self.container, "TellMeWhen_GenericBorder")

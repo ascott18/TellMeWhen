@@ -66,6 +66,7 @@ TimerBar:RegisterConfigPanel_XMLTemplate(52, "TellMeWhen_TimerBar_GlobalColors")
 
 TimerBar:RegisterAnchorableFrame("TimerBar")
 
+
 function TimerBar:OnNewInstance(icon)	
 	local bar = CreateFrame("StatusBar", self:GetChildNameBase() .. "TimerBar", icon)
 	self.bar = bar
@@ -79,6 +80,7 @@ function TimerBar:OnNewInstance(icon)
 	self.start = 0
 	self.duration = 0
 	self.Offset = 0
+	self.__oldPercent = 0
 	
 	self:UpdateValue(true)
 end
@@ -136,8 +138,16 @@ function TimerBar:UpdateValue(force)
 		end
 	end
 
+	local percent = value / self.Max
+
 	if force or value ~= self.__value then
 		self.bar:SetValue(value)
+
+		if abs(self.__oldPercent - percent) > 0.02 then
+			-- If the percentage of the bar changed by more than 2%, force an instant redraw of the texture.
+			-- For some reason, blizzard defers the updating of status bar textures until sometimes 1 or 2 frames after it is set.
+			self:UpdateStatusBarImmediate(value)
+		end
 
 		-- This line is here to fix an issue with the bar texture
 		-- not being in the correct location/correct size if
@@ -158,28 +168,51 @@ function TimerBar:UpdateValue(force)
 			-- If we don't multiply by 2, we would check if (percent > 0.5), but then
 			-- we would have to multiply that percentage by 2 later anyway in order to use the
 			-- full range of colors available (we would only get half the range of colors otherwise, which looks like shit)
-			local percent = value / self.Max * 2
+			local doublePercent = percent * 2
 
-			if percent > 1 then
+			if doublePercent > 1 then
 				completeColor = halfColor
-				percent = percent - 1
+				doublePercent = doublePercent - 1
 			else
 				startColor = halfColor
 			end
 
-			local inv = 1-percent
+			local inv = 1-doublePercent
 
 			self.bar:SetStatusBarColor(
-				(startColor.r * percent) + (completeColor.r * inv),
-				(startColor.g * percent) + (completeColor.g * inv),
-				(startColor.b * percent) + (completeColor.b * inv),
-				(startColor.a * percent) + (completeColor.a * inv)
+				(startColor.r * doublePercent) + (completeColor.r * inv),
+				(startColor.g * doublePercent) + (completeColor.g * inv),
+				(startColor.b * doublePercent) + (completeColor.b * inv),
+				(startColor.a * doublePercent) + (completeColor.a * inv)
 			)
 		end
 		self.__value = value
+		self.__oldPercent = percent
 	end
 	
 	return ret
+end
+
+function TimerBar:UpdateStatusBarImmediate(value)
+	local bar = self.bar
+	--print("immediate status bar", bar:GetName(), value)
+	local tex = bar:GetStatusBarTexture()
+	local percent = value / self.Max
+	if percent < 0 then percent = 0 elseif percent > 1 then percent = 1 end
+
+	if bar:GetOrientation() == "VERTICAL" then
+		local height = bar:GetHeight()
+		local sizePercent = height*percent
+		tex:SetPoint("TOPLEFT", 0, sizePercent - height)
+		tex:SetPoint("TOPRIGHT", 0, sizePercent - height)
+		tex:SetTexCoord(percent, 0, 0, 0, percent, 1, 0, 1)
+	else
+		local width = bar:GetWidth()
+		local sizePercent = width*percent
+		tex:SetPoint("TOPRIGHT", sizePercent - width, 0)
+		tex:SetPoint("BOTTOMRIGHT", sizePercent - width, 0)
+		tex:SetTexCoord(0, percent, 0, 1)
+	end
 end
 
 function TimerBar:SetCooldown(start, duration)

@@ -192,6 +192,7 @@ View:ImplementsModule("IconModule_Backdrop", 51, function(Module, icon)
 	local gspv = group:GetSettingsPerView()
 
 	Module:SetBorder(gspv.BorderBar, gspv.BorderColor)
+	Module:SetOrientation("VERTICAL")
 	
 	Module.container:ClearAllPoints()
 	Module.container:SetAllPoints(icon.Modules.IconModule_TimerBar_BarDisplay.bar)

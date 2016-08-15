@@ -732,10 +732,9 @@ do
 				[1] = L["UIPANEL_GROUPSORT_valuep_1"],
 				[-1] = L["UIPANEL_GROUPSORT_valuep_-1"],
 			}, function(iconA, iconB, attributesA, attributesB, order)
-				if attributesA.maxValue == 0 or attributesB.maxValue == 0 then
-					return false
-				end
-				local a, b = attributesA.value / attributesA.maxValue, attributesB.value / attributesB.maxValue
+				
+				local a, b = attributesA.maxValue == 0 and 0 or attributesA.value / attributesA.maxValue,
+				             attributesB.maxValue == 0 and 0 or attributesB.value / attributesB.maxValue
 				if a ~= b then
 					return a*order < b*order
 				end
