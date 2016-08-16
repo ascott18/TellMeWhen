@@ -127,10 +127,6 @@ function Icon.OnNewInstance(icon)
 	icon.EventHandlersSet = {}
 	icon.lmbButtonData = {}
 	icon.position = {}
-
-	-- This is new in Legion. Trying it out for now.
-	-- It should prevent weird framelevel mixing issues when icons overlap with other things or other icons.
-	icon:SetFlattensRenderLayers(true)
 	
 	icon.attributes = icon:InheritTable(Icon, "attributes")
 end
