@@ -914,7 +914,7 @@ function icon:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local icon = EXPORTS.icon
 	
-	local text = L["fICON"]:format(icon.typeData.name)
+	local text = L["fICON"]:format(TMW.get(icon.typeData.name))
 	info.text = text
 	info.tooltipTitle = text
 

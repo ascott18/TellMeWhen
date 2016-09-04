@@ -162,7 +162,7 @@ function TMW:GetIconMenuText(ics)
 	
 	tooltip = tooltip or ""
 	
-	text = text == "" and (L["UNNAMED"] .. ((Type ~= "" and typeData and (" - " .. typeData.name) or ""))) or text
+	text = text == "" and (L["UNNAMED"] .. ((Type ~= "" and typeData and (" - " .. (TMW.get(typeData.name) or "???")) or ""))) or text
 	local textshort = not dontShorten and strsub(text, 1, 40) or text
 
 	if strlen(text) > 40 and not dontShorten then
@@ -170,7 +170,7 @@ function TMW:GetIconMenuText(ics)
 	end
 
 	tooltip =	tooltip ..
-				((Type ~= "" and typeData.name) or "") ..
+				((Type ~= "" and TMW.get(typeData.name)) or "") ..
 				((ics.Enabled and "") or "\r\n(" .. L["DISABLED"] .. ")")
 
 	return text, textshort, tooltip
