@@ -12,6 +12,7 @@ TMW.CHANGELOG = [==[
 * Fixed an issue with timer/status bars briefly showing their old value when they are first shown.
 * Fixed a few bugs relating to improper handling of the icon type name of some variants of the totem icon type.
 * Fixed an issue with Condition-triggered animations not being able to stop for non-icon-based animations.
+* Fel Rush and Infernal Strike should now work with the Last Ability Used condition.
 
 ===v8.1.2===
 * Restored the old Buff/Debuff duration percentage conditions, since they still have applications for variable-duration effects like Rogue DoTs.

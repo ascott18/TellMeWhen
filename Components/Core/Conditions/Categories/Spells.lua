@@ -226,6 +226,21 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 				if e == "SPELL_CAST_SUCCESS" and sourceGuid == pGUID then
 					Env.LastPlayerCastName = strlower(spellName)
 					Env.LastPlayerCastID = spellID
+					TMW:Fire("TMW_CNDT_LASTCAST_UPDATED")
+				end
+			end)
+
+			-- Spells that don't work with CLEU and must be tracked with USS.
+			local ussSpells = {
+				[189111] = true, -- Infernal Strike (DH)
+				[195072] = true, -- Fel Rush (DH)
+			}
+			module:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED",
+			function(_, unit, spellName, _, _, spellID)
+				if unit == "player" and ussSpells[spellID] then
+					Env.LastPlayerCastName = strlower(spellName)
+					Env.LastPlayerCastID = spellID
+					TMW:Fire("TMW_CNDT_LASTCAST_UPDATED")
 				end
 			end)
 		end
@@ -238,9 +253,10 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 	events = function(ConditionObject, c)
 		local pGUID = UnitGUID("player")
 		assert(pGUID, "pGUID was null when event string was generated!")
+		
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit("player")),
-			ConditionObject:GenerateNormalEventString("COMBAT_LOG_EVENT_UNFILTERED", nil, "SPELL_CAST_SUCCESS", nil, pGUID)
+			ConditionObject:GenerateNormalEventString("TMW_CNDT_LASTCAST_UPDATED")
 	end,
 })
 
