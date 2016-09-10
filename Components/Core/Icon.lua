@@ -670,8 +670,9 @@ function Icon.Update(icon, force)
 				if TMW.Locked then
 					for i = icon.__controlledIconIndex+1, icon.group.numIcons do
 						local ic = icon.group[i]
-						if ic and ic.attributes.shown then
-							ic:Hide()
+						if ic and ic.attributes.realAlpha > 0 then
+							-- ic:Hide()
+							ic:SetInfo("state", 0)
 						end
 					end
 				end
