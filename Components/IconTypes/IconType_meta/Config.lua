@@ -203,7 +203,7 @@ function Config:IconMenu()
 		end
 	elseif TMW.DD.MENU_LEVEL == 2 then
 		for icon in TMW.DD.MENU_VALUE:InIcons() do
-			if icon:IsValid() and CI.icon ~= icon and not icon:IsControlled() then
+			if icon:IsValid() and CI.icon ~= icon then
 				local info = TMW.DD:CreateInfo()
 
 				local text, textshort, tooltip = icon:GetIconMenuText()

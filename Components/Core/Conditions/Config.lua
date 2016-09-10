@@ -318,7 +318,7 @@ function CNDT.IconMenu_DropDown(dropdown)
 		local conditionSettings = dropdown:GetSettingTable()
 
 		for icon in TMW.DD.MENU_VALUE:InIcons() do
-			if icon:IsValid() and not icon:IsControlled() then
+			if icon:IsValid() then
 				local info = TMW.DD:CreateInfo()
 
 				local text, textshort, tooltip = icon:GetIconMenuText()
