@@ -87,6 +87,13 @@ end
 
 -- ALPHAOVERRIDE: "alphaOverride"
 do
+	-- This is used for force-show icons in config mode.
+	-- Note that alphaOverride is also used to hide controlled icons that don't have data.
+	-- This is required because otherwise, meta icon controller unused icons would never hide
+	-- because the state arbitrator would pick the meta icon state over the icon's own state.
+	-- So, we use this property to absolutely override all other possible state inputs.
+	-- Using alphaOverride for controlled icons fixes commit 1172c2092 which broke behavior (ticket 1298).
+
 	local Processor = TMW.Classes.IconDataProcessor:New("ALPHAOVERRIDE", "alphaOverride")
 	Processor:RegisterAsStateArbitrator(0, nil, true)
 	Processor.dontInherit = true
