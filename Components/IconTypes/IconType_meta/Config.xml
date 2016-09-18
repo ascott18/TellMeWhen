@@ -35,7 +35,7 @@
 					<OnUpdate>
 						local Config = TMW.Types.meta.Config
 
-						if self:IsMouseOver() and Config.draggingFrame and self ~= Config.draggingFrame then
+						if (self:IsMouseOver() or self.IconPreview:IsMouseOver()) and Config.draggingFrame and self ~= Config.draggingFrame then
 							if Config.draggingButton == "LeftButton" then
 								local sourceID = Config.draggingFrame:GetParent():GetID()
 								local destID = self:GetParent():GetID()
