@@ -633,9 +633,7 @@ L["ICONMENU_SHOWTTTEXT_STACKS_DESC"] = "Causes the buff/debuff's stacks to be re
 L["ICONMENU_SHOWTTTEXT_FIRST"] = "First non-zero variable"
 L["ICONMENU_SHOWTTTEXT_FIRST_DESC"] = [[Causes the first non-zero variable assoeciated with the buff/debuff to be reported as the icon's stacks.
 
-Usually this will be the correct variable if you desire one of the aura's variables.
-
-If tracking %s, you need to explicitly watch for Variable #1]]
+Usually this will be the correct variable if you desire one of the aura's variables.]]
 L["ICONMENU_SHOWTTTEXT_VAR"] = "Only Variable #%d"
 L["ICONMENU_SHOWTTTEXT_VAR_DESC"] = [[Causes only this variable to be reported as the icon's stacks.
 

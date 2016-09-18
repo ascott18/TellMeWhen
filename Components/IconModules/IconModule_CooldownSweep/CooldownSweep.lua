@@ -182,7 +182,8 @@ function CooldownSweep:OnDisable()
 	local cd = self.cooldown
 	
 	cd.start, cd.duration = 0, 0
-	cd.charges, cd.maxCharges = nil, nil
+	cd.charges, cd.maxCharges = 0, 0
+	cd.chargeStart, cd.chargeDur = 0, 0
 	
 	self:UpdateCooldown()
 end
@@ -230,7 +231,7 @@ function CooldownSweep:SetupForIcon(icon)
 	
 	
 	self:DURATION(icon, attributes.start, attributes.duration)
-	self:SPELLCHARGES(icon, attributes.charges, attributes.maxCharges)
+	self:SPELLCHARGES(icon, attributes.charges, attributes.maxCharges, attributes.chargeStart, attributes.chargeDur)
 	self:REVERSE(icon, attributes.reverse)
 end
 
@@ -242,47 +243,73 @@ function CooldownSweep:UpdateCooldown()
 	--if self.updating then return end
 	self.updating = true
 
-	if duration > 0 then
-		if ElvUI then
-			local E = ElvUI[1]
-			if E and E.OnSetCooldown then
-				if not self.noOCC and E.private.cooldown.enable then
-					E.OnSetCooldown(cd, cd.start, duration, cd.charges, cd.maxCharges)
-				elseif cd.timer then
-					E:Cooldown_StopTimer(cd.timer)
-				end
-			end
-		elseif Tukui then
-			local T = Tukui[1]
-			if T and T.Cooldowns then
-				-- This is broken as of Tukui v16.02, but should be fixed soon after (I emailed and they quickly responded)
-
-				-- We will safecall this just to be safe, in case it changes in a way that breaks things.
-				TMW.safecall(T.Cooldowns.UpdateCooldown, cd, cd.start, duration, true, cd.charges, cd.maxCharges, false)
-			end
+	local mainStart, mainDuration, mainIsCharges
+	local otherStart, otherDuration = 0, 0
+	if cd.maxCharges ~= 0 and cd.charges == 0 then
+		mainStart, mainDuration, mainIsCharges = cd.chargeStart, cd.chargeDur, true
+	else
+		mainStart, mainDuration, mainIsCharges = cd.start, duration, false
+		if cd.charges ~= cd.maxCharges then
+			otherStart, otherDuration = cd.chargeStart, cd.chargeDur
 		end
+	end
 
-		local drawEdge = false
-		if ( duration > 2 and cd.charges and cd.maxCharges and cd.charges ~= 0) then
-			drawEdge = true
-		end
+	if mainDuration > 0 then
+		-- if ElvUI then
+		-- 	local E = ElvUI[1]
+		-- 	if E and E.OnSetCooldown then
+		-- 		if not self.noOCC and E.private.cooldown.enable then
+		-- 			E.OnSetCooldown(cd, mainStart, mainDuration, cd.charges, cd.maxCharges)
+		-- 		elseif cd.timer then
+		-- 			E:Cooldown_StopTimer(cd.timer)
+		-- 		end
+		-- 	end
+		-- elseif Tukui then
+		-- 	local T = Tukui[1]
+		-- 	if T and T.Cooldowns then
+		-- 		-- This is broken as of Tukui v16.02, but should be fixed soon after (I emailed and they quickly responded)
 
+		-- 		-- We will safecall this just to be safe, in case it changes in a way that breaks things.
+		-- 		TMW.safecall(T.Cooldowns.UpdateCooldown, cd, cd.start, duration, true, cd.charges, cd.maxCharges, false)
+		-- 	end
+		-- end
 
 		if self.ShowTimer then
-			cd:SetDrawEdge(TMW.db.profile.DrawEdge or drawEdge)
-			cd:SetDrawSwipe(not drawEdge)
+			cd:SetDrawEdge(TMW.db.profile.DrawEdge)
+			cd:SetDrawSwipe(true)
 		else
 			cd:SetDrawEdge(false)
 			cd:SetDrawSwipe(false)
 		end
 
-		cd:SetCooldown(cd.start, duration)
+		cd:SetCooldown(mainStart, mainDuration)
 		cd:Show()
 
 	elseif icon.attributes.realAlpha == 0 or icon.group:GetEffectiveAlpha() == 0 then
 		cd:Hide()
 	else
 		cd:SetCooldown(0, 0)
+	end
+
+	-- Handle charges of spells that aren't completely depleted.
+	local cd2 = self.cooldown2
+	if otherDuration > 0 then
+		if not cd2 then
+			cd2 = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown2", icon, "CooldownFrameTemplate")
+			self.cooldown2 = cd2
+			cd2:SetAllPoints(self.cooldown)
+			cd2:SetDrawSwipe(false)
+			cd2:SetDrawBling(false)
+		end
+
+		cd2:SetDrawEdge(self.ShowTimer)
+		cd2:SetCooldown(otherStart, otherDuration)
+		cd2:Show()
+
+
+	elseif cd2 then
+		cd2:SetCooldown(0, 0)
+		cd2:Hide()
 	end
 
 	self.updating = false
@@ -304,15 +331,15 @@ function CooldownSweep:DURATION(icon, start, duration)
 end
 CooldownSweep:SetDataListener("DURATION")
 
-function CooldownSweep:SPELLCHARGES(icon, charges, maxCharges)
+function CooldownSweep:SPELLCHARGES(icon, charges, maxCharges, chargeStart, chargeDur)
 	local cd = self.cooldown
 	
-	if cd.charges ~= charges or cd.maxCharges ~= maxCharges then
-		cd.charges = charges
-		cd.maxCharges = maxCharges
-		
-		NeedsUpdate[self] = true
-	end
+	cd.charges = charges or 0
+	cd.maxCharges = maxCharges or 0
+	cd.chargeStart = chargeStart or 0
+	cd.chargeDur = chargeDur or 0
+	
+	NeedsUpdate[self] = true
 end
 CooldownSweep:SetDataListener("SPELLCHARGES")
 

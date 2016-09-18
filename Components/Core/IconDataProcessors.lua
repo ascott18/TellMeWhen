@@ -666,27 +666,32 @@ end
 
 
 
--- SPELLCHARGES: "charges, maxCharges"
+-- SPELLCHARGES: "charges, maxCharges, chargeStart, chargeDur"
 do
-	local Processor = TMW.Classes.IconDataProcessor:New("SPELLCHARGES", "charges, maxCharges")
+	local Processor = TMW.Classes.IconDataProcessor:New("SPELLCHARGES", "charges, maxCharges, chargeStart, chargeDur")
 
 	function Processor:CompileFunctionSegment(t)
-		-- GLOBALS: charges, maxCharges
+		-- GLOBALS: charges, maxCharges, chargeStart, chargeDur
 		t[#t+1] = [[
 		
-		if attributes.charges ~= charges or attributes.maxCharges ~= maxCharges then
+		if attributes.charges ~= charges
+		or attributes.maxCharges ~= maxCharges
+		or attributes.chargeStart ~= chargeStart
+		or attributes.chargeDur ~= chargeDur then
 
 			attributes.charges = charges
 			attributes.maxCharges = maxCharges
+			attributes.chargeStart = chargeStart
+			attributes.chargeDur = chargeDur
 			
-			TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges)
+			TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges, chargeStart, chargeDur)
 			doFireIconUpdated = true
 		end
 		--]]
 	end
 
 	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
-		icon:SetInfo("charges, maxCharges", nil, nil)
+		icon:SetInfo("charges, maxCharges, chargeStart, chargeDur", nil, nil)
 	end)
 end
 

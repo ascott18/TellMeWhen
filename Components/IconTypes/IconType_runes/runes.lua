@@ -38,7 +38,7 @@ local STATE_UNUSABLE = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("state")
-Type:UsesAttributes("charges, maxCharges")
+Type:UsesAttributes("charges, maxCharges, chargeStart, chargeDur")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("texture")
@@ -141,6 +141,9 @@ local function Runes_OnUpdate(icon, time)
 			-- or if it isn't a death rune if it shouldn't be.
 			local start, duration, runeReady = GetRuneCooldown(slot)
 			
+			-- Non-DKs get nil returns from this now in Legion.
+			start = start or 0
+
 			-- Stupid API.
 			if start == 0 then duration = 0 end
 
@@ -180,35 +183,36 @@ local function Runes_OnUpdate(icon, time)
 		-- We found a rune that is ready. Show it.
 
 		if icon.RunesAsCharges and unslot then
-			icon:SetInfo("state; start, duration; charges, maxCharges; stack, stackText",
+			icon:SetInfo("state; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText",
 				STATE_USABLE,
-				unstart, unduration,
-				usableCount, icon.RuneSlotsUsed,
+				0, 0,
+				usableCount, icon.RuneSlotsUsed, unstart, unduration,
 				usableCount, usableCount
 			)
 		else
-			icon:SetInfo("state; start, duration; charges, maxCharges; stack, stackText",
+			icon:SetInfo("state; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText",
 				STATE_USABLE,
 				0, 0,
-				nil, nil,
+				nil, nil, nil, nil, 
 				usableCount, usableCount
 			)
 		end
 	elseif unslot then
 		-- We didn't find any ready runes. Show a cooling down rune.
-		icon:SetInfo("state; start, duration; charges, maxCharges; stack, stackText",
+		icon:SetInfo("state; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText",
 			STATE_UNUSABLE,
 			unstart, unduration,
-			0, 0,
+			0, 0, 0, 0,
 			nil, nil
 		)
 	else
 		-- We didn't find any runes. This might mean that the types of runes being tracked are death runes,
 		-- or if tracking death runes, those death runes aren't death runes.
-		icon:SetInfo("state; start, duration; charges, maxCharges; stack, stackText",
+		-- But now in Legion, this really only means they didn't select any runes at all.
+		icon:SetInfo("state; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText",
 			STATE_UNUSABLE,
 			0, 0,
-			0, 0,
+			0, 0, 0, 0,
 			nil, nil
 		)
 	end

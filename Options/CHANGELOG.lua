@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ===v8.1.3===
 * New DogTag: MaxDuration
 * Controlled icons can now be selected as a target of Meta icons and Icon Shown conditions.
+* Cooldown sweeps that are displaying charges during a GCD when the GCD is allowed will now show the GCD.
 
 ====Bug Fixes====
 * Fixed an issue that would cause unintentional renaming of text layouts. 

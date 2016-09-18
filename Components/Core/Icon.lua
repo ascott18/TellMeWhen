@@ -1306,11 +1306,11 @@ end})
 --  )
 -- 
 --  -- From IconTypes/IconType_reactive:
---  icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+--  icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 --    STATE_USABLE,
 --    GetSpellTexture(iName),
 --    start, duration,
---    charges, maxCharges,
+--    charges, maxCharges, chargeStart, chargeDur
 --    stack, stack,
 --    iName			
 -- )

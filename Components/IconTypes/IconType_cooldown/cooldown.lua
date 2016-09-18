@@ -47,7 +47,7 @@ local STATE_UNUSABLE_NOMANA  = TMW.CONST.STATE.DEFAULT_NOMANA
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("state")
 Type:UsesAttributes("spell")
-Type:UsesAttributes("charges, maxCharges")
+Type:UsesAttributes("charges, maxCharges, chargeStart, chargeDur")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("stack, stackText")
@@ -179,22 +179,10 @@ local function SpellCooldown_OnUpdate(icon, time)
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
 		
-		local start, duration, stack
-		
-		local charges, maxCharges, start_charge, duration_charge = GetSpellCharges(iName)
-		if charges then
-			if charges < maxCharges then
-				-- If the ability has charges and isn't at max charges, 
-				-- the timer on the icon should be the time until the next charge is gained.
-				start, duration = start_charge, duration_charge
-			else
-				start, duration = GetSpellCooldown(iName)
-			end
-			stack = charges
-		else
-			start, duration = GetSpellCooldown(iName)
-			stack = GetSpellCount(iName)
-		end
+		local start, duration = GetSpellCooldown(iName)
+		local charges, maxCharges, chargeStart, chargeDur = GetSpellCharges(iName)
+		local stack = charges or GetSpellCount(iName)
+
 		
 		if duration then
 			if IgnoreRunes and duration == runeCD then
@@ -222,7 +210,16 @@ local function SpellCooldown_OnUpdate(icon, time)
 			-- We store all our data in tables here because we need to keep track of both the first
 			-- usable cooldown and the first unusable cooldown found. We can't always determine which we will
 			-- use until we've found one of each. 
-			if inrange and not nomana and (duration == 0 or (charges and charges > 0) or OnGCD(duration)) then --usable
+			if
+				inrange and not nomana and (
+					-- If the cooldown duration is 0 and there arent charges, then its usable
+					(duration == 0 and not charges)
+					-- If the spell has charges and they aren't all depeleted, its usable
+					or (charges and charges > 0)
+					-- If we're just on a GCD, its usable
+					or OnGCD(duration)
+				)
+			then --usable
 				if not usableFound then
 					--wipe(usableData)
 					usableData.state = STATE_USABLE
@@ -231,6 +228,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 					usableData.stack = stack
 					usableData.charges = charges
 					usableData.maxCharges = maxCharges
+					usableData.chargeStart = chargeStart
+					usableData.chargeDur = chargeDur
 					usableData.start = start
 					usableData.duration = duration
 					
@@ -248,6 +247,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 				unusableData.stack = stack
 				unusableData.charges = charges
 				unusableData.maxCharges = maxCharges
+				unusableData.chargeStart = chargeStart
+				unusableData.chargeDur = chargeDur
 				unusableData.start = start
 				unusableData.duration = duration
 				
@@ -271,11 +272,11 @@ local function SpellCooldown_OnUpdate(icon, time)
 	
 	if dataToUse then
 		icon:SetInfo(
-			"state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+			"state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 			dataToUse.state,
 			dataToUse.tex,
 			dataToUse.start, dataToUse.duration,
-			dataToUse.charges, dataToUse.maxCharges,
+			dataToUse.charges, dataToUse.maxCharges, dataToUse.chargeStart, dataToUse.chargeDur,
 			dataToUse.stack, dataToUse.stack,
 			dataToUse.iName
 		)

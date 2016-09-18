@@ -31,7 +31,6 @@ L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]     = L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]   
 L["CLEU_SPELL_STOLEN_DESC"]             = L["CLEU_SPELL_STOLEN_DESC"]               :format(Spell(30449))
 L["SPELLCHARGES_DESC"]                  = L["SPELLCHARGES_DESC"]                    :format(Spell(109132), Spell(115308))
 L["SPELLCHARGETIME_DESC"]               = L["SPELLCHARGETIME_DESC"]                 :format(Spell(109132), Spell(105174))
-L["ICONMENU_SHOWTTTEXT_FIRST_DESC"]     = L["ICONMENU_SHOWTTTEXT_FIRST_DESC"]       :format(Spell(158300))
 
 
 L["ICONMENU_ICD_DESC"]                  = L["ICONMENU_ICD_DESC"]                    :format(L["ICONMENU_ICDTYPE"])
