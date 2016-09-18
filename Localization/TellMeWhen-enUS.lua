@@ -546,6 +546,8 @@ L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to
 
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar across the top half of the icon that will display the power still needed to cast the spell."
 L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar across the bottom half of the icon that will display the icon's timer."
+L["ICONMENU_REVERSEBARS"] = "Flip"
+L["ICONMENU_REVERSEBARS_DESC"] = "Flips the origin point from the left to the right if checked."
 L["ICONMENU_INVERTBARS"] = "Fill bar up"
 L["ICONMENU_INVERTCBAR_DESC"] = "Causes the bar to fill up as duration reaches zero."
 L["ICONMENU_INVERTPBAR_DESC"] = "Causes the bar to fill up as power become sufficient."

@@ -2,6 +2,7 @@
 * New DogTag: MaxDuration
 * Controlled icons can now be selected as a target of Meta icons and Icon Shown conditions.
 * Cooldown sweeps that are displaying charges during a GCD when the GCD is allowed will now show the GCD.
+* You can now flip the origin of progress bars to the right side of the icon.
 
 ====Bug Fixes====
 * Fixed an issue that would cause unintentional renaming of text layouts. 

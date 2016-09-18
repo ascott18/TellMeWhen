@@ -23,6 +23,7 @@ local print = TMW.print
 local TimerBar_BarDisplay = TMW:NewClass("IconModule_TimerBar_BarDisplay", "IconModule_TimerBar")
 
 TimerBar_BarDisplay:RegisterIconDefaults{
+	BarDisplay_Reverse			= false,
 	BarDisplay_Invert			= false,
 	BarDisplay_BarGCD			= false,
 	BarDisplay_ClassColor		= false,
@@ -212,6 +213,7 @@ function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 	end
 
 	self.sourceIcon = sourceIcon
+	self.bar:SetReverseFill(sourceIcon.BarDisplay_Reverse)
 	self:SetupColors(sourceIcon, sourceIcon.attributes.valueColor, sourceIcon.attributes.unit)
 	
 	self:UpdateValue(true)
