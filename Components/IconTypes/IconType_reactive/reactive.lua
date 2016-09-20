@@ -229,7 +229,7 @@ local function Reactive_OnUpdate(icon, time)
 	end
 	
 	if duration then
-		icon:SetInfo("state; texture; start, duration; charges, maxCharges; stack, stackText; spell",
+		icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 			not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_DEFAULT_NOMANA or STATE_UNUSABLE,
 			icon.FirstTexture,
 			start, duration,
