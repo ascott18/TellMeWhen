@@ -691,7 +691,12 @@ do
 	end
 
 	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
-		icon:SetInfo("charges, maxCharges, chargeStart, chargeDur", nil, nil)
+		icon:SetInfo("charges, maxCharges, chargeStart, chargeDur", nil, nil, nil, nil)
+	end)
+	TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
+		if not TMW.Locked then
+			icon:SetInfo("charges, maxCharges, chargeStart, chargeDur", nil, nil, nil, nil)
+		end
 	end)
 end
 

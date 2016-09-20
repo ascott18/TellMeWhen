@@ -206,22 +206,31 @@ function CooldownSweep:SetupForIcon(icon)
 	
 	-- Tukui uses Blizzard's cooldown count numbers, and just styles them.
 	
+	-- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
+	self.cooldown.noCooldownCount = not icon.ShowTimerText
+	if self.cooldown2 then
+		self.cooldown2.noCooldownCount = not icon.ShowTimerText 
+	end
 	if elvui_loaded then
-		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
-	else
-		self.cooldown.noCooldownCount = not icon.ShowTimerText -- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 	end
 
 	-- new in WoW 6.0
+	local hideNumbers
 	if omnicc_loaded
 	or tullacc_loaded
 	or TMW.db.profile.ForceNoBlizzCC
 	or LibStub("AceAddon-3.0"):GetAddon("LUI_Cooldown", true)
 	then
-		self.cooldown:SetHideCountdownNumbers(true)
+		hideNumbers = true
 	else
-		self.cooldown:SetHideCountdownNumbers(not self.ShowTimerText)
+		hideNumbers = not self.ShowTimerText
+	end
+
+	self.hideNumbers = hideNumbers
+	self.cooldown:SetHideCountdownNumbers(hideNumbers)
+	if self.cooldown2 then
+		self.cooldown2:SetHideCountdownNumbers(hideNumbers)
 	end
 
 	-- new in WoW 6.2
@@ -255,24 +264,16 @@ function CooldownSweep:UpdateCooldown()
 	end
 
 	if mainDuration > 0 then
-		-- if ElvUI then
-		-- 	local E = ElvUI[1]
-		-- 	if E and E.OnSetCooldown then
-		-- 		if not self.noOCC and E.private.cooldown.enable then
-		-- 			E.OnSetCooldown(cd, mainStart, mainDuration, cd.charges, cd.maxCharges)
-		-- 		elseif cd.timer then
-		-- 			E:Cooldown_StopTimer(cd.timer)
-		-- 		end
-		-- 	end
-		-- elseif Tukui then
-		-- 	local T = Tukui[1]
-		-- 	if T and T.Cooldowns then
-		-- 		-- This is broken as of Tukui v16.02, but should be fixed soon after (I emailed and they quickly responded)
-
-		-- 		-- We will safecall this just to be safe, in case it changes in a way that breaks things.
-		-- 		TMW.safecall(T.Cooldowns.UpdateCooldown, cd, cd.start, duration, true, cd.charges, cd.maxCharges, false)
-		-- 	end
-		-- end
+		if ElvUI then
+			local E = ElvUI[1]
+			if E and E.OnSetCooldown then
+				if not self.noOCC and E.private.cooldown.enable then
+					E.OnSetCooldown(cd, mainStart, mainDuration)
+				elseif cd.timer then
+					E:Cooldown_StopTimer(cd.timer)
+				end
+			end
+		end
 
 		if self.ShowTimer then
 			cd:SetDrawEdge(TMW.db.profile.DrawEdge)
@@ -300,6 +301,8 @@ function CooldownSweep:UpdateCooldown()
 			cd2:SetAllPoints(self.cooldown)
 			cd2:SetDrawSwipe(false)
 			cd2:SetDrawBling(false)
+			cd2:SetHideCountdownNumbers(self.hideNumbers)
+			cd2.noCooldownCount = not icon.ShowTimerText
 		end
 
 		cd2:SetDrawEdge(self.ShowTimer)
