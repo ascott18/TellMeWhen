@@ -153,7 +153,7 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-Type:Register(102)
+Type:Register(103)
 
 
 

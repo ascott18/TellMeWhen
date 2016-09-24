@@ -17,6 +17,7 @@ TMW.CHANGELOG = [==[
 * Fixed an issue with Condition-triggered animations not being able to stop for non-icon-based animations.
 * Fel Rush and Infernal Strike should now work with the Last Ability Used condition.
 * On Show/On Hide notification triggers should now work on controlled icons.
+* All-Unit Buffs/Debuffs icons should now work correctly for infinite duration effects. They're also a bit better now at cleaning up things that expired.
 
 ===v8.1.2===
 * Restored the old Buff/Debuff duration percentage conditions, since they still have applications for variable-duration effects like Rogue DoTs.
