@@ -109,7 +109,9 @@
 						GameTooltip:AddLine(self.__title, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
 						GameTooltip:AddLine(self.__text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 
-						TMW.IE:TooltipAddSpellBreakdown(TMW.IE:GetRealNames(self:GetText()))
+						if not self:GetParent().noBreakdown then
+							TMW.IE:TooltipAddSpellBreakdown(TMW.IE:GetRealNames(self:GetText()))
+						end
 
 						GameTooltip:Show()
 					</OnEnter>
@@ -161,10 +163,12 @@
 					local title = TMW.L["ICONMENU_CHOOSENAME3"]
 					local tooltip = TMW.L["CHOOSENAME_DIALOG"]
 
+					self.noBreakdown = false
 					if supplementalData then
 						title = supplementalData.title or title
 						tooltip = supplementalData.text or tooltip
 
+						self.noBreakdown = supplementalData.noBreakdown
 						TMW.SUG:EnableEditBox(self.Name, supplementalData.SUGType or "spell")
 					else
 						TMW.SUG:EnableEditBox(self.Name, "spell")

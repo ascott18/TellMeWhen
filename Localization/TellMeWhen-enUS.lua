@@ -280,10 +280,31 @@ L["ICONMENU_DOTWATCH_AURASFOUND_DESC"] = "Set the icon opacity level for when an
 L["ICONMENU_DOTWATCH_NOFOUND_DESC"] = "Set the icon opacity level for when none of the tracked buffs/debuffs are found."
 
 
-L["ICONMENU_BUFFCHECK"] = "Buff/Debuff Check"
-L["ICONMENU_BUFFCHECK_DESC"] = [[Checks if a buff is absent from any unit that you check.
 
-Use this icon type to check for missing raid buffs.
+L["ICONMENU_GUARDIAN"] = "Guardians"
+L["ICONMENU_GUARDIAN_DESC"] = [[Tracks your active guardians. These are minor units like Wild Imps for Warlocks.
+
+This icon type works best when used as a group controller.]]
+L["ICONMENU_GUARDIAN_TRIGGER"] = "Triggered by: %s"
+L["ICONMENU_GUARDIAN_CHOOSENAME_DESC"] = [[Enter the Name or NPC ID of the guardians you want this icon to monitor.
+
+You can add multiple entries (any combination of names and IDs) by separating them with semicolons (;).]]
+
+L["ICONMENU_GUARDIAN_EMPOWERED"] = "Empowered"
+L["ICONMENU_GUARDIAN_UNEMPOWERED"] = "Unempowered"
+
+L["ICONMENU_GUARDIAN_DUR"] = "Duration to Show"
+L["ICONMENU_GUARDIAN_DUR_GUARDIAN"] = "Guardian Only"
+L["ICONMENU_GUARDIAN_DUR_EMPOWER"] = "Empower Only"
+L["ICONMENU_GUARDIAN_DUR_EITHER"] = "Empower First"
+L["ICONMENU_GUARDIAN_DUR_EITHER_DESC"] = "If empowered, the duration of empower will be used if it is less than the remaining duration of the guardian. Otherwise, the duration of the guardian will be used."
+
+
+
+L["ICONMENU_BUFFCHECK"] = "Missing Buffs/Debuffs"
+L["ICONMENU_BUFFCHECK_DESC"] = [[Checks if an aura is absent from any of the units being watched.
+
+Use this icon type for things like checking for missing raid buffs.
 
 Most other situations should use the %q icon type.]]
 
@@ -407,7 +428,7 @@ L["ICONMENU_OOPOWER"] = "Out of Power"
 L["ICONMENU_OO_F"] = "Out of %s"
 
 L["ICONMENU_STATECOLOR"] = "Icon Tint & Texture"
-L["ICONMENU_STATECOLOR_DESC"] = [[Set the tint of the icon's texture in this icon state.
+L["ICONMENU_STATECOLOR_DESC"] = [[|cff7fffffClick|r to set the tint of the icon's texture in this icon state.
 
 White is normal. Any other color will tint the texture to that color.
 

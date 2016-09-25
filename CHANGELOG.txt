@@ -1,4 +1,6 @@
-===v8.1.3===
+===v8.2.0===
+* New Icon Type: Guardians. Currently only implemented for Warlocks to track their Wild Imps/Dreadstalkers/etc.
+
 * New DogTag: MaxDuration
 * Controlled icons can now be selected as a target of Meta icons and Icon Shown conditions.
 * Cooldown sweeps that are displaying charges during a GCD when the GCD is allowed will now show the GCD.

@@ -118,38 +118,39 @@ local BaseDurations = {}
 local DurationExtends = {}
 
 
-local AllUnits = TMW:GetUnits(nil, [[
-	player;
-	mouseover;
+local AllUnits
+local function CreateAllUnits()
+	AllUnits = AllUnits or TMW:GetUnits(nil, [[
+		player;
+		mouseover;
 
-	target;
-	targettarget;
-	targettargettarget;
+		target;
+		targettarget;
+		targettargettarget;
 
-	focus;
-	focustarget;
-	focustargettarget;
+		focus;
+		focustarget;
+		focustargettarget;
 
-	pet;
-	pettarget;
-	pettargettarget;
-	
-	nameplate1-30;
+		pet;
+		pettarget;
+		pettargettarget;
+		
+		nameplate1-30;
 
-	arena1-5;
-	arena1-5target;
+		arena1-5;
+		arena1-5target;
 
-	boss1-5;
-	boss1-5target;
+		boss1-5;
+		boss1-5target;
 
-	party1-4;
-	party1-4target;
+		party1-4;
+		party1-4target;
 
-	raid1-40;
-	raid1-40target;]]
-)
-
-
+		raid1-40;
+		raid1-40target;]]
+	)
+end
 
 local function ScanForAura(GUID, spellName, spellID)
 	for i = 1, #AllUnits do
@@ -552,11 +553,14 @@ function Type:Setup(icon)
 		nil, nil
 	)
 
-
+	CreateAllUnits()
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	TMW:RegisterCallback("TMW_ICON_DISABLE", Type)
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
+	TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", Type)
+
 	if not Type.CleanupTimer then
 		Type.CleanupTimer = C_Timer.NewTicker(10, CleanupOldAuras)
-		TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", VerifyAll)
 	end
 
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
@@ -575,23 +579,27 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, icon)
+function Type:TMW_ONUPDATE_TIMECONSTRAINED_PRE()
+	VerifyAll()
+end
+
+function Type:TMW_ICON_DISABLE(event, icon)
+	ManualIconsManager:UpdateTable_Unregister(icon)
+end
+
+function Type:TMW_GLOBAL_UPDATE()
 	-- UnitGUID() returns nil at load time, so we need to run this later in order to get pGUID.
 	-- TMW_GLOBAL_UPDATE is good enough.
 	pGUID = UnitGUID("player")
 
 	Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-
-	TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", VerifyAll)
+	TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", Type)
+	
 	if Type.CleanupTimer then
 		Type.CleanupTimer:Cancel()
 		Type.CleanupTimer = nil
 		CleanupOldAuras()
 	end
-end)
-
-TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
-	ManualIconsManager:UpdateTable_Unregister(icon)
-end)
+end
 
 Type:Register(102)

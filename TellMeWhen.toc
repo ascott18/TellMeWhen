@@ -8,7 +8,7 @@
 ## X-Interface: 70000
 ## Title: TellMeWhen
 
-## Version: 8.1.3
+## Version: 8.2.0
 ## Author: Cybeloras of Aerie Peak\Detheroc\Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
@@ -208,6 +208,7 @@ Components\IconTypes\IconType_cooldown\cooldown.lua
 Components\IconTypes\IconType_default\default.lua
 Components\IconTypes\IconType_dotwatch\dotwatch.lua
 Components\IconTypes\IconType_dr\dr.lua
+Components\IconTypes\IconType_guardian\guardian.lua
 Components\IconTypes\IconType_icd\icd.lua
 Components\IconTypes\IconType_item\item.lua
 Components\IconTypes\IconType_losecontrol\losecontrol.lua
