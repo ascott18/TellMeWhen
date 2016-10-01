@@ -233,6 +233,7 @@ local function OnUpdate(icon, time)
 
 	local count = nil
 	if not icon:IsControlled() then
+		local NameHash = icon.NPCs.Hash
 		count = 0
 		-- Non-controlled icons should show the number of active ones right on the icon.
 		-- Controlled icons show this based on the number of icons shown.
@@ -245,7 +246,7 @@ local function OnUpdate(icon, time)
 
 			-- If the guardian matches the icon's name/id filters, and it would be shown based on opacity filters,
 			-- the include it in the count.
-			if (icon.Name == "" or Guardian.nameLower == iName or Guardian.npcID == iName)
+			if (icon.Name == "" or NameHash[Guardian.nameLower] or NameHash[Guardian.npcID])
 			and ((presentAlpha > 0 and empowerRemaining <= 0) or (empowerAlpha > 0 and empowerRemaining > 0)) then
 				count = count + 1
 			end

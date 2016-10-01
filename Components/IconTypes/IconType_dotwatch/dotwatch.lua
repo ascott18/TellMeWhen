@@ -70,26 +70,26 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 	[ STATE_ABSENT  ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"],  tooltipText = L["ICONMENU_DOTWATCH_NOFOUND_DESC"],    },
 })
 
-Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
-	self:SetTitle(L["ICONMENU_DOTWATCH_GCREQ"])
+-- Type:RegisterConfigPanel_ConstructorFunc(10, "TellMeWhen_DotwatchSettings", function(self)
+-- 	self:SetTitle(L["ICONMENU_DOTWATCH_GCREQ"])
 
-	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	self.text:SetWordWrap(true)
-	self.text:SetPoint("TOP", 0, -10)
-	self.text:SetText(L["ICONMENU_DOTWATCH_GCREQ_DESC"])
-	self.text:SetWidth(self:GetWidth() - 15)
-	self:SetHeight(self.text:GetStringHeight() + 20)
+-- 	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+-- 	self.text:SetWordWrap(true)
+-- 	self.text:SetPoint("TOP", 0, -10)
+-- 	self.text:SetText(L["ICONMENU_DOTWATCH_GCREQ_DESC"])
+-- 	self.text:SetWidth(self:GetWidth() - 15)
+-- 	self:SetHeight(self.text:GetStringHeight() + 20)
 
-	self:SetScript("OnSizeChanged", function()
-		self:SetHeight(self.text:GetStringHeight() + 20)
-	end)
+-- 	self:SetScript("OnSizeChanged", function()
+-- 		self:SetHeight(self.text:GetStringHeight() + 20)
+-- 	end)
 
-	self:CScriptAdd("PanelSetup", function()
-		if TMW.CI.icon:IsGroupController() then
-			self:Hide()
-		end
-	end)
-end)
+-- 	self:CScriptAdd("PanelSetup", function()
+-- 		if TMW.CI.icon:IsGroupController() then
+-- 			self:Hide()
+-- 		end
+-- 	end)
+-- end)
 
 -- Holds all dotwatch icons that we need to update.
 -- Since the event handling for this icon type is all done by a single handler that operates on all icons,
@@ -400,11 +400,6 @@ Aura = TMW:NewClass("Aura"){
 }
 Aura:MakeInstancesWeak()
 
-local noRefreshDuration = {
-	980,	-- Agony (Warlock)
-	155159,	-- Necrotic Plague
-}
-
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, destName, _, _, spellID, spellName, _, _, stack)
 	if sourceGUID == pGUID 
 	and	(cleuEvent == "SPELL_AURA_APPLIED"
@@ -438,9 +433,6 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, 
 			end
 
 			if cleuEvent == "SPELL_AURA_APPLIED_DOSE" then
-				if noRefreshDuration[spellID] then
-					aura:Refresh()
-				end
 				aura.stacks = stack
 				aura.verified = false
 			elseif cleuEvent == "SPELL_AURA_REMOVED_DOSE" then
@@ -568,13 +560,7 @@ function Type:Setup(icon)
 	icon:SetUpdateMethod("manual")
 	ManualIconsManager:UpdateTable_Register(icon)
 		
-
-	if icon:IsGroupController() then
-		icon:SetUpdateFunction(Dotwatch_OnUpdate_Controller)
-	elseif icon.Enabled and icon:IsBeingEdited() and TellMeWhen_DotwatchSettings then
-		-- GLOBALS: TellMeWhen_DotwatchSettings
-		TellMeWhen_DotwatchSettings:Flash(1.5)
-	end
+	icon:SetUpdateFunction(Dotwatch_OnUpdate_Controller)
 
 	icon:Update()
 end

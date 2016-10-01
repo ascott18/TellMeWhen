@@ -271,7 +271,7 @@ L["ICONMENU_DOTWATCH_DESC"] = [[Attempts to track the buffs and debuffs that you
 
 Useful for tracking multi-dotting.
 
-This icon type MUST be used as a Group Controller - it cannot be a standalone icon.]]
+This icon type works best when used as a group controller.]]
 L["ICONMENU_DOTWATCH_GCREQ"] = "Must be a group controller"
 L["ICONMENU_DOTWATCH_GCREQ_DESC"] = [[This icon type must be a group controller in order to function. You cannot use it as a standalone icon.
 
