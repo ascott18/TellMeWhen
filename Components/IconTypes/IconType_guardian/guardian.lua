@@ -230,8 +230,30 @@ local function OnUpdate(icon, time)
 	local presentAlpha = icon.States[STATE_PRESENT].Alpha
 	local empowerAlpha = icon.States[STATE_PRESENT_EMPOWERED].Alpha
 
+
+	local count = nil
+	if not icon:IsControlled() then
+		count = 0
+		-- Non-controlled icons should show the number of active ones right on the icon.
+		-- Controlled icons show this based on the number of icons shown.
+		for _, Guardian in pairs(Guardians) do
+
+			local empowerStart = Guardian.empowerStart
+			local empowerDuration = Guardian.empowerDuration
+
+			local empowerRemaining = empowerDuration - (time - empowerStart)
+
+			-- If the guardian matches the icon's name/id filters, and it would be shown based on opacity filters,
+			-- the include it in the count.
+			if (icon.Name == "" or Guardian.nameLower == iName or Guardian.npcID == iName)
+			and ((presentAlpha > 0 and empowerRemaining <= 0) or (empowerAlpha > 0 and empowerRemaining > 0)) then
+				count = count + 1
+			end
+		end
+	end
+
 	-- Iterate in order that NPCs were inputted so that different types stay grouped together.
-	-- Dummy max limit of 1 if there was no input.
+	-- Dummy max limit of 1 if there is no name filter.
 	for i = 1, icon.Name == "" and 1 or #NPCs do
 		local iName = NPCs[i]
 
@@ -262,11 +284,11 @@ local function OnUpdate(icon, time)
 					end
 
 					if empowerRemaining > 0 then
-						if empowerAlpha > 0 and not icon:YieldInfo(true, STATE_PRESENT_EMPOWERED, start, duration, Guardian.texture) then
+						if empowerAlpha > 0 and not icon:YieldInfo(true, STATE_PRESENT_EMPOWERED, start, duration, Guardian.texture, count) then
 							return
 						end
 					else
-						if presentAlpha > 0 and not icon:YieldInfo(true, STATE_PRESENT, start, duration, Guardian.texture) then
+						if presentAlpha > 0 and not icon:YieldInfo(true, STATE_PRESENT, start, duration, Guardian.texture, count) then
 							return
 						end
 					end
@@ -278,18 +300,20 @@ local function OnUpdate(icon, time)
 	icon:YieldInfo(false)
 end
 
-function Type:HandleYieldedInfo(icon, iconToSet, state, start, duration, texture)
+function Type:HandleYieldedInfo(icon, iconToSet, state, start, duration, texture, count)
 	if state then
-		iconToSet:SetInfo("state; texture; start, duration",
+		iconToSet:SetInfo("state; texture; start, duration; stack, stackText",
 			state,
 			texture,
-			start, duration
+			start, duration,
+			count, count
 		)
 	else
-		iconToSet:SetInfo("state; texture; start, duration",
+		iconToSet:SetInfo("state; texture; start, duration; stack, stackText",
 			STATE_ABSENT,
 			icon.FirstTexture,
-			0, 0
+			0, 0,
+			nil, nil
 		)
 	end
 end
