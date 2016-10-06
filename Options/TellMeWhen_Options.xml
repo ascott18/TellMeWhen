@@ -973,9 +973,6 @@
 	<Frame name="TellMeWhen_SimpleDialog" hidden="true" movable="true" toplevel="true" clampedToScreen="true" enableMouse="true" frameStrata="DIALOG" parent="UIParent" virtual="true">
 		<Size x="330"/>
 
-		<!-- Enables the whole frame for dragging -->
-		<TitleRegion setAllPoints="true"/>
-
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="background">
@@ -1027,9 +1024,14 @@
 		</Frames>
 		<Scripts>
 			<OnShow>
-				-- WoW Legion bugfix - TitleRegions don't work until you poke them: http://www.wowinterface.com/forums/showthread.php?p=316445#post316445
-				self:GetTitleRegion():GetCenter()
+				self:RegisterForDrag("LeftButton")
 			</OnShow>
+			<OnDragStart>
+				self:StartMoving()
+			</OnDragStart>
+			<OnDragStop>
+				self:StopMovingOrSizing()
+			</OnDragStop>
 		</Scripts>
 	</Frame>
 
@@ -1489,7 +1491,7 @@
 	</Frame>
 
 	<Frame name="TellMeWhen_DBRestoredNofication" inherits="TellMeWhen_SimpleDialog" >
-		<Size x="400"/>
+		<Size x="400" y="100"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent" y="50"/>
 		</Anchors>
@@ -1511,6 +1513,7 @@
 			<OnLoad>
 				function self:SetTime(time)
 					self.desc:SetText(TMW.L["DBRESTORED_INFO"]:format(date("%B %d, %Y @ %I:%M %p", time)))
+					TMW:Print(self.desc:GetText())
 					self.desc:SetWidth(self:GetWidth() - 30)
 					self:SetHeight(self.desc:GetHeight() + 65)
 				end
@@ -1629,7 +1632,6 @@
 				self.desc:SetWidth(self:GetWidth() - 30)
 				self.desc2:SetWidth(self:GetWidth() - 30)
 
-				self:SetScale(0.85)
 				self:SetHeight(self.desc:GetHeight() + self.desc2:GetHeight() + 140)
 
 				TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(locked)
@@ -1859,7 +1861,7 @@
 
 
 
-	<Frame name="TellMeWhen_IconEditor" hidden="true" movable="true" clampedToScreen="true" enableMouse="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG" inherits="TellMeWhen_SimpleDialog">
+	<Frame name="TellMeWhen_IconEditor" hidden="true" enableKeyboard="true" propagateKeyboardInput="true" frameStrata="DIALOG" inherits="TellMeWhen_SimpleDialog">
 		<Size x="586" y="380"/>
 		<Anchors>
 			<Anchor point="CENTER" relativeTo="UIParent"/>
@@ -2356,16 +2358,11 @@
 
 				-- Needs to go before TellMeWhen_ChangelogDialog or else it will get hidden immediately after the changelog hides.
 				tinsert(UISpecialFrames, 1, self:GetName())
+
 			</OnLoad>
 			<OnSizeChanged>
 				TMW.IE:ResizeTabs()
 			</OnSizeChanged>
-			<!-- <OnDragStart>
-				TMW.IE:StartMoving()
-			</OnDragStart>
-			<OnDragStop>
-				TMW.IE:StopMovingOrSizing()
-			</OnDragStop> -->
 		</Scripts>
 	</Frame>
 

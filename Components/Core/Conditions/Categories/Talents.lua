@@ -348,7 +348,6 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 })
 
 
--- TODO: add a pvp talent condition
 CNDT.Env.TalentMap = {}
 CNDT.Env.PvpTalentMap = {}
 function CNDT:PLAYER_TALENT_UPDATE()
@@ -441,24 +440,6 @@ ConditionCategory:RegisterCondition(10,	 "PVPTALENTLEARNED", {
 	end,
 })
 
-local GetGlyphSocketInfo = GetGlyphSocketInfo
-function CNDT:GLYPH_UPDATED()
-	local GlyphLookup = Env.GlyphLookup
-	wipe(GlyphLookup)
-	for i = 1, NUM_GLYPH_SLOTS do
-		local _, _, _, spellID = GetGlyphSocketInfo(i)
-		local link = GetGlyphLink(i)
-		local glyphID = tonumber(strmatch(link, "|H.-:(%d+)"))
-		
-		if glyphID then
-			GlyphLookup[glyphID] = 1
-			
-			local name = GetSpellInfo(spellID)
-			name = strlowerCache[name]
-			GlyphLookup[name] = 1
-		end
-	end
-end
 ConditionCategory:RegisterCondition(11,	 "GLYPH", {
 	text = L["UIPANEL_GLYPH"],
 	tooltip = L["UIPANEL_GLYPH_DESC"],

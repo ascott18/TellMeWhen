@@ -2,7 +2,7 @@
 	
 
 	<Frame name="TellMeWhen_TextLayout_ListItem" virtual="true" >
-		<Size y="30" />
+		<Size y="18" />
 		<Anchors>
 			<Anchor point="LEFT" />
 			<Anchor point="RIGHT" />

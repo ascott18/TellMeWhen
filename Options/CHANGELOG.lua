@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = [==[
 ===v8.2.0===
 * New Icon Type: Guardians. Currently only implemented for Warlocks to track their Wild Imps/Dreadstalkers/etc.
+* Support for Patch 7.1.
 
 * New DogTag: MaxDuration
 * Controlled icons can now be selected as a target of Meta icons and Icon Shown conditions.

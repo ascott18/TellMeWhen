@@ -36,6 +36,8 @@ local CI = TMW.CI
 if not TEXT then return end
 
 
+local clientVersion = select(4, GetBuildInfo())
+local wow_701 = clientVersion >= 70100 or GetBuildInfo() == "7.1.0" -- they haven't updated the interface number yet.
 
 
 
@@ -145,6 +147,7 @@ TMW:NewClass("Config_TextLayout_ListItem", "Config_Frame") {
 		self:CScriptAdd("SettingTableRequested", self.SettingTableRequested)
 
 		self.Layout:SetScript("OnClick", self.LayoutOnClick)
+		self:SetClipsChildren(true)
 	end,
 
 	SettingTableRequested = function(self)
@@ -205,12 +208,11 @@ TMW:NewClass("Config_TextLayout_ListItem", "Config_Frame") {
 
 			TMW:TT(self.Layout, name, self.tooltipFunction, 1, 1)
 
-
 			-- Setup text display frames
-			if self.Layout:GetChecked() then
-				for id, displaySettings in TMW:InNLengthTable(layoutSettings) do
-					local frame = self:GetTextDisplayFrame(id)
+			for id, displaySettings in TMW:InNLengthTable(layoutSettings) do
+				local frame = self:GetTextDisplayFrame(id)
 
+				if wow_701 or self.Layout:GetChecked() then
 					frame:Show()
 
 					numShown = id
@@ -219,7 +221,7 @@ TMW:NewClass("Config_TextLayout_ListItem", "Config_Frame") {
 		end
 
 		-- Load the first display if there isn't one already loaded.
-		if numShown > 0 and not currentDisplayID then
+		if self.Layout:GetChecked() and not currentDisplayID then
 			TEXT:SetCurrentDisplay(1)
 		end
 
@@ -228,13 +230,13 @@ TMW:NewClass("Config_TextLayout_ListItem", "Config_Frame") {
 			self.frames[i]:Hide()
 		end
 
-		-- Adjust the height to fit all the text displays.
-		local bottomPadding = 0
-		if numShown > 0 then
-			bottomPadding = 10
+		if self.Layout:GetChecked() then
+			-- Adjust the height to fit all the text displays.
+			self:AdjustHeightAnimated(10, 0.2)
+		else
+			-- Shrink to just fit the header.
+			TMW:AnimateHeightChange(self, self.Layout:GetHeight(), 0.2)
 		end
-
-		self:AdjustHeightAnimated(bottomPadding, 0.1)
 	end,
 
 	LayoutOnClick = function(Layout)

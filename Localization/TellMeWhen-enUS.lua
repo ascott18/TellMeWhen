@@ -59,10 +59,11 @@ L["IMPORTERROR_FAILEDPARSE"] = "There was an error processing the string. Ensure
 
 L["DBRESTORED_INFO"] = [[TellMeWhen has detected that its database was either empty or corrupted. This can be caused by a number of issues, the most common of which is WoW not exiting properly.
 
-TellMeWhen_Options maintains a backup of your database in case this happens since it is very unlikely that both TellMeWhen's and TellMeWhen_Options's databases will become corrupted in this way at the same time.
+TellMeWhen_Options maintains a backup of your database in case this happens. The current backup was created on:
 
+%s
 
-This backup, created from your session that began %s, has been restored.]]
+This backup has been restored.]]
 
 
 L["CHANGELOG"] = "Changelog"

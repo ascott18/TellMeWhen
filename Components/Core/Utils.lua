@@ -1354,6 +1354,7 @@ animator.OnUpdate = function()
 	for f in pairs(animator.frames) do
 		if TMW.time - f.__animateHeight_startTime > f.__animateHeight_duration then
 			animator.frames[f] = nil
+			f:SetClipsChildren(f.__animateHeight_wasClipping)
 			f:SetHeight(f.__animateHeight_end)
 		else
 			local pct = (TMW.time - f.__animateHeight_startTime)/f.__animateHeight_duration
@@ -1373,7 +1374,8 @@ function TMW:AnimateHeightChange(f, endHeight, duration)
 	f.__animateHeight_delta = f.__animateHeight_end - f.__animateHeight_start
 	f.__animateHeight_startTime = TMW.time
 	f.__animateHeight_duration = duration
-
+	f.__animateHeight_wasClipping = f:DoesClipChildren()
+	f:SetClipsChildren(true)
 	animator.frames[f] = true
 
 	animator:SetScript("OnUpdate", animator.OnUpdate)
