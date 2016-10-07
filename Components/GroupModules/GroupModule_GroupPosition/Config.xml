@@ -36,6 +36,15 @@
 								self:SetText("UIParent")
 							elseif value:match("|H") then
 								value = value:match("|H(.-)|h.*|h")
+							else
+								-- Match by the return of GetGroupName(). This allows copy/paste of this value from one group to another.
+								local trimmed = value:trim(" \t[]")
+								for group in TMW:InGroups() do
+									local groupName = group:GetGroupName():gsub("|c........", ""):gsub("|r", "")
+									if groupName == trimmed then
+										value = group:GetGUID()
+									end
+								end
 							end
 
 							return value
