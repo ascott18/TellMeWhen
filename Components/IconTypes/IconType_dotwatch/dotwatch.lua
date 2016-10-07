@@ -548,7 +548,6 @@ function Type:Setup(icon)
 	CreateAllUnits()
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterCallback("TMW_ICON_DISABLE", Type)
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
 	TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", Type)
 
 	if not Type.CleanupTimer then
@@ -573,7 +572,7 @@ function Type:TMW_ICON_DISABLE(event, icon)
 	ManualIconsManager:UpdateTable_Unregister(icon)
 end
 
-function Type:TMW_GLOBAL_UPDATE()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	-- UnitGUID() returns nil at load time, so we need to run this later in order to get pGUID.
 	-- TMW_GLOBAL_UPDATE is good enough.
 	pGUID = UnitGUID("player")
@@ -586,6 +585,6 @@ function Type:TMW_GLOBAL_UPDATE()
 		Type.CleanupTimer = nil
 		CleanupOldAuras()
 	end
-end
+end)
 
 Type:Register(102)

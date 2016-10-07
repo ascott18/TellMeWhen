@@ -135,6 +135,42 @@ Type.GuardianInfo = {
 		texture = GetSpellTexture(205180),
 		triggerSpell = 205180,
 	}, 
+
+	-- Grimorie: Imp
+	[416] = {
+		duration = 25,
+		texture = GetSpellTexture(111859),
+		triggerSpell = 111859,
+		triggerMustMatch = true,
+	}, 
+	-- Grimorie: Voidwalker
+	[1860] = {
+		duration = 25,
+		texture = GetSpellTexture(111895),
+		triggerSpell = 111895,
+		triggerMustMatch = true,
+	}, 
+	-- Grimorie: Succubus
+	[1863] = {
+		duration = 25,
+		texture = GetSpellTexture(111896),
+		triggerSpell = 111896,
+		triggerMustMatch = true,
+	}, 
+	-- Grimorie: Felhunter
+	[417] = {
+		duration = 25,
+		texture = GetSpellTexture(111897),
+		triggerSpell = 111897,
+		triggerMustMatch = true,
+	}, 
+	-- Grimorie: Felguard
+	[17252] = {
+		duration = 25,
+		texture = GetSpellTexture(111898),
+		triggerSpell = 111898,
+		triggerMustMatch = true,
+	}, 
 }
 local GuardianInfo = Type.GuardianInfo
 
@@ -165,12 +201,9 @@ local ManualIcons = {}
 local ManualIconsManager = TMW.Classes.UpdateTableManager:New()
 ManualIconsManager:UpdateTable_Set(ManualIcons)
 
-local function GetGuardianID(GUID)
+local function GetNPCID(GUID)
 	local id = tonumber(GUID:match(".-%-%d+%-%d+%-%d+%-%d+%-(%d+)") or 0)
-
-	if GuardianInfo[id] then
-		return id
-	end
+	return id
 end
 
 local Guardians = {}
@@ -184,10 +217,11 @@ local Guardian = TMW:NewClass(){
 		self.empowerStart = 0
 		self.empowerDuration = 0
 
-		self.npcID = GetGuardianID(GUID)
+		self.npcID = GetNPCID(GUID)
+		local info = GuardianInfo[self.npcID]
 
-		self.duration = GuardianInfo[self.npcID].duration
-		self.texture = GuardianInfo[self.npcID].texture
+		self.duration = info.duration
+		self.texture = info.texture
 	end,	
 
 	Empower = function(self)
@@ -207,17 +241,34 @@ local Guardian = TMW:NewClass(){
 
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, event, _, sourceGUID, sourceName, _, _, destGUID, destName, _, _, spellID)
-	if event == "SPELL_SUMMON" and GetGuardianID(destGUID) and sourceGUID == pGUID then
-		Guardians[destGUID] = Guardian:New(destGUID, destName)
+
+	if event == "SPELL_SUMMON" then
+		local npcID = GetNPCID(destGUID)
+		local info = GuardianInfo[npcID]
+		if info and sourceGUID == pGUID and (spellID == info.triggerSpell or not info.triggerMustMatch) then
+			Guardians[destGUID] = Guardian:New(destGUID, destName)
+		else
+			return
+		end
 	elseif (event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH") and sourceGUID == pGUID and spellID == 193396 then
-		local Guardian = Guardians[destGUID]
-		if Guardian then
-			Guardian:Empower()
+		local existingGuardian = Guardians[destGUID]
+		if existingGuardian then
+			existingGuardian:Empower()
 		end
 	elseif event == "UNIT_DIED" then
 		Guardians[destGUID] = nil
 	else
-		return
+		-- Sometimes on the first summon after logging in, the name of a guardian will be "Unknown" in the log.
+		-- If it was wrong and we're now seeing the correct name (because the guardian did something), then correct it.
+		local existingGuardian = Guardians[sourceGUID]
+		if existingGuardian and existingGuardian.name == UNKNOWN and sourceName ~= UNKNOWN then
+			print("fixed guardian name", sourceName)
+			existingGuardian.name = sourceName
+			existingGuardian.nameLower = strlowerCache[sourceName]
+		else
+			-- Don't fall through and trigger icon updates.
+			return
+		end
 	end
 
 	for k = 1, #ManualIcons do
@@ -332,7 +383,6 @@ function Type:Setup(icon)
 	
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterCallback("TMW_ICON_DISABLE", Type)
-	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", Type)
 	TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", Type)
 
 	icon:SetUpdateMethod("manual")
@@ -362,14 +412,14 @@ function Type:TMW_ONUPDATE_TIMECONSTRAINED_PRE(event, time)
 	end
 end
 
-function Type:TMW_GLOBAL_UPDATE()
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	-- UnitGUID() returns nil at load time, so we need to run this later in order to get pGUID.
 	-- TMW_GLOBAL_UPDATE is good enough.
 	pGUID = UnitGUID("player")
 	Type:RefreshNames()
 
 	Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-end
+end)
 
 function Type:TMW_ICON_DISABLE(event, icon)
 	ManualIconsManager:UpdateTable_Unregister(icon)

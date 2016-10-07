@@ -626,6 +626,15 @@ TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	end
 end)
 
+function IE:StartMoving()
+	IE.startX, IE.startY = select(4, IE:GetPoint())
+	IE.cursorStartX, IE.cursorStartY = GetCursorPosition()
+	IE.isMoving = true
+end
+
+function IE:StopMovingOrSizing()
+	IE.isMoving = false
+end
 
 
 

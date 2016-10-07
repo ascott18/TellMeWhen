@@ -2359,10 +2359,20 @@
 				-- Needs to go before TellMeWhen_ChangelogDialog or else it will get hidden immediately after the changelog hides.
 				tinsert(UISpecialFrames, 1, self:GetName())
 
+				self:RegisterForDrag("LeftButton")
 			</OnLoad>
 			<OnSizeChanged>
 				TMW.IE:ResizeTabs()
 			</OnSizeChanged>
+			<OnDragStart>
+				-- We use our own StartMoving for the icon editor because
+				-- the one Bliizard provides bugs out a lot and makes the frame jump around.
+				-- We only do this for the IE because all other frames are very seldom used.
+				TMW.IE:StartMoving()
+			</OnDragStart>
+			<OnDragStop>
+				TMW.IE:StopMovingOrSizing()
+			</OnDragStop>
 		</Scripts>
 	</Frame>
 
