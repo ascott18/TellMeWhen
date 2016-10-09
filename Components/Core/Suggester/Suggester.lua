@@ -138,7 +138,7 @@ function SUG:SuggestingComplete(doSort)
 			buckets_meta.__mode = nil
 
 			-- Fill the bukkits.
-			sorterBucket(SUGpreTable, buckets)
+			sorterBucket(SUG.CurrentModule, SUGpreTable, buckets)
 
 			-- All this data is in the buckets now, so wipe SUGpreTable
 			-- so we can fill it after we sort the buckets.
@@ -224,6 +224,7 @@ function SUG:SuggestingComplete(doSort)
 		f.insert2 = nil
 		f.tooltipmethod = nil
 		f.tooltiparg = nil
+		f.tooltiptitlewrap = 1
 		f.tooltiptitle = nil
 		f.tooltiptext = nil
 		f.overrideInsertID = nil
@@ -886,7 +887,7 @@ function Module:Table_Get()
 	return SpellCache_Cache
 end
 
-function Module.Sorter_Bucket(suggestions, buckets)
+function Module:Sorter_Bucket(suggestions, buckets)
 	for i = 1, #suggestions do
 		local id = suggestions[i]
 

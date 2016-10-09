@@ -27,6 +27,7 @@
 
 						self:SetTexts(TMW.L["UIPANEL_RELATIVETO"], TMW.L["UIPANEL_RELATIVETO_DESC"])
 						self:SetSetting("relativeTo")
+						TMW.SUG:EnableEditBox(self, "frameName", true)
 
 						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							value = value:trim()

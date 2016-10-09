@@ -2006,6 +2006,8 @@ L["SUG_PATTERNMATCH_FISHINGLURE"] = "Fishing Lure %(%+%d+ Fishing Skill%)" -- en
 L["SUG_PATTERNMATCH_WEIGHTSTONE"] = "Weighted %(%+%d+ Damage%)"
 L["SUG_PATTERNMATCH_SHARPENINGSTONE"] = "Sharpened %(%+%d+ Damage%)"
 
+L["SUG_MODULE_FRAME_LIKELYADDON"] = "Guessed source: %s"
+
 
 L["SUG_FIRSTHELP_DESC"] = [[The suggestion list speeds up configuration.
 

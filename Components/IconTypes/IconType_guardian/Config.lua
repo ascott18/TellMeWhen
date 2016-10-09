@@ -31,6 +31,7 @@ if not Type then return end
 local Module = SUG:NewModule("guardian", SUG:GetModule("default"))
 Module.noMin = true
 Module.showColorHelp = false
+Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 function Module:OnInitialize()
 	self.Table = {}
