@@ -163,9 +163,9 @@ CooldownSweep:RegisterAnchorableFrame("Cooldown")
 
 function CooldownSweep:OnNewInstance(icon)
 	self.cooldown = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown", icon, "CooldownFrameTemplate")
-	self.cooldown.module = self
 
-	self.cooldown:SetScript("OnShow", self.Cooldown_OnShow)
+	-- cooldown2 displays charges.
+	self.cooldown2 = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown2", icon, "CooldownFrameTemplate")
 	
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
 end
@@ -173,17 +173,13 @@ end
 local NeedsUpdate = {}
 
 
-function CooldownSweep:Cooldown_OnShow()
-	NeedsUpdate[self.module] = true
-end
-
-
 function CooldownSweep:OnDisable()
-	local cd = self.cooldown
-	
-	cd.start, cd.duration = 0, 0
-	cd.charges, cd.maxCharges = 0, 0
-	cd.chargeStart, cd.chargeDur = 0, 0
+	self.start = 0
+	self.duration = 0
+	self.charges = 0
+	self.maxCharges = 0
+	self.chargeStart = 0
+	self.chargeDur = 0
 	
 	self:UpdateCooldown()
 end
@@ -203,16 +199,12 @@ function CooldownSweep:SetupForIcon(icon)
 		self.ClockGCD = true
 	end
 	
-	
-	-- Tukui uses Blizzard's cooldown count numbers, and just styles them.
-	
 	-- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 	self.cooldown.noCooldownCount = not icon.ShowTimerText
-	if self.cooldown2 then
-		self.cooldown2.noCooldownCount = not icon.ShowTimerText 
-	end
+	self.cooldown2.noCooldownCount = not icon.ShowTimerText 
 	if elvui_loaded then
 		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
+		self.cooldown2.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
 	end
 
 	-- new in WoW 6.0
@@ -227,17 +219,18 @@ function CooldownSweep:SetupForIcon(icon)
 		hideNumbers = not self.ShowTimerText
 	end
 
-	self.hideNumbers = hideNumbers
 	self.cooldown:SetHideCountdownNumbers(hideNumbers)
-	if self.cooldown2 then
-		self.cooldown2:SetHideCountdownNumbers(hideNumbers)
-	end
-
-	-- new in WoW 6.2
+	self.cooldown:SetDrawEdge(self.ShowTimer and TMW.db.profile.DrawEdge)
+	self.cooldown:SetDrawSwipe(self.ShowTimer)
 	self.cooldown:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
-	
+
+	self.cooldown2:SetHideCountdownNumbers(hideNumbers)
+	self.cooldown2:SetDrawEdge(self.ShowTimer)
+	self.cooldown2:SetDrawSwipe(false)
+	self.cooldown2:SetDrawBling(false)
+
+
 	local attributes = icon.attributes
-	
 	
 	self:DURATION(icon, attributes.start, attributes.duration)
 	self:SPELLCHARGES(icon, attributes.charges, attributes.maxCharges, attributes.chargeStart, attributes.chargeDur)
@@ -246,20 +239,20 @@ end
 
 function CooldownSweep:UpdateCooldown()
 	local cd = self.cooldown
-	local duration = cd.duration
 	local icon = self.icon
 
-	--if self.updating then return end
-	self.updating = true
+	local duration = self.duration
 
-	local mainStart, mainDuration, mainIsCharges
+
+	local mainStart, mainDuration
 	local otherStart, otherDuration = 0, 0
-	if cd.maxCharges ~= 0 and cd.charges == 0 then
-		mainStart, mainDuration, mainIsCharges = cd.chargeStart, cd.chargeDur, true
+
+	if self.maxCharges ~= 0 and self.charges == 0 then
+		mainStart, mainDuration = self.chargeStart, self.chargeDur
 	else
-		mainStart, mainDuration, mainIsCharges = cd.start, duration, false
-		if cd.charges ~= cd.maxCharges then
-			otherStart, otherDuration = cd.chargeStart, cd.chargeDur
+		mainStart, mainDuration = self.start, duration
+		if self.charges ~= self.maxCharges then
+			otherStart, otherDuration = self.chargeStart, self.chargeDur
 		end
 	end
 
@@ -285,9 +278,6 @@ function CooldownSweep:UpdateCooldown()
 
 		cd:SetCooldown(mainStart, mainDuration)
 		cd:Show()
-
-	elseif icon.attributes.realAlpha == 0 or icon.group:GetEffectiveAlpha() == 0 then
-		cd:Hide()
 	else
 		cd:SetCooldown(0, 0)
 	end
@@ -295,39 +285,21 @@ function CooldownSweep:UpdateCooldown()
 	-- Handle charges of spells that aren't completely depleted.
 	local cd2 = self.cooldown2
 	if otherDuration > 0 then
-		if not cd2 then
-			cd2 = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown2", icon, "CooldownFrameTemplate")
-			self.cooldown2 = cd2
-			cd2:SetAllPoints(self.cooldown)
-			cd2:SetDrawSwipe(false)
-			cd2:SetDrawBling(false)
-			cd2:SetHideCountdownNumbers(self.hideNumbers)
-			cd2.noCooldownCount = not icon.ShowTimerText
-		end
-
-		cd2:SetDrawEdge(self.ShowTimer)
 		cd2:SetCooldown(otherStart, otherDuration)
 		cd2:Show()
-
-
-	elseif cd2 then
+	else
 		cd2:SetCooldown(0, 0)
-		cd2:Hide()
 	end
-
-	self.updating = false
 end
 
 function CooldownSweep:DURATION(icon, start, duration)
-	local cd = self.cooldown
-	
 	if (not self.ClockGCD and OnGCD(duration)) or (duration - (TMW.time - start)) <= 0 or duration <= 0 then
 		start, duration = 0, 0
 	end
 	
-	if cd.start ~= start or cd.duration ~= duration then
-		cd.start = start
-		cd.duration = duration
+	if self.start ~= start or self.duration ~= duration then
+		self.start = start
+		self.duration = duration
 		
 		NeedsUpdate[self] = true
 	end
@@ -335,12 +307,10 @@ end
 CooldownSweep:SetDataListener("DURATION")
 
 function CooldownSweep:SPELLCHARGES(icon, charges, maxCharges, chargeStart, chargeDur)
-	local cd = self.cooldown
-	
-	cd.charges = charges or 0
-	cd.maxCharges = maxCharges or 0
-	cd.chargeStart = chargeStart or 0
-	cd.chargeDur = chargeDur or 0
+	self.charges = charges or 0
+	self.maxCharges = maxCharges or 0
+	self.chargeStart = chargeStart or 0
+	self.chargeDur = chargeDur or 0
 	
 	NeedsUpdate[self] = true
 end
@@ -354,12 +324,6 @@ function CooldownSweep:REVERSE(icon, reverse)
 	self.cooldown:SetReverse(reverse)
 end
 CooldownSweep:SetDataListener("REVERSE")
-
-function CooldownSweep:REALALPHA(icon, realAlpha)
-	NeedsUpdate[self] = true
-end
-CooldownSweep:SetDataListener("REALALPHA")
-
 
 
 TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function()
