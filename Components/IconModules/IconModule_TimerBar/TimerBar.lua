@@ -79,6 +79,10 @@ function TimerBar:OnNewInstance(icon)
 	
 	self.start = 0
 	self.duration = 0
+	self.normalStart = 0
+	self.normalDuration = 0
+	self.chargeStart = 0
+	self.chargeDur = 0
 	self.Offset = 0
 	self.__oldPercent = 0
 	
@@ -92,7 +96,7 @@ function TimerBar:OnEnable()
 	self.bar:Show()
 	self.texture:SetTexture(StatusBarTexture)
 	
-	self:DURATION(icon, attributes.start, attributes.duration)
+	self:SetCooldown(attributes.start, attributes.start, attributes.chargeStart, attributes.chargeDur)
 end
 function TimerBar:OnDisable()
 	self.bar:Hide()
@@ -242,9 +246,19 @@ function TimerBar:UpdateStatusBarImmediate(value)
 	end
 end
 
-function TimerBar:SetCooldown(start, duration)
-	self.duration = duration
-	self.start = start
+function TimerBar:SetCooldown(start, duration, chargeStart, chargeDur)
+	self.normalStart, self.normalDuration = start, duration
+	self.chargeStart, self.chargeDur = chargeStart, chargeDur
+
+	if chargeDur and chargeDur > 0 then
+		duration = chargeDur
+
+		self.duration = chargeDur
+		self.start = chargeStart
+	else
+		self.duration = duration
+		self.start = start
+	end
 	
 	if duration > 0 then
 		if not self.BarGCD and self.icon:OnGCD(duration) then
@@ -266,10 +280,14 @@ function TimerBar:SetColors(startColor, halfColor, completeColor)
 end
 
 function TimerBar:DURATION(icon, start, duration)
-	self:SetCooldown(start, duration)
+	self:SetCooldown(start, duration, self.chargeStart, self.chargeDur)
 end
 TimerBar:SetDataListener("DURATION")
 
+function TimerBar:SPELLCHARGES(icon, charges, maxCharges, chargeStart, chargeDur)
+	self:SetCooldown(self.normalStart, self.normalDuration, chargeStart, chargeDur)
+end
+TimerBar:SetDataListener("SPELLCHARGES")
 
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)

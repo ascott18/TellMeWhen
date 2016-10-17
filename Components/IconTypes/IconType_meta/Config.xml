@@ -111,7 +111,7 @@
 						PlaySound("igMainMenuOptionCheckBoxOn")
 						
 						tinsert(TMW.CI.ics.Icons, "")
-						TMW.Types.meta.Config:LoadConfig()
+						TMW.Types.meta.Config:Reload()
 					</OnClick>
 				</Scripts>
 			</Button>

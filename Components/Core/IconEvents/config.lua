@@ -221,11 +221,14 @@ function EVENTS:LoadEventID(eventID)
 	
 	EVENTS.currentEventID = eventID ~= 0 and eventID or nil
 
+
+	-- RESET CONFIGURATION:
+	-- Uncheck all existing notification handlers
 	for i, frame in ipairs(EVENTS.EventHandlerFrames.frames) do
 		frame:SetChecked(false)
 	end
 
-
+	-- Hide the config containers for all handlers
 	for _, EventHandler in pairs(TMW.Classes.EventHandler.instancesByName) do
 		EventHandler.ConfigContainer:Hide()
 	end
@@ -238,8 +241,9 @@ function EVENTS:LoadEventID(eventID)
 		return
 	end
 
+	-- START LOADING NEW EVENT:
+	-- Check the corresponding notification handler list frame.
 	eventFrame:SetChecked(true)
-	
 
 	EVENTS:HidePickerButtons()
 	
@@ -253,6 +257,7 @@ function EVENTS:LoadEventID(eventID)
 		EventHandler:LoadSettingsForEventID(eventID)
 		EVENTS:LoadEventSettings()
 	end
+
 end
 
 function EVENTS:LoadEventSettings()
@@ -314,12 +319,12 @@ function EVENTS:LoadEventSettings()
 			end
 		end
 
-		EventSettingsContainer.PassingCndt:RequestReload()
+		-- EventSettingsContainer.PassingCndt:RequestReload()
 		if EventSettingsContainer.PassingCndt				:GetChecked() then
 			EventSettingsContainer.Operator.ValueLabel		:SetFontObject(GameFontHighlight)
 			EventSettingsContainer.Operator					:Enable()
 			EventSettingsContainer.Value					:Enable()
-			if settingsUsedByEvent and not settingsUsedByEvent.CndtJustPassed == "FORCE" then
+			if settingsUsedByEvent and type(settingsUsedByEvent.CndtJustPassed) ~= "function" then
 				EventSettingsContainer.CndtJustPassed		:Enable()
 			end
 		else
@@ -458,7 +463,8 @@ function EVENTS:PickEvent(event)
 
 	EVENTS:SetEvent(eventID, event)
 
-	EVENTS:LoadEventID(eventID)
+	EVENTS.currentEventID = eventID
+	IE.Pages.Events:OnSettingSaved()
 end
 
 function EVENTS:SetEvent(eventID, event)

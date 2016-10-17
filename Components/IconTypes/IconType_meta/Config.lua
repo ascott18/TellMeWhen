@@ -116,6 +116,10 @@ end
 local Config = {}
 Type.Config = Config
 
+function Config:Reload()
+	TellMeWhen_MetaIconOptions:OnSettingSaved()
+end
+
 function Config:LoadConfig()
 	if not TellMeWhen_MetaIconOptions then return end
 	local settings = CI.ics.Icons
@@ -151,12 +155,12 @@ end
 ---------- Click Handlers ----------
 function Config:Insert(where)
 	tinsert(CI.ics.Icons, where, "")
-	Config:LoadConfig()
+	Config:Reload()
 end
 
 function Config:Delete(self)
 	tremove(CI.ics.Icons, self:GetParent():GetID())
-	Config:LoadConfig()
+	Config:Reload()
 end
 
 function Config:SwapIcons(id1, id2)
@@ -164,7 +168,7 @@ function Config:SwapIcons(id1, id2)
 	
 	Icons[id1], Icons[id2] = Icons[id2], Icons[id1]
 	
-	Config:LoadConfig()
+	Config:Reload()
 end
 
 
@@ -234,7 +238,7 @@ function Config:IconMenuOnClick(frame)
 
 	CI.ics.Icons[frame:GetParent():GetID()] = GUID
 
-	Config:LoadConfig()
+	Config:Reload()
 	TMW.DD:CloseDropDownMenus()
 end
 

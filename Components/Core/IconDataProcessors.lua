@@ -520,64 +520,6 @@ do
 
 
 
-	local OnGCD = TMW.OnGCD
-	Processor:RegisterDogTag("TMW", "Duration", {
-		code = function(icon, gcd)
-			icon = TMW.GUIDToOwner[icon]
-
-			if icon then
-				local attributes = icon.attributes
-				local duration = attributes.duration
-				
-				local remaining = duration - (TMW.time - attributes.start)
-				if remaining <= 0 or (not gcd and icon:OnGCD(duration)) then
-					return 0
-				end
-
-				-- cached version of tonumber()
-				return isNumber[format("%.1f", remaining)] or 0
-			else
-				return 0
-			end
-		end,
-		arg = {
-			'icon', 'string', '@req',
-			'gcd', 'boolean', true,
-		},
-		events = "FastUpdate",
-		ret = "number",
-		doc = L["DT_DOC_Duration"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
-		example = '[Duration] => "1.435"; [Duration(gcd=false)] => "0"; [Duration:TMWFormatDuration] => "1.4"; [Duration(icon="TMW:icon:1I7MnrXDCz8T")] => "97.32156"; [Duration(icon="TMW:icon:1I7MnrXDCz8T"):TMWFormatDuration] => "1:37"',
-		category = L["ICON"],
-	})
-	
-	Processor:RegisterDogTag("TMW", "MaxDuration", {
-		code = function(icon)
-			icon = TMW.GUIDToOwner[icon]
-
-			if icon then
-				local duration = icon.attributes.duration
-				
-				if duration <= 0 then
-					return 0
-				end
-
-				-- cached version of tonumber()
-				return isNumber[format("%.1f", duration)] or 0
-			else
-				return 0
-			end
-		end,
-		arg = {
-			'icon', 'string', '@req',
-		},
-		events = "FastUpdate",
-		ret = "number",
-		doc = L["DT_DOC_MaxDuration"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
-		example = '[MaxDuration] => "3"; [MaxDuration:TMWFormatDuration] => "3.0"; [MaxDuration(icon="TMW:icon:1I7MnrXDCz8T")] => "60"',
-		category = L["ICON"],
-	})
-
 	TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 		if not TMW.Locked then
 			icon:SetInfo("start, duration", 0, 0)
@@ -670,6 +612,18 @@ end
 do
 	local Processor = TMW.Classes.IconDataProcessor:New("SPELLCHARGES", "charges, maxCharges, chargeStart, chargeDur")
 
+	Processor:RegisterIconEvent(26, "OnChargeGained", {
+		category = L["EVENT_CATEGORY_CHARGES"],
+		text = L["SOUND_EVENT_ONCHARGEGAINED"],
+		desc = L["SOUND_EVENT_ONCHARGEGAINED_DESC"],
+	})
+
+	Processor:RegisterIconEvent(27, "OnChargeLost", {
+		category = L["EVENT_CATEGORY_CHARGES"],
+		text = L["SOUND_EVENT_ONCHARGELOST"],
+		desc = L["SOUND_EVENT_ONCHARGELOST_DESC"],
+	})
+
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: charges, maxCharges, chargeStart, chargeDur
 		t[#t+1] = [[
@@ -678,6 +632,24 @@ do
 		or attributes.maxCharges ~= maxCharges
 		or attributes.chargeStart ~= chargeStart
 		or attributes.chargeDur ~= chargeDur then
+
+			if charges == maxCharges then
+				chargeStart, chargeDur = 0, 0
+			end
+
+			local oldCharges = attributes.charges
+			if charges and oldCharges then
+				if oldCharges > charges then
+					if EventHandlersSet.OnChargeLost then
+						icon:QueueEvent("OnChargeLost")
+					end
+				elseif oldCharges < charges then
+					if EventHandlersSet.OnChargeGained then
+						icon:QueueEvent("OnChargeGained")
+					end
+				end
+				icon.__realDuration = realDuration
+			end
 
 			attributes.charges = charges
 			attributes.maxCharges = maxCharges
@@ -698,6 +670,89 @@ do
 			icon:SetInfo("charges, maxCharges, chargeStart, chargeDur", nil, nil, nil, nil)
 		end
 	end)
+end
+
+
+
+
+
+
+-- shared DogTags (SPELLCHARGES & DURATION)
+do
+	local OnGCD = TMW.OnGCD
+	TMW.C.IconComponent:RegisterDogTag("TMW", "Duration", {
+		code = function(icon, gcd, ignoreCharges)
+			icon = TMW.GUIDToOwner[icon]
+
+			if icon then
+				local attributes = icon.attributes
+
+				local chargeDur = attributes.chargeDur
+				if not ignoreCharges and chargeDur and chargeDur > 0 then
+
+					local remaining = chargeDur - (TMW.time - attributes.chargeStart)
+					if remaining > 0 then
+						return isNumber[format("%.1f", remaining)] or 0
+					end
+				end
+
+				local duration = attributes.duration
+				
+				local remaining = duration - (TMW.time - attributes.start)
+				if remaining <= 0 or (not gcd and icon:OnGCD(duration)) then
+					return 0
+				end
+
+				-- cached version of tonumber()
+				return isNumber[format("%.1f", remaining)] or 0
+			else
+				return 0
+			end
+		end,
+		arg = {
+			'icon', 'string', '@req',
+			'gcd', 'boolean', true,
+			'ignorecharges', 'boolean', false,
+		},
+		events = "FastUpdate",
+		ret = "number",
+		doc = L["DT_DOC_Duration"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+		example = '[Duration] => "1.435"; [Duration(gcd=false)] => "0"; [Duration(ignorecharges=true)] => "0"; [Duration:TMWFormatDuration] => "1.4"; [Duration(icon="TMW:icon:1I7MnrXDCz8T")] => "97.32156"; [Duration(icon="TMW:icon:1I7MnrXDCz8T"):TMWFormatDuration] => "1:37"',
+		category = L["ICON"],
+	})
+	
+	TMW.C.IconComponent:RegisterDogTag("TMW", "MaxDuration", {
+		code = function(icon, ignoreCharges)
+			icon = TMW.GUIDToOwner[icon]
+
+			if icon then
+				local duration = icon.attributes.duration
+				
+				local chargeDur = attributes.chargeDur
+				if not ignoreCharges and chargeDur and chargeDur > 0 then
+					duration = chargeDur;
+				end
+
+				if duration <= 0 then
+					return 0
+				end
+
+				-- cached version of tonumber()
+				return isNumber[format("%.1f", duration)] or 0
+			else
+				return 0
+			end
+		end,
+		arg = {
+			'icon', 'string', '@req',
+			'ignorecharges', 'boolean', false,
+		},
+		events = "FastUpdate",
+		ret = "number",
+		doc = L["DT_DOC_MaxDuration"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+		example = '[MaxDuration] => "3"; [MaxDuration:TMWFormatDuration] => "3.0"; [MaxDuration(icon="TMW:icon:1I7MnrXDCz8T")] => "60"',
+		category = L["ICON"],
+	})
 end
 
 
@@ -829,7 +884,7 @@ do
 	end
 
 	Processor:RegisterIconEvent(51, "OnStack", {
-		category = L["EVENT_CATEGORY_CHANGED"],
+		category = L["EVENT_CATEGORY_STACKS"],
 		text = L["SOUND_EVENT_ONSTACK"],
 		desc = L["SOUND_EVENT_ONSTACK_DESC"],
 		settings = {
@@ -846,7 +901,7 @@ do
 	})
 
 	Processor:RegisterIconEvent(51.1, "OnStackIncrease", {
-		category = L["EVENT_CATEGORY_CHANGED"],
+		category = L["EVENT_CATEGORY_STACKS"],
 		text = L["SOUND_EVENT_ONSTACKINC"],
 		desc = L["SOUND_EVENT_ONSTACK_DESC"],
 		settings = {
@@ -863,7 +918,7 @@ do
 	})
 
 	Processor:RegisterIconEvent(51.2, "OnStackDecrease", {
-		category = L["EVENT_CATEGORY_CHANGED"],
+		category = L["EVENT_CATEGORY_STACKS"],
 		text = L["SOUND_EVENT_ONSTACKDEC"],
 		desc = L["SOUND_EVENT_ONSTACK_DESC"],
 		settings = {

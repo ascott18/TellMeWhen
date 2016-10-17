@@ -569,7 +569,7 @@ L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to
 L["ICONMENU_SHOWPBAR_DESC"] = "Shows a bar across the top half of the icon that will display the power still needed to cast the spell."
 L["ICONMENU_SHOWCBAR_DESC"] = "Shows a bar across the bottom half of the icon that will display the icon's timer."
 L["ICONMENU_REVERSEBARS"] = "Flip"
-L["ICONMENU_REVERSEBARS_DESC"] = "Flips the origin point from the left to the right if checked."
+L["ICONMENU_REVERSEBARS_DESC"] = "Flips the origin point from the left to the right."
 L["ICONMENU_INVERTBARS"] = "Fill bar up"
 L["ICONMENU_INVERTCBAR_DESC"] = "Causes the bar to fill up as duration reaches zero."
 L["ICONMENU_INVERTPBAR_DESC"] = "Causes the bar to fill up as power become sufficient."
@@ -2038,7 +2038,9 @@ L["EVENT_CATEGORY_CONDITION"] = "Conditions"
 L["EVENT_CATEGORY_MISC"] = "Miscellaneous"
 L["EVENT_CATEGORY_VISIBILITY"] = "Visibility"
 L["EVENT_CATEGORY_TIMER"] = "Timer"
+L["EVENT_CATEGORY_CHARGES"] = "Charges"
 L["EVENT_CATEGORY_CHANGED"] = "Data Changed"
+L["EVENT_CATEGORY_STACKS"] = "Stacks"
 L["EVENT_CATEGORY_CLICK"] = "Interaction"
 
 L["SOUND_EVENT_ONSHOW"] = "On Show"
@@ -2052,6 +2054,12 @@ L["SOUND_EVENT_ONSTART_DESC"] = [[This event triggers when the cooldown becomes 
 
 L["SOUND_EVENT_ONFINISH"] = "On Finish"
 L["SOUND_EVENT_ONFINISH_DESC"] = [[This event triggers when the cooldown becomes usable, the buff/debuff falls off, etc.]]
+
+L["SOUND_EVENT_ONCHARGELOST"] = "On Charge Spent"
+L["SOUND_EVENT_ONCHARGELOST_DESC"] = [[This event triggers when a charge of the ability being tracked is used.]]
+
+L["SOUND_EVENT_ONCHARGEGAINED"] = "On Charge Gained"
+L["SOUND_EVENT_ONCHARGEGAINED_DESC"] = [[This event triggers when a charge of the ability being tracked is gained.]]
 
 L["SOUND_EVENT_ONALPHAINC"] = "On Opacity Increase"
 L["SOUND_EVENT_ONALPHAINC_DESC"] = [[This event triggers when the opacity of an icon increases.
@@ -2076,10 +2084,10 @@ L["SOUND_EVENT_ONSTACK_DESC"] = [[This event triggers when the stacks of whateve
 
 This includes the amount of diminishment for %s icons.]]
 
-L["SOUND_EVENT_ONDURATION"] = "On Duration Changed"
-L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of the icon's timer changes.
+L["SOUND_EVENT_ONDURATION"] = "On Duration Threshold"
+L["SOUND_EVENT_ONDURATION_DESC"] = [[This event triggers when the duration of the icon's timer changes past some threshold.
 
-Because this event occurs every time the icon is updated while a timer is running, you must set a condition, and the event will only occur when the state of that condition changes.]]
+To use this trigger, you must set a condition, and the event will only occur when the state of that condition changes.]]
 
 L["SOUND_EVENT_ONCLEU"] = "On Combat Event"
 L["SOUND_EVENT_ONCLEU_DESC"] = [[This event triggers when the icon processes a combat event.]]

@@ -136,8 +136,7 @@
 
 					TMW.IE:SaveSettings()
 					
-					TMW.EVENTS:LoadEventID(self:GetID())
-
+					TMW.EVENTS.currentEventID = self:GetID()
 					self:OnSettingSaved()
 				end
 			</OnClick>
