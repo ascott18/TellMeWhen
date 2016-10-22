@@ -726,7 +726,9 @@ do
 			icon = TMW.GUIDToOwner[icon]
 
 			if icon then
-				local duration = icon.attributes.duration
+				local attributes = icon.attributes
+
+				local duration = attributes.duration
 				
 				local chargeDur = attributes.chargeDur
 				if not ignoreCharges and chargeDur and chargeDur > 0 then
