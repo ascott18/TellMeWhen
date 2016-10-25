@@ -1,4 +1,4 @@
-﻿## Interface: 70000
+﻿## Interface: 70100
 ## Title: TellMeWhen Options
 
 ## Author: Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
