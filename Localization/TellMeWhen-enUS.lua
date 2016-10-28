@@ -2178,12 +2178,12 @@ L["EVENTS_SETTINGS_PASSINGCNDT_DESC"] = "Prevents the notification from being ha
 L["EVENTS_SETTINGS_CNDTJUSTPASSED"] = "And it just began passing"
 L["EVENTS_SETTINGS_CNDTJUSTPASSED_DESC"] = "Prevents the notification from being handled unless the condition configured above has just begun succeeding."
 
-L["EVENTS_SETTINGS_PASSTHROUGH"] = "Continue to lower events"
+L["EVENTS_SETTINGS_PASSTHROUGH"] = "Continue to lower notifications"
 L["EVENTS_SETTINGS_PASSTHROUGH_DESC"] = [[Check to allow another event-triggered notification to be handled after this one.
 
-If left unchecked, the icon will not process any more events after this event if it successfully processes and outputs/displays something.
+If left unchecked, the icon will not process any more notifications after this notifications if it successfully processes and outputs/displays something.
 
-Exeptions may apply, see individual event descriptions for details.]]
+Exeptions may apply, see individual trigger descriptions for details.]]
 
 
 

@@ -317,6 +317,7 @@ do
 
 	TMW.Classes.Icon.attributes.start = 0
 	TMW.Classes.Icon.attributes.duration = 0
+	TMW.Classes.Icon.__realDuration = 0
 
 	Processor:RegisterIconEvent(21, "OnStart", {
 		category = L["EVENT_CATEGORY_TIMER"],
@@ -371,15 +372,11 @@ do
 		start = start or 0
 		
 		if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
-		local d
-		if start == TMW.time then
-			d = duration
-		else
-			d = duration - (TMW.time - start)
-		end
-		d = d > 0 and d or 0
 
 		if EventHandlersSet.OnDuration then
+			local d = duration - (TMW.time - start)
+			d = d > 0 and d or 0
+			
 			if d ~= icon.__lastDur then
 				icon:QueueEvent("OnDuration")
 				icon.__lastDur = d
@@ -406,7 +403,7 @@ do
 			attributes.start = start
 			attributes.duration = duration
 
-			TMW:Fire(DURATION.changedEvent, icon, start, duration, d)
+			TMW:Fire(DURATION.changedEvent, icon, start, duration)
 			doFireIconUpdated = true
 		end
 		--]]
@@ -648,7 +645,6 @@ do
 						icon:QueueEvent("OnChargeGained")
 					end
 				end
-				icon.__realDuration = realDuration
 			end
 
 			attributes.charges = charges
@@ -1112,7 +1108,7 @@ do
 		t[#t+1] = [[
 		local dogTagUnit
 		local typeData = icon.typeData
-		
+
 		if not typeData or typeData.unitType == "unitid" then
 			dogTagUnit = unit
 			if not DogTag.IsLegitimateUnit[dogTagUnit] then

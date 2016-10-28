@@ -210,8 +210,8 @@ ConditionCategory:RegisterCondition(90.0 - offset, "INSANITY", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_INSANITY),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "INSANITY"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "INSANITY")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "INSANITY"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "INSANITY")
 	end,
 })
 
@@ -225,8 +225,8 @@ ConditionCategory:RegisterCondition(91.0 - offset, "FURY", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_FURY),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "FURY"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "FURY")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "FURY"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "FURY")
 	end,
 })
 ConditionCategory:RegisterCondition(92.0 - offset, "PAIN", {
@@ -238,8 +238,8 @@ ConditionCategory:RegisterCondition(92.0 - offset, "PAIN", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_PAIN),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "PAIN"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "PAIN")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "PAIN"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "PAIN")
 	end,
 })
 
@@ -253,8 +253,8 @@ ConditionCategory:RegisterCondition(93 - offset, "MAELSTROM", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_MAELSTROM),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "MAELSTROM"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "MAELSTROM")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "MAELSTROM"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "MAELSTROM")
 	end,
 })
 
@@ -268,8 +268,8 @@ ConditionCategory:RegisterCondition(94 - offset, "LUNAR_POWER", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_LUNAR_POWER),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "LUNAR_POWER"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", "player", "LUNAR_POWER")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "LUNAR_POWER"),
+			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "LUNAR_POWER")
 	end,
 })
 
