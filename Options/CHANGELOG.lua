@@ -5,9 +5,11 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = [==[
 ===v8.2.1===
 * Added some missing currency definitions
+* Fixed updating of class-specific resource conditions for non-player units.
 
 ====Bug Fixes====
 * On Start and On Finish notification triggers should no longer spaz out.
+* Meta icons should now always use the correct unit when evaluating the DogTags used in their text displays.
 
 
 ===v8.2.0===

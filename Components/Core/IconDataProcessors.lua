@@ -1105,24 +1105,32 @@ do
 
 	Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 		-- GLOBALS: unit
-		t[#t+1] = [[
-		local dogTagUnit
-		local typeData = icon.typeData
 
-		if not typeData or typeData.unitType == "unitid" then
-			dogTagUnit = unit
-			if not DogTag.IsLegitimateUnit[dogTagUnit] then
-				dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
+		-- We shouldn't do this for meta icons.
+		-- If we do, the typeData.unitType will be wrong.
+		-- Instead, just let this be inherited normally from the DOGTAGUNIT processor.
+		-- I don't like coupling meta icons to this, but I can't see any other way that won't require
+		-- sweeping changes to the way that attribute inheriting works.
+		t[#t+1] = [[
+		if icon.Type ~= "meta" then
+			local dogTagUnit
+			local typeData = icon.typeData
+
+			if not typeData or typeData.unitType == "unitid" then
+				dogTagUnit = unit
 				if not DogTag.IsLegitimateUnit[dogTagUnit] then
-					dogTagUnit = "player"
+					dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
+					if not DogTag.IsLegitimateUnit[dogTagUnit] then
+						dogTagUnit = "player"
+					end
 				end
+			else
+				dogTagUnit = "player"
 			end
-		else
-			dogTagUnit = "player"
-		end
-		
-		if attributes.dogTagUnit ~= dogTagUnit then
-			doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdated
+			
+			if attributes.dogTagUnit ~= dogTagUnit then
+				doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdated
+			end
 		end
 		--]]
 	end)
