@@ -202,9 +202,14 @@ function Env.AuraTooltipNumber(...)
 			local ret
 			local allNumbers = ""
 			repeat
-				number, text = (text):match("(%d+)(.*)$")
+				number, text = (text):match("([0-9%" .. LARGE_NUMBER_SEPERATOR .. "]+%" .. DECIMAL_SEPERATOR .. "?[0-9]+)(.*)$")
 
 				if number then
+					-- Remove large number separators
+					number = number:gsub("%" .. LARGE_NUMBER_SEPERATOR, "")
+					-- Normalize decimal separators
+					number = number:gsub("%" .. DECIMAL_SEPERATOR, ".")
+
 					index = index + 1
 					if index == requestedIndex then
 						ret = isNumber[number]
