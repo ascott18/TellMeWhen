@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.2.2===
+* Packaging latest version of LibDogTag-Unit-3.0.
+
 ===v8.2.1===
 * You can now change bar textures on a per-group basis.
 * Added some missing currency definitions.
