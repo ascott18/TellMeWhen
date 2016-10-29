@@ -10,6 +10,7 @@ TMW.CHANGELOG = [==[
 ====Bug Fixes====
 * On Start and On Finish notification triggers should no longer spaz out.
 * Meta icons should now always use the correct unit when evaluating the DogTags used in their text displays.
+* Fixed meta icon rearranging.
 
 
 ===v8.2.0===

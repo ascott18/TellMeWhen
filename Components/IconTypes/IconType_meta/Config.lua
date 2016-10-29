@@ -153,11 +153,6 @@ end
 
 
 ---------- Click Handlers ----------
-function Config:Insert(where)
-	tinsert(CI.ics.Icons, where, "")
-	Config:Reload()
-end
-
 function Config:Delete(self)
 	tremove(CI.ics.Icons, self:GetParent():GetID())
 	Config:Reload()
@@ -168,7 +163,10 @@ function Config:SwapIcons(id1, id2)
 	
 	Icons[id1], Icons[id2] = Icons[id2], Icons[id1]
 	
-	Config:Reload()
+	Config:LoadConfig()
+
+	-- DO NOT CALL Config:Reload() here - it will break click and drag rearranging.
+	-- Config:Reload()
 end
 
 
