@@ -118,7 +118,11 @@ function Backdrop:SetBorder(size, color)
 end
 
 function Backdrop:SetupForIcon(icon)
-	self.backdrop:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
+	local texture = icon.group.TextureName
+	if texture == "" then
+		texture = TMW.db.profile.TextureName
+	end
+	self.backdrop:SetTexture(LSM:Fetch("statusbar", texture))
 	
 	local color = TMW:GetColors("BackdropColor", "BackdropColor_Enable",
 		                        icon:GetSettings(), icon.group:GetSettings(), TMW.db.global)

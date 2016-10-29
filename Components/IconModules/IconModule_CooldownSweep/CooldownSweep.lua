@@ -260,7 +260,7 @@ function CooldownSweep:UpdateCooldown()
 		if ElvUI then
 			local E = ElvUI[1]
 			if E and E.OnSetCooldown then
-				if not self.noOCC and E.private.cooldown.enable then
+				if not cd.noOCC and E.private.cooldown.enable then
 					E.OnSetCooldown(cd, mainStart, mainDuration)
 				elseif cd.timer then
 					E:Cooldown_StopTimer(cd.timer)

@@ -134,5 +134,7 @@ end)
 
 BaseConfig:RegisterConfigPanel_XMLTemplate(20, "TellMeWhen_GM_Dims")
 
+BaseConfig:RegisterConfigPanel_XMLTemplate(21, "TellMeWhen_GM_Texture")
+
 BaseConfig:RegisterConfigPanel_XMLTemplate(500, "TellMeWhen_GM_Delete")
 

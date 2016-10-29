@@ -28,9 +28,6 @@ local OnGCD = TMW.OnGCD
 
 local BarsToUpdate = {}
 
-local StatusBarTexture
-
-
 
 local TimerBar = TMW:NewClass("IconModule_TimerBar", "IconModule", "UpdateTableManager")
 TimerBar:UpdateTable_Set(BarsToUpdate)
@@ -94,7 +91,11 @@ function TimerBar:OnEnable()
 	local attributes = icon.attributes
 	
 	self.bar:Show()
-	self.texture:SetTexture(StatusBarTexture)
+	local texture = icon.group.TextureName
+	if texture == "" then
+		texture = TMW.db.profile.TextureName
+	end
+	self.texture:SetTexture(LSM:Fetch("statusbar", texture))
 	
 	self:SetCooldown(attributes.start, attributes.start, attributes.chargeStart, attributes.chargeDur)
 end
@@ -294,10 +295,6 @@ TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	if not Locked then
 		TimerBar:UpdateTable_UnregisterAll()
 	end
-end)
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event)
-	StatusBarTexture = LSM:Fetch("statusbar", TMW.db.profile.TextureName)
 end)
 
 TMW:RegisterCallback("TMW_ONUPDATE_POST", function(event, time, Locked)

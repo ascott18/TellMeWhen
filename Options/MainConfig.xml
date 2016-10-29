@@ -281,6 +281,9 @@
 						self:SetTexts(TMW.L["UIPANEL_BARTEXTURE"])
 						self.BUTTON_HEIGHT = 20
 
+						local f, s = self.Text:GetFont()
+						self.Text:SetFont(f, s, "THINOUTLINE")
+
 						local values = {
 							SFX = SOUND_VOLUME,
 							Music = MUSIC_VOLUME,

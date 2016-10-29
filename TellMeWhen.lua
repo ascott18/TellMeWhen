@@ -26,9 +26,9 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 82104 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 82105 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
-TELLMEWHEN_FORCECHANGELOG = 80039 -- if the user hasn't seen the changelog until at least this version, show it to them.
+TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
 if TELLMEWHEN_VERSIONNUMBER > 83000 or TELLMEWHEN_VERSIONNUMBER < 82000 then
 	-- safety check because i accidentally made the version number 414069 once
@@ -234,6 +234,7 @@ TMW.Defaults = {
 				},
 				OnlyInCombat	= false,
 				View			= "icon",
+				TextureName		= "",
 				Name			= "",
 				Rows			= 1,
 				Columns			= 4,

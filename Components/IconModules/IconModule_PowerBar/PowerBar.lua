@@ -74,7 +74,11 @@ function PowerBar:OnEnable()
 	local attributes = icon.attributes
 	
 	self.bar:Show()
-	self.texture:SetTexture(LSM:Fetch("statusbar", TMW.db.profile.TextureName))
+	local texture = icon.group.TextureName
+	if texture == "" then
+		texture = TMW.db.profile.TextureName
+	end
+	self.texture:SetTexture(LSM:Fetch("statusbar", texture))
 	
 	self:SPELL(icon, attributes.spell)
 end
