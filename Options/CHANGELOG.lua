@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.2.3===
+* Improved behavior of exporting to other players.
+
 ===v8.2.2===
 * Packaging latest version of LibDogTag-Unit-3.0.
 

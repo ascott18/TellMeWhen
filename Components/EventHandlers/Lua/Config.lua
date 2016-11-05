@@ -85,13 +85,18 @@ function Lua:SetError(code, kind, err)
 	
 	err = err:gsub("%[string .*%]", "line")
 	local line = tonumber(err:match("line:(%d+):"))
-	
-	code = code:gsub("\r\n", "\n"):gsub("\r", "\n")
-	local lineText = select(line, strsplit("\n", code)) or ""
-	
-	lineText = lineText:trim(" \t\r\n")
-	if #lineText > 25 then
-		lineText = lineText:sub(1, 25) .. "..."
+	local lineText
+
+	if line then
+		code = code:gsub("\r\n", "\n"):gsub("\r", "\n")
+		lineText = select(line, strsplit("\n", code)) or ""
+		
+		lineText = lineText:trim(" \t\r\n")
+		if #lineText > 25 then
+			lineText = lineText:sub(1, 25) .. "..."
+		end
+	else
+		lineText = ""
 	end
 	
 	err = "|cffee0000" .. kind .. " ERROR: " .. err:gsub("line:(%d+):", "line %1 (\"" .. lineText .. "\"):")

@@ -820,7 +820,7 @@ L["UIPANEL_PROFILES"] = "Profiles"
 
 L["UIPANEL_GROUPTYPE"] = "Display Method"
 L["UIPANEL_GROUPTYPE_ICON"] = "Icon"
-L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the group using TellMeWhen's traditional icon display.]]
+L["UIPANEL_GROUPTYPE_ICON_DESC"] = [[Displays the icons in the2 group using TellMeWhen's traditional icon display.]]
 L["UIPANEL_GROUPTYPE_BAR"] = "Bar"
 L["UIPANEL_GROUPTYPE_BAR_DESC"] = [[Displays the icons in the group with progress bars attached to the icons.]]
 L["UIPANEL_GROUPTYPE_BARV"] = "Vertical Bar"
@@ -1911,9 +1911,7 @@ L["EXPORT_TOSTRING"] = "To String"
 L["EXPORT_TOCOMM"] = "To Player"
 L["EXPORT_TOGUILD"] = "To Guild"
 L["EXPORT_TORAID"] = "To Raid"
-L["EXPORT_TOCOMM_DESC"] = [[Type a player's name into the editbox and choose this option to send the data to them. They must be somebody that you can whisper (same faction, server, online), and they must have TellMeWhen v4.0.0+
-
-You can also type "GUILD" or "RAID" (case-sensitive) to send to your entire guild or raid group.]]
+L["EXPORT_TOCOMM_DESC"] = [[Type a player's name into the editbox and choose this option to send the data to them. They must be somebody that you can whisper (same faction, server, online).]]
 L["EXPORT_TOSTRING_DESC"] = "A string containing the necessary data will be pasted into the editbox.  Press Ctrl+C to copy it, and then paste it wherever you want to share it."
 L["EXPORT_SPECIALDESC2"] = "Other TellMeWhen users can only import this data if they have version %s"
 L["EXPORT_f"] = "Export %s"

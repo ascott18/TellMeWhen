@@ -1209,7 +1209,7 @@ local Comm = ExportDestination:New("Comm")
 Comm.Export_DescriptionPrepend = L["EXPORT_TOCOMM_DESC"]
 
 function Comm:Export(type, settings, defaults, ...)
-	local player = strtrim(EDITBOX:GetText())
+	local player = self.player
 	if player and #player > 1 then
 		local strings = TMW:GetSettingsStrings(nil, type, settings, defaults, ...)
 
@@ -1226,7 +1226,7 @@ function Comm:Export(type, settings, defaults, ...)
 		end
 
 		for n, str in pairs(strings) do
-			if player == "RAID" or player == "GUILD" then -- note the upper case
+			if player == "RAID" or player == "GUILD" or player == "PARTY" then -- note the upper case
 				TMW:SendCommMessage("TMW", str, player, nil, "BULK", EDITBOX.callback, {n, #strings})
 			else
 				TMW:SendCommMessage("TMW", str, "WHISPER", player, "BULK", EDITBOX.callback, {n, #strings})
@@ -1237,27 +1237,69 @@ function Comm:Export(type, settings, defaults, ...)
 	TMW.DD:CloseDropDownMenus()
 end
 
-function Comm:SetButtonAttributes(editbox, info)
-	local player = strtrim(editbox:GetText())
+function Comm:HandleTopLevelMenu()
+	local info = TMW.DD:CreateInfo()
+	info.notCheckable = true
+	info.hasArrow = true
+
+
+	info.text = RAID
+	info.disabled = not IsInRaid()
+	info.value = function() self.player = "RAID"; ExportDestination.HandleTopLevelMenu(self) end
+	TMW.DD:AddButton(info)
+
+
+	info.text = PARTY
+	info.disabled = not IsInGroup()
+	info.value = function() self.player = "PARTY"; ExportDestination.HandleTopLevelMenu(self) end
+	TMW.DD:AddButton(info)
+
+
+	info.text = GUILD
+	info.disabled = not IsInGuild()
+	info.value = function() self.player = "GUILD"; ExportDestination.HandleTopLevelMenu(self) end
+	TMW.DD:AddButton(info)
+
+
+	local targetIsXrealm = UnitRealmRelationship("target") == LE_REALM_RELATION_COALESCED 
+	info.text = TARGET .. ": " .. (GetUnitName("target", true) or NONE)
+	-- can't send cross realm right now. messages appear to send, but are never recieved.
+	info.disabled = not UnitName("target") or targetIsXrealm
+	if targetIsXrealm then
+		info.tooltipWhileDisabled = true
+		info.tooltipTitle = TARGET
+		info.tooltipText = ERR_PETITION_NOT_SAME_SERVER
+	end
+	info.value = function() self.player = GetUnitName("target", true); ExportDestination.HandleTopLevelMenu(self) end
+	TMW.DD:AddButton(info)
+
+
+	info.text = strtrim(EDITBOX:GetText())
+	local player = strtrim(EDITBOX:GetText())
 	local playerLength = strlenutf8(player)
 	info.disabled = (strfind(player, "[`~^%d!@#%$%%&%*%(%)%+=_]") or playerLength <= 1 or playerLength > 35) and true
-
-	local text
-	if player == "RAID" or player == "GUILD" then
-		text = L["EXPORT_TO" .. player]
-	else
-		text = L["EXPORT_TOCOMM"]
-		if not info.disabled then
-			text = text .. ": " .. player
-		end
+	info.value = function() self.player = player; ExportDestination.HandleTopLevelMenu(self) end
+	local text = L["EXPORT_TOCOMM"]
+	if not info.disabled then
+		text = text .. ": " .. player
 	end
-
-	info.text = text
+	info.tooltipWhileDisabled = true
 	info.tooltipTitle = text
-	info.tooltipText = L["EXPORT_TOCOMM_DESC"]
+	if player:find("%-") then
+		text = "|TInterface\\AddOns\\TellMeWhen\\Textures\\Alert:0:2|t" .. text
+		info.tooltipText = ERR_PETITION_NOT_SAME_SERVER
+	else
+		info.tooltipText = L["EXPORT_TOCOMM_DESC"]
 
-	info.value = "EXPORT_TOCOMM"
-	info.hasArrow = not info.disabled
+	end
+	info.text = text
+	TMW.DD:AddButton(info)
+end
+
+function Comm:SetButtonAttributes(editbox, info)
+	info.text = L["EXPORT_TOCOMM"]
+	info.tooltipTitle = L["EXPORT_TOCOMM"]
+	info.hasArrow = true
 end
 
 
@@ -1355,6 +1397,8 @@ function TMW.IE:ImportExport_DropDown(...)
 		else
 			error("Bad value at " .. TMW.DD.MENU_LEVEL)
 		end
+	elseif type(VALUE) == "function" then
+		VALUE()
 	end
 end
 

@@ -1,4 +1,7 @@
-===v8.2.2===
+===v8.2.3===
+ * Improved behavior of exporting to other players.
+
+ ===v8.2.2===
  * Packaging latest version of LibDogTag-Unit-3.0.
 
 ===v8.2.1===
