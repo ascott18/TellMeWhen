@@ -52,7 +52,6 @@ ignore:
     - USEDLOCALE.lua
     - Options/scrapper.lua
     - Options/USEDLOCALE.lua
-    - Lib
     - Scripts
     - Documentation
     - README.md
