@@ -126,7 +126,10 @@ function IconDragger:CompleteDrag(script, icon)
 			IconDragger.destFrame = icon -- not actually an icon. just some frame.
 			local cursorX, cursorY = GetCursorPosition()
 			local UIScale = 1 -- UIParent:GetScale()
-			Dropdown:SetDropdownAnchor(nil, UIParent, "BOTTOMLEFT", cursorX/UIScale, cursorY/UIScale)
+			-- We offset the position here by 1 so that the frame is always under the cursor.
+			-- Otherwise, it might not be under the cursor, causing the dropdown to never auto-hide if the user
+			-- never drags their cursor over it.
+			Dropdown:SetDropdownAnchor(nil, UIParent, "BOTTOMLEFT", cursorX/UIScale - 1, cursorY/UIScale + 1)
 		end
 
 		if not DropDownList1:IsShown() or TMW.DD.OPEN_MENU ~= Dropdown then

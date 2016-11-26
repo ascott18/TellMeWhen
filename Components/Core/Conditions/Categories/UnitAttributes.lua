@@ -29,57 +29,6 @@ local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_UNIT", 3, L["CNDTCAT_ATTR
 
 
 
-
-
-TMW:RegisterUpgrade(73019, {
-	condition = function(self, condition)
-		if condition.Type == "RAIDICON" then
-			condition.Type = "RAIDICON2"
-			condition.Checked = false
-			CNDT:ConvertSliderCondition(condition, 0, 8)
-		end
-	end,
-})
-ConditionCategory:RegisterCondition(0.4,  "RAIDICON2", {
-	text = L["CONDITIONPANEL_RAIDICON"],
-	tooltip = L["CONDITIONPANEL_RAIDICON_DESC"],
-
-	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_RAIDICON"],
-	bitFlags = (function()
-		local t = {[0]={
-			order = 0,
-			text = NONE,
-		}}
-
-		for i = 1, 8 do  -- Dont use NUM_RAID_ICONS since it is defined in Blizzard's CRF manager addon, which might not be loaded
-			t[i] = {
-				order = i,
-				text = _G["RAID_TARGET_"..i],
-				icon = "Interface/TargetingFrame/UI-RaidTargetingIcon_" .. i
-			}
-		end
-
-		return t
-	end)(),
-
-	icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
-
-	Env = {
-		GetRaidTargetIndex = GetRaidTargetIndex,
-	},
-	funcstr = [[ BITFLAGSMAPANDCHECK( GetRaidTargetIndex(c.Unit) or 0 ) ]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("RAID_TARGET_UPDATE")
-	end,
-})
-
-
-ConditionCategory:RegisterSpacer(0.8)
-
-
-
 ConditionCategory:RegisterCondition(1,    "EXISTS", {
 	text = L["CONDITIONPANEL_EXISTS"],
 
@@ -444,6 +393,51 @@ ConditionCategory:RegisterCondition(10,   "LEVEL", {
 			ConditionObject:GenerateNormalEventString("UNIT_LEVEL", CNDT:GetUnit(c.Unit))
 	end,
 })
+
+TMW:RegisterUpgrade(73019, {
+	condition = function(self, condition)
+		if condition.Type == "RAIDICON" then
+			condition.Type = "RAIDICON2"
+			condition.Checked = false
+			CNDT:ConvertSliderCondition(condition, 0, 8)
+		end
+	end,
+})
+ConditionCategory:RegisterCondition(10.1,  "RAIDICON2", {
+	text = L["CONDITIONPANEL_RAIDICON"],
+	tooltip = L["CONDITIONPANEL_RAIDICON_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_RAIDICON"],
+	bitFlags = (function()
+		local t = {[0]={
+			order = 0,
+			text = NONE,
+		}}
+
+		for i = 1, 8 do  -- Dont use NUM_RAID_ICONS since it is defined in Blizzard's CRF manager addon, which might not be loaded
+			t[i] = {
+				order = i,
+				text = _G["RAID_TARGET_"..i],
+				icon = "Interface/TargetingFrame/UI-RaidTargetingIcon_" .. i
+			}
+		end
+
+		return t
+	end)(),
+
+	icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
+
+	Env = {
+		GetRaidTargetIndex = GetRaidTargetIndex,
+	},
+	funcstr = [[ BITFLAGSMAPANDCHECK( GetRaidTargetIndex(c.Unit) or 0 ) ]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("RAID_TARGET_UPDATE")
+	end,
+})
+
 
 TMW:RegisterUpgrade(73019, {
 	unitClassifications = {

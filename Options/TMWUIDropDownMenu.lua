@@ -59,6 +59,9 @@ DD.SHOW_TIME = 2;
 
 DD.LISTS = CreateFrame("Frame", "TMWDropDowns")
 
+hooksecurefunc("CloseMenus", function()
+	DD:CloseDropDownMenus()
+end)
 
 local function fixself(self)
 	if self == DD then
@@ -113,6 +116,9 @@ end
 
 -- Start the countdown on a frame
 function DD.StartCounting(self)
+	if self == DD then
+		self = DD.LISTS[1]
+	end
 	if ( self.parent ) then
 		DD.StartCounting(self.parent);
 	else
@@ -123,6 +129,9 @@ end
 
 -- Stop the countdown on a frame
 function DD.StopCounting(self)
+	if self == DD then
+		self = DD.LISTS[1]
+	end
 	if ( self.parent ) then
 		DD.StopCounting(self.parent);
 	else
@@ -736,6 +745,10 @@ function DD:GetScrollable()
 	return self.scrollable
 end
 
+
+WorldFrame:HookScript("OnMouseDown", function()
+	DD:CloseDropDownMenus()
+end)
 
 
 

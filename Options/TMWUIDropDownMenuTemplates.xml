@@ -350,9 +350,15 @@
 		<Scripts>
 			<OnEnter>
 				self.Button:LockHighlight()
+				if TMW.DD.OPEN_MENU == self then
+					TMW.DD:StopCounting();
+				end
 			</OnEnter>
 			<OnLeave>
 				self.Button:UnlockHighlight()
+				if TMW.DD.OPEN_MENU == self then
+					TMW.DD:StartCounting();
+				end
 			</OnLeave>
 			<OnHide>
 				--TMW.DD:CloseDropDownMenus()

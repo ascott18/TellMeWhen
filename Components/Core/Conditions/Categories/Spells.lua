@@ -734,8 +734,6 @@ function Env.UnitCastCount(...)
 	return Env.UnitCastCount(...)
 end
 ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
-	old = true,
-	
 	text = L["CONDITIONPANEL_CASTCOUNT"],
 	tooltip = L["CONDITIONPANEL_CASTCOUNT_DESC"],
 	range = 10,

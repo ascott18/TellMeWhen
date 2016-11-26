@@ -283,7 +283,7 @@ local function OnUpdate(icon, time)
 
 
 	local count = nil
-	if not icon:IsControlled() then
+	if not icon:IsGroupController() then
 		local NameHash = icon.NPCs.Hash
 		count = 0
 		-- Non-controlled icons should show the number of active ones right on the icon.
