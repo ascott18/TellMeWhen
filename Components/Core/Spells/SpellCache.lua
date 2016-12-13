@@ -50,21 +50,25 @@ SpellCache.CONST = {
 	
 	-- A list of textures, spells that have these textures should be excluded from the cache.
 	INVALID_TEXTURES = {
-		["Interface\\Icons\\Trade_Alchemy"] = true,
-		["Interface\\Icons\\Trade_BlackSmithing"] = true,
-		["Interface\\Icons\\Trade_BrewPoison"] = true,
-		
-		["Interface\\Icons\\Trade_Engineering"] = true,
-		[136243] = true,
+		-- These are the worst offenders by far
+		["Interface\\Icons\\Trade_Alchemy"] = true, [136240] = true,
+		["Interface\\Icons\\Trade_BlackSmithing"] = true, [136241] = true,
+		["Interface\\Icons\\Trade_Engineering"] = true, [136243] = true,
+		["Interface\\Icons\\Trade_LeatherWorking"] = true, [136247] = true,
 
-		["Interface\\Icons\\Trade_Engraving"] = true,
-		["Interface\\Icons\\Trade_Fishing"] = true,
-		["Interface\\Icons\\Trade_Herbalism"] = true,
-		["Interface\\Icons\\Trade_LeatherWorking"] = true,
-		["Interface\\Icons\\Trade_Mining"] = true,
-		["Interface\\Icons\\Trade_Tailoring"] = true,
-		["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true,
-		["Interface\\Icons\\Temp"] = true,
+		-- These aren't as bad as the rest, but still don't have any real spells that should be in the list.
+		["Interface\\Icons\\Trade_Engraving"] = true, [136244] = true,
+		["Interface\\Icons\\Trade_Fishing"] = true, [136245] = true,
+		["Interface\\Icons\\Trade_Herbalism"] = true, [136246] = true,
+		["Interface\\Icons\\Trade_Mining"] = true, [136248] = true,
+		["Interface\\Icons\\Trade_Tailoring"] = true, [136249] = true,
+		["Interface\\Icons\\INV_Inscription_Tradeskill01"] = true, [237171] = true,
+
+
+		-- These are actually fine and shouldn't be blacklisted.
+		-- ["Interface\\Icons\\Trade_BrewPoison"] = true,
+		-- ["Interface\\Icons\\Temp"] = true,
+
 	},
 }
 local CONST = SpellCache.CONST
