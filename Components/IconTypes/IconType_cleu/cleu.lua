@@ -410,15 +410,19 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			)
 		end
 
-		-- do an immediate update because it might look stupid if
-		-- half the icon changes on event and the other half changes on the next update cycle
-		icon:Update(true)
-
 		-- Fire the OnCLEUEvent icon event to immediately trigger any notifications for it, if needed.
 		if icon.EventHandlersSet.OnCLEUEvent then
 			icon:QueueEvent("OnCLEUEvent")
 			icon:ProcessQueuedEvents()
 		end
+
+		-- do an immediate update because it might look stupid if
+		-- half the icon changes on event and the other half changes on the next update cycle.
+		-- Ddo this after we fire the icon event in case anything in the icon event is going to cause the
+		-- calculated state of the icon to change from what it might otherwise be. See ticket 1352.
+		-- Since the icon's "state" attribute is basically the lowest priority in determining calculated state,
+		-- it should be set only after all other possible overrides have been calculated.
+		icon:Update(true)
 	end
 end
 

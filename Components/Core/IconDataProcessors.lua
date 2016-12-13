@@ -625,14 +625,14 @@ do
 		-- GLOBALS: charges, maxCharges, chargeStart, chargeDur
 		t[#t+1] = [[
 		
+		if charges == maxCharges then
+			chargeStart, chargeDur = 0, 0
+		end
+			
 		if attributes.charges ~= charges
 		or attributes.maxCharges ~= maxCharges
 		or attributes.chargeStart ~= chargeStart
 		or attributes.chargeDur ~= chargeDur then
-
-			if charges == maxCharges then
-				chargeStart, chargeDur = 0, 0
-			end
 
 			local oldCharges = attributes.charges
 			if charges and oldCharges then
