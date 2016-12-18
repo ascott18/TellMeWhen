@@ -152,6 +152,7 @@ end)
 
 
 local function BigWigs_timer_init()
+	local owner = {}
 	BigWigs_timer_init = nil
 
 	if not BigWigsLoader then
@@ -179,7 +180,7 @@ local function BigWigs_timer_init()
 
 	end
 
-	BigWigsLoader:RegisterMessage("BigWigs_StartBar", function(_, module, key, text, time)
+	BigWigsLoader.RegisterMessage(owner, "BigWigs_StartBar", function(_, module, key, text, time)
 			stop(module, text)
 			
 			tinsert(Timers, {module = module, key = key, text = text:lower(), start = TMW.time, duration = time})
@@ -187,17 +188,17 @@ local function BigWigs_timer_init()
 			TMW:Fire("TMW_CNDT_BOSSMODS_BIGWIGS_TIMER_CHANGED")
 	end)
 
-	BigWigsLoader:RegisterMessage("BigWigs_StopBar", function(_, module, text)
+	BigWigsLoader.RegisterMessage(owner, "BigWigs_StopBar", function(_, module, text)
 			stop(module, text)  
 	end)
 
-	BigWigsLoader:RegisterMessage("BigWigs_StopBars", function(_, module)
+	BigWigsLoader.RegisterMessage(owner, "BigWigs_StopBars", function(_, module)
 			stop(module)  
 	end)
-	BigWigsLoader:RegisterMessage("BigWigs_OnBossDisable", function(_, module)
+	BigWigsLoader.RegisterMessage(owner, "BigWigs_OnBossDisable", function(_, module)
 			stop(module)  
 	end)
-	BigWigsLoader:RegisterMessage("BigWigs_OnPluginDisable", function(_, module)
+	BigWigsLoader.RegisterMessage(owner, "BigWigs_OnPluginDisable", function(_, module)
 			stop(module)  
 	end)
 
@@ -289,6 +290,7 @@ ConditionCategory:RegisterCondition(1,	 "BIGWIGS_TIMER", {
 
 
 local function BigWigs_engaged_init()
+	local owner = {}
 	BigWigs_engaged_init = nil
 
 	if not BigWigsLoader then
@@ -304,12 +306,12 @@ local function BigWigs_engaged_init()
 	local EngagedBosses = {}
 
 
-	BigWigsLoader:RegisterMessage("BigWigs_OnBossEngage", function(_, module, diff)
+	BigWigsLoader.RegisterMessage(owner, "BigWigs_OnBossEngage", function(_, module, diff)
 			EngagedBosses[module] = true
 
 			TMW:Fire("TMW_CNDT_BOSSMODS_BIGWIGS_ENGAGED_CHANGED")
 	end)
-	BigWigsLoader:RegisterMessage("BigWigs_OnBossDisable", function(_, module)
+	BigWigsLoader.RegisterMessage(owner, "BigWigs_OnBossDisable", function(_, module)
 			EngagedBosses[module] = nil
 
 			TMW:Fire("TMW_CNDT_BOSSMODS_BIGWIGS_ENGAGED_CHANGED")
