@@ -950,6 +950,7 @@ TMW:NewClass("StaticConfigPanelInfo", "ConfigPanelInfo"){
 
 local CScriptProvider
 local CS_SDepth = 0
+local CS_Root = "";
 local function bubble(frame, get, script, ...)
 	if not frame then
 		return
@@ -1005,6 +1006,9 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 		return bubble(self:GetParent(), true, script, ...)
 	end,
 	CScriptTunnel = function(self, script, ...)
+		if CS_SDepth == 0 then
+			CS_Root = script .. ":" .. (self:GetDebugName() or self.setting or "?")
+		end
 		CS_SDepth = CS_SDepth + 1
 
 		for _, child in TMW:Vararg(self:GetChildren()) do
@@ -1014,6 +1018,9 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 		CS_SDepth = CS_SDepth - 1
 	end,
 	CScriptBubble = function(self, script, ...)
+		if CS_SDepth == 0 then
+			CS_Root = script .. ":" .. (self:GetDebugName() or self.setting or "?")
+		end
 		CS_SDepth = CS_SDepth + 1
 
 		bubble(self:GetParent(), false, script, ...)
@@ -1094,9 +1101,12 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 			return
 		end
 		
+		if CS_SDepth == 0 then
+			CS_Root = script .. ":" .. (self:GetDebugName() or self.setting or "?")
+		end
+		CS_SDepth = CS_SDepth + 1
 		-- If we enter 10 deep cscripts, go into emergency mode
 		-- and start recording data about what is being called.
-		CS_SDepth = CS_SDepth + 1
 		if CS_SDepth > 10 and not self.DEBUG_Started then
 			self:DEBUG_Start()
 		end
@@ -1137,16 +1147,16 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 		if not CScriptProvider.DEBUG_Started then
 			print("entering cscript debug mode")
 
-			CScriptProvider.DEBUG_Stack = {}
+			CScriptProvider.DEBUG_Stack = {{"ROOT", CS_Root}}
 			CScriptProvider.DEBUG_PrevDepth = CS_SDepth - 1
 
 			CScriptProvider.CScriptCall_ORIGINAL = CScriptProvider.CScriptCall
 			CScriptProvider.CScriptBubble_ORIGINAL = CScriptProvider.CScriptBubble
 			CScriptProvider.CScriptTunnel_ORIGINAL = CScriptProvider.CScriptTunnel
 
-			CScriptProvider:PostHookMethod("CScriptCall", self.DEBUG_CScriptCallBase)
-			CScriptProvider:PostHookMethod("CScriptBubble", self.DEBUG_CScriptCallBase)
-			CScriptProvider:PostHookMethod("CScriptTunnel", self.DEBUG_CScriptCallBase)
+			CScriptProvider:PreHookMethod("CScriptCall", self.DEBUG_CScriptCallBase)
+			CScriptProvider:PreHookMethod("CScriptBubble", self.DEBUG_CScriptCallBase)
+			CScriptProvider:PreHookMethod("CScriptTunnel", self.DEBUG_CScriptCallBase)
 
 			CScriptProvider.DEBUG_Started = true
 		end
@@ -1174,7 +1184,12 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 		end
 
 		-- Only record calls that change the stack depth.
-		local stackFrame = {CS_SDepth, script, tostring(self:GetName() or self.setting or self.class)}
+		local name = tostring(self:GetDebugName() or self.setting or self.class)
+			:gsub("^TellMeWhen_?", "")
+			:gsub("_IconEditorPages", "P*")
+			:gsub("_IconEditor", "IE")
+			:gsub("[%x]*.container", "S*")
+		local stackFrame = {CS_SDepth, script, name}
 		if CScriptProvider.DEBUG_PrevDepth ~= CS_SDepth then
 			tinsert(CScriptProvider.DEBUG_Stack, CScriptProvider.DEBUG_PrevStackFrame)
 			tinsert(CScriptProvider.DEBUG_Stack, stackFrame)
@@ -1200,7 +1215,10 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 				str = str .. table.concat(data, ":") .. "\n"
 			end
 
+			-- We fire this off in a delayed timer as well since there is a
+			-- good chance that the stack depth will end up going negative as the stack unwinds through some safecalls.
 			CS_SDepth = 0
+			C_Timer.After(0, function() CS_SDepth = 0 end)
 
 			CScriptProvider:DEBUG_Stop()
 

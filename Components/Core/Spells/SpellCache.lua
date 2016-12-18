@@ -30,11 +30,17 @@ local IsCaching
 
 SpellCache.CONST = {
 	-- A rough estimate of the highest spellID in the game. Doesn't have to be accurate at all - visual only.
-	MAX_SPELLID_GUESS = 180000,
+	MAX_SPELLID_GUESS = 234000,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
 	MAX_FAILED_SPELLS = 2000,
 	
+	WHITELIST = {
+		-- A list of spells that will fail other filters, but are still desired
+		[228911] = true, -- Odyn's test
+		[227626] = true, -- Odyn's test
+	},
+
 	-- A list of spells that should be excluded from the cache
 	INVALID_SPELLS = {
 		[1852] = true, -- GM spell named silenced, interferes with equiv
@@ -211,7 +217,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					findword(name, "camera") or
 					findword(name, "dmg")
 
-					if not fail then
+					if CONST.WHITELIST[index] or not fail then
 						Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
 						Parser:SetSpellByID(index)
 						local r, g, b = LT1:GetTextColor()
