@@ -20,6 +20,9 @@ local print = TMW.print
 local pairs, type, ipairs, bit, select = 
       pairs, type, ipairs, bit, select
 
+local clientVersion = select(4, GetBuildInfo())
+local addonVersion = tonumber(GetAddOnMetadata("TellMeWhen", "X-Interface"))
+
 local _, pclass = UnitClass("Player")
 
 
@@ -160,8 +163,7 @@ TMW.BE = {
 			  -3409, -- Crippling Poison
 			  -3600, -- Earthbind
 			  -5116, -- Concussive Shot
-			  -7302, -- Frost Armor
-			  -7321, -- Chilled
+			 -12544, -- Frost Armor
 			  -7992, -- Slowing Poison
 			  26679, -- Deadly Throw
 			  35346, -- Warp Time
@@ -193,7 +195,6 @@ TMW.BE = {
 			 194279, -- Caltrops
 			 194858, -- Dragonsfire Grenade
 			 195645, -- Wing Clip
-			 196723, -- Dizzying Kicks
 			-196840, -- Frost Shock
 			 198813, -- Vengeful Retreat
 			 201142, -- Frozen Wake (freezing trap break slow from master trapper survival hunter talent)
@@ -284,12 +285,12 @@ TMW.BE = {
 			 199407, -- Light on your feet (mistweaver monk artifact trait)
 			 201233, -- whirling kicks (windwalaker monk pvp talent)
 			 201447, -- Ride the wind (windwalaker monk pvp talent)
-			 204324, -- Instincts of the cheetah (hunter talent)
 			 209754, -- Boarding Party (rogue pvp talent)
 			 210980, -- Focus in the light (holy priest artifact trait)
 			 213177, -- swift as a coursing river (brewmaster artifact trait)
 			 214121, -- Body and Mind (priest talent)
 			 215572, -- Frothing Berserker (warrior talent)
+			 231390, -- Trailblazer (hunter talent)
 			-186257, -- Aspect of the Cheetah
 			-204475, -- Windburst (marks hunter artifact ability)
 		},
@@ -485,7 +486,7 @@ local function ProcessEquivalencies()
 
 	for dispeltype, texture in pairs(TMW.DS) do
 		TMW.EquivFirstIDLookup[dispeltype] = texture
-		TMW.SpellTexturesMetaIndex[strlower(dispeltype)] = icon
+		TMW.SpellTexturesMetaIndex[strlower(dispeltype)] = texture
 	end
 	
 	for category, b in pairs(TMW.BE) do

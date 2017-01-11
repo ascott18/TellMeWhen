@@ -3,6 +3,12 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.2.5===
+* Updates for patch 7.1.5, including:
+** Fixed role detection bug caused by GetSpecializationInfo losing a parameter.
+** Fixed invalid equivalency spell warnings from breaking all equivalencies.
+** Removed some invalid spells from equivalencies.
+
 ===v8.2.4===
 * Changed behavior of the On Combat Event notification trigger slightly to avoid occasional undesired timing issues (Ticket 1352).
 * Added conditions for Monks to check their stagger under the Resources condition category.
