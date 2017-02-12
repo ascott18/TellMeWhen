@@ -8,7 +8,7 @@
 ## X-Interface: 70100
 ## Title: TellMeWhen
 
-## Version: 8.2.6
+## Version: 8.2.7
 ## Author: Cybeloras of Aerie Peak\Detheroc\Mal'Ganis
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
