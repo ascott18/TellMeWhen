@@ -1446,7 +1446,9 @@ L["LUACONDITION"] = "Lua (Advanced)"
 L["LUACONDITION2"] = "Lua Condition"
 L["LUACONDITION_DESC"] = [[This condition type allows you to evaluate Lua code to determine the state of a condition.
 
-The input is not an 'if .. then' statement, nor is it a function closure. It is a regular statement to be evaluated, e.g. 'a and b or c'.  If complex functionality is required, use a call to a function, e.g. 'CheckStuff()', that is defined externally (perhaps using TMW's Lua snippets feature).
+If your input is a regular statement to be evaluated, e.g. 'a and b or c', you don't need a return statement.
+
+If you have any control blocks (e.g. if/then), you'll need return statements.
 
 To get a reference to this icon/group, use "thisobj". To insert a reference to another icon by GUID, shift click that icon while this editbox has focus.
 

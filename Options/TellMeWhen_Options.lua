@@ -2062,6 +2062,8 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 
 TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
 	GetText_original = TMW.C.Config_EditBox_Lua.GetText,
+	SetText_original = TMW.C.Config_EditBox_Lua.SetText,
+	padNewlines = true,
 
 	ColorTable = (function()
 		local colorTable = {}
@@ -2091,12 +2093,24 @@ TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
 
 		self:SetNewlineOnEnter(true)
 
+		local old = IndentationLib.padWithLinebreaks
+		IndentationLib.padWithLinebreaks = function(code)
+			if self:HasFocus() and not padNewlines then
+				return code, false
+			end
+			return old(code)
+		end
+
 		self:SetAcceptsTMWLinks(true, TMW.L["LUA_INSERTGUID_TOOLTIP"])
 		TMW.Classes.ChatEdit_InsertLink_Hook:New(self, self.InsertLinkHook)
 	end,
 
 	OnTabPressed = function(self)
 		self:Insert("    ")
+	end,
+
+	SetPadNewlines = function(self, value)
+		self.padNewlines = value;
 	end,
 
 	GetCursorLineNumber = function(self)

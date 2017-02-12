@@ -274,6 +274,52 @@
 				</Scripts>
 			</CheckButton>
 			
+			<EditBox parentKey="Lua" inherits="TellMeWhen_InputBoxTemplate" multiline="true">
+				<Size y="16"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.Type"/>
+					<Anchor point="RIGHT" x="-15" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self, "Config_EditBox_Lua")
+
+
+						self:SetTexts(TMW.L["LUACONDITION"], TMW.L["LUACONDITION_DESC"])
+						self:SetLabel(TMW.L["CODETOEXE"])
+
+						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
+
+							-- if this editbox is active and is for a Lua condition,
+							-- attempt to insert a reference to the icon by GUID into the editbox
+							if linkType == "TMW" and TMW.CNDT:GetSettings()[self:GetParent():GetID()].Type == "LUA" then
+
+								-- Reconstruct the GUID
+								local GUID = linkType .. ":" .. linkData
+
+								self.editbox:Insert(("TMW:GetDataOwner(%q)"):format(GUID))
+
+								-- notify success
+								return true
+							end
+						end)
+
+						self:SetPadNewlines(false)
+
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
+							return value:trim("\r\n \t")
+						end)
+
+						self:SetSetting("Name")
+					</OnLoad>
+
+					<OnSizeChanged>
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight(5)
+						end
+					</OnSizeChanged>
+				</Scripts>
+			</EditBox>
 
 			<Frame parentKey="BitFlags" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
