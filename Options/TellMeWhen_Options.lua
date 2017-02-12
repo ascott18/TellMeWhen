@@ -1663,6 +1663,9 @@ TMW:NewClass("Config_Page", "Config_Frame"){
 
 		if IE.CurrentTab and IE.CurrentTab.pageKey == self:GetParentKey() then
 			IE.CurrentTab:CScriptCall("PageReloadRequested", self)
+		elseif not IE.CurrentTab then
+			IE.UndoButton:Disable()
+			IE.RedoButton:Disable()
 		end
 	end,
 }

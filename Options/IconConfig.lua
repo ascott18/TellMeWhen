@@ -122,6 +122,10 @@ function IE:LoadIcon(isRefresh, icon)
 		elseif icon == false then
 			CI.icon = nil
 			IE.TabGroups.ICON:SetChildrenEnabled(false)
+
+			if IE.CurrentTabGroup.identifier == "ICON" then
+				IE.ResetButton:Disable()
+			end
 		end
 
 		TMW:Fire("TMW_CONFIG_ICON_LOADED_CHANGED", CI.icon, ic_old)
