@@ -276,7 +276,7 @@ offset = pclass == "DEMONHUNTER" and S or 0
 ConditionCategory:RegisterCondition(91.0 - offset, "FURY", {
 	text = FURY,
 	min = 0,
-	max = 130,
+	range = 200,
 	icon = "Interface\\Icons\\ability_warlock_demonicpower",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_FURY),
@@ -289,7 +289,7 @@ ConditionCategory:RegisterCondition(91.0 - offset, "FURY", {
 ConditionCategory:RegisterCondition(92.0 - offset, "PAIN", {
 	text = PAIN,
 	min = 0,
-	max = 100,
+	range = 200,
 	icon = "Interface\\Icons\\ability_demonhunter_torment",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(SPELL_POWER_PAIN),
