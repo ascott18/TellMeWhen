@@ -255,7 +255,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, event, _, sourceGUID, sourceName
 		if existingGuardian then
 			existingGuardian:Empower()
 		end
-	elseif event == "UNIT_DIED" then
+	elseif event == "UNIT_DIED" or event == "SPELL_INSTAKILL" then
 		Guardians[destGUID] = nil
 	else
 		-- Sometimes on the first summon after logging in, the name of a guardian will be "Unknown" in the log.
