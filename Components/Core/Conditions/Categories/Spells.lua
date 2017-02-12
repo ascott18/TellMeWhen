@@ -321,6 +321,30 @@ ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player")
 	end,
 })
+ConditionCategory:RegisterCondition(4.5, "SPELLCOST", {
+	text = L["CONDITIONPANEL_SPELLCOST"],
+	tooltip = L["CONDITIONPANEL_SPELLCOST_DESC"],
+
+	min = 0,
+	range = 200,
+	
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_SPELLCOST"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
+	useSUG = true,
+	unit = false,
+	icon = "Interface\\Icons\\inv_potion_125",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[(GetSpellCost(c.NameFirst) or 0) c.Operator c.Level]],
+	Env = {
+		GetSpellCost = TMW.GetSpellCost
+	},
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
+	end,
+})
 ConditionCategory:RegisterCondition(5,	 "SPELLRANGE", {
 	text = L["CONDITIONPANEL_SPELLRANGE"],
 	bool = true,

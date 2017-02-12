@@ -3,6 +3,13 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.2.7===
+* New setting for Reactive Ability icons: Require activation border. 
+** For all you prot warriors who like your Revenge procs.
+* New Condition: Spell Cost.
+* Updated the class spell list
+* Demon Hunter resource condition slider limits are now flexible.
+
 ===v8.2.6===
 ====Bug Fixes====
 * Increased Combo Points condition max to 10.

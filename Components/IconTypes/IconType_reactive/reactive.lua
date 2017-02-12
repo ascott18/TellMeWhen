@@ -55,6 +55,9 @@ Type:RegisterIconDefaults{
 	-- Cause an ability to be treated as reactive if there is an activation border on it on the action bars.
 	UseActvtnOverlay		= false,
 
+	-- Cause an ability to be treated as reactive ONLY IF there is an activation border on it on the action bars.
+	OnlyActvtnOverlay		= false,
+
 	-- Cause the avility to be considered unusable of it is on cooldown.
 	CooldownCheck			= false,
 
@@ -91,6 +94,13 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", fun
 			check:SetSetting("UseActvtnOverlay")
 		end,
 		function(check)
+			check:SetTexts(L["ICONMENU_ONLYACTIVATIONOVERLAY"], L["ICONMENU_ONLYACTIVATIONOVERLAY_DESC"])
+			check:SetSetting("OnlyActvtnOverlay")
+			check:CScriptAdd("ReloadRequested", function()
+				check:SetEnabled(TMW.CI.ics.UseActvtnOverlay)
+			end)
+		end,
+		function(check)
 			check:SetTexts(L["ICONMENU_IGNORENOMANA"], L["ICONMENU_IGNORENOMANA_DESC"])
 			check:SetSetting("IgnoreNomana")
 		end,
@@ -125,7 +135,7 @@ end)
 local function Reactive_OnEvent(icon, event, arg1)
 	-- If icon.UseActvtnOverlay == true, treat the icon as usable if the spell has an activation overlay glow.
 	if icon.Spells.First == arg1 or strlowerCache[GetSpellInfo(arg1)] == icon.Spells.FirstString then
-		icon.forceUsable = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
+		icon.activationOverlayActive = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
 		icon.NextUpdateTime = 0
 	end
 end
@@ -133,8 +143,10 @@ end
 local function Reactive_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local NameArray, NameStringArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, forceUsable, IgnoreNomana =
-	 icon.Spells.Array, icon.Spells.StringArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.forceUsable, icon.IgnoreNomana
+	local NameArray, NameStringArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, IgnoreNomana, UseActvtnOverlay, OnlyActvtnOverlay =
+	 icon.Spells.Array, icon.Spells.StringArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.IgnoreNomana, icon.UseActvtnOverlay, icon.OnlyActvtnOverlay
+
+	local activationOverlayActive = icon.activationOverlayActive
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
 	local inrange, nomana, start, duration, CD, usable, charges, maxCharges, chargeStart, chargeDur, stack, start_charge, duration_charge
@@ -185,7 +197,11 @@ local function Reactive_OnUpdate(icon, time)
 				CD = not (duration == 0 or OnGCD(duration))
 			end
 
-			usable = forceUsable or usable
+			if UseActvtnOverlay and OnlyActvtnOverlay then
+				usable = activationOverlayActive
+			else
+				usable = activationOverlayActive or usable
+			end
 			if usable and not CD and not nomana and inrange then --usable
 				icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 					STATE_USABLE,

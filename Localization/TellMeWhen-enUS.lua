@@ -762,6 +762,8 @@ L["ICONMENU_HIDEUNEQUIPPED"] = "Hide when slot lacks weapon"
 L["ICONMENU_HIDEUNEQUIPPED_DESC"] = "Check this to force the icon to be hidden if the weapon spot being checked does not have a weapon in it, or if that slot has a shield or an off-hand frill."
 L["ICONMENU_USEACTIVATIONOVERLAY"] = "Check activation border"
 L["ICONMENU_USEACTIVATIONOVERLAY_DESC"] = "Check this to cause the presence of the sparkly yellow border around an action to force the icon to act as usable."
+L["ICONMENU_ONLYACTIVATIONOVERLAY"] = "Require activation border"
+L["ICONMENU_ONLYACTIVATIONOVERLAY_DESC"] = "Check this to require the presence of the sparkly yellow border around an action to allow the icon to act as usable."
 L["ICONMENU_ONLYEQPPD"] = "Only if equipped"
 L["ICONMENU_ONLYEQPPD_DESC"] = "Check this to make the icon show only if the item is equipped."
 L["ICONMENU_SHOWSTACKS"] = "Show stacks"
@@ -1422,6 +1424,8 @@ L["CONDITIONPANEL_MANAUSABLE"] = "Spell Usable (Mana/Energy/etc.)"
 L["CONDITIONPANEL_MANAUSABLE_DESC"] = [[Checks if a spell is usable base on how much primary resource (mana/energy/rage/focus/runic power/etc.) you have.
 
 Does not check usability based on secondary resources (runes/holy power/chi/etc.)]]
+L["CONDITIONPANEL_SPELLCOST"] = "Spell Cost"
+L["CONDITIONPANEL_SPELLCOST_DESC"] = "Checks the cost of a spell. Units are mana/rage/energy/etc."
 L["CONDITIONPANEL_SPELLRANGE"] = "Spell in range of unit"
 L["CONDITIONPANEL_ITEMRANGE"] = "Item in range of unit"
 L["CONDITIONPANEL_AUTOCAST"] = "Pet spell autocasting"
