@@ -1390,6 +1390,9 @@ L["CONDITIONPANEL_LASTCAST"] = "Last Ability Used"
 L["CONDITIONPANEL_LASTCAST_ISSPELL"] = "Matches"
 L["CONDITIONPANEL_LASTCAST_ISNTSPELL"] = "Doesn't Match"
 
+L["CONDITIONPANEL_OVERLAYED"] = "Spell activation overlay"
+L["CONDITIONPANEL_OVERLAYED_DESC"] = "Checks if a given spell has the activation overlay effect (the sparkly yellow border on your action bars)."
+
 L["CONDITIONPANEL_INTERRUPTIBLE"] = "Interruptible"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOMATCH"] = "Name to Match"
