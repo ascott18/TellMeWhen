@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.3.1===
+====Bug Fixes====
+* Lua conditions should once again properly resolve members defined in TMW.CNDT.Env.
+
 ===v8.3.0===
 * New setting for Reactive Ability icons: Require activation border. 
 ** For all you prot warriors who like your Revenge procs.

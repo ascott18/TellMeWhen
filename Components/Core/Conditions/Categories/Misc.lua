@@ -312,12 +312,13 @@ local function GetCompiledFunction(luaCode)
 		return Functions[luaCode], key
 	end
 	
-	local func, err = loadstring(luaCode)
+	local func, err = loadstring("return " .. luaCode)
 	if err then
-		func, err = loadstring("return " .. luaCode)
+		func, err = loadstring(luaCode)
 	end
 	
 	if func then
+		setfenv(func, TMW.CNDT.Env)
 		key = tostring(func):gsub("function: ", "LF_")
 		Functions[luaCode] = func
 		Env[key] = func
