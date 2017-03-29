@@ -1,4 +1,4 @@
-﻿-- --------------------
+-- --------------------
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
@@ -99,7 +99,4 @@ function Module:Table_GetSorter()
 		return self.Sorter_Spells, self.Sorter_Bucket
 	end
 end
-
-
-
 
