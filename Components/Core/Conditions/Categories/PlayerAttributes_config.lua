@@ -125,10 +125,10 @@ Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 local EquipSetCache = {}
 function Module:Table_Get()
-	for i = 1, GetNumEquipmentSets() do
-		local name, icon = GetEquipmentSetInfo(i)
+	for i, id in pairs(C_EquipmentSet.GetEquipmentSetIDs()) do
+		local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
 
-		EquipSetCache[i] = strlower(name)
+		EquipSetCache[id] = strlower(name)
 	end
 	
 	return EquipSetCache
@@ -137,7 +137,7 @@ function Module:Table_GetSorter()
 	return nil
 end
 function Module:Entry_AddToList_1(f, id)
-	local name, icon = GetEquipmentSetInfo(id)
+	local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
 
 	f.Name:SetText(name)
 	f.ID:SetText(nil)

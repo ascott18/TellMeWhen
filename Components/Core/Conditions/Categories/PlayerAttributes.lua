@@ -350,9 +350,10 @@ ConditionCategory:RegisterCondition(18,	 "BLIZZEQUIPSET", {
 	icon = "Interface\\Icons\\inv_box_04",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetEquipmentSetInfoByName = GetEquipmentSetInfoByName,
+		GetEquipmentSetID = C_EquipmentSet.GetEquipmentSetID,
+		GetEquipmentSetInfo = C_EquipmentSet.GetEquipmentSetInfo,
 	},
-	funcstr = [[BOOLCHECK( select(3, GetEquipmentSetInfoByName(c.NameRaw)) )]],
+	funcstr = [[GetEquipmentSetID(c.NameRaw) and BOOLCHECK( select(4, GetEquipmentSetInfo(GetEquipmentSetID(c.NameRaw))) )]],
 	events = function(ConditionObject, c)
 		return
 			--ConditionObject:GenerateNormalEventString("EQUIPMENT_SWAP_FINISHED") -- this doesn't fire late enough to get updated returns from GetEquipmentSetInfoByName
