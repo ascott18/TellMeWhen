@@ -143,7 +143,7 @@ function TimerBar:UpdateValue(force)
 		end
 	end
 
-	local percent = value / self.Max
+	local percent = self.Max == 0 and 0 or value / self.Max
 
 	if force or value ~= self.__value then
 		local bar = self.bar
@@ -210,7 +210,7 @@ end
 function TimerBar:UpdateStatusBarImmediate(value)
 	local bar = self.bar
 	local tex = self.texture
-	local percent = value / self.Max
+	local percent = self.Max == 0 and 0 or value / self.Max
 	if percent < 0 then percent = 0 elseif percent > 1 then percent = 1 end
 
 

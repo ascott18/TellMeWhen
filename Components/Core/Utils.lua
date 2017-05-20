@@ -1097,9 +1097,6 @@ end
 
 do -- ordered pairs
 
-	local tables = {}
-	local unused = {}
-
 	local sortByValues, compareFunc, reverse
 
 	-- An alternative comparison function that can handle mismatched types.
@@ -1145,21 +1142,16 @@ do -- ordered pairs
 		--return compare(a, b)
 	end
 
-	local function orderedNext(orderedIndex, state)
-		local t = tables[orderedIndex]
-		
-		if state == nil then
-			local key = orderedIndex[1]
-			return key, t[key]
-		end
+	local iterIndexes = {}
+	local tables = {}
+	local unused = {}
 
-		local key
-		for i = 1, #orderedIndex do
-			if orderedIndex[i] == state then
-				key = orderedIndex[i+1]
-				break
-			end
-		end
+	local function orderedNext(orderedIndex)
+		local t = tables[orderedIndex]
+
+		local i = iterIndexes[orderedIndex]
+		local key = orderedIndex[i]
+		iterIndexes[orderedIndex] = i + 1
 
 		if key then
 			return key, t[key]
@@ -1167,6 +1159,7 @@ do -- ordered pairs
 
 		unused[#unused+1] = wipe(orderedIndex)
 		tables[orderedIndex] = nil
+		iterIndexes[orderedIndex] = nil
 		return
 	end
 
@@ -1212,6 +1205,7 @@ do -- ordered pairs
 
 		sort(orderedIndex, sorter)
 		tables[orderedIndex] = t
+		iterIndexes[orderedIndex] = 1
 
 		return orderedNext, orderedIndex
 	end

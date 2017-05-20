@@ -793,7 +793,7 @@ do
 			}, function(iconA, iconB, attributesA, attributesB, order)
 				local a, b = attributesA.value, attributesB.value
 				if a ~= b then
-					return a*order < b*order
+					return (a or 0)*order < (b or 0)*order
 				end
 			end)
 
@@ -806,7 +806,7 @@ do
 				local a, b = attributesA.maxValue == 0 and 0 or attributesA.value / attributesA.maxValue,
 				             attributesB.maxValue == 0 and 0 or attributesB.value / attributesB.maxValue
 				if a ~= b then
-					return a*order < b*order
+					return (a or 0)*order < (b or 0)*order
 				end
 			end)
 		end
