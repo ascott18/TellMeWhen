@@ -25,18 +25,18 @@ local pairs, wipe, _G =
 local PowerBarColor = PowerBarColor
 
 local defaultPowerTypes = {
-	ROGUE		= SPELL_POWER_ENERGY or Enum.PowerType.Energy,
-	PRIEST		= SPELL_POWER_MANA or Enum.PowerType.Mana,
-	DRUID		= SPELL_POWER_MANA or Enum.PowerType.Mana,
-	WARRIOR		= SPELL_POWER_RAGE or Enum.PowerType.Rage,
-	MAGE		= SPELL_POWER_MANA or Enum.PowerType.Mana,
-	WARLOCK		= SPELL_POWER_MANA or Enum.PowerType.Mana,
-	PALADIN		= SPELL_POWER_MANA or Enum.PowerType.Mana,
-	SHAMAN		= SPELL_POWER_MANA or Enum.PowerType.Mana,
-	HUNTER		= SPELL_POWER_FOCUS or Enum.PowerType.Focus,
-	DEATHKNIGHT = SPELL_POWER_RUNIC_POWER or Enum.PowerType.RunicPower,
-	MONK 		= SPELL_POWER_ENERGY or Enum.PowerType.Energy,
-	DEMONHUNTER = SPELL_POWER_FURY or Enum.PowerType.Fury,
+	ROGUE		= Enum.PowerType.Energy,
+	PRIEST		= Enum.PowerType.Mana,
+	DRUID		= Enum.PowerType.Mana,
+	WARRIOR		= Enum.PowerType.Rage,
+	MAGE		= Enum.PowerType.Mana,
+	WARLOCK		= Enum.PowerType.Mana,
+	PALADIN		= Enum.PowerType.Mana,
+	SHAMAN		= Enum.PowerType.Mana,
+	HUNTER		= Enum.PowerType.Focus,
+	DEATHKNIGHT = Enum.PowerType.RunicPower,
+	MONK 		= Enum.PowerType.Energy,
+	DEMONHUNTER = Enum.PowerType.Fury,
 }
 local defaultPowerType = defaultPowerTypes[pclass]
 
@@ -133,7 +133,7 @@ function PowerBar:UpdateCost()
 		
 		if cost then
 			local powerType = costData.type
-			cost = powerType == (SPELL_POWER_HOLY_POWER or Enum.PowerType.HolyPower) and 3 or cost or 0 -- holy power hack: always use a max of 3
+			cost = powerType == (Enum.PowerType.HolyPower) and 3 or cost or 0 -- holy power hack: always use a max of 3
 			self.Max = cost
 			bar:SetMinMaxValues(0, cost)
 			self.__value = nil -- the displayed value might change when we change the max, so force an update
