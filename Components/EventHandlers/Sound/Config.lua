@@ -192,7 +192,7 @@ TMW.HELP:NewCode("SOUND_TEST_ERROR", 10, false)
 
 function Sound:TestSound(button, soundFile)
 	if tonumber(soundFile) then
-		PlaySoundKitID(soundFile)
+		(PlaySoundKitID or PlaySound)(soundFile) -- PlaySoundKitID is gone in 7.3
 	else
 		PlaySoundFile(soundFile, TMW.db.profile.SoundChannel)
 	end

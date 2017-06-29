@@ -428,7 +428,7 @@
 						TMW:TT(self, "CONDITIONPANEL_REMOVE")
 					</OnLoad>
 					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:ClickSound()
 
 						self:GetParent():DeleteHandler()
 					</OnClick>
@@ -447,7 +447,7 @@
 						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:ClickSound()
 
 						self:GetParent():UpOrDown(-1)
 					</OnClick>
@@ -479,7 +479,7 @@
 						self:SetScale(0.8)
 					</OnLoad>
 					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:ClickSound()
 
 						self:GetParent():UpOrDown(1)
 					</OnClick>
@@ -589,7 +589,7 @@
 								self.Plus2:SetPoint("LEFT", self.text, "RIGHT", 10, 0)
 							</OnLoad>
 							<OnClick>
-								PlaySound("igMainMenuOptionCheckBoxOn")
+								TMW:ClickSound()
 								
 								TMW.CNDT:AddCondition(TMW.CNDT:GetSettings())
 								TMW.CNDT:LoadConfig()

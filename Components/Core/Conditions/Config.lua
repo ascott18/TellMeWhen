@@ -588,7 +588,7 @@ TMW:NewClass("Config_Conditions_Paren", "Config_CheckButton") {
 	},
 
 	OnClick = function(self)
-		PlaySound("igMainMenuOptionCheckBoxOn")
+		TMW:ClickSound()
 
 		TMW.HELP:Hide("CNDT_PARENTHESES_FIRSTSEE")
 
@@ -1197,7 +1197,7 @@ TMW:NewClass("Config_Conditions_AndOr", "Config_Button") {
 	end,
 
 	OnClick = function(self)
-		PlaySound("igMainMenuOptionCheckBoxOn")
+		TMW:ClickSound()
 
 		TMW.HELP:Hide("CNDT_ANDOR_FIRSTSEE")
 		

@@ -1841,7 +1841,7 @@ TMW:NewClass("Config_Button", "Button", "Config_Frame"){
 	end,
 
 	OnClick = function(self)
-		PlaySound("igMainMenuOptionCheckBoxOn")
+		TMW:ClickSound()
 	end,
 }
 
@@ -1876,15 +1876,10 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 
 	-- Script Handlers
 	OnClick = function(self, button)
+		TMW:ClickSound()
 		local settings = self:GetSettingTable()
 
 		local checked = not not self:GetChecked()
-
-		if checked then
-			PlaySound("igMainMenuOptionCheckBoxOn")
-		else
-			PlaySound("igMainMenuOptionCheckBoxOff")
-		end
 
 		if settings and self.setting then
 			if self.value == nil then
@@ -2546,7 +2541,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 		self.EditBox.title:SetText(self.title)
 
 		if not self.EditBoxShowing then
-			PlaySound("igMainMenuOptionCheckBoxOn")
+			TMW:ClickSound()
 			
 			self.EditBoxShowing = true
 			
@@ -2562,7 +2557,7 @@ TMW:NewClass("Config_Slider", "Slider", "Config_Frame")
 	end,
 	UseSlider = function(self)
 		if self.EditBoxShowing then
-			PlaySound("igMainMenuOptionCheckBoxOn")
+			TMW:ClickSound()
 
 			self.EditBoxShowing = false
 
@@ -3041,7 +3036,7 @@ TMW:NewClass("Config_PointSelect", "Config_Frame"){
 
 				local settings = self:GetSettingTable()
 
-				PlaySound("igMainMenuOptionCheckBoxOn")
+				TMW:ClickSound()
 				self:SetSelectedPoint(k)
 
 				if settings and self.setting then
@@ -3337,7 +3332,7 @@ TMW:NewClass("IconEditorTabGroup", "IconEditorTabBase"){
 	end,
 
 	OnClick = function(self)
-		PlaySound("igCharacterInfoTab")
+		PlaySound(SOUNDKIT and SOUNDKIT.IG_CHARACTER_INFO_TAB or "igCharacterInfoTab") -- SOUNDKIT is patch 7.3 compat
 
 		IE.CurrentTabGroup = self
 
@@ -3438,7 +3433,7 @@ TMW:NewClass("IconEditorTab", "IconEditorTabBase"){
 	end,
 
 	OnClick = function(self)
-		PlaySound("igCharacterInfoTab")
+		PlaySound(SOUNDKIT and SOUNDKIT.IG_CHARACTER_INFO_TAB or "igCharacterInfoTab") -- SOUNDKIT is patch 7.3 compat
 
 		if IE.CurrentTabGroup ~= self.parent then
 			self.parent:Click()

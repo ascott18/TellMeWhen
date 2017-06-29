@@ -333,7 +333,7 @@
 						self:SetFrameLevel(self:GetFrameLevel()+2)
 					</OnLoad>
 					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:ClickSound()
 
 						local group = TMW.CI.group
 						local module = group:GetModuleOrModuleChild("GroupModule_GroupPosition")

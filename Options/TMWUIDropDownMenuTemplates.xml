@@ -316,7 +316,7 @@
 					</OnLeave>
 					<OnClick>
 						self:GetParent():Toggle();
-						PlaySound("igMainMenuOptionCheckBoxOn");
+						TMW:ClickSound();
 					</OnClick>
 				</Scripts>
 

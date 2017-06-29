@@ -52,7 +52,7 @@
 						TMW:TT(self, "EVENTS_HANDLERS_PLAY", "EVENTS_HANDLERS_PLAY_DESC")
 					</OnLoad>
 					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:ClickSound()
 
 						local ID = self:GetParent():GetID()
 						local Module = TMW.EVENTS:GetEventHandlerForEventSettings(ID)
@@ -125,14 +125,14 @@
 
 				local EventHandler = TMW.EVENTS:GetEventHandlerForEventSettings(self:GetID())
 				if button == "RightButton" then
-					PlaySound("igMainMenuOptionCheckBoxOn")
+					TMW:ClickSound()
 					self.DD.eventButton = self
 					self.DD:Toggle(1, nil, self, 0, 0)
 				end
 			</OnMouseUp>
 			<OnClick>
 				if button ~= "RightButton" then
-					PlaySound("igMainMenuOptionCheckBoxOn")
+					TMW:ClickSound()
 
 					TMW.IE:SaveSettings()
 					
@@ -196,7 +196,7 @@
 				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			</OnLoad>
 			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
+				TMW:ClickSound()
 
 				TMW.EVENTS.pickedHandler = self.handlerIdentifier
 				TMW.EVENTS:ShowEventPickerButtons()
@@ -232,7 +232,7 @@
 				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			</OnLoad>
 			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
+				TMW:ClickSound()
 
 				TMW.EVENTS:PickEvent(self.event)
 			</OnClick>
@@ -253,7 +253,7 @@
 		</Layers>
 		<Scripts>
 			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
+				TMW:ClickSound()
 
 				self.EventHandler:SetSubHandler(self.subHandlerIdentifier)
 			</OnClick>
@@ -391,7 +391,7 @@
 						self.Text:SetMaxLines(3)
 					</OnLoad>
 					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:ClickSound()
 
 						TMW.EVENTS:ShowHandlerPickerButtons()
 						TMW:TT_Update(self)

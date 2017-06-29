@@ -161,7 +161,7 @@
 						self:SetScale(2)
 					</OnLoad>
 					<OnClick>
-						PlaySound("igMainMenuOptionCheckBoxOn")
+						TMW:ClickSound()
 
 						TMW:SlashCommand("options")
 					</OnClick>

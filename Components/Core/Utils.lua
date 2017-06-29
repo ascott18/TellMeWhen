@@ -1568,3 +1568,13 @@ function TMW:DetectImportedLua(table)
 
 	return results
 end
+
+
+function TMW:ClickSound()
+	 -- SOUNDKIT is patch 7.3 compat
+	if SOUNDKIT then
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+	else
+		PlaySound("igMainMenuOptionCheckBoxOn")
+	end
+end

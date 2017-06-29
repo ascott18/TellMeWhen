@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.4.1===
+* Compatibility updates for patch 7.3.0.
+
 ===v8.4.0===
 * Compatibility updates for patch 7.2.5.
 
