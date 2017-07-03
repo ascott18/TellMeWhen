@@ -525,14 +525,20 @@ elseif pclass == "MAGE" then
 	}
 
 elseif pclass == "PALADIN" then
+	local name = GetSpellInfo(26573) .. " & " .. GetSpellInfo(114158)
 	TMW.COMMON.CurrentClassTotems = {
-		name = GetSpellInfo(26573),
-		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(26573)),
+		name = name,
+		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name),
 		{
 			hasVariableNames = false,
-			name = GetSpellInfo(26573),
+			name = GetSpellInfo(26573), --consecration
 			texture = GetSpellTexture(26573)
-		}
+		},
+        {
+            hasVariableNames = false,
+            name = GetSpellInfo(114158), --light's hammer
+            texture = GetSpellTexture(114158)
+        }
 	}
 elseif pclass == "MONK" then
 	TMW.COMMON.CurrentClassTotems = {
