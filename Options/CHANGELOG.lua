@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ===v8.4.1===
 * Compatibility updates for patch 7.3.0.
 * Added Light's Hammer tracking to the totem/Consecration icon type.
+* Added Soul Shard fragment tracking to conditions & Resource Display icons.
 
 ===v8.4.0===
 * Compatibility updates for patch 7.2.5.

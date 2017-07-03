@@ -1621,6 +1621,9 @@ L["CNDT_TOTEMNAME_DESC"] = [[Set blank to track any totems of the selected type.
 
 Enter a totem name, or a list of names separated by semicolons, to only check certain totems.]]
 L["GCD_ACTIVE"] = "GCD active"
+L["RESOURCE_FRAGMENTS"] = "%s Fragments"
+L["ICONMENU_VALUEFRAGMENTS"] = "Track Fragments"
+L["ICONMENU_VALUEFRAGMENTS_DESC"] = "Enable to track more granular fragments of the selected resource. Primarily used for Soul Shards."
 L["BURNING_EMBERS_FRAGMENTS"] = "Burning Ember 'Fragments'"
 L["BURNING_EMBERS_FRAGMENTS_DESC"] = [[Each whole Burning Ember consists of 10 fragments.
 

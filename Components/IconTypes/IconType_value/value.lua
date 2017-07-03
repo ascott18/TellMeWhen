@@ -58,6 +58,9 @@ Type:RegisterIconDefaults{
 	-- The power type to display from the unit.
 	-- -2 is the default resouce type. -1 is health.
 	PowerType				= -2,
+
+	-- Whether to represent value fragments, or only whole value increments.
+	ValueFragments          = false,
 }
 
 
@@ -85,7 +88,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 		[Enum.PowerType.Focus] = FOCUS,
 		-- [SPELL_POWER_RUNES] = RUNES,
 		[Enum.PowerType.RunicPower] = RUNIC_POWER,
-		[Enum.PowerType.SoulShards] = SOUL_SHARDS,
+		[Enum.PowerType.SoulShards] = SOUL_SHARDS_POWER,
 		[Enum.PowerType.HolyPower] = HOLY_POWER,
 		[Enum.PowerType.Chi] = CHI_POWER;
 		[Enum.PowerType.Maelstrom] = MAELSTROM_POWER,
@@ -128,7 +131,21 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	end)
 end)
 
-
+Type:RegisterConfigPanel_ConstructorFunc(105, "TellMeWhen_ValueCheckSettings", function(self)
+	self:SetTitle(Type.name)
+	self:BuildSimpleCheckSettingFrame({
+		function(check)
+			check:SetTexts(L["ICONMENU_VALUEFRAGMENTS"], L["ICONMENU_VALUEFRAGMENTS_DESC"])
+			check:SetSetting("ValueFragments")
+			check:CScriptAdd("ReloadRequested", function()
+				local settings = self:GetSettingTable()
+				-- pcall because this function doesn't accept invalid values.
+				local success, powerMod = pcall(UnitPowerDisplayMod, settings.PowerType)
+				check:SetEnabled(success and powerMod > 1 or false)
+			end)
+		end,
+	})
+end)
 
 TMW:RegisterUpgrade(72011, {
 	icon = function(self, ics)
@@ -148,6 +165,7 @@ PowerBarColor[-1] = {{r=1, g=0, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=0, g=1, b=0,
 
 local function Value_OnUpdate(icon, time)
 	local PowerType = icon.PowerType
+	local ValueFragments = icon.ValueFragments
 	local Units = icon.Units
 
 	for u = 1, #Units do
@@ -159,14 +177,21 @@ local function Value_OnUpdate(icon, time)
 			local value, maxValue, valueColor
 			if PowerType == -1 then
 				value, maxValue, valueColor = UnitHealth(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
-			elseif PowerType == -2 then
-				value, maxValue, valueColor = UnitPower(unit), UnitPowerMax(unit), PowerBarColor[UnitPowerType(unit)]
 			else
+				if PowerType == -2 then
+					PowerType = UnitPowerType(unit)
+				end
 				if PowerType == 4 then -- combo points
 					unit = "player"
 				end
 				
-				value, maxValue, valueColor = UnitPower(unit, PowerType), UnitPowerMax(unit, PowerType), PowerBarColor[PowerType]
+				value, maxValue, valueColor = UnitPower(unit, PowerType, ValueFragments), UnitPowerMax(unit, PowerType, ValueFragments), PowerBarColor[PowerType]
+
+				if ValueFragments then
+					local mod = UnitPowerDisplayMod(PowerType)
+					value = value / mod
+					maxValue = maxValue / mod
+				end
 			end
 
 			if not icon:YieldInfo(true, unit, value, maxValue, valueColor) then
