@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 * Compatibility updates for patch 7.3.0.
 * Added Light's Hammer tracking to the totem/Consecration icon type.
 * Added Soul Shard fragment tracking to conditions & Resource Display icons.
+* Increased Astral Power condition cap to 130.
 
 ===v8.4.0===
 * Compatibility updates for patch 7.2.5.

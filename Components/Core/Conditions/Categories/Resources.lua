@@ -333,7 +333,7 @@ offset = pclass == "DRUID" and S or 0
 ConditionCategory:RegisterCondition(94 - offset, "LUNAR_POWER", {
 	text = LUNAR_POWER,
 	min = 0,
-	max = 100,
+	max = 130, -- Druid tier set increases this to 130
 	icon = "Interface\\Icons\\talentspec_druid_balance",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.LunarPower),
