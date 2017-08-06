@@ -22,8 +22,12 @@ local print = TMW.print
 
 
 local DD = TMW:NewClass("Config_DropDownMenu_NoFrame"){
-	noResize = 1,
+	FORCE_SCALE = nil,
 
+	ForceScale = function(self, scale)
+		self.FORCE_SCALE = scale
+	end,
+	
 	SetFunction = function(self, func)
 		self.initialize = func
 	end,
@@ -57,7 +61,7 @@ DD.MENU_VALUE = nil;
 -- Time to wait to hide the menu
 DD.SHOW_TIME = 2;
 
-DD.LISTS = CreateFrame("Frame", "TMWDropDowns")
+DD.LISTS = CreateFrame("Frame", "TMWDropDowns", UIParent)
 
 hooksecurefunc("CloseMenus", function()
 	DD:CloseDropDownMenus()
@@ -535,11 +539,15 @@ function DD:Toggle(level, value, anchorName, xOffset, yOffset, menuList, button,
 		-- Level specific stuff
 		if ( level == 1 ) then	
 			DD.OPEN_MENU = dropDownFrame
-			TMWDropDowns:SetScale(1)
-			for _, frame in TMW:Vararg(dropDownFrame, anchorName) do
-				if type(frame) == "table" and frame.GetEffectiveScale then
-					TMWDropDowns:SetScale(frame:GetEffectiveScale())
-					break
+			if self.FORCE_SCALE then
+				TMWDropDowns:SetScale(self.FORCE_SCALE)
+			else
+				TMWDropDowns:SetScale(1)
+				for _, frame in TMW:Vararg(dropDownFrame, anchorName) do
+					if type(frame) == "table" and frame.GetEffectiveScale then
+						TMWDropDowns:SetScale(frame:GetEffectiveScale() / TMWDropDowns:GetParent():GetScale())
+						break
+					end
 				end
 			end
 
@@ -643,12 +651,12 @@ function DD:Toggle(level, value, anchorName, xOffset, yOffset, menuList, button,
 		
 		--  We just move level 1 enough to keep it on the screen. We don't necessarily change the anchors.
 		if level == 1 then
-			local scale = listFrame:GetEffectiveScale()
+			local scale = TMWDropDowns:GetScale()
 
-			local offLeft = listFrame:GetLeft() / scale
-			local offRight = (GetScreenWidth() - listFrame:GetRight()) / scale
-			local offTop = (GetScreenHeight() - listFrame:GetTop()) / scale
-			local offBottom = listFrame:GetBottom() / scale
+			local offLeft = listFrame:GetLeft() -- / scale
+			local offRight = (GetScreenWidth() - listFrame:GetRight() * scale) / scale
+			local offTop = (GetScreenHeight() - listFrame:GetTop() * scale) / scale
+			local offBottom = listFrame:GetBottom() -- * scale
 			
 			local xAddOffset, yAddOffset = 0, 0;
 			if ( offLeft < 0 ) then
@@ -664,11 +672,7 @@ function DD:Toggle(level, value, anchorName, xOffset, yOffset, menuList, button,
 			end
 			
 			listFrame:ClearAllPoints();
-			if ( anchorName == "cursor" ) then
-				listFrame:SetPoint(point, relativeTo, relativePoint, xOffset + xAddOffset, yOffset + yAddOffset);
-			else
-				listFrame:SetPoint(point, relativeTo, relativePoint, xOffset + xAddOffset, yOffset + yAddOffset);
-			end
+			listFrame:SetPoint(point, relativeTo, relativePoint, xOffset + xAddOffset, yOffset + yAddOffset);
 		else
 			-- Determine whether the menu is off the screen or not
 			local offscreenY, offscreenX;
