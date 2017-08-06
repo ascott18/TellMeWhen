@@ -406,6 +406,8 @@ TMW.BE = {
 		BurstHaste = {
 			  90355, -- Ancient Hysteria
 			 146555, -- Drums of Rage
+			 178207, -- Drums of Fury
+			 230935, -- Drums of the Mountain
 			   2825, -- Bloodlust
 			  80353, -- Time Warp
 			 160452, -- Netherwinds
@@ -416,34 +418,39 @@ TMW.BE = {
 		Heals = {
 			   2061, -- Flash Heal
 			    596, -- Prayer of Healing
-			    740, -- Tranquility
-			   1064, -- Chain Heal
 			   2060, -- Heal
-			   5185, -- Healing Touch
-			   8004, -- Healing Surge
-			   8936, -- Regrowth
-			  19750, -- Flash of Light
 			  32546, -- Binding Heal
 			  33076, -- Prayer of Mending
-			  48438, -- Wild Growth
 			  64843, -- Divine Hymn
-			  73920, -- Healing Rain
-			  77472, -- Healing Wave
-			  82326, -- Holy Light
-			 114163, -- Eternal Flame
-			 116670, -- Vivify
-			 116694, -- Effuse
 			 120517, -- Halo
-			 124682, -- Enveloping Mist
 			 152118, -- Clarity of Will
 			 186263, -- Shadow Mend
-			 191837, -- Esssence Font
 			 194509, -- Power Word: Radiance
-			 200652, -- Tyr's Deliverance
 			 204065, -- Shadow Covenant
+
+			    740, -- Tranquility
+			   8936, -- Regrowth
+			   5185, -- Healing Touch
+			  48438, -- Wild Growth
+
+			   1064, -- Chain Heal
+			   8004, -- Healing Surge
+			  73920, -- Healing Rain
+			  77472, -- Healing Wave
+			 207778, -- Gift of the Queen
+
+			  19750, -- Flash of Light
+			  82326, -- Holy Light
+			 114163, -- Eternal Flame
+			 200652, -- Tyr's Deliverance
+
+			 116670, -- Vivify
+			 116694, -- Effuse
+			 124682, -- Enveloping Mist
+			 191837, -- Esssence Font
 			 205406, -- Sheilun's Gift
 			 209525, -- Soothing Mist
-			 207778, -- Gift of the Queen
+			 
 		},
 		PvPSpells = {
 			    339, -- Entangling Roots
