@@ -5,9 +5,14 @@ TMW.CHANGELOG_LASTVER="6.2.6"
 TMW.CHANGELOG = [==[
 ===v8.4.1===
 * Compatibility updates for patch 7.3.0.
+* The Guardian icon type (Warlock) now has sort settings.
 * Added Light's Hammer tracking to the totem/Consecration icon type.
 * Added Soul Shard fragment tracking to conditions & Resource Display icons.
 * Increased Astral Power condition cap to 130.
+* Added newer drums to the BurstHaste equivalency.
+
+====Bug Fixes====
+* Fixed dropdown scaling issues.
 
 ===v8.4.0===
 * Compatibility updates for patch 7.2.5.

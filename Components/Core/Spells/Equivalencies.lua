@@ -265,7 +265,7 @@ TMW.BE = {
 			  36554, -- Shadowstep
 			  54861, -- Nitro Boosts
 			  58875, -- Spirit Walk
-			  65081, -- Body and Soul
+			 -65081, -- Body and Soul
 			  68992, -- Darkflight
 			  85499, -- Speed of Light
 			  87023, -- Cauterize
@@ -387,6 +387,7 @@ TMW.BE = {
 			    -17, -- Power Word: Shield
 			  77535, -- Blood Shield
 			 116849, -- Life Cocoon
+			 194022 --- Mental Fortitude (Shadow Priest Artifact)
 		},
 		ImmuneToMagicCC = {
 			  33786, -- Cyclone
@@ -450,7 +451,7 @@ TMW.BE = {
 			 191837, -- Esssence Font
 			 205406, -- Sheilun's Gift
 			 209525, -- Soothing Mist
-			 
+
 		},
 		PvPSpells = {
 			    339, -- Entangling Roots

@@ -51,6 +51,9 @@ Type:RegisterIconDefaults{
 		[STATE_PRESENT_EMPOWERED] = {Alpha = 1}
 	},
 
+	-- Sort the guardians by duration
+	Sort					= false,
+
 	-- Pick what duration to show.
 	-- "guardian" will only show the duration of the guardian.
 	-- "empower" will only show the duration of empower.
@@ -83,6 +86,28 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_GuardianDuration", fun
 		end,
 	})
 end)
+
+Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_GuardianSortSettings", function(self)
+	self:SetTitle(TMW.L["SORTBY"])
+
+	self:BuildSimpleCheckSettingFrame({
+		numPerRow = 3,
+		function(check)
+			check:SetTexts(TMW.L["SORTBYNONE"], TMW.L["SORTBYNONE_DESC"])
+			check:SetSetting("Sort", false)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTASC"], TMW.L["ICONMENU_SORTASC_DESC"])
+			check:SetSetting("Sort", -1)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTDESC"], TMW.L["ICONMENU_SORTDESC_DESC"])
+			check:SetSetting("Sort", 1)
+		end,
+	})
+end)
+
+
 
 if pclass == "WARLOCK" then
 	Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
@@ -236,6 +261,40 @@ local Guardian = TMW:NewClass(){
 		self.empowerStart = TMW.time
 		self.empowerDuration = remaining
 	end,
+
+	GetTimeRemaining = function(self, durationMode)
+		local start = self.summonedAt
+		local duration = self.duration
+
+		local guardianRemaining = duration - (TMW.time - start)
+
+		if guardianRemaining > 0 then
+
+			local empowerStart = self.empowerStart
+			local empowerDuration = self.empowerDuration
+
+			local empowerRemaining = empowerDuration - (TMW.time - empowerStart)
+			local displayedRemaining = guardianRemaining
+
+			if durationMode == "guardian" then
+				-- keep the start/duration from the guardian that are set above
+			elseif durationMode == "empower" then
+				start, duration = empowerStart, empowerDuration
+				displayedRemaining = empowerRemaining
+			else
+				-- Show empower if appropriate - otherwise show the guardian's timer.
+				if empowerRemaining > 0 and guardianRemaining > empowerRemaining then
+					-- There is longer on the guardian than there is on empower. Show empower.
+					start, duration = empowerStart, empowerDuration
+					displayedRemaining = empowerRemaining
+				end
+			end
+
+			return start, duration, displayedRemaining, guardianRemaining, empowerRemaining
+		else 
+			return 0, 0, 0, 0, 0
+		end
+	end,
 }
 
 
@@ -276,74 +335,76 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, event, _, sourceGUID, sourceName
 	end
 end
 
+local function YieldMatchedGuardian(icon, count, Guardian)
+	local presentAlpha = icon.States[STATE_PRESENT].Alpha
+	local empowerAlpha = icon.States[STATE_PRESENT_EMPOWERED].Alpha
+	local start, duration, displayedRemaining, guardianRemaining, empowerRemaining = Guardian:GetTimeRemaining(icon.GuardianDuration)
+	if guardianRemaining > 0 then
+
+		if empowerRemaining > 0 then
+			if empowerAlpha > 0 and not icon:YieldInfo(true, STATE_PRESENT_EMPOWERED, start, duration, Guardian.texture, count) then
+				return false
+			end
+		else
+			if presentAlpha > 0 and not icon:YieldInfo(true, STATE_PRESENT, start, duration, Guardian.texture, count) then
+				return false
+			end
+		end
+	end
+	return true
+end
+
 local function OnUpdate(icon, time)
-	local NPCs = icon.NPCs.Array
+	local NameHash = icon.NPCs.Hash
 	local presentAlpha = icon.States[STATE_PRESENT].Alpha
 	local empowerAlpha = icon.States[STATE_PRESENT_EMPOWERED].Alpha
 
 
 	local count = nil
 	if not icon:IsGroupController() then
-		local NameHash = icon.NPCs.Hash
 		count = 0
 		-- Non-controlled icons should show the number of active ones right on the icon.
 		-- Controlled icons show this based on the number of icons shown.
+
 		for _, Guardian in pairs(Guardians) do
-
-			local empowerStart = Guardian.empowerStart
-			local empowerDuration = Guardian.empowerDuration
-
-			local empowerRemaining = empowerDuration - (time - empowerStart)
 
 			-- If the guardian matches the icon's name/id filters, and it would be shown based on opacity filters,
 			-- the include it in the count.
-			if (icon.Name == "" or NameHash[Guardian.nameLower] or NameHash[Guardian.npcID])
-			and ((presentAlpha > 0 and empowerRemaining <= 0) or (empowerAlpha > 0 and empowerRemaining > 0)) then
-				count = count + 1
+			if (icon.Name == "" or NameHash[Guardian.nameLower] or NameHash[Guardian.npcID]) then
+	
+				-- "guardian" is passed here because it is the simplest, fastest calculation,
+				-- and it doesn't affect the two values we care about here.
+				local _, _, _, guardianRemaining, empowerRemaining = Guardian:GetTimeRemaining("guardian")
+
+				if ((presentAlpha > 0 and guardianRemaining > 0) or (empowerAlpha > 0 and empowerRemaining > 0)) then
+					count = count + 1
+				end
 			end
 		end
 	end
 
-	-- Iterate in order that NPCs were inputted so that different types stay grouped together.
-	-- Dummy max limit of 1 if there is no name filter.
-	for i = 1, icon.Name == "" and 1 or #NPCs do
-		local iName = NPCs[i]
+	if icon.Sort == false then
+		-- Iterate in order that NPCs were inputted so that different types stay grouped together.
+		-- Dummy max limit of 1 if there is no name filter.
 
-		for GUID, Guardian in pairs(Guardians) do
-			local start = Guardian.summonedAt
-			local duration = Guardian.duration
+		local NPCs = icon.NPCs.Array
+		for i = 1, icon.Name == "" and 1 or #NPCs do
+			local iName = NPCs[i]
 
-			local remaining = duration - (time - start)
+			for GUID, Guardian in pairs(Guardians) do
 
-			if remaining > 0 then
 				if icon.Name == "" or Guardian.nameLower == iName or Guardian.npcID == iName then
-
-					local empowerStart = Guardian.empowerStart
-					local empowerDuration = Guardian.empowerDuration
-
-					local empowerRemaining = empowerDuration - (time - empowerStart)
-
-					if icon.GuardianDuration == "guardian" then
-						-- keep the start/duration from the guardian that are set above
-					elseif icon.GuardianDuration == "empower" then
-						start, duration = empowerStart, empowerDuration
-					else
-						-- Show empower if appropriate - otherwise show the guardian's timer.
-						if empowerRemaining > 0 and remaining > empowerRemaining then
-							-- There is longer on the guardian than there is on empower. Show empower.
-							start, duration = empowerStart, empowerDuration
-						end
+					if not YieldMatchedGuardian(icon, count, Guardian) then
+						return
 					end
-
-					if empowerRemaining > 0 then
-						if empowerAlpha > 0 and not icon:YieldInfo(true, STATE_PRESENT_EMPOWERED, start, duration, Guardian.texture, count) then
-							return
-						end
-					else
-						if presentAlpha > 0 and not icon:YieldInfo(true, STATE_PRESENT, start, duration, Guardian.texture, count) then
-							return
-						end
-					end
+				end
+			end
+		end
+	else
+		for GUID, Guardian in TMW:OrderedPairs(Guardians, icon.GuardianCompareFunc, true) do
+			if icon.Name == "" or NameHash[Guardian.nameLower] or NameHash[Guardian.npcID] then
+				if not YieldMatchedGuardian(icon, count, Guardian) then
+					return
 				end
 			end
 		end
@@ -380,6 +441,15 @@ function Type:Setup(icon)
 	icon.FirstTexture = self:GuessIconTexture(icon:GetSettings())
 
 	icon:SetInfo("texture; reverse", icon.FirstTexture, true)
+
+	local durationMode, sort = icon.GuardianDuration, icon.Sort
+	icon.GuardianCompareFunc = sort ~= false and function(a, b)
+		local _, aRemain, bRemain
+		local _, _, aRemain = a:GetTimeRemaining(durationMode)
+		local _, _, bRemain = b:GetTimeRemaining(durationMode)
+
+		return aRemain*sort > bRemain*sort
+	end or nil
 	
 	Type:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	TMW:RegisterCallback("TMW_ICON_DISABLE", Type)
