@@ -139,101 +139,141 @@
 					</Anchors>
 				</FontString>
 			</Layer>
-			<Layer level="ARTWORK">
-				<FontString parentKey="InfoText" hidden="true" inherits="GameFontHighlight">
-					<Size x="180"/>
-					<Anchors>
-						<Anchor point="TOP" y="-45"/>
-					</Anchors>
-				</FontString>
-			</Layer>
 		</Layers>
 		<Frames>
-			<Slider parentKey="Speed" inherits="TellMeWhen_SliderTemplate" hidden="true">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.InfoText" relativePoint="BOTTOM" y="-25"/>
-					<Anchor point="LEFT" x="17"/>
-					<Anchor point="RIGHT" x="-17"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self.exponent = 4
-						self.max = 5000
-						self.Left:SetText(TMW.L["CACHINGSPEED"])
-						
-						self.SpellCache = TMW:GetModule("SpellCache")
-						
-						function self:SetActualValue(val)
-							if val ~= self:GetActualValue() then
-								self:SetValue(val^(1/self.exponent))
-							end
-						end
-						function self:GetActualValue()
-							return min(floor(self:GetValue()^self.exponent+0.5), self.max)
-						end
-						
-						TMW:RegisterCallback("TMW_SPELLCACHE_NUMCACHEPERFRAME_CHANGED", function(event, num)
-							self:SetActualValue(num)
-						end)
-						
-						self:SetMinMaxValues(1, self.max^(1/self.exponent))
-						
-						self.Right:SetText(self.SpellCache:GetNumCachePerFrame())
-						self:SetActualValue(self.SpellCache:GetNumCachePerFrame())
-					</OnLoad>
-					<OnValueChanged>
-						local value = self:GetActualValue()
-						self.SpellCache:SetNumCachePerFrame(value)
-						self.Right:SetText(value)
-					</OnValueChanged>
-					<OnShow>
-						self:GetParent().InfoText:Show()
-					</OnShow>
-					<OnHide>
-						self:GetParent().InfoText:Hide()
-					</OnHide>
-				</Scripts>
-			</Slider>
-			<StatusBar parentKey="Status" hidden="true">
-				<Size x="175" y="25"/>
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Speed" relativePoint="BOTTOM" y="-15"/>
-				</Anchors>
+			
+			<Frame parentKey="Caching" setAllPoints="true" hidden="true">
 				<Layers>
 					<Layer level="ARTWORK">
-						<Texture parentKey="texture" name="$parenttexture" file="Interface\TargetingFrame\UI-StatusBar"/>
-					</Layer>
-
-					<Layer level="OVERLAY">
-						<FontString parentKey="text" name="$parentText" inherits="GameFontHighlight">
+						<FontString parentKey="InfoText" inherits="GameFontHighlight">
+							<Size x="180"/>
 							<Anchors>
-								<Anchor point="CENTER"/>
+								<Anchor point="TOP" y="-45"/>
 							</Anchors>
 						</FontString>
 					</Layer>
 				</Layers>
+				<Frames>
+
+					<!-- <Slider parentKey="Speed" inherits="TellMeWhen_SliderTemplate" hidden="true">
+						<Anchors>
+							<Anchor point="TOP" relativeKey="$parent.InfoText" relativePoint="BOTTOM" y="-25"/>
+							<Anchor point="LEFT" x="17"/>
+							<Anchor point="RIGHT" x="-17"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.exponent = 4
+								self.max = 5000
+								self.Left:SetText(TMW.L["CACHINGSPEED"])
+								
+								self.SpellCache = TMW:GetModule("SpellCache")
+								
+								function self:SetActualValue(val)
+									if val ~= self:GetActualValue() then
+										self:SetValue(val^(1/self.exponent))
+									end
+								end
+								function self:GetActualValue()
+									return min(floor(self:GetValue()^self.exponent+0.5), self.max)
+								end
+								
+								TMW:RegisterCallback("TMW_SPELLCACHE_NUMCACHEPERFRAME_CHANGED", function(event, num)
+									self:SetActualValue(num)
+								end)
+								
+								self:SetMinMaxValues(1, self.max^(1/self.exponent))
+								
+								self.Right:SetText(self.SpellCache:GetNumCachePerFrame())
+								self:SetActualValue(self.SpellCache:GetNumCachePerFrame())
+							</OnLoad>
+							<OnValueChanged>
+								local value = self:GetActualValue()
+								self.SpellCache:SetNumCachePerFrame(value)
+								self.Right:SetText(value)
+							</OnValueChanged>
+							<OnShow>
+								self:GetParent().InfoText:Show()
+							</OnShow>
+							<OnHide>
+								self:GetParent().InfoText:Hide()
+							</OnHide>
+						</Scripts>
+					</Slider> -->
+
+					<StatusBar parentKey="Status">
+						<Size x="175" y="25"/>
+						<Anchors>
+							<!-- <Anchor point="TOP" relativeKey="$parent.Speed" relativePoint="BOTTOM" y="-15"/> -->
+							<Anchor point="TOP" relativeKey="$parent.InfoText" relativePoint="BOTTOM" y="-15"/>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture parentKey="texture" file="Interface\TargetingFrame\UI-StatusBar"/>
+							</Layer>
+
+							<Layer level="OVERLAY">
+								<FontString parentKey="text" inherits="GameFontHighlight">
+									<Anchors>
+										<Anchor point="CENTER"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.SpellCache = TMW:GetModule("SpellCache")
+								
+								self:SetStatusBarTexture(self.texture)
+								self.texture:SetTexture(LibStub("LibSharedMedia-3.0"):Fetch("statusbar", TMW.db.profile.TextureName))
+								
+								TMW:RegisterCallback("TMW_SPELLCACHE_EXPECTEDCACHELENGTH_UPDATED", function(event, max)
+									self:SetMinMaxValues(1, max)
+								end)
+								
+								TMW:RegisterCallback("TMW_SPELLCACHE_NUMCACHED_CHANGED", function(event, num)
+									self:SetValue(num)
+								end)
+							</OnLoad>
+							<OnValueChanged>
+								if self:IsShown() then
+									self.text:SetText(self:GetValue() .. " / ~" .. self.SpellCache:GetExpectedCacheLength())
+								end
+							</OnValueChanged>
+						</Scripts>
+					</StatusBar>
+					<Button parentKey="Finish" inherits="TellMeWhen_ButtonTemplate">
+						<Size x="190" y="15"/>
+						<Anchors>
+							<Anchor point="BOTTOM" y="20"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetText(TMW.L["SUG_FINISHHIM"])
+								TMW:TT(self, "SUG_FINISHHIM", "SUG_FINISHHIM_DESC")
+								self:RegisterEvent("UNIT_FLAGS") -- accurately detects changes to InCombatLockdown
+							</OnLoad>
+							<OnEvent>
+								-- Don't allow this when in combat because of Blizzard's new throttling system in Mists of Pandaria
+								if InCombatLockdown() then
+									self:Disable()
+								else
+									self:Enable()
+								end
+							</OnEvent>
+							<OnClick>
+								TMW:GetModule("SpellCache"):SetNumCachePerFrame(math.huge)
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
 				<Scripts>
 					<OnLoad>
-						self.SpellCache = TMW:GetModule("SpellCache")
-						
-						self:SetStatusBarTexture(self.texture)
-						self.texture:SetTexture(LibStub("LibSharedMedia-3.0"):Fetch("statusbar", TMW.db.profile.TextureName))
-						
-						TMW:RegisterCallback("TMW_SPELLCACHE_EXPECTEDCACHELENGTH_UPDATED", function(event, max)
-							self:SetMinMaxValues(1, max)
-						end)
-						
-						TMW:RegisterCallback("TMW_SPELLCACHE_NUMCACHED_CHANGED", function(event, num)
-							self:SetValue(num)
-						end)
+						self.InfoText:SetText(TMW.L["CACHING"])
 					</OnLoad>
-					<OnValueChanged>
-						if self:IsShown() then
-							self.text:SetText(self:GetValue() .. " / ~" .. self.SpellCache:GetExpectedCacheLength())
-						end
-					</OnValueChanged>
 				</Scripts>
-			</StatusBar>
+			</Frame>
+
 			<Button parentKey="Help" inherits="MainMenuBarMicroButton" hidden="false">
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-5" y="16"/>
@@ -259,30 +299,6 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button parentKey="Finish" inherits="TellMeWhen_ButtonTemplate" hidden="true">
-				<Size x="190" y="15"/>
-				<Anchors>
-					<Anchor point="BOTTOM" y="20"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:SetText(TMW.L["SUG_FINISHHIM"])
-						TMW:TT(self, "SUG_FINISHHIM", "SUG_FINISHHIM_DESC")
-						self:RegisterEvent("UNIT_FLAGS") -- accurately detects changes to InCombatLockdown
-					</OnLoad>
-					<OnEvent>
-						-- Don't allow this when in combat because of Blizzard's new throttling systen in Mists of Pandaria
-						if InCombatLockdown() then
-							self:Disable()
-						else
-							self:Enable()
-						end
-					</OnEvent>
-					<OnClick>
-						TMW:GetModule("SpellCache"):SetNumCachePerFrame(math.huge)
-					</OnClick>
-				</Scripts>
-			</Button>
 			<Button parentKey="blocker" setAllPoints="true" hidden="true">
 				<Layers>
 					<Layer level="OVERLAY">
@@ -302,7 +318,6 @@
 			<OnLoad>
 				TMW.SUG.SuggestionList = self
 				self.Header:SetText(TMW.L["SUGGESTIONS"])
-				self.InfoText:SetText(TMW.L["CACHING"])
 
   				TMW.HELP:NewCode("SUG_FIRSTHELP", 100, true)
 				

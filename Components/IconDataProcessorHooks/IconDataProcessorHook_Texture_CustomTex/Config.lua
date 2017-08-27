@@ -80,7 +80,7 @@ function Module:Entry_AddToList_2(f, id)
 	end
 end
 function Module.Sorter_VarTex(a, b)
-
+	print(a, b)
 	local varTypeA, varDataA = a:match("^$([^%.:]+)%.?([^:]*)$")
 	local varTypeB, varDataB = b:match("^$([^%.:]+)%.?([^:]*)$")
 	

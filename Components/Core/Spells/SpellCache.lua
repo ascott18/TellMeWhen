@@ -30,7 +30,7 @@ local IsCaching
 
 SpellCache.CONST = {
 	-- A rough estimate of the highest spellID in the game. Doesn't have to be accurate at all - visual only.
-	MAX_SPELLID_GUESS = 234000,
+	MAX_SPELLID_GUESS = 255000,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
 	MAX_FAILED_SPELLS = 2000,
@@ -45,7 +45,7 @@ SpellCache.CONST = {
 	INVALID_SPELLS = {
 		[1852] = true, -- GM spell named silenced, interferes with equiv
 		--[[
-		-- I added in special handling for these in the suggetion list. No longer need to manually exclude interferences.
+		-- I added in special handling for these in the suggestion list. No longer need to manually exclude interferences.
 		[47923] = true, -- spell named stunned, interferes
 		[65918] = true, -- spell named stunned, interferes
 		[78320] = true, -- spell named stunned, interferes
@@ -98,6 +98,11 @@ TMW.IE:RegisterUpgrade(71016, {
 		TMW.IE.db.global.IncompleteCache = nil
 		TMW.IE.db.global.WoWVersion = nil
 	end,
+})
+
+-- Force a re-cache - If a re-cache is needed, just update this version num to the latest version.
+-- 84201 - Added a fix to exclude spells with blank names, because Blizzard managed to make a spell with no name.
+TMW.IE:RegisterUpgrade(84201, {
 	locale = function(self, locale)
 		locale.SpellCacheWoWVersion = 0
 	end,
@@ -202,6 +207,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					name = strlower(name)
 
 					local fail =
+					name:trim() == "" or
 					CONST.INVALID_TEXTURES[icon] or
 					findword(name, "dnd") or
 					findword(name, "test") or

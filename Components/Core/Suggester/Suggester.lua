@@ -64,16 +64,12 @@ TMW:RegisterCallback("TMW_CONFIG_ICON_TYPE_CHANGED", function(event, icon)
 end)
 
 function SUG:TMW_SPELLCACHE_STARTED()
-	SUG.SuggestionList.Status:Show()
-	SUG.SuggestionList.Speed:Show()
-	SUG.SuggestionList.Finish:Show()
+	SUG.SuggestionList.Caching:Show()
 end
 TMW:RegisterCallback("TMW_SPELLCACHE_STARTED", SUG)
 
 function SUG:TMW_SPELLCACHE_COMPLETED()
-	SUG.SuggestionList.Speed:Hide()
-	SUG.SuggestionList.Status:Hide()
-	SUG.SuggestionList.Finish:Hide()
+	SUG.SuggestionList.Caching:Hide()
 	
 	if SUG.onCompleteCache and SUG.SuggestionList:IsVisible() then
 		SUG.redoIfSame = 1
