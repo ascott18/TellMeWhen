@@ -3,9 +3,9 @@
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 70200
+## Interface: 70300
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 70200
+## X-Interface: 70300
 ## Title: TellMeWhen
 
 ## Version: 8.4.2
