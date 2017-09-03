@@ -771,6 +771,10 @@ local DD_Frame = TMW:NewClass("Config_DropDownMenu", "Config_Frame", "Config_Dro
 		self:SetText(title)
 	end,
 
+	SetLabel = function(self, title)
+		self.Label:SetText(title)
+	end,
+
 	SetUIDropdownText = function(self, value, tbl, text)
 		self.selectedValue = value
 

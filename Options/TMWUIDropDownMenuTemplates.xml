@@ -338,6 +338,14 @@
 		
 		<Layers>
 			<Layer level="ARTWORK">
+				<FontString parentKey="Label" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="BOTTOM">
+					<Size y="10"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="TOPLEFT" y="2" />
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" y="2"  />
+					</Anchors>
+				</FontString>
+
 				<FontString parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="LEFT" justifyV="CENTER">
 					<Size y="10"/>
 					<Anchors>

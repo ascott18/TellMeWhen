@@ -234,17 +234,19 @@
 	</Frame>
 
 	<Frame name="TellMeWhen_Main_Media" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="34"/>
+		<Size y="45"/>
 		<Frames>
 			<Frame parentKey="SoundChannel" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
 					<Anchor point="LEFT" x="10"/>
 					<Anchor point="RIGHT" relativePoint="CENTER" x="-10" />
+					<Anchor point="BOTTOM" y="7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
 						self:SetTexts(TMW.L["SOUND_CHANNEL"], TMW.L["SOUND_CHANNEL_DESC"])
+						self:SetLabel(TMW.L["SOUND_CHANNEL"])
 
 						local values = {
 							SFX = SOUND_VOLUME,
@@ -273,12 +275,14 @@
 				<Anchors>
 					<Anchor point="RIGHT" x="-10" />
 					<Anchor point="LEFT" relativePoint="CENTER" x="10" />
+					<Anchor point="BOTTOM" y="7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
 						self:SetWidth(200)
 						self:SetTexts(TMW.L["UIPANEL_BARTEXTURE"])
+						self:SetLabel(TMW.L["UIPANEL_BARTEXTURE"])
 						self.BUTTON_HEIGHT = 20
 
 						local f, s = self.Text:GetFont()

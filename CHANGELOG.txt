@@ -1,3 +1,6 @@
+===v8.4.3===
+* Minor options UI improvements.
+
 ===v8.4.2===
 * Version bump & additional fixes for patch 7.3.0.
 

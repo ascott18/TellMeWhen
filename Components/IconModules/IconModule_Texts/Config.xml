@@ -88,23 +88,13 @@
 					<Anchor point="RIGHT" relativeKey="$parent.Delete" relativePoint="LEFT" x="-9" />
 				</Anchors>
 
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString parentKey="headerText" inherits="GameFontHighlightSmall" justifyH="CENTER" justifyV="BOTTOM">
-							<Anchors>
-								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
-								<Anchor point="LEFT" x="-5"/>
-								<Anchor point="RIGHT" x="5"/>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-
 				<Scripts>
 					<OnLoad>
 						TMW:CInit(self)
 
 						self:SetSetting("relativeTo")
+						self:SetTexts(TMW.L["UIPANEL_RELATIVETO"], TMW.L["TEXTLAYOUTS_RELATIVETO_DESC"])
+						self:SetLabel(TMW.L["UIPANEL_RELATIVETO"])
 						self:SetEasyFunctions(
 							function()
 								return TMW:OrderedPairs(TMW.TEXT.Anchor_DropdownGenerator(self))
@@ -114,10 +104,6 @@
 								info.value = value
 							end
 						)
-
-						self:SetTexts(TMW.L["UIPANEL_RELATIVETO"], TMW.L["TEXTLAYOUTS_RELATIVETO_DESC"])
-
-						self.headerText:SetText(TMW.L["UIPANEL_RELATIVETO"])
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -559,7 +545,7 @@
 
 							<Frame parentKey="SkinAs" inherits="TMW_DropDownMenuTemplate">
 								<Anchors>
-									<Anchor point="TOP" relativeKey="$parent.DefaultText" relativePoint="BOTTOM" y="-10"/>
+									<Anchor point="TOP" relativeKey="$parent.DefaultText" relativePoint="BOTTOM" y="-20"/>
 									<Anchor point="LEFT" relativeKey="$parent.DefaultText" />
 									<Anchor point="RIGHT" relativePoint="TOP" x="-10" />
 								</Anchors>
@@ -568,9 +554,10 @@
 										TMW:CInit(self)
 
 										self:SetTexts(TMW.L["TEXTLAYOUTS_SKINAS"], TMW.L["TEXTLAYOUTS_SKINAS_DESC"])
+										self:SetLabel(TMW.L["TEXTLAYOUTS_SKINAS"])
 
 										self:SetSetting("SkinAs")
-										self:SetEasyTitlePrepend(TMW.L["TEXTLAYOUTS_SKINAS"])
+										--self:SetEasyTitlePrepend(TMW.L["TEXTLAYOUTS_SKINAS"])
 										self:SetEasyFunctions(
 											function()
 												return TMW:OrderedPairs(TMW.TEXT.MasqueSkinnableTexts)
@@ -657,7 +644,7 @@
 					</Frame>
 
 					<Frame parentKey="DisplayFontSettings" inherits="TellMeWhen_OptionsModuleContainer" >
-						<Size y="180"/>
+						<Size y="190"/>
 
 						<Frames>
 							<Frame parentKey="Font" inherits="TMW_DropDownMenuTemplate">
@@ -764,7 +751,7 @@
 
 							<Frame parentKey="Justify" inherits="TMW_DropDownMenuTemplate">
 								<Anchors>
-									<Anchor point="TOP" relativeKey="$parent.Size" relativePoint="BOTTOM" y="-15"/>
+									<Anchor point="TOP" relativeKey="$parent.Size" relativePoint="BOTTOM" y="-25"/>
 									<Anchor point="LEFT" relativeKey="$parent.Font" />
 									<Anchor point="RIGHT" relativePoint="TOP" x="-10" />
 								</Anchors>
@@ -773,9 +760,10 @@
 										TMW:CInit(self)
 
 										self:SetTexts(TMW.L["UIPANEL_FONT_JUSTIFY"], TMW.L["UIPANEL_FONT_JUSTIFY_DESC"])
+										self:SetLabel(TMW.L["UIPANEL_FONT_JUSTIFY"])
 
 										self:SetSetting("Justify")
-										self:SetEasyTitlePrepend(TMW.L["UIPANEL_ICONSPACINGX"])
+										--self:SetEasyTitlePrepend(TMW.L["UIPANEL_ICONSPACINGX"])
 										self:SetEasyFunctions(
 											function()
 												return TMW:OrderedPairs(TMW.justifyPoints)
@@ -800,9 +788,10 @@
 										TMW:CInit(self)
 
 										self:SetTexts(TMW.L["UIPANEL_FONT_JUSTIFYV"], TMW.L["UIPANEL_FONT_JUSTIFYV_DESC"])
+										self:SetLabel(TMW.L["UIPANEL_FONT_JUSTIFYV"])
 
 										self:SetSetting("JustifyV")
-										self:SetEasyTitlePrepend(TMW.L["UIPANEL_ICONSPACINGY"])
+										--self:SetEasyTitlePrepend(TMW.L["UIPANEL_ICONSPACINGY"])
 										self:SetEasyFunctions(
 											function()
 												return TMW:OrderedPairs(TMW.justifyVPoints)
