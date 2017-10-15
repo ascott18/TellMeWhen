@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 84301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 84302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1348,6 +1348,11 @@ function TMW:GetSettingsFromGUID(GUID)
 
 	local owner = TMW.GUIDToOwner[GUID] or TMW.PreviousGUIDToOwner[GUID]
 	if owner and owner:GetGUID() == GUID then
+		if owner.IsIcon then
+			-- match returns that are returned when we get results from the iterator
+			-- for icons below (settings [,owner], groupSettings, domain, groupID, iconID)
+			return owner:GetSettings(), owner, owner.group:GetSettings(), owner.group.Domain, owner.group.ID, owner.ID
+		end
 		return owner:GetSettings(), owner
 	end
 
@@ -1368,9 +1373,9 @@ function TMW:GetSettingsFromGUID(GUID)
 	end
 
 	if iter then
-		for settings, a, b, c in iter(TMW) do
+		for settings, a, b, c, d in iter(TMW) do
 			if settings.GUID == GUID then
-				return settings, nil, a, b, c
+				return settings, nil, a, b, c, d
 			end
 		end
 	end
