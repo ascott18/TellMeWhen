@@ -99,8 +99,6 @@ TMW.operators = {
 
 
 ---------- Miscellaneous ----------
-TMW.Backupdb = CopyTable(TellMeWhenDB)
-TMW.BackupDate = date("%I:%M:%S %p")
 
 TMW.CI = setmetatable({}, {__index = function(tbl, k)
 	if k == "ics" then
@@ -264,6 +262,11 @@ function IE:OnInitialize()
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
 		StaticPopup_Show("TMWOPT_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Components/Core/Common/DogTags/config.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+	end
+
+	if TMW.db.global.CreateImportBackup then
+		TMW.Backupdb = CopyTable(TellMeWhenDB)
+		TMW.BackupDate = date("%I:%M:%S %p")
 	end
 
 	TMW:Fire("TMW_OPTIONS_LOADING")
@@ -515,9 +518,15 @@ function IE:InitializeDatabase()
 		TellMeWhen_DBRestoredNofication:SetTime(IE.db.global.TellMeWhenDBBackupDate)
 		TellMeWhen_DBRestoredNofication:Show()
 
-	elseif not TMW.DBWasEmpty --[[and IE.db.global.TellMeWhenDBBackupDate + 86400 < time()]] then
+	elseif not TMW.db.global.BackupDbInOptions then
+		-- User has disabled storing of DB backups in the options. Get rid of it.
+		IE.db.global.TellMeWhenDBBackupDate = nil
+		if IE.db.global.TellMeWhenDBBackup then
+			collectgarbage()
+			IE.db.global.TellMeWhenDBBackup = nil
+		end
+	elseif not TMW.DBWasEmpty then
 		-- TellMeWhenDB was not corrupt, so back it up.
-		-- I have opted against only creating the backup after the old one reaches a certain age.
 		IE.db.global.TellMeWhenDBBackupDate = time()
 		IE.db.global.TellMeWhenDBBackup = TellMeWhenDB
 	end

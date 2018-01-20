@@ -899,6 +899,22 @@ When this threshold is surpassed by an icon's configuration, two things will hap
 
 The default for this setting is 15. ]]
 
+
+L["UIPANEL_ENABLEBACKUP"] = "Maintain Backup Settings"
+L["UIPANEL_ENABLEBACKUP_DESC"] = [[When enabled, TellMeWhen will also save your settings in TellMeWhen_Options' settings.
+
+If TellMeWhen's settings become unreadable, which can happen occasionally to any addon settings when WoW doesn't exit properly, it is likely that this second copy of your settings will be just fine. TellMeWhen will automatically restore this copy when this happens.
+
+This process does require that TMW save and load your settings twice, which can cause slightly longer load times. If you already maintain backups on your computer of your WoW addon settings, you can turn this off.]]
+
+L["UIPANEL_ENABLEIMPORTBACKUP"] = "Enable Fresh Import Source"
+L["UIPANEL_ENABLEIMPORTBACKUP_DESC"] = [[When enabled, TellMeWhen creates a copy of your settings when TellMeWhen_Options is loaded.
+
+This copy can be used as an import source for icons, groups, and other data that will reflect the state of your settings before any changes were made in the current session.
+
+This does not impact CPU usage, but will slightly increase memory usage of TellMeWhen_Options and therefore can have a negative impact on older systems with 2GB of RAM or less.]]
+
+
 L["UIPANEL_ICONSPACING"] = "Icon Spacing"
 L["UIPANEL_ICONSPACINGX"] = "Horizontal"
 L["UIPANEL_ICONSPACINGY"] = "Vertical"

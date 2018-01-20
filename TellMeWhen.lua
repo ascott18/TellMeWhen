@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 84303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 84304 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -136,7 +136,7 @@ local tostringall = tostringall
 
 ---------- Locals ----------
 local Locked
-local UPD_INTV = 0.06	--this is a default, local because i use it in onupdate functions
+local UPD_INTV = 0	--this is a default, local because i use it in onupdate functions
 local LastUpdate = 0
 
 local time = GetTime() TMW.time = time
@@ -206,8 +206,10 @@ TMW.Defaults = {
 		ReceiveComm       = true,
 		AllowCombatConfig = false,
 		ShowGUIDs         = false,
-		Interval          = UPD_INTV,
+		Interval          = 0.05,
 		EffThreshold      = 15,
+		BackupDbInOptions = true,
+		CreateImportBackup = true,
 
 		NumGroups         = 0,
 		-- Groups = {} -- this will be set to the profile group defaults in a second.

@@ -978,9 +978,13 @@ end
 ---------- Backup ----------
 local Backup = ImportSource:New("Backup")
 Backup.displayText = L["IMPORT_FROMBACKUP"]
-Backup.displayDescription = L["IMPORT_FROMBACKUP_DESC"]:format(TMW.BackupDate)
+Backup.displayDescription = L["IMPORT_FROMBACKUP_DESC"]:format(TMW.BackupDate or "<backup disabled>")
+Backup.displayDisabled = function()
+	return not TMW.Backupdb
+end
 
 function Backup:HandleTopLevelMenu()
+	if not TMW.Backupdb then return end
 	local Item = Item:New("database")
 	Item.ImportSource = self
 
