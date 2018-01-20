@@ -17,8 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, loadstring, ipairs, tostring, assert
-	= pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, loadstring, ipairs, tostring, assert
+local next, pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, loadstring, ipairs, tostring, assert
+	= next, pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, assert, loadstring, ipairs, tostring, assert
 
 
 --- [[api/icon/api-documentation/|Icon]] is the class of all Icons.
@@ -571,9 +571,8 @@ IconEventUpdateEngine.UpdateEvents = setmetatable({}, {__index = function(self, 
 	return self[event]
 end})
 IconEventUpdateEngine:SetScript("OnEvent", function(self, event, arg1)
-	local iconsForEvent = self.UpdateEvents[event]
-	for icon, arg1ToMatch in pairs(iconsForEvent) do
-		if arg1ToMatch == true or arg1ToMatch == arg1 then
+	for icon, arg1ToMatch in next, self.UpdateEvents[event] do
+		if icon.NextUpdateTime ~= 0 and (arg1ToMatch == true or arg1ToMatch == arg1) then
 			icon.NextUpdateTime = 0
 		end
 	end

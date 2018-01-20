@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 84302 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 84303 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -2341,7 +2341,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		},
 		[15300] = {
 			icon = function(self, ics)
-				if ics.Alpha > 1 then
+				if ics.Alpha and ics.Alpha > 1 then
 					ics.Alpha = (ics.Alpha / 100)
 				else
 					ics.Alpha = 1
@@ -2508,6 +2508,7 @@ do	-- TMW:OnUpdate()
 
 	local updateInProgress, shouldSafeUpdate
 	local start
+	-- Assume in combat unless we find out otherwise.
 	local inCombatLockdown = 1
 
 	-- Limit in milliseconds for each OnUpdate cycle.
@@ -2526,7 +2527,7 @@ do	-- TMW:OnUpdate()
 			coroutine.yield()
 		end
 	end
-
+	
 	-- This is the main update engine of TMW.
 	local function OnUpdate()
 		while true do
@@ -2560,7 +2561,8 @@ do	-- TMW:OnUpdate()
 						local ConditionObject = group.ConditionObject
 						if ConditionObject and (ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time) then
 							ConditionObject:Check()
-							checkYield()
+
+							if inCombatLockdown then checkYield() end
 						end
 					end
 			
@@ -2568,13 +2570,15 @@ do	-- TMW:OnUpdate()
 						for i = 1, #IconsToUpdate do
 							local icon = IconsToUpdate[i]
 							safecall(icon.Update, icon)
-							checkYield()
+							if inCombatLockdown then checkYield() end
 						end
 					else
 						for i = 1, #IconsToUpdate do
 							--local icon = IconsToUpdate[i]
 							IconsToUpdate[i]:Update()
-							checkYield()
+
+							-- inCombatLockdown check here to avoid a function call.
+							if inCombatLockdown then checkYield() end
 						end
 					end
 				end
@@ -2584,7 +2588,7 @@ do	-- TMW:OnUpdate()
 
 			updateInProgress = nil
 			
-			checkYield()
+			if inCombatLockdown then checkYield() end
 
 			TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
 
