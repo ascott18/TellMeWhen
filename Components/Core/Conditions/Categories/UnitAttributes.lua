@@ -521,26 +521,35 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["NightElf"] = {order = 3, text = LBRace["Night Elf"]},
 			["Gnome"] = {order = 4, text = LBRace["Gnome"]},
 			["Draenei"] = {order = 5, text = LBRace["Draenei"]},
-			["Worgen"] = {order = 6, text = LBRace["Worgen"], space = true},
+			["Worgen"] = {order = 6, text = LBRace["Worgen"]},
+
+			["VoidElf"] = {order = 6.1, text = LBRace["Void Elf"]},
+			["LightforgedDraenei"] = {order = 6.2, text = LBRace["Lightforged Draenei"], space = true},
+
 			["Orc"] = {order = 7, text = LBRace["Orc"]},
 			["Scourge"] = {order = 8, text = LBRace["Undead"]},
 			["Tauren"] = {order = 9, text = LBRace["Tauren"]},
 			["Troll"] = {order = 10, text = LBRace["Troll"]},
 			["BloodElf"] = {order = 11, text = LBRace["Blood Elf"]},
-			["Goblin"] = {order = 12, text = LBRace["Goblin"], space = true},
+			["Goblin"] = {order = 12, text = LBRace["Goblin"]},
+
+			["Nightborne"] = {order = 12.1, text = LBRace["Nightborne"]},
+			["HighmountainTauren"] = {order = 12.2, text = LBRace["Highmountain Tauren"], space = true},
+
 			["Pandaren"] = {order = 13, text = LBRace["Pandaren"]},
 		}
 
 		for token, data in pairs(bitFlags) do
-			data.icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-RACES"
-			data.tcoords = TMW:GetRaceIconCoords(token)
+			data.atlas = TMW:GetRaceIconInfo(token)
+			data.tcoords = CNDT.COMMON.standardtcoords
 		end
 
 		return bitFlags
 	end)(),
 
-	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-RACES",
-	tcoords = TMW:GetRaceIconCoords(select(2, UnitRace("player"))),
+
+	atlas = TMW:GetRaceIconInfo(select(2, UnitRace("player"))),
+	tcoords = CNDT.COMMON.standardtcoords,
 	
 	defaultUnit = "target",
 	Env = {

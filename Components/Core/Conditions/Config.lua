@@ -407,7 +407,7 @@ function CNDT.BitFlags_DropDown(dropdown)
 			info.tooltipText = data.tooltip
 
 			info.icon = data.icon
-
+			info.atlas = data.atlas
 			if data.tcoords then
 				info.tCoordLeft = data.tcoords[1]
 				info.tCoordRight = data.tcoords[2]

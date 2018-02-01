@@ -274,16 +274,21 @@ function DD:AddButton(info, level)
 			width = width - 30;
 		end
 		-- Set icon
-		if ( info.icon ) then
-			icon:SetTexture(info.icon);
-			icon:ClearAllPoints();
-			icon:SetPoint("RIGHT");
+		if ( info.icon or info.atlas ) then
+			if info.icon then
+				icon:SetTexture(info.icon);
 
+			elseif info.atlas then
+				icon:SetAtlas(info.atlas);
+			end
+			
 			if ( info.tCoordLeft ) then
 				icon:SetTexCoord(info.tCoordLeft, info.tCoordRight, info.tCoordTop, info.tCoordBottom);
 			else
 				icon:SetTexCoord(0, 1, 0, 1);
 			end
+			icon:ClearAllPoints();
+			icon:SetPoint("RIGHT");
 			icon:Show();
 			-- Add padding for the icon
 			width = width + 10;
@@ -434,28 +439,6 @@ function DD:AddSpacer()
 	self:AddButton(spacerInfo)
 end
 
-
-
-
-function DD:SetIconImage(icon, texture, info)
-	icon:SetTexture(texture);
-	if ( info.tCoordLeft ) then
-		icon:SetTexCoord(info.tCoordLeft, info.tCoordRight, info.tCoordTop, info.tCoordBottom);
-	else
-		icon:SetTexCoord(0, 1, 0, 1);
-	end
-	if ( info.tSizeX ) then
-		icon:SetWidth(info.tSizeX);
-	else
-		icon:SetWidth(16);
-	end
-	if ( info.tSizeY ) then
-		icon:SetHeight(info.tSizeY);
-	else
-		icon:SetHeight(16);
-	end
-	icon:Show();
-end
 
 
 function DD.Button_OnClick(self)

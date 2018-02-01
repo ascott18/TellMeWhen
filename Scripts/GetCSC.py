@@ -6,7 +6,7 @@ import itertools
 
 from slpp import slpp as lua
 
-base_url = "http://legion.wowhead.com"
+base_url = "http://www.wowhead.com"
 
 num_classes = 12
 
@@ -57,14 +57,18 @@ pet_classes = [
 	'warlock',
 ]
 
+# Some racials don't specify a race, but they do specify a "skill" that corresponds to a race.
+race_skill_map = {
+	899: [24], # pandaren
+	2423: [29], # void elf
+	2421: [30], # lightforged
+	2420: [28], # highmountain
+	2419: [27], # nightborne
+}
+
 race_map_fix = {
 	# These are racials that don't specify their race properly.
-	107072: [24], # pandaren
-	107073: [24], # pandaren
-	107074: [24], # pandaren
-	107076: [24], # pandaren
 	107079: [24], # pandaren
-	131701: [24], # pandaren
 }
 
 racial_no_class_req = [
@@ -139,7 +143,7 @@ def scrape_pet_spells(classID):
 
 def scrape_racial_spells():
 	data = try_scrape_url(
-		url = base_url + "/spells=-4",
+		url = base_url + "/racial-traits",
 		regex = r"var listviewspells = (\[.*\]);",
 		id = "racials")
 
@@ -151,8 +155,11 @@ def scrape_racial_spells():
 			if id in race_map_fix:
 				spell["races"] = race_map_fix[id]
 
+			if spell["skill"] and spell["skill"][0] in race_skill_map:
+				spell["races"] = race_skill_map[spell["skill"][0]]
+
 			if "races" not in spell:
-				raise Exception("Unknown racial %d %s" % (v.id, v.name))
+				raise Exception("Unknown racial %d %s" % (spell["id"], spell["name"]))
 
 			if len(spell["races"]) > 1:
 				raise Exception("Unexpected multiple races %d %s" % (id, spell["races"]))
