@@ -34,8 +34,13 @@ local currencies = {
 		1220,	-- Order Resources
 		1149,	-- Sightless Eye
 		1273,	-- Seal of Broken Fate
-		1171,	-- Artifact Knowledge
 		1314,	-- Lingering Soul Fragment
+		1226,	-- Nethershard
+		1342,	--Legionfall War Supplies
+		1501,	--Writhing Essence
+		1506,	--Argus Waystone
+		1508,	--Veiled Argunite
+		1533,	--Wakening Essence
 		"SPACE",
 		1166,	-- Timewarped Badge
 		395,	-- Justice Points
@@ -44,6 +49,7 @@ local currencies = {
 		1101,	-- Oil
 		824,	-- Garrison Resources
 		823,	-- Apexis Crystal
+		1299,	--Brawler's Gold
 		"SPACE",
 		392,	-- Honor Points
 		390,	-- Conquest Points
@@ -56,7 +62,6 @@ local currencies = {
 		777,	-- Timeless Coin
 		789,	-- Bloody Coin
 		1268,	-- Timeworn Artifact
-		1226,	-- Nethershard
 		1154,	-- Shadowy Coins
 		"SPACE",
 		738,	-- Lesser Charm of Good Fortune
@@ -119,6 +124,9 @@ local blacklist = {
 	483,	-- Conquest Arena Meta
 	484,	-- Conquest Rated BG Meta
 	692,	-- Conquest Random BG Meta
+	1347,	--Legionfall Building - Personal Tracker - Mage Tower (Hidden)
+	1349,	--Legionfall Building - Personal Tracker - Command Tower (Hidden)
+	1350,	--Legionfall Building - Personal Tracker - Nether Tower (Hidden)
 }
 
 
@@ -147,10 +155,10 @@ TMW:RegisterCallback("TMW_INITIALIZE", function()
 
 			if shouldAdd then
 				if not addedSpace then
-					tinsert(currencies[1], "SPACE")
+					tinsert(currencies[1], 1, "SPACE")
 					addedSpace = true
 				end
-				tinsert(currencies[1], id)
+				tinsert(currencies[1], 1, id)
 			end
 
 			numFailed = 0

@@ -514,29 +514,39 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSERACE"],
 	bitFlags = (function()
-		local LBRace = LibStub("LibBabble-Race-3.0"):GetLookupTable()
+		local LBRace = LibStub("LibBabble-Race-3.0")
+		local lookup = LBRace:GetBaseLookupTable()
+		local baseLookup = LBRace:GetBaseLookupTable()
+		local function Name(name)
+			-- Look up the race name without throwing LibBabble errors.
+			if not baseLookup[name] then
+				TMW:Debug("Missing LibBabble-Race-3.0 phrase for: " .. name)
+				return name
+			end
+			return lookup[name]
+		end
 		local bitFlags = {
-			["Human"] = {order = 1, text = LBRace["Human"]},
-			["Dwarf"] = {order = 2, text = LBRace["Dwarf"]},
-			["NightElf"] = {order = 3, text = LBRace["Night Elf"]},
-			["Gnome"] = {order = 4, text = LBRace["Gnome"]},
-			["Draenei"] = {order = 5, text = LBRace["Draenei"]},
-			["Worgen"] = {order = 6, text = LBRace["Worgen"]},
+			["Human"] = {order = 1, text = Name("Human")},
+			["Dwarf"] = {order = 2, text = Name("Dwarf")},
+			["NightElf"] = {order = 3, text = Name("Night Elf")},
+			["Gnome"] = {order = 4, text = Name("Gnome")},
+			["Draenei"] = {order = 5, text = Name("Draenei")},
+			["Worgen"] = {order = 6, text = Name("Worgen")},
 
-			["VoidElf"] = {order = 6.1, text = LBRace["Void Elf"]},
-			["LightforgedDraenei"] = {order = 6.2, text = LBRace["Lightforged Draenei"], space = true},
+			["VoidElf"] = {order = 6.1, text = Name("Void Elf")},
+			["LightforgedDraenei"] = {order = 6.2, text = Name("Lightforged Draenei"), space = true},
 
-			["Orc"] = {order = 7, text = LBRace["Orc"]},
-			["Scourge"] = {order = 8, text = LBRace["Undead"]},
-			["Tauren"] = {order = 9, text = LBRace["Tauren"]},
-			["Troll"] = {order = 10, text = LBRace["Troll"]},
-			["BloodElf"] = {order = 11, text = LBRace["Blood Elf"]},
-			["Goblin"] = {order = 12, text = LBRace["Goblin"]},
+			["Orc"] = {order = 7, text = Name("Orc")},
+			["Scourge"] = {order = 8, text = Name("Undead")},
+			["Tauren"] = {order = 9, text = Name("Tauren")},
+			["Troll"] = {order = 10, text = Name("Troll")},
+			["BloodElf"] = {order = 11, text = Name("Blood Elf")},
+			["Goblin"] = {order = 12, text = Name("Goblin")},
 
-			["Nightborne"] = {order = 12.1, text = LBRace["Nightborne"]},
-			["HighmountainTauren"] = {order = 12.2, text = LBRace["Highmountain Tauren"], space = true},
+			["Nightborne"] = {order = 12.1, text = Name("Nightborne")},
+			["HighmountainTauren"] = {order = 12.2, text = Name("Highmountain Tauren"), space = true},
 
-			["Pandaren"] = {order = 13, text = LBRace["Pandaren"]},
+			["Pandaren"] = {order = 13, text = Name("Pandaren")},
 		}
 
 		for token, data in pairs(bitFlags) do
