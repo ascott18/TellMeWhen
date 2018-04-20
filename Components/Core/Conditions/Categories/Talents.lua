@@ -25,8 +25,8 @@ local _, pclass = UnitClass("Player")
 
 local GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo = 
       GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo
-local GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetClassInfoByID, GetNumClasses, GetClassInfo = 
-      GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetClassInfoByID, GetNumClasses, GetClassInfo
+local GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses, GetClassInfo = 
+      GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses, GetClassInfo
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
       GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec
 
@@ -166,7 +166,7 @@ TMW:RegisterUpgrade(73019, {
 			condition.Type = "CLASS2"
 			condition.Checked = false
 			for i = 1, GetNumClasses() do
-				local name, token, classID = GetClassInfoByID(i)
+				local name, token, classID = GetClassInfo(i)
 				if token == self.classes[condition.Level] then
 					condition.BitFlags = {[i] = true}
 					return
@@ -182,7 +182,7 @@ ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 	bitFlags = (function()
 		local t = {}
 		for i = 1, GetNumClasses() do
-			local name, token, classID = GetClassInfoByID(i)
+			local name, token, classID = GetClassInfo(i)
 			t[i] = {
 				order = i,
 				text = PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name),
