@@ -15,7 +15,31 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "8.4.4"
+-- TODO: temp compatibility for wow 80000
+local polyfillWarned = 0
+local function polyfill(name)
+	if not _G[name] then
+		_G[name] = function(...)
+			polyfillWarned = polyfillWarned + 1
+			if polyfillWarned < 15 then
+				_G.print("Warning: An addon is calling one of the old *AddonMessage* functions, which have moved to C_ChatInfo. TellMeWhen has created hooks to maintain compatibility temporarily, but these usages should be fixed ASAP.")
+			elseif polyfillWarned == 15 then
+				_G.print("OK, enough spam about AddonMessage. Sorry.")
+			end
+			return C_ChatInfo[name](...)
+		end
+	end
+end
+for _, name in pairs({
+"SendAddonMessage",
+"RegisterAddonMessagePrefix",
+"IsAddonMessagePrefixRegistered",
+"GetRegisteredAddonMessagePrefixes",
+}) do polyfill(name) end
+
+
+
+TELLMEWHEN_VERSION = "8.5.0"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -26,11 +50,11 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 84401 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 85001 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 85000 or TELLMEWHEN_VERSIONNUMBER < 84000 then
+if TELLMEWHEN_VERSIONNUMBER > 86000 or TELLMEWHEN_VERSIONNUMBER < 85000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
 end
@@ -1027,11 +1051,11 @@ function TMW:PLAYER_LOGIN()
 	TMW.PLAYER_LOGIN = nil
 
 	-- Check for wrong WoW version
-	if select(4, GetBuildInfo()) < 70000 then
+	if select(4, GetBuildInfo()) < 80000 then
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		local version = GetBuildInfo()
 		StaticPopupDialogs["TMW_BADWOWVERSION"] = {
-			text = "TellMeWhen %s is not compatible with WoW %s. Please downgrade TellMeWhen or wait for a patch to WoW 7.0.3.", 
+			text = "TellMeWhen %s is not compatible with WoW %s. Please downgrade TellMeWhen, or wait for Battle for Azeroth to release.", 
 			button1 = OKAY,
 			timeout = 0,
 			showAlert = true,
