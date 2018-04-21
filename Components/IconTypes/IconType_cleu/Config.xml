@@ -97,12 +97,11 @@
 					<OnEvent>
 						TMW:TT_Update(self)
 					</OnEvent>
-					<OnSizeChanged>
-						local parent = self:GetParent()
-						if parent.AdjustHeight then
-							parent:AdjustHeight()
+					<OnTextChanged>
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight()
 						end
-					</OnSizeChanged>
+					</OnTextChanged>
 				</Scripts>
 			</EditBox>
 			<Frame parentKey="SourceFlags" name="$parentSourceFlags" inherits="TMW_DropDownMenuTemplate">
@@ -195,12 +194,11 @@
 					<OnEvent>
 						TMW:TT_Update(self)
 					</OnEvent>
-					<OnSizeChanged>
-						local parent = self:GetParent()
-						if parent.AdjustHeight then
-							parent:AdjustHeight()
+					<OnTextChanged>
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight()
 						end
-					</OnSizeChanged>
+					</OnTextChanged>
 				</Scripts>
 			</EditBox>
 			<Frame parentKey="DestFlags" name="$parentDestFlags" inherits="TMW_DropDownMenuTemplate">

@@ -535,11 +535,11 @@
 										self:SetTexts(TMW.L["TEXTLAYOUTS_DEFAULTTEXT"], TMW.L["TEXTLAYOUTS_DEFAULTTEXT_DESC"])
 										self:SetSetting("DefaultText")
 									</OnLoad>
-									<OnSizeChanged>
+									<OnTextChanged>
 										if self:GetParent().AdjustHeight then
 											self:GetParent():AdjustHeight()
 										end
-									</OnSizeChanged>
+									</OnTextChanged>
 								</Scripts>
 							</EditBox>
 

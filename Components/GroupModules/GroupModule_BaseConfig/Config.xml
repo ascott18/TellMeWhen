@@ -23,9 +23,11 @@
 
 					</OnLoad>
 
-					<OnSizeChanged>
-						self:GetParent():AdjustHeight()
-					</OnSizeChanged>
+					<OnTextChanged>
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight()
+						end
+					</OnTextChanged>
 				</Scripts>
 			</EditBox>
 		</Frames>
@@ -147,14 +149,6 @@
 
 						local f, s = self.Text:GetFont()
 						self.Text:SetFont(f, s, "THINOUTLINE")
-
-						local values = {
-							SFX = SOUND_VOLUME,
-							Music = MUSIC_VOLUME,
-							Ambience = AMBIENCE_VOLUME,
-							Dialog = DIALOG_VOLUME,
-							Master = TMW.L["SOUND_CHANNEL_MASTER"],
-						}
 
 						local LSM = LibStub("LibSharedMedia-3.0")
 						self:SetSetting("TextureName")
