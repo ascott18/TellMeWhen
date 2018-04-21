@@ -138,29 +138,13 @@ local function BuffCheck_OnUpdate(icon, time)
 			
 			local _iconTexture, _id, _count, _duration, _expirationTime, _buffName, _caster
 			
-			for i = 1, #NameArray do
-				local iName = NameArray[i]
-				
-				-- Check by name
-				_buffName, _, _iconTexture, _count, _, _duration, _expirationTime, _caster, _, _, _id = UnitAura(unit, NameStringArray[i], nil, Filter)
-				
-				-- If the name was found but the ID didnt match, iterate over everything on the unit and check by ID.
-				if _id and _id ~= iName and isNumber[iName] then
-					for index = 1, huge do
-						_buffName, _, _iconTexture, _count, _, _duration, _expirationTime, _caster, _, _, _id = UnitAura(unit, index, Filter)
-						if not _id or _id == iName then
-							-- We ran our of auras, or we found what we are looking for. Break spell loop.
-							break
-						end
-					end
-				end
-				
-				if _id then
-					-- We found a matching aura. Break spell loop.
-					break 
+			for index = 1, huge do
+				_buffName, _iconTexture, _count, _, _duration, _expirationTime, _caster, _, _, _id = UnitAura(unit, index, Filter)
+				if not _id or NameHash[_id] or NameHash[strlowerCache[_buffName]] then
+					-- We ran our of auras, or we found what we are looking for. Break spell loop.
+					break
 				end
 			end
-			
 
 			if _id and not useUnit then
 				-- We found a matching aura, and we haven't recorded one to be used yet, 

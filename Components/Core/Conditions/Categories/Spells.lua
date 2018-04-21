@@ -676,9 +676,9 @@ ConditionCategory:RegisterSpacer(30)
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 Env.UnitCast = function(unit, level, matchname)
-	local name, _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
+	local name, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
-		name, _, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
+		name, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
 	end
 	name = strlowerCache[name]
 	if matchname == "" and name then
@@ -693,9 +693,9 @@ Env.UnitCast = function(unit, level, matchname)
 	end
 end
 Env.UnitCastTime = function(unit, level, matchname)
-	local name, _, _, _, _, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+	local name, _, _, _, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
-		name, _, _, _, _, endTime, _, notInterruptible = UnitChannelInfo(unit)
+		name, _, _, _, endTime, _, notInterruptible = UnitChannelInfo(unit)
 	end
 	name = strlowerCache[name]
 	if matchname == "" and name then
@@ -743,7 +743,6 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
 	end,

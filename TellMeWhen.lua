@@ -15,30 +15,6 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
--- TODO: temp compatibility for wow 80000
-local polyfillWarned = 0
-local function polyfill(name)
-	if not _G[name] then
-		_G[name] = function(...)
-			polyfillWarned = polyfillWarned + 1
-			if polyfillWarned < 15 then
-				_G.print("Warning: An addon is calling one of the old *AddonMessage* functions, which have moved to C_ChatInfo. TellMeWhen has created hooks to maintain compatibility temporarily, but these usages should be fixed ASAP.")
-			elseif polyfillWarned == 15 then
-				_G.print("OK, enough spam about AddonMessage. Sorry.")
-			end
-			return C_ChatInfo[name](...)
-		end
-	end
-end
-for _, name in pairs({
-"SendAddonMessage",
-"RegisterAddonMessagePrefix",
-"IsAddonMessagePrefixRegistered",
-"GetRegisteredAddonMessagePrefixes",
-}) do polyfill(name) end
-
-
-
 TELLMEWHEN_VERSION = "8.5.0"
 
 TELLMEWHEN_VERSION_MINOR = ""

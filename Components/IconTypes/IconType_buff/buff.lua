@@ -261,7 +261,7 @@ local huge = math.huge
 local function Buff_OnUpdate(icon, time)
 	
 	-- Upvalue things that will be referenced a lot in our loops.
-	local Units, NameArray, NameStringArray, NameHash, Filter, Filterh, DurationSort, StackSort
+	local Units, NameArray, NameStringArray, Hash, Filter, Filterh, DurationSort, StackSort
 	= icon.Units, icon.Spells.Array, icon.Spells.StringArray, icon.Spells.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
 	local NotStealable = not icon.Stealable
 
@@ -281,120 +281,66 @@ local function Buff_OnUpdate(icon, time)
 		-- is known by TMW.UNITS to definitely exist.
 		if icon.UnitSet:UnitExists(unit) then
 
-			if icon.buffdebuff_iterateByAuraIndex then
-				-- If we are sorting, or if the icon's number of auras checked exceeds the efficiency threshold, or if we are checking dispel types,
-				-- then check every aura on the unit instead of checking the unit for every aura we are checking.
+			-- If we are sorting, or if the icon's number of auras checked exceeds the efficiency threshold, or if we are checking dispel types,
+			-- then check every aura on the unit instead of checking the unit for every aura we are checking.
+			
+
+			local index, stage = 1, 1
+			local useFilter = Filter
+
+			while true do
+				local _buffName, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _, _, _v1, _v2, _v3 = UnitAura(unit, index, useFilter)
+				index = index + 1
 				
+				-- Bugfix: Enraged is an empty string.
+				if _dispelType == "" then
+					_dispelType = "Enraged"
+				end
 
-				local index, stage = 1, 1
-				local useFilter = Filter
-
-				while true do
-					local _buffName, _, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _, _, _v1, _v2, _v3 = UnitAura(unit, index, useFilter)
-					index = index + 1
-					
-					-- Bugfix: Enraged is an empty string.
-					if _dispelType == "" then
-						_dispelType = "Enraged"
+				if not _buffName then
+					-- If we reached the end of auras found for Filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
+					-- iff we sort or haven't found anything yet.
+					if stage == 1 and Filterh and (doesSort or not buffName) then
+						index, stage = 1, 2
+						useFilter = Filterh
+					else
+						-- Break UnitAura loop (while true do ...)
+						break
 					end
 
-					if not _buffName then
-						-- If we reached the end of auras found for Filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
-						-- iff we sort or haven't found anything yet.
-						if stage == 1 and Filterh and (doesSort or not buffName) then
-							index, stage = 1, 2
-							useFilter = Filterh
-						else
-							-- Break UnitAura loop (while true do ...)
-							break
+				elseif (Hash[_id] or Hash[_dispelType] or Hash[strlowerCache[_buffName]]) and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[_id])) then
+					if DurationSort then
+						local remaining = (_expirationTime == 0 and huge) or _expirationTime - time
+
+						if not buffName or curSortDur*DurationSort < remaining*DurationSort then
+							-- DurationSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
+							-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+							buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit, curSortDur =
+							_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit,    remaining
 						end
+					elseif StackSort then
+						local stack = _count or 0
 
-					elseif (NameHash[_id] or NameHash[_dispelType] or NameHash[strlowerCache[_buffName]]) and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[_id])) then
-						if DurationSort then
-							local remaining = (_expirationTime == 0 and huge) or _expirationTime - time
-
-							if not buffName or curSortDur*DurationSort < remaining*DurationSort then
-								-- DurationSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
-								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit, curSortDur =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit,    remaining
-							end
-						elseif StackSort then
-							local stack = _count or 0
-
-							if not buffName or curSortStacks*StackSort < stack*StackSort then
-								-- StackSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
-								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-								 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit, curSortStacks =
-								_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit,    stack
-							end
-						else
-							-- We aren't sorting, and we haven't found anything yet, so record this
-							 buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit =
-							_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit
-
-							-- We don't need to look for anything else. Stop looking.
-							break
+						if not buffName or curSortStacks*StackSort < stack*StackSort then
+							-- StackSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
+							-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+								buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit, curSortStacks =
+							_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit,    stack
 						end
+					else
+						-- We aren't sorting, and we haven't found anything yet, so record this
+							buffName,  iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit =
+						_buffName, _iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit
+
+						-- We don't need to look for anything else. Stop looking.
+						break
 					end
 				end
+			end
 
 
-				if buffName and not doesSort then
-					break --  break unit loop
-				end
-			else
-
-				for i = 1, #NameArray do
-					local iName = NameArray[i]
-
-					buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, NameStringArray[i], nil, Filter)
-					if Filterh and not buffName then
-						buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, NameStringArray[i], nil, Filterh)
-					end
-
-					if buffName and id ~= iName and isNumber[iName] then
-						-- We got a match by name, but we were checking by ID and the match doesn't match by ID,
-						-- so iterate over the unit's auras and find a matching ID.
-
-						local index, stage = 1, 1
-						local useFilter = Filter
-
-						while true do
-							buffName, _, iconTexture, count, _, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, index, useFilter)
-							index = index + 1
-
-							if not id then
-								-- If we reached the end of auras found for Filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
-								-- iff we sort or haven't found anything yet.
-								if stage == 1 and Filterh then
-									index, stage = 1, 2
-									useFilter = Filterh
-								else
-									-- Break while true loop (inner spell loop)
-									break
-								end
-							elseif id == iName then -- and (NotStealable or canSteal) then
-									-- No reason to check stealable here.
-									-- It will be checked right before breaking the loop.
-									-- Once it finds an ID match, any spell of that ID will have the same stealable status as any other,
-									-- so just match ID and dont check for stealable here.
-								break
-							end
-						end
-					end
-
-					if buffName and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id])) then
-						-- We found a spell that will work for us.
-						-- This half of the code doesn't handle sorting or anything,
-						-- so break out of the loops right away.
-						useUnit = unit
-						break -- break spell loop
-					end
-				end
-				if useUnit then
-					break --  break unit loop
-				end
+			if buffName and not doesSort then
+				break --  break unit loop
 			end
 		end
 	end
@@ -405,7 +351,7 @@ end
 local function Buff_OnUpdate_Controller(icon, time)
 	
 	-- Upvalue things that will be used in our loops.
-	local Units, NameFirst, NameHash, Filter, Filterh
+	local Units, NameFirst, Hash, Filter, Filterh
 	= icon.Units, icon.Spells.First, icon.Spells.Hash, icon.Filter, icon.Filterh
 	local NotStealable = not icon.Stealable
 	
@@ -419,7 +365,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 			local filter = Filter
 
 			while true do
-				local buffName, _, iconTexture, count, dispelType, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, index, filter)
+				local buffName, iconTexture, count, dispelType, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, index, filter)
 				index = index + 1
 				
 				-- Bugfix: Enraged is an empty string.
@@ -437,7 +383,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 						break
 					end
 
-				elseif  (NameFirst == '' or NameHash[id] or NameHash[dispelType] or NameHash[strlowerCache[buffName]])
+				elseif  (NameFirst == '' or Hash[id] or Hash[dispelType] or Hash[strlowerCache[buffName]])
 					and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id]))
 				then
 					

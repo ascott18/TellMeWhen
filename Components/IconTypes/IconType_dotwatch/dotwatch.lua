@@ -156,39 +156,31 @@ local function ScanForAura(GUID, spellName, spellID)
 	for i = 1, #AllUnits do
 		local unit = AllUnits[i]
 		if GUID == UnitGUID(unit) then
-			local buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "PLAYER")
-			if not buffName then
-				buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, spellName, nil, "HARMFUL|PLAYER")
-			end
+			local buffName, duration, expirationTime, id, _
+			local index, stage = 1, 1
+			local filter = "PLAYER"
 
-			if buffName and id ~= spellID then
-				-- We got a match by name, but not by ID,
-				-- so iterate over the unit's auras and find a matching ID.
+			while true do
+				buffName, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, index, filter)
+				index = index + 1
 
-				local index, stage = 1, 1
-				local filter = "PLAYER"
-
-				while true do
-					buffName, _, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, index, filter)
-					index = index + 1
-
-					if not id then
+				if not id then
+					if stage == 1 then
 						-- If we reached the end of auras found for buffs, switch to debuffs
-						if stage == 1 then
-							index, stage = 1, 2
-							filter = "HARMFUL|PLAYER"
-						else
-							-- Break while true loop (spell loop)
-							break
-						end
+						index, stage = 1, 2
+						filter = "HARMFUL|PLAYER"
+					else
+						return
 					end
+				elseif 
+					-- Spell matches
+					(id == spellID or buffName == spellName) and
+					-- Make sure that this is an application that just happened before returning the duration.
+					-- Or, if the duration is 0, then this effect has no duration.
+					duration == 0 or abs((GetTime() + duration) - expirationTime) < 0.1 
+				then 
+					return duration
 				end
-			end
-
-			-- Make sure that this is an application that just happened before returning the duration.
-			-- Or, if the duration is 0, then this effect has no duration.
-			if id and (duration == 0 or abs((GetTime() + duration) - expirationTime) < 0.1) then
-				return duration
 			end
 
 			return
@@ -209,7 +201,7 @@ local function VerifyAll()
 			local filter = "PLAYER"
 
 			while true do
-				local buffName, _, _, count, _, duration, expirationTime, _, _, _, spellID = UnitAura(unit, index, filter)
+				local buffName, _, count, _, duration, expirationTime, _, _, _, spellID = UnitAura(unit, index, filter)
 				index = index + 1
 
 				if spellID then
