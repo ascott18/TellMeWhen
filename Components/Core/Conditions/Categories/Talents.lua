@@ -75,7 +75,6 @@ function SPECS:UpdateUnitSpecs()
 	end
 end
 function SPECS:PrepareUnitSpecEvents()
-	SPECS:RegisterEvent("UPDATE_WORLD_STATES",   "UpdateUnitSpecs")
 	SPECS:RegisterEvent("UNIT_NAME_UPDATE",   "UpdateUnitSpecs")
 	SPECS:RegisterEvent("ARENA_OPPONENT_UPDATE", "UpdateUnitSpecs")
 	SPECS:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdateUnitSpecs")

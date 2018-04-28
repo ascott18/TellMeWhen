@@ -392,7 +392,9 @@ Aura = TMW:NewClass("Aura"){
 }
 Aura:MakeInstancesWeak()
 
-function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, destName, _, _, spellID, spellName, _, _, stack)
+function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
+	local _, cleuEvent, _, sourceGUID, _, _, _, destGUID, destName, _, _, spellID, spellName, _, _, stack = CombatLogGetCurrentEventInfo()
+	
 	if sourceGUID == pGUID 
 	and	(cleuEvent == "SPELL_AURA_APPLIED"
 	or cleuEvent == "SPELL_AURA_APPLIED_DOSE"

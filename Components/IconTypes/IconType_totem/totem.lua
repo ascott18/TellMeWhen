@@ -19,8 +19,8 @@ local print = TMW.print
 
 local format, type, tonumber, wipe, bit =
 	  format, type, tonumber, wipe, bit
-local GetTotemInfo, GetSpellLink, GetSpellInfo =
-	  GetTotemInfo, GetSpellLink, GetSpellInfo
+local GetTotemInfo, GetSpellInfo =
+	  GetTotemInfo, GetSpellInfo
 
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache

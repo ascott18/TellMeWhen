@@ -112,7 +112,7 @@ local function ICD_OnEvent(icon, event, ...)
 
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local cevent, sourceGUID
-		_, cevent, _, sourceGUID, _, _, _, destGUID, _, _, _, spellID, spellName = ...
+		_, cevent, _, sourceGUID, _, _, _, destGUID, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 
 		valid = (sourceGUID == pGUID or (noSource[spellID] and destGUID == pGUID)) and (
 			cevent == "SPELL_AURA_APPLIED" or

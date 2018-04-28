@@ -185,8 +185,10 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	end
 end)
 
-local function DR_OnEvent(icon, event, arg1, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType)
+local function DR_OnEvent(icon, event, arg1)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+		local _, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType = CombatLogGetCurrentEventInfo()
+		
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
 			local NameHash = icon.Spells.Hash
 			if NameHash[spellID] or NameHash[strlowerCache[spellName]] then

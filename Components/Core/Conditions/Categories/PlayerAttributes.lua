@@ -161,8 +161,8 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 			if i == 0 then
 				return NONE
 			else
-				local _, name = GetShapeshiftFormInfo(i)
-				return name or ""
+				local icons, active, catable, spellID = GetShapeshiftFormInfo(i)
+				return spellID and GetSpellInfo(spellID) or ""
 			end
 		end
 	},
@@ -238,7 +238,7 @@ ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
 	Env = {
 		GetActivePetMode2 = function()
 			for i = NUM_PET_ACTION_SLOTS, 1, -1 do -- go backwards since they are probably at the end of the action bar
-				local name, _, _, isToken, isActive = GetPetActionInfo(i)
+				local name, _, isToken, isActive = GetPetActionInfo(i)
 				if isToken and isActive and PetModes[name] then
 					return PetModes[name]
 				end

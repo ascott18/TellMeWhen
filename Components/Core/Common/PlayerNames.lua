@@ -90,7 +90,6 @@ function NAMES:OnInitialize()
 		CUSTOM_CLASS_COLORS:RegisterCallback("UpdateClassColors", self)
 	end
 	self:RegisterEvent("UPDATE_BATTLEFIELD_SCORE")
-	self:RegisterEvent("UPDATE_WORLD_STATES", "UPDATE_BATTLEFIELD_SCORE")
 	self:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 end
 

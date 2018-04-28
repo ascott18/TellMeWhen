@@ -227,7 +227,9 @@ local spellBlacklist = {
 }
 
 
-function Type:COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName)
+function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
+	local _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName = CombatLogGetCurrentEventInfo()
+	
 	if cleuEvent == "SPELL_CAST_SUCCESS"
 	or cleuEvent == "SPELL_AURA_APPLIED"
 	or cleuEvent == "SPELL_AURA_REFRESH"

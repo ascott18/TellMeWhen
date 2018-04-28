@@ -222,7 +222,8 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 			assert(pGUID, "pGUID was null when func string was generated!")
 
 			module:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED",
-			function(_, _, e, _, sourceGuid, _, _, _, _, _, _, _, spellID, spellName)
+			function()
+				local _, e, _, sourceGuid, _, _, _, _, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 				if e == "SPELL_CAST_SUCCESS" and sourceGuid == pGUID then
 					Env.LastPlayerCastName = strlower(spellName)
 					Env.LastPlayerCastID = spellID
@@ -753,7 +754,8 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 
 
 local CastCounts
-local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED(e, _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName)
+local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED()
+	local _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 	if cleuEvent == "SPELL_CAST_SUCCESS" then
 		spellName = spellName and strlowerCache[spellName]
 		local castsForGUID = CastCounts[sourceGUID]

@@ -55,13 +55,17 @@ SwingTimerMonitor.Initialized = false
 -- Swing update functions
 -- ---------------------------------
 
-local function MainHandEvent(_,_,_,event,_,src_guid)
+local function MainHandEvent()
+	local _, event, _, src_guid = CombatLogGetCurrentEventInfo()
+
 	if strsub(event, 1, 5) == "SWING" and src_guid == UnitGUID("player") then
 		SwingTimers[MAINHAND_SLOT]:Start()
 	end
 end
 
-local function DualWieldEvent(_,_,_,event,_,src_guid)
+local function DualWieldEvent()
+	local _, event, _, src_guid = CombatLogGetCurrentEventInfo()
+
 	-- Dual wield is done all funky like this because
 	-- the combat log doesn't distinguish between MH and OH hits.
 	-- we have to guess at what weapon it was that was hit based on the current swing timers.
@@ -198,7 +202,7 @@ SwingTimerMonitor:SetScript("OnEvent", function(self, event, ...)
 		InventoryWatch()
 	elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		if SwingTimerMonitor.EventFunc then
-			SwingTimerMonitor.EventFunc(self, event, ...)
+			SwingTimerMonitor.EventFunc(self, event)
 		end
 	end
 end)
