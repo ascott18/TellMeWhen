@@ -353,7 +353,13 @@ function SUG:NameOnCursor(isClick)
 	wipe(strfindsugMatches)
 
 
-	SUG.inputType = type(tonumber(SUG.lastName) or SUG.lastName)
+	local asNumber = tonumber(SUG.lastName)
+	if asNumber and asNumber ~= math.huge then
+		-- We check against math.huge so that "Inf" isn't treated as a number.
+		SUG.inputType = "number"
+	else
+		SUG.inputType = "string"
+	end
 	SUGIsNumberInput = SUG.inputType == "number"
 	
 	if (not SUG.CurrentModule:GetShouldSuggest()) or (not SUG.CurrentModule.noMin and (SUG.lastName == "" or not strfind(SUG.lastName, "[^%.]"))) then
@@ -387,7 +393,10 @@ function SUG.strfindsug(str)
 		return matched
 	end
 
-	matched = strfind(str, SUG.atBeginning) or (shouldLetterMatch and strfind(str, letterMatch)) or (shouldWordMatch and (strfind(str, wordMatch) or strfind(str, wordMatch2)))
+	matched = strfind(str, SUG.atBeginning) 
+	or (shouldLetterMatch and strfind(str, letterMatch)) 
+	or (shouldWordMatch and (strfind(str, wordMatch) or strfind(str, wordMatch2)))
+
 	strfindsugMatches[str] = not not matched
 	return matched
 end

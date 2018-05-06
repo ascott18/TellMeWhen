@@ -342,7 +342,6 @@ function Type:Setup(icon)
 			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
 			if icon.IgnoreRunes then
 				icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
-				icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
 			end    
 			if icon.ManaCheck then
 				icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")

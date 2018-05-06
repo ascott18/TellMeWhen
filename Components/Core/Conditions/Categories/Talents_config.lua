@@ -68,7 +68,7 @@ end
 Module.Entry_Colorize_1 = TMW.NULLFUNC
 
 
-
+-- TODO: Redo this for the new pvp talent system.
 local Module = SUG:NewModule("pvptalents", SUG:GetModule("talents"))
 Module.table = {}
 

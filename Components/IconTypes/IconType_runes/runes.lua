@@ -248,7 +248,6 @@ function Type:Setup(icon)
 
 	icon:SetInfo("texture", "Interface\\Icons\\Spell_Deathknight_FrostPresence")
 
-	icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
 	icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
 	
 	icon:SetUpdateMethod("manual")
