@@ -136,8 +136,6 @@ Anchoring groups to the cursor can be useful for icons that are checking the 'mo
 
 To anchor a group to the cursor, |cff7fffffRight-Click-and-drag|r an icon to this dummy.
 
-Due to a Blizzard bug, the cooldown sweep animation will bug out when it moves around, so you probably should disable it for cursor-anchored icons.
-
 |cff7fffffLeft-Click and drag|r to move this dummy.]]
 
 L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."

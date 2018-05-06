@@ -107,7 +107,7 @@ ConditionCategory:RegisterCondition(23, "SOUL_SHARDS", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "SOUL_SHARDS")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
 	end,
 	hidden = pclass ~= "WARLOCK",
 })
@@ -121,7 +121,7 @@ ConditionCategory:RegisterCondition(23.1, "SOUL_SHARD_FRAGMENTS", {
 	funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "SOUL_SHARDS")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
 	end,
 	hidden = pclass ~= "WARLOCK",
 })
@@ -135,7 +135,7 @@ ConditionCategory:RegisterCondition(24, "HOLY_POWER", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.HolyPower),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "HOLY_POWER")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "HOLY_POWER")
 	end,
 	hidden = pclass ~= "PALADIN",
 })
@@ -173,7 +173,7 @@ ConditionCategory:RegisterCondition(26, "CHI", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Chi),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "CHI")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "CHI")
 	end,
 	hidden = pclass ~= "MONK",
 })
@@ -248,7 +248,7 @@ ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ComboPoints),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "COMBO_POINTS")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "COMBO_POINTS")
 	end,
 })
 ConditionCategory:RegisterCondition(28, "ARCANE_CHARGES", {
@@ -260,7 +260,7 @@ ConditionCategory:RegisterCondition(28, "ARCANE_CHARGES", {
 	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ArcaneCharges),
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER", "player", "ARCANE_CHARGES")
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "ARCANE_CHARGES")
 	end,
 	hidden = pclass ~= "MAGE",
 })

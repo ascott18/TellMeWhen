@@ -125,7 +125,7 @@ function IconDragger:CompleteDrag(script, icon)
 			IconDragger.desticon = nil
 			IconDragger.destFrame = icon -- not actually an icon. just some frame.
 			local cursorX, cursorY = GetCursorPosition()
-			local UIScale = 1 -- UIParent:GetScale()
+			local UIScale = UIParent:GetScale()
 			-- We offset the position here by 1 so that the frame is always under the cursor.
 			-- Otherwise, it might not be under the cursor, causing the dropdown to never auto-hide if the user
 			-- never drags their cursor over it.
@@ -301,7 +301,7 @@ local function Split(IconDragger, domain)
 
 	-- adjustments and positioning
 	local p = gs.Point
-	p.point, p.relativeTo, p.relativePoint, p.x, p.y = IconDragger.DraggerFrame.texture:GetPoint(2)
+	p.point, p.relativeTo, p.relativePoint, p.x, p.y = IconDragger.DraggerFrame.texture:GetPoint(1)
 	
 	p.relativeTo = "UIParent"
 	

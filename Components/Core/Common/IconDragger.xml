@@ -18,6 +18,7 @@
 				local x, y = GetCursorPosition()
 				local scale = self:GetScale()
 				
+				self.texture:ClearAllPoints()
 				self.texture:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x/scale, y/scale)
 			</OnUpdate>
 		</Scripts>
