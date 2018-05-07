@@ -1,6 +1,11 @@
 ===v8.5.0===
 * Battle For Azeroth support. Still preliminary - please report bugs to https://wow.curseforge.com/projects/tellmewhen/issues/1486
 
+===v8.4.4===
+====Bug Fixes====
+* Fixed additional dropdown scaling issues.
+* Added error messages for invalid import strings.
+
 ===v8.4.3===
 * Updates for Allied Races.
 * Minor options UI improvements.

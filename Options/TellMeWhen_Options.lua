@@ -3749,10 +3749,13 @@ function TMW:MakeSerializedDataPretty(string)
 	gsub("%^ ^", "^^") -- remove double space at the end
 end
 
-function TMW:DeserializeDatum(string)
+function TMW:DeserializeDatum(string, silent)
 	local success, data, version, spaceControl, type = TMW:Deserialize(string)
-	
 	if not success or not data then
+		if not silent then
+			TMW:Warn(data)
+			TMW:Error(data)
+		end
 		-- corrupt/incomplete string
 		return nil
 	end
@@ -3760,13 +3763,13 @@ function TMW:DeserializeDatum(string)
 	if spaceControl then
 		if spaceControl:find("`|") then
 			-- EVERYTHING is broken. try really hard to salvage it. It probably won't be completely successful
-			return TMW:DeserializeDatum(string:gsub("`", "~`"):gsub("~`|", "~`~|"))
+			return TMW:DeserializeDatum(string:gsub("`", "~`"):gsub("~`|", "~`~|"), silent)
 		elseif spaceControl:find("`") then
 			-- if spaces have become corrupt, then reformat them and... re-deserialize
-			return TMW:DeserializeDatum(string:gsub("`", "~`"))
+			return TMW:DeserializeDatum(string:gsub("`", "~`"), silent)
 		elseif spaceControl:find("~|") then
 			-- if pipe characters have been screwed up by blizzard's method of escaping things combined with AS-3.0's way of escaping things, try to fix them.
-			return TMW:DeserializeDatum(string:gsub("~||", "~|"))
+			return TMW:DeserializeDatum(string:gsub("~||", "~|"), silent)
 		end
 	end
 
@@ -3805,7 +3808,7 @@ function TMW:DeserializeDatum(string)
 	return result
 end
 
-function TMW:DeserializeData(str)
+function TMW:DeserializeData(str, silent)
 	if not str then 
 		return
 	end
@@ -3817,7 +3820,7 @@ function TMW:DeserializeData(str)
 	for string in gmatch(str, "(^%d+.-^^)") do
 		results = results or {}
 
-		local result = TMW:DeserializeDatum(string)
+		local result = TMW:DeserializeDatum(string, silent)
 
 		tinsert(results, result)
 	end
