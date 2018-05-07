@@ -1067,7 +1067,7 @@ function Comm:DeserializeReceivedData()
 		for k, who in pairs(TMW.Received) do
 			-- deserialize received data now because we dont do it as they are received; AceSerializer is only embedded in _Options
 			if type(k) == "string" and who then
-				local results = TMW:DeserializeData(k)
+				local results = TMW:DeserializeData(k, true)
 				if results then
 					for _, result in pairs(results) do
 						tinsert(DeserializedData, result)

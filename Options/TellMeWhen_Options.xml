@@ -958,7 +958,7 @@
 				if userInput then
 					TMW.DD:CloseDropDownMenus()
 
-					local editboxResults = TMW.LastExportedString ~= text and TMW:DeserializeData(text)
+					local editboxResults = TMW.LastExportedString ~= text and TMW:DeserializeData(text, true)
 					if editboxResults then
 						self.DoPulseValidString = 1
 					else

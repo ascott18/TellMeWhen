@@ -3,6 +3,11 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="6.2.6"
 
 TMW.CHANGELOG = [==[
+===v8.4.4===
+====Bug Fixes====
+* Fixed additional dropdown scaling issues.
+* Added error messages for invalid import strings.
+
 ===v8.4.3===
 * Updates for Allied Races.
 * Minor options UI improvements.
