@@ -120,7 +120,7 @@ end)
 
 
 
-local function AutoShot_OnEvent(icon, event, unit, _, _, _, spellID)
+local function AutoShot_OnEvent(icon, event, unit, _, spellID)
 	if event == "UNIT_SPELLCAST_SUCCEEDED" and unit == "player" and spellID == 75 then
 		-- When an autoshot happens, set the timer for the next one.
 

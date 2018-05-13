@@ -126,7 +126,8 @@ local function ICD_OnEvent(icon, event, ...)
 
 	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
 		local unit
-		unit, spellName, _, _, spellID = ...
+		unit, _, spellID = ...
+		spellName = GetSpellInfo(spellID)
 
 		valid = unit == "player"
 	end

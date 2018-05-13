@@ -32,6 +32,9 @@ local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local GetSpellTexture = TMW.GetSpellTexture
 
+local GetSpellInfo 
+    = GetSpellInfo
+
 local classSpellNameCache
 
 
@@ -320,7 +323,7 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 	end
 end
 
-function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
+function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, _, spellID)
 	local sourceGUID = UnitGUID(unit)
 	if sourceGUID then
 		-- For some reason, this is firing for unit "npc," (yes, there is a comma there).
@@ -331,6 +334,7 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, spellName, _, _, spellID)
 		-- so remove all errors and just ignore things without GUIDs.
 		
 		local c = Cooldowns[sourceGUID]
+		local spellName = GetSpellInfo(spellID)
 		spellName = strlowerCache[spellName]
 		
 		c[spellName] = spellID

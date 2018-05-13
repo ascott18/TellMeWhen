@@ -768,6 +768,12 @@ end
 
 function IE:Load(isRefresh)
 	if not isRefresh then
+		-- Finish caching really quickly when the icon editor is opened.
+		-- Users aren't going to care about their FPS so much when it gets opened.
+		-- It doesn't do much good to increase this too far - the more cached per frame,
+		-- the slower each frame will be.
+		TMW:GetModule("SpellCache"):SetNumCachePerFrame(1000)
+
 		IE:Show()
 	end
 	

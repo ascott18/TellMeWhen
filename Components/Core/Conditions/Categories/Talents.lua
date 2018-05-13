@@ -362,18 +362,16 @@ function CNDT:PLAYER_TALENT_UPDATE()
 		end
 	end
 
-	-- TODO: Redo this for the new pvp talent system.
-	--wipe(Env.PvpTalentMap)
-	--for tier = 1, MAX_PVP_TALENT_TIERS do
-	--	for column = 1, MAX_PVP_TALENT_TIERS do
-	--		local id, name, icon, selected, available, _, unlocked = GetPvpTalentInfo(tier, column, 1)
-	--		local lower = name and strlowerCache[name]
-	--		if lower then
-	--			Env.PvpTalentMap[lower] = selected
-	--			Env.PvpTalentMap[id] = selected
-	--		end
-	--	end
-	--end
+	wipe(Env.PvpTalentMap)
+	local ids = C_SpecializationInfo.GetAllSelectedPvpTalentIDs()
+	for _, id in pairs(ids) do
+		local _, name = GetPvpTalentInfoByID(id);
+		local lower = name and strlowerCache[name]
+		if lower then
+			Env.PvpTalentMap[lower] = true
+			Env.PvpTalentMap[id] = true
+		end
+	end
 end
 ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 	text = L["UIPANEL_TALENTLEARNED"],
@@ -411,36 +409,34 @@ ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 })
 
 
--- TODO: Redo this for the new pvp talent system.
--- It seems the UI for the new system is inaccessible at the moment, so I can't get a feel for how that new one works at the moment.
 
---ConditionCategory:RegisterCondition(10,	 "PVPTALENTLEARNED", {
---	text = L["UIPANEL_PVPTALENTLEARNED"],
+ConditionCategory:RegisterCondition(10,	 "PVPTALENTLEARNED", {
+	text = L["UIPANEL_PVPTALENTLEARNED"],
 
---	bool = true,
+	bool = true,
 	
---	unit = PLAYER,
---	name = function(editbox)
---		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
---	end,
---	useSUG = "pvptalents",
---	icon = function() return select(3, GetPvpTalentInfo(1, 1, 1)) end,
---	tcoords = CNDT.COMMON.standardtcoords,
---	funcstr = function(ConditionObject, c)
---		-- this is handled externally because PvpTalentMap is so extensive a process,
---		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
---		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
---		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
---		CNDT:PLAYER_TALENT_UPDATE()
+	unit = PLAYER,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = "pvptalents",
+	icon = 1322720,
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(ConditionObject, c)
+		-- this is handled externally because PvpTalentMap is so extensive a process,
+		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
+		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+		CNDT:PLAYER_TALENT_UPDATE()
 	
---		return [[BOOLCHECK( PvpTalentMap[LOWER(c.NameFirst)] )]]
---	end,
---	events = function(ConditionObject, c)
---		return
---			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
---			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
---	end,
---})
+		return [[BOOLCHECK( PvpTalentMap[LOWER(c.NameFirst)] )]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+	end,
+})
 
 
 ConditionCategory:RegisterCondition(11,	 "GLYPH", {

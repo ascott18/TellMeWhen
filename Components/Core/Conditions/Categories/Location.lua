@@ -293,7 +293,7 @@ TMW:RegisterUpgrade(85001, {
 		if condition.Type == "LOC_CONTINENT" then
 			local existing = { BitFlags = condition.BitFlags }
 			condition.BitFlags = {}
-			for old, new in pairs(flagConversions) do
+			for old, new in pairs(self.flagConversions) do
 				if CNDT:GetBitFlag(condition, old) then
 					condition.BitFlags[new] = true
 				end
@@ -316,7 +316,8 @@ ConditionCategory:RegisterCondition(13,   "LOC_CONTINENT", {
 			return t
 		else -- post-wow-80000
 			local t = {}
-			for id, mapInfo in pairs(C_Map.GetMapChildrenInfo(WORLDMAP_COSMIC_ID, Enum.UIMapType.Continent, true)) do
+			-- 946 is the cosmic map ID.
+			for id, mapInfo in pairs(C_Map.GetMapChildrenInfo(946, Enum.UIMapType.Continent, true)) do
 				t[mapInfo.mapID] = mapInfo.name
 			end
 			return t

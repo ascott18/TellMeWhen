@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 85004 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 85005 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -493,11 +493,7 @@ do	-- TMW.safecall
 	end
 
 	function TMW.safecall(func, ...)
-		-- I don't check if func is a function here because i hope that whoever calls it
-		-- is smart enough not to do stupid shit. If they arent, they will figure it out when it errors.
-		--  if type(func) == "function" then
-			return Dispatchers[select('#', ...)](func, ...)
-		-- end
+		return Dispatchers[select('#', ...)](func, ...)
 	end
 end
 local safecall = TMW.safecall

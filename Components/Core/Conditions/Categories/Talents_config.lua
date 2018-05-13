@@ -75,9 +75,12 @@ Module.table = {}
 function Module:Table_Get()
 	wipe(self.table)
 
-	for tier = 1, MAX_TALENT_TIERS do
-		for column = 1, NUM_TALENT_COLUMNS do
-			local id, name = GetPvpTalentInfo(tier, column, 1)
+	for slot = 1, 10 do
+		local info = C_SpecializationInfo.GetPvpTalentSlotInfo(slot)
+		if not info then break end
+
+		for _, id in pairs(info.availableTalentIDs) do 
+			local _, name = GetPvpTalentInfoByID(id)
 			
 			local lower = name and strlowerCache[name]
 			if lower then

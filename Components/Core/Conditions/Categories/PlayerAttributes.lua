@@ -117,6 +117,24 @@ ConditionCategory:RegisterCondition(5.3, "OVERRBAR", {
 	end,
 })
 
+ConditionCategory:RegisterCondition(5.4, "WARMODE", {
+	text = L["CONDITIONPANEL_WARMODE"],
+
+	bool = true,
+	
+	unit = PLAYER,
+	icon = "Interface\\Icons\\achievement_arena_2v2_5",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		IsWarModeDesired = C_PvP.IsWarModeDesired,
+	},
+	funcstr = [[BOOLCHECK( IsWarModeDesired() )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_FLAGS_CHANGED")
+	end,
+})
+
 local NumShapeshiftForms
 local GetShapeshiftForm = GetShapeshiftForm
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()

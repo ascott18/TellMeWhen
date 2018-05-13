@@ -205,7 +205,8 @@
 					</OnLoad>
 				</Scripts>
 			</Slider>
-			<Slider parentKey="EffThreshold" inherits="TellMeWhen_SliderTemplate">
+			<!-- No longer applicable in WoW BfA - UnitAura doesn't allow query by name anymore. -->
+			<!-- <Slider parentKey="EffThreshold" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Interval" />
 					<Anchor point="RIGHT" x="-10" />
@@ -222,7 +223,7 @@
 						self:SetValueStep(1)
 					</OnLoad>
 				</Scripts>
-			</Slider>
+			</Slider> -->
 
 			<CheckButton parentKey="BackupDbInOptions" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>

@@ -34,7 +34,10 @@ if not Type then return end
 
 
 
+Type:RegisterConfigPanel_XMLTemplate(145, "TellMeWhen_IconStates", { })
+
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
+
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_MetaSortSettings", function(self)
 	self:SetTitle(TMW.L["SORTBY"])
