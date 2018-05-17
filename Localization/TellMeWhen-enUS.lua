@@ -840,6 +840,10 @@ L["UIPANEL_BAR_BORDERBAR"] = "Bar Border"
 L["UIPANEL_BAR_BORDERBAR_DESC"] = "Set a border around the bar."
 L["UIPANEL_BAR_BORDERCOLOR"] = "Border Color"
 L["UIPANEL_BAR_BORDERCOLOR_DESC"] = "Change the color of the icon and bar borders."
+L["UIPANEL_BAR_SIZE_X"] = "Icon Width"
+L["UIPANEL_BAR_SIZE_X_DESC"] = "Modifies the width of icons in this group."
+L["UIPANEL_BAR_SIZE_Y"] = "Icon Height"
+L["UIPANEL_BAR_SIZE_Y_DESC"] = "Modifies the height of icons in this group."
 
 
 L["UIPANEL_ICONS"] = "Icons"
