@@ -1,7 +1,7 @@
 <Ui>
 
 	<Frame name="TellMeWhen_GM_Bar" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="100"/>
+		<Size y="136"/>
 		<Frames>
 
 			<CheckButton parentKey="Icon" inherits="TellMeWhen_CheckTemplate">
@@ -137,6 +137,56 @@
 						self:SetWheelStep(0.5)
 
 						self:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_0)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+			<Slider parentKey="SizeX" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.BorderIcon" relativePoint="BOTTOM"  y="-14"/>
+					<Anchor point="LEFT" relativeKey="$parent.BorderIcon" />
+					<Anchor point="RIGHT" relativeKey="$parent.BorderIcon" />
+					
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_BAR_SIZE_X"], TMW.L["UIPANEL_BAR_SIZE_X_DESC"])
+						self:SetSetting("SizeX")
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetMinMaxValues(1, 2000)
+						self:SetRange(20)
+						self:SetValueStep(0.1)
+						self:SetWheelStep(1)
+						
+						self:SetTextFormatter(TMW.C.Formatter.F_1, TMW.C.Formatter.F_0)
+					</OnLoad>
+				</Scripts>
+			</Slider>
+
+			<Slider parentKey="SizeY" inherits="TellMeWhen_SliderTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.SizeX" />
+					<Anchor point="LEFT" relativeKey="$parent.BorderBar" />
+					<Anchor point="RIGHT" relativeKey="$parent.BorderBar" />
+					
+				</Anchors>
+				<Scripts>
+					<OnLoad>						
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_BAR_SIZE_Y"], TMW.L["UIPANEL_BAR_SIZE_Y_DESC"])
+						self:SetSetting("SizeY")
+
+						self:SetMode(self.MODE_ADJUSTING)
+						self:SetMinMaxValues(1, 2000)
+						self:SetRange(20)
+						self:SetValueStep(0.1)
+						self:SetWheelStep(1)
+						
+						self:SetTextFormatter(TMW.C.Formatter.F_1, TMW.C.Formatter.F_0)
 					</OnLoad>
 				</Scripts>
 			</Slider>
