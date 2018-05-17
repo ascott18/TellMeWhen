@@ -62,6 +62,7 @@ SpellCache.CONST = {
 		-- We can't include engineering because there are many valid "tradeskills" that use this icon,
 		-- just because its basically the default icon.
 		-- We will exclude all engineering tradeskills specifically.
+		-- Examples include the class "tradeskills" ("Druid", etc...) and the racial tradeskills ("Racial - Night Elf")
 		--[136243] = true, -- ["Interface\\Icons\\Trade_Engineering"] = true, 
 
 		[136247] = true, -- ["Interface\\Icons\\Trade_LeatherWorking"] = true, 
@@ -190,13 +191,12 @@ end
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
-	Cache = {} -- TMW.IE.db.locale.SpellCache
+	Cache = {}
 
-	SpellCacheInvalidRanges = TMW.IE.db.locale.SpellCacheInvalidRanges
+	local SpellCacheInvalidRanges = TMW.IE.db.locale.SpellCacheInvalidRanges
 
 	local haveSpellCacheInvalidRanges = true
-	if TMW.IE.db.locale.SpellCacheWoWVersion ~= clientBuild
-	then
+	if TMW.IE.db.locale.SpellCacheWoWVersion ~= clientBuild then
 		wipe(SpellCacheInvalidRanges)
 		haveSpellCacheInvalidRanges = false
 	end
@@ -216,7 +216,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		return strfind(str, word) and strfind(str, "%f[%a]" .. word .. "%f[%A]")
 	end
 
-	 tradeSkillBlacklist = {
+ 	local tradeSkillBlacklist = {
 		-- We don't blacklist mounts [777] because mounts are often checked as buffs.
 		[778] = false, -- Companions - no compelling reason to cache battle pet summon spells.
 
