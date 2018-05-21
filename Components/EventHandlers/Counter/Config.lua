@@ -135,7 +135,7 @@ function Module:Entry_AddToList_1(f, name)
 
 	f.insert = name
 end
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	local lastName = SUG.lastName
 
 
@@ -150,7 +150,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	end
 end
 
-function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions)
 	if #SUG.lastName > 0 then
 		suggestions[#suggestions + 1] = "%A"
 	end

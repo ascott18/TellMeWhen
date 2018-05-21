@@ -26,7 +26,7 @@ local ItemCache_Cache
 local Module = SUG:NewModule("texture_withVarTex", SUG:GetModule("texture"))
 Module.Slots = {}
 
-function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions)
 	local lastName = SUG.lastName
 	
 	if SUG.lastName:sub(1, 1) == "$" then

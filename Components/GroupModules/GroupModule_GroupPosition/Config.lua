@@ -73,7 +73,7 @@ end
 function Module:Table_Get()
 	return self.Table
 end
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	local atBeginning = SUG.atBeginning
 	local strfindsug = SUG.strfindsug
 	local lastName = SUG.lastName

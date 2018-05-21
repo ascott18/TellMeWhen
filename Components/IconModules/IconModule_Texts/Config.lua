@@ -37,7 +37,6 @@ if not TEXT then return end
 
 
 local clientVersion = select(4, GetBuildInfo())
-local wow_701 = clientVersion >= 70100 or GetBuildInfo() == "7.1.0" -- they haven't updated the interface number yet.
 
 
 
@@ -212,11 +211,8 @@ TMW:NewClass("Config_TextLayout_ListItem", "Config_Frame") {
 			for id, displaySettings in TMW:InNLengthTable(layoutSettings) do
 				local frame = self:GetTextDisplayFrame(id)
 
-				if wow_701 or self.Layout:GetChecked() then
-					frame:Show()
-
-					numShown = id
-				end
+				frame:Show()
+				numShown = id
 			end
 		end
 

@@ -183,7 +183,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 			end
 		end
 	end
-	function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	function Module:Table_GetNormalSuggestions(suggestions, tbl)
 		local atBeginning = SUG.atBeginning
 		local lastName = SUG.lastName
 

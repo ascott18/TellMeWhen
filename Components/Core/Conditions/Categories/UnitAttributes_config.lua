@@ -55,7 +55,7 @@ function Module:Entry_AddToList_1(f, index)
 	
 	f.insert = creaturetypeLocalized
 end
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	local lastName = SUG.lastName
 
 

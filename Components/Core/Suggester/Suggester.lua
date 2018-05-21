@@ -25,8 +25,10 @@ local LSM = LibStub("LibSharedMedia-3.0")
 
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, assert, rawget, rawset, unpack, select =
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, assert, rawget, rawset, unpack, select
-local strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
-	  strfind, strmatch, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10
+local strfind, strmatch, strbyte, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
+	  strfind, strmatch, strbyte, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10
+local GetSpellInfo, GetItemInfo, GetItemIcon = 
+      GetSpellInfo, GetItemInfo, GetItemIcon
 
 -- GLOBALS: GameTooltip, GameTooltip_SetDefaultAnchor
 
@@ -39,7 +41,7 @@ local SUG = TMW:NewModule("Suggester", "AceEvent-3.0", "AceComm-3.0", "AceSerial
 TMW.SUG = SUG
 
 
-local DEBOUNCE_TIMER = 0.15
+local DEBOUNCE_TIMER = 0.05
 
 TMW.IE:RegisterUpgrade(62217, {
 	global = function(self)
@@ -89,8 +91,8 @@ function SUG:DoSuggest()
 
 	local tbl = SUG.CurrentModule:Table_Get()
 
-
-	SUG.CurrentModule:Table_GetNormalSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
+	local start = debugprofilestop()
+	SUG.CurrentModule:Table_GetNormalSuggestions(SUGpreTable, tbl)
 	SUG.CurrentModule:Table_GetEquivSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
 
 	for specFunc = 1, math.huge do
@@ -99,8 +101,10 @@ function SUG:DoSuggest()
 			break
 		end
 
-		Table_GetSpecialSuggestions(SUG.CurrentModule, SUGpreTable, SUG.CurrentModule:Table_Get())
+		Table_GetSpecialSuggestions(SUG.CurrentModule, SUGpreTable)
 	end
+
+	print("SUG: Got Suggestions in " .. (debugprofilestop() - start))
 
 	suggestedForModule = SUG.CurrentModule
 	SUG.tabIndex = 1
@@ -139,6 +143,7 @@ function SUG:SuggestingComplete(doSort)
 			-- All this data is in the buckets now, so wipe SUGpreTable
 			-- so we can fill it after we sort the buckets.
 			wipe(SUGpreTable)
+			local len = 0
 
 			for k, bucket in TMW:OrderedPairs(buckets) do
 				-- Sort the bucket.
@@ -146,7 +151,8 @@ function SUG:SuggestingComplete(doSort)
 
 				-- Add the sorted bucket's contents to the main table.
 				for i = 1, #bucket do
-					SUGpreTable[#SUGpreTable + 1] = bucket[i]
+					len = len + 1
+					SUGpreTable[len] = bucket[i]
 				end
 
 				-- We're done with this bucket. Prepare it for next use.
@@ -271,7 +277,6 @@ function SUG:SuggestingComplete(doSort)
 	end
 
 	if self.inline then
-		print(#SUGpreTable, numFramesNeeded)
 		if #SUGpreTable >= numFramesNeeded then
 			SUG.SuggestionList:SetHeight(SUG:GetHeightForFrames(numFramesNeeded))
 		else
@@ -345,13 +350,11 @@ function SUG:NameOnCursor(isClick)
 	end
 
 	SUG.atBeginning = "^" .. SUG.lastName
-	shouldLetterMatch = #SUG.lastName < 5
+	shouldLetterMatch = #SUG.lastName > 1 and #SUG.lastName < 5 
 	letterMatch = "^" .. gsub(SUG.lastName, "(.)", " %1.-"):trim()
 	shouldWordMatch = strfind(SUG.lastName, " ")
 	wordMatch = "^" .. gsub(SUG.lastName, " ", ".- "):trim()
-	wordMatch2 = " " .. gsub(SUG.lastName, " ", ".- "):trim()
 	wipe(strfindsugMatches)
-
 
 	local asNumber = tonumber(SUG.lastName)
 	if asNumber and asNumber ~= math.huge then
@@ -395,7 +398,7 @@ function SUG.strfindsug(str)
 
 	matched = strfind(str, SUG.atBeginning) 
 	or (shouldLetterMatch and strfind(str, letterMatch)) 
-	or (shouldWordMatch and (strfind(str, wordMatch) or strfind(str, wordMatch2)))
+	or (shouldWordMatch and strfind(str, wordMatch))
 
 	strfindsugMatches[str] = not not matched
 	return matched
@@ -706,7 +709,48 @@ function Module:Table_GetSorter()
 		return self.Sorter_ByName
 	end
 end
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+
+local StartsWithCache = TMW:NewClass("StartsWithCache") {
+	OnNewInstance = function(self, source)
+		self.Source = source
+		self.Lookups = setmetatable({}, { __mode = "kv" })
+	end,
+
+	GetLookup = function(self, fragment)
+		if self.Lookups[fragment] then 
+			return self.Lookups[fragment] 
+		end
+
+		local sourceData = self.Source
+		local oneLetterShorter = fragment
+		while #oneLetterShorter > 1 do
+			oneLetterShorter = oneLetterShorter:sub(1, -2)
+			if self.Lookups[oneLetterShorter] then
+				sourceData = self.Lookups[oneLetterShorter]
+				break
+			end
+		end
+
+		local pattern = "^" .. fragment
+		local newData = {}
+		for id, name in pairs(sourceData) do
+			if strfind(name, pattern) then
+				newData[id] = name
+			end
+		end
+		self.Lookups[fragment] = newData
+		return newData
+	end,
+}
+
+local startsWithCaches = setmetatable({}, {
+	__index = function(self, k) 
+		self[k] = StartsWithCache:New(k)
+		return self[k]
+	end,
+})
+
+function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	local atBeginning = SUG.atBeginning
 	local lastName = SUG.lastName
 
@@ -719,10 +763,47 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 				suggestions[#suggestions + 1] = id
 			end
 		end
+	elseif tbl == SpellCache:GetCache() then
+		-- We know that the spell cache is unchanging.
+		-- So, we can safely build lookup tables around its contents.
+		-- For other tables, we can't be so sure.
+		-- However, there's basically nothing else that uses this function that 
+		-- either isn't the spell cache, or is large enough for this to matter.
+		local lookup = startsWithCaches[tbl]:GetLookup(SUG.lastName)
+		local len = #suggestions
+
+		if not shouldLetterMatch and not shouldWordMatch then
+			-- No special rules. Just copy straight out of the lookup.
+			for id, name in pairs(lookup) do
+				len = len + 1
+				suggestions[len] = id
+			end
+		else
+			-- Special Rules in place. Need to check every spell against our patterns.
+
+			-- For letter/word matching, check against the lookup for the first letter of the name.
+			-- These matches always must match the first word in the spell name.
+			local firstLetterLookup = startsWithCaches[tbl]:GetLookup(SUG.lastName:sub(1, 1))
+
+			for id, name in pairs(tbl) do
+
+				if  lookup[id]
+					or (firstLetterLookup[id] and (
+						(shouldLetterMatch and strfind(name, letterMatch)) 
+						or (shouldWordMatch and strfind(name, wordMatch))
+					))
+				then
+					len = len + 1
+					suggestions[len] = id
+				end
+			end
+		end
 	else
+		local len = #suggestions
 		for id, name in pairs(tbl) do
 			if strfindsug(name) then
-				suggestions[#suggestions + 1] = id
+				len = len + 1
+				suggestions[len] = id
 			end
 		end
 	end
@@ -764,7 +845,7 @@ function Module:Table_GetEquivSuggestions(suggestions, tbl, ...)
 		end
 	end
 end
-function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions)
 
 end
 function Module:Entry_OnClick(frame, button)
@@ -855,7 +936,7 @@ Module:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 function Module:Table_Get()
 	return TMW:GetModule("ItemCache"):GetCache()
 end
-function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions)
 	local id = tonumber(SUG.lastName)
 
 	if id and GetItemInfo(id) and not TMW.tContains(suggestions, id) then
@@ -914,10 +995,12 @@ function Module:Sorter_Bucket(suggestions, buckets)
 				tinsert(buckets[5], id)
 			else
 				if SUGIsNumberInput then
-					tinsert(buckets[6 + floor(id/5000)], id)
+					tinsert(buckets[6 + floor(id/1000)], id)
 				else
 					local name = SpellCache_Cache[id]
-					local offset = name and strbyte(name) or 0
+					-- Bucket by the first two chars. Most of the time,
+					-- almost all the results will start with the same char.
+					local offset = name and ((strbyte(name) or 0) * 2^8 + (strbyte(name:sub(2)) or 0)) or 0
 					tinsert(buckets[6 + offset], id)
 				end
 			end
@@ -1018,8 +1101,8 @@ local Module = SUG:NewModule("spellwithduration", SUG:GetModule("spell"))
 Module.doAddColon = true
 local MATCH_RECAST_TIME_MIN, MATCH_RECAST_TIME_SEC
 function Module:OnInitialize()
-	MATCH_RECAST_TIME_MIN = SPELL_RECAST_TIME_MIN:gsub("%%%.3g", "([%%d%%.]+)")
-	MATCH_RECAST_TIME_SEC = SPELL_RECAST_TIME_SEC:gsub("%%%.3g", "([%%d%%.]+)")
+	MATCH_RECAST_TIME_MIN = SPELL_RECAST_TIME_MIN:gsub("%%%.%dg", "([%%d%%.]+)")
+	MATCH_RECAST_TIME_SEC = SPELL_RECAST_TIME_SEC:gsub("%%%.%dg", "([%%d%%.]+)")
 end
 function Module:Entry_OnClick(f, button)
 	local insert
@@ -1207,7 +1290,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(GetSpellTexture(firstid))
 	end
 end
-function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions)
 	local atBeginning = SUG.atBeginning
 
 	for dispeltype in pairs(TMW.DS) do

@@ -264,7 +264,7 @@ function Module.Sorter(a, b)
 	end
 end
 
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	local atBeginning = SUG.atBeginning
 
 	for name, id in pairs(tbl) do

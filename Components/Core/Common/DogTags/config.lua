@@ -259,7 +259,7 @@ function Module:GetStartEndPositions(isClick)
 end
 
 
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	local currentTag = getCurrentTag(SUG.Box)
 
 	for _, namespaceName in pairs(DogTag.unpackNamespaceList[DOGTAG.nsList]) do

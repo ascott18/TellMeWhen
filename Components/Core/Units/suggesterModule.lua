@@ -96,7 +96,7 @@ function Module:Entry_AddToList_1(f, index)
 	end
 end
 
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	local atBeginning = SUG.atBeginning
 	
 	for index, unitData in pairs(tbl) do
@@ -106,7 +106,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
 	end
 end
 
-function Module:Table_GetSpecialSuggestions_1(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_1(suggestions)
 	local atBeginning = SUG.atBeginning
 	self:UpdateGroupedPlayersMap()
 	

@@ -212,8 +212,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	local GetTradeSkillTexture = C_TradeSkillUI.GetTradeSkillTexture
 	local classLocalizedName = UnitClass("player")
 
-	local function findword(str, word)
-		return strfind(str, word) and strfind(str, "%f[%a]" .. word .. "%f[%A]")
+	local function findword(name, word)
+		return strfind(name, word) and strfind(name, "%f[%a]" .. word .. "%f[%A]")
 	end
 
  	local tradeSkillBlacklist = {
@@ -296,20 +296,24 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 							local nameOriginal = name
 							name = strlower(name)
 							fail = 
-								findword(name, "quest") or
-								findword(name, "trigger") or
+								(strfind(name, "quest") and strfind(name, "%f[%a]quest%f[%A]")) or
+								(strfind(name, "trigger") and strfind(name, "%f[%a]trigger%f[%A]")) or
 								strfind(name, "[%]%[%%%+%?]") or -- no brackets, plus signs, percent signs, or question marks
-								findword(name, "visual") or
-								findword(name, "dnd") or
-								findword(name, "event") or
-								findword(name, "test") or
-								findword(name, "vehicle") or
-								findword(name, "credit") or
-								findword(name, "camera") or
-								findword(name, "debug") or
-								findword(name, "bunny") or
+								(strfind(name, "visual") and strfind(name, "%f[%a]visual%f[%A]")) or
+								(strfind(name, "dnd") and strfind(name, "%f[%a]dnd%f[%A]")) or
+								(strfind(name, "event") and strfind(name, "%f[%a]event%f[%A]")) or
+								(strfind(name, "test") and strfind(name, "%f[%a]test%f[%A]")) or
+								strfind(name, "%d.%d") or -- Number Dot Number is probably a patch number, used often for internal spells
+								(strfind(name, "vehicle") and strfind(name, "%f[%a]vehicle%f[%A]")) or
+								(strfind(name, "credit") and strfind(name, "%f[%a]credit%f[%A]")) or
+								(strfind(name, "effect") and strfind(name, "%f[%a]effect%f[%A]")) or
+								(strfind(name, "camera") and strfind(name, "%f[%a]camera%f[%A]")) or
+								(strfind(name, "ph") and strfind(name, "%f[%a]ph%f[%A]")) or
+								(strfind(name, "proc") and strfind(name, "%f[%a]proc%f[%A]")) or
+								(strfind(name, "debug") and strfind(name, "%f[%a]debug%f[%A]")) or
+								(strfind(name, "bunny") and strfind(name, "%f[%a]bunny%f[%A]")) or
 								strfind(name, ":%s?%d") or -- interferes with colon duration syntax
-								findword(name, "dmg")
+								(strfind(name, "dmg") and strfind(name, "%f[%a]dmg%f[%A]"))
 
 							isNameGood[nameOriginal] = not fail and name or false
 						end
@@ -332,7 +336,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					-- spellID was successful (fail is false).
 					-- Record the range if its big enough to be significant.
 					local range = spellID - lastFail
-					if range > 5 then
+					if range > 2 then
 						SpellCacheInvalidRanges[lastFail] = range
 					end
 					lastFail = nil

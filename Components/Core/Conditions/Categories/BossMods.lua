@@ -123,7 +123,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		f.tooltiptext = ENCOUNTER_JOURNAL_ENCOUNTER .. " #" .. encounter.index .. "\r\n" .. 
 			encounter.instance .. "\r\n" .. 
 			encounter.tier .. "\r\n\r\n" ..
-			"|T" .. encounter.tex .. ":64:128:0:0|t"
+			(encounter.tex and "|T" .. encounter.tex .. ":64:128:0:0|t" or "")
 
 
 		f.Icon:SetTexture(encounter.tex)
@@ -131,7 +131,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
 		f.insert = encounter.name
 	end
-	function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	function Module:Table_GetNormalSuggestions(suggestions, tbl)
 		local lastName = SUG.lastName
 
 		for index, encounter in pairs(tbl) do

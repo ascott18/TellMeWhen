@@ -1068,25 +1068,8 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 		-- Auto switch to a table if there are too many options for numeric bit flags.
 		if type(conditionSettings.BitFlags) == "number" then
 
-			local switch
-			for index, _ in pairs(conditionData.bitFlags) do
-				if type(index) ~= "number" or index >= 32 or index < 1 then
-					switch = true
-					break
-				end
-			end
-
-			if switch then
-				local flagsOld = conditionSettings.BitFlags
-				conditionSettings.BitFlags = {}
-
-				for index, _ in pairs(conditionData.bitFlags) do
-					if type(index) == "number" and index < 32 and index >= 1 then
-						local flag = bit.lshift(1, index-1)
-						local flagSet = bit.band(flagsOld, flag) == flag
-						conditionSettings.BitFlags[index] = flagSet and true or nil
-					end
-				end
+			if conditionData:UsesTabularBitflags() then
+				CNDT:ConvertBitFlagsToTable(conditionSettings, conditionData)
 			end
 		end
 
@@ -1262,7 +1245,7 @@ function Module:Table_GetSorter()
 	return self.Sorter_ByName
 end
 
-function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	for identifier, conditionData in pairs(tbl) do
 		local text = get(conditionData.text)
 		text = text and text:lower()

@@ -116,7 +116,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.Icon:SetTexture(GetItemIcon(itemID))
 	end
 end
-function Module:Table_GetSpecialSuggestions_2(suggestions, tbl, ...)
+function Module:Table_GetSpecialSuggestions_2(suggestions)
 
 	local atBeginning = SUG.atBeginning
 

@@ -14,7 +14,6 @@
 if not TMW then return end
 
 local clientVersion = select(4, GetBuildInfo())
-local wow_701 = clientVersion >= 70100 or GetBuildInfo() == "7.1.0" -- they haven't updated the interface number yet.
 
 ---------- Libraries ----------
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -772,7 +771,7 @@ function IE:Load(isRefresh)
 		-- Users aren't going to care about their FPS so much when it gets opened.
 		-- It doesn't do much good to increase this too far - the more cached per frame,
 		-- the slower each frame will be.
-		TMW:GetModule("SpellCache"):SetNumCachePerFrame(1000)
+		TMW:GetModule("SpellCache"):SetNumCachePerFrame(3000)
 
 		IE:Show()
 	end
@@ -1315,10 +1314,6 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 		self.text:SetHeight(30)
 		self.text:SetMaxLines(3)
 	end,
-
-	-- Wow 7.1 wow_701 shim. Delete when the patch is live.
-	DoesClipChildren = not wow_701 and function() return false end or nil,
-	SetClipsChildren = not wow_701 and TMW.NULLFUNC or nil,
 
 	SetAnimateHeightAdjustments = function(self, animateHeightAdjusts)
 		self.animateHeightAdjusts = animateHeightAdjusts

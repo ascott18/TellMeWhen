@@ -418,7 +418,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	Module.noTexture = true
 	Module.showColorHelp = false
 
-	function Module:Table_GetNormalSuggestions(suggestions, tbl, ...)
+	function Module:Table_GetNormalSuggestions(suggestions, tbl)
 		local lastName = SUG.lastName
 
 		for name in pairs(tbl) do
