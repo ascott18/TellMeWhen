@@ -129,6 +129,8 @@ function SUG:SuggestingComplete(doSort)
 	SUG.SuggestionList.blocker:Hide()
 	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
 	if doSort and not SUG.CurrentModule.dontSort then
+		local start = debugprofilestop()
+
 		local sorter, sorterBucket = SUG.CurrentModule:Table_GetSorter()
 
 		if sorterBucket then
@@ -147,6 +149,8 @@ function SUG:SuggestingComplete(doSort)
 
 			for k, bucket in TMW:OrderedPairs(buckets) do
 				-- Sort the bucket.
+				sorter = bucket.__sorter or sorter
+
 				sort(bucket, sorter)
 
 				-- Add the sorted bucket's contents to the main table.
@@ -170,6 +174,7 @@ function SUG:SuggestingComplete(doSort)
 			TMW.shellsortDeferred(SUGpreTable, sorter, nil, SUG.SuggestingComplete, SUG, progressCallback)
 			return
 		end
+		print("SUG: Sorted in " .. debugprofilestop() - start)
 	end
 
 	if suggestedForModule ~= SUG.CurrentModule then
@@ -350,9 +355,9 @@ function SUG:NameOnCursor(isClick)
 	end
 
 	SUG.atBeginning = "^" .. SUG.lastName
-	shouldLetterMatch = #SUG.lastName > 1 and #SUG.lastName < 5 
-	letterMatch = "^" .. gsub(SUG.lastName, "(.)", " %1.-"):trim()
 	shouldWordMatch = strfind(SUG.lastName, " ")
+	shouldLetterMatch = not shouldWordMatch and #SUG.lastName > 1 and #SUG.lastName < 5
+	letterMatch = "^" .. gsub(SUG.lastName, "(.)", " %1.-"):trim()
 	wordMatch = "^" .. gsub(SUG.lastName, " ", ".- "):trim()
 	wipe(strfindsugMatches)
 
@@ -743,25 +748,94 @@ local StartsWithCache = TMW:NewClass("StartsWithCache") {
 	end,
 }
 
+local InitialismCache = TMW:NewClass("InitialismCache") {
+	OnNewInstance = function(self)
+		self.Lookups = setmetatable({}, { __mode = "kv" })
+	end,
+
+	GetLookup = function(self, firstLetterLookup, initialism)
+		if self.Lookups[initialism] then 
+			return self.Lookups[initialism] 
+		end
+
+		local sourceData = firstLetterLookup
+		local oneLetterShorter = initialism
+		while #oneLetterShorter > 1 do
+			oneLetterShorter = oneLetterShorter:sub(1, -2)
+			if self.Lookups[oneLetterShorter] then
+				sourceData = self.Lookups[oneLetterShorter]
+				break
+			end
+		end
+
+		-- To form the pattern, put ".- " after each letter except the last. Also, match string starts only.
+		local pattern = "^" .. initialism:gsub("(.)", "%1.- "):trim("-. ")
+
+		local newData = {}
+		for id, name in pairs(sourceData) do
+			if strfind(name, pattern) then
+				newData[id] = name
+			end
+		end
+		self.Lookups[initialism] = newData
+		return newData
+	end,
+}
+
 local startsWithCaches = setmetatable({}, {
 	__index = function(self, k) 
 		self[k] = StartsWithCache:New(k)
 		return self[k]
 	end,
 })
+local spellCacheInitialismCache = InitialismCache:New()
 
 function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	local atBeginning = SUG.atBeginning
 	local lastName = SUG.lastName
 
 	if SUG.inputType == "number" then
-		local len = #SUG.lastName - 1
 		local match = tonumber(SUG.lastName)
+
+		-- Variable names are based on number of trailing zeroes.
+		local lower_1, upper_1 = match*10, (match+1)*10
+		local lower_2, upper_2 = match*100, (match+1)*100
+		local lower_3, upper_3 = match*1000, (match+1)*1000
+		local lower_4, upper_4 = match*10000, (match+1)*10000
+		local lower_5, upper_5 = match*100000, (match+1)*100000
+		-- If WoW ever get spellIDs in the millions, this will break. Will just need another one of these for _6 trailing zeroes.
+		-- At current rates, that will be sometime in the 2040s.
+
 		for id in pairs(tbl) do
-			if min(id, floor(id / 10^(floor(log10(id)) - len))) == match then -- this looks like shit, but is is approx 300% more efficient than the below commented line
-		--	if strfind(id, atBeginning) then
+			-- Oh boy. Optimizations galore!
+
+			-- Checking each number against all the ranges of valid search results 
+			-- is WAY faster then trying to do any sort of exact matching based on 
+			-- the length of the input and the length of the candidate.
+
+			-- We start with the 6 digit numbers because they'll have the most results for 1-digit inputs.
+			-- Longer inputs will have less results total, so we're OK if they're slightly slower,
+			-- becuse they'll take much less time to sort, so the difference comes out in the wash.
+
+			-- We check the less than case first so that after any one less than check fails,
+			-- we can short circuit out of the entire statement.
+			if id < upper_5 and (id >= lower_5
+		        or (id < upper_4 and (id >= lower_4
+			        or (id < upper_3 and (id >= lower_3
+				        or (id < upper_2 and (id >= lower_2
+					        or (id < upper_1 and (id >= lower_1
+						    	or id == match 
+		    )))))))))
+		    then 
 				suggestions[#suggestions + 1] = id
 			end
+
+			-- The old way that we checked this was with the following:
+			-- local len = #SUG.lastName - 1
+			-- min(id, floor(id / 10^(floor(log10(id)) - len))) == match
+			-- This was quite good - approx 3x faster than strfind.
+			-- However, our massive if statement is approx 1.5x faster still,
+			-- putting us at about 4.5x the speed of strfind.
 		end
 	elseif tbl == SpellCache:GetCache() then
 		-- We know that the spell cache is unchanging.
@@ -772,26 +846,42 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl)
 		local lookup = startsWithCaches[tbl]:GetLookup(SUG.lastName)
 		local len = #suggestions
 
-		if not shouldLetterMatch and not shouldWordMatch then
-			-- No special rules. Just copy straight out of the lookup.
-			for id, name in pairs(lookup) do
-				len = len + 1
-				suggestions[len] = id
-			end
-		else
+		-- Always do this. Just copy straight out of the lookup.
+		for id, name in pairs(lookup) do
+			len = len + 1
+			suggestions[len] = id
+		end
+
+		if shouldLetterMatch or shouldWordMatch then
 			-- Special Rules in place. Need to check every spell against our patterns.
+
+			local initialism
+			if shouldWordMatch then
+				-- Convert "foo bar test" to "fbt"
+				initialism = SUG.lastName:gsub("(%f[%a].).-%f[%A].?", "%1"):gsub(" ", "")
+			elseif shouldLetterMatch then
+				-- Input already is the initialism to look for (it doesn't contain spaces and is just a few characters.)
+				initialism = SUG.lastName
+			end
 
 			-- For letter/word matching, check against the lookup for the first letter of the name.
 			-- These matches always must match the first word in the spell name.
 			local firstLetterLookup = startsWithCaches[tbl]:GetLookup(SUG.lastName:sub(1, 1))
 
-			for id, name in pairs(tbl) do
+			local initialismLookup = spellCacheInitialismCache:GetLookup(firstLetterLookup, initialism)
 
-				if  lookup[id]
-					or (firstLetterLookup[id] and (
-						(shouldLetterMatch and strfind(name, letterMatch)) 
-						or (shouldWordMatch and strfind(name, wordMatch))
-					))
+			for id, name in pairs(initialismLookup) do
+				-- For any spell that seems like an initialism match that isn't in the
+				-- starts with lookup (if it IS in there, we already added it),
+				-- check to be sure that its a correct match, and throw it in if it is.
+				if not lookup[id] and (
+					 -- For letter matching, no need to strfind to verify here - 
+					 -- we can be certain that for letter matching, anything in the lookup is valid.
+					(shouldLetterMatch)
+					-- For word matching, we need to validate. The initialism lookup gets us pretty far,
+					-- but we need to make sure all characters after the first character of each word matches as well.
+					or (shouldWordMatch and strfind(name, wordMatch))
+				)
 				then
 					len = len + 1
 					suggestions[len] = id
@@ -973,13 +1063,29 @@ function Module:Table_Get()
 	return SpellCache_Cache
 end
 
+local function spellSort(a, b)
+	local nameA, nameB = SpellCache_Cache[a], SpellCache_Cache[b]
+
+	if nameA == nameB then
+		-- Sort identical names by ID.
+
+		-- This also handles equivalency names (which won't be in the spell cache)
+		-- without an extra table lookup.
+		-- Since these are a relatively unlikely case, this is optimal.
+		-- Because of the way bucket sort works, if "a" is an equiv, then "b" is also an equiv.
+		return a < b
+	else
+		-- Sort by name
+		return nameA < nameB
+	end
+end
 function Module:Sorter_Bucket(suggestions, buckets)
 	for i = 1, #suggestions do
 		local id = suggestions[i]
 
 		if id == "GCD" then
-			 -- Used by the spell suggestions for the spell CD condition.
-			 -- We put it here so that we can still use bucket sort.
+			-- Used by the spell suggestions for the spell CD condition.
+			-- We put it here so that we can still use bucket sort.
 			tinsert(buckets[0.5], id)
 		elseif EquivFirstIDLookup[id] then
 			tinsert(buckets[1], id)
@@ -1001,7 +1107,9 @@ function Module:Sorter_Bucket(suggestions, buckets)
 					-- Bucket by the first two chars. Most of the time,
 					-- almost all the results will start with the same char.
 					local offset = name and ((strbyte(name) or 0) * 2^8 + (strbyte(name:sub(2)) or 0)) or 0
-					tinsert(buckets[6 + offset], id)
+					local bucket = buckets[6 + offset]
+					--bucket.__sorter = spellSort
+					tinsert(bucket, id)
 				end
 			end
 		end
@@ -1009,27 +1117,29 @@ function Module:Sorter_Bucket(suggestions, buckets)
 end
 
 function Module.Sorter_Spells(a, b)
-	-- Due to bucket sort, if EquivFirstIDLookup[a], then it is true for b as well.
-	if SUGIsNumberInput or EquivFirstIDLookup[a] then
-		--sort by id
+	local nameA, nameB = SpellCache_Cache[a], SpellCache_Cache[b]
+
+	if nameA == nameB or not nameA or not nameB then
+		-- Sort identical names by ID.
+
+		-- This also handles equivalency names (which won't be in the spell cache)
+		-- without an extra table lookup.
+		-- Since these are a relatively unlikely case, this is optimal.
+		-- Because of the way bucket sort works, if "a" is an equiv, then "b" is also an equiv.
 		return a < b
 	else
-		--sort by name
-		local nameA, nameB = SpellCache_Cache[a], SpellCache_Cache[b]
-
-		if nameA == nameB then
-			--sort identical names by ID
-			return a < b
-		elseif nameA and nameB then
-			--sort by name
-			return nameA < nameB
-		else
-			return nameA
-		end
+		-- Sort by name
+		return nameA < nameB
 	end
 end
 function Module:Table_GetSorter()
-	return self.Sorter_Spells, self.Sorter_Bucket
+	if SUGIsNumberInput then
+		-- Use the default sort function in Lua if input is numeric.
+		-- Our sort buckets will take care of sorting the different categories correctly.
+		return nil, self.Sorter_Bucket
+	else
+		return self.Sorter_Spells, self.Sorter_Bucket
+	end
 end
 function Module:Entry_AddToList_1(f, id)
 	if tonumber(id) then --sanity check
