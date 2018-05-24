@@ -1,7 +1,7 @@
 <Ui>
 
 	<Frame name="TellMeWhen_GM_GroupPosition" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="250"/>
+		<Size y="196"/>
 		<Frames>
 			<!--  TODO: add a message underneath this box if the target can't be found, and also add one if the target is a GUID. -->
 			<EditBox parentKey="RelativeTo" inherits="TellMeWhen_InputBoxTemplate">
@@ -178,6 +178,7 @@
 					</OnLoad>
 				</Scripts>
 			</Slider>
+
 			<Slider parentKey="Strata" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Point" relativePoint="BOTTOM"  y="-13"/>
@@ -228,66 +229,6 @@
 				</Scripts>
 			</Slider>
 
-			<Slider parentKey="SizeX" inherits="TellMeWhen_SliderTemplate">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Strata" relativePoint="BOTTOM"  y="-20"/>
-					<Anchor point="LEFT" relativeKey="$parent.Strata" />
-					<Anchor point="RIGHT" relativeKey="$parent.Strata" />
-					
-				</Anchors>
-				<Scripts>
-					<OnLoad>						
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["UIPANEL_GROUP_SIZE_X"], TMW.L["UIPANEL_GROUP_SIZE_X_DESC"])
-						self:SetSetting("SizeX")
-
-
-						self:CScriptAdd("SettingTableRequested", function(requester)
-							return TMW.CI.group:GetSettingsPerView()
-						end)
-
-						self:SetMode(self.MODE_ADJUSTING)
-						self:SetMinMaxValues(-2000, 2000)
-						self:SetRange(20)
-						self:SetValueStep(0.1)
-						self:SetWheelStep(1)
-						
-						self:SetTextFormatter(TMW.C.Formatter.F_1, TMW.C.Formatter.F_0)
-					</OnLoad>
-				</Scripts>
-			</Slider>
-
-			<Slider parentKey="SizeY" inherits="TellMeWhen_SliderTemplate">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.SizeX" relativePoint="BOTTOM"  y="-20"/>
-					<Anchor point="LEFT" relativeKey="$parent.SizeX" />
-					<Anchor point="RIGHT" relativeKey="$parent.SizeX" />
-					
-				</Anchors>
-				<Scripts>
-					<OnLoad>						
-						TMW:CInit(self)
-
-						self:SetTexts(TMW.L["UIPANEL_GROUP_SIZE_Y"], TMW.L["UIPANEL_GROUP_SIZE_Y_DESC"])
-						self:SetSetting("SizeY")
-
-
-						self:CScriptAdd("SettingTableRequested", function(requester)
-							return TMW.CI.group:GetSettingsPerView()
-						end)
-
-						self:SetMode(self.MODE_ADJUSTING)
-						self:SetMinMaxValues(-2000, 2000)
-						self:SetRange(20)
-						self:SetValueStep(0.1)
-						self:SetWheelStep(1)
-						
-						self:SetTextFormatter(TMW.C.Formatter.F_1, TMW.C.Formatter.F_0)
-					</OnLoad>
-				</Scripts>
-			</Slider>
-
 			<Slider parentKey="Level" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Strata"/>
@@ -315,12 +256,11 @@
 				</Scripts>
 			</Slider>
 
-
 			<Slider parentKey="Scale" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Level" relativePoint="BOTTOM"  y="-20"/>
-					<Anchor point="LEFT" relativeKey="$parent.Level" />
-					<Anchor point="RIGHT" relativeKey="$parent.Level" />
+					<Anchor point="TOP" relativeKey="$parent.Strata" relativePoint="BOTTOM"  y="-20"/>
+					<Anchor point="LEFT" relativeKey="$parent.Strata" />
+					<Anchor point="RIGHT" relativeKey="$parent.Strata" />
 				</Anchors>
 				<Scripts>
 					<OnLoad>						
@@ -356,7 +296,7 @@
 							
 			<CheckButton parentKey="Locked" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeKey="$parent.SizeY" relativePoint="BOTTOMRIGHT" x="9" y="-6"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Level" relativePoint="BOTTOMLEFT" x="-6" y="-7"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>

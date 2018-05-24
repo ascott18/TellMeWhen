@@ -1097,10 +1097,6 @@ L["UIPANEL_FONT_JUSTIFY"] = "Horizontal Justification"
 L["UIPANEL_FONT_JUSTIFY_DESC"] = "Set the horizontal justification (Left/Center/Right) for this text display."
 L["UIPANEL_FONT_JUSTIFYV"] = "Vertical Justification"
 L["UIPANEL_FONT_JUSTIFYV_DESC"] = "Set the vertical justification (Top/Center/Bottom) for this text display."
-L["UIPANEL_GROUP_SIZE_X"] = "Item Width"
-L["UIPANEL_GROUP_SIZE_X_DESC"] = "Modifies the width of icons in this group."
-L["UIPANEL_GROUP_SIZE_Y"] = "Item Height"
-L["UIPANEL_GROUP_SIZE_Y_DESC"] = "Modifies the height of icons in this group."
 L["UIPANEL_POSITION"] = "Position"
 L["UIPANEL_POINT"] = "Group Point"
 L["UIPANEL_POINT2_DESC"] = "Anchor the %s of the group to the anchor target."
@@ -1559,7 +1555,10 @@ Enter all or part of the name of the timer into "Timer to check".]]
 L["CONDITIONPANEL_DBM_ENGAGED"] = "Deadly Boss Mods - Boss Engaged"
 L["CONDITIONPANEL_DBM_ENGAGED_DESC"] = [[Checks if a boss is engaged according to Deadly Boss Mods.
 
-Enter all or part of the name of the encounter into "Encounter to check".]] 
+Enter all or part of the name of the encounter into "Encounter to check".]]
+L["CONDITIONPANEL_ENEMY_COUNT"] = "Enemy Count"
+L["CONDITIONPANEL_ENEMY_COUNT_DESC"] = "Number of non-friendly units within 8 yards of player"
+
 L["MODTIMERTOCHECK"] = "Timer to check"
 L["MODTIMERTOCHECK_DESC"] = "Enter all or part of the name of the timer as it appears on the boss mod's timer bars."
 L["MODTIMER_PATTERN"] = "Allow Lua pattern matching"

@@ -22,6 +22,11 @@ local Env = CNDT.Env
 
 local min, format = min, format
 
+local _UnitExists = UnitExists
+local _CheckDistance = CheckInteractDistance
+local _UnitReaction = UnitReaction
+
+
 Env.UnitStat = UnitStat
 Env.GetHaste = GetHaste
 Env.GetExpertise = GetExpertise
@@ -321,3 +326,53 @@ ConditionCategory:RegisterCondition(36,	 "MANAREGENCOMBAT", {
 	funcstr = [[select(2, GetManaRegen()) c.Operator c.Level]],
 })
 
+function CountInRange(stop)
+	local stop = 5
+
+	local inRange = 0
+
+	for i = 1, 40 do
+		local name = 'nameplate' .. i
+
+		if _UnitExists(name) and _UnitReaction(name, "player") < 5 and _CheckDistance(name, 2) == true then
+			inRange = inRange + 1
+
+			if inRange == stop then
+				return inRange
+			end
+		end
+	end
+
+	return inRange
+end
+
+Env.CountInRange = CountInRange
+
+ConditionCategory:RegisterCondition(37,  "ENEMYCOUNT", {
+	text = L["CONDITIONPANEL_ENEMY_COUNT"],
+	tooltip = L["CONDITIONPANEL_ENEMY_COUNT_DESC"],
+	min = 0,
+	max = 5,
+	unit="player",
+	formatter = TMW.C.Formatter:New(function(val)
+		return val
+	end),
+
+	icon = "Interface\\Icons\\ability_hunter_snipershot",
+	tcoords = CNDT.COMMON.standardtcoords,
+
+	specificOperators = {["<="] = true, [">="] = true, ["=="]=true, ["~="]=true},
+
+	applyDefaults = function(conditionData, conditionSettings)
+		local op = conditionSettings.Operator
+
+		if not conditionData.specificOperators[op] then
+			conditionSettings.Operator = "<="
+		end
+	end,
+
+	funcstr = function(c, parent)
+
+		return [[(CountInRange() c.Operator c.Level)]]
+	end
+})
