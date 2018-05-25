@@ -797,46 +797,69 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	if SUG.inputType == "number" then
 		local match = tonumber(SUG.lastName)
 
-		-- Variable names are based on number of trailing zeroes.
-		local lower_1, upper_1 = match*10, (match+1)*10
-		local lower_2, upper_2 = match*100, (match+1)*100
-		local lower_3, upper_3 = match*1000, (match+1)*1000
-		local lower_4, upper_4 = match*10000, (match+1)*10000
-		local lower_5, upper_5 = match*100000, (match+1)*100000
-		-- If WoW ever get spellIDs in the millions, this will break. Will just need another one of these for _6 trailing zeroes.
+		-- Optimizations galore!
+
+		-- Checking each number against all the ranges of valid search results 
+		-- is WAY faster then trying to do any sort of exact matching based on 
+		-- the length of the input and the length of the candidate.
+
+		-- We start with the 6 digit numbers because they'll have the most results for 1-digit inputs.
+		-- Longer inputs will have less results total, so we're OK if they're slightly slower,
+		-- becuse they'll take much less time to sort, so the difference comes out in the wash.
+
+		-- We check the less than case first so that after any one less than check fails,
+		-- we can short circuit out of the entire statement.
+
+		-- This compiles into a function that looks like:
+		--[[
+			local tbl, match, suggestions = ...; 
+	        local len = #suggestions
+	        for id in pairs(tbl) do 
+		        if 
+		        	(id <200000 and (id >99999 or 
+			        (id <20000 and (id >9999 or 
+			        (id <2000 and (id >999 or 
+			        (id <200 and (id >99 or 
+			        (id <20 and (id >9 or 
+			        id == match 
+		        	)))))))))) 
+	        	then 
+		        	len = len + 1 
+		        	suggestions[len] = id 
+	        	end 
+	        end
+		]]
+
+		-- The old way that we checked this was with the following:
+		-- local len = #SUG.lastName - 1
+		-- min(id, floor(id / 10^(floor(log10(id)) - len))) == match
+		-- This was quite good - approx 3x faster than strfind.
+		-- However, our massive if statement is approx 1.5x faster still,
+		-- putting us at about 4.5x the speed of strfind.
+		-- Then, compiling this function dynamically with the numbers we compare 
+		-- against as constants gave us another 20% still.
+
+		local f = [[
+		local tbl, match, suggestions = ...; 
+		local len = #suggestions
+		for id in pairs(tbl) do if ]]
+
+		-- If WoW ever get spellIDs in the millions, this will break.
+		-- Just need to increment this number here to 6.
 		-- At current rates, that will be sometime in the 2040s.
+		local maxTrailingZeroes = 5
 
-		for id in pairs(tbl) do
-			-- Oh boy. Optimizations galore!
-
-			-- Checking each number against all the ranges of valid search results 
-			-- is WAY faster then trying to do any sort of exact matching based on 
-			-- the length of the input and the length of the candidate.
-
-			-- We start with the 6 digit numbers because they'll have the most results for 1-digit inputs.
-			-- Longer inputs will have less results total, so we're OK if they're slightly slower,
-			-- becuse they'll take much less time to sort, so the difference comes out in the wash.
-
-			-- We check the less than case first so that after any one less than check fails,
-			-- we can short circuit out of the entire statement.
-			if id < upper_5 and (id >= lower_5
-		        or (id < upper_4 and (id >= lower_4
-			        or (id < upper_3 and (id >= lower_3
-				        or (id < upper_2 and (id >= lower_2
-					        or (id < upper_1 and (id >= lower_1
-						    	or id == match 
-		    )))))))))
-		    then 
-				suggestions[#suggestions + 1] = id
-			end
-
-			-- The old way that we checked this was with the following:
-			-- local len = #SUG.lastName - 1
-			-- min(id, floor(id / 10^(floor(log10(id)) - len))) == match
-			-- This was quite good - approx 3x faster than strfind.
-			-- However, our massive if statement is approx 1.5x faster still,
-			-- putting us at about 4.5x the speed of strfind.
+		local endParens = ""
+		for i = maxTrailingZeroes - floor(log10(match)), 1, -1 do
+			local lower = match*(10^i)-1
+			local upper = (match+1)*(10^i)
+			-- Using only > and < here is faster than >= or <=
+			f = f .. "(id <" .. upper .. " and (id >" .. lower .. " or "
+			endParens = endParens .. "))"
 		end
+		f = f .. " id == match " .. endParens .. " then len = len + 1 suggestions[len] = id end end"
+		assert(loadstring(f))(tbl, match, suggestions)
+
 	elseif tbl == SpellCache:GetCache() then
 		-- We know that the spell cache is unchanging.
 		-- So, we can safely build lookup tables around its contents.
