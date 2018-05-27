@@ -1175,22 +1175,18 @@ do -- ordered pairs
 		end
 
 		local orderedIndex = tremove(unused) or {}
-		local type_comparand = nil
+		local prevType = nil
 		for key, value in pairs(t) do
 			orderedIndex[#orderedIndex + 1] = key
 
 			-- Determine the types of what we're comparing by.
 			-- If we find more than one type, use betterCompare since it handles type mismatches.
 			if compare == nil then
-				local oldType = type_comparand
-				if byValues then
-					type_comparand = type(value)
-				else
-					type_comparand = type(key)
+				local comparandType = byValues and type(value) or type(key)
+				if prevType and prevType ~= comparandType then
+					compare = betterCompare
 				end
-				if oldType ~= type_comparand then
-					compare = compare or betterCompare
-				end
+				prevType = comparandType
 			end
 		end
 

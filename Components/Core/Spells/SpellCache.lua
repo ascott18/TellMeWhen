@@ -33,7 +33,7 @@ local Cache
 
  -- Keep this pretty low. Ideally, the framerate impact is completely unnoticable.
  -- It'll be set significantly higher if the icon editor is opened.
-local NumCachePerFrame = 100
+local NumCachePerFrame = 70
 local IsCaching
 
 
@@ -132,7 +132,7 @@ TMW.IE:RegisterUpgrade(84201, {
 	end,
 })
 
-TMW.IE:RegisterUpgrade(85005, {
+TMW.IE:RegisterUpgrade(84405, {
 	-- I managed to make the spell cache fast enough that its no longer worth persisting to disk.
 	-- We're going to recreate it on each load of TMW_Options.
 	-- This eliminates the significant factor in the load time of TMW_Options, and will also increase logout speeds.

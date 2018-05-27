@@ -772,6 +772,9 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			-- Normal unit input and configuration
 			CndtGroup.Unit:Show()
 			
+			-- Reset suggestion list module. This might get modified by unit conditions.
+			TMW.SUG:EnableEditBox(CndtGroup.Unit, "units", true)
+			
 		elseif unit == false then
 			-- No unit, keep editbox and static text hidden
 			

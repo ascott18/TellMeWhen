@@ -148,20 +148,22 @@ function SUG:SuggestingComplete(doSort)
 			local len = 0
 
 			for k, bucket in TMW:OrderedPairs(buckets) do
-				-- Sort the bucket.
-				sorter = bucket.__sorter or sorter
+				if next(bucket) then
+					-- Sort the bucket.
+					local bucketSorter = bucket.__sorter or sorter
 
-				sort(bucket, sorter)
+					sort(bucket, bucketSorter)
 
-				-- Add the sorted bucket's contents to the main table.
-				for i = 1, #bucket do
-					len = len + 1
-					SUGpreTable[len] = bucket[i]
+					-- Add the sorted bucket's contents to the main table.
+					for i = 1, #bucket do
+						len = len + 1
+						SUGpreTable[len] = bucket[i]
+					end
+
+					-- We're done with this bucket. Prepare it for next use.
+					-- It might get reused, or it might get GC'd.
+					wipe(bucket)
 				end
-
-				-- We're done with this bucket. Prepare it for next use.
-				-- It might get reused, or it might get GC'd.
-				wipe(bucket)
 			end
 
 			-- Resume GC on the buckets.
@@ -796,6 +798,11 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl)
 
 	if SUG.inputType == "number" then
 		local match = tonumber(SUG.lastName)
+		if match <= 0 then
+			-- Can only match positive numbers.
+			-- Zero will cause an infinite loop below (because of our log10(match) call)
+			return
+		end
 
 		-- Optimizations galore!
 
@@ -809,6 +816,9 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl)
 
 		-- We check the less than case first so that after any one less than check fails,
 		-- we can short circuit out of the entire statement.
+
+		-- Compiling this into a function allows for 10% performance 
+		-- increase over referencing variables that have the limit numbers.
 
 		-- This compiles into a function that looks like:
 		--[[

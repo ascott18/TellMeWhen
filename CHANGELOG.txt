@@ -1,8 +1,9 @@
 ===v8.5.0===
 * Battle For Azeroth support. Still preliminary - please report bugs to https://wow.curseforge.com/projects/tellmewhen/issues/1486
-* The spell cache used by TellMeWhen_Options is no longer saved to disk. Many improvements have been made that allow it to be recomputed each time the addon is loaded. This should improve login and logout times by a decent amount.
 
 ===v8.4.4===
+* TellMeWhen no longer saves a spell cache to disk. Performance improvements have made it feasible to compute this each time you log in as it needed. This should result in faster log-in/log-out times.
+
 ====Bug Fixes====
 * Fixed additional dropdown scaling issues.
 * Added error messages for invalid import strings.
