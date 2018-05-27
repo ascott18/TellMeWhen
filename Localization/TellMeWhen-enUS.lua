@@ -1980,7 +1980,7 @@ L["CONFIGPANEL_BACKDROP_HEADER"] = "Bar Backdrop"
 
 
 
-L["CACHING"] = [[TellMeWhen is caching and filtering all spells in the game. This only needs to be done once per WoW patch. You can speed up or slow down the process using the slider below.
+L["CACHING"] = [[TellMeWhen is caching and filtering all spells in the game.
 
 You do not have to wait for this process to complete in order to use TellMeWhen. Only the suggestion list is dependent on the completion of the spell cache.]]
 L["CACHINGSPEED"] = "Spells per frame:"

@@ -243,9 +243,11 @@
 						</Scripts>
 					</StatusBar>
 					<Button parentKey="Finish" inherits="TellMeWhen_ButtonTemplate">
-						<Size x="190" y="15"/>
+						<Size x="190" y="25"/>
 						<Anchors>
-							<Anchor point="BOTTOM" y="20"/>
+							<Anchor point="TOP" relativeKey="$parent.Status" relativePoint="BOTTOM" y="-15"/>
+							<Anchor point="LEFT" x="10"/>
+							<Anchor point="RIGHT" x="-10"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
@@ -253,16 +255,16 @@
 								TMW:TT(self, "SUG_FINISHHIM", "SUG_FINISHHIM_DESC")
 								self:RegisterEvent("UNIT_FLAGS") -- accurately detects changes to InCombatLockdown
 							</OnLoad>
-							<OnEvent>
+							<OnUpdate>
 								-- Don't allow this when in combat because of Blizzard's new throttling system in Mists of Pandaria
 								if InCombatLockdown() then
 									self:Disable()
 								else
 									self:Enable()
 								end
-							</OnEvent>
+							</OnUpdate>
 							<OnClick>
-								TMW:GetModule("SpellCache"):SetNumCachePerFrame(math.huge)
+								TMW:GetModule("SpellCache"):SetNumCachePerFrame(15000)
 							</OnClick>
 						</Scripts>
 					</Button>

@@ -416,6 +416,10 @@
 					for i, set in pairs(self.frames) do
 						set:Hide()
 					end
+
+					if #configData == 0 then
+						self:Hide()
+					end
 					
 					for i, data in ipairs(configData) do
 						local set = self.frames[i]

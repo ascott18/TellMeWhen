@@ -79,6 +79,12 @@ local Cache = {
 	}
 }
 
+
+-- Adjustments to the imported cache data:
+tinsert(Cache[3], 1, 75) -- Add "Auto Shot" to hunter.
+
+
+
 local CacheIsReady = false
 
 local PlayerSpells = {}

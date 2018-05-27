@@ -109,6 +109,15 @@ function Condition:IsDeprecated()
 	return self.funcstr == "DEPRECATED"
 end
 
+function Condition:UsesTabularBitflags() 
+	if not self.bitFlags then return false end
+	for index, _ in pairs(self.bitFlags) do
+		if type(index) ~= "number" or index >= 32 or index < 1 then
+			return true
+		end
+	end
+end
+
 function Condition:PrepareEnv()
 
 	-- Add in anything that the condition wants to include in Env

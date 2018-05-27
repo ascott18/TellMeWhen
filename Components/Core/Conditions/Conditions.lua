@@ -685,6 +685,23 @@ function CNDT:ToggleBitFlag(conditionSettings, index)
 	end
 end
 
+function CNDT:ConvertBitFlagsToTable(conditionSettings, conditionData)
+	if type(conditionSettings.BitFlags) == "table" then
+		return
+	end
+
+	local flagsOld = conditionSettings.BitFlags
+	conditionSettings.BitFlags = {}
+
+	for index, _ in pairs(conditionData.bitFlags) do
+		if type(index) == "number" and index < 32 and index >= 1 then
+			local flag = bit.lshift(1, index-1)
+			local flagSet = bit.band(flagsOld, flag) == flag
+			conditionSettings.BitFlags[index] = flagSet and true or nil
+		end
+	end
+end
+
 
 CNDT.Substitutions = {
 
@@ -976,6 +993,10 @@ function CNDT:GetConditionCheckFunctionString(parent, Conditions)
 		local thisstr = "true"
 		if conditionData then
 		
+			if conditionData:UsesTabularBitflags() then
+				CNDT:ConvertBitFlagsToTable(conditionSettings, conditionData)
+			end
+
 			conditionData:PrepareEnv()
 
 			if conditionData:IsDeprecated() then
