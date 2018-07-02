@@ -308,7 +308,6 @@ TMW.BE = {
 		},
 		DefensiveBuffsAOE = {
 			 -62618, -- Power Word: Barrier
-			-114028, -- Mass Spell Reflection
 			 -31821, -- Aura Mastery
 			 -76577, -- Smoke Bomb
 			 -51052, -- Anti-Magic Zone
@@ -357,7 +356,6 @@ TMW.BE = {
 			  31884, -- Avenging Wrath
 			-107574, -- Avatar
 			 114050, -- Ascendance
-			   3045, -- Rapid Fire
 			 114051, -- Ascendance
 			   5217, -- Tiger's Fury
 		},
@@ -365,7 +363,6 @@ TMW.BE = {
 			   1044, -- Blessing of Freedom
 			  23920, -- Spell Reflection
 			  10060, -- Power Infusion
-			 114028, -- Mass Spell Reflection
 			   2983, -- Sprint
 			  45182, -- Cheating Death
 			  31821, -- Aura Mastery
@@ -397,8 +394,6 @@ TMW.BE = {
 			  48707, -- Anti-Magic Shell
 			  45438, -- Ice Block
 			    642, -- Divine Shield
-			 114028, -- Mass Spell Reflection
-			  49039, -- Lichborne
 			  31224, -- Cloak of Shadows
 			   8178, -- Grounding Totem Effect
 			    710, -- Banish
@@ -431,7 +426,6 @@ TMW.BE = {
 
 			    740, -- Tranquility
 			   8936, -- Regrowth
-			   5185, -- Healing Touch
 			  48438, -- Wild Growth
 
 			   1064, -- Chain Heal
@@ -442,11 +436,9 @@ TMW.BE = {
 
 			  19750, -- Flash of Light
 			  82326, -- Holy Light
-			 114163, -- Eternal Flame
 			 200652, -- Tyr's Deliverance
 
 			 116670, -- Vivify
-			 116694, -- Effuse
 			 124682, -- Enveloping Mist
 			 191837, -- Esssence Font
 			 205406, -- Sheilun's Gift
