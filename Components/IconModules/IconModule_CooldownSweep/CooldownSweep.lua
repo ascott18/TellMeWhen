@@ -260,9 +260,25 @@ function CooldownSweep:UpdateCooldown()
 		if ElvUI then
 			local E = ElvUI[1]
 			if E and E.OnSetCooldown then
-				if not cd.noOCC and E.private.cooldown.enable then
-					E.OnSetCooldown(cd, mainStart, mainDuration)
+				if not cd.noOCC then
+					if E.private.cooldown then
+						-- Elvui 10.74:
+						-- We have to check if the texts are globally enabled ourselves.
+						if E.private.cooldown.enable then
+							E.OnSetCooldown(cd, mainStart, mainDuration)
+						end
+					else
+						-- Elvui (after 10.74 - dont think it has a version right now):
+						-- Elvui ensures that cooldowns are enabled in newer versions,
+						-- so we don't have to look into its "private"s to find out ourselves.
+						-- In fact, the privates have been removed for cooldown,
+						-- so this is how we do the version check!
+						E.OnSetCooldown(cd, mainStart, mainDuration)
+					end
 				elseif cd.timer then
+					-- We have to stop ElvUI's timers ourselves -
+					-- calling OnSetCooldown just returns early if .noOCC == true,
+					-- instead of actually stopping the timer text.
 					E:Cooldown_StopTimer(cd.timer)
 				end
 			end
