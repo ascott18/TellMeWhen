@@ -14,7 +14,7 @@ externals:
     Lib/LibDogTag-Unit-3.0: git://git.wowace.com/wow/libdogtag-unit-3-0/mainline.git
     Lib/LibDogTag-Stats-3.0: svn://svn.wowace.com/wow/libdogtag-stats-3-0/mainline/trunk
 
-    Lib/LibSpellRange-1.0: svn://svn.curseforge.net/wow/libspellrange-1-0/mainline/trunk
+    Lib/LibSpellRange-1.0: git://github.com/ascott18/LibSpellRange-1.0.git
     Lib/LibOO-1.0: git://git.wowace.com/wow/liboo-1-0/mainline.git
     
     Lib/LibRangeCheck-2.0: svn://svn.wowace.com/wow/librangecheck-2-0/mainline/trunk/LibRangeCheck-2.0
