@@ -1,7 +1,7 @@
 ﻿## Interface: 80000
 ## Title: TellMeWhen Options
 
-## Author: Cybeloras of Aerie Peak/Detheroc/Mal'Ganis
+## Author: Cybeloras of Aerie Peak
 ## Notes: Options and configuration for TellMeWhen
 ## RequiredDeps: TellMeWhen
 ## LoadOnDemand: 1

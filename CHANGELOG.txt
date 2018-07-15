@@ -1,6 +1,8 @@
 
 ===v8.5.0===
-* Battle For Azeroth support. Still preliminary - please report bugs to https://wow.curseforge.com/projects/tellmewhen/issues/1486
+* Battle For Azeroth support. Please report bugs to https://wow.curseforge.com/projects/tellmewhen/issues. 
+** I especially need help with the spell equivalencies (e.g. "Stunned", "DefensiveBuffs", etc.)
+** If you notice spells that are missing or that shouldn't be there, please let me know!
 
 ===v8.4.5===
 * Fixes for upcoming changes to ElvUI's cooldown timer texts.
