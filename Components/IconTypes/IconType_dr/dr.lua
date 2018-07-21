@@ -32,7 +32,7 @@ local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 local DRData = LibStub("DRData-1.0")
 
 local DRSpells = DRData.spells
-local DRReset = 18
+local DRReset = 20
 local PvEDRs = {}
 for spellID, category in pairs(DRSpells) do
 	if DRData.pveDR[category] then

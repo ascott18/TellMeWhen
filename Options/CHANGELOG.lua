@@ -5,9 +5,12 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 TMW.CHANGELOG = [==[
 
 ===v8.5.1===
+* Changed DR reset duration to 20 seconds from 18 to increase consistency.
+
 ====Bug Fixes====
 * Fixed #1509 - "Couldn't open Interface/AddOns/TellMeWhen_Options/"
 * Fixed #1507 - Attempt to register unknown event "UNIT_VEHICLE"
+* Fixed #1521 - ComponentsCoreUtils.lua line 574: attempt to index local 'str' (a nil value)
 
 
 ===v8.5.0===
