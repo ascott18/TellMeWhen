@@ -342,8 +342,6 @@ codesnippet:RegisterMenuBuilder(1, function(Item_codesnippet)
 end)
 
 
-codesnippet.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.2.0+")
-
 function codesnippet:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local settings = EXPORTS[self.type]

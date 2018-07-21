@@ -442,7 +442,6 @@ end)
 
 
 
-profile.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.3+")
 function profile:Export_SetButtonAttributes(editbox, info)
 	local text = L["fPROFILE"]:format(TMW.db:GetCurrentProfile())
 	info.text = text
@@ -461,7 +460,6 @@ end
 ---------- Gloabl Groups ----------
 local globalgroups = SharableDataType:New("globalgroups", 20)
 
-globalgroups.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("7.0.0+")
 function globalgroups:Export_SetButtonAttributes(editbox, info)
 	local text = L["fGROUPS"]:format(L["EXPORT_ALLGLOBALGROUPS"])
 	info.text = text

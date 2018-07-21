@@ -1083,7 +1083,6 @@ textlayout:RegisterMenuBuilder(1, function(Item_textlayout)
 end)
 
 
-textlayout.Export_DescriptionAppend = L["EXPORT_SPECIALDESC2"]:format("6.0.0+")
 function textlayout:Export_SetButtonAttributes(editbox, info)
 	local IMPORTS, EXPORTS = editbox:GetAvailableImportExportTypes()
 	local GUID = EXPORTS[self.type]
