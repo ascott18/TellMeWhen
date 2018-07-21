@@ -6,7 +6,8 @@ TMW.CHANGELOG = [==[
 
 ===v8.5.1===
 ====Bug Fixes====
-* Fixed #1509 - "Couldn't open interfaceaddonsTellMeWhen_Options"
+* Fixed #1509 - "Couldn't open Interface/AddOns/TellMeWhen_Options/"
+* Fixed #1507 - Attempt to register unknown event "UNIT_VEHICLE"
 
 
 ===v8.5.0===
