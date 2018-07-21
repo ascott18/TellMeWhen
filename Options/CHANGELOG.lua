@@ -4,6 +4,11 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
 
+===v8.5.1===
+====Bug Fixes====
+* Fixed #1509 - "Couldn't open interfaceaddonsTellMeWhen_Options"
+
+
 ===v8.5.0===
 * Battle For Azeroth support. Please report bugs to https://wow.curseforge.com/projects/tellmewhen/issues. 
 ** I especially need help with the spell equivalencies (e.g. "Stunned", "DefensiveBuffs", etc.)

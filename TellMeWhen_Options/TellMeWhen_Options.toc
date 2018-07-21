@@ -16,5 +16,3 @@
 # This makes the structure for modules and components that need their own config files much neater and nicer.
 
 ..\TellMeWhen\Options\includes.xml
-
- 
