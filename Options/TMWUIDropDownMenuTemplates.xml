@@ -398,22 +398,11 @@
 					</Layer>
 				</Layers>
 				<Scripts>
-					<OnLoad>
-						self:RegisterForDrag("LeftButton", "RightButton")
-					</OnLoad>
 					<OnMouseUp>
 						if button == "RightButton" then
 							TMW.IE:LoadIcon(nil, self.icon)
 						end
 					</OnMouseUp>
-					<OnDragStart>
-						local script = self:GetParent():GetScript("OnDragStart")
-						if script then script(self:GetParent(), button) end
-					</OnDragStart>
-					<OnDragStop>
-						local script = self:GetParent():GetScript("OnDragStop")
-						if script then script(self:GetParent(), button) end
-					</OnDragStop>
 				</Scripts>
 
 				<NormalTexture />
