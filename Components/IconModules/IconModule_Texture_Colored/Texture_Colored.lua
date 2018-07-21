@@ -77,7 +77,7 @@ function Texture_Colored:STATE(icon, stateData)
 	if not TMW.Locked or not stateData then
 		color = "ffffffff"
 	else
-		color = stateData.Color
+		color = stateData.Color or "ffffffff"
 	end
 
 	local texture = stateData.Texture
