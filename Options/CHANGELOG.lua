@@ -4,6 +4,9 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
 
+===v8.5.2===
+* Includes latest LibDogTag-Unit with fixes for [SoulShardParts] and others.
+
 ===v8.5.1===
 * Changed DR reset duration to 20 seconds from 18 to increase consistency.
 
