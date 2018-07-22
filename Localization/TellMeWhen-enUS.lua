@@ -1554,7 +1554,10 @@ Enter all or part of the name of the timer into "Timer to check".]]
 L["CONDITIONPANEL_DBM_ENGAGED"] = "Deadly Boss Mods - Boss Engaged"
 L["CONDITIONPANEL_DBM_ENGAGED_DESC"] = [[Checks if a boss is engaged according to Deadly Boss Mods.
 
-Enter all or part of the name of the encounter into "Encounter to check".]] 
+Enter all or part of the name of the encounter into "Encounter to check".]]
+L["CONDITIONPANEL_ENEMY_COUNT"] = "Enemy Count"
+L["CONDITIONPANEL_ENEMY_COUNT_DESC"] = "Number of non-friendly units within 8 yards of player"
+
 L["MODTIMERTOCHECK"] = "Timer to check"
 L["MODTIMERTOCHECK_DESC"] = "Enter all or part of the name of the timer as it appears on the boss mod's timer bars."
 L["MODTIMER_PATTERN"] = "Allow Lua pattern matching"
