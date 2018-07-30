@@ -1762,7 +1762,9 @@
 					if #currentDetections > self.currentResult then
 						self.currentResult = self.currentResult + 1
 
-						local code = currentDetections[self.currentResult].code
+						-- Code will have raw, unescaped pipes. 
+						-- We need to escape them because we're about to display the code as text.
+						local code = currentDetections[self.currentResult].code:gsub("|", "||")
 						local codeLower = code:lower()
 						local flagged
 
