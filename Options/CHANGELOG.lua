@@ -12,6 +12,7 @@ TMW.CHANGELOG = [==[
 ====Bug Fixes====
 * Fixed #1534 - Attempt to register unknown event "WORLD_MAP_UPDATE"
 * Fixed cusor position in tall textboxes sometimes being incorrect due to a Blizzard bug with FontString:SetSpacing()
+* Fixed handling of pipe characters in export strings.
 
 ===v8.5.1===
 * Changed DR reset duration to 20 seconds from 18 to increase consistency.
