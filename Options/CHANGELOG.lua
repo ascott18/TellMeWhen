@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 ===v8.5.4===
 * New icon drag operation - Insert.
 * Added Dark Icon and Mag'har to Unit Race condition.
+* Added Stagger to the Resouce Display icon type.
 
 ====Bug Fixes====
 * Fixed #1575 - Notification handlers can no longer be chosen when their parent module is disabled.
