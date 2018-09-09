@@ -11,6 +11,7 @@ TMW.CHANGELOG = [==[
 
 ====Bug Fixes====
 * Fixed #1575 - Notification handlers can no longer be chosen when their parent module is disabled.
+* Fixed #1561 - Shear/Fracture not working correctly with Last Ability Used condition.
 
 ===v8.5.3===
 * Guardians icon type now accounts for Implosion and the Consumption talent.
