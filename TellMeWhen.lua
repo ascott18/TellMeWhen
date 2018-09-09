@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 85401 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 85402 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -2538,8 +2538,8 @@ do	-- TMW:OnUpdate()
 				-- if only one icon or icon type is malfunctioning.
 				if not shouldSafeUpdate then
 					TMW:Debug("Update error detected. Switching to safe update mode!")
+					shouldSafeUpdate = true
 				end
-				shouldSafeUpdate = true
 			end
 			updateInProgress = true
 			

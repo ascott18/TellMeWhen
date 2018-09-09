@@ -3,6 +3,9 @@
 * New icon drag operation - Insert.
 * Added Dark Icon and Mag'har to Unit Race condition.
 
+====Bug Fixes====
+* Fixed #1575 - Notification handlers can no longer be chosen when their parent module is disabled.
+
 ===v8.5.3===
 * Guardians icon type now accounts for Implosion and the Consumption talent.
 
