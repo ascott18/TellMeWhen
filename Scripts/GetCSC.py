@@ -31,8 +31,8 @@ class_slugs = {
 
 class_spells_urls = [
 	'/spells/abilities/',
-	# '/spells/artifact-traits/', # Dont care about artifacts anymore
-	'/spells/azerite-traits/', # TODO: if there aren't any active azerite abilities, lets not do this.
+	# '/spells/artifact-traits/', # Artifacts are gone.
+	# '/spells/azerite-traits/', # The bulk of azerite traits are passive, or things you don't care about. Lets not include them.
 	'/spells/pvp-talents/',
 	'/spells/specialization/',
 	'/spells/talents/',
