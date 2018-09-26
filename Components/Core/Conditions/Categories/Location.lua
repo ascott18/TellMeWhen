@@ -172,8 +172,39 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	end,
 })
 
+ConditionCategory:RegisterCondition(1.1,  "MYTHICKEYSTONE", {
+    text = L["CONDITIONPANEL_KEYSTONE"],
+    tooltip = L["CONDITIONPANEL_KEYSTONE_DESC"],
+    min = 0,
+    max = 30,
+    unit= false,
+    icon = "Interface\\Icons\\inv_relics_hourglass",
+    tcoords = CNDT.COMMON.standardtcoords,
 
-ConditionCategory:RegisterCondition(1.1, "GROUPSIZE", {
+    Env = {
+    	GetActiveKeystoneInfo = function()
+    		return select(1, C_ChallengeMode.GetActiveKeystoneInfo()) or 0
+    	end
+	},
+
+    specificOperators = {["<="] = true, [">="] = true, ["=="]=true, ["~="]=true, [">"]=true, ["<"] = true},
+
+    applyDefaults = function(conditionData, conditionSettings)
+        local op = conditionSettings.Operator
+
+        if not conditionData.specificOperators[op] then
+            conditionSettings.Operator = "<="
+        end
+    end,
+
+    funcstr = [[(GetActiveKeystoneInfo() c.Operator c.Level)]],
+
+    events = function(ConditionObject, c)
+    	ConditionObject:GenerateNormalEventString("SCENARIO_CRITERIA_UPDATE")
+	end
+})
+
+ConditionCategory:RegisterCondition(1.2, "GROUPSIZE", {
 	text = L["CONDITIONPANEL_GROUPSIZE"],
 	tooltip = L["CONDITIONPANEL_GROUPSIZE_DESC"],
 	min = 0,

@@ -752,6 +752,17 @@ do
 		example = '[MaxDuration] => "3"; [MaxDuration:TMWFormatDuration] => "3.0"; [MaxDuration(icon="TMW:icon:1I7MnrXDCz8T")] => "60"',
 		category = L["ICON"],
 	})
+
+	TMW.C.IconComponent:RegisterDogTag("TMW", "KeystoneLevel", {
+        code = function(name)
+            return select(1, C_ChallengeMode.GetActiveKeystoneInfo()) or 0
+        end,
+        ret = "number",
+        doc = L["DT_KEYSTONE_DESC"],
+        example = '[KeystoneLevel] => "10"',
+        events = "SCENARIO_CRITERIA_UPDATE",
+        category = L["ICON"]
+    })
 end
 
 
