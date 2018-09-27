@@ -172,9 +172,9 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	end,
 })
 
-ConditionCategory:RegisterCondition(1.1,  "MYTHICKEYSTONE", {
-    text = L["CONDITIONPANEL_KEYSTONE"],
-    tooltip = L["CONDITIONPANEL_KEYSTONE_DESC"],
+ConditionCategory:RegisterCondition(1.1,  "KEYSTONELEVEL", {
+    text = L["CONDITIONPANEL_KEYSTONELEVEL"],
+    tooltip = L["CONDITIONPANEL_KEYSTONELEVEL_DESC"],
     min = 0,
     max = 30,
     unit= false,
@@ -183,19 +183,9 @@ ConditionCategory:RegisterCondition(1.1,  "MYTHICKEYSTONE", {
 
     Env = {
     	GetActiveKeystoneInfo = function()
-    		return select(1, C_ChallengeMode.GetActiveKeystoneInfo()) or 0
+    		return C_ChallengeMode.GetActiveKeystoneInfo() or 0
     	end
 	},
-
-    specificOperators = {["<="] = true, [">="] = true, ["=="]=true, ["~="]=true, [">"]=true, ["<"] = true},
-
-    applyDefaults = function(conditionData, conditionSettings)
-        local op = conditionSettings.Operator
-
-        if not conditionData.specificOperators[op] then
-            conditionSettings.Operator = "<="
-        end
-    end,
 
     funcstr = [[(GetActiveKeystoneInfo() c.Operator c.Level)]],
 
