@@ -96,7 +96,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetZoneType2 = function()
-			local _, z = IsInInstance()			
+			local _, z = IsInInstance()
 
 			local _, _, instanceDifficulty, _, _, _, _, instanceMapID = GetInstanceInfo()
 

@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 85501 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 85502 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -2784,7 +2784,15 @@ end
 
 -- TMW:Update() sets up all groups, icons, and anything else.
 function TMW:Update()
-	if InCombatLockdown() then
+
+	-- We check arena (and I threw BGs in as well)
+	-- in hopes of resolving https://wow.curseforge.com/projects/tellmewhen/issues/1572 -
+	-- a "script ran too long" error that appears to be happening outside of combat,
+	-- potentially when loading into an arena map.
+	local _, z = IsInInstance()
+	local needsCoroutineUpdate = InCombatLockdown() or z == "arena" or z == "pvp"
+
+	if needsCoroutineUpdate then
 		TMW:UpdateViaCoroutine()
 	else
 		TMW:UpdateNormally()
