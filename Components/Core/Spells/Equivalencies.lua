@@ -407,7 +407,9 @@ TMW.BE = {
 			   2825, -- Bloodlust
 			  80353, -- Time Warp
 			 160452, -- Netherwinds
-			  32182, -- Heroism
+			  32182, -- Heroism,
+			  264667, -- Primal Rage
+			  256740, -- Drums of the Maelstrom
 		},
 	},
 	casts = {
