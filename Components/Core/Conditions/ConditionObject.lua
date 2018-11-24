@@ -288,8 +288,13 @@ end
 function ConditionObject:RequestAutoUpdates(requester, doRequest)
 	if doRequest then
 	
-		self.doesAutoUpdate = true
 		self:RegisterForUpdating()
+
+		if not self.doesAutoUpdate then
+			self.doesAutoUpdate = true
+			-- Perform a check now to get the condition consistent with the current state of the world.
+			self:Check()
+		end
 		
 		self.AutoUpdateRequesters[requester] = true
 	else

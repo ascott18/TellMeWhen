@@ -4,6 +4,11 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
 
+===v8.5.6===
+====Bug Fixes====
+* Fixed #1615 - Critical Strike condition throwing error "attempt to call global 'max' (a nil value)"
+* Fixed #1618 - Conditions on Combat Event source/destination units that used event-driven updates could be in an incorrect state before the first time an update is needed.
+
 ===v8.5.5===
 * A few improvements to the spell equivalency lists.
 * Added Keystone Level condition for Mythic+.

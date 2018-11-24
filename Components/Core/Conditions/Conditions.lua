@@ -522,6 +522,7 @@ CNDT.Env = {
 	floor = floor,
 	select = select,
 	min = min,
+	max = max,
 	tonumber = tonumber,
 	isNumber = TMW.isNumber,
 	
@@ -581,6 +582,10 @@ CNDT.Env = {
     CancelDuel = error,
     StartDuel = error,
     DeleteGMTicket = error,
+    AcceptTrade = error,
+    SendMail = error,
+    GuildDisband = error,
+    GuildPromote = error,
 
 } Env = CNDT.Env
 
