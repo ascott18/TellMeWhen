@@ -84,49 +84,51 @@ TMW.BE = {
 		},
 		Feared = {
 			  -5782, -- Fear
-			  -5484, -- Howl of Terror
 			   5246, -- Intimidating Shout
-			  -6789, -- Mortal Coil
-			 -87204, -- Sin and Punishment
+			  87204, -- Sin and Punishment
 			  -8122, -- Psychic Scream
 			 207685, -- Sigil of Misery (Havoc Demon hunter)
 		},
 		Incapacitated = {
 			     99, -- Incapacitating Roar
 			   3355, -- Freezing Trap
-			 209790, -- Freezing Arrow (hunter pvp)
+			 209790, -- Freezing Arrow (diamond ice)
 			  -6770, -- Sap
 			   -118, -- Polymorph
 			 115268, -- Mesmerize
-			 -51514, -- Hex (also 211004, 210873, 211015, 211010)
+			  -6789, -- Mortal Coil
+			 -51514, -- Hex (also 211015; 211010; 211004; 210873; 196942; 269352; 277778; 277784)
 			  20066, -- Repentance
 			 200196, -- Holy Word: Chastise
 			  82691, -- Ring of Frost
+			   2637, -- Hibernate
 			   1776, -- Gouge
+			 217832, -- Imprison
+			 221527, -- Imprison
 			  -6358, -- Seduction
 			 -19386, -- Wyvern Sting
 			 115078, -- Paralysis
-			  31661, -- Dragon's Breath
+			 197214, -- Sundering
 			 107079, -- Quaking Palm
-			 198909, -- Song of Chi-ji (mistweaver monk talent)
 			 203126, -- Maim (with blood trauma feral pvp talent)
 			 226943, -- Mind Bomb
 		},
 		Disoriented = {
 			  -2094, -- Blind
 			  31661, -- Dragon's Breath
-			 105421, -- Bliding light (paladin talent)
+			 105421, -- Blinding light (paladin talent)
 			 186387, -- Bursting Shot (hunter marks ability)
 			 202274, -- Incendiary brew (brewmaster monk pvp talent)
 			 207167, -- Blinding Sleet (dk talent)
 			 213691, -- Scatter Shot (hunter pvp talent)
+			 198909, -- Song of Chi-ji (mistweaver monk talent)
 		},
 		Silenced = {
 			 -15487, -- Silence
-			 -25046, -- Arcane Torrent
 			  -1330, -- Garrote - Silence
 			  31935, -- Avenger's Shield
 			 -78675, -- Solar Beam
+			 217824; -- Shield of Virtue
 			 202933, -- Spider Sting
 			 199683, -- Last Word
 			 -47476, -- Strangulate
@@ -149,12 +151,16 @@ TMW.BE = {
 			 157997, -- Ice Nova (frost mage talent)
 			 162480, -- Steel Trap (hunter talent)
 			 190927, -- harpoon (survival hunter)
+			 198121, -- Frostbite
 			 199042, -- Thunderstruck (Warrior PVP)
 			 200108, -- Ranger's Net (Hunter talent)
 			 201158, -- Super Sticky Tar (Expert Trapper, Hunter talent, Tar Trap effect)
 			 204085, -- Deathchill (DK PVP)
+			 207171, -- Winter is Coming
 			 212638, -- tracker's net (hunter PvP )
 			 228600, -- glacial spike (frost mage talent)
+			 233395, -- Frozen Center
+			 233582, -- Entrenched in Flames
 		},
 		Slowed = {
 			   -116, -- Frostbolt
@@ -219,19 +225,18 @@ TMW.BE = {
 			 210979, -- Focus in the light (holy priest artifact trait)
 		},
 		Stunned = {
-			  -1833, -- Cheap Shot
 			    -25, -- Stun
 			   -408, -- Kidney Shot
 			   -853, -- Hammer of Justice
+			  -1833, -- Cheap Shot
 			   5211, -- Mighty Bash
 			  -7922, -- Warbringer
 			  24394, -- Intimidation
-			  64044, -- Psychic Horror
-			  91797, -- Monstrous Blow
 			 -20549, -- War Stomp
 			  22703, -- Summon Infernal
 			 -30283, -- Shadowfury
 			 -89766, -- Axe Toss
+			  91797, -- Monstrous Blow
 			 -91800, -- Gnaw
 			 108194, -- Asphyxiate (death knight, talent for unholy)
 			 118345, -- Pulverize
@@ -242,18 +247,20 @@ TMW.BE = {
 			 132169, -- Storm Bolt
 			 163505, -- Rake
 			 179057, -- Chaos Nova
-			 196958, -- Strike from the Shadows
 			 199804, -- Between the Eyes
-			 200166, -- Metamorphosis
+			 199085, -- Warpath
 			 200200, -- Holy Word: Chastise
+			 202244, -- Overrun
+			 202346, -- Double Barrel
 			 203123, -- Maim
-			 204399, -- Earthfury (enhancement shaman pvp talent)
+			 204399, -- Earthfury (elemental shaman pvp talent)
+			 204437, -- ightning Lasso
+			 205629, -- Demonic Trample
 			 205630, -- Illidan's Grasp (demon hunter vengeance pvp talent - primary effect)
 			 208618, -- Illidan's Grasp (demon hunter vengeance pvp talent - throw effect)
-			 207165, -- Abomination's Might
-			 207171, -- Winter is Coming
 			 211881, -- Fel Eruption
 			 221562, -- Asphyxiate (death knight, baseline for blood)
+			 255723, -- Bull Rush
 		},
 	},
 	buffs = {
