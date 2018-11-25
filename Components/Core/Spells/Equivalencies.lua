@@ -45,6 +45,28 @@ TMW.BE = {
 			 115625, -- Mortal Cleave
 			  30213, -- Legion Strike
 		},
+		CrowdControl = {
+			   -118, -- Polymorph
+			  -6770, -- Sap
+			   -605, -- Mind Control
+			  20066, -- Repentance
+			 -51514, -- Hex (also 211004, 210873, 211015, 211010)
+			  -9484, -- Shackle Undead
+			  -5782, -- Fear
+			  33786, -- Cyclone
+			  -3355, -- Freezing Trap
+			 209790, -- Freezing Arrow (hunter pvp)
+			   -710, -- Banish
+			  -6358, -- Seduction
+			  -2094, -- Blind
+			 -19386, -- Wyvern Sting
+			 -82691, -- Ring of Frost
+			 115078, -- Paralysis
+			 115268, -- Mesmerize
+			 107079, -- Quaking Palm
+			 207685, -- Sigil of Misery (Havoc Demon hunter)
+			 198909, -- Song of Chi-ji (mistweaver monk talent)
+		},
 		Shatterable = {
 			    122, -- Frost Nova
 			 -82691, -- Ring of Frost
