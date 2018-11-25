@@ -39,28 +39,11 @@ TMW.BE = {
 	debuffs = {
 		ReducedHealing = {
 			 115804, -- Mortal Wounds
-		},
-		CrowdControl = {
-			   -118, -- Polymorph
-			  -6770, -- Sap
-			   -605, -- Mind Control
-			  20066, -- Repentance
-			 -51514, -- Hex (also 211004, 210873, 211015, 211010)
-			  -9484, -- Shackle Undead
-			  -5782, -- Fear
-			  33786, -- Cyclone
-			  -3355, -- Freezing Trap
-			 209790, -- Freezing Arrow (hunter pvp)
-			   -710, -- Banish
-			  -6358, -- Seduction
-			  -2094, -- Blind
-			 -19386, -- Wyvern Sting
-			 -82691, -- Ring of Frost
-			 115078, -- Paralysis
-			 115268, -- Mesmerize
-			 107079, -- Quaking Palm
-			 207685, -- Sigil of Misery (Havoc Demon hunter)
-			 198909, -- Song of Chi-ji (mistweaver monk talent)
+			  27580, -- Sharpen Blade
+			 195452, -- Nightblade
+			   8679, -- Wound Poison
+			 115625, -- Mortal Cleave
+			  30213, -- Legion Strike
 		},
 		Shatterable = {
 			    122, -- Frost Nova
@@ -316,7 +299,6 @@ TMW.BE = {
 		DefensiveBuffsAOE = {
 			 -62618, -- Power Word: Barrier
 			 -31821, -- Aura Mastery
-			 -76577, -- Smoke Bomb
 			 -51052, -- Anti-Magic Zone
 			 204150, -- Aegis of light (prot pally talent)
 			 204335, -- Aegis of light (prot pally talent)
@@ -356,7 +338,6 @@ TMW.BE = {
 			  61336, -- Survival Instincts
 		},
 		DamageBuffs = {
-			  12292, -- Bloodbath
 			   1719, -- Battle Cry
 			  12472, -- Icy Veins
 			  51271, -- Pillar of Frost
@@ -404,7 +385,7 @@ TMW.BE = {
 			  31224, -- Cloak of Shadows
 			   8178, -- Grounding Totem Effect
 			    710, -- Banish
-		     204018, -- Blessing of Spellwarding
+		   	 204018, -- Blessing of Spellwarding
 		},
 		BurstHaste = {
 			  90355, -- Ancient Hysteria
@@ -415,8 +396,8 @@ TMW.BE = {
 			  80353, -- Time Warp
 			 160452, -- Netherwinds
 			  32182, -- Heroism,
-			  264667, -- Primal Rage
-			  256740, -- Drums of the Maelstrom
+			 264667, -- Primal Rage
+			 256740, -- Drums of the Maelstrom
 		},
 	},
 	casts = {
