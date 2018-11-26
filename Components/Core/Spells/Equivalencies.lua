@@ -92,16 +92,15 @@ TMW.BE = {
 			   5246, -- Intimidating Shout
 			  87204, -- Sin and Punishment
 			  -8122, -- Psychic Scream
+			  -6789, -- Mortal Coil
 			 207685, -- Sigil of Misery (Havoc Demon hunter)
 		},
 		Incapacitated = {
 			     99, -- Incapacitating Roar
-			   3355, -- Freezing Trap
-			 209790, -- Freezing Arrow (diamond ice)
+			  -3355, -- Freezing Trap
 			  -6770, -- Sap
 			   -118, -- Polymorph
 			 115268, -- Mesmerize
-			  -6789, -- Mortal Coil
 			 -51514, -- Hex (also 211015; 211010; 211004; 210873; 196942; 269352; 277778; 277784)
 			  20066, -- Repentance
 			 200196, -- Holy Word: Chastise
