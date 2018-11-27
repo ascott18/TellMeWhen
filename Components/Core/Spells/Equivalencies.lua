@@ -270,7 +270,7 @@ TMW.BE = {
 	buffs = {
 		SpeedBoosts = {
 			  -2983, -- Sprint
-			   2379, -- Speed
+			  -2379, -- Speed
 			   2645, -- Ghost Wolf
 			   7840, -- Swim Speed
 			  36554, -- Shadowstep
@@ -278,7 +278,6 @@ TMW.BE = {
 			  58875, -- Spirit Walk
 			 -65081, -- Body and Soul
 			  68992, -- Darkflight
-			  85499, -- Speed of Light
 			  87023, -- Cauterize
 			 -61684, -- Dash
 			 -77761, -- Stampeding Roar
@@ -288,29 +287,33 @@ TMW.BE = {
 			 118922, -- Posthaste
 			 119085, -- Chi Torpedo
 			 121557, -- Angelic Feather
-			 137452, -- Displacer Beast
-			 137573, -- Burst of Speed
+			 188024, -- Skystep Potion
 			 192082, -- Wind Rush (shaman wind rush totem talent)
 			 196674, -- Planewalker (warlock artifact trait)
 			 197023, -- Cut to the chase (rogue pvp talent)
 			 199407, -- Light on your feet (mistweaver monk artifact trait)
-			 201233, -- whirling kicks (windwalaker monk pvp talent)
-			 201447, -- Ride the wind (windwalaker monk pvp talent)
+			 201233, -- whirling kicks (windwalker monk pvp talent)
+			 201447, -- Ride the wind (windwalker monk pvp talent)
+			 202164, -- Bounding Stride (warrior talent)
 			 209754, -- Boarding Party (rogue pvp talent)
 			 210980, -- Focus in the light (holy priest artifact trait)
-			 213177, -- swift as a coursing river (brewmaster artifact trait)
+			 213177, -- Swift as a Coursing River (brewmaster artifact trait)
 			 214121, -- Body and Mind (priest talent)
 			 215572, -- Frothing Berserker (warrior talent)
 			 231390, -- Trailblazer (hunter talent)
 			-186257, -- Aspect of the Cheetah
 			-204475, -- Windburst (marks hunter artifact ability)
+			 250878, -- Lightfoot Potion
+			-276112, -- Divine Steed
 		},
 		ImmuneToStun = {
 			  33786, -- Cyclone
-			 -19263, -- Deterrence
+			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
+			 186265, -- Aspect of the Turtle
 			  48792, -- Icebound Fortitude
-			  46924, -- Bladestorm
-			 227847, -- Bladestorm again?
+			 213610, -- Holy Ward
+			  46924, -- Bladestorm (fury)
+			 227847, -- Bladestorm (arms)
 			    710, -- Banish
 			   6615, -- Free Action
 			  45438, -- Ice Block
@@ -320,14 +323,16 @@ TMW.BE = {
 		DefensiveBuffsAOE = {
 			 -62618, -- Power Word: Barrier
 			 -31821, -- Aura Mastery
+			-209426, -- Darkness
+			 201633, -- Earthen Wall
 			 -51052, -- Anti-Magic Zone
 			 204150, -- Aegis of light (prot pally talent)
 			 204335, -- Aegis of light (prot pally talent)
 		},
 		DefensiveBuffsSingle = {
-			 114030, -- Vigilance
 			  47788, -- Guardian Spirit
 			  31850, -- Ardent Defender
+			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 			  23920, -- Spell Reflection
 			    871, -- Shield Wall
 			 118038, -- Die by the Sword
@@ -335,15 +340,16 @@ TMW.BE = {
 			 104773, -- Unending Resolve
 			   6940, -- Blessing of Sacrifice
 			 108271, -- Astral Shift
+			 210918, -- Ethereal Form (shaman PVP talent)
 			   5277, -- Evasion
 			 102342, -- Ironbark
 			 155835, -- Bristling Fur
+			 184364, -- Enraged Regeneration
 			   1022, -- Blessing of Protection
-			  74001, -- Combat Readiness
 			  31224, -- Cloak of Shadows
 			  33206, -- Pain Suppression
 			  47585, -- Dispersion
-			 -19263, -- Deterrence
+			 186265, -- Aspect of the Turtle
 			  48792, -- Icebound Fortitude
 			 115176, -- Zen Meditation
 			 122783, -- Diffuse Magic
@@ -351,7 +357,6 @@ TMW.BE = {
 			    642, -- Divine Shield
 			  45438, -- Ice Block
 			    498, -- Divine Protection
-			 157913, -- Evanesce
 			 115203, -- Fortifying Brew
 			  22812, -- Barkskin
 			 122278, -- Dampen Harm
@@ -359,14 +364,33 @@ TMW.BE = {
 			  61336, -- Survival Instincts
 		},
 		DamageBuffs = {
-			   1719, -- Battle Cry
+			   1719, -- Recklessness
 			  12472, -- Icy Veins
+			 198144, -- Ice Form
+			 190319, -- Combustion
+			  12042, -- Arcane Power
+			 212283, -- Symbols of Death
+			 185422, -- Shadow Dance
+			  13750, -- Adrenaline Rush
+			 102543, -- Incarnation: King of the Jungle
+			 102560, -- Incarnation: Chosen of Elune
+			 106951, -- Berserk
+			 152173, -- Serenity
+			 137639, -- Storm, Earth, and Fire
+			 193526, -- Trueshot
+			  19574, -- Bestial Wrath
+			 266779, -- Coordinated Assault
 			  51271, -- Pillar of Frost
+			 113858, -- Dark Soul: Instability
+			 113860, -- Dark Soul: Misery
+			 194249, -- Voidform
+			 162264, -- Metamorphosis
 			  31884, -- Avenging Wrath
 			-107574, -- Avatar
 			 114050, -- Ascendance
 			 114051, -- Ascendance
 			   5217, -- Tiger's Fury
+			 262228, -- Deadly Calm
 		},
 		MiscHelpfulBuffs = {
 			   1044, -- Blessing of Freedom
@@ -385,26 +409,38 @@ TMW.BE = {
 			   1463, -- Incanter's Flow
 			 173260, -- Shieldtronic Shield
 			 108366, -- Soul Leech
+			 184662, -- Shield of Vengeance
+			 227225, -- Soul Barrier
 			 169373, -- Boulder Shield
-			 152118, -- Clarity of Will
+			 152118, -- Clarity of Will 
+			 274346, -- Soulmonger (DH azerite talent)
+			 274289, -- Burning Soul (DH azerite talent)
 			 145441, -- Yu'lon's Barrier
+			 235450, -- Prismatic Barrier
+			 235313, -- Blazing Barrier
 			 108416, -- Dark Pact
 			 -11426, -- Ice Barrier
 			    -17, -- Power Word: Shield
 			  77535, -- Blood Shield
 			 116849, -- Life Cocoon
-			 194022 --- Mental Fortitude (Shadow Priest Artifact)
+			 194022, -- Mental Fortitude (Shadow Priest Artifact)
+			 269279, -- Resounding Protection (general azerite talent)
+			 270657, -- Bulwark of the Masses (general azerite talent)
+			 280212, -- Bury the Hatchet (warrior azerite talent, phys absorb only)
 		},
 		ImmuneToMagicCC = {
 			  33786, -- Cyclone
-			 -19263, -- Deterrence
+			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
+			 186265, -- Aspect of the Turtle
 			  23920, -- Spell Reflection
-			  46924, -- Bladestorm
+			  46924, -- Bladestorm (fury)
+			 227847, -- Bladestorm (arms)
 			  48707, -- Anti-Magic Shell
 			  45438, -- Ice Block
 			    642, -- Divine Shield
 			  31224, -- Cloak of Shadows
 			   8178, -- Grounding Totem Effect
+			 213915, -- Mass Spell Reflection
 			    710, -- Banish
 		   	 204018, -- Blessing of Spellwarding
 		},
