@@ -44,6 +44,7 @@ TMW.BE = {
 			 115625, -- Mortal Cleave
 			-115804, -- Mortal Wounds
 			 195452, -- Nightblade
+			 287672, -- Fatal Wounds
 		},
 		CrowdControl = {
 			   -118, -- Polymorph
@@ -70,6 +71,8 @@ TMW.BE = {
 			    122, -- Frost Nova
 			  33395, -- Freeze
 			 -82691, -- Ring of Frost
+			 198121, -- Frostbite
+			 228600, -- Glacial Spike
 		},
 		Bleeding = {
 			   -703, -- Garrote
@@ -85,6 +88,7 @@ TMW.BE = {
 			 162487, -- Steel Trap (hunter talent)
 			 185855, -- Lacerate (Survival hunter)
 			 194279, -- Caltrops (hunter talent)
+			 273794, -- Rezan's Fury (general azerite trait)
 		},
 		Feared = {
 			   5246, -- Intimidating Shout
@@ -112,8 +116,8 @@ TMW.BE = {
 			 197214, -- Sundering
 			 200196, -- Holy Word: Chastise
 			 203126, -- Maim (with blood trauma feral pvp talent
-			 217832, -- Imprison
-			 221527, -- Imprison
+			 217832, -- Imprison (breakable)
+			 221527, -- Imprison (banish, talented)
 			 226943, -- Mind Bomb
 		},
 		Disoriented = {
@@ -133,7 +137,6 @@ TMW.BE = {
 			  31935, -- Avenger's Shield
 			 -47476, -- Strangulate
 			 -78675, -- Solar Beam
-			 199683, -- Last Word
 			 202933, -- Spider Sting
 			 204490, -- Sigil of Silence
 			 217824; -- Shield of Virtue
@@ -160,35 +163,34 @@ TMW.BE = {
 			 201158, -- Super Sticky Tar (Expert Trapper, Hunter talent, Tar Trap effect)
 			 204085, -- Deathchill (DK PVP)
 			 207171, -- Winter is Coming
-			 212638, -- tracker's net (hunter PvP )
-			 228600, -- glacial spike (frost mage talent)
+			 212638, -- Tracker's Net (hunter PvP )
+			 228600, -- Glacial Spike (frost mage talent)
 			 233395, -- Frozen Center
 			 233582, -- Entrenched in Flames
 		},
 		Slowed = {
 			   -116, -- Frostbolt
 			   -120, -- Cone of Cold
-			   2120, -- Flamestrike
-			   6343, -- Thunder Clap
 			  -1715, -- Hamstring
+			   2120, -- Flamestrike
 			  -3409, -- Crippling Poison
 			  -3600, -- Earthbind
 			  -5116, -- Concussive Shot
-			 -12544, -- Frost Armor
+			   6343, -- Thunder Clap
 			  -7992, -- Slowing Poison
-			  26679, -- Deadly Throw
+			 -12323, -- Piercing Howl
+			 -12544, -- Frost Armor
+			 -13810, -- Ice Trap
+			 -15407, -- Mind Flay
+			 -31589, -- Slow
 			  35346, -- Warp Time
 			  44614, -- Flurry
 			  45524, -- Chains of Ice
 			  50259, -- Dazed (Wild Charge, druid talent, cat form)
 			  50433, -- Ankle Crack
 			  51490, -- Thunderstorm
-			  61391, -- Typhoon
-			 -12323, -- Piercing Howl
-			 -13810, -- Ice Trap
-			 -15407, -- Mind Flay
-			 -31589, -- Slow
 			 -58180, -- Infected Wounds
+			  61391, -- Typhoon
 			 102793, -- Ursol's Vortex
 			 116095, -- Disable
 			 121253, -- Keg Smash
@@ -219,13 +221,13 @@ TMW.BE = {
 			 206930, -- Heart Strike
 			 208278, -- Debilitating Infestation (DK unholy talent)
 			 209786, -- Goremaw's Bite
+			 210979, -- Focus in the light (holy priest artifact trait)
 			 211793, -- Remorseless Winter
 			 211831, -- Abomination's Might
 			 212764, -- White Walker
 			 212792, -- Cone of Cold (frost mage)
 			 222775, -- Strike from the Shadows
 			 228354, -- Flurry (frost mage ability)
-			 210979, -- Focus in the light (holy priest artifact trait)
 		},
 		Stunned = {
 			    -25, -- Stun
@@ -296,6 +298,7 @@ TMW.BE = {
 			 202164, -- Bounding Stride (warrior talent)
 			 209754, -- Boarding Party (rogue pvp talent)
 			 210980, -- Focus in the light (holy priest artifact trait)
+			 213602, -- Greater Fade
 			 213177, -- Swift as a Coursing River (brewmaster artifact trait)
 			 214121, -- Body and Mind (priest talent)
 			 215572, -- Frothing Berserker (warrior talent)
@@ -316,6 +319,7 @@ TMW.BE = {
 			  48792, -- Icebound Fortitude
 			 186265, -- Aspect of the Turtle
 			 213610, -- Holy Ward
+			 221527, -- Imprison
 			 227847, -- Bladestorm (arms)
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 		},
@@ -323,6 +327,7 @@ TMW.BE = {
 			 -31821, -- Aura Mastery
 			 -51052, -- Anti-Magic Zone
 			 -62618, -- Power Word: Barrier
+			  97463, -- Rallying Cry
 			 201633, -- Earthen Wall (from Earthen Wall Totem)
 			 204150, -- Aegis of light (prot pally talent)
 			 204335, -- Aegis of light (prot pally talent)
@@ -333,6 +338,7 @@ TMW.BE = {
 			    642, -- Divine Shield
 			    871, -- Shield Wall
 			   1022, -- Blessing of Protection
+			  -1966, -- Feint
 			   5277, -- Evasion
 			   6940, -- Blessing of Sacrifice
 			  22812, -- Barkskin
@@ -340,11 +346,13 @@ TMW.BE = {
 			  31224, -- Cloak of Shadows
 			  31850, -- Ardent Defender
 			  33206, -- Pain Suppression
+			  45182, -- Cheating Death
 			  45438, -- Ice Block
 			  47585, -- Dispersion
 			  47788, -- Guardian Spirit
 			  48707, -- Anti-Magic Shell
 			  48792, -- Icebound Fortitude
+			  53480, -- Roar of Sacrifice
 			  61336, -- Survival Instincts
 			  86659, -- Guardian of Ancient Kings
 			 102342, -- Ironbark
@@ -353,14 +361,21 @@ TMW.BE = {
 			 113862, -- Greater Invisibility
 			 115176, -- Zen Meditation
 			 115203, -- Fortifying Brew
+			 116849, -- Life Cocoon
 			 118038, -- Die by the Sword
 			 122278, -- Dampen Harm
 			 122783, -- Diffuse Magic
 			 155835, -- Bristling Fur
 			 184364, -- Enraged Regeneration
-			 186265, -- Aspect of the Turtle		 
+			 186265, -- Aspect of the Turtle
+			 197268, -- Ray of Hope
+			 199754, -- Riposte
+			 205191, -- Eye for an Eye
 			 210918, -- Ethereal Form (shaman PVP talent)
+			 213602, -- Greater Fade
+			 213871, -- Bodyguard
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
+			 223658, -- Safeguard
 		},
 		DamageBuffs = {
 			   1719, -- Recklessness
@@ -384,10 +399,13 @@ TMW.BE = {
 			 162264, -- Metamorphosis			 
 			 185422, -- Shadow Dance			 
 			 190319, -- Combustion			 
-			 193526, -- Trueshot			
+			 193526, -- Trueshot
+			 194223, -- Celestial Alignment
 			 194249, -- Voidform
 			 198144, -- Ice Form
 			 212283, -- Symbols of Death
+			 216113, -- Way of the Crane
+			 216331, -- Avenging Crusader
 			 262228, -- Deadly Calm
 			 266779, -- Coordinated Assault
 		},
@@ -401,11 +419,13 @@ TMW.BE = {
 			  45182, -- Cheating Death
 			  53271, -- Master's Call
 			  68992, -- Darkflight
+			 213915, -- Mass Spell Reflection
 		},
 		DamageShield = {
 			    -17, -- Power Word: Shield
 			   1463, -- Incanter's Flow
 			 -11426, -- Ice Barrier
+			  48707, -- Anti-Magic Shell
 			  77535, -- Blood Shield
 			 114908, -- Spirit Shell
 			 108008, -- Indomitable
@@ -417,15 +437,25 @@ TMW.BE = {
 			 169373, -- Boulder Shield
 			 173260, -- Shieldtronic Shield
 			 184662, -- Shield of Vengeance
+			 190456, -- Ignore Pain
 			 194022, -- Mental Fortitude (Shadow Priest Artifact)
 			 227225, -- Soul Barrier
 			 235313, -- Blazing Barrier
 			 235450, -- Prismatic Barrier
-			 269279, -- Resounding Protection (general azerite talent)
-			 270657, -- Bulwark of the Masses (general azerite talent)
+			 269279, -- Resounding Protection (general azerite trait)
+			 270657, -- Bulwark of the Masses (general azerite trait)
+			 272979, -- Bulwark of Light (paladin azerite trait)
 			 274289, -- Burning Soul (DH azerite talent)
-			 274346, -- Soulmonger (DH azerite talent)
-			 280212, -- Bury the Hatchet (warrior azerite talent, phys absorb only)
+			 274346, -- Soulmonger (DH azerite trait)
+			 274369, -- Sanctum (priest azerite trait)
+			-274814, -- Reawakening (druid azerite trait)
+			 271466, -- Luminous Barrier
+			 274395, -- Stalwart Protector (paladin azerite trait)
+			 280165, -- Ursoc's Endurance (druid azerite trait)
+			 280170, -- Duck and Cover (hunter azerite trait)
+			 280212, -- Bury the Hatchet (warrior azerite trait)
+			 280788, -- Retaliatory Fury
+			 280862, -- Last Gift
 		},
 		ImmuneToMagicCC = {
 			    642, -- Divine Shield
@@ -441,6 +471,7 @@ TMW.BE = {
 		   	 204018, -- Blessing of Spellwarding
 			 213610, -- Holy Ward
 			 213915, -- Mass Spell Reflection
+			 221527, -- Imprison
 			 227847, -- Bladestorm (arms)
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 		},
