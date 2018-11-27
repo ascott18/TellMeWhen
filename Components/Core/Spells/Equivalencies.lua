@@ -166,6 +166,7 @@ TMW.BE = {
 			 212638, -- Tracker's Net (hunter PvP )
 			 228600, -- Glacial Spike (frost mage talent)
 			 233395, -- Frozen Center
+			 232559, -- Thorns
 			 233582, -- Entrenched in Flames
 		},
 		Slowed = {
@@ -210,7 +211,6 @@ TMW.BE = {
 			 195645, -- Wing Clip
 			-196840, -- Frost Shock
 			 198813, -- Vengeful Retreat
-			 201142, -- Frozen Wake (freezing trap break slow from master trapper survival hunter talent)
 			 204263, -- Shining Force
 			 204843, -- Sigil of Chains
 			 205021, -- Ray of Frost (frost mage talent)
@@ -288,6 +288,7 @@ TMW.BE = {
 			 118922, -- Posthaste
 			 119085, -- Chi Torpedo
 			 121557, -- Angelic Feather
+			-186257, -- Aspect of the Cheetah
 			 188024, -- Skystep Potion
 			 192082, -- Wind Rush (shaman wind rush totem talent)
 			 196674, -- Planewalker (warlock artifact trait)
@@ -296,15 +297,15 @@ TMW.BE = {
 			 201233, -- whirling kicks (windwalker monk pvp talent)
 			 201447, -- Ride the wind (windwalker monk pvp talent)
 			 202164, -- Bounding Stride (warrior talent)
+			-204475, -- Windburst (marks hunter artifact ability)
 			 209754, -- Boarding Party (rogue pvp talent)
 			 210980, -- Focus in the light (holy priest artifact trait)
-			 213602, -- Greater Fade
 			 213177, -- Swift as a Coursing River (brewmaster artifact trait)
+			 213602, -- Greater Fade
 			 214121, -- Body and Mind (priest talent)
 			 215572, -- Frothing Berserker (warrior talent)
 			 231390, -- Trailblazer (hunter talent)
-			-186257, -- Aspect of the Cheetah
-			-204475, -- Windburst (marks hunter artifact ability)
+			 236060, -- Frenetic Speed
 			 250878, -- Lightfoot Potion
 			-276112, -- Divine Steed
 		},
