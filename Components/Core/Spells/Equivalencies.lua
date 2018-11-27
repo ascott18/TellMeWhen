@@ -38,61 +38,60 @@ local _, pclass = UnitClass("Player")
 TMW.BE = {
 	debuffs = {
 		ReducedHealing = {
-			 115804, -- Mortal Wounds
-			  27580, -- Sharpen Blade
-			 195452, -- Nightblade
 			   8679, -- Wound Poison
+			  27580, -- Sharpen Blade
+			  30213, -- Legion Strike		
 			 115625, -- Mortal Cleave
-			  30213, -- Legion Strike
+			-115804, -- Mortal Wounds
+			 195452, -- Nightblade
 		},
 		CrowdControl = {
 			   -118, -- Polymorph
-			  -6770, -- Sap
 			   -605, -- Mind Control
-			  20066, -- Repentance
-			 -51514, -- Hex (also 211004, 210873, 211015, 211010)
-			  -9484, -- Shackle Undead
-			  -5782, -- Fear
-			  33786, -- Cyclone
-			  -3355, -- Freezing Trap
-			 209790, -- Freezing Arrow (hunter pvp)
 			   -710, -- Banish
-			  -6358, -- Seduction
 			  -2094, -- Blind
+			  -3355, -- Freezing Trap
+			  -5782, -- Fear
+			  -6358, -- Seduction
+			  -6770, -- Sap
+			  -9484, -- Shackle Undead
 			 -19386, -- Wyvern Sting
+			  20066, -- Repentance
+			  33786, -- Cyclone
+			 -51514, -- Hex (also 211015; 211010; 211004; 210873; 196942; 269352; 277778; 277784)
 			 -82691, -- Ring of Frost
+			 107079, -- Quaking Palm
 			 115078, -- Paralysis
 			 115268, -- Mesmerize
-			 107079, -- Quaking Palm
-			 207685, -- Sigil of Misery (Havoc Demon hunter)
 			 198909, -- Song of Chi-ji (mistweaver monk talent)
+			 207685, -- Sigil of Misery (Havoc Demon hunter)
 		},
 		Shatterable = {
 			    122, -- Frost Nova
-			 -82691, -- Ring of Frost
 			  33395, -- Freeze
+			 -82691, -- Ring of Frost
 		},
 		Bleeding = {
-			  -1822, -- Rake
-			  -1079, -- Rip
-			-115767, -- Deep Wounds
 			   -703, -- Garrote
-			  16511, -- Hemorrhage
-			 -11977, -- Rend
-			 155722, -- Rake
+			  -1079, -- Rip
+			  -1822, -- Rake
 			   1943, -- Rupture
+			 -11977, -- Rend
+			  16511, -- Hemorrhage
 			  77758, -- Thrash
 			 106830, -- Thrash
+			-115767, -- Deep Wounds
+			 155722, -- Rake
 			 162487, -- Steel Trap (hunter talent)
 			 185855, -- Lacerate (Survival hunter)
 			 194279, -- Caltrops (hunter talent)
 		},
 		Feared = {
-			  -5782, -- Fear
 			   5246, -- Intimidating Shout
-			  87204, -- Sin and Punishment
-			  -8122, -- Psychic Scream
+			  -5782, -- Fear
 			  -6789, -- Mortal Coil
+			  -8122, -- Psychic Scream
+			  87204, -- Sin and Punishment
 			 207685, -- Sigil of Misery (Havoc Demon hunter)
 		},
 		Incapacitated = {
@@ -324,7 +323,7 @@ TMW.BE = {
 			 -31821, -- Aura Mastery
 			 -51052, -- Anti-Magic Zone
 			 -62618, -- Power Word: Barrier
-			 201633, -- Earthen Wall
+			 201633, -- Earthen Wall (from Earthen Wall Totem)
 			 204150, -- Aegis of light (prot pally talent)
 			 204335, -- Aegis of light (prot pally talent)
 			-209426, -- Darkness
@@ -440,13 +439,14 @@ TMW.BE = {
 			  48707, -- Anti-Magic Shell
 			 186265, -- Aspect of the Turtle
 		   	 204018, -- Blessing of Spellwarding
+			 213610, -- Holy Ward
 			 213915, -- Mass Spell Reflection
 			 227847, -- Bladestorm (arms)
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 		},
 		BurstHaste = {
 			   2825, -- Bloodlust
-			  32182, -- Heroism,
+			  32182, -- Heroism
 			  80353, -- Time Warp
 			  90355, -- Ancient Hysteria
 			 146555, -- Drums of Rage
