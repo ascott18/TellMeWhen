@@ -97,24 +97,24 @@ TMW.BE = {
 		},
 		Incapacitated = {
 			     99, -- Incapacitating Roar
-			  -3355, -- Freezing Trap
-			  -6770, -- Sap
 			   -118, -- Polymorph
-			 115268, -- Mesmerize
-			 -51514, -- Hex (also 211015; 211010; 211004; 210873; 196942; 269352; 277778; 277784)
-			  20066, -- Repentance
-			 200196, -- Holy Word: Chastise
-			  82691, -- Ring of Frost
 			   2637, -- Hibernate
 			   1776, -- Gouge
+			  -3355, -- Freezing Trap
+			  -6358, -- Seduction
+			  -6770, -- Sap
+			 -19386, -- Wyvern Sting
+			  20066, -- Repentance
+			 -51514, -- Hex (also 211015; 211010; 211004; 210873; 196942; 269352; 277778; 277784)
+			  82691, -- Ring of Frost
+			 107079, -- Quaking Palm
+			 115078, -- Paralysis
+			 115268, -- Mesmerize
+			 197214, -- Sundering
+			 200196, -- Holy Word: Chastise
+			 203126, -- Maim (with blood trauma feral pvp talent
 			 217832, -- Imprison
 			 221527, -- Imprison
-			  -6358, -- Seduction
-			 -19386, -- Wyvern Sting
-			 115078, -- Paralysis
-			 197214, -- Sundering
-			 107079, -- Quaking Palm
-			 203126, -- Maim (with blood trauma feral pvp talent)
 			 226943, -- Mind Bomb
 		},
 		Disoriented = {
@@ -122,22 +122,22 @@ TMW.BE = {
 			  31661, -- Dragon's Breath
 			 105421, -- Blinding light (paladin talent)
 			 186387, -- Bursting Shot (hunter marks ability)
+			 198909, -- Song of Chi-ji (mistweaver monk talent)
 			 202274, -- Incendiary brew (brewmaster monk pvp talent)
 			 207167, -- Blinding Sleet (dk talent)
 			 213691, -- Scatter Shot (hunter pvp talent)
-			 198909, -- Song of Chi-ji (mistweaver monk talent)
 		},
 		Silenced = {
-			 -15487, -- Silence
 			  -1330, -- Garrote - Silence
-			  31935, -- Avenger's Shield
-			 -78675, -- Solar Beam
-			 217824; -- Shield of Virtue
-			 202933, -- Spider Sting
-			 199683, -- Last Word
-			 -47476, -- Strangulate
+			 -15487, -- Silence
 			  31117, -- Unstable Affliction
+			  31935, -- Avenger's Shield
+			 -47476, -- Strangulate
+			 -78675, -- Solar Beam
+			 199683, -- Last Word
+			 202933, -- Spider Sting
 			 204490, -- Sigil of Silence
+			 217824; -- Shield of Virtue
 		},
 		Rooted = {
 			   -339, -- Entangling Roots
@@ -307,161 +307,161 @@ TMW.BE = {
 			-276112, -- Divine Steed
 		},
 		ImmuneToStun = {
-			  33786, -- Cyclone
-			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
-			 186265, -- Aspect of the Turtle
-			  48792, -- Icebound Fortitude
-			 213610, -- Holy Ward
-			  46924, -- Bladestorm (fury)
-			 227847, -- Bladestorm (arms)
-			    710, -- Banish
-			   6615, -- Free Action
-			  45438, -- Ice Block
 			    642, -- Divine Shield
+			    710, -- Banish
 			   1022, -- Blessing of Protection
+			   6615, -- Free Action
+			  33786, -- Cyclone
+			  45438, -- Ice Block
+			  46924, -- Bladestorm (fury)
+			  48792, -- Icebound Fortitude
+			 186265, -- Aspect of the Turtle
+			 213610, -- Holy Ward
+			 227847, -- Bladestorm (arms)
+			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 		},
 		DefensiveBuffsAOE = {
-			 -62618, -- Power Word: Barrier
 			 -31821, -- Aura Mastery
-			-209426, -- Darkness
-			 201633, -- Earthen Wall
 			 -51052, -- Anti-Magic Zone
+			 -62618, -- Power Word: Barrier
+			 201633, -- Earthen Wall
 			 204150, -- Aegis of light (prot pally talent)
 			 204335, -- Aegis of light (prot pally talent)
+			-209426, -- Darkness
 		},
 		DefensiveBuffsSingle = {
-			  47788, -- Guardian Spirit
-			  31850, -- Ardent Defender
-			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
-			  23920, -- Spell Reflection
+			    498, -- Divine Protection
+			    642, -- Divine Shield
 			    871, -- Shield Wall
-			 118038, -- Die by the Sword
-			  48707, -- Anti-Magic Shell
-			 104773, -- Unending Resolve
-			   6940, -- Blessing of Sacrifice
-			 108271, -- Astral Shift
-			 210918, -- Ethereal Form (shaman PVP talent)
+			   1022, -- Blessing of Protection
 			   5277, -- Evasion
+			   6940, -- Blessing of Sacrifice
+			  22812, -- Barkskin
+			  23920, -- Spell Reflection
+			  31224, -- Cloak of Shadows
+			  31850, -- Ardent Defender
+			  33206, -- Pain Suppression
+			  45438, -- Ice Block
+			  47585, -- Dispersion
+			  47788, -- Guardian Spirit
+			  48707, -- Anti-Magic Shell
+			  48792, -- Icebound Fortitude
+			  61336, -- Survival Instincts
+			  86659, -- Guardian of Ancient Kings
 			 102342, -- Ironbark
+			 104773, -- Unending Resolve
+			 108271, -- Astral Shift
+			 113862, -- Greater Invisibility
+			 115176, -- Zen Meditation
+			 115203, -- Fortifying Brew
+			 118038, -- Die by the Sword
+			 122278, -- Dampen Harm
+			 122783, -- Diffuse Magic
 			 155835, -- Bristling Fur
 			 184364, -- Enraged Regeneration
-			   1022, -- Blessing of Protection
-			  31224, -- Cloak of Shadows
-			  33206, -- Pain Suppression
-			  47585, -- Dispersion
-			 186265, -- Aspect of the Turtle
-			  48792, -- Icebound Fortitude
-			 115176, -- Zen Meditation
-			 122783, -- Diffuse Magic
-			  86659, -- Guardian of Ancient Kings
-			    642, -- Divine Shield
-			  45438, -- Ice Block
-			    498, -- Divine Protection
-			 115203, -- Fortifying Brew
-			  22812, -- Barkskin
-			 122278, -- Dampen Harm
-			 113862, -- Greater Invisibility
-			  61336, -- Survival Instincts
+			 186265, -- Aspect of the Turtle		 
+			 210918, -- Ethereal Form (shaman PVP talent)
+			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 		},
 		DamageBuffs = {
 			   1719, -- Recklessness
+			   5217, -- Tiger's Fury
+			  12042, -- Arcane Power			   
 			  12472, -- Icy Veins
-			 198144, -- Ice Form
-			 190319, -- Combustion
-			  12042, -- Arcane Power
-			 212283, -- Symbols of Death
-			 185422, -- Shadow Dance
-			  13750, -- Adrenaline Rush
-			 102543, -- Incarnation: King of the Jungle
-			 102560, -- Incarnation: Chosen of Elune
-			 106951, -- Berserk
-			 152173, -- Serenity
-			 137639, -- Storm, Earth, and Fire
-			 193526, -- Trueshot
-			  19574, -- Bestial Wrath
-			 266779, -- Coordinated Assault
-			  51271, -- Pillar of Frost
-			 113858, -- Dark Soul: Instability
-			 113860, -- Dark Soul: Misery
-			 194249, -- Voidform
-			 162264, -- Metamorphosis
+			  13750, -- Adrenaline Rush			  
+			  19574, -- Bestial Wrath	
 			  31884, -- Avenging Wrath
-			-107574, -- Avatar
+			  51271, -- Pillar of Frost	
+			 102543, -- Incarnation: King of the Jungle
+			 102560, -- Incarnation: Chosen of Elune			  
+			 106951, -- Berserk
+			-107574, -- Avatar	
+			 113858, -- Dark Soul: Instability
+			 113860, -- Dark Soul: Misery						
 			 114050, -- Ascendance
 			 114051, -- Ascendance
-			   5217, -- Tiger's Fury
+			 137639, -- Storm, Earth, and Fire			 
+			 152173, -- Serenity
+			 162264, -- Metamorphosis			 
+			 185422, -- Shadow Dance			 
+			 190319, -- Combustion			 
+			 193526, -- Trueshot			
+			 194249, -- Voidform
+			 198144, -- Ice Form
+			 212283, -- Symbols of Death
 			 262228, -- Deadly Calm
+			 266779, -- Coordinated Assault
 		},
 		MiscHelpfulBuffs = {
 			   1044, -- Blessing of Freedom
-			  23920, -- Spell Reflection
-			  10060, -- Power Infusion
+			   1850, -- Dash			   
 			   2983, -- Sprint
-			  45182, -- Cheating Death
+			  10060, -- Power Infusion
+			  23920, -- Spell Reflection
 			  31821, -- Aura Mastery
-			  68992, -- Darkflight
+			  45182, -- Cheating Death
 			  53271, -- Master's Call
-			   1850, -- Dash
+			  68992, -- Darkflight
 		},
 		DamageShield = {
+			    -17, -- Power Word: Shield
+			   1463, -- Incanter's Flow
+			 -11426, -- Ice Barrier
+			  77535, -- Blood Shield
 			 114908, -- Spirit Shell
 			 108008, -- Indomitable
-			   1463, -- Incanter's Flow
-			 173260, -- Shieldtronic Shield
 			 108366, -- Soul Leech
-			 184662, -- Shield of Vengeance
-			 227225, -- Soul Barrier
-			 169373, -- Boulder Shield
-			 152118, -- Clarity of Will 
-			 274346, -- Soulmonger (DH azerite talent)
-			 274289, -- Burning Soul (DH azerite talent)
-			 145441, -- Yu'lon's Barrier
-			 235450, -- Prismatic Barrier
-			 235313, -- Blazing Barrier
 			 108416, -- Dark Pact
-			 -11426, -- Ice Barrier
-			    -17, -- Power Word: Shield
-			  77535, -- Blood Shield
 			 116849, -- Life Cocoon
+			 145441, -- Yu'lon's Barrier
+			 152118, -- Clarity of Will 
+			 169373, -- Boulder Shield
+			 173260, -- Shieldtronic Shield
+			 184662, -- Shield of Vengeance
 			 194022, -- Mental Fortitude (Shadow Priest Artifact)
+			 227225, -- Soul Barrier
+			 235313, -- Blazing Barrier
+			 235450, -- Prismatic Barrier
 			 269279, -- Resounding Protection (general azerite talent)
 			 270657, -- Bulwark of the Masses (general azerite talent)
+			 274289, -- Burning Soul (DH azerite talent)
+			 274346, -- Soulmonger (DH azerite talent)
 			 280212, -- Bury the Hatchet (warrior azerite talent, phys absorb only)
 		},
 		ImmuneToMagicCC = {
-			  33786, -- Cyclone
-			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
-			 186265, -- Aspect of the Turtle
-			  23920, -- Spell Reflection
-			  46924, -- Bladestorm (fury)
-			 227847, -- Bladestorm (arms)
-			  48707, -- Anti-Magic Shell
-			  45438, -- Ice Block
 			    642, -- Divine Shield
-			  31224, -- Cloak of Shadows
-			   8178, -- Grounding Totem Effect
-			 213915, -- Mass Spell Reflection
 			    710, -- Banish
+			   8178, -- Grounding Totem Effect
+			  23920, -- Spell Reflection
+			  31224, -- Cloak of Shadows
+			  33786, -- Cyclone
+			  45438, -- Ice Block
+			  46924, -- Bladestorm (fury)
+			  48707, -- Anti-Magic Shell
+			 186265, -- Aspect of the Turtle
 		   	 204018, -- Blessing of Spellwarding
+			 213915, -- Mass Spell Reflection
+			 227847, -- Bladestorm (arms)
+			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 		},
 		BurstHaste = {
+			   2825, -- Bloodlust
+			  32182, -- Heroism,
+			  80353, -- Time Warp
 			  90355, -- Ancient Hysteria
 			 146555, -- Drums of Rage
 			 178207, -- Drums of Fury
-			 230935, -- Drums of the Mountain
-			   2825, -- Bloodlust
-			  80353, -- Time Warp
 			 160452, -- Netherwinds
-			  32182, -- Heroism,
-			 264667, -- Primal Rage
+			 230935, -- Drums of the Mountain
 			 256740, -- Drums of the Maelstrom
+			 264667, -- Primal Rage
 		},
 	},
 	casts = {
 		Heals = {
-			   2061, -- Flash Heal
 			    596, -- Prayer of Healing
 			   2060, -- Heal
+			   2061, -- Flash Heal
 			  32546, -- Binding Heal
 			  33076, -- Prayer of Mending
 			  64843, -- Divine Hymn
@@ -493,17 +493,16 @@ TMW.BE = {
 
 		},
 		PvPSpells = {
-			    339, -- Entangling Roots
-			  33786, -- Cyclone
-			   5782, -- Fear
-			   -605, -- Mind Control
-			  51514, -- Hex
-			  20066, -- Repentance
-			    982, -- Revive Pet
-			  12051, -- Evocation
 			    118, -- Polymorph
-			   5484, -- Howl of Terror
+			    339, -- Entangling Roots
+			   -605, -- Mind Control
+			    982, -- Revive Pet
+			   5782, -- Fear
+			  12051, -- Evocation
 			  20484, -- Rebirth
+			  20066, -- Repentance
+			  33786, -- Cyclone
+			 -51514, -- Hex
 		},
 	},
 }
