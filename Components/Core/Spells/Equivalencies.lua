@@ -403,6 +403,7 @@ TMW.BE = {
 			 194223, -- Celestial Alignment
 			 194249, -- Voidform
 			 198144, -- Ice Form
+			 212155, -- Tricks of the Trade (Outlaw PVP talent)
 			 212283, -- Symbols of Death
 			 216113, -- Way of the Crane
 			 216331, -- Avenging Crusader
@@ -419,6 +420,7 @@ TMW.BE = {
 			  45182, -- Cheating Death
 			  53271, -- Master's Call
 			  68992, -- Darkflight
+			 197003, -- Maneuverability
 			 213915, -- Mass Spell Reflection
 		},
 		DamageShield = {
