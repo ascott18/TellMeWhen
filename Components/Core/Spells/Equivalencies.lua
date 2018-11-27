@@ -210,6 +210,7 @@ TMW.BE = {
 			 194858, -- Dragonsfire Grenade
 			 195645, -- Wing Clip
 			-196840, -- Frost Shock
+			 198222, -- System Shock
 			 198813, -- Vengeful Retreat
 			 204263, -- Shining Force
 			 204843, -- Sigil of Chains
@@ -323,6 +324,7 @@ TMW.BE = {
 			 221527, -- Imprison
 			 227847, -- Bladestorm (arms)
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
+			 287081, -- Lichborne
 		},
 		DefensiveBuffsAOE = {
 			 -31821, -- Aura Mastery
@@ -377,6 +379,7 @@ TMW.BE = {
 			 213871, -- Bodyguard
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 			 223658, -- Safeguard
+			 287081, -- Lichborne
 		},
 		DamageBuffs = {
 			   1719, -- Recklessness
@@ -489,6 +492,17 @@ TMW.BE = {
 			 230935, -- Drums of the Mountain
 			 256740, -- Drums of the Maelstrom
 			 264667, -- Primal Rage
+		},
+		ImmuneToInterrupts = {
+			    642, -- Divine Shield
+			 104773, -- Unending Resolve
+			 186265, -- Aspect of the Turtle
+			 196773, -- Inner Focus
+			 209584, -- Zen Focus Tea
+			 210294, -- Divine Favor
+			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
+			-289657, -- Holy Word: Concentration
+			 290641, -- Ancestral Gift
 		},
 	},
 	casts = {
