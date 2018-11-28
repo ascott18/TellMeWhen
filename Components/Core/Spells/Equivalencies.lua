@@ -40,7 +40,7 @@ TMW.BE = {
 		ReducedHealing = {
 			   8679, -- Wound Poison
 			  27580, -- Sharpen Blade
-			  30213, -- Legion Strike		
+			  30213, -- Legion Strike
 			 115625, -- Mortal Cleave
 			-115804, -- Mortal Wounds
 			 195452, -- Nightblade
@@ -124,7 +124,6 @@ TMW.BE = {
 			  -2094, -- Blind
 			  31661, -- Dragon's Breath
 			 105421, -- Blinding light (paladin talent)
-			 186387, -- Bursting Shot (hunter marks ability)
 			 198909, -- Song of Chi-ji (mistweaver monk talent)
 			 202274, -- Incendiary brew (brewmaster monk pvp talent)
 			 207167, -- Blinding Sleet (dk talent)
@@ -165,7 +164,6 @@ TMW.BE = {
 			 207171, -- Winter is Coming
 			 212638, -- Tracker's Net (hunter PvP )
 			 228600, -- Glacial Spike (frost mage talent)
-			 233395, -- Frozen Center
 			 232559, -- Thorns
 			 233582, -- Entrenched in Flames
 		},
@@ -229,6 +227,8 @@ TMW.BE = {
 			 212792, -- Cone of Cold (frost mage)
 			 222775, -- Strike from the Shadows
 			 228354, -- Flurry (frost mage ability)
+			-287681, -- Turbo Fists
+			 288962, -- BLood Bolt
 		},
 		Stunned = {
 			    -25, -- Stun
@@ -267,6 +267,7 @@ TMW.BE = {
 			 211881, -- Fel Eruption
 			 221562, -- Asphyxiate (death knight, baseline for blood)
 			 255723, -- Bull Rush
+			 287254, -- Dead of Winter
 		},
 	},
 	buffs = {
@@ -307,6 +308,7 @@ TMW.BE = {
 			 236060, -- Frenetic Speed (fire mage talent)
 			 250878, -- Lightfoot Potion
 			 262232, -- War Machine
+			 273415, -- Gathering Storm
 			-276112, -- Divine Steed
 		},
 		ImmuneToStun = {
@@ -384,26 +386,25 @@ TMW.BE = {
 		DamageBuffs = {
 			   1719, -- Recklessness
 			   5217, -- Tiger's Fury
-			  12042, -- Arcane Power			   
+			  12042, -- Arcane Power
 			  12472, -- Icy Veins
-			  13750, -- Adrenaline Rush			  
-			  19574, -- Bestial Wrath	
+			  13750, -- Adrenaline Rush
+			  19574, -- Bestial Wrath
 			  31884, -- Avenging Wrath
-			  51271, -- Pillar of Frost	
+			  51271, -- Pillar of Frost
 			 102543, -- Incarnation: King of the Jungle
-			 102560, -- Incarnation: Chosen of Elune			  
+			 102560, -- Incarnation: Chosen of Elune
 			 106951, -- Berserk
-			-107574, -- Avatar	
+			-107574, -- Avatar
 			 113858, -- Dark Soul: Instability
-			 113860, -- Dark Soul: Misery						
+			 113860, -- Dark Soul: Misery
 			 114050, -- Ascendance
 			 114051, -- Ascendance
-			 137639, -- Storm, Earth, and Fire			 
+			 137639, -- Storm, Earth, and Fire
 			 152173, -- Serenity
-			 162264, -- Metamorphosis			 
-			 185422, -- Shadow Dance			 
-			 190319, -- Combustion			 
-			 193526, -- Trueshot
+			 162264, -- Metamorphosis
+			 185422, -- Shadow Dance
+			 190319, -- Combustion
 			 194223, -- Celestial Alignment
 			 194249, -- Voidform
 			 198144, -- Ice Form
@@ -413,10 +414,11 @@ TMW.BE = {
 			 216331, -- Avenging Crusader
 			 262228, -- Deadly Calm
 			 266779, -- Coordinated Assault
+			 288613, -- Trueshot
 		},
 		MiscHelpfulBuffs = {
 			   1044, -- Blessing of Freedom
-			   1850, -- Dash			   
+			   1850, -- Dash
 			   2983, -- Sprint
 			  10060, -- Power Infusion
 			  23920, -- Spell Reflection
@@ -457,12 +459,14 @@ TMW.BE = {
 			 274369, -- Sanctum (priest azerite trait)
 			-274814, -- Reawakening (druid azerite trait)
 			 271466, -- Luminous Barrier
+			 272987, -- Revel in Pain
 			 274395, -- Stalwart Protector (paladin azerite trait)
 			 280165, -- Ursoc's Endurance (druid azerite trait)
 			 280170, -- Duck and Cover (hunter azerite trait)
 			 280212, -- Bury the Hatchet (warrior azerite trait)
 			 280788, -- Retaliatory Fury
 			 280862, -- Last Gift
+			 287722, -- Death Denied
 		},
 		ImmuneToMagicCC = {
 			    642, -- Divine Shield
