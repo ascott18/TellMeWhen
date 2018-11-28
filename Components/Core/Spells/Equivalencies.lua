@@ -445,6 +445,7 @@ TMW.BE = {
 			 184662, -- Shield of Vengeance
 			 190456, -- Ignore Pain
 			 194022, -- Mental Fortitude (Shadow Priest Artifact)
+			 203538, -- Greater Blessing of Kings
 			 227225, -- Soul Barrier
 			 235313, -- Blazing Barrier
 			 235450, -- Prismatic Barrier
