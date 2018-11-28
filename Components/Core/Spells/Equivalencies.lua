@@ -505,6 +505,7 @@ TMW.BE = {
 			 196773, -- Inner Focus
 			 209584, -- Zen Focus Tea
 			 210294, -- Divine Favor
+			 221705, -- Casting Circle
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 			-289657, -- Holy Word: Concentration
 			 290641, -- Ancestral Gift
