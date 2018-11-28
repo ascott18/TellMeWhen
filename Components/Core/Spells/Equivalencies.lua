@@ -283,7 +283,6 @@ TMW.BE = {
 			  87023, -- Cauterize
 			 -61684, -- Dash
 			 -77761, -- Stampeding Roar
-			 108843, -- Blazing Speed
 			 111400, -- Burning Rush
 			 116841, -- Tiger's Lust
 			 118922, -- Posthaste
@@ -293,21 +292,21 @@ TMW.BE = {
 			 188024, -- Skystep Potion
 			 192082, -- Wind Rush (shaman wind rush totem talent)
 			 196674, -- Planewalker (warlock artifact trait)
-			 197023, -- Cut to the chase (rogue pvp talent)
-			 199407, -- Light on your feet (mistweaver monk artifact trait)
-			 201233, -- whirling kicks (windwalker monk pvp talent)
-			 201447, -- Ride the wind (windwalker monk pvp talent)
+			 197023, -- Cut to the Chase (rogue pvp talent)
+			 199407, -- Light on your Feet (mistweaver monk artifact trait)
+			 201233, -- Whirling Kicks (windwalker monk pvp talent)
+			 201447, -- Ride the Wind (windwalker monk pvp talent)
 			 202164, -- Bounding Stride (warrior talent)
 			-204475, -- Windburst (marks hunter artifact ability)
 			 209754, -- Boarding Party (rogue pvp talent)
-			 210980, -- Focus in the light (holy priest artifact trait)
+			 210980, -- Focus in the Light (holy priest artifact trait)
 			 213177, -- Swift as a Coursing River (brewmaster artifact trait)
 			 213602, -- Greater Fade
 			 214121, -- Body and Mind (priest talent)
-			 215572, -- Frothing Berserker (warrior talent)
 			 231390, -- Trailblazer (hunter talent)
-			 236060, -- Frenetic Speed
+			 236060, -- Frenetic Speed (fire mage talent)
 			 250878, -- Lightfoot Potion
+			 262232, -- War Machine
 			-276112, -- Divine Steed
 		},
 		ImmuneToStun = {
@@ -373,6 +372,7 @@ TMW.BE = {
 			 186265, -- Aspect of the Turtle
 			 197268, -- Ray of Hope
 			 199754, -- Riposte
+		   	 204018, -- Blessing of Spellwarding
 			 205191, -- Eye for an Eye
 			 210918, -- Ethereal Form (shaman PVP talent)
 			 213602, -- Greater Fade
