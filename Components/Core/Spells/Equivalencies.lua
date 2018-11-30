@@ -500,7 +500,6 @@ TMW.BE = {
 		},
 		ImmuneToInterrupts = {
 			    642, -- Divine Shield
-			 104773, -- Unending Resolve
 			 186265, -- Aspect of the Turtle
 			 196773, -- Inner Focus
 			 209584, -- Zen Focus Tea
