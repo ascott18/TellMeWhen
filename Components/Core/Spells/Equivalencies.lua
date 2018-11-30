@@ -547,12 +547,9 @@ TMW.BE = {
 		},
 		PvPSpells = {
 			    118, -- Polymorph
-			    339, -- Entangling Roots
 			   -605, -- Mind Control
 			    982, -- Revive Pet
 			   5782, -- Fear
-			  12051, -- Evocation
-			  20484, -- Rebirth
 			  20066, -- Repentance
 			  33786, -- Cyclone
 			 -51514, -- Hex
