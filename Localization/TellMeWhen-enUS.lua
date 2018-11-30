@@ -2770,6 +2770,7 @@ L["DefensiveBuffsAOE"] = "AOE Defensive Buffs"
 L["MiscHelpfulBuffs"] = "Misc. Helpful Buffs"
 L["SpeedBoosts"] = "Speed Boosts"
 L["DamageBuffs"] = "Damage Buffs"
+L["ImmuneToInterrupts"] = "Immunity to Interrupt Spells"
 
 -- Deprecated
 --L["IncreasedVersatility"] = "Increased Versatility"
