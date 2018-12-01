@@ -87,8 +87,8 @@ TMW.BE = {
 			 155722, -- Rake
 			 162487, -- Steel Trap (hunter talent)
 			 185855, -- Lacerate (Survival hunter)
-			-202028, -- Brutal Slash (feral druid talent)
 			 194279, -- Caltrops (hunter talent)
+			-202028, -- Brutal Slash (feral druid talent)
 			 273794, -- Rezan's Fury (general azerite trait)
 		},
 		Feared = {
