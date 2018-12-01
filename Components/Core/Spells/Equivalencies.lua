@@ -87,6 +87,7 @@ TMW.BE = {
 			 155722, -- Rake
 			 162487, -- Steel Trap (hunter talent)
 			 185855, -- Lacerate (Survival hunter)
+			-202028, -- Brutal Slash (feral druid talent)
 			 194279, -- Caltrops (hunter talent)
 			 273794, -- Rezan's Fury (general azerite trait)
 		},
@@ -115,7 +116,7 @@ TMW.BE = {
 			 115268, -- Mesmerize
 			 197214, -- Sundering
 			 200196, -- Holy Word: Chastise
-			 203126, -- Maim (with blood trauma feral pvp talent
+			 203126, -- Maim (with blood trauma feral pvp talent)
 			 217832, -- Imprison (breakable)
 			 221527, -- Imprison (banish, talented)
 			 226943, -- Mind Bomb
@@ -128,6 +129,7 @@ TMW.BE = {
 			 202274, -- Incendiary brew (brewmaster monk pvp talent)
 			 207167, -- Blinding Sleet (dk talent)
 			 213691, -- Scatter Shot (hunter pvp talent)
+			 236748, -- Intimidating Roar
 		},
 		Silenced = {
 			  -1330, -- Garrote - Silence
@@ -273,6 +275,7 @@ TMW.BE = {
 	},
 	buffs = {
 		SpeedBoosts = {
+			    783, -- Travel Form
 			  -2983, -- Sprint
 			  -2379, -- Speed
 			   2645, -- Ghost Wolf
@@ -308,6 +311,7 @@ TMW.BE = {
 			 231390, -- Trailblazer (hunter talent)
 			 236060, -- Frenetic Speed (fire mage talent)
 			 250878, -- Lightfoot Potion
+			 252216, -- Tiger Dash
 			 262232, -- War Machine
 			 273415, -- Gathering Storm
 			-276112, -- Divine Steed
@@ -501,11 +505,11 @@ TMW.BE = {
 		},
 		ImmuneToInterrupts = {
 			    642, -- Divine Shield
+			 104773, -- Unending Resolve
 			 186265, -- Aspect of the Turtle
 			 196773, -- Inner Focus
 			 209584, -- Zen Focus Tea
 			 210294, -- Divine Favor
-			 221705, -- Casting Circle
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 			-289657, -- Holy Word: Concentration
 			 290641, -- Ancestral Gift
