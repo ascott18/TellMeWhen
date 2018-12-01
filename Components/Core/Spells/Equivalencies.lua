@@ -227,6 +227,7 @@ TMW.BE = {
 			 212792, -- Cone of Cold (frost mage)
 			 222775, -- Strike from the Shadows
 			 228354, -- Flurry (frost mage ability)
+			 248744, -- Shiv
 			-287681, -- Turbo Fists
 			 288962, -- BLood Bolt
 		},
