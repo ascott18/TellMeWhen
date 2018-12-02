@@ -1,5 +1,8 @@
 
 ===v8.5.6===
+* You can now use "thisunit" in Lua conditions as a reference to the current unit in any Unit Conditions.
+* Made a number of performance optimizations around Unit Conditions.
+
 ====Bug Fixes====
 * Fixed #1615 - Critical Strike condition throwing error "attempt to call global 'max' (a nil value)"
 * Fixed #1618 - Conditions on Combat Event source/destination units that used event-driven updates could be in an incorrect state before the first time an update is needed.
