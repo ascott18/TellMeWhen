@@ -116,7 +116,6 @@ TMW.BE = {
 			 115268, -- Mesmerize
 			 197214, -- Sundering
 			 200196, -- Holy Word: Chastise
-			 203126, -- Maim (with blood trauma feral pvp talent)
 			 217832, -- Imprison (breakable)
 			 221527, -- Imprison (banish, talented)
 			 226943, -- Mind Bomb
