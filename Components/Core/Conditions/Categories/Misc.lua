@@ -354,7 +354,7 @@ ConditionCategory:RegisterCondition(31,	 "LUA", {
 
 		if lua:find("thisunit") then
 			if c.Unit and c.Unit ~= "" then
-				lua = lua:gsub("thisunit", CNDT:GetConditionUnitSubstitution(c.Unit))
+				lua = lua:gsub("thisunit", "(" .. CNDT:GetConditionUnitSubstitution(c.Unit) .. ")")
 			else
 				error("Attempted use of `thisunit` in conditions without units.")
 			end
