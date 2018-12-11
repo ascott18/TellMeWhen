@@ -455,6 +455,7 @@ TMW.BE = {
 			 227225, -- Soul Barrier
 			 235313, -- Blazing Barrier
 			 235450, -- Prismatic Barrier
+			 258153, -- Watery Dome (m+ absorb)
 			 269279, -- Resounding Protection (general azerite trait)
 			 270657, -- Bulwark of the Masses (general azerite trait)
 			 272979, -- Bulwark of Light (paladin azerite trait)
