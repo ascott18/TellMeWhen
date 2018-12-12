@@ -455,10 +455,12 @@ TMW.BE = {
 			 227225, -- Soul Barrier
 			 235313, -- Blazing Barrier
 			 235450, -- Prismatic Barrier
-			 258153, -- Watery Dome (m+ absorb)
+			 258153, -- Watery Dome (m+)
+			 265991, -- Luster (m+)
 			 269279, -- Resounding Protection (general azerite trait)
 			 270657, -- Bulwark of the Masses (general azerite trait)
 			 272979, -- Bulwark of Light (paladin azerite trait)
+			 273432, -- Bound by Shadow (m+ and Uldir)
 			 274289, -- Burning Soul (DH azerite talent)
 			 274346, -- Soulmonger (DH azerite trait)
 			 274369, -- Sanctum (priest azerite trait)
