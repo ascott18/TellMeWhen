@@ -231,7 +231,7 @@ TMW.BE = {
 			 228354, -- Flurry (frost mage ability)
 			 248744, -- Shiv
 			-287681, -- Turbo Fists
-			 288962, -- BLood Bolt
+			 288962, -- Blood Bolt
 		},
 		Stunned = {
 			    -25, -- Stun
@@ -501,6 +501,8 @@ TMW.BE = {
 			 146555, -- Drums of Rage
 			 178207, -- Drums of Fury
 			 160452, -- Netherwinds
+			 204361, -- Bloodlust (PVP talent)
+			 204362, -- Heroism (PVP talent)
 			 230935, -- Drums of the Mountain
 			 256740, -- Drums of the Maelstrom
 			 264667, -- Primal Rage
