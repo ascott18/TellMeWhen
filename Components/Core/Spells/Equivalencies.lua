@@ -211,6 +211,7 @@ TMW.BE = {
 			-196840, -- Frost Shock
 			 198222, -- System Shock
 			 198813, -- Vengeful Retreat
+			 201787, -- Heavy-Handed Strikes (ww pvp talent)
 			 204263, -- Shining Force
 			 204843, -- Sigil of Chains
 			 205021, -- Ray of Frost (frost mage talent)
@@ -241,7 +242,7 @@ TMW.BE = {
 			  -7922, -- Warbringer
 			  24394, -- Intimidation
 			 -20549, -- War Stomp
-			  22703, -- Summon Infernal
+			  22703, -- Infernal Awakening
 			 -30283, -- Shadowfury
 			 -89766, -- Axe Toss
 			  91797, -- Monstrous Blow
@@ -261,8 +262,7 @@ TMW.BE = {
 			 202244, -- Overrun
 			 202346, -- Double Barrel
 			 203123, -- Maim
-			 204399, -- Earthfury (elemental shaman pvp talent)
-			 204437, -- ightning Lasso
+			 204437, -- Lightning Lasso
 			 205629, -- Demonic Trample
 			 205630, -- Illidan's Grasp (demon hunter vengeance pvp talent - primary effect)
 			 208618, -- Illidan's Grasp (demon hunter vengeance pvp talent - throw effect)
