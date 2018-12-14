@@ -234,6 +234,7 @@ TMW.BE = {
 			 288962, -- Blood Bolt
 		},
 		Stunned = {
+			    -25, -- Stun
 			   -408, -- Kidney Shot
 			   -853, -- Hammer of Justice
 			  -1833, -- Cheap Shot
@@ -273,14 +274,11 @@ TMW.BE = {
 	buffs = {
 		SpeedBoosts = {
 			    783, -- Travel Form
-			   1044, -- Blessing of Freedom
 			  -2983, -- Sprint
 			  -2379, -- Speed
 			   2645, -- Ghost Wolf
 			   7840, -- Swim Speed
 			  36554, -- Shadowstep
-			  48265, -- Death's Advance
-			  54216, -- Master's Call
 			  54861, -- Nitro Boosts
 			  58875, -- Spirit Walk
 			 -65081, -- Body and Soul
@@ -378,7 +376,7 @@ TMW.BE = {
 			 155835, -- Bristling Fur
 			 184364, -- Enraged Regeneration
 			 186265, -- Aspect of the Turtle
-			 197268, -- Ray of Hope
+			-197268, -- Ray of Hope
 			 199754, -- Riposte
 		   	 204018, -- Blessing of Spellwarding
 			 205191, -- Eye for an Eye
@@ -511,6 +509,16 @@ TMW.BE = {
 			-289657, -- Holy Word: Concentration
 			 290641, -- Ancestral Gift
 		},
+		ImmuneToSlows = {
+			   1044, -- Blessing of Freedom
+			  46924, -- Bladestorm (fury)
+			  48265, -- Death's Advance
+			  54216, -- Master's Call
+			  87023, -- Cauterize
+			 201447, -- Ride the Wind (windwalker monk pvp talent)
+			 212552, -- Wraith Walk
+			 227847, -- Bladestorm (arms)
+		}.
 	},
 	casts = {
 		Heals = {
