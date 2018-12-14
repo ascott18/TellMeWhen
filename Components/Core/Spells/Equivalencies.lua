@@ -420,19 +420,6 @@ TMW.BE = {
 			 266779, -- Coordinated Assault
 			 288613, -- Trueshot
 		},
-		MiscHelpfulBuffs = {
-			   1044, -- Blessing of Freedom
-			   1850, -- Dash
-			   2983, -- Sprint
-			  10060, -- Power Infusion
-			  23920, -- Spell Reflection
-			  31821, -- Aura Mastery
-			  45182, -- Cheating Death
-			  53271, -- Master's Call
-			  68992, -- Darkflight
-			 197003, -- Maneuverability
-			 213915, -- Mass Spell Reflection
-		},
 		DamageShield = {
 			    -17, -- Power Word: Shield
 			   1463, -- Incanter's Flow
@@ -452,7 +439,6 @@ TMW.BE = {
 			 190456, -- Ignore Pain
 			 194022, -- Mental Fortitude (Shadow Priest Artifact)
 			 203538, -- Greater Blessing of Kings
-			 227225, -- Soul Barrier
 			 235313, -- Blazing Barrier
 			 235450, -- Prismatic Barrier
 			 258153, -- Watery Dome (m+)
@@ -554,17 +540,16 @@ TMW.BE = {
 			 209525, -- Soothing Mist
 
 		},
-		PvPSpells = {
-			    118, -- Polymorph
-			   -605, -- Mind Control
-			    982, -- Revive Pet
-			   5782, -- Fear
-			  20066, -- Repentance
-			  33786, -- Cyclone
-			 -51514, -- Hex
-		},
 	},
 }
+
+TMW:RegisterUpgrade(85702, {
+	icon = function(self, ics)
+		-- Some equivalencies being retired.
+		ics.Name = ics.Name:gsub("PvPSpells", "118;605;982;5782;20066;33786;51514")
+		ics.Name = ics.Name:gsub("MiscHelpfulBuffs", "1044;1850;2983;10060;23920;31821;45182;53271;68992;197003;213915")
+	end,
+})
 
 TMW.BE.buffs.DefensiveBuffs	= CopyTable(TMW.BE.buffs.DefensiveBuffsSingle)
 for k, v in pairs(TMW.BE.buffs.DefensiveBuffsAOE) do
