@@ -230,11 +230,10 @@ TMW.BE = {
 			 222775, -- Strike from the Shadows
 			 228354, -- Flurry (frost mage ability)
 			 248744, -- Shiv
-			-287681, -- Turbo Fists
+			-273984, -- Grip of the Dead
 			 288962, -- Blood Bolt
 		},
 		Stunned = {
-			    -25, -- Stun
 			   -408, -- Kidney Shot
 			   -853, -- Hammer of Justice
 			  -1833, -- Cheap Shot
@@ -251,7 +250,6 @@ TMW.BE = {
 			 118345, -- Pulverize
 			 118905, -- Static Charge
 			 119381, -- Leg Sweep
-			-131402, -- Stunning Strike
 			 132168, -- Shockwave
 			 132169, -- Storm Bolt
 			 163505, -- Rake
@@ -275,11 +273,14 @@ TMW.BE = {
 	buffs = {
 		SpeedBoosts = {
 			    783, -- Travel Form
+			   1044, -- Blessing of Freedom
 			  -2983, -- Sprint
 			  -2379, -- Speed
 			   2645, -- Ghost Wolf
 			   7840, -- Swim Speed
 			  36554, -- Shadowstep
+			  48265, -- Death's Advance
+			  54216, -- Master's Call
 			  54861, -- Nitro Boosts
 			  58875, -- Spirit Walk
 			 -65081, -- Body and Soul
@@ -304,6 +305,7 @@ TMW.BE = {
 			-204475, -- Windburst (marks hunter artifact ability)
 			 209754, -- Boarding Party (rogue pvp talent)
 			 210980, -- Focus in the Light (holy priest artifact trait)
+			 212552, -- Wraith Walk
 			 213177, -- Swift as a Coursing River (brewmaster artifact trait)
 			 213602, -- Greater Fade
 			 214121, -- Body and Mind (priest talent)
@@ -390,7 +392,7 @@ TMW.BE = {
 		DamageBuffs = {
 			   1719, -- Recklessness
 			   5217, -- Tiger's Fury
-			  12042, -- Arcane Power
+			  12042, -- Arcane Power 
 			  12472, -- Icy Veins
 			  13750, -- Adrenaline Rush
 			  19574, -- Bestial Wrath
@@ -399,7 +401,7 @@ TMW.BE = {
 			 102543, -- Incarnation: King of the Jungle
 			 102560, -- Incarnation: Chosen of Elune
 			 106951, -- Berserk
-			-107574, -- Avatar
+			 107574, -- Avatar
 			 113858, -- Dark Soul: Instability
 			 113860, -- Dark Soul: Misery
 			 114050, -- Ascendance
@@ -412,10 +414,13 @@ TMW.BE = {
 			 194223, -- Celestial Alignment
 			 194249, -- Voidform
 			 198144, -- Ice Form
+			 199261, -- Death Wish
+			 207289, -- Unholy Frenzy
 			 212155, -- Tricks of the Trade (Outlaw PVP talent)
 			 212283, -- Symbols of Death
 			 216113, -- Way of the Crane
 			 216331, -- Avenging Crusader
+			 248622, -- In for the Kill
 			 262228, -- Deadly Calm
 			 266779, -- Coordinated Assault
 			 288613, -- Trueshot
@@ -442,6 +447,7 @@ TMW.BE = {
 			 235313, -- Blazing Barrier
 			 235450, -- Prismatic Barrier
 			 258153, -- Watery Dome (m+)
+			 265946, -- Ritual Wraps
 			 265991, -- Luster (m+)
 			 269279, -- Resounding Protection (general azerite trait)
 			 270657, -- Bulwark of the Masses (general azerite trait)
@@ -454,6 +460,7 @@ TMW.BE = {
 			 271466, -- Luminous Barrier
 			 272987, -- Revel in Pain
 			 274395, -- Stalwart Protector (paladin azerite trait)
+			 278159, -- Xalzaix's Veil
 			 280165, -- Ursoc's Endurance (druid azerite trait)
 			 280170, -- Duck and Cover (hunter azerite trait)
 			 280212, -- Bury the Hatchet (warrior azerite trait)
