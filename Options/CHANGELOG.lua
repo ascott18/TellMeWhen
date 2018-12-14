@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 TMW.CHANGELOG = [==[
 ===v8.5.7===
 * Bump the TOC version to 8.1 now that Blizzard finally remembered to increment it on their end.
+* Significant updates to buff/debuff eqauivalencies (thanks to user Jalopyy!)
 
 ===v8.5.6===
 * You can now use "thisunit" in Lua conditions as a reference to the current unit in any Unit Conditions.
