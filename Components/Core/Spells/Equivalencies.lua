@@ -251,6 +251,7 @@ TMW.BE = {
 			 118345, -- Pulverize
 			 118905, -- Static Charge
 			 119381, -- Leg Sweep
+			-131402, -- Stunning Strike
 			 132168, -- Shockwave
 			 132169, -- Storm Bolt
 			 163505, -- Rake
