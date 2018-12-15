@@ -122,14 +122,14 @@ TMW.BE = {
 			 226943, -- Mind Bomb
 		},
 		Disoriented = {
-			  -2094, -- Blind
-			  31661, -- Dragon's Breath
+			  -2094, -- Blind (rogue, general)
+			  31661, -- Dragon's Breath (fire mage)
 			 105421, -- Blinding light (paladin talent)
 			 198909, -- Song of Chi-ji (mistweaver monk talent)
 			 202274, -- Incendiary brew (brewmaster monk pvp talent)
-			 207167, -- Blinding Sleet (dk talent)
-			 213691, -- Scatter Shot (hunter pvp talent)
-			 236748, -- Intimidating Roar
+			 207167, -- Blinding Sleet (Frost DK talent)
+			 213691, -- Scatter Shot (MM hunter PVP talent)
+			 236748, -- Intimidating Roar (bear druid)
 		},
 		Silenced = {
 			  -1330, -- Garrote - Silence
@@ -139,7 +139,7 @@ TMW.BE = {
 			 -47476, -- Strangulate
 			 -78675, -- Solar Beam
 			 202933, -- Spider Sting
-			 204490, -- Sigil of Silence
+			 204490, -- Sigil of Silence (Vengeance Demon Hunter)
 			 217824; -- Shield of Virtue
 		},
 		Rooted = {
@@ -204,7 +204,6 @@ TMW.BE = {
 			 169733, -- Brutal Bash
 			 183218, -- Hand of Hindrance
 			 185763, -- Pistol Shot
-			 190780, -- Frost Breath (dk frost artifact ability)
 			 191397, -- Bestial Cunning
 			 194858, -- Dragonsfire Grenade
 			 195645, -- Wing Clip
@@ -222,7 +221,6 @@ TMW.BE = {
 			 206930, -- Heart Strike
 			 208278, -- Debilitating Infestation (DK unholy talent)
 			 209786, -- Goremaw's Bite
-			 210979, -- Focus in the light (holy priest artifact trait)
 			 211793, -- Remorseless Winter
 			 211831, -- Abomination's Might
 			 212764, -- White Walker
@@ -295,17 +293,12 @@ TMW.BE = {
 			-186257, -- Aspect of the Cheetah
 			 188024, -- Skystep Potion
 			 192082, -- Wind Rush (shaman wind rush totem talent)
-			 196674, -- Planewalker (warlock artifact trait)
 			 197023, -- Cut to the Chase (rogue pvp talent)
-			 199407, -- Light on your Feet (mistweaver monk artifact trait)
 			 201233, -- Whirling Kicks (windwalker monk pvp talent)
 			 201447, -- Ride the Wind (windwalker monk pvp talent)
 			 202164, -- Bounding Stride (warrior talent)
-			-204475, -- Windburst (marks hunter artifact ability)
 			 209754, -- Boarding Party (rogue pvp talent)
-			 210980, -- Focus in the Light (holy priest artifact trait)
 			 212552, -- Wraith Walk (F/UHDK PVE talent)
-			 213177, -- Swift as a Coursing River (brewmaster artifact trait)
 			 213602, -- Greater Fade
 			 214121, -- Body and Mind (priest talent)
 			 231390, -- Trailblazer (hunter talent)
@@ -440,7 +433,6 @@ TMW.BE = {
 			 173260, -- Shieldtronic Shield
 			 184662, -- Shield of Vengeance
 			 190456, -- Ignore Pain
-			 194022, -- Mental Fortitude (Shadow Priest Artifact)
 			 203538, -- Greater Blessing of Kings
 			 235313, -- Blazing Barrier
 			 235450, -- Prismatic Barrier
