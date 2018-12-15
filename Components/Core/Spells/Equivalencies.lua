@@ -38,66 +38,67 @@ local _, pclass = UnitClass("Player")
 TMW.BE = {
 	debuffs = {
 		ReducedHealing = {
-			   8679, -- Wound Poison
-			  27580, -- Sharpen Blade
-			  30213, -- Legion Strike
-			 115625, -- Mortal Cleave
-			-115804, -- Mortal Wounds
-			 195452, -- Nightblade
-			 287672, -- Fatal Wounds
+			   8679, -- Wound Poison (sin rogue)
+			  27580, -- Sharpen Blade (arms warr PVP talent)
+			  30213, -- Legion Strike (demo lock pet)
+			 115625, -- Mortal Cleave (demo lock pet)
+			-115804, -- Mortal Wounds (arms/ww/hunter pet)
+			 195452, -- Nightblade (sub rogue)
+			 287672, -- Fatal Wounds (WW PVP talent)
 		},
 		CrowdControl = {
-			   -118, -- Polymorph
-			   -605, -- Mind Control
-			   -710, -- Banish
-			  -2094, -- Blind
-			  -3355, -- Freezing Trap
-			  -5782, -- Fear
-			  -6358, -- Seduction
-			  -6770, -- Sap
-			  -9484, -- Shackle Undead
-			 -19386, -- Wyvern Sting
-			  20066, -- Repentance
-			  33786, -- Cyclone
-			 -51514, -- Hex (also 211015; 211010; 211004; 210873; 196942; 269352; 277778; 277784)
-			 -82691, -- Ring of Frost
-			 107079, -- Quaking Palm
-			 115078, -- Paralysis
-			 115268, -- Mesmerize
+			   -118, -- Polymorph (mage, general)
+			   -605, -- Mind Control (priest, general PVE talent)
+			   -710, -- Banish (warlock, general)
+			  -2094, -- Blind (rogue, general)
+			  -3355, -- Freezing Trap (hunter, general)
+			  -5782, -- Fear (warlock, general)
+			  -6358, -- Seduction (warlock pet, succubus)
+			  -6770, -- Sap (rogue, general)
+			  -9484, -- Shackle Undead (priest, general)
+			  20066, -- Repentance (paladin, general)
+			  33786, -- Cyclone (feral/resto/boomkin)
+			 -51514, -- Hex (shaman, general)
+			 -82691, -- Ring of Frost (mage, general)
+			 107079, -- Quaking Palm (pandaren racial)
+			 115078, -- Paralysis (monk, general)
+			 115268, -- Mesmerize (warlock pet, Grimiore of Supremacy version of Succubus)
 			 198909, -- Song of Chi-ji (mistweaver monk talent)
-			 207685, -- Sigil of Misery (Havoc Demon hunter)
+			 207685, -- Sigil of Misery (Vengeance Demon hunter)
 		},
 		Shatterable = {
-			    122, -- Frost Nova
-			  33395, -- Freeze
-			 -82691, -- Ring of Frost
-			 198121, -- Frostbite
-			 228600, -- Glacial Spike
+			    122, -- Frost Nova (frost mage)
+			  -3355, -- Freezing Trap (hunter, general)
+			  33395, -- Freeze (frost mage pet)
+			 -82691, -- Ring of Frost (mage, general)
+			 157997, -- Ice Nova (frost mage PVE talent)
+			 198121, -- Frostbite (frost mage PVP talent)
+			 228358, -- Winter's Chill (frost mage)
+			 228600, -- Glacial Spike (frost mage PVE talent)
 		},
 		Bleeding = {
-			   -703, -- Garrote
-			  -1079, -- Rip
-			  -1822, -- Rake
-			   1943, -- Rupture
-			 -11977, -- Rend
-			  16511, -- Hemorrhage
-			  77758, -- Thrash
-			 106830, -- Thrash
-			-115767, -- Deep Wounds
-			 155722, -- Rake
+			   -703, -- Garrote (rogue, general)
+			  -1079, -- Rip (feral druid)
+			  -1822, -- Rake (feral druid)
+			   1943, -- Rupture (rogue, general)
+			 -11977, -- Rend (arms warr PVE talent)
+			  16511, -- Hemorrhage (sub rogue)
+			  77758, -- Thrash (bear druid)
+			 106830, -- Thrash (feral druid)
+			-115767, -- Deep Wounds (arms/prot warr)
 			 162487, -- Steel Trap (hunter talent)
 			 185855, -- Lacerate (Survival hunter)
-			 194279, -- Caltrops (hunter talent)
 			-202028, -- Brutal Slash (feral druid talent)
+			 259277, -- Kill Command (SV hunter PVE talent, Bloodseeker)
 			 273794, -- Rezan's Fury (general azerite trait)
 		},
 		Feared = {
-			   5246, -- Intimidating Shout
-			  -5782, -- Fear
-			  -6789, -- Mortal Coil
-			  -8122, -- Psychic Scream
-			  87204, -- Sin and Punishment
-			 207685, -- Sigil of Misery (Havoc Demon hunter)
+			   5246, -- Intimidating Shout (warrior, general)
+			  -5782, -- Fear (warlock, general)
+			  -6789, -- Mortal Coil (warlock PVE talent, general)
+			  -8122, -- Psychic Scream (priest passive/talent, general)
+			  87204, -- Sin and Punishment (spriest VT backlash)
+			 207685, -- Sigil of Misery (Vengeance Demon hunter)
 		},
 		Incapacitated = {
 			     99, -- Incapacitating Roar
@@ -205,7 +206,6 @@ TMW.BE = {
 			 185763, -- Pistol Shot
 			 190780, -- Frost Breath (dk frost artifact ability)
 			 191397, -- Bestial Cunning
-			 194279, -- Caltrops
 			 194858, -- Dragonsfire Grenade
 			 195645, -- Wing Clip
 			-196840, -- Frost Shock
