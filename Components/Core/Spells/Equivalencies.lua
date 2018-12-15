@@ -96,26 +96,7 @@ TMW.BE = {
 			 162487, -- Steel Trap (hunter talent)
 			 185855, -- Lacerate (Survival hunter)
 			-202028, -- Brutal Slash (feral druid talent)
-			 255434, -- Serrated Teeth (Atal'dazar dungeon)
-			 255814, -- Rending Maul (Atal'dazar dungeon)
-			 256363, -- Ripper Punch (Freehold dungeon)
-			 257544, -- Jagged Cut (Motherload dungeon)
-			 259277, -- Kill Command (SV hunter PVE talent, Bloodseeker)
-			 260016, -- Itchy Bite (Tol Dagor dungeon)*
-			 260455, -- Serrated Fangs (Underrot dungeon)
-			 260741, -- Jagged Nettles (Waycrest Manor dungeon)*
-			 264556, -- Tearing Strike (Waycrest Manor dungeon)*
-			 265019, -- Savage Cleave (Underrot dungeon)* 
-			 265533, -- Blood Maw (Underrot dungeon)*
-			 266035, -- Bone Splinter (Waycrest Manor dungeon)*
-			 266191, -- Whirling Axe (King's Rest dungeon)*
-			 266231, -- Severing Axe (King's Rest dungeon)*
-			 270084, -- Axe Barrage (King's Rest dungeon)*
-			 270487, -- Severing Blade (King's Rest dungeon)*
-			 271175, -- Ravaging Leap (Waycrest Manor dungeon)*
 			 273794, -- Rezan's Fury (general azerite trait)
-			 273658, -- Dark Leap (Waycrest Manor dungeon)*
-			 274389, -- Rat Traps (Freehold dungeon)
 		},
 		Feared = {
 			   5246, -- Intimidating Shout (warrior, general)
