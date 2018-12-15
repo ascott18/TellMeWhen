@@ -304,7 +304,7 @@ TMW.BE = {
 			-204475, -- Windburst (marks hunter artifact ability)
 			 209754, -- Boarding Party (rogue pvp talent)
 			 210980, -- Focus in the Light (holy priest artifact trait)
-			 212552, -- Wraith Walk
+			 212552, -- Wraith Walk (F/UHDK PVE talent)
 			 213177, -- Swift as a Coursing River (brewmaster artifact trait)
 			 213602, -- Greater Fade
 			 214121, -- Body and Mind (priest talent)
@@ -330,7 +330,7 @@ TMW.BE = {
 			 221527, -- Imprison
 			 227847, -- Bladestorm (arms)
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
-			 287081, -- Lichborne
+			 287081, -- Lichborne (F/UHDK PVP talent)
 		},
 		DefensiveBuffsAOE = {
 			 -31821, -- Aura Mastery
@@ -386,7 +386,7 @@ TMW.BE = {
 			 213871, -- Bodyguard
 			-228049, -- Guardian of the Forgotten Queen (spellID might be wrong?)
 			 223658, -- Safeguard
-			 287081, -- Lichborne
+			 287081, -- Lichborne (F/UHDK PVP talent)
 		},
 		DamageBuffs = {
 			   1719, -- Recklessness
@@ -436,7 +436,6 @@ TMW.BE = {
 			 108416, -- Dark Pact
 			 116849, -- Life Cocoon
 			 145441, -- Yu'lon's Barrier
-			 152118, -- Clarity of Will 
 			 169373, -- Boulder Shield
 			 173260, -- Shieldtronic Shield
 			 184662, -- Shield of Vengeance
@@ -517,8 +516,10 @@ TMW.BE = {
 			  54216, -- Master's Call
 			  87023, -- Cauterize
 			 201447, -- Ride the Wind (windwalker monk pvp talent)
-			 212552, -- Wraith Walk
+			 212552, -- Wraith Walk (F/UHDK PVE talent)
+			 216113, -- Way of the Crane
 			 227847, -- Bladestorm (arms)
+			 287081, -- Lichborne (F/UHDK PVP talent)
 		}.
 	},
 	casts = {
@@ -526,34 +527,35 @@ TMW.BE = {
 			    596, -- Prayer of Healing
 			   2060, -- Heal
 			   2061, -- Flash Heal
-			  32546, -- Binding Heal
+			  32546, -- Binding Heal (hpriest PVE talent)
 			  33076, -- Prayer of Mending
 			  64843, -- Divine Hymn
-			 120517, -- Halo
-			 152118, -- Clarity of Will
+			 120517, -- Halo (hpriest/disc PVE talent)
 			 186263, -- Shadow Mend
 			 194509, -- Power Word: Radiance
-			 204065, -- Shadow Covenant
+			 265202, -- Holy Word: Salvation (hpriest PVE talent)
+			 289666, -- Greater Heal (hpriest PVP talent)
 
 			    740, -- Tranquility
 			   8936, -- Regrowth
 			  48438, -- Wild Growth
+			 289022, -- Nourish (rdruid PVP talent)
 
 			   1064, -- Chain Heal
 			   8004, -- Healing Surge
 			  73920, -- Healing Rain
 			  77472, -- Healing Wave
-			 207778, -- Gift of the Queen
+			 197995, -- Wellspring (rsham PVE talent)
+			 207778, -- Downpour (rsham PVE talent)
 
 			  19750, -- Flash of Light
 			  82326, -- Holy Light
-			 200652, -- Tyr's Deliverance
 
 			 116670, -- Vivify
 			 124682, -- Enveloping Mist
-			 191837, -- Esssence Font
-			 205406, -- Sheilun's Gift
-			 209525, -- Soothing Mist
+			 191837, -- Essence Font
+			-209525, -- Soothing Mist
+			 227344, -- Surging Mist (MW pvp talent)
 
 		},
 	},
