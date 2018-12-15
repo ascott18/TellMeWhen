@@ -2773,6 +2773,7 @@ L["SpeedBoosts"] = "Speed Boosts"
 L["DamageBuffs"] = "Damage Buffs"
 L["ImmuneToInterrupts"] = "Immunity to Interrupt Spells"
 L["ImmuneToSlows"] = "Immunity to Movement Speed Reducing Debuffs"
+L["DispellableEnrage"] = "Buffs That Can Be Soothed"
 
 -- Deprecated
 --L["IncreasedVersatility"] = "Increased Versatility"
