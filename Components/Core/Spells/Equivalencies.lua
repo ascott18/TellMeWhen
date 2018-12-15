@@ -44,6 +44,13 @@ TMW.BE = {
 			 115625, -- Mortal Cleave (demo lock pet)
 			-115804, -- Mortal Wounds (arms/ww/hunter pet)
 			 195452, -- Nightblade (sub rogue)
+			 257775, -- Plague Step (Freehold dungeon)
+			 257908, -- Oiled Blade (Freehold dungeon)
+			 258323, -- Infected Wound (Freehold dungeon)
+			 262513, -- Azerite Heartseeker (Motherload dungeon)
+			 269686, -- Plague (Temple of Sethraliss dungeon)
+			 272588, -- Rotting Wounds (Siege of Boralus dungeon)
+			 274555, -- Scabrous Bite (Freehold dungeon)
 			 287672, -- Fatal Wounds (WW PVP talent)
 		},
 		CrowdControl = {
@@ -89,8 +96,26 @@ TMW.BE = {
 			 162487, -- Steel Trap (hunter talent)
 			 185855, -- Lacerate (Survival hunter)
 			-202028, -- Brutal Slash (feral druid talent)
+			 255434, -- Serrated Teeth (Atal'dazar dungeon)
+			 255814, -- Rending Maul (Atal'dazar dungeon)
+			 256363, -- Ripper Punch (Freehold dungeon)
+			 257544, -- Jagged Cut (Motherload dungeon)
 			 259277, -- Kill Command (SV hunter PVE talent, Bloodseeker)
+			 260016, -- Itchy Bite (Tol Dagor dungeon)*
+			 260455, -- Serrated Fangs (Underrot dungeon)
+			 260741, -- Jagged Nettles (Waycrest Manor dungeon)*
+			 264556, -- Tearing Strike (Waycrest Manor dungeon)*
+			 265019, -- Savage Cleave (Underrot dungeon)* 
+			 265533, -- Blood Maw (Underrot dungeon)*
+			 266035, -- Bone Splinter (Waycrest Manor dungeon)*
+			 266191, -- Whirling Axe (King's Rest dungeon)*
+			 266231, -- Severing Axe (King's Rest dungeon)*
+			 270084, -- Axe Barrage (King's Rest dungeon)*
+			 270487, -- Severing Blade (King's Rest dungeon)*
+			 271175, -- Ravaging Leap (Waycrest Manor dungeon)*
 			 273794, -- Rezan's Fury (general azerite trait)
+			 273658, -- Dark Leap (Waycrest Manor dungeon)*
+			 274389, -- Rat Traps (Freehold dungeon)
 		},
 		Feared = {
 			   5246, -- Intimidating Shout (warrior, general)
@@ -99,6 +124,13 @@ TMW.BE = {
 			  -8122, -- Psychic Scream (priest passive/talent, general)
 			  87204, -- Sin and Punishment (spriest VT backlash)
 			 207685, -- Sigil of Misery (Vengeance Demon hunter)
+			 255041, -- Terrifying Screech (Atal'dazar dungeon)
+			 255371, -- Terrifying Visage (Atal'dazar dungeon)
+			 257169, -- Terrifying Roar (Siege of Boralus dungeon)
+			 257791, -- Howling Fear (Tol Dagor dungeon)
+			 269369, -- Deathly Roar (King's Rest dungeon)
+			 272609, -- Maddening Gaze (Underrot dungeon)
+			 276031, -- Pit of Despair (King's Rest dungeon)
 		},
 		Incapacitated = {
 			     99, -- Incapacitating Roar
@@ -108,7 +140,6 @@ TMW.BE = {
 			  -3355, -- Freezing Trap
 			  -6358, -- Seduction
 			  -6770, -- Sap
-			 -19386, -- Wyvern Sting
 			  20066, -- Repentance
 			 -51514, -- Hex (also 211015; 211010; 211004; 210873; 196942; 269352; 277778; 277784)
 			  82691, -- Ring of Frost
@@ -120,8 +151,14 @@ TMW.BE = {
 			 217832, -- Imprison (breakable)
 			 221527, -- Imprison (banish, talented)
 			 226943, -- Mind Bomb
+			 252781, -- Unstable Hex (Atal'dazar dungeon)
+			 263914, -- Blinding Sand (Temple of Sethraliss dungeon)
+			 268008, -- Snake Charm (Temple of Sethraliss dungeon)
+			 268797, -- Transmute: Enemy to Goo (Motherload dungeon)
+			 280032, -- Neurotoxin (Temple of Sethraliss dungeon)
 		},
 		Disoriented = {
+			   -605, -- Mind Control (priest, general PVE talent)
 			  -2094, -- Blind (rogue, general)
 			  31661, -- Dragon's Breath (fire mage)
 			 105421, -- Blinding light (paladin talent)
@@ -130,6 +167,10 @@ TMW.BE = {
 			 207167, -- Blinding Sleet (Frost DK talent)
 			 213691, -- Scatter Shot (MM hunter PVP talent)
 			 236748, -- Intimidating Roar (bear druid)
+			 257371, -- Tear Gas (Motherload dungeon)
+			 258875, -- Blackout Barrel (Freehold dungeon)
+			 258917, -- Righteous FLames (Tol Dagor dungeon)
+			 270920, -- Seduction (King's Rest dungeon)
 		},
 		Silenced = {
 			  -1330, -- Garrote - Silence
@@ -141,6 +182,8 @@ TMW.BE = {
 			 202933, -- Spider Sting
 			 204490, -- Sigil of Silence (Vengeance Demon Hunter)
 			 217824; -- Shield of Virtue
+			 258313, -- Handcuff (Tol Dagor dungeon)
+			 268846, -- Echo Blade (Motherload dungeon)
 		},
 		Rooted = {
 			   -339, -- Entangling Roots
@@ -168,6 +211,11 @@ TMW.BE = {
 			 228600, -- Glacial Spike (frost mage talent)
 			 232559, -- Thorns
 			 233582, -- Entrenched in Flames
+			 256897, -- Clamping Jaws (Siege of Boralus dungeon)
+			 258058, -- Squeeze (Tol Dagor dungeon)
+			 259711, -- Lockdown (Tol Dagor dungeon)
+			 268050, -- Anchor of Binding (Shrine of the Storms dungeon)
+			 274389, -- Rat Traps (Freehold dungeon)
 		},
 		Slowed = {
 			   -116, -- Frostbolt
@@ -212,7 +260,7 @@ TMW.BE = {
 			 198813, -- Vengeful Retreat
 			 201787, -- Heavy-Handed Strikes (ww pvp talent)
 			 204263, -- Shining Force
-			 204843, -- Sigil of Chains
+			 204843, -- Sigil of Chains (veng DH)
 			 205021, -- Ray of Frost (frost mage talent)
 			 205320, -- Strike of the Windlord
 			 205708, -- Chilled (frost mage effect)
@@ -227,9 +275,18 @@ TMW.BE = {
 			 212792, -- Cone of Cold (frost mage)
 			 222775, -- Strike from the Shadows
 			 228354, -- Flurry (frost mage ability)
-			 248744, -- Shiv
-			-273984, -- Grip of the Dead
-			 288962, -- Blood Bolt
+			 248744, -- Shiv (rogue PVP talent)
+			 257478, -- Crippling Bite (Freehold dungeon)
+			 257777, -- Crippling Shiv  (Tol Dagor dungeon)
+			 258313, -- Handcuff (Tol Dagor dungeon)
+			 267899, -- Hindering Cleave (Shrine of the Storms dungeon)
+			 268896, -- Mind Rend (Shrine of the Storms dungeon)
+			 270499, -- Frost Shock (King's Rest dungeon)
+			 271564, -- Embalming Fluid (King's Rest dungeon)
+			 272834, -- Viscous Slobber (Siege of Boralus dungeon)
+			-273984, -- Grip of the Dead (UHDK PVP talent)
+			 280604, -- Iced Spritzer (Motherload dungeon)
+			 288962, -- Blood Bolt (hunter pet ability)
 		},
 		Stunned = {
 			    -25, -- Stun
@@ -267,6 +324,22 @@ TMW.BE = {
 			 211881, -- Fel Eruption
 			 221562, -- Asphyxiate (death knight, baseline for blood)
 			 255723, -- Bull Rush
+			 256474, -- Heartstopper Venom (Tol Dagor dungeon)
+			 257119, -- Sand Trap (Tol Dagor dungeon)
+			 257292, -- Heavy Slash (Siege of Boralus dungeon)
+			 257337, -- Shocking Claw (Motherload dungeon)
+			 260067, -- Vicious Mauling (Tol Dagor dungeon)
+			 263637, -- Clothesline (Motherload dungeon)
+			 263891, -- Grasping Thorns (Waycrest Manor dungeon)
+			 263958, -- A Knot of Snakes (Temple of Sethraliss dungeon)
+			 268796, -- Impaling Spear (King's Rest dungeon)
+			 269104, -- Explosive Void (Shrine of the Storms dungeon)
+			 270003, -- Suppression Slam (King's Rest dungeon)
+			 272713, -- Crushing Slam (Siege of Boralus dungeon)
+			 272874, -- Trample (Siege of Boralus dungeon)
+			 276268, -- Heaving Blow (Shrine of the Storms dungeon)
+			 278961, -- Decaying Mind (Underrot dungeon)
+			 280605, -- Brain Freeze (Motherload dungeon)
 			 287254, -- Dead of Winter
 		},
 	},
@@ -384,7 +457,7 @@ TMW.BE = {
 		DamageBuffs = {
 			   1719, -- Recklessness
 			   5217, -- Tiger's Fury
-			  12042, -- Arcane Power 
+			  12042, -- Arcane Power
 			  12472, -- Icy Veins
 			  13750, -- Adrenaline Rush
 			  19574, -- Bestial Wrath
@@ -512,7 +585,21 @@ TMW.BE = {
 			 216113, -- Way of the Crane
 			 227847, -- Bladestorm (arms)
 			 287081, -- Lichborne (F/UHDK PVP talent)
-		}.
+		},
+		DispellableEnrage = {
+			  18499, -- Berserker Rage (warrior, general)
+			 184362, -- Enrage (fury warrior)
+			 228318, -- Raging (m+ affix)
+			 255824, -- Fanatic's Rage (Atal'dazar dungeon)
+			 257260, -- Enrage (Waycrest Manor dungeon)
+			 257476, -- Bestial Wrath (Freehold dungeon)
+			 259975, -- Enrage (Tol Dagor dungeon)
+			 262092, -- Inhale Vapors (Motherload dungeon)
+			 265081, -- Warcry (Underrot dungeon)
+			 266209, -- Wicked Frenzy (Underrot dungeon)
+			 269976, -- Ancestral Fury (King's Rest dungeon)
+			 272888, -- Ferocity (Siege of Boralus dungeon)
+		},
 	},
 	casts = {
 		Heals = {
