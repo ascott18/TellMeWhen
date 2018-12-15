@@ -351,6 +351,7 @@ TMW.BE = {
 			   2645, -- Ghost Wolf
 			   7840, -- Swim Speed
 			  36554, -- Shadowstep
+			  48265, -- Death's Advance
 			  54861, -- Nitro Boosts
 			  58875, -- Spirit Walk
 			 -65081, -- Body and Soul
@@ -466,7 +467,7 @@ TMW.BE = {
 			 102543, -- Incarnation: King of the Jungle
 			 102560, -- Incarnation: Chosen of Elune
 			 106951, -- Berserk
-			 107574, -- Avatar
+			-107574, -- Avatar
 			 113858, -- Dark Soul: Instability
 			 113860, -- Dark Soul: Misery
 			 114050, -- Ascendance
@@ -585,20 +586,6 @@ TMW.BE = {
 			 216113, -- Way of the Crane
 			 227847, -- Bladestorm (arms)
 			 287081, -- Lichborne (F/UHDK PVP talent)
-		},
-		DispellableEnrage = {
-			  18499, -- Berserker Rage (warrior, general)
-			 184362, -- Enrage (fury warrior)
-			 228318, -- Raging (m+ affix)
-			 255824, -- Fanatic's Rage (Atal'dazar dungeon)
-			 257260, -- Enrage (Waycrest Manor dungeon)
-			 257476, -- Bestial Wrath (Freehold dungeon)
-			 259975, -- Enrage (Tol Dagor dungeon)
-			 262092, -- Inhale Vapors (Motherload dungeon)
-			 265081, -- Warcry (Underrot dungeon)
-			 266209, -- Wicked Frenzy (Underrot dungeon)
-			 269976, -- Ancestral Fury (King's Rest dungeon)
-			 272888, -- Ferocity (Siege of Boralus dungeon)
 		},
 	},
 	casts = {
