@@ -38,7 +38,7 @@ local _, pclass = UnitClass("Player")
 TMW.BE = {
 	debuffs = {
 		ReducedHealing = {
-			   8679, -- Wound Poison (sin rogue)
+			   8679, -- Wound Poison (assassination rogue)
 			  27580, -- Sharpen Blade (arms warr PVP talent)
 			  30213, -- Legion Strike (demo lock pet)
 			 115625, -- Mortal Cleave (demo lock pet)
@@ -51,7 +51,7 @@ TMW.BE = {
 			 269686, -- Plague (Temple of Sethraliss dungeon)
 			 272588, -- Rotting Wounds (Siege of Boralus dungeon)
 			 274555, -- Scabrous Bite (Freehold dungeon)
-			 287672, -- Fatal Wounds (WW PVP talent)
+			 287672, -- Fatal Wounds (windwalker PVP talent)
 		},
 		CrowdControl = {
 			   -118, -- Polymorph (mage, general)
@@ -104,7 +104,7 @@ TMW.BE = {
 			  -6789, -- Mortal Coil (warlock PVE talent, general)
 			  -8122, -- Psychic Scream (priest passive/talent, general)
 			  87204, -- Sin and Punishment (spriest VT backlash)
-			 207685, -- Sigil of Misery (Vengeance Demon hunter)
+			 207685, -- Sigil of Misery (veng demon hunter)
 			 255041, -- Terrifying Screech (Atal'dazar dungeon)
 			 255371, -- Terrifying Visage (Atal'dazar dungeon)
 			 257169, -- Terrifying Roar (Siege of Boralus dungeon)
@@ -114,24 +114,24 @@ TMW.BE = {
 			 276031, -- Pit of Despair (King's Rest dungeon)
 		},
 		Incapacitated = {
-			     99, -- Incapacitating Roar
-			   -118, -- Polymorph
-			   2637, -- Hibernate
-			   1776, -- Gouge
-			  -3355, -- Freezing Trap
-			  -6358, -- Seduction
-			  -6770, -- Sap
-			  20066, -- Repentance
-			 -51514, -- Hex (also 211015; 211010; 211004; 210873; 196942; 269352; 277778; 277784)
-			  82691, -- Ring of Frost
-			 107079, -- Quaking Palm
-			 115078, -- Paralysis
-			 115268, -- Mesmerize
-			 197214, -- Sundering
-			 200196, -- Holy Word: Chastise
-			 217832, -- Imprison (breakable)
-			 221527, -- Imprison (banish, talented)
-			 226943, -- Mind Bomb
+			     99, -- Incapacitating Roar (bear druid)
+			   -118, -- Polymorph (mage, general)
+			   2637, -- Hibernate (druid, general)
+			   1776, -- Gouge (rogue, outlaw)
+			  -3355, -- Freezing Trap (hunter, general)
+			  -6358, -- Seduction (warlock pet)
+			  -6770, -- Sap (rogue, general)
+			  20066, -- Repentance (paladin PVE talent, general)
+			 -51514, -- Hex (shaman, general)
+			  82691, -- Ring of Frost (mage PVE talent, general)
+			 107079, -- Quaking Palm (pandaren racial)
+			 115078, -- Paralysis (monk, general)
+			 115268, -- Mesmerize (warlock pet, Grimiore of Supremacy version of Succubus)
+			 197214, -- Sundering (enhancement shaman PVE talent)
+			 200196, -- Holy Word: Chastise (holy priest, baseline)
+			 217832, -- Imprison (demon hunter, baseline, general)
+			 221527, -- Imprison (demon hunter, PVP talent, general)
+			 226943, -- Mind Bomb (shadow priest, PVE talent)
 			 252781, -- Unstable Hex (Atal'dazar dungeon)
 			 263914, -- Blinding Sand (Temple of Sethraliss dungeon)
 			 268008, -- Snake Charm (Temple of Sethraliss dungeon)
@@ -154,44 +154,41 @@ TMW.BE = {
 			 270920, -- Seduction (King's Rest dungeon)
 		},
 		Silenced = {
-			  -1330, -- Garrote - Silence
-			 -15487, -- Silence
-			  31117, -- Unstable Affliction
-			  31935, -- Avenger's Shield
-			 -47476, -- Strangulate
-			 -78675, -- Solar Beam
-			 202933, -- Spider Sting
-			 204490, -- Sigil of Silence (Vengeance Demon Hunter)
-			 217824; -- Shield of Virtue
+			  -1330, -- Garrote - Silence (rogue, general)
+			 -15487, -- Silence (shadow priest, baseline)
+			  31117, -- Unstable Affliction (affliction warlock, dispel backlash)
+			  31935, -- Avenger's Shield (protection paladin, baseline)
+			 -47476, -- Strangulate (blood death knight, baseline)
+			 -78675, -- Solar Beam (balance druid, baseline)
+			 202933, -- Spider Sting (hunter, PVP talent, general)
+			 204490, -- Sigil of Silence (vengeance demon hunter, baseline)
+			 217824; -- Shield of Virtue (protection paladin, PVP talent)
 			 258313, -- Handcuff (Tol Dagor dungeon)
 			 268846, -- Echo Blade (Motherload dungeon)
 		},
 		Rooted = {
-			   -339, -- Entangling Roots
-			   -122, -- Frost Nova
+			   -339, -- Entangling Roots (druid, general, baseline)
+			   -122, -- Frost Nova (mage, general, baseline)
 			  33395, -- Freeze (frost mage water elemental)
 			  45334, -- Immobilized (wild charge, bear form)
-			  53148, -- Charge
-			  96294, -- Chains of Ice
-			 -64695, -- Earthgrab
-			  91807, -- Shambling Rush (DK ghoul)
-			 102359, -- Mass Entanglement
-			 105771, -- Charge
-			 116706, -- Disable
-			 117526, -- Binding Shot
-			 157997, -- Ice Nova (frost mage talent)
-			 162480, -- Steel Trap (hunter talent)
-			 190927, -- harpoon (survival hunter)
-			 198121, -- Frostbite
-			 199042, -- Thunderstruck (Warrior PVP)
-			 200108, -- Ranger's Net (Hunter talent)
-			 201158, -- Super Sticky Tar (Expert Trapper, Hunter talent, Tar Trap effect)
-			 204085, -- Deathchill (DK PVP)
-			 207171, -- Winter is Coming
-			 212638, -- Tracker's Net (hunter PvP )
-			 228600, -- Glacial Spike (frost mage talent)
-			 232559, -- Thorns
-			 233582, -- Entrenched in Flames
+			  53148, -- Charge (hunter pet)
+			  96294, -- Chains of Ice (death knight, baseline)
+			 -64695, -- Earthgrab (resto shaman, PVE talent)
+			  91807, -- Shambling Rush (Unholy DK pet)
+			 102359, -- Mass Entanglement (druid, PVE talent, general)
+			 105771, -- Charge (warrior, baseline)
+			 116706, -- Disable (windwalker monk, disable 2x application)
+			 117526, -- Binding Shot (hunter, PVE talent, general)
+			 157997, -- Ice Nova (frost mage, PVE talent)
+			 162480, -- Steel Trap (survival hunter, PVE talent)
+			 190927, -- Harpoon (survival hunter, baseline)
+			 198121, -- Frostbite (frost mage, PVP talent)
+			 199042, -- Thunderstruck (protection warrior, PVP talent)
+			 200108, -- Ranger's Net (survival hunter, baseline)
+			 204085, -- Deathchill (frost death knight, PVP talent)
+			 212638, -- Tracker's Net (survival hunter, PVP talent)
+			 228600, -- Glacial Spike (frost mage, PVE talent)
+			 233582, -- Entrenched in Flame (destro warlock, PVP talent)
 			 256897, -- Clamping Jaws (Siege of Boralus dungeon)
 			 258058, -- Squeeze (Tol Dagor dungeon)
 			 259711, -- Lockdown (Tol Dagor dungeon)
@@ -199,53 +196,49 @@ TMW.BE = {
 			 274389, -- Rat Traps (Freehold dungeon)
 		},
 		Slowed = {
-			   -116, -- Frostbolt
-			   -120, -- Cone of Cold
-			  -1715, -- Hamstring
-			   2120, -- Flamestrike
-			  -3409, -- Crippling Poison
-			  -3600, -- Earthbind
-			  -5116, -- Concussive Shot
-			   6343, -- Thunder Clap
-			  -7992, -- Slowing Poison
-			 -12323, -- Piercing Howl
-			 -12544, -- Frost Armor
-			 -13810, -- Ice Trap
-			 -15407, -- Mind Flay
-			 -31589, -- Slow
-			  35346, -- Warp Time
-			  44614, -- Flurry
-			  45524, -- Chains of Ice
+			   -116, -- Frostbolt (frost mage)
+			   -120, -- Cone of Cold (frost mage)
+			  -1715, -- Hamstring (arms warrior)
+			   2120, -- Flamestrike (fire mage)
+			  -3409, -- Crippling Poison (assassination rogue)
+			  -3600, -- Earthbind (shaman, general)
+			  -5116, -- Concussive Shot (beast mastery/marksman hunter)
+			   6343, -- Thunder Clap (protection warrior)
+			  -7992, -- Slowing Poison (NPC ability)
+			 -12323, -- Piercing Howl (fury warrior)
+			 -12544, -- Frost Armor (NPC ability only now?)
+			 -15407, -- Mind Flay (shadow priest)
+			 -31589, -- Slow (arcane mage)
+			  35346, -- Warp Time (NPC ability)
+			  44614, -- Flurry (frost mage)
+			  45524, -- Chains of Ice (death knight)
 			  50259, -- Dazed (Wild Charge, druid talent, cat form)
-			  50433, -- Ankle Crack
-			  51490, -- Thunderstorm
-			 -58180, -- Infected Wounds
-			  61391, -- Typhoon
-			 102793, -- Ursol's Vortex
-			 116095, -- Disable
-			 121253, -- Keg Smash
-			 123586, -- Flying Serpent Kick
-			 135299, -- Tar Trap
-			 147732, -- Frostbrand Attack
-			 157981, -- Blast Wave
-			 160065, -- Tendon Rip
-			 160067, -- Web Spray
-			 169733, -- Brutal Bash
-			 183218, -- Hand of Hindrance
-			 185763, -- Pistol Shot
-			 191397, -- Bestial Cunning
-			 194858, -- Dragonsfire Grenade
-			 195645, -- Wing Clip
-			-196840, -- Frost Shock
-			 198222, -- System Shock
-			 198813, -- Vengeful Retreat
-			 201787, -- Heavy-Handed Strikes (ww pvp talent)
-			 204263, -- Shining Force
-			 204843, -- Sigil of Chains (veng DH)
-			 205021, -- Ray of Frost (frost mage talent)
-			 205320, -- Strike of the Windlord
-			 205708, -- Chilled (frost mage effect)
-			 206755, -- Ranger's Net
+			  50433, -- Ankle Crack (hunter pet)
+			  51490, -- Thunderstorm (elemental shaman)
+			 -58180, -- Infected Wounds (feral druid)
+			  61391, -- Typhoon (druid, general)
+			 102793, -- Ursol's Vortex (resto druid)
+			 116095, -- Disable (windwalker monk)
+			 121253, -- Keg Smash (brewmaster monk)
+			 123586, -- Flying Serpent Kick (windwalker monk)
+			 135299, -- Tar Trap (survival hunter)
+			 147732, -- Frostbrand Attack (enhancement shaman)
+			 157981, -- Blast Wave (fire mage)
+			 160065, -- Tendon Rip (NPC ability)
+			 160067, -- Web Spray (pet ability)
+			 169733, -- Brutal Bash (NPC ability?)
+			 183218, -- Hand of Hindrance (retribution paladin)
+			 185763, -- Pistol Shot (outlaw rogue)
+			 191397, -- Bestial Cunning (hunter passive of some sort, defunct?)
+			 195645, -- Wing Clip (survival hunter)
+			-196840, -- Frost Shock (elemental shaman)
+			 198222, -- System Shock (assassination rogue, PVP talent)
+			 198813, -- Vengeful Retreat (havoc demon hunter)
+			 201787, -- Heavy-Handed Strikes (windwalker monk, PVP talent)
+			 204263, -- Shining Force (disc/holy priest, PVE talent)
+			 204843, -- Sigil of Chains (veng demon hunter, PVE talent)
+			 205021, -- Ray of Frost (frost mage, PVE talent)
+			 205708, -- Chilled (frost mage)
 			 206760, -- Night Terrors
 			 206930, -- Heart Strike
 			 208278, -- Debilitating Infestation (DK unholy talent)
