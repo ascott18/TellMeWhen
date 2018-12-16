@@ -526,9 +526,8 @@ TMW.BE = {
 			 264667, -- Primal Rage (hunter pet)
 		},
 		ImmuneToInterrupts = {
-			    642, -- Divine Shield (paladin)
+			    642, -- Divine Shield (paladin, general)
 			 186265, -- Aspect of the Turtle (hunter)
-			 196773, -- Inner Focus (
 			 209584, -- Zen Focus Tea (mistweaver monk, PVP talent)
 			 210294, -- Divine Favor (holy paladin, PVP talent)
 			 221705, -- Casting Circle (warlock, PVP talent, generaL)
