@@ -363,7 +363,6 @@ TMW.BE = {
 			 287081, -- Lichborne (frost/unholy death knight, PVP talent)
 		},
 		DefensiveBuffsAOE = {
-			 -31821, -- Aura Mastery (holy paladin)
 			 -51052, -- Anti-Magic Zone (unholy death knight, PVP talent)
 			 -62618, -- Power Word: Barrier (disc priest)
 			  97463, -- Rallying Cry (arms/fury warrior)
