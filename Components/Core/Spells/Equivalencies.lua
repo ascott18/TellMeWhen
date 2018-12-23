@@ -194,6 +194,7 @@ TMW.BE = {
 			 259711, -- Lockdown (Tol Dagor dungeon)
 			 268050, -- Anchor of Binding (Shrine of the Storms dungeon)
 			 274389, -- Rat Traps (Freehold dungeon)
+			 285515, -- Surge of Power (elemental shaman, PVE talent)
 		},
 		Slowed = {
 			   -116, -- Frostbolt (frost mage)
@@ -330,6 +331,7 @@ TMW.BE = {
 			 116841, -- Tiger's Lust (monk, PVE talent, general)
 			 118922, -- Posthaste (hunter, PVE talent, general)
 			 119085, -- Chi Torpedo (monk, PVE talent, general)
+			 199203, -- Thirst for Battle (fury warrior, PVP talent)
 			 121557, -- Angelic Feather (holy/disc priest, PVE talent)
 			-186257, -- Aspect of the Cheetah (hunter, general)
 			 188024, -- Skystep Potion (Legion potion)
@@ -355,7 +357,7 @@ TMW.BE = {
 			  45438, -- Ice Block (mage)
 			  46924, -- Bladestorm (fury ID)
 			  48792, -- Icebound Fortitude (death knight, general)
-			 186265, -- Aspect of the Turtle (hunter)
+			 186265, -- Aspect of the Turtle (hunter, general)
 			 213610, -- Holy Ward (holy priest, PVP talent)
 			 221527, -- Imprison (demon hunter, PVP talent)
 			 227847, -- Bladestorm (arms ID)
@@ -365,7 +367,6 @@ TMW.BE = {
 		DefensiveBuffsAOE = {
 			 -51052, -- Anti-Magic Zone (unholy death knight, PVP talent)
 			 -62618, -- Power Word: Barrier (disc priest)
-			  97463, -- Rallying Cry (arms/fury warrior)
 			 201633, -- Earthen Wall (resto shaman, PVE talent)
 			 204150, -- Aegis of light (protection paladin, PVE talent)
 			 204335, -- Aegis of light (protection paladin, PVE talent)
@@ -540,11 +541,11 @@ TMW.BE = {
 			  48265, -- Death's Advance (death knight, general)
 			  54216, -- Master's Call (hunter, pet ability)
 			  87023, -- Cauterize (fire mage)
+			 197003, -- Maneuverability (rogue, PVP talent, general)
 			 201447, -- Ride the Wind (windwalker monk, PVP talent)
 			 212552, -- Wraith Walk (frost/unholy death knight, PVE talent)
 			 216113, -- Way of the Crane (mistweaver monk, PVP talent)
 			 227847, -- Bladestorm (arms ID)
-			 287081, -- Lichborne (frost/unholy death knight, PVP talent)
 		},
 	},
 	casts = {
@@ -552,26 +553,26 @@ TMW.BE = {
 			    596, -- Prayer of Healing
 			   2060, -- Heal
 			   2061, -- Flash Heal
-			  32546, -- Binding Heal (hpriest PVE talent)
+			  32546, -- Binding Heal (holy priest, PVE talent)
 			  33076, -- Prayer of Mending
 			  64843, -- Divine Hymn
-			 120517, -- Halo (hpriest/disc PVE talent)
+			 120517, -- Halo (holy/disc priest, PVE talent)
 			 186263, -- Shadow Mend
 			 194509, -- Power Word: Radiance
-			 265202, -- Holy Word: Salvation (hpriest PVE talent)
-			 289666, -- Greater Heal (hpriest PVP talent)
+			 265202, -- Holy Word: Salvation (holy priest, PVE talent)
+			 289666, -- Greater Heal (holy priest, PVP talent)
 
 			    740, -- Tranquility
 			   8936, -- Regrowth
 			  48438, -- Wild Growth
-			 289022, -- Nourish (rdruid PVP talent)
+			 289022, -- Nourish (restoration druid, PVP talent)
 
 			   1064, -- Chain Heal
 			   8004, -- Healing Surge
 			  73920, -- Healing Rain
 			  77472, -- Healing Wave
-			 197995, -- Wellspring (rsham PVE talent)
-			 207778, -- Downpour (rsham PVE talent)
+			 197995, -- Wellspring (restoration shaman, PVE talent)
+			 207778, -- Downpour (restoration shaman, PVE talent)
 
 			  19750, -- Flash of Light
 			  82326, -- Holy Light
@@ -580,7 +581,7 @@ TMW.BE = {
 			 124682, -- Enveloping Mist
 			 191837, -- Essence Font
 			-209525, -- Soothing Mist
-			 227344, -- Surging Mist (MW pvp talent)
+			 227344, -- Surging Mist (mistweaver monk, PVP talent)
 
 		},
 	},
