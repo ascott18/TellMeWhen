@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 85801 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 85802 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -41,11 +41,39 @@ end
 
 TELLMEWHEN_MAXROWS = 20
 
--- Put required libs here: (If they fail to load, they will make all of TMW fail to load)
-local AceDB = LibStub("AceDB-3.0")
+-- Put required libs here: (If they fail to load, all of TMW should fail to load)
+local AceDB = LibStub("AceDB-3.0", true)
+local LibOO = LibStub("LibOO-1.0", true)
+local LSM = LibStub("LibSharedMedia-3.0", true)
+
+if not AceDB or not LibOO or not LSM then
+	-- This is only a small handful of libs that we're checking, 
+	-- but should cover the bulk case of nolib installs 
+	-- (especially LibOO, which is basically only used by TMW)
+
+	StaticPopupDialogs["TMW_MISSINGLIB"] = {
+		-- This is not localizable, because AceLocale might not have loaded
+		-- (this is why we don't bother to load AceLocale until after these checks).
+		text = [[You're missing required libraries for TellMeWhen.
+
+Normally, these come bundled with TMW, but you may have installed a nolib version of TMW by accident.
+
+This can happen especially if you use the Twitch app - ensure "Install Libraries Separately" isn't check for TellMeWhen in the Twitch app.]], 
+		button1 = EXIT_GAME,
+		button2 = CANCEL,
+		OnAccept = ForceQuit,
+		timeout = 0,
+		showAlert = true,
+		whileDead = true,
+		preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+	}
+	StaticPopup_Show("TMW_MISSINGLIB")
+
+	-- Stop trying to load TMW.
+	return
+end
+
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
-local LibOO = LibStub("LibOO-1.0")
-local LSM = LibStub("LibSharedMedia-3.0")
 
 LSM:Register("font", "Open Sans Regular", "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf")
 LSM:Register("font", "Vera Mono", "Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf")
