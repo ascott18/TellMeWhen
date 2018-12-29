@@ -367,6 +367,7 @@ TMW.BE = {
 		DefensiveBuffsAOE = {
 			 -51052, -- Anti-Magic Zone (unholy death knight, PVP talent)
 			 -62618, -- Power Word: Barrier (disc priest)
+			  97463, -- Rallying Cry (arms/fury warrior)
 			 201633, -- Earthen Wall (resto shaman, PVE talent)
 			 204150, -- Aegis of light (protection paladin, PVE talent)
 			 204335, -- Aegis of light (protection paladin, PVE talent)
@@ -546,6 +547,7 @@ TMW.BE = {
 			 212552, -- Wraith Walk (frost/unholy death knight, PVE talent)
 			 216113, -- Way of the Crane (mistweaver monk, PVP talent)
 			 227847, -- Bladestorm (arms ID)
+			 287081, -- Lichborne (frost/unholy death knight, PVP talent)
 		},
 	},
 	casts = {
