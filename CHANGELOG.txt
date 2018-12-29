@@ -3,6 +3,7 @@
 
 ====Bug Fixes====
 * Fixed #1631 - The Frame Level setting should no longer be prevented from having an effect until the next UI reload due to a change Blizzard has made recently to the way that `:SetToplevel(true)` works. A side effect of this fix is that clicking a group to configure it or its icons will no longer bring that group above others on your screen if you have overlapping groups.
+* Item cooldown icons no longer incorrectly show timers for items whose cooldowns are pending start, like potions used in combat.
 
 ===v8.5.7===
 * Bump the TOC version to 8.1 now that Blizzard finally remembered to increment it on their end.
