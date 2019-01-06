@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 85803 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 85804 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 82105 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1181,7 +1181,11 @@ function TMW:PLAYER_LOGIN()
 	TMW.Initialized = true
 	
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
-	TMW:Update()
+
+	-- Pass true to update via coroutine to try to fix 
+	-- https://wow.curseforge.com/projects/tellmewhen/issues/1643
+	-- It appears there can be "script ran too long" errors when logging in.
+	TMW:Update(true)
 end
 TMW:RegisterEvent("PLAYER_LOGIN")
 
@@ -2736,6 +2740,7 @@ do -- TMW:UpdateViaCoroutine()
 
 	local function CheckCoroutineTermination()
 		if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
+			TMW:Debug("Update() yielded early at %s", time)
 			coroutine.yield(UpdateCoroutine)
 		end
 	end
@@ -2820,14 +2825,14 @@ do -- TMW:UpdateViaCoroutine()
 end
 
 -- TMW:Update() sets up all groups, icons, and anything else.
-function TMW:Update()
+function TMW:Update(forceCoroutine)
 
 	-- We check arena (and I threw BGs in as well)
 	-- in hopes of resolving https://wow.curseforge.com/projects/tellmewhen/issues/1572 -
 	-- a "script ran too long" error that appears to be happening outside of combat,
 	-- potentially when loading into an arena map.
 	local _, z = IsInInstance()
-	local needsCoroutineUpdate = InCombatLockdown() or z == "arena" or z == "pvp"
+	local needsCoroutineUpdate = forceCoroutine or InCombatLockdown() or z == "arena" or z == "pvp"
 
 	if needsCoroutineUpdate then
 		TMW:UpdateViaCoroutine()
