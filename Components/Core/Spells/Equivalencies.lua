@@ -468,6 +468,7 @@ TMW.BE = {
 			 184662, -- Shield of Vengeance                 (paladin, retribution)
 			 190456, -- Ignore Pain                         (warrior, protection)
 			 203538, -- Greater Blessing of Kings           (paladin, retribution)
+			 205655, -- Dome of Mists			(monk, mistweaver, PVP talent)
 			 235313, -- Blazing Barrier                     (mage, fire)
 			 235450, -- Prismatic Barrier                   (mage, arcane)
 			 258153, -- Watery Dome                         (Tol Dagor dungeon)
