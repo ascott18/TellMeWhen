@@ -448,8 +448,9 @@ function TMW:SplitNames(input, stringsOnly)
 	for a, b in ipairs(tbl) do
 		local new = strtrim(b) --remove spaces from the beginning and end of each name
 		if not stringsOnly then
-			tbl[a] = tonumber(new) or new -- turn it into a number if it is one
+			new = tonumber(new) or new -- turn it into a number if it is one
 		end
+		tbl[a] = new
 	end
 	return tbl
 end
