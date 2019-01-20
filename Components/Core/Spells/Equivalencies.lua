@@ -541,7 +541,7 @@ TMW.BE = {
 			  46924, -- Bladestorm                          (fury ID)
 			  48265, -- Death's Advance                     (death knight, general)
 			  54216, -- Master's Call                       (hunter, pet ability)
-			  87023, -- Cauterize                           (mage, fire)
+			 108843, -- Blazing Speed (cauterize)           (mage, fire)
 			 186265, -- Aspect of the Turtle                (hunter)
 			 197003, -- Maneuverability                     (rogue, PVP talent, general)
 			 201447, -- Ride the Wind                       (monk, windwalker)
