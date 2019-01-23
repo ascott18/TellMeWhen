@@ -486,6 +486,7 @@ TMW.BE = {
 			 272987, -- Revel in Pain                       (demon hunter, vengeance)
 			 274395, -- Stalwart Protector                  (paladin azerite trait)
 			 278159, -- Xalzaix's Veil                      (Uldir tank trinket)
+			 279187, -- Surging Tides                       (shaman, restoration, azerite trait)
 			 280165, -- Ursoc's Endurance                   (druid, azerite trait)
 			 280170, -- Duck and Cover                      (hunter, azerite trait)
 			 280212, -- Bury the Hatchet                    (warrior, arms/fury)
