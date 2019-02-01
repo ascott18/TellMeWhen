@@ -498,6 +498,7 @@ TMW.BE = {
 			 280788, -- Retaliatory Fury                    (general azerite trait)
 			 280862, -- Last Gift                           (general azerite trait)
 			 286342, -- Gladiator's Safeguard               (BFA PVP trinket)
+			 287568, -- Enveloping Protection               (Ward of Envelopment, Battle of Dazar'alor raid)
 			 287722, -- Death Denied                        (priest, azerite trait)
 		},
 		ImmuneToMagicCC = {
