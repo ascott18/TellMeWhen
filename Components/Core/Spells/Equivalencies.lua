@@ -478,6 +478,7 @@ TMW.BE = {
 			 265946, -- Ritual Wraps                        (trinket from King's Rest)
 			 265991, -- Luster                              (Atal'dazar dungeon)
 			 266201, -- Bone Shield                         (The Underrot dungeon)
+			 269120, -- Miniaturized Plasma Shield          (Blacksmithing belt enchant)
 			 269279, -- Resounding Protection               (general azerite trait)
 			 270657, -- Bulwark of the Masses               (general azerite trait)
 			 272979, -- Bulwark of Light                    (paladin, azerite trait)
