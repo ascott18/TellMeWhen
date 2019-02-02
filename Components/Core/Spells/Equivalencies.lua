@@ -500,6 +500,7 @@ TMW.BE = {
 			 286342, -- Gladiator's Safeguard               (BFA PVP trinket)
 			 287568, -- Enveloping Protection               (Ward of Envelopment, Battle of Dazar'alor raid)
 			 287722, -- Death Denied                        (priest, azerite trait)
+			 288024, -- Diamond Barrier                     (Diamond-Laced Refracting Prism, Battle of Dazar'alor raid)
 		},
 		ImmuneToMagicCC = {
 			    642, -- Divine Shield                       (paladin, general)
