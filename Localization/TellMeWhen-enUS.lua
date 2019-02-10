@@ -889,6 +889,10 @@ This option is account-wide: all of your profiles will share this setting.
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
 L["UIPANEL_USE_PROFILE"] = "Use Profile Setting"
 L["UIPANEL_PERFORMANCE"] = "Performance"
+L["UIPANEL_OPENCPUPROFILE"] = "View CPU usage"
+L["UIPANEL_OPENCPUPROFILE_DESC"] = [[View detailed CPU usage metrics about each of your icons.
+
+Also accessible via '/tmw cpu']]
 L["UIPANEL_UPDATEINTERVAL"] = "Update Interval"
 L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = [[Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc.
 

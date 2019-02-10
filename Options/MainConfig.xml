@@ -205,6 +205,24 @@
 					</OnLoad>
 				</Scripts>
 			</Slider>
+
+			<Button parentKey="OpenProfiling" inherits="TellMeWhen_ButtonTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.Interval" />
+					<Anchor point="RIGHT" x="-10" />
+					<Anchor point="LEFT" relativePoint="CENTER" x="10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText(TMW.L["UIPANEL_OPENCPUPROFILE"], TMW.L["UIPANEL_OPENCPUPROFILE_DESC"])
+						self:SetWidth(self:GetTextWidth()+15)
+					</OnLoad>
+					<OnClick>
+						TMW:SlashCommand("cpu")
+					</OnClick>
+				</Scripts>
+			</Button>
+
 			<!-- No longer applicable in WoW BfA - UnitAura doesn't allow query by name anymore. -->
 			<!-- <Slider parentKey="EffThreshold" inherits="TellMeWhen_SliderTemplate">
 				<Anchors>

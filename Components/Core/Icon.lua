@@ -163,6 +163,23 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", Icon, "UpdateTable_PerformAutoSor
 -- [WRAPPER] (no documentation needed)
 Icon.SetScript_Blizz = Icon.SetScript
 function Icon.SetScript(icon, handler, func)
+
+	if icon.cpu_startTime and handler == "OnEvent" and func then
+		local origFunc = func
+		func = function(...) 
+			local start = TMW:CpuProfilePush()
+
+			origFunc(...)
+
+			local currentUsage = TMW:CpuProfilePop()
+			if icon.cpu_eventPeak < currentUsage then
+				icon.cpu_eventPeak = currentUsage
+			end
+			icon.cpu_eventCount = icon.cpu_eventCount + 1
+			icon.cpu_eventTotal = icon.cpu_eventTotal + currentUsage
+		end
+	end
+
 	icon[handler] = func
 	icon:SetScript_Blizz(handler, func)
 end
@@ -645,19 +662,41 @@ function Icon.Update(icon, force)
 	
 	if icon.attributes.shown and icon.UpdateFunction and (force or icon.LastUpdate <= time - UPD_INTV) then
 		icon.LastUpdate = time
-		
+
+		local profilingOn = icon.cpu_startTime
 		local Update_Method = icon.Update_Method
 
+		-- The condition check needs to come before we determine iconUpdateNeeded because
+		-- checking a condition may set NextUpdateTime to 0 if the condition passing state changes.
 		local ConditionObject = icon.ConditionObject
 		if ConditionObject and (ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time) then
-			-- The condition check needs to come before we determine iconUpdateNeeded because
-			-- checking a condition may set NextUpdateTime to 0 if the condition passing state changes.
-			ConditionObject:Check()
+
+			if profilingOn then
+				-- I'm going to profile the ConditionObject:Check() as part of the icon for now.
+				-- Technically it should be measured on its own because it can be shared between multiple icons/groups,
+				-- but I don't know how to display the stats in a true-to-reality way.
+				-- I could just sum condition time + icon time, but then the condition could be double counted.
+				-- So, I'm electing to just let a random icon take the hit if it ends up being responsible for checking a condition.
+				
+				TMW:CpuProfilePush()
+
+				ConditionObject:Check()
+
+				local currentUsage = TMW:CpuProfilePop()
+				icon.cpu_cndtCount = icon.cpu_cndtCount + 1
+				icon.cpu_cndtTotal = icon.cpu_cndtTotal + currentUsage
+			else
+				ConditionObject:Check()
+			end
+
 		end
 
 		local iconUpdateNeeded = force or Update_Method == "auto" or icon.NextUpdateTime < time
 
 		if iconUpdateNeeded then
+			if profilingOn then
+				TMW:CpuProfilePush()
+			end
 
 			icon.__yieldHandledOnce = false
 			if not icon:IsGroupController() then
@@ -683,6 +722,16 @@ function Icon.Update(icon, force)
 
 			if Update_Method == "manual" then
 				icon:ScheduleNextUpdate()
+			end
+
+			if profilingOn then
+				local currentUsage = TMW:CpuProfilePop()
+
+				if icon.cpu_updatePeak < currentUsage then
+					icon.cpu_updatePeak = currentUsage
+				end
+				icon.cpu_updateCount = icon.cpu_updateCount + 1
+				icon.cpu_updateTotal = icon.cpu_updateTotal + currentUsage
 			end
 		end
 	end
