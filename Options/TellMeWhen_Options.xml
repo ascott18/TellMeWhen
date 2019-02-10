@@ -2412,6 +2412,7 @@
 							return TMW
 						end)
 						self:CScriptAdd("SettingSaved", function(requester)
+							TMW:Update()
 							TMW:CpuProfileReset()
 						end)
 					</OnLoad>

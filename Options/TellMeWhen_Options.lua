@@ -4215,6 +4215,53 @@ local function leftPad(text, len)
 	return strrep(" ", len - #text) .. text
 end
 
+local function makeColorFunc(greenBelow, redAbove)
+	--local completeColor = TMW:StringToCachedRGBATable("ff00ff00")
+	--local halfColor = TMW:StringToCachedRGBATable("ffff8000")
+	--local startColor = TMW:StringToCachedRGBATable("ffff0000")
+	local completeColor = TMW:StringToCachedRGBATable("ff00ff47")
+	local halfColor = TMW:StringToCachedRGBATable("ff00f9ff")
+	local startColor = TMW:StringToCachedRGBATable("ff0078ff")
+
+	return function(value)
+		local completeColor, startColor, halfColor = completeColor, startColor, halfColor
+
+		if value ~= 0 then
+			value = value - greenBelow
+			local percent = value / (redAbove - greenBelow)
+			percent = min(max(percent, 0), 1)
+
+			if Invert then
+				completeColor, startColor = startColor, completeColor
+			end
+			
+			-- This is multiplied by 2 because we subtract 100% if it ends up being past
+			-- the point where halfColor will be used.
+			-- If we don't multiply by 2, we would check if (percent > 0.5), but then
+			-- we would have to multiply that percentage by 2 later anyway in order to use the
+			-- full range of colors available (we would only get half the range of colors otherwise, which looks like shit)
+			local doublePercent = percent * 2
+
+			if doublePercent > 1 then
+				completeColor = halfColor
+				doublePercent = doublePercent - 1
+			else
+				startColor = halfColor
+			end
+
+			local inv = 1-doublePercent
+
+			return TMW:RGBAToString(
+				(startColor.r * doublePercent) + (completeColor.r * inv),
+				(startColor.g * doublePercent) + (completeColor.g * inv),
+				(startColor.b * doublePercent) + (completeColor.b * inv),
+				(startColor.a * doublePercent) + (completeColor.a * inv)
+			)
+		end
+		return "ff00ff00"
+	end
+end
+
 TMW.IE.CpuReportParameters = {
 	Columns = {
 		{
@@ -4258,7 +4305,8 @@ TMW.IE.CpuReportParameters = {
 			label = "Updates Avg",
 			desc = "Milliseconds of CPU time spent on icon updates, per second of wall clock time.",
 			value = function(icon) return icon.cpu_updateTotal / (TMW.time - icon.cpu_startTime) end,
-			format = "%.2f ms/s"
+			format = "%.2f ms/s",
+			color = makeColorFunc(0.05, 2)
 		},
 		{
 			title = "Updates: Peak",
@@ -4300,7 +4348,8 @@ TMW.IE.CpuReportParameters = {
 			label = "Events avg",
 			desc = "Average CPU time spent on event handling per second of wall clock time.",
 			value = function(icon) return icon.cpu_eventTotal / (TMW.time - icon.cpu_startTime) end,
-			format = "%.2f ms/s"
+			format = "%.2f ms/s",
+			color = makeColorFunc(0.03, 1)
 		},
 		{
 			title = "Events: Peak",
@@ -4352,7 +4401,8 @@ TMW.IE.CpuReportParameters = {
 			label = "Cndtn avg",
 			desc = "Average CPU time spent on condition checking per second of wall clock time.",
 			value = function(icon) return icon.cpu_cndtTotal / (TMW.time - icon.cpu_startTime) end,
-			format = "%.2f ms/s"
+			format = "%.2f ms/s",
+			color = makeColorFunc(0.02, 0.6)
 		},
 	}
 }
@@ -4407,6 +4457,9 @@ function TMW.IE:GetCpuProfileReport()
 							column.format and format(column.format, value) or
 							column.text(value)
 						text = leftPad(text, column.width or #column.label)
+						if column.color then
+							text = "|c" .. column.color(value) .. text .. "|r"
+						end
 
 						r[#r+1] = text .. "  "
 					end

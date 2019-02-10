@@ -588,11 +588,38 @@ IconEventUpdateEngine.UpdateEvents = setmetatable({}, {__index = function(self, 
 	return self[event]
 end})
 IconEventUpdateEngine:SetScript("OnEvent", function(self, event, arg1)
-	for icon, arg1ToMatch in next, self.UpdateEvents[event] do
-		if icon.NextUpdateTime ~= 0 and (arg1ToMatch == true or arg1ToMatch == arg1) then
-			icon.NextUpdateTime = 0
+	if TMW.profilingEnabled then
+		
+		-- We start outside the loop so that we can include the loop execution time in our costs.
+		local start = TMW:CpuProfilePush()
+
+		for icon, arg1ToMatch in next, self.UpdateEvents[event] do
+
+			if icon.NextUpdateTime ~= 0 and (arg1ToMatch == true or arg1ToMatch == arg1) then
+				icon.NextUpdateTime = 0
+			end
+
+			local currentUsage = TMW:CpuProfilePop()
+			if icon.cpu_startTime then
+				if icon.cpu_eventPeak < currentUsage then
+					icon.cpu_eventPeak = currentUsage
+				end
+				icon.cpu_eventCount = icon.cpu_eventCount + 1
+				icon.cpu_eventTotal = icon.cpu_eventTotal + currentUsage
+			end
+			start = TMW:CpuProfilePush()
+		end
+
+		TMW:CpuProfilePop()
+
+	else
+		for icon, arg1ToMatch in next, self.UpdateEvents[event] do
+			if icon.NextUpdateTime ~= 0 and (arg1ToMatch == true or arg1ToMatch == arg1) then
+				icon.NextUpdateTime = 0
+			end
 		end
 	end
+
 end)
 
 --- Registers a Blizzard event that will, upon being fired, trigger the icon to schedule a manual update for the next TMW update cycle.
