@@ -205,6 +205,7 @@ TMW.BE = {
 			   6343, -- Thunder Clap                        (warrior, protection)
 			  -7992, -- Slowing Poison                      (NPC ability)
 			 -12323, -- Piercing Howl                       (warrior, fury)
+			  12486, -- Blizzard                            (mage, frost)
 			 -12544, -- Frost Armor                         (NPC ability only now?)
 			 -15407, -- Mind Flay                           (priest, shadow)
 			 -31589, -- Slow                                (mage, arcane)
