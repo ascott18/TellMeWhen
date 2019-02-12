@@ -354,6 +354,7 @@ TMW.BE = {
 			 262232, -- War Machine                         (warrior, fury)
 			 273415, -- Gathering Storm                     (warrior, azerite trait, general)
 			-276112, -- Divine Steed                        (paladin, general)
+			 287827, -- Fight or Flight                     (azerite trait, general)
 			 290244, -- Gilded Path                         (Boots of the Gilded Path, Battle of Dazar'alor raid)
 		},
 		ImmuneToStun = {
