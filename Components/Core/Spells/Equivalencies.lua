@@ -240,7 +240,7 @@ TMW.BE = {
 			 206930, -- Heart Strike                        (death knight, blood)
 			 208278, -- Debilitating Infestation            (DK unholy talent)
 			 211793, -- Remorseless Winter                  (death knight, frost)
-			 212792, -- Cone of Cold                        (mage, frost)
+			-212792, -- Cone of Cold                        (mage, frost)
 			 213405, -- Master of the Glaive                (demon hunter, PVE talent, havoc)
 			 228354, -- Flurry                              (mage, frost)
 			 248744, -- Shiv                                (rogue, PVP talent, general)
