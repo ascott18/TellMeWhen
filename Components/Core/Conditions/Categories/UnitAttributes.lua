@@ -72,7 +72,7 @@ ConditionCategory:RegisterCondition(2,    "ALIVE", {
 		UnitIsDeadOrGhost = UnitIsDeadOrGhost,
 	},
 	-- Must check that UnitExists so that a non-existing unit isn't treated as alive (#1622)
-	funcstr = [[ BOOLCHECK( UnitExists(c.Unit) && not UnitIsDeadOrGhost(c.Unit) )]], 
+	funcstr = [[ BOOLCHECK( UnitExists(c.Unit) and not UnitIsDeadOrGhost(c.Unit) )]], 
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
