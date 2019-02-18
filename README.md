@@ -70,6 +70,7 @@ All available slash commands are:
 *   '/tmw enable groupID iconID' - Enables the specified group or icon (E.g. '/tmw enable 2 4' or '/tmw enable 3').
 *   '/tmw disable groupID iconID' - Disables the specified group or icon (E.g. '/tmw disable 2 4' or '/tmw disable 3').
 *   '/tmw toggle groupID iconID' - Toggles the specified group or icon between enabled and disabled (E.g. '/tmw toggle 2 4' or '/tmw toggle 3').
+*   '/tmw cpu' - Enables and displays a UI for measurements of icon performance. This is an advanced feature; no guidance on reading the data will be offered.
 
 ### Conditions
 
