@@ -7,8 +7,8 @@ assignees: ''
 
 ---
 
-**What version of TellMeWhen are you using? (Found in-game at the top of TMW's configuration window. "The latest" is not a version.)**
-
+**What version of TellMeWhen are you using? **
+<!-- Found in-game at the top of TMW's configuration window. "The latest" is not a version. -->
 
 
 **What steps will reproduce the problem?**
