@@ -114,7 +114,7 @@
 
 				<Scripts>
 					<OnLoad>
-						-- TMW:CInit(self)
+						TMW:CInit(self)
 						self:SetFontObject(GameFontHighlightLarge)
 					</OnLoad>
 					<OnTextChanged>
