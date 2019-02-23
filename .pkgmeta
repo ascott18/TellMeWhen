@@ -39,7 +39,7 @@ optional-dependencies:
 
 manual-changelog:
     filename: CHANGELOG.txt
-    markup-type: creole
+    markup-type: markdown
 
 license-output: LICENSE.txt
 enable-nolib-creation: yes
