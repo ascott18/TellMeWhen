@@ -1883,6 +1883,14 @@ L["MAIN_DESC"] = "Contains the main options for this icon."
 L["UNNAMED"] = "(Unnamed)"
 L["NOTYPE"] = "<No Icon Type>"
 
+L["HELP"] = "Help"
+L["HELP_ISSUES"] = "Bugs & Feature Requests"
+L["HELP_ISSUES_DESC"] = [[Report bugs and request features on the official TellMeWhen issue tracker on GitHub.]]
+L["HELP_COMMUNITY"] = "Community Discord"
+L["HELP_COMMUNITY_DESC"] = [[Join the official TellMeWhen discord! 
+
+Ask questions, share configuration, or just hang out with other TellMeWhen users.]]
+
 
 L["MISCELLANEOUS"] = "Miscellaneous"
 L["TEXTMANIP"] = "Text manipulation"

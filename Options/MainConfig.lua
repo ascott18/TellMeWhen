@@ -23,9 +23,7 @@ local CI = TMW.CI
 
 
 local TabGroup = IE:RegisterTabGroup("MAIN", L["MAIN"], 3, function(tabGroup)
-	local titlePrepend = "TellMeWhen v" .. TELLMEWHEN_VERSION_FULL
-
-	IE.Header:SetText(titlePrepend)
+	IE.Header:SetText("TellMeWhen v" .. TELLMEWHEN_VERSION_FULL)
 end)
 TabGroup:SetTexts(L["MAIN"], L["TABGROUP_MAIN_DESC"])
 
@@ -342,3 +340,6 @@ TMW:RegisterCallback("TMW_CONFIG_LOADED", function()
 		IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
 	end
 end)
+
+
+IE:RegisterTab("MAIN", "HELP", "Help", 101):SetTexts(L["HELP"])
