@@ -3,6 +3,9 @@
 ** This feature is for advanced users. No instructions or guidance will be provided on how to use it or how to interpret the data.
 * Added a Scale setting to the Activation Border animation.
 
+====Bug Fixes====
+* Fixed a bug that caused export strings to sometimes contain a large amount of superfluous defaults.
+
 ===v8.5.9===
 ====Bug Fixes====
 * Fixed GitHub #12 - A major bug introduced by a last-minute change in v8.5.8 that broke all icons that check multiple units.

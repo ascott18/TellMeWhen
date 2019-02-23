@@ -3888,6 +3888,10 @@ function TMW:CleanDefaults(settings, defaults, blocker)
 						-- if it was specified, only strip ** content, but block values which were set in the key table
 						elseif k == "**" then
 							TMW:CleanDefaults(value, v, defaults[key])
+                            -- if the table is empty afterwards, remove it
+                            if next(value) == nil then
+                                settings[key] = nil
+                            end
 						end
 					end
 				end
