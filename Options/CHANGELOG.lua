@@ -12,7 +12,8 @@ TMW.CHANGELOG = [==[
 * Created a new system to collect performance metrics on a per-icon basis. You can view this new feature via `/tmw cpu` or under the "Performance" section in the main options.
  * This feature is for advanced users. No instructions or guidance will be provided on how to use it or how to interpret the data.
 * Added a Scale setting to the Activation Border animation.
-* You can now toggle an icon's enabled/disabled state by Ctrl+clicking it.
+* You can now toggle an icon's enabled/disabled state by Ctrl+clicking it. (#22)
+* New setting for Combat Event icons: Only if Conditions Passing. (#20)
 
 ### Bug Fixes
 * Fixed a bug that caused export strings to sometimes contain a large amount of superfluous defaults.

@@ -676,6 +676,8 @@ L["ICONMENU_DONTREFRESH"] = "Don't Refresh"
 L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if the trigger occurs while it is still counting down."
 L["ICONMENU_CLEU_NOREFRESH"] = "Don't Refresh"
 L["ICONMENU_CLEU_NOREFRESH_DESC"] = "Check to cause the icon to ignore events that happen while the icon's timer is active."
+L["ICONMENU_ONLYIFCONDITIONS"] = "Only If Conditions Passing"
+L["ICONMENU_ONLYIFCONDITIONS_DESC"] = "Only process the event if the icon's conditions are passing."
 
 L["SORTBY"] = "Prioritize"
 L["SORTBYNONE"] = "Normally"
