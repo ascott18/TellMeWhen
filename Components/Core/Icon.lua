@@ -111,6 +111,27 @@ do
 			end
 		)
 
+		TMW.IconDragger:RegisterIconDragHandler(111, -- Copy Unit Conditions
+			function(IconDragger, info)
+				local n = IconDragger.srcicon:GetSettings().UnitConditions.n
+				
+				if IconDragger.desticon and n > 0 then
+					info.text = L["ICONMENU_COPYCONDITIONS_UNIT"]:format(n)
+					info.tooltipTitle = info.text
+					info.tooltipText = L["ICONMENU_COPYCONDITIONS_DESC"]:format(
+						IconDragger.srcicon:GetIconName(true), n, IconDragger.desticon:GetIconName(true))
+
+					return true
+				end
+			end,
+			function(IconDragger)
+				-- copy the settings
+				local srcics = IconDragger.srcicon:GetSettings()
+				
+				IconDragger.desticon:GetSettings().UnitConditions = TMW:CopyWithMetatable(srcics.UnitConditions)
+			end
+		)
+
 	end)
 
 end
