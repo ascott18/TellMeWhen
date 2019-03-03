@@ -1,6 +1,6 @@
 ---
 name: Question/Help
-about: If you're having trouble with TellMeWhen, ask a question here.
+about: If you're having trouble with TellMeWhen, ask a question here. Alternatively, consider asking your question on the TMW discord at https://discord.gg/NH7RmcP
 title: ''
 labels: question
 assignees: ''
@@ -11,6 +11,7 @@ assignees: ''
 
 
 
+
 **What things have you already tried in order to accomplish this on your own?**
 <!-- If applicable, please include export string(s) of the configurations you already tried. 
 
@@ -18,4 +19,8 @@ To get an export string, open the icon editor, and click the button labeled "Imp
 
 
 
+
 **Where are you getting stuck? What is the question you need answered that will empower you to move forward?**
+
+
+

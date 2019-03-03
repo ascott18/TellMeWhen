@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 86101 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 86102 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -3220,7 +3220,7 @@ function TMW:LoadOptions(recursed)
 		return;
 	end
 
-	TMW:Print(L["LOADINGOPT"])
+	TMW:Debug(L["LOADINGOPT"])
 
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
 	if not loaded then

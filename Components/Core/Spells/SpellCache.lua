@@ -46,6 +46,8 @@ SpellCache.CONST = {
 	
 	WHITELIST = {
 		-- A list of spells that will fail other filters, but are still desired
+		[8178] = true, -- Grounding Totem Effect
+		[255016] = true, -- Grounding Totem Effect
 		[228911] = true, -- Odyn's test
 		[227626] = true, -- Odyn's test
 	},
