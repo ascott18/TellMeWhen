@@ -74,9 +74,9 @@ All available slash commands are:
 *   '/tmw' - Toggles TellMeWhen between locked (functional) or unlocked (configuration) states.
 *   '/tmw options' - Opens the general settings configuration for TellMeWhen.
 *   '/tmw profile "Profile Name"' - Loads a TellMeWhen profile. Profile name is case sensitive, and must be quoted if it contains spaces. (E.g. '/tmw profile "Cybeloras - Aerie Peak"').
-*   '/tmw enable groupID iconID' - Enables the specified group or icon (E.g. '/tmw enable 2 4' or '/tmw enable 3').
-*   '/tmw disable groupID iconID' - Disables the specified group or icon (E.g. '/tmw disable 2 4' or '/tmw disable 3').
-*   '/tmw toggle groupID iconID' - Toggles the specified group or icon between enabled and disabled (E.g. '/tmw toggle 2 4' or '/tmw toggle 3').
+*   '/tmw enable global|profile groupID iconID' - Enables the specified group or icon (E.g. '/tmw enable 2 4' or '/tmw enable global 3').
+*   '/tmw disable global|profile groupID iconID' - Disables the specified group or icon (E.g. '/tmw disable profile 2 4' or '/tmw disable 3').
+*   '/tmw toggle global|profile groupID iconID' - Toggles the specified group or icon between enabled and disabled (E.g. '/tmw toggle global 2 4' or '/tmw toggle profile 3').
 *   '/tmw cpu' - Enables and displays a UI for measurements of icon performance. This is an advanced feature; no guidance on reading the data will be offered.
 
 ### Conditions

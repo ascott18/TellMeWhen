@@ -10,6 +10,7 @@
 * You can now toggle an icon's enabled/disabled state by Ctrl+clicking it. (#22)
 * New setting for Combat Event icons: Only if Conditions Passing. (#20)
 * Unit Conditions can now be copied from one icon to another. (#18)
+* Added Raise Abomination to the totem icon type for DKs (#1688)
 
 ### Bug Fixes
 * Fixed a bug that caused export strings to sometimes contain a large amount of superfluous defaults.
