@@ -151,7 +151,7 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	local isDefaultSkin = not Module:IsIconSkinned(icon)
 	
 	local frameLevelOffset
-	if select(2, LibStub("Masque")) >= 80100 then
+	if (select(2, LibStub("Masque", true)) or 0) >= 80100 then
 		frameLevelOffset = 1
 	else
 		frameLevelOffset = 1 or (isDefaultSkin and 1 or -2)
