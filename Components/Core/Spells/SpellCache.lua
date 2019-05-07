@@ -50,6 +50,10 @@ SpellCache.CONST = {
 		[255016] = true, -- Grounding Totem Effect
 		[228911] = true, -- Odyn's test
 		[227626] = true, -- Odyn's test
+		[275529] = true, -- Test of Might
+		[275531] = true, -- Test of Might
+		[275532] = true, -- Test of Might
+		[275540] = true, -- Test of Might
 	},
 
 	-- A list of spells that should be excluded from the cache
@@ -80,7 +84,6 @@ SpellCache.CONST = {
 		[134071] = true, -- JC
 		[134366] = true, -- Skinning
 		[134708] = true, -- Mining
-		[134071] = true, -- JC
 	},
 
 	-- Any spell that uses these textures should be excluded.
