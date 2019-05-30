@@ -158,7 +158,7 @@ local function TestType_OnUpdate(icon, time)
 			
 			icon:SetInfo(
 				"state; texture; start, duration; spell; stack, stackText",
-				not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_DEFAULT_NOMANA or STATE_UNUSABLE,
+				not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 				GetSpellTexture(NameFirst),
 				start, duration,
 				NameFirst,
@@ -331,7 +331,7 @@ local function TestType_OnUpdate(icon, time)
 			
 			icon:SetInfo(
 				"state; texture; start, duration; spell; stack, stackText",
-				not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_DEFAULT_NOMANA or STATE_UNUSABLE,
+				not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 				GetSpellTexture(NameFirst),
 				start, duration,
 				NameFirst,
