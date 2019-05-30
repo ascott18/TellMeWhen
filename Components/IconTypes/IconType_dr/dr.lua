@@ -166,39 +166,42 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	-- Create our own DR equivalencies in TMW using the data from DRData-1.0
 
 	if DRData then
-		local myCategories = {
-			stun			= "DR-Stun",
-			silence			= "DR-Silence",
-			disorient		= "DR-Disorient",
-			root			= "DR-Root", 
-			incapacitate	= "DR-Incapacitate",
-			taunt 			= "DR-Taunt",
-		}
 
-		local ignored = {
-			rndstun = true,
-			fear = true,
-			mc = true,
-			cyclone = true,
-			shortdisorient = true,
-			horror = true,
-			disarm = true,
-			shortroot = true,
-			knockback = true,
-		}
+		-- TODO-CLASSIC: Figure out data for diminishing returns.
+
+		-- local myCategories = {
+		-- 	stun			= "DR-Stun",
+		-- 	silence			= "DR-Silence",
+		-- 	disorient		= "DR-Disorient",
+		-- 	root			= "DR-Root", 
+		-- 	incapacitate	= "DR-Incapacitate",
+		-- 	taunt 			= "DR-Taunt",
+		-- }
+
+		-- local ignored = {
+		-- 	rndstun = true,
+		-- 	fear = true,
+		-- 	mc = true,
+		-- 	cyclone = true,
+		-- 	shortdisorient = true,
+		-- 	horror = true,
+		-- 	disarm = true,
+		-- 	shortroot = true,
+		-- 	knockback = true,
+		-- }
 		
-		TMW.BE.dr = {}
-		local dr = TMW.BE.dr
-		for spellID, category in pairs(DRData.spells) do
-			local k = myCategories[category]
+		-- TMW.BE.dr = {}
+		-- local dr = TMW.BE.dr
+		-- for spellID, category in pairs(DRData.spells) do
+		-- 	local k = myCategories[category]
 
-			if k then
-				dr[k] = dr[k] or {}
-				tinsert(dr[k], spellID)
-			elseif TMW.debug and not ignored[category] then
-				TMW:Error("The DR category %q is undefined!", category)
-			end
-		end
+		-- 	if k then
+		-- 		dr[k] = dr[k] or {}
+		-- 		tinsert(dr[k], spellID)
+		-- 	elseif TMW.debug and not ignored[category] then
+		-- 		TMW:Error("The DR category %q is undefined!", category)
+		-- 	end
+		-- end
 	end
 end)
 

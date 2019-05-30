@@ -27,8 +27,8 @@ local math, max, ceil, floor, random, abs =
 local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer =
 	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer
 
-local UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate =
-	  UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate
+local UnitAura, IsUsableSpell, GetFramerate =
+	  UnitAura, IsUsableSpell, GetFramerate
 
 local debugprofilestop = debugprofilestop_SAFE
 
@@ -1439,18 +1439,6 @@ function TMW.GetSpellCost(spell)
 	else
 		return cost.cost, cost
 	end
-end
-
-function TMW.GetCurrentSpecializationRole()
-	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
-	-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
-	local currentSpec = GetSpecialization()
-	if not currentSpec then
-		return nil
-	end
-
-	local _, _, _, _, role = GetSpecializationInfo(currentSpec)
-	return role
 end
 
 do	-- TMW:GetParser()

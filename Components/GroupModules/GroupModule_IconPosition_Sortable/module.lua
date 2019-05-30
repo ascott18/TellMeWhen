@@ -349,20 +349,20 @@ function IconPosition_Sortable:AdjustIconsForModNumRowsCols(deltaRows, deltaCols
 
 
 		    if row_old > rows_new then
-		    	if self:ClobberCheck(ics) then
-		    	    group.__iconPosClobbered[row_old][column_old] = ics
+				if self:ClobberCheck(ics) then
+				    group.__iconPosClobbered[row_old][column_old] = ics
 			    end
 		    else
-		    	group:GetSettings().Icons[newIconID] = ics
+				group:GetSettings().Icons[newIconID] = ics
 
-		    	if row_old == rows_old then
-		    		for i = rows_old + 1, rows_new do
-		    			local newIconID = newIconID + i - rows_old
-		    			local column_new = ceil(newIconID / rows_new)
+				if row_old == rows_old then
+					for i = rows_old + 1, rows_new do
+						local newIconID = newIconID + i - rows_old
+						local column_new = ceil(newIconID / rows_new)
 
-		    			group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[i][column_new]
-		    		end
-		    	end
+						group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[i][column_new]
+					end
+				end
 		    end
 		end
 
@@ -388,20 +388,20 @@ function IconPosition_Sortable:AdjustIconsForModNumRowsCols(deltaRows, deltaCols
 
 
 		    if column_old > columns_new then
-		    	if self:ClobberCheck(ics) then
+				if self:ClobberCheck(ics) then
 			        group.__iconPosClobbered[column_old][row_old] = ics
 			    end
 		    else
-		    	group:GetSettings().Icons[newIconID] = ics
+				group:GetSettings().Icons[newIconID] = ics
 
-		    	if column_old == columns_old then
-		    		for i = columns_old + 1, columns_new do
-		    			local newIconID = newIconID + i - columns_old
-		    			local row_new = ceil(newIconID / columns_new)
+				if column_old == columns_old then
+					for i = columns_old + 1, columns_new do
+						local newIconID = newIconID + i - columns_old
+						local row_new = ceil(newIconID / columns_new)
 
-		    			group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[i][row_new]
-		    		end
-		    	end
+						group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[i][row_new]
+					end
+				end
 		    end
 		end
 

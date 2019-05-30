@@ -502,114 +502,27 @@ TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 -- Constant spell data
 ---------------------------------
 
-
-if pclass == "DRUID" then
-	TMW.COMMON.CurrentClassTotems = {
-		name = GetSpellInfo(145205),
-		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(145205)),
-		{
-			hasVariableNames = false,
-			name = GetSpellInfo(145205),
-			texture = GetSpellTexture(145205)
-		}
-	}
-elseif pclass == "MAGE" then
-	TMW.COMMON.CurrentClassTotems = {
-		name = GetSpellInfo(116011),
-		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(116011)),
-		{
-			hasVariableNames = false,
-			name = GetSpellInfo(116011),
-			texture = GetSpellTexture(116011)
-		}
-	}
-
-elseif pclass == "PALADIN" then
-	local name = GetSpellInfo(26573) .. " & " .. GetSpellInfo(114158)
-	TMW.COMMON.CurrentClassTotems = {
-		name = name,
-		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name),
-		{
-			hasVariableNames = false,
-			name = GetSpellInfo(26573), --consecration
-			texture = GetSpellTexture(26573)
-		},
-        {
-            hasVariableNames = false,
-            name = GetSpellInfo(114158), --light's hammer
-            texture = GetSpellTexture(114158)
-        }
-	}
-elseif pclass == "MONK" then
-	TMW.COMMON.CurrentClassTotems = {
-		name = L["ICONMENU_STATUE"],
-		desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(L["ICONMENU_STATUE"]),
-		{
-			hasVariableNames = false,
-			name = L["ICONMENU_STATUE"],
-			texture = function()
-				if GetSpecialization() == 1 then
-					return GetSpellTexture(163177) -- black ox
-				else
-					return GetSpellTexture(115313) -- jade serpent
-				end
-			end,
-		}
-	}
-elseif pclass == "DEATHKNIGHT" then
-	local npcName = function(npcID)
-		local cachedName = TMW:TryGetNPCName(npcID)
-		return function()
-			if cachedName then return cachedName end
-			cachedName = TMW:TryGetNPCName(npcID)
-			return cachedName
-		end
-	end
-	local name = GetSpellInfo(49206) .. " & " .. GetSpellInfo(288853)
-	TMW.COMMON.CurrentClassTotems = {
-		name = name,
-		desc = function() return L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name) end,
-		texture = GetSpellTexture(49206),
-		[1] = { -- Raise Abomination (pvp talent)
-			hasVariableNames = false,
-			name = npcName(149555),
-			texture = GetSpellTexture(288853),
-		},
-		[3] = { -- Ebon Gargoyle
-			hasVariableNames = false,
-			name = npcName(27829),
-			texture = GetSpellTexture(49206),
-		}
-	}
-else
-	-- This includes shamans now in Legion - the elements of totems is no longer a notion.
-	TMW.COMMON.CurrentClassTotems = {
-		name = L["ICONMENU_TOTEM"],
-		desc = L["ICONMENU_TOTEM_DESC"],
-		{
-			hasVariableNames = true,
-			name = L["GENERICTOTEM"]:format(1),
-			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
-		},
-		{
-			hasVariableNames = true,
-			name = L["GENERICTOTEM"]:format(2),
-			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
-		},
-		{
-			hasVariableNames = true,
-			name = L["GENERICTOTEM"]:format(3),
-			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
-		},
-		{
-			hasVariableNames = true,
-			name = L["GENERICTOTEM"]:format(4),
-			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
-		},
-		{
-			hasVariableNames = true,
-			name = L["GENERICTOTEM"]:format(5),
-			texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
-		},
-	}
-end
+TMW.COMMON.CurrentClassTotems = {
+	name = L["ICONMENU_TOTEM"],
+	desc = L["ICONMENU_TOTEM_DESC"],
+	{
+		hasVariableNames = true,
+		name = L["FIRE"],
+		texture = GetSpellTexture(8227), -- flametongue
+	},
+	{
+		hasVariableNames = true,
+		name = L["EARTH"],
+		texture = GetSpellTexture(8072), -- stoneskin
+	},
+	{
+		hasVariableNames = true,
+		name = L["WATER"],
+		texture = GetSpellTexture(5675), -- mana spring
+	},
+	{
+		hasVariableNames = true,
+		name = L["AIR"],
+		texture = GetSpellTexture(8512), -- windfury
+	},
+}

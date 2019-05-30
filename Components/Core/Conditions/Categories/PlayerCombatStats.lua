@@ -104,6 +104,20 @@ ConditionCategory:RegisterCondition(4,	 "INTELLECT", {
 	end,
 })
 
+ConditionCategory:RegisterCondition(4.5,	"SPIRIT", {
+	text = _G["SPELL_STAT5_NAME"],
+	range = 2000,
+	unit = PLAYER,
+	formatter = TMW.C.Formatter.COMMANUMBER,
+	icon = "Interface\\Icons\\spell_shadow_burningspirit",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[UnitStat("player", 5) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UNIT_STATS", "player")
+	end,
+})
+
 
 ConditionCategory:RegisterSpacer(5)
 
@@ -138,114 +152,10 @@ ConditionCategory:RegisterCondition(7,	 "MELEEHASTE", {
 			ConditionObject:GenerateNormalEventString("UNIT_ATTACK_SPEED", "player")
 	end,
 })
-ConditionCategory:RegisterCondition(8,	 "MASTERY", {
-	text = STAT_MASTERY,
-	min = 0,
-	range = 100,
-	formatter = TMW.C.Formatter.PERCENT,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\spell_holy_championsbond",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GetMasteryEffect() c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("MASTERY_UPDATE")
-	end,
-})
-ConditionCategory:RegisterCondition(9,	 "EXPERTISE", {		-- DEPRECATED
-	text = _G["COMBAT_RATING_NAME"..CR_EXPERTISE],
-	funcstr = "DEPRECATED",
-	min = 0, 
-	range = 100,
-})
 
 
 ConditionCategory:RegisterSpacer(10)
 
-
-ConditionCategory:RegisterCondition(11,	"SPIRIT", {
-	text = _G["SPELL_STAT5_NAME"],
-	range = 2000,
-	unit = PLAYER,
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	icon = "Interface\\Icons\\spell_shadow_burningspirit",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[UnitStat("player", 5) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_STATS", "player")
-	end,
-})
-ConditionCategory:RegisterCondition(13, "MULTISTRIKE", {
-	text = STAT_MULTISTRIKE,
-	min = 0,
-	range = 50,
-	step = 0.1,
-	formatter = TMW.C.Formatter.PERCENT,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\Ability_UpgradeMoonGlaive",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = "DEPRECATED",
-})
-ConditionCategory:RegisterCondition(14, "LIFESTEAL", {
-	text = STAT_LIFESTEAL,
-	min = 0,
-	range = 10,
-	step = 0.1,
-	formatter = TMW.C.Formatter.PERCENT,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\Spell_Shadow_LifeDrain02",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GetLifesteal() c.Operator c.Level]],
-	Env = {
-		GetLifesteal = GetLifesteal,
-	},
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("LIFESTEAL_UPDATE")
-	end,
-})
-ConditionCategory:RegisterCondition(15, "VERSATILITY", {
-	text = STAT_VERSATILITY,
-	min = 0,
-	range = 50,
-	step = 0.1,
-	formatter = TMW.C.Formatter.PERCENT,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\achievement_dungeon_icecrown_frostmourne",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_DONE) + GetVersatilityBonus(CR_VERSATILITY_DAMAGE_DONE) c.Operator c.Level]],
-	Env = {
-		CR_VERSATILITY_DAMAGE_DONE = CR_VERSATILITY_DAMAGE_DONE,
-		GetCombatRatingBonus = GetCombatRatingBonus,
-		GetVersatilityBonus = GetVersatilityBonus,
-	},
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("COMBAT_RATING_UPDATE")
-	end,
-})
-ConditionCategory:RegisterCondition(16, "AVOIDANCE", {
-	text = STAT_AVOIDANCE,
-	min = 0,
-	range = 10,
-	step = 0.1,
-	formatter = TMW.C.Formatter.PERCENT,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\spell_shadow_shadowward",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[GetAvoidance() c.Operator c.Level]],
-	Env = {
-		GetAvoidance = GetAvoidance,
-	},
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("AVOIDANCE_UPDATE")
-	end,
-})
-
-
-ConditionCategory:RegisterSpacer(30)
 
 local UnitAttackPower = UnitAttackPower
 ConditionCategory:RegisterCondition(30.5, "MELEEAP", {
@@ -269,9 +179,6 @@ ConditionCategory:RegisterCondition(30.5, "MELEEAP", {
 })
 
 
-if MAX_SPELL_SCHOOLS ~= 7 then
-	TMW:Error("MAX_SPELL_SCHOOLS has changed, so the spell school dependent conditions need updating")
-end
 local GetSpellBonusDamage = GetSpellBonusDamage
 ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 	text = STAT_SPELLPOWER,

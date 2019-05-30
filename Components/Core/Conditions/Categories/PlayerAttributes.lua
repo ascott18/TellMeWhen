@@ -79,61 +79,7 @@ ConditionCategory:RegisterCondition(5,	 "RESTING", {
 			ConditionObject:GenerateNormalEventString("PLAYER_ENTERING_WORLD")
 	end,
 })
-ConditionCategory:RegisterCondition(5.2, "INPETBATTLE", {
-	text = L["CONDITIONPANEL_INPETBATTLE"],
 
-	bool = true,
-	
-	unit = PLAYER,
-	icon = "Interface\\Icons\\pet_type_critter",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		IsInBattle = C_PetBattles.IsInBattle,
-	},
-	funcstr = [[BOOLCHECK( IsInBattle() )]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PET_BATTLE_OPENING_START"),
-			ConditionObject:GenerateNormalEventString("PET_BATTLE_CLOSE")
-	end,
-})
-
-ConditionCategory:RegisterCondition(5.3, "OVERRBAR", {
-	text = L["CONDITIONPANEL_OVERRBAR"],
-	tooltip = L["CONDITIONPANEL_OVERRBAR_DESC"],
-
-	bool = true,
-	
-	unit = PLAYER,
-	icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		HasOverrideActionBar = HasOverrideActionBar,
-	},
-	funcstr = [[BOOLCHECK( HasOverrideActionBar() )]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UPDATE_OVERRIDE_ACTIONBAR")
-	end,
-})
-
-ConditionCategory:RegisterCondition(5.4, "WARMODE", {
-	text = L["CONDITIONPANEL_WARMODE"],
-
-	bool = true,
-	
-	unit = PLAYER,
-	icon = "Interface\\Icons\\achievement_arena_2v2_5",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		IsWarModeDesired = C_PvP.IsWarModeDesired,
-	},
-	funcstr = [[BOOLCHECK( IsWarModeDesired() )]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_FLAGS_CHANGED")
-	end,
-})
 
 local NumShapeshiftForms
 local GetShapeshiftForm = GetShapeshiftForm
@@ -144,6 +90,7 @@ end)
 
 ConditionCategory:RegisterSpacer(5.5)
 
+-- TODO-CLASSIC: STANCE probably needs to be totally redone.
 local FirstStances = {
 	DRUID = 5487, 		-- Bear Form
 	ROGUE = 1784, 		-- Stealth
@@ -233,7 +180,7 @@ TMW:RegisterUpgrade(73019, {
 	end,
 })
 local PetModes = {
-	PET_MODE_ASSIST = 1,
+	PET_MODE_ASSIST = 1,-- TODO-CLASSIC:
 	PET_MODE_DEFENSIVE = 2,
 	PET_MODE_PASSIVE = 3,
 }
@@ -244,7 +191,7 @@ ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 		[0] = L["CONDITIONPANEL_PETMODE_NONE"],
-		[1] = PET_MODE_ASSIST,
+		[1] = PET_MODE_ASSIST,-- TODO-CLASSIC: assist was "agressive" in classic
 		[2] = PET_MODE_DEFENSIVE,
 		[3] = PET_MODE_PASSIVE
 	},
@@ -269,43 +216,6 @@ ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_PET", "player"),
 			ConditionObject:GenerateNormalEventString("PET_BAR_UPDATE")
-	end,
-})
-
-TMW:RegisterUpgrade(73019, {
-	condition = function(self, condition)
-		if condition.Type == "PETSPEC" then
-			condition.Type = "PETSPEC2"
-			condition.Checked = false
-			CNDT:ConvertSliderCondition(condition, 0, 3)
-		end
-	end,
-})
-ConditionCategory:RegisterCondition(14.1, "PETSPEC2", {
-	text = L["CONDITIONPANEL_PETSPEC"],
-	tooltip = L["CONDITIONPANEL_PETSPEC_DESC"],
-
-	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
-	bitFlags = {
-		[0] = NONE,
-		[1] = L["PET_TYPE_FEROCITY"],
-		[2] = L["PET_TYPE_TENACITY"],
-		[3] = L["PET_TYPE_CUNNING"]
-	},
-
-	hidden = pclass ~= "HUNTER",
-	unit = false,
-	icon = "Interface\\Icons\\Ability_Druid_DemoralizingRoar",
-	tcoords = CNDT.COMMON.standardtcoords,
-
-	Env = {
-		GetSpecialization = GetSpecialization
-	},
-	funcstr = [[BITFLAGSMAPANDCHECK( GetSpecialization(nil, true) or 0 )]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_PET", "player"),
-			ConditionObject:GenerateNormalEventString("PET_SPECIALIZATION_CHANGED")
 	end,
 })
 
@@ -345,38 +255,6 @@ ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("MINIMAP_UPDATE_TRACKING")
-	end,
-})
-
-
-
-ConditionCategory:RegisterSpacer(17)
-
-
-ConditionCategory:RegisterCondition(18,	 "BLIZZEQUIPSET", {
-	text = L["CONDITIONPANEL_BLIZZEQUIPSET"],
-	tooltip = L["CONDITIONPANEL_BLIZZEQUIPSET_DESC"],
-
-	bool = true,
-	
-	unit = PLAYER,
-	name = function(editbox)
-		editbox:SetTexts(L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT"], L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC"])
-		editbox:SetLabel(L["EQUIPSETTOCHECK"])
-	end,
-	useSUG = "blizzequipset",
-	icon = "Interface\\Icons\\inv_box_04",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetEquipmentSetID = C_EquipmentSet.GetEquipmentSetID,
-		GetEquipmentSetInfo = C_EquipmentSet.GetEquipmentSetInfo,
-	},
-	funcstr = [[GetEquipmentSetID(c.NameRaw) and BOOLCHECK( select(4, GetEquipmentSetInfo(GetEquipmentSetID(c.NameRaw))) )]],
-	events = function(ConditionObject, c)
-		return
-			--ConditionObject:GenerateNormalEventString("EQUIPMENT_SWAP_FINISHED") -- this doesn't fire late enough to get updated returns from GetEquipmentSetInfoByName
-			ConditionObject:GenerateNormalEventString("BAG_UPDATE"), -- this is slightly overkill, but it is the first event that fires when the return value of GetEquipmentSetInfoByName has changed
-			ConditionObject:GenerateNormalEventString("EQUIPMENT_SETS_CHANGED") -- this is needed to handle saving an equipment set that is alredy equipped
 	end,
 })
 

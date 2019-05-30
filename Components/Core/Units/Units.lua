@@ -48,18 +48,14 @@ UNITS.Units = {
 	{ value = "player",				text = PLAYER, 											desc = L["PLAYER_DESC"] },
 	{ value = "target",				text = TARGET														},
 	{ value = "targettarget",		text = L["ICONMENU_TARGETTARGET"]									},
-	{ value = "focus",				text = L["ICONMENU_FOCUS"]											},
-	{ value = "focustarget",		text = L["ICONMENU_FOCUSTARGET"]									},
 	{ value = "pet",				text = PET 															},
 	{ value = "pettarget",			text = L["ICONMENU_PETTARGET"]										},
 	{ value = "mouseover",			text = L["ICONMENU_MOUSEOVER"]										},
 	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]								},
-	{ value = "vehicle",			text = L["ICONMENU_VEHICLE"]										},
 	{ value = "nameplate",			text = L["ICONMENU_NAMEPLATE"],	range = 30							},
 	{ value = "party",				text = PARTY,				range = MAX_PARTY_MEMBERS				},
 	{ value = "raid",				text = RAID,				range = MAX_RAID_MEMBERS				},
 	{ value = "group",				text = GROUP,				range = MAX_RAID_MEMBERS,	desc = L["ICONMENU_GROUPUNIT_DESC"]	},
-	{ value = "arena",				text = ARENA,				range = 5								},
 	{ value = "boss",				text = BOSS,				range = MAX_BOSS_FRAMES					},
 	{ value = "maintank",			text = L["MAINTANK"],		range = MAX_RAID_MEMBERS,	desc = L["MAINTANK_DESC"]			},
 	{ value = "mainassist",			text = L["MAINASSIST"],		range = MAX_RAID_MEMBERS,	desc = L["MAINASSIST_DESC"]				},
@@ -146,14 +142,6 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				UNITS.unitsWithBaseExistsEvent[unit] = "pet"
 				self.allUnitsChangeOnEvent = false
 
-			elseif unit == "focus" then -- the unit exactly
-				self.updateEvents.PLAYER_FOCUS_CHANGED = true
-				UNITS.unitsWithExistsEvent[unit] = true
-			elseif unit:find("^focus") then -- the unit as a base, with something else tacked onto it.
-				self.updateEvents.PLAYER_FOCUS_CHANGED = true
-				UNITS.unitsWithBaseExistsEvent[unit] = "focus"
-				self.allUnitsChangeOnEvent = false
-
 			elseif unit:find("^raid%d+$") then -- the unit exactly
 				self.updateEvents["GROUP_ROSTER_UPDATE"] = true
 				UNITS.unitsWithExistsEvent[unit] = true
@@ -176,14 +164,6 @@ local UnitSet = TMW:NewClass("UnitSet"){
 			elseif unit:find("^boss%d+") then -- the unit as a base, with something else tacked onto it.
 				self.updateEvents.INSTANCE_ENCOUNTER_ENGAGE_UNIT = true
 				UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(boss%d+)")
-				self.allUnitsChangeOnEvent = false
-
-			elseif unit:find("^arena%d+$") then -- the unit exactly
-				self.updateEvents.ARENA_OPPONENT_UPDATE = true
-				UNITS.unitsWithExistsEvent[unit] = true
-			elseif unit:find("^arena%d+") then -- the unit as a base, with something else tacked onto it.
-				self.updateEvents.ARENA_OPPONENT_UPDATE = true
-				UNITS.unitsWithBaseExistsEvent[unit] = unit:match("^(arena%d+)")
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^nameplate%d+$") then -- the unit exactly

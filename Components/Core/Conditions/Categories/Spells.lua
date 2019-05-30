@@ -136,68 +136,6 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 
 ConditionCategory:RegisterSpacer(2.4)
 
-ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
-	text = L["SPELLCHARGES"],
-	tooltip = L["SPELLCHARGES_DESC"],
-	min = 0,
-	range = 5,
-	name = function(editbox)
-		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
-	end,
-	useSUG = "spell",
-	unit = PLAYER,
-	icon = "Interface\\Icons\\ability_monk_roll",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetSpellCharges = GetSpellCharges,
-		GetSpellCount = GetSpellCount,
-	},
-	funcstr = [[(GetSpellCharges(c.NameFirst) or GetSpellCount(c.NameFirst)) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_CHARGES")
-	end,	
-})
-ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
-	text = L["SPELLCHARGETIME"],
-	tooltip = L["SPELLCHARGETIME_DESC"],
-	min = 0,
-	range = 30,
-	step = 0.1,
-	name = function(editbox)
-		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
-	end,
-	useSUG = "spell",
-	unit = PLAYER,
-	formatter = TMW.C.Formatter:New(function(value)
-		local s = TMW.C.Formatter.TIME_YDHMS:Format(value)
-		if value == 0 then
-			s = s .. " ("..L["SPELLCHARGES_FULLYCHARGED"]..")"
-		end
-		return s
-	end),
-	icon = "Interface\\Icons\\ability_warlock_handofguldan",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		GetSpellCharges = GetSpellCharges,
-	},
-	funcstr = [[RechargeDuration(c.NameFirst) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_CHARGES")
-	end,
-	anticipate = [[
-		local _, _, start, duration = GetSpellCharges(c.NameFirst)
-		local VALUE = duration and start + (duration - c.Level) or huge
-	]],
-})
-
-ConditionCategory:RegisterSpacer(2.7)
-
 ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 	text = L["CONDITIONPANEL_LASTCAST"],
 	bool = true,

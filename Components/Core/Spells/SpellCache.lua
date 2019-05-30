@@ -47,13 +47,6 @@ SpellCache.CONST = {
 	WHITELIST = {
 		-- A list of spells that will fail other filters, but are still desired
 		[8178] = true, -- Grounding Totem Effect
-		[255016] = true, -- Grounding Totem Effect
-		[228911] = true, -- Odyn's test
-		[227626] = true, -- Odyn's test
-		[275529] = true, -- Test of Might
-		[275531] = true, -- Test of Might
-		[275532] = true, -- Test of Might
-		[275540] = true, -- Test of Might
 	},
 
 	-- A list of spells that should be excluded from the cache
@@ -213,8 +206,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	local WHITELIST_TRADESKILLS = CONST.WHITELIST_TRADESKILLS
 	local WHITELIST = CONST.WHITELIST
 	local MAX_FAILED_SPELLS = CONST.MAX_FAILED_SPELLS
-	local GetTradeSkillLineForRecipe = C_TradeSkillUI.GetTradeSkillLineForRecipe
-	local GetTradeSkillTexture = C_TradeSkillUI.GetTradeSkillTexture
+	
 	local classLocalizedName = UnitClass("player")
 
 	local function findword(name, word)
@@ -276,6 +268,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					-- We do this by getting the texture of the tradeskill, since all variants of profession tradeskills use the same texture.
 					-- I couldn't find any other way to correlate this data without doing it by hand for hundreds of these.
 
+					-- TODO-CLASSIC: Figure out filtering out of tradeskill spells.
+					--[[
 					local tradeSkillID, tradeSkillName = GetTradeSkillLineForRecipe(spellID)
 					local isTradeSkillOk = not tradeSkillID or tradeSkillBlacklist[tradeSkillID]
 					if isTradeSkillOk == nil then
@@ -287,6 +281,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 					end
 
 					fail = not isTradeSkillOk
+					]]
 
 					if not fail then
 						-- Keep track of known good names. Don't do name checking on known good names.

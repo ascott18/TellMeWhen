@@ -128,10 +128,6 @@ local function CreateAllUnits()
 		targettarget;
 		targettargettarget;
 
-		focus;
-		focustarget;
-		focustargettarget;
-
 		pet;
 		pettarget;
 		pettargettarget;

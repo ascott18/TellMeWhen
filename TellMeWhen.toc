@@ -208,13 +208,10 @@ Components\IconTypes\IconType_cooldown\cooldown.lua
 Components\IconTypes\IconType_default\default.lua
 Components\IconTypes\IconType_dotwatch\dotwatch.lua
 Components\IconTypes\IconType_dr\dr.lua
-Components\IconTypes\IconType_guardian\guardian.lua
 Components\IconTypes\IconType_icd\icd.lua
 Components\IconTypes\IconType_item\item.lua
-Components\IconTypes\IconType_losecontrol\losecontrol.lua
 Components\IconTypes\IconType_meta\meta.lua
 Components\IconTypes\IconType_reactive\reactive.lua
-Components\IconTypes\IconType_runes\runes.lua
 Components\IconTypes\IconType_swingtimer\swingtimer.lua
 Components\IconTypes\IconType_totem\totem.lua
 Components\IconTypes\IconType_uierror\uierror.lua

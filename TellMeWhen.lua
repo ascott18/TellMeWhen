@@ -25,7 +25,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 	TELLMEWHEN_VERSION_MINOR = ("r%d (%s)"):format(strmatch(projectVersion, "%-(%d+)%-(.*)"))
 end
 
-TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
+TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " Classic " .. TELLMEWHEN_VERSION_MINOR
 TELLMEWHEN_VERSIONNUMBER = 86103 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
@@ -418,9 +418,6 @@ end})
 
 
 TMW.SpellTexturesMetaIndex = {
-	--hack for pvp tinkets
-	[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
-	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
 }
 local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
 
@@ -1051,11 +1048,11 @@ function TMW:PLAYER_LOGIN()
 	TMW.PLAYER_LOGIN = nil
 
 	-- Check for wrong WoW version
-	if select(4, GetBuildInfo()) < 80000 then
+	if select(4, GetBuildInfo()) < 11300 or select(4, GetBuildInfo()) > 19999 then
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		local version = GetBuildInfo()
 		StaticPopupDialogs["TMW_BADWOWVERSION"] = {
-			text = "TellMeWhen %s is not compatible with WoW %s. Please downgrade TellMeWhen, or wait for Battle for Azeroth to release.", 
+			text = "TellMeWhen %s is only compatible with Classic WoW.",
 			button1 = OKAY,
 			timeout = 0,
 			showAlert = true,
@@ -1135,13 +1132,7 @@ function TMW:PLAYER_LOGIN()
 
 	
 	
-	TMW:RegisterEvent("BARBER_SHOP_OPEN")
-	TMW:RegisterEvent("BARBER_SHOP_CLOSE")
-	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-	-- There was a time where we did not register PLAYER_TALENT_UPDATE because it fired way too much (See ticket 949)
-	-- We definitely need it in Warlords, though, because PLAYER_SPECIALIZATION_CHANGED doesnt happen as often.
-	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
-	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("CHARACTER_POINTS_CHANGED")
 
 
 
@@ -1630,75 +1621,6 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 				ics.Alpha = nil
 				ics.UnAlpha = nil
 				ics.ShowWhen = nil
-			end,
-		},
-
-		[80005] = {
-			group = function(self, gs, domain, groupID)
-				if domain == "profile" then
-					local expectedProfileName = UnitName("player") .. " - " .. GetRealmName()
-					if expectedProfileName == TMW.db:GetCurrentProfile() or TMW.db.profile.Version > 70001 then
-						-- If the current profile is named after the current character,
-						-- or if the version is after 70001 (which is the all-profiles upgrade)
-						-- we can safely pull the player's current talents to get rid of these settings.
-
-						-- If neither of these things are the case, then just kill the settings without trying to upgrade.
-						-- The user will have to re-configure those groups that will now be showing when they shouldn't be.
-
-
-						-- Normalize these with their old default values to make this easier.
-						if gs.PrimarySpec == nil then
-							gs.PrimarySpec = true
-						end
-						if gs.SecondarySpec == nil then
-							gs.SecondarySpec = true
-						end
-
-						-- Only do anything if only one of these was enabled.
-						-- If both were enabled, don't disable anything (duh),
-						-- and if both were disabled, then.... why? Silly user!
-						if (gs.PrimarySpec and not gs.SecondarySpec)
-						or (not gs.PrimarySpec and gs.SecondarySpec)
-						then
-							local enabledSpec 
-							if gs.PrimarySpec then
-								enabledSpec = GetSpecialization(false, false, 1)
-							else
-								enabledSpec = GetSpecialization(false, false, 2)
-							end
-
-							-- Disable any specs that aren't the one that was enabled.
-							for i = 1, 4 do
-								if i ~= enabledSpec then
-									gs["Tree" .. i] = false
-								end
-							end
-						end
-
-
-						-- Now, upgrade the Tree settings. These are moving from being stored in one key per tree
-						-- to a table that stores specIDs. This prevents the crap we had to go through for this upgrade:
-						-- the old settings we context-sensitive (on the player's class), while the new settings are not.
-
-						for treeID = 1, GetNumSpecializations() do
-							local specID = GetSpecializationInfo(treeID)
-							local specEnabled = gs["Tree" .. treeID]
-							if specEnabled == nil then
-								specEnabled = true
-							end
-
-							gs.EnabledSpecs[specID] = specEnabled
-						end
-					end
-				end
-
-				-- We're done with these now. Goodbye!
-				gs.PrimarySpec = nil
-				gs.SecondarySpec = nil
-
-				for i = 1, 4 do
-					gs["Tree" .. i] = false
-				end
 			end,
 		},
 
@@ -2908,24 +2830,20 @@ function TMW:ScheduleUpdate(delay)
 end
 
 function TMW:UpdateTalentTextureCache()
-	for tier = 1, MAX_TALENT_TIERS do
-		for column = 1, NUM_TALENT_COLUMNS do
-			local id, name, tex = GetTalentInfo(tier, column, 1)
+	for tab = 1, GetNumTalentTabs() do
+		for index = 1, GetNumTalents(tab) do
+			local name, iconTexture = GetTalentInfo(tab, index)
 
 			local lower = name and strlowerCache[name]
 			
 			if lower then
-				SpellTexturesMetaIndex[lower] = tex
+				SpellTexturesMetaIndex[lower] = iconTexture
 			end
 		end
 	end
 end
 
-function TMW:PLAYER_SPECIALIZATION_CHANGED(event, unit)
-	if event == "PLAYER_SPECIALIZATION_CHANGED" and unit ~= "player" then
-		return
-	end
-
+function TMW:CHARACTER_POINTS_CHANGED()
 	if not InCombatLockdown() then
 		TMW:ScheduleUpdate(.2)
 		--TMW:Update()
@@ -2960,14 +2878,6 @@ function TMW:OnProfile(event, arg2, arg3)
 	end
 	
 	TMW:Fire("TMW_ON_PROFILE", event, arg2, arg3)
-end
-
-function TMW:BARBER_SHOP_OPEN()
-	TMW:Hide()
-end
-
-function TMW:BARBER_SHOP_CLOSE()
-	TMW:Show()
 end
 
 

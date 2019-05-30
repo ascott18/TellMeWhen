@@ -106,25 +106,6 @@ ConditionCategory:RegisterCondition(3,    "COMBAT", {
 	end,
 })
 
-ConditionCategory:RegisterCondition(4,    "VEHICLE", {
-	text = L["CONDITIONPANEL_VEHICLE"],
-
-	bool = true,
-	
-	icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitHasVehicleUI = UnitHasVehicleUI,
-	},
-	funcstr = [[BOOLCHECK( UnitHasVehicleUI(c.Unit) )]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_ENTERED_VEHICLE", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_EXITED_VEHICLE", CNDT:GetUnit(c.Unit))
-	end,
-})
-
 ConditionCategory:RegisterCondition(5,    "PVPFLAG", {
 	text = L["CONDITIONPANEL_PVPFLAG"],
 
@@ -184,27 +165,6 @@ ConditionCategory:RegisterCondition(6.2,  "ISPLAYER", {
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
 	end,
 })
-
-ConditionCategory:RegisterCondition(6.7,  "INCHEALS", {
-	text = L["INCHEALS"],
-	tooltip = L["INCHEALS_DESC"],
-	range = 50000,
-	icon = "Interface\\Icons\\spell_holy_flashheal",
-	tcoords = CNDT.COMMON.standardtcoords,
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	Env = {
-		UnitGetIncomingHeals = UnitGetIncomingHeals,
-	},
-	funcstr = function(c)
-		return [[(UnitGetIncomingHeals(c.Unit) or 0) c.Operator c.Level]]
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_HEAL_PREDICTION", CNDT:GetUnit(c.Unit))
-	end,
-})
-
 
 
 ConditionCategory:RegisterSpacer(6.9)
@@ -533,28 +493,11 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["Dwarf"] = {order = 2, text = Name("Dwarf")},
 			["NightElf"] = {order = 3, text = Name("Night Elf")},
 			["Gnome"] = {order = 4, text = Name("Gnome")},
-			["Draenei"] = {order = 5, text = Name("Draenei")},
-			["Worgen"] = {order = 6, text = Name("Worgen")},
-
-			["VoidElf"] = {order = 6.1, text = Name("Void Elf")},
-			["LightforgedDraenei"] = {order = 6.2, text = Name("Lightforged Draenei")},
-			["DarkIronDwarf"] = {order = 6.3, text = Name("Dark Iron Dwarf")},
-			["KulTiran"] = {order = 6.4, text = Name("Kul Tiran"), space = true},
 
 			["Orc"] = {order = 7, text = Name("Orc")},
 			["Scourge"] = {order = 8, text = Name("Undead")},
 			["Tauren"] = {order = 9, text = Name("Tauren")},
 			["Troll"] = {order = 10, text = Name("Troll")},
-			["BloodElf"] = {order = 11, text = Name("Blood Elf")},
-			["Goblin"] = {order = 12, text = Name("Goblin")},
-
-			["Nightborne"] = {order = 12.1, text = Name("Nightborne")},
-			["HighmountainTauren"] = {order = 12.2, text = Name("Highmountain Tauren")},
-			["MagharOrc"] = {order = 12.3, text = Name("Mag'har Orc")},
-			["ZandalariTroll"] = {order = 12.4, text = Name("Zandalari Troll"), space = true},
-
-			["Pandaren"] = {order = 13, text = Name("Pandaren")},
-
 		}
 
 		for token, data in pairs(bitFlags) do
@@ -578,44 +521,4 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
 	end,
-})
-
-
-
-ConditionCategory:RegisterSpacer(13.5)
-
-
-
-ConditionCategory:RegisterCondition(17,   "THREATSCALED", {
-	text = L["CONDITIONPANEL_THREAT_SCALED"],
-	tooltip = L["CONDITIONPANEL_THREAT_SCALED_DESC"],
-	min = 0,
-	max = 100,
-	defaultUnit = "target",
-	formatter = TMW.C.Formatter.PERCENT,
-	icon = "Interface\\Icons\\spell_misc_emotionangry",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitExists = UnitExists,
-		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
-	},
-	funcstr = [[UnitExists(c.Unit) and ((select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level)]],
-	-- events = absolutely no events
-})
-
-ConditionCategory:RegisterCondition(18,   "THREATRAW", {
-	text = L["CONDITIONPANEL_THREAT_RAW"],
-	tooltip = L["CONDITIONPANEL_THREAT_RAW_DESC"],
-	min = 0,
-	max = 130,
-	defaultUnit = "target",
-	formatter = TMW.C.Formatter.PERCENT,
-	icon = "Interface\\Icons\\spell_misc_emotionhappy",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitExists = UnitExists,
-		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
-	},
-	funcstr = [[UnitExists(c.Unit) and ((select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level)]],
-	-- events = absolutely no events
 })

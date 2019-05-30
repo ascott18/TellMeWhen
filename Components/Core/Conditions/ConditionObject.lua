@@ -430,16 +430,12 @@ function ConditionObject:GetUnitChangedEventString(unit)
 		return self:GenerateNormalEventString("PLAYER_TARGET_CHANGED")
 	elseif unit == "pet" then
 		return self:GenerateNormalEventString("UNIT_PET", "player")
-	elseif unit == "focus" then
-		return self:GenerateNormalEventString("PLAYER_FOCUS_CHANGED")
 	elseif unit:find("^raid%d+$") then
 		return self:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
 	elseif unit:find("^party%d+$") then
 		return self:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
 	elseif unit:find("^boss%d+$") then
 		return self:GenerateNormalEventString("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
-	elseif unit:find("^arena%d+$") then
-		return self:GenerateNormalEventString("ARENA_OPPONENT_UPDATE")
 	end
 	
 	return false

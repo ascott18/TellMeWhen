@@ -4,11 +4,15 @@ local pname = UnitName("player")
 local locale = GetLocale()
 
 local spellFmt = "|T%s:0|t%s"
-local function Spell(id)
+local function Spell(id, noTex)
     local name, _, tex = GetSpellInfo(id)
     if not name or name == "" or not tex then
         return "?????"
     end
+    if noTex then
+        return name
+    end
+
     if id == 42292 then
         tex = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1")
     end
@@ -21,11 +25,12 @@ L["ECLIPSE"] = (locale == "enUS" or locale == "enGB") and "Eclipse" or ECLIPSE
 
 L["DOMAIN_GLOBAL_NC"] = L["DOMAIN_GLOBAL"]:gsub("|cff00c300", ""):gsub("|r", "")
 
-L["HELP_FIRSTUCD"]                      = L["HELP_FIRSTUCD"]                        :format(L["ICONMENU_CHOOSENAME3"], GetSpellInfo(65547), GetSpellInfo(47528), GetSpellInfo(2139), GetSpellInfo(62618), GetSpellInfo(62618))
-L["HELP_MISSINGDURS"]                   = L["HELP_MISSINGDURS"]                     :format("%s", GetSpellInfo(1766)) -- keep the first "%s" as "%s"
+L["HELP_FIRSTUCD"]                      = L["HELP_FIRSTUCD"]                        :format(L["ICONMENU_CHOOSENAME3"], 
+                                                                                        Spell(65547, true), Spell(47528, true), Spell(2139, true), Spell(62618, true), Spell(62618, true))
+L["HELP_MISSINGDURS"]                   = L["HELP_MISSINGDURS"]                     :format("%s", Spell(1766, true)) -- keep the first "%s" as "%s"
 L["ICONMENU_IGNORENOMANA_DESC"]         = L["ICONMENU_IGNORENOMANA_DESC"]           :format(Spell(85288), Spell(5308))
-L["ICONMENU_REACTIVE_DESC"]             = L["ICONMENU_REACTIVE_DESC"]               :format(Spell(5308), Spell(119996), Spell(32379))
-L["ICONMENU_UNITCOOLDOWN_DESC"]         = L["ICONMENU_UNITCOOLDOWN_DESC"]           :format(Spell(42292), GetSpellInfo(42292))
+L["ICONMENU_REACTIVE_DESC"]             = L["ICONMENU_REACTIVE_DESC"]               :format(Spell(5308), Spell(7384), Spell(19306))
+L["ICONMENU_UNITCOOLDOWN_DESC"]         = L["ICONMENU_UNITCOOLDOWN_DESC"]           :format(Spell(42292), Spell(42292, true))
 L["CLEU_DAMAGE_SHIELD_DESC"]            = L["CLEU_DAMAGE_SHIELD_DESC"]              :format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]     = L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]       :format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_SPELL_STOLEN_DESC"]             = L["CLEU_SPELL_STOLEN_DESC"]               :format(Spell(30449))

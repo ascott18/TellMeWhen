@@ -43,7 +43,6 @@ Type:UsesAttributes("state")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("start, duration")
-Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -54,9 +53,6 @@ Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 
 Type:RegisterIconDefaults{
-	-- The unit(s) to check for casts
-	Unit					= "player", 
-
 	-- True if the icon should only check interruptible casts.
 	Interruptible			= false,
 
@@ -68,10 +64,6 @@ Type:RegisterIconDefaults{
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	SUGType = "cast",
-})
-
-Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
-	implementsConditions = true,
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
@@ -131,39 +123,37 @@ local function Cast_OnUpdate(icon, time)
 	local NameFirst, NameStringHash, Units, Interruptible =
 	icon.Spells.First, icon.Spells.StringHash, icon.Units, icon.Interruptible
 
-	for u = 1, #Units do
-		local unit = Units[u]
-		local GUID = UnitGUID(unit)
+	local unit = Units[1]
+	local GUID = UnitGUID(unit)
 
-		if GUID then
+	if GUID then
 
-			local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
-			-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
-			local reverse = false
+		local name, _, iconTexture, start, endTime, _, _, notInterruptible = CastingInfo()
+		-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
+		local reverse = false
 
-			-- There is no regular spellcast. Check for a channel.
-			if not name then
-				name, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
-				-- Channeled casts should reverse the timer sweep behavior.
-				reverse = true
+		-- There is no regular spellcast. Check for a channel.
+		if not name then
+			name, _, iconTexture, start, endTime, _, notInterruptible = ChannelInfo()
+			-- Channeled casts should reverse the timer sweep behavior.
+			reverse = true
+		end
+
+		if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
+			
+			-- Times reported by the cast APIs are in milliseconds for some reason.
+			start, endTime = start/1000, endTime/1000
+			local duration = endTime - start
+			icon.LastTextures[GUID] = iconTexture
+
+			if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse) then
+				-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+				return
 			end
-
-			if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
-				
-				-- Times reported by the cast APIs are in milliseconds for some reason.
-				start, endTime = start/1000, endTime/1000
-				local duration = endTime - start
-				icon.LastTextures[GUID] = iconTexture
-
-				if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse) then
-					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-					return
-				end
-			elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
-				if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
-					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-					return
-				end
+		elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
+			if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
+				-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+				return
 			end
 		end
 	end
@@ -213,7 +203,7 @@ end
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
 	
-	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, "player")
 
 	icon.LastTextures = icon.LastTextures or {}
 

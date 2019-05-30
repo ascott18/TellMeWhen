@@ -172,30 +172,6 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	end,
 })
 
-ConditionCategory:RegisterCondition(1.1,  "KEYSTONELEVEL", {
-	text = L["CONDITIONPANEL_KEYSTONELEVEL"],
-	tooltip = L["CONDITIONPANEL_KEYSTONELEVEL_DESC"],
-	min = 0,
-	max = 30,
-	unit = false,
-	icon = "Interface\\Icons\\inv_relics_hourglass",
-	tcoords = CNDT.COMMON.standardtcoords,
-
-	Env = {
-		GetActiveKeystoneInfo = function()
-			return C_ChallengeMode.GetActiveKeystoneInfo() or 0
-		end
-	},
-
-	funcstr = [[(GetActiveKeystoneInfo() c.Operator c.Level)]],
-
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("SCENARIO_CRITERIA_UPDATE"),
-			ConditionObject:GenerateNormalEventString("CHALLENGE_MODE_START")
-	end
-})
-
 ConditionCategory:RegisterCondition(1.2, "GROUPSIZE", {
 	text = L["CONDITIONPANEL_GROUPSIZE"],
 	tooltip = L["CONDITIONPANEL_GROUPSIZE_DESC"],
@@ -331,27 +307,19 @@ ConditionCategory:RegisterCondition(13,   "LOC_CONTINENT", {
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_CONTINENT"],
 	bitFlags = (function()
-		if GetContinentMaps then -- Pre-wow-80000
-			local t = GetContinentMaps()
-			for continentID in pairs(t) do
-				t[continentID] = GetContinentName(continentID)
-			end
-			return t
-		else -- post-wow-80000
-			local t = {}
-			-- 946 is the cosmic map ID.
-			for id, mapInfo in pairs(C_Map.GetMapChildrenInfo(946, Enum.UIMapType.Continent, true)) do
-				t[mapInfo.mapID] = mapInfo.name
-			end
-			return t
+		local t = {}
+		-- 947 is the Azeroth Map ID.
+		for id, mapInfo in pairs(C_Map.GetMapChildrenInfo(947, Enum.UIMapType.Continent, true)) do
+			t[mapInfo.mapID] = mapInfo.name
 		end
+		return t
 	end)(),
 
 	nooperator = true,
 	icon = "Interface\\Icons\\inv_misc_map02",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetCurrentMapContinent = _G.GetCurrentMapContinent or function()
+		GetCurrentMapContinent = function()
 			local mapID = C_Map.GetBestMapForUnit("player")
 			if not mapID then return nil end
 			local mapInfo = C_Map.GetMapInfo(mapID)

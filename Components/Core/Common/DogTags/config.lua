@@ -200,8 +200,8 @@ local function getCurrentTag(editbox)
 	    local color = t:match("^|cff(%x%x%x%x%x%x)", i)
 	    
 	    if color then
-	    	local tokenType = TMW.tContains(colors, color)
-	    	if tokenType == "tag" or tokenType == "modifier" then
+			local tokenType = TMW.tContains(colors, color)
+			if tokenType == "tag" or tokenType == "modifier" then
 		        local startPos, endPos = t:find("(.-)|cff", i+10)
 
 		        if not endPos then
@@ -223,7 +223,7 @@ local function getCurrentTag(editbox)
 
 		        return tag, startPos, endPos
 		    else
-		    	return nil
+				return nil
 		    end
 	    end
 	end

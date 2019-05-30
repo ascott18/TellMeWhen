@@ -130,20 +130,20 @@ function IconPosition:AdjustIconsForModNumRowsCols(deltaRows, deltaCols)
 
 
 		    if column_old > columns_new then
-		    	if self:ClobberCheck(ics) then
+				if self:ClobberCheck(ics) then
 			        group.__iconPosClobbered[row_old][column_old] = ics
 			    end
 		    else
-		    	group:GetSettings().Icons[newIconID] = ics
+				group:GetSettings().Icons[newIconID] = ics
 
-		    	if column_old == columns_old then
-		    		for i = columns_old + 1, columns_new do
-		    			local newIconID = newIconID + i - columns_old
-		    			local row_new = ceil(newIconID / columns_new)
+				if column_old == columns_old then
+					for i = columns_old + 1, columns_new do
+						local newIconID = newIconID + i - columns_old
+						local row_new = ceil(newIconID / columns_new)
 
-		    			group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[row_new][i]
-		    		end
-		    	end
+						group:GetSettings().Icons[newIconID] = group.__iconPosClobbered[row_new][i]
+					end
+				end
 		    end
 		end
 

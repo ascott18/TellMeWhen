@@ -19,10 +19,8 @@ local print = TMW.print
 
 local sort, type, pairs
 	= sort, type, pairs
-local UnitAffectingCombat, GetSpecialization
-	= UnitAffectingCombat, GetSpecialization
-
-local GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole
+local UnitAffectingCombat
+	= UnitAffectingCombat
 
 
 --- [[api/group/api-documentation/|Group]] is the class of all Icons.
@@ -306,32 +304,6 @@ function Group.GetSettingsPerView(group, view)
 	return gs.SettingsPerView[view]
 end
 
-local function helper_currentSpecMatchesRole(Role)
-	if Role == 0x7 then
-		return true
-	end
-
-	local role = GetCurrentSpecializationRole()
-	if not role then
-		return false
-	end
-
-	local currentBit
-	if role == "DAMAGER" then
-		currentBit = 0x1
-	elseif role == "HEALER" then
-		currentBit = 0x2
-	elseif role == "TANK" then
-		currentBit = 0x4
-	end
-
-	if bit.band(Role, currentBit) == currentBit then
-		return true
-	end
-
-	return false
-end
-
 --- Gets whether or not the group's icons should be updated based on the group's settings
 -- @name Group:GetSettingsPerView
 -- @paramsig
@@ -342,17 +314,8 @@ function Group.ShouldUpdateIcons(group)
 	if	(group:GetID() > TMW.db[group.Domain].NumGroups)
 		or (not group.viewData)
 		or (not group:IsEnabled())
-		or (not helper_currentSpecMatchesRole(group.Role))
 	then
 		return false
-
-	elseif
-		group.Domain == "profile"
-		and GetSpecialization()
-		and not gs.EnabledSpecs[GetSpecializationInfo(GetSpecialization())]
-	then
-		return false
-	
 	end
 
 	return true
