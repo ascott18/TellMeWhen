@@ -15,15 +15,14 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount =
-	  GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount
+local GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCount =
+	  GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCount
 local _, pclass = UnitClass("player")
 
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
-local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 
 local Type = TMW.Classes.IconType:New("reactive")
@@ -117,8 +116,7 @@ local function Reactive_OnUpdate(icon, time)
 		
 
 		start, duration = GetSpellCooldown(iName)
-		charges, maxCharges, chargeStart, chargeDur = GetSpellCharges(iName)
-		stack = charges or GetSpellCount(iName)
+		stack = GetSpellCount(iName)
 		
 		if duration then
 			inrange, CD = true, nil
@@ -166,8 +164,7 @@ local function Reactive_OnUpdate(icon, time)
 	if numChecked > 1 then
 
 		start, duration = GetSpellCooldown(NameFirst)
-		charges, maxCharges, chargeStart, chargeDur = GetSpellCharges(NameFirst)
-		stack = charges or GetSpellCount(NameFirst)
+		stack = GetSpellCount(NameFirst)
 
 		inrange, nomana = true, nil
 		if RangeCheck then
@@ -184,11 +181,10 @@ local function Reactive_OnUpdate(icon, time)
 	end
 	
 	if duration then
-		icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+		icon:SetInfo("state; texture; start, duration; stack, stackText; spell",
 			not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 			icon.FirstTexture,
 			start, duration,
-			charges, maxCharges, chargeStart, chargeDur,
 			stack, stack,
 			NameFirst
 		)

@@ -2962,44 +2962,6 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 			return c.r, c.g, c.b, a, c.flags
 		else
 			return 0, 0, 0, 0, nil
-		end		
-	end,
-}
-
-TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
-	-- Constructor
-
-	OnNewInstance_Button_Rune = function(self)
-		if not self:GetRuneNumber() then
-			self:SetRuneNumber(self:GetID())
-		end
-	end,
-
-	GetRuneNumber = function(self)
-		return self.runeNumber
-	end,
-
-	SetRuneNumber = function(self, runeNumber)
-		self.runeNumber = runeNumber
-
-		self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-SingleRune")
-
-		self:SetSettingBitID(self.runeNumber)
-	end,
-
-
-	-- Methods
-	checked = false,
-	GetChecked = function(self)
-		return self.checked
-	end,
-
-	SetChecked = function(self, checked)
-		self.checked = checked
-		if checked then
-			self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-		else
-			self.Check:SetTexture(nil)
 		end
 	end,
 }

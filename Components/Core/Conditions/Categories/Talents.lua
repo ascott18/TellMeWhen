@@ -72,10 +72,41 @@ ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 
 ConditionCategory:RegisterSpacer(6)
 
--- TODO-CLASSIC: Bring back PTSINTAL
+Env.TalentMap = {}
+function CNDT:CHARACTER_POINTS_CHANGED()
+	wipe(Env.TalentMap)
+	for tab = 1, GetNumTalentTabs() do
+		for talent = 1, GetNumTalents(tab) do
+			local name, _, _, _, rank = GetTalentInfo(tab, talent)
+			local lower = name and strlowerCache[name]
+			if lower then
+				Env.TalentMap[lower] = rank or 0
+			end
+		end
+	end
+end
+
 ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	text = L["UIPANEL_PTSINTAL"],
-	funcstr = "DEPRECATED",
+	value = "PTSINTAL",
 	min = 0,
 	max = 5,
+	unit = PLAYER,
+	name = function(editbox) 
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
+	useSUG = "talents",
+	icon = function() return select(2, GetTalentInfo(1, 1)) end,
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[(TalentMap[c.NameName] or 0) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		-- this is handled externally because TalentMap is so extensive a process,
+		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
+		CNDT:RegisterEvent("CHARACTER_POINTS_CHANGED")
+		CNDT:CHARACTER_POINTS_CHANGED()
+
+		return
+			ConditionObject:GenerateNormalEventString("CHARACTER_POINTS_CHANGED")
+	end,
 })

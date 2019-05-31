@@ -29,19 +29,21 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 Module.table = {}
 
+-- TODO-CLASSIC: I started working on this suggestion module during the stress test,
+-- but ran out of time. It 100% doesn't work. Question: Are TalentIDs a thing we can stil use?
 function Module:OnInitialize()
 	-- nothing
 end
 function Module:Table_Get()
 	wipe(self.table)
 
-	for tier = 1, MAX_TALENT_TIERS do
-		for column = 1, NUM_TALENT_COLUMNS do
-			local id, name = GetTalentInfo(tier, column, 1)
+	for tab = 1, GetNumTalentTabs() do
+		for talent = 1, GetNumTalents(tab) do
+			local name, iconTexture = GetTalentInfo(tab, talent)
 			
 			local lower = name and strlowerCache[name]
 			if lower then
-				self.table[id] = lower
+				self.table[{tab, talent}] = lower
 			end
 		end
 	end
@@ -51,17 +53,15 @@ end
 function Module:Table_GetSorter()
 	return nil
 end
-function Module:Entry_AddToList_1(f, id)
-	local id, name, iconTexture = GetTalentInfoByID(id) -- restore case
+function Module:Entry_AddToList_1(f, tabTal)
+	local name, iconTexture = GetTalentInfo(tabTal[1], tabTal[2])
 
 	f.Name:SetText(name)
-	f.ID:SetText(id)
 
 	f.tooltipmethod = "SetHyperlink"
 	f.tooltiparg = GetTalentLink(id)
 
 	f.insert = name
-	f.insert2 = id
 
 	f.Icon:SetTexture(iconTexture)
 end

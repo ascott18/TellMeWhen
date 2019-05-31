@@ -1382,6 +1382,26 @@ end
 -- WoW API Helpers
 ---------------------------------
 
+local classInfo = {
+	[1] = C_CreatureInfo.GetClassInfo(1),
+	[2] = C_CreatureInfo.GetClassInfo(2),
+	[3] = C_CreatureInfo.GetClassInfo(3),
+	[4] = C_CreatureInfo.GetClassInfo(4),
+	[5] = C_CreatureInfo.GetClassInfo(5),
+	[7] = C_CreatureInfo.GetClassInfo(7),
+	[8] = C_CreatureInfo.GetClassInfo(8),
+	[9] = C_CreatureInfo.GetClassInfo(9),
+	[11] = C_CreatureInfo.GetClassInfo(11),
+}
+function TMW.GetMaxClassID()
+	return 11
+end
+function TMW.GetClassInfo(classID)
+	local info = classInfo[classID]
+	if not info then return end
+	return info.className, info.classFile, info.classID
+end
+
 function TMW.SpellHasNoMana(spell)
 	-- TODO: in warlords, you can't determine spell costs anymore. Thanks, blizzard!
 	-- This function used to get the spell cost, and determine usability from that, 
@@ -1390,13 +1410,6 @@ function TMW.SpellHasNoMana(spell)
 
 	local _, nomana = IsUsableSpell(spell)
 	return nomana
-end
-
-function TMW.GetRuneCooldownDuration()
-	-- Round to a precision of 3 decimal points for comparison with returns from GetSpellCooldown
-	local _, duration = GetRuneCooldown(1)
-	if not duration then return 0 end
-	return floor(duration * 1e3 + 0.5) / 1e3
 end
 
 local function spellCostSorter(a, b)

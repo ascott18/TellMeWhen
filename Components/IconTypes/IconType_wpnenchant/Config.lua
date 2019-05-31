@@ -55,13 +55,9 @@ Module.showColorHelp = false
 
 Module.ItemIDs = {
 	-- item enhancements
-	--43233,	--Deadly Poison
-	--3775,	--Crippling Poison
-	--5237,	--Mind-Numbing Poison
-	--43235,	--Wound Poison
-	--43231,	--Instant Poison
-
-	31535,	--Bloodboil Poison
+	2892,	--Deadly Poison
+	3775,	--Crippling Poison
+	5237,	--Mind-Numbing Poison
 
 	3829,	--Frost Oil
 	3824,	--Shadow Oil -- good
@@ -78,49 +74,28 @@ Module.ItemIDs = {
 	20746,	--Lesser Wizard Oil -- good
 	20744,	--Minor Wizard Oil -- good
 
+	23123,	--Blessed Wizard Oil
 
-	34539,	--Righteous Weapon Coating
-	34538,	--Blessed Weapon Coating
+	7307,	--Flesh Eating Worm
 
-	--23123,	--Blessed Wizard Oil
+	6529,	--Shiny Bauble
+	6532,	--Bright Baubles
+	6533,	--Aquadynamic Fish Attractor
+	6530,	--Nightcrawlers
+	6811,	--Aquadynamic Fish Lens
 
-	--23576,	--Greater Ward of Shielding
-	--23575,	--Lesser Ward of Shielding
+	12643,	--Dense Weightstone
+	3241,	--Heavy Weightstone
+	7965,	--Solid Weightstone
+	3240,	--Coarse Weightstone
+	3239,	--Rough Weightstone
 
-	--25521,	--Greater Rune of Warding
-	--23559,	--Lesser Rune of Warding
-
-	--7307,	--Flesh Eating Worm
-
-	--46006,	--Glow Worm
-	--6529,	--Shiny Bauble
-	--6532,	--Bright Baubles
-	--67404,	--Glass Fishing Bobber
-	--69907,	--Corpse Worm
-	--62673,	--Feathered Lure
-	--34861,	--Sharpened Fish Hook
-	--6533,	--Aquadynamic Fish Attractor
-	--6530,	--Nightcrawlers
-	--68049,	--Heat-Treated Spinning Lure
-	--6811,	--Aquadynamic Fish Lens
-
-	--12643,	--Dense Weightstone
-	--3241,	--Heavy Weightstone
-	--7965,	--Solid Weightstone
-	--3240,	--Coarse Weightstone
-	--28420,	--Fel Weightstone
-	--28421,	--Adamantite Weightstone
-	--3239,	--Rough Weightstone
-
-	--23529,	--Adamantite Sharpening Stone
-	--7964,	--Solid Sharpening Stone
-	--23122,	--Consecrated Sharpening Stone
-	--2871,	--Heavy Sharpening Stone
-	--23528,	--Fel Sharpening Stone
-	--2862,	--Rough Sharpening Stone
-	--2863,	--Coarse Sharpening Stone
-	--12404,	--Dense Sharpening Stone
-	--18262,	--Elemental Sharpening Stone
+	7964,	--Solid Sharpening Stone
+	2871,	--Heavy Sharpening Stone
+	2862,	--Rough Sharpening Stone
+	2863,	--Coarse Sharpening Stone
+	12404,	--Dense Sharpening Stone
+	18262,	--Elemental Sharpening Stone
 
 	-- ZHTW:
 	-- weightstone: ???

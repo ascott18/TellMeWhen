@@ -52,15 +52,6 @@ function Env.CooldownDuration(spell)
 	return 0
 end
 
-local GetSpellCharges = GetSpellCharges
-function Env.RechargeDuration(spell)
-	local charges, maxCharges, start, duration = GetSpellCharges(spell)
-	if charges and charges ~= maxCharges then
-		return (duration == 0 and 0) or (duration - (TMW.time - start))
-	end
-	return 0
-end
-
 local SwingTimers = TMW.COMMON.SwingTimerMonitor.SwingTimers
 function Env.SwingDuration(slot)
 	local SwingTimer = SwingTimers[slot]

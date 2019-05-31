@@ -26,7 +26,7 @@ L["ECLIPSE"] = (locale == "enUS" or locale == "enGB") and "Eclipse" or ECLIPSE
 L["DOMAIN_GLOBAL_NC"] = L["DOMAIN_GLOBAL"]:gsub("|cff00c300", ""):gsub("|r", "")
 
 L["HELP_FIRSTUCD"]                      = L["HELP_FIRSTUCD"]                        :format(L["ICONMENU_CHOOSENAME3"], 
-                                                                                        Spell(65547, true), Spell(47528, true), Spell(2139, true), Spell(62618, true), Spell(62618, true))
+                                                                                        Spell(5277, true), Spell(586, true), Spell(2139, true), Spell(853, true), Spell(853, true))
 L["HELP_MISSINGDURS"]                   = L["HELP_MISSINGDURS"]                     :format("%s", Spell(1766, true)) -- keep the first "%s" as "%s"
 L["ICONMENU_IGNORENOMANA_DESC"]         = L["ICONMENU_IGNORENOMANA_DESC"]           :format(Spell(85288), Spell(5308))
 L["ICONMENU_REACTIVE_DESC"]             = L["ICONMENU_REACTIVE_DESC"]               :format(Spell(5308), Spell(7384), Spell(19306))

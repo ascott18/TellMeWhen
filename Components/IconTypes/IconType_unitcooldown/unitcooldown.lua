@@ -165,18 +165,7 @@ end})
 
 
 local resetsOnCast = {
-	
-	[108285] = { -- Call of the Elements
-		[108269] = 1, -- Capacitor Totem
-		[8177] = 1, -- Grounding Totem
-		[51485] = 1, -- Earthgrab Totem
-		[8143] = 1, -- Tremor Totem
-		[5394] = 1, -- Healing Stream Totem
-	},
-	[11129] = { -- Combustion
-		[108853] = 1, -- Inferno Blast
-	},
-	[235219] = { -- coldsnap
+	[12472] = { -- coldsnap
 		[45438] = 1, -- iceblock
 		[11426] = 1, -- ice barrier
 		[120] = 1, -- cone of cold
@@ -187,45 +176,10 @@ local resetsOnCast = {
 		[2983] = 1, -- Sprint
 		[1856] = 1, -- Vanish
 	},
-	[50334] = { --druid berserk or something
-		[33878] = 1,
-		[33917] = 1,
-	},
 }
 local resetsOnAura = {
-	[81162] = { -- Will of the Necropolis
-		[48982] = 1, -- Rune Tap
-	},
-	[93622] = { -- Mangle! (from lacerate and thrash)
-		[33878] = 1, -- Mangle
-	},
-	[48518] = { -- lunar eclipse
-		[48505] = 1, -- Starfall
-	},
-	[50227] = { -- Sword and Board
-		[23922] = 1, -- Shield Slam
-	},
-	[59578] = { -- The Art of War
-		[879] = 1, -- Exorcism
-	},
-	[52437] = { -- Sudden Death
-		[86346] = 1, -- Colossus Smash
-	},
-	[124430] = { -- Divine Insight (Shadow version)
-		[8092] = 1, -- Mind Blast
-	},
-	[77762] = { -- Lava Surge
-		[51505] = 1, -- Lava Burst
-	},
-	[93400] = { -- Shooting Stars
-		[78674] = 1, -- Starsurge
-	},
-	[32216] = { -- Victorious
-		[103840] = 1, -- Impending Victory
-	},
 }
 local spellBlacklist = {
-	[50288] = 1, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
 }
 
 

@@ -3,10 +3,11 @@ import json
 import urllib.request
 import multiprocessing
 import itertools
+import os
 
 from slpp import slpp as lua
 
-base_url = "http://www.wowhead.com"
+base_url = "http://classic.wowhead.com"
 
 num_classes = 12
 
@@ -15,12 +16,12 @@ spell_id_blacklist = [
 ]
 
 class_slugs = {
-	'death-knight': 6,
-	'demon-hunter': 12,
+	# 'death-knight': 6,
+	# 'demon-hunter': 12,
 	'druid': 11,
 	'hunter': 3 ,
 	'mage': 8,
-	'monk': 10,
+	# 'monk': 10,
 	'paladin': 2,
 	'priest': 5,
 	'rogue': 4,
@@ -31,18 +32,16 @@ class_slugs = {
 
 class_spells_urls = [
 	'/spells/abilities/',
-	# '/spells/artifact-traits/', # Artifacts are gone.
-	# '/spells/azerite-traits/', # The bulk of azerite traits are passive, or things you don't care about. Lets not include them.
-	'/spells/pvp-talents/',
-	'/spells/specialization/',
+	#'/spells/pvp-talents/',
+	#'/spells/specialization/',
 	'/spells/talents/',
 ]
 
 spell_cat_whitelist = [
 	7,     # abilities
-	-12,   # specializations
+	# -12,   # specializations
 	-2,    # talents
-	-16,    # pvp talents
+	# -16,    # pvp talents
 
 	# -14, # draenor perks
 	# -13, # glyphs
@@ -52,35 +51,20 @@ spell_cat_whitelist = [
 pet_spells_url = '/spells/pet-abilities/'
 
 pet_classes = [
-	'death-knight',
+	# 'death-knight',
 	'hunter',
-	'shaman',
+	# 'shaman',
 	'warlock',
 ]
 
 # Some racials don't specify a race, but they do specify a "skill" that corresponds to a race.
 race_skill_map = {
-	899: [24], # pandaren
-	2423: [29], # void elf
-	2421: [30], # lightforged
-	2420: [28], # highmountain
-	2419: [27], # nightborne
 }
 
 race_map_fix = {
-	# These are racials that don't specify their race properly.
-	107079: [24], # pandaren
 }
 
 racial_no_class_req = [
-	# Worgen racials have massive class req fields for no reason.
-	68975,
-	68976,
-	68978,
-	68992,
-	68996,
-	87840,
-	94293,
 ]
 
 
@@ -107,7 +91,7 @@ def try_scrape_url(url, regex, id, tries = 0):
 	data = re.sub(r"frommerge:1", r'"frommerge":1', data)
 	data = json.loads(data)
 
-	return data;
+	return data
 
 def scrape_class_spells(urlAndId):
 	classId = urlAndId[1]
@@ -213,6 +197,6 @@ if __name__ == '__main__':
 
 	output = "local Cache = " + lua.encode(keyed_results)
 	output = re.sub(r"\n\t\t(.*?) = ", r'\1=', output)
-	open('CSC.lua', 'w').write(output)
+	open(os.path.join(os.path.dirname(__file__), 'CSC.lua'), 'w').write(output)
 
 	print("complete. written to CSC.lua.")
