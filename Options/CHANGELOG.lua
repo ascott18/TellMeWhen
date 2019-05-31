@@ -3,6 +3,15 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v8.6.1
+* Buff/Debuff equivalency improvements
+* Added Kul Tiran and Zandalari to the Unit Race condition
+
+### Bug Fixes
+* Fixed #1690: Framelevel issue with latest alphas of Masque.
+* Fixed #1694: Empty group shrinks to minimum size of 1 icon.
+* Fixed that Reactive Ability icons wouldn't use the No Mana state.
+
 ## v8.6.0
 
 ### Discord
