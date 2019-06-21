@@ -1454,6 +1454,99 @@ function TMW.GetSpellCost(spell)
 	end
 end
 
+local classSpecIds = {
+	DRUID = {102,103,105},
+	HUNTER = {253,254,255},
+	MAGE = {62,63,64},
+	PALADIN = {65,66,70},
+	PRIEST = {256,257,258},
+	ROGUE = {259,260,261},
+	SHAMAN = {262,263,264},
+	WARLOCK = {265,266,267},
+	WARRIOR = {71,72,73},
+}
+local specs = {
+	[253]	= {"Beast Mastery", 461112, "DAMAGER"},
+	[254]	= {"Marksmanship", 236179, "DAMAGER"},
+	[255]	= {"Survival", 461113, "DAMAGER"},
+
+	[71]	= {"Arms", 132355, "DAMAGER"},
+	[72]	= {"Fury", 132347, "DAMAGER"},
+	[73]	= {"Protection", 132341, "TANK"},
+
+	[65]	= {"Holy", 135920, "HEALER"},
+	[66]	= {"Protection", 236264, "TANK"},
+	[70]	= {"Retribution", 135873, "DAMAGER"},
+
+	[62]	= {"Arcane", 135932, "DAMAGER"},
+	[63]	= {"Fire", 135810, "DAMAGER"},
+	[64]	= {"Frost", 135846, "DAMAGER"},
+
+	[256]	= {"Discipline", 135940, "HEALER"},
+	[257]	= {"Holy", 237542, "HEALER"},
+	[258]	= {"Shadow", 136207, "DAMAGER"},
+
+	[265]	= {"Affliction", 136145, "DAMAGER"},
+	[266]	= {"Demonology", 136172, "DAMAGER"},
+	[267]	= {"Destruction", 136186, "DAMAGER"},
+
+	[102]	= {"Balance", 136096, "DAMAGER"},
+	[103]	= {"Feral", 132115, "DAMAGER"},
+	[105]	= {"Restoration", 136041, "HEALER"},
+
+	[262]	= {"Elemental", 136048, "DAMAGER"},
+	[263]	= {"Enhancement", 237581, "DAMAGER"},
+	[264]	= {"Restoration", 136052, "HEALER"},
+
+	[259]	= {"Assassination", 236270, "DAMAGER"},
+	[260]	= {"Combat", 236286, "DAMAGER"},
+	[261]	= {"Subtlety", 132320, "DAMAGER"},
+}
+
+function TMW.GetNumSpecializations()
+	return 3
+end
+
+function TMW.GetCurrentSpecializationID()
+	local _, pclass = UnitClass("player")
+	local specIDs = classSpecIds[pclass]
+	
+	local biggest = 0
+	local specID
+	for i = 1, #specIDs do
+		local _, _, points = GetTalentTabInfo(i)
+		if points > biggest then
+			biggest = points
+			specID = specIDs[i]
+		end
+	end
+
+	return specID
+end
+
+function TMW.GetSpecializationInfo(index)
+	local _, pclass = UnitClass("player")
+	return TMW.GetSpecializationInfoByID(classSpecIds[pclass][index])
+end
+
+function TMW.GetSpecializationInfoByID(specID)
+	local data = specs[specID]
+	-- 3rd param is description... I didn't include it because TMW doesn't need it.
+	return specID, data[1], nil, data[2], data[3]
+end
+
+function TMW.GetCurrentSpecializationRole()
+	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
+	-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
+	local currentSpec = TMW.GetCurrentSpecializationID()
+	if not currentSpec then
+		return nil
+	end
+
+	local _, _, _, _, role = TMW.GetSpecializationInfoByID(currentSpec)
+	return role
+end
+
 do	-- TMW:GetParser()
 	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
 	function TMW:GetParser()

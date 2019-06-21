@@ -99,7 +99,7 @@ ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	useSUG = "talents",
 	icon = function() return select(2, GetTalentInfo(1, 1)) end,
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[(TalentMap[c.NameName] or 0) c.Operator c.Level]],
+	funcstr = [[(TalentMap[c.NameString] or 0) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		-- this is handled externally because TalentMap is so extensive a process,
 		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.

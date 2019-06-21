@@ -244,6 +244,55 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 			tooltipText = tooltipText .. "\r\n" .. L["DISABLED"]
 			
 		else
+			if group.Domain == "profile" then
+				-- Indicator for talent tree (specialization) configuration.
+				for i = 1, TMW.GetNumSpecializations() do
+					local specID = TMW.GetSpecializationInfo(i)
+					if not gs.EnabledSpecs[specID] then
+						isSpecLimited = true
+						break
+					end
+				end
+
+				if isSpecLimited then
+					-- Iterate backwards so they appear in the correct order
+					-- (since they are positioned from right to left, not left to right)
+					local foundOne
+					for i = TMW.GetNumSpecializations(), 1, -1 do
+						local specID = TMW.GetSpecializationInfo(i)
+						if gs.EnabledSpecs[specID] then
+							local _, name, _, texture = TMW.GetSpecializationInfo(i)
+
+							local tex = self:GetTexture(textureIndex)
+							textureIndex = textureIndex + 1
+
+							tex:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+							tex:SetTexture(texture)
+							foundOne = true
+						end
+					end
+					if not foundOne then
+						isUnavailable = true
+					end
+				end
+			end
+
+			-- Indicator for role configuration.
+			if not isSpecLimited and gs.Role ~= 0x7 then
+				if gs.Role == 0 then
+					isUnavailable = true
+				else
+					for bitID, role in TMW:Vararg("DAMAGER", "HEALER", "TANK") do
+						if bit.band(gs.Role, bit.lshift(1, bitID - 1)) > 0 then
+							local tex = self:GetTexture(textureIndex)
+							textureIndex = textureIndex + 1
+
+							tex:SetTexture("Interface\\Addons\\TellMeWhen\\Textures\\" .. role)
+						end
+					end
+				end
+			end
+
 			if isUnavailable then
 				local tex = self:GetTexture(textureIndex)
 				textureIndex = textureIndex + 1
