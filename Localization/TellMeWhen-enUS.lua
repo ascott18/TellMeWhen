@@ -1891,7 +1891,7 @@ L["HELP"] = "Help"
 L["HELP_ISSUES"] = "Bugs & Feature Requests"
 L["HELP_ISSUES_DESC"] = [[Report bugs and request features on the official TellMeWhen issue tracker on GitHub.]]
 L["HELP_COMMUNITY"] = "Community Discord"
-L["HELP_COMMUNITY_DESC"] = [[Join the official TellMeWhen discord! 
+L["HELP_COMMUNITY_DESC"] = [[Join the official TellMeWhen discord!
 
 Ask questions, share configuration, or just hang out with other TellMeWhen users.]]
 

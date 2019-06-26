@@ -6,6 +6,7 @@
 * Fixed #1690: Framelevel issue with latest alphas of Masque.
 * Fixed #1694: Empty group shrinks to minimum size of 1 icon.
 * Fixed that Reactive Ability icons wouldn't use the No Mana state.
+* Fixed #1697: Error when logging in in WoW 8.2.
 
 ## v8.6.0
 
