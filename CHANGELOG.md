@@ -1,3 +1,7 @@
+## v8.6.5
+### Bug Fixes
+* The Major Azerite Essence Active condition will now properly update after changing essence.
+
 ## v8.6.4
 * New Conditions: 
  * Azerite Essence Active

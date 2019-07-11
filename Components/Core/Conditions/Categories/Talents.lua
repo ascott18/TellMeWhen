@@ -406,6 +406,7 @@ CNDT.Env.AzeriteEssenceMap = {}
 CNDT.Env.AzeriteEssenceMap_MAJOR = {}
 function CNDT:AZERITE_ESSENCE_UPDATE()
 	wipe(Env.AzeriteEssenceMap)
+	wipe(Env.AzeriteEssenceMap_MAJOR)
 	
 	for _, slot in pairs(C_AzeriteEssence.GetMilestones()) do
 		if slot.unlocked then
