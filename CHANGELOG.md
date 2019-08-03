@@ -1,5 +1,6 @@
 ## v8.6.6
 * Added border options to the standard Icon view (#1705).
+* Added Heal Crit & Non-Crit events to the Combat Event icon (#1685).
 
 ### Bug Fixes
 * Fixed a number of errors around the Azerite Essence Active conditions that would occur for characters without a Heart of Azeroth (i.e. sub level 120).
