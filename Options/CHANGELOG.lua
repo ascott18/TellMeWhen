@@ -4,6 +4,8 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
 ## v8.6.6
+* Added border options to the standard Icon view (#1705).
+
 ### Bug Fixes
 * Fixed a number of errors around the Azerite Essence Active conditions that would occur for characters without a Heart of Azeroth (i.e. sub level 120).
 * Fixed an issue that prevented a descriptive message from being visible in the icon editor when no icon is loaded.
