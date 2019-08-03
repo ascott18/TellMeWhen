@@ -2,6 +2,7 @@
 ### Bug Fixes
 * Fixed a number of errors around the Azerite Essence Active conditions that would occur for characters without a Heart of Azeroth (i.e. sub level 120).
 * Fixed an issue that prevented a descriptive message from being visible in the icon editor when no icon is loaded.
+* Added workarounds to errors that will arise when anchoring a group to a "restricted" region (like a nameplate).
 
 ## v8.6.5
 ### Bug Fixes
