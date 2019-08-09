@@ -86,6 +86,67 @@ function CNDT:CHARACTER_POINTS_CHANGED()
 	end
 end
 
+
+CNDT.Env.AzeriteEssenceMap = {}
+CNDT.Env.AzeriteEssenceMap_MAJOR = {}
+function CNDT:AZERITE_ESSENCE_UPDATE()
+	wipe(Env.AzeriteEssenceMap)
+	wipe(Env.AzeriteEssenceMap_MAJOR)
+	local milestones = C_AzeriteEssence.GetMilestones()
+	if not milestones then return end
+	
+	for _, slot in pairs(milestones) do
+		if slot.unlocked then
+			local equippedEssenceId = C_AzeriteEssence.GetMilestoneEssence(slot.ID)
+			if equippedEssenceId then
+				local essence = C_AzeriteEssence.GetEssenceInfo(equippedEssenceId)
+				local name = essence.name
+				local id = essence.ID
+
+				local lower = name and strlowerCache[name]
+				if lower then
+					Env.AzeriteEssenceMap[lower] = true
+					Env.AzeriteEssenceMap[id] = true
+
+					-- Slot 0 is the major slot. There doesn't seem to be any other way to identify it.
+					if slot.slot == 0 then 
+						Env.AzeriteEssenceMap_MAJOR[lower] = true
+						Env.AzeriteEssenceMap_MAJOR[id] = true
+					end
+				end
+			end
+		end
+	end
+end
+
+for i, kind in TMW:Vararg("", "_MAJOR") do
+	ConditionCategory:RegisterCondition(9.1 + i/10,	"AZESSLEARNED" .. kind, {
+		text = L["UIPANEL_AZESSLEARNED" .. kind],
+		bool = true,
+		unit = PLAYER,
+		name = function(editbox)
+			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+		end,
+		useSUG = "azerite_essence",
+		icon = "Interface\\Icons\\" .. (kind == "" and "inv_radientazeritematrix" or "spell_azerite_essence_15"),
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(ConditionObject, c)
+			CNDT:RegisterEvent("AZERITE_ESSENCE_UPDATE")
+			CNDT:RegisterEvent("AZERITE_ESSENCE_ACTIVATED", "AZERITE_ESSENCE_UPDATE")
+			CNDT:AZERITE_ESSENCE_UPDATE()
+			
+			return [[BOOLCHECK( AzeriteEssenceMap]] .. kind .. [[[LOWER(c.NameFirst)] )]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("AZERITE_ESSENCE_UPDATE"),
+				ConditionObject:GenerateNormalEventString("AZERITE_ESSENCE_ACTIVATED")
+		end,
+	})
+end
+
+
+
 ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	text = L["UIPANEL_PTSINTAL"],
 	value = "PTSINTAL",

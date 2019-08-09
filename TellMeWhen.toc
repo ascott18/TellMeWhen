@@ -1,14 +1,23 @@
-# Originally by Nephthys of Hyjal
-# Major Updates by Oozebull of Twisting Nether, Xenyr of Aszune, and Cybeloras of Aerie Peak
+#  --------------------
+#  TellMeWhen
+#  Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+# 
+#  Other contributions by:
+# 		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+# 		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
+# 
+#  Currently maintained by
+#  Cybeloras of Aerie Peak
+#  --------------------
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 80100
+## Interface: 80200
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 80100
+## X-Interface: 80200
 ## Title: TellMeWhen
 
-## Version: 8.6.1
+## Version: 8.6.6
 ## Author: Cybeloras of Aerie Peak
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.

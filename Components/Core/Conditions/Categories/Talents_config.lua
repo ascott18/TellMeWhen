@@ -23,7 +23,7 @@ local strlowerCache = TMW.strlowerCache
 local _, pclass = UnitClass("Player")
 
 
-local Module = SUG:NewModule("talents", SUG:GetModule("spell"))
+local Module = SUG:NewModule("talents", SUG:GetModule("default"))
 Module.noMin = true
 Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
@@ -50,9 +50,6 @@ function Module:Table_Get()
 
 	return self.table
 end
-function Module:Table_GetSorter()
-	return nil
-end
 function Module:Entry_AddToList_1(f, tabTal)
 	local name, iconTexture = GetTalentInfo(tabTal[1], tabTal[2])
 
@@ -68,7 +65,6 @@ end
 Module.Entry_Colorize_1 = TMW.NULLFUNC
 
 
--- TODO: Redo this for the new pvp talent system.
 local Module = SUG:NewModule("pvptalents", SUG:GetModule("talents"))
 Module.table = {}
 

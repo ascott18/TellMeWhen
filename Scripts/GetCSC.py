@@ -5,6 +5,7 @@ import multiprocessing
 import itertools
 import os
 
+
 from slpp import slpp as lua
 
 base_url = "http://classic.wowhead.com"
@@ -89,6 +90,7 @@ def try_scrape_url(url, regex, id, tries = 0):
 
 	data = match.group(1)
 	data = re.sub(r"frommerge:1", r'"frommerge":1', data)
+	data = re.sub(r"popularity:", r'"popularity":', data)
 	data = json.loads(data)
 
 	return data
@@ -146,13 +148,17 @@ def scrape_racial_spells():
 			if "races" not in spell:
 				raise Exception("Unknown racial %d %s" % (spell["id"], spell["name"]))
 
-			if len(spell["races"]) > 1:
-				raise Exception("Unexpected multiple races %d %s" % (id, spell["races"]))
+			#if len(spell["races"]) > 1:
+				#raise Exception("Unexpected multiple races %d %s" % (id, spell["races"]))
 
+			# wowhead provides multiple race IDs for some spells,
+			# and TMW is able to handle these.
+			# However, wowhead's data is pretty inaccurate for almost all spells
+			# that have multiple race IDs. So, we still only grab the first one.
 			if "reqclass" in spell and id not in racial_no_class_req:
-				ids[id] = [spell["races"][0], spell["reqclass"] or 0]
+				ids[id] = [[spell["races"][0]], spell["reqclass"] or 0]
 			else:
-				ids[id] = spell["races"][0]
+				ids[id] = [[spell["races"][0]], 0]
 
 	return ids
 
@@ -165,7 +171,8 @@ if __name__ == '__main__':
 
 
 	# Run racials first since they're most prone to failure.
-	result = pool.apply(scrape_racial_spells)
+	# result = pool.apply(scrape_racial_spells)
+	result = scrape_racial_spells()
 	keyed_results["RACIAL"] = result
 
 
@@ -194,9 +201,17 @@ if __name__ == '__main__':
 
 
 
+	output = "local Cache = {\n"
+	for key in sorted(keyed_results, key=lambda k: '%03d' % k if isinstance(k, (int)) else str(k) ):
+		# in-place sort the list of spellIDs.
+		if type(keyed_results[key]) is list:
+			keyed_results[key].sort()
 
-	output = "local Cache = " + lua.encode(keyed_results)
-	output = re.sub(r"\n\t\t(.*?) = ", r'\1=', output)
+		line = lua.encode(keyed_results[key])
+		line = re.sub(r"[\n\t ]", r'', line)
+		output += "\t[" + lua.encode(key) + "] = " + line + ",\n"
+
+	output += "}"
 	open(os.path.join(os.path.dirname(__file__), 'CSC.lua'), 'w').write(output)
 
 	print("complete. written to CSC.lua.")

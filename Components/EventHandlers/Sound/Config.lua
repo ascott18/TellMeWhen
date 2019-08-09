@@ -190,16 +190,22 @@ local soundChannels = {
 
 TMW.HELP:NewCode("SOUND_TEST_ERROR", 10, false)
 
-function Sound:TestSound(button, soundFile)
-	if tonumber(soundFile) then
-		PlaySound(soundFile)
-	else
-		PlaySoundFile(soundFile, TMW.db.profile.SoundChannel)
-	end
-
+function Sound:TestSound(helpAnchor, settingValue)
 	local error
 
-	if GetCVar("Sound_EnableAllSound") == "0" then
+	local success, err = pcall(Sound.PlaySoundFromSettingValue, Sound, settingValue)
+	if not success then
+		
+		-- Remove the file name and line number from the error:
+		err = gsub(err, ".-%.lua:%d+:%s*", "")
+
+		if err:find("Invalid fileDataID") then
+			err = err .. "\n\n" .. L["SOUND_ERROR_BADFILE"]
+		end
+
+		error = err
+
+	elseif GetCVar("Sound_EnableAllSound") == "0" then
 		error = L["SOUND_ERROR_ALLDISABLED"]
 	else
 		local channelData = soundChannels[TMW.db.profile.SoundChannel]
@@ -215,12 +221,14 @@ function Sound:TestSound(button, soundFile)
 		TMW.HELP:Show{
 			code = "SOUND_TEST_ERROR",
 			icon = TMW.CI.icon,
-			relativeTo = button,
+			relativeTo = helpAnchor,
 			x = 0,
 			y = 0,
-			text = format(error)
+			text = error
 		}
-	end	
+	else 
+		TMW.HELP:Hide("SOUND_TEST_ERROR")
+	end
 end
 
 

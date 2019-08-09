@@ -1,3 +1,38 @@
+## v8.6.6
+* Added border options to the standard Icon view (#1705).
+* Added Heal Crit & Non-Crit events to the Combat Event icon (#1685).
+
+### Bug Fixes
+* Fixed an issue that prevented a descriptive message from being visible in the icon editor when no icon is loaded.
+* Added workarounds to errors that will arise when anchoring a group to a "restricted" region (like a nameplate).
+* Fixed #1696: When swapping profiles, run snippets before setting up icons.
+
+## v8.6.4
+* Added better error messages when testing sounds for sound notifications.
+
+### Bug Fixes
+* Fixed an issue where custom sounds entered by a SoundKitID would not play using the configured sound channel.
+
+## v8.6.3
+### Bug Fixes
+* Fixed #1698 (again): Utils.lua:438: attempt to index local 'path' (a number value)
+* Switched WoW-built-in sounds that TMW registers with LSM to use FileDataIDs instead of paths, since paths aren't allowed anymore in WoW 8.2.
+ * Note that if you have other addons which are still incorrectly registering these sounds (like Omen), they won't work for you.
+
+## v8.6.2
+### Bug Fixes
+* Fixed #1698: Utils.lua:438: attempt to index local 'path' (a number value)
+* Fixed #1699: Several lists when editing notifications were no longer displaying correctly, if at all, in WoW 8.2.
+
+## v8.6.1
+* Buff/Debuff equivalency improvements
+
+### Bug Fixes
+* Fixed #1690: Framelevel issue with latest alphas of Masque.
+* Fixed #1694: Empty group shrinks to minimum size of 1 icon.
+* Fixed that Reactive Ability icons wouldn't use the No Mana state.
+* Fixed #1697: Error when logging in in WoW 8.2.
+
 ## v8.6.0
 
 ### Discord
