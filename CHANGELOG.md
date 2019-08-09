@@ -1,3 +1,6 @@
+## v8.6.7
+* Added an Inset option to the border for both Bar and Icon views.
+
 ## v8.6.6
 * Added border options to the standard Icon view (#1705).
 * Added Heal Crit & Non-Crit events to the Combat Event icon (#1685).
