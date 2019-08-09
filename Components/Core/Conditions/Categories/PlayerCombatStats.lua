@@ -214,7 +214,7 @@ ConditionCategory:RegisterCondition(35,	 "MANAREGEN", {
 	range = 1000/5,
 	unit = PLAYER,
 	texttable = function(k) return format(L["MP5"], TMW.C.Formatter.COMMANUMBER:Format(k)*5) end,
-	icon = "Interface\\Icons\\spell_magic_managain",
+	icon = "Interface\\Icons\\spell_nature_manaregentotem",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[GetManaRegen() c.Operator c.Level]], -- anyone know of an event that can be reliably listened to to get this?
 })

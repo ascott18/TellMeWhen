@@ -127,24 +127,7 @@ end
 
 do	-- LSM sound registration
 
-	-- These are FileIDs, not SoundKitIDs.
-	-- They were obtained by searching https://wow.tools/files/ 
-	LSM:Register("sound", "Rubber Ducky",  566121)
-	LSM:Register("sound", "Cartoon FX",	   566543)
-	LSM:Register("sound", "Explosion", 	   566982)
-	LSM:Register("sound", "Shing!", 	   566240)
-	LSM:Register("sound", "Wham!", 		   566946)
-	LSM:Register("sound", "Simon Chime",   566076)
-	LSM:Register("sound", "War Drums", 	   567275)
-	LSM:Register("sound", "Cheer", 		   567283)
-	LSM:Register("sound", "Humm", 		   569518)
-	LSM:Register("sound", "Short Circuit", 568975)
-	LSM:Register("sound", "Fel Portal",    569215)
-	LSM:Register("sound", "Fel Nova", 	   568582)
-	LSM:Register("sound", "You Will Die!", 546633)
-
-	LSM:Register("sound", "Die!", 		   551339)
-	LSM:Register("sound", "You Fail!", 	   553345)
+	LSM:Register("sound", "You Will Die!", [[Sound\Creature\CThun\CThunYouWillDie.ogg]])
 
 	LSM:Register("sound", "TMW - Pling 1", [[Interface\Addons\TellMeWhen\Sounds\Pling1.ogg]])
 	LSM:Register("sound", "TMW - Pling 2", [[Interface\Addons\TellMeWhen\Sounds\Pling2.ogg]])

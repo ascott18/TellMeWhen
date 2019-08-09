@@ -93,7 +93,9 @@ ConditionCategory:RegisterSpacer(5.5)
 -- TODO-CLASSIC: STANCE probably needs to be totally redone.
 local FirstStances = {
 	DRUID = 5487, 		-- Bear Form
+	PRIEST = 15473, 	-- Shadowform
 	ROGUE = 1784, 		-- Stealth
+	WARRIOR = 2457, 	-- Battle Stance
 }
 ConditionCategory:RegisterCondition(6,	 "STANCE", {
 	text = 	pclass == "DRUID" and L["SHAPESHIFT"] or
@@ -180,7 +182,7 @@ TMW:RegisterUpgrade(73019, {
 	end,
 })
 local PetModes = {
-	PET_MODE_ASSIST = 1,-- TODO-CLASSIC:
+	PET_MODE_AGGRESSIVE = 1,
 	PET_MODE_DEFENSIVE = 2,
 	PET_MODE_PASSIVE = 3,
 }
@@ -191,13 +193,13 @@ ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 		[0] = L["CONDITIONPANEL_PETMODE_NONE"],
-		[1] = PET_MODE_ASSIST,-- TODO-CLASSIC: assist was "agressive" in classic
+		[1] = PET_MODE_AGGRESSIVE,
 		[2] = PET_MODE_DEFENSIVE,
 		[3] = PET_MODE_PASSIVE
 	},
 
 	unit = false,
-	icon = PET_ASSIST_TEXTURE,
+	icon = PET_PASSIVE_TEXTURE,
 	tcoords = CNDT.COMMON.standardtcoords,
 
 	Env = {

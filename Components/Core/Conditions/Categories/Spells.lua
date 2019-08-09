@@ -287,7 +287,7 @@ ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	useSUG = true,
 	unit = false,
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
-	icon = "Interface\\Icons\\inv_potion_137",
+	icon = "Interface\\Icons\\inv_potion_72",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[not BOOLCHECK( SpellHasNoMana(c.NameFirst) )]],
 	Env = {
@@ -312,7 +312,7 @@ ConditionCategory:RegisterCondition(4.5, "SPELLCOST", {
 	end,
 	useSUG = true,
 	unit = false,
-	icon = "Interface\\Icons\\inv_potion_125",
+	icon = "Interface\\Icons\\inv_potion_74",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[(GetSpellCost(c.NameFirst) or 0) c.Operator c.Level]],
 	Env = {
@@ -346,7 +346,7 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 	text = L["GCD_ACTIVE"],
 	bool = true,
 	unit = PLAYER,
-	icon = "Interface\\Icons\\ability_hunter_steadyshot",
+	icon = "Interface\\Icons\\spell_fire_flamebolt",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[BOOLCHECK( (TMW.GCD > 0 and TMW.GCD < 1.7) )]],
 	events = function(ConditionObject, c)
@@ -739,7 +739,7 @@ ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 	text = L["CONDITIONPANEL_CASTCOUNT"],
 	tooltip = L["CONDITIONPANEL_CASTCOUNT_DESC"],
 	range = 10,
-	icon = "Interface\\Icons\\spell_nature_lightningoverload",
+	icon = "Interface\\Icons\\Temp",
 	name = function(editbox)
 		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
 	end,

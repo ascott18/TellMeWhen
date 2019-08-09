@@ -1624,10 +1624,9 @@ end
 
 function TMW.GetCurrentSpecializationRole()
 	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
-	-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
 	local currentSpec = TMW.GetCurrentSpecializationID()
 	if not currentSpec then
-		return nil
+		return "DAMAGER" -- assume DPS if no talents are learned
 	end
 
 	local _, _, _, _, role = TMW.GetSpecializationInfoByID(currentSpec)

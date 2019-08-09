@@ -51,7 +51,7 @@ TMW.BE = {
 			  -9484, -- Shackle Undead                      (priest, general)
 			  20066, -- Repentance                          (paladin, general)
 		},
-		Shatterable = { -- TODO-CLASSIC: Shatter isn't a menchanic in classic, right?
+		Shatterable = {
 			    122, -- Frost Nova                          (mage, frost)
 			  -3355, -- Freezing Trap                       (hunter, general)
 		},

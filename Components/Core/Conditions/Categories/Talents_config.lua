@@ -35,8 +35,6 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 Module.table = {}
 
--- TODO-CLASSIC: I started working on this suggestion module during the stress test,
--- but ran out of time. It 100% doesn't work. Question: Are TalentIDs a thing we can stil use?
 function Module:OnInitialize()
 	-- nothing
 end

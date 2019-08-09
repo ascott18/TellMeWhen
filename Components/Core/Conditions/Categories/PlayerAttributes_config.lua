@@ -30,13 +30,20 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 Module.stances = {
+	WARRIOR = {
+		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
+		[71] = 		GetSpellInfo(71),		-- Defensive Stance
+		[2458] = 	GetSpellInfo(2458), 	-- Berserker Stance
+	},
 	DRUID = {
 		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
 		[768] = 	GetSpellInfo(768),		-- Cat Form
 		[783] = 	GetSpellInfo(783),		-- Travel Form
 		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
 		[33891] = 	GetSpellInfo(33891), 	-- Incarnation: Tree of Life
-		[171745] = 	GetSpellInfo(171745), 	-- Claws of Shirvallah	
+	},
+	PRIEST = {
+		[15473] = 	GetSpellInfo(15473), 	-- Shadowform	
 	},
 	ROGUE = {
 		[1784] = 	GetSpellInfo(1784), 	-- Stealth	

@@ -284,7 +284,7 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
 	formatter = TMW.C.Formatter.PERCENT,
-	icon = "Interface\\Icons\\spell_holy_circleofrenewal",
+	icon = "Interface\\Icons\\spell_holy_renew",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		return [[AuraPercent(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -320,7 +320,7 @@ ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
 	useSUG = true,
-	icon = "Interface\\Icons\\spell_nature_rejuvenation",
+	icon = "Interface\\Icons\\spell_nature_resistnature",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		return [[AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator AuraDur(c.Unit, c.NameFirst2, "HELPFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[")]]
@@ -342,7 +342,7 @@ ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
 	texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
-	icon = "Interface\\Icons\\inv_misc_herb_felblossom",
+	icon = "Interface\\Icons\\spell_holy_blessingofstrength",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		return [[AuraStacks(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -365,7 +365,7 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	check = function(check)
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
-	icon = "Interface\\Icons\\inv_elemental_primal_mana",
+	icon = "Interface\\Icons\\spell_ice_lament",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		return [[AuraVariableNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -389,7 +389,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		check = function(check)
 			check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 		end,
-		icon = "Interface\\Icons\\ability_priest_clarityofwill",
+		icon = "Interface\\Icons\\spell_ice_lament",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
 			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
@@ -414,7 +414,7 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
 	texttable = function(k) return format(L["ACTIVE"], k) end,
-	icon = "Interface\\Icons\\ability_paladin_sacredcleansing",
+	icon = "Interface\\Icons\\spell_holy_sealofprotection",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		return [[AuraCount(c.Unit, c.NameRaw, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -427,28 +427,6 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 })
 
 ConditionCategory:RegisterSpacer(8)
-
-ConditionCategory:RegisterCondition(9,	 "ABSORBAMT", {
-	text = L["ABSORBAMT"],
-	tooltip = L["ABSORBAMT_DESC"],
-	range = 50000,
-	icon = "Interface\\Icons\\spell_holy_powerwordshield",
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitGetTotalAbsorbs = UnitGetTotalAbsorbs,
-	},
-	funcstr = function(c)
-		return [[UnitGetTotalAbsorbs(c.Unit) c.Operator c.Level]]
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", CNDT:GetUnit(c.Unit))
-	end,
-})
-
-ConditionCategory:RegisterSpacer(10)
 
 ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["DURATION"],
@@ -515,7 +493,7 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
 	formatter = TMW.C.Formatter.PERCENT,
-	icon = "Interface\\Icons\\spell_priest_voidshift",
+	icon = "Interface\\Icons\\ability_rogue_dualweild",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		return [[AuraPercent(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -646,7 +624,7 @@ ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
 	texttable = function(k) return format(L["ACTIVE"], k) end,
-	icon = "Interface\\Icons\\spell_deathknight_frostfever",
+	icon = "Interface\\Icons\\ability_hunter_quickshot",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		return [[AuraCount(c.Unit, c.NameRaw, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]

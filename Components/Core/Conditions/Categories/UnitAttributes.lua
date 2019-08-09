@@ -132,7 +132,7 @@ ConditionCategory:RegisterCondition(6,    "REACT", {
 	defaultUnit = "target",
 	texttable = {[1] = L["ICONMENU_HOSTILE"], [2] = L["ICONMENU_FRIEND"]},
 	nooperator = true,
-	icon = "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood",
+	icon = "Interface\\Icons\\spell_holy_blessingofstamina",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		UnitIsEnemy = UnitIsEnemy,
@@ -435,7 +435,7 @@ ConditionCategory:RegisterCondition(12.1, "CLASSIFICATION2", {
 
 	defaultUnit = "target",
 
-	icon = "Interface\\Icons\\achievement_pvp_h_03",
+	icon = "Interface\\Icons\\inv_jewelry_stormpiketrinket_05",
 	tcoords = CNDT.COMMON.standardtcoords,
 
 	Env = {
