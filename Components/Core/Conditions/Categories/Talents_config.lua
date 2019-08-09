@@ -22,6 +22,12 @@ local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("Player")
 
+local function makeId(tab, talent)
+	return "" .. tab .. "," .. talent
+end
+local function parseId(id)
+	return (","):split(id)
+end
 
 local Module = SUG:NewModule("talents", SUG:GetModule("default"))
 Module.noMin = true
@@ -34,6 +40,10 @@ Module.table = {}
 function Module:OnInitialize()
 	-- nothing
 end
+function Module:Table_GetSorter()
+	SUG.SortTable = self:Table_Get()
+	return self.Sorter_ByName
+end
 function Module:Table_Get()
 	wipe(self.table)
 
@@ -43,44 +53,7 @@ function Module:Table_Get()
 			
 			local lower = name and strlowerCache[name]
 			if lower then
-				self.table[{tab, talent}] = lower
-			end
-		end
-	end
-
-	return self.table
-end
-function Module:Entry_AddToList_1(f, tabTal)
-	local name, iconTexture = GetTalentInfo(tabTal[1], tabTal[2])
-
-	f.Name:SetText(name)
-
-	f.tooltipmethod = "SetHyperlink"
-	f.tooltiparg = GetTalentLink(id)
-
-	f.insert = name
-
-	f.Icon:SetTexture(iconTexture)
-end
-Module.Entry_Colorize_1 = TMW.NULLFUNC
-
-
-local Module = SUG:NewModule("pvptalents", SUG:GetModule("talents"))
-Module.table = {}
-
-function Module:Table_Get()
-	wipe(self.table)
-
-	for slot = 1, 10 do
-		local info = C_SpecializationInfo.GetPvpTalentSlotInfo(slot)
-		if not info then break end
-
-		for _, id in pairs(info.availableTalentIDs) do 
-			local _, name = GetPvpTalentInfoByID(id)
-			
-			local lower = name and strlowerCache[name]
-			if lower then
-				self.table[id] = lower
+				self.table[makeId(tab, talent)] = lower
 			end
 		end
 	end
@@ -88,16 +61,16 @@ function Module:Table_Get()
 	return self.table
 end
 function Module:Entry_AddToList_1(f, id)
-	local id, name, iconTexture = GetPvpTalentInfoByID(id) -- restore case
+	local tab, talent = parseId(id)
+	local name, iconTexture = GetTalentInfo(tab, talent)
 
 	f.Name:SetText(name)
-	f.ID:SetText(id)
 
-	f.tooltipmethod = "SetHyperlink"
-	f.tooltiparg = GetPvpTalentLink(id)
+	f.tooltipmethod = "SetTalent"
+	f.tooltiparg = {tab, talent}
 
 	f.insert = name
-	f.insert2 = id
 
 	f.Icon:SetTexture(iconTexture)
 end
+Module.Entry_Colorize_1 = TMW.NULLFUNC

@@ -250,11 +250,9 @@ end
 
 function ClassSpellCache:TMW_DB_INITIALIZED()
 	
-	for classID, spellList in pairs(Cache) do
-		print(classID)
+	for classID, spellList in pairs(CopyTable(Cache)) do
 		if type(classID) == "number" then
 			local name, token, classID = TMW.GetClassInfo(classID)
-			print(name, token)
 			local spellDict = {}
 			for k, v in pairs(spellList) do
 				spellDict[v] = true
