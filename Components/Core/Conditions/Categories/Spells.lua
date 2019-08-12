@@ -150,40 +150,20 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 			local pGUID = UnitGUID("player")
 			assert(pGUID, "pGUID was null when func string was generated!")
 
-			local blacklist = {
-				[204255] = true -- Soul Fragment (happens after casting Sheer for DH tanks)
-			}
-
 			module:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED",
 			function()
 				local _, e, _, sourceGuid, _, _, _, _, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
-				if e == "SPELL_CAST_SUCCESS" and sourceGuid == pGUID and not blacklist[spellID] then
+				if e == "SPELL_CAST_SUCCESS" and sourceGuid == pGUID then
 					Env.LastPlayerCastName = strlower(spellName)
-					Env.LastPlayerCastID = spellID
-					TMW:Fire("TMW_CNDT_LASTCAST_UPDATED")
-				end
-			end)
-
-			-- Spells that don't work with CLEU and must be tracked with USS.
-			local ussSpells = {
-				[189110] = true, -- Infernal Strike (DH)
-				[189111] = true, -- Infernal Strike (DH)
-				[195072] = true, -- Fel Rush (DH)
-			}
-			module:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED",
-			function(_, unit, _, spellID)
-				if unit == "player" and ussSpells[spellID] and not blacklist[spellID] then
-					Env.LastPlayerCastName = strlower(GetSpellInfo(spellID))
-					Env.LastPlayerCastID = spellID
 					TMW:Fire("TMW_CNDT_LASTCAST_UPDATED")
 				end
 			end)
 		end
 
 		if c.Level == 1 then
-			return [[LastPlayerCastName ~= LOWER(c.NameFirst) and LastPlayerCastID ~= c.NameFirst]] 
+			return [[LastPlayerCastName ~= LOWER(c.NameString)]]
 		end
-		return [[LastPlayerCastName == LOWER(c.NameFirst) or LastPlayerCastID == c.NameFirst]] 
+		return [[LastPlayerCastName == LOWER(c.NameString)]]
 	end,
 	events = function(ConditionObject, c)
 		local pGUID = UnitGUID("player")
@@ -699,13 +679,15 @@ local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED()
 			CastCounts[sourceGUID] = castsForGUID
 		end
 		
-		castsForGUID[spellName] = spellID
-		castsForGUID[spellID] = (castsForGUID[spellID] or 0) + 1
+		-- castsForGUID[spellName] = spellID
+		castsForGUID[spellName] = (castsForGUID[spellName] or 0) + 1
+		TMW:Fire("TMW_CNDT_CASTCOUNT_UPDATE")
 	
 	elseif cleuEvent == "UNIT_DIED" then
 		if destFlags then
 			if bit_band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= COMBATLOG_OBJECT_TYPE_PLAYER then
 				CastCounts[destGUID] = nil
+				TMW:Fire("TMW_CNDT_CASTCOUNT_UPDATE")
 			end
 		end
 	end
@@ -727,9 +709,9 @@ function Env.UnitCastCount(...)
 			return 0
 		end
 		
-		if not isNumber[spell] then
-			spell = casts[spell] or spell -- spell name keys have values that are spellIDs
-		end
+		-- if not isNumber[spell] then
+		-- 	spell = casts[spell] or spell -- spell name keys have values that are spellIDs
+		-- end
 		return casts[spell] or 0
 	end
 	
@@ -754,6 +736,6 @@ ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("COMBAT_LOG_EVENT_UNFILTERED", nil, "SPELL_CAST_SUCCESS")
+			ConditionObject:GenerateNormalEventString("TMW_CNDT_CASTCOUNT_UPDATE")
 	end,
 })

@@ -18,7 +18,7 @@ local print = TMW.print
 local type, wipe, pairs, rawget, abs, min, next, GetTime =
 	  type, wipe, pairs, rawget, abs, min, next, GetTime
 local UnitGUID, UnitAura, UnitName, GetSpellInfo =
-	  UnitGUID, UnitAura, UnitName, GetSpellInfo
+	  UnitGUID, TMW.UnitAura, UnitName, GetSpellInfo
 
 local C_Timer = C_Timer
 local huge = math.huge
@@ -101,8 +101,7 @@ ManualIconsManager:UpdateTable_Set(ManualIcons)
 -- Holds the cooldowns of all known auras. Structure is:
 --[[ Auras = {
 	[GUID] = {
-		[spellID] = TMW.C.Aura,
-		[spellName] = spellID,
+		[spellName] = TMW.C.Aura,
 		...
 	},
 	...
@@ -200,21 +199,21 @@ local function VerifyAll()
 				local buffName, _, count, _, duration, expirationTime, _, _, _, spellID = UnitAura(unit, index, filter)
 				index = index + 1
 
-				if spellID then
+				if buffName then
 					buffName = strlowerCache[buffName]
 
 					auras = auras or Auras[GUID]
-					local aura = auras[spellID]
+					local aura = auras[buffName]
 					if not aura then
-						aura = Aura:New(spellID, GUID, UnitName(unit), true)
-						auras[spellID] = aura
-						auras[buffName] = spellID
+						aura = Aura:New(buffName, GUID, UnitName(unit), true)
+						auras[buffName] = aura
 					end
+					aura.spellID = spellID
 					aura.lastSeen = TMW.time
 
 					local verified = aura.verified
-					if 	verified and 
-						(aura.start ~= expirationTime - duration 
+					if 	verified and
+						(aura.start ~= expirationTime - duration
 						or aura.duration ~= duration
 						or aura.stacks ~= count)
 					then
@@ -229,8 +228,8 @@ local function VerifyAll()
 
 						for k = 1, #ManualIcons do
 							local icon = ManualIcons[k]
-							local NameHash = icon.Spells.Hash
-							if NameHash and (NameHash[spellID] or NameHash[buffName]) then
+							local NameHash = icon.Spells.NameHash
+							if NameHash and NameHash[buffName] then
 								icon.NextUpdateTime = 0
 							end
 						end
@@ -250,28 +249,18 @@ local function VerifyAll()
 			-- Clean up anything that wasn't just scanned.
 			auras = auras or Auras[GUID]
 			for k, v in next, auras do
-				local aura, spellID
+				local aura, spellName
 				if type(v) == "table" then
-					aura, spellID = v, k
-				else
-					aura, spellID = auras[v], v
-					if not aura then
-						-- This is a spell name pointing at an untracked ID. Get rid of it.
-						auras[k] = nil
-					end
+					aura, spellName = v, k
 				end
 
 				if aura and aura.lastSeen ~= TMW.time then
-					auras[spellID] = nil
-					local spellName = strlowerCache[aura.spellName]
-					if auras[spellName] == spellID then
-						auras[spellName] = nil
-					end
+					auras[spellName] = nil
 
 					for k = 1, #ManualIcons do
 						local icon = ManualIcons[k]
-						local NameHash = icon.Spells.Hash
-						if NameHash and (NameHash[spellID] or NameHash[spellName]) then
+						local NameHash = icon.Spells.StringHash
+						if NameHash and NameHash[spellName] then
 							icon.NextUpdateTime = 0
 						end
 					end
@@ -319,7 +308,7 @@ local FALLBACK_DURATION = 15
 local MAX_REFRESH_AMOUNT = 1.3
 
 Aura = TMW:NewClass("Aura"){
-	spellID = 0,
+	spellID = nil,
 	spellName = "",
 	start = 0,
 	duration = 0,
@@ -329,28 +318,27 @@ Aura = TMW:NewClass("Aura"){
 	verified = false,
 
 
-	OnNewInstance = function(self, spellID, destGUID, destName, maybeRefresh)
+	OnNewInstance = function(self, spellName, destGUID, destName, maybeRefresh)
 		self.GUID = destGUID
 		self.unitName = destName
 
-		self.spellID = spellID
-		self.spellName = GetSpellInfo(spellID)
+		self.spellName = spellName
 		self.start = TMW.time
 		self.lastSeen = TMW.time
-		local duration = BaseDurations[spellID]
+		local duration = BaseDurations[spellName]
 
 		if not duration then
 			-- ScanForAura will try and determine the base duration of the effect.
-			duration = ScanForAura(destGUID, self.spellName, spellID)
+			duration = ScanForAura(destGUID, self.spellName, nil)
 			if not maybeRefresh then
 				-- Only record the duration if we are 100% sure that this is a first application.
 				-- Sometimes, we might be creating an object for a refresh of an aura that we never saw
 				-- the application of.
-				BaseDurations[spellID] = duration
+				BaseDurations[spellName] = duration
 			end
 		end
 
-		self.duration = duration or FALLBACK_DURATION
+		self.duration = duration or TMW:GetAuraDuration(spellID) or FALLBACK_DURATION
 	end,
 
 	Remaining = function(self)
@@ -362,7 +350,7 @@ Aura = TMW:NewClass("Aura"){
 	end,
 
 	Refresh = function(self)
-		local base = BaseDurations[self.spellID]
+		local base = BaseDurations[self.spellName]
 		local baseOrFallback = base or FALLBACK_DURATION
 
 		local remaining = self:Remaining()
@@ -374,11 +362,11 @@ Aura = TMW:NewClass("Aura"){
 		if duration then
 			if base and duration > base + 1 then
 				-- If the duration is greater than the base by at least 1 second, assume that it does extend when refreshed
-				DurationExtends[self.spellID] = true
+				DurationExtends[self.spellName] = true
 			end
 
 			self.duration = duration
-		elseif DurationExtends[self.spellID] then
+		elseif DurationExtends[self.spellName] then
 			self.duration = min(baseOrFallback*MAX_REFRESH_AMOUNT, remaining+baseOrFallback)
 		else
 			self.duration = baseOrFallback
@@ -406,13 +394,8 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 
 		if cleuEvent == "SPELL_AURA_REMOVED" then
 			aurasOnGUID[spellName] = nil
-			aurasOnGUID[spellID] = nil
 		else
-			-- Map the spellName to the spellID.
-			aurasOnGUID[spellName] = spellID
-
-
-			local aura = aurasOnGUID[spellID]
+			local aura = aurasOnGUID[spellName]
 
 			local actuallyRefresh
 			if cleuEvent ~= "SPELL_AURA_APPLIED" and not aura then
@@ -433,8 +416,8 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 			elseif cleuEvent == "SPELL_PERIODIC_DAMAGE" or cleuEvent == "SPELL_PERIODIC_HEAL" then
 				-- This aura is still there! Nothing special to do - just fall through and update lastSeen.
 			else -- SPELL_AURA_APPLIED
-				aura = Aura:New(spellID, destGUID, destName, actuallyRefresh)
-				aurasOnGUID[spellID] = aura
+				aura = Aura:New(spellName, destGUID, destName, actuallyRefresh)
+				aurasOnGUID[spellName] = aura
 			end
 			aura.lastSeen = TMW.time
 		end
@@ -442,8 +425,8 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 		-- Update any icons that are interested in the aura that we just handled
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
-			local NameHash = icon.Spells.Hash
-			if NameHash and (NameHash[spellID] or NameHash[spellName]) then
+			local NameHash = icon.Spells.StringHash
+			if NameHash and NameHash[spellName] then
 				icon.NextUpdateTime = 0
 			end
 		end
@@ -464,20 +447,15 @@ end
 local function Dotwatch_OnUpdate_Controller(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local NameArray = icon.Spells.Array
+	local NameArray = icon.Spells.StringArray
 	local presentAlpha = icon.States[STATE_PRESENT].Alpha
 		
 	for GUID, auras in pairs(Auras) do
 		local unit = nil
 		for i = 1, #NameArray do
-			local iName = NameArray[i]
-			if not isNumber[iName] then
-				-- spell name keys have values that are the spellid of the name,
-				-- we need the spellid for the texture (thats why i did it like this)
-				iName = auras[iName] or iName
-			end
+			local spellName = NameArray[i]
 
-			local aura = auras[iName]
+			local aura = auras[spellName]
 
 			if aura then
 				local start = aura.start
@@ -486,13 +464,13 @@ local function Dotwatch_OnUpdate_Controller(icon, time)
 				local remaining = duration - (time - start)
 
 				if remaining > 0 or (start == 0 and duration == 0) then
-					if presentAlpha > 0 and not icon:YieldInfo(true, iName, start, duration, aura.unitName, GUID, aura.stacks) then
+					if presentAlpha > 0 and not icon:YieldInfo(true, spellName, start, duration, aura.unitName, GUID, aura.stacks) then
 						-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 						return
 					end
 
 				else
-					auras[iName] = nil
+					auras[spellName] = nil
 				end
 			end
 		end
@@ -526,7 +504,7 @@ end
 
 
 function Type:Setup(icon)
-	icon.Spells = TMW:GetSpells(icon.Name, false)	
+	icon.Spells = TMW:GetSpells(icon.Name, false)
 
 	icon:SetInfo("texture; reverse; spell; unit, GUID",
 		Type:GetConfigIconTexture(icon),

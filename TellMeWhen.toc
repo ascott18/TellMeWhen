@@ -95,6 +95,7 @@ Components\Core\BaseClasses\IconDataProcessorComponent.lua
 # Components\Core\Spells\includes.core.xml
 Components\Core\Spells\Equivalencies.lua
 Components\Core\Spells\Spells.lua
+Components\Core\Spells\AuraDurations.lua
 Components\Core\Spells\AuraCache.lua
 Components\Core\Spells\ClassSpellCache.lua
 

@@ -261,7 +261,7 @@ local pveDR = {
 local PvEDRs = {}
 for spellID, category in pairs(spells) do
 	if pveDR[category] then
-		PvEDRs[spellID] = 1
+		PvEDRs[strlowerCache[GetSpellInfo(spellID)]] = 1
 	end
 end
 
@@ -426,13 +426,14 @@ end)
 local function DR_OnEvent(icon, event, arg1)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local _, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType = CombatLogGetCurrentEventInfo()
-		
+		spellName = strlowerCache[spellName]
+
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
-			local NameHash = icon.Spells.Hash
-			if NameHash[spellID] or NameHash[strlowerCache[spellName]] then
+			local NameHash = icon.Spells.StringHash
+			if NameHash[spellName] then
 
 				-- Check that either the spell always has DR, or that the target is a player (or pet).
-				if PvEDRs[spellID] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
+				if PvEDRs[spellName] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
 					-- dr is the table that holds the DR info for this target GUID.
 					local dr = icon.DRInfo[destGUID]
 
@@ -452,7 +453,7 @@ local function DR_OnEvent(icon, event, arg1)
 								amt = 50,
 								start = TMW.time,
 								duration = icon.DRDuration,
-								tex = GetSpellTexture(spellID)
+								tex = GetSpellTexture(spellName)
 							}
 							icon.DRInfo[destGUID] = dr
 						else
@@ -463,7 +464,7 @@ local function DR_OnEvent(icon, event, arg1)
 								dr.amt = amt > 25 and amt/2 or 0
 								dr.duration = icon.DRDuration
 								dr.start = TMW.time
-								dr.tex = GetSpellTexture(spellID)
+								dr.tex = GetSpellTexture(spellName)
 							end
 						end
 					end

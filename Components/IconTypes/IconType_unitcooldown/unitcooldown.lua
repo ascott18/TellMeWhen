@@ -2,13 +2,9 @@
 -- TellMeWhen
 -- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
 
--- Other contributions by
--- Sweetmms of Blackrock
--- Oozebull of Twisting Nether
--- Oodyboo of Mug'thol
--- Banjankri of Blackrock
--- Predeter of Proudmoore
--- Xenyr of Aszune
+-- Other contributions by:
+--		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
+--		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
 
 -- Currently maintained by
 -- Cybeloras of Aerie Peak
@@ -149,8 +145,7 @@ ManualIconsManager:UpdateTable_Set(ManualIcons)
 -- Holds the cooldowns of all known units. Structure is:
 --[[ Cooldowns = {
 	[GUID] = {
-		[spellID] = lastCastTime,
-		[spellName] = spellID,
+		[spellName] = lastCastTime,
 		...
 	},
 	...
@@ -165,22 +160,84 @@ end})
 
 
 local resetsOnCast = {
-	[12472] = { -- coldsnap
-		[45438] = 1, -- iceblock
-		[11426] = 1, -- ice barrier
-		[120] = 1, -- cone of cold
-		[122] = 1, -- frost nova
+	
+	[23989] = { -- readiness
+		[19263] = 1, -- Deterrence
+		[5384] = 1, -- Feign
+		-- Freezing Trap
+		[1499] = 1,
+		[14310] = 1,
+		[14311] = 1,
+		-- Frost Trap
+		[13809] = 1,
+		-- Immolation Trap
+		[13795] = 1,
+		[14302] = 1,
+		[14303] = 1,
+		[14304] = 1,
+		[14305] = 1,
 	},
+
+	[12472] = { -- coldsnap
+		-- cone of cold
+		[120] = 1,
+		[8492] = 1,
+		[10159] = 1,
+		[10160] = 1,
+		[10161] = 1,
+
+		-- frost ward
+		[6143] = 1,
+		[8461] = 1,
+		[8462] = 1,
+		[10177] = 1,
+		[28609] = 1,
+		[11189] = 1,
+		[28332] = 1,
+
+		-- frost nova
+		[122] = 1,
+		[865] = 1,
+		[6131] = 1,
+		[10230] = 1,
+
+		-- Ice Block (does this really reset?)
+		[11958] = 1,
+
+		-- Ice Barrier
+		[11426] = 1,
+		[13031] = 1,
+		[13032] = 1,
+		[13033] = 1,
+	},
+	
 	[14185] = { --prep
+		[2094] = 1, -- Blind
 		[5277] = 1, -- Evasion
 		[2983] = 1, -- Sprint
 		[1856] = 1, -- Vanish
+		[8643] = 1, -- Kidney Shot
+		[11286] = 1, -- Gouge
+		[14177] = 1, -- Cold Blood
+		[14183] = 1, -- Premeditation
+		[1766] = 1, -- Kick
+		-- Probably missing some other ones
 	},
 }
-local resetsOnAura = {
-}
-local spellBlacklist = {
-}
+
+-- Map to names, since classic doesn't provide spellIDs to CLEU
+resetsOnCast = TMW.map(resetsOnCast, function(v, k)
+	return TMW.map(v, function(v, k)
+		return v, strlowerCache[GetSpellInfo(k)]
+	end), strlowerCache[GetSpellInfo(k)]
+end)
+
+-- local resetsOnAura = {
+	
+-- }
+-- local spellBlacklist = {
+-- 	[50288] = 1, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
+-- }
 
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
@@ -194,38 +251,38 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 	or cleuEvent == "SPELL_MISSED"
 	then
 	
-		if spellBlacklist[spellID] then
-			return
-		end
+		-- if spellBlacklist[spellID] then
+		-- 	return
+		-- end
 		
 		spellName = spellName and strlowerCache[spellName]
 		local cooldownsForGUID = Cooldowns[sourceGUID]
 		
-		if cleuEvent == "SPELL_AURA_APPLIED" and resetsOnAura[spellID] then
-			-- Handle things that reset on aura application.
-			for id in pairs(resetsOnAura[spellID]) do
-				if cooldownsForGUID[id] then
-					-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
-					-- on the other hand, dont set things to nil or it will look like they haven't been seen.
-					cooldownsForGUID[id] = 0
+		-- if cleuEvent == "SPELL_AURA_APPLIED" and resetsOnAura[spellID] then
+		-- 	-- Handle things that reset on aura application.
+		-- 	for id in pairs(resetsOnAura[spellID]) do
+		-- 		if cooldownsForGUID[id] then
+		-- 			-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
+		-- 			-- on the other hand, dont set things to nil or it will look like they haven't been seen.
+		-- 			cooldownsForGUID[id] = 0
 					
-					-- Force update all icons. Too hard to check each icon to see if they were tracking the spellIDs that were reset,
-					-- or if they were tracking the names of the spells that were reset.
-					for k = 1, #ManualIcons do
-						ManualIcons[k].NextUpdateTime = 0
-					end
-				end
-			end
-		end
+		-- 			-- Force update all icons. Too hard to check each icon to see if they were tracking the spellIDs that were reset,
+		-- 			-- or if they were tracking the names of the spells that were reset.
+		-- 			for k = 1, #ManualIcons do
+		-- 				ManualIcons[k].NextUpdateTime = 0
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 		
 
 		if cleuEvent == "SPELL_CAST_SUCCESS" then
-			if resetsOnCast[spellID] then
-				for id in pairs(resetsOnCast[spellID]) do
-					if cooldownsForGUID[id] then
+			if resetsOnCast[spellName] then
+				for name in pairs(resetsOnCast[spellName]) do
+					if cooldownsForGUID[name] then
 						-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
 						-- on the other hand, dont set things to nil or it will look like they haven't been seen.
-						cooldownsForGUID[id] = 0
+						cooldownsForGUID[name] = 0
 						
 						-- Force update all icons. Too hard to check each icon to see if they were tracking the spellIDs that were reset,
 						-- or if they were tracking the names of the spells that were reset.
@@ -237,11 +294,10 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 			end
 
 
-			cooldownsForGUID[spellName] = spellID
-			cooldownsForGUID[spellID] = TMW.time
+			cooldownsForGUID[spellName] = TMW.time
 		else
 			local time = TMW.time
-			local storedTimeForSpell = cooldownsForGUID[spellID]
+			local storedTimeForSpell = cooldownsForGUID[spellName]
 			
 			-- If this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS
 			-- or a UNIT_SPELLCAST_SUCCEEDED then ignore it.
@@ -250,19 +306,17 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 			-- (And really, how often are people actually going to be tracking cooldowns with cast times?
 			-- There arent that many, and the ones that do exist arent that important)
 			if not storedTimeForSpell or storedTimeForSpell + 1.8 < time then
-				cooldownsForGUID[spellName] = spellID
-				
 				-- Hack it to make it a little bit more accurate.
 				-- A max range dk deathcoil has a travel time of about 1.3 seconds,
 				-- so 1 second should be a good average to be safe with travel times.
-				cooldownsForGUID[spellID] = time-1			
+				cooldownsForGUID[spellName] = time-1
 			end
 		end
 		
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
-			local NameHash = icon.Spells.Hash
-			if NameHash and (NameHash[spellID] or NameHash[spellName]) then
+			local NameHash = icon.Spells.StringHash
+			if NameHash and NameHash[spellName] then
 				icon.NextUpdateTime = 0
 			end
 		end
@@ -290,13 +344,12 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, _, spellID)
 		local spellName = GetSpellInfo(spellID)
 		spellName = strlowerCache[spellName]
 		
-		c[spellName] = spellID
-		c[spellID] = TMW.time
+		c[spellName] = TMW.time
 		
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
-			local NameHash = icon.Spells.Hash
-			if NameHash and (NameHash[spellID] or NameHash[spellName]) then
+			local NameHash = icon.Spells.StringHash
+			if NameHash and (NameHash[spellName]) then
 				icon.NextUpdateTime = 0
 			end
 		end
@@ -364,7 +417,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local NameArray, OnlySeen, Sort, Durations, Units =
-	icon.Spells.Array, icon.OnlySeen, icon.Sort, icon.Spells.Durations, icon.Units
+	icon.Spells.StringArray, icon.OnlySeen, icon.Sort, icon.Spells.Durations, icon.Units
 	
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
 	local usableAllAlpha = icon.States[STATE_USABLE_ALL].Alpha
@@ -390,29 +443,22 @@ local function UnitCooldown_OnUpdate(icon, time)
 
 		if cooldowns then
 			for i = 1, #NameArray do
-				local iName = NameArray[i]
-				local baseName = iName
-
-				if not isNumber[iName] then
-					-- spell name keys have values that are the spellid of the name,
-					-- we need the spellid for the texture (thats why i did it like this)
-					iName = cooldowns[iName] or iName
-				end
+				local spellName = NameArray[i]
 
 				local start
 				if OnlySeen == true then
 					-- If we only want cooldowns that have been seen,
 					-- don't default to 0 if it isn't in the table.
-					start = cooldowns[iName]
+					start = cooldowns[spellName]
 				elseif OnlySeen == "class" then
 					local _, class = UnitClass(unit)
 
 					-- we allow (not classSpellNameCache[class]) because of ticket 1144
-					if not classSpellNameCache[class] or classSpellNameCache[class][baseName] then
-						start = cooldowns[iName] or 0
+					if not classSpellNameCache[class] or classSpellNameCache[class][spellName] then
+						start = cooldowns[spellName] or 0
 					end
 				else
-					start = cooldowns[iName] or 0
+					start = cooldowns[spellName] or 0
 				end
 
 				if start then
@@ -427,7 +473,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 							-- (multiplying by a negative flips inequalities)
 							if curSortDur*Sort < remaining*Sort then
 								curSortDur = remaining
-								unname = iName
+								unname = spellName
 								unstart = start
 								unduration = duration
 								unUnit = unit
@@ -435,30 +481,30 @@ local function UnitCooldown_OnUpdate(icon, time)
 						else
 							-- We found the first usable cooldown
 							if not usename then
-								usename = iName
+								usename = spellName
 								useUnit = unit
 							end
 						end
 					else
 						if remaining ~= 0 and not unname then
 							-- We found the first UNusable cooldown
-							unname = iName
+							unname = spellName
 							unstart = start
 							unduration = duration
 							unUnit = unit
 
 							-- We DONT care about usable cooldowns, so stop looking
-							if usableAlpha == 0 and usableAllAlpha == 0 then 
+							if usableAlpha == 0 and usableAllAlpha == 0 then
 								dobreak = 1
 								break
 							end
 						elseif remaining == 0 and not usename then
 							-- We found the first usable cooldown
-							usename = iName
+							usename = spellName
 							useUnit = unit
 
 							-- We care about usable cooldowns (but not all of them), so stop looking
-							if usableAlpha > 0 and usableAllAlpha == 0 then 
+							if usableAlpha > 0 and usableAllAlpha == 0 then
 								dobreak = 1
 								break
 							end
@@ -508,7 +554,7 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local NameArray, OnlySeen, Durations, Units =
-	icon.Spells.Array, icon.OnlySeen, icon.Spells.Durations, icon.Units
+	icon.Spells.StringArray, icon.OnlySeen, icon.Spells.Durations, icon.Units
 	
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
 	local unusableAlpha = icon.States[STATE_UNUSABLE].Alpha
@@ -527,28 +573,21 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 
 		if cooldowns then
 			for i = 1, #NameArray do
-				local iName = NameArray[i]
-				local baseName = iName
-
-				if not isNumber[iName] then
-					-- spell name keys have values that are the spellid of the name,
-					-- we need the spellid for the texture (thats why i did it like this)
-					iName = cooldowns[iName] or iName
-				end
+				local spellName = NameArray[i]
 
 				local start
 				if OnlySeen == true then
 					-- If we only want cooldowns that have been seen,
 					-- don't default to 0 if it isn't in the table.
-					start = cooldowns[iName]
+					start = cooldowns[spellName]
 				elseif OnlySeen == "class" then
 					local _, class = UnitClass(unit)
 
-					if classSpellNameCache[class][baseName] then
-						start = cooldowns[iName] or 0
+					if classSpellNameCache[class][spellName] then
+						start = cooldowns[spellName] or 0
 					end
 				else
-					start = cooldowns[iName] or 0
+					start = cooldowns[spellName] or 0
 				end
 
 				if start then
@@ -557,13 +596,13 @@ local function UnitCooldown_OnUpdate_Controller(icon, time)
 					if remaining < 0 then remaining = 0 end
 
 					if remaining ~= 0 then
-						if unusableAlpha > 0 and not icon:YieldInfo(true, iName, start, duration, unit, GUID, STATE_UNUSABLE) then
+						if unusableAlpha > 0 and not icon:YieldInfo(true, spellName, start, duration, unit, GUID, STATE_UNUSABLE) then
 							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 							return
 						end
 
 					else
-						if usableAlpha > 0 and not icon:YieldInfo(true, iName, 0, 0, unit, GUID, STATE_USABLE) then
+						if usableAlpha > 0 and not icon:YieldInfo(true, spellName, 0, 0, unit, GUID, STATE_USABLE) then
 							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 							return
 						end

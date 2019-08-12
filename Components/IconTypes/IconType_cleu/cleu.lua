@@ -304,13 +304,13 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			extraName = arg2
 			spellID = arg4 -- the spell that was interrupted or the aura that was removed
 			spellName = arg5
-			tex = GetSpellTexture(spellID)
+			tex = GetSpellTexture(spellName)
 		elseif event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_INTERRUPT_SPELL" then
 			extraID = arg4 -- the spell that broke it, or the spell that was interrupted
 			extraName = arg5
 			spellID = arg1 -- the spell that was broken, or the spell used to interrupt
 			spellName = arg2
-			tex = GetSpellTexture(spellID)
+			tex = GetSpellTexture(spellName)
 		elseif event == "ENVIRONMENTAL_DAMAGE" then
 			spellName = _G["ACTION_ENVIRONMENTAL_DAMAGE_" .. arg1]
 			tex = EnvironmentalTextures[arg1] or "Interface\\Icons\\INV_Misc_QuestionMark" -- arg1 is
@@ -318,7 +318,7 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			spellName = L["CLEU_DIED"]
 			tex = "Interface\\Icons\\Ability_Rogue_FeignDeath"
 			if not sourceUnit then
-			--	sourceUnit = destUnit -- clone it (wait, why? commenting this out because its stupid)
+				sourceUnit = destUnit -- clone it so that UNIT_DIED can be filtered by sourceUnit
 			end
 		else
 			spellID = arg1
@@ -368,11 +368,11 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			]]
 		end
 
-		local NameHash = icon.Spells.Hash
+		local NameHash = icon.Spells.StringHash
 		local duration
 		if icon.Name ~= "" and not EventsWithoutSpells[event] then
 			-- Filter the event by spell.
-			local key = (NameHash[spellID] or NameHash[strlowerCache[spellName]])
+			local key = (NameHash[strlowerCache[spellName]])
 			if not key then
 				-- We are filtering by spell, but the even't spell wasn't in the list of OK spells. Return out.
 				return
@@ -387,8 +387,6 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			end
 		end
 
-		TMW:Assert(tex or spellID)
-
 		-- Set the info that was obtained from the event:
 		local unit, GUID
 		if destUnit then
@@ -397,11 +395,13 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			unit, GUID = sourceUnit, sourceGUID
 		end
 
+		local spell = spellID ~= 0 and spellID or spellName
+
 		if icon:IsGroupController() then
 			tinsert(icon.capturedCLEUEvents, 1, {
 				TMW.time, duration or icon.CLEUDur,
-				tex or GetSpellTexture(spellID),
-				spellID or spellName,
+				tex or GetSpellTexture(spell),
+				spell,
 				extraID,
 				unit, GUID,
 				sourceUnit, sourceGUID,
@@ -411,8 +411,8 @@ local function CLEU_OnEvent(icon, _, t, event, h, sourceGUID, sourceName, source
 			icon:SetInfo(
 				"start, duration; texture; spell; extraSpell; unit, GUID; sourceUnit, sourceGUID; destUnit, destGUID",
 				TMW.time, duration or icon.CLEUDur,
-				tex or GetSpellTexture(spellID),
-				spellID or spellName,
+				tex or GetSpellTexture(spell),
+				spell,
 				extraID,
 				unit, GUID,
 				sourceUnit, sourceGUID,
