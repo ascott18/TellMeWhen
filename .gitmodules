@@ -1,0 +1,3 @@
+[submodule "build/lib/packager"]
+	path = build/lib/packager
+	url = https://github.com/ascott18/packager.git

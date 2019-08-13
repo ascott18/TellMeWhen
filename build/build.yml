@@ -1,0 +1,17 @@
+
+trigger:
+- master
+- classic
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- bash: sudo apt-get install -y pandoc
+  displayName: "Install Packages"
+
+- bash: ./create-lua-changelog.sh
+  displayName: "Build Changelog"
+
+- bash: ./release.sh
+  displayName: "Package and Upload"

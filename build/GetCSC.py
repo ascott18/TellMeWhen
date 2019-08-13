@@ -5,7 +5,6 @@ import multiprocessing
 import itertools
 import os
 
-
 from slpp import slpp as lua
 
 base_url = "http://www.wowhead.com"
