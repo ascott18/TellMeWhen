@@ -10,10 +10,10 @@ steps:
 - bash: sudo apt-get install -y pandoc
   displayName: "Install Packages"
 
-- bash: ./build/create-lua-changelog.sh
+- bash: sudo chmod ./build/create-lua-changelog +x && ./build/create-lua-changelog.sh
   displayName: "Build Changelog"
 
-- bash: ./build/lib/packager/release.sh
+- bash: sudo chmod ./build/lib/packager/release.sh +x && ./build/lib/packager/release.sh
   displayName: "Package and Upload"
 
 - task: PublishBuildArtifacts@1
