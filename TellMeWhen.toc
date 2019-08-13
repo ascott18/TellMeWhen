@@ -16,6 +16,8 @@
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
 ## X-Interface: 80200
 ## Title: TellMeWhen
+## X-Curse-Project-ID: 8025
+## X-WoWI-ID: 10855
 
 ## Version: 8.6.7
 ## Author: Cybeloras of Aerie Peak
