@@ -9,7 +9,7 @@ pool:
 steps:
 - checkout: self
   submodules: true
-  
+
 - bash: sudo apt-get install -y pandoc
   displayName: "Install Packages"
 
@@ -23,5 +23,5 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    pathToPublish: $(Build.SourcesDirectory)/.build/
-    artifactName: build
+    pathToPublish: $(Build.SourcesDirectory)/.release/
+    artifactName: release
