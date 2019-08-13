@@ -21,6 +21,10 @@ steps:
 - bash: sudo chmod +x ./release.sh && ./release.sh
   displayName: "Package and Upload"
   workingDirectory: $(Build.SourcesDirectory)/build/lib/packager
+  env:
+    CF_API_KEY: $(CF_API_KEY)
+    WOWI_API_TOKEN: $(WOWI_API_TOKEN)
+    GITHUB_OAUTH: $(GITHUB_OAUTH)
 
 - task: PublishBuildArtifacts@1
   inputs:
