@@ -14,9 +14,9 @@ steps:
 - bash: sudo apt-get install -y pandoc
   displayName: "Install Packages"
 
-- bash: sudo chmod +x ./create-lua-changelog.sh && ./create-lua-changelog.sh
+- bash: sudo chmod +x ./build/create-lua-changelog.sh && ./build/create-lua-changelog.sh
   displayName: "Build Changelog"
-  workingDirectory: $(Build.SourcesDirectory)/build
+  workingDirectory: $(Build.SourcesDirectory)
 
 - bash: sudo chmod +x ./release.sh && ./release.sh
   displayName: "Package and Upload"

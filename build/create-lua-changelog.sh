@@ -2,6 +2,12 @@
 #
 # Copies the changelog to a format that can be loaded into WoW and displayed in-game
 
+INPUT=CHANGELOG.md
+if [ ! -f "$INPUT" ]; then
+    echo "$INPUT does not exist"
+	exit 1
+fi
+
 LAST_VERSION="7.4.0"
 OUTPUT="Options/CHANGELOG.lua"
 echo -e "if not TMW then return end\n\nTMW.CHANGELOG_LASTVER=\"$LAST_VERSION\"\n\nTMW.CHANGELOG = [==[" > $OUTPUT;
@@ -12,7 +18,7 @@ while read line; do
 	fi
 
 	echo "$line";
-done <CHANGELOG.md >>$OUTPUT
+done <$INPUT >>$OUTPUT
 
 echo "]==]" >> $OUTPUT;
 
