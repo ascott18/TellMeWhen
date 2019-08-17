@@ -1,7 +1,12 @@
 
 trigger:
-- master
-- classic
+  branches:
+    include:
+      - master
+      - classic
+  tags:
+    include:
+      - '*'
 
 pr: none
 
