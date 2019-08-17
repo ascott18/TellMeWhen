@@ -39,25 +39,6 @@ Icons can track any of the following things:
 
 * * *
 
-## Examples
-
-**Curse has removed project forums in their CurseForge update, including TellMeWhen's Examples forums.** If you're disappointed by this decision, [consider adding your feedback](https://www.curseforge.com/forums/wow-sites/wow-sites-feedback/127024-no-more-project-forums). (please be civil - anger never helps!)
-
-* A druid could display an icon when a clearcasting buff procs ([link](http://wow.curseforge.com/addons/tellmewhen/forum/druid/25021-display-an-icon-when-clearcasting-procs/))
-* A mage could display an icon when Arcane Blast has sufficient mana to be cast and is in range of the target ([link](http://wow.curseforge.com/addons/tellmewhen/forum/mage/25022-display-arcane-blast-when-mana-range-are-sufficient/)), and have a Polymorph icon appear when the mob they've set to focus becomes unsheeped ([link](http://wow.curseforge.com/addons/tellmewhen/forum/mage/25027-show-when-polymorph-falls/))
-* A death knight could have icons appear to show when Freezing Fog procs ([link](http://wow.curseforge.com/addons/tellmewhen/forum/deathknight/25024-show-freeizing-fog-procs/)), when Rune Strike is usable ([link](http://wow.curseforge.com/addons/tellmewhen/forum/deathknight/25025-show-rune-strike-usability/)), and when Horn of Winter drops and needs to be refreshed ([link](http://wow.curseforge.com/addons/tellmewhen/forum/deathknight/25026-show-when-horn-of-winter-has-dropped/))
-* A rogue could monitor their own stack of Deadly Poison on a mob ([link](http://wow.curseforge.com/addons/tellmewhen/forum/rogue/25028-monitor-deadly-poison-stacks/)), and have icons appear when they need to reapply poisons to their weapons ([link](http://wow.curseforge.com/addons/tellmewhen/forum/rogue/25029-monitor-poisons-on-weapons/))
-* An elemental shaman could set an icon to show when they have more than 6 stacks of Lightning Shield ([link](http://wow.curseforge.com/addons/tellmewhen/forum/shaman/25031-show-lightning-shield-when-stacks-6/))
-* A retribution paladin could show an icon for Templar's verdict when they have 3 holy power ([link](http://wow.curseforge.com/addons/tellmewhen/forum/paladin/25032-show-templars-verdict-when-holy-power-3/))
-* A hunter could show icon to help facilitate aspect swapping ([link](http://wow.curseforge.com/addons/tellmewhen/forum/hunter/25968-aspect-swapping-icon/)), and an icon for mend pet when their pet's health is below 50% ([link](http://wow.curseforge.com/addons/tellmewhen/forum/hunter/25033-show-mend-pet-when-pet-health-50/))
-* A balance druid could show an icon when they are out of combat and one of their mushrooms is not placed ([link](http://wow.curseforge.com/addons/tellmewhen/forum/druid/25036-show-when-a-mushroom-is-not-placed/))
-* A priest could set an icon to monitor all of their chakra states in one icon ([link](http://wow.curseforge.com/addons/tellmewhen/forum/priest/25037-monitor-chakra-state-and-cooldown/)), or set an icon to watch the cooldown of Rapture ([link](http://wow.curseforge.com/addons/tellmewhen/forum/priest/25211-discipline-rapture-cooldown/))
-
-While these examples may help you get started, the best way to use TellMeWhen is to use your imagination! The possibilities are virtually limitless, so download TellMeWhen now and see what it can do for you!
-
-<del>For more examples, visit the [TellMeWhen examples forum](http://wow.curseforge.com/addons/tellmewhen/forum/)</del>. **Curse has removed project forums in their CurseForge update**. If you're disappointed by this decision, [consider adding your feedback](https://www.curseforge.com/forums/wow-sites/wow-sites-feedback/127024-no-more-project-forums).
-
-* * *
 
 ## Instructions
 
@@ -104,19 +85,6 @@ All TellMeWhen icons belong to a parent group. Each of these groups have many se
 *   If the name of the ability does not work properly, use the SpellID. SpellIDs can be found by looking at the suggestion list that pops up as you begin typing in the name, or by finding the ability on a site such as [Wowhead](http://www.wowhead.com). The spellID is in the url, for example: <code>www.wowhead.com/spell=**53351**</code>
 *   Check the settings of the icon's group.
 *   Check the icon's settings in the other tabs of the icon editor.
-
-## Guides
-
-<del>Check out TellMeWhen's [Examples Forum](http://wow.curseforge.com/addons/tellmewhen/forum/) for many examples of how to accomplish wide varieties of setups in TellMeWhen.</del> **Curse has removed project forums in their CurseForge update.** If you're disappointed by this decision, [consider adding your feedback](https://www.curseforge.com/forums/wow-sites/wow-sites-feedback/127024-no-more-project-forums).As is the case with anything on the internet, a Google search may help you to locate what you are looking for.
-
-You may also wish to try some of these video guides, created by users of TellMeWhen:
-
-*   These videos may be a little outdated:
-    *   [TellMeWhen Addon Guide WoW MoP](http://www.youtube.com/watch?v=Sp32I0FE-Eg)
-    *   [Tellmewhen Addon How To Guide For Internal Cooldowns Of Trinkets](http://www.youtube.com/watch?v=GAaEml_giuk)
-    *   [WoW - Detailed guide for TellMeWhen addon w/ commentary](http://www.youtube.com/watch?v=uwbe9UiCe3s)
-    *   [WoW - (TellMeWhen) Cooldown Addon Guide + Review ▶ Syrup + TGN.TV](http://www.youtube.com/watch?v=NVoCkIGaQjc)
-    *   [Draaxx - How to setup TellMeWhen addon](http://www.youtube.com/watch?v=RP7fp7qZEEA)
 
 ## Donations
 
