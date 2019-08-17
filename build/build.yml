@@ -1,6 +1,7 @@
 
 
 trigger:
+- master
 - classic
 
 pr: none
@@ -26,6 +27,10 @@ steps:
     CF_API_KEY: $(CF_API_KEY)
     WOWI_API_TOKEN: $(WOWI_API_TOKEN)
     GITHUB_OAUTH: $(GITHUB_OAUTH)
+
+- bash: echo "##vso[build.updatebuildnumber]$(ls *.zip | sed -e 's/\.zip//')"
+  displayName: "Set Build Number"
+  workingDirectory: $(Build.SourcesDirectory)/.release
 
 - task: PublishBuildArtifacts@1
   inputs:
