@@ -2,6 +2,6 @@ __pycache__
 .release
 
 # Script-generated:
-CHANGELOG.short.md
+# CHANGELOG.short.md # do not ignore this - it will cause the packager to ignore copying it, too.
 gh-release.pkgmeta
 readme.bbcode.txt
