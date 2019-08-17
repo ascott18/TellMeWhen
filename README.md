@@ -1,6 +1,6 @@
-# TellMeWhen
+# TellMeWhen Classic
 
-[![Build Status](https://dev.azure.com/Cybeloras/TellMeWhen/_apis/build/status/TellMeWhen?branchName=master)](https://dev.azure.com/Cybeloras/TellMeWhen/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://dev.azure.com/Cybeloras/TellMeWhen/_apis/build/status/TellMeWhen?branchName=classic)](https://dev.azure.com/Cybeloras/TellMeWhen/_build/latest?definitionId=1&branchName=classic)
 [![Discord](https://img.shields.io/discord/546941305264275456?color=%237289da&label=Discord&logo=Discord)](https://discord.gg/NH7RmcP)
 [![Paypal](https://img.shields.io/badge/Paypal-Donate-Blue?logo=Paypal)](https://www.paypal.com/cgi-bin/webscr?return=http%3A%2F%2Fwow.curseforge.com%2Fprojects%2Ftellmewhen&cn=Add+special+instructions+to+the+addon+author%28s%29&business=ascott18%40msn.com&bn=PP-DonationsBF%3Abtn_donateCC_LG.gif%3ANonHosted&cancel_return=http%3A%2F%2Fwow.curseforge.com%2Fprojects%2Ftellmewhen&lc=US&item_name=TellMeWhen+%28from+Curse.com%29&cmd=_donations&rm=1&no_shipping=1&currency_code=USD)
 
@@ -18,15 +18,13 @@ Icons can track any of the following things:
 *   Cooldowns
 *   Buffs/Debuffs
 *   Reactive abilities
-*   Multi-state abilities
 *   Temporary weapon enchants
-*   Totems/Wild mushrooms/Ghouls/Lightwell
+*   Totems
 *   Rune cooldowns
 *   Internal cooldowns
 *   Others' cooldowns
 *   Diminishing returns
 *   Spell casts
-*   Loss of Control effects
 *   ...And any combination of over 110 other things with easy-to-use [conditions](http://wow.curseforge.com/addons/tellmewhen/images/29).
 
 ## Customizable
@@ -85,7 +83,7 @@ All TellMeWhen icons belong to a parent group. Each of these groups have many se
 
 *   **Make sure that TellMeWhen is not in configuration mode. Type '/tmw' to toggle configuration mode on and off.**
 *   The most common problem people encounter is caused by not entering the name correctly during configuration. Make sure you enter names EXACTLY as they are named when you mouse over them. For buffs this is often different from the ability/totem/trinket/enchant/**talent** which casts the buff, so be sure to check. Known buffs and debuffs are shown as a dark purple or a warrior brown color in the suggestion list.
-*   If the name of the ability does not work properly, use the SpellID. SpellIDs can be found by looking at the suggestion list that pops up as you begin typing in the name, or by finding the ability on a site such as [Wowhead](http://www.wowhead.com). The spellID is in the url, for example: <code>www.wowhead.com/spell=**53351**</code>
+*   If the name of the ability does not work properly, use the SpellID. SpellIDs can be found by looking at the suggestion list that pops up as you begin typing in the name, or by finding the ability on a site such as [Wowhead](http://classic.wowhead.com). The spellID is in the url, for example: <code>classic.wowhead.com/spell=**53351**</code>
 *   Check the settings of the icon's group.
 *   Check the icon's settings in the other tabs of the icon editor.
 

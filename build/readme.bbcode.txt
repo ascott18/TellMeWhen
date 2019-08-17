@@ -1,10 +1,10 @@
-[size="6"]TellMeWhen[/size]
+[size="6"]TellMeWhen Classic[/size]
+
+[url="https://dev.azure.com/Cybeloras/TellMeWhen/_build/latest?definitionId=1&amp;branchName=classic"][img]https://dev.azure.com/Cybeloras/TellMeWhen/_apis/build/status/TellMeWhen?branchName=classic[/img][/url] [url="https://discord.gg/NH7RmcP"][img]https://img.shields.io/discord/546941305264275456?color=%237289da&amp;label=Discord&amp;logo=Discord[/img][/url] [url="https://www.paypal.com/cgi-bin/webscr?return=http%3A%2F%2Fwow.curseforge.com%2Fprojects%2Ftellmewhen&amp;cn=Add+special+instructions+to+the+addon+author%28s%29&amp;business=ascott18%40msn.com&amp;bn=PP-DonationsBF%3Abtn_donateCC_LG.gif%3ANonHosted&amp;cancel_return=http%3A%2F%2Fwow.curseforge.com%2Fprojects%2Ftellmewhen&amp;lc=US&amp;item_name=TellMeWhen+%28from+Curse.com%29&amp;cmd=_donations&amp;rm=1&amp;no_shipping=1&amp;currency_code=USD"][img]https://img.shields.io/badge/Paypal-Donate-Blue?logo=Paypal[/img][/url]
 
  Join the official TellMeWhen Discord! [url="https://discord.gg/NH7RmcP"]https://discord.gg/NH7RmcP[/url]  Ask questions, share configuration, or just hang out.
 
-
-
-TellMeWhen is a WoW addon that provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat. TellMeWhen is...
+ TellMeWhen is a WoW addon that provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat. TellMeWhen is...
 
 [size="5"]Flexible[/size]
 
@@ -14,15 +14,13 @@ Icons can track any of the following things:
 [*]Cooldowns
 [*]Buffs/Debuffs
 [*]Reactive abilities
-[*]Multi-state abilities
 [*]Temporary weapon enchants
-[*]Totems/Wild mushrooms/Ghouls/Lightwell
+[*]Totems
 [*]Rune cooldowns
 [*]Internal cooldowns
 [*]Others' cooldowns
 [*]Diminishing returns
 [*]Spell casts
-[*]Loss of Control effects
 [*]...And any combination of over 110 other things with easy-to-use [url="http://wow.curseforge.com/addons/tellmewhen/images/29"]conditions[/url].
 [/list]
 
@@ -84,7 +82,7 @@ All TellMeWhen icons belong to a parent group. Each of these groups have many se
 [list]
 [*][b]Make sure that TellMeWhen is not in configuration mode. Type '/tmw' to toggle configuration mode on and off.[/b]
 [*]The most common problem people encounter is caused by not entering the name correctly during configuration. Make sure you enter names EXACTLY as they are named when you mouse over them. For buffs this is often different from the ability/totem/trinket/enchant/[b]talent[/b] which casts the buff, so be sure to check. Known buffs and debuffs are shown as a dark purple or a warrior brown color in the suggestion list.
-[*]If the name of the ability does not work properly, use the SpellID. SpellIDs can be found by looking at the suggestion list that pops up as you begin typing in the name, or by finding the ability on a site such as [url="http://www.wowhead.com"]Wowhead[/url]. The spellID is in the url, for example: [font="monospace"]www.wowhead.com/spell=[b]53351[/b][/font]
+[*]If the name of the ability does not work properly, use the SpellID. SpellIDs can be found by looking at the suggestion list that pops up as you begin typing in the name, or by finding the ability on a site such as [url="http://classic.wowhead.com"]Wowhead[/url]. The spellID is in the url, for example: [font="monospace"]classic.wowhead.com/spell=[b]53351[/b][/font]
 [*]Check the settings of the icon's group.
 [*]Check the icon's settings in the other tabs of the icon editor.
 [/list]
