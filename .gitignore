@@ -1,2 +1,7 @@
 __pycache__
 .release
+
+# Script-generated:
+CHANGELOG.short.md
+gh-release.pkgmeta
+readme.bbcode.txt

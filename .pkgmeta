@@ -56,7 +56,6 @@ ignore:
     - build
     - Documentation
     - README.md
-    - CHANGELOG.txt
     - Localization/TellMeWhen-itIT.lua
     - Localization/TellMeWhen-frFR.lua
     - Localization/TellMeWhen-deDE.lua

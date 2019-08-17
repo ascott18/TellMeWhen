@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Copies the changelog to a format that can be loaded into WoW and displayed in-game
 
