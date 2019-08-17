@@ -15,6 +15,24 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
+local wow_classic = WOW_PROJECT_ID and WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+if wow_classic then
+	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
+		-- This is not localizable, because AceLocale might not have loaded
+		-- (this is why we don't bother to load AceLocale until after these checks).
+		text = "You've installed TellMeWhen for retail WoW, but this is Classic WoW. Please double-check which version of TMW you downloaded.", 
+		button1 = EXIT_GAME,
+		button2 = CANCEL,
+		OnAccept = ForceQuit,
+		timeout = 0,
+		showAlert = true,
+		whileDead = true,
+		preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+	}
+	StaticPopup_Show("TMW_PROJECT_MISMATCH")
+	return
+end
+
 TELLMEWHEN_VERSION = "8.6.7"
 
 TELLMEWHEN_VERSION_MINOR = ""
