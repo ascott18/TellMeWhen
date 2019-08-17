@@ -8,7 +8,7 @@
 # 
 #  Currently maintained by
 #  Cybeloras of Aerie Peak
-#  --------------------
+#  -------------------- 
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
