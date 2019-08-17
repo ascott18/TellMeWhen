@@ -32,7 +32,7 @@ externals:
     Lib/LibBabble-Race-3.0: svn://svn.wowace.com/wow/libbabble-race-3-0/mainline/trunk
 
 optional-dependencies:
-    - buttonfacade
+    - masque
     - omni-cc
     - tullacc
     - libdatabroker-1-1
@@ -42,7 +42,7 @@ manual-changelog:
     markup-type: markdown
 
 license-output: LICENSE.txt
-enable-nolib-creation: yes
+enable-nolib-creation: no
 
 move-folders:
     TellMeWhen/TellMeWhen_Options: TellMeWhen_Options
@@ -53,6 +53,7 @@ ignore:
     - Options/scrapper.lua
     - Options/USEDLOCALE.lua
     - Scripts
+    - build
     - Documentation
     - README.md
     - CHANGELOG.txt
