@@ -682,6 +682,7 @@ local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED()
 		-- castsForGUID[spellName] = spellID
 		castsForGUID[spellName] = (castsForGUID[spellName] or 0) + 1
 		TMW:Fire("TMW_CNDT_CASTCOUNT_UPDATE")
+		TMW:Fire("TMW_CNDT_CASTCOUNT_UPDATE")
 	
 	elseif cleuEvent == "UNIT_DIED" then
 		if destFlags then

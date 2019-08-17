@@ -1,0 +1,32 @@
+
+trigger:
+- master
+
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- checkout: self
+  submodules: true
+
+- bash: sudo apt-get install -y pandoc
+  displayName: "Install Packages"
+
+- bash: sudo chmod +x ./build/create-lua-changelog.sh && ./build/create-lua-changelog.sh
+  displayName: "Build Changelog"
+  workingDirectory: $(Build.SourcesDirectory)
+
+- bash: sudo chmod +x ./release.sh && ./release.sh
+  displayName: "Package and Upload"
+  workingDirectory: $(Build.SourcesDirectory)/build/lib/packager
+  env:
+    CF_API_KEY: $(CF_API_KEY)
+    WOWI_API_TOKEN: $(WOWI_API_TOKEN)
+    GITHUB_OAUTH: $(GITHUB_OAUTH)
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: $(Build.SourcesDirectory)/.release/
+    artifactName: release
