@@ -1,4 +1,6 @@
 
+name: "TellMeWhen Classic"
+
 trigger:
 - classic
 
