@@ -19,7 +19,7 @@ steps:
   submodules: true
 
 - bash: printenv | sort
-  displayName: "Dump Vars"
+  displayName: "Dump Vars "
 
 - bash: sudo apt-get install -y pandoc
   displayName: "Install Packages"
