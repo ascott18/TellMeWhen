@@ -29,4 +29,9 @@ done <$INPUT >>$OUTPUT
 
 echo "Wrote changelog up to $max_versions versions to $OUTPUT";
 
+# `git add`ing this is required to make the packager not exclude it.
+echo 
+echo git add $OUTPUT
+git add $OUTPUT 2> /dev/null
+
 exit 0
