@@ -25,18 +25,18 @@ Icons can track any of the following things:
 *   Others' cooldowns
 *   Diminishing returns
 *   Spell casts
-*   ...And any combination of over 110 other things with easy-to-use [conditions](http://wow.curseforge.com/addons/tellmewhen/images/29).
+*   ...And any combination of over 110 other things with easy-to-use conditions.
 
 ## Customizable
 
 *   Icons can be set to show or hide based on the status of their basic element and their usability based on range, duration, stacks, and resources.
-*   All icons can show the standard cooldown animation to display their status, and are compatible with [OmniCC](http://www.curse.com/addons/wow/omni-cc).
-*   There are over 110 [conditions](http://wow.curseforge.com/addons/tellmewhen/images/29) that can be configured to make an icon show only under very specific or very general circumstances.
-*   You can [set a sound to play](http://wow.curseforge.com/addons/tellmewhen/images/19-sounds/) when important attributes of an icon change.
-*   You can also [set text to be announced/displayed](http://wow.curseforge.com/addons/tellmewhen/images/20-text-output/) when an icon's attributes change.
+*   All icons can show the standard cooldown animation to display their status, and are compatible with OmniCC.
+*   There are over 110 conditions that can be configured to make an icon show only under very specific or very general circumstances.
+*   You can set a sound to play when important attributes of an icon change.
+*   You can also set text to be announced/displayed when an icon's attributes change.
 *   Icons can show at different transparency levels based upon the usability/existence of what they are checking.
 *   Icons can show status bars on top of them, indicating the required resources and their remaining cooldown/duration in a different way.
-*   Icons can be skinned with [Masque](http://www.curse.com/addons/wow/masque) (formerly ButtonFacade).
+*   Icons can be skinned with Masque (formerly ButtonFacade).
 
 * * *
 
@@ -45,7 +45,7 @@ Icons can track any of the following things:
 
 To lock and unlock TellMeWhen, type "/tmw" or "/tellmewhen".
 
-When you first log in with TellMeWhen installed, you will see one group of four icons in the center of your screen. To begin using TellMeWhen, right-click on one of these icons, and the [icon editor](http://wow.curseforge.com/addons/tellmewhen/images/18-the-icon-editor/) will appear. You need to select an icon type from the dropdown menu and enable the icon, and then configure the icon to suit your needs based on the settings that are available. An explanation of what most settings do can be found in the tooltip displayed when you mouse over a setting.
+When you first log in with TellMeWhen installed, you will see one group of four icons in the center of your screen. To begin using TellMeWhen, right-click on one of these icons, and the icon editor will appear. You need to select an icon type from the dropdown menu and enable the icon, and then configure the icon to suit your needs based on the settings that are available. An explanation of what most settings do can be found in the tooltip displayed when you mouse over a setting.
 
 You can also drag spells from your spellbook, your pet's spellbook, or items from your inventory to quickly set up a cooldown icon for that spell/item. Icons can be spatially manipulated by holding down the right mouse button and dragging them around. When they are dropped on another icon, a menu will appear asking you what you want to do with the icon - Options include Move, Copy, and Swap.
 
