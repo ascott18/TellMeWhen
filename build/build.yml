@@ -19,7 +19,17 @@ steps:
   submodules: true
 
 - bash: printenv | sort
-  displayName: "Dump Vars "
+  displayName: "Dump Vars"
+
+# Prevent double packaging when a branch and a tag both trigger a build.
+- bash: |
+    if [[ "$BUILD_SOURCEBRANCH" = "refs/heads/"* ]] && [ -n "$( git -C "$BUILD_SOURCESDIRECTORY" tag --points-at )" ]; then
+      echo "Build appears to be a branch trigger, but the head is tagged. Stopping Job."
+      echo
+      echo "##vso[task.setvariable variable=agent.jobstatus;]canceled"
+      echo "##vso[task.complete result=Canceled;]DONE"
+    fi
+  displayName: "Prevent Duplicate Builds"
 
 - bash: sudo apt-get install -y pandoc
   displayName: "Install Packages"
