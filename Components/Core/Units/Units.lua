@@ -92,10 +92,17 @@ function TMW:GetUnits(icon, setting, Conditions)
 		for i, ConditionObject in ipairs(UnitSet.ConditionObjects) do
 			ConditionObject:RequestAutoUpdates(UnitSet, true)
 		end
+
+		-- Register for state changes AFTER requesting updates.
+		-- Requesting updates will trigger checks on all the objects.
+		-- We don't want each check to update the unit set one by one.
+		-- We'll update after they're all registered.
 		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", UnitSet)
 	end
-	
-	
+
+	-- Perform an update now that all of the conditions (if any) are in their initial state.
+	UnitSet:Update()
+
 	return UnitSet.exposedUnits, UnitSet
 end
 
@@ -106,7 +113,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		return unitsWithExistsEvent[unit] or UnitExists(unit)
 	end,
 
-	OnNewInstance = function(self, unitSettings, Conditions, parent)		
+	OnNewInstance = function(self, unitSettings, Conditions, parent)
 		self.Conditions = Conditions
 		self.parent = parent
 		
@@ -254,25 +261,29 @@ local UnitSet = TMW:NewClass("UnitSet"){
 					:gsub("%-%-", "-")
 					:trim("-")
 				end
-				
+
 				-- Modifications are done. Construct the ConditionObject
 				local ConditionObject = ConditionObjectConstructor:Construct()
-				
+
 				if ConditionObject then
 					self.ConditionObjects = self.ConditionObjects or {}
 					self.ConditionObjects[k] = ConditionObject
 					self.ConditionObjects[ConditionObject] = k
 				end
 			end
-		end		
-		
+		end
+
 		for event in pairs(self.updateEvents) do
 			UNITS:RegisterEvent(event, "OnEvent")
 		end
 
+		-- This call will end up being redundant
+		-- with the update done in TMW:GetUnits(), 
+		-- but I'm leaving it here in case anyone
+		-- was manually creating a UnitSet.
 		self:Update()
 	end,
-	
+
 	TMW_CNDT_OBJ_PASSING_CHANGED = function(self, event, ConditionObject, failed)
 		if self.ConditionObjects[ConditionObject] then
 			self:Update()

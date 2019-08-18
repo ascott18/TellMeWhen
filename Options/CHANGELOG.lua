@@ -3,6 +3,13 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v8.6.9
+### Bug Fixes
+* Fixed an issue with Unit Conditions where the initial state of the conditions sometimes wouldn't be taken into account.
+
+## v8.6.8
+* Classic: Fixed the logic for checking if the client is Classic or Retail.
+
 ## v8.6.7
 * Added an Inset option to the border for both Bar and Icon views.
 
