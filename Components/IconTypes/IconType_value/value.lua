@@ -87,19 +87,6 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 		{ order = 3,  id = Enum.PowerType.Energy, name = ENERGY, },
 		{ order = 4,  id = Enum.PowerType.ComboPoints, name = COMBO_POINTS, },
 		{ order = 5,  id = Enum.PowerType.Focus, name = FOCUS, },
-		{ order = 6,  id = Enum.PowerType.RunicPower, name = RUNIC_POWER, },
-		{ order = 7,  id = Enum.PowerType.SoulShards, name = SOUL_SHARDS_POWER, },
-		{ order = 8,  id = Enum.PowerType.HolyPower, name = HOLY_POWER, },
-		{ order = 9,  id = Enum.PowerType.Chi, name = CHI_POWER; },
-		{ order = 10,  id = Enum.PowerType.Maelstrom, name = MAELSTROM_POWER, },
-		{ order = 11,  id = Enum.PowerType.ArcaneCharges, name = ARCANE_CHARGES_POWER, },
-		{ order = 12,  id = Enum.PowerType.LunarPower, name = LUNAR_POWER, },
-		{ order = 13,  id = Enum.PowerType.Insanity, name = INSANITY_POWER, },
-		{ order = 14,  id = Enum.PowerType.Fury, name = FURY, },
-		{ order = 15,  id = Enum.PowerType.Pain, name = PAIN, },
-	    { order = 16,  id = Enum.PowerType.Alternate, name = L["CONDITIONPANEL_ALTPOWER"], },
-
-	    { order = 17,  id = -3, name = STAGGER, },
 	}
 
 
@@ -195,8 +182,6 @@ local function Value_OnUpdate(icon, time)
 			local value, maxValue, valueColor
 			if PowerType == -1 then
 				value, maxValue, valueColor = UnitHealth(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
-			elseif PowerType == -3 then
-				value, maxValue, valueColor = UnitStagger(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
 			else
 				if PowerType == -2 then
 					PowerType = UnitPowerType(unit)
