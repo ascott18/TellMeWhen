@@ -6,6 +6,9 @@ TMW.CHANGELOG = [==[
 ## v8.6.9
 ### Bug Fixes
 * Fixed an issue with Unit Conditions where the initial state of the conditions sometimes wouldn't be taken into account.
+* Changed the Slowed equivalency to track Crippling Poison by ID to prevent it from picking up the Rogue buff by the same name.
+* When scrolling with the mousewheel, sliders that happen to land under your mouse will no longer be adjusted as long as your cursor does not move.
+* Classic: Fixed the Tracking Active condition.
 
 ## v8.6.8
 * Classic: Fixed the logic for checking if the client is Classic or Retail.
