@@ -99,19 +99,31 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 local TrackingCache = {}
+for _, id in pairs{
+	2580, -- Find Minerals
+	2383, -- Find Herbs
+	1494, -- Track Beasts
+	19878, -- Track Demons
+	19879, -- Track Dragonkin
+	19880, -- Track Elementals
+	19882, -- Track Giants
+	19885, -- Track Hidden
+	5225, -- Track Humanoids (druid)
+	19883, -- Track Humanoids
+	19884, -- Track Undead
+} do
+	local name = GetSpellInfo(id)
+	TrackingCache[id] = strlower(name)
+end
+
 function Module:Table_Get()
-	for i = 1, GetNumTrackingTypes() do
-		local name, _, active = GetTrackingInfo(i)
-		TrackingCache[i] = strlower(name)
-	end
-	
 	return TrackingCache
 end
 function Module:Table_GetSorter()
 	return nil
 end
 function Module:Entry_AddToList_1(f, id)
-	local name, texture = GetTrackingInfo(id)
+	local name, _, texture = GetSpellInfo(id)
 
 	f.Name:SetText(name)
 	f.ID:SetText(nil)

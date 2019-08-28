@@ -25,8 +25,8 @@ local _, pclass = UnitClass("Player")
 
 local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
-local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo = 
-	  GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo
+local GetPetActionInfo = 
+	  GetPetActionInfo
 	  
 	  
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], false, false)
@@ -226,11 +226,16 @@ ConditionCategory:RegisterSpacer(15.5)
 
 
 Env.Tracking = {}
+local Parser, LT1 = TMW:GetParser()
 function CNDT:MINIMAP_UPDATE_TRACKING()
 	wipe(Env.Tracking)
-	for i = 1, GetNumTrackingTypes() do
-		local name, _, active = GetTrackingInfo(i)
-		Env.Tracking[strlower(name)] = active and 1 or nil
+	Parser:SetOwner(UIParent, "ANCHOR_NONE")
+	Parser:SetTrackingSpell()
+	local text = LT1:GetText() or ""
+	Parser:Hide()
+
+	if text and text ~= "" then
+		Env.Tracking[strlower(text)] = 1
 	end
 end
 ConditionCategory:RegisterCondition(16,	 "TRACKING", {

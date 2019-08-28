@@ -153,7 +153,8 @@ TMW.BE = {
 		},
 		DamageShield = {
 			    -17, -- Power Word: Shield                  (priest, disc/shadow)
-			 -11426, -- Ice Barrier                         (mage, frost)
+			 -11426, -- Ice Barrier                         (mage)
+			  -1463, -- Mana Shield                         (mage)
 		},
 		ImmuneToMagicCC = {
 			    642, -- Divine Shield                       (paladin, general)
