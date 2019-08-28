@@ -102,6 +102,7 @@ local TrackingCache = {}
 for _, id in pairs{
 	2580, -- Find Minerals
 	2383, -- Find Herbs
+	2481, -- Find Treasure
 	1494, -- Track Beasts
 	19878, -- Track Demons
 	19879, -- Track Dragonkin
