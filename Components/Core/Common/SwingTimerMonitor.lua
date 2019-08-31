@@ -33,6 +33,8 @@ local strsub, pairs
 local UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 	= UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 
+local strlowerCache = TMW.strlowerCache
+
 -- Module creation
 TMW.COMMON.SwingTimerMonitor = CreateFrame("Frame")
 
@@ -49,43 +51,64 @@ SwingTimerMonitor.DualWield = nil
 SwingTimerMonitor.Latency = 0
 SwingTimerMonitor.Initialized = false
 
+local pGUID
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	pGUID = UnitGUID("player")
+end)
 
 
 -- ---------------------------------
 -- Swing update functions
 -- ---------------------------------
 
-local function MainHandEvent()
-	local _, event, _, src_guid = CombatLogGetCurrentEventInfo()
+local swingSpells = {
+	[strlowerCache[GetSpellInfo(78)]] = 1, -- Heroic Strike
+	[strlowerCache[GetSpellInfo(845)]] = 1, -- Cleave
+	[strlowerCache[GetSpellInfo(6807)]] = 1, -- Maul
+	[strlowerCache[GetSpellInfo(2973)]] = 1, -- Raptor Strike
+}
 
-	if strsub(event, 1, 5) == "SWING" and src_guid == UnitGUID("player") then
-		SwingTimers[MAINHAND_SLOT]:Start()
+local function MainHandEvent()
+	local _, event, _, src_guid, _, _, _, _, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
+
+	if src_guid == pGUID then
+		local firstFive = strsub(event, 1, 5)
+		if firstFive == "SWING" then
+			SwingTimers[MAINHAND_SLOT]:Start()
+		elseif firstFive == "SPELL" and spellName and swingSpells[strlowerCache[spellName]] then
+			SwingTimers[MAINHAND_SLOT]:Start()
+		end
 	end
 end
 
 local function DualWieldEvent()
-	local _, event, _, src_guid = CombatLogGetCurrentEventInfo()
+	local _, event, _, src_guid, _, _, _, _, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 
 	-- Dual wield is done all funky like this because
 	-- the combat log doesn't distinguish between MH and OH hits.
 	-- we have to guess at what weapon it was that was hit based on the current swing timers.
-	if strsub(event, 1, 5) == "SWING" and src_guid == UnitGUID("player") then
-		
-		for slot, frame in pairs(SwingTimers) do
-			frame:CheckTime()
-		end
-		
-		-- This handles the case when lag throws timers out of sync.
-		-- Both timers get reset, and they should work themselves out within a few swings
-		if SwingTimers[MAINHAND_SLOT].active and SwingTimers[OFFHAND_SLOT].active then
-			SwingTimers[MAINHAND_SLOT].active = false
-			SwingTimers[OFFHAND_SLOT].active = false
-		end
-			
-		if SwingTimers[MAINHAND_SLOT].active then
-			SwingTimers[OFFHAND_SLOT]:Start()
-		else
+	if src_guid == pGUID then
+		local firstFive = strsub(event, 1, 5)
+		if firstFive == "SPELL" and spellName and swingSpells[strlowerCache[spellName]] then
 			SwingTimers[MAINHAND_SLOT]:Start()
+		elseif firstFive == "SWING" then
+
+			for slot, frame in pairs(SwingTimers) do
+				frame:CheckTime()
+			end
+			
+			-- This handles the case when lag throws timers out of sync.
+			-- Both timers get reset, and they should work themselves out within a few swings
+			if SwingTimers[MAINHAND_SLOT].active and SwingTimers[OFFHAND_SLOT].active then
+				SwingTimers[MAINHAND_SLOT].active = false
+				SwingTimers[OFFHAND_SLOT].active = false
+			end
+				
+			if SwingTimers[MAINHAND_SLOT].active then
+				SwingTimers[OFFHAND_SLOT]:Start()
+			else
+				SwingTimers[MAINHAND_SLOT]:Start()
+			end
 		end
 			
 	end
