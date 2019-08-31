@@ -338,7 +338,7 @@ Aura = TMW:NewClass("Aura"){
 			end
 		end
 
-		self.duration = duration or TMW:GetAuraDuration(spellID) or FALLBACK_DURATION
+		self.duration = duration or FALLBACK_DURATION
 	end,
 
 	Remaining = function(self)

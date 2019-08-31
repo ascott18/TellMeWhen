@@ -92,7 +92,7 @@ ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	min = 0,
 	max = 5,
 	unit = PLAYER,
-	name = function(editbox) 
+	name = function(editbox)
 		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
 		editbox:SetLabel(L["SPELLTOCHECK"])
 	end,

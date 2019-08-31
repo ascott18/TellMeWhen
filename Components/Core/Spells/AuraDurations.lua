@@ -20,8 +20,8 @@ local print = TMW.print
 local rawget, next, setmetatable
     = rawget, next, setmetatable
 
-local UnitAura, UnitGUID, CombatLogGetCurrentEventInfo
-    = UnitAura, UnitGUID, CombatLogGetCurrentEventInfo
+local UnitAura, UnitGUID, CombatLogGetCurrentEventInfo, IsPlayerSpell, UnitIsFriend
+    = UnitAura, UnitGUID, CombatLogGetCurrentEventInfo, IsPlayerSpell, UnitIsFriend
 
 local strlowerCache = TMW.strlowerCache
 
@@ -605,10 +605,127 @@ local AuraDurations = {
     [301100]=3,[301101]=3,
 }
 
-function TMW:GetAuraDuration(spellID)
-    return AuraDurations[spellID]
+local talentMods = {
+    -- {
+    --     talents = { <talent spellIDs> },
+    --     durationMod = <duration mod per learned rank>,
+    --     auras = { <affected aura spellIDs> },
+    -- }
+
+    -- Improved Shadow Word: pain
+    {
+        talents = { 15275, 15317 },
+        durationMod = 3,
+        auras = { 589, 594, 970, 992, 2767, 10892, 10893, 10894 },
+    },
+
+    -- Brutal Impact
+    {
+        talents = { 16940, 16941 },
+        durationMod = 0.5,
+        auras = { 5211, 6798, 8983, 9005, 9823, 9827 },
+    },
+
+    -- Booming Voice (against Battle Shout)
+    {
+        talents = { 12321, 12835, 12836, 12837, 12838 },
+        durationMod = 12,
+        auras = { 5242, 6192, 6673, 11549, 11550, 11551, 25289 },
+    },
+
+    -- Booming Voice (against Demo Shout)
+    {
+        talents = { 12321, 12835, 12836, 12837, 12838 },
+        durationMod = 3,
+        auras = { 1160, 6190, 11554, 11555, 11556 },
+    },
+
+    -- Improved Disarm
+    {
+        talents = { 12313, 12804, 12807 },
+        durationMod = 1,
+        auras = { 676 },
+    },
+
+    -- Improved Gouge
+    {
+        talents = { 13741, 13793, 13792 },
+        durationMod = 0.5,
+        auras = { 1776, 1777, 8629, 11285, 11286 },
+    },
+
+    -- Improved Succubus (against Seduction)
+    {
+        talents = { 18754, 18755, 18756 },
+        durationMod = 2,
+        auras = { 6358 },
+    },
+
+    -- Lasting Judgement
+    {
+        talents = { 20359, 20360, 20361 },
+        durationMod = 10,
+        auras = { 20185, 20344, 20345, 20346, 20186, 20354, 20355 },
+    },
+
+    -- Clever Traps (against Freezing Trap rank 1)
+    {
+        talents = { 19239, 19245 },
+        durationMod = 1.5,
+        auras = { 3355 },
+    },
+
+    -- Clever Traps (against Freezing Trap rank 2)
+    {
+        talents = { 19239, 19245 },
+        durationMod = 2.25,
+        auras = { 14308 },
+    },
+
+    -- Clever Traps (against Freezing Trap rank 3)
+    {
+        talents = { 19239, 19245 },
+        durationMod = 3,
+        auras = { 14309 },
+    },
+
+    -- Permafrost
+    {
+        talents = { 11175, 12569, 12571 },
+        durationMod = 3,
+        auras = {
+            120, 8492, 10159, 10160, 10161, -- Cone of Cold
+            6136, 7321, -- Frost Armor
+            116, 205, 837, 7322, 8406, 8407, 8408, 10179, 10180, 10181, 25304 -- Frostbolt
+        },
+    },
+}
+
+-- Transform raw talent data to a fast lookup structure
+local auraTalentMods = {}
+local talentsThatMod = {}
+for _, mod in pairs(talentMods) do
+    for _, spellID in pairs(mod.auras) do
+        if auraTalentMods[spellID] then
+            error("talentMods currently doesn't support multiple mods for one aura. SpellID: " + spellID)
+        end
+        auraTalentMods[spellID] = mod
+    end
+    for _, spellID in pairs(mod.talents) do
+        talentsThatMod[spellID] = true
+    end
+    mod.maxDurationMod = mod.durationMod * #mod.talents
 end
 
+local learnedTalents = {}
+local function updateLearnedTalents()
+    wipe(learnedTalents)
+    for id in pairs(talentsThatMod) do
+        if IsPlayerSpell(id) then
+            learnedTalents[id] = true
+        end
+    end
+end
 
 local targets = setmetatable({}, {__index = function(t, k)
 	local n = setmetatable({}, {__index = function(t, k)
@@ -622,6 +739,7 @@ end})
 
 local pGUID
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+    updateLearnedTalents()
 	pGUID = UnitGUID("player")
 end)
 
@@ -634,6 +752,7 @@ frame:SetScript("OnEvent", function(self, event)
         
         if (
             cleuEvent == "SPELL_AURA_APPLIED"
+            or cleuEvent == "SPELL_AURA_APPLIED_DOSE"
             or cleuEvent == "SPELL_AURA_REFRESH"
             -- or cleuEvent == "SPELL_PERIODIC_DAMAGE"
             -- or cleuEvent == "SPELL_PERIODIC_HEAL"
@@ -682,13 +801,41 @@ function TMW.UnitAura(unit, index, filter, unitGUID)
             unitGUID or UnitGUID(unit),
             caster and UnitGUID(caster) or nil,
             name,
-            true -- source will never be the player in this context, so skip the player's data when the caster is unknown
+            -- If the source is unknown (i.e. no GUID, i.e. 'caster' was nil),
+            -- source was definitely not "player", so skip the player's data if the caster is unknown
+            true
         )
         if applied > 0 then
-            duration = TMW:GetAuraDuration(id) or 0
+            duration = AuraDurations[id] or 0
             if duration > 0 then
-                -- Duration will be 0 if the spell actually has no duration.
-                -- Don't set the expiration, since the expiration should be 0 for no-duration auras.
+
+                -- Apply talent mods
+                local talentMod = auraTalentMods[id]
+                if talentMod then
+                    if caster == "player" then
+                        local talents = talentMod.talents
+                        for talIdx = 1, #talents do
+                            if learnedTalents[talents[talIdx]] then
+                                duration = duration + talentMod.durationMod
+                            end
+                        end
+                    else
+                        -- The idea is to assume the worst in all cases.
+                        -- Assume long buffs and short debuffs on enemies
+                        -- Assume short buffs and long debuffs on friendlies
+
+                        local debuff = filter == "HARMFUL" or filter == "HARMFUL|PLAYER"
+                        local friendly = UnitIsFriend("player", unit)
+
+                        -- Shortened logic of ((debuff and friendly) or (not debuff and not friendly))
+                        --                    (long debuff on friend)   (long buff on enemy)
+                        if debuff == friendly then
+                            duration = duration + talentMod.maxDurationMod
+                        end
+                    end
+                end
+
+                -- We only set the expiration if duration > 0, since the expiration should be 0 for no-duration auras.
                 expirationTime = applied + duration
             end
         end
