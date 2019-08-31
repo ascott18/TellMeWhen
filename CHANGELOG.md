@@ -1,6 +1,7 @@
 ## v8.6.9
 * Classic: Aura durations now account for learned talents.
 * Classic: Swing Timer now accounts for next-swing abilities.
+* Classic: Added Spell Queued condition (for Heroic Strike & other next-attack abilities)
 
 ### Bug Fixes
 * Fixed an issue with Unit Conditions where the initial state of the conditions sometimes wouldn't be taken into account.
