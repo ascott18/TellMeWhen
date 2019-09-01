@@ -1103,7 +1103,7 @@ CScriptProvider = TMW:NewClass("CScriptProvider"){
 	end,
 
 	CScriptRemoveAll = function(self)
-		self.__CScripts = null
+		self.__CScripts = nil
 	end,
 
 	CScriptCall = function(self, script, ...)
