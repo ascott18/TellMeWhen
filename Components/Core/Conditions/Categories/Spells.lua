@@ -572,37 +572,33 @@ end
 
 ConditionCategory:RegisterSpacer(30)
 
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+local UnitCastingInfo, UnitChannelInfo = TMW.UnitCastingInfo, TMW.UnitChannelInfo
 Env.UnitCast = function(unit, level, matchname)
-	local name, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
+	local name = UnitCastingInfo(unit)
 	if not name then
-		name, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
+		name = UnitChannelInfo(unit)
 	end
 	name = strlowerCache[name]
 	if matchname == "" and name then
 		matchname = name
 	end
-	if level == 0 then -- only interruptible
-		return not notInterruptible and name == matchname
-	elseif level == 1 then -- present
+	if level == 0 or level == 1 then -- present
 		return name == matchname
 	else -- absent
 		return name ~= matchname
 	end
 end
 Env.UnitCastTime = function(unit, level, matchname)
-	local name, _, _, _, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+	local name, _, _, _, endTime = UnitCastingInfo(unit)
 	if not name then
-		name, _, _, _, endTime, _, notInterruptible = UnitChannelInfo(unit)
+		name, _, _, _, endTime = UnitChannelInfo(unit)
 	end
 	name = strlowerCache[name]
 	if matchname == "" and name then
 		matchname = name
 	end
 	local remaining = endTime and endTime/1000 - TMW.time or 0
-	if level == 0 then -- only interruptible
-		return not notInterruptible and name == matchname and remaining or 0
-	elseif level == 1 then -- present
+	if level == 0 or level == 1 then -- present
 		return name == matchname and remaining or 0
 	else -- absent
 		return name ~= matchname and remaining or 0
@@ -610,12 +606,12 @@ Env.UnitCastTime = function(unit, level, matchname)
 end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
-	min = 0,
+	min = 1,
 	max = 2,
 	levelChecks = true,
 	nooperator = true,
 	texttable = {
-		[0] = L["CONDITIONPANEL_INTERRUPTIBLE"],
+		-- [0] = L["CONDITIONPANEL_INTERRUPTIBLE"],
 		[1] = L["ICONMENU_PRESENT"],
 		[2] = L["ICONMENU_ABSENT"],
 	},
@@ -628,21 +624,12 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	useSUG = true,
 	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameString))]], -- LOWER is some gsub magic
 	events = function(ConditionObject, c)
-		-- holy shit... need i say more?
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_START", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_STOP", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_SUCCEEDED", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_FAILED", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_FAILED_QUIET", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_DELAYED", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTED", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
+			
+			-- We can't check against the unit here because LibClassicCasterino's events don't
+			-- work like the blizzard events do - they don't fire with every valid unitID.
+			ConditionObject:GenerateNormalEventString("TMW_UNIT_CAST_UPDATE" --[[, CNDT:GetUnit(c.Unit)]])
 	end,
 })
 

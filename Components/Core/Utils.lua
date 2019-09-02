@@ -1642,6 +1642,47 @@ function TMW.GetCurrentSpecializationRole()
 	return role
 end
 
+
+
+-- Cast info
+
+local LibClassicCasterino = LibStub("LibClassicCasterino")
+local UnitIsUnit, CastingInfo, ChannelInfo
+	= UnitIsUnit, CastingInfo, ChannelInfo
+
+local castEventHandler = function(event, unit)
+	TMW:Fire("TMW_UNIT_CAST_UPDATE", unit)
+end
+
+-- TODO: Do we need to also register the game's UNIT_SPELLCAST_SUCCEEDED and UNIT_SPELLCAST_FAILED_QUIET? Casterino doesn't provide them.
+LibClassicCasterino:RegisterCallback("UNIT_SPELLCAST_START", castEventHandler)
+LibClassicCasterino:RegisterCallback("UNIT_SPELLCAST_DELAYED", castEventHandler)
+LibClassicCasterino:RegisterCallback("UNIT_SPELLCAST_STOP", castEventHandler)
+LibClassicCasterino:RegisterCallback("UNIT_SPELLCAST_FAILED", castEventHandler)
+LibClassicCasterino:RegisterCallback("UNIT_SPELLCAST_INTERRUPTED", castEventHandler)
+LibClassicCasterino:RegisterCallback("UNIT_SPELLCAST_CHANNEL_START", castEventHandler)
+LibClassicCasterino:RegisterCallback("UNIT_SPELLCAST_CHANNEL_UPDATE", castEventHandler)
+LibClassicCasterino:RegisterCallback("UNIT_SPELLCAST_CHANNEL_STOP", castEventHandler)
+
+function TMW.UnitCastingInfo(unit)
+	if unit == "player" or UnitIsUnit(unit, "player") then
+		return CastingInfo()
+	else
+		return LibClassicCasterino:UnitCastingInfo(unit)
+	end
+end
+function TMW.UnitChannelInfo(unit)
+	if unit == "player" or UnitIsUnit(unit, "player") then
+		return ChannelInfo()
+	else
+		return LibClassicCasterino:UnitChannelInfo(unit)
+	end
+end
+
+
+
+
+
 do	-- TMW:GetParser()
 	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
 	function TMW:GetParser()

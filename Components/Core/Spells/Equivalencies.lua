@@ -93,6 +93,7 @@ TMW.BE = {
 		},
 		Slowed = {
 			   -116, -- Frostbolt                           (mage, frost)
+			   -120, -- Cone of Cold                        (mage, frost)
 			  -1715, -- Hamstring                           (warrior, arms)
 			   2120, -- Flamestrike                         (mage, fire)
 			   
@@ -114,6 +115,7 @@ TMW.BE = {
 			   -853, -- Hammer of Justice                   (paladin, general)
 			  -1833, -- Cheap Shot                          (rogue, general)
 			   5211, -- Mighty Bash                         (druid, PVE talent, general)
+			  12809, -- Concussion Blow                     (warrior)
 			  24394, -- Intimidation                        (hunter, beast mastery/surival)
 			 -20549, -- War Stomp                           (tauren racial)
 			  22703, -- Infernal Awakening                  (warlock, destro)

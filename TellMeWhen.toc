@@ -30,11 +30,11 @@
 ## Notes-ruRU: Визуальные, звуковые и текстовые оповещения о готовности заклинаний, способностей, наличии баффов\дебаффов и многого другого.
 ## Notes-esES: Proporciona notificaciones visuales, auditivas y textuales sobre tiempos de reutilización, ventajas y básicamente cualquier otra cosa. 
 
-## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0, ElvUI, DBM-Core, BigWigs
+## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0, ElvUI, DBM-Core, BigWigs, LibClassicCasterino
 # The per character settings are the old settings, but we still need them to upgrade to the new ones. If they aren't defined, then they will be deleted immediately
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB
-## X-Embeds: LibStub, Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0
+## X-Embeds: LibStub, Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, DRData-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0, LibClassicCasterino
 ## X-Category: Combat
 
 #@no-lib-strip@
@@ -59,6 +59,7 @@ Lib\LibSpellRange-1.0\lib.xml
 Lib\LibRangeCheck-2.0\LibRangeCheck-2.0.lua
 Lib\LibBabble-CreatureType-3.0\lib.xml
 Lib\LibBabble-Race-3.0\lib.xml
+Lib\LibClassicCasterino\LibClassicCasterino.lua 
 #@end-no-lib-strip@
 
 Localization\TellMeWhen-enUS.lua

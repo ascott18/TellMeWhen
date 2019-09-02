@@ -101,8 +101,8 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 end)
 
 
-local function ICD_OnEvent(icon, event, ...)
-	local valid, spellID, spellName, _
+local function ICD_OnEvent(icon, event, unit, _, spellID)
+	local valid, spellName, _
 
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local cevent, sourceGUID
@@ -118,12 +118,9 @@ local function ICD_OnEvent(icon, event, ...)
 			cevent == "SPELL_MISSED"
 		)
 
-	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
-		local unit
-		unit, _, spellID = ...
+	elseif unit == "player" and (event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START") then
 		spellName = GetSpellInfo(spellID)
-
-		valid = unit == "player"
+		valid = true
 	end
 
 	if valid then

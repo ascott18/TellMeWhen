@@ -17,8 +17,11 @@ local L = TMW.L
 local print = TMW.print
 local pairs, ipairs =
 	  pairs, ipairs
-local GetSpellInfo, UnitCastingInfo, UnitChannelInfo =
-	  GetSpellInfo, UnitCastingInfo, UnitChannelInfo
+local GetSpellInfo, UnitGUID =
+	  GetSpellInfo, UnitGUID
+
+local UnitCastingInfo = TMW.UnitCastingInfo
+local UnitChannelInfo = TMW.UnitChannelInfo
 
 local strlowerCache = TMW.strlowerCache
 
@@ -43,6 +46,7 @@ Type:UsesAttributes("state")
 Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("start, duration")
+Type:UsesAttributes("unit, GUID")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
@@ -53,8 +57,8 @@ Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 
 Type:RegisterIconDefaults{
-	-- True if the icon should only check interruptible casts.
-	Interruptible			= false,
+	-- The unit(s) to check for casts
+	Unit					= "player",
 
 	-- True if the icon should display blanks instead of the pocketwatch texture.
 	NoPocketwatch			= false,
@@ -66,6 +70,10 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "cast",
 })
 
+Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
+	implementsConditions = true,
+})
+
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 	[STATE_PRESENT]     = { order = 1, text = "|cFF00FF00" .. L["ICONMENU_PRESENT"], },
 	[STATE_ABSENTEACH]  = { order = 2, text = "|cFFFF0000" .. L["ICONMENU_ABSENTEACH"], tooltipText = L["ICONMENU_ABSENTEACH_DESC"]:format(L["ICONMENU_ABSENTONALL"]) },
@@ -75,10 +83,10 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CastSettings", function(self)
 	self:SetTitle(Type.name)
 	self:BuildSimpleCheckSettingFrame({
-		function(check)
-			check:SetTexts(L["ICONMENU_ONLYINTERRUPTIBLE"], L["ICONMENU_ONLYINTERRUPTIBLE_DESC"])
-			check:SetSetting("Interruptible")
-		end,
+		-- function(check)
+		-- 	check:SetTexts(L["ICONMENU_ONLYINTERRUPTIBLE"], L["ICONMENU_ONLYINTERRUPTIBLE_DESC"])
+		-- 	check:SetSetting("Interruptible")
+		-- end,
 		function(check)
 			check:SetTexts(L["ICONMENU_NOPOCKETWATCH"], L["ICONMENU_NOPOCKETWATCH_DESC"])
 			check:SetSetting("NoPocketwatch")
@@ -88,26 +96,10 @@ end)
 
 
 
--- The unit spellcast events that the icon will register.
--- We keep them in a table because there's a fuckload of them.
-local events = {
-	UNIT_SPELLCAST_START = true,
-	UNIT_SPELLCAST_STOP = true,
-	UNIT_SPELLCAST_SUCCEEDED = true,
-	UNIT_SPELLCAST_FAILED = true,
-	UNIT_SPELLCAST_FAILED_QUIET = true,
-	UNIT_SPELLCAST_DELAYED = true,
-	UNIT_SPELLCAST_INTERRUPTED = true,
-	UNIT_SPELLCAST_CHANNEL_START = true,
-	UNIT_SPELLCAST_CHANNEL_UPDATE = true,
-	UNIT_SPELLCAST_CHANNEL_STOP = true,
-}
-
-
 local function Cast_OnEvent(icon, event, arg1)
-	if events[event] and icon.UnitSet.UnitsLookup[arg1] then
-		-- A UNIT_SPELLCAST_ event
-		-- If the icon is checking the unit, schedule an update for the icon.
+	if event == "TMW_UNIT_CAST_UPDATE" --[[ and icon.UnitSet.UnitsLookup[arg1] ]] then
+		-- We can't check against the unit here because LibClassicCasterino's events don't
+		-- work like the blizzard events do - they don't fire with every valid unitID.
 		icon.NextUpdateTime = 0
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
@@ -118,40 +110,42 @@ end
 local function Cast_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local NameFirst, NameStringHash, Units, Interruptible =
-	icon.Spells.First, icon.Spells.StringHash, icon.Units, icon.Interruptible
+	local NameFirst, NameStringHash, Units =
+	icon.Spells.First, icon.Spells.StringHash, icon.Units
 
-	local unit = Units[1]
-	local GUID = UnitGUID(unit)
+	for u = 1, #Units do
+		local unit = Units[u]
+		local GUID = UnitGUID(unit)
 
-	if GUID then
+		if GUID then
 
-		local name, _, iconTexture, start, endTime, _, _, notInterruptible = CastingInfo()
-		-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
-		local reverse = false
+			local name, _, iconTexture, start, endTime, _, _ = UnitCastingInfo(unit)
+			-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
+			local reverse = false
 
-		-- There is no regular spellcast. Check for a channel.
-		if not name then
-			name, _, iconTexture, start, endTime, _, notInterruptible = ChannelInfo()
-			-- Channeled casts should reverse the timer sweep behavior.
-			reverse = true
-		end
-
-		if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
-			
-			-- Times reported by the cast APIs are in milliseconds for some reason.
-			start, endTime = start/1000, endTime/1000
-			local duration = endTime - start
-			icon.LastTextures[GUID] = iconTexture
-
-			if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse) then
-				-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-				return
+			-- There is no regular spellcast. Check for a channel.
+			if not name then
+				name, _, iconTexture, start, endTime, _ = UnitChannelInfo(unit)
+				-- Channeled casts should reverse the timer sweep behavior.
+				reverse = true
 			end
-		elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
-			if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
-				-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-				return
+
+			if name and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
+				
+				-- Times reported by the cast APIs are in milliseconds for some reason.
+				start, endTime = start/1000, endTime/1000
+				local duration = endTime - start
+				icon.LastTextures[GUID] = iconTexture
+
+				if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse) then
+					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+					return
+				end
+			elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
+				if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
+					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+					return
+				end
 			end
 		end
 	end
@@ -201,7 +195,7 @@ end
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
 	
-	icon.Units, icon.UnitSet = TMW:GetUnits(icon, "player")
+	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
 	icon.LastTextures = icon.LastTextures or {}
 
@@ -217,11 +211,7 @@ function Type:Setup(icon)
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 	
-		-- Register the UNIT_SPELLCAST_ events
-		for event in pairs(events) do
-			icon:RegisterEvent(event)
-		end
-	
+		TMW:RegisterCallback("TMW_UNIT_CAST_UPDATE", Cast_OnEvent, icon)
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Cast_OnEvent, icon)
 		icon:SetScript("OnEvent", Cast_OnEvent)
 	end

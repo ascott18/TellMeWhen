@@ -3,6 +3,12 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v8.7.0
+* Updated the Cast condition and icon type to use LibClassicCasterino for approximations of others' spell casts.
+
+### Bug Fixes
+* Classic: Fixed the Unit Class condition's options.
+
 ## v8.6.9
 * Classic: Aura durations now account for learned talents.
 * Classic: Swing Timer now accounts for next-swing abilities.
