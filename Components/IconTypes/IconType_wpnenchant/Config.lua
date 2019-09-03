@@ -68,19 +68,16 @@ Module.ItemIDs = {
 	5237,	--Mind-Numbing Poison
 
 	3829,	--Frost Oil
-	3824,	--Shadow Oil -- good
+	3824,	--Shadow Oil
 
-	36899,	--Exceptional Mana Oil
-	22521,	--Superior Mana Oil -- good
-	20748,	--Brilliant Mana Oil -- good
-	20747,	--Lesser Mana Oil -- good
-	20745,	--Minor Mana Oil -- good
+	20748,	--Brilliant Mana Oil
+	20747,	--Lesser Mana Oil
+	20745,	--Minor Mana Oil
 
-	22522,	--Superior Wizard Oil -- good
-	20749,	--Brilliant Wizard Oil -- good
-	20750,	--Wizard Oil -- good
-	20746,	--Lesser Wizard Oil -- good
-	20744,	--Minor Wizard Oil -- good
+	20749,	--Brilliant Wizard Oil
+	20750,	--Wizard Oil
+	20746,	--Lesser Wizard Oil
+	20744,	--Minor Wizard Oil
 
 	23123,	--Blessed Wizard Oil
 
@@ -168,6 +165,29 @@ function Module:OnSuggest()
 	TMW:GetModule("ItemCache"):CacheItems()
 	CurrentItems = TMW:GetModule("ItemCache"):GetCurrentItems()
 end
+
+-- This must be handled independently from Etc_DoItemLookups to prevent infinte loops
+-- of requesting item info from the server, because Blizz for some reason will fire
+-- GET_ITEM_INFO_RECEIVED even when no new information became available.
+local gotItemInfo = {}
+function Module:GET_ITEM_INFO_RECEIVED(event, id)
+	-- Don't care about items that we... don't care about.
+	if not TMW.tContains(self.ItemIDs, id) then return end
+
+	-- Don't handle information for an item more than once.
+	-- This prevents the infinite loop.
+	if gotItemInfo[id] then return end
+	gotItemInfo[id] = true
+
+	local name = GetItemInfo(id)
+	if name then
+		self.Items[name] = id
+		self.Table[name] = id
+	else
+		print("wpnenchant SUG: WoW Server seems to think that item doesn't exist", id)
+	end
+end
+
 function Module:Etc_DoItemLookups()
 	self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
 
@@ -176,7 +196,7 @@ function Module:Etc_DoItemLookups()
 		if name then
 			self.Items[name] = id
 		else
-			self:RegisterEvent("GET_ITEM_INFO_RECEIVED", "Etc_DoItemLookups")
+			self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 		end
 	end
 
