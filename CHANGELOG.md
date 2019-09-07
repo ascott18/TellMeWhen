@@ -4,6 +4,7 @@
 ### Bug Fixes
 * Classic: Fixed the Unit Class condition's options.
 * Classic: Fixed the Weapon Imbue icon type & Condition for offhands.
+* Classic: Fixed combopoint tracking.
 
 ## v8.6.9
 * Classic: Aura durations now account for learned talents.

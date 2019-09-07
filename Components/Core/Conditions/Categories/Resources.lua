@@ -98,9 +98,9 @@ ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
 	icon = "Interface\\Icons\\ability_rogue_eviscerate",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitPower = UnitPower,
+		GetComboPoints = GetComboPoints,
 	},
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ComboPoints),
+	funcstr = [[GetComboPoints("player", "target") c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "COMBO_POINTS")

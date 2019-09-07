@@ -15,10 +15,10 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local UnitPower, UnitPowerMax
-	= UnitPower, UnitPowerMax
+local UnitHealth, UnitHealthMax, UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
+    = UnitHealth, UnitHealthMax, UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
 local pairs
-	= pairs  
+    = pairs
 	
 local _, pclass = UnitClass("Player")
 local GetSpellTexture = TMW.GetSpellTexture
@@ -182,12 +182,12 @@ local function Value_OnUpdate(icon, time)
 			local value, maxValue, valueColor
 			if PowerType == -1 then
 				value, maxValue, valueColor = UnitHealth(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
+			elseif PowerType == Enum.PowerType.ComboPoints then
+				-- combo points
+				value, maxValue, valueColor = GetComboPoints("player", unit), MAX_COMBO_POINTS, PowerBarColor[PowerType]
 			else
 				if PowerType == -2 then
 					PowerType = UnitPowerType(unit)
-				end
-				if PowerType == 4 then -- combo points
-					unit = "player"
 				end
 				
 				value, maxValue, valueColor = UnitPower(unit, PowerType, ValueFragments), UnitPowerMax(unit, PowerType, ValueFragments), PowerBarColor[PowerType]

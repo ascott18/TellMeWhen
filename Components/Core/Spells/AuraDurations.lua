@@ -692,7 +692,7 @@ local talentMods = {
     -- Permafrost
     {
         talents = { 11175, 12569, 12571 },
-        durationMod = 3,
+        durationMod = 1,
         auras = {
             120, 8492, 10159, 10160, 10161, -- Cone of Cold
             6136, 7321, -- Frost Armor
@@ -773,7 +773,7 @@ frame:SetScript("OnEvent", function(self, event)
     end
 end)
 
-function TMW:GetAuraAppliedTime(unitGUID, sourceGUID, spellName, skipPlayerSource)
+local function GetAuraAppliedTime(unitGUID, sourceGUID, spellName, skipPlayerSource)
     local target = rawget(targets, unitGUID)
     if not target then return 0 end
     local source, _
@@ -797,7 +797,7 @@ function TMW.UnitAura(unit, index, filter, unitGUID)
         = UnitAura(unit, index, filter)
 
     if name and unit ~= "player" and duration == 0 and expirationTime == 0 then
-        local applied = TMW:GetAuraAppliedTime(
+        local applied = GetAuraAppliedTime(
             unitGUID or UnitGUID(unit),
             caster and UnitGUID(caster) or nil,
             name,
@@ -816,7 +816,7 @@ function TMW.UnitAura(unit, index, filter, unitGUID)
                         local talents = talentMod.talents
                         for talIdx = 1, #talents do
                             if learnedTalents[talents[talIdx]] then
-                                duration = duration + talentMod.durationMod
+                                duration = duration + (talentMod.durationMod * talIdx)
                             end
                         end
                     else
