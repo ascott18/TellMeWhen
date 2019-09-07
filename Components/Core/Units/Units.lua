@@ -130,8 +130,10 @@ local UnitSet = TMW:NewClass("UnitSet"){
 			unit = tostring(unit)
 
 			if unit == "player" then
-			--	UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, but do this for external checks of unitsWithExistsEvent to increase efficiency.
-			-- if someone legitimately entered "playertarget" then they probably dont deserve to have increased eficiency... dont bother handling player as a base unit
+				--UNITS.unitsWithExistsEvent[unit] = true -- doesnt really have an event, 
+				-- but do this for external checks of unitsWithExistsEvent to increase efficiency.
+				-- if someone legitimately entered "playertarget" then they probably dont deserve to have increased eficiency... 
+				-- dont bother handling player as a base unit
 
 			elseif unit == "target" then -- the unit exactly
 				self.updateEvents.PLAYER_TARGET_CHANGED = true
@@ -303,6 +305,14 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		local old_len = #exposedUnits
 		local exposed_len = 0
 		local changed = false
+		
+		-- We must wipe UnitsLookup because we can't surgically update it
+		-- as we iterate. Attempts to do so in the past (before the commit that added this comment)
+		-- caused a bug that led to units being removed from UnitsLookup when in fact they still 
+		-- should have been there. This was triggered when lower-index units would become no longer exposed,
+		-- shifting all units downwards in the exposedUnits table, leading to an issue when clearing out any
+		-- units past the new maximum index of exposedUnits.
+		wipe(UnitsLookup)
 
 		for k = 1, #originalUnits do
 			local unit = originalUnits[k]
@@ -355,10 +365,9 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				and ((baseUnit and UnitExists(baseUnit)) or (not baseUnit and (not hasExistsEvent or UnitExists(unit))))
 
 			then
+				UnitsLookup[unit] = true
 				if exposedUnits[exposed_len+1] ~= unit then
 					exposedUnits[exposed_len+1] = unit
-
-					UnitsLookup[unit] = true
 					changed = true
 				end
 				exposed_len = exposed_len + 1
@@ -367,7 +376,6 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 		-- Clear out the rest of the table.
 		for k = exposed_len+1, #exposedUnits do
-			UnitsLookup[exposedUnits[k]] = nil
 			exposedUnits[k] = nil
 		end
 
@@ -385,12 +393,12 @@ local UnitSet = TMW:NewClass("UnitSet"){
 }
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	for i, UnitSet in ipairs(TMW.Classes.UnitSet.instances) do
-		if UnitSet.ConditionObjects then
-			for i, ConditionObject in ipairs(UnitSet.ConditionObjects) do
-				ConditionObject:RequestAutoUpdates(UnitSet, false)
+	for i, unitSet in ipairs(UnitSet.instances) do
+		if unitSet.ConditionObjects then
+			for i, ConditionObject in ipairs(unitSet.ConditionObjects) do
+				ConditionObject:RequestAutoUpdates(unitSet, false)
 			end
-			TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", UnitSet)
+			TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", unitSet)
 		end
 	end
 end)
@@ -456,7 +464,7 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 		if unit and firstnum and lastnum then
 
 			if abs(lastnum - firstnum) > 100 then
-				TMW:Print("Why on Earth would you want to track more than 100", unit, "units? I'll just ignore it and save you from possibly crashing.")
+				TMW:Print("You can't track more than 100", unit, "units.")
 			else
 				local str = ""
 				local order = firstnum > lastnum and -1 or 1
@@ -585,7 +593,6 @@ function UNITS:OnEvent(event, arg1)
 			end
 		end
 	end
-	forceNoExists = nil
 end
 
 function UNITS:SubstituteSpecialUnit(oldunit)

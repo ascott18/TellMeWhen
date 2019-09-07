@@ -9,6 +9,7 @@ TMW.CHANGELOG = [==[
 * The Missing Buffs/Debuffs icon type now sorts by lowest duration first.
 
 ### Bug Fixes
+* Fixed an uncommon issue that could cause some event-driven icons to not update correctly after one of the units being tracked by an icon stops existing.
 * Classic: Fixed the Unit Class condition's options.
 * Classic: Fixed the Weapon Imbue icon type & Condition for offhands.
 * Classic: Fixed talented aura duration tracking.
