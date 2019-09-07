@@ -6,6 +6,9 @@ TMW.CHANGELOG = [==[
 ## v8.7.0
 * The Missing Buffs/Debuffs icon type now sorts by lowest duration first.
 
+### Bug Fixes
+* Fixed an uncommon issue that could cause some event-driven icons to not update correctly after one of the units being tracked by an icon stops existing.
+
 ## v8.6.9
 ### Bug Fixes
 * Fixed an issue with Unit Conditions where the initial state of the conditions sometimes wouldn't be taken into account.
