@@ -5,10 +5,12 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 TMW.CHANGELOG = [==[
 ## v8.7.0
 * Classic: Updated the Cast condition and icon type to use LibClassicCasterino for approximations of others' spell casts.
+* Classic: Aura durations might now be correct for abilities whose durations are variable by combopoints.
 
 ### Bug Fixes
 * Classic: Fixed the Unit Class condition's options.
 * Classic: Fixed the Weapon Imbue icon type & Condition for offhands.
+* Classic: Fixed talented aura duration tracking.
 * Classic: Fixed combopoint tracking.
 
 ## v8.6.9

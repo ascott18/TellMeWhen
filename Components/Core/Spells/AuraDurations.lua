@@ -17,11 +17,11 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local rawget, next, setmetatable
-    = rawget, next, setmetatable
+local rawget, next, setmetatable, max
+    = rawget, next, setmetatable, max
 
-local UnitAura, UnitGUID, CombatLogGetCurrentEventInfo, IsPlayerSpell, UnitIsFriend
-    = UnitAura, UnitGUID, CombatLogGetCurrentEventInfo, IsPlayerSpell, UnitIsFriend
+local UnitAura, UnitGUID, CombatLogGetCurrentEventInfo, IsPlayerSpell, UnitIsFriend, GetComboPoints, UnitClass
+    = UnitAura, UnitGUID, CombatLogGetCurrentEventInfo, IsPlayerSpell, UnitIsFriend, GetComboPoints, UnitClass
 
 local strlowerCache = TMW.strlowerCache
 
@@ -701,6 +701,12 @@ local talentMods = {
     },
 }
 
+local maxExtendableDurations = {
+    -- 5-Combopoint Slice and Dice (21 sec) w/ 3-rank Improved Slice and Dice (+45%)
+    [ 5171] = 21*1.45,
+    [ 6774] = 21*1.45,
+}
+
 -- Transform raw talent data to a fast lookup structure
 local auraTalentMods = {}
 local talentsThatMod = {}
@@ -710,11 +716,11 @@ for _, mod in pairs(talentMods) do
             error("talentMods currently doesn't support multiple mods for one aura. SpellID: " + spellID)
         end
         auraTalentMods[spellID] = mod
+        maxExtendableDurations[spellID] = mod.durationMod * #mod.talents
     end
     for _, spellID in pairs(mod.talents) do
         talentsThatMod[spellID] = true
     end
-    mod.maxDurationMod = mod.durationMod * #mod.talents
 end
 
 local learnedTalents = {}
@@ -727,6 +733,23 @@ local function updateLearnedTalents()
     end
 end
 
+-- Additional duration per combopoint.
+-- This is added onto a base duration that represents a theoretical zero-combopoint application.
+local combopointMods = {
+    [  408] = 1, -- Kidney Shot
+    [ 8643] = 1, -- Kidney Shot
+    [ 1943] = 2, -- Rupture
+    [ 8639] = 2, -- Rupture
+    [ 8640] = 2, -- Rupture
+    [11273] = 2, -- Rupture
+    [11274] = 2, -- Rupture
+    [11275] = 2, -- Rupture
+}
+for spellID, amount in pairs(CopyTable(combopointMods)) do
+    combopointMods[strlowerCache[GetSpellInfo(spellID)]] = amount
+    maxExtendableDurations[spellID] = amount * MAX_COMBO_POINTS
+end
+
 local targets = setmetatable({}, {__index = function(t, k)
 	local n = setmetatable({}, {__index = function(t, k)
         local n = {}
@@ -737,45 +760,76 @@ local targets = setmetatable({}, {__index = function(t, k)
 	return n
 end})
 
-local pGUID
+local _, pGUID, pClass
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
     updateLearnedTalents()
-	pGUID = UnitGUID("player")
+    pGUID = UnitGUID("player")
+    _, pClass = UnitClass("Player")
 end)
+
+-- A stack to store the last two combo point readings.
+-- Storing more than just the last-read value
+-- helps with timing issues due to combopoints being consumed before the debuff is applied.
+local comboPointStack0, comboPointStack1 = 0, 0
 
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-frame:SetScript("OnEvent", function(self, event)
+frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+frame:RegisterEvent("UNIT_POWER_UPDATE")
+frame:SetScript("OnEvent", function(self, event, arg1, arg2)
     if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local _, cleuEvent, _, sourceGUID, _, _, _, destGUID, destName, _, _, spellID, spellName
+        local _, cleuEvent, _, sourceGUID, _, _, _, destGUID, destName, _, _, _, spellName
             = CombatLogGetCurrentEventInfo()
-        
+
         if (
             cleuEvent == "SPELL_AURA_APPLIED"
             or cleuEvent == "SPELL_AURA_APPLIED_DOSE"
             or cleuEvent == "SPELL_AURA_REFRESH"
-            -- or cleuEvent == "SPELL_PERIODIC_DAMAGE"
-            -- or cleuEvent == "SPELL_PERIODIC_HEAL"
-            or cleuEvent == "SPELL_AURA_REMOVED")
+            or cleuEvent == "SPELL_AURA_REMOVED"
+            ) and spellName
         then
-        
-            spellName = spellName and strlowerCache[spellName]
+            spellName = strlowerCache[spellName]
             local aurasOnGUIDBySource = targets[destGUID][sourceGUID]
 
             if cleuEvent == "SPELL_AURA_REMOVED" then
                 aurasOnGUIDBySource[spellName] = nil
             else
-                aurasOnGUIDBySource[spellName] = TMW.time
+                if  pGUID == sourceGUID
+                and pClass == "ROGUE"
+                and combopointMods[spellName]
+                and destGUID == UnitGUID('target')
+                then
+                    -- destguid is checked against target because we only store current combopoints against the target
+                    aurasOnGUIDBySource[spellName] = {
+                        TMW.time,
+                        combopointMods[spellName] * max(comboPointStack0, comboPointStack1)
+                    }
+                else
+                    aurasOnGUIDBySource[spellName] = TMW.time
+                end
             end
         elseif cleuEvent == "UNIT_DIED" and destGUID then
             targets[destGUID] = nil
         end
+    elseif pClass == "ROGUE" then
+        if event == "PLAYER_TARGET_CHANGED" then
+            -- reset values to the target on target change
+            comboPointStack0 = GetComboPoints("player", "target")
+            comboPointStack1 = 0
+        elseif event == "UNIT_POWER_UPDATE" and arg2 == "COMBO_POINTS" then
+            local current = GetComboPoints("player", "target")
+            if current ~= comboPointStack0 then
+                comboPointStack1 = comboPointStack0
+                comboPointStack0 = current
+            end
+        end
     end
 end)
 
-local function GetAuraAppliedTime(unitGUID, sourceGUID, spellName, skipPlayerSource)
+local function GetAuraTimings(unitGUID, sourceGUID, spellName, spellID, unit, filter)
     local target = rawget(targets, unitGUID)
-    if not target then return 0 end
+    if not target then return 0, 0 end
+
     local source, _
     if sourceGUID then
         source = rawget(target, sourceGUID)
@@ -783,13 +837,63 @@ local function GetAuraAppliedTime(unitGUID, sourceGUID, spellName, skipPlayerSou
         -- If we aren't looking for a specific source, grab the first one.
         sourceGUID, source = next(target)
 
-        -- If we're in a context where we know that the source will never be the player,
-        -- we can exclude the player's auras in the event that the first key we grabbed was the player.
-        if skipPlayerSource and sourceGUID == pGUID then
+        -- We know that the source was not the player,
+        -- so we can exclude the player's auras in the event that the first key we grabbed was the player.
+        if sourceGUID == pGUID then
             _, source = next(target, sourceGUID)
         end
     end
-    return source and source[strlowerCache[spellName]] or 0
+
+    if not source then return 0, 0 end
+
+    local data = source[strlowerCache[spellName]]
+    if not data then return 0, 0 end
+
+    local applied, durationMod
+    if type(data) == "table" then
+        applied, durationMod = data[0], data[1]
+    else
+        applied, durationMod = data, 0
+    end
+
+    local duration = (AuraDurations[spellID] or 0) + durationMod
+    if applied == 0 or duration == 0 then return 0, 0 end
+
+    if sourceGUID == pGUID then
+        -- Source is player. Talent duration extensions are known.
+        local talentMod = auraTalentMods[spellID]
+        local talents = talentMod.talents
+        for talIdx = 1, #talents do
+            if learnedTalents[talents[talIdx]] then
+                duration = duration + (talentMod.durationMod * talIdx)
+                break
+            end
+        end
+    else
+        -- Source isn't the player.
+        -- The idea is to assume the worst in all cases.
+        -- Assume long buffs and short debuffs on enemies
+        -- Assume short buffs and long debuffs on friendlies
+
+        -- maxExtendableDurations only contains values whose duration could ever be variable.
+        -- It contains the longest possible duration.
+        -- `AuraDurations` contains the shortest possible durations (where `duration` came from)
+
+        local maxDuration = maxExtendableDurations[spellID]
+        if maxDuration then
+
+            local debuff = filter == "HARMFUL" or filter == "HARMFUL|PLAYER"
+            local friendly = UnitIsFriend("player", unit)
+
+            -- Shortened logic of ((debuff and friendly) or (not debuff and not friendly))
+            --                    (long debuff on friend)   (long buff on enemy)
+            if debuff == friendly then
+                duration = maxDuration
+            end
+        end
+    end
+
+    return duration, applied + duration
 end
 
 function TMW.UnitAura(unit, index, filter, unitGUID)
@@ -797,48 +901,14 @@ function TMW.UnitAura(unit, index, filter, unitGUID)
         = UnitAura(unit, index, filter)
 
     if name and unit ~= "player" and duration == 0 and expirationTime == 0 then
-        local applied = GetAuraAppliedTime(
+        duration, expirationTime = GetAuraTimings(
             unitGUID or UnitGUID(unit),
             caster and UnitGUID(caster) or nil,
             name,
-            -- If the source is unknown (i.e. no GUID, i.e. 'caster' was nil),
-            -- source was definitely not "player", so skip the player's data if the caster is unknown
-            true
+            id,
+            unit,
+            filter
         )
-        if applied > 0 then
-            duration = AuraDurations[id] or 0
-            if duration > 0 then
-
-                -- Apply talent mods
-                local talentMod = auraTalentMods[id]
-                if talentMod then
-                    if caster == "player" then
-                        local talents = talentMod.talents
-                        for talIdx = 1, #talents do
-                            if learnedTalents[talents[talIdx]] then
-                                duration = duration + (talentMod.durationMod * talIdx)
-                            end
-                        end
-                    else
-                        -- The idea is to assume the worst in all cases.
-                        -- Assume long buffs and short debuffs on enemies
-                        -- Assume short buffs and long debuffs on friendlies
-
-                        local debuff = filter == "HARMFUL" or filter == "HARMFUL|PLAYER"
-                        local friendly = UnitIsFriend("player", unit)
-
-                        -- Shortened logic of ((debuff and friendly) or (not debuff and not friendly))
-                        --                    (long debuff on friend)   (long buff on enemy)
-                        if debuff == friendly then
-                            duration = duration + talentMod.maxDurationMod
-                        end
-                    end
-                end
-
-                -- We only set the expiration if duration > 0, since the expiration should be 0 for no-duration auras.
-                expirationTime = applied + duration
-            end
-        end
     end
 
     return name, texture, count, dispelType, duration, expirationTime, caster, canSteal, a, id, b, c, d, e, f
