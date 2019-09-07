@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v8.7.0
+* The Missing Buffs/Debuffs icon type now sorts by lowest duration first.
+
 ## v8.6.9
 ### Bug Fixes
 * Fixed an issue with Unit Conditions where the initial state of the conditions sometimes wouldn't be taken into account.

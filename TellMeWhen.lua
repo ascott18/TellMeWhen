@@ -33,7 +33,7 @@ if wow_classic then
 	return
 end
 
-TELLMEWHEN_VERSION = "8.6.9"
+TELLMEWHEN_VERSION = "8.7.0"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -44,11 +44,11 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 86904 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 87006 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 87000 or TELLMEWHEN_VERSIONNUMBER < 86000 then
+if TELLMEWHEN_VERSIONNUMBER > 88000 or TELLMEWHEN_VERSIONNUMBER < 87000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
 end
