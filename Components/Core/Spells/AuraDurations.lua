@@ -862,11 +862,13 @@ local function GetAuraTimings(unitGUID, sourceGUID, spellName, spellID, unit, fi
     if sourceGUID == pGUID then
         -- Source is player. Talent duration extensions are known.
         local talentMod = auraTalentMods[spellID]
-        local talents = talentMod.talents
-        for talIdx = 1, #talents do
-            if learnedTalents[talents[talIdx]] then
-                duration = duration + (talentMod.durationMod * talIdx)
-                break
+        if talentMod then
+            local talents = talentMod.talents
+            for talIdx = 1, #talents do
+                if learnedTalents[talents[talIdx]] then
+                    duration = duration + (talentMod.durationMod * talIdx)
+                    break
+                end
             end
         end
     else
