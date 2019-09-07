@@ -174,7 +174,7 @@ end)
 
 
 local function WpnEnchant_OnUpdate(icon, time)
-	local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
+	local has, expiration, charges, id = select(icon.SelectIndex, GetWeaponEnchantInfo())
 
 	if has and icon.CorrectEnchant then
 		-- Convert milliseconds to seconds.
@@ -184,7 +184,7 @@ local function WpnEnchant_OnUpdate(icon, time)
 		local EnchantName = icon.EnchantName
 		if EnchantName then
 			-- We know the enchant name, which means the duration can be cached.
-			local d = WpnEnchDurs[EnchantName]
+			local d = WpnEnchDurs[EnchantName] or 0
 			if d < expiration then
 				-- Re-cache the duration if we have a higher duration than what is stored.
 				WpnEnchDurs[EnchantName] = ceil(expiration)
@@ -287,7 +287,7 @@ function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
 
 
-	icon.SelectIndex = icon.WpnEnchantType == "SecondaryHandSlot" and 4 or 1
+	icon.SelectIndex = icon.WpnEnchantType == "SecondaryHandSlot" and 5 or 1
 	icon.Slot = GetInventorySlotInfo(icon.WpnEnchantType)
 
 
