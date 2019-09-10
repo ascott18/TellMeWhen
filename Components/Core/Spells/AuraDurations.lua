@@ -851,7 +851,7 @@ local function GetAuraTimings(unitGUID, sourceGUID, spellName, spellID, unit, fi
 
     local applied, durationMod
     if type(data) == "table" then
-        applied, durationMod = data[0], data[1]
+        applied, durationMod = data[1], data[2]
     else
         applied, durationMod = data, 0
     end
