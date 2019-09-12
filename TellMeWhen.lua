@@ -44,7 +44,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 87007 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 87008 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1132,9 +1132,9 @@ function TMW:PLAYER_LOGIN()
 		return
 
 	-- if the file is NOT required for gross functionality
-	elseif not TMW.DOGTAG then
+	elseif not LibStub("DRList-1.0", false) then
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			text = L["ERROR_MISSINGFILE_NOREQ"], 
+			text = L["ERROR_MISSINGFILE_NOREQ"],
 			button1 = EXIT_GAME,
 			button2 = CANCEL,
 			OnAccept = ForceQuit,
@@ -1143,7 +1143,7 @@ function TMW:PLAYER_LOGIN()
 			whileDead = true,
 			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
 		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Lib/LibBabble-CreatureType-3.0/LibBabble-CreatureType-3.0.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Lib/DRList-1.0/DRList-1.0.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
 	end
 	
 
