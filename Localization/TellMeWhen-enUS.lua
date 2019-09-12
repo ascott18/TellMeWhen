@@ -2521,7 +2521,7 @@ Icon can be filtered by the spell that caused the interrupt. The spell that was 
 Note the difference between the two interrupt events - both will always occur when a spell is interrupted, but each filters the spells involved differently.]]
 L["CLEU_SPELL_LEECH"] = "Resource Leech"
 L["CLEU_SPELL_LEECH_DESC"] = "Occurs when resources (health/mana/rage/energy/etc) are removed from one unit and simultaneously given to another."
-L["CLEU_SPELL_MISSED"] = "Spell Miss"
+L["CLEU_SPELL_MISSED"] = "Spell Miss/Resist"
 L["CLEU_SPELL_CREATE"] = "Spell Create"
 L["CLEU_SPELL_CREATE_DESC"] = "Occurs when an object, such as a hunter trap or a mage portal, is created."
 L["CLEU_SPELL_SUMMON"] = "Spell Summon"
@@ -2547,6 +2547,12 @@ L["CLEU_PARTY_KILL"] = "Party Kill"
 L["CLEU_PARTY_KILL_DESC"] = "Occurs when someone in your party kills something."
 
 
+L["CLEU_SPELL_MISSED_DODGE"] = "Spell/Ability Dodge" -- custom event
+L["CLEU_SPELL_MISSED_PARRY"] = "Spell/Ability Parry" -- custom event
+L["CLEU_SPELL_MISSED_BLOCK"] = "Spell/Ability Block" -- custom event
+L["CLEU_SWING_MISSED_DODGE"] = "Swing Dodge" -- custom event
+L["CLEU_SWING_MISSED_PARRY"] = "Swing Parry" -- custom event
+L["CLEU_SWING_MISSED_BLOCK"] = "Swing Block" -- custom event
 
 L["CLEU_CAT_CAST"] = "Casts"
 L["CLEU_CAT_SWING"] = "Melee/Ranged"
