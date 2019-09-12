@@ -1120,9 +1120,7 @@ function TMW:PLAYER_LOGIN()
 		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
 			text = L["ERROR_MISSINGFILE"], 
-			button1 = EXIT_GAME,
-			button2 = CANCEL,
-			OnAccept = ForceQuit,
+			button1 = OKAY,
 			timeout = 0,
 			showAlert = true,
 			whileDead = true,
@@ -1132,12 +1130,10 @@ function TMW:PLAYER_LOGIN()
 		return
 
 	-- if the file is NOT required for gross functionality
-	elseif not LibStub("DRList-1.0", false) then
+	elseif not LibStub("DRList-1.0", true) then
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
 			text = L["ERROR_MISSINGFILE_NOREQ"],
-			button1 = EXIT_GAME,
-			button2 = CANCEL,
-			OnAccept = ForceQuit,
+			button1 = OKAY,
 			timeout = 0,
 			showAlert = true,
 			whileDead = true,
