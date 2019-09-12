@@ -29,239 +29,13 @@ local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 -- GLOBALS: TellMeWhen_ChooseName
 
 
--- A snapshot of the very first version of DRData-1.0.
--- Probably lots of things that are wrong for classic.
-local spells = {
-	--[[ TAUNT ]]--
-	-- Taunt (Warrior)
-	[355] = "taunt",
-	-- Mocking Blow
-	[694] = "taunt",
-	-- Growl (Druid)
-	[6795] = "taunt",
-	-- Distracting Shot
-	[20736] = "taunt",
-	-- Challenging Shout
-	[1161] = "taunt",
-	-- Challenging Roar
-	[5209] = "taunt",
+local DRList = LibStub("DRList-1.0")
 	
-	--[[ DISORIENTS ]]--
-	
-	-- Sap
-	[6770] = "disorient",
-	[2070] = "disorient",
-	[11297] = "disorient",
-	
-	-- Gouge
-	[1776] = "disorient",
-	
-	-- Shackle
-	[9484] = "disorient",
-	[9485] = "disorient",
-	[10955] = "disorient",
-	
-	-- Polymorph
-	[118] = "disorient",
-	[12824] = "disorient",
-	[12825] = "disorient",
-	[28272] = "disorient",
-	[28271] = "disorient",
-	[12826] = "disorient",
-	
-	-- Freezing Trap
-	[3355] = "disorient",
-	[14308] = "disorient",
-	[14309] = "disorient",
-
-	-- Wyvern Sting
-	[19386] = "disorient",
-	[24132] = "disorient",
-	[24133] = "disorient",
-	
-	-- Repentance
-	[20066] = "disorient",
-		
-	--[[ SILENCES ]]--
-	-- Garrote
-	[1330] = "silence",
-	
-	-- Silence
-	[15487] = "silence",
-
-	-- Improved Kick
-	[18425] = "silence",
-
-	-- Improved Counterspell
-	[18469] = "silence",
-	
-	-- Spell Lock
-	[19244] = "silence",
-	[19647] = "silence",
-	
-	-- Gag Order (Warrior talent)
-	[18498] = "silence",
-	
-	--[[ DISARMS ]]--
-	-- Disarm
-	[676] = "disarm",
-	
-	--[[ FEARS ]]--
-	-- Blind
-	[2094] = "fear",
-
-	-- Fear (Warlock)
-	[5782] = "fear",
-	[6213] = "fear",
-	[6215] = "fear",
-	
-	-- Seduction (Pet)
-	[6358] = "fear",
-	
-	-- Howl of Terror
-	[5484] = "fear",
-	[17928] = "fear",
-
-	-- Psychic scream
-	[8122] = "fear",
-	[8124] = "fear",
-	[10888] = "fear",
-	[10890] = "fear",
-	
-	-- Scare Beast
-	[1513] = "fear",
-	[14326] = "fear",
-	[14327] = "fear",
-	
-	-- Turn Evil
-	[10326] = "fear",
-	
-	-- Intimidating Shout
-	[5246] = "fear",
-	
-
-	--[[ CONTROL STUNS ]]--
-	-- Concussion Blow
-	[12809] = "ctrlstun",
-	
-	-- Hammer of Justice
-	[853] = "ctrlstun",
-	[5588] = "ctrlstun",
-	[5589] = "ctrlstun",
-	[10308] = "ctrlstun",
-
-	-- Bash
-	[5211] = "ctrlstun",
-	[6798] = "ctrlstun",
-	[8983] = "ctrlstun",
-	
-	-- Intimidation
-	[19577] = "ctrlstun",
-
-	-- Maim
-	[22570] = "ctrlstun",
-
-	-- Kidney Shot
-	[408] = "ctrlstun",
-	[8643] = "ctrlstun",
-
-	-- War Stomp
-	[20549] = "ctrlstun",
-
-	-- Intercept
-	[20252] = "ctrlstun",
-	
-	-- Holy Wrath
-	[2812] = "ctrlstun",
-	
-	-- Inferno Effect
-	[22703] = "ctrlstun",
-	
-	--[[ RANDOM STUNS ]]--
-	-- Impact
-	[12355] = "rndstun",
-	
-	-- Seal of Justice
-	[20170] = "rndstun",
-	
-	-- Revenge Stun
-	[12798] = "rndstun",
-	
-	--[[ ROOTS ]]--
-	
-	-- Frost Nova
-	[122] = "ctrlroot",
-	[865] = "ctrlroot",
-	[6131] = "ctrlroot",
-	[10230] = "ctrlroot",
-	
-	-- Entangling Roots
-	[339] = "ctrlroot",
-	[1062] = "ctrlroot",
-	[5195] = "ctrlroot",
-	[5196] = "ctrlroot",
-	[9852] = "ctrlroot",
-	[9853] = "ctrlroot",
-
-	-- Earthgrab (Storm, Earth and Fire talent)
-	[8377] = "ctrlroot",
-
-	--[[ RANDOM ROOTS ]]--
-	-- Improved Hamstring
-	[23694] = "rndroot",
-	
-	-- Frostbite
-	[12494] = "rndroot",
-	
-	--[[ SLEEPS ]]--
-	-- Hibernate
-	[2637] = "sleep",
-	[18657] = "sleep",
-	[18658] = "sleep",
-		
-	--[[ HORROR ]]--
-	-- Death Coil
-	[6789] = "horror",
-	[17925] = "horror",
-	[17926] = "horror",
-	
-	--[[ MISC ]]--
-	-- Scatter Shot
-	[19503] = "scatters",
-
-	-- Cheap Shot
-	[1833] = "cheapshot",
-
-	-- Pounce
-	[9005] = "cheapshot",
-	[9823] = "cheapshot",
-	[9827] = "cheapshot",
-
-	-- Charge
-	[7922] = "charge",
-	
-	-- Mind Control
-	[605] = "mc",
-	[10911] = "mc",
-	[10912] = "mc",
-
-	-- Banish
-	[710] = "banish",
-	[18647] = "banish",
-	
-	-- Entrapment
-	[19185] = "entrapment",
-}
-local pveDR = {
-	["ctrlstun"] = true,
-	["rndstun"] = true,
-	["taunt"] = true,
-	["cyclone"] = true,
-}
+local DRSpells = DRList:GetSpells()
 local PvEDRs = {}
-for spellID, category in pairs(spells) do
-	if pveDR[category] then
-		PvEDRs[strlowerCache[GetSpellInfo(spellID)]] = 1
+for spellName, data in pairs(DRSpells) do
+	if DRList:IsPvECategory(data.category) then
+		PvEDRs[strlowerCache[spellName]] = 1
 	end
 end
 
@@ -389,36 +163,53 @@ end)
 
 
 TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
-	local myCategories = {
-		banish =       "DR-Banish",
-		charge =       "DR-Charge",
-		cheapshot =    "DR-CheapShot",
-		ctrlstun =     "DR-ControlledStun",
-		disarm =       "DR-Disarm",
-		disorient =    "DR-Disorient",
-		entrapment =   "DR-Entrapment",
-		fear =         "DR-Fear",
-		horror =       "DR-Horrify",
-		mc =           "DR-MindControl",
-		rndroot =      "DR-RandomRoot",
-		rndstun =      "DR-RandomStun",
-		ctrlroot =     "DR-ControlledRoot",
-		scatters =     "DR-Scatter",
-		silence =      "DR-Silence",
-		sleep =        "DR-Hibernate",
-		taunt =        "DR-Taunt",
-	}
-	
-	TMW.BE.dr = {}
-	local dr = TMW.BE.dr
-	for spellID, category in pairs(spells) do
-		local k = myCategories[category]
+	-- Create our own DR equivalencies in TMW using the data from DRList-1.0
 
-		if k then
-			dr[k] = dr[k] or {}
-			tinsert(dr[k], spellID)
-		elseif TMW.debug and not ignored[category] then
-			TMW:Error("The DR category %q is undefined!", category)
+	if DRList then
+		local myCategories = {
+			incapacitate = "DR-Incapacitate",
+			charge =       "DR-Charge",
+			opener_stun =  "DR-CheapShot",
+			stun =         "DR-ControlledStun",
+			disarm =       "DR-Disarm",
+			entrapment =   "DR-Entrapment",
+			fear =         "DR-Fear",
+			death_coil =   "DR-Horrify",
+			mind_control = "DR-MindControl",
+			random_root =  "DR-RandomRoot",
+			random_stun =  "DR-RandomStun",
+			root =         "DR-ControlledRoot",
+			silence =      "DR-Silence",
+		}
+
+		local ignored = {
+			knockback = true,
+			frost_shock = true,
+		}
+	
+		TMW.BE.dr = {}
+		local dr = TMW.BE.dr
+
+		local usedCategories = {}
+		for spellName, data in pairs(DRList:GetSpells()) do
+			local spellID, category = data.spellID, data.category
+			local k = myCategories[category]
+
+			if k then
+				usedCategories[category] = true
+				dr[k] = dr[k] or {}
+				tinsert(dr[k], spellID)
+			elseif TMW.debug and not ignored[category] then
+				TMW:Error("The DR category %q is undefined!", category)
+			end
+		end
+
+		if TMW.debug then
+			for category, myCategory in pairs(myCategories) do
+				if not usedCategories[category] then
+					TMW:Error("The DR category %q isn't used!", category)
+				end
+			end
 		end
 	end
 end)
