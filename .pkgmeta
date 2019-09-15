@@ -32,6 +32,7 @@ externals:
     Lib/LibBabble-Race-3.0: svn://svn.wowace.com/wow/libbabble-race-3-0/mainline/trunk
 
     Lib/LibClassicCasterino: https://github.com/rgd87/LibClassicCasterino.git
+    Lib/LibClassicMobHealth-1.0: https://repos.curseforge.com/wow/libclassicmobhealth-1-0
 
 optional-dependencies:
     - masque

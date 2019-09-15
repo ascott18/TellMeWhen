@@ -1680,6 +1680,31 @@ function TMW.UnitChannelInfo(unit)
 end
 
 
+-- LibMobHealth
+TMW.UnitHealth = UnitHealth
+TMW.UnitHealthMax = UnitHealthMax
+if RealMobHealth then
+	local GetUnitHealth = RealMobHealth.GetUnitHealth
+
+	TMW.UnitHealth = GetUnitHealth
+	function TMW.UnitHealthMax(unit)
+		local _, max = GetUnitHealth(unit)
+		return max
+	end
+else
+	-- Standalone install of LCMH is LOD
+	LoadAddOn("LibClassicMobHealth-1.0")
+	local CMH = LibStub("LibClassicMobHealth-1.0", true)
+	if CMH then
+		function TMW.UnitHealth(unit)
+			return CMH:GetUnitCurrentHP(unit)
+		end
+		function TMW.UnitHealthMax(unit)
+			return CMH:GetUnitMaxHP(unit)
+		end
+	end
+end
+
 
 
 

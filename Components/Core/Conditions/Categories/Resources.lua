@@ -22,8 +22,8 @@ local Env = CNDT.Env
 
 local _, pclass = UnitClass("Player")
 
-Env.UnitHealth = UnitHealth
-Env.UnitHealthMax = UnitHealthMax
+Env.UnitHealth = TMW.UnitHealth
+Env.UnitHealthMax = TMW.UnitHealthMax
 Env.UnitPower = UnitPower
 Env.UnitPowerMax = UnitPowerMax
 

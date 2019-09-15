@@ -15,8 +15,12 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local UnitHealth, UnitHealthMax, UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
-    = UnitHealth, UnitHealthMax, UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
+local UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
+    = UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
+
+local UnitHealth = TMW.UnitHealth
+local UnitHealthMax = TMW.UnitHealthMax
+
 local pairs
     = pairs
 	
