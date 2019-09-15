@@ -58,7 +58,14 @@ Type:RegisterIconDefaults{
 
 
 if pclass == "HUNTER" then
-	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip")
+	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip", { 
+		spellID = 75
+	})
+elseif pclass == "MAGE" or pclass == "PRIEST" or pclass == "WARLOCK" then
+	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip", { 
+		spellID = 5019,
+		descriptiveName = GetSpellInfo(5009) -- "Wands" (best i could do - couldnt find "Wand")
+	})
 end
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
@@ -123,6 +130,12 @@ function Type:Setup(icon)
 	-- Convert the slot name to a slotID.
 	icon.Slot = GetInventorySlotInfo(icon.SwingTimerSlot)
 
+	local SwingTimer = SwingTimers[icon.Slot]
+	if not SwingTimer then
+		-- invalid slot
+		icon:SetInfo("texture", "Interface\\Icons\\INV_Misc_QuestionMark")
+		return
+	end
 
 	local wpnTexture = GetInventoryItemTexture("player", icon.Slot)
 	icon:SetInfo("texture", wpnTexture or GetSpellTexture(15590))
