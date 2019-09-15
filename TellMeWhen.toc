@@ -51,7 +51,10 @@ Lib\AceComm-3.0\AceComm-3.0.xml
 Lib\AceSerializer-3.0\AceSerializer-3.0.xml
 Lib\LibSharedMedia-3.0\lib.xml
 Lib\libdatabroker-1-1\LibDataBroker-1.1.lua
-Lib\DRList-1.0\DRList-1.0.xml
+
+# DRList-1.0 uses an unconventional folder layout, requiring the double nesting.
+Lib\DRList-1.0\DRList-1.0\DRList-1.0.xml
+
 Lib\LibDogTag-3.0\lib.xml
 Lib\LibDogTag-Unit-3.0\lib.xml
 Lib\LibDogTag-Stats-3.0\lib.xml
