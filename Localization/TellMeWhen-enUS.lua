@@ -2271,7 +2271,9 @@ L["SOUNDERROR2"] = [[Custom WAV files are not supported by WoW 4.0+
 
 (Sounds built into WoW will still work, though)]]
 L["SOUNDERROR3"] = "Only OGG and MP3 files are supported!"
-L["SOUNDERROR4"] = "Since WoW 8.2, Custom files must be under the Interface directory"
+L["SOUNDERROR4"] = [[Since WoW 8.2, custom files must be under the Interface directory. 
+
+Your entered path should start with "Interface/".]]
 
 L["ANN_TAB"] = "Text"
 L["ANN_TAB_DESC"] = [[Outputs text to chat channels, UI frames, or other AddOns.]]
