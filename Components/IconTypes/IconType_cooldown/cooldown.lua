@@ -64,6 +64,9 @@ Type:RegisterIconDefaults{
 
 	-- True to cause the icon to act as unusable when the ability lacks power to be used.
 	ManaCheck				= false,
+
+	-- True to treat the spell as unusable if it is on the GCD.
+	GCDAsUnusable			= false,
 }
 
 TMW:RegisterUpgrade(80004, {
@@ -106,6 +109,10 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", fun
 		function(check)
 			check:SetTexts(L["ICONMENU_MANACHECK"], L["ICONMENU_MANACHECK_DESC"])
 			check:SetSetting("ManaCheck")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_GCDASUNUSABLE"], L["ICONMENU_GCDASUNUSABLE_DESC"])
+			check:SetSetting("GCDAsUnusable")
 		end,
 	})
 end)
@@ -160,8 +167,8 @@ local usableData = {}
 local unusableData = {}
 local function SpellCooldown_OnUpdate(icon, time)    
 	-- Upvalue things that will be referenced a lot in our loops.
-	local RangeCheck, ManaCheck, NameArray, NameStringArray =
-	icon.RangeCheck, icon.ManaCheck, icon.Spells.Array, icon.Spells.StringArray
+	local RangeCheck, ManaCheck, GCDAsUnusable, NameArray, NameStringArray =
+	      icon.RangeCheck, icon.ManaCheck, icon.GCDAsUnusable, icon.Spells.Array, icon.Spells.StringArray
 
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
 
@@ -197,7 +204,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 					-- If the cooldown duration is 0, then its usable
 					(duration == 0)
 					-- If we're just on a GCD, its usable
-					or OnGCD(duration)
+					or (not GCDAsUnusable and OnGCD(duration))
 				)
 			then --usable
 				if not usableFound then

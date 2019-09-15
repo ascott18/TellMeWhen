@@ -661,6 +661,10 @@ L["ICONMENU_MANACHECK"] = "Power check"
 L["ICONMENU_MANACHECK_DESC"] = "Check this to enable changing the color of the icon when you are out of mana/rage/runic power/etc."
 L["ICONMENU_COOLDOWNCHECK"] = "Cooldown check"
 L["ICONMENU_COOLDOWNCHECK_DESC"] = "Check this to cause the icon to be considered unusable if it is on cooldown."
+L["ICONMENU_GCDASUNUSABLE"] = "Don't ignore GCD"
+L["ICONMENU_GCDASUNUSABLE_DESC"] = [[Normally, TellMeWhen classifies cooldowns on GCD as being usable.
+
+Enable this setting to prevent that behavior, making spells on the GCD be treated as unusable.]]
 L["ICONMENU_DONTREFRESH"] = "Don't Refresh"
 L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if the trigger occurs while it is still counting down."
 L["ICONMENU_CLEU_NOREFRESH"] = "Don't Refresh"
