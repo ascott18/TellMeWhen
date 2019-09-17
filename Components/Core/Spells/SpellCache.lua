@@ -50,6 +50,7 @@ SpellCache.CONST = {
 		[3355] = true, -- Freezing Trap Effect
 		[14308] = true, -- Freezing Trap Effect
 		[14309] = true, -- Freezing Trap Effect
+		[19675] = true, -- Feral Charge Effect
 	},
 
 	-- A list of spells that should be excluded from the cache

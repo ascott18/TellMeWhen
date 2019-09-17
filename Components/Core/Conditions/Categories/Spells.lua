@@ -232,7 +232,7 @@ ConditionCategory:RegisterCondition(3.1, "CURRENTSPELL", {
 	end,
 	useSUG = true,
 	unit = false,
-	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
+	formatter = TMW.C.Formatter.BOOL,
 	icon = "Interface\\Icons\\ability_rogue_ambush",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
@@ -242,6 +242,31 @@ ConditionCategory:RegisterCondition(3.1, "CURRENTSPELL", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("CURRENT_SPELL_CAST_CHANGED")
+	end,
+})
+ConditionCategory:RegisterCondition(3.2, "AUTOSPELL", {
+	text = L["CONDITIONPANEL_AUTOSPELL"],
+	tooltip = L["CONDITIONPANEL_AUTOSPELL_DESC"],
+
+	bool = true,
+	
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
+	useSUG = true,
+	unit = false,
+	formatter = TMW.C.Formatter.BOOL,
+	icon = 135467,
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		IsAutoRepeatSpell = IsAutoRepeatSpell,
+	},
+	funcstr = [[BOOLCHECK( IsAutoRepeatSpell(c.NameFirst) )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("START_AUTOREPEAT_SPELL"),
+			ConditionObject:GenerateNormalEventString("STOP_AUTOREPEAT_SPELL")
 	end,
 })
 

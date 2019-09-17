@@ -90,12 +90,15 @@ TMW.BE = {
 		Rooted = {
 			   -339, -- Entangling Roots                    (druid, general)
 			   -122, -- Frost Nova                          (mage, general)
+			  19229, -- Improved Wing Clip					(hunter, talent)
+			  16979, -- Feral Charge (unused?)
+			  19675, -- Feral Charge Effect
 		},
 		Slowed = {
 			   -116, -- Frostbolt                           (mage, frost)
 			   -120, -- Cone of Cold                        (mage, frost)
 			  -1715, -- Hamstring                           (warrior, arms)
-			   2120, -- Flamestrike                         (mage, fire)
+			  -2974, -- Wing Clip                           (hunter))
 			   
 			   -- Crippling Poison intentionally not by name -
 			   -- 3408 is the buff that goes on the rogue who has applied it to their weapons.
@@ -103,6 +106,7 @@ TMW.BE = {
 			  -3600, -- Earthbind                           (shaman, general)
 			  -5116, -- Concussive Shot                     (hunter, beast mastery/marksman)
 			  -6343, -- Thunder Clap                        (warrior, protection)
+			  -7321, -- Chilled (Ice/Frost Armor)           (mage)
 			  -7992, -- Slowing Poison                      (NPC ability)
 			 -12323, -- Piercing Howl                       (warrior, fury)
 			  12486, -- Blizzard                            (mage, frost)
@@ -114,11 +118,14 @@ TMW.BE = {
 			   -408, -- Kidney Shot                         (rogue, subtlety/assassination)
 			   -853, -- Hammer of Justice                   (paladin, general)
 			  -1833, -- Cheap Shot                          (rogue, general)
-			   5211, -- Mighty Bash                         (druid, PVE talent, general)
+			  -5211, -- Bash                                (druid)
+			  -7922, -- Charge Stun                         (warrior)
+			  12355, -- Impact                              (mage, fire)
 			  12809, -- Concussion Blow                     (warrior)
-			  24394, -- Intimidation                        (hunter, beast mastery/surival)
+			 -20253, -- Intercept Stun                      (warrior)
 			 -20549, -- War Stomp                           (tauren racial)
 			  22703, -- Infernal Awakening                  (warlock, destro)
+			  24394, -- Intimidation                        (hunter, beast mastery/surival)
 		},
 	},
 	buffs = {
@@ -151,10 +158,12 @@ TMW.BE = {
 		DamageBuffs = {
 			   1719, -- Recklessness                        (warrior, arms)
 			   5217, -- Tiger's Fury                        (druid, feral)
+			  12043, -- Presence of Mind                    (mage, arcane)
 			  12042, -- Arcane Power                        (mage, arcane)
 			  12472, -- Icy Veins                           (mage, frost)
 			  13750, -- Adrenaline Rush                     (rogue, outlaw)
 			  19574, -- Bestial Wrath                       (hunter, beast mastery)
+			  28682, -- Combustion                          (mage, fire)
 		},
 		DamageShield = {
 			    -17, -- Power Word: Shield                  (priest, disc/shadow)

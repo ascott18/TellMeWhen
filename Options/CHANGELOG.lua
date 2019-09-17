@@ -12,6 +12,7 @@ TMW.CHANGELOG = [==[
 * Classic: Added support for Real Mob Health and LibClassicMobHealth. Real Mob Health is the better approach, and must be installed standalone.
 * Classic: Added instructions to the Swing Timer icon type on how to get Wand "swing" timers.
 * Added an option to Spell Cooldown icons and Cooldown conditions to prevent the GCD from being ignored.
+* Classic: Added a Spell Autocasting condition.
 
 ### Bug Fixes
 * Fixed an uncommon issue that could cause some event-driven icons to not update correctly after one of the units being tracked by an icon stops existing.

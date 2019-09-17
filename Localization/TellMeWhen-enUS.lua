@@ -1426,6 +1426,9 @@ L["CONDITIONPANEL_OVERLAYED_DESC"] = "Checks if a given spell has the activation
 L["CONDITIONPANEL_CURRENTSPELL"] = "Spell Queued"
 L["CONDITIONPANEL_CURRENTSPELL_DESC"] = "Checks if a given next-swing spell is currently activated."
 
+L["CONDITIONPANEL_AUTOSPELL"] = "Spell Autocasting"
+L["CONDITIONPANEL_AUTOSPELL_DESC"] = "Checks if a given spell or ability is autocasting."
+
 L["CONDITIONPANEL_INTERRUPTIBLE"] = "Interruptible"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOMATCH"] = "Name to Match"
