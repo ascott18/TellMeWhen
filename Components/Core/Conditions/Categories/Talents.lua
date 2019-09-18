@@ -70,6 +70,33 @@ ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 	end,
 })
 
+ConditionCategory:RegisterCondition(2,	 "HAPPINESS", {
+	-- poor translation to other languages, but better than just HAPPINESS on its own.
+	text = PET .. " " .. HAPPINESS,
+	
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEVALUES"],
+	bitFlags = {
+		[1] = PET_HAPPINESS1,
+		[2] = PET_HAPPINESS2,
+		[3] = PET_HAPPINESS3
+	},
+
+	unit = PET,
+	icon = "Interface\\PetPaperDollFrame\\UI-PetHappiness",
+	tcoords = {0.390625, 0.5491, 0.03, 0.3305},
+	Env = {
+		GetPetHappiness = GetPetHappiness,
+	},
+	funcstr = [[ BITFLAGSMAPANDCHECK( GetPetHappiness() or 0 ) ]],
+	hidden = pclass ~= "HUNTER",
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit("pet")),
+			ConditionObject:GenerateNormalEventString("UNIT_HAPPINESS", "pet"),
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "pet")
+	end,
+})
+
 
 ConditionCategory:RegisterSpacer(6)
 

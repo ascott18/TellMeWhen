@@ -3,6 +3,12 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v8.7.1
+* Classic: Added a pet happiness condition.
+
+### Bug Fixes
+* Classic: Fixed errors when checking the health of non-existent units with Real Mob Health installed.
+
 ## v8.7.0
 * Classic: Updated the Cast condition and icon type to use LibClassicCasterino for approximations of others' spell casts.
 * Classic: Aura durations might now be correct for abilities whose durations are variable by combopoints.

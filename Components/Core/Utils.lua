@@ -1686,10 +1686,12 @@ TMW.UnitHealthMax = UnitHealthMax
 if RealMobHealth then
 	local GetUnitHealth = RealMobHealth.GetUnitHealth
 
-	TMW.UnitHealth = GetUnitHealth
+	function TMW.UnitHealth(unit)
+		return GetUnitHealth(unit) or 0
+	end
 	function TMW.UnitHealthMax(unit)
 		local _, max = GetUnitHealth(unit)
-		return max
+		return max or 0
 	end
 else
 	-- Standalone install of LCMH is LOD
