@@ -1,3 +1,8 @@
+## v8.7.2
+
+### Bug Fixes
+* Classic: Fixed detection of weapon imbues with charges.
+
 ## v8.7.1
 * Classic: Added a pet happiness condition.
 

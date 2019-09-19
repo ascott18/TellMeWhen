@@ -48,6 +48,7 @@ Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("texture")
+Type:UsesAttributes("stack, stackText")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 
@@ -154,7 +155,13 @@ local function GetWeaponEnchantName(slot)
 			-- This magical regex should work with all locales and only get the weapon enchant name,
 			-- not other things (like the weapon DPS).
 			-- （） multibyte parenthesis are used in zhCN locale.
-			local r = strmatch(t, "(.+)[%(%（]%d+[^%.]*[^%d]+[%)%）]")
+			-- Some test strings:
+			--[[
+				Poison instantané (32 min) (23 charges)
+				Instant Poison (32 min) (23 charges)
+				Deadly Poison (32 min)
+			]]
+			local r = strmatch(t, "(.-)[%(%（]%d+[^%.]*[^%d]+[%)%）]")
 
 			if r then
 				r = strtrim(r)
@@ -202,16 +209,18 @@ local function WpnEnchant_OnUpdate(icon, time)
 
 		local start = floor(time - duration + expiration)
 
-		icon:SetInfo("state; start, duration; spell",
+		icon:SetInfo("state; start, duration; spell; stack, stackText",
 			STATE_PRESENT,
 			start, duration,
-			EnchantName
+			EnchantName,
+			charges, charges
 		)
 	else
-		icon:SetInfo("state; start, duration; spell",
+		icon:SetInfo("state; start, duration; spell; stack, stackText",
 			STATE_ABSENT,
 			0, 0,
-			nil
+			nil,
+			nil, nil
 		)
 	end
 end
