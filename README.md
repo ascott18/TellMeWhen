@@ -7,8 +7,12 @@
 <img align="left" src="https://discordapp.com/assets/f8389ca1a741a115313bede9ac02e2c0.svg" width="55"/> Join the official TellMeWhen Discord!  [https://discord.gg/NH7RmcP](https://discord.gg/NH7RmcP)
 <br>
 Ask questions, share configuration, or just hang out.
-
 <br>
+
+## Find a bug? Have a feature request? [Please open an issue on GitHub](https://github.com/ascott18/TellMeWhen/issues)
+
+
+----
 TellMeWhen is a WoW addon that provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat. TellMeWhen is...
 
 ## Flexible
