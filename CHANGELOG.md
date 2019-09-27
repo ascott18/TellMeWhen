@@ -1,3 +1,7 @@
+## v8.7.1
+### Bug Fixes
+* Fixed the buff/debuff "Either" setting for WoW 8.2.5.
+
 ## v8.7.0
 * The Missing Buffs/Debuffs icon type now sorts by lowest duration first.
 * Switched to DRList-1.0 (from DRData-1.0) for DR category data.
