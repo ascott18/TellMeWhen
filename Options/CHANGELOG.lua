@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ## v8.7.2
 
 ### Bug Fixes
+* Fixed handling of spell names in French that have a space before a colon.
 * Classic: Fixed detection of weapon imbues with charges.
 
 ## v8.7.1

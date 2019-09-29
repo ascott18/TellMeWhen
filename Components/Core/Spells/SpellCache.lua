@@ -233,7 +233,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 							strfind(name, "%d.%d") or -- Number Dot Number is probably a patch number, used often for internal spells
 							(strfind(name, "vehicle") and strfind(name, "%f[%a]vehicle%f[%A]")) or
 							(strfind(name, "credit") and strfind(name, "%f[%a]credit%f[%A]")) or
-							(strfind(name, "effect") and strfind(name, "%f[%a]effect%f[%A]")) or
+							-- 'effect' is used quite bit in classic for lots of real things. Don't blacklist it.
+							-- (strfind(name, "effect") and strfind(name, "%f[%a]effect%f[%A]")) or
 							(strfind(name, "camera") and strfind(name, "%f[%a]camera%f[%A]")) or
 							(strfind(name, "ph") and strfind(name, "%f[%a]ph%f[%A]")) or
 							(strfind(name, "proc") and strfind(name, "%f[%a]proc%f[%A]")) or
