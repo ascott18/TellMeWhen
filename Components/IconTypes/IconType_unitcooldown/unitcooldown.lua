@@ -149,7 +149,7 @@ ManualIconsManager:UpdateTable_Set(ManualIcons)
 -- Holds the cooldowns of all known units. Structure is:
 --[[ Cooldowns = {
 	[GUID] = {
-		[spellID] = lastCastTime,
+		[spellID] = { castTime1, castTime2, castTime3, ... }, -- Up to MAX_CASTS_SAVED. More recent times are at the start.
 		[spellName] = spellID,
 		...
 	},
@@ -228,6 +228,26 @@ local spellBlacklist = {
 	[50288] = 1, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
 }
 
+local MAX_CASTS_SAVED = 10
+local function saveCast(cooldownsForGUID, spellName, spellID, bufferWindow)
+	local time = TMW.time
+
+	cooldownsForGUID[spellName] = spellID
+	local castTimes = cooldownsForGUID[spellID]
+	if not castTimes then
+		castTimes = {}
+		cooldownsForGUID[spellID] = {}
+	end
+
+	local len = #castTimes
+	if len == 0 or time > castTimes[len] + bufferWindow then
+		-- If no cast has been seen, or if this cast
+		-- is more than x time after the last one, record it.
+		-- The window is to prevent recording when multiple events occur for the same cast.
+		
+		castTimes[len + 1] = TMW.time
+	end
+end
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 	local _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName = CombatLogGetCurrentEventInfo()
@@ -251,9 +271,8 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 			-- Handle things that reset on aura application.
 			for id in pairs(resetsOnAura[spellID]) do
 				if cooldownsForGUID[id] then
-					-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
-					-- on the other hand, dont set things to nil or it will look like they haven't been seen.
-					cooldownsForGUID[id] = 0
+					
+					wipe(cooldownsForGUID[id])
 					
 					-- Force update all icons. Too hard to check each icon to see if they were tracking the spellIDs that were reset,
 					-- or if they were tracking the names of the spells that were reset.
@@ -269,9 +288,8 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 			if resetsOnCast[spellID] then
 				for id in pairs(resetsOnCast[spellID]) do
 					if cooldownsForGUID[id] then
-						-- dont set it to 0 if it doesnt exist so we dont make spells that havent been seen suddenly act like they have been seen
-						-- on the other hand, dont set things to nil or it will look like they haven't been seen.
-						cooldownsForGUID[id] = 0
+						
+						wipe(cooldownsForGUID[id])
 						
 						-- Force update all icons. Too hard to check each icon to see if they were tracking the spellIDs that were reset,
 						-- or if they were tracking the names of the spells that were reset.
@@ -282,27 +300,16 @@ function Type:COMBAT_LOG_EVENT_UNFILTERED(e)
 				end
 			end
 
-
-			cooldownsForGUID[spellName] = spellID
-			cooldownsForGUID[spellID] = TMW.time
+			saveCast(cooldownsForGUID, spellName, spellID, 1)
 		else
-			local time = TMW.time
-			local storedTimeForSpell = cooldownsForGUID[spellID]
-			
 			-- If this event was less than 1.8 seconds after a SPELL_CAST_SUCCESS
 			-- or a UNIT_SPELLCAST_SUCCEEDED then ignore it.
 			-- (This is just a safety window for spell travel time so that
 			-- if we found the real cast start, we dont overwrite it)
 			-- (And really, how often are people actually going to be tracking cooldowns with cast times?
 			-- There arent that many, and the ones that do exist arent that important)
-			if not storedTimeForSpell or storedTimeForSpell + 1.8 < time then
-				cooldownsForGUID[spellName] = spellID
-				
-				-- Hack it to make it a little bit more accurate.
-				-- A max range dk deathcoil has a travel time of about 1.3 seconds,
-				-- so 1 second should be a good average to be safe with travel times.
-				cooldownsForGUID[spellID] = time-1			
-			end
+
+			saveCast(cooldownsForGUID, spellName, spellID, 1.8)
 		end
 		
 		for k = 1, #ManualIcons do
@@ -332,12 +339,11 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, _, spellID)
 		-- Addendum 6-17-12: Fired for arena1 and GUID was nil. Seems this is a more common issue than I though,
 		-- so remove all errors and just ignore things without GUIDs.
 		
-		local c = Cooldowns[sourceGUID]
+		local cooldownsForGUID = Cooldowns[sourceGUID]
 		local spellName = GetSpellInfo(spellID)
 		spellName = strlowerCache[spellName]
 		
-		c[spellName] = spellID
-		c[spellID] = TMW.time
+		saveCast(cooldownsForGUID, spellName, spellID, 1)
 		
 		for k = 1, #ManualIcons do
 			local icon = ManualIcons[k]
@@ -405,18 +411,23 @@ local function UnitCooldown_OnEvent(icon, event, arg1)
 end
 
 local BLANKTABLE = {}
+local EMPTY_START = {0}
 
 local function UnitCooldown_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local NameArray, OnlySeen, Sort, Durations, Units =
-	icon.Spells.Array, icon.OnlySeen, icon.Sort, icon.Spells.Durations, icon.Units
+	local spells = icon.Spells
+	local NameArray, OnlySeen, Sort, Durations, Charges, Units =
+	spells.Array, icon.OnlySeen, icon.Sort, spells.Durations, spells.Charges, icon.Units
 	
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
 	local usableAllAlpha = icon.States[STATE_USABLE_ALL].Alpha
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
-	local unstart, unname, unduration, usename, dobreak, useUnit, unUnit
+	local unstart, unname, unduration, 
+		uncharges, unmaxCharges,
+		usecharges, usemaxCharges, usechargeStart, usechargeDur,
+		usename, dobreak, useUnit, unUnit
 	
 	-- Initial values for the vars that track the duration/stack of the aura that currently occupies unname and related locals.
 	-- If we are sorting by smallest duration, we intitialize to math.huge so that the first thing we find is definitely smaller.
@@ -445,25 +456,86 @@ local function UnitCooldown_OnUpdate(icon, time)
 					iName = cooldowns[iName] or iName
 				end
 
-				local start
+				local starts
 				if OnlySeen == true then
 					-- If we only want cooldowns that have been seen,
 					-- don't default to 0 if it isn't in the table.
-					start = cooldowns[iName]
+					starts = cooldowns[iName]
 				elseif OnlySeen == "class" then
 					local _, class = UnitClass(unit)
 
 					-- we allow (not classSpellNameCache[class]) because of ticket 1144
 					if not classSpellNameCache[class] or classSpellNameCache[class][baseName] then
-						start = cooldowns[iName] or 0
+						starts = cooldowns[iName] or BLANKTABLE
 					end
 				else
-					start = cooldowns[iName] or 0
+					starts = cooldowns[iName] or BLANKTABLE
 				end
 
-				if start then
+				if starts then
 					local duration = Durations[i]
-					local remaining = duration - (time - start)
+					local maxCharges = Charges[i]
+
+					local start, charges = nil, 0
+					if maxCharges <= 1 then
+						-- Spell only has one charge. Use the last seen start time.
+						start = starts[1]
+					else
+						-- Spell has charges. Now the fun begins.
+
+						-- Starting from the oldest cast, work forwards.
+						-- (oldest casts are at the end of the array).
+						-- TODO: reverse the array. Put new ones at the end. Probably better perf.
+
+						charges = maxCharges
+						local lastTime = nil
+						local chargesGained = 0
+						print("-------", iName, "-------")
+						for s = 1, #starts + 1 do
+							local isFixup = s > #starts
+							local castTime = isFixup and TMW.time or starts[s]
+							print("---", castTime)
+
+							if start then
+								-- Timer was running.
+								
+								-- Add charges equal to:
+								-- 	The number of complete recharge cycles since the current start time,
+								--	minus the number of recharge cycles that we already have added
+								local modC = floor((castTime - start) / duration) - chargesGained
+								chargesGained = chargesGained + modC
+								charges = charges + modC
+								print("mod", modC, charges)
+									
+								-- If the current charges now meet or exceed
+								-- the max charges, stop the current timer,
+								-- because we must have maxed out charges before the current time.
+								if charges >= maxCharges then
+									start = nil
+								end
+							end
+
+							if not isFixup then
+								-- We're processing a cast (and not the final iteration for the current time)
+								if not start then
+									-- Timer not currently running. Start it.
+									start = castTime
+									charges = maxCharges -- we'll subtract one in a second.
+									chargesGained = 0
+									print("reset")
+								end
+
+								-- Process the current cast, which costs a charge.
+								charges = charges - 1
+								print("charges", charges)
+							end
+
+							lastTime = castTime
+						end
+					end
+
+					start = start or 0
+					local remaining = duration - (time - start) - (charges * duration)
 					if remaining < 0 then remaining = 0 end
 
 					if Sort then
@@ -476,6 +548,8 @@ local function UnitCooldown_OnUpdate(icon, time)
 								unname = iName
 								unstart = start
 								unduration = duration
+								uncharges = charges
+								unmaxCharges = maxCharges
 								unUnit = unit
 							end
 						else
@@ -483,6 +557,10 @@ local function UnitCooldown_OnUpdate(icon, time)
 							if not usename then
 								usename = iName
 								useUnit = unit
+								usecharges = charges
+								usemaxCharges = maxCharges
+								usechargeStart = start
+								usechargeDur = duration
 							end
 						end
 					else
@@ -491,6 +569,8 @@ local function UnitCooldown_OnUpdate(icon, time)
 							unname = iName
 							unstart = start
 							unduration = duration
+							uncharges = charges
+							unmaxCharges = maxCharges
 							unUnit = unit
 
 							-- We DONT care about usable cooldowns, so stop looking
@@ -502,9 +582,13 @@ local function UnitCooldown_OnUpdate(icon, time)
 							-- We found the first usable cooldown
 							usename = iName
 							useUnit = unit
+							usecharges = charges
+							usemaxCharges = maxCharges
+							usechargeStart = start
+							usechargeDur = duration
 
 							-- We care about usable cooldowns (but not all of them), so stop looking
-							if usableAlpha > 0 and usableAllAlpha == 0 then 
+							if usableAlpha > 0 and usableAllAlpha == 0 then
 								dobreak = 1
 								break
 							end
@@ -519,28 +603,31 @@ local function UnitCooldown_OnUpdate(icon, time)
 	end
 	
 	if usename and usableAllAlpha > 0 and not unname then
-		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
+		icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; spell; unit, GUID",
 			STATE_USABLE_ALL,
 			GetSpellTexture(usename) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			0, 0,
+			usecharges, usemaxCharges, usechargeStart, usechargeDur,
 			usename,
 			useUnit, nil
 		)
 
 	elseif usename and usableAlpha > 0 then
-		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
+		icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; spell; unit, GUID",
 			STATE_USABLE,
 			GetSpellTexture(usename) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			0, 0,
+			usecharges, usemaxCharges, usechargeStart, usechargeDur,
 			usename,
 			useUnit, nil
 		)
 
 	elseif unname then
-		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
+		icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; spell; unit, GUID",
 			STATE_UNUSABLE,
 			GetSpellTexture(unname),
 			unstart, unduration,
+			uncharges, unmaxCharges, unstart, unduration,
 			unname,
 			unUnit, nil
 		)
@@ -553,8 +640,9 @@ end
 local function UnitCooldown_OnUpdate_Controller(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local NameArray, OnlySeen, Durations, Units =
-	icon.Spells.Array, icon.OnlySeen, icon.Spells.Durations, icon.Units
+	local spells = icon.Spells
+	local NameArray, OnlySeen, Durations, Charges, Units =
+	spells.Array, icon.OnlySeen, spells.Durations, spells.Charges, icon.Units
 	
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
 	local unusableAlpha = icon.States[STATE_UNUSABLE].Alpha
@@ -657,12 +745,12 @@ function Type:Setup(icon)
 	end
 
 	-- Setup icon events and update functions.
-	if icon.UnitSet.allUnitsChangeOnEvent then
-		icon:SetUpdateMethod("manual")
-		ManualIconsManager:UpdateTable_Register(icon)
+	-- if icon.UnitSet.allUnitsChangeOnEvent then
+	-- 	icon:SetUpdateMethod("manual")
+	-- 	ManualIconsManager:UpdateTable_Register(icon)
 		
-		TMW:RegisterCallback("TMW_UNITSET_UPDATED", UnitCooldown_OnEvent, icon)
-	end
+	-- 	TMW:RegisterCallback("TMW_UNITSET_UPDATED", UnitCooldown_OnEvent, icon)
+	-- end
 
 	if icon:IsGroupController() then
 		icon:SetUpdateFunction(UnitCooldown_OnUpdate_Controller)

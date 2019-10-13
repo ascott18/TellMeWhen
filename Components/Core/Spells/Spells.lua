@@ -42,17 +42,34 @@ local _, pclass = UnitClass("player")
 local function splitSpellAndDuration(str)
 	-- A space is optionally allowed before the semicolon 
 	-- to support French, which likes spaces around semicolons.
-	local spell, duration = strmatch(str, "(.-)%s?:([%d:%s%.]*)$")
+	local spell, duration, charges
+
+	-- First see if there is a number of charges before the duration,
+	-- like "Spell Name: 3*2:00"
+	spell, charges, duration = strmatch(str, "(.-)%s?:%s*(%d*)%*([%d:%s%.]*)$")
+	
+	-- If not, next try to match just a spell with duration:
+	-- "Spell Name: 2:00"
 	if not spell then
-		return str, 0
+		spell, duration = strmatch(str, "(.-)%s?:([%d:%s%.]*)$")
+	end
+
+	-- There is no duration. Just return the spell.
+	if not spell then
+		return str, 0, 1
 	end
 	if not duration then
 		duration = 0
 	else
 		duration = tonumber( TMW.toSeconds(duration:trim(" :;.")) )
 	end
+	if not charges then
+		charges = 1
+	else
+		charges = tonumber(charges)
+	end
 
-	return spell:trim(" "), duration
+	return spell:trim(" "), duration, charges
 end
 
 local function parseSpellsString(setting, doLower, keepDurations)
@@ -94,15 +111,15 @@ local function parseSpellsString(setting, doLower, keepDurations)
 			tremove(buffNames, k)
 
 			local thingToRemove = tostring(v):match("^%-%s*(.*)"):lower()
-			local spellToRemove, durationToRemove = splitSpellAndDuration(thingToRemove)
+			local spellToRemove, durationToRemove, chargesToRemove = splitSpellAndDuration(thingToRemove)
 
 			local i = 1
 			local removed
 			while buffNames[i] do
 				local name = tostring(buffNames[i]):lower()
-				local spell, duration = splitSpellAndDuration(name)
+				local spell, duration, charges = splitSpellAndDuration(name)
 				
-				if spellToRemove == spell and durationToRemove == duration then
+				if spellToRemove == spell and durationToRemove == duration and chargesToRemove == charges then
 					tremove(buffNames, i)
 					removed = true
 				else
@@ -122,8 +139,11 @@ local function parseSpellsString(setting, doLower, keepDurations)
 	-- Remove invalid SpellIDs
 	for k = #buffNames, 1, -1 do
 		local v = buffNames[k]
-		local spell, duration = splitSpellAndDuration(v)
-		if (tonumber(spell) or 0) >= 2^31 or duration >= 2^31 then
+		local spell, duration, charges = splitSpellAndDuration(v)
+		if (tonumber(spell) or 0) >= 2^31
+		or duration >= 2^31 or duration < 0
+		or charges >= 2^31 or charges <= 0
+		then
 			-- Invalid spellID or duration. Remove it to prevent integer overflow errors.
 			tremove(buffNames, k)
 			TMW:Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
@@ -135,7 +155,7 @@ local function parseSpellsString(setting, doLower, keepDurations)
 	-- THIS MUST HAPPEN LAST or else the duration array and spell array can get mismatched.
 	if not keepDurations then
 		for k, buffName in pairs(buffNames) do
-			local spell, duration = splitSpellAndDuration(buffName)
+			local spell = splitSpellAndDuration(buffName)
 			buffNames[k] = tonumber(spell) or spell
 		end
 	end
@@ -207,19 +227,27 @@ end
 local function getSpellDurations(setting)
 	local NameArray = parseSpellsString(setting, false, true)
 
-	local DurationArray = CopyTable(NameArray)
+	local out = CopyTable(NameArray)
 
-	-- EXTRACT SPELL DURATIONS
-	for k, buffName in pairs(NameArray) do
-		local dur = strmatch(buffName, ".-:([%d:%s%.]*)$")
-		if not dur then
-			DurationArray[k] = 0
-		else
-			DurationArray[k] = tonumber( TMW.toSeconds(dur:trim(" :;.")) )
-		end
+	for k, name in pairs(NameArray) do
+		local _, dur = splitSpellAndDuration(name)
+		out[k] = dur
 	end
 
-	return DurationArray
+	return out
+end
+
+local function getSpellCharges(setting)
+	local NameArray = parseSpellsString(setting, false, true)
+
+	local out = CopyTable(NameArray)
+
+	for k, name in pairs(NameArray) do
+		local _, _, charges = splitSpellAndDuration(name)
+		out[k] = charges
+	end
+
+	return out
 end
 
 
@@ -252,6 +280,7 @@ local tableArgs = {
 	-- every time the cache needs to be reset (handled in the :Wipe() method).
 	-- It is handled specially, though.
 	Durations = true,
+	Charges = true,
 }
 local __index_old = nil
 
@@ -297,6 +326,11 @@ TMW:NewClass("SpellSet"){
 		
 		if k == "Durations" then
 			self[k] = getSpellDurations(self.Name)
+			return self[k]
+		end
+		
+		if k == "Charges" then
+			self[k] = getSpellCharges(self.Name)
 			return self[k]
 		end
 

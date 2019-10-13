@@ -311,6 +311,7 @@ function IE:GetRealNames(Name)
 		tbl = TMW:GetSpells(text).Array
 	end
 	local durations = TMW:GetSpells(text).Durations
+	local charges = TMW:GetSpells(text).Charges
 
 	local Cache = TMW:GetModule("SpellCache"):GetCache()
 	
@@ -345,7 +346,13 @@ function IE:GetRealNames(Name)
 
 		local dur = ""
 		if CI_typeData.DurationSyntax or durations[k] > 0 then
-			dur = ": "..TMW:FormatSeconds(durations[k])
+			dur = ": "
+
+			if charges[k] ~= 1 then
+				dur = dur .. tostring(charges[k]) .. " * "
+			end
+
+			dur = dur .. TMW:FormatSeconds(durations[k])
 		end
 
 		local str = (texture and ("|T" .. texture .. ":0|t") or "") .. name .. dur
