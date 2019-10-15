@@ -217,9 +217,13 @@ end)
 local function DR_OnEvent(icon, event, arg1)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local _, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType = CombatLogGetCurrentEventInfo()
-		spellName = strlowerCache[spellName]
 
-		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
+		if auraType == "DEBUFF" and (
+			cevent == "SPELL_AURA_REMOVED" or 
+			cevent == "SPELL_AURA_APPLIED" or 
+			(icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")
+		) then
+			spellName = strlowerCache[spellName]
 			local NameHash = icon.Spells.StringHash
 			if NameHash[spellName] then
 
