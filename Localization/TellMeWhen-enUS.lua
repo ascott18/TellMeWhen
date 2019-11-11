@@ -631,6 +631,7 @@ L["AIR"] = "Air"
 L["MUSHROOM"] = "Mushroom %d"
 L["RUNEOFPOWER"] = "Rune %d"
 L["GENERICTOTEM"] = "Totem %d"
+L["GENERICTOTEM_ANY"] = "Any Totem"
 L["RUNES"] = "Rune(s) to check"
 
 

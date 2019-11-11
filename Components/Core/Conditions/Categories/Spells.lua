@@ -657,6 +657,57 @@ function Env.TotemHelper(slot, nameString)
 	return duration and duration ~= 0 and (duration - (TMW.time - start)) or 0
 end
 
+function Env.TotemHelperAny(nameString)
+	for slot = 1, 10 do
+		local have, name, start, duration = GetTotemInfo(slot)
+		if have == nil then
+			return 0 -- `have` will be nil if the slot doesn't exist.
+		end
+
+		if
+			have and (
+				-- If we're not filtering by name,
+				(not nameString or nameString == "" or nameString == ";")
+				-- Or we are filtering by name and the name matches
+				or (name and strfind(nameString, Env.SemicolonConcatCache[name]))
+			)
+		then
+			-- Then return the time of this totem as the result.
+			return duration and duration ~= 0 and (duration - (TMW.time - start)) or 0
+		end
+		-- If the above condition didn't succeeed, continue on to the next totem.
+	end
+
+	-- No results were found.
+	return 0
+end
+
+
+ConditionCategory:RegisterCondition(20.1,	 "TOTEM_ANY", {
+	text = L["GENERICTOTEM_ANY"],
+	tooltip = L["ICONMENU_TOTEM_DESC"],
+	min = 0,
+	range = 60,
+	unit = false,
+	name = function(editbox)
+		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
+		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
+	end,
+	useSUG = true,
+	allowMultipleSUGEntires = true,
+	formatter = TMW.C.Formatter.TIME_0ABSENT,
+	icon = "Interface\\ICONS\\ability_shaman_tranquilmindtotem",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[TotemHelperAny(c.Name) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
+	end,
+	anticipate = function(c)
+		return [[local VALUE = time + TotemHelperAny(c.Name) - c.Level]]
+	end,
+})
+
 for i = 1, 5 do
 	local totem = totemData[i]
 	ConditionCategory:RegisterCondition(20 + i,	 "TOTEM" .. i, {
