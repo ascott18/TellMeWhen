@@ -698,13 +698,13 @@ ConditionCategory:RegisterCondition(20.1,	 "TOTEM_ANY", {
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\ICONS\\ability_shaman_tranquilmindtotem",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[TotemHelperAny(c.Name) c.Operator c.Level]],
+	funcstr = [[TotemHelperAny(c.NameStrings) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
 	end,
 	anticipate = function(c)
-		return [[local VALUE = time + TotemHelperAny(c.Name) - c.Level]]
+		return [[local VALUE = time + TotemHelperAny(c.NameStrings) - c.Level]]
 	end,
 })
 
@@ -725,7 +725,7 @@ for i = 1, 5 do
 		formatter = TMW.C.Formatter.TIME_0ABSENT,
 		icon = totem and totem.texture or "Interface\\ICONS\\ability_shaman_tranquilmindtotem",
 		tcoords = CNDT.COMMON.standardtcoords,
-		funcstr = [[TotemHelper(]] .. i .. ((not totem or totem.hasVariableNames) and [[, c.Name]] or "") .. [[) c.Operator c.Level]],
+		funcstr = [[TotemHelper(]] .. i .. ((not totem or totem.hasVariableNames) and [[, c.NameString]] or "") .. [[) c.Operator c.Level]],
 		events = function(ConditionObject, c)
 			return
 				ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
