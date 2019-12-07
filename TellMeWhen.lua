@@ -2621,7 +2621,13 @@ do	-- TMW:OnUpdate()
 
 	TMW:RegisterEvent("UNIT_FLAGS", function(event, unit)
 		if unit == "player" then
+			local old = inCombatLockdown
 			inCombatLockdown = InCombatLockdown()
+			if not old and inCombatLockdown then
+				TMW:Fire("TMW_COMBAT_LOCKDOWN_STARTED")
+			elseif old and not inCombatLockdown then
+				TMW:Fire("TMW_COMBAT_LOCKDOWN_ENDED")
+			end
 		end
 	end)
 

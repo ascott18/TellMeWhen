@@ -4,6 +4,8 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
 ## v8.7.3
+* Added a new "Any Totem" condition that will check all totem slots.
+
 ### Bug Fixes
 * Fix #1742 - Errors related to improper escaping of user input for the suggestion list.
 
