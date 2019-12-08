@@ -350,6 +350,13 @@ function Icon.IsBeingEdited(icon)
 	end
 end
 
+function Icon.IsMouseOver(icon)
+	-- Ignore mouseover checks that fail due to the frame being restricted.
+	local success, isOver = pcall(UIParent.IsMouseOver, icon)
+	if not success then return false end
+	return isOver
+end
+
 --- Returns a string that contains the texture of the icon plus the name of the group and the ID of the icon.
 -- @name Icon:GetIconName
 -- @paramsig texture

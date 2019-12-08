@@ -225,11 +225,13 @@ end<</code>>
 ** Substitutes the data from the first and second editboxes after it has been cleaned of redundant semicolons, made lowercase, and then wrapped in semicolons at beginning and end. The usage of this is a bit unintuitive, so please refer to TMW's source for its implementations. The primary use of this substitution is when a condition can check over multiple values with semicolon-delimited input.
 
 * "c.NameFirst" & "c.NameFirst2"
-** Substitues the value from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted.
+** Substitues the value from the first and second editboxes, respectively. If there are multiple semicolon-delimited values, only the first will be substituted.
 * "c.GCDReplacedNameFirst" & "c.GCDReplacedNameFirst2"
 ** Behaves exactly like "c.NameFirst" except that if the value of the setting is equal to "gcd", TMW.GCDSpell will be substituted instead.
 * "c.NameString" & "c.NameString2"
-** Substitues the spell name from the first and second editboxes, respectively. If there are multiple, semicolon-delimited values, only the first will be substituted. If the value inputted into these textboxes is not a valid spell, the raw value from the textbox will be used.
+** Substitues the spell name from the first and second editboxes, respectively. If there are multiple semicolon-delimited values, only the first will be substituted. If the value inputted into these textboxes is not a valid spell, the raw value from the textbox will be used.
+* "c.NameStrings"
+** Substitues the spell names from the first editbox after it has been cleaned of redundant semicolons, made lowercase, and then wrapped in semicolons at beginning and end. If there are multiple semicolon-delimited values, semicolons will be maintained.
 
 * "c.Item" & "c.Item2"
 ** Substitutes a reference to the TMW.Classes.Item-derived object constructed for the input from the first and second editboxes, respectively. You should always use this substitution when working with a condition that checks items - never access the "Name" or "Name2" setting directly from the settings table when it is passed into the {{{funcstr}}} call because that is a raw, unprocessed setting. Example usage for these includes things like {{{c.Item:GetCount() c.Operator c.Level}}}.
