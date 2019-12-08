@@ -70,6 +70,13 @@ function Env.SwingDuration(slot)
 	end
 	return 0
 end
+function Env.SwingInfo(slot)
+	local SwingTimer = SwingTimers[slot]
+	if SwingTimer then
+		return SwingTimer.startTime, SwingTimer.duration
+	end
+	return nil, nil
+end
 
 local ConditionCategory = CNDT:GetCategory("SPELLSABILITIES", 4, L["CNDTCAT_SPELLSABILITIES"], true, false)
 
@@ -616,7 +623,7 @@ ConditionCategory:RegisterCondition(19,	 "MHSWING", {
 	end,
 	hidden = not TMW.COMMON.SwingTimerMonitor,
 	anticipate = [[
-		local start, duration = SwingDuration(]] .. GetInventorySlotInfo("MainHandSlot") .. [[)
+		local start, duration = SwingInfo(]] .. GetInventorySlotInfo("MainHandSlot") .. [[)
 		local VALUE = duration and start + (duration - c.Level) or huge
 	]],
 })
@@ -639,7 +646,7 @@ ConditionCategory:RegisterCondition(19.5,	 "OHSWING", {
 	end,
 	hidden = not TMW.COMMON.SwingTimerMonitor,
 	anticipate = [[
-		local start, duration = SwingDuration(]] .. GetInventorySlotInfo("SecondaryHandSlot") .. [[)
+		local start, duration = SwingInfo(]] .. GetInventorySlotInfo("SecondaryHandSlot") .. [[)
 		local VALUE = duration and start + (duration - c.Level) or huge
 	]],
 })
