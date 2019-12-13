@@ -97,11 +97,7 @@ end)
 
 
 local function Cast_OnEvent(icon, event, arg1)
-	if event == "TMW_UNIT_CAST_UPDATE" --[[ and icon.UnitSet.UnitsLookup[arg1] ]] then
-		-- We can't check against the unit here because LibClassicCasterino's events don't
-		-- work like the blizzard events do - they don't fire with every valid unitID.
-		icon.NextUpdateTime = 0
-	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
@@ -210,8 +206,11 @@ function Type:Setup(icon)
 	-- Setup events and update functions.
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-	
-		TMW:RegisterCallback("TMW_UNIT_CAST_UPDATE", Cast_OnEvent, icon)
+
+		-- We can't check against the unit for TMW_UNIT_CAST_UPDATE because LibClassicCasterino's events don't
+		-- work like the blizzard events do - they don't fire with every valid unitID.
+		icon:RegisterSimpleUpdateEvent("TMW_UNIT_CAST_UPDATE")
+		
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Cast_OnEvent, icon)
 		icon:SetScript("OnEvent", Cast_OnEvent)
 	end

@@ -20,7 +20,7 @@ local print = TMW.print
 local format, type, tonumber, wipe, bit =
 	  format, type, tonumber, wipe, bit
 local GetTotemInfo, GetSpellInfo =
-	  GetTotemInfo, GetSpellInfo
+	  TMW.GetTotemInfo, GetSpellInfo
 
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
@@ -207,8 +207,7 @@ function Type:Setup(icon)
 	)
 
 	icon:SetUpdateMethod("manual")
-	
-	icon:RegisterSimpleUpdateEvent("PLAYER_TOTEM_UPDATE")
+	icon:RegisterSimpleUpdateEvent("TMW_TOTEM_UPDATE")
 	
 	icon:SetUpdateFunction(Totem_OnUpdate)
 	icon:Update()
