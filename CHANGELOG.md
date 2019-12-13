@@ -6,6 +6,7 @@
 * Fix #1742 - Errors related to improper escaping of user input for the suggestion list.
 * Fixed error `bad argument #1 to 'strlower' (string expected, got boolean)` when using Diminishing Returns icons
 * Fix #1755 - Swing Timer conditions with durations other than zero seconds were not triggering updates at the proper moment.
+* Fixed error `PlayerNames.lua:96: attempt to concatenate field "?" (a nil value)`
 
 ## v8.7.2
 ### Bug Fixes

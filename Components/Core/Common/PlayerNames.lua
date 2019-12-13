@@ -91,8 +91,8 @@ end
 
 function NAMES:UPDATE_BATTLEFIELD_SCORE()
 	for i = 1, GetNumBattlefieldScores() do
-		local name, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
-		if name and class then -- sometimes this returns nil??
+		local name, _, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
+		if name and class and self.ClassColors[class] then -- sometimes this returns nil??
 			self.ClassColoredNameCache[name] = self.ClassColors[class] .. name .. "|r"
 		end
 	end
