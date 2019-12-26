@@ -55,7 +55,7 @@ local totemsById = {
     [10463] = { texture = 135127, slot = WATER, duration = 60 },  -- Healing Stream
     [10479] = { texture = 135866, slot = FIRE,  duration = 120 }, -- Frost Resistance
     [10497] = { texture = 136053, slot = WATER, duration = 60 },  -- Mana Spring
-    [10538] = { texture = 135832, slot = FIRE,  duration = 120 }, -- Fire Resistance
+    [10538] = { texture = 135832, slot = WATER, duration = 120 }, -- Fire Resistance
     [10587] = { texture = 135826, slot = FIRE,  duration = 20 },  -- Magma
     [10601] = { texture = 136061, slot = AIR,   duration = 120 }, -- Nature Resistance
     [10614] = { texture = 136114, slot = AIR,   duration = 120 }, -- Windfury
