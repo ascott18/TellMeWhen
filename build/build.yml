@@ -34,8 +34,11 @@ steps:
     if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="*.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
       grep -rnP '## X?-?\KInterface.*' --exclude-dir=.release --include="*.toc" . | cat
       echo "More than 1 distinct ##Interface version found in .toc files." 1>&2
+      exit 1
     fi;
   displayName: "Valicate TOC"
+  failOnStderr: true
+  workingDirectory: $(Build.SourcesDirectory)
 
 - bash: sudo apt-get install -y pandoc
   displayName: "Install Packages"
