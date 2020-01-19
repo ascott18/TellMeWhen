@@ -1,6 +1,7 @@
 ## v8.7.4
 ### Bug Fixes
 * Fixed Fire Resistance Totem being classified as a fire totem rather than a water totem.
+* Fix #1761 - Earth and Water totems were switched with one another.
 
 ## v8.7.3
 * Added a new "Any Totem" condition that will check all totem slots.

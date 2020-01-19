@@ -40,8 +40,8 @@ if pClass ~= "SHAMAN" then
 end
 
 local FIRE = 1
-local WATER = 2
-local EARTH = 3
+local EARTH = 2
+local WATER = 3
 local AIR = 4
 
 local totemsById = {
