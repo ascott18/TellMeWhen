@@ -36,7 +36,7 @@ steps:
       echo "More than 1 distinct ##Interface version found in .toc files." 1>&2
       exit 1
     fi;
-  displayName: "Valicate TOC"
+  displayName: "Validate TOC"
   failOnStderr: true
   workingDirectory: $(Build.SourcesDirectory)
 
