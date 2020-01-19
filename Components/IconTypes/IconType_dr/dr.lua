@@ -168,18 +168,14 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	if DRList then
 		local myCategories = {
 			incapacitate = "DR-Incapacitate",
-			charge =       "DR-Charge",
-			opener_stun =  "DR-CheapShot",
 			stun =         "DR-ControlledStun",
-			disarm =       "DR-Disarm",
-			entrapment =   "DR-Entrapment",
 			fear =         "DR-Fear",
-			death_coil =   "DR-Horrify",
 			mind_control = "DR-MindControl",
 			random_root =  "DR-RandomRoot",
 			random_stun =  "DR-RandomStun",
 			root =         "DR-ControlledRoot",
 			silence =      "DR-Silence",
+			kidney_shot =  "DR-KidneyShot",
 		}
 
 		local ignored = {
