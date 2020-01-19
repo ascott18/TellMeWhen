@@ -1,3 +1,7 @@
+## v8.7.4
+### Bug Fixes
+* Fix #1762 - Suggestion list insertion via left-click not working due to bizarre new focus-clearing mechanism in WoW 8.3.
+
 ## v8.7.3
 * Added a new "Any Totem" condition that will check all totem slots.
 
