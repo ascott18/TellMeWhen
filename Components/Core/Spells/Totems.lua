@@ -94,7 +94,7 @@ frame:SetScript("OnEvent", function(self, event)
             
         if sourceGUID == pGUID and cleuEvent == "SPELL_SUMMON" and spellName then
             local info = totemsByName[spellName]
-            if cleuEvent == "SPELL_SUMMON" then
+            if cleuEvent == "SPELL_SUMMON" and info then
                 Slots[info.slot] = {
                     name = info.name,
                     start = TMW.time,
