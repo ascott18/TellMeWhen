@@ -1,5 +1,6 @@
 ## v8.7.5
 * #1787 - Added Vulpera and Mechagnomes to Unit Race condition.
+* #1784 - Let OmniCC detect charge-type cooldowns 
 
 ### Bug Fixes
 * Fix #1764 - Fix resizing of the main configuration window, the color picker, and a few others.
