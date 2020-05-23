@@ -167,7 +167,7 @@ ConditionCategory:RegisterCondition(30.5, "MELEEAP", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		MELEEAP_UnitAttackPower = function(unit)
-			local base, pos, neg = c(unit)
+			local base, pos, neg = UnitAttackPower(unit)
 			return base + pos + neg
 		end,
 	},
