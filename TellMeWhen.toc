@@ -103,7 +103,6 @@ Components\Core\BaseClasses\IconDataProcessorComponent.lua
 Components\Core\Spells\Equivalencies.lua
 Components\Core\Spells\Spells.lua
 Components\Core\Spells\AuraDurations.lua
-Components\Core\Spells\Totems.lua
 Components\Core\Spells\AuraCache.lua
 Components\Core\Spells\ClassSpellCache.lua
 

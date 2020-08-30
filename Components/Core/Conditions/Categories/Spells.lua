@@ -27,7 +27,7 @@ local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 
-local GetTotemInfo = TMW.GetTotemInfo
+local GetTotemInfo = GetTotemInfo
 local UnitGUID = UnitGUID
 local max, strfind, format = max, strfind, format
 local bit_band = bit.band
@@ -625,7 +625,7 @@ ConditionCategory:RegisterCondition(20.1,	 "TOTEM_ANY", {
 	funcstr = [[TotemHelperAny(c.NameStrings) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("TMW_TOTEM_UPDATE")
+			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
 	end,
 	anticipate = function(c)
 		return [[local VALUE = time + TotemHelperAny(c.NameStrings) - c.Level]]
@@ -652,7 +652,7 @@ for i = 1, 5 do
 		funcstr = [[TotemHelper(]] .. i .. ((not totem or totem.hasVariableNames) and [[, c.NameString]] or "") .. [[) c.Operator c.Level]],
 		events = function(ConditionObject, c)
 			return
-				ConditionObject:GenerateNormalEventString("TMW_TOTEM_UPDATE")
+				ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
 		end,
 		anticipate = function(c)
 			return [[local VALUE = time + TotemHelper(]] .. i .. [[) - c.Level]]
