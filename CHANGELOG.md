@@ -1,3 +1,6 @@
+## v8.7.6
+* Shadowlands/Patch 9.0 support. Please report bugs to https://github.com/ascott18/TellMeWhen/issues.
+
 ## v8.7.5
 * #1787 - Added Vulpera and Mechagnomes to Unit Race condition.
 * #1784 - Let OmniCC detect charge-type cooldowns 

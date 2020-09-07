@@ -259,7 +259,7 @@ function Type:Setup(icon)
 	--		icon:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
 	--		icon:RegisterEvent("UNIT_MAXHEALTH")
 	--	elseif icon.PowerType == -1 then
-	--		icon:RegisterEvent("UNIT_HEALTH_FREQUENT")
+	--		icon:RegisterEvent("UNIT_HEALTH")
 	--		icon:RegisterEvent("UNIT_MAXHEALTH")
 	--	elseif icon.PowerType == -2 then
 	--		icon:RegisterEvent("UNIT_POWER_FREQUENT")

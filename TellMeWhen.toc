@@ -15,6 +15,7 @@
 ## Interface: 80300
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
 ## X-Interface: 80300
+## X-Compatible-With: 90000
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 10855
