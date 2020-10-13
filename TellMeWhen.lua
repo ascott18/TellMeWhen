@@ -1191,7 +1191,7 @@ function TMW:PLAYER_LOGIN()
 	
 	TMW:Fire("TMW_INITIALIZE")
 	TMW:UnregisterAllCallbacks("TMW_INITIALIZE")
-	
+
 	TMW.Initialized = true
 	
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
@@ -2876,9 +2876,19 @@ do -- TMW:UpdateViaCoroutine()
 		NumCoroutinesQueued = NumCoroutinesQueued + 1
 	end
 
+	local function TryPreloadOptions()
+		if TMW.db.global.AllowCombatConfig and not TMW.ALLOW_LOCKDOWN_CONFIG then
+			TMW.ALLOW_LOCKDOWN_CONFIG = true
+			TMW:LoadOptions()
+			return true
+		end
+		return false
+	end
+
 	TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+		TryPreloadOptions()
 		if TMW.Initialized then
-			if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.Locked then
+			if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.db.profile.Locked then
 				TMW:LockToggle()
 			end
 		end
@@ -2887,9 +2897,7 @@ do -- TMW:UpdateViaCoroutine()
 	-- Auto-loads options if AllowCombatConfig is enabled.
 	TMW:RegisterSelfDestructingCallback("TMW_GLOBAL_UPDATE", function()
 		if TMW.db.global.AllowCombatConfig and not TMW.ALLOW_LOCKDOWN_CONFIG then
-			TMW.ALLOW_LOCKDOWN_CONFIG = true
-			TMW:LoadOptions()
-			return true -- Signal callback destruction
+			return TryPreloadOptions()
 		end
 	end)
 end

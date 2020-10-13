@@ -234,7 +234,8 @@ end
 
 function Module:OnSuggest()
 	if not InCombatLockdown() then
-		-- I honestly can't remember why i did this.
+		-- Doing this will generate all the DogTag help strings
+		-- so we can then use them in the suggstion list.
 		local frame = _G["LibDogTag-3.0_HelpFrame"]
 		local wasShown = frame and frame:IsShown()
 		DogTag:OpenHelp()
