@@ -7,7 +7,7 @@ import os
 
 from slpp import slpp as lua
 
-base_url = "http://www.wowhead.com"
+base_url = "https://www.wowhead.com"
 
 num_classes = 12
 
@@ -91,7 +91,10 @@ max_retries = 3
 def try_scrape_url(url, regex, id, tries = 0):
 	print("getting " + str(id))
 
-	response = urllib.request.urlopen(url)
+	user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
+	headers = {'User-Agent': user_agent}
+	req = urllib.request.Request(url, [], headers)
+	response = urllib.request.urlopen(req)
 
 	content = response.read().decode()
 	
@@ -107,6 +110,7 @@ def try_scrape_url(url, regex, id, tries = 0):
 	data = match.group(1)
 	data = re.sub(r"frommerge:1", r'"frommerge":1', data)
 	data = re.sub(r"popularity:", r'"popularity":', data)
+	data = re.sub(r"quality:", r'"quality":', data)
 	data = json.loads(data)
 
 	return data
