@@ -139,7 +139,7 @@ L["STACKALPHA_DESC"] = L["STACKALPHA_DESC"]:format(L["ICONMENU_SHOWWHEN"])
 
 -- Wizard magic to make ICONMENU_CHOOSENAME_WPNENCH_DESC be locale-dynamic
 do
-	local FlametongueWeapon = GetSpellInfo(8024)
+	local FlametongueWeapon = GetSpellInfo(318038)
 	local FlametongueWeaponEnchant
 	for i = 1, select("#", strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
 		local enchant = select(i, strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"]))
