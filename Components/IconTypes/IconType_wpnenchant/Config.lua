@@ -302,6 +302,16 @@ function Module:Table_GetSorter()
 	return self.Sorter
 end
 function Module.Sorter(a, b)
+	local haveA = Module.Spells[a] and PlayerSpells[Module.Spells[a]]
+	local haveB = Module.Spells[b] and PlayerSpells[Module.Spells[b]]
+
+	if haveA or haveB then
+		if haveA and haveB then
+			return a < b
+		else
+			return haveA
+		end
+	end
 
 	local haveA = Module.Items[a] and (CurrentItems[ strlowerCache[ a ]] )
 	local haveB = Module.Items[b] and (CurrentItems[ strlowerCache[ b ]] )
@@ -347,7 +357,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl)
 	end
 end
 function Module:Entry_Colorize_1(f, name)
-	if CurrentItems[ strlowerCache[ name ]] then
+	if PlayerSpells[Module.Spells[name]] or (CurrentItems[ strlowerCache[ name ]]) then
 		f.Background:SetVertexColor(.41, .8, .94, 1) --color all spells and items that you have mage blue
 		
 	elseif rawget(TMW.db.locale.WpnEnchDurs, name) then
