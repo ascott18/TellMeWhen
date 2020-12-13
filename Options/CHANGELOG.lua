@@ -10,6 +10,7 @@ TMW.CHANGELOG = [==[
 * #1829 - Fixed Guardians icon type Felguard timer (15 -> 17 seconds).
 * #1831 - Blacklist "Sinful Revelation" from the last cast condition
 * #1819 - Cloning notifications will now always clone all condition settings for condition-based triggers.
+* #1821 - Fix errors caused by Brewmaster stagger APIs returning nil in loading screens.
 
 ## v9.0.2
 ### Bug Fixes
