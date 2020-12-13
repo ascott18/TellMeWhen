@@ -437,8 +437,8 @@ end})
 
 TMW.SpellTexturesMetaIndex = {
 	--hack for pvp tinkets
-	[42292] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
-	[strlowerCache[GetSpellInfo(42292)]] = "Interface\\Icons\\inv_jewelry_trinketpvp_0" .. (UnitFactionGroup("player") == "Horde" and "2" or "1"),
+	[336126] = GetSpellTexture(336126),
+	[strlowerCache[GetSpellInfo(336126)]] = GetSpellTexture(336126),
 }
 local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
 

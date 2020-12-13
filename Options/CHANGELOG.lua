@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ## v9.0.3
 ### Bug Fixes
 * #1824 - Fix incorrect detection of Defensive mode in the Pet Attack Mode condition.
+* #1828 - Fix tooltips mentioning obsolete ways of tracking PvP trinkets.
 
 ## v9.0.2
 ### Bug Fixes
