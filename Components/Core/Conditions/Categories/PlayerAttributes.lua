@@ -184,6 +184,7 @@ TMW:RegisterUpgrade(73019, {
 local PetModes = {
 	PET_MODE_AGGRESSIVE = 1,
 	PET_MODE_DEFENSIVE = 2,
+	PET_MODE_DEFENSIVEASSIST = 2, -- Added in 8.3
 	PET_MODE_PASSIVE = 3,
 }
 ConditionCategory:RegisterCondition(13.1, "PETMODE2", {

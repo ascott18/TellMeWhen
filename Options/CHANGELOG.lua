@@ -3,6 +3,16 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v9.0.3
+### Bug Fixes
+* #1824 - Fix incorrect detection of Defensive mode in the Pet Attack Mode condition.
+* #1819 - Cloning notifications will now always clone all condition settings for condition-based triggers.
+* #1822 - All-Unit Buffs/Debuffs icons configured to only show when All Absent should now function as such.
+
+## v9.0.2
+### Bug Fixes
+* #1814 - Fix issues with range checking for some abilities
+
 ## v8.7.6
 * Totem timer functions are once again based on Blizzard's GetTotemInfo API that was restored in patch 1.13.4.
 

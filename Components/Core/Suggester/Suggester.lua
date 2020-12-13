@@ -1294,9 +1294,6 @@ function Module:Entry_OnClick(f, button)
 			end
 		end
 	end
-	if spellID == 42292 then -- pvp trinket override
-		dur = "2:00"
-	end
 
 	if button == "RightButton" and f.insert2 then
 		insert = f.insert2

@@ -33,7 +33,7 @@ if not wow_classic then
 	return
 end
 
-TELLMEWHEN_VERSION = "8.7.6"
+TELLMEWHEN_VERSION = "9.0.3"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -44,11 +44,11 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " Classic " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 87601 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 90301 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 88000 or TELLMEWHEN_VERSIONNUMBER < 87000 then
+if TELLMEWHEN_VERSIONNUMBER > 91000 or TELLMEWHEN_VERSIONNUMBER < 90000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
 end
@@ -2769,9 +2769,19 @@ do -- TMW:UpdateViaCoroutine()
 		NumCoroutinesQueued = NumCoroutinesQueued + 1
 	end
 
+	local function TryPreloadOptions()
+		if TMW.db.global.AllowCombatConfig and not TMW.ALLOW_LOCKDOWN_CONFIG then
+			TMW.ALLOW_LOCKDOWN_CONFIG = true
+			TMW:LoadOptions()
+			return true
+		end
+		return false
+	end
+
 	TMW:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+		TryPreloadOptions()
 		if TMW.Initialized then
-			if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.Locked then
+			if not TMW.ALLOW_LOCKDOWN_CONFIG and not TMW.db.profile.Locked then
 				TMW:LockToggle()
 			end
 		end
@@ -2780,9 +2790,7 @@ do -- TMW:UpdateViaCoroutine()
 	-- Auto-loads options if AllowCombatConfig is enabled.
 	TMW:RegisterSelfDestructingCallback("TMW_GLOBAL_UPDATE", function()
 		if TMW.db.global.AllowCombatConfig and not TMW.ALLOW_LOCKDOWN_CONFIG then
-			TMW.ALLOW_LOCKDOWN_CONFIG = true
-			TMW:LoadOptions()
-			return true -- Signal callback destruction
+			return TryPreloadOptions()
 		end
 	end)
 end

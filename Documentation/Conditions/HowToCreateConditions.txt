@@ -79,7 +79,7 @@ You also can create these manually. They look something like this:
 "event == 'PLAYER_UPDATE_RESTING'"
 
 -- E.g. #2:
-"event == 'UNIT_HEALTH_FREQUENT' and arg1 == 'player'"
+"event == 'UNIT_HEALTH' and arg1 == 'player'"
 <</code>>
 
 Event args can be accessed through variables named "arg1", "arg2", etc. assuming that the proper number of args have been requested using [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:SetNumEventArgs()}}}. When generating event strings manually, it is also important to requested the needed events using [[api/conditions/api-documentation/condition-object/|ConditionObject]]{{{:RequestEvent()}}}.
@@ -121,7 +121,7 @@ if (not event or
   (event == 'PLAYER_UPDATE_RESTING') or 
   (event == 'SPELL_UPDATE_USABLE') or 
   (event == 'SPELL_UPDATE_COOLDOWN') or 
-  (event == 'UNIT_HEALTH_FREQUENT' and arg1 == 'player') or 
+  (event == 'UNIT_HEALTH' and arg1 == 'player') or 
   (false) or 
   (event == 'PLAYER_ENTERING_WORLD') or 
   (event == 'UNIT_MAXHEALTH' and arg1 == 'player') 
