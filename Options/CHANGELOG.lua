@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v9.0.3
+### Bug Fixes
+* #1824 - Fix incorrect detection of Defensive mode in the Pet Attack Mode condition.
+
 ## v9.0.2
 ### Bug Fixes
 * #1814 - Fix issues with range checking for some abilities
