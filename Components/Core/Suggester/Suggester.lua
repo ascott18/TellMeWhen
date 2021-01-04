@@ -91,7 +91,6 @@ function SUG:DoSuggest()
 
 	local tbl = SUG.CurrentModule:Table_Get() or {}
 
-	local start = debugprofilestop()
 	SUG.CurrentModule:Table_GetNormalSuggestions(SUGpreTable, tbl)
 	SUG.CurrentModule:Table_GetEquivSuggestions(SUGpreTable, SUG.CurrentModule:Table_Get())
 
@@ -103,8 +102,6 @@ function SUG:DoSuggest()
 
 		Table_GetSpecialSuggestions(SUG.CurrentModule, SUGpreTable)
 	end
-
-	print("SUG: Got Suggestions in " .. (debugprofilestop() - start))
 
 	suggestedForModule = SUG.CurrentModule
 	SUG.tabIndex = 1
@@ -129,7 +126,6 @@ function SUG:SuggestingComplete(doSort)
 	SUG.SuggestionList.blocker:Hide()
 	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
 	if doSort and not SUG.CurrentModule.dontSort then
-		local start = debugprofilestop()
 
 		local sorter, sorterBucket = SUG.CurrentModule:Table_GetSorter()
 
@@ -176,7 +172,6 @@ function SUG:SuggestingComplete(doSort)
 			TMW.shellsortDeferred(SUGpreTable, sorter, nil, SUG.SuggestingComplete, SUG, progressCallback)
 			return
 		end
-		print("SUG: Sorted in " .. debugprofilestop() - start)
 	end
 
 	if suggestedForModule ~= SUG.CurrentModule then
