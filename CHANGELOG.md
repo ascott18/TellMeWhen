@@ -1,3 +1,5 @@
+## v9.0.4
+* #1811 - The group/target point of a group will now be preserved when moving a shrunk group via click-and-drag.
 ## v9.0.3
 ### Bug Fixes
 * #1824 - Fix incorrect detection of Defensive mode in the Pet Attack Mode condition.
