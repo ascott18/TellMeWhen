@@ -23,13 +23,17 @@ local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("Player")
 
+local wipe = 
+      wipe
 local GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo = 
       GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo
 local GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses, GetClassInfo = 
       GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses, GetClassInfo
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
       GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec
-
+local UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID =
+	  UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID
+	  
 local ConditionCategory = CNDT:GetCategory("TALENTS", 1.4, L["CNDTCAT_TALENTS"], true, false)
 
 
@@ -353,8 +357,9 @@ function CNDT:PLAYER_TALENT_UPDATE()
 	wipe(Env.TalentMap)
 	for tier = 1, MAX_TALENT_TIERS do
 		for column = 1, NUM_TALENT_COLUMNS do
-			local id, name, _, selected = GetTalentInfo(tier, column, 1)
+			local id, name, _, selected, available, _, _, _, _, _, grantedByAura = GetTalentInfo(tier, column, 1)
 			local lower = name and strlowerCache[name]
+			selected = selected or grantedByAura
 			if lower then
 				Env.TalentMap[lower] = selected
 				Env.TalentMap[id] = selected
@@ -404,6 +409,7 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 
 CNDT.Env.AzeriteEssenceMap = {}
 CNDT.Env.AzeriteEssenceMap_MAJOR = {}
+local C_AzeriteEssence = C_AzeriteEssence
 function CNDT:AZERITE_ESSENCE_UPDATE()
 	wipe(Env.AzeriteEssenceMap)
 	wipe(Env.AzeriteEssenceMap_MAJOR)
@@ -459,6 +465,66 @@ for i, kind in TMW:Vararg("", "_MAJOR") do
 		end,
 	})
 end
+
+local AnimaPowWatcher = TMW:NewModule("ANIMAPOW", "AceEvent-3.0")
+local currentAnimaPows = {}
+Env.CurrentAnimaPows = currentAnimaPows
+function AnimaPowWatcher:Init()
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnLocationUpdate")
+	self:OnLocationUpdate()
+end
+function AnimaPowWatcher:OnLocationUpdate()
+	if IsInJailersTower() and not self.watching then
+		self:RegisterEvent("UNIT_AURA")
+		self.watching = true
+		self:UNIT_AURA(nil, "player")
+	elseif not IsInJailersTower() and self.watching then
+		wipe(currentAnimaPows)
+		TMW:Fire("TMW_ANIMA_POWER_COUNT_CHANGED")
+		self:UnregisterEvent("UNIT_AURA")
+		self.watching = false
+	end
+end
+function AnimaPowWatcher:UNIT_AURA(_, unit)
+	if unit ~= "player" then return end
+
+	for i=1, 300 do
+		local name, _, count, _, _, _, _, _, _, spellID = UnitAura("player", i, "MAW");
+		if not spellID then return end
+		if count == 0 then
+			count = 1;
+		end
+
+		if currentAnimaPows[spellID] ~= count then
+			currentAnimaPows[spellID] = count;
+			currentAnimaPows[strlowerCache[name]] = count;
+			TMW:Fire("TMW_ANIMA_POWER_COUNT_CHANGED")
+		end
+	end
+end
+
+
+ConditionCategory:RegisterCondition(9.4, "ANIMAPOW", {
+	text = L["UIPANEL_ANIMAPOW"],
+	range = 5,
+	unit = PLAYER,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = true,
+	icon = 3528304,
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(ConditionObject, c)
+		AnimaPowWatcher:Init()
+		return [[(CurrentAnimaPows[LOWER(c.NameFirst)] or 0) c.Operator c.Level]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("TMW_ANIMA_POWER_COUNT_CHANGED")
+	end,
+})
+
+
 
 
 
