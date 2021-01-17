@@ -390,7 +390,7 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 	useSUG = "talents",
 	icon = function() return select(3, GetTalentInfo(1, 1, 1)) end,
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function(ConditionObject, c)
+	funcstr = function(c)
 		-- this is handled externally because TalentMap is so extensive a process,
 		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
 		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
@@ -407,64 +407,64 @@ ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
 })
 
 
-CNDT.Env.AzeriteEssenceMap = {}
-CNDT.Env.AzeriteEssenceMap_MAJOR = {}
-local C_AzeriteEssence = C_AzeriteEssence
-function CNDT:AZERITE_ESSENCE_UPDATE()
-	wipe(Env.AzeriteEssenceMap)
-	wipe(Env.AzeriteEssenceMap_MAJOR)
-	local milestones = C_AzeriteEssence.GetMilestones()
-	if not milestones then return end
+
+ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
+	text = L["UIPANEL_PTSINTAL"],
+	funcstr = "DEPRECATED",
+	min = 0,
+	max = 5,
+})
+
+
+
+ConditionCategory:RegisterCondition(10,	 "PVPTALENTLEARNED", {
+	text = L["UIPANEL_PVPTALENTLEARNED"],
+
+	bool = true,
 	
-	for _, slot in pairs(milestones) do
-		if slot.unlocked then
-			local equippedEssenceId = C_AzeriteEssence.GetMilestoneEssence(slot.ID)
-			if equippedEssenceId then
-				local essence = C_AzeriteEssence.GetEssenceInfo(equippedEssenceId)
-				local name = essence.name
-				local id = essence.ID
+	unit = PLAYER,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = "pvptalents",
+	icon = 1322720,
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(c)
+		-- this is handled externally because PvpTalentMap is so extensive a process,
+		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
+		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+		CNDT:PLAYER_TALENT_UPDATE()
+	
+		return [[BOOLCHECK( PvpTalentMap[LOWER(c.NameFirst)] )]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+	end,
+})
 
-				local lower = name and strlowerCache[name]
-				if lower then
-					Env.AzeriteEssenceMap[lower] = true
-					Env.AzeriteEssenceMap[id] = true
 
-					-- Slot 0 is the major slot. There doesn't seem to be any other way to identify it.
-					if slot.slot == 0 then 
-						Env.AzeriteEssenceMap_MAJOR[lower] = true
-						Env.AzeriteEssenceMap_MAJOR[id] = true
-					end
-				end
-			end
-		end
-	end
-end
+ConditionCategory:RegisterCondition(11,	 "GLYPH", {
+	text = L["UIPANEL_GLYPH"],
+	tooltip = L["UIPANEL_GLYPH_DESC"],
 
-for i, kind in TMW:Vararg("", "_MAJOR") do
-	ConditionCategory:RegisterCondition(9.1 + i/10,	"AZESSLEARNED" .. kind, {
-		text = L["UIPANEL_AZESSLEARNED" .. kind],
-		bool = true,
-		unit = PLAYER,
-		name = function(editbox)
-			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
-		end,
-		useSUG = "azerite_essence",
-		icon = "Interface\\Icons\\" .. (kind == "" and "inv_radientazeritematrix" or "spell_azerite_essence_15"),
-		tcoords = CNDT.COMMON.standardtcoords,
-		funcstr = function(ConditionObject, c)
-			CNDT:RegisterEvent("AZERITE_ESSENCE_UPDATE")
-			CNDT:RegisterEvent("AZERITE_ESSENCE_ACTIVATED", "AZERITE_ESSENCE_UPDATE")
-			CNDT:AZERITE_ESSENCE_UPDATE()
-			
-			return [[BOOLCHECK( AzeriteEssenceMap]] .. kind .. [[[LOWER(c.NameFirst)] )]]
-		end,
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("AZERITE_ESSENCE_UPDATE"),
-				ConditionObject:GenerateNormalEventString("AZERITE_ESSENCE_ACTIVATED")
-		end,
-	})
-end
+	bool = true,
+	
+	unit = PLAYER,
+	name = function(editbox)
+		editbox:SetTexts(L["GLYPHTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = "DEPRECATED",
+})
+
+ConditionCategory:RegisterSpacer(20)
+
+
+
 
 local AnimaPowWatcher = TMW:NewModule("ANIMAPOW", "AceEvent-3.0")
 local currentAnimaPows = {}
@@ -503,9 +503,8 @@ function AnimaPowWatcher:UNIT_AURA(_, unit)
 	end
 end
 
-
-ConditionCategory:RegisterCondition(9.4, "ANIMAPOW", {
-	text = L["UIPANEL_ANIMAPOW"],
+ConditionCategory:RegisterCondition(21, "ANIMAPOW", {
+	text = L["CONDITIONPANEL_ANIMAPOW"],
 	range = 5,
 	unit = PLAYER,
 	name = function(editbox)
@@ -514,7 +513,7 @@ ConditionCategory:RegisterCondition(9.4, "ANIMAPOW", {
 	useSUG = true,
 	icon = 3528304,
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function(ConditionObject, c)
+	funcstr = function(c)
 		AnimaPowWatcher:Init()
 		return [[(CurrentAnimaPows[LOWER(c.NameFirst)] or 0) c.Operator c.Level]]
 	end,
@@ -524,59 +523,103 @@ ConditionCategory:RegisterCondition(9.4, "ANIMAPOW", {
 	end,
 })
 
-
-
-
-
-ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
-	text = L["UIPANEL_PTSINTAL"],
-	funcstr = "DEPRECATED",
-	min = 0,
-	max = 5,
-})
-
-
-
-ConditionCategory:RegisterCondition(10,	 "PVPTALENTLEARNED", {
-	text = L["UIPANEL_PVPTALENTLEARNED"],
-
+ConditionCategory:RegisterCondition(21, "SOULBIND", {
+	text = L["CONDITIONPANEL_SOULBIND"],
 	bool = true,
-	
 	unit = PLAYER,
 	name = function(editbox)
 		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
 	end,
-	useSUG = "pvptalents",
-	icon = 1322720,
+	useSUG = "soulbind",
+	icon = 3528291,
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function(ConditionObject, c)
-		-- this is handled externally because PvpTalentMap is so extensive a process,
-		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
-		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
-		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
-		CNDT:PLAYER_TALENT_UPDATE()
+	Env = {
+		GetActiveSoulbindID = C_Soulbinds.GetActiveSoulbindID,
+	},
+	funcstr = function(c)
+		local id = c.Name:trim()
+		if not tonumber(id) then
+			for i = 1, 30 do
+				local data = C_Soulbinds.GetSoulbindData(i)
+				if strlowerCache[data.name] == strlowerCache[c.Name] then
+					id = i
+					break
+				end
+			end
+		end
+		if not tonumber(id) then
+			return "false"
+		end
 	
-		return [[BOOLCHECK( PvpTalentMap[LOWER(c.NameFirst)] )]]
+		return "BOOLCHECK( GetActiveSoulbindID() == " .. id .. " )"
 	end,
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
-			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+			ConditionObject:GenerateNormalEventString("SOULBIND_ACTIVATED")
 	end,
 })
 
 
-ConditionCategory:RegisterCondition(11,	 "GLYPH", {
-	text = L["UIPANEL_GLYPH"],
-	tooltip = L["UIPANEL_GLYPH_DESC"],
 
-	bool = true,
+
+
+
+
+CNDT.Env.AzeriteEssenceMap = {}
+CNDT.Env.AzeriteEssenceMap_MAJOR = {}
+local C_AzeriteEssence = C_AzeriteEssence
+function CNDT:AZERITE_ESSENCE_UPDATE()
+	wipe(Env.AzeriteEssenceMap)
+	wipe(Env.AzeriteEssenceMap_MAJOR)
+	local milestones = C_AzeriteEssence.GetMilestones()
+	if not milestones then return end
 	
-	unit = PLAYER,
-	name = function(editbox)
-		editbox:SetTexts(L["GLYPHTOCHECK"], L["CNDT_ONLYFIRST"])
-	end,
-	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = "DEPRECATED",
-})
+	for _, slot in pairs(milestones) do
+		if slot.unlocked then
+			local equippedEssenceId = C_AzeriteEssence.GetMilestoneEssence(slot.ID)
+			if equippedEssenceId then
+				local essence = C_AzeriteEssence.GetEssenceInfo(equippedEssenceId)
+				local name = essence.name
+				local id = essence.ID
+
+				local lower = name and strlowerCache[name]
+				if lower then
+					Env.AzeriteEssenceMap[lower] = true
+					Env.AzeriteEssenceMap[id] = true
+
+					-- Slot 0 is the major slot. There doesn't seem to be any other way to identify it.
+					if slot.slot == 0 then 
+						Env.AzeriteEssenceMap_MAJOR[lower] = true
+						Env.AzeriteEssenceMap_MAJOR[id] = true
+					end
+				end
+			end
+		end
+	end
+end
+
+for i, kind in TMW:Vararg("", "_MAJOR") do
+	ConditionCategory:RegisterCondition(30 + i/10,	"AZESSLEARNED" .. kind, {
+		text = L["UIPANEL_AZESSLEARNED" .. kind],
+		bool = true,
+		unit = PLAYER,
+		name = function(editbox)
+			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+		end,
+		useSUG = "azerite_essence",
+		icon = "Interface\\Icons\\" .. (kind == "" and "inv_radientazeritematrix" or "spell_azerite_essence_15"),
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(c)
+			CNDT:RegisterEvent("AZERITE_ESSENCE_UPDATE")
+			CNDT:RegisterEvent("AZERITE_ESSENCE_ACTIVATED", "AZERITE_ESSENCE_UPDATE")
+			CNDT:AZERITE_ESSENCE_UPDATE()
+			
+			return [[BOOLCHECK( AzeriteEssenceMap]] .. kind .. [[[LOWER(c.NameFirst)] )]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("AZERITE_ESSENCE_UPDATE"),
+				ConditionObject:GenerateNormalEventString("AZERITE_ESSENCE_ACTIVATED")
+		end,
+	})
+end

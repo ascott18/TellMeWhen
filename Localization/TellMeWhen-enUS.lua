@@ -876,7 +876,6 @@ L["UIPANEL_PTSINTAL"] = "Points in talent"
 L["UIPANEL_TALENTLEARNED"] = "Talent learned"
 L["UIPANEL_AZESSLEARNED"] = "Azerite Essence Active"
 L["UIPANEL_AZESSLEARNED_MAJOR"] = "Major Azerite Essence Active"
-L["UIPANEL_ANIMAPOW"] = "Torghast Anima Power Count"
 L["UIPANEL_PVPTALENTLEARNED"] = "PvP Talent learned"
 L["UIPANEL_GLYPH"] = "Glyph active"
 L["UIPANEL_GLYPH_DESC"] = "Checks if you have a particular glyph active."
@@ -1601,6 +1600,10 @@ L["CONDITIONPANEL_LOC_SUBZONE"] = "Sub-Zone"
 L["CONDITIONPANEL_LOC_SUBZONE_LABEL"] = "Enter Sub-Zones to check"
 L["CONDITIONPANEL_LOC_SUBZONE_DESC"] = "Checks your current sub-zone. Note that sometimes, you may not be in a sub-zone."
 L["CONDITIONPANEL_LOC_SUBZONE_BOXDESC"] = "Enter the sub-zones that you would like to check for. Separate multiple sub-zones with semicolons."
+
+
+L["CONDITIONPANEL_ANIMAPOW"] = "Torghast Anima Power Count"
+L["CONDITIONPANEL_SOULBIND"] = "Soulbind Active"
 
 
 L["AURA"] = "Aura"
