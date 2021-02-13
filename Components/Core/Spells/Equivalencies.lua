@@ -515,6 +515,8 @@ TMW.BE = {
 			 288024, -- Diamond Barrier                     (Diamond-Laced Refracting Prism, Battle of Dazar'alor raid)
 			 295271, -- Umbral Shell                        (Void Stone, Crucible of Storms raid)
 			 295431, -- Ephemeral Vigor                     (Abyssal Speaker's Gauntlets, Crucible of Storms raid)
+			 311444, -- Indomitable Deck                    (Shadowlands tank darkmoon deck)
+			 322507, -- Celestial Brew                      (Monk, brewmaster)
 			 324867, -- Fleshcraft							(Necrolord)
 		},
 		ImmuneToMagicCC = {
