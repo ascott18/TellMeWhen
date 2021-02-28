@@ -966,7 +966,7 @@
 
 	<!--
 		A single text display in the icon editor.
-		Contains the editbox, the copy menu, and the rest to default button.
+		Contains the editbox, the copy menu, and the reset to default button.
 		
 		Height of this frame is adjusted based on the height of the editbox.
 		Height of TellMeWhen_TextDisplayOptions is adjusted based on heights of these frames.
