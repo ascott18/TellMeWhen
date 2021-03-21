@@ -25,10 +25,10 @@ jobs:
           fi;
                 
       - name: "Build In-Game Changelog"
-      - run: sudo chmod +x ./build/create-lua-changelog.sh && ./build/create-lua-changelog.sh
+        run: sudo chmod +x ./build/create-lua-changelog.sh && ./build/create-lua-changelog.sh
                 
       - name: "Build Short Changelog"
-      - run: sudo chmod +x ./build/create-short-changelog.sh && ./build/create-short-changelog.sh
+        run: sudo chmod +x ./build/create-short-changelog.sh && ./build/create-short-changelog.sh
                 
       - name: Create Package (CF and WoWI)
         uses: BigWigsMods/packager@master
