@@ -1691,7 +1691,7 @@
 			</Frame>
 
 			<!-- border dummy-->
-			<Frame inherits="BackdropTemplate">
+			<Frame>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentScrollContainerScrollFrame" x="-5" y="5"/>
 					<Anchor point="BOTTOMRIGHT" relativeTo="$parentScrollContainerScrollFrame" x="5" y="-5"/>
