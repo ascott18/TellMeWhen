@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 
 ### Bug Fixes
 * Fixed an issue with some types of items in the item suggestion list.
+* Fix #1878 - Couldn't find inherited node: BackdropTemplate
 
 ## v9.0.5
 
