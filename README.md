@@ -66,6 +66,7 @@ All available slash commands are:
 *   '/tmw enable global|profile groupID iconID' - Enables the specified group or icon (E.g. '/tmw enable 2 4' or '/tmw enable global 3').
 *   '/tmw disable global|profile groupID iconID' - Disables the specified group or icon (E.g. '/tmw disable profile 2 4' or '/tmw disable 3').
 *   '/tmw toggle global|profile groupID iconID' - Toggles the specified group or icon between enabled and disabled (E.g. '/tmw toggle global 2 4' or '/tmw toggle profile 3').
+*   '/tmw counter counter-name +|-|/|*|= number' - Mutate a TMW counter. Counters can be checked in conditions or displayed on icons. (E.g. '/tmw counter casts = 0' or '/tmw counter phase + 1')
 *   '/tmw cpu' - Enables and displays a UI for measurements of icon performance. This is an advanced feature; no guidance on reading the data will be offered.
 
 ### Conditions

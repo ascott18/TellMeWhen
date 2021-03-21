@@ -1911,7 +1911,7 @@ Ask questions, share configuration, or just hang out with other TellMeWhen users
 
 L["MISCELLANEOUS"] = "Miscellaneous"
 L["TEXTMANIP"] = "Text manipulation"
-L["DT_DOC_Counter"] = "Returns the value of a TellMeWhen Counter. Counters are created and modified with Icon Notifications."
+L["DT_DOC_Counter"] = "Returns the value of a TellMeWhen Counter. Counters are created and modified with Icon Notifications or '/tmw counter'."
 L["DT_DOC_Timer"] = "Returns the value of a TellMeWhen Timer. Timers are created and modified with Icon Notifications."
 L["DT_DOC_TMWFormatDuration"] = "Returns a string formatted by TellMeWhen's time format. Alternative to [FormatDuration]."
 L["DT_DOC_gsub"] = [[Gives access to Lua's string.gsub function for DogTags for powerful string manipulation capabilities.
@@ -2404,7 +2404,7 @@ L["EVENTHANDLER_LUA_CODE_DESC"] = "Type the Lua code that should be executed whe
 
 L["LUA_INSERTGUID_TOOLTIP"] = "|cff7fffffShift-click|r to insert a reference to this icon into your code."
 
-L["CONDITIONPANEL_COUNTER_DESC"] = "Check the value of a counter that has been established and modified by the \"Counter\" Notification handler"
+L["CONDITIONPANEL_COUNTER_DESC"] = "Check the value of a counter that has been established and modified by the \"Counter\" Notification handler or by '/tmw counter'"
 L["CONDITION_COUNTER"] = "Counter to check"
 L["CONDITION_COUNTER_EB_DESC"] = "Enter the name of the counter that you would like to check."
 
@@ -2444,10 +2444,10 @@ L["EVENTS_SETTINGS_COUNTER_NAME_DESC"] = [[Enter the name of the counter to be m
 
 Counter names must be lower-case with no spaces.
 
-Use this counter name in other places where you would like to check this counter (Conditions, and Text Displays via the [Counter] DogTag)
+Use this counter name in other places where you would like to use this counter (Conditions, Text Displays via the [Counter] DogTag, and '/tmw counter')
 
 
-Advanced Users: Counters are stored in TMW.COUNTERS[counterName] = value.   Call TMW:Fire( "TMW_COUNTER_MODIFIED", counterName ) if you change a counter in a custom Lua script.]]
+Advanced Users: Counters are stored in TMW.COUNTERS[counterName] = value.  Use TMW:ChangeCounter(name, '=', value) to change a counter in a custom Lua script.]]
 
 L["EVENTS_SETTINGS_TIMER_NAME"] = "Timer Name"
 L["EVENTS_SETTINGS_TIMER_NAME_DESC"] = [[Enter the name of the timer to be modified.
