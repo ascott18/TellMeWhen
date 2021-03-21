@@ -1504,6 +1504,7 @@ If more help is needed (but not help about how to write Lua code), try the TMW D
 
 L["CONDITIONPANEL_OLD"] = "<|cffff1300OLD|r>"
 L["CONDITIONPANEL_OLD_DESC"] = "<|cffff1300OLD|r> - There is a newer/better version of this condition available."
+L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_VALUES"] = "Choose Values..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"] = "Choose Types..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSERACE"] = "Choose Races..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
@@ -1603,6 +1604,7 @@ L["CONDITIONPANEL_LOC_SUBZONE_BOXDESC"] = "Enter the sub-zones that you would li
 
 
 L["CONDITIONPANEL_ANIMAPOW"] = "Torghast Anima Power Count"
+L["CONDITIONPANEL_COVENANT"] = "Covenant Membership"
 L["CONDITIONPANEL_SOULBIND"] = "Soulbind Active"
 
 
