@@ -1,3 +1,8 @@
+## v9.0.6
+
+### Bug Fixes
+* Fixed an issue with some types of items in the item suggestion list.
+
 ## v9.0.5
 
 ### Bug Fixes
