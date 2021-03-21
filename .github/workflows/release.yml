@@ -1,0 +1,56 @@
+name: Package Retail
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+    tags-ignore:
+      - "*-classic"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: "Validate TOC"
+        run: |
+          if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="*.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
+            grep -rnP '## X?-?\KInterface.*' --exclude-dir=.release --include="*.toc" . | cat
+            echo "More than 1 distinct ##Interface version found in .toc files." 1>&2
+            exit 1
+          fi;
+                
+      - name: "Build In-Game Changelog"
+      - run: sudo chmod +x ./build/create-lua-changelog.sh && ./build/create-lua-changelog.sh
+                
+      - name: "Build Short Changelog"
+      - run: sudo chmod +x ./build/create-short-changelog.sh && ./build/create-short-changelog.sh
+                
+      - name: Create Package (CF and WoWI)
+        uses: BigWigsMods/packager@master
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+                
+      - name: "Create GitHub release pkgmeta"
+        run: cat .pkgmeta | sed 's/CHANGELOG.md/CHANGELOG.short.md/gI' > gh-release.pkgmeta
+
+      - name: Create GitHub release
+        uses: BigWigsMods/packager@master
+        env:
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: -o -e -c -l -m ./gh-release.pkgmeta
+        # -o: Overwrite existing directory,
+        # -e: Skip externals, 
+        # -c: skip copying files
+        # -l: Skip @localization@ keyword replacement
+        # We only want to upload to github using the short changelog 
+        # specified by gh-release.pkgmeta. Unfortunately, we still have 
+        # to re-create the zip due to the way that release.sh works.
