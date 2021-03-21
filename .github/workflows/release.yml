@@ -6,8 +6,6 @@ on:
       - master
     tags:
       - "*"
-    tags-ignore:
-      - "*-classic"
 
 jobs:
   build:
