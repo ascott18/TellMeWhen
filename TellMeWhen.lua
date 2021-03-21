@@ -3008,6 +3008,14 @@ function TMW:SlashCommand(str)
 		else
 			TMW:Print("Bad syntax. Usage: /tmw [enable||disable||toggle] [profile||global] groupID iconID")
 		end
+	elseif cmd == "counter" then
+		local name, operation, value = arg2, arg3, tonumber(arg4)
+		if value == nil or arg2 == nil or arg3 == nil then
+			TMW:Print("Usage: /tmw counter counter-name [+||-||/||*||=] number. E.g. '/tmw counter casts + 1'")
+			return
+		end
+		TMW:ChangeCounter(name, operation, value)
+
 	elseif cmd == "cpu" then
 		if arg2 == "reset" then
 			TMW:CpuProfileReset()

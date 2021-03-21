@@ -1,6 +1,7 @@
 # TellMeWhen Classic
 
-[![Build Status](https://dev.azure.com/Cybeloras/TellMeWhen/_apis/build/status/TellMeWhen?branchName=classic)](https://dev.azure.com/Cybeloras/TellMeWhen/_build/latest?definitionId=1&branchName=classic)
+[![Retail](https://github.com/ascott18/TellMeWhen/actions/workflows/release.yml/badge.svg)](https://github.com/ascott18/TellMeWhen/actions/workflows/release.yml)
+[![Classic](https://github.com/ascott18/TellMeWhen/actions/workflows/release-classic.yml/badge.svg)](https://github.com/ascott18/TellMeWhen/actions/workflows/release-classic.yml)
 [![Discord](https://img.shields.io/discord/546941305264275456?color=%237289da&label=Discord&logo=Discord)](https://discord.gg/NH7RmcP)
 [![Paypal](https://img.shields.io/badge/Paypal-Donate-Blue?logo=Paypal)](https://www.paypal.com/cgi-bin/webscr?return=http%3A%2F%2Fwow.curseforge.com%2Fprojects%2Ftellmewhen&cn=Add+special+instructions+to+the+addon+author%28s%29&business=ascott18%40msn.com&bn=PP-DonationsBF%3Abtn_donateCC_LG.gif%3ANonHosted&cancel_return=http%3A%2F%2Fwow.curseforge.com%2Fprojects%2Ftellmewhen&lc=US&item_name=TellMeWhen+%28from+Curse.com%29&cmd=_donations&rm=1&no_shipping=1&currency_code=USD)
 
@@ -63,6 +64,7 @@ All available slash commands are:
 *   '/tmw enable global|profile groupID iconID' - Enables the specified group or icon (E.g. '/tmw enable 2 4' or '/tmw enable global 3').
 *   '/tmw disable global|profile groupID iconID' - Disables the specified group or icon (E.g. '/tmw disable profile 2 4' or '/tmw disable 3').
 *   '/tmw toggle global|profile groupID iconID' - Toggles the specified group or icon between enabled and disabled (E.g. '/tmw toggle global 2 4' or '/tmw toggle profile 3').
+*   '/tmw counter counter-name +|-|/|*|= number' - Mutate a TMW counter. Counters can be checked in conditions or displayed on icons. (E.g. '/tmw counter casts = 0' or '/tmw counter phase + 1')
 *   '/tmw cpu' - Enables and displays a UI for measurements of icon performance. This is an advanced feature; no guidance on reading the data will be offered.
 
 ### Conditions
