@@ -1,3 +1,13 @@
+## v9.0.5
+
+### Bug Fixes
+* Fixed an error with the `[Name]` DogTag breaking when LibDogTag-Unit gets upgraded after TMW loads.
+* Fixed incorrect labels on Text Display editboxes after changing an icon's text layout.
+* Fixed #1868 - Lua errors and broken sliders in WoW 9.0.5.
+
+## v9.0.4
+* #1811 - The group/target point of a group will now be preserved when moving a shrunk group via click-and-drag.
+
 ## v9.0.3
 ### Bug Fixes
 * #1824 - Fix incorrect detection of Defensive mode in the Pet Attack Mode condition.

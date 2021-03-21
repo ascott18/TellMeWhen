@@ -52,7 +52,7 @@ UNITS.Units = {
 	{ value = "pettarget",			text = L["ICONMENU_PETTARGET"]										},
 	{ value = "mouseover",			text = L["ICONMENU_MOUSEOVER"]										},
 	{ value = "mouseovertarget",	text = L["ICONMENU_MOUSEOVERTARGET"]								},
-	{ value = "nameplate",			text = L["ICONMENU_NAMEPLATE"],	range = 30							},
+	{ value = "nameplate",			text = L["ICONMENU_NAMEPLATE"],	range = 40							},
 	{ value = "party",				text = PARTY,				range = MAX_PARTY_MEMBERS				},
 	{ value = "raid",				text = RAID,				range = MAX_RAID_MEMBERS				},
 	{ value = "group",				text = GROUP,				range = MAX_RAID_MEMBERS,	desc = L["ICONMENU_GROUPUNIT_DESC"]	},
