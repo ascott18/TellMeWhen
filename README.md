@@ -1,6 +1,7 @@
 # TellMeWhen
 
-[![Build Status](https://dev.azure.com/Cybeloras/TellMeWhen/_apis/build/status/TellMeWhen?branchName=master)](https://dev.azure.com/Cybeloras/TellMeWhen/_build/latest?definitionId=1&branchName=master)
+[![Retail](https://github.com/ascott18/TellMeWhen/actions/workflows/release.yml/badge.svg)](https://github.com/ascott18/TellMeWhen/actions/workflows/release.yml)
+[![Classic](https://github.com/ascott18/TellMeWhen/actions/workflows/release-classic.yml/badge.svg)](https://github.com/ascott18/TellMeWhen/actions/workflows/release-classic.yml)
 [![Discord](https://img.shields.io/discord/546941305264275456?color=%237289da&label=Discord&logo=Discord)](https://discord.gg/NH7RmcP)
 [![Paypal](https://img.shields.io/badge/Paypal-Donate-Blue?logo=Paypal)](https://www.paypal.com/cgi-bin/webscr?return=http%3A%2F%2Fwow.curseforge.com%2Fprojects%2Ftellmewhen&cn=Add+special+instructions+to+the+addon+author%28s%29&business=ascott18%40msn.com&bn=PP-DonationsBF%3Abtn_donateCC_LG.gif%3ANonHosted&cancel_return=http%3A%2F%2Fwow.curseforge.com%2Fprojects%2Ftellmewhen&lc=US&item_name=TellMeWhen+%28from+Curse.com%29&cmd=_donations&rm=1&no_shipping=1&currency_code=USD)
 
