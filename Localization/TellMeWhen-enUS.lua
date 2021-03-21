@@ -1002,6 +1002,11 @@ L["UIPANEL_GROUPSORT_duration_DESC"] = "Sorts the group by the duration remainin
 L["UIPANEL_GROUPSORT_duration_1"] = "Low duration first"
 L["UIPANEL_GROUPSORT_duration_-1"] = "High duration first"
 
+L["UIPANEL_GROUPSORT_start"] = "Timer start"
+L["UIPANEL_GROUPSORT_start_DESC"] = "Sorts the group by the start time of its timer."
+L["UIPANEL_GROUPSORT_start_1"] = "Older timers first"
+L["UIPANEL_GROUPSORT_start_-1"] = "Newer timers first"
+
 L["UIPANEL_GROUPSORT_alpha"] = "Opacity"
 L["UIPANEL_GROUPSORT_alpha_DESC"] = "Sorts the group by the opacity of its icons."
 L["UIPANEL_GROUPSORT_alpha_1"] = "Low opacity first"

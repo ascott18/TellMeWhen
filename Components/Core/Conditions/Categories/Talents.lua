@@ -531,10 +531,8 @@ TMW.CovenantIcons = {
 }
 ConditionCategory:RegisterCondition(22, "COVENANT", {
 	text = L["CONDITIONPANEL_COVENANT"],
-	bool = true,
 	unit = PLAYER,
 
-	-- bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"],
 	bitFlags = (function()
 		local t = {}
 		for i, id in pairs(C_Covenants.GetCovenantIDs()) do
