@@ -15,12 +15,11 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-local wow_classic = WOW_PROJECT_ID and WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-if not wow_classic then
+if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
 	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
 		-- This is not localizable, because AceLocale might not have loaded
 		-- (this is why we don't bother to load AceLocale until after these checks).
-		text = "You've installed TellMeWhen for Classic WoW, but this is retail WoW. Please double-check which version of TMW you downloaded.", 
+		text = ("You've installed TellMeWhen for Classic WoW, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" + GetExpansionLevel()]), 
 		button1 = EXIT_GAME,
 		button2 = CANCEL,
 		OnAccept = ForceQuit,
