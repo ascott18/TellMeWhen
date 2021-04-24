@@ -23,7 +23,7 @@ local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local huge = math.huge
 
-local UnitAura = TMW.UnitAura
+local UnitAura = UnitAura
 
 function Env.AuraStacks(unit, name, filter)
 	for i = 1, huge do

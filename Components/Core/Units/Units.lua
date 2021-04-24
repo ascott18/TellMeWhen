@@ -48,6 +48,8 @@ UNITS.Units = {
 	{ value = "player",				text = PLAYER, 											desc = L["PLAYER_DESC"] },
 	{ value = "target",				text = TARGET														},
 	{ value = "targettarget",		text = L["ICONMENU_TARGETTARGET"]									},
+	{ value = "focus",				text = L["ICONMENU_FOCUS"]											},
+	{ value = "focustarget",		text = L["ICONMENU_FOCUSTARGET"]									},
 	{ value = "pet",				text = PET 															},
 	{ value = "pettarget",			text = L["ICONMENU_PETTARGET"]										},
 	{ value = "mouseover",			text = L["ICONMENU_MOUSEOVER"]										},
@@ -149,6 +151,14 @@ local UnitSet = TMW:NewClass("UnitSet"){
 			elseif unit:find("^pet") then -- the unit as a base, with something else tacked onto it.
 				self.updateEvents.UNIT_PET = true
 				UNITS.unitsWithBaseExistsEvent[unit] = "pet"
+				self.allUnitsChangeOnEvent = false
+
+			elseif unit == "focus" then -- the unit exactly
+				self.updateEvents.PLAYER_FOCUS_CHANGED = true
+				UNITS.unitsWithExistsEvent[unit] = true
+			elseif unit:find("^focus") then -- the unit as a base, with something else tacked onto it.
+				self.updateEvents.PLAYER_FOCUS_CHANGED = true
+				UNITS.unitsWithBaseExistsEvent[unit] = "focus"
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^raid%d+$") then -- the unit exactly

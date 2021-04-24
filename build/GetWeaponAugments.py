@@ -7,7 +7,7 @@ import os
 
 from slpp import slpp as lua
 
-base_url = "https://www.wowhead.com"
+base_url = "https://TBC.wowhead.com"
 
 max_retries = 1
 

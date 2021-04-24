@@ -664,7 +664,7 @@ end
 
 ConditionCategory:RegisterSpacer(30)
 
-local UnitCastingInfo, UnitChannelInfo = TMW.UnitCastingInfo, TMW.UnitChannelInfo
+local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 Env.UnitCast = function(unit, level, matchname)
 	local name = UnitCastingInfo(unit)
 	if not name then
@@ -718,10 +718,16 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			
-			-- We can't check against the unit here because LibClassicCasterino's events don't
-			-- work like the blizzard events do - they don't fire with every valid unitID.
-			ConditionObject:GenerateNormalEventString("TMW_UNIT_CAST_UPDATE" --[[, CNDT:GetUnit(c.Unit)]])
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_START", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_STOP", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_SUCCEEDED", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_FAILED", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_FAILED_QUIET", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_DELAYED", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTED", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit))
 	end,
 })
 

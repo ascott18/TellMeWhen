@@ -46,6 +46,10 @@ NAMES.CONST = {
 	targettarget;
 	targettargettarget;
 	
+	focus;
+	focustarget;
+	focustargettarget;
+	
 	pet;
 	pettarget;
 	pettargettarget;

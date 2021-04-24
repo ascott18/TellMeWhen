@@ -64,9 +64,11 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	bitFlags = {
 		[01] = {order=01, text=L["CONDITIONPANEL_INSTANCETYPE_NONE"],                                space=true,   }, -- None (Outside)
 		[02] = {order=02, text=BATTLEGROUND,                                                                       }, -- Battleground
+		[03] = {order=03, text=ARENA,                                                                space=true,   }, -- Arena
 
 		[04] = {order=10, text=DUNGEON_DIFFICULTY_5PLAYER,                                                         }, -- 5-player
-
+		[05] = {order=11, text=DUNGEON_DIFFICULTY_5PLAYER_HEROIC,                                                  }, -- 5-player Heroic
+		
 		[12] = {order=36, text=L["CONDITIONPANEL_INSTANCETYPE_LEGACY"]:format(RAID_DIFFICULTY_40PLAYER),           }, -- 40-man raid (legacy)
 
 	},
@@ -286,8 +288,8 @@ ConditionCategory:RegisterCondition(13,   "LOC_CONTINENT", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_CONTINENT"],
 	bitFlags = (function()
 		local t = {}
-		-- 947 is the Azeroth Map ID.
-		for id, mapInfo in pairs(C_Map.GetMapChildrenInfo(947, Enum.UIMapType.Continent, true)) do
+		-- 946 is the cosmic map ID.
+		for id, mapInfo in pairs(C_Map.GetMapChildrenInfo(946, Enum.UIMapType.Continent, true)) do
 			t[mapInfo.mapID] = mapInfo.name
 		end
 		return t

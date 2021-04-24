@@ -40,13 +40,24 @@ Module.stances = {
 		[768] = 	GetSpellInfo(768),		-- Cat Form
 		[783] = 	GetSpellInfo(783),		-- Travel Form
 		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
-		[33891] = 	GetSpellInfo(33891), 	-- Incarnation: Tree of Life
+		[33891] = 	GetSpellInfo(33891), 	-- Tree of Life
+		[33943] = 	GetSpellInfo(33943), 	-- Flight Form
+		[40120] = 	GetSpellInfo(40120), 	-- Swift Flight Form	
 	},
 	PRIEST = {
 		[15473] = 	GetSpellInfo(15473), 	-- Shadowform	
 	},
 	ROGUE = {
 		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
+	},
+	PALADIN = {
+		[19746] = 	GetSpellInfo(19746), 	-- Concentration Aura
+		[32223] = 	GetSpellInfo(32223), 	-- Crusader Aura
+		[465] = 	GetSpellInfo(465),		-- Devotion Aura
+		[19900] = 	GetSpellInfo(19891), 	-- Fire Resistance Aura
+		[19898] = 	GetSpellInfo(19891), 	-- Frost Resistance Aura
+		[19896] = 	GetSpellInfo(19891), 	-- Shadow Resistance Aura
+		[7294] = 	GetSpellInfo(7294),		-- Retribution Aura	
 	},
 }
 function Module:Table_Get()

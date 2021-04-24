@@ -17,11 +17,8 @@ local L = TMW.L
 local print = TMW.print
 local pairs, ipairs =
 	  pairs, ipairs
-local GetSpellInfo, UnitGUID =
-	  GetSpellInfo, UnitGUID
-
-local UnitCastingInfo = TMW.UnitCastingInfo
-local UnitChannelInfo = TMW.UnitChannelInfo
+local GetSpellInfo, UnitGUID, UnitCastingInfo, UnitChannelInfo =
+	  GetSpellInfo, UnitGUID, UnitCastingInfo, UnitChannelInfo
 
 local strlowerCache = TMW.strlowerCache
 
@@ -58,7 +55,7 @@ Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
 Type:RegisterIconDefaults{
 	-- The unit(s) to check for casts
-	Unit					= "player",
+	Unit					= "player", 
 
 	-- True if the icon should display blanks instead of the pocketwatch texture.
 	NoPocketwatch			= false,
@@ -96,8 +93,30 @@ end)
 
 
 
+-- The unit spellcast events that the icon will register.
+-- We keep them in a table because there's a fuckload of them.
+local events = {
+	UNIT_SPELLCAST_START = true,
+	UNIT_SPELLCAST_STOP = true,
+	UNIT_SPELLCAST_SUCCEEDED = true,
+	UNIT_SPELLCAST_FAILED = true,
+	UNIT_SPELLCAST_FAILED_QUIET = true,
+	UNIT_SPELLCAST_DELAYED = true,
+	UNIT_SPELLCAST_INTERRUPTED = true,
+	UNIT_SPELLCAST_CHANNEL_START = true,
+	UNIT_SPELLCAST_CHANNEL_UPDATE = true,
+	UNIT_SPELLCAST_CHANNEL_STOP = true,
+	-- UNIT_SPELLCAST_INTERRUPTIBLE = true,
+	-- UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
+}
+
+
 local function Cast_OnEvent(icon, event, arg1)
-	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+	if events[event] and icon.UnitSet.UnitsLookup[arg1] then
+		-- A UNIT_SPELLCAST_ event
+		-- If the icon is checking the unit, schedule an update for the icon.
+		icon.NextUpdateTime = 0
+	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
@@ -206,11 +225,12 @@ function Type:Setup(icon)
 	-- Setup events and update functions.
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-
-		-- We can't check against the unit for TMW_UNIT_CAST_UPDATE because LibClassicCasterino's events don't
-		-- work like the blizzard events do - they don't fire with every valid unitID.
-		icon:RegisterSimpleUpdateEvent("TMW_UNIT_CAST_UPDATE")
-		
+	
+		-- Register the UNIT_SPELLCAST_ events
+		for event in pairs(events) do
+			icon:RegisterEvent(event)
+		end
+	
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Cast_OnEvent, icon)
 		icon:SetScript("OnEvent", Cast_OnEvent)
 	end

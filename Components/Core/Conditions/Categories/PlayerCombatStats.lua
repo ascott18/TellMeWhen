@@ -159,7 +159,7 @@ ConditionCategory:RegisterSpacer(10)
 
 local UnitAttackPower = UnitAttackPower
 ConditionCategory:RegisterCondition(30.5, "MELEEAP", {
-	text = STAT_ATTACK_POWER,
+	text = MELEE_ATTACK_POWER,
 	range = 5000,
 	unit = PLAYER,
 	formatter = TMW.C.Formatter.COMMANUMBER,
@@ -175,6 +175,27 @@ ConditionCategory:RegisterCondition(30.5, "MELEEAP", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UNIT_ATTACK_POWER", "player")
+	end,
+})
+
+local UnitRangedAttackPower = UnitRangedAttackPower
+ConditionCategory:RegisterCondition(30.6, "RANGEAP", {
+	text = RANGED_ATTACK_POWER,
+	range = 5000,
+	unit = PLAYER,
+	formatter = TMW.C.Formatter.COMMANUMBER,
+	icon = "Interface\\Icons\\inv_weapon_bow_12",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		RANGEAP_UnitAttackPower = function(unit)
+			local base, pos, neg = UnitRangedAttackPower(unit)
+			return base + pos + neg
+		end,
+	},
+	funcstr = [[RANGEAP_UnitAttackPower("player") c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UNIT_RANGED_ATTACK_POWER", "player")
 	end,
 })
 

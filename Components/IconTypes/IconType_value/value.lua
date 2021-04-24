@@ -18,8 +18,8 @@ local print = TMW.print
 local UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
     = UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
 
-local UnitHealth = TMW.UnitHealth
-local UnitHealthMax = TMW.UnitHealthMax
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
 
 local pairs
     = pairs

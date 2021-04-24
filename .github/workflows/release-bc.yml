@@ -1,11 +1,11 @@
-name: Package Classic
+name: Package TBC
 
 on:
   push:
     branches:
-      - classic
+      - bc
     tags:
-      - "*-classic"
+      - "*-bc"
 
 jobs:
   build:

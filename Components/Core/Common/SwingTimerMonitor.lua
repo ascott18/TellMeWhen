@@ -62,6 +62,7 @@ end)
 -- ---------------------------------
 
 local swingSpells = {
+	[strlowerCache[GetSpellInfo(78)]] = 1, -- Slam
 	[strlowerCache[GetSpellInfo(78)]] = 1, -- Heroic Strike
 	[strlowerCache[GetSpellInfo(845)]] = 1, -- Cleave
 	[strlowerCache[GetSpellInfo(6807)]] = 1, -- Maul

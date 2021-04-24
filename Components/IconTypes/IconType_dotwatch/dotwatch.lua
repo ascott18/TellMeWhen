@@ -18,7 +18,7 @@ local print = TMW.print
 local type, wipe, pairs, rawget, abs, min, next, GetTime =
 	  type, wipe, pairs, rawget, abs, min, next, GetTime
 local UnitGUID, UnitAura, UnitName, GetSpellInfo =
-	  UnitGUID, TMW.UnitAura, UnitName, GetSpellInfo
+	  UnitGUID, UnitAura, UnitName, GetSpellInfo
 
 local C_Timer = C_Timer
 local huge = math.huge
@@ -126,6 +126,10 @@ local function CreateAllUnits()
 		target;
 		targettarget;
 		targettargettarget;
+
+		focus;
+		focustarget;
+		focustargettarget;
 
 		pet;
 		pettarget;

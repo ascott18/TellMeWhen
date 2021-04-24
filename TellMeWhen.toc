@@ -12,9 +12,9 @@
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 11307
+## Interface: 20501
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 11307
+## X-Interface: 20501
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 25152
@@ -102,7 +102,6 @@ Components\Core\BaseClasses\IconDataProcessorComponent.lua
 # Components\Core\Spells\includes.core.xml
 Components\Core\Spells\Equivalencies.lua
 Components\Core\Spells\Spells.lua
-Components\Core\Spells\AuraDurations.lua
 Components\Core\Spells\AuraCache.lua
 Components\Core\Spells\ClassSpellCache.lua
 

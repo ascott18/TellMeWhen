@@ -7,7 +7,7 @@ import os
 
 from slpp import slpp as lua
 
-base_url = "http://classic.wowhead.com"
+base_url = "https://tbc.wowhead.com"
 
 num_classes = 12
 
@@ -19,7 +19,7 @@ class_slugs = {
 	# 'death-knight': 6,
 	# 'demon-hunter': 12,
 	'druid': 11,
-	'hunter': 3 ,
+	'hunter': 3,
 	'mage': 8,
 	# 'monk': 10,
 	'paladin': 2,

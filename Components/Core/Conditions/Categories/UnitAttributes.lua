@@ -495,11 +495,13 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["Dwarf"] = {order = 2, text = Name("Dwarf")},
 			["NightElf"] = {order = 3, text = Name("Night Elf")},
 			["Gnome"] = {order = 4, text = Name("Gnome")},
+			["Draenei"] = {order = 5, text = Name("Draenei")},
 
 			["Orc"] = {order = 7, text = Name("Orc")},
 			["Scourge"] = {order = 8, text = Name("Undead")},
 			["Tauren"] = {order = 9, text = Name("Tauren")},
 			["Troll"] = {order = 10, text = Name("Troll")},
+			["BloodElf"] = {order = 11, text = Name("Blood Elf")},
 		}
 
 		for token, data in pairs(bitFlags) do
