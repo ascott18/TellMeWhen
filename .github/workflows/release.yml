@@ -1,9 +1,11 @@
-name: Package Retail
+name: Package
 
 on:
   push:
     branches:
       - master
+      - classic
+      - bc
     tags:
       - "*"
 
@@ -30,25 +32,9 @@ jobs:
       - name: "Build Short Changelog"
         run: sudo chmod +x ./build/create-short-changelog.sh && ./build/create-short-changelog.sh
                 
-      - name: Create Package (CF and WoWI)
+      - name: Create Package
         uses: BigWigsMods/packager@master
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
-                
-      - name: "Create GitHub release pkgmeta"
-        run: cat .pkgmeta | sed 's/CHANGELOG.md/CHANGELOG.short.md/gI' > gh-release.pkgmeta
-
-      - name: Create GitHub release
-        uses: BigWigsMods/packager@master
-        env:
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: -o -e -c -l -m ./gh-release.pkgmeta
-        # -o: Overwrite existing directory,
-        # -e: Skip externals, 
-        # -c: skip copying files
-        # -l: Skip @localization@ keyword replacement
-        # We only want to upload to github using the short changelog 
-        # specified by gh-release.pkgmeta. Unfortunately, we still have 
-        # to re-create the zip due to the way that release.sh works.
