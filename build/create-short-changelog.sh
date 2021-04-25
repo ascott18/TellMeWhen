@@ -27,6 +27,9 @@ while read line; do
 	echo "$line";
 done <$INPUT >>$OUTPUT
 
+echo "" >> $OUTPUT;
+echo "[View Full Changelog](https://github.com/ascott18/TellMeWhen/blob/$(git rev-parse HEAD)/CHANGELOG.md)" >> $OUTPUT;
+
 echo "Wrote changelog up to $max_versions versions to $OUTPUT";
 
 # `git add`ing this is required to make the packager not exclude it.
