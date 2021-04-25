@@ -3795,7 +3795,7 @@ function TMW:DeserializeDatum(string, silent)
 end
 
 function TMW:DeserializeData(str, silent)
-	if not str then 
+	if not str then
 		return
 	end
 
@@ -3807,9 +3807,12 @@ function TMW:DeserializeData(str, silent)
 		results = results or {}
 
 		local result = TMW:DeserializeDatum(string, silent)
-
-		tinsert(results, result)
+		if result then
+			tinsert(results, result)
+		end
 	end
+
+	if results and #results == 0 then return end
 
 	return results
 end

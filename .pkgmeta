@@ -41,7 +41,7 @@ optional-dependencies:
     - libdatabroker-1-1
 
 manual-changelog:
-    filename: CHANGELOG.md
+    filename: CHANGELOG.short.md
     markup-type: markdown
 
 license-output: LICENSE.txt
