@@ -1,11 +1,9 @@
-name: Package
+name: Package Retail
 
 on:
   push:
     branches:
       - master
-      - classic
-      - bc
     tags:
       - "*"
 
