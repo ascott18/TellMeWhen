@@ -17,7 +17,7 @@ externals:
     Lib/LibSpellRange-1.0: git://github.com/ascott18/LibSpellRange-1.0.git
     Lib/LibOO-1.0: git://github.com/ascott18/LibOO-1.0.git
     
-    Lib/LibRangeCheck-2.0: svn://svn.wowace.com/wow/librangecheck-2-0/mainline/trunk/LibRangeCheck-2.0
+    Lib/LibRangeCheck-2.0: https://github.com/WeakAuras/LibRangeCheck-2.0
 
     Lib/AceAddon-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
     Lib/AceEvent-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceEvent-3.0
@@ -49,6 +49,7 @@ enable-nolib-creation: no
 
 move-folders:
     TellMeWhen/TellMeWhen_Options: TellMeWhen_Options
+    Lib/LibRangeCheck-2.0/LibRangeCheck-2.0: Lib/LibRangeCheck-2.0
 
 ignore:
     - scrapper.lua
