@@ -23,6 +23,11 @@ end
 -- Blizzard has a typo in the English string ("Ecplise")
 L["ECLIPSE"] = (locale == "enUS" or locale == "enGB") and "Eclipse" or ECLIPSE
 
+L["DR-DeathCoil"] = GetSpellInfo(6789)
+L["DR-FreezingTrap"] = GetSpellInfo(3355)
+L["DR-Sleep"] = GetSpellInfo(700)
+L["DR-UnstableAffliction"] = GetSpellInfo(30108)
+
 L["DOMAIN_GLOBAL_NC"] = L["DOMAIN_GLOBAL"]:gsub("|cff00c300", ""):gsub("|r", "")
 
 L["HELP_FIRSTUCD"]                      = L["HELP_FIRSTUCD"]                        :format(L["ICONMENU_CHOOSENAME3"], 

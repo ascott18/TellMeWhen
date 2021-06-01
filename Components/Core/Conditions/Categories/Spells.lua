@@ -171,15 +171,16 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 				local _, e, _, sourceGuid, _, _, _, _, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 				if e == "SPELL_CAST_SUCCESS" and sourceGuid == pGUID then
 					Env.LastPlayerCastName = strlower(spellName)
+					Env.LastPlayerCastID = spellID
 					TMW:Fire("TMW_CNDT_LASTCAST_UPDATED")
 				end
 			end)
 		end
 
 		if c.Level == 1 then
-			return [[LastPlayerCastName ~= LOWER(c.NameString)]]
+			return [[LastPlayerCastName ~= LOWER(c.NameFirst) and LastPlayerCastID ~= c.NameFirst]] 
 		end
-		return [[LastPlayerCastName == LOWER(c.NameString)]]
+		return [[LastPlayerCastName == LOWER(c.NameFirst) or LastPlayerCastID == c.NameFirst]] 
 	end,
 	events = function(ConditionObject, c)
 		local pGUID = UnitGUID("player")

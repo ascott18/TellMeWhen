@@ -124,8 +124,8 @@ local function ICD_OnEvent(icon, event, unit, _, spellID)
 	end
 
 	if valid then
-		local NameHash = icon.Spells.StringHash
-		local Key = NameHash[strlowerCache[spellName]]
+		local NameHash = icon.Spells.Hash
+		local Key = NameHash[spellID] or NameHash[strlowerCache[spellName]]
 		if Key and not (icon.DontRefresh and (TMW.time - icon.ICDStartTime) < icon.Spells.Durations[Key]) then
 			-- Make sure we don't reset a running timer if we shouldn't.
 			-- If everything is good, record the data about this event and schedule an icon update.

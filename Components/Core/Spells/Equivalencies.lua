@@ -260,7 +260,7 @@ TMW.BE = {
 			  -1064, -- Chain Heal
 			  -8004, -- Lesser Healing Wave
 
-			   -863, -- Holy Light
+			   -635, -- Holy Light
 			 -19750, -- Flash of Light
 		},
 	},

@@ -33,9 +33,9 @@ local DRList = LibStub("DRList-1.0")
 	
 local DRSpells = DRList:GetSpells()
 local PvEDRs = {}
-for spellName, data in pairs(DRSpells) do
-	if DRList:IsPvECategory(data.category) then
-		PvEDRs[strlowerCache[spellName]] = 1
+for spellID, category in pairs(DRSpells) do
+	if DRList:IsPvECategory(category) then
+		PvEDRs[spellID] = 1
 	end
 end
 
@@ -174,8 +174,15 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 			random_root =  "DR-RandomRoot",
 			random_stun =  "DR-RandomStun",
 			root =         "DR-ControlledRoot",
-			silence =      "DR-Silence",
+			-- silence =      "DR-Silence",
 			kidney_shot =  "DR-KidneyShot",
+			death_coil =   "DR-DeathCoil",
+			disarm =       "DR-Disarm",
+			scatter_shot = "DR-Scatter",
+			disorient =    "DR-Disorient",
+			freezing_trap ="DR-FreezingTrap",
+			sleep =        "DR-Sleep",
+			unstable_affliction = "DR-UnstableAffliction",
 		}
 
 		local ignored = {
@@ -187,8 +194,7 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		local dr = TMW.BE.dr
 
 		local usedCategories = {}
-		for spellName, data in pairs(DRList:GetSpells()) do
-			local spellID, category = data.spellID, data.category
+		for spellID, category in pairs(DRList:GetSpells()) do
 			local k = myCategories[category]
 
 			if k then
@@ -213,18 +219,13 @@ end)
 local function DR_OnEvent(icon, event, arg1)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local _, cevent, _, _, _, _, _, destGUID, _, destFlags, _, spellID, spellName, _, auraType = CombatLogGetCurrentEventInfo()
-
-		if auraType == "DEBUFF" and (
-			cevent == "SPELL_AURA_REMOVED" or 
-			cevent == "SPELL_AURA_APPLIED" or 
-			(icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")
-		) then
-			spellName = strlowerCache[spellName]
-			local NameHash = icon.Spells.StringHash
-			if NameHash[spellName] then
+		
+		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
+			local NameHash = icon.Spells.Hash
+			if NameHash[spellID] or NameHash[strlowerCache[spellName]] then
 
 				-- Check that either the spell always has DR, or that the target is a player (or pet).
-				if PvEDRs[spellName] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
+				if PvEDRs[spellID] or bitband(destFlags, CL_CONTROL_PLAYER) == CL_CONTROL_PLAYER then
 					-- dr is the table that holds the DR info for this target GUID.
 					local dr = icon.DRInfo[destGUID]
 
@@ -244,7 +245,7 @@ local function DR_OnEvent(icon, event, arg1)
 								amt = 50,
 								start = TMW.time,
 								duration = icon.DRDuration,
-								tex = GetSpellTexture(spellName)
+								tex = GetSpellTexture(spellID)
 							}
 							icon.DRInfo[destGUID] = dr
 						else
@@ -255,7 +256,7 @@ local function DR_OnEvent(icon, event, arg1)
 								dr.amt = amt > 25 and amt/2 or 0
 								dr.duration = icon.DRDuration
 								dr.start = TMW.time
-								dr.tex = GetSpellTexture(spellName)
+								dr.tex = GetSpellTexture(spellID)
 							end
 						end
 					end
