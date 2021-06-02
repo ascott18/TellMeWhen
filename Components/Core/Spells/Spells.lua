@@ -257,12 +257,6 @@ local __index_old = nil
 
 
 TMW:NewClass("SpellSet"){
-	instancesByName = {
-		-- Keyed here by allowRenaming
-		[true] = setmetatable({}, {__mode='kv'}),
-		[false] = setmetatable({}, {__mode='kv'}),
-	},
-
 	OnFirstInstance = function(self)
 		self:MakeInstancesWeak()
 
@@ -281,10 +275,6 @@ TMW:NewClass("SpellSet"){
 
 		self.Name = name
 		self.AllowRenaming = allowRenaming
-
-		if name then
-			self.instancesByName[allowRenaming][name] = self
-		end
 		
 		setmetatable(self, self.betterMeta)
 	end,
@@ -315,6 +305,8 @@ TMW:NewClass("SpellSet"){
 		end
 	end,
 }
+
+TMW:MakeNArgFunctionCached(2, TMW.C.SpellSet, "New")
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	-- We need to wipe the stored objects/strings on every TMW_GLOBAL_UPDATE because of issues with
@@ -351,9 +343,12 @@ function TMW:GetSpells(spellString, allowRenaming)
 	-- Make sure that allowRenaming is a boolean.
 	allowRenaming = not not allowRenaming
 
-	return TMW.C.SpellSet.instancesByName[allowRenaming][spellString] or TMW.C.SpellSet:New(spellString, allowRenaming)
+	return TMW.C.SpellSet:New(spellString, allowRenaming)
 end
 
+-- Slightly redunant with the caching on SpellSet:New,
+-- but also makes things slightly faster by skipping a stack level or two.
+TMW:MakeNArgFunctionCached(2, TMW, "GetSpells")
 
 
 
@@ -528,3 +523,164 @@ TMW.COMMON.CurrentClassTotems = {
 		texture = GetSpellTexture(8512), -- windfury
 	},
 }
+
+TMW.COMMON.TotemBaseNames = {}
+TMW.COMMON.TotemRanks = {}
+local numerals = {
+	[1]="I",
+	[2]="II",
+	[3]="III",
+	[4]="IV",
+	[5]="V",
+	[6]="VI",
+	[7]="VII",
+	[8]="VIII",
+	[9]="IX",
+	[10]="X",
+	[11]="XI",
+	[12]="XII",
+	[13]="XIII",
+	[14]="XIV",
+	[15]="XV",
+}
+local function Totem(spellID, rank)
+	local data = {
+		spellID = spellID,
+		rankNumber = rank,
+		rankRoman = numerals[rank]
+	}
+	
+	data.spellName = GetSpellInfo(spellID)
+	data.spellNameLower = strlower(data.spellName)
+	data.totemName = data.spellName
+	if rank > 1 then
+		data.totemName = data.totemName .. " " .. numerals[rank]
+	end
+	data.totemNameLower = strlower(data.totemName)
+
+	TMW.COMMON.TotemRanks[spellID] = data
+	TMW.COMMON.TotemRanks[data.totemNameLower] = data
+
+	if not TMW.COMMON.TotemBaseNames[data.spellNameLower] then
+		TMW.COMMON.TotemBaseNames[data.spellNameLower] = data
+		TMW.COMMON.TotemBaseNames[spellID] = data
+	end
+end
+
+Totem(8170, 1)  -- Disease Cleansing Totem
+
+Totem(2062, 1)  -- Earth Elemental Totem
+
+Totem(2484, 1)  -- Earthbind Totem
+
+Totem(2894, 1)  -- Fire Elemental Totem
+
+Totem(1535, 1)  -- Fire Nova Totem
+Totem(8498, 2)  -- Fire Nova Totem
+Totem(8499, 3)  -- Fire Nova Totem
+Totem(11314, 4) -- Fire Nova Totem
+Totem(11315, 5) -- Fire Nova Totem
+Totem(25546, 6) -- Fire Nova Totem
+Totem(25547, 7) -- Fire Nova Totem
+
+Totem(8184, 1)  -- Fire Resistance Totem
+Totem(10537, 2) -- Fire Resistance Totem
+Totem(10538, 3) -- Fire Resistance Totem
+Totem(25563, 4) -- Fire Resistance Totem
+
+Totem(8227, 1)  -- Flametongue Totem
+Totem(8249, 2)  -- Flametongue Totem
+Totem(10526, 3) -- Flametongue Totem
+Totem(16387, 4) -- Flametongue Totem
+Totem(25557, 5) -- Flametongue Totem
+
+Totem(8181, 1)  -- Frost Resistance Totem
+Totem(10478, 2) -- Frost Resistance Totem
+Totem(10479, 3) -- Frost Resistance Totem
+Totem(25560, 4) -- Frost Resistance Totem
+
+Totem(8835, 1)  -- Grace of Air Totem
+Totem(10627, 2) -- Grace of Air Totem
+Totem(25359, 3) -- Grace of Air Totem
+
+Totem(8177, 1)  -- Grounding Totem
+
+Totem(5394, 1)  -- Healing Stream Totem
+Totem(6375, 2)  -- Healing Stream Totem
+Totem(6377, 3)  -- Healing Stream Totem
+Totem(10462, 4) -- Healing Stream Totem
+Totem(10463, 5) -- Healing Stream Totem
+Totem(25567, 6) -- Healing Stream Totem
+
+Totem(8190, 1)  -- Magma Totem
+Totem(10585, 2) -- Magma Totem
+Totem(10586, 3) -- Magma Totem
+Totem(10587, 4) -- Magma Totem
+Totem(25552, 5) -- Magma Totem
+
+Totem(5675, 1)  -- Mana Spring Totem
+Totem(10495, 2) -- Mana Spring Totem
+Totem(10496, 3) -- Mana Spring Totem
+Totem(10497, 4) -- Mana Spring Totem
+Totem(25570, 5) -- Mana Spring Totem
+
+Totem(16190, 1) -- Mana Tide Totem
+
+Totem(10595, 1) -- Nature Resistance Totem
+Totem(10600, 2) -- Nature Resistance Totem
+Totem(10601, 3) -- Nature Resistance Totem
+Totem(25574, 4) -- Nature Resistance Totem
+
+Totem(8166, 1)  -- Poison Cleansing Totem
+
+Totem(3599, 1)  -- Searing Totem
+Totem(6363, 2)  -- Searing Totem
+Totem(6364, 3)  -- Searing Totem
+Totem(6365, 4)  -- Searing Totem
+Totem(10437, 5) -- Searing Totem
+Totem(10438, 6) -- Searing Totem
+Totem(25533, 7) -- Searing Totem
+
+Totem(6495, 1)  -- Sentry Totem
+
+Totem(5730, 1)  -- Stoneclaw Totem
+Totem(6390, 2)  -- Stoneclaw Totem
+Totem(6391, 3)  -- Stoneclaw Totem
+Totem(6392, 4)  -- Stoneclaw Totem
+Totem(10427, 5) -- Stoneclaw Totem
+Totem(10428, 6) -- Stoneclaw Totem
+Totem(25525, 7) -- Stoneclaw Totem
+
+Totem(8071, 1)  -- Stoneskin Totem
+Totem(8154, 2)  -- Stoneskin Totem
+Totem(8155, 3)  -- Stoneskin Totem
+Totem(10406, 4) -- Stoneskin Totem
+Totem(10407, 5) -- Stoneskin Totem
+Totem(10408, 6) -- Stoneskin Totem
+Totem(25508, 7) -- Stoneskin Totem
+Totem(25509, 8) -- Stoneskin Totem
+
+Totem(8075, 1)  -- Strength of Earth Totem
+Totem(8160, 2)  -- Strength of Earth Totem
+Totem(8161, 3)  -- Strength of Earth Totem
+Totem(10442, 4) -- Strength of Earth Totem
+Totem(25361, 5) -- Strength of Earth Totem
+Totem(25528, 6) -- Strength of Earth Totem
+Totem(30706, 7) -- Totem of Wrath
+
+Totem(25908, 1) -- Tranquil Air Totem
+
+Totem(8143, 1)  -- Tremor Totem
+
+Totem(8512, 1)  -- Windfury Totem
+Totem(10613, 2) -- Windfury Totem
+Totem(10614, 3) -- Windfury Totem
+Totem(25585, 4) -- Windfury Totem
+Totem(25587, 5) -- Windfury Totem
+
+Totem(15107, 1) -- Windwall Totem
+Totem(15111, 2) -- Windwall Totem
+Totem(15112, 3) -- Windwall Totem
+Totem(25577, 4) -- Windwall Totem
+
+Totem(3738, 1)  -- Wrath of Air Totem

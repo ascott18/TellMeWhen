@@ -573,31 +573,63 @@ ConditionCategory:RegisterCondition(19.5,	 "OHSWING", {
 ConditionCategory:RegisterSpacer(20)
 
 local totemData = TMW.COMMON.CurrentClassTotems
+local totemRanks = TMW.COMMON.TotemRanks
 
-function Env.TotemHelper(slot, nameString)
-	local have, name, start, duration = GetTotemInfo(slot)
-	if nameString and nameString ~= "" and nameString ~= ";" and name and not strfind(nameString, Env.SemicolonConcatCache[name or ""]) then
-		return 0
+function Env.TotemHelper(slot, spellSet)
+	local _, totemName, start, duration = GetTotemInfo(slot)
+	local totemNameLower = strlowerCache[totemName]
+	local totemInfo = totemRanks[totemNameLower]
+	local Hash = spellSet and spellSet.Hash
+	
+	if
+		start ~= 0 and
+		totemName and
+		(
+			not spellSet or
+			Hash[totemNameLower] or
+			(totemInfo and (
+				-- By totem name, (e.g. "Searing Totem III")
+				Hash[totemInfo.totemNameLower] or
+				-- or by spellID,
+				Hash[totemInfo.spellID] or
+				-- Or by the spell name (which is the same as the rank 1 totem name) (e.g. "Searing Totem")
+				Hash[totemInfo.spellNameLower])
+			)
+		)
+	then
+		return duration and duration ~= 0 and (duration - (TMW.time - start)) or 0
 	end
-	return duration and duration ~= 0 and (duration - (TMW.time - start)) or 0
+	return 0
 end
 
-function Env.TotemHelperAny(nameString)
+function Env.TotemHelperAny(spellSet)
+	local Hash = spellSet and spellSet.Hash
+	
 	for slot = 1, 10 do
-		local have, name, start, duration = GetTotemInfo(slot)
+		local have, totemName, start, duration = GetTotemInfo(slot)
 		if have == nil then
 			return 0 -- `have` will be nil if the slot doesn't exist.
 		end
+		
+		local totemNameLower = strlowerCache[totemName]
+		local totemInfo = totemRanks[totemNameLower]
 
 		if
-			have and (
-				-- If we're not filtering by name,
-				(not nameString or nameString == "" or nameString == ";")
-				-- Or we are filtering by name and the name matches
-				or (name and strfind(nameString, Env.SemicolonConcatCache[name]))
+			start ~= 0 and
+			totemName and
+			(
+				not spellSet or
+				Hash[totemNameLower] or
+				(totemInfo and (
+					-- By totem name, (e.g. "Searing Totem III")
+					Hash[totemInfo.totemNameLower] or
+					-- or by spellID,
+					Hash[totemInfo.spellID] or
+					-- Or by the spell name (which is the same as the rank 1 totem name) (e.g. "Searing Totem")
+					Hash[totemInfo.spellNameLower])
+				)
 			)
 		then
-			-- Then return the time of this totem as the result.
 			return duration and duration ~= 0 and (duration - (TMW.time - start)) or 0
 		end
 		-- If the above condition didn't succeeed, continue on to the next totem.
@@ -618,18 +650,18 @@ ConditionCategory:RegisterCondition(20.1,	 "TOTEM_ANY", {
 		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
 		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
-	useSUG = true,
+	useSUG = "totem",
 	allowMultipleSUGEntires = true,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\ICONS\\spell_nature_brilliance",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[TotemHelperAny(c.NameStrings) c.Operator c.Level]],
+	funcstr = [[TotemHelperAny(c.Spells) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
 	end,
 	anticipate = function(c)
-		return [[local VALUE = time + TotemHelperAny(c.NameStrings) - c.Level]]
+		return [[local VALUE = time + TotemHelperAny(c.Spells) - c.Level]]
 	end,
 })
 
@@ -645,12 +677,12 @@ for i = 1, 5 do
 			editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
 			editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 		end,
-		useSUG = true,
+		useSUG = "totem",
 		allowMultipleSUGEntires = true,
 		formatter = TMW.C.Formatter.TIME_0ABSENT,
 		icon = totem and totem.texture or "Interface\\ICONS\\ability_shaman_tranquilmindtotem",
 		tcoords = CNDT.COMMON.standardtcoords,
-		funcstr = [[TotemHelper(]] .. i .. ((not totem or totem.hasVariableNames) and [[, c.NameString]] or "") .. [[) c.Operator c.Level]],
+		funcstr = [[TotemHelper(]] .. i .. ((not totem or totem.hasVariableNames) and [[, c.Spells]] or "") .. [[) c.Operator c.Level]],
 		events = function(ConditionObject, c)
 			return
 				ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")

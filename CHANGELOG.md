@@ -1,3 +1,8 @@
+## v9.0.8
+* Fixed up diminishing returns categories
+* Reworked suggestion list for totems to make it clear that the actual totem name is the correct input.
+* Adjusted the totem icon type to allow for matching ranks by spell ID, and to allow matching any rank by entering the name of the rank 1 version of the totem.
+
 ## v9.0.7
 ## Bug Fixes
 * Fixed #1886 - invalid key to "next" (new version of LibDogTag-Unit-3.0 should resolve this).

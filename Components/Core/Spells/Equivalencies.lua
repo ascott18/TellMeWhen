@@ -234,7 +234,7 @@ TMW.BE = {
 		},
 		BurstHaste = {
 			   2825, -- Bloodlust                           (shaman, horde)
-			  32128, -- Heroism                             (shaman, alliance)
+			  32182, -- Heroism                             (shaman, alliance)
 		},
 		ImmuneToInterrupts = {
 			   -642, -- Divine Shield                       (paladin, general)
