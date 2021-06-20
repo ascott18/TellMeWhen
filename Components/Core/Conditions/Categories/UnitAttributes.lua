@@ -526,3 +526,55 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
 	end,
 })
+
+
+ConditionCategory:RegisterSpacer(13.5)
+
+
+
+ConditionCategory:RegisterCondition(17,   "THREATSCALED", {
+	text = L["CONDITIONPANEL_THREAT_SCALED"],
+	tooltip = L["CONDITIONPANEL_THREAT_SCALED_DESC"],
+	min = 0,
+	max = 100,
+	defaultUnit = "target",
+	formatter = TMW.C.Formatter.PERCENT,
+	icon = GetSpellTexture(6612),
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitExists = UnitExists,
+		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
+	},
+	funcstr = [[UnitExists(c.Unit) and ((select(3, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level)]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_THREAT_LIST_UPDATE", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_THREAT_SITUATION_UPDATE", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_THREAT_SITUATION_UPDATE", "player")
+	end,
+})
+
+
+ConditionCategory:RegisterCondition(18,   "THREATRAW", {
+	text = L["CONDITIONPANEL_THREAT_RAW"],
+	tooltip = L["CONDITIONPANEL_THREAT_RAW_DESC"],
+	min = 0,
+	max = 130,
+	defaultUnit = "target",
+	formatter = TMW.C.Formatter.PERCENT,
+	icon = GetSpellTexture(9174),
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitExists = UnitExists,
+		UnitDetailedThreatSituation = UnitDetailedThreatSituation,
+	},
+	funcstr = [[UnitExists(c.Unit) and ((select(4, UnitDetailedThreatSituation("player", c.Unit)) or 0) c.Operator c.Level)]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_THREAT_LIST_UPDATE", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_THREAT_SITUATION_UPDATE", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_THREAT_SITUATION_UPDATE", "player")
+	end,
+})
