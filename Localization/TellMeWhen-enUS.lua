@@ -272,10 +272,8 @@ L["ICONMENU_DOTWATCH_NOFOUND_DESC"] = "Set the icon opacity level for when none 
 
 
 
-L["ICONMENU_GUARDIAN"] = "Guardians"
-L["ICONMENU_GUARDIAN_DESC"] = [[Tracks your active guardians. These are minor units like Wild Imps for Warlocks.
-
-This icon type works best when used as a group controller.]]
+L["ICONMENU_GUARDIAN"] = "Guardians/Pets"
+L["ICONMENU_GUARDIAN_DESC"] = [[Tracks your active guardians and temporary pets.]]
 L["ICONMENU_GUARDIAN_TRIGGER"] = "Triggered by: %s"
 L["ICONMENU_GUARDIAN_CHOOSENAME_DESC"] = [[Enter the Name or NPC ID of the guardians you want this icon to monitor.
 

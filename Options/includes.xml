@@ -136,6 +136,7 @@
 <Include file="..\Components\IconTypes\IconType_conditionicon\Config.xml" />
 <Include file="..\Components\IconTypes\IconType_default\Config.xml" />
 <Script  file="..\Components\IconTypes\IconType_dr\Config.lua" />
+<Script  file="..\Components\IconTypes\IconType_guardian\Config.lua" />
 <Script  file="..\Components\IconTypes\IconType_item\Config.lua" />
 <Include file="..\Components\IconTypes\IconType_meta\Config.xml" />
 <Script  file="..\Components\IconTypes\IconType_meta\Config.lua" />

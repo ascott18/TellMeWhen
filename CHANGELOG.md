@@ -2,6 +2,8 @@
 * Fixed up diminishing returns categories
 * Reworked suggestion list for totems to make it clear that the actual totem name is the correct input.
 * Adjusted the totem icon type to allow for matching ranks by spell ID, and to allow matching any rank by entering the name of the rank 1 version of the totem.
+* Reintroduced the Guardians icon type for temporary pets like Water Elemental, Shadowfiend, etc.
+* #1901 - Reintroduced the threat conditions.
 
 ## v9.0.7
 ## Bug Fixes

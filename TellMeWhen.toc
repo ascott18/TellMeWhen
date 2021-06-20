@@ -221,6 +221,7 @@ Components\IconTypes\IconType_cooldown\cooldown.lua
 Components\IconTypes\IconType_default\default.lua
 Components\IconTypes\IconType_dotwatch\dotwatch.lua
 Components\IconTypes\IconType_dr\dr.lua
+Components\IconTypes\IconType_guardian\guardian.lua
 Components\IconTypes\IconType_icd\icd.lua
 Components\IconTypes\IconType_item\item.lua
 Components\IconTypes\IconType_meta\meta.lua
