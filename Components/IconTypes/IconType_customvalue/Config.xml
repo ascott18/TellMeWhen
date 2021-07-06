@@ -1,0 +1,76 @@
+<Ui>
+	<Frame name="TellMeWhen_CustomValue" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="50"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="Text" wordwrap="true" inherits="GameFontHighlightSmall">
+					<Anchors>
+						<Anchor point="TOP" y="-10"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<EditBox parentKey="Lua" inherits="TellMeWhen_InputBoxTemplate" multiline="true">
+				<Size y="16"/>
+				<Anchors>
+					<Anchor point="LEFT" x="5" relativeKey="$parent.Type"/>
+					<Anchor point="RIGHT" x="-5" />
+					<Anchor point="TOP" y="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self, "Config_EditBox_Lua")
+						self:SetSetting("code")
+
+						self:SetTexts(TMW.L["CUSTOMVALUE_LUA"], TMW.L["CUSTOMVALUE_LUA_TOOLTIP"])
+						self:SetLabel(TMW.L["CODETOEXE"])
+
+						TMW.Classes.ChatEdit_InsertLink_Hook:New(self, function(self, text, linkType, linkData)
+
+							-- if this editbox is active and is for a Lua condition,
+							-- attempt to insert a reference to the icon by GUID into the editbox
+							if linkType == "TMW" and TMW.CNDT:GetSettings()[self:GetParent():GetID()].Type == "LUA" then
+
+								-- Reconstruct the GUID
+								local GUID = linkType .. ":" .. linkData
+
+								self.editbox:Insert(("TMW:GetDataOwner(%q)"):format(GUID))
+
+								-- notify success
+								return true
+							end
+						end)
+
+						self:SetPadNewlines(false)
+
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
+							return value:trim("\r\n \t")
+						end)
+
+						self:SetSetting("Name")
+					</OnLoad>
+
+					<OnSizeChanged>
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight(5)
+						end
+					</OnSizeChanged>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["CUSTOMVALUE_LUA"])
+
+				self.Text:SetWidth(self:GetWidth() - 15)
+				self:SetHeight(self.Text:GetStringHeight() + 43)
+			</OnLoad>
+			<OnSizeChanged>
+				self:SetHeight(self.Text:GetStringHeight() + 43)
+			</OnSizeChanged>
+		</Scripts>
+	</Frame>
+</Ui>

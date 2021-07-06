@@ -1332,6 +1332,8 @@ L["CONDITIONPANEL_MAX"] = "Max"
 L["CONDITIONPANEL_COMBO"] = "Combo Points"
 L["CONDITIONPANEL_ALTPOWER"] = "Alt. Power"
 L["CONDITIONPANEL_ALTPOWER_DESC"] = [[This is the encounter-specific power used for many quests and boss fights.]]
+L["CONDITIONPANEL_LUAVALUE"] = "Lua Value"
+L["CONDITIONPANEL_LUAVALUE_DESC"] = [[Value return by a custom Lua function.]]
 L["CONDITIONPANEL_EXISTS"] = "Unit Exists"
 L["CONDITIONPANEL_ALIVE"] = "Unit is Alive"
 L["CONDITIONPANEL_ALIVE_DESC"] = "The condition will pass if the unit specified is alive."
@@ -2895,3 +2897,30 @@ Creature types must be typed exactly as they appear in the creature's tooltip.
 
 The condition will pass if any types are matched.]]
 
+L["ICONMENU_CUSTOMVALUE"] = "Custom Value (Advanced)"
+L["ICONMENU_CUSTOMVALUE_DESC"] = [[Track a value returned by a custom lua function.]]
+L["ICONMENU_CUSTOMVALUE_OK"] = "Lua OK"
+L["ICONMENU_CUSTOMVALUE_ERROR"] = "Lua Error"
+L["CUSTOMVALUE_LUA"] = "Lua Function Body"
+L["CUSTOMVALUE_LUA_TOOLTIP"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
+
+The lua code must be in the form of a function body that returns two values: the current value & the maximum value. For example, to have a bar that shows the player's world latency (out of 1000 ms), use the following code:
+
+|cfffffffflocal lat = select(4, GetNetStats())|r
+|cffffffffreturn lat, 1000|r
+
+If more help is needed (but not help about how to write Lua code), try the TMW Discord. For help on how to write Lua, go to the internet.]]
+L["CUSTOMVALUE_LUA_TOOLTIP2"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
+
+The lua code must be in the form of a function body that returns two values: the current value & the maximum value. For example, to have a bar that shows the player's valor points, use the following code:
+
+|cfffffffflocal valorInfo = C_CurrencyInfo.GetCurrencyInfo(1191)|r
+|cfffffffflocal curValor = valorInfo["quantity"]|r
+|cfffffffflocal maxValor = valorInfo["maxQuantity"]|r
+|cffffffffreturn curValor, maxValor|r
+
+or single line version
+
+|cffffffffreturn C_CurrencyInfo.GetCurrencyInfo(1191)["quantity"], C_CurrencyInfo.GetCurrencyInfo(1191)["maxQuantity"]|r
+  
+If more help is needed (but not help about how to write Lua code), try the TMW Discord. For help on how to write Lua, go to the internet.]]
