@@ -2896,9 +2896,10 @@ Creature types must be typed exactly as they appear in the creature's tooltip.
 The condition will pass if any types are matched.]]
 
 L["ICONMENU_CUSTOMVALUE"] = "Custom Value (Advanced)"
+L["ICONMENU_CUSTOMVALUE2"] = "Custom Value"
 L["ICONMENU_CUSTOMVALUE_DESC"] = [[Track a value returned by a custom lua function.]]
-L["ICONMENU_CUSTOMVALUE_OK"] = "Lua OK"
-L["ICONMENU_CUSTOMVALUE_ERROR"] = "Lua Error"
+L["ICONMENU_CUSTOMVALUE_OK"] = "Custom Value OK"
+L["ICONMENU_CUSTOMVALUE_ERROR"] = "Unusable result"
 L["CUSTOMVALUE_LUA"] = "Lua Function Body"
 L["CUSTOMVALUE_LUA_TOOLTIP"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
 
@@ -2907,18 +2908,6 @@ The lua code must be in the form of a function body that returns two values: the
 |cfffffffflocal lat = select(4, GetNetStats())|r
 |cffffffffreturn lat, 1000|r
 
+If the function did not return two numeric values (or a Lua syntax error is encountered), the Icon will be displayed as set in "Unusable result".
 If more help is needed (but not help about how to write Lua code), try the TMW Discord. For help on how to write Lua, go to the internet.]]
-L["CUSTOMVALUE_LUA_TOOLTIP2"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
 
-The lua code must be in the form of a function body that returns two values: the current value & the maximum value. For example, to have a bar that shows the player's valor points, use the following code:
-
-|cfffffffflocal valorInfo = C_CurrencyInfo.GetCurrencyInfo(1191)|r
-|cfffffffflocal curValor = valorInfo["quantity"]|r
-|cfffffffflocal maxValor = valorInfo["maxQuantity"]|r
-|cffffffffreturn curValor, maxValor|r
-
-or single line version
-
-|cffffffffreturn C_CurrencyInfo.GetCurrencyInfo(1191)["quantity"], C_CurrencyInfo.GetCurrencyInfo(1191)["maxQuantity"]|r
-  
-If more help is needed (but not help about how to write Lua code), try the TMW Discord. For help on how to write Lua, go to the internet.]]
