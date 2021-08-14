@@ -61,7 +61,8 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_IconStates", {
 
 local function CustomValue_OnUpdate(icon, time)    
 
-	local func = loadstring(icon.LuaCode)
+	local value, maxVaule, func = icon.value, icon.maxValue, icon.luaFunc
+	
 
 	if func == nil then
 		icon:SetInfo("state", STATE_FAIL)
@@ -95,7 +96,7 @@ function Type:Setup(icon)
 	icon:SetInfo("texture", "Interface/Icons/inv_misc_punchcards_white")
 	icon:SetUpdateMethod("auto")
 	icon:SetUpdateFunction(CustomValue_OnUpdate)
-	icon.luaCode = loadstring(icon.LuaCode)
+	icon.luaFunc = loadstring(icon.LuaCode)
 	icon:Update()
 end
 
