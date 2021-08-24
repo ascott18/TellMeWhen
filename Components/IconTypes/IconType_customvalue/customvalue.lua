@@ -23,9 +23,7 @@ Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 Type:UsesAttributes("texture")
 
-Type:UsesAttributes("value")
-Type:UsesAttributes("maxValue")
-Type:UsesAttributes("valueColor")
+Type:UsesAttributes("value, maxValue, valueColor")
 Type:UsesAttributes("state")
 
 local BarColors = {{r=0, g=0, b=1, a=1}, {r=0, g=1, b=1, a=1}, {r=0, g=1, b=0, a=1}}
@@ -33,24 +31,10 @@ local BarColors = {{r=0, g=0, b=1, a=1}, {r=0, g=1, b=1, a=1}, {r=0, g=1, b=0, a
 Type:RegisterIconDefaults{
 	-- Lua code to be evaluated
 	LuaCode			="",
-
-	-- Currently displayed value
-	value			=0,
-	
-	-- Maximum value displayed
-	maxValue		=0,
-	
-	-- Bar color scheme
-	valueColor		=BarColors,
-	
-	-- Initial state of icon (set as fail since we have no code yet)
-	state			=STATE_FAIL,
-
 }
 
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_CustomValue", {
-	implementConditions = true,
 })
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_IconStates", {
@@ -61,8 +45,8 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_IconStates", {
 
 local function CustomValue_OnUpdate(icon, time)    
 
-	local value, maxVaule, func = icon.value, icon.maxValue, icon.luaFunc
-	
+	local value, maxValue
+	local func = icon.luaFunc
 
 	if func == nil then
 		icon:SetInfo("state", STATE_FAIL)
@@ -71,17 +55,16 @@ local function CustomValue_OnUpdate(icon, time)
 	value, maxValue = func()
 	value = tonumber(value)
 	maxValue = tonumber(maxValue)
-	if value == nil or maxValue == nil then
+
+	if value == nil or maxValue == nil or maxValue < 0 then
 		icon:SetInfo("state", STATE_FAIL)
 		return
 	end
+
 	if value < 0 then
 		value = 0
 	end
-	if maxValue < 0 then
-		icon:SetInfo("state", STATE_FAIL)
-		return
-	end
+
 	if value > maxValue then
 		maxValue = value
 	end	

@@ -2897,13 +2897,13 @@ The condition will pass if any types are matched.]]
 
 L["ICONMENU_CUSTOMVALUE"] = "Custom Value (Advanced)"
 L["ICONMENU_CUSTOMVALUE2"] = "Custom Value"
-L["ICONMENU_CUSTOMVALUE_DESC"] = [[Track a value returned by a custom lua function.]]
+L["ICONMENU_CUSTOMVALUE_DESC"] = [[Track a value returned by a custom Lua function.]]
 L["ICONMENU_CUSTOMVALUE_OK"] = "Custom Value OK"
 L["ICONMENU_CUSTOMVALUE_ERROR"] = "Unusable result"
 L["CUSTOMVALUE_LUA"] = "Lua Function Body"
 L["CUSTOMVALUE_LUA_TOOLTIP"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
 
-The lua code must be in the form of a function body that returns two values: the current value & the maximum value. For example, to have a bar that shows the player's world latency (out of 1000 ms), use the following code:
+The Lua code must be in the form of a function body that returns two values: the current value & the maximum value. For example, to have a bar that shows the player's world latency (out of 1000 ms), use the following code:
 
 |cfffffffflocal lat = select(4, GetNetStats())|r
 |cffffffffreturn lat, 1000|r
