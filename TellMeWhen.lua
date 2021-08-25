@@ -32,7 +32,7 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_BURNING_CRUSADE_CLASSIC then
 	return
 end
 
-TELLMEWHEN_VERSION = "9.0.8"
+TELLMEWHEN_VERSION = "9.1.1"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -42,12 +42,12 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 	TELLMEWHEN_VERSION_MINOR = ("r%d (%s)"):format(strmatch(projectVersion, "%-(%d+)%-(.*)"))
 end
 
-TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " TBC " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 90801 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
+TELLMEWHEN_VERSIONNUMBER = 91100 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 91000 or TELLMEWHEN_VERSIONNUMBER < 90000 then
+if TELLMEWHEN_VERSIONNUMBER > 92000 or TELLMEWHEN_VERSIONNUMBER < 91000 then
 	-- safety check because i accidentally made the version number 414069 once
 	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
 end
