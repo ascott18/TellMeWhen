@@ -438,6 +438,8 @@ function ConditionObject:GetUnitChangedEventString(unit)
 		return self:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
 	elseif unit:find("^boss%d+$") then
 		return self:GenerateNormalEventString("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
+	elseif unit:find("^arena%d+$") then
+		return self:GenerateNormalEventString("ARENA_OPPONENT_UPDATE")
 	end
 	
 	return false

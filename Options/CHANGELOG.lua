@@ -3,6 +3,11 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v9.1.1
+### Bug Fixes
+* Fixed #1909 - IconConfig.lua:127: attempt to index field "CurrentTabGroup" (a nil value)
+* Fixed #1905 - Re-added arena unitIDs.
+
 ## v9.0.8
 * Fixed up diminishing returns categories
 * Reworked suggestion list for totems to make it clear that the actual totem name is the correct input.
