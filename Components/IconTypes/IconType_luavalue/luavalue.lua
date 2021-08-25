@@ -6,10 +6,10 @@ local L = TMW.L
 local print = TMW.print
 
 
-local Type = TMW.Classes.IconType:New("customvalue")
+local Type = TMW.Classes.IconType:New("luavalue")
 
-Type.name = L["ICONMENU_CUSTOMVALUE"]
-Type.desc = L["ICONMENU_CUSTOMVALUE_DESC"]
+Type.name = L["ICONMENU_LUAVALUE"]
+Type.desc = L["ICONMENU_LUAVALUE_DESC"]
 Type.menuIcon = "Interface/Icons/inv_misc_punchcards_white"
 
 Type.hasNoGCD = true
@@ -34,16 +34,16 @@ Type:RegisterIconDefaults{
 }
 
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_CustomValue", {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_LuaValue", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_IconStates", {
-	[STATE_SUCCEED] = { text = "|cFF00FF00" .. L["ICONMENU_CUSTOMVALUE_OK"], },
-	[STATE_FAIL] =    { text = "|cFFFF0000" .. L["ICONMENU_CUSTOMVALUE_ERROR"], },
+	[STATE_SUCCEED] = { text = "|cFF00FF00" .. L["ICONMENU_LUAVALUE_OK"], },
+	[STATE_FAIL] =    { text = "|cFFFF0000" .. L["ICONMENU_LUAVALUE_ERROR"], },
 })
 
 
-local function CustomValue_OnUpdate(icon, time)    
+local function LuaValue_OnUpdate(icon, time)    
 
 	local value, maxValue
 	local func = icon.luaFunc
@@ -78,14 +78,14 @@ end
 function Type:Setup(icon)
 	icon:SetInfo("texture", "Interface/Icons/inv_misc_punchcards_white")
 	icon:SetUpdateMethod("auto")
-	icon:SetUpdateFunction(CustomValue_OnUpdate)
+	icon:SetUpdateFunction(LuaValue_OnUpdate)
 	icon.luaFunc = loadstring(icon.LuaCode)
 	icon:Update()
 end
 
 TMW:RegisterLuaImportDetector(function(table)
 	if rawget(table, "LuaCode") ~= "" then
-		return table.LuaCode, L["ICONMENU_CUSTOMVALUE2"]
+		return table.LuaCode, L["ICONMENU_LUAVALUE2"]
 	end
 end)
 

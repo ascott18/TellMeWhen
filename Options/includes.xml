@@ -146,7 +146,7 @@
 <Include file="..\Components\IconTypes\IconType_swingtimer\Config.xml" />
 <Include file="..\Components\IconTypes\IconType_uierror\Config.xml" />
 <Script  file="..\Components\IconTypes\IconType_wpnenchant\Config.lua" />
-<Include file="..\Components\IconTypes\IconType_customvalue\Config.xml" />
+<Include file="..\Components\IconTypes\IconType_luavalue\Config.xml" />
 </Ui>
 
 

@@ -2895,13 +2895,13 @@ Creature types must be typed exactly as they appear in the creature's tooltip.
 
 The condition will pass if any types are matched.]]
 
-L["ICONMENU_CUSTOMVALUE"] = "Custom Value (Advanced)"
-L["ICONMENU_CUSTOMVALUE2"] = "Custom Value"
-L["ICONMENU_CUSTOMVALUE_DESC"] = [[Track a value returned by a custom Lua function.]]
-L["ICONMENU_CUSTOMVALUE_OK"] = "Custom Value OK"
-L["ICONMENU_CUSTOMVALUE_ERROR"] = "Unusable result"
-L["CUSTOMVALUE_LUA"] = "Lua Function Body"
-L["CUSTOMVALUE_LUA_TOOLTIP"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
+L["ICONMENU_LUAVALUE"] = "Lua Value (Advanced)"
+L["ICONMENU_LUAVALUE2"] = "Lua Value"
+L["ICONMENU_LUAVALUE_DESC"] = [[Track a value returned by a user supplied Lua function.]]
+L["ICONMENU_LUAVALUE_OK"] = "Lua Value OK"
+L["ICONMENU_LUAVALUE_ERROR"] = "Unusable result"
+L["LUAVALUE_LUA"] = "Lua Function Body"
+L["LUAVALUE_LUA_TOOLTIP"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
 
 The Lua code must be in the form of a function body that returns two values: the current value & the maximum value. For example, to have a bar that shows the player's world latency (out of 1000 ms), use the following code:
 
