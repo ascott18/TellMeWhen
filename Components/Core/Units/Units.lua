@@ -528,6 +528,15 @@ function UNITS:UpdateTankAndAssistMap()
 				maMap[#maMap + 1] = i
 			end
 		end
+	else
+		for i = 1, GetNumSubgroupMembers() do
+			local raidunit = "party" .. i
+			if UnitGroupRolesAssigned(raidunit) == "TANK" then
+				mtMap[#mtMap + 1] = i
+			elseif UnitGroupRolesAssigned(raidunit) == "DAMAGER" then
+				maMap[#maMap + 1] = i
+			end
+		end
 	end
 end
 
@@ -640,7 +649,12 @@ function UNITS:SubstituteSpecialUnit(oldunit)
 		return false
 
 	elseif strfind(oldunit, "^maintank") then -- the old unit (maintank1)
-		local newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid1) (number not changed yet)
+		local newunit
+		if IsInRaid() then
+			newunit = gsub(oldunit, "maintank", "raid") -- the new unit (raid1) (number not changed yet)
+		else
+			newunit = gsub(oldunit, "maintank", "party")
+		end
 		local oldnumber = tonumber(strmatch(newunit, "(%d+)")) -- the old number (1)
 		local newnumber = oldnumber and UNITS.mtMap[oldnumber] -- the new number(7)
 		if newnumber then
@@ -652,7 +666,12 @@ function UNITS:SubstituteSpecialUnit(oldunit)
 		return false
 
 	elseif strfind(oldunit, "^mainassist") then
-		local newunit = gsub(oldunit, "mainassist", "raid")
+		local newunit
+		if IsInRaid() then
+			newunit = gsub(oldunit, "mainassist", "raid")
+		else
+			newunit = gsub(oldunit, "mainassist", "party")
+		end
 		local oldnumber = tonumber(strmatch(newunit, "(%d+)"))
 		local newnumber = oldnumber and UNITS.maMap[oldnumber]
 		if newnumber then
