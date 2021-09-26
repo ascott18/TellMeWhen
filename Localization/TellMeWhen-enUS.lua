@@ -220,14 +220,6 @@ This setting will be ignored if the icon is already hidden due to another %s set
 Conditions can be configured in the %q tab.]]
 
 
-L["DURATIONALPHA_DESC"] = [[Set the opacity level that the icon should display at when the duration requirements fail.
-
-This setting will be ignored if the icon is already hidden due to another %s setting.]]
-L["STACKALPHA_DESC"] = [[Set the opacity level that the icon should display at when the stack requirements fail.
-
-This setting will be ignored if the icon is already hidden due to another %s setting.]]
-
-
 
 
 
@@ -734,11 +726,26 @@ L["STACKS"] = "Stacks"
 L["STACKSPANEL_TITLE2"] = "Stack Requirements"
 L["ICONMENU_STACKS_MIN_DESC"] = "Minimum number of stacks needed to show the icon"
 L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks allowed to show the icon"
+L["STACKALPHA_DESC"] = [[Set the opacity level that the icon should display at when the stack requirements fail.
+
+This setting will be ignored if the icon is already hidden due to another %s setting.]]
+
+
+L["VALUE"] = "Value"
+L["VALUEPANEL_TITLE2"] = "Value Requirements"
+L["ICONMENU_VALUE_MIN_DESC"] = "Minimum value needed to show the icon"
+L["ICONMENU_VALUE_MAX_DESC"] = "Maximum value allowed to show the icon"
+L["VALUEALPHA_DESC"] = [[Set the opacity level that the icon should display at when the value requirements fail.
+
+This setting will be ignored if the icon is already hidden due to another %s setting.]]
 
 L["DURATION"] = "Duration"
 L["DURATIONPANEL_TITLE2"] = "Duration Requirements"
 L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon, in seconds"
 L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon, in seconds"
+L["DURATIONALPHA_DESC"] = [[Set the opacity level that the icon should display at when the duration requirements fail.
+
+This setting will be ignored if the icon is already hidden due to another %s setting.]]
 
 L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of a timer to set on the icon when conditions begin succeeding"
 L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of a timer to set on the icon when conditions begin failing"

@@ -98,6 +98,7 @@
 <!-- ..\Components\IconDataProcessorHooks\includes.config.xml -->
 <Include file="..\Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_DurationReq\Config.xml" />
 <Include file="..\Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_StackReq\Config.xml" />
+<Include file="..\Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ValueReq\Config.xml" />
 <Include file="..\Components\IconDataProcessorHooks\IconDataProcessorHook_Texture_CustomTex\Config.xml" />
 <Script  file="..\Components\IconDataProcessorHooks\IconDataProcessorHook_Texture_CustomTex\Config.lua" />
 
