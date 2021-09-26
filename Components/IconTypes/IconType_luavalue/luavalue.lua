@@ -30,9 +30,8 @@ local BarColors = {{r=0, g=0, b=1, a=1}, {r=0, g=1, b=1, a=1}, {r=0, g=1, b=0, a
 
 Type:RegisterIconDefaults{
 	-- Lua code to be evaluated
-	LuaCode			="",
+	LuaCode			= "",
 }
-
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_LuaValue", {
 })
@@ -43,16 +42,10 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_IconStates", {
 })
 
 
-local function LuaValue_OnUpdate(icon, time)    
-
-	local value, maxValue
+local function LuaValue_OnUpdate(icon)
 	local func = icon.luaFunc
 
-	if func == nil then
-		icon:SetInfo("state", STATE_FAIL)
-		return
-	end
-	value, maxValue = func()
+	local value, maxValue = func()
 	value = tonumber(value)
 	maxValue = tonumber(maxValue)
 
@@ -67,19 +60,34 @@ local function LuaValue_OnUpdate(icon, time)
 
 	if value > maxValue then
 		maxValue = value
-	end	
+	end
 
 	icon:SetInfo("state; value, maxValue, valueColor", STATE_SUCCEED, value, maxValue, BarColors)
-
 end
-
-
 
 function Type:Setup(icon)
 	icon:SetInfo("texture", "Interface/Icons/inv_misc_punchcards_white")
+
+	if icon.LuaCode:trim() == "" then
+		icon:SetInfo("state", STATE_FAIL)
+		return
+	end
+
+	icon.luaFunc = nil
+	local func, err = loadstring(icon.LuaCode, icon:GetIconName())
+	if func then
+		icon.luaFunc = func
+	elseif err then
+		TMW:Error(err)
+	end
+
+	if not func then
+		icon:SetInfo("state", STATE_FAIL)
+		return
+	end
+
 	icon:SetUpdateMethod("auto")
 	icon:SetUpdateFunction(LuaValue_OnUpdate)
-	icon.luaFunc = loadstring(icon.LuaCode)
 	icon:Update()
 end
 

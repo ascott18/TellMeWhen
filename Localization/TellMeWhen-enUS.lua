@@ -1854,13 +1854,15 @@ L["CNDT_DEPRECATED_DESC"] = "The %s condition no longer functions. This is proba
 L["CNDT_UNKNOWN_DESC"] = "Your settings contain a condition with the identifier %s, but no such condition could be found. You may be using an old version of TMW, or this condition may have been removed."
 
 
+-- Descriptions of anchor points for text displays.
+-- Keys are the valid values of the relativeTo setting of text display anchors.
 L["IconModule_IconContainer_MasqueIconContainer"] = "Icon Container"
 L["IconModule_IconContainer_MasqueIconContainer_DESC"] = "Holds the main parts of the icon, such as the texture"
 L["IconModule_TimerBar_OverlayTimerBar"] = "Timer Bar Overlay"
 L["IconModule_PowerBar_OverlayPowerBar"] = "Power Bar Overlay"
 L["IconModule_Texture_ColoredTexture"] = "Icon Texture"
 L["IconModule_CooldownSweepCooldown"] = "Cooldown Sweep"
-L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
+L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer/Value Bar"
 L["IconModule_SelfIcon"] = "Icon"
 
 
@@ -2009,6 +2011,7 @@ If you intended to replace existing data, please re-import it to the correct loc
 L["CONFIGPANEL_TIMER_HEADER"] = "Timer Sweep"
 L["CONFIGPANEL_CBAR_HEADER"] = "Timer Bar Overlay"
 L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"] = "Timer Bar"
+L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER_VALUE"] = "Value Bar"
 L["CONFIGPANEL_PBAR_HEADER"] = "Power Bar Overlay"
 L["CONFIGPANEL_CLEU_HEADER"] = "Combat Events"
 L["CONFIGPANEL_CNDTTIMERS_HEADER"] = "Condition Timers"

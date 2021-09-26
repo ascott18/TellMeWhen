@@ -173,7 +173,13 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
-				self:SetTitle(TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
+
+				self:CScriptAdd("ReloadRequested", function() 
+
+				self:SetTitle(TMW.CI.icon.typeData.barIsValue 
+					and TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER_VALUE"] 
+					or TMW.L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
+				end)
 				
 				self.Invert:ConstrainLabel(self.FakeMax)
 
