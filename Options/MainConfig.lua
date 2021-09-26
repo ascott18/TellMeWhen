@@ -19,6 +19,9 @@ local print = TMW.print
 local IE = TMW.IE
 local CI = TMW.CI
 
+local tinsert, format
+    = tinsert, format
+
 
 
 
@@ -145,52 +148,9 @@ MainTab:SetHistorySet(HistorySet)
 local ChangelogTab = IE:RegisterTab("MAIN", "CHANGELOG", "Changelog", 100)
 ChangelogTab:SetTexts(L["CHANGELOG"], L["CHANGELOG_DESC"])
 
-local changelogEnd = "<p align='center'>|cff666666To see the changelog for versions up to v" ..
-(TMW.CHANGELOG_LASTVER or "???") .. ", click the tab below again.|r</p>"
-local changelogEndAll = "<p align='center'>|cff666666For older versions, visit TellMeWhen's AddOn page on Curse.com|r</p><br/>"
-
 function IE:ShowChangelog(lastVer)
-
 	IE.TabGroups.MAIN.CHANGELOG:Click()
-
-	if not lastVer then lastVer = 0 end
-
-	local CHANGELOGS = IE:ProcessChangelogData()
-
-	local texts = {}
-
-	for version, text in TMW:OrderedPairs(CHANGELOGS, nil, nil, true) do
-		if lastVer >= version then
-			if lastVer > 0 then
-				text = text:gsub("</h1>", " (" .. L["CHANGELOG_LAST_VERSION"] .. ")</h1>")
-			end
-				
-			tinsert(texts, text)
-			break
-		else
-			tinsert(texts, text)
-		end
-	end
-
-	-- The intro text, before any actual changelog entries
-	tinsert(texts, 1, "<p align='center'>|cff999999" .. L["CHANGELOG_INFO2"]:format(TELLMEWHEN_VERSION_FULL) .. "|r</p>")
-
-	if lastVer > 0 then
-		tinsert(texts, changelogEnd .. changelogEndAll)
-	else
-		tinsert(texts, changelogEndAll)
-	end
-
-	local Container = IE.Pages.Changelog.Container
-
-	local body = format("<html><body>%s</body></html>", table.concat(texts, "<br/>"))
-	Container.HTML:SetText(body)
-
-	-- This has to be stored because there is no GetText method.
-	Container.HTML.text = body
-
-	IE.Pages.Changelog.Container.ScrollFrame:SetVerticalScroll(0)
-	Container:GetScript("OnSizeChanged")(Container)
+	IE.Pages.Changelog.Container:Render(lastVer)
 end
 
 local function htmlEscape(char)
@@ -241,7 +201,7 @@ function IE:ProcessChangelogData()
 
 	local log = TMW.CHANGELOG
 
-	log = log:gsub("([&<>])", htmlEscape)        
+	log = log:gsub("([&<>])", htmlEscape)
 	log = log:trim(" \t\r\n")
 
 	-- Replace 4 equals with h2
@@ -316,6 +276,54 @@ function IE:ProcessChangelogData()
 	return CHANGELOGS
 end
 
+TMW:NewClass("Config_Changelog", "Frame"){
+	lastVer = 0,
+
+	OnNewInstance = function(self)
+		TMW:ConvertContainerToScrollFrame(self, false, 0, 12)
+		self.ScrollFrame:SetWheelStepAmount(25)
+	end,
+
+	Render = function(self, lastVer)
+		if not lastVer then lastVer = 0 end
+		self.lastVer = lastVer
+
+		self.RenderAll:SetShown(lastVer > 0)
+	
+		local texts = {}
+	
+		local changelogs = IE:ProcessChangelogData()
+		for version, text in TMW:OrderedPairs(changelogs, nil, nil, true) do
+			if lastVer >= version then
+				if lastVer > 0 then
+					text = text:gsub("</h1>", " (" .. L["CHANGELOG_LAST_VERSION"] .. ")</h1>")
+				end
+					
+				tinsert(texts, text)
+				break
+			else
+				tinsert(texts, text)
+			end
+		end
+	
+		-- The intro text, before any actual changelog entries
+		tinsert(texts, 1, ("<p align='center'>|cff999999Welcome to TellMeWhen v%s!|r</p>"):format(TELLMEWHEN_VERSION_FULL))
+	
+
+		local foot = format("<html><body><p align='center'>|cff666666To view changelogs for %s or older, visit TellMeWhen's AddOn page on CurseForge.com|r</p></body></html>", TMW.CHANGELOG_LASTVER or "???")
+		self.Footer:SetText(foot)
+		self.Footer.text = foot
+	
+		local body = format("<html><body>%s</body></html>", table.concat(texts, "<br/>"))
+		self.HTML:SetText(body)
+	
+		-- This has to be stored because there is no GetText method.
+		self.HTML.text = body
+	
+		self:GetScript("OnSizeChanged")(self)
+	end,
+}
+
 TMW:RegisterCallback("TMW_CONFIG_LOADED", function()
 	if IE.db.global.LastChangelogVersion > 0 then		
 		if IE.db.global.LastChangelogVersion < TELLMEWHEN_VERSIONNUMBER then
@@ -323,15 +331,10 @@ TMW:RegisterCallback("TMW_CONFIG_LOADED", function()
 			or TELLMEWHEN_VERSION_MINOR == "" -- upgraded to a release version (e.g. 7.0.0 release)
 			or floor(IE.db.global.LastChangelogVersion/100) < floor(TELLMEWHEN_VERSIONNUMBER/100) -- upgraded to a new minor version (e.g. 6.2.6 release -> 7.0.0 alpha)
 			then
-				-- Put this in a C_Timer so that it runs after all the auto tab clicking mumbo jumbo has finished.
-				-- C_Timers with a delay of 0 will run after the current script finishes execution.
-				-- In the case of loading the IE, it is probably an OnClick.
-
 				-- We have to upvalue this since its about to get set to the current version.l
 				local version = IE.db.global.LastChangelogVersion
-				C_Timer.After(0, function()
-					IE:ShowChangelog(version)	
-				end)
+				TellMeWhen_ChangelogStandalone.Changelog:Render(version)
+				TellMeWhen_ChangelogStandalone:Show()
 			end
 
 			IE.db.global.LastChangelogVersion = TELLMEWHEN_VERSIONNUMBER
