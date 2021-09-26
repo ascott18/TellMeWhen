@@ -220,14 +220,6 @@ This setting will be ignored if the icon is already hidden due to another %s set
 Conditions can be configured in the %q tab.]]
 
 
-L["DURATIONALPHA_DESC"] = [[Set the opacity level that the icon should display at when the duration requirements fail.
-
-This setting will be ignored if the icon is already hidden due to another %s setting.]]
-L["STACKALPHA_DESC"] = [[Set the opacity level that the icon should display at when the stack requirements fail.
-
-This setting will be ignored if the icon is already hidden due to another %s setting.]]
-
-
 
 
 
@@ -728,11 +720,26 @@ L["STACKS"] = "Stacks"
 L["STACKSPANEL_TITLE2"] = "Stack Requirements"
 L["ICONMENU_STACKS_MIN_DESC"] = "Minimum number of stacks needed to show the icon"
 L["ICONMENU_STACKS_MAX_DESC"] = "Maximum number of stacks allowed to show the icon"
+L["STACKALPHA_DESC"] = [[Set the opacity level that the icon should display at when the stack requirements fail.
+
+This setting will be ignored if the icon is already hidden due to another %s setting.]]
+
+
+L["VALUE"] = "Value"
+L["VALUEPANEL_TITLE2"] = "Value Requirements"
+L["ICONMENU_VALUE_MIN_DESC"] = "Minimum value needed to show the icon"
+L["ICONMENU_VALUE_MAX_DESC"] = "Maximum value allowed to show the icon"
+L["VALUEALPHA_DESC"] = [[Set the opacity level that the icon should display at when the value requirements fail.
+
+This setting will be ignored if the icon is already hidden due to another %s setting.]]
 
 L["DURATION"] = "Duration"
 L["DURATIONPANEL_TITLE2"] = "Duration Requirements"
 L["ICONMENU_DURATION_MIN_DESC"] = "Minimum duration needed to show the icon, in seconds"
 L["ICONMENU_DURATION_MAX_DESC"] = "Maximum duration allowed to show the icon, in seconds"
+L["DURATIONALPHA_DESC"] = [[Set the opacity level that the icon should display at when the duration requirements fail.
+
+This setting will be ignored if the icon is already hidden due to another %s setting.]]
 
 L["CONDITION_TIMERS_SUCCEED_DESC"] = "Duration of a timer to set on the icon when conditions begin succeeding"
 L["CONDITION_TIMERS_FAIL_DESC"] = "Duration of a timer to set on the icon when conditions begin failing"
@@ -1855,13 +1862,15 @@ L["CNDT_DEPRECATED_DESC"] = "The %s condition no longer functions. This is proba
 L["CNDT_UNKNOWN_DESC"] = "Your settings contain a condition with the identifier %s, but no such condition could be found. You may be using an old version of TMW, or this condition may have been removed."
 
 
+-- Descriptions of anchor points for text displays.
+-- Keys are the valid values of the relativeTo setting of text display anchors.
 L["IconModule_IconContainer_MasqueIconContainer"] = "Icon Container"
 L["IconModule_IconContainer_MasqueIconContainer_DESC"] = "Holds the main parts of the icon, such as the texture"
 L["IconModule_TimerBar_OverlayTimerBar"] = "Timer Bar Overlay"
 L["IconModule_PowerBar_OverlayPowerBar"] = "Power Bar Overlay"
 L["IconModule_Texture_ColoredTexture"] = "Icon Texture"
 L["IconModule_CooldownSweepCooldown"] = "Cooldown Sweep"
-L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer Bar"
+L["IconModule_TimerBar_BarDisplayTimerBar"] = "Timer/Value Bar"
 L["IconModule_SelfIcon"] = "Icon"
 
 
@@ -2010,6 +2019,7 @@ If you intended to replace existing data, please re-import it to the correct loc
 L["CONFIGPANEL_TIMER_HEADER"] = "Timer Sweep"
 L["CONFIGPANEL_CBAR_HEADER"] = "Timer Bar Overlay"
 L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"] = "Timer Bar"
+L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER_VALUE"] = "Value Bar"
 L["CONFIGPANEL_PBAR_HEADER"] = "Power Bar Overlay"
 L["CONFIGPANEL_CLEU_HEADER"] = "Combat Events"
 L["CONFIGPANEL_CNDTTIMERS_HEADER"] = "Condition Timers"
@@ -2895,4 +2905,20 @@ L["CONDITIONPANEL_CREATURETYPE_DESC"] = [[You can enter multiple creature types 
 Creature types must be typed exactly as they appear in the creature's tooltip.
 
 The condition will pass if any types are matched.]]
+
+L["ICONMENU_LUAVALUE"] = "Lua Value (Advanced)"
+L["ICONMENU_LUAVALUE2"] = "Lua Value"
+L["ICONMENU_LUAVALUE_DESC"] = [[Track a value returned by a user supplied Lua function.]]
+L["ICONMENU_LUAVALUE_OK"] = "Lua Value OK"
+L["ICONMENU_LUAVALUE_ERROR"] = "Unusable result"
+L["LUAVALUE_LUA"] = "Lua Function Body"
+L["LUAVALUE_LUA_TOOLTIP"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
+
+The Lua code must be in the form of a function body that returns two values: the current value & the maximum value. For example, to have a bar that shows the player's world latency (out of 1000 ms), use the following code:
+
+|cfffffffflocal lat = select(4, GetNetStats())|r
+|cffffffffreturn lat, 1000|r
+
+If the function did not return two numeric values (or a Lua syntax error is encountered), the Icon will be displayed as set in "Unusable result".
+If more help is needed (but not help about how to write Lua code), try the TMW Discord. For help on how to write Lua, go to the internet.]]
 

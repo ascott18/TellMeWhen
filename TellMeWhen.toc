@@ -179,6 +179,7 @@ Components\EventHandlers\Lua\Lua.lua
 Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ConditionReq\Alpha_ConditionReq.lua
 Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_DurationReq\Alpha_DurationReq.lua
 Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_StackReq\Alpha_StackReq.lua
+Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ValueReq\Alpha_ValueReq.lua
 Components\IconDataProcessorHooks\IconDataProcessorHook_Texture_CustomTex\Texture_CustomTex.lua
 
 # Components\GroupModules\includes.core.xml
@@ -233,6 +234,7 @@ Components\IconTypes\IconType_unitcooldown\unitcooldown.lua
 Components\IconTypes\IconType_unitcondition\unitcondition.lua
 Components\IconTypes\IconType_value\value.lua
 Components\IconTypes\IconType_wpnenchant\wpnenchant.lua
+Components\IconTypes\IconType_luavalue\luavalue.lua
 
 LDB.lua
 
