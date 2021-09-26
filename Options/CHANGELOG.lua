@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v9.1.2
+### Bug Fixes
+* Fixed #1918 - Combo point resource display icons now update properly.
+
 ## v9.1.1
 ### Bug Fixes
 * Fixed #1909 - IconConfig.lua:127: attempt to index field "CurrentTabGroup" (a nil value)

@@ -161,13 +161,14 @@ end
 PowerBarColor[-1] = {{r=1, g=0, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=0, g=1, b=0, a=1}}
 PowerBarColor[-3] = {{r=0, g=1, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=1, g=0, b=0, a=1}}
 
-local function Value_OnEvent(icon, event, arg1)
+local function Value_OnEvent(icon, event, arg1, arg2)
 	
 	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
-	elseif --[[event == "UNIT_AURA" and]] icon.UnitSet.UnitsLookup[arg1] then
-		
+	elseif arg2 == "COMBO_POINTS" or icon.UnitSet.UnitsLookup[arg1] then
+		-- COMBO_POINTS fires for the player, but the unit being checked by the icon
+		-- will almost always be "target" (https://github.com/ascott18/TellMeWhen/issues/1918)
 		icon.NextUpdateTime = 0
 	end
 end
