@@ -1,68 +1,142 @@
 <Ui>
 
+	<Frame name="TellMeWhen_ChangelogDisplay" virtual="true">
+		<Frames>
+			<SimpleHTML parentKey="HTML" justifyH="LEFT" justifyV="TOP">
+				<Size x="1" y="1"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-10" X="10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						local font = "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf"
+
+						-- Just incase they haven't restarted after installing the version
+						-- that first included this font (v7.3.5)
+						if not self:SetFont(font, 12) then
+							font = "Fonts\\FRIZQT__.TTF"
+						end
+
+						self:SetFont(font, 12)
+						self:SetFont("h1", font, 20)
+						self:SetFont("h2", font, 14)
+
+						self:SetSpacing("h1", 10)
+						self:SetSpacing("h2", 6)
+						self:SetSpacing("p", 5)
+						self:SetIndentedWordWrap("p", true)
+
+						self:SetTextColor("h1", 0xFF/0xFF, 0x63/0xFF, 0x00/0xFF)
+						self:SetTextColor("h2", 0x00/0xFF, 0xF1/0xFF, 0xFF/0xFF)
+					</OnLoad>
+				</Scripts>
+			</SimpleHTML>
+			
+			<Button parentKey="RenderAll" inherits="TellMeWhen_ButtonTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.HTML" relativePoint="BOTTOM" y="-20" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetText("Show changes up to " .. (TMW.CHANGELOG_LASTVER or "???"))
+						self:SetWidth(self:GetTextWidth()+15)
+					</OnLoad>
+					<OnClick>
+						self:GetParent():Render()
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+			<SimpleHTML parentKey="Footer" justifyH="LEFT" justifyV="TOP">
+				<Size x="1" y="1"/>
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.RenderAll" relativePoint="BOTTOM" y="-20" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						local font = "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf"
+
+						self:SetFont(font, 12)
+						self:SetSpacing("p", 5)
+						self:SetIndentedWordWrap("p", true)
+					</OnLoad>
+				</Scripts>
+			</SimpleHTML>
+
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self, "Config_Changelog")
+			</OnLoad>
+			<OnShow>
+				self:GetScript("OnSizeChanged")(self)
+			</OnShow>
+			<OnSizeChanged>
+				-- SimpleHTML doesn't wrap properly with anchors set on the left and right.
+				-- We have to set one only on the left, and use this to adjust the wrappping.
+				-- The SetText call is absolutely required for the wrapping to get recalculated.
+
+				for _, html in pairs({self.HTML, self.Footer}) do
+					html:SetWidth(self:GetWidth()-35)
+					html:SetText(html.text)
+					html:SetHeight(html:GetContentHeight())
+				end
+			</OnSizeChanged>
+		</Scripts>
+	</Frame>
+
+	<Frame name="TellMeWhen_ChangelogStandalone" inherits="TellMeWhen_SimpleDialog" >
+		<Size x="600" y="500"/>
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="UIParent"/>
+		</Anchors>
+
+		<Frames>
+			<Frame parentKey="Changelog" inherits="TellMeWhen_ChangelogDisplay">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.desc"/>
+					<Anchor point="BOTTOM" y="5"/>
+					<Anchor point="LEFT" x="5" />
+					<Anchor point="RIGHT" x="-2" />
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+
+				self.border:SetColor(0x00/0xFF, 0xF1/0xFF, 0xFF/0xFF)
+				self.border:SetBorderSize(1)
+
+				self.title:SetText("TellMeWhen " .. TMW.L["CHANGELOG"])
+				TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
+					self:SetScale(TMW.IE.db.global.EditorScale)
+					self.resizer = TMW.Classes.Resizer_Generic:New(self)
+					self.resizer:Show()
+					self.resizer.scale_min = 0.4
+					self.resizer.y_min = 400
+					self.resizer.y_max = 1200
+					self.resizer:SetModes(self.resizer.MODE_SCALE, self.resizer.MODE_SIZE)
+				end)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
 	<Frame parentKey="Changelog" inherits="TellMeWhen_IE_PageTemplate">
 		<Frames>
-
-			<Frame parentKey="Container">
+			<Frame parentKey="Container" inherits="TellMeWhen_ChangelogDisplay">
 				<Anchors>
 					<Anchor point="TOP" y="-5"/>
 					<Anchor point="BOTTOM" y="5"/>
 					<Anchor point="LEFT" x="5" />
 					<Anchor point="RIGHT" x="-2" />
 				</Anchors>
-
-				<Frames>
-					<SimpleHTML parentKey="HTML" justifyH="LEFT" justifyV="TOP">
-						<Size x="1" y="1"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" y="-10" X="10" />
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								local font = "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf"
-
-								-- Just incase they haven't restarted after installing the version
-								-- that first included this font (v7.3.5)
-								if not self:SetFont(font, 12) then
-									font = "Fonts\\FRIZQT__.TTF"
-								end
-
-								self:SetFont(font, 12)
-								self:SetFont("h1", font, 20)
-								self:SetFont("h2", font, 14)
-
-								self:SetSpacing("h1", 10)
-								self:SetSpacing("h2", 6)
-								self:SetSpacing("p", 5)
-								self:SetIndentedWordWrap("p", true)
-
-								self:SetTextColor("h1", 0xFF/0xFF, 0x63/0xFF, 0x00/0xFF)
-								self:SetTextColor("h2", 0x00/0xFF, 0xF1/0xFF, 0xFF/0xFF)
-							</OnLoad>
-						</Scripts>
-					</SimpleHTML>
-				</Frames>
-				<Scripts>
-					<OnLoad>
-						TMW:ConvertContainerToScrollFrame(self, false, 0, 12)
-						self.ScrollFrame:SetWheelStepAmount(25)
-					</OnLoad>
-					<OnShow>
-						TMW.IE:ShowChangelog()
-						self:GetScript("OnSizeChanged")(self)
-					</OnShow>
-					<OnSizeChanged>
-						-- SimpleHTML doesn't wrap properly with anchors set on the left and right.
-						-- We have to set one only on the left, and use this to adjust the wrappping.
-						-- The SetText call is absolutely required for the wrapping to get recalculated.
-
-						self.HTML:SetWidth(self:GetWidth()-35)
-						self.HTML:SetText(self.HTML.text)
-					</OnSizeChanged>
-				</Scripts>
 			</Frame>
-
 		</Frames>
+		<Scripts>
+			<OnShow>
+				self.Container:Render()
+			</OnShow>
+		</Scripts>
 	</Frame>
 
 	<Frame name="TellMeWhen_HelpSection" virtual="true" >
