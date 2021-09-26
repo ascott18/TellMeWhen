@@ -237,6 +237,7 @@ Components\IconTypes\IconType_unitcooldown\unitcooldown.lua
 Components\IconTypes\IconType_unitcondition\unitcondition.lua
 Components\IconTypes\IconType_value\value.lua
 Components\IconTypes\IconType_wpnenchant\wpnenchant.lua
+Components\IconTypes\IconType_luavalue\luavalue.lua
 
 LDB.lua
 

@@ -2895,3 +2895,19 @@ Creature types must be typed exactly as they appear in the creature's tooltip.
 
 The condition will pass if any types are matched.]]
 
+L["ICONMENU_LUAVALUE"] = "Lua Value (Advanced)"
+L["ICONMENU_LUAVALUE2"] = "Lua Value"
+L["ICONMENU_LUAVALUE_DESC"] = [[Track a value returned by a user supplied Lua function.]]
+L["ICONMENU_LUAVALUE_OK"] = "Lua Value OK"
+L["ICONMENU_LUAVALUE_ERROR"] = "Unusable result"
+L["LUAVALUE_LUA"] = "Lua Function Body"
+L["LUAVALUE_LUA_TOOLTIP"] = [[This icon type allows you to evaluate Lua code to determine the values displayed.
+
+The Lua code must be in the form of a function body that returns two values: the current value & the maximum value. For example, to have a bar that shows the player's world latency (out of 1000 ms), use the following code:
+
+|cfffffffflocal lat = select(4, GetNetStats())|r
+|cffffffffreturn lat, 1000|r
+
+If the function did not return two numeric values (or a Lua syntax error is encountered), the Icon will be displayed as set in "Unusable result".
+If more help is needed (but not help about how to write Lua code), try the TMW Discord. For help on how to write Lua, go to the internet.]]
+

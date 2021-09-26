@@ -45,7 +45,7 @@
 								self:SetSetting("BarDisplay_FakeMax")
 
 								self:CScriptAdd("ReloadRequested", function()
-									self:SetShown(TMW.CI.icon.typeData.barIsTimer ~= false)
+									self:SetShown(TMW.CI.icon.typeData.barIsValue ~= true)
 									local settings = self:GetSettingTable()
 									self:SetEnabled(not settings.BarDisplay_Invert)
 								end)
@@ -65,7 +65,7 @@
 								end)
 
 								self:CScriptAdd("ReloadRequested", function()
-									self:SetShown(TMW.CI.icon.typeData.barIsTimer == false)
+									self:SetShown(TMW.CI.icon.typeData.barIsValue)
 									local settings = self:GetSettingTable()
 									self:SetEnabled(not settings.BarDisplay_Invert)
 								end)
