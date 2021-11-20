@@ -96,6 +96,26 @@ TMW:RegisterUpgrade(80003, {
 	end,
 })
 
+TMW:RegisterCallback("TMW_CONFIG_ICON_TYPE_CHANGED", function(event, icon, type, oldType)
+	local icspv = icon:GetSettingsPerView()
+
+	if not TMW.Types[oldType].barIsValue and TMW.Types[type].barIsValue then
+		icon:GetSettings().CustomTex = "NONE"
+		local layout = TMW.TEXT:GetTextLayoutForIcon(icon)
+
+		if layout == "bar1" or layout == "bar2" then
+			icspv.Texts[1] = "[(Value / ValueMax * 100):Round:Percent]"
+			icspv.Texts[2] = "[Value:Short \"/\" ValueMax:Short]"
+		end
+	elseif TMW.Types[oldType].barIsValue and not TMW.Types[type].barIsValue then
+		if icspv.Texts[1] == "[(Value / ValueMax * 100):Round:Percent]" then
+			icspv.Texts[1] = nil
+		end
+		if icspv.Texts[2] == "[Value:Short \"/\" ValueMax:Short]" then
+			icspv.Texts[2] = nil
+		end
+	end
+end)
 
 View:RegisterConfigPanel_XMLTemplate(50, "TellMeWhen_GM_Bar")
 

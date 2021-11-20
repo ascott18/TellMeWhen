@@ -1,5 +1,23 @@
+## v9.1.2
+* New icon type: Lua Value (community contribution by Taurlog of Wyrmrest Accord)
+* Minor performance improvements
+  
+### Bug Fixes
+* Fixed #1918 - Combo point resource display icons now update properly.
+
+## v9.1.1
+### Bug Fixes
+* Fixed #1909 - IconConfig.lua:127: attempt to index field "CurrentTabGroup" (a nil value)
+* Fixed #1913 (LibDogTag-Stats-3.0/1) - Error with code "[SpellCrit]"
+* Fixed #1914 - Meta icons that switch between shown/hidden OmniCC timer text without changing the duration of their timer now properly hide/show the timer text.
+
+
+## v9.1.0
+* Version bump for WoW 9.1
+* Minor performance improvements
+
 ## v9.0.7
-## Bug Fixes
+### Bug Fixes
 * Fixed #1886 - invalid key to "next" (new version of LibDogTag-Unit-3.0 should resolve this).
 * Fixed #1889 - error thrown when attempting to import corrupted strings
 

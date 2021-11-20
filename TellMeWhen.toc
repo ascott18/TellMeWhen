@@ -12,14 +12,14 @@
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 11307
+## Interface: 11401
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 11307
+## X-Interface: 11401
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 25152
 
-## Version: 9.0.7
+## Version: 9.1.2
 ## Author: Cybeloras of Aerie Peak
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
@@ -182,6 +182,7 @@ Components\EventHandlers\Lua\Lua.lua
 Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ConditionReq\Alpha_ConditionReq.lua
 Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_DurationReq\Alpha_DurationReq.lua
 Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_StackReq\Alpha_StackReq.lua
+Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ValueReq\Alpha_ValueReq.lua
 Components\IconDataProcessorHooks\IconDataProcessorHook_Texture_CustomTex\Texture_CustomTex.lua
 
 # Components\GroupModules\includes.core.xml
@@ -235,6 +236,7 @@ Components\IconTypes\IconType_unitcooldown\unitcooldown.lua
 Components\IconTypes\IconType_unitcondition\unitcondition.lua
 Components\IconTypes\IconType_value\value.lua
 Components\IconTypes\IconType_wpnenchant\wpnenchant.lua
+Components\IconTypes\IconType_luavalue\luavalue.lua
 
 LDB.lua
 

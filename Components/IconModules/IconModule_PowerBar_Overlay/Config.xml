@@ -31,11 +31,20 @@
 					</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<EditBox parentKey="PBarOffs" name="$parentPBarOffs" inherits="TellMeWhen_TimeEditBoxTemplate" autoFocus="false">
+			<EditBox parentKey="PBarOffs" name="$parentPBarOffs" inherits="TellMeWhen_InputBoxTemplate" autoFocus="false">
 				<Size x="45" y="15"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentInvertPBar" relativePoint="RIGHT" y="1"/>
 				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="LEFT">
+							<Anchors>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="2"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
 				<Scripts>
 					<OnLoad>
 						self.text:SetText(TMW.L["ICONMENU_OFFS"])
@@ -48,6 +57,10 @@
 
 						self:SetTexts(TMW.L["ICONMENU_OFFS"], TMW.L["ICONMENU_BAROFFS"])
 						self:SetSetting("PBarOffs")
+
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
+							return tonumber(self:GetText():trim()) or 0
+						end)
 						
 						self:CScriptAdd("ReloadRequested", function()
 							local settings = self:GetSettingTable()

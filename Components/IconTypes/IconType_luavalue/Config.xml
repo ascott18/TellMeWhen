@@ -1,0 +1,45 @@
+<Ui>
+	<Frame name="TellMeWhen_LuaValue" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="50"/>
+		<Frames>
+			<EditBox parentKey="LuaCode" name="$parentLuaCode" inherits="TellMeWhen_InputBoxTemplate" multiline="true">
+				<Size y="16"/>
+				<Anchors>
+					<Anchor point="LEFT" x="5"/>
+					<Anchor point="RIGHT" x="-5" />
+					<Anchor point="TOP" y="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self, "Config_EditBox_Lua")
+
+						self:SetSetting("LuaCode")
+
+
+						self:SetTexts(TMW.L["LUAVALUE_LUA"], TMW.L["LUAVALUE_LUA_TOOLTIP"])
+						self:SetLabel(TMW.L["CODETOEXE"])
+
+						self:SetPadNewlines(false)
+
+						self:CScriptAdd("ModifyValueForSave", function(self, value)
+							return value:trim("\r\n \t")
+						end)
+					</OnLoad>
+
+					<OnSizeChanged>
+						if self:GetParent().AdjustHeight then
+							self:GetParent():AdjustHeight(5)
+						end
+					</OnSizeChanged>
+				</Scripts>
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+				self:SetTitle(TMW.L["LUAVALUE_LUA"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+</Ui>
+
