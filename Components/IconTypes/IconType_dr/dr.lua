@@ -174,7 +174,6 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 			random_root =  "DR-RandomRoot",
 			random_stun =  "DR-RandomStun",
 			root =         "DR-ControlledRoot",
-			silence =      "DR-Silence",
 			kidney_shot =  "DR-KidneyShot",
 		}
 

@@ -1,6 +1,7 @@
 ## v9.1.2
 * New icon type: Lua Value (community contribution by Taurlog of Wyrmrest Accord)
 * Minor performance improvements
+* Support for Classic SoM patch (1.14).
   
 ### Bug Fixes
 * Fixed #1918 - Combo point resource display icons now update properly.
