@@ -45,5 +45,4 @@ body:
             I am reporting a bug with TellMeWhen. I understand that questions on
             how to use TMW should be directed to the [TMW
             discord](https://discord.gg/NH7RmcP)
-          validations:
-            required: true
+          required: true
