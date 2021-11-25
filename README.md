@@ -87,7 +87,8 @@ All TellMeWhen icons belong to a parent group. Each of these groups have many se
 
 ## Troubleshooting
 
-**PLEASE DIRECT ALL FEEDBACK/BUGS/SUGGESTIONS [HERE](https://github.com/ascott18/TellMeWhen/issues)**
+**PLEASE DIRECT ALL BUGS AND FEATURE REQUESTS [HERE](https://github.com/ascott18/TellMeWhen/issues).**
+**PLEASE DIRECT ALL QUESTIONS TO [THE TMW DISCORD](https://discord.gg/NH7RmcP).**
 
 *   **Make sure that TellMeWhen is not in configuration mode. Type '/tmw' to toggle configuration mode on and off.**
 *   The most common problem people encounter is caused by not entering the name correctly during configuration. Make sure you enter names EXACTLY as they are named when you mouse over them. For buffs this is often different from the ability/totem/trinket/enchant/**talent** which casts the buff, so be sure to check. Known buffs and debuffs are shown as a dark purple or a warrior brown color in the suggestion list.
