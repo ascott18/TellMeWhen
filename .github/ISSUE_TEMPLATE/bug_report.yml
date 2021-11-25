@@ -1,0 +1,49 @@
+name: Bug report
+description: template for bug reports
+title: '[Bug]: '
+body:
+  - type: input
+    id: version
+    attributes:
+      label: TellMeWhen Version
+      description: |
+        What version of TellMeWhen are you using? Found in-game at the top of TMW's configuration window. 
+        
+        "The latest" is not a version.
+      placeholder: x.x.x
+    validations:
+      required: true
+  - type: textarea
+    id: bug-desc
+    attributes:
+      label: Describe the bug
+      description: |
+        A clear and concise description of what the bug is. Add screenshots if they'll help explain the problem. You can paste images directly into this text field.
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: textarea
+    id: export-strings
+    attributes:
+      label: Export Strings
+      description: |
+        If your issue pertains to a specific icon or group, please post the
+        relevant export string(s).
+        
+        To get an export string, open the icon editor, and click the button labeled "Import/Export/Backup". Select the "To String" option for the appropriate export type (icon, group, or profile), and then press CTRL+C to copy it to your clipboard.
+      placeholder: If your issue does not pertain to a specific icon or group, please enter "N/A".
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Bug Checklist
+      description: Before submitting the issue, please verify the following
+      options:
+        - label: >-
+            I am reporting a bug with TellMeWhen. I understand that questions on
+            how to use TMW should be directed to the [TMW
+            discord](https://discord.gg/NH7RmcP)
+          validations:
+            required: true
