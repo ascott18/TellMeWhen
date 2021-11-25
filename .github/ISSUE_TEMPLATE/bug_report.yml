@@ -42,7 +42,7 @@ body:
       description: |
         If your issue pertains to a specific icon or group, please post the relevant export string(s). Otherwise, please enter "N/A".
         
-        To get an export string, open the icon editor, and click the button labeled "Import/Export/Backup". Select the "To String" option for the appropriate export type (icon, group, or profile), and then press CTRL+C to copy it to your clipboard.
+        To get an export string, open the icon editor and click the button at the bottom labeled "Import/Export/Backup". Select the "To String" option for the appropriate export type (icon, group, or profile), and then press CTRL+C to copy it to your clipboard.
       placeholder: If your issue does not pertain to a specific icon or group, please enter "N/A".
       render: text
     validations:
