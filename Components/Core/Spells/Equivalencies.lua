@@ -132,7 +132,6 @@ TMW.BE = {
 			   3409, -- Crippling Poison                    (rogue, assassination)
 			  -3600, -- Earthbind                           (shaman, general)
 			  -5116, -- Concussive Shot                     (hunter, beast mastery/marksman)
-			  -6343, -- Thunder Clap                        (warrior, protection)
 			  -7321, -- Chilled (Ice/Frost Armor)           (mage)
 			  -7992, -- Slowing Poison                      (NPC ability)
 			 -12323, -- Piercing Howl                       (warrior, fury)
