@@ -4330,7 +4330,7 @@ TMW.IE.CpuReportParameters = {
 			title = "Updates: Average",
 			label = "Updates Avg",
 			desc = "Milliseconds of CPU time spent on icon updates, per second of wall clock time.",
-			value = function(icon) return icon.cpu_updateTotal / (TMW.time - icon.cpu_startTime) end,
+			value = function(icon) return icon.cpu_updateTotal / (TMW.time - icon.cpu_startTime + 0.00001) end,
 			format = "%.2f ms/s",
 			color = makeColorFunc(0.05, 2)
 		},
@@ -4373,7 +4373,7 @@ TMW.IE.CpuReportParameters = {
 			title = "Events: Average",
 			label = "Events avg",
 			desc = "Average CPU time spent on event handling per second of wall clock time.",
-			value = function(icon) return icon.cpu_eventTotal / (TMW.time - icon.cpu_startTime) end,
+			value = function(icon) return icon.cpu_eventTotal / (TMW.time - icon.cpu_startTime + 0.00001) end,
 			format = "%.2f ms/s",
 			color = makeColorFunc(0.03, 1)
 		},
@@ -4426,7 +4426,7 @@ TMW.IE.CpuReportParameters = {
 			title = "Conditions: Average",
 			label = "Cndtn avg",
 			desc = "Average CPU time spent on condition checking per second of wall clock time.",
-			value = function(icon) return icon.cpu_cndtTotal / (TMW.time - icon.cpu_startTime) end,
+			value = function(icon) return icon.cpu_cndtTotal / (TMW.time - icon.cpu_startTime + 0.00001) end,
 			format = "%.2f ms/s",
 			color = makeColorFunc(0.02, 0.6)
 		},
@@ -4443,7 +4443,7 @@ function TMW.IE:GetCpuProfileReport()
 		for icon in group:InIcons() do 
 			if icon.cpu_updateTotal > 0 or icon.cpu_eventTotal > 0 or icon.cpu_cndtTotal > 0 then
 
-				local time = TMW.time - icon.cpu_startTime
+				local time = TMW.time - icon.cpu_startTime + 0.00001 -- add epsilon to prevent div by 0
 				local update = icon.cpu_updateTotal / time
 				local event = icon.cpu_eventTotal == 0 and 0 or (icon.cpu_eventTotal / time)
 				update_avg = update_avg + update

@@ -1,3 +1,6 @@
+## v9.2.0
+* #1929 - Utilize new payload for UNIT_AURA event to greatly improve performance.
+
 ## v9.1.2
 * New icon type: Lua Value (community contribution by Taurlog of Wyrmrest Accord)
 * Minor performance improvements

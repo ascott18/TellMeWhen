@@ -175,8 +175,8 @@ local usableData = {}
 local unusableData = {}
 local function SpellCooldown_OnUpdate(icon, time)    
 	-- Upvalue things that will be referenced a lot in our loops.
-	local IgnoreRunes, RangeCheck, ManaCheck, GCDAsUnusable, NameArray, NameStringArray =
-	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.GCDAsUnusable, icon.Spells.Array, icon.Spells.StringArray
+	local IgnoreRunes, RangeCheck, ManaCheck, GCDAsUnusable, NameArray =
+	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.GCDAsUnusable, icon.Spells.Array
 
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
 	local runeCD = IgnoreRunes and GetRuneCooldownDuration()
