@@ -41,9 +41,9 @@ function Env.AuraStacks(unit, name, filter)
 	end
 end
 
-function Env.AuraCount(unit, nameRaw, filter)
+function Env.AuraCount(unit, spells, filter)
 	local n = 0
-	local names = TMW:GetSpells(nameRaw).Hash
+	local names = spells.Hash
 
 	for i = 1, huge do
 		local buffName, _, _, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
@@ -239,7 +239,7 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 	anticipate = function(c)
 		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
@@ -292,7 +292,7 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 	anticipate = function(c)
 		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
@@ -328,7 +328,8 @@ ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked),
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name2).First, c.Checked2)
 	end,
 })
 ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
@@ -350,7 +351,7 @@ ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 })
 ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
@@ -373,7 +374,7 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 })
 for i = 1, 3 do -- BUFFTOOLTIPSCAN
@@ -397,7 +398,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		events = function(ConditionObject, c)
 			return
 				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-				ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+				ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 		end,
 	})
 end
@@ -417,12 +418,12 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	icon = "Interface\\Icons\\ability_paladin_sacredcleansing",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraCount(c.Unit, c.NameRaw, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraCount(c.Unit, c.Spells, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 })
 
@@ -470,7 +471,7 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 	anticipate = function(c)
 		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
@@ -523,7 +524,7 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 	anticipate = function(c)
 		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
@@ -559,7 +560,8 @@ ConditionCategory:RegisterCondition(12,	 "DEBUFFDURCOMP", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked),
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name2).First, c.Checked2)
 	end,
 	-- anticipate: no anticipator is needed because the durations will always remain the same relative to eachother until at least a UNIT_AURA fires
 })
@@ -582,7 +584,7 @@ ConditionCategory:RegisterCondition(13,	 "DEBUFFSTACKS", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 })
 ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
@@ -605,7 +607,7 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 })
 for i = 1, 3 do -- BUFFTOOLTIPSCAN
@@ -629,7 +631,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		events = function(ConditionObject, c)
 			return
 				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-				ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+				ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 		end,
 	})
 end
@@ -649,12 +651,12 @@ ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	icon = "Interface\\Icons\\spell_deathknight_frostfever",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraCount(c.Unit, c.NameRaw, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraCount(c.Unit, c.Spells, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 })
 
