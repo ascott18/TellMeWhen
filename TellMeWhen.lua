@@ -3148,6 +3148,11 @@ function TMW:SlashCommand(str)
 
 				if not TMW.profilingEnabled then
 					TMW.profilingEnabled = true
+
+					-- Do a reset before we :Update() so that when we do the :Update(),
+					-- icons can be setup with the knowledge that CPU profiling is on
+					-- (so that event handlers for example can get setup with profiling)
+					TMW:CpuProfileReset()
 					TMW:Update()
 					TMW:CpuProfileReset()
 				end
