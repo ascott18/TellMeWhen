@@ -259,9 +259,14 @@ local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 				-- Check if the aura fits into the icons filters.
 				-- Checking name/id + OnlyMine are the only 2 worthwhile checks here.
 				-- Anything else (like isHarmful/isHelpful) is just not likely to yield meaningful benefit
+
+				-- BLIZZ BUG NOTE: In UnitAura, the dispel type of enrage is "" but for typeless effects it is nil.
+				-- HOWEVER, in `updatedAura`, the dispel type of both enrages AND typeless effects are both "".
+				-- SO, sadly we have to treat all "" types as enrages, so icons checking Enrage won't really benefit much here.
+				local debuffType = updatedAura.debuffType
 				if
 					(not OnlyMine or (updatedAura.sourceUnit == "player" or updatedAura.sourceUnit == "pet")) and
-					(Hash[updatedAura.spellId] or Hash[strlowerCache[updatedAura.name]])
+					(Hash[updatedAura.spellId] or Hash[strlowerCache[updatedAura.name]] or Hash[debuffType == "" and "Enraged" or debuffType])
 				then
 					icon.NextUpdateTime = 0
 					return

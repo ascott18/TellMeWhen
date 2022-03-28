@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v9.2.1
+### Bug Fixes
+* Fix #1930 - Buff/Debuff icons checking dispel types were not responding to events.
+  
 ## v9.2.0
 * #1929 - Utilize new payload for UNIT_AURA event to greatly improve performance.
 
