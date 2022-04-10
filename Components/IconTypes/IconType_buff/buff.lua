@@ -250,7 +250,7 @@ local NOT_ACTUALLY_SPELLSTEALABLE = {
 local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 	if event == "UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
 		-- If the icon is checking the unit, schedule an update for the icon.
-		if arg2 == false then
+		if arg2 == false and icon.Spells.First ~= "" then
 			-- arg2: isFullUpdate
 			-- arg3: updatedAuras
 			local Hash, OnlyMine = icon.Spells.Hash, icon.OnlyMine
@@ -265,8 +265,16 @@ local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 				-- SO, sadly we have to treat all "" types as enrages, so icons checking Enrage won't really benefit much here.
 				local debuffType = updatedAura.debuffType
 				if
-					(not OnlyMine or (updatedAura.sourceUnit == "player" or updatedAura.sourceUnit == "pet")) and
-					(Hash[updatedAura.spellId] or Hash[strlowerCache[updatedAura.name]] or Hash[debuffType == "" and "Enraged" or debuffType])
+					(
+						not OnlyMine or
+						updatedAura.sourceUnit == "player" or
+						updatedAura.sourceUnit == "pet"
+					) and
+					(
+						Hash[updatedAura.spellId] or
+						Hash[strlowerCache[updatedAura.name]] or
+						Hash[debuffType == "" and "Enraged" or debuffType]
+					)
 				then
 					icon.NextUpdateTime = 0
 					return

@@ -1,3 +1,7 @@
+## v9.2.2
+### Bug Fixes
+Fix #1931 - Group controller Buff/Debuff icons not checking any specific aura were not responding to UNIT_AURA events.
+  
 ## v9.2.1
 ### Bug Fixes
 * Fix #1930 - Buff/Debuff icons checking dispel types were not responding to events.
