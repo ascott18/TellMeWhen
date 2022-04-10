@@ -1542,6 +1542,9 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 	Setup = function(self, panelInfo)
 		self.panelInfo = panelInfo
 
+		self:CScriptCall("PanelSetup", self, panelInfo)
+		self:CScriptTunnel("PanelSetup", self, panelInfo)
+
 		if type(panelInfo.supplementalData) == "table" then
 			local OnSetup = panelInfo.supplementalData.OnSetup
 
@@ -1549,9 +1552,6 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 				OnSetup(self, panelInfo, panelInfo.supplementalData)
 			end
 		end
-
-		self:CScriptCall("PanelSetup", self, panelInfo)
-		self:CScriptTunnel("PanelSetup", self, panelInfo)
 
 		self:RequestReload()
 
