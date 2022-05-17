@@ -19,7 +19,7 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
 	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
 		-- This is not localizable, because AceLocale might not have loaded
 		-- (this is why we don't bother to load AceLocale until after these checks).
-		text = ("You've installed TellMeWhen for retail WoW, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" + GetExpansionLevel()]), 
+		text = ("You've installed TellMeWhen for retail WoW, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
 		button1 = EXIT_GAME,
 		button2 = CANCEL,
 		OnAccept = ForceQuit,
