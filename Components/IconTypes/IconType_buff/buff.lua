@@ -247,10 +247,42 @@ local NOT_ACTUALLY_SPELLSTEALABLE = {
 }
 
 
-local function Buff_OnEvent(icon, event, arg1)
+local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 	if event == "UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
 		-- If the icon is checking the unit, schedule an update for the icon.
-		icon.NextUpdateTime = 0
+		if arg2 == false and icon.Spells.First ~= "" then
+			-- arg2: isFullUpdate
+			-- arg3: updatedAuras
+			local Hash, OnlyMine = icon.Spells.Hash, icon.OnlyMine
+			for i = 1, #arg3 do
+				local updatedAura = arg3[i]
+				-- Check if the aura fits into the icons filters.
+				-- Checking name/id + OnlyMine are the only 2 worthwhile checks here.
+				-- Anything else (like isHarmful/isHelpful) is just not likely to yield meaningful benefit
+
+				-- BLIZZ BUG NOTE: In UnitAura, the dispel type of enrage is "" but for typeless effects it is nil.
+				-- HOWEVER, in `updatedAura`, the dispel type of both enrages AND typeless effects are both "".
+				-- SO, sadly we have to treat all "" types as enrages, so icons checking Enrage won't really benefit much here.
+				local debuffType = updatedAura.debuffType
+				if
+					(
+						not OnlyMine or
+						updatedAura.sourceUnit == "player" or
+						updatedAura.sourceUnit == "pet"
+					) and
+					(
+						Hash[updatedAura.spellId] or
+						Hash[strlowerCache[updatedAura.name]] or
+						Hash[debuffType == "" and "Enraged" or debuffType]
+					)
+				then
+					icon.NextUpdateTime = 0
+					return
+				end
+			end
+		else
+			icon.NextUpdateTime = 0
+		end
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
@@ -259,7 +291,6 @@ end
 
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
-	
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, Hash, Filter, Filterh, DurationSort, StackSort
 	= icon.Units, icon.Spells.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort

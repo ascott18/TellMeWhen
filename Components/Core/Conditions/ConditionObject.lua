@@ -19,10 +19,11 @@ local print = TMW.print
 
 local CNDT = TMW.CNDT
 
-local tostring, loadstring, setfenv, wipe, type, next, pairs, max, select
-	= tostring, loadstring, setfenv, wipe, type, next, pairs, max, select
+local tostring, loadstring, setfenv, format, wipe, type, next, pairs, max, select
+	= tostring, loadstring, setfenv, format, wipe, type, next, pairs, max, select
 local huge = math.huge
 
+local strlowerCache = TMW.strlowerCache
 
 
 --- A [[api/conditions/api-documentation/condition-object/|ConditionObject]] represents a group of individual conditions. 
@@ -89,7 +90,6 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 		local condition = CNDT.ConditionsByType[t]
 		
 		if condition and condition.events then
-			local voidNext
 			for n, argCheckerString in TMW:Vararg(TMW.get(condition.events, self, c)) do
 				if argCheckerString == false or argCheckerString == nil then
 					return
@@ -108,7 +108,8 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 		end
 
 		-- handle code that anticipates when a change in state will occur.
-		-- this is usually used to predict when a duration threshold will be used, but you could really use it for whatever you want.
+		-- this is usually used to predict when a duration threshold will be reached,
+		-- but you could really use it for whatever you want.
 		if condition.anticipate then
 			numAnticipatorResults = numAnticipatorResults + 1
 
@@ -410,6 +411,40 @@ function ConditionObject:GenerateNormalEventString(event, ...)
 	return str
 end
 
+function ConditionObject:IsUnitAuraEventRelevant(updatedAuras, spell, onlyMine)
+	for i = 1, #updatedAuras do
+		local updatedAura = updatedAuras[i]
+		-- Check if the aura fits into the icons filters.
+		-- Checking name/id + OnlyMine are the only 2 worthwhile checks here.
+		-- Anything else (like isHarmful/isHelpful) is just not likely to yield meaningful benefit
+		if
+			(not onlyMine or (updatedAura.sourceUnit == "player" or updatedAura.sourceUnit == "pet")) and
+			(spell == updatedAura.spellId or spell == strlowerCache[updatedAura.name])
+		then
+			return true
+		end
+	end
+end
+
+function ConditionObject:GenerateUnitAuraString(unit, spell, onlyMine)
+	self:RequestEvent("UNIT_AURA")
+	self:SetNumEventArgs(3)
+	
+	local str = "event == 'UNIT_AURA' and arg1 == "
+		.. format("%q", unit)
+		-- arg2 is isFullUpdate:
+		-- If it is nil, the client doesn't support the new UNIT_AURA payload.
+		-- If it is true, the event isn't about any particular aura.
+		-- If it is false, then arg3 is `updatedAuras`.
+		.. " and (arg2 ~= false or ConditionObject:IsUnitAuraEventRelevant(arg3,"
+		.. (type(spell) == "string" and format("%q", spell) or tostring(spell))
+		.. ", "
+		.. tostring(onlyMine)
+		.. "))"
+	
+	return str
+end
+
 --- (//For use in the events function of a condition type declaration//)
 -- Gets an event checker string that will have the proper event checking for monitoring when the unit changes (you change target, summon a pet, etc).
 -- @param unit [string] A unitID to check the unit for. Should be the return value of a call to CNDT:GetUnit(unit).
@@ -418,7 +453,7 @@ end
 -- @usage events = function(ConditionObject, c)
 --   return
 --     ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
---     ConditionObject:GenerateNormalEventString("UNIT_AURA", CNDT:GetUnit(c.Unit))
+--     ConditionObject:GenerateNormalEventString("UNIT_HEALTH", CNDT:GetUnit(c.Unit))
 -- end,
 function ConditionObject:GetUnitChangedEventString(unit)
 	if unit == "player" then

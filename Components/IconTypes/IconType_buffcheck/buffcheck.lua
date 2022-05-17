@@ -106,10 +106,29 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 
 
 
-local function Buff_OnEvent(icon, event, arg1)
+local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 	if event == "UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
 		-- If the icon is checking the unit, schedule an update for the icon.
-		icon.NextUpdateTime = 0
+		if arg2 == false then
+			-- arg2: isFullUpdate
+			-- arg3: updatedAuras
+			local Hash, OnlyMine = icon.Spells.Hash, icon.OnlyMine
+			for i = 1, #arg3 do
+				local updatedAura = arg3[i]
+				-- Check if the aura fits into the icons filters.
+				-- Checking name/id + OnlyMine are the only 2 worthwhile checks here.
+				-- Anything else (like isHarmful/isHelpful) is just not likely to yield meaningful benefit
+				if
+					(not OnlyMine or (updatedAura.sourceUnit == "player" or updatedAura.sourceUnit == "pet")) and
+					(Hash[updatedAura.spellId] or Hash[strlowerCache[updatedAura.name]])
+				then
+					icon.NextUpdateTime = 0
+					return
+				end
+			end
+		else
+			icon.NextUpdateTime = 0
+		end
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
@@ -120,8 +139,8 @@ local huge = math.huge
 local function BuffCheck_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local Units, NameArray, NameStringArray, NameHash, Filter
-	= icon.Units, icon.Spells.Array, icon.Spells.StringArray, icon.Spells.Hash, icon.Filter
+	local Units, Hash, Filter
+	= icon.Units, icon.Spells.Hash, icon.Filter
 	
 	local AbsentAlpha = icon.States[STATE_ABSENT].Alpha
 	local PresentAlpha = icon.States[STATE_PRESENT].Alpha
@@ -144,7 +163,7 @@ local function BuffCheck_OnUpdate(icon, time)
 				if not _id then
 					-- No more auras on the unit. Break spell loop.
 					break
-				elseif NameHash[_id] or NameHash[strlowerCache[_buffName]] then
+				elseif Hash[_id] or Hash[strlowerCache[_buffName]] then
 					foundOnUnit = true
 					local remaining = (_expirationTime == 0 and huge) or _expirationTime - time
 

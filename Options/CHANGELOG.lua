@@ -3,6 +3,17 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v9.2.2
+### Bug Fixes
+* Fix #1931 - Group controller Buff/Debuff icons not checking any specific aura were not responding to UNIT_AURA events.
+  
+## v9.2.1
+### Bug Fixes
+* Fix #1930 - Buff/Debuff icons checking dispel types were not responding to events.
+  
+## v9.2.0
+* #1929 - Utilize new payload for UNIT_AURA event to greatly improve performance.
+
 ## v9.1.2
 * New icon type: Lua Value (community contribution by Taurlog of Wyrmrest Accord)
 * Minor performance improvements
