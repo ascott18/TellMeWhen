@@ -20,9 +20,9 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
 		-- This is not localizable, because AceLocale might not have loaded
 		-- (this is why we don't bother to load AceLocale until after these checks).
 		text = ("You've installed TellMeWhen for retail WoW, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
-		button1 = EXIT_GAME,
+		button1 = RELOADUI,
 		button2 = CANCEL,
-		OnAccept = ForceQuit,
+		OnAccept = ReloadUI,
 		timeout = 0,
 		showAlert = true,
 		whileDead = true,
@@ -76,9 +76,9 @@ if not AceDB or not LibOO or not LSM then
 Normally, these come bundled with TMW, but you may have installed a nolib version of TMW by accident.
 
 This can happen especially if you use the Twitch app - ensure "Install Libraries Separately" isn't check for TellMeWhen in the Twitch app.]], 
-		button1 = EXIT_GAME,
+		button1 = RELOADUI,
 		button2 = CANCEL,
-		OnAccept = ForceQuit,
+		OnAccept = ReloadUI,
 		timeout = 0,
 		showAlert = true,
 		whileDead = true,
