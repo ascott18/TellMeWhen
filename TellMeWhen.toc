@@ -12,12 +12,13 @@
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 20502
+## Interface: 20504
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 20502
+## X-Interface: 20504
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 25152
+## X-Wago-ID: ZQ6aZqKW
 
 ## Version: 9.2.2
 ## Author: Cybeloras of Aerie Peak
