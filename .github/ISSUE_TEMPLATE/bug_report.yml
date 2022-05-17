@@ -1,0 +1,49 @@
+name: Bug report
+description: Report a problem with TellMeWhen
+title: '[Bug]: '
+labels: defect
+body:
+  - type: dropdown
+    id: wowversion
+    attributes:
+      label: WoW Version
+      description: What version(s) of WoW did you find this bug in?
+      multiple: true
+      options:
+        - Retail
+        - TBC Classic
+        - Classic/Classic SoM
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: TellMeWhen Version
+      description: |
+        What version of TellMeWhen did you find this bug in? 
+        
+        Found in-game at the top of TMW's configuration window. "The latest" is not a version.
+      placeholder: x.x.x
+    validations:
+      required: true
+  - type: textarea
+    id: bug-desc
+    attributes:
+      label: Describe the bug
+      description: |
+        A clear and concise description of what the bug is. Add screenshots if they'll help explain the problem. You can paste or attach images directly into this field.
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: textarea
+    id: export-strings
+    attributes:
+      label: Export Strings
+      description: |
+        If your issue pertains to a specific icon or group, please post the relevant export string(s). Otherwise, please enter "N/A".
+        
+        To get an export string, open the icon editor and click the button at the bottom labeled "Import/Export/Backup". Select the "To String" option for the appropriate export type (icon, group, or profile), and then press CTRL+C to copy it to your clipboard.
+      placeholder: If your issue does not pertain to a specific icon or group, please enter "N/A".
+      render: text
+    validations:
+      required: true
