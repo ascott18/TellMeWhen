@@ -15,23 +15,6 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
-		-- This is not localizable, because AceLocale might not have loaded
-		-- (this is why we don't bother to load AceLocale until after these checks).
-		text = ("You've installed TellMeWhen for retail WoW, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
-		button1 = RELOADUI,
-		button2 = CANCEL,
-		OnAccept = ReloadUI,
-		timeout = 0,
-		showAlert = true,
-		whileDead = true,
-		preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
-	}
-	StaticPopup_Show("TMW_PROJECT_MISMATCH")
-	return
-end
-
 TELLMEWHEN_VERSION = "9.2.3"
 
 TELLMEWHEN_VERSION_MINOR = ""
@@ -87,6 +70,24 @@ This can happen especially if you use the Twitch app - ensure "Install Libraries
 	StaticPopup_Show("TMW_MISSINGLIB")
 
 	-- Stop trying to load TMW.
+	return
+end
+
+if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
+	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
+		-- This is not localizable, because AceLocale might not have loaded
+		-- (this is why we don't bother to load AceLocale until after these checks).
+		text = ("You've installed TellMeWhen for retail WoW, but this is %s. Please double-check which version of TMW you downloaded.")
+			:format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
+		button1 = RELOADUI,
+		button2 = CANCEL,
+		OnAccept = ReloadUI,
+		timeout = 0,
+		showAlert = true,
+		whileDead = true,
+		preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+	}
+	StaticPopup_Show("TMW_PROJECT_MISMATCH")
 	return
 end
 
