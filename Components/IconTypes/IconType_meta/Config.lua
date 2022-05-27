@@ -219,7 +219,7 @@ function Config:IconMenu()
 
 				local text, textshort, tooltip = icon:GetIconMenuText()
 				info.text = textshort
-				info.tooltipTitle = text
+				info.tooltipTitle = textshort
 				info.tooltipText = tooltip
 
 				info.value = icon

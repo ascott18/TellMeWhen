@@ -3,6 +3,11 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v9.2.4
+* #1935 - More informative tooltips on "previews" of meta icon components.
+* When exporting an icon, icons referenced by its conditions will be included as related data.
+* When exporting a meta icon that includes an entire group, that group will be included as related data.
+
 ## v9.2.3
 ### Bug Fixes
 * Fix #1936 - Syntax error in the version mismatch popup.
