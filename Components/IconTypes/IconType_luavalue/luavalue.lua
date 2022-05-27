@@ -92,7 +92,8 @@ function Type:Setup(icon)
 end
 
 TMW:RegisterLuaImportDetector(function(table)
-	if rawget(table, "LuaCode") ~= "" then
+	local code = rawget(table, "LuaCode")
+	if type(code) == "string" and code:trim() ~= "" then
 		return table.LuaCode, L["ICONMENU_LUAVALUE2"]
 	end
 end)

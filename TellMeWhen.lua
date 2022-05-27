@@ -15,7 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "9.2.3"
+TELLMEWHEN_VERSION = "9.2.4"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 92300 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 92400 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -1396,6 +1396,8 @@ function TMW:GetSettingsFromGUID(GUID)
 			-- match returns that are returned when we get results from the iterator
 			-- for icons below (settings [,owner], groupSettings, domain, groupID, iconID)
 			return owner:GetSettings(), owner, owner.group:GetSettings(), owner.group.Domain, owner.group.ID, owner.ID
+		elseif owner.class == TMW.C.Group then
+			return owner:GetSettings(), owner, owner.domain, owner.ID
 		end
 		return owner:GetSettings(), owner
 	end
@@ -1567,6 +1569,18 @@ TMW.C.TMW:Inherit("Core_Upgrades")
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
 
+		[92400] = {
+			-- The lua import detector for the luavalue icon type
+			-- implemented its rawget guard incorrectly,
+			-- leading to extra per-view settings getting created on imported data.
+			group = function(self, gs)
+				gs.SettingsPerView.LuaCode = nil
+			end,
+			icon = function(self, ics)
+				ics.SettingsPerView.LuaCode = nil
+			end,
+		},
+		
 		[81206] = {
 			group = function(self, gs, domain, groupID)
 				-- the old upgrade accidentaly set these to false instead of nil
