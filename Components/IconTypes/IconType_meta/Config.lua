@@ -94,9 +94,15 @@ TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, t
 		for k, GUID in pairs(settings.Icons) do
 			if GUID ~= settings.GUID then
 				local type = TMW:ParseGUID(GUID)
-				local settings = TMW:GetSettingsFromGUID(GUID)
-				if type == "icon" and settings then
-					TMW:GetSettingsStrings(strings, type, settings, TMW.Icon_Defaults)
+				local settings, _, _, ret4 = TMW:GetSettingsFromGUID(GUID)
+				if settings then
+					if type == "icon" then
+						TMW:GetSettingsStrings(strings, type, settings, TMW.Icon_Defaults)
+					end
+					if type == "group" then
+						local groupID = ret4
+						TMW:GetSettingsStrings(strings, type, settings, TMW.Group_Defaults, groupID)
+					end
 				end
 			end
 		end
