@@ -127,13 +127,15 @@ ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	useSUG = "talents",
 	icon = function() return select(2, GetTalentInfo(1, 1)) end,
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[(TalentMap[c.NameString] or 0) c.Operator c.Level]],
-	events = function(ConditionObject, c)
+	funcstr = function(c) 
 		-- this is handled externally because TalentMap is so extensive a process,
 		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
 		CNDT:RegisterEvent("CHARACTER_POINTS_CHANGED")
 		CNDT:CHARACTER_POINTS_CHANGED()
 
+		return [[(TalentMap[c.NameString] or 0) c.Operator c.Level]]
+	end,
+	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("CHARACTER_POINTS_CHANGED")
 	end,
