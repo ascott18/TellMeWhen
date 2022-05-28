@@ -2,6 +2,9 @@
 * #1935 - More informative tooltips on "previews" of meta icon components.
 * When exporting an icon, icons referenced by its conditions will be included as related data.
 * When exporting a meta icon that includes an entire group, that group will be included as related data.
+  
+### Bug Fixes
+* Fix #1938 - The Points in Talent condition would fail to work in some circumstances.
 
 ## v9.2.3
 ### Bug Fixes
