@@ -32,6 +32,8 @@
 		<Scripts>
 			<OnLoad>
 				function self:SetBorderSize(pixels)
+					if not TMW then return end
+
 					self.size = pixels
 					self.borderTop:ClearAllPoints()
 					self.borderBottom:ClearAllPoints()
@@ -56,6 +58,7 @@
 				end
 
 				function self:SetColor(r, g, b, a)
+					if not TMW then return end
 					a = a or 1
 
 					for i, tex in TMW:Vararg(self:GetRegions()) do
@@ -154,8 +157,13 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						TMW:TT(self, "MAINOPTIONS_SHOW")
-						self:SetText(TMW.L["MAINOPTIONS_SHOW"])
+						if TMW then
+							TMW:TT(self, "MAINOPTIONS_SHOW")
+							self:SetText(TMW.L["MAINOPTIONS_SHOW"])
+						else
+							self:SetText("TellMeWhen was unable to load.")
+							self:Disable()
+						end
 						self:SetWidth(self:GetTextWidth() + 10)
 						self:SetFrameLevel(self:GetFrameLevel() + 2)
 						self:SetScale(2)

@@ -981,11 +981,10 @@ TMW:NewClass("Config_DropDownMenu_Icon", "Config_DropDownMenu"){
 
 			texture = TMW:GuessIconTexture(ics)
 			title = L["GROUPICON"]:format(TMW:GetGroupName(gs.Name, groupID, 1), iconID)
-
-			self.IconPreview.texture:SetTexture(tex)
 		else
-			desc = L["ICON_TOOLTIP2NEWSHORT"]
-			title = icon:GetIconName()
+			local text, textshort, tooltip = icon:GetIconMenuText()
+			title = textshort
+			desc = tooltip .. "\r\n\r\n" .. L["ICON_TOOLTIP2NEWSHORT"]
 			texture = icon and icon.attributes.texture
 		end
 
