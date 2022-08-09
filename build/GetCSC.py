@@ -7,7 +7,7 @@ import os
 
 from slpp import slpp as lua
 
-base_url = "https://tbc.wowhead.com"
+base_url = "https://www.wowhead.com/wotlk"
 
 num_classes = 12
 
@@ -16,7 +16,7 @@ spell_id_blacklist = [
 ]
 
 class_slugs = {
-	# 'death-knight': 6,
+	'death-knight': 6,
 	# 'demon-hunter': 12,
 	'druid': 11,
 	'hunter': 3,
@@ -44,11 +44,12 @@ spell_cat_whitelist = [
 	# -16,    # pvp talents
 
 	# -14, # draenor perks
-	# -13, # glyphs
+	-13, # glyphs
 	# -11, # proficiencies
 ]
 
 pet_spells_url = '/spells/pet-abilities/'
+glyph_spells_url = '/spells/glyphs/'
 
 pet_classes = [
 	# 'death-knight',
@@ -200,6 +201,18 @@ if __name__ == '__main__':
 	for classIDAndSpells in results:
 		classID = classIDAndSpells[0]
 		keyed_results["PET"].update({id: classID for id in classIDAndSpells[1]})
+
+
+
+
+
+	# glyphs (temporary hack, extract from the Cache var and put into Talents_config.lua)
+	results = pool.map(scrape_class_spells, [(glyph_spells_url + c, class_slugs[c]) for c in class_slugs])
+
+	keyed_results["GLYPH"] = {}
+	for classIDAndSpells in results:
+		classID = classIDAndSpells[0]
+		keyed_results["GLYPH"].update({id: classID for id in classIDAndSpells[1]})
 
 
 

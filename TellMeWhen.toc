@@ -12,9 +12,9 @@
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 20504
+## Interface: 30400
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 20504
+## X-Interface: 30400
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 25152
@@ -228,6 +228,7 @@ Components\IconTypes\IconType_icd\icd.lua
 Components\IconTypes\IconType_item\item.lua
 Components\IconTypes\IconType_meta\meta.lua
 Components\IconTypes\IconType_reactive\reactive.lua
+Components\IconTypes\IconType_runes\runes.lua
 Components\IconTypes\IconType_swingtimer\swingtimer.lua
 Components\IconTypes\IconType_totem\totem.lua
 Components\IconTypes\IconType_uierror\uierror.lua

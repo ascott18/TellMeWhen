@@ -88,7 +88,7 @@ CNDT.Condition_Defaults = {
 		Checked			= false,
 		Checked2		= false,
 
-		-- Runes 		= {}, -- Deprecated
+		Runes 		    = {},
 
 		-- IMPORTANT: This setting can be a number OR a table.
 		BitFlags		= 0x0, -- may also be a table.

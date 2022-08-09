@@ -699,31 +699,35 @@ ConditionCategory:RegisterSpacer(30)
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 Env.UnitCast = function(unit, level, matchname)
-	local name = UnitCastingInfo(unit)
+	local name, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
-		name = UnitChannelInfo(unit)
+		name, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
 	end
 	name = strlowerCache[name]
 	if matchname == "" and name then
 		matchname = name
 	end
-	if level == 0 or level == 1 then -- present
+	if level == 0 then -- only interruptible
+		return not notInterruptible and name == matchname
+	elseif level == 1 then -- present
 		return name == matchname
 	else -- absent
 		return name ~= matchname
 	end
 end
 Env.UnitCastTime = function(unit, level, matchname)
-	local name, _, _, _, endTime = UnitCastingInfo(unit)
+	local name, _, _, _, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
-		name, _, _, _, endTime = UnitChannelInfo(unit)
+		name, _, _, _, endTime, _, notInterruptible = UnitChannelInfo(unit)
 	end
 	name = strlowerCache[name]
 	if matchname == "" and name then
 		matchname = name
 	end
 	local remaining = endTime and endTime/1000 - TMW.time or 0
-	if level == 0 or level == 1 then -- present
+	if level == 0 then -- only interruptible
+		return not notInterruptible and name == matchname and remaining or 0
+	elseif level == 1 then -- present
 		return name == matchname and remaining or 0
 	else -- absent
 		return name ~= matchname and remaining or 0
@@ -736,7 +740,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	levelChecks = true,
 	nooperator = true,
 	texttable = {
-		-- [0] = L["CONDITIONPANEL_INTERRUPTIBLE"],
+		[0] = L["CONDITIONPANEL_INTERRUPTIBLE"],
 		[1] = L["ICONMENU_PRESENT"],
 		[2] = L["ICONMENU_ABSENT"],
 	},
@@ -761,6 +765,8 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
 			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit))
+			--,ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
+			--,ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
 	end,
 })
 

@@ -78,7 +78,7 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_BURNING_CRUSADE_CLASSIC then
 	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
 		-- This is not localizable, because AceLocale might not have loaded
 		-- (this is why we don't bother to load AceLocale until after these checks).
-		text = ("You've installed TellMeWhen for Classic TBC, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
+		text = ("You've installed TellMeWhen for Classic TBC/Wrath, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
 		button1 = RELOADUI,
 		button2 = CANCEL,
 		OnAccept = ReloadUI,
@@ -1066,39 +1066,7 @@ function TMW:PLAYER_LOGIN()
 	TMW.PLAYER_LOGIN = nil
 
 	-- Check for wrong WoW version
-	if select(4, GetBuildInfo()) < 20501 or select(4, GetBuildInfo()) > 29999 then
-		-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
-		local version = GetBuildInfo()
-		StaticPopupDialogs["TMW_BADWOWVERSION"] = {
-			text = "TellMeWhen %s is only compatible with TBC Classic.",
-			button1 = OKAY,
-			timeout = 0,
-			showAlert = true,
-			whileDead = true,
-			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
-		}
-		StaticPopup_Show("TMW_BADWOWVERSION", TELLMEWHEN_VERSION_FULL, version)
-		return
-
-	-- -- if the file IS required for gross functionality
-	-- elseif not LibStub("LibClassicCasterino", true) then
-	-- 	local fileName = "TellMeWhen/Lib/LibClassicCasterino/LibClassicCasterino.lua"
-
-	-- 	-- this also includes upgrading from older than 3.0 (pre-Ace3 DB settings)
-	-- 	-- GLOBALS: StaticPopupDialogs, StaticPopup_Show, EXIT_GAME, CANCEL, ForceQuit
-	-- 	StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-	-- 		text = L["ERROR_MISSINGFILE"], 
-	-- 		button1 = OKAY,
-	-- 		timeout = 0,
-	-- 		showAlert = true,
-	-- 		whileDead = true,
-	-- 		preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
-	-- 	}
-	-- 	StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, fileName) -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
-	-- 	return
-
-	-- if the file is NOT required for gross functionality
-	elseif not LibStub("DRList-1.0", true) then
+	if not LibStub("DRList-1.0", true) then
 		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
 			text = L["ERROR_MISSINGFILE_NOREQ"], 
 			button1 = OKAY,

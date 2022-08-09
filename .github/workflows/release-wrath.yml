@@ -3,9 +3,9 @@ name: Package TBC
 on:
   push:
     branches:
-      - bc
+      - wrath
     tags:
-      - "*-bcc"
+      - "*-wrath"
 
 jobs:
   build:

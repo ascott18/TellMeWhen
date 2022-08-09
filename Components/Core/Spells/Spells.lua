@@ -551,6 +551,10 @@ local function Totem(spellID, rank)
 	}
 	
 	data.spellName = GetSpellInfo(spellID)
+	if not data.spellName then
+		TMW:Debug("Bad totam ID: " .. spellID)
+		return
+	end
 	data.spellNameLower = strlower(data.spellName)
 	data.totemName = data.spellName
 	if rank > 1 then
@@ -567,7 +571,7 @@ local function Totem(spellID, rank)
 	end
 end
 
-Totem(8170, 1)  -- Disease Cleansing Totem
+Totem(8170, 1)  -- Cleansing Totem
 
 Totem(2062, 1)  -- Earth Elemental Totem
 
@@ -575,33 +579,28 @@ Totem(2484, 1)  -- Earthbind Totem
 
 Totem(2894, 1)  -- Fire Elemental Totem
 
-Totem(1535, 1)  -- Fire Nova Totem
-Totem(8498, 2)  -- Fire Nova Totem
-Totem(8499, 3)  -- Fire Nova Totem
-Totem(11314, 4) -- Fire Nova Totem
-Totem(11315, 5) -- Fire Nova Totem
-Totem(25546, 6) -- Fire Nova Totem
-Totem(25547, 7) -- Fire Nova Totem
-
 Totem(8184, 1)  -- Fire Resistance Totem
 Totem(10537, 2) -- Fire Resistance Totem
 Totem(10538, 3) -- Fire Resistance Totem
 Totem(25563, 4) -- Fire Resistance Totem
+Totem(58737, 5) -- Fire Resistance Totem
+Totem(58739, 6) -- Fire Resistance Totem
 
 Totem(8227, 1)  -- Flametongue Totem
 Totem(8249, 2)  -- Flametongue Totem
 Totem(10526, 3) -- Flametongue Totem
 Totem(16387, 4) -- Flametongue Totem
 Totem(25557, 5) -- Flametongue Totem
+Totem(58649, 6) -- Flametongue Totem
+Totem(58652, 7) -- Flametongue Totem
+Totem(58656, 8) -- Flametongue Totem
 
 Totem(8181, 1)  -- Frost Resistance Totem
 Totem(10478, 2) -- Frost Resistance Totem
 Totem(10479, 3) -- Frost Resistance Totem
 Totem(25560, 4) -- Frost Resistance Totem
-
-Totem(8835, 1)  -- Grace of Air Totem
-Totem(10627, 2) -- Grace of Air Totem
-Totem(25359, 3) -- Grace of Air Totem
+Totem(58741, 5) -- Frost Resistance Totem
+Totem(58745, 6) -- Frost Resistance Totem
 
 Totem(8177, 1)  -- Grounding Totem
 
@@ -611,18 +610,26 @@ Totem(6377, 3)  -- Healing Stream Totem
 Totem(10462, 4) -- Healing Stream Totem
 Totem(10463, 5) -- Healing Stream Totem
 Totem(25567, 6) -- Healing Stream Totem
+Totem(58755, 7) -- Healing Stream Totem
+Totem(58756, 8) -- Healing Stream Totem
+Totem(58757, 9) -- Healing Stream Totem
 
 Totem(8190, 1)  -- Magma Totem
 Totem(10585, 2) -- Magma Totem
 Totem(10586, 3) -- Magma Totem
 Totem(10587, 4) -- Magma Totem
 Totem(25552, 5) -- Magma Totem
+Totem(58731, 6) -- Magma Totem
+Totem(58734, 7) -- Magma Totem
 
 Totem(5675, 1)  -- Mana Spring Totem
 Totem(10495, 2) -- Mana Spring Totem
 Totem(10496, 3) -- Mana Spring Totem
 Totem(10497, 4) -- Mana Spring Totem
 Totem(25570, 5) -- Mana Spring Totem
+Totem(58771, 6) -- Mana Spring Totem
+Totem(58773, 7) -- Mana Spring Totem
+Totem(58774, 8) -- Mana Spring Totem
 
 Totem(16190, 1) -- Mana Tide Totem
 
@@ -630,8 +637,8 @@ Totem(10595, 1) -- Nature Resistance Totem
 Totem(10600, 2) -- Nature Resistance Totem
 Totem(10601, 3) -- Nature Resistance Totem
 Totem(25574, 4) -- Nature Resistance Totem
-
-Totem(8166, 1)  -- Poison Cleansing Totem
+Totem(58746, 5) -- Nature Resistance Totem
+Totem(58749, 6) -- Nature Resistance Totem
 
 Totem(3599, 1)  -- Searing Totem
 Totem(6363, 2)  -- Searing Totem
@@ -640,6 +647,9 @@ Totem(6365, 4)  -- Searing Totem
 Totem(10437, 5) -- Searing Totem
 Totem(10438, 6) -- Searing Totem
 Totem(25533, 7) -- Searing Totem
+Totem(58699, 8) -- Searing Totem
+Totem(58703, 9) -- Searing Totem
+Totem(58704, 10) -- Searing Totem
 
 Totem(6495, 1)  -- Sentry Totem
 
@@ -650,6 +660,9 @@ Totem(6392, 4)  -- Stoneclaw Totem
 Totem(10427, 5) -- Stoneclaw Totem
 Totem(10428, 6) -- Stoneclaw Totem
 Totem(25525, 7) -- Stoneclaw Totem
+Totem(58580, 8) -- Stoneclaw Totem
+Totem(58581, 9) -- Stoneclaw Totem
+Totem(58582, 10) -- Stoneclaw Totem
 
 Totem(8071, 1)  -- Stoneskin Totem
 Totem(8154, 2)  -- Stoneskin Totem
@@ -659,6 +672,8 @@ Totem(10407, 5) -- Stoneskin Totem
 Totem(10408, 6) -- Stoneskin Totem
 Totem(25508, 7) -- Stoneskin Totem
 Totem(25509, 8) -- Stoneskin Totem
+Totem(58751, 9) -- Stoneskin Totem
+Totem(58753, 10) -- Stoneskin Totem
 
 Totem(8075, 1)  -- Strength of Earth Totem
 Totem(8160, 2)  -- Strength of Earth Totem
@@ -666,21 +681,13 @@ Totem(8161, 3)  -- Strength of Earth Totem
 Totem(10442, 4) -- Strength of Earth Totem
 Totem(25361, 5) -- Strength of Earth Totem
 Totem(25528, 6) -- Strength of Earth Totem
-Totem(30706, 7) -- Totem of Wrath
+Totem(57622, 7) -- Strength of Earth Totem
+Totem(58643, 8) -- Strength of Earth Totem
 
-Totem(25908, 1) -- Tranquil Air Totem
+Totem(30706, 7) -- Totem of Wrath
 
 Totem(8143, 1)  -- Tremor Totem
 
 Totem(8512, 1)  -- Windfury Totem
-Totem(10613, 2) -- Windfury Totem
-Totem(10614, 3) -- Windfury Totem
-Totem(25585, 4) -- Windfury Totem
-Totem(25587, 5) -- Windfury Totem
-
-Totem(15107, 1) -- Windwall Totem
-Totem(15111, 2) -- Windwall Totem
-Totem(15112, 3) -- Windwall Totem
-Totem(25577, 4) -- Windwall Totem
 
 Totem(3738, 1)  -- Wrath of Air Totem

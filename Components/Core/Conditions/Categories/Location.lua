@@ -70,6 +70,8 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 		[05] = {order=11, text=DUNGEON_DIFFICULTY_5PLAYER_HEROIC,                                    space=true,   }, -- 5-player Heroic
 		[06] = {order=32, text=RAID_DIFFICULTY_10PLAYER,           }, -- 10-player raid (legacy)
 		[07] = {order=33, text=RAID_DIFFICULTY_25PLAYER,           }, -- 25-player raid (legacy)
+		[08] = {order=34, text=RAID_DIFFICULTY_10PLAYER_HEROIC,    }, -- 10-player heroic raid (legacy)
+		[09] = {order=35, text=RAID_DIFFICULTY_25PLAYER_HEROIC,    }, -- 25-player heroic raid (legacy)
 		
 		[12] = {order=36, text=RAID_DIFFICULTY_40PLAYER,           }, -- 40-man raid (legacy)
 

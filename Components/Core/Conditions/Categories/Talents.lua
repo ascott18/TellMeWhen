@@ -25,6 +25,7 @@ local _, pclass = UnitClass("Player")
 
 local ConditionCategory = CNDT:GetCategory("TALENTS", 1.4, L["CNDTCAT_TALENTS"], true, false)
 
+
 ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 	text = L["CONDITIONPANEL_CLASS"],
 
@@ -70,30 +71,30 @@ ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 	end,
 })
 
-ConditionCategory:RegisterCondition(2,	 "HAPPINESS", {
-	-- poor translation to other languages, but better than just HAPPINESS on its own.
-	text = PET .. " " .. HAPPINESS,
-	
-	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEVALUES"],
+ConditionCategory:RegisterCondition(0.3,  "ROLE2", {
+	text = L["CONDITIONPANEL_ROLE"],
+	tooltip = L["CONDITIONPANEL_ROLE_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
-		[1] = PET_HAPPINESS1,
-		[2] = PET_HAPPINESS2,
-		[3] = PET_HAPPINESS3
+		NONE = 		{order = 1, text=NONE },
+		TANK = 		{order = 2, text=TANK, icon = "Interface/AddOns/TellMeWhen/Textures/TANK", },
+		HEALER = 	{order = 3, text=HEALER, icon = "Interface/AddOns/TellMeWhen/Textures/HEALER", },
+		DAMAGER = 	{order = 4, text=DAMAGER, icon = "Interface/AddOns/TellMeWhen/Textures/DAMAGER", },
 	},
 
-	unit = PET,
-	icon = "Interface\\PetPaperDollFrame\\UI-PetHappiness",
-	tcoords = {0.390625, 0.5491, 0.03, 0.3305},
+	icon = "Interface\\Addons\\TellMeWhen\\Textures\\DAMAGER",
 	Env = {
-		GetPetHappiness = GetPetHappiness,
+		UnitGroupRolesAssigned = UnitGroupRolesAssigned,
 	},
-	funcstr = [[ BITFLAGSMAPANDCHECK( GetPetHappiness() or 0 ) ]],
-	hidden = pclass ~= "HUNTER",
+	funcstr = [[BITFLAGSMAPANDCHECK( UnitGroupRolesAssigned(c.Unit) ) ]],
 	events = function(ConditionObject, c)
+		-- The unit change events should actually cover many of the changes
+		-- (at least for party and raid units, but roles only exist in party and raid anyway.)
 		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit("pet")),
-			ConditionObject:GenerateNormalEventString("UNIT_HAPPINESS", "pet"),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "pet")
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("PLAYER_ROLES_ASSIGNED"),
+			ConditionObject:GenerateNormalEventString("ROLE_CHANGED_INFORM")
 	end,
 })
 
@@ -113,6 +114,98 @@ function CNDT:CHARACTER_POINTS_CHANGED()
 		end
 	end
 end
+
+ConditionCategory:RegisterCondition(6.1,	 "UNITSPEC", {
+	text = L["UIPANEL_SPECIALIZATION"],
+
+	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
+	bitFlags = (function()
+		local t = {}
+		for i = 1, GetNumClasses() do
+			local _, class, classID = GetClassInfo(i)
+			if classID then
+				for j = 1, TMW.GetNumSpecializationsForClassID(classID) do
+					local specID, spec, desc, icon = TMW.GetSpecializationInfoForClassID(classID, j)
+					t[specID] = {
+						order = specID,
+						text = PLAYER_CLASS:format(RAID_CLASS_COLORS[class].colorStr, spec, LOCALIZED_CLASS_NAMES_MALE[class]),
+						icon = icon,
+						tcoords = CNDT.COMMON.standardtcoords
+					}
+				end
+			end
+		end
+		return t
+	end)(),
+
+	icon = function() return select(4, TMW.GetSpecializationInfo(1)) end,
+	tcoords = CNDT.COMMON.standardtcoords,
+	unit = PLAYER,
+
+	Env = {
+		GetCurrentSpecializationID = TMW.GetCurrentSpecializationID,
+	},
+	funcstr = function(c)
+		return [[ BITFLAGSMAPANDCHECK( GetCurrentSpecializationID() ) ]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE")
+	end,
+})
+
+ConditionCategory:RegisterCondition(7,	 "SPEC", {
+	text = L["UIPANEL_SPEC"],
+	min = 1,
+	max = 2,
+	levelChecks = true,
+	texttable = {
+		[1] = L["UIPANEL_PRIMARYSPEC"],
+		[2] = L["UIPANEL_SECONDARYSPEC"],
+	},
+	nooperator = true,
+	unit = PLAYER,
+	icon = "Interface\\Icons\\achievement_general",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetActiveTalentGroup = GetActiveTalentGroup
+	},
+	funcstr = [[c.Level == GetActiveTalentGroup()]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+	end,
+})
+
+ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
+	text = L["UIPANEL_SPECIALIZATIONROLE"],
+	tooltip = L["UIPANEL_SPECIALIZATIONROLE_DESC"],
+
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
+	bitFlags = {
+		TANK =    {order = 1, text=TANK, icon = "Interface/AddOns/TellMeWhen/Textures/TANK", },
+		HEALER =  {order = 2, text=HEALER, icon = "Interface/AddOns/TellMeWhen/Textures/HEALER", },
+		DAMAGER = {order = 3, text=DAMAGER, icon = "Interface/AddOns/TellMeWhen/Textures/DAMAGER", },
+	},
+
+	unit = PLAYER,
+	icon = "Interface\\Addons\\TellMeWhen\\Textures\\HEALER",
+	Env = {
+		GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole,
+	},
+	funcstr = [[BITFLAGSMAPANDCHECK( GetCurrentSpecializationRole() ) ]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED"),
+			ConditionObject:GenerateNormalEventString("TALENT_GROUP_ROLE_CHANGED")
+	end,
+})
+
+
+
+ConditionCategory:RegisterSpacer(8.9)
 
 ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	text = L["UIPANEL_PTSINTAL"],
@@ -138,5 +231,55 @@ ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("CHARACTER_POINTS_CHANGED")
+	end,
+})
+
+
+local GetGlyphSocketInfo = GetGlyphSocketInfo
+function CNDT:GLYPH_UPDATED()
+	local GlyphLookup = Env.GlyphLookup
+	wipe(GlyphLookup)
+	for i = 1, 6 do
+		local _, _, spellID = GetGlyphSocketInfo(i)
+		if spellID then
+			GlyphLookup[spellID] = 1
+			
+			local name = GetSpellInfo(spellID)
+			name = strlowerCache[name]
+			GlyphLookup[name] = 1
+		end
+	end
+end
+ConditionCategory:RegisterCondition(11,	 "GLYPH", {
+	text = L["UIPANEL_GLYPH"],
+	tooltip = L["UIPANEL_GLYPH_DESC"],
+
+	bool = true,
+	
+	unit = PLAYER,
+	name = function(editbox)
+		editbox:SetTexts(L["GLYPHTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = "glyphs",
+	icon = "Interface\\Icons\\inv_inscription_tradeskill01",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(ConditionObject, c)
+		-- this is handled externally because GlyphLookup is so extensive a process,
+		-- and if it does get stuck in an OnUpdate condition, it could be very bad.
+		CNDT:RegisterEvent("GLYPH_ADDED", 	 "GLYPH_UPDATED")
+		CNDT:RegisterEvent("GLYPH_REMOVED",  "GLYPH_UPDATED")
+		CNDT:RegisterEvent("GLYPH_UPDATED",  "GLYPH_UPDATED")
+		CNDT:GLYPH_UPDATED()
+	
+		return [[BOOLCHECK( GlyphLookup[c.NameFirst] )]]
+	end,
+	Env = {
+		GlyphLookup = {},
+	},
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("GLYPH_ADDED"),
+			ConditionObject:GenerateNormalEventString("GLYPH_REMOVED"),
+			ConditionObject:GenerateNormalEventString("GLYPH_UPDATED")
 	end,
 })

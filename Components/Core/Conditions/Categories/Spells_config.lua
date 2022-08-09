@@ -64,6 +64,7 @@ end
 
 
 local Module = SUG:NewModule("totem", Module_spell)
+Module.noMin = true
 function Module:OnInitialize()
 	self.Table = {}
 	for k, v in pairs(TMW.COMMON.TotemRanks) do

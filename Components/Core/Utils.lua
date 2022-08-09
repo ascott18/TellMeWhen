@@ -1490,6 +1490,7 @@ local classInfo = {
 	[3] = C_CreatureInfo.GetClassInfo(3),
 	[4] = C_CreatureInfo.GetClassInfo(4),
 	[5] = C_CreatureInfo.GetClassInfo(5),
+	[6] = C_CreatureInfo.GetClassInfo(6),
 	[7] = C_CreatureInfo.GetClassInfo(7),
 	[8] = C_CreatureInfo.GetClassInfo(8),
 	[9] = C_CreatureInfo.GetClassInfo(9),
@@ -1566,6 +1567,7 @@ local classSpecIds = {
 	SHAMAN = {262,263,264},
 	WARLOCK = {265,266,267},
 	WARRIOR = {71,72,73},
+	DEATHKNIGHT = {250,251,252},
 }
 local specs = {
 	[253]	= {"Beast Mastery", 461112, "DAMAGER"},
@@ -1603,27 +1605,45 @@ local specs = {
 	[259]	= {"Assassination", 236270, "DAMAGER"},
 	[260]	= {"Combat", 236286, "DAMAGER"},
 	[261]	= {"Subtlety", 132320, "DAMAGER"},
+
+	[250]	= {"Blood", 135770, "DAMAGER"},
+	[251]	= {"Frost", 135773, "DAMAGER"},
+	[252]	= {"Unholy", 135775, "DAMAGER"},
 }
 
 function TMW.GetNumSpecializations()
 	return 3
 end
 
-function TMW.GetCurrentSpecializationID()
+function TMW.GetNumSpecializationsForClassID(classID)
+	return 3
+end
+
+function TMW.GetSpecializationInfoForClassID(classID, i) 
+	local _, slug = GetClassInfo(classID)
+	return TMW.GetSpecializationInfoByID(classSpecIds[slug][i])
+end
+
+function TMW.GetCurrentSpecialization()
 	local _, pclass = UnitClass("player")
 	local specIDs = classSpecIds[pclass]
 	
 	local biggest = 0
-	local specID
+	local spec
 	for i = 1, #specIDs do
 		local _, _, points = GetTalentTabInfo(i)
 		if points > biggest then
 			biggest = points
-			specID = specIDs[i]
+			spec = i
 		end
 	end
 
-	return specID
+	return spec
+end
+
+function TMW.GetCurrentSpecializationID()
+	local _, pclass = UnitClass("player")
+	return classSpecIds[pclass][TMW.GetCurrentSpecialization()]
 end
 
 function TMW.GetSpecializationInfo(index)
@@ -1639,13 +1659,13 @@ end
 
 function TMW.GetCurrentSpecializationRole()
 	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
-	local currentSpec = TMW.GetCurrentSpecializationID()
-	if not currentSpec then
-		return "DAMAGER" -- assume DPS if no talents are learned
+
+	local activeSpec = GetActiveTalentGroup()
+	if not activeSpec or activeSpec == 0 then
+		return "DAMAGER"
 	end
 
-	local _, _, _, _, role = TMW.GetSpecializationInfoByID(currentSpec)
-	return role
+	return GetTalentGroupRole(activeSpec) or "DAMAGER"
 end
 
 

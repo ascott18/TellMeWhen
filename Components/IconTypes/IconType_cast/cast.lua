@@ -57,6 +57,9 @@ Type:RegisterIconDefaults{
 	-- The unit(s) to check for casts
 	Unit					= "player", 
 
+	-- True if the icon should only check interruptible casts.
+	Interruptible			= false,
+
 	-- True if the icon should display blanks instead of the pocketwatch texture.
 	NoPocketwatch			= false,
 }
@@ -80,10 +83,10 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CastSettings", function(self)
 	self:SetTitle(Type.name)
 	self:BuildSimpleCheckSettingFrame({
-		-- function(check)
-		-- 	check:SetTexts(L["ICONMENU_ONLYINTERRUPTIBLE"], L["ICONMENU_ONLYINTERRUPTIBLE_DESC"])
-		-- 	check:SetSetting("Interruptible")
-		-- end,
+		function(check)
+			check:SetTexts(L["ICONMENU_ONLYINTERRUPTIBLE"], L["ICONMENU_ONLYINTERRUPTIBLE_DESC"])
+			check:SetSetting("Interruptible")
+		end,
 		function(check)
 			check:SetTexts(L["ICONMENU_NOPOCKETWATCH"], L["ICONMENU_NOPOCKETWATCH_DESC"])
 			check:SetSetting("NoPocketwatch")
@@ -106,8 +109,8 @@ local events = {
 	UNIT_SPELLCAST_CHANNEL_START = true,
 	UNIT_SPELLCAST_CHANNEL_UPDATE = true,
 	UNIT_SPELLCAST_CHANNEL_STOP = true,
-	-- UNIT_SPELLCAST_INTERRUPTIBLE = true,
-	-- UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
+	--UNIT_SPELLCAST_INTERRUPTIBLE = true,
+	--UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true,
 }
 
 
@@ -125,8 +128,8 @@ end
 local function Cast_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local NameFirst, NameStringHash, Units =
-	icon.Spells.First, icon.Spells.StringHash, icon.Units
+	local NameFirst, NameStringHash, Units, Interruptible =
+	icon.Spells.First, icon.Spells.StringHash, icon.Units, icon.Interruptible
 
 	for u = 1, #Units do
 		local unit = Units[u]
@@ -134,18 +137,18 @@ local function Cast_OnUpdate(icon, time)
 
 		if GUID then
 
-			local name, _, iconTexture, start, endTime, _, _ = UnitCastingInfo(unit)
+			local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 			-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
 			local reverse = false
 
 			-- There is no regular spellcast. Check for a channel.
 			if not name then
-				name, _, iconTexture, start, endTime, _ = UnitChannelInfo(unit)
+				name, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
 				-- Channeled casts should reverse the timer sweep behavior.
 				reverse = true
 			end
 
-			if name and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
+			if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
 				
 				-- Times reported by the cast APIs are in milliseconds for some reason.
 				start, endTime = start/1000, endTime/1000
