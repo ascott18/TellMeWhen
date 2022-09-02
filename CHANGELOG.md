@@ -1,3 +1,6 @@
+## v9.2.5
+* Fix for Blizzard changing WOW_PROJECT_ID without warning.
+
 ## v9.2.4
 * Supports Wrath Classic
 * #1935 - More informative tooltips on "previews" of meta icon components.
