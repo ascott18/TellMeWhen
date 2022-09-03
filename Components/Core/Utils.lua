@@ -27,8 +27,8 @@ local math, max, ceil, floor, random, abs =
 local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer =
 	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer
 
-local UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate =
-	  UnitAura, IsUsableSpell, GetSpecialization, GetSpecializationInfo, GetFramerate
+local UnitAura, IsUsableSpell, GetRuneCooldown, GetSpecialization, GetSpecializationInfo, GetFramerate =
+	  UnitAura, IsUsableSpell, GetRuneCooldown, GetSpecialization, GetSpecializationInfo, GetFramerate
 
 local debugprofilestop = debugprofilestop_SAFE
 

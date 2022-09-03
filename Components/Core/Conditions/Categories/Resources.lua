@@ -29,9 +29,6 @@ Env.UnitHealthMax = UnitHealthMax
 Env.UnitPower = UnitPower
 Env.UnitPowerMax = UnitPowerMax
 
-local GetRuneCooldown = GetRuneCooldown
-
-
 TMW:RegisterUpgrade(62032, {
 	condition = function(self, condition)
 		if condition.Type == "RUNES" then
