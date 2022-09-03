@@ -656,6 +656,10 @@ L["ICONMENU_GCDASUNUSABLE"] = "Don't ignore GCD"
 L["ICONMENU_GCDASUNUSABLE_DESC"] = [[Normally, TellMeWhen classifies cooldowns on GCD as being usable.
 
 Enable this setting to prevent that behavior, making spells on the GCD be treated as unusable.]]
+
+L["ICONMENU_IGNORERUNES"] = "Ignore Runes"
+L["ICONMENU_IGNORERUNES_DESC"] = "Check this to treat the cooldown as usable if the only thing hindering it is a rune cooldown (or a global cooldown)."
+L["ICONMENU_IGNORERUNES_DESC_DISABLED"] = "You must enable the \"Cooldown check\" setting to enable the \"Ignore Runes\" setting."
 L["ICONMENU_DONTREFRESH"] = "Don't Refresh"
 L["ICONMENU_DONTREFRESH_DESC"] = "Check to force the cooldown to not reset if the trigger occurs while it is still counting down."
 L["ICONMENU_CLEU_NOREFRESH"] = "Don't Refresh"

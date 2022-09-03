@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v9.2.6
+* Added Ignore Runes settings for Cooldown and Reactive icon types.
+
 ## v9.2.5
 * Fix for Blizzard changing WOW_PROJECT_ID without warning.
 

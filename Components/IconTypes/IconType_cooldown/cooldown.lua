@@ -25,6 +25,7 @@ local pairs, wipe, strlower =
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
 local GetSpellTexture = TMW.GetSpellTexture
+local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local _, pclass = UnitClass("Player")
 
@@ -67,6 +68,9 @@ Type:RegisterIconDefaults{
 
 	-- True to treat the spell as unusable if it is on the GCD.
 	GCDAsUnusable			= false,
+
+	-- True to prevent rune cooldowns from causing the ability to be deemed unusable.
+	IgnoreRunes				= false,
 }
 
 TMW:RegisterUpgrade(80004, {
@@ -113,6 +117,10 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", fun
 		function(check)
 			check:SetTexts(L["ICONMENU_GCDASUNUSABLE"], L["ICONMENU_GCDASUNUSABLE_DESC"])
 			check:SetSetting("GCDAsUnusable")
+		end,
+		pclass == "DEATHKNIGHT" and function(check)
+			check:SetTexts(L["ICONMENU_IGNORERUNES"], L["ICONMENU_IGNORERUNES_DESC"])
+			check:SetSetting("IgnoreRunes")
 		end,
 	})
 end)
@@ -165,12 +173,14 @@ end
 
 local usableData = {}
 local unusableData = {}
+local mindfreeze = strlower(GetSpellInfo(47528))
 local function SpellCooldown_OnUpdate(icon, time)    
 	-- Upvalue things that will be referenced a lot in our loops.
-	local RangeCheck, ManaCheck, GCDAsUnusable, NameArray =
-	      icon.RangeCheck, icon.ManaCheck, icon.GCDAsUnusable, icon.Spells.Array
+	local IgnoreRunes, RangeCheck, ManaCheck, GCDAsUnusable, NameArray =
+	icon.IgnoreRunes, icon.RangeCheck, icon.ManaCheck, icon.GCDAsUnusable, icon.Spells.Array
 
 	local usableAlpha = icon.States[STATE_USABLE].Alpha
+	local runeCD = IgnoreRunes and GetRuneCooldownDuration()
 
 	local usableFound, unusableFound
 
@@ -182,6 +192,15 @@ local function SpellCooldown_OnUpdate(icon, time)
 
 		
 		if duration then
+			if IgnoreRunes and duration == runeCD and iName ~= mindfreeze and iName ~= 47528 then
+				-- DK abilities that are on cooldown because of runes are always reported
+				-- as having a cooldown duration equal to the current rune cooldown duration.
+				-- We use this fact to filter out rune cooldowns.
+				-- Mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
+				-- so it is excluded from this logic.
+				start, duration = 0, 0
+			end
+
 			local inrange, nomana = true, nil
 			if RangeCheck then
 				inrange = IsSpellInRange(iName, "target")
@@ -267,6 +286,10 @@ end
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, true)
 	
+	if pclass ~= "DEATHKNIGHT" then
+		icon.IgnoreRunes =  nil
+	end
+	
 	if icon.Spells.FirstString == strlower(GetSpellInfo(75)) and not icon.Spells.Array[2] then
 		-- Auto shot needs special handling - it isn't a regular cooldown, so it gets its own update function.
 		icon:SetInfo("texture", GetSpellTexture(75))
@@ -296,6 +319,10 @@ function Type:Setup(icon)
 
 			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
 			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
+			if icon.IgnoreRunes then
+				icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
+				icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
+			end
 			if icon.ManaCheck then
 				icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
 				-- icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")-- already registered

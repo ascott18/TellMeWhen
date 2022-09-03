@@ -27,8 +27,8 @@ local math, max, ceil, floor, random, abs =
 local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer =
 	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer
 
-local UnitAura, IsUsableSpell, GetFramerate =
-	  UnitAura, IsUsableSpell, GetFramerate
+local UnitAura, IsUsableSpell, GetRuneCooldown, GetFramerate =
+	  UnitAura, IsUsableSpell, GetRuneCooldown, GetFramerate
 
 local debugprofilestop = debugprofilestop_SAFE
 
@@ -1513,6 +1513,13 @@ function TMW.SpellHasNoMana(spell)
 
 	local _, nomana = IsUsableSpell(spell)
 	return nomana
+end
+
+function TMW.GetRuneCooldownDuration()
+	-- Round to a precision of 3 decimal points for comparison with returns from GetSpellCooldown
+	local _, duration = GetRuneCooldown(1)
+	if not duration then return 0 end
+	return floor(duration * 1e3 + 0.5) / 1e3
 end
 
 local function spellCostSorter(a, b)

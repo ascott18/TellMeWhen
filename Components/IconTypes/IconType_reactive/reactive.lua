@@ -57,6 +57,9 @@ Type:RegisterIconDefaults{
 	-- Don't treat the ability as unusable if there is only a lack of power to use it.
 	IgnoreNomana			= false,
 
+	-- True to prevent rune cooldowns from causing the ability to be deemed unusable.
+	IgnoreRunes				= false,
+
 	-- True to cause the icon to act as unusable when the ability is out of range.
 	RangeCheck				= false,
 
@@ -95,19 +98,33 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", fun
 			check:SetTexts(L["ICONMENU_COOLDOWNCHECK"], L["ICONMENU_COOLDOWNCHECK_DESC"])
 			check:SetSetting("CooldownCheck")
 		end,
+		pclass == "DEATHKNIGHT" and function(check)
+			check:SetSetting("IgnoreRunes")
+
+			check:CScriptAdd("ReloadRequested", function()
+				check:SetEnabled(TMW.CI.ics.CooldownCheck)
+				if TMW.CI.ics.CooldownCheck then
+					check:SetTexts(L["ICONMENU_IGNORERUNES"], L["ICONMENU_IGNORERUNES_DESC"])
+				else
+					check:SetTexts(L["ICONMENU_IGNORERUNES"], L["ICONMENU_IGNORERUNES_DESC_DISABLED"])
+				end
+			end)
+		end,
 	})
 end)
 
+local mindfreeze = strlower(GetSpellInfo(47528))
 local function Reactive_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local NameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreNomana =
-	 icon.Spells.Array, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreNomana
+	local NameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, IgnoreNomana =
+	 icon.Spells.Array, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.IgnoreNomana
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
 	local inrange, nomana, start, duration, CD, usable, charges, maxCharges, chargeStart, chargeDur, stack, start_charge, duration_charge
 
 	local numChecked = 1
+	local runeCD = IgnoreRunes and GetRuneCooldownDuration()
 	
 
 	for i = 1, #NameArray do
@@ -140,6 +157,14 @@ local function Reactive_OnUpdate(icon, time)
 			end
 
 			if CooldownCheck then
+				if IgnoreRunes and duration == runeCD and iName ~= mindfreeze and iName ~= 47528 then
+					-- DK abilities that are on cooldown because of runes are always reported
+					-- as having a cooldown duration equal to the current rune cooldown duration.
+					-- We use this fact to filter out rune cooldowns.
+					-- Mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
+					-- so it is excluded from this logic.
+					start, duration = 0, 0
+				end
 				CD = not (duration == 0 or OnGCD(duration))
 			end
 
@@ -165,6 +190,15 @@ local function Reactive_OnUpdate(icon, time)
 
 		start, duration = GetSpellCooldown(NameFirst)
 		stack = GetSpellCount(NameFirst)
+
+		if IgnoreRunes and duration == runeCD and NameFirst ~= mindfreeze and NameFirst ~= 47528 then
+			-- DK abilities that are on cooldown because of runes are always reported
+			-- as having a cooldown duration equal to the current rune cooldown duration.
+			-- We use this fact to filter out rune cooldowns.
+			-- Mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
+			-- so it is excluded from this logic.
+			start, duration = 0, 0
+		end
 
 		inrange, nomana = true, nil
 		if RangeCheck then
@@ -203,6 +237,9 @@ function Type:Setup(icon)
 
 	icon:SetInfo("texture", Type:GetConfigIconTexture(icon))
 	
+	if pclass ~= "DEATHKNIGHT" then
+		icon.IgnoreRunes = nil
+	end
 	
 
 
@@ -219,6 +256,10 @@ function Type:Setup(icon)
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
+		if icon.IgnoreRunes then
+			icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
+			icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
+		end	
 		if icon.ManaCheck then
 			icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
 			-- icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE") -- already registered
