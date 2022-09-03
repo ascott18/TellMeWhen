@@ -1,4 +1,5 @@
 ## v9.2.6
+* Improvements to Swing Timers, especially around changes in attack speed (#1947)
 * Added Ignore Runes settings for Cooldown and Reactive icon types.
 * Added missing items to the Stance condition suggestion list.
 
