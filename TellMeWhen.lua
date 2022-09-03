@@ -74,11 +74,12 @@ This can happen especially if you use the Twitch app - ensure "Install Libraries
 	return
 end
 
-if WOW_PROJECT_ID ~= WOW_PROJECT_WRATH_CLASSIC  then
+if WOW_PROJECT_ID ~= WOW_PROJECT_WRATH_CLASSIC and WOW_PROJECT_ID ~= WOW_PROJECT_BURNING_CRUSADE_CLASSIC then
 	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
 		-- This is not localizable, because AceLocale might not have loaded
 		-- (this is why we don't bother to load AceLocale until after these checks).
-		text = ("You've installed TellMeWhen for Wrath Classic, but this is %s. Please double-check which version of TMW you downloaded."):format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
+		text = ("You've installed TellMeWhen for Wrath Classic, but this is %s. Please double-check which version of TMW you downloaded.\n\nTellMeWhen %s\nWOW_PROJECT_ID %s\nWoW Build %s %s")
+			:format(_G["EXPANSION_NAME" .. GetExpansionLevel()], TELLMEWHEN_VERSION_FULL, WOW_PROJECT_ID, select(2, GetBuildInfo())), 
 		button1 = RELOADUI,
 		button2 = CANCEL,
 		OnAccept = ReloadUI,
