@@ -20,7 +20,7 @@
 ## X-WoWI-ID: 25152
 ## X-Wago-ID: ZQ6aZqKW
 
-## Version: 9.2.5
+## Version: 9.2.6
 ## Author: Cybeloras of Aerie Peak
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.

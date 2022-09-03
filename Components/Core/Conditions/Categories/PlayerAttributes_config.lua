@@ -37,8 +37,10 @@ Module.stances = {
 	},
 	DRUID = {
 		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
+		[9634] = 	GetSpellInfo(9634), 	-- Dire Bear Form
 		[768] = 	GetSpellInfo(768),		-- Cat Form
 		[783] = 	GetSpellInfo(783),		-- Travel Form
+		[1066] = 	GetSpellInfo(1066),		-- Aquatic Form
 		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
 		[33891] = 	GetSpellInfo(33891), 	-- Tree of Life
 		[33943] = 	GetSpellInfo(33943), 	-- Flight Form
@@ -58,6 +60,11 @@ Module.stances = {
 		[19898] = 	GetSpellInfo(19891), 	-- Frost Resistance Aura
 		[19896] = 	GetSpellInfo(19891), 	-- Shadow Resistance Aura
 		[7294] = 	GetSpellInfo(7294),		-- Retribution Aura	
+	},
+	DEATHKNIGHT = {
+		[48266] = 	GetSpellInfo(48266), 	-- Blood
+		[48263] = 	GetSpellInfo(48263), 	-- Frost
+		[48265] = 	GetSpellInfo(48265), 	-- Unholy
 	},
 }
 function Module:Table_Get()
