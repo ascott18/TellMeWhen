@@ -520,6 +520,7 @@ TMW.BE = {
 			 322507, -- Celestial Brew                      (Monk, brewmaster)
 			 324867, -- Fleshcraft                          (Necrolord)
 			 330927, -- Cleansing Rites                     (Kyrian?)
+			 336874, -- Fortifying Ingredients              (Monk, conduit)
 		},
 		ImmuneToMagicCC = {
 			    642, -- Divine Shield                       (paladin, general)
