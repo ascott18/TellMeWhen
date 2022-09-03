@@ -15,7 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "9.2.4"
+TELLMEWHEN_VERSION = "9.2.6"
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -26,7 +26,7 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 92400 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+TELLMEWHEN_VERSIONNUMBER = 92600 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
@@ -77,8 +77,8 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
 	StaticPopupDialogs["TMW_PROJECT_MISMATCH"] = {
 		-- This is not localizable, because AceLocale might not have loaded
 		-- (this is why we don't bother to load AceLocale until after these checks).
-		text = ("You've installed TellMeWhen for retail WoW, but this is %s. Please double-check which version of TMW you downloaded.")
-			:format(_G["EXPANSION_NAME" .. GetExpansionLevel()]), 
+		text = ("You've installed TellMeWhen for retail WoW, but this is %s. Please double-check which version of TMW you downloaded.\n\nTellMeWhen %s\nWOW_PROJECT_ID %s\nWoW Build %s %s")
+			:format(_G["EXPANSION_NAME" .. GetExpansionLevel()], TELLMEWHEN_VERSION_FULL, WOW_PROJECT_ID, select(2, GetBuildInfo())), 
 		button1 = RELOADUI,
 		button2 = CANCEL,
 		OnAccept = ReloadUI,

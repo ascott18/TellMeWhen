@@ -33,6 +33,8 @@ local strsub, pairs
 local UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 	= UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 
+local strlowerCache = TMW.strlowerCache
+
 -- Module creation
 TMW.COMMON.SwingTimerMonitor = CreateFrame("Frame")
 
@@ -49,47 +51,10 @@ SwingTimerMonitor.DualWield = nil
 SwingTimerMonitor.Latency = 0
 SwingTimerMonitor.Initialized = false
 
-
-
--- ---------------------------------
--- Swing update functions
--- ---------------------------------
-
-local function MainHandEvent()
-	local _, event, _, src_guid = CombatLogGetCurrentEventInfo()
-
-	if strsub(event, 1, 5) == "SWING" and src_guid == UnitGUID("player") then
-		SwingTimers[MAINHAND_SLOT]:Start()
-	end
-end
-
-local function DualWieldEvent()
-	local _, event, _, src_guid = CombatLogGetCurrentEventInfo()
-
-	-- Dual wield is done all funky like this because
-	-- the combat log doesn't distinguish between MH and OH hits.
-	-- we have to guess at what weapon it was that was hit based on the current swing timers.
-	if strsub(event, 1, 5) == "SWING" and src_guid == UnitGUID("player") then
-		
-		for slot, frame in pairs(SwingTimers) do
-			frame:CheckTime()
-		end
-		
-		-- This handles the case when lag throws timers out of sync.
-		-- Both timers get reset, and they should work themselves out within a few swings
-		if SwingTimers[MAINHAND_SLOT].active and SwingTimers[OFFHAND_SLOT].active then
-			SwingTimers[MAINHAND_SLOT].active = false
-			SwingTimers[OFFHAND_SLOT].active = false
-		end
-			
-		if SwingTimers[MAINHAND_SLOT].active then
-			SwingTimers[OFFHAND_SLOT]:Start()
-		else
-			SwingTimers[MAINHAND_SLOT]:Start()
-		end
-			
-	end
-end
+local pGUID
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	pGUID = UnitGUID("player")
+end)
 
 
 -- ---------------------------------
@@ -100,27 +65,6 @@ local function SetLatency()
 	local _, _, Latency = GetNetStats()
 	
 	SwingTimerMonitor.Latency = Latency / 1000
-end
-
-local function InventoryWatch()
-	local wasDualWield = SwingTimerMonitor.DualWield
-	
-	SwingTimerMonitor.DualWield = IsDualWielding()
-		
-	if SwingTimerMonitor.DualWield ~= wasDualWield then
-	
-		if SwingTimerMonitor.DualWield then
-			SwingTimerMonitor.EventFunc = DualWieldEvent
-		else
-			SwingTimerMonitor.EventFunc = MainHandEvent
-		end
-	
-		for slot, SwingTimer in pairs(SwingTimers) do
-			SwingTimer:Reset()
-			SwingTimer:FireChanged()
-		end
-	end
-	
 end
 
 
@@ -148,15 +92,15 @@ local SwingTimer = TMW:NewClass("SwingTimer"){
 	CheckTime = function(self)
 		local elapsed = TMW.time - self.startTime
 		
-		-- It should be safe at the current time to allow the timer to be
-		-- overwritten with the next swing that is seen, so set it as inactive.
 		if elapsed > (self.duration - SwingTimerMonitor.Latency) then
+			-- It should be safe at the current time to allow the timer to be
+			-- overwritten with the next swing that is seen, so set it as inactive.
 			self.active = false
 		end
 		
-		-- The time that has passed since the duration of the last swing
-		-- has exceeded the swing timer, so reset it.
 		if elapsed > self.duration then
+			-- The time that has passed since the duration of the last swing
+			-- has exceeded the swing timer, so reset it.
 			self:Reset()
 		end
 		
@@ -188,21 +132,53 @@ local SwingTimer = TMW:NewClass("SwingTimer"){
 	SetSwingSpeed = function(self)
 		local mainhand, offhand = UnitAttackSpeed("player")
 		
-		if SwingTimerMonitor.DualWield and self.slot == OFFHAND_SLOT then
-			self.duration = offhand
-		else
+		if self.slot == MAINHAND_SLOT then
+			local delta = self.duration - mainhand
+
+			-- Shift the start time by the percentage of the delta that has elapsed.
+			-- elapsedTime = (TMW.time - self.startTime) / self.duration
+			if self.duration ~= 0 and delta ~= 0 then
+				self.startTime = self.startTime + ((TMW.time - self.startTime) / self.duration * delta)
+			end
 			self.duration = mainhand
+		elseif SwingTimerMonitor.DualWield and offhand then
+			local delta = self.duration - offhand
+			if self.duration ~= 0 and delta ~= 0 then
+				self.startTime = self.startTime + ((TMW.time - self.startTime) / self.duration * delta)
+			end
+			self.duration = offhand
 		end
+		self:CheckTime()
 	end,
 }
 
 
 SwingTimerMonitor:SetScript("OnEvent", function(self, event, ...)
-	if event == "UNIT_INVENTORY_CHANGED" and ... == "player" then
-		InventoryWatch()
-	elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-		if SwingTimerMonitor.EventFunc then
-			SwingTimerMonitor.EventFunc(self, event)
+	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+		local _, event, _, src_guid, _, _, _, _, _, _, _, spellID, arg13, _, _, _, _, _, _, _, isOffHandHit = CombatLogGetCurrentEventInfo()
+	
+		-- Dual wield is done all funky like this because
+		-- the combat log doesn't distinguish between MH and OH hits.
+		-- we have to guess at what weapon it was that was hit based on the current swing timers.
+		if src_guid == pGUID then
+			-- arg13 = spellName
+			if event == "SWING_DAMAGE" then
+				SwingTimers[isOffHandHit and OFFHAND_SLOT or MAINHAND_SLOT]:Start()
+			elseif event == "SWING_MISSED" then
+				SwingTimers[arg13 and OFFHAND_SLOT or MAINHAND_SLOT]:Start()
+			end
+		end
+	elseif event == "UNIT_ATTACK_SPEED" and ... == "player" then
+		for slot, SwingTimer in pairs(SwingTimers) do
+			SwingTimer:SetSwingSpeed()
+		end
+	elseif event == "PLAYER_EQUIPMENT_CHANGED" then
+		SwingTimerMonitor.DualWield = IsDualWielding()
+		-- When an item is changed in one of the weapon slots, 
+		-- it resets that swing timer to its full duration
+		local timer = SwingTimers[...]
+		if timer then
+			timer:Start()
 		end
 	end
 end)
@@ -218,11 +194,10 @@ SwingTimerMonitor.SwingTimers = setmetatable({},
 	-- Create the swing timers
 	SwingTimer:New(MAINHAND_SLOT)
 	SwingTimer:New(OFFHAND_SLOT)
-	
-	SwingTimerMonitor:RegisterEvent("UNIT_INVENTORY_CHANGED")
-	SwingTimerMonitor:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
-	InventoryWatch()
+	SwingTimerMonitor:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	SwingTimerMonitor:RegisterEvent("UNIT_ATTACK_SPEED")
+	SwingTimerMonitor:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 
 	SwingTimerMonitor.Initialized = true
 
