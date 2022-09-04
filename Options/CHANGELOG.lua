@@ -8,6 +8,7 @@ TMW.CHANGELOG = [==[
 * Added Ignore Runes settings for Cooldown and Reactive icon types.
 * Added missing items to the Stance condition suggestion list.
 * Fix outdated DR categories.
+* Restore the Interruptible option to the Spell Cast condition.
 
 ## v9.2.5
 * Fix for Blizzard changing WOW_PROJECT_ID without warning.

@@ -735,7 +735,7 @@ Env.UnitCastTime = function(unit, level, matchname)
 end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
-	min = 1,
+	min = 0,
 	max = 2,
 	levelChecks = true,
 	nooperator = true,
