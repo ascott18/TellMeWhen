@@ -174,20 +174,19 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 			random_root =  "DR-RandomRoot",
 			random_stun =  "DR-RandomStun",
 			root =         "DR-ControlledRoot",
-			-- silence =      "DR-Silence",
-			kidney_shot =  "DR-KidneyShot",
-			death_coil =   "DR-DeathCoil",
+			silence =      "DR-Silence",
+			opener_stun =  "DR-OpenerStun",
+			horror =       "DR-Horrify",
 			disarm =       "DR-Disarm",
-			scatter_shot = "DR-Scatter",
-			disorient =    "DR-Disorient",
-			freezing_trap ="DR-FreezingTrap",
-			sleep =        "DR-Sleep",
-			unstable_affliction = "DR-UnstableAffliction",
+			scatter =      "DR-Scatter",
 		}
 
 		local ignored = {
 			knockback = true,
 			frost_shock = true,
+			cyclone = true,
+			counterattack = true,
+			charge = true,
 		}
 	
 		TMW.BE.dr = {}

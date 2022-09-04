@@ -2904,7 +2904,7 @@ L["DR-ControlledRoot"] = "Controlled roots"
 L["DR-Charge"] = "Charge"
 L["DR-CheapShot"] = "Cheap Shot / Pounce"
 L["DR-Hibernate"] = "Hibernate"
-L["DR-KidneyShot"] = "Kidney Shot"
+L["DR-OpenerStun"] = "Opener Stun"
 
 L["CONDITIONPANEL_CREATURETYPE"] = "Unit Creature Type"
 L["CONDITIONPANEL_CREATURETYPE_LABEL"] = "Creature Type(s)"
