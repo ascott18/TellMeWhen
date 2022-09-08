@@ -186,17 +186,19 @@ ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 		local t = {}
 		for i = 1, GetNumClasses() do
 			local name, token, classID = GetClassInfo(i)
-			t[i] = {
-				order = i,
-				text = PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name),
-				icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
-				tcoords = {
-					(CLASS_ICON_TCOORDS[token][1]+.02),
-					(CLASS_ICON_TCOORDS[token][2]-.02),
-					(CLASS_ICON_TCOORDS[token][3]+.02),
-					(CLASS_ICON_TCOORDS[token][4]-.02),
+			if RAID_CLASS_COLORS[token] then -- Filter out Blizz's "Adventurer" test class
+				t[i] = {
+					order = i,
+					text = PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name),
+					icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+					tcoords = {
+						(CLASS_ICON_TCOORDS[token][1]+.02),
+						(CLASS_ICON_TCOORDS[token][2]-.02),
+						(CLASS_ICON_TCOORDS[token][3]+.02),
+						(CLASS_ICON_TCOORDS[token][4]-.02),
+					}
 				}
-			}
+			end
 		end
 		return t
 	end)(),

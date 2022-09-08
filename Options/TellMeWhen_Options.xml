@@ -1077,7 +1077,7 @@
 							self.textures[i] = tex
 							tex:SetPoint("TOP", self.Background, "TOP", 0, 0)
 							tex:SetPoint("BOTTOM", self.Background, "BOTTOM", 0, 0)
-							tex:SetColorTexture(1, 1, 1)
+							tex:SetColorTexture(1, 1, 1, 1)
 							tex:SetWidth(self:GetWidth()/self.NUM_SEGMENTS)
 							if i > 1 then
 								tex:SetPoint("LEFT", self.textures[i-1], "RIGHT", 0, 0)
@@ -1101,7 +1101,7 @@
 						self:SetTextFormatter(TMW.C.Formatter.PERCENT100)
 						self:SetMinMaxValues(0, 1)
 						self:SetValueStep(0.001)
-						self.Background:SetColorTexture(1, 1, 1)
+						self.Background:SetColorTexture(1, 1, 1, 1)
 					</OnLoad>
 				</Scripts>
 			</Slider>
@@ -1118,7 +1118,7 @@
 						self:SetTextFormatter(TMW.C.Formatter.PERCENT100)
 						self:SetMinMaxValues(0, 1)
 						self:SetValueStep(0.001)
-						self.Background:SetColorTexture(1, 1, 1)
+						self.Background:SetColorTexture(1, 1, 1, 1)
 					</OnLoad>
 				</Scripts>
 			</Slider>
@@ -1137,7 +1137,7 @@
 						self:SetTextFormatter(TMW.C.Formatter.PERCENT100)
 						self:SetMinMaxValues(0, 1)
 						self:SetValueStep(0.001)
-						self.Background:SetColorTexture(1, 1, 1)
+						self.Background:SetColorTexture(1, 1, 1, 1)
 
 						local w = self:GetWidth()
 						local h = self.Background:GetHeight()
@@ -1150,7 +1150,7 @@
 								tex:SetPoint("TOPLEFT", self.Background, "TOPLEFT", (x-1)*squareSize, -(y-1)*squareSize)
 								tex:SetSize(squareSize, squareSize)
 								local c = (x+y)%2 == 0 and 0.35 or 0.65
-								tex:SetColorTexture(c, c, c)
+								tex:SetColorTexture(c, c, c, 1)
 							end
 						end
 					</OnLoad>
@@ -2502,7 +2502,7 @@
 					<OnLoad>
 						TMW:CInit(self)
 						
-						self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 11)
+						self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 11, "")
 
 						self:MakeScrollable(true, 2, 7)
 

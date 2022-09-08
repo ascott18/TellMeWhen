@@ -157,9 +157,6 @@ SwingTimerMonitor:SetScript("OnEvent", function(self, event, ...)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local _, event, _, src_guid, _, _, _, _, _, _, _, spellID, arg13, _, _, _, _, _, _, _, isOffHandHit = CombatLogGetCurrentEventInfo()
 	
-		-- Dual wield is done all funky like this because
-		-- the combat log doesn't distinguish between MH and OH hits.
-		-- we have to guess at what weapon it was that was hit based on the current swing timers.
 		if src_guid == pGUID then
 			-- arg13 = spellName
 			if event == "SWING_DAMAGE" then

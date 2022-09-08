@@ -13,13 +13,13 @@
 
 						-- Just incase they haven't restarted after installing the version
 						-- that first included this font (v7.3.5)
-						if not self:SetFont(font, 12) then
+						if not self:SetFont("p", font, 12, "") then
 							font = "Fonts\\FRIZQT__.TTF"
 						end
 
-						self:SetFont(font, 12)
-						self:SetFont("h1", font, 20)
-						self:SetFont("h2", font, 14)
+						self:SetFont("p", font, 12, "")
+						self:SetFont("h1", font, 20, "")
+						self:SetFont("h2", font, 14, "")
 
 						self:SetSpacing("h1", 10)
 						self:SetSpacing("h2", 6)
@@ -56,7 +56,7 @@
 					<OnLoad>
 						local font = "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf"
 
-						self:SetFont(font, 12)
+						self:SetFont("p", font, 12, "")
 						self:SetSpacing("p", 5)
 						self:SetIndentedWordWrap("p", true)
 					</OnLoad>
@@ -78,7 +78,7 @@
 
 				for _, html in pairs({self.HTML, self.Footer}) do
 					html:SetWidth(self:GetWidth()-35)
-					html:SetText(html.text)
+					html:SetText(html.text or "")
 					html:SetHeight(html:GetContentHeight())
 				end
 			</OnSizeChanged>
@@ -211,7 +211,9 @@
 				self.Background:SetColorTexture(.66, .66, .66, 0.09)
 			</OnLoad>
 			<OnSizeChanged>
-				self:AdjustHeight(10)
+				if self.AdjustHeight then
+					self:AdjustHeight(10)
+				end
 			</OnSizeChanged>
 		</Scripts>
 	</Frame>

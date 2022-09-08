@@ -496,7 +496,9 @@
 								self:AdjustHeight()
 							</OnLoad>
 							<OnSizeChanged>
-								self:AdjustHeight()
+								if self.AdjustHeight then
+									self:AdjustHeight()
+								end
 							</OnSizeChanged>
 						</Scripts>
 

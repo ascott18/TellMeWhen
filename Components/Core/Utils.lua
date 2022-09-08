@@ -713,7 +713,7 @@ function TMW:RGBToHSV(r, g, b)
 	return h, s, v
 end
 
-function TMW:HSVToRGB(h, s, v)
+function TMW:HSVToRGB(h, s, v, a)
 	local r, g, b
 
 	local i = floor(h * 6)
@@ -732,7 +732,7 @@ function TMW:HSVToRGB(h, s, v)
 	elseif i == 5 then r, g, b = v, p, q
 	end
 
-	return r, g, b
+	return r, g, b, a
 end
 
 local getColorsTemp = {}

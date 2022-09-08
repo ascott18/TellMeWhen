@@ -2116,7 +2116,7 @@ TMW:NewClass("Config_EditBox_Lua", "Config_EditBox") {
 	OnNewInstance_EditBox_Lua = function(self)
 		TMW.indentLib.enable(self, self.ColorTable, 4)
 
-		self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 11)
+		self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 11, "")
 
 		self:SetNewlineOnEnter(true)
 
@@ -3235,21 +3235,50 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 
 		self.StringEditbox:SetText(TMW:HSVAToColorString(h, s, v, a))
 
-		local r,g,b=TMW:HSVToRGB(h, 0, v)
-		self.SaturationSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, 1, v))
-
-		local r,g,b=TMW:HSVToRGB(h, s, 0)
-		self.ValueSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, s, 1))
-
-		for i = 1, self.HueSlider.NUM_SEGMENTS do
-			local r,g,b=TMW:HSVToRGB((i-1)/self.HueSlider.NUM_SEGMENTS, s, v)
-			self.HueSlider.textures[i]:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(i/self.HueSlider.NUM_SEGMENTS, s, v))
+		if not self.AlphaSlider.Background.SetGradientAlpha then
+			-- Wow 10.0+
+			self.SaturationSlider.Background:SetGradient(
+				"HORIZONTAL", 
+				CreateColor(TMW:HSVToRGB(h, 0, v, 1)), 
+				CreateColor(TMW:HSVToRGB(h, 1, v, 1))
+			)
+	
+			self.ValueSlider.Background:SetGradient(
+				"HORIZONTAL", 
+				CreateColor(TMW:HSVToRGB(h, s, 0, 1)), 
+				CreateColor(TMW:HSVToRGB(h, s, 1, 1))
+			)
+	
+			for i = 1, self.HueSlider.NUM_SEGMENTS do
+				self.HueSlider.textures[i]:SetGradient(
+					"HORIZONTAL", 
+					CreateColor(TMW:HSVToRGB((i-1)/self.HueSlider.NUM_SEGMENTS, s, v, 1)), 
+					CreateColor(TMW:HSVToRGB(i/self.HueSlider.NUM_SEGMENTS, s, v, 1))
+				)
+			end
+	
+			self.AlphaSlider.Background:SetGradient(
+				"HORIZONTAL", 
+				CreateColor(TMW:HSVToRGB(h, s, v, 0)), 
+				CreateColor(TMW:HSVToRGB(h, s, v, 1))
+			)
+		else
+			local r,g,b=TMW:HSVToRGB(h, 0, v)
+			self.SaturationSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, 1, v))
+	
+			local r,g,b=TMW:HSVToRGB(h, s, 0)
+			self.ValueSlider.Background:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(h, s, 1))
+	
+			for i = 1, self.HueSlider.NUM_SEGMENTS do
+				local r,g,b=TMW:HSVToRGB((i-1)/self.HueSlider.NUM_SEGMENTS, s, v)
+				self.HueSlider.textures[i]:SetGradient("HORIZONTAL", r,g,b, TMW:HSVToRGB(i/self.HueSlider.NUM_SEGMENTS, s, v))
+			end
+	
+			local r,g,b=TMW:HSVToRGB(h, s, v)
+			self.AlphaSlider.Background:SetGradientAlpha("HORIZONTAL", r, g, b, 0, r, g, b, 1)
 		end
-
-		local r,g,b=TMW:HSVToRGB(h, s, v)
-		self.AlphaSlider.Background:SetGradientAlpha("HORIZONTAL", r, g, b, 0, r, g, b, 1)
-
-		self.swatch.swatch:SetColorTexture(r,g,b)
+		
+		self.swatch.swatch:SetColorTexture(TMW:HSVToRGB(h, s, v, a))
 		self.swatch.swatch:SetAlpha(a)
 
 
@@ -3586,6 +3615,12 @@ function IE:ResizeTabs()
 
 		prevTabGroup = tabGroup
 	end
+
+	-- New in Dragonflight: calling GetWidth on a child frame can trigger a 
+	-- resize of a parent frame for some reason! Which means that while the icon editor
+	-- is being initialized, its being resized before the tabs even exist!
+	if not prevTabGroup then return end
+
 	prevTabGroup:SetPoint("RIGHT", -interPadding)
 	-- Adjust the conatiner width to fit the tabs exactly so calculations are easy.
 	TMW.IE.Tabs.primary:SetWidth(primaryWidth)
