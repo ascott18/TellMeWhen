@@ -67,6 +67,8 @@ function CNDT:LoadConfig(conditionSetName)
 	if not CNDT:GetSettings() then
 		return
 	end
+
+	CNDT:TryUpgradeSettings(CNDT:GetSettings())
 	
 	
 	TMW.HELP:Hide("CNDT_UNIT_MISSING")

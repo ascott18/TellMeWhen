@@ -1126,6 +1126,7 @@ end
 -- @param conditionSettings [table] The condition settings that the ConditionObject will be created for.
 -- @return [ [[api/conditions/api-documentation/condition-object/|ConditionObject]]|nil] A [[api/conditions/api-documentation/condition-object/|ConditionObject]] instance (may be previously cached or may be a new instance), or nil if the conditions passed in were invalid.
 function CNDT:GetConditionObject(parent, conditionSettings)
+	CNDT:TryUpgradeSettings(conditionSettings)
 	local conditionString = CNDT:GetConditionCheckFunctionString(parent, conditionSettings)
 	
 	if conditionString and conditionString ~= "" then
@@ -1139,6 +1140,15 @@ function CNDT:GetConditionObject(parent, conditionSettings)
 	end
 end
 
+function CNDT:TryUpgradeSettings(Conditions)
+	for n, conditionSettings in TMW:InNLengthTable(Conditions) do
+		local Type = conditionSettings.Type
+		local conditionData = CNDT.ConditionsByType[Type]
+		if conditionData.upgrade then
+			conditionData.upgrade(conditionSettings)
+		end
+	end
+end
 
 
 

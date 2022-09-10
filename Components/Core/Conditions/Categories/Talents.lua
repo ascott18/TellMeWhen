@@ -355,68 +355,161 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 
 CNDT.Env.TalentMap = {}
 CNDT.Env.PvpTalentMap = {}
-function CNDT:PLAYER_TALENT_UPDATE()
-	wipe(Env.TalentMap)
-	for tier = 1, MAX_TALENT_TIERS do
-		for column = 1, NUM_TALENT_COLUMNS do
-			local id, name, _, selected, available, _, _, _, _, _, grantedByAura = GetTalentInfo(tier, column, 1)
+if C_Traits then
+	-- Dragonflight
+
+	function CNDT:PLAYER_TALENT_UPDATE()
+		wipe(Env.TalentMap)
+		-- A "config" is a loadout - either the current one (maybe unsaved), or a saved one.
+		local configID = C_ClassTalents.GetActiveConfigID()
+		local configInfo = C_Traits.GetConfigInfo(configID)
+
+		-- I have no idea why the concept of trees exists.
+		-- It seems that every class has a single tree, regardless of spec.
+		for _, treeID in pairs(configInfo.treeIDs) do
+
+			-- Nodes are circles/square in the talent tree.
+			for _, nodeID in pairs(C_Traits.GetTreeNodes(treeID)) do
+				local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+
+				-- Entries are the choices in each node.
+				-- Choice nodes have two, otherwise there's only one.
+				for _, entryID in pairs(nodeInfo.entryIDs) do
+					local entryInfo = C_Traits.GetEntryInfo(configID, entryID)
+					-- Definition seems a useless layer between entry and spellID.
+					-- Blizzard's in-game API help about them is currently completely wrong
+					-- about what fields it has. Currently the only field I see is spellID.
+					local definitionInfo = C_Traits.GetDefinitionInfo(entryInfo.definitionID)
+					local spellID = definitionInfo.spellID
+					local name, _, tex = GetSpellInfo(spellID)
+
+					-- The ranks are stored on the node, but we
+					-- have to make sure that we're looking at the ranks for the
+					-- currently selected entry for the talent.
+					local ranks = nodeInfo.activeEntry and nodeInfo.activeEntry.entryID == entryID and nodeInfo.ranksPurchased or 0
+
+					local lower = name and strlowerCache[name]
+					if lower then
+						Env.TalentMap[lower] = ranks
+						Env.TalentMap[spellID] = ranks
+					end
+				end
+			end
+		end
+
+		wipe(Env.PvpTalentMap)
+		local ids = C_SpecializationInfo.GetAllSelectedPvpTalentIDs()
+		for _, id in pairs(ids) do
+			local _, name = GetPvpTalentInfoByID(id);
 			local lower = name and strlowerCache[name]
-			selected = selected or grantedByAura
 			if lower then
-				Env.TalentMap[lower] = selected
-				Env.TalentMap[id] = selected
+				Env.PvpTalentMap[lower] = true
+				Env.PvpTalentMap[id] = true
 			end
 		end
 	end
 
-	wipe(Env.PvpTalentMap)
-	local ids = C_SpecializationInfo.GetAllSelectedPvpTalentIDs()
-	for _, id in pairs(ids) do
-		local _, name = GetPvpTalentInfoByID(id);
-		local lower = name and strlowerCache[name]
-		if lower then
-			Env.PvpTalentMap[lower] = true
-			Env.PvpTalentMap[id] = true
+	ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
+		text = L["UIPANEL_TALENTLEARNED"],
+		bool = true,
+		funcstr = "DEPRECATED",
+		upgrade = function(conditionSettings)
+			-- Used to be boolean, where 0==true and 1==false.
+			conditionSettings.Operator = conditionSettings.Level == 0 and ">" or "=="
+			conditionSettings.Level = 0
+			conditionSettings.Type = "PTSINTAL"
+		end,
+	})
+
+	ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
+		text = L["UIPANEL_PTSINTAL"],
+		min = 0,
+		max = 3,
+		unit = PLAYER,
+		name = function(editbox)
+			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+		end,
+		useSUG = "talents",
+		icon = "Interface\\Icons\\ability_revendreth_priest",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(c)
+			-- this is handled externally because TalentMap is so extensive a process,
+			-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
+			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+			CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+			CNDT:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_TALENT_UPDATE")
+			CNDT:PLAYER_TALENT_UPDATE()
+		
+			return [[(TalentMap[c.NameFirst] or 0) c.Operator c.Level]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+				ConditionObject:GenerateNormalEventString("TRAIT_CONFIG_UPDATED"),
+				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+		end,
+	})
+else
+	function CNDT:PLAYER_TALENT_UPDATE()
+		wipe(Env.TalentMap)
+		for tier = 1, MAX_TALENT_TIERS do
+			for column = 1, NUM_TALENT_COLUMNS do
+				local id, name, _, selected, available, _, _, _, _, _, grantedByAura = GetTalentInfo(tier, column, 1)
+				local lower = name and strlowerCache[name]
+				selected = selected or grantedByAura
+				if lower then
+					Env.TalentMap[lower] = selected
+					Env.TalentMap[id] = selected
+				end
+			end
+		end
+
+		wipe(Env.PvpTalentMap)
+		local ids = C_SpecializationInfo.GetAllSelectedPvpTalentIDs()
+		for _, id in pairs(ids) do
+			local _, name = GetPvpTalentInfoByID(id);
+			local lower = name and strlowerCache[name]
+			if lower then
+				Env.PvpTalentMap[lower] = true
+				Env.PvpTalentMap[id] = true
+			end
 		end
 	end
+	ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
+		text = L["UIPANEL_TALENTLEARNED"],
+
+		bool = true,
+		
+		unit = PLAYER,
+		name = function(editbox)
+			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+		end,
+		useSUG = "talents",
+		icon = function() return select(3, GetTalentInfo(1, 1, 1)) end,
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(c)
+			-- this is handled externally because TalentMap is so extensive a process,
+			-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
+			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+			CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+			CNDT:PLAYER_TALENT_UPDATE()
+		
+			return [[BOOLCHECK( TalentMap[LOWER(c.NameFirst)] )]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+		end,
+	})
+
+	ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
+		text = L["UIPANEL_PTSINTAL"],
+		funcstr = "DEPRECATED",
+		min = 0,
+		max = 5,
+	})
 end
-ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
-	text = L["UIPANEL_TALENTLEARNED"],
-
-	bool = true,
-	
-	unit = PLAYER,
-	name = function(editbox)
-		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
-	end,
-	useSUG = "talents",
-	icon = function() return select(3, GetTalentInfo(1, 1, 1)) end,
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function(c)
-		-- this is handled externally because TalentMap is so extensive a process,
-		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
-		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
-		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
-		CNDT:PLAYER_TALENT_UPDATE()
-	
-		return [[BOOLCHECK( TalentMap[LOWER(c.NameFirst)] )]]
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
-			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
-	end,
-})
-
-
-
-ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
-	text = L["UIPANEL_PTSINTAL"],
-	funcstr = "DEPRECATED",
-	min = 0,
-	max = 5,
-})
-
 
 
 ConditionCategory:RegisterCondition(10,	 "PVPTALENTLEARNED", {

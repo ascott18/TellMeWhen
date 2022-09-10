@@ -39,6 +39,7 @@ function ConditionObjectConstructor:LoadParentAndConditions(parent, Conditions)
 	assert(self.status == "ready", "Cannot :LoadParentAndConditions() to a ConditionObjectConstructor whose status is not 'ready'!")
 	
 	self.parent = parent
+	CNDT:TryUpgradeSettings(Conditions)
 	self.Conditions = Conditions
 	self.ConditionsToConstructWith = Conditions
 	
