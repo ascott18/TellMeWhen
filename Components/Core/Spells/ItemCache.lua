@@ -182,9 +182,9 @@ function ItemCache:CacheItems(force)
 
 	-- Cache items in bags.
 	for container = 0, NUM_BAG_SLOTS do
-		for slot = 1, GetContainerNumSlots(container) do
-			local id = GetContainerItemID(container, slot)
-			local link = GetContainerItemLink(container, slot)
+		for slot = 1, C_Container.GetContainerNumSlots(container) do
+			local id = C_Container.GetContainerItemID(container, slot)
+			local link = C_Container.GetContainerItemLink(container, slot)
 			if id then
 				cacheItem(id, link)
 			end
