@@ -98,8 +98,9 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 		{ order = 14,  id = Enum.PowerType.Fury, name = FURY, },
 		{ order = 15,  id = Enum.PowerType.Pain, name = PAIN, },
 	    { order = 16,  id = Enum.PowerType.Alternate, name = L["CONDITIONPANEL_ALTPOWER"], },
+	    { order = 17,  id = Enum.PowerType.Essence, name = POWER_TYPE_ESSENCE, },
 
-	    { order = 17,  id = -3, name = STAGGER, },
+	    { order = 20,  id = -3, name = STAGGER, },
 	}
 
 
@@ -114,12 +115,14 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	end
 	self.PowerType:SetFunction(function(self)
 		for _, data in TMW:OrderedPairs(types) do
-			local info = TMW.DD:CreateInfo()
-			info.text = data.name
-			info.func = DropdownOnClick
-			info.arg1 = data.id
-			info.checked = info.arg1 == TMW.CI.ics.PowerType
-			TMW.DD:AddButton(info)
+			if data.id then
+				local info = TMW.DD:CreateInfo()
+				info.text = data.name
+				info.func = DropdownOnClick
+				info.arg1 = data.id
+				info.checked = info.arg1 == TMW.CI.ics.PowerType
+				TMW.DD:AddButton(info)
+			end
 		end
 	end)
 

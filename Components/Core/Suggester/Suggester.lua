@@ -1332,7 +1332,7 @@ function Module:Entry_AddToList_1(f, id)
 		f.tooltiparg = id
 
 		f.insert = id
-		if ClassSpellCache:GetCache()[pclass][id] and name and GetSpellTexture(name) then
+		if ClassSpellCache:GetPlayerSpells()[id] and name and GetSpellTexture(name) then
 			f.insert2 = name
 		end
 

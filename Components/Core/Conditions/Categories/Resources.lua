@@ -264,6 +264,19 @@ ConditionCategory:RegisterCondition(28, "ARCANE_CHARGES", {
 	end,
 	hidden = pclass ~= "MAGE",
 })
+ConditionCategory:RegisterCondition(29, "ESSENCE", {
+	text = POWER_TYPE_ESSENCE,
+	min = 0,
+	max = 6,
+	icon = "Interface\\Icons\\ability_evoker_essenceburst",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Essence),
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "ESSENCE")
+	end,
+	hidden = pclass ~= "EVOKER" or not Enum.PowerType.Essence,
+})
 
 ConditionCategory:RegisterSpacer(30)
 ConditionCategory:RegisterSpacer(70)
