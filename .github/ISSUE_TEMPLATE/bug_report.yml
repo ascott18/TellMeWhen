@@ -11,7 +11,7 @@ body:
       multiple: true
       options:
         - Retail
-        - TBC Classic
+        - Wrath Classic
         - Classic/Classic SoM
     validations:
       required: true
