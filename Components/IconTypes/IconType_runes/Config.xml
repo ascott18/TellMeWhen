@@ -40,65 +40,34 @@
 		<Frames>
 			<Button name="$parentBlood1" parentKey="1" inherits="TellMeWhen_TypeCheckRuneTemplate" id="1">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="7" y="-6"/>
+					<Anchor point="TOP" y="-6"/>
 				</Anchors>
 			</Button>
 			<Button name="$parentBlood2" parentKey="2" inherits="TellMeWhen_TypeCheckRuneTemplate" id="2">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood1" relativePoint="RIGHT"/>
-				</Anchors>
 			</Button>
-			<Button name="$parentFrost1" parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood2" relativePoint="RIGHT"/>
-				</Anchors>
+			<Button name="$parentFrost1" parentKey="5" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
 			</Button>
-			<Button name="$parentFrost2" parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentFrost1" relativePoint="RIGHT"/>
-				</Anchors>
+			<Button name="$parentFrost2" parentKey="6" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
 			</Button>
-			<Button name="$parentUnholy1" parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="5">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentFrost2" relativePoint="RIGHT"/>
-				</Anchors>
+			<Button name="$parentUnholy1" parentKey="3" inherits="TellMeWhen_TypeCheckRuneTemplate" id="3">
 			</Button>
-			<Button name="$parentUnholy2" parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="6">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnholy1" relativePoint="RIGHT"/>
-				</Anchors>
+			<Button name="$parentUnholy2" parentKey="4" inherits="TellMeWhen_TypeCheckRuneTemplate" id="4">
 			</Button>
 			
 			<Button name="$parentBlood1Death" parentKey="7" inherits="TellMeWhen_TypeCheckRuneTemplate" id="7">
 				<Anchors>
-					<Anchor point="LEFT" x="7"/>
 					<Anchor point="TOP" relativeTo="$parentBlood1" relativePoint="BOTTOM" y="-4"/>
 				</Anchors>
 			</Button>
 			<Button name="$parentBlood2Death" parentKey="8" inherits="TellMeWhen_TypeCheckRuneTemplate" id="8">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood1Death" relativePoint="RIGHT"/>
-				</Anchors>
 			</Button>
-			<Button name="$parentFrost1Death" parentKey="11" inherits="TellMeWhen_TypeCheckRuneTemplate" id="9">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentBlood2Death" relativePoint="RIGHT"/>
-				</Anchors>
+			<Button name="$parentFrost1Death" parentKey="11" inherits="TellMeWhen_TypeCheckRuneTemplate" id="11">
 			</Button>
-			<Button name="$parentFrost2Death" parentKey="12" inherits="TellMeWhen_TypeCheckRuneTemplate" id="10">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentFrost1Death" relativePoint="RIGHT"/>
-				</Anchors>
+			<Button name="$parentFrost2Death" parentKey="12" inherits="TellMeWhen_TypeCheckRuneTemplate" id="12">
 			</Button>
-			<Button name="$parentUnholy1Death" parentKey="9" inherits="TellMeWhen_TypeCheckRuneTemplate" id="11">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentFrost2Death" relativePoint="RIGHT"/>
-				</Anchors>
+			<Button name="$parentUnholy1Death" parentKey="9" inherits="TellMeWhen_TypeCheckRuneTemplate" id="9">
 			</Button>
-			<Button name="$parentUnholy2Death" parentKey="10" inherits="TellMeWhen_TypeCheckRuneTemplate" id="12">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentUnholy1Death" relativePoint="RIGHT"/>
-				</Anchors>
+			<Button name="$parentUnholy2Death" parentKey="10" inherits="TellMeWhen_TypeCheckRuneTemplate" id="10">
 			</Button>
 		</Frames>
 		<Scripts>
@@ -107,19 +76,19 @@
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 6,
 					self["1"],
 					self["2"],
-					self["3"],
-					self["4"],
 					self["5"],
-					self["6"]
+					self["6"],
+					self["3"],
+					self["4"]
 				)
 				
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 6,
 					self["7"],
 					self["8"],
-					self["9"],
-					self["10"],
 					self["11"],
-					self["12"]
+					self["12"],
+					self["9"],
+					self["10"]
 				)
 				
 			</OnLoad>

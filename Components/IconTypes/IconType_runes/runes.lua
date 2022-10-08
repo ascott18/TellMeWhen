@@ -229,11 +229,11 @@ local function Runes_OnUpdate(icon, time)
 		-- or if tracking death runes, those death runes aren't death runes.
 		icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 		STATE_UNUSABLE,
-			textures[icon.FirstSlot],
+			textures[icon.FirstType],
 			0, 0, nil, nil,
 			0, 0,
 			nil, nil,
-			runeNames[icon.FirstSlot]
+			runeNames[icon.FirstType]
 		)
 	end
 end
@@ -260,21 +260,27 @@ function Type:Setup(icon)
 		end
 	end
 
-	icon.FirstSlot = nil
+	icon.FirstType = nil
 	for k, v in ipairs(icon.Slots) do
 		if v then
 			if k > 6 then
-				icon.FirstSlot = 4
+				icon.FirstType = 4
+			elseif k > 4 then
+				-- Slots 5 and 6 are Frost, rune type 2
+				icon.FirstType = 2
+			elseif k > 2 then
+				-- Slots 5 and 6 are Unholy, rune type 3
+				icon.FirstType = 3
 			else
-				icon.FirstSlot = ceil(k/2)
+				icon.FirstType = ceil(k/2)
 			end
 			break
 		end
 	end
-
+	
 	icon:SetInfo("texture; spell",
-		textures[icon.FirstSlot] or "Interface\\Icons\\INV_Misc_QuestionMark",
-		runeNames[icon.FirstSlot]
+		textures[icon.FirstType] or "Interface\\Icons\\INV_Misc_QuestionMark",
+		runeNames[icon.FirstType]
 	)
 
 	icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")

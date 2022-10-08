@@ -9,6 +9,11 @@ TMW.CHANGELOG = [==[
 * Added missing items to the Stance condition suggestion list.
 * Fix outdated DR categories.
 * Restore the Interruptible option to the Spell Cast condition.
+* Restored the Unit Controls Vehicle condition.
+
+### Bug Fixes
+* #1958 - Fix mismatch of rune types between configuration and actual behavior in the Rune Cooldown icon.
+* #1965 - Slam does not reset the swing timer.
 
 ## v9.2.5
 * Fix for Blizzard changing WOW_PROJECT_ID without warning.

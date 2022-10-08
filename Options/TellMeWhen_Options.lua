@@ -2990,16 +2990,16 @@ TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame
 	-- Constructor
 	Runes = {
 		"Blood",
-		"Frost",
 		"Unholy",
+		"Frost",
 	},
 
 	OnNewInstance_Button_Rune = function(self)
 		self.runeNumber = self:GetID()
 
 		-- detect what texture should be used
-		local runeType = ((self.runeNumber-1)%6)+1 -- gives 1, 2, 3, 4, 5, 6
-		local runeName = self.Runes[ceil(runeType/2)] -- Gives "Blood", "Unholy", "Frost"
+		local runeSlot = ((self.runeNumber-1)%6)+1 -- gives 1, 2, 3, 4, 5, 6
+		local runeName = self.Runes[ceil(runeSlot/2)] -- Gives "Blood", "Unholy", "Frost"
 		
 		if self.runeNumber > 6 then
 			self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeName)
