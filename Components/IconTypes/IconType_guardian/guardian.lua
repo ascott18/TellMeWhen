@@ -178,11 +178,7 @@ local GuardianInfo = Type.GuardianInfo
 function Type:RefreshNames()
 	for npcID, data in pairs(GuardianInfo) do
 		if not data.nameKnown then
-			local Parser, LT1 = TMW:GetParser()
-			Parser:SetOwner(UIParent, "ANCHOR_NONE")
-			Parser:SetHyperlink(("unit:Creature-0-0-0-0-%d"):format(npcID))
-			local name = LT1:GetText()
-			Parser:Hide()
+			local name = TMW:TryGetNPCName(npcID)
 
 			if not name or name == "" then
 				name = "NPC ID " .. npcID

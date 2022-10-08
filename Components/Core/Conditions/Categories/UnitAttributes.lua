@@ -558,6 +558,7 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["Vulpera"] = {order = 12.5, text = Name("Vulpera"), space = true},
 
 			["Pandaren"] = {order = 13, text = Name("Pandaren")},
+			["Dracthyr"] = {order = 14, text = Name("Dracthyr")},
 
 		}
 

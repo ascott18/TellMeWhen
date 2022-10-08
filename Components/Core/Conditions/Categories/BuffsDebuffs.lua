@@ -116,6 +116,7 @@ end
 
 
 function Env.AuraTooltipNumber(...)
+	-- TODO: Replace GetParser with direct usage of C_TooltipInfo when available
 	local Parser, LT1, LT2 = TMW:GetParser()
 	local module = CNDT:NewModule("TooltipParser", "AceEvent-3.0")
 

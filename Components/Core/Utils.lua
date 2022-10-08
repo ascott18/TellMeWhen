@@ -1560,6 +1560,12 @@ do	-- TMW:GetParser()
 	function TMW:GetParser()
 		if not Parser then
 			Parser = CreateFrame("GameTooltip")
+			if TooltipDataHandlerMixin then
+				-- in theory this could use TooltipDataHandlerMixin,
+				-- but the blizzard PTR tooltips explode if we dont use GameTooltipDataMixin
+				-- because somehow for some reason they need GetUnit?
+				Mixin(Parser, GameTooltipDataMixin)
+			end
 
 			LT1 = Parser:CreateFontString()
 			RT1 = Parser:CreateFontString()
@@ -1594,6 +1600,7 @@ end
 TMW:MakeSingleArgFunctionCached(TMW, "GetRaceIconInfo")
 
 function TMW:TryGetNPCName(id)
+	-- TODO: Replace GetParser with direct usage of C_TooltipInfo when available
     local tooltip, LT1 = TMW:GetParser()
     tooltip:SetOwner(UIParent, "ANCHOR_NONE")
     tooltip:SetHyperlink( string.format( "unit:Creature-0-0-0-0-%d:0000000000", id))
