@@ -7,6 +7,9 @@ TMW.CHANGELOG = [==[
 * Very early initial minimally functioning updates for Dragonflight Beta/PTR.
 * Improvements to Swing Timers, especially around changes in attack speed (#1947)
 
+### Bug Fixes
+* #1956 - Fix Loss of Control states being backwards from their labels.
+
 ## v9.2.4
 * #1935 - More informative tooltips on "previews" of meta icon components.
 * When exporting an icon, icons referenced by its conditions will be included as related data.
