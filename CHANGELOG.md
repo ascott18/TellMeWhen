@@ -9,6 +9,7 @@
 ### Bug Fixes
 * #1958 - Fix mismatch of rune types between configuration and actual behavior in the Rune Cooldown icon.
 * #1965 - Slam does not reset the swing timer.
+* #1955 - Fix dual spec changes not triggering updates when the player has no unspent talent points.
 
 ## v9.2.5
 * Fix for Blizzard changing WOW_PROJECT_ID without warning.

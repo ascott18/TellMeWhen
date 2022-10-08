@@ -136,7 +136,8 @@ ConditionCategory:RegisterCondition(6.1,	 "UNITSPEC", {
 	end,
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE")
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end,
 })
 
@@ -222,13 +223,15 @@ ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 		-- this is handled externally because TalentMap is so extensive a process,
 		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
 		CNDT:RegisterEvent("CHARACTER_POINTS_CHANGED")
+		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "CHARACTER_POINTS_CHANGED")
 		CNDT:CHARACTER_POINTS_CHANGED()
 
 		return [[(TalentMap[c.NameString] or 0) c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("CHARACTER_POINTS_CHANGED")
+			ConditionObject:GenerateNormalEventString("CHARACTER_POINTS_CHANGED"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end,
 })
 
