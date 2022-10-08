@@ -108,6 +108,25 @@ ConditionCategory:RegisterCondition(3,    "COMBAT", {
 	end,
 })
 
+ConditionCategory:RegisterCondition(4,    "VEHICLE", {
+	text = L["CONDITIONPANEL_VEHICLE"],
+
+	bool = true,
+	
+	icon = "Interface\\Icons\\Ability_Vehicle_SiegeEngineCharge",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		UnitHasVehicleUI = UnitHasVehicleUI,
+	},
+	funcstr = [[BOOLCHECK( UnitHasVehicleUI(c.Unit) )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_ENTERED_VEHICLE", CNDT:GetUnit(c.Unit)),
+			ConditionObject:GenerateNormalEventString("UNIT_EXITED_VEHICLE", CNDT:GetUnit(c.Unit))
+	end,
+})
+
 ConditionCategory:RegisterCondition(5,    "PVPFLAG", {
 	text = L["CONDITIONPANEL_PVPFLAG"],
 
