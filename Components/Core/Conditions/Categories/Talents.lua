@@ -101,20 +101,6 @@ ConditionCategory:RegisterCondition(0.3,  "ROLE2", {
 
 ConditionCategory:RegisterSpacer(6)
 
-Env.TalentMap = {}
-function CNDT:CHARACTER_POINTS_CHANGED()
-	wipe(Env.TalentMap)
-	for tab = 1, GetNumTalentTabs() do
-		for talent = 1, GetNumTalents(tab) do
-			local name, _, _, _, rank = GetTalentInfo(tab, talent)
-			local lower = name and strlowerCache[name]
-			if lower then
-				Env.TalentMap[lower] = rank or 0
-			end
-		end
-	end
-end
-
 ConditionCategory:RegisterCondition(6.1,	 "UNITSPEC", {
 	text = L["UIPANEL_SPECIALIZATION"],
 
@@ -207,9 +193,21 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 
 ConditionCategory:RegisterSpacer(8.9)
 
+Env.TalentMap = {}
+function CNDT:CHARACTER_POINTS_CHANGED()
+	wipe(Env.TalentMap)
+	for tab = 1, GetNumTalentTabs() do
+		for talent = 1, GetNumTalents(tab) do
+			local name, _, _, _, rank = GetTalentInfo(tab, talent)
+			local lower = name and strlowerCache[name]
+			if lower then
+				Env.TalentMap[lower] = rank or 0
+			end
+		end
+	end
+end
 ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 	text = L["UIPANEL_PTSINTAL"],
-	value = "PTSINTAL",
 	min = 0,
 	max = 5,
 	unit = PLAYER,
