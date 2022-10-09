@@ -314,7 +314,10 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 								(strfind(name, "credit") and strfind(name, "%f[%a]credit%f[%A]")) or
 								(strfind(name, "effect") and strfind(name, "%f[%a]effect%f[%A]")) or
 								(strfind(name, "camera") and strfind(name, "%f[%a]camera%f[%A]")) or
-								(strfind(name, "ph") and strfind(name, "%f[%a]ph%f[%A]")) or
+								-- "ph" was removed because it is so short and non-specific
+								-- that it interferes with words like Phönixflammen (https://de.wowhead.com/spell=194466/ph%C3%B6nixflammen)
+								-- due to the fact that lua isn't unicode aware.
+								--(strfind(name, "ph") and strfind(name, "%f[%a]ph%f[%A]")) or
 								(strfind(name, "proc") and strfind(name, "%f[%a]proc%f[%A]")) or
 								(strfind(name, "debug") and strfind(name, "%f[%a]debug%f[%A]")) or
 								(strfind(name, "bunny") and strfind(name, "%f[%a]bunny%f[%A]")) or
