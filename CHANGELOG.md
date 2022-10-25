@@ -1,5 +1,5 @@
-## v9.2.6
-* Very early initial minimally functioning updates for Dragonflight Beta/PTR.
+## v10.0.0
+* Updates for Dragonflight.
 * Improvements to Swing Timers, especially around changes in attack speed (#1947)
 
 ### Bug Fixes

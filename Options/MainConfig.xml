@@ -11,12 +11,6 @@
 					<OnLoad>
 						local font = "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf"
 
-						-- Just incase they haven't restarted after installing the version
-						-- that first included this font (v7.3.5)
-						if not self:SetFont("p", font, 12, "") then
-							font = "Fonts\\FRIZQT__.TTF"
-						end
-
 						self:SetFont("p", font, 12, "")
 						self:SetFont("h1", font, 20, "")
 						self:SetFont("h2", font, 14, "")

@@ -680,8 +680,15 @@ function UNITS:SubstituteGroupedUnit(oldunit)
 	return nil
 end
 
-
-do--function UNITS:TestUnit(unit)
+--function UNITS:TestUnit(unit)
+if UnitTokenFromGUID then
+	-- wow 10.0+
+	local UnitTokenFromGUID = UnitTokenFromGUID;
+	local UnitGUID = UnitGUID;
+	function UNITS:TestUnit(unit)
+		return UnitTokenFromGUID(UnitGUID(unit))
+	end
+else	
 	local TestTooltip = CreateFrame("GameTooltip")
 	local name, unitID
 	TestTooltip:SetScript("OnTooltipSetUnit", function(self)
