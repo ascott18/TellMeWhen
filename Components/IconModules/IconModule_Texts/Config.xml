@@ -1006,11 +1006,11 @@
 						end
 					</OnClick>
 				</Scripts>
-				<NormalTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
+				<NormalTexture file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
 					<TexCoords left="0.125" right="0.859375" top="0.140625" bottom="0.875"/>
 					<Color r=".7" g=".7" b=".7" a="1"/>
 				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
+				<HighlightTexture file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
 					<TexCoords left="0.125" right="0.859375" top="0.140625" bottom="0.875"/>
 					<Color r="1" g="1" b="1" a="0.3"/>
 				</HighlightTexture>
@@ -1039,9 +1039,9 @@
 						self.DD:Toggle(1, nil, self, 0, 0)
 					</OnClick>
 				</Scripts>
-				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Copy">
+				<NormalTexture file="Interface\AddOns\TellMeWhen\Textures\Copy">
 				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Copy" alphaMode="ADD">
+				<HighlightTexture file="Interface\AddOns\TellMeWhen\Textures\Copy" alphaMode="ADD">
 					<Color r="1" g="1" b="1" a="0.3"/>
 				</HighlightTexture>
 			</Button>
@@ -1144,11 +1144,11 @@
 								end
 							</OnClick>
 						</Scripts>
-						<NormalTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
+						<NormalTexture file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
 							<TexCoords left="0.125" right="0.859375" top="0.140625" bottom="0.875"/>
 							<Color r=".7" g=".7" b=".7" a="1"/>
 						</NormalTexture>
-						<HighlightTexture urgency="5" file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
+						<HighlightTexture file="Interface\PaperDollInfoFrame\UI-GearManager-Undo" alphaMode="ADD">
 							<TexCoords left="0.125" right="0.859375" top="0.140625" bottom="0.875"/>
 							<Color r="1" g="1" b="1" a="0.3"/>
 						</HighlightTexture>
@@ -1176,9 +1176,9 @@
 								
 							</OnClick>
 						</Scripts>
-						<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Config">
+						<NormalTexture file="Interface\AddOns\TellMeWhen\Textures\Config">
 						</NormalTexture>
-						<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Config" alphaMode="ADD">
+						<HighlightTexture file="Interface\AddOns\TellMeWhen\Textures\Config" alphaMode="ADD">
 							<Color r="1" g="1" b="1" a="0.3"/>
 						</HighlightTexture>
 					</Button>

@@ -75,10 +75,10 @@
 						self:GetParent():UnlockHighlight()
 					</OnLeave>
 				</Scripts>
-				<NormalTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
+				<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
 					<TexCoords left="0.3125" right="0.625" top="0.3" bottom="0.71857"/>
 				</NormalTexture>
-				<HighlightTexture urgency="5" file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
+				<HighlightTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" alphaMode="ADD">
 					<TexCoords left="0.3125" right="0.625" top="0.3" bottom="0.71857"/>
 				</HighlightTexture>
 			</Button>

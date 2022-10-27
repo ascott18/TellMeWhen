@@ -10,7 +10,6 @@
 <Script  file="TMWUIDropDownMenu.lua" />
 <Include file="TMWUIDropDownMenuTemplates.xml" />
 <Include file="TellMeWhen_Options.xml" />
-<Include file="Bindings.xml" />
 <Script  file="MainConfig.lua" />
 <Include file="MainConfig.xml" />
 <Script  file="GroupConfig.lua" />
