@@ -1,3 +1,8 @@
+## v10.0.1
+### Bug Fixes
+* Fix #1974 - Assorted warnings about XML attributes
+* Fix #1977 - Texts.lua:696: bad argument #1 to 'SetEndDelay' (must be a finite number)
+
 ## v10.0.0
 * Updates for Dragonflight.
 * Improvements to Swing Timers, especially around changes in attack speed (#1947)

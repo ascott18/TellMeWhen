@@ -683,28 +683,32 @@ local function reSetup(self, event, icon)
 end
 
 local function rotate(self, degrees)
-	local anim = self.anim
-	if not anim then
-		if degrees == 0 then
-			return
-		end
-
-		self.animGroup = self:CreateAnimationGroup()
-
-		anim = self.animGroup:CreateAnimation("Rotation")
-		anim:SetDuration(0)
-		anim:SetEndDelay(math.huge)
-
-		self.anim = anim
-	end
-	
-	if degrees ~= 0 then
-		anim:SetDegrees(degrees)
-		anim:SetOrigin("CENTER", 0, 0)
-		
-		self.animGroup:Play()
+	if self.SetRotation then
+		self:SetRotation(degrees * (math.pi/180))
 	else
-		self.animGroup:Stop()
+		local anim = self.anim
+		if not anim then
+			if degrees == 0 then
+				return
+			end
+
+			self.animGroup = self:CreateAnimationGroup()
+
+			anim = self.animGroup:CreateAnimation("Rotation")
+			anim:SetDuration(0)
+			anim:SetEndDelay(2^42)
+
+			self.anim = anim
+		end
+		
+		if degrees ~= 0 then
+			anim:SetDegrees(degrees)
+			anim:SetOrigin("CENTER", 0, 0)
+			
+			self.animGroup:Play()
+		else
+			self.animGroup:Stop()
+		end
 	end
 end
 
