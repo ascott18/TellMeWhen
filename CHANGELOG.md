@@ -2,6 +2,7 @@
 ### Bug Fixes
 * Fix #1974 - Assorted warnings about XML attributes
 * Fix #1977 - Texts.lua:696: bad argument #1 to 'SetEndDelay' (must be a finite number)
+* Fix #1981 - Fix integration with ElvUI's timer text
 
 ## v10.0.0
 * Updates for Dragonflight.

@@ -188,7 +188,6 @@ function CooldownSweep:OnDisable()
 	self:UpdateCooldown()
 end
 
-local elvui_loaded = IsAddOnLoaded("ElvUI")
 local omnicc_loaded = IsAddOnLoaded("OmniCC")
 local tullacc_loaded = IsAddOnLoaded("tullaCC")
 
@@ -206,9 +205,12 @@ function CooldownSweep:SetupForIcon(icon)
 	-- For OmniCC/tullaCC/most other cooldown count mods (I think LUI uses this too)
 	self.cooldown.noCooldownCount = not icon.ShowTimerText
 	self.cooldown2.noCooldownCount = not icon.ShowTimerText 
-	if elvui_loaded then
-		self.cooldown.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
-		self.cooldown2.noOCC = not icon.ShowTimerTextnoOCC -- For ElvUI
+	if ElvUI and ElvUI[1] and ElvUI[1].CooldownEnabled and ElvUI[1].RegisterCooldown then
+		if icon.ShowTimerTextnoOCC then
+			ElvUI[1]:RegisterCooldown(self.cooldown, "TellMeWhen")
+		else
+			ElvUI[1]:ToggleCooldown(self.cooldown, icon.ShowTimerTextnoOCC);
+		end
 	end
 
 	-- new in WoW 6.0
@@ -271,33 +273,6 @@ function CooldownSweep:UpdateCooldown()
 	end
 
 	if mainDuration > 0 then
-		if ElvUI then
-			local E = ElvUI[1]
-			if E and E.OnSetCooldown then
-				if not cd.noOCC then
-					if E.private.cooldown then
-						-- Elvui 10.74:
-						-- We have to check if the texts are globally enabled ourselves.
-						if E.private.cooldown.enable then
-							E.OnSetCooldown(cd, mainStart, mainDuration)
-						end
-					else
-						-- Elvui (after 10.74 - dont think it has a version right now):
-						-- Elvui ensures that cooldowns are enabled in newer versions,
-						-- so we don't have to look into its "private"s to find out ourselves.
-						-- In fact, the privates have been removed for cooldown,
-						-- so this is how we do the version check!
-						E.OnSetCooldown(cd, mainStart, mainDuration)
-					end
-				elseif cd.timer then
-					-- We have to stop ElvUI's timers ourselves -
-					-- calling OnSetCooldown just returns early if .noOCC == true,
-					-- instead of actually stopping the timer text.
-					E:Cooldown_StopTimer(cd.timer)
-				end
-			end
-		end
-
 		if self.ShowTimer then
 			cd:SetDrawEdge(TMW.db.profile.DrawEdge)
 			cd:SetDrawSwipe(true)

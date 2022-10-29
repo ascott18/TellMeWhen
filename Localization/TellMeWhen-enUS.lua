@@ -1112,9 +1112,7 @@ L["UIPANEL_FONT_HEIGHT_DESC"] = [[Set the maximum height of the text display. If
  If this text display is anchored on both its top and bottom sides, this setting will have no effect.]]
 
 L["UIPANEL_FONT_ROTATE"] = "Rotation"
-L["UIPANEL_FONT_ROTATE_DESC"] = [[Set the amount, in degrees, that you want to rotate the text display by.
-
-The way this is implemented is not supported by Blizzard, so if it behaves strangely, there isn't much that can be done.]]
+L["UIPANEL_FONT_ROTATE_DESC"] = [[Set the amount, in degrees, that you want to rotate the text display by.]]
 
 L["UIPANEL_FONT_XOFFS"] = "X Offset"
 L["UIPANEL_FONT_XOFFS_DESC"] = "The x-axis offset of the anchor"
