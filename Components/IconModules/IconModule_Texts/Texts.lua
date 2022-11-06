@@ -586,7 +586,7 @@ function TEXT:GetTextLayoutForIconSettings(gs, ics, view)
 		-- Attempt to find the layout settings again.
 		layoutSettings = rawget(TMW.db.global.TextLayouts, GUID)
 		
-		-- Freak the fuck out if it wasn't found;
+		-- Freak out if it wasn't found;
 		-- Only happens if a view defines a default layout but doesn't actually define layout itself.
 		assert(layoutSettings, ("Couldn't find default text layout with GUID %q for IconView %q"):format(GUID, view))
 	end
@@ -665,7 +665,7 @@ function Texts:CreateFontString(id)
 	local fontString = container:CreateFontString(self:GetChildNameBase() .. id, "ARTWORK", "NumberFontNormalSmall")
 
 	-- LDT-Unit has a script running on a timer that automatically cancels all queued updates for icons with kwargs.unit == "mouseover"
-	-- This doesn't make any fucking sense to me at all, so I added a flag to LDT-Unit-3.0 that lets me disable this behavior on a per-fontstring basis.
+	-- This doesn't make any sense to me at all, so I added a flag to LDT-Unit-3.0 that lets me disable this behavior on a per-fontstring basis.
 	fontString.__DT_dontcancelupdatesforMO = true
 
 	self.fontStrings[id] = fontString
@@ -737,7 +737,7 @@ function Texts:GetAnchor(layoutSettings, anchorSettings, fontStringID)
 		end
 
 		if not relativeTo then
-			-- If the index was invalid, or by some incident of fuckery the fontString doesn't exist when it should,
+			-- If the index was invalid, or by somehow the fontString doesn't exist when it should,
 			-- show an error.
 			err = L["TEXTLAYOUTS_ERR_ANCHOR_BADINDEX"]:format(fontStringID, index, index, fontStringID)
 		end
@@ -812,7 +812,7 @@ function Texts:SetupForIcon(sourceIcon)
 	
 
 	-- Queue all fontStrings for removal from DogTag.
-	-- Don't remove them all outright because DogTag uses a fuckton of CPU to do this.
+	-- Don't remove them all outright because DogTag uses a lot of CPU to do this.
 	-- This var will be set false on still-valid strings, so we will only remove ones we don't use.
 	for _, fontString in pairs(self.fontStrings) do
 		fontString.TMW_QueueForRemoval = true

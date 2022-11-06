@@ -29,7 +29,44 @@ Module.noMin = true
 Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
-Module.stances = {
+Module.stances = TMW.isWrath and {
+	WARRIOR = {
+		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
+		[71] = 		GetSpellInfo(71),		-- Defensive Stance
+		[2458] = 	GetSpellInfo(2458), 	-- Berserker Stance
+	},
+	DRUID = {
+		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
+		[9634] = 	GetSpellInfo(9634), 	-- Dire Bear Form
+		[768] = 	GetSpellInfo(768),		-- Cat Form
+		[783] = 	GetSpellInfo(783),		-- Travel Form
+		[1066] = 	GetSpellInfo(1066),		-- Aquatic Form
+		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
+		[33891] = 	GetSpellInfo(33891), 	-- Tree of Life
+		[33943] = 	GetSpellInfo(33943), 	-- Flight Form
+		[40120] = 	GetSpellInfo(40120), 	-- Swift Flight Form	
+	},
+	PRIEST = {
+		[15473] = 	GetSpellInfo(15473), 	-- Shadowform	
+	},
+	ROGUE = {
+		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
+	},
+	PALADIN = {
+		[19746] = 	GetSpellInfo(19746), 	-- Concentration Aura
+		[32223] = 	GetSpellInfo(32223), 	-- Crusader Aura
+		[465] = 	GetSpellInfo(465),		-- Devotion Aura
+		[19900] = 	GetSpellInfo(19891), 	-- Fire Resistance Aura
+		[19898] = 	GetSpellInfo(19891), 	-- Frost Resistance Aura
+		[19896] = 	GetSpellInfo(19891), 	-- Shadow Resistance Aura
+		[7294] = 	GetSpellInfo(7294),		-- Retribution Aura	
+	},
+	DEATHKNIGHT = {
+		[48266] = 	GetSpellInfo(48266), 	-- Blood
+		[48263] = 	GetSpellInfo(48263), 	-- Frost
+		[48265] = 	GetSpellInfo(48265), 	-- Unholy
+	},
+} or {
 	DRUID = {
 		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
 		[768] = 	GetSpellInfo(768),		-- Cat Form
@@ -117,37 +154,38 @@ function Module:Entry_AddToList_1(f, id)
 end
 
 
+if C_EquipmentSet then
+	local Module = SUG:NewModule("blizzequipset", SUG:GetModule("default"))
+	Module.noMin = true
+	Module.showColorHelp = false
+	Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
-local Module = SUG:NewModule("blizzequipset", SUG:GetModule("default"))
-Module.noMin = true
-Module.showColorHelp = false
-Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+	local EquipSetCache = {}
+	function Module:Table_Get()
+		for i, id in pairs(C_EquipmentSet.GetEquipmentSetIDs()) do
+			local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
 
-local EquipSetCache = {}
-function Module:Table_Get()
-	for i, id in pairs(C_EquipmentSet.GetEquipmentSetIDs()) do
+			EquipSetCache[id] = strlower(name)
+		end
+		
+		return EquipSetCache
+	end
+	function Module:Table_GetSorter()
+		return nil
+	end
+	function Module:Entry_AddToList_1(f, id)
 		local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
 
-		EquipSetCache[id] = strlower(name)
+		f.Name:SetText(name)
+		f.ID:SetText(nil)
+
+		f.tooltipmethod = "SetEquipmentSet"
+		f.tooltiparg = name
+
+		f.insert = name
+
+		f.Icon:SetTexture(icon)
 	end
-	
-	return EquipSetCache
-end
-function Module:Table_GetSorter()
-	return nil
-end
-function Module:Entry_AddToList_1(f, id)
-	local name, icon = C_EquipmentSet.GetEquipmentSetInfo(id)
-
-	f.Name:SetText(name)
-	f.ID:SetText(nil)
-
-	f.tooltipmethod = "SetEquipmentSet"
-	f.tooltiparg = name
-
-	f.insert = name
-
-	f.Icon:SetTexture(icon)
 end
 
 

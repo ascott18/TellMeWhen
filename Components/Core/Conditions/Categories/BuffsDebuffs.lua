@@ -369,6 +369,7 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	end,
 	icon = "Interface\\Icons\\inv_elemental_primal_mana",
 	tcoords = CNDT.COMMON.standardtcoords,
+	hidden = TMW.isWrath,
 	funcstr = function(c)
 		return [[AuraVariableNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
@@ -391,7 +392,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		check = function(check)
 			check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 		end,
-		icon = "Interface\\Icons\\ability_priest_clarityofwill",
+		icon = TMW.isWrath and "Interface\\Icons\\spell_ice_lament" or "Interface\\Icons\\ability_priest_clarityofwill",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
 			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
@@ -430,25 +431,27 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 
 ConditionCategory:RegisterSpacer(8)
 
-ConditionCategory:RegisterCondition(9,	 "ABSORBAMT", {
-	text = L["ABSORBAMT"],
-	tooltip = L["ABSORBAMT_DESC"],
-	range = 50000,
-	icon = "Interface\\Icons\\spell_holy_powerwordshield",
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitGetTotalAbsorbs = UnitGetTotalAbsorbs,
-	},
-	funcstr = function(c)
-		return [[UnitGetTotalAbsorbs(c.Unit) c.Operator c.Level]]
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", CNDT:GetUnit(c.Unit))
-	end,
-})
+if UnitGetTotalAbsorbs then
+	ConditionCategory:RegisterCondition(9,	 "ABSORBAMT", {
+		text = L["ABSORBAMT"],
+		tooltip = L["ABSORBAMT_DESC"],
+		range = 50000,
+		icon = "Interface\\Icons\\spell_holy_powerwordshield",
+		formatter = TMW.C.Formatter.COMMANUMBER,
+		tcoords = CNDT.COMMON.standardtcoords,
+		Env = {
+			UnitGetTotalAbsorbs = UnitGetTotalAbsorbs,
+		},
+		funcstr = function(c)
+			return [[UnitGetTotalAbsorbs(c.Unit) c.Operator c.Level]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", CNDT:GetUnit(c.Unit))
+		end,
+	})
+end
 
 ConditionCategory:RegisterSpacer(10)
 
@@ -517,7 +520,7 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
 	formatter = TMW.C.Formatter.PERCENT,
-	icon = "Interface\\Icons\\spell_priest_voidshift",
+	icon = TMW.isWrath and "Interface\\Icons\\ability_rogue_dualweild" or "Interface\\Icons\\spell_priest_voidshift",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		return [[AuraPercent(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
@@ -602,6 +605,7 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	end,
 	icon = "Interface\\Icons\\spell_shadow_lifedrain",
 	tcoords = CNDT.COMMON.standardtcoords,
+	hidden = TMW.isWrath,
 	funcstr = function(c)
 		return [[AuraVariableNumber(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,

@@ -118,7 +118,7 @@ function Type:GetIconMenuText(ics)
 end
 
 function Type:GuessIconTexture(ics)
-	return "Interface\\Icons\\LevelUpIcon-LFD"
+	return "Interface\\AddOns\\TellMeWhen\\Textures\\levelupicon-lfd"
 end
 
 

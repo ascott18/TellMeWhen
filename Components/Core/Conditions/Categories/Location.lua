@@ -61,7 +61,20 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
-	bitFlags = {
+	bitFlags = TMW.isWrath and {
+		[01] = {order=01, text=L["CONDITIONPANEL_INSTANCETYPE_NONE"],                                space=true,   }, -- None (Outside)
+		[02] = {order=02, text=BATTLEGROUND,                                                                       }, -- Battleground
+		[03] = {order=03, text=ARENA,                                                                space=true,   }, -- Arena
+
+		[04] = {order=10, text=DUNGEON_DIFFICULTY_5PLAYER,                                                         }, -- 5-player
+		[05] = {order=11, text=DUNGEON_DIFFICULTY_5PLAYER_HEROIC,                                    space=true,   }, -- 5-player Heroic
+		[06] = {order=32, text=RAID_DIFFICULTY_10PLAYER,           }, -- 10-player raid 
+		[07] = {order=33, text=RAID_DIFFICULTY_25PLAYER,           }, -- 25-player raid 
+		[08] = {order=34, text=RAID_DIFFICULTY_10PLAYER_HEROIC,    }, -- 10-player heroic raid 
+		[09] = {order=35, text=RAID_DIFFICULTY_25PLAYER_HEROIC,    }, -- 25-player heroic raid 
+		
+		[12] = {order=36, text=RAID_DIFFICULTY_40PLAYER,           }, -- 40-man raid 
+	} or {
 		[01] = {order=01, text=L["CONDITIONPANEL_INSTANCETYPE_NONE"],                                space=true,   }, -- None (Outside)
 		[02] = {order=02, text=BATTLEGROUND,                                                                       }, -- Battleground
 		[03] = {order=03, text=ARENA,                                                                space=true,   }, -- Arena
@@ -172,29 +185,31 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 	end,
 })
 
-ConditionCategory:RegisterCondition(1.1,  "KEYSTONELEVEL", {
-	text = L["CONDITIONPANEL_KEYSTONELEVEL"],
-	tooltip = L["CONDITIONPANEL_KEYSTONELEVEL_DESC"],
-	min = 0,
-	max = 30,
-	unit = false,
-	icon = "Interface\\Icons\\inv_relics_hourglass",
-	tcoords = CNDT.COMMON.standardtcoords,
+if C_ChallengeMode then
+	ConditionCategory:RegisterCondition(1.1,  "KEYSTONELEVEL", {
+		text = L["CONDITIONPANEL_KEYSTONELEVEL"],
+		tooltip = L["CONDITIONPANEL_KEYSTONELEVEL_DESC"],
+		min = 0,
+		max = 30,
+		unit = false,
+		icon = "Interface\\Icons\\inv_relics_hourglass",
+		tcoords = CNDT.COMMON.standardtcoords,
 
-	Env = {
-		GetActiveKeystoneInfo = function()
-			return C_ChallengeMode.GetActiveKeystoneInfo() or 0
+		Env = {
+			GetActiveKeystoneInfo = function()
+				return C_ChallengeMode.GetActiveKeystoneInfo() or 0
+			end
+		},
+
+		funcstr = [[(GetActiveKeystoneInfo() c.Operator c.Level)]],
+
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("SCENARIO_CRITERIA_UPDATE"),
+				ConditionObject:GenerateNormalEventString("CHALLENGE_MODE_START")
 		end
-	},
-
-	funcstr = [[(GetActiveKeystoneInfo() c.Operator c.Level)]],
-
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("SCENARIO_CRITERIA_UPDATE"),
-			ConditionObject:GenerateNormalEventString("CHALLENGE_MODE_START")
-	end
-})
+	})
+end
 
 ConditionCategory:RegisterCondition(1.2, "GROUPSIZE", {
 	text = L["CONDITIONPANEL_GROUPSIZE"],

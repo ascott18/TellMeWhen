@@ -2980,43 +2980,86 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	end,
 }
 
-TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
-	-- Constructor
+if TMW.isWrath then 
+	TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
+		-- Constructor
+		Runes = {
+			"Blood",
+			"Unholy",
+			"Frost",
+		},
+	
+		OnNewInstance_Button_Rune = function(self)
+			self.runeNumber = self:GetID()
+	
+			-- detect what texture should be used
+			local runeSlot = ((self.runeNumber-1)%6)+1 -- gives 1, 2, 3, 4, 5, 6
+			local runeName = self.Runes[ceil(runeSlot/2)] -- Gives "Blood", "Unholy", "Frost"
+			
+			if self.runeNumber > 6 then
+				self.texture:SetTexture("Interface\\AddOns\\TellMeWhen\\Textures\\" .. runeName)
+			else
+				self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-" .. runeName)
+			end
+	
+			self.bit = bit.lshift(1, self.runeNumber - 1)
+		end,
+	
+	
+		-- Methods
+		checked = false,
+		GetChecked = function(self)
+			return self.checked
+		end,
+	
+		SetChecked = function(self, checked)
+			self.checked = checked
+			if checked then
+				self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+			else
+				self.Check:SetTexture(nil)
+			end
+		end,
+	}
+elseif TMW.isRetail then
+	TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
+		-- Constructor
 
-	OnNewInstance_Button_Rune = function(self)
-		if not self:GetRuneNumber() then
-			self:SetRuneNumber(self:GetID())
-		end
-	end,
+		OnNewInstance_Button_Rune = function(self)
+			if not self:GetRuneNumber() then
+				self:SetRuneNumber(self:GetID())
+			end
+		end,
 
-	GetRuneNumber = function(self)
-		return self.runeNumber
-	end,
+		GetRuneNumber = function(self)
+			return self.runeNumber
+		end,
 
-	SetRuneNumber = function(self, runeNumber)
-		self.runeNumber = runeNumber
+		SetRuneNumber = function(self, runeNumber)
+			self.runeNumber = runeNumber
 
-		self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-SingleRune")
+			self.texture:SetTexture("Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-SingleRune")
 
-		self:SetSettingBitID(self.runeNumber)
-	end,
+			self:SetSettingBitID(self.runeNumber)
+		end,
 
 
-	-- Methods
-	checked = false,
-	GetChecked = function(self)
-		return self.checked
-	end,
+		-- Methods
+		checked = false,
+		GetChecked = function(self)
+			return self.checked
+		end,
 
-	SetChecked = function(self, checked)
-		self.checked = checked
-		if checked then
-			self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
-		else
-			self.Check:SetTexture(nil)
-		end
-	end,
-}
+		SetChecked = function(self, checked)
+			self.checked = checked
+			if checked then
+				self.Check:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-Ready")
+			else
+				self.Check:SetTexture(nil)
+			end
+		end,
+	}
+end
 
 TMW:NewClass("Config_PointSelect", "Config_Frame"){
 
@@ -4294,7 +4337,7 @@ local function makeColorFunc(greenBelow, redAbove)
 			-- the point where halfColor will be used.
 			-- If we don't multiply by 2, we would check if (percent > 0.5), but then
 			-- we would have to multiply that percentage by 2 later anyway in order to use the
-			-- full range of colors available (we would only get half the range of colors otherwise, which looks like shit)
+			-- full range of colors available (we would only get half the range of colors otherwise, which looks bad)
 			local doublePercent = percent * 2
 
 			if doublePercent > 1 then

@@ -48,6 +48,7 @@ Type:UsesAttributes("spell")
 Type:UsesAttributes("reverse")
 Type:UsesAttributes("start, duration")
 Type:UsesAttributes("texture")
+Type:UsesAttributes("stack, stackText")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
 
@@ -154,7 +155,13 @@ local function GetWeaponEnchantName(slot)
 			-- This magical regex should work with all locales and only get the weapon enchant name,
 			-- not other things (like the weapon DPS).
 			-- （） multibyte parenthesis are used in zhCN locale.
-			local r = strmatch(t, "(.+)[%(%（]%d+[^%.]*[^%d]+[%)%）]")
+			-- Some test strings:
+			--[[
+				Poison instantané (32 min) (23 charges)
+				Instant Poison (32 min) (23 charges)
+				Deadly Poison (32 min)
+			]]
+			local r = strmatch(t, "(.-)[%(%（]%d+[^%.]*[^%d]+[%)%）]")
 
 			if r then
 				r = strtrim(r)
@@ -174,7 +181,7 @@ end)
 
 
 local function WpnEnchant_OnUpdate(icon, time)
-	local has, expiration = select(icon.SelectIndex, GetWeaponEnchantInfo())
+	local has, expiration, charges, id = select(icon.SelectIndex, GetWeaponEnchantInfo())
 
 	if has and icon.CorrectEnchant then
 		-- Convert milliseconds to seconds.
@@ -184,7 +191,7 @@ local function WpnEnchant_OnUpdate(icon, time)
 		local EnchantName = icon.EnchantName
 		if EnchantName then
 			-- We know the enchant name, which means the duration can be cached.
-			local d = WpnEnchDurs[EnchantName]
+			local d = WpnEnchDurs[EnchantName] or 0
 			if d < expiration then
 				-- Re-cache the duration if we have a higher duration than what is stored.
 				WpnEnchDurs[EnchantName] = ceil(expiration)
@@ -194,7 +201,7 @@ local function WpnEnchant_OnUpdate(icon, time)
 				duration = d
 			end
 		else
-			-- We don't know the enchant name, which is fucked.
+			-- We don't know the enchant name, which is bad.
 			-- The timer sweep won't work, but timer texts will.
 			duration = expiration
 		end
@@ -202,16 +209,18 @@ local function WpnEnchant_OnUpdate(icon, time)
 
 		local start = floor(time - duration + expiration)
 
-		icon:SetInfo("state; start, duration; spell",
+		icon:SetInfo("state; start, duration; spell; stack, stackText",
 			STATE_PRESENT,
 			start, duration,
-			EnchantName
+			EnchantName,
+			charges, charges
 		)
 	else
-		icon:SetInfo("state; start, duration; spell",
+		icon:SetInfo("state; start, duration; spell; stack, stackText",
 			STATE_ABSENT,
 			0, 0,
-			nil
+			nil,
+			nil, nil
 		)
 	end
 end

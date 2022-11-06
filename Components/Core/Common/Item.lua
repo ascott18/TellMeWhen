@@ -77,7 +77,7 @@ function TMW:GetItems(setting)
 	local items = {}
 
 	for k, item in ipairs(names) do
-		item = strtrim(item, " \t\r\n;") -- trim crap
+		item = strtrim(item, " \t\r\n;") -- trim junk
 
 		items[#items + 1] = Item:GetRepresentation(item)
 	end

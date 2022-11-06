@@ -89,6 +89,35 @@ ConditionCategory:RegisterCondition(1.2, "HEALTH_MAX", {
 
 ConditionCategory:RegisterSpacer(1.9)
 
+if GetPetHappiness then
+	ConditionCategory:RegisterCondition(2,	 "HAPPINESS", {
+		-- poor translation to other languages, but better than just HAPPINESS on its own.
+		text = PET .. " " .. HAPPINESS,
+		
+		bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEVALUES"],
+		bitFlags = {
+			[1] = PET_HAPPINESS1,
+			[2] = PET_HAPPINESS2,
+			[3] = PET_HAPPINESS3
+		},
+
+		unit = PET,
+		icon = "Interface\\PetPaperDollFrame\\UI-PetHappiness",
+		tcoords = {0.390625, 0.5491, 0.03, 0.3305},
+		Env = {
+			GetPetHappiness = GetPetHappiness,
+		},
+		funcstr = [[ BITFLAGSMAPANDCHECK( GetPetHappiness() or 0 ) ]],
+		hidden = pclass ~= "HUNTER",
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit("pet")),
+				ConditionObject:GenerateNormalEventString("UNIT_HAPPINESS", "pet"),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "pet")
+		end,
+	})
+end
+
 
 
 
@@ -97,186 +126,375 @@ ConditionCategory:RegisterSpacer(3)
 
 
 -- Private Class Resources (other players can't see them)
-ConditionCategory:RegisterCondition(23, "SOUL_SHARDS", {
-	text = SOUL_SHARDS_POWER,
-	min = 0,
-	max = 6,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
-	end,
-	hidden = pclass ~= "WARLOCK",
-})
-ConditionCategory:RegisterCondition(23.1, "SOUL_SHARD_FRAGMENTS", {
-	text = L["RESOURCE_FRAGMENTS"]:format(SOUL_SHARDS_POWER),
-	min = 0,
-	max = 60,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
-	end,
-	hidden = pclass ~= "WARLOCK",
-})
-ConditionCategory:RegisterCondition(24, "HOLY_POWER", {
-	text = HOLY_POWER,
-	min = 0,
-	max = 5,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\Spell_Holy_Rune",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.HolyPower),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "HOLY_POWER")
-	end,
-	hidden = pclass ~= "PALADIN",
-})
-ConditionCategory:RegisterCondition(25, "RUNES2", {
-	text = L["CONDITIONPANEL_RUNES"],
-	tooltip = L["CONDITIONPANEL_RUNES_DESC3"],
-	unit = false,
-	min = 0,
-	max = 6,
-	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
-	Env = {
-		GetRuneType = GetRuneType,
-		GetRuneCount = GetRuneCount,
-	},
-	funcstr = function(c)
+if TMW.isRetail then
+	ConditionCategory:RegisterCondition(23, "SOUL_SHARDS", {
+		text = SOUL_SHARDS_POWER,
+		min = 0,
+		max = 6,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
+		end,
+		hidden = pclass ~= "WARLOCK",
+	})
+	ConditionCategory:RegisterCondition(23.1, "SOUL_SHARD_FRAGMENTS", {
+		text = L["RESOURCE_FRAGMENTS"]:format(SOUL_SHARDS_POWER),
+		min = 0,
+		max = 60,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
+		end,
+		hidden = pclass ~= "WARLOCK",
+	})
+	ConditionCategory:RegisterCondition(24, "HOLY_POWER", {
+		text = HOLY_POWER,
+		min = 0,
+		max = 5,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Spell_Holy_Rune",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.HolyPower),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "HOLY_POWER")
+		end,
+		hidden = pclass ~= "PALADIN",
+	})
+	ConditionCategory:RegisterCondition(25, "RUNES2", {
+		text = L["CONDITIONPANEL_RUNES"],
+		tooltip = L["CONDITIONPANEL_RUNES_DESC3"],
+		unit = false,
+		min = 0,
+		max = 6,
+		icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
+		Env = {
+			GetRuneType = GetRuneType,
+			GetRuneCount = GetRuneCount,
+		},
+		funcstr = function(c)
+			local str = ""
+			for i = 1, 6 do
+				str = str .. [[ + (GetRuneCount(]]..i..[[) or 0)]]
+			end
+			return str:trim("+ ") .. " c.Operator c.Level" 
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE")
+		end,
+		hidden = pclass ~= "DEATHKNIGHT",
+	})
+	ConditionCategory:RegisterCondition(26, "CHI", {
+		text = CHI_POWER,
+		min = 0,
+		max = 6,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\ability_monk_chiwave",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Chi),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "CHI")
+		end,
+		hidden = pclass ~= "MONK",
+	})
+	ConditionCategory:RegisterCondition(26.1, "STAGGER", {
+		text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_PERCENTOFMAXHP"],
+		percent = true,
+		formatter = TMW.C.Formatter.PERCENT,
+		min = 0,
+		max = 100,
+		unit = PLAYER,
+		icon = 611419,
+		tcoords = CNDT.COMMON.standardtcoords,
+		Env = {
+			UnitStagger = UnitStagger,
+		},
+		funcstr = [[(UnitStagger("player") or 0) / (UnitHealthMax("player")+epsilon) c.Operator c.Level]],
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", "player"),
+				ConditionObject:GenerateNormalEventString("UNIT_MAXHEALTH", "player")
+		end,
+		hidden = pclass ~= "MONK",
+	})
+	ConditionCategory:RegisterCondition(26.15, "STAGGER_CURPCT", {
+		text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_PERCENTOFCURHP"],
+		percent = true,
+		formatter = TMW.C.Formatter.PERCENT,
+		min = 0,
+		max = 100,
+		unit = PLAYER,
+		icon = 611419,
+		tcoords = CNDT.COMMON.standardtcoords,
+		Env = {
+			UnitStagger = UnitStagger,
+		},
+		funcstr = [[(UnitStagger("player") or 0) / (UnitHealth("player")+epsilon) c.Operator c.Level]],
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", "player"),
+				ConditionObject:GenerateNormalEventString(healthEvent, "player")
+		end,
+		hidden = pclass ~= "MONK",
+	})
+	ConditionCategory:RegisterCondition(26.2, "STAGGER_ABS", {
+		text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
+		min = 0,
+		range = 1000000,
+		unit = PLAYER,
+		icon = 611419,
+		tcoords = CNDT.COMMON.standardtcoords,
+		Env = {
+			UnitStagger = UnitStagger,
+		},
+		funcstr = [[(UnitStagger("player") or 0) c.Operator c.Level]],
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", "player")
+		end,
+		hidden = pclass ~= "MONK",
+	})
+	local offset = TMW.tContains({"ROGUE", "DRUID"}, pclass) and 0 or 62
+	ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
+		text = L["CONDITIONPANEL_COMBO"],
+		min = 0,
+		max = 10,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\ability_rogue_eviscerate",
+		tcoords = CNDT.COMMON.standardtcoords,
+		Env = {
+			UnitPower = UnitPower,
+		},
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ComboPoints),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "COMBO_POINTS")
+		end,
+	})
+	ConditionCategory:RegisterCondition(28, "ARCANE_CHARGES", {
+		text = ARCANE_CHARGES_POWER,
+		min = 0,
+		max = 4,
+		icon = "Interface\\Icons\\spell_arcane_arcanetorrent",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ArcaneCharges),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "ARCANE_CHARGES")
+		end,
+		hidden = pclass ~= "MAGE",
+	})
+	ConditionCategory:RegisterCondition(29, "ESSENCE", {
+		text = POWER_TYPE_ESSENCE,
+		min = 0,
+		max = 6,
+		icon = "Interface\\Icons\\ability_evoker_essenceburst",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Essence),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "ESSENCE")
+		end,
+		hidden = pclass ~= "EVOKER" or not Enum.PowerType.Essence,
+	})
+else
+	local function runeFuncstrHelper(c)
 		local str = ""
 		for i = 1, 6 do
-			str = str .. [[ + (GetRuneCount(]]..i..[[) or 0)]]
+			--[[
+				[1] = blood
+				[2] = unholy
+				[3] = frost
+
+				[4] = death blood
+				[5] = death unholy
+				[6] = death frost
+			]]
+			local checked = CNDT:GetBitFlag(c, i)
+
+			if checked then
+				local death = false
+				local bothTypes
+				if i > 3 then
+					death = true
+					i = i - 3
+					bothTypes = CNDT:GetBitFlag(c, i)
+				else
+					bothTypes = CNDT:GetBitFlag(c, i+3)
+				end
+
+				-- An index of 2 corresponds to runes 3 and 4, for example.
+				-- An index of 3 corresponds to runes 5 and 6.
+				local runeID1 = i*2 - 1
+				local runeID2 = runeID1 + 1
+
+				for _, runeID in TMW:Vararg(runeID1, runeID2) do
+					-- If we aren't on death runes in our outer loop,
+					-- or if we are only checking one type of this rune slot, 
+					-- put the plus now.
+					if not (death and bothTypes) then
+						str = str .. [[ + ]]
+					end
+
+					-- If we're checking both runes of this slot, we don't need to check if
+					-- the rune is a death rune (because we would check again to see if it isn't a death rune),
+					-- which is completely redundant.
+					if not bothTypes then
+						str = str .. [[ (GetRuneType(]]..runeID..[[)]]
+						str = str .. (death and "=" or "~") .. [[=4 and ]]
+					end
+
+					-- If we aren't on death runes in our outer loop,
+					-- or if we are only checking one type of this rune slot, 
+					-- then check the count of this rune slot.
+
+					-- If we ARE on death runes, and we are checking both types of this slot,
+					-- then don't check for this, because it will already exist in the string,
+					-- which would cause double counting.
+					if not (death and bothTypes) then
+						if bothTypes then
+							-- We still need the parenthesis that was excluded earlier.
+							str = str .. "("
+						end
+
+						if c.Type == "RUNES2" then
+							str = str .. [[GetRuneCount(]]..runeID..[[) or 0)]]
+
+						elseif c.Type == "RUNESRECH" then
+							str = str .. [[IsRuneRecharging(]]..runeID..[[,]] .. (runeID == runeID1 and runeID2 or runeID1) .. [[) and 1 or 0)]]
+
+						elseif c.Type == "RUNESLOCK" then
+							-- This is more efficient to be in a helper function (otherwise it would require 3 calls to GetRuneCooldown)
+							-- We can't do simple comparison to see if the start time is in the future to check if a rune is locked
+							-- because this doesn't work all the time (sometimes a cooldown down rune will report a start slightly in the future
+							-- right when it starts).
+							str = str .. [[IsRuneLocked(]]..runeID..[[,]] .. (runeID == runeID1 and runeID2 or runeID1) .. [[) and 1 or 0)]]
+						end
+					end
+				end
+			end
 		end
-		return str:trim("+ ") .. " c.Operator c.Level" 
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE")
-	end,
-	hidden = pclass ~= "DEATHKNIGHT",
-})
-ConditionCategory:RegisterCondition(26, "CHI", {
-	text = CHI_POWER,
-	min = 0,
-	max = 6,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\ability_monk_chiwave",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Chi),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "CHI")
-	end,
-	hidden = pclass ~= "MONK",
-})
-ConditionCategory:RegisterCondition(26.1, "STAGGER", {
-	text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_PERCENTOFMAXHP"],
-	percent = true,
-	formatter = TMW.C.Formatter.PERCENT,
-	min = 0,
-	max = 100,
-	unit = PLAYER,
-	icon = 611419,
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitStagger = UnitStagger,
-	},
-	funcstr = [[(UnitStagger("player") or 0) / (UnitHealthMax("player")+epsilon) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", "player"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXHEALTH", "player")
-	end,
-	hidden = pclass ~= "MONK",
-})
-ConditionCategory:RegisterCondition(26.15, "STAGGER_CURPCT", {
-	text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_PERCENTOFCURHP"],
-	percent = true,
-	formatter = TMW.C.Formatter.PERCENT,
-	min = 0,
-	max = 100,
-	unit = PLAYER,
-	icon = 611419,
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitStagger = UnitStagger,
-	},
-	funcstr = [[(UnitStagger("player") or 0) / (UnitHealth("player")+epsilon) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", "player"),
-			ConditionObject:GenerateNormalEventString(healthEvent, "player")
-	end,
-	hidden = pclass ~= "MONK",
-})
-ConditionCategory:RegisterCondition(26.2, "STAGGER_ABS", {
-	text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
-	min = 0,
-	range = 1000000,
-	unit = PLAYER,
-	icon = 611419,
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitStagger = UnitStagger,
-	},
-	funcstr = [[(UnitStagger("player") or 0) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", "player")
-	end,
-	hidden = pclass ~= "MONK",
-})
-local offset = TMW.tContains({"ROGUE", "DRUID"}, pclass) and 0 or 62
-ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
-	text = L["CONDITIONPANEL_COMBO"],
-	min = 0,
-	max = 10,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\ability_rogue_eviscerate",
-	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		UnitPower = UnitPower,
-	},
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ComboPoints),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "COMBO_POINTS")
-	end,
-})
-ConditionCategory:RegisterCondition(28, "ARCANE_CHARGES", {
-	text = ARCANE_CHARGES_POWER,
-	min = 0,
-	max = 4,
-	icon = "Interface\\Icons\\spell_arcane_arcanetorrent",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ArcaneCharges),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "ARCANE_CHARGES")
-	end,
-	hidden = pclass ~= "MAGE",
-})
-ConditionCategory:RegisterCondition(29, "ESSENCE", {
-	text = POWER_TYPE_ESSENCE,
-	min = 0,
-	max = 6,
-	icon = "Interface\\Icons\\ability_evoker_essenceburst",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Essence),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "ESSENCE")
-	end,
-	hidden = pclass ~= "EVOKER" or not Enum.PowerType.Essence,
-})
+		if str == "" then
+			return [[true]]
+		else
+			return "" .. str:trim("+ ") .. " c.Operator c.Level" 
+		end
+	end
+	local function GetRuneCount(runeSlot)
+		local start = GetRuneCooldown(runeSlot)
+		return start == 0 and 1 or 0
+	end
+	local function IsRuneLocked(runeSlot, otherSlot)
+		local start = GetRuneCooldown(runeSlot)
+		if start == 0 then
+			-- This rune is ready, so it isn't locked.
+			return false
+		else
+			local start2 = GetRuneCooldown(otherSlot)
+			if start2 == 0 then
+				-- The other rune is ready, so this one is ready or recharging.
+				return false
+			end
+			if start > start2 then
+				-- Both runes aren't ready, and this one has a start time after the other,
+				-- so it must be locked.
+				return true
+			end
+		end
+		
+		return false
+	end
+	local function IsRuneRecharging(runeSlot, otherSlot)
+		local start = GetRuneCooldown(runeSlot)
+		if start == 0 then
+			-- This rune is ready, so it isn't recharging.
+			return false
+		else
+			local start2 = GetRuneCooldown(otherSlot)
+			if start2 == 0 then
+				-- The other rune is ready, and this one isn't, so it must be recharging.
+				return true
+			end
+			if start < start2 then
+				-- Both runes aren't ready, and this one has a start time before the other,
+				-- so it must be recharging (the other one is locked).
+				return true
+			end
+		end
+		
+		return false
+	end
+
+	ConditionCategory:RegisterCondition(15.1, "RUNES2", {
+		text = L["CONDITIONPANEL_RUNES"],
+		tooltip = L["CONDITIONPANEL_RUNES_DESC3"] .. "\r\n\r\n" .. L["CONDITIONPANEL_RUNES_DESC_GENERIC"],
+		unit = false,
+		runesConfig = true,
+		min = 0,
+		max = 6,
+		icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
+		Env = {
+			GetRuneType = GetRuneType,
+			GetRuneCount = GetRuneCount,
+		},
+		funcstr = runeFuncstrHelper,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE"),
+				ConditionObject:GenerateNormalEventString("RUNE_TYPE_UPDATE")
+		end,
+		hidden = pclass ~= "DEATHKNIGHT",
+	})
+	ConditionCategory:RegisterCondition(15.2, "RUNESRECH", {
+		text = L["CONDITIONPANEL_RUNESRECH"],
+		tooltip = L["CONDITIONPANEL_RUNESRECH_DESC"] .. "\r\n\r\n" .. L["CONDITIONPANEL_RUNES_DESC_GENERIC"],
+		unit = false,
+		runesConfig = true,
+		min = 0,
+		max = 3,
+		icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost",
+		Env = {
+			GetRuneType = GetRuneType,
+			GetRuneCount = GetRuneCount,
+			IsRuneRecharging = IsRuneRecharging,
+		},
+		funcstr = runeFuncstrHelper,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE"),
+				ConditionObject:GenerateNormalEventString("RUNE_TYPE_UPDATE")
+		end,
+		hidden = pclass ~= "DEATHKNIGHT",
+	})
+		
+	local offset = TMW.tContains({"ROGUE", "DRUID"}, pclass) and 0 or 62
+	ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
+		text = L["CONDITIONPANEL_COMBO"],
+		min = 0,
+		max = 10,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\ability_rogue_eviscerate",
+		tcoords = CNDT.COMMON.standardtcoords,
+		Env = {
+			GetComboPoints = GetComboPoints,
+		},
+		funcstr = [[GetComboPoints("player", "target") c.Operator c.Level]],
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "COMBO_POINTS")
+		end,
+	})
+end
 
 ConditionCategory:RegisterSpacer(30)
 ConditionCategory:RegisterSpacer(70)
@@ -284,79 +502,81 @@ ConditionCategory:RegisterSpacer(70)
 
 -- Public Class Resources that don't need percent/abs/max conditions
 local S = 80
-local offset = pclass == "PRIEST" and S or 0
-ConditionCategory:RegisterCondition(90.0 - offset, "INSANITY", {
-	text = INSANITY_POWER,
-	min = 0,
-	max = 100,
-	icon = "Interface\\Icons\\spell_shadow_painandsuffering",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Insanity),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "INSANITY"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "INSANITY")
-	end,
-})
+local offset
+if TMW.isRetail then
+	offset = pclass == "PRIEST" and S or 0
+	ConditionCategory:RegisterCondition(90.0 - offset, "INSANITY", {
+		text = INSANITY_POWER,
+		min = 0,
+		max = 100,
+		icon = "Interface\\Icons\\spell_shadow_painandsuffering",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Insanity),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "INSANITY"),
+				ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "INSANITY")
+		end,
+	})
 
-offset = pclass == "DEMONHUNTER" and S or 0
-ConditionCategory:RegisterCondition(91.0 - offset, "FURY", {
-	text = FURY,
-	min = 0,
-	range = 200,
-	icon = "Interface\\Icons\\ability_warlock_demonicpower",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Fury),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "FURY"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "FURY")
-	end,
-})
-ConditionCategory:RegisterCondition(92.0 - offset, "PAIN", {
-	text = PAIN,
-	min = 0,
-	range = 200,
-	icon = "Interface\\Icons\\ability_demonhunter_torment",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Pain),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "PAIN"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "PAIN")
-	end,
-})
+	offset = pclass == "DEMONHUNTER" and S or 0
+	ConditionCategory:RegisterCondition(91.0 - offset, "FURY", {
+		text = FURY,
+		min = 0,
+		range = 200,
+		icon = "Interface\\Icons\\ability_warlock_demonicpower",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Fury),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "FURY"),
+				ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "FURY")
+		end,
+	})
+	ConditionCategory:RegisterCondition(92.0 - offset, "PAIN", {
+		text = PAIN,
+		min = 0,
+		range = 200,
+		icon = "Interface\\Icons\\ability_demonhunter_torment",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Pain),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "PAIN"),
+				ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "PAIN")
+		end,
+	})
 
-offset = pclass == "SHAMAN" and S or 0
-ConditionCategory:RegisterCondition(93 - offset, "MAELSTROM", {
-	text = MAELSTROM_POWER,
-	min = 0,
-	max = 150,
-	icon = "Interface\\Icons\\spell_shaman_maelstromweapon",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Maelstrom),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "MAELSTROM"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "MAELSTROM")
-	end,
-})
+	offset = pclass == "SHAMAN" and S or 0
+	ConditionCategory:RegisterCondition(93 - offset, "MAELSTROM", {
+		text = MAELSTROM_POWER,
+		min = 0,
+		max = 150,
+		icon = "Interface\\Icons\\spell_shaman_maelstromweapon",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Maelstrom),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "MAELSTROM"),
+				ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "MAELSTROM")
+		end,
+	})
 
-offset = pclass == "DRUID" and S or 0
-ConditionCategory:RegisterCondition(94 - offset, "LUNAR_POWER", {
-	text = LUNAR_POWER,
-	min = 0,
-	max = 130, -- Druid tier set increases this to 130
-	icon = "Interface\\Icons\\talentspec_druid_balance",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.LunarPower),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "LUNAR_POWER"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "LUNAR_POWER")
-	end,
-})
-
+	offset = pclass == "DRUID" and S or 0
+	ConditionCategory:RegisterCondition(94 - offset, "LUNAR_POWER", {
+		text = LUNAR_POWER,
+		min = 0,
+		max = 130, -- Druid tier set increases this to 130
+		icon = "Interface\\Icons\\talentspec_druid_balance",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.LunarPower),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "LUNAR_POWER"),
+				ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "LUNAR_POWER")
+		end,
+	})
+end
 
 ConditionCategory:RegisterSpacer(100)
 
@@ -414,7 +634,7 @@ ConditionCategory:RegisterCondition(102.2, "DEFAULT_MAX", {
 	end,
 })
 
-offset = TMW.tContains({"PALADIN", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID", "MONK"}, pclass) and S or 0
+offset = TMW.tContains({"PALADIN", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID", "MONK", TMW.isWrath and "HUNTER" or nil}, pclass) and S or 0
 ConditionCategory:RegisterCondition(103.0 - offset, "MANA", {
 	text = MANA .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,
@@ -646,61 +866,64 @@ ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
 
 
 
-ConditionCategory:RegisterSpacer(200)
 
-ConditionCategory:RegisterCondition(208.0, "ALTPOWER", {
-	text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_PERCENT"],
-	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
-	percent = true,
-	formatter = TMW.C.Formatter.PERCENT,
-	min = 0,
-	max = 100,
-	icon = "Interface\\Icons\\spell_shadow_mindflay",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(Enum.PowerType.Alternate, Enum.PowerType.Alternate),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "ALTERNATE"),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "ALTERNATE"),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", CNDT:GetUnit(c.Unit))
-	end,
-})
-ConditionCategory:RegisterCondition(208.1, "ALTPOWER_ABS", {
-	text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
-	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	min = 0,
-	range = 200,
-	icon = "Interface\\Icons\\spell_shadow_mindflay",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPower(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Alternate),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "ALTERNATE"),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", CNDT:GetUnit(c.Unit))
-	end,
-})
-ConditionCategory:RegisterCondition(208.2, "ALTPOWER_MAX", {
-	text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_MAX"],
-	tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	min = 0,
-	range = 200,
-	icon = "Interface\\Icons\\spell_shadow_mindflay",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = ([[UnitPowerMax(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Alternate),
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "ALTERNATE"),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", CNDT:GetUnit(c.Unit))
-	end,
-})
+if TMW.isRetail then
+	ConditionCategory:RegisterSpacer(200)
+	-- Altpower was added in cata
+	ConditionCategory:RegisterCondition(208.0, "ALTPOWER", {
+		text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_PERCENT"],
+		tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
+		percent = true,
+		formatter = TMW.C.Formatter.PERCENT,
+		min = 0,
+		max = 100,
+		icon = "Interface\\Icons\\spell_shadow_mindflay",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(Enum.PowerType.Alternate, Enum.PowerType.Alternate),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "ALTERNATE"),
+				ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "ALTERNATE"),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", CNDT:GetUnit(c.Unit))
+		end,
+	})
+	ConditionCategory:RegisterCondition(208.1, "ALTPOWER_ABS", {
+		text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
+		tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
+		formatter = TMW.C.Formatter.COMMANUMBER,
+		min = 0,
+		range = 200,
+		icon = "Interface\\Icons\\spell_shadow_mindflay",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Alternate),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", CNDT:GetUnit(c.Unit), "ALTERNATE"),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", CNDT:GetUnit(c.Unit))
+		end,
+	})
+	ConditionCategory:RegisterCondition(208.2, "ALTPOWER_MAX", {
+		text = L["CONDITIONPANEL_ALTPOWER"] .. " - " .. L["CONDITIONPANEL_MAX"],
+		tooltip = L["CONDITIONPANEL_ALTPOWER_DESC"],
+		formatter = TMW.C.Formatter.COMMANUMBER,
+		min = 0,
+		range = 200,
+		icon = "Interface\\Icons\\spell_shadow_mindflay",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPowerMax(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Alternate),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_MAXPOWER", CNDT:GetUnit(c.Unit), "ALTERNATE"),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_SHOW", CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_BAR_HIDE", CNDT:GetUnit(c.Unit))
+		end,
+	})
+end
 
 
 
@@ -755,33 +978,6 @@ ConditionCategory:RegisterCondition(0, "SHADOW_ORBS", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Spell_Priest_Shadoworbs",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = "DEPRECATED",
-})
-ConditionCategory:RegisterCondition(0, "RUNES", {
-	text = RUNES,
-	--tooltip = L["CONDITIONPANEL_RUNES_DESC"],
-	unit = false,
-	nooperator = true,
-	noslide = true,
-	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
-	funcstr = "DEPRECATED",
-})
-ConditionCategory:RegisterCondition(0, "RUNESRECH", {
-	text = L["CONDITIONPANEL_RUNESRECH"],
-	tooltip = L["CONDITIONPANEL_RUNESRECH_DESC"],
-	unit = false,
-	min = 0,
-	max = 3,
-	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Frost",
-	funcstr = "DEPRECATED",
-})
-ConditionCategory:RegisterCondition(0, "RUNESLOCK", {
-	text = L["CONDITIONPANEL_RUNESLOCK"],
-	tooltip = L["CONDITIONPANEL_RUNESLOCK_DESC"],
-	unit = false,
-	min = 0,
-	max = 3,
-	icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Unholy",
 	funcstr = "DEPRECATED",
 })
 ConditionCategory:RegisterCondition(0, "BURNING_EMBERS", {

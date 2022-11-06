@@ -153,7 +153,7 @@ ConditionCategory:RegisterCondition(6,    "REACT", {
 	defaultUnit = "target",
 	texttable = {[1] = L["ICONMENU_HOSTILE"], [2] = L["ICONMENU_FRIEND"]},
 	nooperator = true,
-	icon = "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood",
+	icon = TMW.isRetail and "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood" or "Interface\\Icons\\spell_holy_blessingofstamina",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		UnitIsEnemy = UnitIsEnemy,
@@ -187,26 +187,27 @@ ConditionCategory:RegisterCondition(6.2,  "ISPLAYER", {
 	end,
 })
 
-ConditionCategory:RegisterCondition(6.7,  "INCHEALS", {
-	text = L["INCHEALS"],
-	tooltip = L["INCHEALS_DESC"],
-	range = 50000,
-	icon = "Interface\\Icons\\spell_holy_flashheal",
-	tcoords = CNDT.COMMON.standardtcoords,
-	formatter = TMW.C.Formatter.COMMANUMBER,
-	Env = {
-		UnitGetIncomingHeals = UnitGetIncomingHeals,
-	},
-	funcstr = function(c)
-		return [[(UnitGetIncomingHeals(c.Unit) or 0) c.Operator c.Level]]
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_HEAL_PREDICTION", CNDT:GetUnit(c.Unit))
-	end,
-})
-
+if UnitGetIncomingHeals then
+	ConditionCategory:RegisterCondition(6.7,  "INCHEALS", {
+		text = L["INCHEALS"],
+		tooltip = L["INCHEALS_DESC"],
+		range = 50000,
+		icon = "Interface\\Icons\\spell_holy_flashheal",
+		tcoords = CNDT.COMMON.standardtcoords,
+		formatter = TMW.C.Formatter.COMMANUMBER,
+		Env = {
+			UnitGetIncomingHeals = UnitGetIncomingHeals,
+		},
+		funcstr = function(c)
+			return [[(UnitGetIncomingHeals(c.Unit) or 0) c.Operator c.Level]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("UNIT_HEAL_PREDICTION", CNDT:GetUnit(c.Unit))
+		end,
+	})
+end
 
 
 ConditionCategory:RegisterSpacer(6.9)
@@ -536,31 +537,34 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["NightElf"] = {order = 3, text = Name("Night Elf")},
 			["Gnome"] = {order = 4, text = Name("Gnome")},
 			["Draenei"] = {order = 5, text = Name("Draenei")},
-			["Worgen"] = {order = 6, text = Name("Worgen")},
-
-			["VoidElf"] = {order = 6.1, text = Name("Void Elf")},
-			["LightforgedDraenei"] = {order = 6.2, text = Name("Lightforged Draenei")},
-			["DarkIronDwarf"] = {order = 6.3, text = Name("Dark Iron Dwarf")},
-			["KulTiran"] = {order = 6.4, text = Name("Kul Tiran")},
-			["Mechagnome"] = {order = 6.5, text = Name("Mechagnome"), space = true},
 
 			["Orc"] = {order = 7, text = Name("Orc")},
 			["Scourge"] = {order = 8, text = Name("Undead")},
 			["Tauren"] = {order = 9, text = Name("Tauren")},
 			["Troll"] = {order = 10, text = Name("Troll")},
 			["BloodElf"] = {order = 11, text = Name("Blood Elf")},
-			["Goblin"] = {order = 12, text = Name("Goblin")},
-
-			["Nightborne"] = {order = 12.1, text = Name("Nightborne")},
-			["HighmountainTauren"] = {order = 12.2, text = Name("Highmountain Tauren")},
-			["MagharOrc"] = {order = 12.3, text = Name("Mag'har Orc")},
-			["ZandalariTroll"] = {order = 12.4, text = Name("Zandalari Troll")},
-			["Vulpera"] = {order = 12.5, text = Name("Vulpera"), space = true},
-
-			["Pandaren"] = {order = 13, text = Name("Pandaren")},
-			["Dracthyr"] = {order = 14, text = Name("Dracthyr")},
-
 		}
+
+		if TMW.isRetail then
+			TMW:CopyTableInPlaceUsingDestinationMeta({
+				["Worgen"] = {order = 6, text = Name("Worgen")},
+				["VoidElf"] = {order = 6.1, text = Name("Void Elf")},
+				["LightforgedDraenei"] = {order = 6.2, text = Name("Lightforged Draenei")},
+				["DarkIronDwarf"] = {order = 6.3, text = Name("Dark Iron Dwarf")},
+				["KulTiran"] = {order = 6.4, text = Name("Kul Tiran")},
+				["Mechagnome"] = {order = 6.5, text = Name("Mechagnome"), space = true},
+				
+				["Goblin"] = {order = 12, text = Name("Goblin")},
+				["Nightborne"] = {order = 12.1, text = Name("Nightborne")},
+				["HighmountainTauren"] = {order = 12.2, text = Name("Highmountain Tauren")},
+				["MagharOrc"] = {order = 12.3, text = Name("Mag'har Orc")},
+				["ZandalariTroll"] = {order = 12.4, text = Name("Zandalari Troll")},
+				["Vulpera"] = {order = 12.5, text = Name("Vulpera"), space = true},
+
+				["Pandaren"] = {order = 13, text = Name("Pandaren")},
+				["Dracthyr"] = {order = 14, text = Name("Dracthyr")},
+			}, bitFlags, true)
+		end
 
 		for token, data in pairs(bitFlags) do
 			data.atlas = TMW:GetRaceIconInfo(token)

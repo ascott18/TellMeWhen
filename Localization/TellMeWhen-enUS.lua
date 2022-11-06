@@ -1374,7 +1374,8 @@ The group of the icon being checked must be shown in order to check the icon.]=]
 L["CONDITIONPANEL_RUNES"] = "Rune Count"
 L["CONDITIONPANEL_RUNES_DESC3"] = [=[Use this condition type to check when the desired number of runes are available.]=]
 L["CONDITIONPANEL_RUNES_CHECK_DESC"] = [=[Check to count this rune type into the total count for the condition.]=]
-
+L["CONDITIONPANEL_RUNES_DESC_GENERIC"] = [=[Each rune is a check button. Check each rune to have it be counted into the conditions.
+The runes in the first row will not match death runes. The runes in the second row are the death rune version of each rune above.]=]
 
 L["CONDITIONPANEL_RUNESRECH"] = "Recharging Rune Count"
 L["CONDITIONPANEL_RUNESRECH_DESC"] = [=[Use this condition type to check when the desired number of runes are recharging.]=]
@@ -1393,6 +1394,7 @@ L["CONDITIONPANEL_CLASS"] = "Unit Class"
 L["CONDITIONPANEL_UNITRACE"] = "Unit Race"
 L["CONDITIONPANEL_UNITSPEC"] = "Unit Specialization"
 L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"] = "Choose Specs..."
+
 L["CONDITIONPANEL_UNITSPEC_DESC"] = [[This condition ONLY works for:
 |cff7fffff-|r Yourself
 |cff7fffff-|r Battleground enemies
@@ -1401,6 +1403,15 @@ L["CONDITIONPANEL_UNITSPEC_DESC"] = [[This condition ONLY works for:
 It does NOT work for: |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t
 |cff7fffff-|r Group members
 |cff7fffff-|r Any other players]]
+
+L["CONDITIONPANEL_UNITSPEC_DESC_WRATH"] = [[This condition ONLY works for:
+|cff7fffff-|r Yourself
+
+It does NOT work for: |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t
+|cff7fffff-|r Group members
+|cff7fffff-|r Enemy players
+|cff7fffff-|r Any other players]]
+
 L["CONDITIONPANEL_CLASSIFICATION"] = "Unit Classification"
 L["CONDITIONPANEL_CLASSIFICATION_DESC"] = "Checks the rare/elite/world boss status of a unit."
 L["CONDITIONPANEL_ROLE"] = "Unit Group Role"
@@ -1437,6 +1448,12 @@ L["CONDITIONPANEL_LASTCAST_ISNTSPELL"] = "Doesn't Match"
 
 L["CONDITIONPANEL_OVERLAYED"] = "Spell activation overlay"
 L["CONDITIONPANEL_OVERLAYED_DESC"] = "Checks if a given spell has the activation overlay effect (the sparkly yellow border on your action bars)."
+
+L["CONDITIONPANEL_CURRENTSPELL"] = "Spell Queued"
+L["CONDITIONPANEL_CURRENTSPELL_DESC"] = "Checks if a given next-swing spell is currently activated."
+
+L["CONDITIONPANEL_AUTOSPELL"] = "Spell Autocasting"
+L["CONDITIONPANEL_AUTOSPELL_DESC"] = "Checks if a given spell or ability is autocasting."
 
 L["CONDITIONPANEL_INTERRUPTIBLE"] = "Interruptible"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
@@ -1518,6 +1535,7 @@ L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_VALUES"] = "Choose Values..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"] = "Choose Types..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSERACE"] = "Choose Races..."
 L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"] = "Choose Classes..."
+L["CONDITIONPANEL_BITFLAGS_CHOOSEVALUES"] = "Choose Values..."
 L["CONDITIONPANEL_BITFLAGS_SELECTED"] = "|cff7fffffSelected|r:"
 L["CONDITIONPANEL_BITFLAGS_NOT"] = "Not"
 L["CONDITIONPANEL_BITFLAGS_ALWAYS"] = "Always True"
@@ -1666,7 +1684,7 @@ L["SPELLCHARGES"] = "Spell charges"
 L["SPELLCHARGES_DESC"] = "Tracks the charges of a spell like %s or %s."
 L["SPELLCHARGETIME"] = "Spell charge time"
 L["SPELLCHARGETIME_DESC"] = "Tracks the time remaining until a spell like %s or %s will regenerate one charge."
-L["SPELLREACTIVITY"] = "Spell reactivity"
+L["SPELLREACTIVITY"] = "Spell Reactivity"
 L["MP5"] = "%d MP5"
 L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the ability, not the cooldown of it."
 L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored."
@@ -2877,23 +2895,23 @@ L["DR-Taunt"] = "Taunts"
 L["DR-Disorient"] = "Disorients"
 L["DR-Root"] = "Roots"
 L["DR-Incapacitate"] = "Incapacitates"
---L["DR-RandomStun"] = "Short/Random stuns"
---L["DR-ControlledStun"] = "Controlled stuns"
---L["DR-Horrify"] = "Horrors"
---L["DR-Fear"] = "Fears"
---L["DR-Cyclone"] = "Cyclone"
---L["DR-Scatter"] = "Scatter Shot"
---L["DR-Banish"] = "Banish"
---L["DR-Entrapment"] = "Entrapment"
---L["DR-MindControl"] = "Mind Control"
---L["DR-ShortDisorient"] = "Short Mesmerizes/Disorients"
+L["DR-RandomStun"] = "Short/Random stuns"
+L["DR-ControlledStun"] = "Controlled stuns"
+L["DR-Horrify"] = "Horrors"
+L["DR-Fear"] = "Fears"
+L["DR-Cyclone"] = "Cyclone"
+L["DR-Scatter"] = "Scatter Shot"
+L["DR-Banish"] = "Banish"
+L["DR-Entrapment"] = "Entrapment"
+L["DR-MindControl"] = "Mind Control"
+L["DR-ShortDisorient"] = "Short Mesmerizes/Disorients"
 L["DR-Disarm"] = "Disarms"
---L["DR-RandomRoot"] = "Short/Random roots"
---L["DR-ControlledRoot"] = "Controlled roots"
---L["DR-DragonsBreath"] = "Dragon's Breath"
---L["DR-BindElemental"] = "Bind Elemental"
---L["DR-Charge"] = "Charge"
---L["DR-IceWard"] = "Ice Ward"
+L["DR-RandomRoot"] = "Short/Random roots"
+L["DR-ControlledRoot"] = "Controlled roots"
+L["DR-Charge"] = "Charge"
+L["DR-CheapShot"] = "Cheap Shot / Pounce"
+L["DR-Hibernate"] = "Hibernate"
+L["DR-OpenerStun"] = "Opener Stun"
 
 L["CONDITIONPANEL_CREATURETYPE"] = "Unit Creature Type"
 L["CONDITIONPANEL_CREATURETYPE_LABEL"] = "Creature Type(s)"

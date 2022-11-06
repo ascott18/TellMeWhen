@@ -24,7 +24,7 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local Type = TMW.Classes.IconType:New("meta")
 Type.name = L["ICONMENU_META"]
 Type.desc = L["ICONMENU_META_DESC"]
-Type.menuIcon = "Interface\\Icons\\LevelUpIcon-LFD"
+Type.menuIcon = "Interface\\AddOns\\TellMeWhen\\Textures\\levelupicon-lfd"
 Type.AllowNoName = true
 Type.canControlGroup = true
 
@@ -451,7 +451,7 @@ function Type:Setup(icon)
 
 	icon:SetInfo("state; texture", 
 		0, 
-		"Interface\\Icons\\LevelUpIcon-LFD"
+		"Interface\\AddOns\\TellMeWhen\\Textures\\levelupicon-lfd"
 	)
 	
 	-- DONT DO THIS! (manual updates) ive tried for many hours to get it working,

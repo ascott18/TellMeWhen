@@ -163,8 +163,75 @@ local Cooldowns = setmetatable({}, {__index = function(t, k)
 end})
 
 
+local resetsOnCast, resetsOnAura, spellBlacklist = {}, {}, {}
+if TMW.isWrath then
+resetsOnCast = {
+	[23989] = { -- readiness
+		[19263] = 1, -- Deterrence
+		[5384] = 1, -- Feign
+		-- Freezing Trap
+		[1499] = 1,
+		[14310] = 1,
+		[14311] = 1,
+		-- Frost Trap
+		[13809] = 1,
+		-- Immolation Trap
+		[13795] = 1,
+		[14302] = 1,
+		[14303] = 1,
+		[14304] = 1,
+		[14305] = 1,
+	},
 
-local resetsOnCast = {
+	[12472] = { -- coldsnap
+		-- cone of cold
+		[120] = 1,
+		[8492] = 1,
+		[10159] = 1,
+		[10160] = 1,
+		[10161] = 1,
+
+		-- frost ward
+		[6143] = 1,
+		[8461] = 1,
+		[8462] = 1,
+		[10177] = 1,
+		[28609] = 1,
+		[11189] = 1,
+		[28332] = 1,
+
+		-- frost nova
+		[122] = 1,
+		[865] = 1,
+		[6131] = 1,
+		[10230] = 1,
+
+		-- Ice Block (does this really reset?)
+		[11958] = 1,
+
+		-- Ice Barrier
+		[11426] = 1,
+		[13031] = 1,
+		[13032] = 1,
+		[13033] = 1,
+	},
+	
+	[14185] = { --prep
+		[2094] = 1, -- Blind
+		[5277] = 1, -- Evasion
+		[2983] = 1, -- Sprint
+		[1856] = 1, -- Vanish
+		[8643] = 1, -- Kidney Shot
+		[11286] = 1, -- Gouge
+		[14177] = 1, -- Cold Blood
+		[14183] = 1, -- Premeditation
+		[1766] = 1, -- Kick
+		-- Probably missing some other ones
+	},
+}
+else
+
+resetsOnCast = {
 	
 	[108285] = { -- Call of the Elements
 		[108269] = 1, -- Capacitor Totem
@@ -192,7 +259,7 @@ local resetsOnCast = {
 		[33917] = 1,
 	},
 }
-local resetsOnAura = {
+resetsOnAura = {
 	[81162] = { -- Will of the Necropolis
 		[48982] = 1, -- Rune Tap
 	},
@@ -224,9 +291,10 @@ local resetsOnAura = {
 		[103840] = 1, -- Impending Victory
 	},
 }
-local spellBlacklist = {
+spellBlacklist = {
 	[50288] = 1, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
 }
+end
 
 
 function Type:COMBAT_LOG_EVENT_UNFILTERED(e)

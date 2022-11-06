@@ -1,24 +1,38 @@
 ## v10.0.2
-### Bug Fixes
+* Unified codebase for Retail and Wrath versions.
 * Fix #1984 - attempt to index local 'conditionData' (a nil value)
 
 ## v10.0.1
-### Bug Fixes
 * Fix #1974 - Assorted warnings about XML attributes
-* Fix #1977 - Texts.lua:696: bad argument #1 to 'SetEndDelay' (must be a finite number)
 * Fix #1981 - Fix integration with ElvUI's timer text
+* Retail: Fix #1977 - Texts.lua:696: bad argument #1 to 'SetEndDelay' (must be a finite number)
 
 ## v10.0.0
-* Updates for Dragonflight.
+* Retail: Updates for Dragonflight.
 * Improvements to Swing Timers, especially around changes in attack speed (#1947)
 
 ### Bug Fixes
 * #1956 - Fix Loss of Control states being backwards from their labels.
 
+## v9.2.6
+* Wrath: Added Ignore Runes settings for Cooldown and Reactive icon types.
+* Wrath: Added missing items to the Stance condition suggestion list.
+* Wrath: Fix outdated DR categories.
+* Wrath: Restore the Interruptible option to the Spell Cast condition.
+* Wrath: Restored the Unit Controls Vehicle condition.
+* Wrath: #1958 - Fix mismatch of rune types between configuration and actual behavior in the Rune Cooldown icon.
+* Wrath: #1965 - Slam does not reset the swing timer.
+* Wrath: #1955 - Fix dual spec changes not triggering updates when the player has no unspent talent points.
+
+## v9.2.5
+* Fix for Blizzard changing WOW_PROJECT_ID without warning.
+
 ## v9.2.4
+* Wrath: Supports Wrath Classic
 * #1935 - More informative tooltips on "previews" of meta icon components.
 * When exporting an icon, icons referenced by its conditions will be included as related data.
 * When exporting a meta icon that includes an entire group, that group will be included as related data.
+* Wrath: Fix #1938 - The Points in Talent condition would fail to work in some circumstances.
 
 ## v9.2.3
 ### Bug Fixes

@@ -173,6 +173,7 @@ end
 
 local usableData = {}
 local unusableData = {}
+local mindfreeze = strlower(GetSpellInfo(47528))
 local function SpellCooldown_OnUpdate(icon, time)    
 	-- Upvalue things that will be referenced a lot in our loops.
 	local IgnoreRunes, RangeCheck, ManaCheck, GCDAsUnusable, NameArray =
@@ -192,11 +193,12 @@ local function SpellCooldown_OnUpdate(icon, time)
 
 		
 		if duration then
-			if IgnoreRunes and duration == runeCD then
+			if IgnoreRunes and duration == runeCD and iName ~= mindfreeze and iName ~= 47528  then
 				-- DK abilities that are on cooldown because of runes are always reported
-				-- as having a cooldown duration equal to the current rune cooldown duration.
-				-- We use this fact to filter out rune cooldowns. GetSpellCooldown reports with a precision of 
-				-- 3 digits past the decimal, so we need to trim off extra trailing digits from GetRuneCooldown.
+				-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
+				
+				-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
+				-- so it is excluded from this logic.
 				start, duration = 0, 0
 			end
 
@@ -331,6 +333,9 @@ function Type:Setup(icon)
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
 		if icon.IgnoreRunes then
+			if GetRuneType then
+				icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
+			end
 			icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
 		end    
 		if icon.ManaCheck then

@@ -243,7 +243,7 @@ end
 -- [WRAPPER] (no documentation needed)
 Icon.UnregisterAllEvents_Blizz = Icon.UnregisterAllEvents
 function Icon.UnregisterAllEvents(icon, event)
-	-- UnregisterAllEvents_Blizz uses a metric fuckton of CPU, so don't do it.
+	-- UnregisterAllEvents_Blizz uses a lot of CPU, so don't do it.
 	-- Instead, keep track of events that we register, and unregister them by hand.
 	
 	if icon.registeredEvents then
@@ -1094,7 +1094,7 @@ function Icon.Setup(icon)
 			icon:InheritDataFromIcon(icon.group.Controller)
 		else
 			-- In config mode, give controller icons the special texture,
-			-- and make them slightly transparent for the hell of it.
+			-- and make them slightly transparent for the fun of it.
 			icon:SetInfo("texture; alphaOverride",
 				"Interface\\AddOns\\TellMeWhen\\Textures\\Controlled",
 				icon.Enabled and 0.95 or 0.5

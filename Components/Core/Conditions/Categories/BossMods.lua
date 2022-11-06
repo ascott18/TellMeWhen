@@ -33,6 +33,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	local Encounters = {}
 
 	local function scan()
+		if not EJ_GetNumTiers then return end
+
 		for t = 1, EJ_GetNumTiers() do
 			EJ_SelectTier(t)
 			local tierName = EJ_GetTierInfo(t)
@@ -444,7 +446,7 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 		if not DBM then
 			return "Interface\\Icons\\INV_Misc_QuestionMark"
 		end
-		return "Interface\\AddOns\\DBM-Core\\textures\\GuardTower"
+		return "Interface\\AddOns\\DBM-Core\\textures\\dbm_airhorn"
 	end,
 
 	tcoords = CNDT.COMMON.standardtcoords,
@@ -548,7 +550,7 @@ ConditionCategory:RegisterCondition(11,	 "DBM_ENGAGED", {
 		if not DBM then
 			return "Interface\\Icons\\INV_Misc_QuestionMark"
 		end
-		return "Interface\\AddOns\\DBM-Core\\textures\\OrcTower"
+		return "Interface\\AddOns\\DBM-Core\\textures\\dbm_airhorn"
 	end,
 
 	tcoords = CNDT.COMMON.standardtcoords,

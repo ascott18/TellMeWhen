@@ -1,5 +1,39 @@
 ﻿<Ui>
 	
+	<CheckButton name="TellMeWhen_ConditionEditorRuneCheckTemplate" virtual="true">
+		<!-- Wrath classic only -->
+		<KeyValues>
+			<KeyValue key="tmwClass" type="string" value="Config_Conditions_Rune"/>
+		</KeyValues>
+
+		<Size x="33" y="29"/>
+		<Layers>
+			<Layer level="OVERLAY">
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="texture">
+					<Size x="26" y="26"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				if not TMW.C.Config_Conditions_Rune then return end
+				TMW:CInit(self)
+			</OnLoad>
+		</Scripts>
+
+		<CheckedTexture parentKey="Check" file="Interface/RAIDFRAME/ReadyCheck-Ready">
+			<Size x="27" y="27"/>
+			<Anchors>
+				<Anchor point="CENTER"/>
+			</Anchors>
+		</CheckedTexture>
+	</CheckButton>
+
 	<CheckButton name="TellMeWhen_ConditionEditorParenthesisTemplate" hidden="true" virtual="true">
 		<KeyValues>
 			<KeyValue key="tmwClass" type="string" value="Config_Conditions_Paren"/>
@@ -303,6 +337,80 @@
 					</OnSizeChanged>
 				</Scripts>
 			</EditBox>
+			<Frame parentKey="Runes" hidden="true">
+				<Size x="1" y="58"/>
+				<Anchors>
+					<Anchor point="TOP" y="-7"/>
+					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="11" />
+				</Anchors>
+				<Frames>
+					<CheckButton parentKey="rune1" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="1">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Blood"/>
+							<KeyValue key="key" type="number" value="1"/>
+							<KeyValue key="death" type="boolean" value="false"/>
+						</KeyValues>
+						<Anchors>
+							<Anchor point="LEFT"/>
+							<Anchor point="BOTTOM" relativePoint="CENTER"/>
+						</Anchors>
+					</CheckButton>
+
+		 			<CheckButton parentKey="rune2" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="2">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Frost"/>
+							<KeyValue key="key" type="number" value="3"/>
+							<KeyValue key="death" type="boolean" value="false"/>
+						</KeyValues>
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.rune1" relativePoint="RIGHT" x="4"/>
+						</Anchors>
+					</CheckButton>
+
+					<CheckButton parentKey="rune3" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="3">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Unholy"/>
+							<KeyValue key="key" type="number" value="2"/>
+							<KeyValue key="death" type="boolean" value="false"/>
+						</KeyValues>
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.rune2" relativePoint="RIGHT" x="4"/>
+						</Anchors>
+					</CheckButton>
+
+
+					<CheckButton parentKey="rune4" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="4">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Blood"/>
+							<KeyValue key="key" type="number" value="4"/>
+							<KeyValue key="death" type="boolean" value="true"/>
+						</KeyValues>
+						<Anchors>
+							<Anchor point="TOP" relativeKey="$parent.rune1" relativePoint="BOTTOM"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton parentKey="rune5" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="5">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Frost"/>
+							<KeyValue key="key" type="number" value="6"/>
+							<KeyValue key="death" type="boolean" value="true"/>
+						</KeyValues>
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.rune4" relativePoint="RIGHT" x="4"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton parentKey="rune6" inherits="TellMeWhen_ConditionEditorRuneCheckTemplate" id="6">
+						<KeyValues>
+							<KeyValue key="runeType" type="string" value="Unholy"/>
+							<KeyValue key="key" type="number" value="5"/>
+							<KeyValue key="death" type="boolean" value="true"/>
+						</KeyValues>
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.rune5" relativePoint="RIGHT" x="4"/>
+						</Anchors>
+					</CheckButton>
+				</Frames>
+			</Frame>
 
 			<Frame parentKey="BitFlags" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>

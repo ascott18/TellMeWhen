@@ -20,16 +20,14 @@
 				<Scripts>
 					<OnLoad>
 						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 4)
-						
-						self:SetText(TMW.L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"])
-						
-						self:SetWidth(self:GetTextWidth() + 15)
 					</OnLoad>
 					<OnClick>
 						local ics = TMW.CI.ics
 						
 						ics.Type = "cooldown"
-						ics.Name = 75
+						ics.Name = self:GetParent().spellIdToApply or 75
+						ics.BarDisplay_BarGCD = true
+						ics.ClockGCD = true
 						
 						TMW.IE:LoadIcon(1)
 					</OnClick>
@@ -42,11 +40,29 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
+
 				self:SetTitle(GetSpellInfo(75))
 				self.Text:SetText(TMW.L["ICONTYPE_SWINGTIMER_TIP"])
-				
-				self.Text:SetWidth(self:GetWidth() - 15)
-				self:SetHeight(self.Text:GetStringHeight() + 43)
+				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
+					local settings = self:GetSettingTable()
+					local supplementalData = panelInfo.supplementalData
+					local spellID = supplementalData.spellID
+					local name = GetSpellInfo(spellID)
+					local descriptiveName = supplementalData.descriptiveName or name
+					self.spellIdToApply = spellID
+
+					self:SetTitle(descriptiveName)
+					self.Text:SetText(TMW.L["ICONTYPE_SWINGTIMER_TIP"]:format(
+						descriptiveName, TMW.L["ICONMENU_SPELLCOOLDOWN"], TMW.L["ICONMENU_SPELLCOOLDOWN"], name, spellID
+					))
+					self.ApplySettings:SetText(TMW.L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"]:format(
+						descriptiveName
+					))
+					self.ApplySettings:SetWidth(self.ApplySettings:GetTextWidth() + 15)
+
+					self.Text:SetWidth(self:GetWidth() - 15)
+					self:SetHeight(self.Text:GetStringHeight() + 43)
+				end)
 			</OnLoad>
 			<OnSizeChanged>
 				self:SetHeight(self.Text:GetStringHeight() + 43)
