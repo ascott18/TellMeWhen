@@ -1144,7 +1144,7 @@ function CNDT:TryUpgradeSettings(Conditions)
 	for n, conditionSettings in TMW:InNLengthTable(Conditions) do
 		local Type = conditionSettings.Type
 		local conditionData = CNDT.ConditionsByType[Type]
-		if conditionData.upgrade then
+		if conditionData and conditionData.upgrade then
 			conditionData.upgrade(conditionSettings)
 		end
 	end
