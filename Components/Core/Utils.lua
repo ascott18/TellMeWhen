@@ -1683,8 +1683,11 @@ else
 	TMW.GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
 	TMW.GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
 	TMW.GetNumSpecializations = GetNumSpecializations
-	TMW.GetMaxClassID = GetMaxClassID
+	TMW.GetMaxClassID = GetNumClasses
 	TMW.GetClassInfo = GetClassInfo
+	function TMW.GetCurrentSpecializationID() 
+		return GetSpecializationInfo(GetSpecialization())
+	end
 	function TMW.GetCurrentSpecializationRole()
 		-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
 		-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
