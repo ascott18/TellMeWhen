@@ -185,7 +185,6 @@ TMW:NewClass("ChatEdit_InsertLink_Hook"){
 	end,
 }
 
-local old_ChatEdit_InsertLink = ChatEdit_InsertLink
 local function hook_ChatEdit_InsertLink(text)	
 	if type(text) ~= "string" then
 		return false
@@ -203,14 +202,9 @@ local function hook_ChatEdit_InsertLink(text)
 	return false
 end
 
-function ChatEdit_InsertLink(...)
-	local executionSuccess, insertSuccess = TMW.safecall(hook_ChatEdit_InsertLink, ...)
-	if executionSuccess and insertSuccess then
-		return insertSuccess
-	else
-		return old_ChatEdit_InsertLink(...)
-	end
-end
+hooksecurefunc("ChatEdit_InsertLink", function(...)
+	TMW.safecall(hook_ChatEdit_InsertLink, ...)
+end)
 
 
 
