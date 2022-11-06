@@ -1,3 +1,7 @@
+## v10.0.2
+### Bug Fixes
+* Fix #1984 - attempt to index local 'conditionData' (a nil value)
+
 ## v10.0.1
 ### Bug Fixes
 * Fix #1974 - Assorted warnings about XML attributes
