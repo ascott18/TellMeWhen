@@ -133,7 +133,7 @@ Components\Core\Conditions\Categories\Talents.lua
 Components\Core\Conditions\Categories\Location.lua
 Components\Core\Conditions\Categories\PlayerAttributes.lua
 Components\Core\Conditions\Categories\UnitAttributes.lua
-Components\Core\Conditions\Categories\PlayerCombatStats.lua
+Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua
 Components\Core\Conditions\Categories\Currencies.lua
 Components\Core\Conditions\Categories\BossMods.lua
 Components\Core\Conditions\Categories\Misc.lua
