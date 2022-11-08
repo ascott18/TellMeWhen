@@ -62,6 +62,7 @@ local swingSpells =
 		[strlowerCache[GetSpellInfo(845)]] = 1, -- Cleave
 		[strlowerCache[GetSpellInfo(6807)]] = 1, -- Maul
 		[strlowerCache[GetSpellInfo(2973)]] = 1, -- Raptor Strike
+		[strlowerCache[GetSpellInfo(56815)]] = 1, -- Rune Strike
 	} 
 	or {}
 
