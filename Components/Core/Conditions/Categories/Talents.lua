@@ -392,38 +392,61 @@ if C_Traits then
 
 	function CNDT:PLAYER_TALENT_UPDATE()
 		wipe(Env.TalentMap)
+
+		if C_ClassTalents.GetStarterBuildActive() then
+			Env.CurrentLoadoutName = TALENT_FRAME_DROP_DOWN_STARTER_BUILD
+		else
+			local realLoadout = C_ClassTalents.GetLastSelectedSavedConfigID(TMW.GetCurrentSpecializationID())
+			if realLoadout then
+				local realConfigInfo = C_Traits.GetConfigInfo(realLoadout)
+				if realConfigInfo then
+					Env.CurrentLoadoutName = realConfigInfo.name or ""
+				else
+					Env.CurrentLoadoutName = TALENT_FRAME_DROP_DOWN_DEFAULT
+				end
+			else
+				Env.CurrentLoadoutName = TALENT_FRAME_DROP_DOWN_DEFAULT
+			end
+		end
+		Env.CurrentLoadoutName = Env.CurrentLoadoutName:lower()
+
 		-- A "config" is a loadout - either the current one (maybe unsaved), or a saved one.
+		-- NOTE: C_ClassTalents.GetActiveConfigID returns a generic config for the curent class spec,
+		-- not the actual currently selected loadout (which is only returned by )
 		local configID = C_ClassTalents.GetActiveConfigID()
-		local configInfo = C_Traits.GetConfigInfo(configID)
+		if configID then
+			-- will be nil on fresh characters
+			local configInfo = C_Traits.GetConfigInfo(configID)
 
-		-- I have no idea why the concept of trees exists.
-		-- It seems that every class has a single tree, regardless of spec.
-		for _, treeID in pairs(configInfo.treeIDs) do
+			-- I have no idea why the concept of trees exists.
+			-- It seems that every class has a single tree, regardless of spec.
+			for _, treeID in pairs(configInfo.treeIDs) do
 
-			-- Nodes are circles/square in the talent tree.
-			for _, nodeID in pairs(C_Traits.GetTreeNodes(treeID)) do
-				local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
+				-- Nodes are circles/square in the talent tree.
+				for _, nodeID in pairs(C_Traits.GetTreeNodes(treeID)) do
+					local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID)
 
-				-- Entries are the choices in each node.
-				-- Choice nodes have two, otherwise there's only one.
-				for _, entryID in pairs(nodeInfo.entryIDs) do
-					local entryInfo = C_Traits.GetEntryInfo(configID, entryID)
-					-- Definition seems a useless layer between entry and spellID.
-					-- Blizzard's in-game API help about them is currently completely wrong
-					-- about what fields it has. Currently the only field I see is spellID.
-					local definitionInfo = C_Traits.GetDefinitionInfo(entryInfo.definitionID)
-					local spellID = definitionInfo.spellID
-					local name, _, tex = GetSpellInfo(spellID)
+					-- Entries are the choices in each node.
+					-- Choice nodes have two, otherwise there's only one.
+					for _, entryID in pairs(nodeInfo.entryIDs) do
+						local entryInfo = C_Traits.GetEntryInfo(configID, entryID)
+						-- Definition seems a useless layer between entry and spellID.
+						-- Blizzard's in-game API help about them is currently completely wrong
+						-- about what fields it has. Currently the only field I see is spellID.
+						local definitionInfo = C_Traits.GetDefinitionInfo(entryInfo.definitionID)
+						local spellID = definitionInfo.spellID
+						local name, _, tex = GetSpellInfo(spellID)
 
-					-- The ranks are stored on the node, but we
-					-- have to make sure that we're looking at the ranks for the
-					-- currently selected entry for the talent.
-					local ranks = nodeInfo.activeEntry and nodeInfo.activeEntry.entryID == entryID and nodeInfo.ranksPurchased or 0
+						-- The ranks are stored on the node, but we
+						-- have to make sure that we're looking at the ranks for the
+						-- currently selected entry for the talent.
+						local ranks = nodeInfo.activeEntry and nodeInfo.activeEntry.entryID == entryID and nodeInfo.ranksPurchased or 0
 
-					local lower = name and strlowerCache[name]
-					if lower then
-						Env.TalentMap[lower] = ranks
-						Env.TalentMap[spellID] = ranks
+						local lower = name and strlowerCache[name]
+						if lower then
+							Env.TalentMap[lower] = ranks
+							Env.TalentMap[spellID] = ranks
+						end
 					end
 				end
 			end
@@ -453,6 +476,34 @@ if C_Traits then
 		end,
 	})
 
+	local initUpdate = false
+	local function setupTalentEvents()
+		-- this is handled externally because TalentMap is so extensive a process,
+		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
+		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+		CNDT:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_TALENT_UPDATE")
+		-- TRAIT_TREE_CHANGED needed for detecting some loadout changes,
+		-- including when changing between two identical loadouts.
+		-- Except obnoxiously the data isn't available immediately.
+		CNDT:RegisterEvent("TRAIT_TREE_CHANGED", function() 
+			C_Timer.After(0.5, function()
+				CNDT:PLAYER_TALENT_UPDATE()
+			end)
+		end)
+		if not initUpdate then
+			initUpdate = true
+			CNDT:PLAYER_TALENT_UPDATE()
+		end
+	end
+
+	local talentEvents = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+			ConditionObject:GenerateNormalEventString("TRAIT_CONFIG_UPDATED"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+	end
+
 	ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
 		text = L["UIPANEL_PTSINTAL"],
 		min = 0,
@@ -465,22 +516,30 @@ if C_Traits then
 		icon = "Interface\\Icons\\ability_revendreth_priest",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
-			-- this is handled externally because TalentMap is so extensive a process,
-			-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
-			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
-			CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
-			CNDT:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_TALENT_UPDATE")
-			CNDT:PLAYER_TALENT_UPDATE()
-		
+			setupTalentEvents()
 			return [[(TalentMap[c.NameFirst] or 0) c.Operator c.Level]]
 		end,
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
-				ConditionObject:GenerateNormalEventString("TRAIT_CONFIG_UPDATED"),
-				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
-		end,
+		events = talentEvents,
 	})
+	
+	ConditionCategory:RegisterCondition(9.1,	 "TALENTLOADOUT", {
+		text = L["UIPANEL_TALENTLOADOUT"],
+		bool = true,
+		unit = PLAYER,
+		name = function(editbox)
+			editbox:SetTexts(L["UIPANEL_TALENTLOADOUT"], L["CONDITIONPANEL_NAMETOOLTIP"])
+		end,
+		useSUG = "talentloadout",
+		allowMultipleSUGEntires = true,
+		icon = "Interface\\Icons\\ability_ardenweald_druid",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(c)
+			setupTalentEvents()
+			return [[BOOLCHECK(MULTINAMECHECK( CurrentLoadoutName ))]]
+		end,
+		events = talentEvents,
+	})
+
 elseif GetNumTalentTabs then
 	-- Wrath
 	Env.TalentMap = {}

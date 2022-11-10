@@ -146,6 +146,47 @@ function Module:Entry_AddToList_1(f, id)
 end
 Module.Entry_Colorize_1 = TMW.NULLFUNC
 
+if C_ClassTalents then
+	local Module = SUG:NewModule("talentloadout", SUG:GetModule("default"))
+	Module.noMin = true
+	Module.showColorHelp = false
+	Module.noTexture = true
+	Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
+	Module.table = {}
+
+	function Module:Table_Get()
+		wipe(self.table)
+
+		tinsert(self.table, TALENT_FRAME_DROP_DOWN_STARTER_BUILD)
+		tinsert(self.table, TALENT_FRAME_DROP_DOWN_DEFAULT)
+
+		for i = TMW.GetNumSpecializations(), 1, -1 do
+			local specID = TMW.GetSpecializationInfo(i)
+			for _, configId in pairs(C_ClassTalents.GetConfigIDsBySpecID(specID)) do
+				local config = C_Traits.GetConfigInfo(configId)
+				if config and config.name then
+					tinsert(self.table, config.name)
+				end
+			end
+		end
+
+		return self.table
+	end
+	function Module:Table_GetNormalSuggestions(suggestions, tbl)
+		local lastName = SUG.lastName
+
+		for _, name in pairs(self.table) do
+			if strfind(strlower(name), lastName) then
+				suggestions[#suggestions + 1] = name
+			end
+		end
+	end
+	function Module:Entry_AddToList_1(f, name)
+		f.Name:SetText(name)
+		f.insert = name
+		f.tooltiptitle = name
+	end
+end
 
 if GetPvpTalentInfoByID then
 	local Module = SUG:NewModule("pvptalents", SUG:GetModule("talents"))

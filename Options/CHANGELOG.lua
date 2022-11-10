@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 TMW.CHANGELOG = [==[
 ## v10.0.2
 * Unified codebase for Retail and Wrath versions.
+* Added Talent Loadout condition.
 * Fix #1984 - attempt to index local 'conditionData' (a nil value)
 * Wrath: #1996 - Add Rune Strike as a swing timer trigger
 
