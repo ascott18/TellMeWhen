@@ -344,7 +344,7 @@ function IE:GetRealNames(Name)
 		end
 
 		local dur = ""
-		if CI_typeData.DurationSyntax or durations[k] > 0 then
+		if CI_typeData.DurationSyntax or durations[k] and durations[k] > 0 then
 			dur = ": "..TMW:FormatSeconds(durations[k])
 		end
 
