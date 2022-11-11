@@ -317,6 +317,8 @@ L["ICONMENU_ICD_DESC"] = [=[Tracks the cooldown of a proc or a similar effect.
 
 L["ICONMENU_CAST"] = "Spell Cast"
 L["ICONMENU_CAST_DESC"] = [=[Tracks spell casts and channels.]=]
+L["ICONMENU_CAST_PERCENT"] = "Spell Cast Percent Completion"
+L["ICONMENU_CAST_PERCENT_DESC"] = [=[Tracks the completion percentage of spell casts and channels.]=]
 
 L["ICONMENU_UNITCNDTIC"] = "Unit Condition Icon"
 L["ICONMENU_UNITCNDTIC_DESC"] = [=[Tracks the state of conditions on a number of units.

@@ -7,8 +7,9 @@ TMW.CHANGELOG = [==[
 * Unified codebase for Retail and Wrath versions.
 * #1992 - Added Talent Loadout condition.
 * #1749 - Item Cooldown conditions no longer treat unusable items as having a cooldown of zero.
-* Fix #1984 - attempt to index local 'conditionData' (a nil value)
+* #1758 - Added Spell Cast Percent Completion condition
 * Wrath: #1996 - Add Rune Strike as a swing timer trigger
+* Fix #1984 - attempt to index local 'conditionData' (a nil value)
 
 ## v10.0.1
 * Fix #1974 - Assorted warnings about XML attributes

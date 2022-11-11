@@ -818,6 +818,8 @@ Env.UnitCast = function(unit, level, matchname)
 	end
 end
 Env.UnitCastTime = function(unit, level, matchname)
+	-- This function was added for use in Lua conditions.
+	-- There's intentionally no condition using it.
 	local name, _, _, _, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
 		name, _, _, _, endTime, _, notInterruptible = UnitChannelInfo(unit)
@@ -835,8 +837,42 @@ Env.UnitCastTime = function(unit, level, matchname)
 		return name ~= matchname and remaining or 0
 	end
 end
+Env.UnitCastPercent = function(unit, matchname)
+	local name, _, _, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+	if not name then
+		name, _, _, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
+	end
+	if not name then 
+		return 0, nil
+	end
+	name = strlowerCache[name]
+	if matchname == "" and name then
+		matchname = name
+	end
+	local remaining = endTime and endTime/1000 - TMW.time or 0
+	local duration = endTime/1000 - start/1000
+	-- second return value is the percent-per-second, used by anticipate
+	return 1 - (remaining / duration), 1 / duration
+end
+local castEvents = function(ConditionObject, c)
+	return
+		ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_START", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_STOP", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_SUCCEEDED", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_FAILED", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_FAILED_QUIET", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_DELAYED", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTED", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit)),
+		TMW.isWrath and "false" or ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
+		TMW.isWrath and "false" or ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
+end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
+	text = L["ICONMENU_CAST_DESC"],
 	min = 0,
 	max = 2,
 	levelChecks = true,
@@ -854,22 +890,30 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	end,
 	useSUG = true,
 	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameString))]], -- LOWER is some gsub magic
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_START", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_STOP", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_SUCCEEDED", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_FAILED", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_FAILED_QUIET", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_DELAYED", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTED", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit)),
-			TMW.isWrath and "false" or ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
-			TMW.isWrath and "false" or ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
+	events = castEvents,
+})
+ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
+	text = L["ICONMENU_CAST_PERCENT"],
+	tooltip = L["ICONMENU_CAST_PERCENT_DESC"],
+	percent = true,
+	formatter = TMW.C.Formatter.PERCENT,
+	min = 0,
+	max = 100,
+	icon = "Interface\\Icons\\Temp",
+	tcoords = CNDT.COMMON.standardtcoords,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_CASTTOMATCH"], L["CONDITIONPANEL_CASTTOMATCH_DESC"])
+		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"])
 	end,
+	useSUG = true,
+	funcstr = [[UnitCastPercent(c.Unit, LOWER(c.NameString)) c.Operator c.Level]],
+	events = castEvents,
+	anticipate = [[
+		local percent, percentPerSecond = UnitCastPercent(c.Unit, LOWER(c.NameString))
+		local VALUE = 
+			percentPerSecond == nil and huge or 
+			((c.Level - percent) / percentPerSecond) + time
+	]],
 })
 
 
