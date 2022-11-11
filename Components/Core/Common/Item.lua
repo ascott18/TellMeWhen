@@ -142,17 +142,21 @@ end
 function Item:GetName()
 	error("This function must be overridden by subclasses")
 end
--- These two functions give the remaining cooldown time for an icon.
+-- These two functions give the remaining cooldown time for an item.
 function Item:GetCooldownDuration()
-	local start, duration = self:GetCooldown()
-	if duration then
+	local start, duration, enable = self:GetCooldown()
+	if enable == 0 then
+		return math.huge
+	elseif duration then
 		return (duration == 0 and 0) or (duration - (TMW.time - start))
 	end
 	return 0
 end
 function Item:GetCooldownDurationNoGCD()
-	local start, duration = self:GetCooldown()
-	if duration then
+	local start, duration, enable = self:GetCooldown()
+	if enable == 0 then
+		return math.huge
+	elseif duration then
 		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (TMW.time - start))
 	end
 	return 0

@@ -528,8 +528,8 @@ ConditionCategory:RegisterCondition(11,	 "ITEMCD", {
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
-		local start, duration = c.Item:GetCooldown()
-		local VALUE = duration and start + (duration - c.Level) or huge
+		local start, duration, enable = c.Item:GetCooldown()
+		local VALUE = enable == 1 and duration and start + (duration - c.Level) or huge
 	]],
 })
 ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
@@ -551,10 +551,12 @@ ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
 			ConditionObject:GenerateNormalEventString("BAG_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
-		local start, duration = c.Item:GetCooldown()
-		local start2, duration2 = c.Item2:GetCooldown()
+		local start, duration, enable = c.Item:GetCooldown()
+		local start2, duration2, enable2 = c.Item2:GetCooldown()
 		local VALUE
-		if duration and duration2 then
+		if enable == 0 or enable2 == 0 then
+			VALUE = huge
+		elseif duration and duration2 then
 			local v1, v2 = start + duration, start2 + duration2
 			VALUE = v1 < v2 and v1 or v2
 		elseif duration then
