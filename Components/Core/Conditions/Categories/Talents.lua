@@ -396,7 +396,8 @@ if C_Traits then
 		if C_ClassTalents.GetStarterBuildActive() then
 			Env.CurrentLoadoutName = TALENT_FRAME_DROP_DOWN_STARTER_BUILD
 		else
-			local realLoadout = C_ClassTalents.GetLastSelectedSavedConfigID(TMW.GetCurrentSpecializationID())
+			local spec = TMW.GetCurrentSpecializationID()
+			local realLoadout = spec and C_ClassTalents.GetLastSelectedSavedConfigID(spec)
 			if realLoadout then
 				local realConfigInfo = C_Traits.GetConfigInfo(realLoadout)
 				if realConfigInfo then
