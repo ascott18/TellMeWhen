@@ -10,6 +10,7 @@ TMW.CHANGELOG = [==[
 * #1758 - Added Spell Cast Percent Completion condition
 * Wrath: #1996 - Add Rune Strike as a swing timer trigger
 * Fix #1984 - attempt to index local 'conditionData' (a nil value)
+* Fix #1998 - Error with Raid Warning (Fake) text notifications
 
 ## v10.0.1
 * Fix #1974 - Assorted warnings about XML attributes
