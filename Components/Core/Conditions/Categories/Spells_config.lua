@@ -39,7 +39,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.Name:SetText(L["GCD"])
 		f.ID:SetText(nil)
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = spellID
 
 		f.insert = "GCD"
@@ -84,7 +84,7 @@ if TMW.COMMON.TotemRanks then
 		f.insert2 = spellID
 			
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = spellID
 
 		local _, _, tex = GetSpellInfo(spellID)

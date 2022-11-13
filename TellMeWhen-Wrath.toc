@@ -102,6 +102,7 @@ Components\Core\BaseClasses\IconDataProcessorComponent.lua
 Components\Core\Spells\Equivalencies-Wrath.lua
 Components\Core\Spells\Spells.lua
 Components\Core\Spells\AuraCache.lua
+Components\Core\Spells\ClassSpellCache.lua
 Components\Core\Spells\ClassSpellCache-Wrath.lua
 
 # Components\Core\Suggester\includes.core.xml

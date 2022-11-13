@@ -151,6 +151,24 @@ function Module:Table_GetSorter()
 	return self.Sorter_ByName, self.Sorter_Bucket
 end
 
+local highlight = CreateFrame("Frame")
+highlight:SetFrameStrata("FULLSCREEN_DIALOG")
+local texture = highlight:CreateTexture(nil, "OVERLAY")
+texture:SetAllPoints()
+texture:SetColorTexture(1, 0, .66, 0.5)
+GameTooltip:HookScript("OnHide", function() 
+	highlight:Hide()
+end)
+local function SetFrameHighlight(_, frame)
+	-- Don't highlight UIParent, it gets annoying.
+	if frame ~= UIParent then
+		highlight:SetAllPoints(frame)
+		highlight:Show()
+	else
+		highlight:Hide()
+	end
+end
+
 function Module:Entry_AddToList_1(f, frame)
 
 	if frame.class == TMW.C.Group then 
@@ -176,26 +194,10 @@ function Module:Entry_AddToList_1(f, frame)
 			addon = "Blizzard"
 		end
 		f.tooltiptext = L["SUG_MODULE_FRAME_LIKELYADDON"]:format(addon)
+
 		f.Name:SetText(name)
 	end
-end
 
-local highlight = CreateFrame("Frame")
-highlight:SetFrameStrata("FULLSCREEN_DIALOG")
-highlight:SetScript("OnUpdate", function()
-	if not GameTooltip:IsVisible() then
-		highlight:Hide()
-	end
-end)
-local texture = highlight:CreateTexture(nil, "OVERLAY")
-texture:SetAllPoints()
-texture:SetColorTexture(1, 0, .66, 0.5)
-function GameTooltip:TMW_SetFrameHighlight(frame)
-	-- Don't highlight UIParent, it gets annoying.
-	if frame ~= UIParent then
-		highlight:SetAllPoints(frame)
-		highlight:Show()
-	else
-		highlight:Hide()
-	end
+	f.tooltipmethod = SetFrameHighlight
+	f.tooltiparg = {frame}
 end

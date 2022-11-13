@@ -330,7 +330,7 @@ function Module:Entry_AddToList_1(f, tagName)
 	f.insert = tagName
 	f.overrideInsertName = L["SUG_INSERTTEXTSUB"]
 	
-	f.tooltipmethod = "TMW_SetDogTag"
+	f.tooltipmethod = TMW.GameTooltip_SetDogTag
 	f.tooltiparg = tagName
 end
 function Module.Sorter(a, b)
@@ -400,12 +400,12 @@ local function generateArgFormattedTagString(tag, tagData)
 	return retstring
 end
 
-function GameTooltip:TMW_SetDogTag(tagName)
+function TMW.GameTooltip_SetDogTag(self, tagName)
 	local tag = "[" .. tagName .. "]"
 	local colorized = DogTag:ColorizeCode(tag)
 		
-	GameTooltip:AddLine(colorized, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
-	GameTooltip:AddLine(" ", 1, 1, 1, false)
+	self:AddLine(colorized, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+	self:AddLine(" ", 1, 1, 1, false)
 	
 	local numTags = tagName:find(":") or 0
 	local desc = ""
@@ -422,19 +422,19 @@ function GameTooltip:TMW_SetDogTag(tagName)
 			local tag_colorized = generateArgFormattedTagString(tag, tagData)
 		
 			if tag_colorized then
-				GameTooltip:AddLine(tag_colorized .. " |cff888888- " .. ns .. "", HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
-				GameTooltip:AddLine(doc or "<???>", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+				self:AddLine(tag_colorized .. " |cff888888- " .. ns .. "", HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b, false)
+				self:AddLine(doc or "<???>", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
 
 				for i, v in TMW:Vararg((";"):split(tagData.example)) do
 					local tag, result = v:trim():match("^(.*) => \"(.*)\"$")
 					result = "\"|cffffffff" .. result .. "\""
 
 					local example = "   • " .. DogTag:ColorizeCode(tag) .. " => " .. result
-					GameTooltip:AddLine(example, 1, 1, 1, false)
+					self:AddLine(example, 1, 1, 1, false)
 				end
 			end
 			if i ~= numTags then
-				GameTooltip:AddLine(" ", 1, 1, 1, false)
+				self:AddLine(" ", 1, 1, 1, false)
 			end
 		end
 	end

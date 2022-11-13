@@ -371,7 +371,7 @@ if GetGlyphSocketInfo then
 		f.insert = name
 		f.insert2 = spellID
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = spellID
 
 		f.Icon:SetTexture(tex)

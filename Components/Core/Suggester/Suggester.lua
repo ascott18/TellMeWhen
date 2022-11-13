@@ -1283,7 +1283,7 @@ function Module:Entry_AddToList_1(f, id)
 		f.Name:SetText(name)
 		f.ID:SetText(id)
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = id
 
 		if TMW.EquivFirstIDLookup[name] then
@@ -1328,7 +1328,7 @@ function Module:Entry_AddToList_1(f, id)
 		f.Name:SetText(name)
 		f.ID:SetText(id)
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = id
 
 		f.insert = id
@@ -1454,7 +1454,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.insert = equiv
 		f.overrideInsertName = L["SUG_INSERTEQUIV"]
 
-		f.tooltipmethod = "TMW_SetEquiv"
+		f.tooltipmethod = TMW.GameTooltip_SetEquiv
 		f.tooltiparg = equiv
 
 		f.Icon:SetTexture(GetSpellTexture(id))
@@ -1526,7 +1526,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.insert = equiv
 		f.overrideInsertName = L["SUG_INSERTEQUIV"]
 
-		f.tooltipmethod = "TMW_SetEquiv"
+		f.tooltipmethod = TMW.GameTooltip_SetEquiv
 		f.tooltiparg = equiv
 
 		f.Icon:SetTexture(GetSpellTexture(firstid))

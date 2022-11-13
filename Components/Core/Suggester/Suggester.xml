@@ -20,10 +20,11 @@
 					GameTooltip:AddLine(self.tooltiptext, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
 				end
 				if self.tooltipmethod and self.tooltiparg then
+					local method = type(self.tooltipmethod) == "function" and self.tooltipmethod or GameTooltip[self.tooltipmethod]
 					if type(self.tooltiparg) == "table" then
-						GameTooltip[self.tooltipmethod](GameTooltip, unpack(self.tooltiparg))
+						method(GameTooltip, unpack(self.tooltiparg))
 					else
-						GameTooltip[self.tooltipmethod](GameTooltip, self.tooltiparg)
+						method(GameTooltip, self.tooltiparg)
 					end
 				end
 
