@@ -483,6 +483,8 @@ if C_Traits then
 		-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
 		CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
 		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+		-- APSC is needed to detect changes in spec - the others are too early I guess?
+		CNDT:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE")
 		CNDT:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_TALENT_UPDATE")
 		-- TRAIT_TREE_CHANGED needed for detecting some loadout changes,
 		-- including when changing between two identical loadouts.
@@ -502,6 +504,7 @@ if C_Traits then
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
 			ConditionObject:GenerateNormalEventString("TRAIT_CONFIG_UPDATED"),
+			ConditionObject:GenerateNormalEventString("ACTIVE_PLAYER_SPECIALIZATION_CHANGED"),
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end
 

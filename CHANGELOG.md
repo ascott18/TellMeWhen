@@ -6,6 +6,7 @@
 * Wrath: #1996 - Add Rune Strike as a swing timer trigger
 * Fix #1984 - attempt to index local 'conditionData' (a nil value)
 * Fix #1998 - Error with Raid Warning (Fake) text notifications
+* Fix #2001 - Points in talent not updating when switching specs
 
 ## v10.0.1
 * Fix #1974 - Assorted warnings about XML attributes
