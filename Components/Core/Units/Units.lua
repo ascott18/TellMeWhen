@@ -686,7 +686,8 @@ if UnitTokenFromGUID then
 	local UnitTokenFromGUID = UnitTokenFromGUID;
 	local UnitGUID = UnitGUID;
 	function UNITS:TestUnit(unit)
-		return UnitTokenFromGUID(UnitGUID(unit))
+		local guid = unit and UnitGUID(unit)
+		return guid and UnitTokenFromGUID(guid)
 	end
 else	
 	local TestTooltip = CreateFrame("GameTooltip")

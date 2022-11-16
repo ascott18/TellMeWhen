@@ -12,10 +12,10 @@
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 100000
+## Interface: 100002
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 100000
-## X-Compatible-With: 100000, 100002, 90200
+## X-Interface: 100002
+## X-Compatible-With: 100002, 90200
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 10855
