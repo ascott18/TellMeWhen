@@ -274,7 +274,7 @@ if TMW.isRetail then
 					for i = 1,Env.EmpoweredNumStages-1,1 do
 						local duration = getStageDuration(i);
 
-						if(duration > CASTBAR_STAGE_DURATION_INVALID) then
+						if(duration > 0) then
 							sumDuration = sumDuration + duration;
 							module.Timers[i] = C_Timer.NewTicker(sumDuration/1000, function()
 								Env.EmpoweredStage = i
