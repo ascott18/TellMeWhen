@@ -37,6 +37,57 @@ local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 Env.GetSpellCooldown = GetSpellCooldown
 Env.GetItemCooldown = GetItemCooldown
 
+Env.EmpoweredCasts = {
+	units = {}
+}
+
+Env.EmpoweredCasts.getStage = function(unit)
+	if not Env.EmpoweredCasts.units[unit] then return 0 end
+	return Env.EmpoweredCasts.units[unit].currentStage
+end
+
+Env.EmpoweredCasts.getNextStageTime = function(unit, skip)
+	local config = Env.EmpoweredCasts.units[unit]
+
+	if not config then
+		return 0
+	end
+
+	return config.stages[config.currentStage + (skip or 1)] or 0
+end
+
+Env.EmpoweredCasts.getSpell = function(unit)
+	if not Env.EmpoweredCasts.units[unit] then return '' end
+	return Env.EmpoweredCasts.units[unit].spellName
+end
+
+Env.EmpoweredCasts.clearUnit = function(unit)
+	local config = Env.EmpoweredCasts.units[unit]
+
+	if not config then return end
+
+	for i=1,config.numStages do 
+		if config.timers[i] then config.timers[i]:Cancel() end
+	end		
+	
+	Env.EmpoweredCasts.units[unit] = nil
+end
+
+Env.EmpoweredCasts.addUnit = function(unit, stages, spell)
+	if (Env.EmpoweredCasts.units[unit]) then
+		Env.EmpoweredCasts.clearUnit(unit)
+	end
+
+	local config = {
+		numStages = stages,
+		spellName = spell,
+		currentStage = 0,
+		stages = {},
+		timers = {}
+	}
+	Env.EmpoweredCasts.units[unit] = config
+	return config
+end
 
 local GetSpellCooldown = GetSpellCooldown
 function Env.CooldownDuration(spell, gcdAsUnusable)
@@ -210,6 +261,78 @@ if TMW.isRetail then
 			local _, _, start, duration = GetSpellCharges(c.NameFirst)
 			local VALUE = duration and start + (duration - c.Level) or huge
 		]],
+	})
+
+	ConditionCategory:RegisterCondition(2.6,  "EMPOWEREDSTAGE", {
+	    text = L["EMPOWEREDSTAGE"],
+	    tooltip = L["EMPOWEREDSTAGE_DESC"],
+		useSUG = "spell",	
+	    name = function(editbox)
+			editbox:SetTexts(L["SPELLTOCOMP1"], L["CNDT_ONLYFIRST"])
+		end,
+	    min = 0,
+	    max = 5,
+	    icon = "Interface\\Icons\\inv_10_enchanting2_elementalswirl_color1",
+
+	    tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(c)
+			local module = CNDT:GetModule("TMWST_EMPOWERED_CAST", true)
+
+			local getStageDuration = function(unit, stage)
+				if stage == numStages then	
+					return GetUnitEmpowerHoldAtMaxTime(unit);
+				else
+					return GetUnitEmpowerStageDuration(unit, stage-1);
+				end
+			end;
+
+			if not module then
+				module = CNDT:NewModule("TMWST_EMPOWERED_CAST", "AceEvent-3.0")
+
+				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START", 
+				function(event, unit)
+					local name, _, _, _, _, _, _, _, _, numStages = UnitChannelInfo(unit);
+
+					local config = Env.EmpoweredCasts.addUnit(unit, numStages , name)
+
+					local sumDuration = 0;
+
+					TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, 0)	
+
+					for i = 1,numStages-1,1 do
+						local duration = getStageDuration(unit, i);
+
+						if(duration > 0) then
+							sumDuration = sumDuration + duration;
+
+							config.timers[i] = C_Timer.NewTicker(sumDuration/1000, function()
+								config.currentStage = i
+								config.stages[i] = sumDuration
+								TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, i)
+							end, 1)
+						end
+					end
+				end)
+
+				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP", 
+				function(event, unit)
+					Env.EmpoweredCasts.clearUnit(unit)
+
+					TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, 0)	
+				end)
+			end
+
+			return [[(strlower(c.NameFirst) == strlower(EmpoweredCasts.getSpell(c.Unit)) and EmpoweredCasts.getStage(c.Unit) c.Operator c.Level)]]
+		end,
+
+		anticipate = [[
+			local VALUE = EmpoweredCasts.getNextStageTime(c.Unit, skip) or huge
+		]],
+
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("TMW_CNDT_EMPOWERED_UPDATED")
+		end,
 	})
 end
 
@@ -901,6 +1024,9 @@ local castEvents = function(ConditionObject, c)
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_START", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_UPDATE", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_STOP", CNDT:GetUnit(c.Unit)),
 		TMW.isWrath and "false" or ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
 		TMW.isWrath and "false" or ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
 end
