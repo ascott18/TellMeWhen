@@ -264,27 +264,22 @@ if TMW.isRetail then
 	    icon = "Interface\\Icons\\inv_10_enchanting2_elementalswirl_color1",
 	    tcoords = CNDT.COMMON.standardtcoords,
 
-	    specificOperators = {["<="] = true, [">="] = true, ["=="]=true, ["~="]=true},
-
-	    applyDefaults = function(conditionData, conditionSettings)
-	        local op = conditionSettings.Operator
-
-	        if not conditionData.specificOperators[op] then
-	            conditionSettings.Operator = "<="
-	        end
-	    end,
-
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("TMW_CNDT_EMPOWERED_UPDATED")
-		end,
 		funcstr = function(c)
 			local module = CNDT:GetModule("TMWST_EMPOWERED_CAST", true)
+
+			local getStageDuration = function(unit, stage)
+				if stage == numStages then	
+					return GetUnitEmpowerHoldAtMaxTime(unit);
+				else
+					return GetUnitEmpowerStageDuration(unit, stage-1);
+				end
+			end;
 
 			if not module then
 				module = CNDT:NewModule("TMWST_EMPOWERED_CAST", "AceEvent-3.0")
 
-				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START", function(event, unit)
+				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START", 
+				function(event, unit)
 					local name, _, _, _, _, _, _, _, _, numStages = UnitChannelInfo(unit);
 
 					local config = Env.EmpoweredCasts.addUnit(unit, numStages , name)
@@ -293,16 +288,8 @@ if TMW.isRetail then
 
 					TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, 0)	
 
-					local getStageDuration = function(stage)
-						if stage == numStages then	
-							return GetUnitEmpowerHoldAtMaxTime(unit);
-						else
-							return GetUnitEmpowerStageDuration(unit, stage-1);
-						end
-					end;
-
 					for i = 1,numStages-1,1 do
-						local duration = getStageDuration(i);
+						local duration = getStageDuration(unit, i);
 
 						if(duration > 0) then
 							sumDuration = sumDuration + duration;
@@ -315,7 +302,8 @@ if TMW.isRetail then
 					end
 				end)
 
-				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP", function(event, unit)
+				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP", 
+				function(event, unit)
 					Env.EmpoweredCasts.clearUnit(unit)
 
 					TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, 0)	
@@ -324,6 +312,11 @@ if TMW.isRetail then
 
 			return [[(strlower(c.NameFirst) == strlower(EmpoweredCasts.getSpell(c.Unit)) and EmpoweredCasts.getStage(c.Unit) c.Operator c.Level)]]
 		end 
+
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("TMW_CNDT_EMPOWERED_UPDATED")
+		end,
 	})
 end
 
