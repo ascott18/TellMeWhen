@@ -37,11 +37,46 @@ local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 Env.GetSpellCooldown = GetSpellCooldown
 Env.GetItemCooldown = GetItemCooldown
 
+Env.EmpoweredCasts = {
+	units = {}
+}
 
-Env.EmpoweredStage = 0
-Env.EmpoweredSpellName = ''
-Env.EmpoweredNumStages = 0
+Env.EmpoweredCasts.getStage = function(unit)
+	if not Env.EmpoweredCasts.units[unit] then return 0 end
+	return Env.EmpoweredCasts.units[unit].currentStage
+end
 
+Env.EmpoweredCasts.getSpell = function(unit)
+	if not Env.EmpoweredCasts.units[unit] then return '' end
+	return Env.EmpoweredCasts.units[unit].spellName
+end
+
+Env.EmpoweredCasts.clearUnit = function(unit)
+	local config = Env.EmpoweredCasts.units[unit]
+
+	if not config then return end
+
+	for i=1,config.numStages do 
+		if config.timers[i] then config.timers[i]:Cancel() end
+	end		
+	
+	Env.EmpoweredCasts.units[unit] = nil
+end
+
+Env.EmpoweredCasts.addUnit = function(unit, stages, spell)
+	if (Env.EmpoweredCasts.units[unit]) then
+		Env.EmpoweredCasts.clearUnit(unit)
+	end
+
+	local config = {
+		numStages = stages,
+		spellName = spell,
+		currentStage = 0,
+		timers = {}
+	}
+	Env.EmpoweredCasts.units[unit] = config
+	return config
+end
 
 local GetSpellCooldown = GetSpellCooldown
 function Env.CooldownDuration(spell, gcdAsUnusable)
@@ -220,7 +255,6 @@ if TMW.isRetail then
 	ConditionCategory:RegisterCondition(2.6,  "EMPOWEREDSTAGE", {
 	    text = L["EMPOWEREDSTAGE"],
 	    tooltip = L["EMPOWEREDSTAGE_DESC"],
-	    unit="player",
 		useSUG = "spell",	
 	    name = function(editbox)
 			editbox:SetTexts(L["SPELLTOCOMP1"], L["CNDT_ONLYFIRST"])
@@ -246,57 +280,49 @@ if TMW.isRetail then
 		end,
 		funcstr = function(c)
 			local module = CNDT:GetModule("TMWST_EMPOWERED_CAST", true)
+
 			if not module then
 				module = CNDT:NewModule("TMWST_EMPOWERED_CAST", "AceEvent-3.0")
-				module.Timers = {}
-				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START", function()
-					local unit = 'player'
-					local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible, spellID, _, numStages = UnitChannelInfo(unit);
 
-					if not name then return end
+				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START", function(event, unit)
+					local name, _, _, _, _, _, _, _, _, numStages = UnitChannelInfo(unit);
 
-					Env.EmpoweredStage = 0
-					Env.EmpoweredSpellName = name
-					Env.EmpoweredNumStages = numStages + 1;
+					local config = Env.EmpoweredCasts.addUnit(unit, numStages , name)
 
 					local sumDuration = 0;
 
-					TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED")	
+					TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, 0)	
 
 					local getStageDuration = function(stage)
-						if stage == Env.EmpoweredNumStages then	
+						if stage == numStages then	
 							return GetUnitEmpowerHoldAtMaxTime(unit);
 						else
 							return GetUnitEmpowerStageDuration(unit, stage-1);
 						end
 					end;
 
-					for i = 1,Env.EmpoweredNumStages-1,1 do
+					for i = 1,numStages-1,1 do
 						local duration = getStageDuration(i);
 
 						if(duration > 0) then
 							sumDuration = sumDuration + duration;
-							module.Timers[i] = C_Timer.NewTicker(sumDuration/1000, function()
-								Env.EmpoweredStage = i
-								TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED")
+
+							config.timers[i] = C_Timer.NewTicker(sumDuration/1000, function()
+								config.currentStage = i
+								TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, i)
 							end, 1)
 						end
 					end
 				end)
 
-				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP", function()
-					for i=1,Env.EmpoweredNumStages do 
-						if module.Timers[i] then module.Timers[i]:Cancel() end
-					end		
-					module.Timers = {}
-					Env.EmpoweredStage = 0
-					Env.EmpoweredSpellName = ''
-					Env.EmpoweredNumStages = 0
-					TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED")	
+				module:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP", function(event, unit)
+					Env.EmpoweredCasts.clearUnit(unit)
+
+					TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, 0)	
 				end)
 			end
 
-			return [[(strlower(c.NameFirst) == strlower(EmpoweredSpellName) and EmpoweredStage c.Operator c.Level)]]
+			return [[(strlower(c.NameFirst) == strlower(EmpoweredCasts.getSpell(c.Unit)) and EmpoweredCasts.getStage(c.Unit) c.Operator c.Level)]]
 		end 
 	})
 end
