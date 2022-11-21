@@ -46,6 +46,16 @@ Env.EmpoweredCasts.getStage = function(unit)
 	return Env.EmpoweredCasts.units[unit].currentStage
 end
 
+Env.EmpoweredCasts.getNextStageTime = function(unit, skip)
+	local config = Env.EmpoweredCasts.units[unit]
+
+	if not config then
+		return 0
+	end
+
+	return config.stages[config.currentStage + (skip or 1)] or 0
+end
+
 Env.EmpoweredCasts.getSpell = function(unit)
 	if not Env.EmpoweredCasts.units[unit] then return '' end
 	return Env.EmpoweredCasts.units[unit].spellName
@@ -72,6 +82,7 @@ Env.EmpoweredCasts.addUnit = function(unit, stages, spell)
 		numStages = stages,
 		spellName = spell,
 		currentStage = 0,
+		stages = {},
 		timers = {}
 	}
 	Env.EmpoweredCasts.units[unit] = config
@@ -262,8 +273,8 @@ if TMW.isRetail then
 	    min = 0,
 	    max = 5,
 	    icon = "Interface\\Icons\\inv_10_enchanting2_elementalswirl_color1",
-	    tcoords = CNDT.COMMON.standardtcoords,
 
+	    tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
 			local module = CNDT:GetModule("TMWST_EMPOWERED_CAST", true)
 
@@ -296,6 +307,7 @@ if TMW.isRetail then
 
 							config.timers[i] = C_Timer.NewTicker(sumDuration/1000, function()
 								config.currentStage = i
+								config.stages[i] = sumDuration
 								TMW:Fire("TMW_CNDT_EMPOWERED_UPDATED", unit, i)
 							end, 1)
 						end
@@ -311,7 +323,11 @@ if TMW.isRetail then
 			end
 
 			return [[(strlower(c.NameFirst) == strlower(EmpoweredCasts.getSpell(c.Unit)) and EmpoweredCasts.getStage(c.Unit) c.Operator c.Level)]]
-		end 
+		end,
+
+		anticipate = [[
+			local VALUE = EmpoweredCasts.getNextStageTime(c.Unit, skip) or huge
+		]],
 
 		events = function(ConditionObject, c)
 			return
