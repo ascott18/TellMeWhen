@@ -129,6 +129,24 @@ local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 		else
 			icon.NextUpdateTime = 0
 		end
+	elseif event == "TMW_UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
+		-- Used by Dragonflight+
+
+		-- arg2: updatedAuras = { [name | id | dispelType] = mightBeMine(bool) }
+		if arg2 then
+			local Hash, OnlyMine = icon.Spells.Hash, icon.OnlyMine
+			for identifier, mightBeMine in next, arg2 do
+				-- TODO: test this
+				-- TODO: test dispel types, including enrage
+				-- TODO: Make versions of Buff_OnUpdate and Buff_OnUpdate_Controller that use the auras module
+				if Hash[identifier] and (mightBeMine or not OnlyMine) then
+					icon.NextUpdateTime = 0
+					return
+				end
+			end
+		else
+			icon.NextUpdateTime = 0
+		end
 	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
@@ -194,6 +212,95 @@ local function BuffCheck_OnUpdate(icon, time)
 	-- We didn't find any units that were missing all the auras being checked.
 	-- So, report the lowest duration aura that we did find.
 	icon:YieldInfo(false, useUnit, iconTexture, count, duration, expirationTime, caster, id)
+end
+
+local GetAuras = TMW.COMMON.Auras and TMW.COMMON.Auras.GetAuras
+local function BuffCheck_OnUpdate_Packed(icon, time)
+
+	-- Upvalue things that will be referenced a lot in our loops.
+	local Units, SpellsArray, KindKey
+	= icon.Units, icon.Spells.Array, icon.KindKey
+	
+	local AbsentAlpha = icon.States[STATE_ABSENT].Alpha
+	local PresentAlpha = icon.States[STATE_PRESENT].Alpha
+
+	-- These variables will hold all the attributes that we pass to YieldInfo().
+	local foundInstance, foundUnit
+	local curSortDur = huge
+
+	for u = 1, #Units do
+		local unit = Units[u]
+		-- UnitSet:UnitExists(unit) is an improved UnitExists() that returns early if the unit
+		-- is known by TMW.UNITS to definitely exist.
+		-- Also don't check dead units since the point of this icon type is to check for
+		-- raid members that are missing raid buffs.
+		if icon.UnitSet:UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+			local auras = GetAuras(unit)
+			local lookup, instances = auras.lookup, auras.instances
+			
+			local foundOnUnit = false
+			
+			for i = 1, #SpellsArray do
+				local spell = SpellsArray[i]
+				local auraInstanceIDs = auras.lookup[spell]
+				if auraInstanceIDs then
+					for auraInstanceID, isMine in next, auraInstanceIDs do
+						local instance = instances[auraInstanceID]
+
+						if 
+							(not KindKey or instance[KindKey])
+						and	(NotOnlyMine or isMine)
+						then
+							foundOnUnit = true
+							local remaining = (instance.expirationTime == 0 and huge) or instance.expirationTime - time
+		
+							-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+							if not foundInstance or remaining < curSortDur then
+								foundInstance = instance
+								foundUnit = unit
+								curSortDur = remaining
+							end
+
+							if PresentAlpha == 0 then
+								-- We aren't displaying present auras,
+								-- so don't bother continuing to look after we've found something.
+								break
+							end
+						end
+					end
+
+					if foundOnUnit and PresentAlpha == 0 then
+						-- We aren't displaying present auras,
+						-- so don't bother continuing to look after we've found something.
+						break
+					end
+				end
+			end
+
+			if not foundOnUnit and AbsentAlpha > 0 and not icon:YieldInfo(true, unit) then
+				-- If we didn't find a matching aura, and the icon is set to show when we don't find something
+				-- then report what unit it was. This is the primary point of the icon - to find units that are missing everything.
+				-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+				return
+			end
+		end
+	end
+
+	-- We didn't find any units that were missing all the auras being checked.
+	-- So, report the lowest duration aura that we did find.
+	if foundInstance then
+		icon:YieldInfo(false, 
+			foundUnit, 
+			foundInstance.icon, 
+			foundInstance.applications, 
+			foundInstance.duration, 
+			foundInstance.expirationTime, 
+			foundInstance.sourceUnit, 
+			foundInstance.spellId
+		)
+	else
+		icon:YieldInfo(false, nil)
+	end
 end
 
 function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, caster, id)
@@ -264,16 +371,22 @@ function Type:Setup(icon)
 
 
 	-- Setup events and update functions.
+	icon:SetUpdateFunction(BuffCheck_OnUpdate)
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-	
-		icon:RegisterEvent("UNIT_AURA")
+		
+		if TMW.COMMON.Auras then
+			TMW.COMMON.Auras:RequestUnits(icon.UnitSet)
+			TMW:RegisterCallback("TMW_UNIT_AURA", Buff_OnEvent, icon)
+
+			icon:SetUpdateFunction(BuffCheck_OnUpdate_Packed)
+		else
+			icon:RegisterEvent("UNIT_AURA")
+		end
 	
 		icon:SetScript("OnEvent", Buff_OnEvent)
 		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Buff_OnEvent, icon)
 	end
-
-	icon:SetUpdateFunction(BuffCheck_OnUpdate)
 
 	icon:Update()
 end

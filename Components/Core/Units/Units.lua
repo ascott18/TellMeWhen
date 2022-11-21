@@ -588,6 +588,7 @@ function UNITS:OnEvent(event, arg1)
 	if (event == "GROUP_ROSTER_UPDATE" or event == "RAID_ROSTER_UPDATE") and UNITS.doTankAndAssistMap then
 		UNITS:UpdateTankAndAssistMap()
 	end
+	
 	if UNITS.doGroupedPlayersMap
 	and (
 		event == "GROUP_ROSTER_UPDATE"

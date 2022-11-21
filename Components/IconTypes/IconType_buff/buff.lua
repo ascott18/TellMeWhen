@@ -227,6 +227,12 @@ Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_SortSettingsWithStacks
 		end,
 	})
 
+	self:CScriptAdd("PanelSetup", function()
+		if TMW.CI.icon:IsGroupController() then
+			self:Hide()
+		end
+	end)
+
 	self:CScriptAdd("DescendantSettingSaved", function()
 		local settings = self:GetSettingTable()
 		if settings.StackSort then
@@ -249,6 +255,8 @@ local NOT_ACTUALLY_SPELLSTEALABLE = {
 
 local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 	if event == "UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
+		-- Still used by Wrath (even though Wrath doesn't have updatedAuras payload yet?)
+
 		-- If the icon is checking the unit, schedule an update for the icon.
 		if arg2 == false and icon.Spells.First ~= "" then
 			-- arg2: isFullUpdate
@@ -276,6 +284,24 @@ local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 						Hash[debuffType == "" and "Enraged" or debuffType]
 					)
 				then
+					icon.NextUpdateTime = 0
+					return
+				end
+			end
+		else
+			icon.NextUpdateTime = 0
+		end
+	elseif event == "TMW_UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
+		-- Used by Dragonflight+
+
+		-- arg2: updatedAuras = { [name | id | dispelType] = mightBeMine(bool) }
+		if arg2 and icon.Spells.First ~= "" then
+			local Hash, OnlyMine = icon.Spells.Hash, icon.OnlyMine
+			for identifier, mightBeMine in next, arg2 do
+				-- TODO: test this
+				-- TODO: test dispel types, including enrage
+				-- TODO: Make versions of Buff_OnUpdate and Buff_OnUpdate_Controller that use the auras module
+				if Hash[identifier] and (mightBeMine or not OnlyMine) then
 					icon.NextUpdateTime = 0
 					return
 				end
@@ -379,6 +405,103 @@ local function Buff_OnUpdate(icon, time)
 	icon:YieldInfo(true, useUnit, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3)
 end
 
+local GetAuras = TMW.COMMON.Auras and TMW.COMMON.Auras.GetAuras
+local function Buff_OnUpdate_Packed(icon, time)
+	-- Upvalue things that will be referenced a lot in our loops.
+	local Units, SpellsArray, DurationSort, StackSort, KindKey
+	    = icon.Units, icon.Spells.Array, icon.Sort, icon.StackSort, icon.KindKey
+	local NotStealable = not icon.Stealable
+	local NotOnlyMine = not icon.OnlyMine
+		
+	-- These variables will hold all the attributes that we pass to YieldInfo().
+	local foundInstance, foundUnit
+	local doesSort = DurationSort or StackSort
+
+	-- Initial values for the vars that track the duration/stack of the aura that currently occupies buffName and related locals.
+	-- If we are sorting by smallest duration, we intitialize these to math.huge so that the first thing we find is definitely smaller.
+	local curSortDur = DurationSort == -1 and huge or 0
+	local curSortStacks = StackSort == -1 and huge or -1
+	
+	for u = 1, #Units do
+		local unit = Units[u]
+		-- UnitSet:UnitExists(unit) is an improved UnitExists() that returns early if the unit
+		-- is known by TMW.UNITS to definitely exist.
+		if icon.UnitSet:UnitExists(unit) then
+			local auras = GetAuras(unit)
+			local lookup, instances = auras.lookup, auras.instances
+
+			for i = 1, #SpellsArray do
+				local spell = SpellsArray[i]
+				local auraInstanceIDs = auras.lookup[spell]
+				if auraInstanceIDs then
+					for auraInstanceID, isMine in next, auraInstanceIDs do
+						local instance = instances[auraInstanceID]
+
+						if 
+							(not KindKey or instance[KindKey])
+						and	(NotOnlyMine or isMine)
+						and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
+						then
+							if DurationSort then
+								local remaining = (instance.expirationTime == 0 and huge) or instance.expirationTime - time
+		
+								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+								if not foundInstance or curSortDur*DurationSort < remaining*DurationSort then
+									foundInstance = instance
+									foundUnit = unit
+									curSortDur = remaining
+								end
+							elseif StackSort then
+								local stack = instance.applications or 0
+		
+								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+								if not foundInstance or curSortStacks*StackSort < stack*StackSort then
+									foundInstance = instance
+									foundUnit = unit
+									curSortStacks = stack
+								end
+							else
+								-- We aren't sorting, and we found something. use it.
+								foundInstance = instance
+								foundUnit = unit
+								break
+							end
+						end
+					end
+
+					if foundInstance and not doesSort then
+						break -- break spells loop
+					end
+				end
+			end
+
+			if foundInstance and not doesSort then
+				break -- break unit loop
+			end
+		end
+	end
+	
+	-- sourceunit may end up stale if UNIT_AURA doesnt trigger when the sourceunit gets assigned a new unitid?
+	-- todo: switch HandleYieldedInfo to accept an instance
+	if foundInstance then
+		icon:YieldInfo(
+			true, 
+			foundUnit, 
+			foundInstance.icon, 
+			foundInstance.applications, 
+			foundInstance.duration, 
+			foundInstance.expirationTime, 
+			foundInstance.sourceUnit, 
+			foundInstance.spellId, 
+			foundInstance.points[1],
+			foundInstance.points[2],
+			foundInstance.points[3]
+		)
+	else
+		icon:YieldInfo(true, nil)
+	end
+end
+
 local function Buff_OnUpdate_Controller(icon, time)
 	
 	-- Upvalue things that will be used in our loops.
@@ -430,6 +553,104 @@ local function Buff_OnUpdate_Controller(icon, time)
 	-- Signal the group controller that we are at the end of our data harvesting.
 	icon:YieldInfo(false)
 end
+
+local function auraInstanceCompare(a,b)
+	return a.auraInstanceID < b.auraInstanceID
+end
+local binaryInsert = TMW.binaryInsert
+local function Buff_OnUpdate_Controller_Packed(icon, time)
+	
+	-- Upvalue things that will be used in our loops.
+	local Units, NameFirst, SpellsArray, KindKey
+	= icon.Units, icon.Spells.First, icon.Spells.Array, icon.KindKey
+	local NotStealable = not icon.Stealable
+	local NotOnlyMine = not icon.OnlyMine
+	
+	for u = 1, #Units do
+		local unit = Units[u]
+		-- UnitSet:UnitExists(unit) is an improved UnitExists() that returns early if the unit
+		-- is known by TMW.UNITS to definitely exist.
+		if icon.UnitSet:UnitExists(unit) then
+			local auras = GetAuras(unit)
+			local lookup, instances = auras.lookup, auras.instances
+
+			if NameFirst == '' then
+				-- I don't feel bad about allocation here because this OnUpdate
+				-- method is always 100% event driven. We have to sort here because otherwise new auras will jump around.
+				local results = {}
+				for auraInstanceID, instance in next, instances do
+					local sourceUnit = instance.sourceUnit
+					
+					if 
+						(not KindKey or instance[KindKey])
+					and	(NotOnlyMine or sourceUnit == "player" or sourceUnit == "pet")
+					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
+					then
+						binaryInsert(results, instance, auraInstanceCompare)
+					end
+				end
+
+				for i = 1, #results do
+					local instance = results[i]
+					if not icon:YieldInfo(
+						true, 
+						unit, 
+						instance.icon, 
+						instance.applications, 
+						instance.duration, 
+						instance.expirationTime, 
+						instance.sourceUnit, 
+						instance.spellId, 
+						instance.points[1],
+						instance.points[2],
+						instance.points[3]
+					) then
+						-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
+						return
+					end
+				end
+			else
+				for i = 1, #SpellsArray do
+					local spell = SpellsArray[i]
+					local auraInstanceIDs = auras.lookup[spell]
+					if auraInstanceIDs then
+						for auraInstanceID, isMine in next, auraInstanceIDs do
+							local instance = instances[auraInstanceID]
+
+							if 
+								(not KindKey or instance[KindKey])
+							and	(NotOnlyMine or isMine)
+							and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
+							then
+								
+								if not icon:YieldInfo(
+									true, 
+									unit, 
+									instance.icon, 
+									instance.applications, 
+									instance.duration, 
+									instance.expirationTime, 
+									instance.sourceUnit, 
+									instance.spellId, 
+									instance.points[1],
+									instance.points[2],
+									instance.points[3]
+								) then
+									-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
+									return
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- Signal the group controller that we are at the end of our data harvesting.
+	icon:YieldInfo(false)
+end
+
 function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3)
 	local Units = icon.Units
 
@@ -575,6 +796,12 @@ function Type:Setup(icon)
 		icon.Filter = icon.Filter .. "|PLAYER"
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
+	icon.KindKey = nil
+	if icon.BuffOrDebuff == "HELPFUL" then
+		icon.KindKey = "isHelpful" 
+	elseif icon.BuffOrDebuff == "HARMFUL" then
+		icon.KindKey = "isHarmful" 
+	end
 
 	-- There are lots of spells (RPPM enchants) that don't report a source.
 	-- Because of this, you can't track them while OnlyMine is enabled.
@@ -609,19 +836,30 @@ function Type:Setup(icon)
 
 
 	-- Setup events and update functions.
-	if icon.UnitSet.allUnitsChangeOnEvent then
-		icon:SetUpdateMethod("manual")
-		
-		icon:RegisterEvent("UNIT_AURA")
-	
-		icon:SetScript("OnEvent", Buff_OnEvent)
-		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Buff_OnEvent, icon)
-	end
 
 	if icon:IsGroupController() then
 		icon:SetUpdateFunction(Buff_OnUpdate_Controller)
 	else
 		icon:SetUpdateFunction(Buff_OnUpdate)
+	end
+
+	if icon.UnitSet.allUnitsChangeOnEvent then
+		icon:SetUpdateMethod("manual")
+		
+		if TMW.COMMON.Auras then
+			TMW.COMMON.Auras:RequestUnits(icon.UnitSet)
+			TMW:RegisterCallback("TMW_UNIT_AURA", Buff_OnEvent, icon)
+
+			icon:SetUpdateFunction(
+				icon:IsGroupController() and Buff_OnUpdate_Controller_Packed 
+				or Buff_OnUpdate_Packed
+			)
+		else
+			icon:RegisterEvent("UNIT_AURA")
+		end
+	
+		icon:SetScript("OnEvent", Buff_OnEvent)
+		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Buff_OnEvent, icon)
 	end
 
 	icon:Update()

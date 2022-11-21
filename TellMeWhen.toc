@@ -114,6 +114,7 @@ Components\Core\Common\SwingTimerMonitor.lua
 Components\Core\Common\UpdateTableManager.lua
 Components\Core\Common\PlayerNames.lua
 Components\Core\Common\Item.lua
+Components\Core\Common\Auras.lua
 
 # Components\Core\Common\DogTags\includes.core.xml
 Components\Core\Common\DogTags\DogTags.lua
