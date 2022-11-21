@@ -16,6 +16,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: "Validate Version"
+        run: |
+          if [[ "$(grep -hroP '## Version.*' --exclude-dir=.release --include="*.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
+            grep -rnP '## Version.*' --exclude-dir=.release --include="*.toc" . | cat
+            echo "More than 1 distinct ##Version found in .toc files." 1>&2
+            exit 1
+          fi;
+
       - name: "Validate TOC Wrath"
         run: |
           if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="*-Wrath.toc" . | sort --unique | wc -l)" -gt 1 ]]; then

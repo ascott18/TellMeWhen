@@ -20,6 +20,9 @@ local print = TMW.print
 local pairs, type, ipairs, bit, select = 
       pairs, type, ipairs, bit, select
 
+local GetClassInfo = TMW.GetClassInfo
+local GetMaxClassID = TMW.GetMaxClassID
+
 local _, pclass = UnitClass("Player")
 
 
@@ -83,9 +86,9 @@ function ClassSpellCache:GetPlayerSpells()
 			if TMW.tContains(raceNames, race) then
 				if classReq ~= 0 then
 					-- Verify that it is valid for this class.
-					for classID = 1, MAX_CLASSES do
+					for classID = 1, GetMaxClassID() do
 						local name, token = GetClassInfo(classID)
-						if token == pclass and bit.band(bit.lshift(1, classID-1), classReq) > 0 then
+						if name and token == pclass and bit.band(bit.lshift(1, classID-1), classReq) > 0 then
 							PlayerSpells[spellID] = 1
 							break
 						end
@@ -195,9 +198,9 @@ function TMW.GameTooltip_SetSpellByIDWithClassIcon(self, spellID)
 
 			-- Find the classes that it is valid for.
 			if classReq ~= 0 then
-				for classID = 1, MAX_CLASSES do
+				for classID = 1, GetMaxClassID() do
 					local name, token = GetClassInfo(classID)
-					if bit.band(bit.lshift(1, classID-1), classReq) > 0 then
+					if name and bit.band(bit.lshift(1, classID-1), classReq) > 0 then
 						secondIcon = secondIcon .. " " .. getClassIconString(token)
 					end
 				end
@@ -228,7 +231,7 @@ end
 function ClassSpellCache:TMW_DB_INITIALIZED()
 	local SpellData = self.SpellData
 
-	for classID, spellList in ipairs(SpellData) do
+	for classID, spellList in pairs(SpellData) do
 		local name, token, classID = GetClassInfo(classID)
 
 		if name then

@@ -27,13 +27,16 @@ local wipe =
       wipe
 local GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo = 
       GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo
-local GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses, GetClassInfo = 
-      GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses, GetClassInfo
+local GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses = 
+      GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
       GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec
 local UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID =
 	  UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID
 	  
+local GetClassInfo = TMW.GetClassInfo
+local GetMaxClassID = TMW.GetMaxClassID
+
 local ConditionCategory = CNDT:GetCategory("TALENTS", 1.4, L["CNDTCAT_TALENTS"], true, false)
 
 
@@ -92,8 +95,8 @@ ConditionCategory:RegisterCondition(0.1,  "UNITSPEC", {
 	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
 	bitFlags = (function()
 		local t = {}
-		for i = 1, TMW.GetMaxClassID() do
-			local _, class, classID = TMW.GetClassInfo(i)
+		for i = 1, GetMaxClassID() do
+			local _, class, classID = GetClassInfo(i)
 			if classID then
 				specNameToRole[class] = {}
 				for j = 1, TMW.GetNumSpecializationsForClassID(classID) do
@@ -184,8 +187,8 @@ ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"],
 	bitFlags = (function()
 		local t = {}
-		for classID = 1, TMW.GetMaxClassID() do
-			local name, token = TMW.GetClassInfo(classID)
+		for classID = 1, GetMaxClassID() do
+			local name, token = GetClassInfo(classID)
 			if name then
 				t[classID] = {
 					order = classID,
@@ -761,7 +764,7 @@ if IsInJailersTower then
 	end
 	function AnimaPowWatcher:OnLocationUpdate()
 		if IsInJailersTower() and not self.watching then
-			self:RegisterEvent("UNIT_AURA")
+			self:RegisterUnitEvent("UNIT_AURA", "player")
 			self.watching = true
 			self:UNIT_AURA(nil, "player")
 		elseif not IsInJailersTower() and self.watching then
