@@ -1,6 +1,5 @@
 name: Bug report
 description: Report a problem with TellMeWhen
-title: ''
 labels: defect
 body:
   - type: dropdown
