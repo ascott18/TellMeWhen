@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 TMW.CHANGELOG = [==[
 ## v10.0.3
 * Fix ClassSpellCache.lua:171: attempt to index field 'SpellData' (a nil value)
+* Fix #2019 - Expired totems are now treated as absent by the totem icon type, even if the wow API says they still exist.
 * Wrath: Fix #2011 - PlayerNames.lua:100 attempt to concatenate field '?' (a nil value) 
 * Wrath: Fix #2016 - "Unknown class DRUID"
 * Wrath: Fix #2006 - Totems conditions once again function against any totem rank.
