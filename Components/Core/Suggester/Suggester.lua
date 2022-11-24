@@ -88,6 +88,7 @@ function SUG:DoSuggest()
 	end
 
 	wipe(SUGpreTable)
+	suggestedForModule = SUG.CurrentModule
 
 	local tbl = SUG.CurrentModule:Table_Get() or {}
 
@@ -103,17 +104,8 @@ function SUG:DoSuggest()
 		Table_GetSpecialSuggestions(SUG.CurrentModule, SUGpreTable)
 	end
 
-	suggestedForModule = SUG.CurrentModule
 	SUG.tabIndex = 1
 	SUG:SuggestingComplete(1)
-end
-
-local function progressCallback(countdown)
-	-- This is called for each step of TMW.shellSortDeferred.
-	SUG:SuggestingComplete()
-
-	SUG.SuggestionList.blocker:Show()
-	SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"] .. " " .. countdown)
 end
 
 local buckets_meta = {__index = function(t, k)
@@ -123,10 +115,15 @@ end}
 local buckets = setmetatable({}, buckets_meta)
 
 function SUG:SuggestingComplete(doSort)
+	if suggestedForModule ~= SUG.CurrentModule then
+		TMW:Debug("SUG module changed mid-suggestion")
+		return
+	end
+
 	SUG.SuggestionList.blocker:Hide()
 	SUG.SuggestionList.Header:SetText(SUG.CurrentModule.headerText)
-	if doSort and not SUG.CurrentModule.dontSort then
 
+	if doSort and not SUG.CurrentModule.dontSort then
 		local sorter, sorterBucket = SUG.CurrentModule:Table_GetSorter()
 
 		if sorterBucket then
@@ -166,17 +163,8 @@ function SUG:SuggestingComplete(doSort)
 			buckets_meta.__mode = 'kv'
 
 		else
-			SUG.SuggestionList.blocker:Show()
-			SUG.SuggestionList.Header:SetText(L["SUGGESTIONS_SORTING"])
-
-			TMW.shellsortDeferred(SUGpreTable, sorter, nil, SUG.SuggestingComplete, SUG, progressCallback)
-			return
+			sort(SUGpreTable, sorter)
 		end
-	end
-
-	if suggestedForModule ~= SUG.CurrentModule then
-		TMW:Debug("SUG module changed mid-suggestion")
-		return
 	end
 
 	-- Each module should maintain a cached list of invalid entries
@@ -1229,10 +1217,10 @@ function Module:Sorter_Bucket(suggestions, buckets)
 		elseif ClassSpellLookup[id] then
 			tinsert(buckets[3], id)
 		else
-			local auraSoruce = AuraCache_Cache[id]
-			if auraSoruce == 2 then
+			local auraSource = AuraCache_Cache[id]
+			if auraSource == 2 then
 				tinsert(buckets[4], id)
-			elseif auraSoruce == 1 then
+			elseif auraSource == 1 then
 				tinsert(buckets[5], id)
 			else
 				if SUGIsNumberInput then
