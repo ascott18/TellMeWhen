@@ -171,7 +171,7 @@ function TMW.GameTooltip_SetSpellByIDWithClassIcon(self, spellID)
 	if classToken then
 		local secondIcon = ""
 		if classToken == "PET" then
-			classToken = self.SpellData.PET[spellID]
+			classToken = ClassSpellCache.SpellData.PET[spellID]
 			local icon
 			if classToken == "WARLOCK" then
 				icon = "spell_shadow_metamorphosis"
@@ -187,7 +187,7 @@ function TMW.GameTooltip_SetSpellByIDWithClassIcon(self, spellID)
 			classToken = nil
 
 
-			local data = self.SpellData.RACIAL[spellID]
+			local data = ClassSpellCache.SpellData.RACIAL[spellID]
 			-- There are class restrictions on the spell.
 			local raceNames = data[1]
 			local classReq = data[2]
@@ -213,7 +213,7 @@ function TMW.GameTooltip_SetSpellByIDWithClassIcon(self, spellID)
 		textLeft1:SetText( 
 			classIcon ..
 			secondIcon .. " " ..
-			textLeft1:GetText()
+			(textLeft1:GetText() or "")
 		)
 	end
 
@@ -231,17 +231,19 @@ end
 function ClassSpellCache:TMW_DB_INITIALIZED()
 	local SpellData = self.SpellData
 
-	for classID, spellList in pairs(SpellData) do
-		local name, token, classID = GetClassInfo(classID)
+	for classID, spellList in pairs(CopyTable(SpellData)) do
+		if type(classID) == "number" then
+			local name, token, classID = GetClassInfo(classID)
 
-		if name then
-			local spellDict = {}
-			for k, v in pairs(spellList) do
-				spellDict[v] = true
+			if name then
+				local spellDict = {}
+				for k, v in pairs(spellList) do
+					spellDict[v] = true
+				end
+
+				SpellData[token] = spellDict
+				SpellData[classID] = nil
 			end
-
-			SpellData[token] = spellDict
-			SpellData[classID] = nil
 		end
 	end
 

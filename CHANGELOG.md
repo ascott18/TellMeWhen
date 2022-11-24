@@ -1,3 +1,7 @@
+## v10.0.3
+* Fix ClassSpellCache.lua:171: attempt to index field 'SpellData' (a nil value)
+* Wrath: Fix "Unknown class DRUID"
+
 ## v10.0.2
 * Unified codebase for Retail and Wrath versions.
 * #1992 - Added Talent Loadout condition.
