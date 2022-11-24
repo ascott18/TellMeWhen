@@ -2502,7 +2502,7 @@
 					<OnLoad>
 						TMW:CInit(self)
 						
-						self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 11, "")
+						self:SetFont("Interface/Addons/TellMeWhen/Fonts/RobotoMono-Regular.ttf", 11, "")
 
 						self:MakeScrollable(true, 2, 7)
 

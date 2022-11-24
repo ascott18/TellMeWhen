@@ -76,6 +76,7 @@ end
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
 
 LSM:Register("font", "Open Sans Regular", "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf")
+LSM:Register("font", "Roboto Mono", "Interface/Addons/TellMeWhen/Fonts/RobotoMono-Regular.ttf")
 LSM:Register("font", "Vera Mono", "Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf")
 
 -- Standalone versions of these libs are LoD
