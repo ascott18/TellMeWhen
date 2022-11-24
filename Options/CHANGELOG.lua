@@ -5,8 +5,9 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 TMW.CHANGELOG = [==[
 ## v10.0.3
 * Fix ClassSpellCache.lua:171: attempt to index field 'SpellData' (a nil value)
-* Wrath: Fix #2011 PlayerNames.lua:100 attempt to concatenate field '?' (a nil value) 
-* Wrath: Fix #2016 "Unknown class DRUID"
+* Wrath: Fix #2011 - PlayerNames.lua:100 attempt to concatenate field '?' (a nil value) 
+* Wrath: Fix #2016 - "Unknown class DRUID"
+* Wrath: Fix #2006 - Totems conditions once again function against any totem rank.
 
 ## v10.0.2
 * Unified codebase for Retail and Wrath versions.

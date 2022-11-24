@@ -552,7 +552,7 @@ if TMW.isWrath then
 		
 		data.spellName = GetSpellInfo(spellID)
 		if not data.spellName then
-			TMW:Debug("Bad totam ID: " .. spellID)
+			TMW:Debug("Bad totem ID: " .. spellID)
 			return
 		end
 		data.spellNameLower = strlower(data.spellName)
