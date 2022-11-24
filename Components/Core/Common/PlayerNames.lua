@@ -95,9 +95,23 @@ end
 
 function NAMES:UPDATE_BATTLEFIELD_SCORE()
 	for i = 1, GetNumBattlefieldScores() do
-		local name, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
+		local name, class, _
+		if TMW.isWrath then
+			-- There's an extra "rank" return that's not there in retail.
+			name, _, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
+		else
+			name, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
+		end
+
 		if name and class then -- sometimes this returns nil??
-			self.ClassColoredNameCache[name] = self.ClassColors[class] .. name .. "|r"
+			local color = self.ClassColors[class]
+			if color then
+				self.ClassColoredNameCache[name] = color .. name .. "|r"
+			else
+				-- Should be impossible, unless there's an API change to GetBattlefieldScore
+				-- that moves the return of `class` (again).
+				self.ClassColoredNameCache[name] = name
+			end
 		end
 	end
 end
@@ -118,7 +132,8 @@ end
 
 function NAMES:UpdateClassColors()
 	-- GLOBALS: CUSTOM_CLASS_COLORS, RAID_CLASS_COLORS
-	for class, color in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
+	for class, color in pairs(RAID_CLASS_COLORS) do
+		color = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class] or color
 		if color.colorStr then
 			self.ClassColors[class] = "|c" .. color.colorStr
 		else
