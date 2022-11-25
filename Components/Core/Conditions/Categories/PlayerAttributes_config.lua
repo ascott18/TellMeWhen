@@ -20,6 +20,9 @@ local print = TMW.print
 local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
 
+local GetNumTrackingTypes = GetNumTrackingTypes or C_Minimap.GetNumTrackingTypes
+local GetTrackingInfo = GetTrackingInfo or C_Minimap.GetTrackingInfo
+
 local _, pclass = UnitClass("Player")
 
 
@@ -187,6 +190,3 @@ if C_EquipmentSet then
 		f.Icon:SetTexture(icon)
 	end
 end
-
-
-

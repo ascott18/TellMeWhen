@@ -25,9 +25,9 @@ local _, pclass = UnitClass("Player")
 
 local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
-local GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo = 
-	  GetPetActionInfo, GetNumTrackingTypes, GetTrackingInfo
-	  
+local GetPetActionInfo = GetPetActionInfo
+local GetNumTrackingTypes = GetNumTrackingTypes or C_Minimap.GetNumTrackingTypes
+local GetTrackingInfo = GetTrackingInfo or C_Minimap.GetTrackingInfo
 	  
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], false, false)
 
