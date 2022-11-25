@@ -27,7 +27,7 @@ local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftF
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
 local GetPetActionInfo = GetPetActionInfo
 local GetNumTrackingTypes = GetNumTrackingTypes or C_Minimap.GetNumTrackingTypes
-local GetTrackingInfo = GetTrackingInto or C_Minimap.GetTrackingInfo
+local GetTrackingInfo = GetTrackingInfo or C_Minimap.GetTrackingInfo
 	  
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], false, false)
 
