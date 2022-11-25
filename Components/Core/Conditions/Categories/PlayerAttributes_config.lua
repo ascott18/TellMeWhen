@@ -21,7 +21,7 @@ local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
 
 local GetNumTrackingTypes = GetNumTrackingTypes or C_Minimap.GetNumTrackingTypes
-local GetTrackingInfo = GetTrackingInto or C_Minimap.GetTrackingInfo
+local GetTrackingInfo = GetTrackingInfo or C_Minimap.GetTrackingInfo
 
 local _, pclass = UnitClass("Player")
 
