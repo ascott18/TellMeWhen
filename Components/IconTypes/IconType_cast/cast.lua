@@ -111,7 +111,7 @@ local events = {
 	UNIT_SPELLCAST_CHANNEL_STOP = true,
 	UNIT_SPELLCAST_EMPOWER_START = true,
 	UNIT_SPELLCAST_EMPOWER_UPDATE = true,
-	UNIT_SPELLCAST_EMPOWER_END = true
+	UNIT_SPELLCAST_EMPOWER_STOP = true
 }
 if TMW.isRetail then
 	-- not available in wrath
