@@ -64,7 +64,13 @@ function Module:OnSuggest()
 	local frame = EnumerateFrames()
 	while frame do
 		local name = frame:GetName()
-		if name and _G[name] == frame and frame:GetNumPoints() > 0 and frame:GetHeight() > 0 and frame:GetWidth() > 0 then
+		if name 
+		and _G[name] == frame 
+		and frame:GetNumPoints() > 0 
+		and frame:GetHeight() > 0 
+		and frame:GetWidth() > 0 
+		and not frame:IsForbidden()
+		then
 			self.Table[frame] = name
 		end
 		frame = EnumerateFrames(frame)
@@ -151,6 +157,36 @@ function Module:Table_GetSorter()
 	return self.Sorter_ByName, self.Sorter_Bucket
 end
 
+local highlight = CreateFrame("Frame")
+highlight:SetFrameStrata("FULLSCREEN_DIALOG")
+local texture = highlight:CreateTexture(nil, "OVERLAY")
+texture:SetAllPoints()
+texture:SetColorTexture(1, 0, .66, 0.5)
+GameTooltip:HookScript("OnHide", function() 
+	highlight:Hide()
+end)
+local function SetFrameHighlight(_, frame)
+	highlight:ClearAllPoints()
+	if frame:IsAnchoringRestricted() then
+		highlight:Hide()
+		return
+	end
+
+	-- Don't highlight UIParent or other fullscreen frames, it gets annoying.
+	local p1, r1, rp1, x1, y1 = frame:GetPoint(1)
+	local p2, r2, rp2, x2, y2 = frame:GetPoint(2)
+	if 
+		not frame:IsAnchoringRestricted() and
+		(not r1 or r1 == UIParent) and p1 == "TOPLEFT" and rp1 == "TOPLEFT" and x1 == 0 and y1 == 0 and
+		(not r2 or r2 == UIParent) and p2 == "BOTTOMRIGHT" and rp2 == "BOTTOMRIGHT" and x2 == 0 and y2 == 0 
+	then
+		highlight:Hide()
+	else
+		highlight:SetAllPoints(frame)
+		highlight:Show()
+	end
+end
+
 function Module:Entry_AddToList_1(f, frame)
 
 	if frame.class == TMW.C.Group then 
@@ -176,26 +212,10 @@ function Module:Entry_AddToList_1(f, frame)
 			addon = "Blizzard"
 		end
 		f.tooltiptext = L["SUG_MODULE_FRAME_LIKELYADDON"]:format(addon)
+
 		f.Name:SetText(name)
 	end
-end
 
-local highlight = CreateFrame("Frame")
-highlight:SetFrameStrata("FULLSCREEN_DIALOG")
-highlight:SetScript("OnUpdate", function()
-	if not GameTooltip:IsVisible() then
-		highlight:Hide()
-	end
-end)
-local texture = highlight:CreateTexture(nil, "OVERLAY")
-texture:SetAllPoints()
-texture:SetColorTexture(1, 0, .66, 0.5)
-function GameTooltip:TMW_SetFrameHighlight(frame)
-	-- Don't highlight UIParent, it gets annoying.
-	if frame ~= UIParent then
-		highlight:SetAllPoints(frame)
-		highlight:Show()
-	else
-		highlight:Hide()
-	end
+	f.tooltipmethod = SetFrameHighlight
+	f.tooltiparg = {frame}
 end

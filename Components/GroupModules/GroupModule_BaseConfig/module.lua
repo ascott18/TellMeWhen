@@ -96,11 +96,11 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", functio
 	self:SetTitle(SPECIALIZATION)
 	
 	local data = {
-		numPerRow = GetNumSpecializations()
+		numPerRow = TMW.GetNumSpecializations()
 	}	
 
-	for i = 1, GetNumSpecializations() do
-		local specID, name, _, texture = GetSpecializationInfo(i)
+	for i = 1, TMW.GetNumSpecializations() do
+		local specID, name, _, texture = TMW.GetSpecializationInfo(i)
 		tinsert(data, function(check)
 			check:SetLabel("")
 			check:SetTexts(name, L["UIPANEL_TREE_DESC"])

@@ -27,12 +27,12 @@ local Type = TMW.Classes.IconType:New("guardian")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_GUARDIAN"]
 Type.desc = L["ICONMENU_GUARDIAN_DESC"]
-Type.menuIcon = GetSpellTexture(211158)
+Type.menuIcon = GetSpellTexture(TMW.isWrath and 31687 or 211158)
 Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.hasNoGCD = true
 Type.canControlGroup = true
-Type.hidden = pclass ~= "WARLOCK"
+Type.hidden = TMW.isRetail and pclass ~= "WARLOCK"
 
 local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
@@ -68,24 +68,26 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["ICONMENU_GUARDIAN_CHOOSENAME_DESC"],
 })
 
-Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_GuardianDuration", function(self)
-	self:SetTitle(TMW.L["ICONMENU_GUARDIAN_DUR"])
-	self:BuildSimpleCheckSettingFrame({
-		numPerRow = 3,
-		function(check)
-			check:SetTexts(L["ICONMENU_GUARDIAN_DUR_GUARDIAN"], nil)
-			check:SetSetting("GuardianDuration", "guardian")
-		end,
-		function(check)
-			check:SetTexts(L["ICONMENU_GUARDIAN_DUR_EMPOWER"], nil)
-			check:SetSetting("GuardianDuration", "empower")
-		end,
-		function(check)
-			check:SetTexts(L["ICONMENU_GUARDIAN_DUR_EITHER"], L["ICONMENU_GUARDIAN_DUR_EITHER_DESC"])
-			check:SetSetting("GuardianDuration", "either")
-		end,
-	})
-end)
+if TMW.isRetail then
+	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_GuardianDuration", function(self)
+		self:SetTitle(TMW.L["ICONMENU_GUARDIAN_DUR"])
+		self:BuildSimpleCheckSettingFrame({
+			numPerRow = 3,
+			function(check)
+				check:SetTexts(L["ICONMENU_GUARDIAN_DUR_GUARDIAN"], nil)
+				check:SetSetting("GuardianDuration", "guardian")
+			end,
+			function(check)
+				check:SetTexts(L["ICONMENU_GUARDIAN_DUR_EMPOWER"], nil)
+				check:SetSetting("GuardianDuration", "empower")
+			end,
+			function(check)
+				check:SetTexts(L["ICONMENU_GUARDIAN_DUR_EITHER"], L["ICONMENU_GUARDIAN_DUR_EITHER_DESC"])
+				check:SetSetting("GuardianDuration", "either")
+			end,
+		})
+	end)
+end
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_GuardianSortSettings", function(self)
 	self:SetTitle(TMW.L["SORTBY"])
@@ -109,7 +111,7 @@ end)
 
 
 
-if pclass == "WARLOCK" then
+if pclass == "WARLOCK" and TMW.isRetail then
 	Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 		[ STATE_PRESENT_EMPOWERED  ] = { order = 1, text = "|cFF00FF00" .. L["ICONMENU_PRESENT"] .. " - " .. L["ICONMENU_GUARDIAN_EMPOWERED"],  },
 		[ STATE_PRESENT ] = { order = 2, text = "|cFF00FF00" .. L["ICONMENU_PRESENT"] .. " - " .. L["ICONMENU_GUARDIAN_UNEMPOWERED"], },
@@ -137,7 +139,14 @@ local function Info(duration, spell, triggerMatch, extraData)
 	return data
 end
 
-Type.GuardianInfo = {
+Type.GuardianInfo = TMW.isWrath and {
+	[510] = Info(45, 31687, false), -- Water Elemental
+	[19668] = Info(15, 34433, false), -- Shadowfiend
+	[15438] = Info(120, 32982, false), -- Fire ele totem
+	[15352] = Info(120, 2062, false), -- Earth ele totem
+	[89] = Info(60 * 5, 1122, false), -- Inferno (warlock)
+	[1964] = Info(30, 33831, false, { countable = true }), -- Treants (force of nature, druid)
+} or {
 	
 	[ 98035] = Info(12, 104316, false), -- Dreadstalker
 	[    89] = Info(30, 1122, false), -- Infernal (Destro)
@@ -178,11 +187,7 @@ local GuardianInfo = Type.GuardianInfo
 function Type:RefreshNames()
 	for npcID, data in pairs(GuardianInfo) do
 		if not data.nameKnown then
-			local Parser, LT1 = TMW:GetParser()
-			Parser:SetOwner(UIParent, "ANCHOR_NONE")
-			Parser:SetHyperlink(("unit:Creature-0-0-0-0-%d"):format(npcID))
-			local name = LT1:GetText()
-			Parser:Hide()
+			local name = TMW:TryGetNPCName(npcID)
 
 			if not name or name == "" then
 				name = "NPC ID " .. npcID

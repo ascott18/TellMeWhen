@@ -39,7 +39,7 @@ local IsCaching
 
 SpellCache.CONST = {
 	-- A rough estimate of the highest spellID in the game. Doesn't have to be accurate at all - visual only.
-	MAX_SPELLID_GUESS = 400000,
+	MAX_SPELLID_GUESS = TMW.isWrath and 80000 or 400000,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
 	MAX_FAILED_SPELLS = 2000,
@@ -54,6 +54,12 @@ SpellCache.CONST = {
 		[275531] = true, -- Test of Might
 		[275532] = true, -- Test of Might
 		[275540] = true, -- Test of Might
+
+		-- Classic:
+		[3355] = true, -- Freezing Trap Effect
+		[14308] = true, -- Freezing Trap Effect
+		[14309] = true, -- Freezing Trap Effect
+		[19675] = true, -- Feral Charge Effect
 	},
 
 	-- A list of spells that should be excluded from the cache
@@ -214,8 +220,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	local WHITELIST_TRADESKILLS = CONST.WHITELIST_TRADESKILLS
 	local WHITELIST = CONST.WHITELIST
 	local MAX_FAILED_SPELLS = CONST.MAX_FAILED_SPELLS
-	local GetTradeSkillLineForRecipe = C_TradeSkillUI.GetTradeSkillLineForRecipe
-	local GetTradeSkillTexture = C_TradeSkillUI.GetTradeSkillTexture
+	local GetTradeSkillLineForRecipe = C_TradeSkillUI and C_TradeSkillUI.GetTradeSkillLineForRecipe
+	local GetTradeSkillTexture = C_TradeSkillUI and C_TradeSkillUI.GetTradeSkillTexture
 	local classLocalizedName = UnitClass("player")
 
 	local function findword(name, word)
@@ -264,30 +270,31 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 				fail = INVALID_TEXTURES[icon] or false
 
 				if not fail then
-					-- Get the tradeskillID of the spell.
-					-- There are tons of these. Some examples are
-					-- - "Druid"
-					-- - "Engineering"
-					-- - "Northrend Tailoring"
-					-- - "Racial - Night Elf"
-					-- - "Mounts"
-					-- - "Companions" (battlepets)
+					if GetTradeSkillLineForRecipe then
+						-- Get the tradeskillID of the spell.
+						-- There are tons of these. Some examples are
+						-- - "Druid"
+						-- - "Engineering"
+						-- - "Northrend Tailoring"
+						-- - "Racial - Night Elf"
+						-- - "Mounts"
+						-- - "Companions" (battlepets)
 
-					-- What we want to do is filter out anything that has a tradeskill that is some variant of an actual profession.
-					-- We do this by getting the texture of the tradeskill, since all variants of profession tradeskills use the same texture.
-					-- I couldn't find any other way to correlate this data without doing it by hand for hundreds of these.
+						-- What we want to do is filter out anything that has a tradeskill that is some variant of an actual profession.
+						-- We do this by getting the texture of the tradeskill, since all variants of profession tradeskills use the same texture.
+						-- I couldn't find any other way to correlate this data without doing it by hand for hundreds of these.
+						local tradeSkillID, tradeSkillName = GetTradeSkillLineForRecipe(spellID)
+						local isTradeSkillOk = not tradeSkillID or tradeSkillBlacklist[tradeSkillID]
+						if isTradeSkillOk == nil then
+							-- We haven't made a determination yet for this tradeskill. Look for its texture.
+							local tex = GetTradeSkillTexture(tradeSkillID)
+							-- This tradeskill is ok if its texture isn't found in BLACKLIST_TRADESKILL_TEXTURES
+							isTradeSkillOk = not BLACKLIST_TRADESKILL_TEXTURES[tex]
+							tradeSkillBlacklist[tradeSkillID] = isTradeSkillOk
+						end
 
-					local tradeSkillID, tradeSkillName = GetTradeSkillLineForRecipe(spellID)
-					local isTradeSkillOk = not tradeSkillID or tradeSkillBlacklist[tradeSkillID]
-					if isTradeSkillOk == nil then
-						-- We haven't made a determination yet for this tradeskill. Look for its texture.
-						local tex = GetTradeSkillTexture(tradeSkillID)
-						-- This tradeskill is ok if its texture isn't found in BLACKLIST_TRADESKILL_TEXTURES
-						isTradeSkillOk = not BLACKLIST_TRADESKILL_TEXTURES[tex]
-						tradeSkillBlacklist[tradeSkillID] = isTradeSkillOk
+						fail = not isTradeSkillOk
 					end
-
-					fail = not isTradeSkillOk
 
 					if not fail then
 						-- Keep track of known good names. Don't do name checking on known good names.
@@ -312,9 +319,16 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 								strfind(name, "%d.%d") or -- Number Dot Number is probably a patch number, used often for internal spells
 								(strfind(name, "vehicle") and strfind(name, "%f[%a]vehicle%f[%A]")) or
 								(strfind(name, "credit") and strfind(name, "%f[%a]credit%f[%A]")) or
-								(strfind(name, "effect") and strfind(name, "%f[%a]effect%f[%A]")) or
+								
+								-- 'effect' is used quite bit in classic for lots of real things. Don't blacklist it.
+								-- (note: not sure if this is still true in wrath classic.)
+								(not TMW.isWrath and strfind(name, "effect") and strfind(name, "%f[%a]effect%f[%A]")) or
+
 								(strfind(name, "camera") and strfind(name, "%f[%a]camera%f[%A]")) or
-								(strfind(name, "ph") and strfind(name, "%f[%a]ph%f[%A]")) or
+								-- "ph" was removed because it is so short and non-specific
+								-- that it interferes with words like Phönixflammen (https://de.wowhead.com/spell=194466/ph%C3%B6nixflammen)
+								-- due to the fact that lua isn't unicode aware.
+								--(strfind(name, "ph") and strfind(name, "%f[%a]ph%f[%A]")) or
 								(strfind(name, "proc") and strfind(name, "%f[%a]proc%f[%A]")) or
 								(strfind(name, "debug") and strfind(name, "%f[%a]debug%f[%A]")) or
 								(strfind(name, "bunny") and strfind(name, "%f[%a]bunny%f[%A]")) or
@@ -386,7 +400,10 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 				Cache[spellID] = nil
 			end
 			for spellID in pairs(CONST.WHITELIST) do
-				Cache[spellID] = strlower(GetSpellInfo(spellID))
+				local name = GetSpellInfo(spellID)
+				if name then
+					Cache[spellID] = strlower(name)
+				end
 			end
 
 			IsCaching = nil

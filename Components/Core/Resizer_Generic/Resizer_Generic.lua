@@ -177,14 +177,14 @@ TMW:NewClass("Resizer_Generic"){
 
 		-- Calculate new scale:
 		--[[
-			Holy shit. Look at this wicked sick dimensional analysis:
+			Look at this wicked sick dimensional analysis:
 			
 			std_newHeight   oldScale
 			------------- X	-------- = newScale
 			std_oldHeight       1
 
 			'std_Height' cancels out 'std_Height', and 'old' cancels out 'old', leaving us with 'new' and 'Scale'!
-			I just wanted to make sure I explained why this shit works, because this code used to be confusing as hell
+			I just wanted to make sure I explained why this works, because this code used to be confusing
 			(which is why I am rewriting it right now)
 		]]
 		local std_newWidth = std_cursorX - self.std_oldLeft

@@ -88,7 +88,7 @@ CNDT.Condition_Defaults = {
 		Checked			= false,
 		Checked2		= false,
 
-		-- Runes 		= {}, -- Deprecated
+		Runes 		    = GetRuneType and {} or nil,
 
 		-- IMPORTANT: This setting can be a number OR a table.
 		BitFlags		= 0x0, -- may also be a table.
@@ -1144,7 +1144,7 @@ function CNDT:TryUpgradeSettings(Conditions)
 	for n, conditionSettings in TMW:InNLengthTable(Conditions) do
 		local Type = conditionSettings.Type
 		local conditionData = CNDT.ConditionsByType[Type]
-		if conditionData.upgrade then
+		if conditionData and conditionData.upgrade then
 			conditionData.upgrade(conditionSettings)
 		end
 	end

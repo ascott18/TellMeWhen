@@ -166,7 +166,20 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	-- Create our own DR equivalencies in TMW using the data from DRList-1.0
 
 	if DRList then
-		local myCategories = {
+		local myCategories = TMW.isWrath and {
+			incapacitate = "DR-Incapacitate",
+			stun =         "DR-ControlledStun",
+			fear =         "DR-Fear",
+			mind_control = "DR-MindControl",
+			random_root =  "DR-RandomRoot",
+			random_stun =  "DR-RandomStun",
+			root =         "DR-ControlledRoot",
+			silence =      "DR-Silence",
+			opener_stun =  "DR-OpenerStun",
+			horror =       "DR-Horrify",
+			disarm =       "DR-Disarm",
+			scatter =      "DR-Scatter",
+		} or {
 			stun			= "DR-Stun",
 			silence			= "DR-Silence",
 			disorient		= "DR-Disorient",
@@ -176,7 +189,13 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 			disarm 			= "DR-Disarm",
 		}
 
-		local ignored = {
+		local ignored = TMW.isWrath and {
+			knockback = true,
+			frost_shock = true,
+			cyclone = true,
+			counterattack = true,
+			charge = true,
+		} or {
 			rndstun = true,
 			fear = true,
 			mc = true,
@@ -190,14 +209,24 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		
 		TMW.BE.dr = {}
 		local dr = TMW.BE.dr
+		local usedCategories = {}
 		for spellID, category in pairs(DRList:GetSpells()) do
 			local k = myCategories[category]
 
 			if k then
+				usedCategories[category] = true
 				dr[k] = dr[k] or {}
 				tinsert(dr[k], spellID)
 			elseif TMW.debug and not ignored[category] then
 				TMW:Error("The DR category %q is undefined!", category)
+			end
+		end
+
+		if TMW.debug then
+			for category, myCategory in pairs(myCategories) do
+				if not usedCategories[category] then
+					TMW:Error("The DR category %q isn't used!", category)
+				end
 			end
 		end
 	end

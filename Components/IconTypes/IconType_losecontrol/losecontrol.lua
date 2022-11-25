@@ -38,8 +38,8 @@ Type.usePocketWatch = 1
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
-local INCONTROL = 1
-local CONTROLLOST = 2
+local CONTROLLOST = 1
+local INCONTROL = 2
 
 -- AUTOMATICALLY GENERATED: UsesAttributes
 Type:UsesAttributes("state")
@@ -131,7 +131,7 @@ end
 function Type:HandleYieldedInfo(icon, iconToSet, category, texture, start, duration, spellID)
 	if category then
 		iconToSet:SetInfo("state; texture; start, duration; spell; locCategory",
-			INCONTROL,
+			CONTROLLOST,
 			texture,
 			start, duration,
 			spellID,
@@ -139,7 +139,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, category, texture, start, durat
 		)
 	else
 		iconToSet:SetInfo("state; start, duration; spell; locCategory",
-			CONTROLLOST,
+			INCONTROL,
 			0, 0,
 			nil,
 			nil

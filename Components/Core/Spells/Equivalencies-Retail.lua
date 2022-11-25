@@ -351,7 +351,6 @@ TMW.BE = {
 			 202164, -- Bounding Stride                     (arms/fury, PVE talent)
 			 209754, -- Boarding Party                      (rogue, outlaw)
 			 212552, -- Wraith Walk                         (death knight, frost/unholy)
-			 213602, -- Greater Fade                        (priest, PVP talent, general)
 			 236060, -- Frenetic Speed                      (mage, fire)
 			 250878, -- Lightfoot Potion                    (BFA potion)
 			 252216, -- Tiger Dash                          (druid, PVE talent, general)
@@ -425,7 +424,6 @@ TMW.BE = {
 		   	 204018, -- Blessing of Spellwarding            (paladin, protection)
 			 205191, -- Eye for an Eye                      (paladin, retribution)
 			 210918, -- Ethereal Form                       (shaman, enhancement)
-			 213602, -- Greater Fade                        (priest, PVP talent, general)
 			 213915, -- Mass Spell Reflection               (warrior, protection)
 			-228049, -- Guardian of the Forgotten Queen     (paladin, protection)
 			 223658, -- Safeguard                           (warrior, protection)
@@ -589,7 +587,6 @@ TMW.BE = {
 			  33076, -- Prayer of Mending
 			  64843, -- Divine Hymn
 			 120517, -- Halo                                (priest, holy/disc)
-			 186263, -- Shadow Mend
 			 194509, -- Power Word: Radiance
 			 265202, -- Holy Word: Salvation                (priest, holy)
 			 289666, -- Greater Heal                        (priest, holy)

@@ -1,4 +1,4 @@
-name: Package Retail
+name: Package Retail/Wrath
 
 on:
   push:
@@ -16,10 +16,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "Validate TOC"
+      - name: "Validate Version"
         run: |
-          if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="*.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
-            grep -rnP '## X?-?\KInterface.*' --exclude-dir=.release --include="*.toc" . | cat
+          if [[ "$(grep -hroP '## Version.*' --exclude-dir=.release --include="*.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
+            grep -rnP '## Version.*' --exclude-dir=.release --include="*.toc" . | cat
+            echo "More than 1 distinct ##Version found in .toc files." 1>&2
+            exit 1
+          fi;
+
+      - name: "Validate TOC Wrath"
+        run: |
+          if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="*-Wrath.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
+            grep -rnP '## X?-?\KInterface.*' --exclude-dir=.release --include="*-Wrath.toc" . | cat
+            echo "More than 1 distinct ##Interface version found in .toc files." 1>&2
+            exit 1
+          fi;
+
+      - name: "Validate TOC Retail"
+        run: |
+          if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="TellMeWhen.toc" --include="TellMeWhen_Options.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
+            grep -rnP '## X?-?\KInterface.*' --exclude-dir=.release --include="TellMeWhen.toc" --include="TellMeWhen_Options.toc" . | cat
             echo "More than 1 distinct ##Interface version found in .toc files." 1>&2
             exit 1
           fi;

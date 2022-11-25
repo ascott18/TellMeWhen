@@ -10,7 +10,6 @@
 <Script  file="TMWUIDropDownMenu.lua" />
 <Include file="TMWUIDropDownMenuTemplates.xml" />
 <Include file="TellMeWhen_Options.xml" />
-<Include file="Bindings.xml" />
 <Script  file="MainConfig.lua" />
 <Include file="MainConfig.xml" />
 <Script  file="GroupConfig.lua" />
@@ -143,7 +142,6 @@
 <Script  file="..\Components\IconTypes\IconType_losecontrol\Config.lua" />
 <Include file="..\Components\IconTypes\IconType_meta\Config.xml" />
 <Script  file="..\Components\IconTypes\IconType_meta\Config.lua" />
-<Include file="..\Components\IconTypes\IconType_runes\Config.xml" />
 <Include file="..\Components\IconTypes\IconType_swingtimer\Config.xml" />
 <Include file="..\Components\IconTypes\IconType_uierror\Config.xml" />
 <Script  file="..\Components\IconTypes\IconType_wpnenchant\Config.lua" />

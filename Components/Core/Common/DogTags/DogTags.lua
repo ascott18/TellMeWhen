@@ -119,7 +119,7 @@ DogTag:AddCompilationStep("TMW", "finish", function(t, ast, kwargTypes, extraKwa
 		for i = 1, #t do
 			if t[i] == [=[if ]=]
 
-			-- extraKwargs gets cleared out (seriously? why the fuck would you do that?) before finish steps,
+			-- extraKwargs gets cleared out before finish steps,
 			-- so we can't check for this. It doesn't matter, though, because the next line is unique.
 			--and t[i+1] == extraKwargs["unit"][1] 
 

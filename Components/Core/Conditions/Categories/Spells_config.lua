@@ -39,7 +39,7 @@ function Module:Entry_AddToList_2(f, id)
 		f.Name:SetText(L["GCD"])
 		f.ID:SetText(nil)
 
-		f.tooltipmethod = "TMW_SetSpellByIDWithClassIcon"
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = spellID
 
 		f.insert = "GCD"
@@ -58,4 +58,36 @@ function Module.Sorter_Spells(a, b)
 	end
 
 	return Module_spell.Sorter_Spells(a, b)
+end
+
+if TMW.COMMON.TotemRanks then
+	local Module = SUG:NewModule("totem", Module_spell)
+	Module.noMin = true
+	function Module:OnInitialize()
+		self.Table = {}
+		for k, v in pairs(TMW.COMMON.TotemRanks) do
+			if type(k) == "number" and not self.Table[k] then
+				self.Table[k] = strlower(v.totemName)
+			end
+		end
+	end
+
+	function Module:Table_Get()
+		return self.Table
+	end
+	function Module:Entry_AddToList_1(f, spellID)
+		local data = TMW.COMMON.TotemRanks[spellID]
+		f.Name:SetText(data.totemName)
+		f.ID:SetText(spellID)
+
+		f.insert = data.totemName
+		f.insert2 = spellID
+			
+
+		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
+		f.tooltiparg = spellID
+
+		local _, _, tex = GetSpellInfo(spellID)
+		f.Icon:SetTexture(tex)
+	end
 end

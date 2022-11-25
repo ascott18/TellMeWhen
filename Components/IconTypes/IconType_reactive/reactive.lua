@@ -140,6 +140,7 @@ local function Reactive_OnEvent(icon, event, arg1)
 	end
 end
 
+local mindfreeze = strlower(GetSpellInfo(47528))
 local function Reactive_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
@@ -186,12 +187,12 @@ local function Reactive_OnUpdate(icon, time)
 			end
 
 			if CooldownCheck then
-				if IgnoreRunes and duration == runeCD then
+				if IgnoreRunes and duration == runeCD and iName ~= mindfreeze and iName ~= 47528 then
 					-- DK abilities that are on cooldown because of runes are always reported
 					-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
-					-- We used to have to make sure the ability being checked wasn't Mind Freeze before doing this,
-					-- but Mind Freeze has a 15 second cooldown now (instead of 10), so we don't have to worry.
 					
+					-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
+					-- so it is excluded from this logic.
 					start, duration = 0, 0
 				end
 				CD = not (duration == 0 or OnGCD(duration))
@@ -226,7 +227,12 @@ local function Reactive_OnUpdate(icon, time)
 		charges, maxCharges, chargeStart, chargeDur = GetSpellCharges(NameFirst)
 		stack = charges or GetSpellCount(NameFirst)
 
-		if IgnoreRunes and duration == runeCD then
+		if IgnoreRunes and duration == runeCD and NameFirst ~= mindfreeze and NameFirst ~= 47528 then
+			-- DK abilities that are on cooldown because of runes are always reported
+			-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
+			
+			-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
+			-- so it is excluded from this logic.
 			start, duration = 0, 0
 		end
 
@@ -288,6 +294,9 @@ function Type:Setup(icon)
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
 		if icon.IgnoreRunes then
+			if GetRuneType then
+				icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")
+			end
 			icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
 		end	
 		if icon.ManaCheck then

@@ -12,16 +12,16 @@
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 90200
+## Interface: 100002
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
-## X-Interface: 90200
-## X-Compatible-With: 90200
+## X-Interface: 100002
+## X-Compatible-With: 100002, 90200
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 10855
 ## X-Wago-ID: ZQ6aZqKW
 
-## Version: 9.2.6
+## Version: 10.0.3
 ## Author: Cybeloras of Aerie Peak
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
@@ -100,10 +100,11 @@ Components\Core\BaseClasses\IconDataProcessorComponent.lua
 # Components\Core\Help\includes.core.xml
 
 # Components\Core\Spells\includes.core.xml
-Components\Core\Spells\Equivalencies.lua
+Components\Core\Spells\Equivalencies-Retail.lua
 Components\Core\Spells\Spells.lua
 Components\Core\Spells\AuraCache.lua
 Components\Core\Spells\ClassSpellCache.lua
+Components\Core\Spells\ClassSpellCache-Retail.lua
 
 # Components\Core\Suggester\includes.core.xml
 
@@ -133,7 +134,7 @@ Components\Core\Conditions\Categories\Talents.lua
 Components\Core\Conditions\Categories\Location.lua
 Components\Core\Conditions\Categories\PlayerAttributes.lua
 Components\Core\Conditions\Categories\UnitAttributes.lua
-Components\Core\Conditions\Categories\PlayerCombatStats.lua
+Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua
 Components\Core\Conditions\Categories\Currencies.lua
 Components\Core\Conditions\Categories\BossMods.lua
 Components\Core\Conditions\Categories\Misc.lua
@@ -231,7 +232,7 @@ Components\IconTypes\IconType_item\item.lua
 Components\IconTypes\IconType_losecontrol\losecontrol.lua
 Components\IconTypes\IconType_meta\meta.lua
 Components\IconTypes\IconType_reactive\reactive.lua
-Components\IconTypes\IconType_runes\runes.lua
+Components\IconTypes\IconType_runes\runes-Retail.lua
 Components\IconTypes\IconType_swingtimer\swingtimer.lua
 Components\IconTypes\IconType_totem\totem.lua
 Components\IconTypes\IconType_uierror\uierror.lua

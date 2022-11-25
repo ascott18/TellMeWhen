@@ -19,10 +19,11 @@ local print = TMW.print
 
 local sort, type, pairs
 	= sort, type, pairs
-local UnitAffectingCombat, GetSpecialization
-	= UnitAffectingCombat, GetSpecialization
+local UnitAffectingCombat
+	= UnitAffectingCombat
 
 local GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole
+local GetCurrentSpecializationID = TMW.GetCurrentSpecializationID
 
 
 --- [[api/group/api-documentation/|Group]] is the class of all Icons.
@@ -348,8 +349,8 @@ function Group.ShouldUpdateIcons(group)
 
 	elseif
 		group.Domain == "profile"
-		and GetSpecialization()
-		and not gs.EnabledSpecs[GetSpecializationInfo(GetSpecialization())]
+		and GetCurrentSpecializationID()
+		and not gs.EnabledSpecs[GetCurrentSpecializationID()]
 	then
 		return false
 	

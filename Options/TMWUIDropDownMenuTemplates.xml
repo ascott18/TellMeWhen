@@ -320,16 +320,16 @@
 					</OnClick>
 				</Scripts>
 
-				<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" >
+				<NormalTexture file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" >
 					<TexCoords left="0" right="1" top="1" bottom="0"/>
 					<Color r="0.35" g="0.35" b="0.35" a="1"/>
 				</NormalTexture>
 
-				<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" alphaMode="ADD">
+				<HighlightTexture file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" alphaMode="ADD">
 					<TexCoords left="0" right="1" top="1" bottom="0"/>
 					<Color r="1" g="1" b="1" a="0.4"/>
 				</HighlightTexture>
-				<DisabledTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" >
+				<DisabledTexture file="Interface\AddOns\TellMeWhen\Textures\HeadlessArrow" >
 					<TexCoords left="0" right="1" top="1" bottom="0"/>
 					<Color r="0" g="0" b="0" a="0.35"/>
 				</DisabledTexture>

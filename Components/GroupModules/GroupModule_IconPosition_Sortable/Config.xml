@@ -35,16 +35,16 @@
 		<Size x="18" y="18"/>
 		<!-- <HitRectInsets left="-2" right="-2" top="-2" bottom="-2" /> -->
 
-		<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+		<NormalTexture file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
 			<Color r="1.0" g="0.92" b="0.9" a="0.25"/>
 		</NormalTexture>
-		<DisabledTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+		<DisabledTexture file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
 			<Color r="0" g="0" b="0" a="1"/>
 		</DisabledTexture>
-		<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\Arrow" alphaMode="ADD">
+		<HighlightTexture file="Interface\AddOns\TellMeWhen\Textures\Arrow" alphaMode="ADD">
 			<Color r="1" g="1" b="1" a="0.4"/>
 		</HighlightTexture>
-		<CheckedTexture urgency="6" file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
+		<CheckedTexture file="Interface\AddOns\TellMeWhen\Textures\Arrow" >
 			<Color r="1.0" g="0.82" b="0" a="1"/>
 		</CheckedTexture>
 	</CheckButton>

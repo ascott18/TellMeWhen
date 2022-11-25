@@ -142,7 +142,7 @@ TMW:RegisterUpgrade(47321, {
 })
 TMW:RegisterUpgrade(47320, {
 	iconEventHandler = function(self, eventSettings)
-		-- these numbers got really screwy with FP errors (shit like 0.8000000119), put then back to what they should be (0.8)
+		-- these numbers got really screwy with FP errors (like 0.8000000119), put then back to what they should be (0.8)
 		eventSettings.Duration 	= eventSettings.Duration  and tonumber(format("%0.1f",	eventSettings.Duration))
 		eventSettings.Magnitude = eventSettings.Magnitude and tonumber(format("%1f",	eventSettings.Magnitude))
 		eventSettings.Period  	= eventSettings.Period    and tonumber(format("%0.1f",	eventSettings.Period))

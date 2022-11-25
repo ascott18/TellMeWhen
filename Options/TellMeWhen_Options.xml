@@ -255,11 +255,11 @@
 				self:UnlockHighlight()
 			</OnLeave>
 		</Scripts>
-		<NormalTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Up"/>
-		<PushedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Down"/>
-		<HighlightTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
-		<CheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check"/>
-		<DisabledCheckedTexture urgency="5" file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
+		<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
+		<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
+		<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+		<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
+		<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
 	</CheckButton>
 
 	<!-- Appearance Templates -->
@@ -597,14 +597,14 @@
 
 	<Button name="TellMeWhen_DeleteButtonTemplate" virtual="true">
 		<Size x="18" y="18"/>
-		<NormalTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\RedX"/>
+		<NormalTexture file="Interface\AddOns\TellMeWhen\Textures\RedX"/>
 		<PushedTexture file="Interface\AddOns\TellMeWhen\Textures\RedX">
 			<Anchors>
 				<Anchor point="TOPLEFT" x="-1" y="-1"/>
 				<Anchor point="BOTTOMRIGHT" x="-1" y="-1"/>
 			</Anchors>
 		</PushedTexture>
-		<HighlightTexture urgency="5" file="Interface\AddOns\TellMeWhen\Textures\RedX" alphaMode="ADD"/>
+		<HighlightTexture file="Interface\AddOns\TellMeWhen\Textures\RedX" alphaMode="ADD"/>
 		<Scripts>
 			<OnEnable>
 				self:GetNormalTexture():SetDesaturated(false)
@@ -762,8 +762,8 @@
 							<Color r="0" g="0.7" b="0" a="0.3"/>
 							<Animations>
 								<AnimationGroup parentKey="Anim" looping="REPEAT">
-									<Alpha change="1" duration="0.7" order="1"/>
-									<Alpha startDelay="0.1" change="-1" duration="0.7" order="2"/>
+									<Alpha fromAlpha="0" toAlpha="1" duration="0.7" order="1"/>
+									<Alpha startDelay="0.1" fromAlpha="1" toAlpha="0" duration="0.7" order="2"/>
 								</AnimationGroup>
 							</Animations>
 						</Texture>
@@ -833,7 +833,7 @@
 
 				<Animations>
 					<AnimationGroup parentKey="FadeIn">
-						<Alpha change="1" duration="1" order="1"/>
+						<Alpha fromAlpha="0" toAlpha="1" duration="1" order="1"/>
 						<Scripts>
 							<OnPlay>
 								self:GetParent():SetAlpha(0)
@@ -846,7 +846,7 @@
 						</Scripts>
 					</AnimationGroup>
 					<AnimationGroup parentKey="FadeOut">
-						<Alpha change="-1" duration="1" order="1"/>
+						<Alpha startDelay="0.1" fromAlpha="1" toAlpha="0" duration="1" order="2"/>
 						<Scripts>
 							<OnPlay>
 								self:GetParent().FadeIn:Stop()
@@ -1410,8 +1410,8 @@
 					<Color r="0" g="0.4" b="0"/>
 					<Animations>
 						<AnimationGroup parentKey="anim">
-							<Alpha startDelay="0" change="0.9" duration="0.8" order="1"/>
-							<Alpha startDelay="0.6" change="-0.9" duration="1" order="2"/>
+							<Alpha startDelay="0" fromAlpha="0" toAlpha="0.9" duration="0.8" order="1"/>
+							<Alpha startDelay="0.6" fromAlpha="0.9" toAlpha="0" duration="1" order="2"/>
 							<Scripts>
 								<OnFinished>
 									self:GetParent():GetParent():Hide()
@@ -2502,7 +2502,7 @@
 					<OnLoad>
 						TMW:CInit(self)
 						
-						self:SetFont("Interface/Addons/TellMeWhen/Fonts/VeraMono.ttf", 11, "")
+						self:SetFont("Interface/Addons/TellMeWhen/Fonts/RobotoMono-Regular.ttf", 11, "")
 
 						self:MakeScrollable(true, 2, 7)
 

@@ -56,6 +56,15 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	pGUID = UnitGUID("player")
 end)
 
+local swingSpells = 
+	TMW.isWrath and {
+		[strlowerCache[GetSpellInfo(78)]] = 1, -- Heroic Strike
+		[strlowerCache[GetSpellInfo(845)]] = 1, -- Cleave
+		[strlowerCache[GetSpellInfo(6807)]] = 1, -- Maul
+		[strlowerCache[GetSpellInfo(2973)]] = 1, -- Raptor Strike
+		[strlowerCache[GetSpellInfo(56815)]] = 1, -- Rune Strike
+	} 
+	or {}
 
 -- ---------------------------------
 -- Misc state update functions
@@ -159,7 +168,9 @@ SwingTimerMonitor:SetScript("OnEvent", function(self, event, ...)
 	
 		if src_guid == pGUID then
 			-- arg13 = spellName
-			if event == "SWING_DAMAGE" then
+			if (event == "SPELL_DAMAGE" or event == "SPELL_MISSED") and arg13 and swingSpells[strlowerCache[arg13]] then
+				SwingTimers[MAINHAND_SLOT]:Start()
+			elseif event == "SWING_DAMAGE" then
 				SwingTimers[isOffHandHit and OFFHAND_SLOT or MAINHAND_SLOT]:Start()
 			elseif event == "SWING_MISSED" then
 				SwingTimers[arg13 and OFFHAND_SLOT or MAINHAND_SLOT]:Start()

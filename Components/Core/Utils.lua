@@ -1025,140 +1025,6 @@ function TMW:DeepCompare(t1, t2)
 	return true
 end
 
-do	-- TMW.shellsortDeferred
-	-- From http://lua-users.org/wiki/LuaSorting - shellsort
-	-- Written by Rici Lake. The author disclaims all copyright and offers no warranty.
-	--
-	-- This module returns a single function (not a table) whose interface is upwards-
-	-- compatible with the interface to table.sort:
-	--
-	-- array = shellsort(array, before, n)
-	-- array is an array of comparable elements to be sorted in place
-	-- before is a function of two arguments which returns true if its first argument
-	--    should be before the second argument in the second result. It must define
-	--    a total order on the elements of array.
-	--      Alternatively, before can be one of the strings "<" or ">", in which case
-	--    the comparison will be done with the indicated operator.
-	--    If before is omitted, the default value is "<"
-	-- n is the number of elements in the array. If it is omitted, #array will be used.
-	-- For convenience, shellsort returns its first argument.
-
-	-- A036569
-	local incs = { 8382192, 3402672, 1391376,
-		463792, 198768, 86961, 33936,
-		13776, 4592, 1968, 861, 336, 
-	112, 48, 21, 7, 3, 1 }
-
-	local execCap = 17
-	local start = 0
-	
-	local function ssup(v, testval)
-		return v < testval
-	end
-	
-	local function ssdown(v, testval)
-		return v > testval
-	end
-	
-	local function ssgeneral(t, n, before, progressCallback, progressCallbackArg)
-		local lastProgress = 100
-
-		for idx, h in ipairs(incs) do
-			local count = 1
-			for i = h + 1, n do
-				local v = t[i]
-				for j = i - h, 1, -h do
-					local testval = t[j]
-					if not before(v, testval) then break end
-					t[i] = testval; i = j
-				end
-				t[i] = v
-
-				count = count + 1
-
-				if (count % 200 == 0) and debugprofilestop() - start > execCap then
-					local progress = #incs - idx + 1
-
-					if progressCallback and progress ~= lastProgress then
-						if progressCallbackArg then
-							progressCallback(progressCallbackArg, progress)
-						else
-							progressCallback(progress)
-						end
-						lastProgress = progress
-					end
-					
-					coroutine.yield()
-				end
-			end
-		end
-		return t
-	end
-	
-	local coroutines = {}
-	local function shellsort(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
-		n = n or #t
-		if not before or before == "<" then
-			ssgeneral(t, n, ssup, progressCallback, progressCallbackArg)
-		elseif before == ">" then
-			ssgeneral(t, n, ssdown, progressCallback, progressCallbackArg)
-		else
-			ssgeneral(t, n, before, progressCallback, progressCallbackArg)
-		end
-
-		if callbackArg ~= nil then
-			callback(callbackArg)
-		else
-			callback()
-		end
-
-		coroutines[t] = nil
-	end
-	
-	local timer
-
-	local function OnUpdate()
-		local table, co = next(coroutines)
-
-		if table then
-			if coroutine.status(co) == "dead" then
-				-- This might happen if there was an error thrown before the coroutine could finish.
-				coroutines[table] = nil
-				return
-			end
-			-- dynamic execution cap based on framerate.
-			-- this will keep us from dropping the user's framerate too much
-			-- without doing so little sorting that the process goes super slowly.
-			-- subtract a little bit to account for CPU usage for other things, like the game itself.
-			execCap = 1000/max(20, GetFramerate()) - 5
-
-			start = debugprofilestop()
-			assert(coroutine.resume(co))
-		end
-
-		if not next(coroutines) then
-			timer:Cancel()
-			timer = nil
-		end
-	end
-
-	-- The purpose of shellSortDeferred is to have a sort that won't
-	-- lock up the game when we sort huge things.
-	function TMW.shellsortDeferred(t, before, n, callback, callbackArg, progressCallback, progressCallbackArg)
-		local co = coroutine.create(shellsort)
-		coroutines[t] = co
-		start = debugprofilestop()
-
-		if not timer then
-			timer = C_Timer.NewTicker(0.001, OnUpdate)
-		end
-
-		assert(coroutine.resume(co, t, before, n, callback, callbackArg, progressCallback, progressCallbackArg))
-	end
-end
-
-
-
 
 
 
@@ -1543,16 +1409,162 @@ function TMW.GetSpellCost(spell)
 	end
 end
 
-function TMW.GetCurrentSpecializationRole()
-	-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
-	-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
-	local currentSpec = GetSpecialization()
-	if not currentSpec then
-		return nil
+if TMW.isWrath then
+	local classInfo = {
+		[1] = C_CreatureInfo.GetClassInfo(1),
+		[2] = C_CreatureInfo.GetClassInfo(2),
+		[3] = C_CreatureInfo.GetClassInfo(3),
+		[4] = C_CreatureInfo.GetClassInfo(4),
+		[5] = C_CreatureInfo.GetClassInfo(5),
+		[6] = C_CreatureInfo.GetClassInfo(6),
+		[7] = C_CreatureInfo.GetClassInfo(7),
+		[8] = C_CreatureInfo.GetClassInfo(8),
+		[9] = C_CreatureInfo.GetClassInfo(9),
+		[11] = C_CreatureInfo.GetClassInfo(11),
+	}
+	function TMW.GetMaxClassID()
+		return 11
 	end
+	function TMW.GetClassInfo(classID)
+		local info = classInfo[classID]
+		if not info then return end
+		return info.className, info.classFile, info.classID
+	end
+	
+	local classSpecIds = {
+		DRUID = {102,103,105},
+		HUNTER = {253,254,255},
+		MAGE = {62,63,64},
+		PALADIN = {65,66,70},
+		PRIEST = {256,257,258},
+		ROGUE = {259,260,261},
+		SHAMAN = {262,263,264},
+		WARLOCK = {265,266,267},
+		WARRIOR = {71,72,73},
+		DEATHKNIGHT = {250,251,252},
+	}
+	local specs = {
+		[253]	= {"Beast Mastery", 461112, "DAMAGER"},
+		[254]	= {"Marksmanship", 236179, "DAMAGER"},
+		[255]	= {"Survival", 461113, "DAMAGER"},
+	
+		[71]	= {"Arms", 132355, "DAMAGER"},
+		[72]	= {"Fury", 132347, "DAMAGER"},
+		[73]	= {"Protection", 132341, "TANK"},
+	
+		[65]	= {"Holy", 135920, "HEALER"},
+		[66]	= {"Protection", 236264, "TANK"},
+		[70]	= {"Retribution", 135873, "DAMAGER"},
+	
+		[62]	= {"Arcane", 135932, "DAMAGER"},
+		[63]	= {"Fire", 135810, "DAMAGER"},
+		[64]	= {"Frost", 135846, "DAMAGER"},
+	
+		[256]	= {"Discipline", 135940, "HEALER"},
+		[257]	= {"Holy", 237542, "HEALER"},
+		[258]	= {"Shadow", 136207, "DAMAGER"},
+	
+		[265]	= {"Affliction", 136145, "DAMAGER"},
+		[266]	= {"Demonology", 136172, "DAMAGER"},
+		[267]	= {"Destruction", 136186, "DAMAGER"},
+	
+		[102]	= {"Balance", 136096, "DAMAGER"},
+		[103]	= {"Feral", 132115, "DAMAGER"},
+		[105]	= {"Restoration", 136041, "HEALER"},
+	
+		[262]	= {"Elemental", 136048, "DAMAGER"},
+		[263]	= {"Enhancement", 237581, "DAMAGER"},
+		[264]	= {"Restoration", 136052, "HEALER"},
+	
+		[259]	= {"Assassination", 236270, "DAMAGER"},
+		[260]	= {"Combat", 236286, "DAMAGER"},
+		[261]	= {"Subtlety", 132320, "DAMAGER"},
+	
+		[250]	= {"Blood", 135770, "DAMAGER"},
+		[251]	= {"Frost", 135773, "DAMAGER"},
+		[252]	= {"Unholy", 135775, "DAMAGER"},
+	}
+	
+	function TMW.GetNumSpecializations()
+		return 3
+	end
+	
+	function TMW.GetNumSpecializationsForClassID(classID)
+		return 3
+	end
+	
+	function TMW.GetSpecializationInfoForClassID(classID, i) 
+		local _, slug = GetClassInfo(classID)
+		return TMW.GetSpecializationInfoByID(classSpecIds[slug][i])
+	end
+	
+	function TMW.GetCurrentSpecialization()
+		local _, pclass = UnitClass("player")
+		local specIDs = classSpecIds[pclass]
+		
+		local biggest = 0
+		local spec
+		for i = 1, #specIDs do
+			local _, _, points = GetTalentTabInfo(i)
+			if points > biggest then
+				biggest = points
+				spec = i
+			end
+		end
+	
+		return spec
+	end
+	
+	function TMW.GetCurrentSpecializationID()
+		local _, pclass = UnitClass("player")
+		return classSpecIds[pclass][TMW.GetCurrentSpecialization()]
+	end
+	
+	function TMW.GetSpecializationInfo(index)
+		local _, pclass = UnitClass("player")
+		return TMW.GetSpecializationInfoByID(classSpecIds[pclass][index])
+	end
+	
+	function TMW.GetSpecializationInfoByID(specID)
+		local data = specs[specID]
+		-- 3rd param is description... I didn't include it because TMW doesn't need it.
+		return specID, data[1], nil, data[2], data[3]
+	end
+	
+	function TMW.GetCurrentSpecializationRole()
+		-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
+	
+		local activeSpec = GetActiveTalentGroup()
+		if not activeSpec or activeSpec == 0 then
+			return "DAMAGER"
+		end
+	
+		return GetTalentGroupRole(activeSpec) or "DAMAGER"
+	end
+else
+	TMW.GetSpecializationInfoByID = GetSpecializationInfoByID
+	TMW.GetCurrentSpecializationID = GetCurrentSpecializationID
+	TMW.GetSpecializationInfo = GetSpecializationInfo
+	TMW.GetCurrentSpecialization = GetCurrentSpecialization
+	TMW.GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
+	TMW.GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
+	TMW.GetNumSpecializations = GetNumSpecializations
+	TMW.GetMaxClassID = GetNumClasses
+	TMW.GetClassInfo = GetClassInfo
+	function TMW.GetCurrentSpecializationID() 
+		return GetSpecializationInfo(GetSpecialization())
+	end
+	function TMW.GetCurrentSpecializationRole()
+		-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
+		-- UPDATE_SHAPESHIFT_FORM if the player is a warrior.
+		local currentSpec = GetSpecialization()
+		if not currentSpec then
+			return nil
+		end
 
-	local _, _, _, _, role = GetSpecializationInfo(currentSpec)
-	return role
+		local _, _, _, _, role = GetSpecializationInfo(currentSpec)
+		return role
+	end
 end
 
 do	-- TMW:GetParser()
@@ -1560,6 +1572,12 @@ do	-- TMW:GetParser()
 	function TMW:GetParser()
 		if not Parser then
 			Parser = CreateFrame("GameTooltip")
+			if TooltipDataHandlerMixin then
+				-- in theory this could use TooltipDataHandlerMixin,
+				-- but the blizzard PTR tooltips explode if we dont use GameTooltipDataMixin
+				-- because somehow for some reason they need GetUnit?
+				Mixin(Parser, GameTooltipDataMixin)
+			end
 
 			LT1 = Parser:CreateFontString()
 			RT1 = Parser:CreateFontString()
@@ -1594,6 +1612,7 @@ end
 TMW:MakeSingleArgFunctionCached(TMW, "GetRaceIconInfo")
 
 function TMW:TryGetNPCName(id)
+	-- TODO: Replace GetParser with direct usage of C_TooltipInfo when available
     local tooltip, LT1 = TMW:GetParser()
     tooltip:SetOwner(UIParent, "ANCHOR_NONE")
     tooltip:SetHyperlink( string.format( "unit:Creature-0-0-0-0-%d:0000000000", id))

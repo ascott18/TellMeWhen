@@ -1,4 +1,4 @@
-﻿## Interface: 90200
+﻿## Interface: 100002
 ## Title: TellMeWhen Options
 
 ## Author: Cybeloras of Aerie Peak
@@ -16,3 +16,4 @@
 # This makes the structure for modules and components that need their own config files much neater and nicer.
 
 ..\TellMeWhen\Options\includes.xml
+..\TellMeWhen\Options\includes-Retail.xml

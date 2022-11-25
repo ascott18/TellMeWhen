@@ -37,6 +37,7 @@ local defaultPowerTypes = {
 	DEATHKNIGHT = Enum.PowerType.RunicPower,
 	MONK 		= Enum.PowerType.Energy,
 	DEMONHUNTER = Enum.PowerType.Fury,
+	EVOKER		= Enum.PowerType.Mana,
 }
 local defaultPowerType = defaultPowerTypes[pclass]
 

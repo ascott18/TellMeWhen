@@ -18,6 +18,7 @@ spell_id_blacklist = [
 class_slugs = {
 	'death-knight': 6,
 	'demon-hunter': 12,
+	'evoker': 13,
 	'druid': 11,
 	'hunter': 3 ,
 	'mage': 8,
@@ -66,6 +67,10 @@ race_skill_map = {
 	2421: [30], # lightforged
 	2420: [28], # highmountain
 	2419: [27], # nightborne
+	2597: [34], # dark iron dwarf
+	2598: [36], # maghar orc
+	2775: [35], # vulpera
+	2774: [37], # mechagnome
 }
 
 race_map_fix = {
@@ -159,6 +164,9 @@ def scrape_racial_spells():
 		id = spell["id"]
 		if id not in spell_id_blacklist:
 
+			# if "Passive" in spell["rank"]:
+			# 	continue
+
 			if id in race_map_fix:
 				spell["races"] = race_map_fix[id]
 
@@ -166,7 +174,7 @@ def scrape_racial_spells():
 				spell["races"] = race_skill_map[spell["skill"][0]]
 
 			if "races" not in spell:
-				raise Exception("Unknown racial %d %s" % (spell["id"], spell["name"]))
+				raise Exception("Unknown racial %d %s (skillID %d)" % (spell["id"], spell["name"], spell["skill"][0]))
 
 			#if len(spell["races"]) > 1:
 				#raise Exception("Unexpected multiple races %d %s" % (id, spell["races"]))

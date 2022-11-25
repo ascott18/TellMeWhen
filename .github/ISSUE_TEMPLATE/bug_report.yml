@@ -1,6 +1,5 @@
 name: Bug report
 description: Report a problem with TellMeWhen
-title: '[Bug]: '
 labels: defect
 body:
   - type: dropdown
@@ -11,7 +10,7 @@ body:
       multiple: true
       options:
         - Retail
-        - TBC Classic
+        - Wrath Classic
         - Classic/Classic SoM
     validations:
       required: true

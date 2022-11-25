@@ -33,6 +33,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	local Encounters = {}
 
 	local function scan()
+		if not EJ_GetNumTiers then return end
+
 		for t = 1, EJ_GetNumTiers() do
 			EJ_SelectTier(t)
 			local tierName = EJ_GetTierInfo(t)
@@ -234,12 +236,6 @@ ConditionCategory:RegisterCondition(1,	 "BIGWIGS_TIMER", {
 		check:SetTexts(L["MODTIMER_PATTERN"], L["MODTIMER_PATTERN_DESC"])
 	end,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
-	icon = function()
-		if not BigWigsLoader then
-			return "Interface\\Icons\\INV_Misc_QuestionMark"
-		end
-		return "Interface\\AddOns\\BigWigs\\Media\\Textures\\icons\\core-disabled"
-	end,
 
 	tcoords = CNDT.COMMON.standardtcoords,
 	disabled = function()
@@ -340,12 +336,6 @@ ConditionCategory:RegisterCondition(2,	 "BIGWIGS_ENGAGED", {
 		editbox:SetTexts(L["ENCOUNTERTOCHECK"], L["ENCOUNTERTOCHECK_DESC_BIGWIGS"])
 	end,
 	useSUG = "bossfights",
-	icon = function()
-		if not BigWigsLoader then
-			return "Interface\\Icons\\INV_Misc_QuestionMark"
-		end
-		return "Interface\\AddOns\\BigWigs\\Media\\Textures\\icons\\core-enabled"
-	end,
 
 	tcoords = CNDT.COMMON.standardtcoords,
 	disabled = function()
@@ -440,12 +430,6 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 		check:SetTexts(L["MODTIMER_PATTERN"], L["MODTIMER_PATTERN_DESC"])
 	end,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
-	icon = function()
-		if not DBM then
-			return "Interface\\Icons\\INV_Misc_QuestionMark"
-		end
-		return "Interface\\AddOns\\DBM-Core\\textures\\GuardTower"
-	end,
 
 	tcoords = CNDT.COMMON.standardtcoords,
 	disabled = function()
@@ -544,12 +528,6 @@ ConditionCategory:RegisterCondition(11,	 "DBM_ENGAGED", {
 		editbox:SetTexts(L["ENCOUNTERTOCHECK"], L["ENCOUNTERTOCHECK_DESC_DBM"])
 	end,
 	useSUG = "bossfights",
-	icon = function()
-		if not DBM then
-			return "Interface\\Icons\\INV_Misc_QuestionMark"
-		end
-		return "Interface\\AddOns\\DBM-Core\\textures\\OrcTower"
-	end,
 
 	tcoords = CNDT.COMMON.standardtcoords,
 	disabled = function()

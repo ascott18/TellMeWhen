@@ -246,8 +246,8 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 		else
 			if group.Domain == "profile" then
 				-- Indicator for talent tree (specialization) configuration.
-				for i = 1, GetNumSpecializations() do
-					local specID = GetSpecializationInfo(i)
+				for i = 1, TMW.GetNumSpecializations() do
+					local specID = TMW.GetSpecializationInfo(i)
 					if not gs.EnabledSpecs[specID] then
 						isSpecLimited = true
 						break
@@ -258,10 +258,10 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 					-- Iterate backwards so they appear in the correct order
 					-- (since they are positioned from right to left, not left to right)
 					local foundOne
-					for i = GetNumSpecializations(), 1, -1 do
-						local specID = GetSpecializationInfo(i)
+					for i = TMW.GetNumSpecializations(), 1, -1 do
+						local specID = TMW.GetSpecializationInfo(i)
 						if gs.EnabledSpecs[specID] then
-							local _, name, _, texture = GetSpecializationInfo(i)
+							local _, name, _, texture = TMW.GetSpecializationInfo(i)
 
 							local tex = self:GetTexture(textureIndex)
 							textureIndex = textureIndex + 1
