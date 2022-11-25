@@ -990,6 +990,9 @@ local castEvents = function(ConditionObject, c)
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_START", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_UPDATE", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_END", CNDT:GetUnit(c.Unit)),
 		TMW.isWrath and "false" or ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
 		TMW.isWrath and "false" or ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit))
 end

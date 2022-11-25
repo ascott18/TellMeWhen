@@ -109,7 +109,7 @@ local noSource = {
 }
 local function ICD_OnEvent(icon, event, ...)
 	local valid, spellID, spellName, _
-
+	
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local cevent, sourceGUID
 		_, cevent, _, sourceGUID, _, _, _, destGUID, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
@@ -124,7 +124,12 @@ local function ICD_OnEvent(icon, event, ...)
 			cevent == "SPELL_MISSED"
 		)
 
-	elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" or event == "UNIT_SPELLCAST_START" then
+	elseif 
+			event == "UNIT_SPELLCAST_SUCCEEDED" 
+			or event == "UNIT_SPELLCAST_CHANNEL_START" 
+			or event == "UNIT_SPELLCAST_START" 
+			or event == "UNIT_SPELLCAST_EMPOWER_START"
+			then
 		local unit
 		unit, _, spellID = ...
 		spellName = GetSpellInfo(spellID)
