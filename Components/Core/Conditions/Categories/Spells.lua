@@ -714,7 +714,7 @@ function Env.TotemHelper(slot, spellSet)
 	local totemNameLower = strlowerCache[totemName]
 	local totemInfo = totemRanks[totemNameLower]
 
-	local matchAny = spellSet.Name == ""
+	local matchAny = not spellSet or spellSet.Name == ""
 	local Hash = not matchAny and spellSet.Hash
 	
 	if

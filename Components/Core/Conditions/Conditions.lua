@@ -769,7 +769,7 @@ CNDT.Substitutions = {
 
 {
 	src = "c.NameFirst2",
-	rep = "error('Condition sub c.NameFirst2 is obsolete. Use c.Spells2.FirstS')",
+	rep = "error('Condition sub c.NameFirst2 is obsolete. Use c.Spells2.FirstString')",
 },{
 	src = "c.NameString2",
 	rep = "error('Condition sub c.NameString2 is obsolete. Use c.Spells2.FirstString')",
@@ -826,7 +826,7 @@ CNDT.Substitutions = {
 					end
 				end
 			end
-			return spells .. suffix
+			return CNDT:GetTableSubstitution(spells, "Spells")
 		end
 	end,
 },
@@ -847,7 +847,7 @@ CNDT.Substitutions = {
 					end
 				end
 			end
-			return spells .. suffix
+			return CNDT:GetTableSubstitution(spells, "Spells")
 		end
 	end,
 },
@@ -888,6 +888,7 @@ local conditionNameSettingProcessedCache = setmetatable(
 		name = ";" .. name .. ";"
 		name = gsub(name, ";;", ";")
 		name = strtrim(name)
+		name = strtrim(name, ";")
 		name = strlower(name)
 
 		t[i] = name

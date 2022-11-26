@@ -1,3 +1,6 @@
+## v10.0.4
+*  Fix bugs in totem conditions (and a few others) introduced in 10.0.3
+
 ## v10.0.3
 * Fix ClassSpellCache.lua:171: attempt to index field 'SpellData' (a nil value)
 * Fix #2019 - Expired totems are now treated as absent by the totem icon type, even if the wow API says they still exist.
