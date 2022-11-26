@@ -235,7 +235,7 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraDur(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -243,7 +243,7 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 	anticipate = function(c)
-		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
 		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and expirationTime - c.Level or 0
@@ -288,7 +288,7 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 	icon = "Interface\\Icons\\spell_holy_circleofrenewal",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraPercent(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraPercent(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -296,7 +296,7 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 	anticipate = function(c)
-		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
 		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
@@ -324,7 +324,7 @@ ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraDur(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator AuraDur(c.Unit, c.NameFirst2, "HELPFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[")]]
+		return [[AuraDur(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator AuraDur(c.Unit, c.Spells2.First, "HELPFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[")]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -347,7 +347,7 @@ ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
 	icon = "Interface\\Icons\\inv_misc_herb_felblossom",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraStacks(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraStacks(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -371,7 +371,7 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	hidden = TMW.isWrath,
 	funcstr = function(c)
-		return [[AuraVariableNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraVariableNumber(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -395,7 +395,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		icon = TMW.isWrath and "Interface\\Icons\\spell_ice_lament" or "Interface\\Icons\\ability_priest_clarityofwill",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
-			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
+			return [[AuraTooltipNumber(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
 		end,
 		events = function(ConditionObject, c)
 			return
@@ -470,7 +470,7 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraDur(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -478,7 +478,7 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 	anticipate = function(c)
-		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
 		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and expirationTime - c.Level or 0
@@ -523,7 +523,7 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 	icon = TMW.isWrath and "Interface\\Icons\\ability_rogue_dualweild" or "Interface\\Icons\\spell_priest_voidshift",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraPercent(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraPercent(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -531,7 +531,7 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 	anticipate = function(c)
-		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
+		return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
 		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
@@ -559,7 +559,7 @@ ConditionCategory:RegisterCondition(12,	 "DEBUFFDURCOMP", {
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraDur(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator AuraDur(c.Unit, c.NameFirst2, "HARMFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[")]]
+		return [[AuraDur(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator AuraDur(c.Unit, c.Spells.First2, "HARMFUL]] .. (c.Checked2 and " PLAYER" or "") .. [[")]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -583,7 +583,7 @@ ConditionCategory:RegisterCondition(13,	 "DEBUFFSTACKS", {
 	icon = "Interface\\Icons\\ability_warrior_sunder",
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
-		return [[AuraStacks(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraStacks(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -607,7 +607,7 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	hidden = TMW.isWrath,
 	funcstr = function(c)
-		return [[AuraVariableNumber(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraVariableNumber(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -631,7 +631,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		icon = "Interface\\Icons\\spell_fire_flameshock",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
-			return [[AuraTooltipNumber(c.Unit, c.NameFirst, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
+			return [[AuraTooltipNumber(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
 		end,
 		events = function(ConditionObject, c)
 			return

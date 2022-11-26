@@ -144,8 +144,8 @@ local mindfreeze = strlower(GetSpellInfo(47528))
 local function Reactive_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local NameArray, NameStringArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, IgnoreNomana, UseActvtnOverlay, OnlyActvtnOverlay =
-	 icon.Spells.Array, icon.Spells.StringArray, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.IgnoreNomana, icon.UseActvtnOverlay, icon.OnlyActvtnOverlay
+	local NameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, IgnoreNomana, UseActvtnOverlay, OnlyActvtnOverlay =
+	 icon.Spells.Array, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.IgnoreNomana, icon.UseActvtnOverlay, icon.OnlyActvtnOverlay
 
 	local activationOverlayActive = icon.activationOverlayActive
 

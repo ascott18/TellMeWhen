@@ -41,14 +41,14 @@ local GetSpellCooldown = GetSpellCooldown
 function Env.CooldownDuration(spell, gcdAsUnusable)
 	if spell == "gcd" then
 		local start, duration = GetSpellCooldown(TMW.GCDSpell)
-		return duration == 0 and 0 or (duration - (TMW.time - start))
+		return duration == 0 and 0 or (duration - (TMW.time - start)), start, duration
 	end
 
 	local start, duration = GetSpellCooldown(spell)
 	if duration then
-		return ((duration == 0 or (not gcdAsUnusable and OnGCD(duration))) and 0) or (duration - (TMW.time - start))
+		return ((duration == 0 or (not gcdAsUnusable and OnGCD(duration))) and 0) or (duration - (TMW.time - start)), start, duration
 	end
-	return 0
+	return 0, 0, 0
 end
 
 local GetSpellCharges = GetSpellCharges
@@ -95,14 +95,14 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	formatter = TMW.C.Formatter.TIME_0USABLE,
 	icon = "Interface\\Icons\\spell_holy_divineintervention",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[CooldownDuration(c.NameFirst, c.Checked) c.Operator c.Level]],
+	funcstr = [[CooldownDuration(c.OwnSpells.First, c.Checked) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
 	end,
 	anticipate = [[
-		local start, duration = GetSpellCooldown(c.GCDReplacedNameFirst)
+		local _, start, duration = GetSpellCooldown(c.OwnSpells.First)
 		local VALUE = duration and start + (duration - c.Level) or huge
 	]],
 })
@@ -125,15 +125,15 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\spell_holy_divineintervention",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[CooldownDuration(c.NameFirst, c.Checked) c.Operator CooldownDuration(c.NameFirst2, c.Checked2)]],
+	funcstr = [[CooldownDuration(c.OwnSpells.First, c.Checked) c.Operator CooldownDuration(c.OwnSpells2.First, c.Checked2)]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
 	end,
 	anticipate = [[
-		local start, duration = GetSpellCooldown(c.GCDReplacedNameFirst)
-		local start2, duration2 = GetSpellCooldown(c.GCDReplacedNameFirst2)
+		local _, start, duration = GetSpellCooldown(c.OwnSpells.First)
+		local _, start2, duration2 = GetSpellCooldown(c.OwnSpells2.First)
 		local VALUE
 		if duration and duration2 then
 			local v1, v2 = start + duration, start2 + duration2
@@ -167,7 +167,7 @@ if TMW.isRetail then
 			GetSpellCharges = GetSpellCharges,
 			GetSpellCount = GetSpellCount,
 		},
-		funcstr = [[(GetSpellCharges(c.NameFirst) or GetSpellCount(c.NameFirst)) c.Operator c.Level]],
+		funcstr = [[(GetSpellCharges(c.OwnSpells.First) or GetSpellCount(c.OwnSpells.First)) c.Operator c.Level]],
 		events = function(ConditionObject, c)
 			return
 				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
@@ -198,7 +198,7 @@ if TMW.isRetail then
 		Env = {
 			GetSpellCharges = GetSpellCharges,
 		},
-		funcstr = [[RechargeDuration(c.NameFirst) c.Operator c.Level]],
+		funcstr = [[RechargeDuration(c.OwnSpells.First) c.Operator c.Level]],
 		events = function(ConditionObject, c)
 			return
 				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
@@ -206,7 +206,7 @@ if TMW.isRetail then
 				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_CHARGES")
 		end,
 		anticipate = [[
-			local _, _, start, duration = GetSpellCharges(c.NameFirst)
+			local _, _, start, duration = GetSpellCharges(c.OwnSpells.First)
 			local VALUE = duration and start + (duration - c.Level) or huge
 		]],
 	})
@@ -269,9 +269,9 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 		end
 
 		if c.Level == 1 then
-			return [[LastPlayerCastName ~= LOWER(c.NameFirst) and LastPlayerCastID ~= c.NameFirst]] 
+			return [[LastPlayerCastName ~= LOWER(c.Spells.First) and LastPlayerCastID ~= c.Spells.First]] 
 		end
-		return [[LastPlayerCastName == LOWER(c.NameFirst) or LastPlayerCastID == c.NameFirst]] 
+		return [[LastPlayerCastName == LOWER(c.Spells.First) or LastPlayerCastID == c.Spells.First]] 
 	end,
 	events = function(ConditionObject, c)
 		local pGUID = UnitGUID("player")
@@ -313,7 +313,7 @@ ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
 	icon = "Interface\\Icons\\ability_warrior_revenge",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[BOOLCHECK( ReactiveHelper(c.NameFirst, c.Checked) )]],
+	funcstr = [[BOOLCHECK( ReactiveHelper(c.OwnSpells.First, c.Checked) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
@@ -337,7 +337,7 @@ ConditionCategory:RegisterCondition(3.1, "CURRENTSPELL", {
 	Env = {
 		IsCurrentSpell = IsCurrentSpell,
 	},
-	funcstr = [[BOOLCHECK( IsCurrentSpell(c.NameFirst) )]],
+	funcstr = [[BOOLCHECK( IsCurrentSpell(c.OwnSpells.First) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("CURRENT_SPELL_CAST_CHANGED")
@@ -361,7 +361,7 @@ ConditionCategory:RegisterCondition(3.2, "AUTOSPELL", {
 	Env = {
 		IsAutoRepeatSpell = IsAutoRepeatSpell,
 	},
-	funcstr = [[BOOLCHECK( IsAutoRepeatSpell(c.NameFirst) )]],
+	funcstr = [[BOOLCHECK( IsAutoRepeatSpell(c.OwnSpells.First) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("START_AUTOREPEAT_SPELL"),
@@ -401,7 +401,7 @@ ConditionCategory:RegisterCondition(3.5,  "OVERLAYED", {
 			module:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", handleEvent)
 		end
 
-		return [[BOOLCHECK( IsSpellOverlayed(OverlayedNameMap[c.NameFirst] or (isNumber[c.NameFirst] and c.NameFirst) or 0) )]]
+		return [[BOOLCHECK( IsSpellOverlayed(OverlayedNameMap[c.Spells.First] or (isNumber[c.Spells.First] and c.Spells.First) or 0) )]]
 	end,
 	events = function(ConditionObject, c)
 		return
@@ -427,7 +427,7 @@ ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	formatter = TMW.C.Formatter.BOOL_USABLEUNUSABLE,
 	icon = "Interface\\Icons\\inv_potion_137",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[not BOOLCHECK( SpellHasNoMana(c.NameFirst) )]],
+	funcstr = [[not BOOLCHECK( SpellHasNoMana(c.OwnSpells.First) )]],
 	Env = {
 		SpellHasNoMana = TMW.SpellHasNoMana
 	},
@@ -452,7 +452,7 @@ ConditionCategory:RegisterCondition(4.5, "SPELLCOST", {
 	unit = false,
 	icon = "Interface\\Icons\\inv_potion_125",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[(GetSpellCost(c.NameFirst) or 0) c.Operator c.Level]],
+	funcstr = [[(GetSpellCost(c.OwnSpells.First) or 0) c.Operator c.Level]],
 	Env = {
 		GetSpellCost = TMW.GetSpellCost
 	},
@@ -477,7 +477,7 @@ ConditionCategory:RegisterCondition(5,	 "SPELLRANGE", {
 		IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange,
 	},
 	funcstr = function(c)
-		return 1-c.Level .. [[ == (IsSpellInRange(c.NameFirst, c.Unit) or 0)]]
+		return 1-c.Level .. [[ == (IsSpellInRange(c.OwnSpells.First, c.Unit) or 0)]]
 	end,
 })
 ConditionCategory:RegisterCondition(6,	 "GCD", {
@@ -713,13 +713,15 @@ function Env.TotemHelper(slot, spellSet)
 	local _, totemName, start, duration = GetTotemInfo(slot)
 	local totemNameLower = strlowerCache[totemName]
 	local totemInfo = totemRanks[totemNameLower]
-	local Hash = spellSet and spellSet.Hash
+
+	local matchAny = spellSet.Name == ""
+	local Hash = not matchAny and spellSet.Hash
 	
 	if
 		start ~= 0 and
 		totemName and
 		(
-			not spellSet or
+			matchAny or
 			Hash[totemNameLower] or
 			(totemInfo and (
 				-- By totem name, (e.g. "Searing Totem III")
@@ -737,7 +739,8 @@ function Env.TotemHelper(slot, spellSet)
 end
 
 function Env.TotemHelperAny(spellSet)
-	local Hash = spellSet and spellSet.Hash
+	local matchAny = spellSet.Name == ""
+	local Hash = not matchAny and spellSet.Hash
 	
 	for slot = 1, 10 do
 		local have, totemName, start, duration = GetTotemInfo(slot)
@@ -752,7 +755,7 @@ function Env.TotemHelperAny(spellSet)
 			start ~= 0 and
 			totemName and
 			(
-				not spellSet or
+				matchAny or
 				Hash[totemNameLower] or
 				(totemInfo and (
 					-- By totem name, (e.g. "Searing Totem III")
@@ -925,7 +928,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
 	useSUG = true,
-	funcstr = [[UnitCast(c.Unit, c.Level, LOWER(c.NameString))]], -- LOWER is some gsub magic
+	funcstr = [[UnitCast(c.Unit, c.Level, c.Spells.FirstString)]],
 	events = castEvents,
 })
 ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
@@ -942,10 +945,10 @@ ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
 		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
 	useSUG = true,
-	funcstr = [[UnitCastPercent(c.Unit, LOWER(c.NameString)) c.Operator c.Level]],
+	funcstr = [[UnitCastPercent(c.Unit, c.Spells.FirstString) c.Operator c.Level]],
 	events = castEvents,
 	anticipate = [[
-		local percent, percentPerSecond = UnitCastPercent(c.Unit, LOWER(c.NameString))
+		local percent, percentPerSecond = UnitCastPercent(c.Unit, c.Spells.FirstString)
 		local VALUE = 
 			percentPerSecond == nil and huge or 
 			((c.Level - percent) / percentPerSecond) + time
@@ -991,11 +994,11 @@ if GetUnitEmpowerStageDuration then
 
 		tcoords = CNDT.COMMON.standardtcoords,
 
-		funcstr = [[GetCurrentEmpowerStage(c.Unit, LOWER(c.NameString)) c.Operator c.Level]],
+		funcstr = [[GetCurrentEmpowerStage(c.Unit, c.Spells.FirstString) c.Operator c.Level]],
 		anticipate = [[
 			-- Doesn't anticpiate the specific stage we're looking for.
 			-- Only the next stage change. Which is plenty good enough.
-			local _, VALUE = GetCurrentEmpowerStage(c.Unit, LOWER(c.NameString))
+			local _, VALUE = GetCurrentEmpowerStage(c.Unit, c.Spells.FirstString)
 		]],
 
 		events = function(ConditionObject, c)
@@ -1076,7 +1079,7 @@ ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 		 -- attempt initialization if it hasn't been done already
 		Env.UnitCastCount("none", "none")
 		
-		return [[UnitCastCount(c.Unit, c.NameFirst) c.Operator c.Level]]
+		return [[UnitCastCount(c.Unit, c.Spells.First) c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
 		return

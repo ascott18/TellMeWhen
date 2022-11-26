@@ -225,7 +225,7 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	Env = {
 		GetSpellAutocast = GetSpellAutocast,
 	},
-	funcstr = [[BOOLCHECK( select(2, GetSpellAutocast(c.NameString)) )]],
+	funcstr = [[BOOLCHECK( select(2, GetSpellAutocast(c.Spells.FirstString)) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("PET_BAR_UPDATE")
@@ -355,7 +355,7 @@ ConditionCategory:RegisterCondition(16,	 "TRACKING", {
 		CNDT:RegisterEvent("MINIMAP_UPDATE_TRACKING")
 		CNDT:MINIMAP_UPDATE_TRACKING()
 	
-		return [[BOOLCHECK( Tracking[c.NameString] )]]
+		return [[BOOLCHECK( Tracking[c.Spells.FirstString] )]]
 	end,
 	events = function(ConditionObject, c)
 		return

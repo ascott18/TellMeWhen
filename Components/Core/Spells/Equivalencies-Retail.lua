@@ -552,6 +552,7 @@ TMW.BE = {
 			 230935, -- Drums of the Mountain               (leatherworking item)
 			 256740, -- Drums of the Maelstrom              (leatherworking item)
 			 264667, -- Primal Rage                         (hunter pet)
+			 390386, -- Fury of the Aspects                 (evoker)
 		},
 		ImmuneToInterrupts = {
 			    642, -- Divine Shield                       (paladin, general)

@@ -97,7 +97,7 @@ An example of this can be seen in the Spell Cooldown condition, among many other
 
 <<code lua>>
 anticipate = [[
-  local start, duration = GetSpellCooldown(c.GCDReplacedNameFirst)
+  local start, duration = GetSpellCooldown(c.NameFirst)
   local VALUE = duration and start + duration - c.Level or huge
 ]]
 <</code>>

@@ -270,7 +270,7 @@ ConditionCategory:RegisterCondition(21,	 "QUESTCOMPLETE", {
 	},
 	funcstr = function(c)
 		if c.Name ~= "" then
-			return [[BOOLCHECK( IsQuestFlaggedCompleted(c.NameFirst) )]]
+			return [[BOOLCHECK( IsQuestFlaggedCompleted(c.Name) )]]
 		else
 			return [[false]]
 		end

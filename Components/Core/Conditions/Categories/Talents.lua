@@ -524,7 +524,7 @@ if C_Traits then
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
 			setupTalentEvents()
-			return [[(TalentMap[c.NameFirst] or 0) c.Operator c.Level]]
+			return [[(TalentMap[c.Spells.First] or 0) c.Operator c.Level]]
 		end,
 		events = talentEvents,
 	})
@@ -581,7 +581,7 @@ elseif GetNumTalentTabs then
 			CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "CHARACTER_POINTS_CHANGED")
 			CNDT:CHARACTER_POINTS_CHANGED()
 
-			return [[(TalentMap[c.NameString] or 0) c.Operator c.Level]]
+			return [[(TalentMap[c.Spells.FirstString] or 0) c.Operator c.Level]]
 		end,
 		events = function(ConditionObject, c)
 			return
@@ -637,7 +637,7 @@ else
 			CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
 			CNDT:PLAYER_TALENT_UPDATE()
 		
-			return [[BOOLCHECK( TalentMap[LOWER(c.NameFirst)] )]]
+			return [[BOOLCHECK( TalentMap[LOWER(c.Spells.First)] )]]
 		end,
 		events = function(ConditionObject, c)
 			return
@@ -691,7 +691,7 @@ if GetGlyphSocketInfo then
 			CNDT:RegisterEvent("GLYPH_UPDATED",  "GLYPH_UPDATED")
 			CNDT:GLYPH_UPDATED()
 		
-			return [[BOOLCHECK( GlyphLookup[c.NameFirst] )]]
+			return [[BOOLCHECK( GlyphLookup[c.Spells.First] )]]
 		end,
 		Env = {
 			GlyphLookup = {},
@@ -740,7 +740,7 @@ if GetPvpTalentInfoByID then
 			CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
 			CNDT:PLAYER_TALENT_UPDATE()
 		
-			return [[BOOLCHECK( PvpTalentMap[LOWER(c.NameFirst)] )]]
+			return [[BOOLCHECK( PvpTalentMap[LOWER(c.Spells.First)] )]]
 		end,
 		events = function(ConditionObject, c)
 			return
@@ -804,7 +804,7 @@ if IsInJailersTower then
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
 			AnimaPowWatcher:Init()
-			return [[(CurrentAnimaPows[LOWER(c.NameFirst)] or 0) c.Operator c.Level]]
+			return [[(CurrentAnimaPows[LOWER(c.Spells.First)] or 0) c.Operator c.Level]]
 		end,
 		events = function(ConditionObject, c)
 			return
@@ -942,7 +942,7 @@ if C_AzeriteEssence and TMW.isRetail then
 				CNDT:RegisterEvent("AZERITE_ESSENCE_ACTIVATED", "AZERITE_ESSENCE_UPDATE")
 				CNDT:AZERITE_ESSENCE_UPDATE()
 				
-				return [[BOOLCHECK( AzeriteEssenceMap]] .. kind .. [[[LOWER(c.NameFirst)] )]]
+				return [[BOOLCHECK( AzeriteEssenceMap]] .. kind .. [[[LOWER(c.Spells.First)] )]]
 			end,
 			events = function(ConditionObject, c)
 				return

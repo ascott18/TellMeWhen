@@ -57,23 +57,23 @@ end
 
 local function parseSpellsString(setting, doLower, keepDurations)
 
-	local buffNames = TMW:SplitNames(setting) -- Get a table of everything
+	local spells = TMW:SplitNames(setting) -- Get a table of everything
 	
 	if doLower then
-		buffNames = TMW:LowerNames(buffNames)
+		spells = TMW:LowerNames(spells)
 	end
 
 	--INSERT EQUIVALENCIES
 	--start at the end of the table, that way we dont have to worry
-	--about increasing the key of buffNames to work with every time we insert something
-	local k = #buffNames
+	--about increasing the key of spells to work with every time we insert something
+	local k = #spells
 	while k > 0 do
-		local eqtt = TMW:EquivToTable(buffNames[k]) -- Get the table form of the equivalency string
+		local eqtt = TMW:EquivToTable(spells[k]) -- Get the table form of the equivalency string
 		if eqtt then
 			local n = k	--point to start inserting the values at
-			tremove(buffNames, k)	--take the actual equavalancey itself out, because it isnt an actual spell name or anything
+			tremove(spells, k)	--take the actual equavalancey itself out, because it isnt an actual spell name or anything
 			for z, x in ipairs(eqtt) do
-				tinsert(buffNames, n, x)	--put the names into the main table
+				tinsert(spells, n, x)	--put the names into the main table
 				n = n + 1	--increment the point of insertion
 			end
 		else
@@ -82,28 +82,28 @@ local function parseSpellsString(setting, doLower, keepDurations)
 	end
 
 	-- REMOVE DUPLICATES
-	TMW.tRemoveDuplicates(buffNames)
+	TMW.tRemoveDuplicates(spells)
 
 
 	-- Remove entries that the user has chosed to omit by using a "-" prefix.
-	local k = #buffNames
+	local k = #spells
 	while k > 0 do
-		local v = buffNames[k]
+		local v = spells[k]
 		if (type(v) == "string" and v:match("^%-")) or (type(v) == "number" and v < 0) then
 
-			tremove(buffNames, k)
+			tremove(spells, k)
 
 			local thingToRemove = tostring(v):match("^%-%s*(.*)"):lower()
 			local spellToRemove, durationToRemove = splitSpellAndDuration(thingToRemove)
 
 			local i = 1
 			local removed
-			while buffNames[i] do
-				local name = tostring(buffNames[i]):lower()
+			while spells[i] do
+				local name = tostring(spells[i]):lower()
 				local spell, duration = splitSpellAndDuration(name)
 				
 				if spellToRemove == spell and durationToRemove == duration then
-					tremove(buffNames, i)
+					tremove(spells, i)
 					removed = true
 				else
 					i = i + 1
@@ -111,7 +111,7 @@ local function parseSpellsString(setting, doLower, keepDurations)
 			end
 
 			if not removed then
-				TMW:Printf(L["SPELL_EQUIV_REMOVE_FAILED"], thingToRemove, tconcat(buffNames, "; "))
+				TMW:Printf(L["SPELL_EQUIV_REMOVE_FAILED"], thingToRemove, tconcat(spells, "; "))
 			end
 		else
 			-- The entry was valid, so move backwards towards the beginning.
@@ -120,12 +120,12 @@ local function parseSpellsString(setting, doLower, keepDurations)
 	end
 
 	-- Remove invalid SpellIDs
-	for k = #buffNames, 1, -1 do
-		local v = buffNames[k]
+	for k = #spells, 1, -1 do
+		local v = spells[k]
 		local spell, duration = splitSpellAndDuration(v)
 		if (tonumber(spell) or 0) >= 2^31 or duration >= 2^31 then
 			-- Invalid spellID or duration. Remove it to prevent integer overflow errors.
-			tremove(buffNames, k)
+			tremove(spells, k)
 			TMW:Warn(L["ERROR_INVALID_SPELLID2"]:format(v))
 		end
 	end
@@ -134,27 +134,73 @@ local function parseSpellsString(setting, doLower, keepDurations)
 	-- REMOVE SPELL DURATIONS (FOR UNIT COOLDOWNS/ICDs)
 	-- THIS MUST HAPPEN LAST or else the duration array and spell array can get mismatched.
 	if not keepDurations then
-		for k, buffName in pairs(buffNames) do
+		for k, buffName in pairs(spells) do
 			local spell, duration = splitSpellAndDuration(buffName)
-			buffNames[k] = tonumber(spell) or spell
+			spells[k] = tonumber(spell) or spell
 		end
 	end
 
-	return buffNames
+	return spells
 end
 parseSpellsString = TMW:MakeNArgFunctionCached(3, parseSpellsString)
 
+-- IDs of spells that can't be tracked properly because of blizzard bugs.
+local fixSpellMap = { 
+	[382614] = function()
+		-- Evoker https://github.com/ascott18/TellMeWhen/issues/2017
+		-- 375783: Font of Magic (talent)
+		-- 382614: Dream Breath (Preservation talent, with Font of Magic LEARNED)
+		-- 355936: Dream Breath (Preservation talent, with Font of Magic UNLEARNED)
+		if not IsPlayerSpell(382614) and not IsPlayerSpell(375783) then
+			return 355936
+		end
+	end,
+	[382731] = function()
+		-- Evoker https://github.com/ascott18/TellMeWhen/issues/2017
+		-- 375783: Font of Magic (talent)
+		-- 382731: Spiritbloom (Preservation talent, with Font of Magic LEARNED)
+		-- 367226: Spiritbloom (Preservation talent, with Font of Magic UNLEARNED)
+		if not IsPlayerSpell(382731) and not IsPlayerSpell(375783) then
+			return 367226
+		end
+	end,
+	[382411] = function()
+		-- Evoker https://github.com/ascott18/TellMeWhen/issues/2017
+		-- 375783: Font of Magic (talent)
+		-- 382411: Eternity Surge (Devastation baseline, with Font of Magic LEARNED)
+		-- 359073: Eternity Surge (Devastation baseline, with Font of Magic UNLEARNED)
+		if not IsPlayerSpell(382411) and not IsPlayerSpell(375783) then
+			return 359073
+		end
+	end,
+}
 
-local function getSpellNames(setting, doLower, firstOnly, toname, hash, allowRenaming)
-	local buffNames = parseSpellsString(setting, doLower, false)
+local function getSpellNames(setting, doLower, firstOnly, toName, hash, allowRenaming)
+	local spells = parseSpellsString(setting, doLower, false)
 
-	-- buffNames MUST BE COPIED because the return from parseSpellsString is cached.
-	buffNames = CopyTable(buffNames)
+	-- spells MUST BE COPIED because the return from parseSpellsString is cached.
+	spells = CopyTable(spells)
+
+	if allowRenaming then
+		-- Attempt to fix blizzard bugs like https://github.com/Stanzilla/WoWUIBugs/issues/354
+		for k, v in ipairs(spells) do
+			-- Doesn't matter if the input is a name or an ID.
+			-- We need to map it to an ID to fix blizzard bugs
+			local name, _, _, _, _, _, spellID = GetSpellInfo(v or "")
+			if spellID and fixSpellMap[spellID] then
+				local newSpell = fixSpellMap[spellID]()
+				if newSpell then
+					print("fixing bugged spell", v, spellID, "=>", newSpell)
+					spells[k] = newSpell
+				end
+			end
+		end
+	end
 
 	if hash then
 		local hash = {}
-		for k, v in ipairs(buffNames) do
-			if toname and (allowRenaming or tonumber(v)) then
+		for k, v in ipairs(spells) do
+			if toName and (allowRenaming or tonumber(v)) then
 				v = GetSpellInfo(v or "") or v -- Turn the value into a name if needed
 			end
 
@@ -167,10 +213,10 @@ local function getSpellNames(setting, doLower, firstOnly, toname, hash, allowRen
 		return hash
 	end
 
-	if toname then
+	if toName then
 		if firstOnly then
 			-- Turn the first value into a name and return it
-			local ret = buffNames[1] or ""
+			local ret = spells[1] or ""
 			if (allowRenaming or tonumber(ret)) then
 				ret = GetSpellInfo(ret) or ret 
 			end
@@ -182,26 +228,26 @@ local function getSpellNames(setting, doLower, firstOnly, toname, hash, allowRen
 			return ret
 		else
 			-- Convert everything to a name
-			for k, v in ipairs(buffNames) do
+			for k, v in ipairs(spells) do
 				if (allowRenaming or tonumber(v)) then
-					buffNames[k] = GetSpellInfo(v or "") or v 
+					spells[k] = GetSpellInfo(v or "") or v 
 				end
 			end
 
 			if doLower
-				then TMW:LowerNames(buffNames)
+				then TMW:LowerNames(spells)
 			end
 
-			return buffNames
+			return spells
 		end
 	end
 
 	if firstOnly then
-		local ret = buffNames[1] or ""
+		local ret = spells[1] or ""
 		return ret
 	end
 
-	return buffNames
+	return spells
 end
 
 local function getSpellDurations(setting)
@@ -232,7 +278,7 @@ end
 ---------------------------------
 
 local tableArgs = {
-	--						lower,	first,	toname,	hash
+	--						lower,	first,	toName,	hash
 	First				= { 1,		1,		nil,	nil	},
 	FirstString			= { 1,		1,		1,		nil },
 	Array				= { 1,		nil,	nil,	nil },
@@ -240,7 +286,7 @@ local tableArgs = {
 	Hash				= { 1,		nil,	nil, 	1	},
 	StringHash			= { 1,		nil,	1,		1	},
 
-	--						lower,	first,	toname,	hash
+	--						lower,	first,	toName,	hash
 	FirstNoLower		= { nil,	1,		nil,	nil },
 	FirstStringNoLower	= { nil,	1,		1,		nil	},
 	ArrayNoLower		= { nil,	nil,	nil,	nil	},
@@ -334,7 +380,7 @@ end)
 
 -- @arg spellString [string] A semicolon-delimited list of spells that
 -- will be parsed and made available in various forms by the {{{TMW.C.SpellSet}}}.
--- @arg allowRenaiming [boolean] True if the SpellSet should attempt to rename spells
+-- @arg allowRenaming [boolean] True if the SpellSet should attempt to rename spells
 -- that were inputted by name but have different names because of the player's currently learned spells.
 -- @return [TMW.C.SpellSet] An instance of {{{TMW.C.SpellSet}}} for the requested spells.
 function TMW:GetSpells(spellString, allowRenaming)
