@@ -428,13 +428,12 @@ end
 
 function ConditionObject:GenerateUnitAuraString(unit, spell, onlyMine)
 	if TMW.COMMON.Auras then
-		TMW.COMMON.Auras:RequestUnits(unit)
+		local canUsePacked, auraEvent = TMW.COMMON.Auras:RequestUnits(unit)
 		
-		self:RequestEvent("TMW_UNIT_AURA")
+		self:RequestEvent(auraEvent)
 		self:SetNumEventArgs(2)
 
-		local str = "event == 'TMW_UNIT_AURA' and arg1 == "
-			.. format("%q", unit)
+		local str = ("event == %q and arg1 == %q"):format(auraEvent, unit)
 			-- arg2 is payload:
 			-- If it is nil, the event is a general update for the unit
 			-- If it is a table, its keys are names/ids of what changed

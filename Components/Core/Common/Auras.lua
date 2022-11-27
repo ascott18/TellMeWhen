@@ -64,6 +64,20 @@ data = {
 local data = {}
 Auras.data = data
 
+-- Optimization: have specific events for the most common units
+-- to avoid all consumers having to listen to all UNIT_AURA events.
+local dedicatedEventUnits = {
+    player = "TMW_UNIT_AURA_PLAYER",
+    target = "TMW_UNIT_AURA_TARGET",
+    pet = "TMW_UNIT_AURA_PET",
+}
+local function FireUnitAura(unit, payload)
+    local dedicatedEvent = dedicatedEventUnits[unit]
+    if dedicatedEvent then
+        TMW:Fire(dedicatedEvent, unit, payload)
+    end
+    TMW:Fire("TMW_UNIT_AURA", unit, payload)
+end
 Auras:RegisterEvent("UNIT_AURA")
 Auras:SetScript("OnEvent", function(_, _, unit, unitAuraUpdateInfo)
     local unitData = data[unit]
@@ -74,13 +88,13 @@ Auras:SetScript("OnEvent", function(_, _, unit, unitAuraUpdateInfo)
 
         -- Still fire TMW_UNIT_AURA because even things in TMW that don't use Auras:GetAuras 
         -- do use TMW_UNIT_AURA in order to avoid the excessive allocations from blizz's UNIT_AURA
-        TMW:Fire("TMW_UNIT_AURA", unit)
+        FireUnitAura(unit)
         return
     end
 
     if unitAuraUpdateInfo.isFullUpdate then
         data[unit] = nil
-        TMW:Fire("TMW_UNIT_AURA", unit)
+        FireUnitAura(unit)
         return
     end
 
@@ -215,48 +229,46 @@ Auras:SetScript("OnEvent", function(_, _, unit, unitAuraUpdateInfo)
         end
     end
 
-    TMW:Fire("TMW_UNIT_AURA", unit, payload)
+    FireUnitAura(unit, payload)
 end)
 
 local registeredUnitSets = {}
 
-TMW:RegisterCallback("TMW_UNITSET_UPDATED", function(event, unitSet)
-    if registeredUnitSets[unitSet] then
-        local originalUnits = unitSet.originalUnits
-        local auraKnownUnits = unitSet.auraKnownUnits
-        local auraKnownUnitGuids = unitSet.auraKnownUnitGuids
-        local translatedUnits = unitSet.translatedUnits
-        local UnitsLookup = unitSet.UnitsLookup
+local function TMW_UNITSET_UPDATED(event, unitSet)
+    local originalUnits = unitSet.originalUnits
+    local auraKnownUnits = unitSet.auraKnownUnits
+    local auraKnownUnitGuids = unitSet.auraKnownUnitGuids
+    local translatedUnits = unitSet.translatedUnits
+    local UnitsLookup = unitSet.UnitsLookup
 
-        for i = 1, #originalUnits do
-            local currentUnit = translatedUnits[i]
-            local exists = UnitsLookup[currentUnit]
+    for i = 1, #originalUnits do
+        local currentUnit = translatedUnits[i]
+        local exists = UnitsLookup[currentUnit]
             
-            if not exists then
-                -- this unit is gone. the auras module formerly knew this unit as auraKnownUnits[i],
-                -- which is what this originalUnit used to translate into before it stopped existing.
-                local oldKnownUnit = auraKnownUnits[i]
-                if oldKnownUnit then
-                    --print("wiping unit (gone)", currentUnit)
-                    data[oldKnownUnit] = nil
-                    auraKnownUnits[i] = nil
-                    auraKnownUnitGuids[i] = nil
-                end
-            else
-                local guid = UnitGUID(currentUnit)
-                auraKnownUnits[i] = currentUnit
-                if guid ~= auraKnownUnitGuids[i] then
-                    -- The unitID is now referring to a different entity.
-                    -- Clear out its saved auras so they'll be repopulated
-                    -- the next time someone asks for that unit's auras.
-                    auraKnownUnitGuids[i] = guid
-                    --print("wiping unit (new guid)", currentUnit)
-                    data[currentUnit] = nil
-                end
+        if not exists then
+            -- this unit is gone. the auras module formerly knew this unit as auraKnownUnits[i],
+            -- which is what this originalUnit used to translate into before it stopped existing.
+            local oldKnownUnit = auraKnownUnits[i]
+            if oldKnownUnit then
+                --print("wiping unit (gone)", currentUnit)
+                data[oldKnownUnit] = nil
+                auraKnownUnits[i] = nil
+                auraKnownUnitGuids[i] = nil
+            end
+        else
+            local guid = UnitGUID(currentUnit)
+            auraKnownUnits[i] = currentUnit
+            if guid ~= auraKnownUnitGuids[i] then
+                -- The unitID is now referring to a different entity.
+                -- Clear out its saved auras so they'll be repopulated
+                -- the next time someone asks for that unit's auras.
+                --print("wiping unit (new guid)", currentUnit)
+                auraKnownUnitGuids[i] = guid
+                data[currentUnit] = nil
             end
         end
     end
-end)
+end
 
 function Auras:RequestUnits(unitSet)
     if type(unitSet) == "string" then
@@ -268,10 +280,17 @@ function Auras:RequestUnits(unitSet)
     end
     if not registeredUnitSets[unitSet] then
         registeredUnitSets[unitSet] = true
+        TMW:RegisterCallback(unitSet.event, TMW_UNITSET_UPDATED)
         unitSet.auraKnownUnits = {}
         unitSet.auraKnownUnitGuids = {}
     end
-    return unitSet.allUnitsChangeOnEvent
+    if not unitSet.allUnitsChangeOnEvent then
+        return false, "TMW_UNIT_AURA"
+    elseif dedicatedEventUnits[unitSet.unitSettings] then
+        return true, dedicatedEventUnits[unitSet.unitSettings]
+    else
+        return true, "TMW_UNIT_AURA"
+    end
 end
 
 local function UpdateAuras(unit, instances, lookup, continuationToken, ...)

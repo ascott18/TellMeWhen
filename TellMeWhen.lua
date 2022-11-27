@@ -809,37 +809,37 @@ do
 	function TMW:Fire(event, ...)
 		local funcs = callbackregistry[event]
 
-		if funcs then
-			local wasInProgress = firingsInProgress
-			firingsInProgress = true
+		if not funcs then return end
+		
+		local wasInProgress = firingsInProgress
+		firingsInProgress = true
+		
+		local funcsNeedsFix
+		for t = 1, #funcs do
+			local args = funcs[t]
 			
-			local funcsNeedsFix
-			for t = 1, #funcs do
-				local args = funcs[t]
-				
-				if args then
-					local method = args.func
-					for index = 1, args.n do
-						local arg1 = args[index]
+			if args then
+				local method = args.func
+				for index = 1, args.n do
+					local arg1 = args[index]
 
-						if arg1 == nil then
-							funcsNeedsFix = true
-						elseif arg1 ~= true then
-							safecall(method, arg1, event, ...)
-						else
-							safecall(method, event, ...)
-						end
+					if arg1 == nil then
+						funcsNeedsFix = true
+					elseif arg1 ~= true then
+						safecall(method, arg1, event, ...)
+					else
+						safecall(method, event, ...)
 					end
 				end
 			end
-			
-			if not wasInProgress then
-				firingsInProgress = false
+		end
+		
+		if not wasInProgress then
+			firingsInProgress = false
 
-				if funcsNeedsFix then
-					for i = #funcs, 1, -1 do
-						cleanup(event, i, funcs[i])
-					end
+			if funcsNeedsFix then
+				for i = #funcs, 1, -1 do
+					cleanup(event, i, funcs[i])
 				end
 			end
 		end

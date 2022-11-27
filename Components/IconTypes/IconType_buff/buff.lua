@@ -292,7 +292,7 @@ local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 		else
 			icon.NextUpdateTime = 0
 		end
-	elseif event == "TMW_UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
+	elseif event == icon.auraEvent and icon.UnitSet.UnitsLookup[arg1] then
 		-- Used by Dragonflight+
 
 		-- arg2: updatedAuras = { [name | id | dispelType] = mightBeMine(bool) }
@@ -307,7 +307,7 @@ local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 		else
 			icon.NextUpdateTime = 0
 		end
-	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+	elseif event == icon.UnitSet.event then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
@@ -839,15 +839,19 @@ function Type:Setup(icon)
 		icon:SetUpdateMethod("manual")
 		
 		icon:SetScript("OnEvent", Buff_OnEvent)
-		icon:RegisterEvent("TMW_UNITSET_UPDATED")
+		icon:RegisterEvent(icon.UnitSet.event)
 
-		if TMW.COMMON.Auras and TMW.COMMON.Auras:RequestUnits(icon.UnitSet) then
-			icon:RegisterEvent("TMW_UNIT_AURA")
+		if TMW.COMMON.Auras then
+			local canUsePacked, auraEvent = TMW.COMMON.Auras:RequestUnits(icon.UnitSet)
+			icon.auraEvent = auraEvent
+			icon:RegisterEvent(auraEvent)
 
-			icon:SetUpdateFunction(icon:IsGroupController() 
-				and Buff_OnUpdate_Controller_Packed 
-				or Buff_OnUpdate_Packed
-			)
+			if canUsePacked then
+				icon:SetUpdateFunction(icon:IsGroupController() 
+					and Buff_OnUpdate_Controller_Packed 
+					or Buff_OnUpdate_Packed
+				)
+			end
 		else
 			icon:RegisterEvent("UNIT_AURA")
 		end

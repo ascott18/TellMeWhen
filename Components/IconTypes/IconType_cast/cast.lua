@@ -125,7 +125,7 @@ local function Cast_OnEvent(icon, event, arg1)
 		-- A UNIT_SPELLCAST_ event
 		-- If the icon is checking the unit, schedule an update for the icon.
 		icon.NextUpdateTime = 0
-	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+	elseif event == icon.UnitSet.event then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
@@ -241,7 +241,7 @@ function Type:Setup(icon)
 			icon:RegisterEvent(event)
 		end
 	
-		icon:RegisterEvent("TMW_UNITSET_UPDATED")
+		icon:RegisterEvent(icon.UnitSet.event)
 	end
 
 	icon:SetUpdateFunction(Cast_OnUpdate)

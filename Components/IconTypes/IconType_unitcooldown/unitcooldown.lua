@@ -466,7 +466,7 @@ end
 
 
 local function UnitCooldown_OnEvent(icon, event, arg1)
-	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+	if event == icon.UnitSet.event then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
@@ -729,7 +729,7 @@ function Type:Setup(icon)
 		icon:SetUpdateMethod("manual")
 		ManualIconsManager:UpdateTable_Register(icon)
 		icon:SetScript("OnEvent", UnitCooldown_OnEvent)
-		icon:RegisterEvent("TMW_UNITSET_UPDATED")
+		icon:RegisterEvent(icon.UnitSet.event)
 	end
 
 	if icon:IsGroupController() then

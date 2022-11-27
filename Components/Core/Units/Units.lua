@@ -91,6 +91,8 @@ function TMW:GetUnits(icon, setting, Conditions)
 		end
 	end
 
+	-- Normalize before calling GetUnitSet in order to normalize caching.
+	setting = UNITS:NormalizeUnitString(setting)
 	local UnitSet = UNITS:GetUnitSet(setting, serializedConditions, nil, Conditions, conditionsParent)
 	
 	if UnitSet.ConditionObjects then
@@ -125,10 +127,13 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		self.UnitsLookup = {}
 		self.unitSettings = unitSettings
 		self.originalUnits = UNITS:GetOriginalUnitTable(unitSettings)
-		self.updateEvents = {PLAYER_ENTERING_WORLD = true,}
 		self.exposedUnits = {}
 		self.translatedUnits = {}
+
+		self.eventUnits = {}
+		self.updateEvents = {PLAYER_ENTERING_WORLD = true,}
 		self.allUnitsChangeOnEvent = true
+		self.event = "TMW_UNITSET_UPDATED_" .. tostring(self):match("([A-Fa-f0-9]+)$")
 
 		-- determine the operations that the set needs to stay updated
 		for k, unit in ipairs(self.originalUnits) do
@@ -255,6 +260,13 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				UNITS:UpdateGroupedPlayersMap()
 
 				self.allUnitsChangeOnEvent = false
+			end
+
+			local eventUnit = UNITS.unitsWithExistsEvent[unit] 
+				and unit 
+				or UNITS.unitsWithBaseExistsEvent[unit]
+			if eventUnit then
+				self.eventUnits[eventUnit] = true
 			end
 		end
 
@@ -409,10 +421,21 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		end
 		
 		if changed then
-			TMW:Fire("TMW_UNITSET_UPDATED", self)
+			self:FireChanged()
 		end
 
 		return changed
+	end,
+
+	FireChanged = function(self)
+		-- Each individual unitset has its own event, because most things listening
+		-- for unitset events are only listening for one single unitset,
+		-- so this lets us avoid a fair bit of wasted event processing, especially
+		-- for events fired by any nameplate unitsets (which tend to be noisy).
+		TMW:Fire(self.event, self)
+
+		-- Also fire the global event for anything listening for it.
+		TMW:Fire("TMW_UNITSET_UPDATED", self)
 	end,
 }
 
@@ -427,33 +450,13 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	end
 end)
 
-function UNITS:GetUnitSet(unitSettings, SerializedConditions, noUpdate, conditions, parent)
-	-- This is just a hack for the function cacher. Need a unique UnitSet for any variations in conditions.
-	-- This value isn't actually used, so discard it.
-	SerializedConditions = nil
-
-	unitSettings = TMW:CleanString(unitSettings):
-	lower(): -- all units should be lowercase
-	gsub("[\r\n\t]", ""):
-	gsub("|cffff0000", ""): -- strip color codes (NOTE LOWERCASE)
-	gsub("|r", ""):
-	gsub("#", "") -- strip the # from the dropdown
-	
-	return UnitSet:New(unitSettings, conditions, parent, noUpdate)
-end
--- Deliberately does not cache `conditions` and `parent`.
-TMW:MakeNArgFunctionCached(3, UNITS, "GetUnitSet")
-
-function UNITS:GetOriginalUnitTable(unitSettings)
+function UNITS:NormalizeUnitString(unitSettings)
 	unitSettings = TMW:CleanString(unitSettings)
 		:lower() -- all units should be lowercase
-		-- Stripping color codes doesn't matter now since they aren't inserted now ("#" isnt inserted either)
-		-- but keep this here for compatibility with old setups.
+		:gsub("[\r\n\t]", "")
 		:gsub("|cffff0000", "") -- strip color codes (NOTE LOWERCASE)
 		:gsub("|r", "")
-		:gsub("#", "") -- strip the # from the dropdown 
-		.. " "
-
+		:gsub("#", "") -- strip the # from the dropdown
 
 	--SUBSTITUTE "party" with "party1-4", etc
 	--also handles conversion of "party 1" into "party1"
@@ -504,6 +507,24 @@ function UNITS:GetOriginalUnitTable(unitSettings)
 			end
 		end
 	end
+	return unitSettings
+end
+TMW:MakeSingleArgFunctionCached(UNITS, "NormalizeUnitString")
+
+function UNITS:GetUnitSet(unitSettings, SerializedConditions, noUpdate, conditions, parent)
+	-- This is just a hack for the function cacher. Need a unique UnitSet for any variations in conditions.
+	-- This value isn't actually used, so discard it.
+	SerializedConditions = nil
+
+	unitSettings = UNITS:NormalizeUnitString(unitSettings)
+	
+	return UnitSet:New(unitSettings, conditions, parent, noUpdate)
+end
+-- Deliberately does not cache `conditions` and `parent`.
+TMW:MakeNArgFunctionCached(3, UNITS, "GetUnitSet")
+
+function UNITS:GetOriginalUnitTable(unitSettings)
+	unitSettings =  UNITS:NormalizeUnitString(unitSettings)
 
 	local Units = TMW:SplitNames(unitSettings, true) -- get a table of everything
 
@@ -611,10 +632,18 @@ function UNITS:OnEvent(event, arg1)
 	local instances = unitSetsByEvent[event]
 	for i = 1, #instances do
 		local unitSet = instances[i]
-		if not unitSet:Update(forceNoExists) then
+
+		if (event == "NAME_PLATE_UNIT_ADDED" or event == "NAME_PLATE_UNIT_REMOVED") and not unitSet.eventUnits[arg1] then
+			-- Nameplate events are extremely noisy. Don't process a nameplate unit for a unitset that isn't looking at that unit.
+			-- We don't really need to do this optimization for any other event because no other events are noisy like this.
+			-- Specically, the issue here is if someone puts unit conditions on "nameplate1-40", 
+			-- that generates an individual unitset for each individual unit.
+
+			-- do nothing
+		elseif not unitSet:Update(forceNoExists) then
 			-- If the units in the UnitSet didn't change, still fire a TMW_UNITSET_UPDATED to signal that they may have shuffled around a bit
 			-- (for example, the player changed target, or raid members moved around)
-			TMW:Fire("TMW_UNITSET_UPDATED", unitSet)
+			unitSet:FireChanged()
 		end
 	end
 end

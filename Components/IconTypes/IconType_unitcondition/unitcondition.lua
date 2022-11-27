@@ -183,7 +183,7 @@ function Type:Setup(icon)
 	if UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		icon:SetScript("OnEvent", ConditionIcon_OnEvent)
-		icon:RegisterEvent("TMW_UNITSET_UPDATED")
+		icon:RegisterEvent(UnitSet.event)
 	end
 
 	

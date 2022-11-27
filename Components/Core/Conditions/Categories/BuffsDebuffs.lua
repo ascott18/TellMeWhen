@@ -232,17 +232,16 @@ function Env.AuraTooltipNumber(...)
 			wipe(cache[unit])
 		end
 	end
-	TMW:RegisterCallback("TMW_UNITSET_UPDATED", TMW_UNITSET_UPDATED)
 
 	function Env.AuraTooltipNumber(unit, name, filter, requestedIndex)
 		requestedIndex = requestedIndex or 1
 
-		local UnitSet = watchedUnits[unit]
+		local UnitSet, _ = watchedUnits[unit]
 		if not UnitSet then
-			-- You're supposed to use TMW:GetUnits(), but this is much faster and is sufficient for our needs.
-			UnitSet = TMW.UNITS:GetUnitSet(unit)
+			_, UnitSet = TMW:GetUnits(nil, unit)
 			unitSets[UnitSet] = unit
 			watchedUnits[unit] = UnitSet
+			TMW:RegisterCallback(UnitSet.event, TMW_UNITSET_UPDATED)
 		end
 
 		local cacheable = UnitSet.allUnitsChangeOnEvent

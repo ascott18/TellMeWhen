@@ -282,7 +282,7 @@ local function DR_OnEvent(icon, event, arg1)
 				end
 			end
 		end
-	elseif event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+	elseif event == icon.UnitSet.event then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	end
@@ -476,7 +476,7 @@ function Type:Setup(icon)
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		
-		icon:RegisterEvent("TMW_UNITSET_UPDATED")
+		icon:RegisterEvent(icon.UnitSet.event)
 	end
 	
 	icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")

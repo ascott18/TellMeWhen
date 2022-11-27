@@ -180,8 +180,7 @@ PowerBarColor[-1] = {{r=1, g=0, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=0, g=1, b=0,
 PowerBarColor[-3] = {{r=0, g=1, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=1, g=0, b=0, a=1}}
 
 local function Value_OnEvent(icon, event, arg1, arg2)
-	
-	if event == "TMW_UNITSET_UPDATED" and arg1 == icon.UnitSet then
+	if event == icon.UnitSet.event then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
 	elseif arg2 == "COMBO_POINTS" or icon.UnitSet.UnitsLookup[arg1] then
@@ -284,7 +283,7 @@ function Type:Setup(icon)
 			icon:RegisterEvent("UNIT_MAXPOWER")
 		end
 	
-		icon:RegisterEvent("TMW_UNITSET_UPDATED")
+		icon:RegisterEvent(icon.UnitSet.event)
 	end
 	
 	icon:SetUpdateFunction(Value_OnUpdate)
