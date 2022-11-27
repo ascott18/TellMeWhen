@@ -614,7 +614,6 @@ local function strWrap(string)
 	end
 end
 
-Env.ItemRefs = {}
 function CNDT:GetItemRefForConditionChecker(name)
 	local item = TMW:GetItems(name)[1]
 
@@ -622,9 +621,7 @@ function CNDT:GetItemRefForConditionChecker(name)
 		item = TMW:GetNullRefItem()
 	end
 
-	Env.ItemRefs[name] = item
-
-	return "ItemRefs[" .. strWrap(name) .. "]"
+	return CNDT:GetTableSubstitution(item, "Item")
 end
 
 
