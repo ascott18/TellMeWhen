@@ -100,6 +100,7 @@ function TimerBar:OnEnable()
 	self:SetCooldown(attributes.start, attributes.start, attributes.chargeStart, attributes.chargeDur)
 end
 function TimerBar:OnDisable()
+	self.__oldPercent = -1
 	self.bar:Hide()
 	self:UpdateTable_Unregister()
 end
