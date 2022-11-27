@@ -75,3 +75,8 @@ tinsert(Cache[3], 1, 75) -- Add "Auto Shot" to hunter.
 -- Execute issues: see https://wow.curseforge.com/projects/tellmewhen/issues/1633
 tinsert(Cache[1], 280735) -- The actual ID for Execute (fury)
 tinsert(Cache[1], 281000) -- The actual ID for Execute (arms)
+
+-- Evoker empowered spell issues, see https://github.com/ascott18/TellMeWhen/issues/2017
+tinsert(Cache[13], 382614)
+tinsert(Cache[13], 382731)
+tinsert(Cache[13], 382411)

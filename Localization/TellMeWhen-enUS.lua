@@ -2534,6 +2534,13 @@ NOTE: To prevent potential abuse, Blizzard has excluded the destination unit fro
 L["CLEU_SPELL_CAST_SUCCESS"] = "Spell Cast Success"
 L["CLEU_SPELL_CAST_SUCCESS_DESC"] = [[Occurs when an spell is successfully cast.]]
 
+L["CLEU_SPELL_EMPOWER_START"] = "Empowered Spell Cast Start"
+L["CLEU_SPELL_EMPOWER_START_DESC"] = [[Occurs when an empowered spell begins casting.]]
+L["CLEU_SPELL_EMPOWER_END"] = "Empowered Spell Cast Success"
+L["CLEU_SPELL_EMPOWER_END_DESC"] = [[Occurs when an empowered spell is successfully cast.]]
+L["CLEU_SPELL_EMPOWER_INTERRUPT"] = "Empowered Spell Cast Failed"
+L["CLEU_SPELL_EMPOWER_INTERRUPT_DESC"] = [[Occurs when an empowered spell is interrupted or cancelled.]]
+
 L["CLEU_SPELL_DAMAGE"] = "Spell Damage"
 L["CLEU_SPELL_DAMAGE_DESC"] = [[Occurs when any spell does any damage.]]
 L["CLEU_SPELL_DAMAGE_CRIT"] = "Spell Crit"
