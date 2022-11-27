@@ -733,8 +733,10 @@ CNDT.Substitutions = {
 	end,
 },
 {	src = "MULTINAMECHECK(%b())",
+	-- TODO: Replace this horrifying thing with 
+	-- e.g. [[BOOLCHECK(c.Spells.Hash[GetShapeshiftForm() or ""])]],
 	rep = function(conditionData, conditionSettings, name, name2)
-		return [[ (not not strfind(c.Name, SemicolonConcatCache[%1])) ]]
+		return [[ (not not strfind(";" .. c.Name .. ";", SemicolonConcatCache[%1])) ]]
 	end,
 },
 

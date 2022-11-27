@@ -189,14 +189,14 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 			end
 
 			if i == 0 then
-				return NONE
+				return strlowerCache[NONE]
 			else
 				local icons, active, catable, spellID = GetShapeshiftFormInfo(i)
-				return spellID and GetSpellInfo(spellID) or ""
+				return spellID and strlowerCache[GetSpellInfo(spellID)] or ""
 			end
 		end
 	},
-	funcstr = [[BOOLCHECK(MULTINAMECHECK(  GetShapeshiftForm() or ""  ))]],
+	funcstr = [[BOOLCHECK(c.Spells.StringHash[GetShapeshiftForm() or ""])]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")
