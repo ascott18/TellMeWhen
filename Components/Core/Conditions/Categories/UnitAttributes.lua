@@ -42,7 +42,7 @@ ConditionCategory:RegisterCondition(1,    "EXISTS", {
 	},
 	funcstr = function(c)
 		if c.Unit == "player" then
-			return [[true]]
+			return [[BOOLCHECK( true )]]
 		else
 			return [[BOOLCHECK( UnitExists(c.Unit) )]]
 		end

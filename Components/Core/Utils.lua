@@ -313,7 +313,7 @@ function TMW:MakeNArgFunctionCached(argCount, obj, method)
 		funcStr = funcStr .. "arg" .. i
 	end
 
-	funcStr = funcStr .. [[)
+	funcStr = funcStr .. [[, ...)
 	local next, prev, key = cache
 	]]
 
@@ -332,7 +332,7 @@ function TMW:MakeNArgFunctionCached(argCount, obj, method)
 		if i > 1 then funcStr = funcStr .. "," end
 		funcStr = funcStr .. "arg" .. i
 	end
-	funcStr = funcStr .. [[)
+	funcStr = funcStr .. [[, ...)
 		prev[key] = ret
 		return ret;
 	end, cache

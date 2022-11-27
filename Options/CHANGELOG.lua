@@ -7,7 +7,8 @@ TMW.CHANGELOG = [==[
 * Implement new WoW 10.0 Aura handling capabilities, resulting in an overwhelming performance improvement for the buff/debuff handling parts of TMW.
 * Fix #2026 - [string "Condition_ITEMSPELL"]:3: attempt to index field '?' (a nil value)
 * Fix #2027 - Shapeshift, Zone/Subzone, Loadout, Name, NpcID, and Creature Type conditions broken.
-
+* Fix #2029 - Unit Exists condition against "player" is always `true`, even if False is checked.
+* Fix #2030 - Unit Conditions were being ignored
 
 ## v10.0.4
 *  Fix bugs in totem conditions (and a few others) introduced in 10.0.3
