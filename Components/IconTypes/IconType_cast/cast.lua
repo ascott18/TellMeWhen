@@ -234,14 +234,14 @@ function Type:Setup(icon)
 	-- Setup events and update functions.
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
+		icon:SetScript("OnEvent", Cast_OnEvent)
 	
 		-- Register the UNIT_SPELLCAST_ events
 		for event in pairs(events) do
 			icon:RegisterEvent(event)
 		end
 	
-		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Cast_OnEvent, icon)
-		icon:SetScript("OnEvent", Cast_OnEvent)
+		icon:RegisterEvent("TMW_UNITSET_UPDATED")
 	end
 
 	icon:SetUpdateFunction(Cast_OnUpdate)

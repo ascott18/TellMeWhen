@@ -215,6 +215,10 @@ end<</code>>
 * "c.Name" & "c.Name2"
 ** Substitutes the data from the first and second editboxes after it has been cleaned of redundant semicolons, made lowercase, and then wrapped in semicolons at beginning and end. The usage of this is a bit unintuitive, so please refer to TMW's source for its implementations. The primary use of this substitution is when a condition can check over multiple values with semicolon-delimited input.
 
+* "c.Spells" & "c.Spells2"
+** Substitutes the data from the first and second editboxes, respectively, with the result of TMW:GetSpells(value).
+* "c.OwnSpells" & "c.OwnSpells2"
+** Substitutes the data from the first and second editboxes, respectively, with the result of TMW:GetSpells(value, true).
 * "c.NameFirst" & "c.NameFirst2"
 ** Substitutes the value from the first and second editboxes, respectively. If there are multiple semicolon-delimited values, only the first will be substituted.
 * "c.NameString" & "c.NameString2" (deprecated)

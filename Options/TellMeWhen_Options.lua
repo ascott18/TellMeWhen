@@ -4421,7 +4421,7 @@ TMW.IE.CpuReportParameters = {
 			value = function(icon) return icon.cpu_updateCount == 0 
 				and 0
 				or icon.cpu_updateTotal / icon.cpu_updateCount end,
-			format = "%.2f ms"
+			format = "%.3f ms"
 		},
 		{
 			selected = true,
@@ -4429,7 +4429,7 @@ TMW.IE.CpuReportParameters = {
 			label = "Updates Avg",
 			desc = "Milliseconds of CPU time spent on icon updates, per second of wall clock time.",
 			value = function(icon) return icon.cpu_updateTotal / (TMW.time - icon.cpu_startTime + 0.00001) end,
-			format = "%.2f ms/s",
+			format = "%.3f ms/s",
 			color = makeColorFunc(0.05, 2)
 		},
 		{
@@ -4437,7 +4437,7 @@ TMW.IE.CpuReportParameters = {
 			label = "Peak Update",
 			desc = "Highest CPU time spent on any single update.",
 			value = function(icon) return icon.cpu_updatePeak end,
-			format = "%.2f ms"
+			format = "%.3f ms"
 		},
 
 
@@ -4464,7 +4464,7 @@ TMW.IE.CpuReportParameters = {
 			value = function(icon) return icon.cpu_eventCount == 0 
 					and 0
 					or icon.cpu_eventTotal / icon.cpu_eventCount end,
-			format = "%.2f ms"
+			format = "%.3f ms"
 		},
 		{
 			selected = true,
@@ -4472,7 +4472,7 @@ TMW.IE.CpuReportParameters = {
 			label = "Events avg",
 			desc = "Average CPU time spent on event handling per second of wall clock time.",
 			value = function(icon) return icon.cpu_eventTotal / (TMW.time - icon.cpu_startTime + 0.00001) end,
-			format = "%.2f ms/s",
+			format = "%.3f ms/s",
 			color = makeColorFunc(0.03, 1)
 		},
 		{
@@ -4480,7 +4480,7 @@ TMW.IE.CpuReportParameters = {
 			label = "Peak Event",
 			desc = "Highest CPU time spent on any single event.",
 			value = function(icon) return icon.cpu_eventPeak end,
-			format = "%.2f ms"
+			format = "%.3f ms"
 		},
 
 
@@ -4517,7 +4517,7 @@ TMW.IE.CpuReportParameters = {
 			value = function(icon) return icon.cpu_cndtCount == 0 
 					and 0
 					or icon.cpu_cndtTotal / icon.cpu_cndtCount end,
-			format = "%.2f ms"
+			format = "%.3f ms"
 		},
 		{
 			selected = true,
@@ -4525,7 +4525,7 @@ TMW.IE.CpuReportParameters = {
 			label = "Cndtn avg",
 			desc = "Average CPU time spent on condition checking per second of wall clock time.",
 			value = function(icon) return icon.cpu_cndtTotal / (TMW.time - icon.cpu_startTime + 0.00001) end,
-			format = "%.2f ms/s",
+			format = "%.3f ms/s",
 			color = makeColorFunc(0.02, 0.6)
 		},
 	}

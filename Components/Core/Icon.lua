@@ -33,9 +33,12 @@ local next, pairs, error, rawget, next, wipe, tinsert, sort, strsplit, table, as
 
 local bitband = bit.band
 
-local function ClearScripts(f)
-	f:SetScript("OnEvent", nil)
-	f:SetScript("OnUpdate", nil)
+local function ClearScripts(icon)
+	icon:UnregisterAllEvents()
+	icon:UnregisterAllSimpleUpdateEvents()
+	icon:SetScript("OnEvent", nil)
+	icon:SetScript("OnUpdate", nil)
+	icon:SetUpdateFunction(nil)
 end
 
 local UPD_INTV
@@ -236,22 +239,33 @@ function Icon.RegisterEvent(icon, event)
 		icon.registeredEvents = {}
 	end
 	icon.registeredEvents[event] = true
+	if event:find("^TMW_") then
+		if not icon.OnEvent then
+			TMW:Error("icon:SetScript('OnEvent', func) needs to be done before registering for TMW events on an icon with RegisterEvent.")
+		end
 
-	icon:RegisterEvent_Blizz(event)
+		TMW:RegisterCallback(event, icon.OnEvent, icon)
+	else
+		icon:RegisterEvent_Blizz(event)
+	end
 end
 
 -- [WRAPPER] (no documentation needed)
 Icon.UnregisterAllEvents_Blizz = Icon.UnregisterAllEvents
 function Icon.UnregisterAllEvents(icon, event)
-	-- UnregisterAllEvents_Blizz uses a lot of CPU, so don't do it.
-	-- Instead, keep track of events that we register, and unregister them by hand.
+	if not icon.registeredEvents then return end
+	for event in pairs(icon.registeredEvents) do
+		if event:find("^TMW_") then
+			if not icon.OnEvent then
+				TMW:Error("icon:SetScript('OnEvent', func) needs to be done after unregistering for TMW events on an icon with RegisterEvent.")
+			end
 	
-	if icon.registeredEvents then
-		for event in pairs(icon.registeredEvents) do
+			TMW:UnregisterCallback(event, icon.OnEvent, icon)
+		else
 			icon:UnregisterEvent(event)
 		end
-		wipe(icon.registeredEvents)
 	end
+	wipe(icon.registeredEvents)
 end
 
 -- [SCRIPT HANDLER] (no documentation needed)
@@ -879,11 +893,8 @@ end
 -- @param soft [boolean] True if the icon might not be getting permanantly disabled (in which case this method just serves as a reset)
 function Icon.DisableIcon(icon, soft)
 	
-	icon:UnregisterAllEvents()
-	icon:UnregisterAllSimpleUpdateEvents()
 	ClearScripts(icon)
 	icon:SetUpdateMethod("auto")
-	icon:SetUpdateFunction(nil)
 	icon:Hide()
 
 	if not soft then
@@ -1069,7 +1080,6 @@ function Icon.Setup(icon)
 		-- Put the icon in a configurable state.
 		icon:Show()
 		ClearScripts(icon)
-		icon:SetUpdateFunction(nil)
 		
 		icon:SetInfo(
 			"alphaOverride; start, duration; stack, stackText",

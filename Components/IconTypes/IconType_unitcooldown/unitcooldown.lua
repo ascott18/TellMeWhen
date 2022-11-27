@@ -728,8 +728,8 @@ function Type:Setup(icon)
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
 		ManualIconsManager:UpdateTable_Register(icon)
-		
-		TMW:RegisterCallback("TMW_UNITSET_UPDATED", UnitCooldown_OnEvent, icon)
+		icon:SetScript("OnEvent", UnitCooldown_OnEvent)
+		icon:RegisterEvent("TMW_UNITSET_UPDATED")
 	end
 
 	if icon:IsGroupController() then

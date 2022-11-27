@@ -427,22 +427,43 @@ function ConditionObject:IsUnitAuraEventRelevant(updatedAuras, spell, onlyMine)
 end
 
 function ConditionObject:GenerateUnitAuraString(unit, spell, onlyMine)
-	self:RequestEvent("UNIT_AURA")
-	self:SetNumEventArgs(3)
-	
-	local str = "event == 'UNIT_AURA' and arg1 == "
-		.. format("%q", unit)
-		-- arg2 is isFullUpdate:
-		-- If it is nil, the client doesn't support the new UNIT_AURA payload.
-		-- If it is true, the event isn't about any particular aura.
-		-- If it is false, then arg3 is `updatedAuras`.
-		.. " and (arg2 ~= false or ConditionObject:IsUnitAuraEventRelevant(arg3,"
-		.. (type(spell) == "string" and format("%q", spell) or tostring(spell))
-		.. ", "
-		.. tostring(onlyMine)
-		.. "))"
-	
-	return str
+	if TMW.COMMON.Auras then
+		TMW.COMMON.Auras:RequestUnits(unit)
+		
+		self:RequestEvent("TMW_UNIT_AURA")
+		self:SetNumEventArgs(2)
+
+		local str = "event == 'TMW_UNIT_AURA' and arg1 == "
+			.. format("%q", unit)
+			-- arg2 is payload:
+			-- If it is nil, the event is a general update for the unit
+			-- If it is a table, its keys are names/ids of what changed
+			-- and the values indicate if the aura might have been mine.
+			.. " and (not arg2 or arg2["
+			.. (type(spell) == "string" and format("%q", spell) or tostring(spell))
+			.. "]"
+			.. (onlyMine and "" or " ~= nil")
+			.. ")"
+		
+		return str
+	else
+		self:RequestEvent("UNIT_AURA")
+		self:SetNumEventArgs(3)
+			
+		local str = "event == 'UNIT_AURA' and arg1 == "
+			.. format("%q", unit)
+			-- arg2 is isFullUpdate:
+			-- If it is nil, the client doesn't support the new UNIT_AURA payload.
+			-- If it is true, the event isn't about any particular aura.
+			-- If it is false, then arg3 is `updatedAuras`.
+			.. " and (arg2 ~= false or ConditionObject:IsUnitAuraEventRelevant(arg3,"
+			.. (type(spell) == "string" and format("%q", spell) or tostring(spell))
+			.. ", "
+			.. tostring(onlyMine)
+			.. "))"
+		
+		return str
+	end
 end
 
 --- (//For use in the events function of a condition type declaration//)

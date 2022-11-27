@@ -182,8 +182,8 @@ function Type:Setup(icon)
 	-- Setup events and update functions.
 	if UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
-	
-		TMW:RegisterCallback("TMW_UNITSET_UPDATED", ConditionIcon_OnEvent, icon)
+		icon:SetScript("OnEvent", ConditionIcon_OnEvent)
+		icon:RegisterEvent("TMW_UNITSET_UPDATED")
 	end
 
 	

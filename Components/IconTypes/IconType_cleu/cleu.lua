@@ -424,8 +424,6 @@ local function CLEU_OnEvent(icon, _, t, event, h,
 			end
 		end
 
-		TMW:Assert(tex or spellID)
-
 		-- Set the info that was obtained from the event:
 		local unit, GUID
 		if destUnit then

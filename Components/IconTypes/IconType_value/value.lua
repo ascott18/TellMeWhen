@@ -267,6 +267,7 @@ function Type:Setup(icon)
 
 	if icon.UnitSet.allUnitsChangeOnEvent then
 		icon:SetUpdateMethod("manual")
+		icon:SetScript("OnEvent", Value_OnEvent)
 		
 		if icon.PowerType == -3 then
 			icon:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
@@ -283,8 +284,7 @@ function Type:Setup(icon)
 			icon:RegisterEvent("UNIT_MAXPOWER")
 		end
 	
-		icon:SetScript("OnEvent", Value_OnEvent)
-		TMW:RegisterCallback("TMW_UNITSET_UPDATED", Value_OnEvent, icon)
+		icon:RegisterEvent("TMW_UNITSET_UPDATED")
 	end
 	
 	icon:SetUpdateFunction(Value_OnUpdate)
