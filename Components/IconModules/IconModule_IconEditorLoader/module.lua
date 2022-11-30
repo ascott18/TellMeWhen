@@ -116,19 +116,20 @@ Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 
 	elseif IsShiftKeyDown() and button == "LeftButton" then
 
-		-- Don't insert into the chat editbox.
-		if not ChatEdit_GetActiveWindow() then
+		local currentFocus = GetCurrentKeyBoardFocus()
+		if 
+			currentFocus 
+			and currentFocus.GetAcceptsTMWLinks
+			and currentFocus:GetAcceptsTMWLinks()
+		then
 
 			local GUID = icon:GetGUID()
 			local link = format("|H%s|h%s|h", GUID, GUID)
 
 			local inserted = ChatEdit_InsertLink(link)
 
-			if inserted then
-				-- If the insertion was successful, make the GUID permanant.
-				icon:GetGUID(1)
-			end
-
+			-- If the insertion was successful, make the GUID permanant.
+			icon:GetGUID(1)
 		end
 	end
 end)

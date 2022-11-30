@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v10.0.6
+* Fix icon GUIDs not getting persisted when inserted into DogTag strings.
+
 ## v10.0.5
 * Implement new WoW 10.0 Aura handling capabilities, resulting in an overwhelming performance improvement for the buff/debuff handling parts of TMW.
 * #2025 - Add events to Combat Event icons for empowered spell casts.

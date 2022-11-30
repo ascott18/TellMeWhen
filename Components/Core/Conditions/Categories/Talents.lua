@@ -67,7 +67,7 @@ function SPECS:UpdateUnitSpecs()
 
 		TMW:Fire("TMW_UNITSPEC_UPDATE")
 
-	elseif z == "pvp" then
+	elseif z == "pvp" and not TMW.isWrath then
 		RequestBattlefieldScoreData()
 
 		for i = 1, GetNumBattlefieldScores() do
