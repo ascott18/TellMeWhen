@@ -216,7 +216,8 @@ local function BuffCheck_OnUpdate_Packed(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, SpellsArray, KindKey
-	= icon.Units, icon.Spells.Array, icon.KindKey
+		= icon.Units, icon.Spells.Array, icon.KindKey
+	local NotOnlyMine = not icon.OnlyMine
 	
 	local AbsentAlpha = icon.States[STATE_ABSENT].Alpha
 	local PresentAlpha = icon.States[STATE_PRESENT].Alpha
