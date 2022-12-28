@@ -58,10 +58,6 @@ end
 local function parseSpellsString(setting, doLower, keepDurations)
 
 	local spells = TMW:SplitNames(setting) -- Get a table of everything
-	
-	if doLower then
-		spells = TMW:LowerNames(spells)
-	end
 
 	--INSERT EQUIVALENCIES
 	--start at the end of the table, that way we dont have to worry
@@ -79,6 +75,10 @@ local function parseSpellsString(setting, doLower, keepDurations)
 		else
 			k = k - 1	--there is no equivalency to insert, so move backwards one key towards zero to the next key
 		end
+	end
+	
+	if doLower then
+		spells = TMW:LowerNames(spells)
 	end
 
 	-- REMOVE DUPLICATES
@@ -208,7 +208,9 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 				v = GetSpellInfo(v or "") or v -- Turn the value into a name if needed
 			end
 
-			v = TMW:LowerNames(v)
+			if doLower then
+				v = TMW:LowerNames(v)
+			end
 
 			-- Put the final value in the table as well (may or may not be the same as the original value).
 			-- Value should be NameArrray's key, for use with the duration table.

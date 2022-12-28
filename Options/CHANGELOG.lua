@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 * Loss of Control icons now show the locked out spell school in the `[LocType]` tag.
 * Fix icon GUIDs not getting persisted when inserted into DogTag strings.
 * Fix an issue where Missing Buffs/Debuffs icon type sometimes functioned as if the 'Only cast by me' setting was enabled, even when it wasn't.
+* Fix #2048 - names in spell equivalency lists were not being lowercased, resulting in spells listed by name not working in buff/debuff icons.
 
 ## v10.0.5
 * Implement new WoW 10.0 Aura handling capabilities, resulting in an overwhelming performance improvement for the buff/debuff handling parts of TMW.
