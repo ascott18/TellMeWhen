@@ -87,18 +87,17 @@ local function LoseControl_OnUpdate(icon, time)
 	
 
 	for eventIndex = 1, GetNumEvents() do 
-		local locType, spellID, text, texture, start, _, duration, lockoutSchool = GetEventInfo(eventIndex)
-		if wow_900 then
-			locType, spellID, text, texture, start, duration, lockoutSchool = 
-				locType.locType,
-				locType.spellID,
-				locType.displayText,
-				locType.iconTexture,
-				locType.startTime,
-				locType.duration,
-				locType.lockoutSchool
+		local data = GetEventInfo(eventIndex)
+		local locType, text, lockoutSchool = 
+			data.locType,
+			data.displayText,
+			data.lockoutSchool
+
+		if locType == "SCHOOL_INTERRUPT" and lockoutSchool and lockoutSchool ~= 0 then
+			-- Replace text with school-specific lockout text
+			text = LOSS_OF_CONTROL_DISPLAY_INTERRUPT_SCHOOL:format(GetSchoolString(lockoutSchool));
 		end
-		
+
 		local isValidType = LoseControlTypes[""]
 		if not isValidType then
 			if locType == "SCHOOL_INTERRUPT" then
@@ -117,7 +116,7 @@ local function LoseControl_OnUpdate(icon, time)
 				end
 			end
 		end
-		if isValidType and not icon:YieldInfo(true, text, texture, start, duration, spellID) then
+		if isValidType and not icon:YieldInfo(true, text, data.iconTexture, data.startTime, data.duration, data.spellID) then
 			-- icon:YieldInfo() returns false if we don't need to harvest any more info
 			return
 		end
