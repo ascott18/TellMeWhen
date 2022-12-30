@@ -553,6 +553,7 @@ TMW.BE = {
 			 256740, -- Drums of the Maelstrom              (leatherworking item)
 			 264667, -- Primal Rage                         (hunter pet)
 			 390386, -- Fury of the Aspects                 (evoker)
+			 386540, -- Temporal Warp                       (mage, talent)
 		},
 		ImmuneToInterrupts = {
 			    642, -- Divine Shield                       (paladin, general)
