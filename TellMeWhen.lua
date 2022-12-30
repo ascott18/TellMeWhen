@@ -15,7 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
-TELLMEWHEN_VERSION = "10.0.6"
+TELLMEWHEN_VERSION = GetAddOnMetadata("TellMeWhen", "Version")
 
 TELLMEWHEN_VERSION_MINOR = ""
 local projectVersion = "@project-version@" -- comes out like "6.2.2-21-g4e91cee"
@@ -26,14 +26,19 @@ elseif strmatch(projectVersion, "%-%d+%-") then
 end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
-TELLMEWHEN_VERSIONNUMBER = 100600 -- NEVER DECREASE THIS NUMBER (duh?).  IT IS ALSO ONLY INTERNAL (for versioning of)
+
+local REVISION = 0
+if #TELLMEWHEN_VERSION > 6 or REVISION >= 100 then
+	return error("TELLMEWHEN: UNEXPECTEDLY HIGH VERSION/REVISION")
+end
+
+-- This number is used for running migrations, showing the last changelog version,
+-- and communicating new versions to other players.
+-- For a TOC version 10.2.3 and a REVISION=45, it'll be `102345`.
+TELLMEWHEN_VERSIONNUMBER = tonumber(TELLMEWHEN_VERSION:gsub("%.", "") .. ("%02d"):format(REVISION))
 
 TELLMEWHEN_FORCECHANGELOG = 86005 -- if the user hasn't seen the changelog until at least this version, show it to them.
 
-if TELLMEWHEN_VERSIONNUMBER > 101000 or TELLMEWHEN_VERSIONNUMBER < 100000 then
-	-- safety check because i accidentally made the version number 414069 once
-	return error("TELLMEWHEN: THE VERSION NUMBER IS SCREWED UP OR MAYBE THE SAFETY LIMITS ARE WRONG")
-end
 
 if TELLMEWHEN_VERSION_MINOR == "dev" and not strfind(TELLMEWHEN_VERSIONNUMBER, TELLMEWHEN_VERSION:gsub("%.", ""), nil) then
 	return error("TELLMEWHEN: TELLMEWHEN_VERSION DOESN'T AGREE WITH TELLMEWHEN_VERSIONNUMBER")

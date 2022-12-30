@@ -194,7 +194,7 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 						print("fixing bugged spell", v, spellID, "=>", newSpell)
 						spells[k] = newSpell
 					end
-				else 
+				elseif convert == "id" then
 					spells[k] = spellID
 				end
 			end
