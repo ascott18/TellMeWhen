@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v10.0.8
+* #2054 - Workaround Blizzard issue breaking tracking Execute cooldown by name.
+
 ## v10.0.7
 * #2053 - Fix an issue that broke tracking of Void Eruption and other similar spells in 10.0.6.
 

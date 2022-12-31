@@ -173,6 +173,19 @@ local fixSpellMap = {
 			return 359073
 		end
 	end,
+	[280735] = function()
+		-- Fury Execute https://github.com/ascott18/TellMeWhen/issues/2054
+		-- 206315: Massacre (fury talent)
+		-- 280735: Execute when Massacre is learned
+		--   5308: Execute when Massacre is unlearned.
+		-- Execute is not trackable by name when massacre is learned,
+		-- Despite the fact that GetSpellInfo("Execute") does always return the right ID
+		-- (unlike the evoker bugs where GetSpellInfo returns the wrong id)
+		if IsPlayerSpell(206315) and not IsPlayerSpell(280735) then
+			-- force to be the ID. Yes this is a weird case.
+			return 280735
+		end
+	end,
 }
 
 local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRenaming)

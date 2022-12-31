@@ -519,6 +519,7 @@ TMW.BE = {
 			 324867, -- Fleshcraft                          (Necrolord)
 			 330927, -- Cleansing Rites                     (Kyrian?)
 			 336874, -- Fortifying Ingredients              (Monk, conduit)
+			 388380, -- Dragonrider's Compassion            (Dragonriding Talent)
 		},
 		ImmuneToMagicCC = {
 			    642, -- Divine Shield                       (paladin, general)
