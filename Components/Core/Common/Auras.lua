@@ -299,16 +299,21 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
     for i = 1, n do
         local slot = select(i, ...)
         local instance = GetAuraDataBySlot(unit, slot)
-        local auraInstanceID = instance.auraInstanceID
-        local isMine = 
-            instance.sourceUnit == "player" or
-            instance.sourceUnit == "pet"
 
-        instances[auraInstanceID] = instance
-        getOrCreate(lookup, strlowerCache[instance.name])[auraInstanceID] = isMine
-        getOrCreate(lookup, instance.spellId)[auraInstanceID] = isMine
-        if instance.dispelName then
-            getOrCreate(lookup, instance.dispelName)[auraInstanceID] = isMine
+        -- Check `if instance` because sometimes UnitAuraSlots returns invalid slots I guess?
+        -- Only ever seen this happen in arena.
+        if instance then
+            local auraInstanceID = instance.auraInstanceID
+            local isMine = 
+                instance.sourceUnit == "player" or
+                instance.sourceUnit == "pet"
+
+            instances[auraInstanceID] = instance
+            getOrCreate(lookup, strlowerCache[instance.name])[auraInstanceID] = isMine
+            getOrCreate(lookup, instance.spellId)[auraInstanceID] = isMine
+            if instance.dispelName then
+                getOrCreate(lookup, instance.dispelName)[auraInstanceID] = isMine
+            end
         end
     end
 end
