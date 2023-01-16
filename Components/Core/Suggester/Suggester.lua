@@ -1465,12 +1465,17 @@ function Module:Entry_IsValid(id)
 		return true
 	end
 
+	-- var lines = TooltipUtil.FindLinesFromGetter({0}, "GetSpellByID", 198013)
 	local Parser, LT1, LT2, LT3 = TMW:GetParser()
 
 	Parser:SetOwner(UIParent, "ANCHOR_NONE") -- must set the owner before text can be obtained.
 	Parser:SetSpellByID(id)
 
-	if LT2:GetText() == SPELL_CAST_CHANNELED or LT3:GetText() == SPELL_CAST_CHANNELED then
+	if 
+		LT1:GetText() == SPELL_CAST_CHANNELED or 
+		LT2:GetText() == SPELL_CAST_CHANNELED or 
+		LT3:GetText() == SPELL_CAST_CHANNELED 
+	then
 		return true
 	end
 end
