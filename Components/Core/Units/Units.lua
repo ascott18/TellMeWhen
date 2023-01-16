@@ -163,6 +163,12 @@ local UnitSet = TMW:NewClass("UnitSet"){
 
 			elseif unit == "focus" then -- the unit exactly
 				self.updateEvents.PLAYER_FOCUS_CHANGED = true
+
+				-- These events are for when a focused arena teammate joins the game after you.
+				-- The game doesn't fire PLAYER_FOCUS_CHANGED when UnitExists("focus") changes from false to true.
+				self.updateEvents.GROUP_FORMED = true
+				self.updateEvents.UNIT_PHASE = true
+
 				UNITS.unitsWithExistsEvent[unit] = true
 			elseif unit:find("^focus") then -- the unit as a base, with something else tacked onto it.
 				self.updateEvents.PLAYER_FOCUS_CHANGED = true

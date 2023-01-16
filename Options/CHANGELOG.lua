@@ -5,6 +5,8 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 TMW.CHANGELOG = [==[
 ## v10.0.8
 * #2054 - Workaround Blizzard issue breaking tracking Execute cooldown by name.
+* Workaround rare aura tracking error in arenas (Auras.lua:302: attempt to index local "instance" (a nil value)).
+* Try to fix issues with `focus` unit handling when focused arena teammates join a match after you.
 
 ## v10.0.7
 * #2053 - Fix an issue that broke tracking of Void Eruption and other similar spells in 10.0.6.
