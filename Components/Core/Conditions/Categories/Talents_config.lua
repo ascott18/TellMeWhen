@@ -41,7 +41,7 @@ end
 function Module:Table_Get()
 	wipe(self.table)
 
-	if C_Traits then
+	if C_ClassTalents then
 		-- A "config" is a loadout - either the current one (maybe unsaved), or a saved one.
 		local configID = C_ClassTalents.GetActiveConfigID()
 		local configInfo = C_Traits.GetConfigInfo(configID)
@@ -106,11 +106,14 @@ function Module:Table_Get()
 	return self.table
 end
 function Module:Entry_AddToList_1(f, id)
-	if C_Traits then
+	if C_ClassTalents then
 		local name = GetSpellInfo(id)
 	
 		f.Name:SetText(name)
 		f.insert = name
+
+		f.ID:SetText(id)
+		f.insert2 = id
 
 		f.tooltipmethod = "SetSpellByID"
 		f.tooltiparg = id
@@ -121,12 +124,11 @@ function Module:Entry_AddToList_1(f, id)
 		local tab, talent = parseId(id)
 		local name, iconTexture = GetTalentInfo(tab, talent)
 
+		f.insert = name
 		f.Name:SetText(name)
 
 		f.tooltipmethod = "SetTalent"
 		f.tooltiparg = {tab, talent}
-
-		f.insert = name
 
 		f.Icon:SetTexture(iconTexture)
 	else
@@ -134,15 +136,15 @@ function Module:Entry_AddToList_1(f, id)
 
 		f.Name:SetText(name)
 		f.insert = name
+
+		f.ID:SetText(id)
+		f.insert2 = id
 	
 		f.tooltipmethod = "SetHyperlink"
 		f.tooltiparg = GetTalentLink(id)
 	
 		f.Icon:SetTexture(iconTexture)
 	end
-
-	f.ID:SetText(id)
-	f.insert2 = id
 end
 Module.Entry_Colorize_1 = TMW.NULLFUNC
 

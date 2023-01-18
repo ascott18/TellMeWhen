@@ -2,6 +2,8 @@
 * #2054 - Workaround Blizzard issue breaking tracking Execute cooldown by name.
 * Workaround rare aura tracking error in arenas (Auras.lua:302: attempt to index local "instance" (a nil value)).
 * Try to fix issues with `focus` unit handling when focused arena teammates join a match after you.
+* Wrath: #2046 - Blizzard moved GetItemCooldown for no good reason.
+* Wrath: Fix Talents.lua:399: attempt to index global 'C_ClassTalents' (a nil value) and other similar errors.
 
 ## v10.0.7
 * #2053 - Fix an issue that broke tracking of Void Eruption and other similar spells in 10.0.6.

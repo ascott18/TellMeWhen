@@ -35,9 +35,10 @@ local bit_band = bit.band
 local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 
 Env.GetSpellCooldown = GetSpellCooldown
-Env.GetItemCooldown = GetItemCooldown
-
 local GetSpellCooldown = GetSpellCooldown
+
+local GetItemCooldown = GetItemCooldown or (C_Container and C_Container.GetItemCooldown)
+
 function Env.CooldownDuration(spell, gcdAsUnusable)
 	if spell == "gcd" then
 		local start, duration = GetSpellCooldown(TMW.GCDSpell)
@@ -500,7 +501,6 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 
 ConditionCategory:RegisterSpacer(10)
 
-local GetItemCooldown = GetItemCooldown
 function Env.ItemCooldownDuration(itemID)
 	local start, duration = GetItemCooldown(itemID)
 	if duration then

@@ -17,12 +17,14 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local IsEquippedItem, GetItemCount, GetItemInfo, GetItemCooldown, GetItemIcon, IsItemInRange
-	= IsEquippedItem, GetItemCount, GetItemInfo, GetItemCooldown, GetItemIcon, IsItemInRange
+local IsEquippedItem, GetItemCount, GetItemInfo, GetItemIcon, IsItemInRange
+	= IsEquippedItem, GetItemCount, GetItemInfo, GetItemIcon, IsItemInRange
 local GetInventoryItemTexture, GetInventoryItemCooldown, GetInventoryItemID, GetInventoryItemLink
 	= GetInventoryItemTexture, GetInventoryItemCooldown, GetInventoryItemID, GetInventoryItemLink
 local tonumber, type, pairs, strfind, strmatch, ipairs, strtrim, error
 	= tonumber, type, pairs, strfind, strmatch, ipairs, strtrim, error
+
+local GetItemCooldown = GetItemCooldown or (C_Container and C_Container.GetItemCooldown)
 
 local INVSLOT_LAST_EQUIPPED = INVSLOT_LAST_EQUIPPED
 

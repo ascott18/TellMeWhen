@@ -390,7 +390,7 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 
 CNDT.Env.TalentMap = {}
 CNDT.Env.PvpTalentMap = {}
-if C_Traits then
+if C_ClassTalents then
 	-- Dragonflight
 
 	function CNDT:PLAYER_TALENT_UPDATE()
