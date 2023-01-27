@@ -396,23 +396,31 @@ if C_ClassTalents then
 	function CNDT:PLAYER_TALENT_UPDATE()
 		wipe(Env.TalentMap)
 
+		local loadoutName
 		if C_ClassTalents.GetStarterBuildActive() then
-			Env.CurrentLoadoutName = TALENT_FRAME_DROP_DOWN_STARTER_BUILD
+			loadoutName = TALENT_FRAME_DROP_DOWN_STARTER_BUILD
 		else
 			local spec = TMW.GetCurrentSpecializationID()
 			local realLoadout = spec and C_ClassTalents.GetLastSelectedSavedConfigID(spec)
 			if realLoadout then
 				local realConfigInfo = C_Traits.GetConfigInfo(realLoadout)
 				if realConfigInfo then
-					Env.CurrentLoadoutName = realConfigInfo.name or ""
+					loadoutName = realConfigInfo.name or ""
 				else
-					Env.CurrentLoadoutName = TALENT_FRAME_DROP_DOWN_DEFAULT
+					loadoutName = TALENT_FRAME_DROP_DOWN_DEFAULT
 				end
 			else
-				Env.CurrentLoadoutName = TALENT_FRAME_DROP_DOWN_DEFAULT
+				loadoutName = TALENT_FRAME_DROP_DOWN_DEFAULT
 			end
 		end
-		Env.CurrentLoadoutName = Env.CurrentLoadoutName:lower()
+		
+		-- This is an event because we usually have to do weird delayed updates
+		-- after blizz events fire before we can receive the actual real active loadout name.
+		loadoutName = loadoutName:lower()
+		if loadoutName ~= Env.CurrentLoadoutName then
+			Env.CurrentLoadoutName = loadoutName
+			TMW:Fire("TMW_TALENT_LOADOUT_NAME_UPDATE", loadoutName)
+		end
 
 		-- A "config" is a loadout - either the current one (maybe unsaved), or a saved one.
 		-- NOTE: C_ClassTalents.GetActiveConfigID returns a generic config for the curent class spec,
@@ -488,7 +496,14 @@ if C_ClassTalents then
 		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
 		-- APSC is needed to detect changes in spec - the others are too early I guess?
 		CNDT:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE")
-		CNDT:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_TALENT_UPDATE")
+		CNDT:RegisterEvent("TRAIT_CONFIG_UPDATED", function() 
+			-- I... just... you just have do to it this way, ok?
+			-- Sometimes the data is available right away, sometimes you have to wait a frame.
+			CNDT:PLAYER_TALENT_UPDATE()
+			C_Timer.After(0, function()
+				CNDT:PLAYER_TALENT_UPDATE()
+			end)
+		end)
 		-- TRAIT_TREE_CHANGED needed for detecting some loadout changes,
 		-- including when changing between two identical loadouts.
 		-- Except obnoxiously the data isn't available immediately.
@@ -508,6 +523,7 @@ if C_ClassTalents then
 			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
 			ConditionObject:GenerateNormalEventString("TRAIT_CONFIG_UPDATED"),
 			ConditionObject:GenerateNormalEventString("ACTIVE_PLAYER_SPECIALIZATION_CHANGED"),
+			ConditionObject:GenerateNormalEventString("TMW_TALENT_LOADOUT_NAME_UPDATE"),
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 	end
 
@@ -544,7 +560,10 @@ if C_ClassTalents then
 			setupTalentEvents()
 			return [[BOOLCHECK(MULTINAMECHECK( CurrentLoadoutName ))]]
 		end,
-		events = talentEvents,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("TMW_TALENT_LOADOUT_NAME_UPDATE")
+		end,
 	})
 
 elseif GetNumTalentTabs then

@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ## v10.0.9
 * Fix #2066 - Enrage effects were not being stored properly when fetching auras for noncached units.
 * Fix #2059 - Condition update were not happening at the proper time for spell cooldown conditions.
+* Fix #2038 - Fix more scenarios in which talent loadout name is not available immediately after talent events fire.
 * Workaround #2065 - Blizzard's cooldown bling effect ignores opacity, so suppress it for hidden icons.
 
 ## v10.0.8
