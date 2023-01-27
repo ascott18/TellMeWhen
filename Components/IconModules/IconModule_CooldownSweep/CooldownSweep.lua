@@ -190,6 +190,7 @@ end
 
 local omnicc_loaded = IsAddOnLoaded("OmniCC")
 local tullacc_loaded = IsAddOnLoaded("tullaCC")
+local shouldShowBling
 
 function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
@@ -228,7 +229,28 @@ function CooldownSweep:SetupForIcon(icon)
 	self.cooldown:SetHideCountdownNumbers(hideNumbers)
 	self.cooldown:SetDrawEdge(self.ShowTimer and TMW.db.profile.DrawEdge)
 	self.cooldown:SetDrawSwipe(self.ShowTimer)
-	self.cooldown:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
+
+	shouldShowBling = not TMW.db.profile.HideBlizzCDBling
+	self.cooldown:SetDrawBling(shouldShowBling)
+	self.blingShown = shouldShowBling
+	if shouldShowBling and not self.hookedBling then
+		self.hookedBling = true
+
+		-- Workaround https://github.com/ascott18/TellMeWhen/issues/2065
+		-- because the bling effect entirely ignores the alpha of its ancestor tree.
+		-- So, hide the bling at the moment of CD finish if the icon is hidden.
+		self.cooldown:SetScript("OnCooldownDone", function()
+			if shouldShowBling and self.cooldown:GetEffectiveAlpha() > 0 then
+				if not self.blingShown then
+					self.blingShown = true
+					self.cooldown:SetDrawBling(true)
+				end
+			elseif self.blingShown then
+				self.blingShown = false
+				self.cooldown:SetDrawBling(false)
+			end
+		end)
+	end
 
 	self.cooldown2:SetHideCountdownNumbers(hideNumbers)
 	self.cooldown2:SetDrawEdge(self.ShowTimer)
