@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 TMW.CHANGELOG = [==[
 ## v10.0.9
 * Fix #2066 - Enrage effects were not being stored properly when fetching auras for noncached units.
+* Fix #2059 - Condition update were not happening at the proper time for spell cooldown conditions.
 * Workaround #2065 - Blizzard's cooldown bling effect ignores opacity, so suppress it for hidden icons.
 
 ## v10.0.8
