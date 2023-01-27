@@ -311,8 +311,13 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
             instances[auraInstanceID] = instance
             getOrCreate(lookup, strlowerCache[instance.name])[auraInstanceID] = isMine
             getOrCreate(lookup, instance.spellId)[auraInstanceID] = isMine
-            if instance.dispelName then
-                getOrCreate(lookup, instance.dispelName)[auraInstanceID] = isMine
+            local dispelType = instance.dispelName
+            if dispelType then
+                if dispelType == "" then
+                    -- Bugfix: Enraged is an empty string.
+                    dispelType = "Enraged"
+                end
+                getOrCreate(lookup, dispelType)[auraInstanceID] = isMine
             end
         end
     end

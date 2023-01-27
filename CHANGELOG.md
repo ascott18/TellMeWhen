@@ -1,3 +1,6 @@
+## v10.0.9
+* Fix #2066 - Enrage effects were not being stored properly when fetching auras for noncached units.
+
 ## v10.0.8
 * #2054 - Workaround Blizzard issue breaking tracking Execute cooldown by name.
 * Workaround rare aura tracking error in arenas (Auras.lua:302: attempt to index local "instance" (a nil value)).
