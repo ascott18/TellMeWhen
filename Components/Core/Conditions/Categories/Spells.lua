@@ -896,9 +896,8 @@ Env.UnitCastPercent = function(unit, matchname)
 	if not name then 
 		return 0, nil
 	end
-	name = strlowerCache[name]
-	if matchname == "" and name then
-		matchname = name
+	if matchname ~= "" and strlowerCache[name] ~= matchname then
+		return 0, nil
 	end
 	local remaining = endTime and endTime/1000 - TMW.time or 0
 	local duration = endTime/1000 - start/1000
