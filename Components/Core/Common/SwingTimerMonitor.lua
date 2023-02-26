@@ -207,6 +207,7 @@ SwingTimerMonitor.SwingTimers = setmetatable({},
 	SwingTimerMonitor:RegisterEvent("UNIT_ATTACK_SPEED")
 	SwingTimerMonitor:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 
+	SwingTimerMonitor.DualWield = IsDualWielding()
 	SwingTimerMonitor.Initialized = true
 
 	return SwingTimers[k]

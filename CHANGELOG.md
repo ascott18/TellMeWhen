@@ -3,6 +3,7 @@
 * Fix #2059 - Condition update were not happening at the proper time for spell cooldown conditions.
 * Fix #2038 - Fix more scenarios in which talent loadout name is not available immediately after talent events fire.
 * Fix #2075 - Spell cast percent completion was not filtering by name.
+* Fix #2072 - Swing timer monitors were not initializing dual-wield state until an equipment change was observed.
 * Workaround #2065 - Blizzard's cooldown bling effect ignores opacity, so suppress it for hidden icons.
 
 ## v10.0.8
