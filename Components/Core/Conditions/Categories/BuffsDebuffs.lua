@@ -60,35 +60,38 @@ function Env.AuraStacksPacked(unit, name, kindKey, onlyMine)
 	return 0
 end
 
-function Env.AuraCount(unit, spells, filter)
+function Env.AuraCount(units, spells, filter)
 	local n = 0
 	local names = spells.Hash
 
-	for i = 1, huge do
-		local buffName, _, _, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
-		if not buffName then
-			return n
-		elseif names[id] or names[strlowerCache[buffName]] then
-			n = n + 1
+	for u = 1, #units do
+		for i = 1, huge do
+			local buffName, _, _, _, _, _, _, _, _, id = UnitAura(units[u], i, filter)
+			if not buffName then
+				break
+			elseif names[id] or names[strlowerCache[buffName]] then
+				n = n + 1
+			end
 		end
 	end
 
 	return n
 end
 
-function Env.AuraCountPacked(unit, spells, kindKey, onlyMine)
-	local auras = GetAuras(unit)
-	local instances = auras.instances
-	local lookup = auras.lookup
-	local SpellsArray = spells.Array
-	
+function Env.AuraCountPacked(units, spells, kindKey, onlyMine)
 	local n = 0
-	for i = 1, #SpellsArray do
-		for auraInstanceID, isMine in next, lookup[SpellsArray[i]] or empty do
-			if (isMine or not onlyMine) then
-				local instance = instances[auraInstanceID]
-				if instance[kindKey] then
-					n = n + 1
+	local SpellsArray = spells.Array
+	for u = 1, #units do
+		local auras = GetAuras(units[u])
+		local instances = auras.instances
+		local lookup = auras.lookup
+		
+		for i = 1, #SpellsArray do
+			for auraInstanceID, isMine in next, lookup[SpellsArray[i]] or empty do
+				if (isMine or not onlyMine) then
+					if instances[auraInstanceID][kindKey] then
+						n = n + 1
+					end
 				end
 			end
 		end
@@ -359,7 +362,7 @@ end
 
 local function CanUsePackedAuras(c)
 	if not GetAuras then return false end
-	if not TMW.COMMON.Auras:RequestUnits(CNDT:GetUnit(c.Unit)) then return false end
+	if not TMW.COMMON.Auras:RequestUnits(c.Unit) then return false end
 	return true
 end
 
@@ -578,12 +581,13 @@ end
 ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["NUMAURAS"],
 	tooltip = L["NUMAURAS_DESC"],
-	min = 0,
-	max = 20,
+	range = 20,
+	multiUnit = true,
 	name = function(editbox)
 		editbox:SetTexts(L["BUFFTOCHECK"], L["CNDT_MULTIPLEVALID"])
 	end,
 	useSUG = true,
+	allowMultipleSUGEntires = true,
 	check = function(check)
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
@@ -592,14 +596,15 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
-			return [[AuraCountPacked(c.Unit, c.Spells, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
+			return [[AuraCountPacked(c.Units, c.Spells, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
 		end
-		return [[AuraCount(c.Unit, c.Spells, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraCount(c.Units, c.Spells, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
+		local _, unitSet = TMW:GetUnits(nil, c.Unit)
 		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
+			ConditionObject:GenerateNormalEventString(unitSet.event),
+			ConditionObject:GenerateUnitAuraString(unitSet, TMW:GetSpells(c.Name), c.Checked)
 	end,
 })
 
@@ -843,12 +848,13 @@ end
 ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	text = L["ICONMENU_DEBUFF"] .. " - " .. L["NUMAURAS"],
 	tooltip = L["NUMAURAS_DESC"],
-	min = 0,
-	max = 20,
+	range = 20,
+	multiUnit = true,
 	name = function(editbox)
 		editbox:SetTexts(L["DEBUFFTOCHECK"], L["CNDT_MULTIPLEVALID"])
 	end,
 	useSUG = true,
+	allowMultipleSUGEntires = true,
 	check = function(check)
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
@@ -857,14 +863,15 @@ ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
-			return [[AuraCountPacked(c.Unit, c.Spells, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
+			return [[AuraCountPacked(c.Units, c.Spells, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
 		end
-		return [[AuraCount(c.Unit, c.Spells, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
+		return [[AuraCount(c.Units, c.Spells, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[") c.Operator c.Level]]
 	end,
 	events = function(ConditionObject, c)
+		local _, unitSet = TMW:GetUnits(nil, c.Unit)
 		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
+			ConditionObject:GetUnitChangedEventString(unitSet),
+			ConditionObject:GenerateUnitAuraString(unitSet, TMW:GetSpells(c.Name), c.Checked)
 	end,
 })
 

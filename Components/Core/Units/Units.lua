@@ -250,7 +250,9 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^mouseover") then
-				-- There is a unit when you gain a mouseover, but there isn't one when you lose it, so we can't have events for this one.
+				-- There is an event when you gain a mouseover, but there isn't one when you lose it, so we can't have events for this one.
+				-- Additionally, most other UNIT_ events don't properly fire for mouseover, so saying that mouseover has events would 
+				-- cause other functions to assume they can update on unit, even when they can't.
 				self.allUnitsChangeOnEvent = false
 				
 			else

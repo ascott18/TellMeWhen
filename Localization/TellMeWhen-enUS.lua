@@ -1742,7 +1742,11 @@ L["PARENTHESIS_TYPE_("] = "opening"
 L["PARENTHESIS_TYPE_)"] = "closing"
 L["NUMAURAS"] = "Number of"
 L["ACTIVE"] = "%d Active"
-L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.  This is for checking things like if you have both weapon enchant procs active at the same time.  Use sparingly, as the process used to count the numbers is a bit CPU intensive.]]
+L["NUMAURAS_DESC"] = [[This condition checks the number of an aura active - not to be confused with the number of stacks of an aura.
+
+This can be used for checking things like if you have both weapon enchant procs active at the same time, or for checking the quantity of a buff active on your raid/group members.
+
+This condition's inputs accept multiple units and multiple spells.]]
 L["TOOLTIPSCAN"] = "Aura Variable"
 L["TOOLTIPSCAN_DESC"] = "This condition type will allow you to check the first variable associated with an aura. Numbers are provided by Blizzard API and do not necessarily match numbers found on the tooltip of the aura. There is also no guarantee that a number will be obtained for an aura. In most practical cases, though, the correct number will be checked."
 
@@ -2745,7 +2749,7 @@ To see the correct texture now, change the first spell being checked into a Spel
 
 L["HELP_NOUNITS"] = [[You must enter at least one unit!]]
 L["HELP_NOUNIT"] = [[You must enter a unit!]]
-L["HELP_ONLYONEUNIT"] = [[Conditions only accept one unit, but you have entered %d |4unit:units;.
+L["HELP_ONLYONEUNIT"] = [[This condition only accepts one unit, but you have entered %d |4unit:units;.
 
 If you need to check many units, consider using a separate icon with an Icon Shown condition to reference that icon.]]
 

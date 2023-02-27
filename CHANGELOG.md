@@ -1,4 +1,5 @@
 ## v10.0.9
+* The "Buff - Number Of" and "Debuff - Number Of" conditions now support tracking multiple units (e.g. `group 1-40`). (#1989)
 * Fix #2066 - Enrage effects were not being stored properly when fetching auras for noncached units.
 * Fix #2059 - Condition update were not happening at the proper time for spell cooldown conditions.
 * Fix #2038 - Fix more scenarios in which talent loadout name is not available immediately after talent events fire.

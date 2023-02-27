@@ -146,20 +146,17 @@
 
 						self:SetSetting("Unit")
 
-						self:SetLabel("|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r")
-						self:SetTexts(TMW.L["CONDITIONPANEL_UNIT"], TMW.L["ICONMENU_UNIT_DESC_CONDITIONUNIT"])
-
-						TMW.SUG:EnableEditBox(self, "units", true)
-
-
+						
 						self:CScriptAdd("ModifyValueForSave", function(self, value)
 							return TMW:CleanString(value)
 						end)
 
 						self:CScriptAdd("SettingSaved", function()
 							local unitTable = TMW.UNITS:GetOriginalUnitTable(self:GetText())
+							local CndtGroup = self:GetParent()
+							local conditionData = CndtGroup:GetConditionData()
 
-							if #unitTable > 1 then
+							if #unitTable > 1 and not conditionData.multiUnit then
 								TMW.HELP:Show{
 									code = "CNDT_UNIT_ONLYONE",
 									icon = TMW.CI.icon,

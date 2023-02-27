@@ -828,7 +828,15 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			CndtGroup.Unit:Show()
 			
 			-- Reset suggestion list module. This might get modified by unit conditions.
-			TMW.SUG:EnableEditBox(CndtGroup.Unit, "units", true)
+			TMW.SUG:EnableEditBox(CndtGroup.Unit, "units", not conditionData.multiUnit)
+
+			if conditionData.multiUnit then
+				CndtGroup.Unit:SetLabel("|cFFFF5050" .. TMW.L["ICONMENU_UNITS"] .. "!|r")
+				CndtGroup.Unit:SetTexts(TMW.L["ICONMENU_UNITS"], TMW.L["ICONMENU_UNIT_DESC"])
+			else
+				CndtGroup.Unit:SetLabel("|cFFFF5050" .. TMW.L["CONDITIONPANEL_UNIT"] .. "!|r")
+				CndtGroup.Unit:SetTexts(TMW.L["CONDITIONPANEL_UNIT"], TMW.L["ICONMENU_UNIT_DESC_CONDITIONUNIT"])
+			end
 			
 		elseif unit == false then
 			-- No unit, keep editbox and static text hidden

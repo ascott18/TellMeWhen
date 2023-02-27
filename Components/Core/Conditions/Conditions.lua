@@ -852,6 +852,22 @@ CNDT.Substitutions = {
 },
 
 {
+	src = "c.Units",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return CNDT:GetTableSubstitution(TMW:GetUnits(nil, conditionSettings.Unit), "Units")
+	end,
+},
+{
+	src = "c%.Unit(2?)",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return function(two)
+			local unit = two == "2" and conditionSettings.Name or conditionSettings.Unit
+			return CNDT:GetConditionUnitSubstitution(unit)
+		end
+	end,
+},
+
+{
 	src = "c.Item2",
 	rep = function(conditionData, conditionSettings, name, name2)
 		return CNDT:GetItemRefForConditionChecker(name2)
@@ -931,23 +947,6 @@ end
 -- [INTERNAL]
 function CNDT:DoConditionSubstitutions(conditionData, conditionSettings, funcstr)
 	-- Substitutes all the c.XXXXX substitutions into a string.
-	
-	for _, append in TMW:Vararg("2", "") do -- Unit2 MUST be before Unit
-		if strfind(funcstr, "c.Unit" .. append) then
-			-- Use CNDT:GetUnit() first to grab only the first unit
-			-- in case the configured value is an expansion (like party1-4).
-			local unit
-			if append == "2" then
-				unit = CNDT:GetUnit(conditionSettings.Name)
-			elseif append == "" then
-				unit = CNDT:GetUnit(conditionSettings.Unit)
-			end
-			if unit then
-				funcstr = gsub(funcstr, "c.Unit" .. append,	CNDT:GetConditionUnitSubstitution(unit))
-			end
-		end
-	end
-
 	local name  = conditionNameSettingProcessedCache[conditionSettings.Name]
 	local name2 = conditionNameSettingProcessedCache[conditionSettings.Name2]
 
