@@ -10,6 +10,7 @@ TMW.CHANGELOG = [==[
 * Fix #2075 - Spell cast percent completion was not filtering by name.
 * Fix #2072 - Swing timer monitors were not initializing dual-wield state until an equipment change was observed.
 * Fix #2071 - Tooltip Number conditions not working on retail. Also switched these conditions to use modern APIs, resulting in substantially better performance.
+* Workaround #1978, #2055  - Add hardcoded workarounds for a few reported covenant abilities that can't be tracked properly by name (Soul Rot, Adaptive Swarm).
 * Workaround #2065 - Blizzard's cooldown bling effect ignores opacity, so suppress it for hidden icons.
 
 ## v10.0.8

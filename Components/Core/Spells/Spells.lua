@@ -187,6 +187,28 @@ local fixSpellMap = {
 		end
 	end,
 }
+local function covenantFix(shadowlandsId, talentedId)
+	-- For covenant abilities that became talents,
+	-- there are two abilities with different cooldowns, names, ids, etc.
+	
+	-- However, the talent cannot be used while the covenant ability is on CD, and vice-versa.
+	-- Additionally, and the reason for this fix, is spell APIs by name will resolve to the covenant ability,
+	-- not to the talent. So, when both are learned, we'll assume that if the player has both abilities learned,
+	-- then the talent one is the one they're actually using, so we have TMW replace the spell with the ID of the talent.
+
+	-- Note: not all covenant abilities are broken in this way.
+	-- For example, Convoke the Spirits, while it does have two different spells,
+	-- resolves by-name to the correct spell based on talent learned vs unlearned.
+
+	fixSpellMap[shadowlandsId] = function()
+		if IsPlayerSpell(shadowlandsId) and IsPlayerSpell(talentedId) then
+			return talentedId
+		end
+	end
+end
+
+covenantFix(325727, 391888) -- Adaptive Swarm (druid, necrolord) https://github.com/ascott18/TellMeWhen/issues/2055
+covenantFix(325640, 386997) -- Soul Rot (warlock, nf) https://github.com/ascott18/TellMeWhen/issues/1978
 
 local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRenaming)
 	local spells = parseSpellsString(setting, doLower, false)
