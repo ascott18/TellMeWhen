@@ -206,7 +206,6 @@ end
 
 
 function Env.AuraTooltipNumber(...)
-	-- TODO: Replace GetParser with direct usage of C_TooltipInfo when available
 	local Parser, LT1, LT2 = TMW:GetParser()
 	local module = CNDT:NewModule("TooltipParser", "AceEvent-3.0")
 
@@ -266,7 +265,7 @@ function Env.AuraTooltipNumber(...)
 			local index = 0
 		    Parser:SetOwner(UIParent, "ANCHOR_NONE")
 		    Parser:SetUnitAura(unit, n, filter)
-			local text = LT2:GetText() or ""
+			local text = (TMW.isRetail and LT1 or LT2):GetText() or ""
 			Parser:Hide()
 
 			local number
@@ -304,6 +303,58 @@ function Env.AuraTooltipNumber(...)
 	end
 
 	return Env.AuraTooltipNumber(...)
+end
+
+function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedIndex)
+	local auras = GetAuras(unit)
+	local instances = auras.instances
+	
+	for auraInstanceID, isMine in next, auras.lookup[name] or empty do
+		if (isMine or not onlyMine) then
+			local instance = instances[auraInstanceID]
+			if instance[kindKey] then
+
+				if instance.tmwTooltipNumbers then
+					-- Return cached value if available
+					return instance.tmwTooltipNumbers[requestedIndex] or 0
+				end
+
+				local data = C_TooltipInfo[kindKey == "isHelpful" and "GetUnitBuffByAuraInstanceID" or "GetUnitDebuffByAuraInstanceID"](unit, auraInstanceID)
+				
+				local text
+				-- Only look at the second line (first line after the title):
+				-- (third line is the duration)
+				for _, arg in pairs(data.lines[2].args) do
+					if arg.field == "leftText" then
+						text = arg.stringVal
+						break
+					end
+				end
+
+				instance.tmwTooltipNumbers = {}
+				local index = 0
+				local number
+				local allNumbers = ""
+				repeat
+					number, text = (text):match("([0-9%" .. LARGE_NUMBER_SEPERATOR .. "]+%" .. DECIMAL_SEPERATOR .. "?[0-9]+)(.*)$")
+
+					if number then
+						-- Remove large number separators
+						number = number:gsub("%" .. LARGE_NUMBER_SEPERATOR, "")
+						-- Normalize decimal separators
+						number = number:gsub("%" .. DECIMAL_SEPERATOR, ".")
+
+						index = index + 1
+						instance.tmwTooltipNumbers[index] = isNumber[number]
+					end
+				until not number
+
+				return instance.tmwTooltipNumbers[requestedIndex] or 0
+			end
+		end
+	end
+
+	return 0
 end
 
 local function CanUsePackedAuras(c)
@@ -512,6 +563,9 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		icon = TMW.isWrath and "Interface\\Icons\\spell_ice_lament" or "Interface\\Icons\\ability_priest_clarityofwill",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
+			if CanUsePackedAuras(c) then
+				return [[AuraTooltipNumberPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[, ]] .. i .. [[) c.Operator c.Level]]
+			end
 			return [[AuraTooltipNumber(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
 		end,
 		events = function(ConditionObject, c)
@@ -758,7 +812,7 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 			ConditionObject:GenerateUnitAuraString(CNDT:GetUnit(c.Unit), TMW:GetSpells(c.Name).First, c.Checked)
 	end,
 })
-for i = 1, 3 do -- BUFFTOOLTIPSCAN
+for i = 1, 3 do -- DEBUFFTOOLTIPSCAN
 	ConditionCategory:RegisterCondition(14 + 0.1*i,	 "DEBUFFTOOLTIPSCAN" .. i, {
 		text = L["ICONMENU_DEBUFF"] .. " - " .. L["TOOLTIPSCAN2"]:format(i),
 		tooltip = L["TOOLTIPSCAN2_DESC"],
@@ -774,6 +828,9 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		icon = "Interface\\Icons\\spell_fire_flameshock",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
+			if CanUsePackedAuras(c) then
+				return [[AuraTooltipNumberPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[, ]] .. i .. [[) c.Operator c.Level]]
+			end
 			return [[AuraTooltipNumber(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
 		end,
 		events = function(ConditionObject, c)
