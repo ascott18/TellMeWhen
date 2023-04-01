@@ -15,6 +15,7 @@
 -- ADDON GLOBALS AND LOCALS
 -- ---------------------------------
 
+local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 TELLMEWHEN_VERSION = GetAddOnMetadata("TellMeWhen", "Version")
 
 TELLMEWHEN_VERSION_MINOR = ""

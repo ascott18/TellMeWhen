@@ -881,3 +881,79 @@ else
 	end
 
 end
+
+
+TMW.DS = {
+	Magic 	= "Interface\\Icons\\spell_fire_immolation",
+	Curse 	= "Interface\\Icons\\spell_shadow_curseofsargeras",
+	Disease = "Interface\\Icons\\spell_nature_nullifydisease",
+	Poison 	= "Interface\\Icons\\spell_nature_corrosivebreath",
+	Enraged = "Interface\\Icons\\ability_druid_challangingroar",
+}
+
+local function ProcessEquivalencies()
+	TMW.EquivOriginalLookup = {}
+	TMW.EquivFullIDLookup = {}
+	TMW.EquivFullNameLookup = {}
+	TMW.EquivFirstIDLookup = {}
+
+	TMW:Fire("TMW_EQUIVS_PROCESSING")
+	TMW:UnregisterAllCallbacks("TMW_EQUIVS_PROCESSING")
+
+	for dispeltype, texture in pairs(TMW.DS) do
+		TMW.EquivFirstIDLookup[dispeltype] = texture
+		TMW.SpellTexturesMetaIndex[strlower(dispeltype)] = texture
+	end
+
+	for category, b in pairs(TMW.BE) do
+		for equiv, tbl in pairs(b) do
+			TMW.EquivOriginalLookup[equiv] = CopyTable(tbl)
+			TMW.EquivFirstIDLookup[equiv] = abs(tbl[1])
+			TMW.EquivFullIDLookup[equiv] = ""
+			TMW.EquivFullNameLookup[equiv] = ""
+
+			-- turn all negative IDs into their localized name.
+			-- When defining equavalancies, dont put a negative on every single one,
+			-- but do use it for spells that do not have any other spells with the same name and different effects.
+
+			for i, spellID in pairs(tbl) do
+
+				local realSpellID = abs(spellID)
+				local name, _, tex = GetSpellInfo(realSpellID)
+
+				TMW.EquivFullIDLookup[equiv] = TMW.EquivFullIDLookup[equiv] .. ";" .. realSpellID
+				TMW.EquivFullNameLookup[equiv] = TMW.EquivFullNameLookup[equiv] .. ";" .. (name or realSpellID)
+
+				if spellID < 0 then
+
+					-- name will be nil if the ID isn't a valid spell (possibly the spell was removed in a patch).
+					if name then
+						-- this will insert the spell name into the table of spells for capitalization restoration.
+						TMW:LowerNames(name)
+
+						-- map the spell's name and ID to its texture for the spell texture cache
+						TMW.SpellTexturesMetaIndex[realSpellID] = tex
+						TMW.SpellTexturesMetaIndex[TMW.strlowerCache[name]] = tex
+
+						tbl[i] = name
+					else
+						TMW:Debug("Invalid spellID found: %s (%s - %s)!", realSpellID, category, equiv)
+
+						tbl[i] = realSpellID
+					end
+				else
+					tbl[i] = realSpellID
+				end
+			end
+
+			for _, spell in pairs(tbl) do
+				if type(spell) == "number" and not GetSpellInfo(spell) then
+					TMW:Debug("Invalid spellID found: %s (%s - %s)!",
+						spell, category, equiv)
+				end
+			end
+		end
+	end
+end
+
+TMW:RegisterCallback("TMW_INITIALIZE", ProcessEquivalencies)

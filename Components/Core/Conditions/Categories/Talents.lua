@@ -783,7 +783,7 @@ if IsInJailersTower then
 	end
 	function AnimaPowWatcher:OnLocationUpdate()
 		if IsInJailersTower() and not self.watching then
-			self:RegisterUnitEvent("UNIT_AURA", "player")
+			self:RegisterEvent("UNIT_AURA")
 			self.watching = true
 			self:UNIT_AURA(nil, "player")
 		elseif not IsInJailersTower() and self.watching then

@@ -11,11 +11,45 @@
 -- --------------------
 
 
-if not TMW then return end
-
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+
+function TellMeWhen_OnAddonCompartmentClick(addonName, button) 
+	if not TMW then return end
+	if button == "RightButton" then
+		TMW:SlashCommand("options")
+	else
+		TMW:LockToggle()
+	end
+end
+
+function TellMeWhen_AddonCompartmentFuncOnEnter() 
+	local f = GetMouseFocus()
+	while f and not f.dropdown do
+		f = f:GetParent()
+	end
+	GameTooltip:SetOwner(f, "ANCHOR_NONE")
+	GameTooltip:SetPoint("TOPRIGHT", f, "TOPLEFT", 0, 0)
+
+	if not TMW then 
+		GameTooltip:AddLine("TellMeWhen failed to load.")
+		GameTooltip:Show()
+		return
+	end
+
+	GameTooltip:AddLine("TellMeWhen")
+	GameTooltip:AddLine(L["LDB_TOOLTIP1"])
+	GameTooltip:AddLine(L["LDB_TOOLTIP2"])
+	GameTooltip:Show()
+end
+
+function TellMeWhen_AddonCompartmentFuncOnLeave() 
+	GameTooltip:Hide()
+end
+
+if not TMW then return end
+
 
 local ldb = LibStub("LibDataBroker-1.1")
 local dataobj = ldb:GetDataObjectByName("TellMeWhen") or

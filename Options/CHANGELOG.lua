@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v10.1.0
+* Fixes for WoW 10.1.
+
 ## v10.0.9
 * The "Buff - Number Of" and "Debuff - Number Of" conditions now support tracking multiple units (e.g. `group 1-40`). (#1989)
 * Fix #2066 - Enrage effects were not being stored properly when fetching auras for noncached units.

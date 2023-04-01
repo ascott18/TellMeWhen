@@ -251,6 +251,7 @@ ConditionCategory:RegisterCondition(8.5,  "LIBRANGECHECK", {
 	tooltip = L["CNDT_RANGE_DESC"],
 	min = 0,
 	max = 100,
+	defaultUnit = "target",
 	formatter = TMW.C.Formatter:New(function(val)
 		local LRC = LibStub("LibRangeCheck-2.0")
 		if not LRC then
@@ -339,6 +340,7 @@ ConditionCategory:RegisterCondition(9,    "NAME", {
 	text = L["CONDITIONPANEL_NAME"],
 
 	bool = true,
+	defaultUnit = "target",
 	
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITIONPANEL_NAMETOMATCH"], L["CONDITIONPANEL_NAMETOOLTIP"])

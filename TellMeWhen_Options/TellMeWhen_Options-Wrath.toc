@@ -3,6 +3,7 @@
 
 ## Author: Cybeloras of Aerie Peak
 ## Notes: Options and configuration for TellMeWhen
+## IconTexture: Interface\Addons\TellMeWhen\Textures\LDB Icon
 ## RequiredDeps: TellMeWhen
 ## LoadOnDemand: 1
 ## SavedVariables: TMWOptDB

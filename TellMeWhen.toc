@@ -21,8 +21,12 @@
 ## X-WoWI-ID: 10855
 ## X-Wago-ID: ZQ6aZqKW
 
-## Version: 10.0.9
+## Version: 10.1.0
 ## Author: Cybeloras of Aerie Peak
+## IconTexture: Interface\Addons\TellMeWhen\Textures\LDB Icon
+## AddonCompartmentFunc: TellMeWhen_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: TellMeWhen_AddonCompartmentFuncOnEnter
+## AddonCompartmentFuncOnLeave: TellMeWhen_AddonCompartmentFuncOnLeave
 
 ## Notes: Provides visual, auditory, and textual notifications about cooldowns, buffs, and pretty much every other element of combat.
 ## Notes-zhCN: 为冷却、增益\减益及其他各个方面提供视觉、听觉以及文字上的通知。
