@@ -325,6 +325,7 @@ function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedInd
 				local data = C_TooltipInfo[kindKey == "isHelpful" and "GetUnitBuffByAuraInstanceID" or "GetUnitDebuffByAuraInstanceID"](unit, auraInstanceID)
 				
 				local text
+				-- TODO: wow 10.1: The C_TooltipInfo APIs now return data with all data and line arguments surfaced, removing the need to call TooltipUtil.SurfaceArgs().
 				-- Only look at the second line (first line after the title):
 				-- (third line is the duration)
 				for _, arg in pairs(data.lines[2].args) do
