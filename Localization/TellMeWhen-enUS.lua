@@ -640,7 +640,7 @@ Numbers are provided by Blizzard API and do not necessarily match numbers found 
 L["ICONMENU_SHOWTTTEXT_STACKS"] = "Stacks (default behavior)"
 L["ICONMENU_SHOWTTTEXT_STACKS_DESC"] = "Causes the buff/debuff's stacks to be reported as the icon's stacks."
 L["ICONMENU_SHOWTTTEXT_FIRST"] = "First non-zero variable"
-L["ICONMENU_SHOWTTTEXT_FIRST_DESC"] = [[Causes the first non-zero variable assoeciated with the buff/debuff to be reported as the icon's stacks.
+L["ICONMENU_SHOWTTTEXT_FIRST_DESC"] = [[Causes the first non-zero variable associated with the buff/debuff to be reported as the icon's stacks.
 
 Usually this will be the correct variable if you desire one of the aura's variables.]]
 L["ICONMENU_SHOWTTTEXT_VAR"] = "Only Variable #%d"

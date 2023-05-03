@@ -13,7 +13,7 @@
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
 ## Interface: 100100
-## Version: 10.1.0
+## Version: 10.1.1
 
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025

@@ -164,15 +164,6 @@ local fixSpellMap = {
 			return 367226
 		end
 	end,
-	[382411] = function()
-		-- Evoker https://github.com/ascott18/TellMeWhen/issues/2017
-		-- 375783: Font of Magic (talent)
-		-- 382411: Eternity Surge (Devastation baseline, with Font of Magic LEARNED)
-		-- 359073: Eternity Surge (Devastation baseline, with Font of Magic UNLEARNED)
-		if not IsPlayerSpell(382411) and not IsPlayerSpell(375783) then
-			return 359073
-		end
-	end,
 	[280735] = function()
 		-- Fury Execute https://github.com/ascott18/TellMeWhen/issues/2054
 		-- 206315: Massacre (fury talent)
