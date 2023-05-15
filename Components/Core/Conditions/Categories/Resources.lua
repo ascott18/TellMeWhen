@@ -508,7 +508,7 @@ if TMW.isRetail then
 	ConditionCategory:RegisterCondition(90.0 - offset, "INSANITY", {
 		text = INSANITY_POWER,
 		min = 0,
-		max = 100,
+		max = 150, -- 150 with talent Voidtouched
 		icon = "Interface\\Icons\\spell_shadow_painandsuffering",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Insanity),

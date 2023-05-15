@@ -1,5 +1,6 @@
 ## v10.1.1
 * Fix #2081 - Cooldown of Eternity Surge not trackable when Font of Magic learned.
+* Fix #2082 - Increase Insanity condition max to 150.
 
 ## v10.1.0
 * Fixes for WoW 10.1.
