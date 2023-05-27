@@ -925,7 +925,7 @@ local castEvents = function(ConditionObject, c)
 end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
-	text = L["ICONMENU_CAST_DESC"],
+	tooltip = L["ICONMENU_CAST_DESC"],
 	min = 0,
 	max = 2,
 	levelChecks = true,
