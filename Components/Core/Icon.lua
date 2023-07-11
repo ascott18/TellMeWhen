@@ -1164,7 +1164,6 @@ function Icon.SetModulesToEnabledStateOfIcon(icon, sourceIcon)
 end
 
 
--- If you want me to explain wtf this is, send me (Cybeloras) a PM on CurseForge.
 TMW.IconStateArbitrator = {
 	StateHandlers = {},
 	
@@ -1211,8 +1210,7 @@ TMW.IconStateArbitrator = {
 				-- This happens when undoing to a blank icon from a non-blank icon, for example.
 				print("NO ALPHA ON STATE:", handlerToUse.attribute, icon, icon:GetName(), state.Alpha, state)
 			end
-			icon:SetInfo_INTERNAL("realAlpha", state.Alpha or 0)
-			icon:SetInfo_INTERNAL("calculatedState", state)
+			icon:SetInfo_INTERNAL("realAlpha; calculatedState", state.Alpha or 0, state)
 		end
 	end,
 
