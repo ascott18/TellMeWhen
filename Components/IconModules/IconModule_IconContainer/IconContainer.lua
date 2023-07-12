@@ -28,6 +28,7 @@ function IconContainer:OnNewInstance_IconContainer(icon)
 	container:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress")
 
 	self.container = container
+	container.module = self
 	
 	container:EnableMouse(false)
 end
@@ -119,10 +120,10 @@ else
 	-- Legacy:
 	local function OverlayGlowAnimOutFinished(animGroup)
 		local overlay = animGroup:GetParent();
-		local actionButton = overlay:GetParent();
+		local container = overlay:GetParent();
 		overlay:Hide();
 		tinsert(unusedOverlayGlows, overlay);
-		actionButton.overlay = nil;
+		container.module.overlay = nil;
 	end
 	local function OverlayOnHide(overlay)
 		if ( overlay.animOut:IsPlaying() ) then
@@ -147,8 +148,8 @@ else
 	end
 
 	function IconContainer:ShowOverlayGlow()
-		local IconModule_IconContainer = self
-		self = self.container
+		local container = self.container
+		local overlay = self.overlay
 
 		if ( self.overlay ) then
 			if ( self.overlay.animOut:IsPlaying() ) then
@@ -156,26 +157,27 @@ else
 				self.overlay.animIn:Play();
 			end
 		else
-			self.overlay = IconModule_IconContainer:GetOverlayGlow();
-			local frameWidth, frameHeight = self:GetSize();
-			self.overlay:SetParent(self);
+			overlay = self:GetOverlayGlow();
+			self.overlay = overlay
+			local frameWidth, frameHeight = container:GetSize();
+			self.overlay:SetParent(container);
 			self.overlay:ClearAllPoints();
 			--Make the height/width available before the next frame:
 			self.overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4);
-			self.overlay:SetPoint("TOPLEFT", self, "TOPLEFT", -frameWidth * 0.2, frameHeight * 0.2);
-			self.overlay:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", frameWidth * 0.2, -frameHeight * 0.2);
+			self.overlay:SetPoint("TOPLEFT", container, "TOPLEFT", -frameWidth * 0.2, frameHeight * 0.2);
+			self.overlay:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", frameWidth * 0.2, -frameHeight * 0.2);
 			self.overlay.animIn:Play();
 		end
 	end
 
 	function IconContainer:HideOverlayGlow()
-		self = self.container
+		local container = self.container
 
 		if ( self.overlay ) then
 			if ( self.overlay.animIn:IsPlaying() ) then
 				self.overlay.animIn:Stop();
 			end
-			if ( self:IsVisible() ) then
+			if ( container:IsVisible() ) then
 				self.overlay.animOut:Play();
 			else
 				OverlayGlowAnimOutFinished(self.overlay.animOut);	--We aren't shown anyway, so we'll instantly hide it.
