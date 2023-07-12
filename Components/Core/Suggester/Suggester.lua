@@ -424,6 +424,9 @@ do	-- KeyManger
 	end
 
 	KeyManager:SetScript("OnKeyDown", function(self, key)
+		-- Can't call SetPropagateKeyboardInput in combat since wow 10.1.5:
+		if InCombatLockdown() then return end
+		
 		if SUG.SuggestionList:IsVisible() and (key == "UP" or key == "DOWN") then
 			KeyManager:SetPropagateKeyboardInput(false)
 			self.down = {key = key, start = TMW.time}
@@ -434,6 +437,9 @@ do	-- KeyManger
 		end
 	end)
 	KeyManager:SetScript("OnKeyUp", function(self, key)
+		-- Can't call SetPropagateKeyboardInput in combat since wow 10.1.5:
+		if InCombatLockdown() then return end
+
 		KeyManager:SetPropagateKeyboardInput(true)
 
 		self.down = nil
@@ -448,6 +454,17 @@ do	-- KeyManger
 		if (not data.last and data.start + 0.5 < TMW.time) or (data.last and data.last + repeatRate < TMW.time) then
 			self:HandlePress(data.key)
 			data.last = (data.last or TMW.time) + repeatRate
+		end
+	end)
+	KeyManager:RegisterEvent("PLAYER_REGEN_DISABLED")
+	KeyManager:SetScript("OnEvent", function(self, event)
+		if event == "PLAYER_REGEN_DISABLED" then
+			-- When going into combat lockdown, restore keyboard propagation
+			-- so that if the user happened to have the suggestion list opened
+			-- and a finger held on their up or down arrow, they aren't stuck
+			-- without their keyboard until combat ends.
+			KeyManager:SetPropagateKeyboardInput(true)
+			self.down = nil
 		end
 	end)
 end
