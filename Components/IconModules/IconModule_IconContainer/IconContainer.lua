@@ -68,73 +68,118 @@ end
 
 
 
---Overlay stuff, copied from Blizz code.
--- We use our own instance of the code to prevent taint.
+-- SpellActivationAlert animation handling:
 local unusedOverlayGlows = {}
 local numOverlays = 0
+if CreateFrame("Frame", nil, UIParent, "ActionBarButtonSpellActivationAlert").ProcStartAnim then
+	-- Wow 10.1.5+
+	function IconContainer:ShowOverlayGlow()
+		local container = self.container
 
-local function OverlayGlowAnimOutFinished(animGroup)
-	local overlay = animGroup:GetParent();
-	local actionButton = overlay:GetParent();
-	overlay:Hide();
-	tinsert(unusedOverlayGlows, overlay);
-	actionButton.overlay = nil;
-end
-local function OverlayOnHide(overlay)
-	if ( overlay.animOut:IsPlaying() ) then
-		overlay.animOut:Stop();
-		OverlayGlowAnimOutFinished(overlay.animOut);
+		if not self.overlay then
+			self.overlay = CreateFrame("Frame", nil, container, "ActionBarButtonSpellActivationAlert")
+
+			-- The intro animation to the new activation alert animation in wow 10.1.5 is extremely weird,
+			-- so we're electing to not use it and only use the loop animation (ProcLoop).
+			self.overlay.ProcStartFlipbook:Hide()
+
+			-- Remove the default OnHide script that stops the animation when the overlay hides, 
+			-- as otherwise the animation will stop if the parent group hides, e.g. when leaving and entering combat rapidly.
+			self.overlay:SetScript("OnHide", nil)
+
+			-- Since we're disregarding the intro, add an alpha fade-in:
+			self.fadeIn = self.overlay:CreateAnimationGroup()
+			local alphaFade = self.fadeIn:CreateAnimation("Alpha")
+			alphaFade:SetDuration(0.2)
+			alphaFade:SetFromAlpha(0)
+			alphaFade:SetToAlpha(1)
+
+			local frameWidth, frameHeight = container:GetSize()
+			self.overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4)
+			self.overlay:SetPoint("CENTER", container, "CENTER", 0, 0)
+			self.overlay:Hide()
+			
+		end
+		if not self.overlay:IsShown() then
+			self.overlay:Show()
+			self.overlay.ProcLoop:Play()
+			self.fadeIn:Play()
+		end
 	end
-end
 
-function IconContainer:GetOverlayGlow()
-	local overlay = tremove(unusedOverlayGlows);
-	if ( not overlay ) then
-		numOverlays = numOverlays + 1;
-		overlay = CreateFrame("Frame", "TMW_ActionButtonOverlay" .. numOverlays, UIParent, "ActionBarButtonSpellActivationAlert");
-
-
-		-- Override scripts from the blizzard template:
-		-- We do this so we don't have to duplicate the template as well.
-		overlay.animOut:SetScript("OnFinished", OverlayGlowAnimOutFinished)
-		overlay:SetScript("OnHide", OverlayOnHide)
+	function IconContainer:HideOverlayGlow()
+		if self.overlay then
+			self.overlay.ProcStartAnim:Stop()
+			self.overlay.ProcLoop:Stop()
+		end
+		self.overlay:Hide()
 	end
-	return overlay;
-end
+else
 
-function IconContainer:ShowOverlayGlow()
-	local IconModule_IconContainer = self
-	self = self.container
+	-- Legacy:
+	local function OverlayGlowAnimOutFinished(animGroup)
+		local overlay = animGroup:GetParent();
+		local actionButton = overlay:GetParent();
+		overlay:Hide();
+		tinsert(unusedOverlayGlows, overlay);
+		actionButton.overlay = nil;
+	end
+	local function OverlayOnHide(overlay)
+		if ( overlay.animOut:IsPlaying() ) then
+			overlay.animOut:Stop();
+			OverlayGlowAnimOutFinished(overlay.animOut);
+		end
+	end
 
-	if ( self.overlay ) then
-		if ( self.overlay.animOut:IsPlaying() ) then
-			self.overlay.animOut:Stop();
+	function IconContainer:GetOverlayGlow()
+		local overlay = tremove(unusedOverlayGlows);
+		if ( not overlay ) then
+			numOverlays = numOverlays + 1;
+			overlay = CreateFrame("Frame", "TMW_ActionButtonOverlay" .. numOverlays, UIParent, "ActionBarButtonSpellActivationAlert");
+
+
+			-- Override scripts from the blizzard template:
+			-- We do this so we don't have to duplicate the template as well.
+			overlay.animOut:SetScript("OnFinished", OverlayGlowAnimOutFinished)
+			overlay:SetScript("OnHide", OverlayOnHide)
+		end
+		return overlay;
+	end
+
+	function IconContainer:ShowOverlayGlow()
+		local IconModule_IconContainer = self
+		self = self.container
+
+		if ( self.overlay ) then
+			if ( self.overlay.animOut:IsPlaying() ) then
+				self.overlay.animOut:Stop();
+				self.overlay.animIn:Play();
+			end
+		else
+			self.overlay = IconModule_IconContainer:GetOverlayGlow();
+			local frameWidth, frameHeight = self:GetSize();
+			self.overlay:SetParent(self);
+			self.overlay:ClearAllPoints();
+			--Make the height/width available before the next frame:
+			self.overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4);
+			self.overlay:SetPoint("TOPLEFT", self, "TOPLEFT", -frameWidth * 0.2, frameHeight * 0.2);
+			self.overlay:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", frameWidth * 0.2, -frameHeight * 0.2);
 			self.overlay.animIn:Play();
 		end
-	else
-		self.overlay = IconModule_IconContainer:GetOverlayGlow();
-		local frameWidth, frameHeight = self:GetSize();
-		self.overlay:SetParent(self);
-		self.overlay:ClearAllPoints();
-		--Make the height/width available before the next frame:
-		self.overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4);
-		self.overlay:SetPoint("TOPLEFT", self, "TOPLEFT", -frameWidth * 0.2, frameHeight * 0.2);
-		self.overlay:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", frameWidth * 0.2, -frameHeight * 0.2);
-		self.overlay.animIn:Play();
 	end
-end
 
-function IconContainer:HideOverlayGlow()
-	self = self.container
+	function IconContainer:HideOverlayGlow()
+		self = self.container
 
-	if ( self.overlay ) then
-		if ( self.overlay.animIn:IsPlaying() ) then
-			self.overlay.animIn:Stop();
-		end
-		if ( self:IsVisible() ) then
-			self.overlay.animOut:Play();
-		else
-			OverlayGlowAnimOutFinished(self.overlay.animOut);	--We aren't shown anyway, so we'll instantly hide it.
+		if ( self.overlay ) then
+			if ( self.overlay.animIn:IsPlaying() ) then
+				self.overlay.animIn:Stop();
+			end
+			if ( self:IsVisible() ) then
+				self.overlay.animOut:Play();
+			else
+				OverlayGlowAnimOutFinished(self.overlay.animOut);	--We aren't shown anyway, so we'll instantly hide it.
+			end
 		end
 	end
 end
@@ -170,8 +215,8 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 		IconModule_IconContainer:ShowOverlayGlow()
 		
 		-- overlay is a field created by IconModule_IconContainer:ShowOverlayGlow()
-		container.overlay:SetScale(table.Scale)
-		container.overlay:SetFrameLevel(icon:GetFrameLevel() + 3)
+		IconModule_IconContainer.overlay:SetScale(table.Scale)
+		IconModule_IconContainer.overlay:SetFrameLevel(icon:GetFrameLevel() + 3)
 	end,
 	OnStop = function(icon, table)
 		local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true, true)
