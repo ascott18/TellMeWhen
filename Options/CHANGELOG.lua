@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v10.1.5
+* Support for WoW 10.1.5
+
 ## v10.1.1
 * Fix #2081 - Cooldown of Eternity Surge not trackable when Font of Magic learned.
 * Fix #2082 - Increase Insanity condition max to 150.
