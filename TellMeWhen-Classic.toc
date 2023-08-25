@@ -8,12 +8,13 @@
 # 
 #  Currently maintained by
 #  Cybeloras of Aerie Peak
-#  --------------------
+#  -------------------- 
 
 
 # Also dont forget to bump both of these - X-Interface is used to get the interface version in-game to check that the user is using a current client.
-## Interface: 100105
-
+## Interface: 11404
+# DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
+## X-Interface: 11404
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 10855
@@ -34,23 +35,23 @@
 ## Notes-ruRU: Визуальные, звуковые и текстовые оповещения о готовности заклинаний, способностей, наличии баффов\дебаффов и многого другого.
 ## Notes-esES: Proporciona notificaciones visuales, auditivas y textuales sobre tiempos de reutilización, ventajas y básicamente cualquier otra cosa. 
 
-## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRList-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0, ElvUI, DBM-Core, BigWigs
+## OptionalDeps: Masque, Ace3, OmniCC, tullaCC, sct, sctd, MikScrollingBattleText, Parrot, DRList-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0, ElvUI, DBM-Core, BigWigs, LibClassicCasterino
 # The per character settings are the old settings, but we still need them to upgrade to the new ones. If they aren't defined, then they will be deleted immediately
 ## SavedVariablesPerCharacter: TellMeWhen_Settings
 ## SavedVariables: TellMeWhenDB
 ## X-Embeds: LibStub, Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, DRList-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-2.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0
 ## X-Category: Combat
 
+Lib\LibClassicCasterino\LibClassicCasterino.lua
+
 includes.xml
 
-# Components\Core\Spells\includes.core.xml
-Components\Core\Spells\Equivalencies-Retail.lua
-Components\Core\Spells\ClassSpellCache-Retail.lua
-Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua
+Components\Core\Spells\Equivalencies-Classic.lua
+Components\Core\Spells\ClassSpellCache-Classic.lua
+Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua
 
-Components\IconTypes\IconType_runes\runes-Retail.lua
-Components\IconTypes\IconType_dotwatch\dotwatch.lua
-Components\IconTypes\IconType_unitcooldown\unitcooldown.lua
-Components\IconTypes\IconType_losecontrol\losecontrol.lua
-Components\IconTypes\IconType_cast\cast.lua
+Components\IconTypes\IconType_dotwatch\dotwatch-Classic.lua
+Components\IconTypes\IconType_cast\cast-Classic.lua
+Components\IconTypes\IconType_unitcooldown\unitcooldown-Classic.lua
 
+# TODO: Fix all combat log usages to handle no spellIDs

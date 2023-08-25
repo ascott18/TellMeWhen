@@ -120,7 +120,7 @@ ConditionCategory:RegisterCondition(0.51,	"TIMER", {
 	formatter = TMW.C.Formatter.TIME_YDHMS,
 
 	unit = false,
-	icon = TMW.isWrath and "Interface\\Icons\\INV_Misc_PocketWatch_01" or "Interface\\Icons\\spell_mage_altertime",
+	icon = not TMW.isRetail and "Interface\\Icons\\INV_Misc_PocketWatch_01" or "Interface\\Icons\\spell_mage_altertime",
 	name = function(editbox)
 		editbox:SetTexts(L["CONDITION_TIMER"], L["CONDITION_TIMER_EB_DESC"])
 	end,

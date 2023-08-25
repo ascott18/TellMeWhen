@@ -95,6 +95,7 @@ _G.TellMeWhen = _G.TMW
 local TMW = _G.TMW
 
 local tocVersion = select(4, GetBuildInfo());
+TMW.isClassic = tocVersion <= 11499
 TMW.isWrath = tocVersion >= 30400 and tocVersion <= 30499
 TMW.isRetail = tocVersion >= 90000
 
@@ -1087,11 +1088,11 @@ function TMW:PLAYER_LOGIN()
 	end
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
-	if TMW.isWrath then
-		TMW:RegisterEvent("CHARACTER_POINTS_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
-	else
+	if TMW.isRetail then
 		TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 		TMW:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_SPECIALIZATION_CHANGED")
+	else
+		TMW:RegisterEvent("CHARACTER_POINTS_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 	end
 
 

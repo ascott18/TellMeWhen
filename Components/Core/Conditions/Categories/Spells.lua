@@ -803,7 +803,7 @@ ConditionCategory:RegisterCondition(20.1,	 "TOTEM_ANY", {
 		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
 		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
-	useSUG = TMW.isWrath and "totem" or true,
+	useSUG = TMW.isRetail and true or "totem",
 	allowMultipleSUGEntires = true,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\ICONS\\spell_nature_groundingtotem",
@@ -830,7 +830,7 @@ for i = 1, 5 do
 			editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
 			editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 		end,
-		useSUG = TMW.isWrath and "totem" or true,
+		useSUG = TMW.isRetail and true or "totem",
 		allowMultipleSUGEntires = true,
 		formatter = TMW.C.Formatter.TIME_0ABSENT,
 		icon = totem and totem.texture or "Interface\\ICONS\\spell_nature_groundingtotem",
@@ -850,7 +850,7 @@ end
 
 ConditionCategory:RegisterSpacer(30)
 
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+local UnitCastingInfo, UnitChannelInfo = TMW.UnitCastingInfo or UnitCastingInfo, TMW.UnitChannelInfo or UnitChannelInfo
 Env.UnitCast = function(unit, level, matchname)
 	local name, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
@@ -905,6 +905,15 @@ Env.UnitCastPercent = function(unit, matchname)
 	return 1 - (remaining / duration), 1 / duration
 end
 local castEvents = function(ConditionObject, c)
+	if TMW.isClassic then
+		return
+			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+			
+			-- We can't check against the unit here because LibClassicCasterino's events don't
+			-- work like the blizzard events do - they don't fire with every valid unitID.
+			ConditionObject:GenerateNormalEventString("TMW_UNIT_CAST_UPDATE")
+	end
+
 	return
 		ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_START", CNDT:GetUnit(c.Unit)),
@@ -926,7 +935,7 @@ end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
 	tooltip = L["ICONMENU_CAST_DESC"],
-	min = 0,
+	min = TMW.isClassic and 1 or 0,
 	max = 2,
 	levelChecks = true,
 	nooperator = true,
@@ -1028,76 +1037,81 @@ end
 
 
 
+-- No SpellIDs in the classic combat log. 
+-- Can't imagine how this condition would ever be useful in classic, so just excluding it.
+if not TMW.isClassic then
 
-local CastCounts
-local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED()
-	local _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName = CombatLogGetCurrentEventInfo()
-	if cleuEvent == "SPELL_CAST_SUCCESS" then
-		spellName = spellName and strlowerCache[spellName]
-		local castsForGUID = CastCounts[sourceGUID]
+	local CastCounts
+	local function CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED()
+		local _, cleuEvent, _, sourceGUID, _, _, _, destGUID, _, destFlags, _, spellID, spellName = CombatLogGetCurrentEventInfo()
+		if cleuEvent == "SPELL_CAST_SUCCESS" then
+			spellName = spellName and strlowerCache[spellName]
+			local castsForGUID = CastCounts[sourceGUID]
+			
+			if not castsForGUID then
+				castsForGUID = {}
+				CastCounts[sourceGUID] = castsForGUID
+			end
+			
+			castsForGUID[spellName] = spellID
+			castsForGUID[spellID] = (castsForGUID[spellID] or 0) + 1
+			TMW:Fire("TMW_CNDT_CASTCOUNT_UPDATE")
 		
-		if not castsForGUID then
-			castsForGUID = {}
-			CastCounts[sourceGUID] = castsForGUID
-		end
-		
-		castsForGUID[spellName] = spellID
-		castsForGUID[spellID] = (castsForGUID[spellID] or 0) + 1
-		TMW:Fire("TMW_CNDT_CASTCOUNT_UPDATE")
-	
-	elseif cleuEvent == "UNIT_DIED" then
-		if destFlags then
-			if bit_band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= COMBATLOG_OBJECT_TYPE_PLAYER then
-				CastCounts[destGUID] = nil
-				TMW:Fire("TMW_CNDT_CASTCOUNT_UPDATE")
+		elseif cleuEvent == "UNIT_DIED" then
+			if destFlags then
+				if bit_band(destFlags, COMBATLOG_OBJECT_TYPE_PLAYER) ~= COMBATLOG_OBJECT_TYPE_PLAYER then
+					CastCounts[destGUID] = nil
+					TMW:Fire("TMW_CNDT_CASTCOUNT_UPDATE")
+				end
 			end
 		end
 	end
-end
-function Env.UnitCastCount(...)
-	CastCounts = {}
-	CNDT.CastCounts = CastCounts
-	CNDT:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED)
-	
-	Env.UnitCastCount = function(unit, spell)
-		local GUID = UnitGUID(unit)
-		if not GUID then
-			return 0
+	function Env.UnitCastCount(...)
+		CastCounts = {}
+		CNDT.CastCounts = CastCounts
+		CNDT:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", CASTCOUNT_COMBAT_LOG_EVENT_UNFILTERED)
+		
+		Env.UnitCastCount = function(unit, spell)
+			local GUID = UnitGUID(unit)
+			if not GUID then
+				return 0
+			end
+			
+			local casts = CastCounts[GUID]
+			
+			if not casts then
+				return 0
+			end
+			
+			if not isNumber[spell] then
+				spell = casts[spell] or spell -- spell name keys have values that are spellIDs
+			end
+			return casts[spell] or 0
 		end
 		
-		local casts = CastCounts[GUID]
-		
-		if not casts then
-			return 0
-		end
-		
-		if not isNumber[spell] then
-			spell = casts[spell] or spell -- spell name keys have values that are spellIDs
-		end
-		return casts[spell] or 0
+		return Env.UnitCastCount(...)
 	end
-	
-	return Env.UnitCastCount(...)
+	ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
+		text = L["CONDITIONPANEL_CASTCOUNT"],
+		tooltip = L["CONDITIONPANEL_CASTCOUNT_DESC"],
+		range = 10,
+		icon = "Interface\\Icons\\spell_nature_lightningoverload",
+		name = function(editbox)
+			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+		end,
+		useSUG = true,
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function()
+			-- attempt initialization if it hasn't been done already
+			Env.UnitCastCount("none", "none")
+			
+			return [[UnitCastCount(c.Unit, c.Spells.First) c.Operator c.Level]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
+				ConditionObject:GenerateNormalEventString("TMW_CNDT_CASTCOUNT_UPDATE")
+		end,
+	})
+
 end
-ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
-	text = L["CONDITIONPANEL_CASTCOUNT"],
-	tooltip = L["CONDITIONPANEL_CASTCOUNT_DESC"],
-	range = 10,
-	icon = "Interface\\Icons\\spell_nature_lightningoverload",
-	name = function(editbox)
-		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
-	end,
-	useSUG = true,
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function()
-		 -- attempt initialization if it hasn't been done already
-		Env.UnitCastCount("none", "none")
-		
-		return [[UnitCastCount(c.Unit, c.Spells.First) c.Operator c.Level]]
-	end,
-	events = function(ConditionObject, c)
-		return
-			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
-			ConditionObject:GenerateNormalEventString("TMW_CNDT_CASTCOUNT_UPDATE")
-	end,
-})

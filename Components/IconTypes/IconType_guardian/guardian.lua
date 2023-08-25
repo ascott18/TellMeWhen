@@ -27,7 +27,7 @@ local Type = TMW.Classes.IconType:New("guardian")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_GUARDIAN"]
 Type.desc = L["ICONMENU_GUARDIAN_DESC"]
-Type.menuIcon = GetSpellTexture(TMW.isWrath and 31687 or 211158)
+Type.menuIcon = GetSpellTexture(not TMW.isRetail and 31687 or 211158)
 Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.hasNoGCD = true
@@ -139,7 +139,10 @@ local function Info(duration, spell, triggerMatch, extraData)
 	return data
 end
 
-Type.GuardianInfo = TMW.isWrath and {
+Type.GuardianInfo = TMW.isClassic and {
+	[510] = Info(45, 31687, false), -- Water Elemental
+	[89] = Info(60 * 5, 1122, false), -- Inferno (warlock)
+} or TMW.isWrath and {
 	[510] = Info(45, 31687, false), -- Water Elemental
 	[19668] = Info(15, 34433, false), -- Shadowfiend
 	[15438] = Info(120, 32982, false), -- Fire ele totem

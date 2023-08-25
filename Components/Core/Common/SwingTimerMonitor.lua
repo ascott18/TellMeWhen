@@ -57,14 +57,17 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 end)
 
 local swingSpells = 
-	TMW.isWrath and {
+	not TMW.isRetail and {
 		[strlowerCache[GetSpellInfo(78)]] = 1, -- Heroic Strike
 		[strlowerCache[GetSpellInfo(845)]] = 1, -- Cleave
 		[strlowerCache[GetSpellInfo(6807)]] = 1, -- Maul
 		[strlowerCache[GetSpellInfo(2973)]] = 1, -- Raptor Strike
-		[strlowerCache[GetSpellInfo(56815)]] = 1, -- Rune Strike
 	} 
 	or {}
+
+if TMW.isWrath then
+	swingSpells[strlowerCache[GetSpellInfo(56815)]] = 1 -- Rune Strike
+end
 
 -- ---------------------------------
 -- Misc state update functions

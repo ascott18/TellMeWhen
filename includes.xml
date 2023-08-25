@@ -1,0 +1,168 @@
+
+<!-- Core included files that are agnostic to game version -->
+
+<Ui>
+
+<Script file="Lib\LibStub\LibStub.lua" />
+<Include file="Lib\CallbackHandler-1.0\CallbackHandler-1.0.xml" />
+<Include file="Lib\LibOO-1.0\lib.xml" />
+<Include file="Lib\AceAddon-3.0\AceAddon-3.0.xml" />
+<Include file="Lib\AceConsole-3.0\AceConsole-3.0.xml" />
+<Include file="Lib\AceEvent-3.0\AceEvent-3.0.xml" />
+<Include file="Lib\AceTimer-3.0\AceTimer-3.0.xml" />
+<Include file="Lib\AceLocale-3.0\AceLocale-3.0.xml" />
+<Include file="Lib\AceDB-3.0\AceDB-3.0.xml" />
+<Include file="Lib\AceComm-3.0\AceComm-3.0.xml" />
+<Include file="Lib\AceSerializer-3.0\AceSerializer-3.0.xml" />
+<Include file="Lib\LibSharedMedia-3.0\lib.xml" />
+<Script file="Lib\libdatabroker-1-1\LibDataBroker-1.1.lua" />
+
+<!-- DRList-1.0 uses an unconventional folder layout, requiring the double nesting. -->
+<Include file="Lib\DRList-1.0\DRList-1.0\DRList-1.0.xml" />
+
+<Include file="Lib\LibDogTag-3.0\lib.xml" />
+<Include file="Lib\LibDogTag-Unit-3.0\lib.xml" />
+<Include file="Lib\LibDogTag-Stats-3.0\lib.xml" />
+<Include file="Lib\LibSpellRange-1.0\lib.xml" />
+<Script file="Lib\LibRangeCheck-2.0\LibRangeCheck-2.0.lua" />
+<Include file="Lib\LibBabble-CreatureType-3.0\lib.xml" />
+<Include file="Lib\LibBabble-Race-3.0\lib.xml" />
+
+<!-- 
+<Script file="Localization\TellMeWhen-deDE.lua" />
+<Script file="Localization\TellMeWhen-esMX.lua" />
+<Script file="Localization\TellMeWhen-frFR.lua" />
+<Script file="Localization\TellMeWhen-koKR.lua" />
+<Script file="Localization\TellMeWhen-ptBR.lua" />
+<Script file="Localization\TellMeWhen-itIT.lua" /> -->
+<Script file="Localization\TellMeWhen-enUS.lua" />
+<Script file="Localization\TellMeWhen-esES.lua" />
+<Script file="Localization\TellMeWhen-ruRU.lua" />
+<Script file="Localization\TellMeWhen-zhCN.lua" />
+<Script file="Localization\TellMeWhen-zhTW.lua" />
+<Script file="Localization\StaticFormats.lua" />
+
+<Script file="TellMeWhen.lua" />
+
+<Script file="Components\Core\Utils.lua" />
+
+<Script file="Components\Core\Spells\Spells.lua" />
+<Script file="Components\Core\Spells\AuraCache.lua" />
+<Script file="Components\Core\Spells\ClassSpellCache.lua" />
+
+<Script file="Components\Core\BaseClasses\GenericComponentImplementor.lua" />
+<Script file="Components\Core\BaseClasses\GenericModuleImplementor.lua" />
+<Script file="Components\Core\BaseClasses\GenericComponent.lua" />
+<Script file="Components\Core\BaseClasses\IconComponent.lua" />
+<Script file="Components\Core\BaseClasses\GroupComponent.lua" />
+<Script file="Components\Core\BaseClasses\ObjectModule.lua" />
+<Script file="Components\Core\BaseClasses\IconDataProcessorComponent.lua" />
+
+<Script file="Components\Core\Common\Textures.lua" />
+<Script file="Components\Core\Common\SwingTimerMonitor.lua" />
+<Script file="Components\Core\Common\UpdateTableManager.lua" />
+<Script file="Components\Core\Common\PlayerNames.lua" />
+<Script file="Components\Core\Common\Item.lua" />
+<Script file="Components\Core\Common\Auras.lua" />
+<Script file="Components\Core\Common\DogTags\DogTags.lua" />
+
+<Script file="Components\Core\Conditions\Conditions.lua" />
+<Script file="Components\Core\Conditions\ConditionObject.lua" />
+<Script file="Components\Core\Conditions\ConditionObjectConstructor.lua" />
+<Script file="Components\Core\Conditions\UpdateEngine.lua" />
+<Script file="Components\Core\Conditions\ConditionCategory.lua" />
+<Script file="Components\Core\Conditions\Condition.lua" />
+
+<Script file="Components\Core\Conditions\Categories\Resources.lua" />
+<Script file="Components\Core\Conditions\Categories\Spells.lua" />
+<Script file="Components\Core\Conditions\Categories\BuffsDebuffs.lua" />
+<Script file="Components\Core\Conditions\Categories\Talents.lua" />
+<Script file="Components\Core\Conditions\Categories\Location.lua" />
+<Script file="Components\Core\Conditions\Categories\PlayerAttributes.lua" />
+<Script file="Components\Core\Conditions\Categories\UnitAttributes.lua" />
+<Script file="Components\Core\Conditions\Categories\Currencies.lua" />
+<Script file="Components\Core\Conditions\Categories\BossMods.lua" />
+<Script file="Components\Core\Conditions\Categories\Misc.lua" />
+
+<Script file="Components\Core\Units\Units.lua" />
+
+<Script file="Components\Core\IconEvents\EventHandler.lua" />
+
+<Script file="Components\Core\IconType.lua" />
+<Script file="Components\Core\IconView.lua" />
+<Script file="Components\Core\Group.lua" />
+<Script file="Components\Core\GroupModule.lua" />
+<Script file="Components\Core\Icon.lua" />
+<Script file="Components\Core\IconModule.lua" />
+<Script file="Components\Core\IconDataProcessor.lua" />
+<Script file="Components\Core\IconDataProcessorHook.lua" />
+<Script file="Components\Core\IconDataProcessors.lua" />
+
+<Script file="Components\Core\Snippets\Snippets.lua" />
+
+<Script file="Components\EventHandlers\Sound\Sound.lua" />
+<Script file="Components\EventHandlers\Announcements\Announcements.lua" />
+<Script file="Components\EventHandlers\Animations\Animations.lua" />
+<Script file="Components\EventHandlers\Counter\Counter.lua" />
+<Script file="Components\EventHandlers\Timer\Timer.lua" />
+<Script file="Components\EventHandlers\Lua\Lua.lua" />
+
+<Script file="Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ConditionReq\Alpha_ConditionReq.lua" />
+<Script file="Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_DurationReq\Alpha_DurationReq.lua" />
+<Script file="Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_StackReq\Alpha_StackReq.lua" />
+<Script file="Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ValueReq\Alpha_ValueReq.lua" />
+<Script file="Components\IconDataProcessorHooks\IconDataProcessorHook_Texture_CustomTex\Texture_CustomTex.lua" />
+
+<Script file="Components\GroupModules\GroupModule_BaseConfig\module.lua" />
+<Script file="Components\GroupModules\GroupModule_GroupPosition\module.lua" />
+<Script file="Components\GroupModules\GroupModule_IconPosition\module.lua" />
+<Script file="Components\GroupModules\GroupModule_IconPosition_Sortable\module.lua" />
+<Script file="Components\GroupModules\GroupModule_Alpha\module.lua" />
+
+<Script file="Components\IconModules\IconModule_Self\Self.lua" />
+<Script file="Components\IconModules\IconModule_Alpha\Alpha.lua" />
+<Script file="Components\IconModules\IconModule_CooldownSweep\CooldownSweep.lua" />
+<Script file="Components\IconModules\IconModule_IconContainer\IconContainer.lua" />
+<Script file="Components\IconModules\IconModule_IconContainer_Masque\IconContainer_Masque.lua" />
+<Script file="Components\IconModules\IconModule_IconEventClickHandler\IconEventClickHandler.lua" />
+<Script file="Components\IconModules\IconModule_IconEventConditionHandler\IconEventConditionHandler.lua" />
+<Script file="Components\IconModules\IconModule_PowerBar\PowerBar.lua" />
+<Script file="Components\IconModules\IconModule_PowerBar_Overlay\PowerBar_Overlay.lua" />
+<Script file="Components\IconModules\IconModule_Texts\Texts.lua" />
+<Script file="Components\IconModules\IconModule_Backdrop\Backdrop.lua" />
+<Script file="Components\IconModules\IconModule_Texture\Texture.lua" />
+<Script file="Components\IconModules\IconModule_Texture_Colored\Texture_Colored.lua" />
+<Script file="Components\IconModules\IconModule_TimerBar\TimerBar.lua" />
+<Script file="Components\IconModules\IconModule_TimerBar_BarDisplay\TimerBar_BarDisplay.lua" />
+<Script file="Components\IconModules\IconModule_TimerBar_Overlay\TimerBar_Overlay.lua" />
+
+<Script file="Components\IconViews\Icon\Icon.lua" />
+<Script file="Components\IconViews\Bar\Bar.lua" />
+<Script file="Components\IconViews\BarV\BarV.lua" />
+
+<Script file="Components\IconTypes\IconType_buff\buff.lua" />
+<Script file="Components\IconTypes\IconType_buffcheck\buffcheck.lua" />
+<Script file="Components\IconTypes\IconType_cleu\cleu.lua" />
+<Script file="Components\IconTypes\IconType_conditionicon\conditionicon.lua" />
+<Script file="Components\IconTypes\IconType_cooldown\cooldown.lua" />
+<Script file="Components\IconTypes\IconType_default\default.lua" />
+<Script file="Components\IconTypes\IconType_dr\dr.lua" />
+<Script file="Components\IconTypes\IconType_guardian\guardian.lua" />
+<Script file="Components\IconTypes\IconType_icd\icd.lua" />
+<Script file="Components\IconTypes\IconType_item\item.lua" />
+<Script file="Components\IconTypes\IconType_meta\meta.lua" />
+<Script file="Components\IconTypes\IconType_reactive\reactive.lua" />
+<Script file="Components\IconTypes\IconType_swingtimer\swingtimer.lua" />
+<Script file="Components\IconTypes\IconType_totem\totem.lua" />
+<Script file="Components\IconTypes\IconType_uierror\uierror.lua" />
+<Script file="Components\IconTypes\IconType_unitcondition\unitcondition.lua" />
+<Script file="Components\IconTypes\IconType_value\value.lua" />
+<Script file="Components\IconTypes\IconType_wpnenchant\wpnenchant.lua" />
+<Script file="Components\IconTypes\IconType_luavalue\luavalue.lua" />
+
+<Script file="LDB.lua" />
+
+<Include file="TellMeWhen.xml" />
+</Ui>
+
+

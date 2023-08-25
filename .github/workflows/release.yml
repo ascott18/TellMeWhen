@@ -24,6 +24,14 @@ jobs:
             exit 1
           fi;
 
+      - name: "Validate TOC Classic"
+        run: |
+          if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="*-Classic.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
+            grep -rnP '## X?-?\KInterface.*' --exclude-dir=.release --include="*-Classic.toc" . | cat
+            echo "More than 1 distinct ##Interface version found in .toc files." 1>&2
+            exit 1
+          fi;
+
       - name: "Validate TOC Wrath"
         run: |
           if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="*-Wrath.toc" . | sort --unique | wc -l)" -gt 1 ]]; then

@@ -39,7 +39,10 @@ local IsCaching
 
 SpellCache.CONST = {
 	-- A rough estimate of the highest spellID in the game. Doesn't have to be accurate at all - visual only.
-	MAX_SPELLID_GUESS = TMW.isWrath and 80000 or 400000,
+	MAX_SPELLID_GUESS = 
+		TMW.isClassic and 30000 or 
+		TMW.isWrath and 80000 or 
+		400000,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
 	MAX_FAILED_SPELLS = 2000,
@@ -322,7 +325,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 								
 								-- 'effect' is used quite bit in classic for lots of real things. Don't blacklist it.
 								-- (note: not sure if this is still true in wrath classic.)
-								(not TMW.isWrath and strfind(name, "effect") and strfind(name, "%f[%a]effect%f[%A]")) or
+								(TMW.isRetail and strfind(name, "effect") and strfind(name, "%f[%a]effect%f[%A]")) or
 
 								(strfind(name, "camera") and strfind(name, "%f[%a]camera%f[%A]")) or
 								-- "ph" was removed because it is so short and non-specific

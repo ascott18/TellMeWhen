@@ -1,3 +1,6 @@
+## v10.1.6
+* Support for WoW Classic Era 1.14.4. The classic era codebase has been merged into the main codebase, so some features that don't support classic may be present in a non-working state.
+
 ## v10.1.5
 * Support for WoW 10.1.5
 

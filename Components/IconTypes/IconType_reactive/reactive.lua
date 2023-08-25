@@ -140,7 +140,7 @@ local function Reactive_OnEvent(icon, event, arg1)
 	end
 end
 
-local mindfreeze = strlower(GetSpellInfo(47528))
+local mindfreeze = GetSpellInfo(47528) and strlower(GetSpellInfo(47528))
 local function Reactive_OnUpdate(icon, time)
 
 	-- Upvalue things that will be referenced a lot in our loops.

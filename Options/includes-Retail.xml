@@ -3,6 +3,8 @@
 
 <Ui>
 <Include file="..\Components\IconTypes\IconType_runes\Config-Retail.xml" />
+<Include file="..\Components\IconTypes\IconType_losecontrol\Config.xml" />
+<Script  file="..\Components\IconTypes\IconType_losecontrol\Config.lua" />
 </Ui>
 
 

@@ -138,8 +138,6 @@
 <Script  file="..\Components\IconTypes\IconType_dr\Config.lua" />
 <Script  file="..\Components\IconTypes\IconType_guardian\Config.lua" />
 <Script  file="..\Components\IconTypes\IconType_item\Config.lua" />
-<Include file="..\Components\IconTypes\IconType_losecontrol\Config.xml" />
-<Script  file="..\Components\IconTypes\IconType_losecontrol\Config.lua" />
 <Include file="..\Components\IconTypes\IconType_meta\Config.xml" />
 <Script  file="..\Components\IconTypes\IconType_meta\Config.lua" />
 <Include file="..\Components\IconTypes\IconType_swingtimer\Config.xml" />

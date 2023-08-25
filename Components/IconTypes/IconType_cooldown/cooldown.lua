@@ -173,7 +173,7 @@ end
 
 local usableData = {}
 local unusableData = {}
-local mindfreeze = strlower(GetSpellInfo(47528))
+local mindfreeze = GetSpellInfo(47528) and strlower(GetSpellInfo(47528))
 local function SpellCooldown_OnUpdate(icon, time)    
 	-- Upvalue things that will be referenced a lot in our loops.
 	local IgnoreRunes, RangeCheck, ManaCheck, GCDAsUnusable, NameArray =

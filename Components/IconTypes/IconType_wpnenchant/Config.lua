@@ -53,7 +53,7 @@ local Module = SUG:NewModule("wpnenchant", SUG:GetModule("default"), "AceEvent-3
 Module.noMin = true
 Module.showColorHelp = false
 
-Module.ItemIDs = TMW.isWrath and {} or {
+Module.ItemIDs = TMW.isRetail and {
 	-- item enhancements
 	--43233,	--Deadly Poison
 	--3775,	--Crippling Poison
@@ -109,12 +109,12 @@ Module.ItemIDs = TMW.isWrath and {} or {
 	-- weightstone: ???
 	-- sharpening stone: ???
 	--25679,	--Comfortable Insoles
-}
-Module.SpellIDs = TMW.isWrath and {} or {
+} or {}
+Module.SpellIDs = TMW.isRetail and {
 	-- Shaman Enchants
 	318038,	--Flametongue Weapon
 	33757,	--Windfury Weapon
-}
+} or {}
 
 local CurrentItems
 function Module:OnInitialize()

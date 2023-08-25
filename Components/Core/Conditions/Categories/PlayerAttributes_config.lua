@@ -69,6 +69,25 @@ Module.stances = TMW.isWrath and {
 		[48263] = 	GetSpellInfo(48263), 	-- Frost
 		[48265] = 	GetSpellInfo(48265), 	-- Unholy
 	},
+} or TMW.isClassic and {
+	WARRIOR = {
+		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
+		[71] = 		GetSpellInfo(71),		-- Defensive Stance
+		[2458] = 	GetSpellInfo(2458), 	-- Berserker Stance
+	},
+	DRUID = {
+		[5487] = 	GetSpellInfo(5487), 	-- Bear Form
+		[768] = 	GetSpellInfo(768),		-- Cat Form
+		[783] = 	GetSpellInfo(783),		-- Travel Form
+		[24858] = 	GetSpellInfo(24858), 	-- Moonkin Form
+		[33891] = 	GetSpellInfo(33891), 	-- Incarnation: Tree of Life
+	},
+	PRIEST = {
+		[15473] = 	GetSpellInfo(15473), 	-- Shadowform	
+	},
+	ROGUE = {
+		[1784] = 	GetSpellInfo(1784), 	-- Stealth	
+	},
 } or {
 	DRUID = {
 		[5487] = 	GetSpellInfo(5487), 	-- Bear Form

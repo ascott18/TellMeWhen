@@ -634,7 +634,7 @@ ConditionCategory:RegisterCondition(102.2, "DEFAULT_MAX", {
 	end,
 })
 
-offset = TMW.tContains({"PALADIN", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID", "MONK", TMW.isWrath and "HUNTER" or nil}, pclass) and S or 0
+offset = TMW.tContains({"PALADIN", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID", "MONK", not TMW.isRetail and "HUNTER" or nil}, pclass) and S or 0
 ConditionCategory:RegisterCondition(103.0 - offset, "MANA", {
 	text = MANA .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,

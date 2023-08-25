@@ -61,7 +61,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
-	bitFlags = TMW.isWrath and {
+	bitFlags = not TMW.isRetail and {
 		[01] = {order=01, text=L["CONDITIONPANEL_INSTANCETYPE_NONE"],                                space=true,   }, -- None (Outside)
 		[02] = {order=02, text=BATTLEGROUND,                                                                       }, -- Battleground
 		[03] = {order=03, text=ARENA,                                                                space=true,   }, -- Arena
@@ -354,8 +354,12 @@ ConditionCategory:RegisterCondition(13,   "LOC_CONTINENT", {
 			return t
 		else -- post-wow-80000
 			local t = {}
-			-- 946 is the cosmic map ID.
-			for id, mapInfo in pairs(C_Map.GetMapChildrenInfo(946, Enum.UIMapType.Continent, true)) do
+			for id, mapInfo in pairs(
+				-- 946 is the cosmic map ID.
+				C_Map.GetMapChildrenInfo(946, Enum.UIMapType.Continent, true) or
+				-- 947 is the Azeroth Map ID (will be used on pre-TBC versions)
+				C_Map.GetMapChildrenInfo(947, Enum.UIMapType.Continent, true)
+			) do
 				t[mapInfo.mapID] = mapInfo.name
 			end
 			return t

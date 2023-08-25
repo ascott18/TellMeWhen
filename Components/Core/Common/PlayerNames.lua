@@ -96,7 +96,7 @@ end
 function NAMES:UPDATE_BATTLEFIELD_SCORE()
 	for i = 1, GetNumBattlefieldScores() do
 		local name, class, _
-		if TMW.isWrath then
+		if not TMW.isRetail then
 			-- There's an extra "rank" return that's not there in retail.
 			name, _, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
 		else

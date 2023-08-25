@@ -149,7 +149,7 @@ end)
 
 ConditionCategory:RegisterSpacer(5.5)
 
-local FirstStances = TMW.isWrath and {
+local FirstStances = not TMW.isRetail and {
 	DRUID = 5487, 		-- Bear Form
 	PRIEST = 15473, 	-- Shadowform
 	ROGUE = 1784, 		-- Stealth
@@ -246,7 +246,7 @@ TMW:RegisterUpgrade(73019, {
 })
 local PetModes = {
 	PET_MODE_ASSIST = 1, -- Retail
-	PET_MODE_AGRESSIVE = 1, -- Wrath
+	PET_MODE_AGRESSIVE = 1, -- Wrath/Classic
 	PET_MODE_DEFENSIVE = 2,
 	PET_MODE_DEFENSIVEASSIST = 2, -- Added in 8.3
 	PET_MODE_PASSIVE = 3,
@@ -258,13 +258,13 @@ ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 		[0] = L["CONDITIONPANEL_PETMODE_NONE"],
-		[1] = TMW.isWrath and PET_MODE_AGRESSIVE or PET_MODE_ASSIST,
+		[1] = not TMW.isRetail and PET_MODE_AGRESSIVE or PET_MODE_ASSIST,
 		[2] = PET_MODE_DEFENSIVE,
 		[3] = PET_MODE_PASSIVE
 	},
 
 	unit = false,
-	icon = TMW.isWrath and PET_PASSIVE_TEXTURE or PET_ASSIST_TEXTURE,
+	icon = not TMW.isRetail and PET_PASSIVE_TEXTURE or PET_ASSIST_TEXTURE,
 	tcoords = CNDT.COMMON.standardtcoords,
 
 	Env = {

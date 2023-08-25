@@ -206,7 +206,7 @@ local function Value_OnUpdate(icon, time)
 				value, maxValue, valueColor = UnitHealth(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
 			elseif PowerType == -3 then
 				value, maxValue, valueColor = UnitStagger(unit) or 0, UnitHealthMax(unit), PowerBarColor[PowerType]
-			elseif TMW.isWrath and PowerType == Enum.PowerType.ComboPoints then
+			elseif not TMW.isRetail and PowerType == Enum.PowerType.ComboPoints then
 				-- combo points
 				value, maxValue, valueColor = GetComboPoints("player", unit), MAX_COMBO_POINTS, PowerBarColor[PowerType]
 			else
@@ -272,7 +272,7 @@ function Type:Setup(icon)
 			icon:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
 			icon:RegisterEvent("UNIT_MAXHEALTH")
 		elseif icon.PowerType == -1 then
-			icon:RegisterEvent(TMW.isWrath and "UNIT_HEALTH_FREQUENT" or "UNIT_HEALTH")
+			icon:RegisterEvent(not TMW.isRetail and "UNIT_HEALTH_FREQUENT" or "UNIT_HEALTH")
 			icon:RegisterEvent("UNIT_MAXHEALTH")
 		elseif icon.PowerType == -2 then
 			icon:RegisterEvent("UNIT_POWER_FREQUENT")

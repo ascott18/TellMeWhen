@@ -418,7 +418,6 @@ TMW.BE = {
 			 199754, -- Riposte                             (rogue, outlaw)
 		   	 204018, -- Blessing of Spellwarding            (paladin, protection)
 			 205191, -- Eye for an Eye                      (paladin, retribution)
-			 210918, -- Ethereal Form                       (shaman, enhancement)
 			 213915, -- Mass Spell Reflection               (warrior, protection)
 			-228049, -- Guardian of the Forgotten Queen     (paladin, protection)
 			 223658, -- Safeguard                           (warrior, protection)

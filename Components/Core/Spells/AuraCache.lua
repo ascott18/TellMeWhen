@@ -66,16 +66,16 @@ end
 -- PRIVATE:
 
 TMW:RegisterCallback("TMW_DB_INITIALIZED", function()
-	-- This is the old aura cache.
-	-- Storing it directly in the DB is a terrible practice, so just wipe and start again from scratch.
-	-- (Users experiencing this wipe for the first time are probably loading in fresh with MoP anyway)
-	TellMeWhenDB.AuraCache = nil
-	
 	Cache = TMW.db.global.AuraCache
 	
 	-- Always be listening for new auras,
-	-- store them in the main DB until the options DB is loaded.	
-	AuraCache:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	-- store them in the main DB until the options DB is loaded.
+	if not TMW.isClassic then
+		-- The aura cache is only useful if we can harvest spellIDs.
+		-- Otherwise, it fills with too much useless data.
+		-- Since the combat log in classic doesnt have spellids, disable it.
+		AuraCache:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	end
 end)
 
 function AuraCache:COMBAT_LOG_EVENT_UNFILTERED()

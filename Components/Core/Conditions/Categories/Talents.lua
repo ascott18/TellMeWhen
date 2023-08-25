@@ -27,8 +27,8 @@ local wipe =
       wipe
 local GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo = 
       GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo
-local GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses = 
-      GetSpecializationInfo, GetNumSpecializationsForClassID, GetSpecializationInfoForClassID, GetNumClasses
+local GetSpecializationInfo, GetNumClasses = 
+      GetSpecializationInfo, GetNumClasses
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
       GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec
 local UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID =
@@ -67,7 +67,7 @@ function SPECS:UpdateUnitSpecs()
 
 		TMW:Fire("TMW_UNITSPEC_UPDATE")
 
-	elseif z == "pvp" and not TMW.isWrath then
+	elseif z == "pvp" and TMW.isRetail then
 		RequestBattlefieldScoreData()
 
 		for i = 1, GetNumBattlefieldScores() do
@@ -90,7 +90,7 @@ function SPECS:PrepareUnitSpecEvents()
 end
 ConditionCategory:RegisterCondition(0.1,  "UNITSPEC", {
 	text = L["CONDITIONPANEL_UNITSPEC"],
-	tooltip = TMW.isWrath and L["CONDITIONPANEL_UNITSPEC_DESC_WRATH"] or L["CONDITIONPANEL_UNITSPEC_DESC"],
+	tooltip = TMW.isRetail and L["CONDITIONPANEL_UNITSPEC_DESC"] or L["CONDITIONPANEL_UNITSPEC_DESC_WRATH"],
 
 	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
 	bitFlags = (function()
@@ -371,7 +371,7 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 	},
 	funcstr = [[BITFLAGSMAPANDCHECK( GetCurrentSpecializationRole() ) ]],
 	events = function(ConditionObject, c)
-		if TMW.isWrath then
+		if not TMW.isRetail then
 			return
 				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
 				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED"),
