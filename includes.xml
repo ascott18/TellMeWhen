@@ -48,6 +48,7 @@
 
 <Script file="Components\Core\Spells\Spells.lua" />
 <Script file="Components\Core\Spells\AuraCache.lua" />
+<Script file="Components\Core\Spells\AuraDurations.lua" />
 <Script file="Components\Core\Spells\ClassSpellCache.lua" />
 
 <Script file="Components\Core\BaseClasses\GenericComponentImplementor.lua" />

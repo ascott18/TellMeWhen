@@ -24,7 +24,7 @@ local strlowerCache = TMW.strlowerCache
 local huge = math.huge
 local empty = {}
 
-local UnitAura = UnitAura
+local UnitAura = TMW.UnitAura
 local GetAuras = TMW.COMMON.Auras and TMW.COMMON.Auras.GetAuras
 
 function Env.AuraStacks(unit, name, filter)
@@ -268,7 +268,7 @@ function Env.AuraTooltipNumber(...)
 			local index = 0
 		    Parser:SetOwner(UIParent, "ANCHOR_NONE")
 		    Parser:SetUnitAura(unit, n, filter)
-			local text = (TMW.isRetail and LT1 or LT2):GetText() or ""
+			local text = LT2:GetText() or ""
 			Parser:Hide()
 
 			local number
@@ -324,17 +324,7 @@ function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedInd
 
 				local data = C_TooltipInfo[kindKey == "isHelpful" and "GetUnitBuffByAuraInstanceID" or "GetUnitDebuffByAuraInstanceID"](unit, auraInstanceID)
 				
-				local text
-				-- TODO: wow 10.1: The C_TooltipInfo APIs now return data with all data and line arguments surfaced, removing the need to call TooltipUtil.SurfaceArgs().
-				-- Only look at the second line (first line after the title):
-				-- (third line is the duration)
-				for _, arg in pairs(data.lines[2].args) do
-					if arg.field == "leftText" then
-						text = arg.stringVal
-						break
-					end
-				end
-
+				local text = data.lines[2].leftText
 				instance.tmwTooltipNumbers = {}
 				local index = 0
 				local number

@@ -1609,27 +1609,22 @@ do	-- TMW:GetParser()
 	local Parser, LT1, LT2, LT3, RT1, RT2, RT3
 	function TMW:GetParser()
 		if not Parser then
-			Parser = CreateFrame("GameTooltip")
+			Parser = CreateFrame("GameTooltip", "TMWParser", nil, "GameTooltipTemplate")
 			if TooltipDataHandlerMixin then
 				-- in theory this could use TooltipDataHandlerMixin,
 				-- but the blizzard PTR tooltips explode if we dont use GameTooltipDataMixin
 				-- because somehow for some reason they need GetUnit?
 				Mixin(Parser, GameTooltipDataMixin)
 			end
-
-			LT1 = Parser:CreateFontString()
-			RT1 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT1, RT1)
-
-			LT2 = Parser:CreateFontString()
-			RT2 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT2, RT2)
-
-			LT3 = Parser:CreateFontString()
-			RT3 = Parser:CreateFontString()
-			Parser:AddFontStrings(LT3, RT3)
 		end
-		return Parser, LT1, LT2, LT3, RT1, RT2, RT3
+		return 
+			Parser, 
+			TMWParserTextLeft1,
+			TMWParserTextLeft2,
+			TMWParserTextLeft3,
+			TMWParserTextRight1,
+			TMWParserTextRight2,
+			TMWParserTextRight3
 	end
 end
 
