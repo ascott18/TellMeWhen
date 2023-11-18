@@ -126,7 +126,8 @@ function NAMES:UPDATE_MOUSEOVER_UNIT()
 
 	if class then
 		-- ClientActor type NPCs return nils for UnitClass.
-		self.ClassColoredNameCache[name] = self.ClassColors[class] .. name .. "|r"
+		local classColor = self.ClassColors[class]
+		self.ClassColoredNameCache[name] = classColor and (classColor .. name .. "|r") or name
 	end
 end
 
