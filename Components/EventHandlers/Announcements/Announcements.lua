@@ -149,7 +149,18 @@ TMW:RegisterUpgrade(42102, {
 
 
 function Announcements:ProcessIconEventSettings(event, eventSettings)
-	if eventSettings.Channel ~= "" then
+	local Channel = eventSettings.Channel
+	if Channel ~= "" then
+		local chandata = self.AllSubHandlersByIdentifier[Channel]
+		
+		if not chandata then
+			return
+		end
+
+		if chandata.onUsed then
+			chandata.onUsed()
+		end
+
 		return true
 	end
 end
@@ -596,19 +607,19 @@ Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 		"Color",
 	},
 
+	onUsed = function()
+		if not CombatText_AddMessage then
+			UIParentLoadAddOn("Blizzard_CombatText")
+		end
+	end,
+
 	handler = function(icon, eventSettings, Text)
 		if eventSettings.ShowIconTex then
 			Text = "|T" .. (icon.attributes.texture or "") .. ":20:20:-5|t " .. Text
 		end
-		if SHOW_COMBAT_TEXT ~= "0" then
-			if not CombatText_AddMessage then
-				-- GLOBALS: UIParentLoadAddOn
-				UIParentLoadAddOn("Blizzard_CombatText")
-			end
-
-			local c = TMW:StringToCachedRGBATable(eventSettings.TextColor)
-			CombatText_AddMessage(Text, CombatText_StandardScroll, c.r, c.g, c.b, eventSettings.Sticky and "crit" or nil, false)
-		end
+		
+		local c = TMW:StringToCachedRGBATable(eventSettings.TextColor)
+		CombatText_AddMessage(Text, CombatText_StandardScroll, c.r, c.g, c.b, eventSettings.Sticky and "crit" or nil, false)
 	end,
 })
 
