@@ -262,12 +262,12 @@ ConditionCategory:RegisterCondition(8.5,  "LIBRANGECHECK", {
 			return L["CNDT_RANGE_PRECISE"]:format(val)
 		end
 
-		for range in LRC:GetHarmCheckers() do
+		for range in LRC:GetHarmCheckers(true) do
 			if range == val then
 				return L["CNDT_RANGE_PRECISE"]:format(val)
 			end
 		end
-		for range in LRC:GetFriendCheckers() do
+		for range in LRC:GetFriendCheckers(true) do
 			if range == val then
 				return L["CNDT_RANGE_PRECISE"]:format(val)
 			end
