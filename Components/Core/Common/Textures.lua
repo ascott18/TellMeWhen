@@ -106,17 +106,20 @@ function Textures:GetTexturePathFromSetting(setting)
 		
 	if setting and setting ~= "" then
 
-		if TMW.GetSpellTexture(setting) then
-			return TMW.GetSpellTexture(setting)
+		-- If there is a slash and a dot in it, then it is probably a raw file path.
+		-- Due to https://github.com/ascott18/TellMeWhen/issues/2114 and https://github.com/Stanzilla/WoWUIBugs/issues/503,
+		-- we must always return early here for anything that looks like a file path
+		if strfind(setting, "[\\/].*%.") then 
+			return setting
 		end
 
-		-- If there is a slash in it, then it is probably a full path
-		if strfind(setting, "[\\/]") then 
-			return setting
-		else
-			-- If there isn't a slash in it, then it is probably be a wow icon in interface\icons.
-			-- it still might be a file in wow's root directory, but there is no way to tell for sure
-			return "Interface/Icons/" .. setting
-		end			
+		local textureFromSpell = TMW.GetSpellTexture(setting)
+		if textureFromSpell then
+			return textureFromSpell
+		end
+
+		-- If nothing else was detected, then it may be a wow icon in interface\icons.
+		-- it still might be a file in wow's root directory, but there is no way to tell for sure
+		return "Interface/Icons/" .. setting
 	end
 end
