@@ -1761,7 +1761,7 @@ L["ABSORBAMT"] = "Absorbtion shield amount"
 L["ABSORBAMT_DESC"] = "Checks the total amount of absorbtion shields that the unit has."
 
 L["CNDT_RANGE"] = "Unit Range"
-L["CNDT_RANGE_DESC"] = "Checks the approximate range of a unit using LibRangeCheck-2.0. Condition will evaluate to false if the unit does not exist."
+L["CNDT_RANGE_DESC"] = "Checks the approximate range of a unit using LibRangeCheck-3.0. Condition will evaluate to false if the unit does not exist."
 L["CNDT_RANGE_PRECISE"] = "%d yds. (|cff00c322Precise|r)"
 L["CNDT_RANGE_IMPRECISE"] = "%d yds. (|cffff1300Imprecise|r)"
 

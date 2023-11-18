@@ -17,8 +17,7 @@ externals:
     Lib/LibSpellRange-1.0: https://github.com/ascott18/LibSpellRange-1.0.git
     Lib/LibOO-1.0: https://github.com/ascott18/LibOO-1.0.git
     
-    Lib/LibRangeCheck-2.0: svn://svn.wowace.com/wow/librangecheck-2-0/mainline/trunk/LibRangeCheck-2.0
-    Lib/LibRangeCheck-2.0-WA: https://github.com/WeakAuras/LibRangeCheck-2.0
+    Lib/LibRangeCheck-3.0: https://github.com/WeakAuras/LibRangeCheck-3.0
 
     Lib/AceAddon-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
     Lib/AceEvent-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceEvent-3.0

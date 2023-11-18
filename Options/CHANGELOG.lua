@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v10.2.0
+* Workaround #2114 - Most textures become Avenging Wrath when Avenging Wrath is glyphed.
+* Fix #2119 - handle Blizzard's new, poorly-introduced range check restrictions.
+
 ## v10.1.6
 * Support for WoW Classic Era 1.14.4. The classic era codebase has been merged into the main codebase, so some features that don't support classic may be present in a non-working state.
 
