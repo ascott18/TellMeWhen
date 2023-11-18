@@ -24,7 +24,7 @@
 <Include file="Lib\LibDogTag-Unit-3.0\lib.xml" />
 <Include file="Lib\LibDogTag-Stats-3.0\lib.xml" />
 <Include file="Lib\LibSpellRange-1.0\lib.xml" />
-<Script file="Lib\LibRangeCheck-3.0\LibRangeCheck-3.0.lua" />
+<Script file="Lib\LibRangeCheck-3.0\LibRangeCheck-3.0\LibRangeCheck-3.0.lua" />
 <Include file="Lib\LibBabble-CreatureType-3.0\lib.xml" />
 <Include file="Lib\LibBabble-Race-3.0\lib.xml" />
 
