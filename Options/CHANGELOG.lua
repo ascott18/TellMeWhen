@@ -4,7 +4,7 @@ TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
 ## v10.2.0
-* Version bumps for WoW 10.2, Classic 1.15. 
+* Version bumps for all WoW versions. 
 * Fixed classic client detection.
 * Fix #2119 - Handle Blizzard's new, poorly-introduced range check restrictions.
 * Fix #2121 - Efflorescence is now just a buff, no longer a totem. If you were using the Efflorescence icon type (which will now just show as "Totem"), switch to using a buff/debuff icon.
