@@ -816,28 +816,7 @@ else
 		},
 	}
 
-	if pclass == "DRUID" then
-		TMW.COMMON.CurrentClassTotems = {
-			name = GetSpellInfo(145205),
-			desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(145205)),
-			{
-				hasVariableNames = false,
-				name = GetSpellInfo(145205),
-				texture = GetSpellTexture(145205)
-			}
-		}
-	elseif pclass == "MAGE" then
-		TMW.COMMON.CurrentClassTotems = {
-			name = GetSpellInfo(116011),
-			desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(GetSpellInfo(116011)),
-			{
-				hasVariableNames = false,
-				name = GetSpellInfo(116011),
-				texture = GetSpellTexture(116011)
-			}
-		}
-
-	elseif pclass == "PALADIN" then
+	if pclass == "PALADIN" then
 		local name = GetSpellInfo(26573) .. " & " .. GetSpellInfo(114158)
 		TMW.COMMON.CurrentClassTotems = {
 			name = name,
@@ -862,16 +841,11 @@ else
 				return cachedName
 			end
 		end
-		local name = GetSpellInfo(49206) .. " & " .. GetSpellInfo(288853)
+		local name = GetSpellInfo(49206)
 		TMW.COMMON.CurrentClassTotems = {
 			name = name,
 			desc = function() return L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name) end,
 			texture = GetSpellTexture(49206),
-			[1] = { -- Raise Abomination (pvp talent)
-				hasVariableNames = false,
-				name = npcName(149555),
-				texture = GetSpellTexture(288853),
-			},
 			[3] = { -- Ebon Gargoyle
 				hasVariableNames = false,
 				name = npcName(27829),
