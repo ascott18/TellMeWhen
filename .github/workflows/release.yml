@@ -1,4 +1,4 @@
-name: Package Retail/Wrath
+name: Package Retail/Wrath/Classic
 
 on:
   push:

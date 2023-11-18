@@ -278,12 +278,14 @@ function Auras:RequestUnits(unitSet)
         -- Get the pure unit set in case the one we were given had conditions attached.
         _, unitSet = TMW:GetUnits(nil, unitSet.unitSettings)
     end
+
     if not registeredUnitSets[unitSet] then
         registeredUnitSets[unitSet] = true
         TMW:RegisterCallback(unitSet.event, TMW_UNITSET_UPDATED)
         unitSet.auraKnownUnits = {}
         unitSet.auraKnownUnitGuids = {}
     end
+
     if not unitSet.allUnitsChangeOnEvent then
         return false, "TMW_UNIT_AURA"
     elseif dedicatedEventUnits[unitSet.unitSettings] then
@@ -324,7 +326,7 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
 end
 
 --- It is assumed that the caller has previously called Auras:RequestUnit(unitSet) on a
---- unitset that contained the provided unit, and that unitSet.allUnitsChangeOnEvent == true.
+--- unitSet that contained the provided unit, and that unitSet.allUnitsChangeOnEvent == true.
 function Auras.GetAuras(unit)
     local unitData = data[unit]
     if not unitData then
