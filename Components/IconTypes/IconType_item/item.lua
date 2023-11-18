@@ -68,9 +68,9 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_READY"],   },
-	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_NOTREADY"], },
-	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck" },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], order = 2 },
+	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], order = 3 },
+	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck", order = 1 },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ItemSettings", function(self)

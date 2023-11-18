@@ -97,10 +97,10 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 })
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_READY"],   },
-	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_NOTREADY"], },
-	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck" },
-	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck" },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], order = 3, },
+	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], order = 4, },
+	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck", order = 1 },
+	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck", order = 2 },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", function(self)
@@ -250,7 +250,10 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 			elseif not unusableFound then
 				--wipe(unusableData)
-				unusableData.state = not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE
+				unusableData.state = 
+					not inrange and STATE_UNUSABLE_NORANGE or 
+					nomana and STATE_UNUSABLE_NOMANA or 
+					STATE_UNUSABLE
 				unusableData.tex = GetSpellTexture(iName)
 				unusableData.iName = iName
 				unusableData.stack = stack
