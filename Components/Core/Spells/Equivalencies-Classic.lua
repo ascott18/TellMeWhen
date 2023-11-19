@@ -25,9 +25,6 @@ local pairs, type, ipairs, bit, select =
 -- NEGATIVE SPELLIDS WILL BE REPLACED BY THEIR SPELL NAME
 ---------------------------------------------------------
 
---[[ TODO: add the following:
-
-]]
 TMW.BE = {
 	debuffs = {
 		ReducedHealing = {

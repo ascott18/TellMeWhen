@@ -245,8 +245,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				end
 
 			elseif unit:find("^vehicle") then
-				-- TODO: This isn't strictly true.
-				-- There might actually be events that work, but I don't feel like finding them at the moment.
+				-- NB: There might actually be events that work.
 				self.allUnitsChangeOnEvent = false
 
 			elseif unit:find("^mouseover") then

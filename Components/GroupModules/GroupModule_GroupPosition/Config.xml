@@ -73,9 +73,6 @@
 						end)
 
 						self.headerText:SetText(TMW.L["UIPANEL_RELATIVETO"])
-
-						-- TODO: make a cool sug module for this.
-					--	TMW.SUG:EnableEditBox(self, "texture", true)
 					</OnLoad>
 				</Scripts>
 			</EditBox>
