@@ -17,7 +17,7 @@ local L = TMW.L
 local print = TMW.print
 local tonumber, pairs, type, format, select =
 	  tonumber, pairs, type, format, select
-local UnitAura = TMW.UnitAura
+local UnitAura = UnitAura
 
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache

@@ -48,8 +48,5 @@ Components\Core\Spells\ClassSpellCache-Retail.lua
 Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua
 
 Components\IconTypes\IconType_runes\runes-Retail.lua
-Components\IconTypes\IconType_dotwatch\dotwatch.lua
-Components\IconTypes\IconType_unitcooldown\unitcooldown.lua
 Components\IconTypes\IconType_losecontrol\losecontrol.lua
-Components\IconTypes\IconType_cast\cast.lua
 

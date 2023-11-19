@@ -24,7 +24,7 @@ local strlowerCache = TMW.strlowerCache
 local huge = math.huge
 local empty = {}
 
-local UnitAura = TMW.UnitAura
+local UnitAura = UnitAura
 local GetAuras = TMW.COMMON.Auras and TMW.COMMON.Auras.GetAuras
 
 function Env.AuraStacks(unit, name, filter)

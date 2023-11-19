@@ -48,7 +48,6 @@
 
 <Script file="Components\Core\Spells\Spells.lua" />
 <Script file="Components\Core\Spells\AuraCache.lua" />
-<Script file="Components\Core\Spells\AuraDurations.lua" />
 <Script file="Components\Core\Spells\ClassSpellCache.lua" />
 
 <Script file="Components\Core\BaseClasses\GenericComponentImplementor.lua" />
@@ -143,10 +142,12 @@
 
 <Script file="Components\IconTypes\IconType_buff\buff.lua" />
 <Script file="Components\IconTypes\IconType_buffcheck\buffcheck.lua" />
+<Script file="Components\IconTypes\IconType_cast\cast.lua" />
 <Script file="Components\IconTypes\IconType_cleu\cleu.lua" />
 <Script file="Components\IconTypes\IconType_conditionicon\conditionicon.lua" />
 <Script file="Components\IconTypes\IconType_cooldown\cooldown.lua" />
 <Script file="Components\IconTypes\IconType_default\default.lua" />
+<Script file="Components\IconTypes\IconType_dotwatch\dotwatch.lua" />
 <Script file="Components\IconTypes\IconType_dr\dr.lua" />
 <Script file="Components\IconTypes\IconType_guardian\guardian.lua" />
 <Script file="Components\IconTypes\IconType_icd\icd.lua" />
@@ -157,6 +158,7 @@
 <Script file="Components\IconTypes\IconType_totem\totem.lua" />
 <Script file="Components\IconTypes\IconType_uierror\uierror.lua" />
 <Script file="Components\IconTypes\IconType_unitcondition\unitcondition.lua" />
+<Script file="Components\IconTypes\IconType_unitcooldown\unitcooldown.lua" />
 <Script file="Components\IconTypes\IconType_value\value.lua" />
 <Script file="Components\IconTypes\IconType_wpnenchant\wpnenchant.lua" />
 <Script file="Components\IconTypes\IconType_luavalue\luavalue.lua" />

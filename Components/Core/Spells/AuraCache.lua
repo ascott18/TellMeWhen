@@ -70,12 +70,7 @@ TMW:RegisterCallback("TMW_DB_INITIALIZED", function()
 	
 	-- Always be listening for new auras,
 	-- store them in the main DB until the options DB is loaded.
-	if not TMW.isClassic then
-		-- The aura cache is only useful if we can harvest spellIDs.
-		-- Otherwise, it fills with too much useless data.
-		-- Since the combat log in classic doesnt have spellids, disable it.
-		AuraCache:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	end
+	AuraCache:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end)
 
 function AuraCache:COMBAT_LOG_EVENT_UNFILTERED()

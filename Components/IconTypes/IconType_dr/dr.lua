@@ -260,27 +260,8 @@ local function DR_OnEvent(icon, event, arg1)
 		if auraType == "DEBUFF" and (cevent == "SPELL_AURA_REMOVED" or cevent == "SPELL_AURA_APPLIED" or (icon.CheckRefresh and cevent == "SPELL_AURA_REFRESH")) then
 			spellName = strlowerCache[spellName]
 			
-
-			local match = false
-
-			if TMW.isClassic then
-				match = icon.Spells.StringHash[spellName] 
-				
-				if match then
-					-- FOR WOW CLASSIC: SpellID will always be zero in the combat log.
-					-- If someone typed in IDs (e.g. they used an equivalency composed of IDs),
-					-- then use that to reverse the match back out to what they typed in
-					-- using the reverse mapping feature of SpellSet's hash tables
-					-- whose values are the position in the array that the entry came from:
-					spellID = icon.Spells.Array[match]
-					-- If we couldn't get an ID, perform all remaining functions that use spellID
-					-- using the name instead:
-					spellID = isNumber[spellID] or spellName 
-				end
-			else
-				local NameHash = icon.Spells.Hash
-				match = NameHash[spellID] or NameHash[spellName]
-			end
+			local NameHash = icon.Spells.Hash
+			local match = NameHash[spellID] or NameHash[spellName]
 
 			if match then
 				-- Check that either the spell always has DR, or that the target is a player (or pet).

@@ -329,7 +329,7 @@ ConditionCategory:RegisterSpacer(15.5)
 
 
 Env.Tracking = {}
-if not TMW.isClassic then
+if GetNumTrackingTypes and GetTrackingInfo then
 	-- Wrath+
 	function CNDT:MINIMAP_UPDATE_TRACKING()
 		wipe(Env.Tracking)

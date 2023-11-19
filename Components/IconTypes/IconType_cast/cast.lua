@@ -82,16 +82,25 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CastSettings", function(self)
 	self:SetTitle(Type.name)
-	self:BuildSimpleCheckSettingFrame({
-		function(check)
-			check:SetTexts(L["ICONMENU_ONLYINTERRUPTIBLE"], L["ICONMENU_ONLYINTERRUPTIBLE_DESC"])
-			check:SetSetting("Interruptible")
-		end,
-		function(check)
-			check:SetTexts(L["ICONMENU_NOPOCKETWATCH"], L["ICONMENU_NOPOCKETWATCH_DESC"])
-			check:SetSetting("NoPocketwatch")
-		end,
-	})
+
+	local noPocketwatch = function(check)
+		check:SetTexts(L["ICONMENU_NOPOCKETWATCH"], L["ICONMENU_NOPOCKETWATCH_DESC"])
+		check:SetSetting("NoPocketwatch")
+	end
+
+	if TMW.isClassic then -- TODO: Is notInterruptible populated in wrath? was it added in cata?
+		self:BuildSimpleCheckSettingFrame({
+			noPocketwatch,
+		})
+	else
+		self:BuildSimpleCheckSettingFrame({
+			function(check)
+				check:SetTexts(L["ICONMENU_ONLYINTERRUPTIBLE"], L["ICONMENU_ONLYINTERRUPTIBLE_DESC"])
+				check:SetSetting("Interruptible")
+			end,
+			noPocketwatch,
+		})
+	end
 end)
 
 

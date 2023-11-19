@@ -49,6 +49,3 @@ Components\Core\Spells\ClassSpellCache-Wrath.lua
 Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua
 
 Components\IconTypes\IconType_runes\runes-Wrath.lua
-Components\IconTypes\IconType_dotwatch\dotwatch.lua
-Components\IconTypes\IconType_unitcooldown\unitcooldown.lua
-Components\IconTypes\IconType_cast\cast.lua
