@@ -1,4 +1,5 @@
 ## v10.2.1
+* Classic: Modern APIs added back in WoW 1.15.0 are used for buff/debuff durations and spell casts.
 * Fix #2122 - Keyboard input blocked after UI reload in combat when Allow Config In Combat enabled.
 
 ## v10.2.0
