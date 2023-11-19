@@ -851,6 +851,7 @@ end
 ConditionCategory:RegisterSpacer(30)
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+
 Env.UnitCast = function(unit, level, matchname)
 	local name, _, _, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
@@ -868,6 +869,7 @@ Env.UnitCast = function(unit, level, matchname)
 		return name ~= matchname
 	end
 end
+
 Env.UnitCastTime = function(unit, level, matchname)
 	-- This function was added for use in Lua conditions.
 	-- There's intentionally no condition using it.
@@ -888,6 +890,7 @@ Env.UnitCastTime = function(unit, level, matchname)
 		return name ~= matchname and remaining or 0
 	end
 end
+
 Env.UnitCastPercent = function(unit, matchname)
 	local name, _, _, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 	if not name then
@@ -904,8 +907,8 @@ Env.UnitCastPercent = function(unit, matchname)
 	-- second return value is the percent-per-second, used by anticipate
 	return 1 - (remaining / duration), 1 / duration
 end
-local castEvents = function(ConditionObject, c)
 
+local castEvents = function(ConditionObject, c)
 	return
 		ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_START", CNDT:GetUnit(c.Unit)),
@@ -918,12 +921,13 @@ local castEvents = function(ConditionObject, c)
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_START", CNDT:GetUnit(c.Unit)),
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_UPDATE", CNDT:GetUnit(c.Unit)),
 		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_CHANNEL_STOP", CNDT:GetUnit(c.Unit)),
-		TMW.isRetail and ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_START", CNDT:GetUnit(c.Unit)) or "false",
-		TMW.isRetail and ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_UPDATE", CNDT:GetUnit(c.Unit)) or "false",
-		TMW.isRetail and ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_STOP", CNDT:GetUnit(c.Unit)) or "false",
-		TMW.isRetail and ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)) or "false",
-		TMW.isRetail and ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit) or "false")
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
+		ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", CNDT:GetUnit(c.Unit)),
+		GetUnitEmpowerStageDuration and ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_START", CNDT:GetUnit(c.Unit)) or "false",
+		GetUnitEmpowerStageDuration and ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_UPDATE", CNDT:GetUnit(c.Unit)) or "false",
+		GetUnitEmpowerStageDuration and ConditionObject:GenerateNormalEventString("UNIT_SPELLCAST_EMPOWER_STOP", CNDT:GetUnit(c.Unit)) or "false"
 end
+
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
 	tooltip = L["ICONMENU_CAST_DESC"],
@@ -946,6 +950,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	funcstr = [[UnitCast(c.Unit, c.Level, c.Spells.FirstString)]],
 	events = castEvents,
 })
+
 ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
 	text = L["ICONMENU_CAST_PERCENT"],
 	tooltip = L["ICONMENU_CAST_PERCENT_DESC"],
@@ -970,8 +975,9 @@ ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
 	]],
 })
 
+local GetUnitEmpowerStageDuration = GetUnitEmpowerStageDuration
+local GetUnitEmpowerHoldAtMaxTime = GetUnitEmpowerHoldAtMaxTime
 if GetUnitEmpowerStageDuration then
-	
 	function Env.GetCurrentEmpowerStage(unit, matchname)
 		-- all of the function calls in this function combined,
 		-- assuming the worst case of current cast is on its last stage,

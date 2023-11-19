@@ -88,7 +88,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CastSettings", functio
 		check:SetSetting("NoPocketwatch")
 	end
 
-	if TMW.isClassic then -- TODO: Is notInterruptible populated in wrath? was it added in cata?
+	if TMW.isClassic then
 		self:BuildSimpleCheckSettingFrame({
 			noPocketwatch,
 		})
@@ -117,15 +117,15 @@ local events = {
 	UNIT_SPELLCAST_INTERRUPTED = true,
 	UNIT_SPELLCAST_CHANNEL_START = true,
 	UNIT_SPELLCAST_CHANNEL_UPDATE = true,
-	UNIT_SPELLCAST_CHANNEL_STOP = true
+	UNIT_SPELLCAST_CHANNEL_STOP = true,
+	UNIT_SPELLCAST_INTERRUPTIBLE = true,
+	UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true
 }
-if TMW.isRetail then
-	-- not available in wrath
+
+if GetUnitEmpowerStageDuration then
 	events.UNIT_SPELLCAST_EMPOWER_START = true
 	events.UNIT_SPELLCAST_EMPOWER_UPDATE = true
 	events.UNIT_SPELLCAST_EMPOWER_STOP = true
-	events.UNIT_SPELLCAST_INTERRUPTIBLE = true
-	events.UNIT_SPELLCAST_NOT_INTERRUPTIBLE = true
 end
 
 
