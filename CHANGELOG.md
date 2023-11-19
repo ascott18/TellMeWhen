@@ -1,3 +1,6 @@
+## v10.2.1
+* Fix #2122 - Keyboard input blocked after UI reload in combat when Allow Config In Combat enabled.
+
 ## v10.2.0
 * Version bumps for all WoW versions. 
 * Fixed classic client detection.

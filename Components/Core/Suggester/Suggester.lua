@@ -400,6 +400,8 @@ do	-- KeyManger
 	local KeyManager = CreateFrame("Frame", nil, UIParent)
 	KeyManager:SetFrameStrata("FULLSCREEN")
 	KeyManager:EnableKeyboard(true)
+	-- Start with propagation enabled in case the user reloads during combat
+	KeyManager:SetPropagateKeyboardInput(true)
 	KeyManager:Show()
 	function KeyManager:HandlePress(key)
 		if key == "UP" then
