@@ -1203,12 +1203,12 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 		if conditionData.funcstr == "DEPRECATED" then
 			if conditionData.customDeprecated then
-				text = conditionData.customDeprecated(conditionSettings)
+				text = get(conditionData.customDeprecated, conditionSettings)
 			else
 				text = TMW.L["CNDT_DEPRECATED_DESC"]:format(get(conditionData.text))
 			end
 		elseif conditionData.customDeprecated then
-			text = conditionData.customDeprecated(conditionSettings)
+			text = get(conditionData.customDeprecated, conditionSettings)
 		end
 
 		if text and text ~= "" then

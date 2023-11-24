@@ -304,6 +304,8 @@ ConditionCategory:RegisterCondition(8.5,  "LIBRANGECHECK", {
 			TMW:Error("Bad operator %q for range check condition of %s", c.Operator, tostring(parent))
 		end
 	end,
+
+	customDeprecated = ("NOTICE: As of Nov 16 2023, this condition is nearly useless due to Blizzard restrictions. If you want to check the range of a spell, consider using the %q condition instead. The range levels that can still be checked precisely vary depending on your class."):format(L["CONDITIONPANEL_SPELLRANGE"])
 	-- events = absolutely no events
 })
 
