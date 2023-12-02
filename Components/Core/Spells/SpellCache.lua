@@ -38,14 +38,15 @@ local IsCaching
 
 
 SpellCache.CONST = {
-	-- A rough estimate of the highest spellID in the game. Doesn't have to be accurate at all - visual only.
-	MAX_SPELLID_GUESS = 
-		TMW.isClassic and 30000 or 
-		TMW.isWrath and 80000 or 
-		400000,
+	-- A rough estimate of the highest spellID in the game.
+	-- This is also the minimum id to stop at, since Classic SOD added new spells
+	-- after retail spells, in the IDs around 430000.
+	-- Since we save ranges of invalid IDs to skip, this won't matter for perf at all
+	-- in any spell scan where SpellCacheInvalidRanges has nonstale data.
+	MAX_SPELLID_GUESS = 440000,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
-	MAX_FAILED_SPELLS = 2000,
+	MAX_FAILED_SPELLS = 10000,
 	
 	WHITELIST = {
 		-- A list of spells that will fail other filters, but are still desired
@@ -140,8 +141,8 @@ TMW.IE:RegisterUpgrade(71016, {
 })
 
 -- Force a re-cache - If a re-cache is needed, just update this version num to the latest version.
--- 84201 - Added a fix to exclude spells with blank names, because Blizzard managed to make a spell with no name.
-TMW.IE:RegisterUpgrade(84201, {
+-- 102101 - Updated spell ID range for Classic SOD.
+TMW.IE:RegisterUpgrade(102101, {
 	locale = function(self, locale)
 		locale.SpellCacheWoWVersion = 0
 	end,
@@ -384,7 +385,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 		local start = debugprofilestop()
 
 		local success = TMW.safecall(SpellCacher)
-		if success and spellsFailed < MAX_FAILED_SPELLS then
+		if success and (spellsFailed < MAX_FAILED_SPELLS or spellID < CONST.MAX_SPELLID_GUESS) then
 			-- Carry on. Keep iterating.
 		else
 			-- We're done, or we errored.
