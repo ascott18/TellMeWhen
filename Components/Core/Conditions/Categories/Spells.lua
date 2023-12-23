@@ -311,6 +311,32 @@ function Env.ReactiveHelper(NameFirst, Checked)
 	end
 end
 
+ConditionCategory:RegisterCondition(2.95, "SPELL_LEARNED", {
+	text = L["SPELL_LEARNED"],
+
+	bool = true,
+	
+	name = function(editbox)
+		editbox:SetTexts(L["SPELL_LEARNED"], L["CNDT_ONLYFIRST"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
+	useSUG = true,
+	unit = false,
+	formatter = TMW.C.Formatter.BOOL,
+	icon = 237558,
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetSpellInfo = GetSpellInfo,
+	},
+	-- In Classic SoD, IsPlayerSpell doesn't work for rune abilities (always returns false).
+	-- However, GetSpellInfo with a name input only returns the player's spells.
+	funcstr = [[BOOLCHECK( GetSpellInfo(c.Spells.FirstString) )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("SPELLS_CHANGED")
+	end,
+})
+
 ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	text = L["SPELLREACTIVITY"],
 	tooltip = L["REACTIVECNDT_DESC"],

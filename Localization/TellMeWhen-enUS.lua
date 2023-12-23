@@ -1690,6 +1690,7 @@ L["SPELLCHARGETIME_DESC"] = "Tracks the time remaining until a spell like %s or 
 
 L["EMPOWEREDSTAGE"] = "Empowered Spell Stage"
 L["EMPOWEREDSTAGE_DESC"] = "Current stage of empowered spell"
+L["SPELL_LEARNED"] = "Spell Learned"
 L["SPELLREACTIVITY"] = "Spell Reactivity"
 L["MP5"] = "%d MP5"
 L["REACTIVECNDT_DESC"] = "This condition only checks the reactive state of the ability, not the cooldown of it."
