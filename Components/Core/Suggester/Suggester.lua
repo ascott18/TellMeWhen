@@ -604,6 +604,12 @@ function SUG:GetNumFramesNeeded()
 		return INLINE_MAX_FRAMES
 	end
 
+	-- ElvUI will indirectly call this codepath during initialization before SuggestionList exists.
+	-- https://github.com/ascott18/TellMeWhen/issues/2132
+	if not TMW.SUG.SuggestionList then
+		return 0
+	end
+
 	return floor((TMW.SUG.SuggestionList:GetHeight() + 5)/TMW.SUG[1]:GetHeight()) - (self.inline and 1 or 2)
 end
 
