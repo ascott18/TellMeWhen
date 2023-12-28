@@ -6,7 +6,8 @@ TMW.CHANGELOG = [==[
 ## v10.2.1
 * Classic: Modern APIs added back in WoW 1.15.0 are used for buff/debuff durations and spell casts.
 * Fix #2122 - Keyboard input blocked after UI reload in combat when Allow Config In Combat enabled.
-* Fix #2132 - attempt to index field 'SuggestionList' (a nil value)
+* Fix #2132 - attempt to index field 'SuggestionList' (a nil value).
+* Fix #2131 - Additional scenarios where current talent loadout can be unknown.
 
 ## v10.2.0
 * Version bumps for all WoW versions. 

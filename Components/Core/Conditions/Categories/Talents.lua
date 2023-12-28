@@ -496,14 +496,18 @@ if C_ClassTalents then
 		CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
 		-- APSC is needed to detect changes in spec - the others are too early I guess?
 		CNDT:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED", "PLAYER_TALENT_UPDATE")
-		CNDT:RegisterEvent("TRAIT_CONFIG_UPDATED", function() 
+
+		local function onTraitUpdated() 
 			-- I... just... you just have do to it this way, ok?
 			-- Sometimes the data is available right away, sometimes you have to wait a frame.
 			CNDT:PLAYER_TALENT_UPDATE()
 			C_Timer.After(0, function()
 				CNDT:PLAYER_TALENT_UPDATE()
 			end)
-		end)
+		end
+		
+		CNDT:RegisterEvent("TRAIT_CONFIG_UPDATED", onTraitUpdated)
+		CNDT:RegisterEvent("TRAIT_CONFIG_LIST_UPDATED", onTraitUpdated)
 		-- TRAIT_TREE_CHANGED needed for detecting some loadout changes,
 		-- including when changing between two identical loadouts.
 		-- Except obnoxiously the data isn't available immediately.
@@ -522,6 +526,7 @@ if C_ClassTalents then
 		return
 			ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
 			ConditionObject:GenerateNormalEventString("TRAIT_CONFIG_UPDATED"),
+			ConditionObject:GenerateNormalEventString("TRAIT_CONFIG_LIST_UPDATED"),
 			ConditionObject:GenerateNormalEventString("ACTIVE_PLAYER_SPECIALIZATION_CHANGED"),
 			ConditionObject:GenerateNormalEventString("TMW_TALENT_LOADOUT_NAME_UPDATE"),
 			ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
