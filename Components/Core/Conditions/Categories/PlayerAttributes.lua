@@ -329,7 +329,7 @@ ConditionCategory:RegisterSpacer(15.5)
 
 
 Env.Tracking = {}
-if GetNumTrackingTypes and GetTrackingInfo then
+if GetNumTrackingTypes and GetTrackingInfo and GetNumTrackingTypes() > 0 then
 	-- Wrath+
 	function CNDT:MINIMAP_UPDATE_TRACKING()
 		wipe(Env.Tracking)
@@ -347,7 +347,7 @@ else
 		Parser:SetTrackingSpell()
 		local text = LT1:GetText() or ""
 		Parser:Hide()
-
+		
 		if text and text ~= "" then
 			Env.Tracking[strlower(text)] = 1
 		end

@@ -150,7 +150,7 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 local TrackingCache = {}
-if GetNumTrackingTypes and GetTrackingInfo then
+if GetNumTrackingTypes and GetTrackingInfo and GetNumTrackingTypes() > 0 then
 	function Module:Table_Get()
 		for i = 1, GetNumTrackingTypes() do
 			local name, _, active = GetTrackingInfo(i)
