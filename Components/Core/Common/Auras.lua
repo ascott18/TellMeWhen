@@ -23,7 +23,7 @@ local setmetatable = setmetatable
 
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot
-local UnitAuraSlots = UnitAuraSlots
+local GetAuraSlots = C_UnitAuras.GetAuraSlots or UnitAuraSlots
 local UnitGUID = UnitGUID
 
 if not GetAuraDataByAuraInstanceID then return end
@@ -302,7 +302,7 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
         local slot = select(i, ...)
         local instance = GetAuraDataBySlot(unit, slot)
 
-        -- Check `if instance` because sometimes UnitAuraSlots returns invalid slots I guess?
+        -- Check `if instance` because sometimes GetAuraSlots returns invalid slots I guess?
         -- Only ever seen this happen in arena.
         if instance then
             local auraInstanceID = instance.auraInstanceID
@@ -339,8 +339,8 @@ function Auras.GetAuras(unit)
         data[unit] = unitData
 
         --print("full updating unit", unit)
-        UpdateAuras(unit, instances, lookup, UnitAuraSlots(unit, "HELPFUL"))
-        UpdateAuras(unit, instances, lookup, UnitAuraSlots(unit, "HARMFUL"))
+        UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HELPFUL"))
+        UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HARMFUL"))
     end
     return unitData
 end
