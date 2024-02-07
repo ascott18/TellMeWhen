@@ -1,6 +1,8 @@
+## v10.2.3
+* Fix #2148 - Aura Tracking broken in WoW 1.15.1
+
 ## v10.2.2
 * Fix #2137 - Tracking active condition broken in Classic Era.
-* Fix #2148 - Aura Tracking broken in WoW 1.15.1
 
 ## v10.2.1
 * Classic: Modern APIs added back in WoW 1.15.0 are used for buff/debuff durations and spell casts.
