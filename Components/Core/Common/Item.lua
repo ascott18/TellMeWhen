@@ -133,7 +133,9 @@ function Item:GetCooldown()
 	error("This function must be overridden by subclasses")
 end
 function Item:HasUseEffect()
-	return not not GetItemSpell(self:GetID())
+	local id = self:GetID()
+	if not id then return false end
+	return not not GetItemSpell(id)
 end
 function Item:GetID()
 	error("This function must be overridden by subclasses")
@@ -181,6 +183,9 @@ function Item.NullRef:GetEquipped()
 end
 function Item.NullRef:GetCooldown()
 	return 0, 0, 0
+end
+function Item.NullRef:HasUseEffect()
+	return false
 end
 function Item.NullRef:GetID()
 	return 0
@@ -349,7 +354,9 @@ end
 
 
 function ItemBySlot:IsInRange(unit)
-	return IsItemInRange(self:GetLink(), unit)
+	local link = self:GetLink()
+	if not link then return false end
+	return IsItemInRange(link, unit)
 end
 function ItemBySlot:GetIcon()
 	return GetInventoryItemTexture("player", self.slot)
@@ -358,7 +365,9 @@ function ItemBySlot:GetCount()
 	return ItemCount[self:GetID()]
 end
 function ItemBySlot:GetEquipped()
-	return IsEquippedItem(self:GetLink())
+	local link = self:GetLink()
+	if not link then return false end
+	return IsEquippedItem(link)
 end
 function ItemBySlot:GetCooldown()
 	return GetInventoryItemCooldown("player", self.slot)

@@ -1,3 +1,6 @@
+## v10.2.4
+* Fix: #2154 - Errors when tracking items by slot number when the slot is empty.
+
 ## v10.2.3
 * Fix #2148 - Aura Tracking broken in WoW 1.15.1
 
