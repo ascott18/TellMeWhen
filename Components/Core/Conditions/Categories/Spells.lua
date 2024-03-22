@@ -570,7 +570,7 @@ ConditionCategory:RegisterCondition(11,	 "ITEMCD", {
 	end,
 	anticipate = [[
 		local start, duration, enable = c.Item:GetCooldown()
-		local VALUE = enable == 1 and duration and start + (duration - c.Level) or huge
+		local VALUE = (enable == 1 or enable == true) and duration and start + (duration - c.Level) or huge
 	]],
 })
 ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
@@ -595,7 +595,7 @@ ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
 		local start, duration, enable = c.Item:GetCooldown()
 		local start2, duration2, enable2 = c.Item2:GetCooldown()
 		local VALUE
-		if enable == 0 or enable2 == 0 then
+		if enable == 0 or enable == false or enable2 == 0 or enable2 == false then
 			VALUE = huge
 		elseif duration and duration2 then
 			local v1, v2 = start + duration, start2 + duration2
