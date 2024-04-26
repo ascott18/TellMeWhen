@@ -829,7 +829,7 @@ ConditionCategory:RegisterCondition(20.1,	 "TOTEM_ANY", {
 		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
 		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
-	useSUG = TMW.isRetail and true or "totem",
+	useSUG = TMW.COMMON.TotemRanks and "totem" or "spell",
 	allowMultipleSUGEntires = true,
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\ICONS\\spell_nature_groundingtotem",
@@ -856,7 +856,7 @@ for i = 1, 5 do
 			editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
 			editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 		end,
-		useSUG = TMW.isRetail and true or "totem",
+		useSUG = TMW.COMMON.TotemRanks and "totem" or "spell",
 		allowMultipleSUGEntires = true,
 		formatter = TMW.C.Formatter.TIME_0ABSENT,
 		icon = totem and totem.texture or "Interface\\ICONS\\spell_nature_groundingtotem",

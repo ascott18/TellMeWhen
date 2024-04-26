@@ -577,7 +577,97 @@ TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 ---------------------------------
 -- Constant spell data
 ---------------------------------
-if not TMW.isRetail then
+if TMW.isCata then
+	if pclass == "PALADIN" then
+		local name = GetSpellInfo(26573) 
+		TMW.COMMON.CurrentClassTotems = {
+			name = name,
+			desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name),
+			{
+				hasVariableNames = false,
+				name = GetSpellInfo(26573), --consecration
+				texture = GetSpellTexture(26573)
+			}
+		}
+	elseif pclass == "DEATHKNIGHT" then
+		local npcName = function(npcID)
+			local cachedName = TMW:TryGetNPCName(npcID)
+			return function()
+				if cachedName then return cachedName end
+				cachedName = TMW:TryGetNPCName(npcID)
+				return cachedName
+			end
+		end
+		local name = GetSpellInfo(46584)
+		TMW.COMMON.CurrentClassTotems = {
+			name = name,
+			desc = function() return L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name) end,
+			texture = GetSpellTexture(49206),
+			[1] = { -- Risen Ghoul
+				hasVariableNames = false,
+				name = npcName(26125),
+				texture = GetSpellTexture(46584),
+			},
+			-- Ebon Gargoyle is NOT a totem in cata
+		}
+	elseif pclass == "SHAMAN" then
+		TMW.COMMON.CurrentClassTotems = {
+			name = L["ICONMENU_TOTEM"],
+			desc = L["ICONMENU_TOTEM_DESC"],
+			{
+				hasVariableNames = true,
+				name = L["FIRE"],
+				texture = GetSpellTexture(8227), -- flametongue
+			},
+			{
+				hasVariableNames = true,
+				name = L["EARTH"],
+				texture = GetSpellTexture(8072), -- stoneskin
+			},
+			{
+				hasVariableNames = true,
+				name = L["WATER"],
+				texture = GetSpellTexture(5675), -- mana spring
+			},
+			{
+				hasVariableNames = true,
+				name = L["AIR"],
+				texture = GetSpellTexture(8512), -- windfury
+			},
+		}
+	else
+		TMW.COMMON.CurrentClassTotems = {
+			name = L["ICONMENU_TOTEM"],
+			desc = L["ICONMENU_TOTEM_DESC"],
+			{
+				hasVariableNames = true,
+				name = L["GENERICTOTEM"]:format(1),
+				texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+			},
+			{
+				hasVariableNames = true,
+				name = L["GENERICTOTEM"]:format(2),
+				texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+			},
+			{
+				hasVariableNames = true,
+				name = L["GENERICTOTEM"]:format(3),
+				texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+			},
+			{
+				hasVariableNames = true,
+				name = L["GENERICTOTEM"]:format(4),
+				texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+			},
+			{
+				hasVariableNames = true,
+				name = L["GENERICTOTEM"]:format(5),
+				texture = "Interface\\ICONS\\ability_shaman_tranquilmindtotem"
+			},
+		}
+	end
+
+elseif not TMW.isRetail then
 	TMW.COMMON.CurrentClassTotems = {
 		name = L["ICONMENU_TOTEM"],
 		desc = L["ICONMENU_TOTEM_DESC"],

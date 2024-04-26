@@ -158,7 +158,7 @@ end)
 TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	-- Create our own DR equivalencies in TMW using the data from DRList-1.0
 
-	local myCategories = TMW.isWrath and {
+	local myCategories = (TMW.isWrath or TMW.isCata) and {
 		incapacitate = "DR-Incapacitate",
 		stun =         "DR-ControlledStun",
 		fear =         "DR-Fear",
@@ -171,6 +171,8 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		horror =       "DR-Horrify",
 		disarm =       "DR-Disarm",
 		scatter =      "DR-Scatter",
+		cyclone =      "DR-Cyclone",
+		entrapment =   "DR-Entrapment",
 	} or TMW.isClassic and {
 		incapacitate = "DR-Incapacitate",
 		stun =         "DR-ControlledStun",
@@ -190,12 +192,11 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		disarm 			= "DR-Disarm",
 	}
 
-	local ignored = TMW.isWrath and {
+	local ignored = (TMW.isCata or TMW.isWrath) and {
 		knockback = true,
-		frost_shock = true,
-		cyclone = true,
 		counterattack = true,
 		charge = true,
+		dragons = true,
 	} or TMW.isClassic and {
 		knockback = true,
 		frost_shock = true,

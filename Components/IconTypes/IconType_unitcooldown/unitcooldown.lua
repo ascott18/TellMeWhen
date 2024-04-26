@@ -164,7 +164,7 @@ end})
 
 
 local resetsOnCast, resetsOnAura, spellBlacklist = {}, {}, {}
-if TMW.isWrath or TMW.isClassic then
+if TMW.isCata or TMW.isWrath or TMW.isClassic then
 resetsOnCast = {
 	[23989] = { -- readiness
 		[19263] = 1, -- Deterrence

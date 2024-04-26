@@ -177,7 +177,6 @@ if TMW.isRetail then
 		max = 6,
 		icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
 		Env = {
-			GetRuneType = GetRuneType,
 			GetRuneCount = GetRuneCount,
 		},
 		funcstr = function(c)

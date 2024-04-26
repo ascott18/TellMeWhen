@@ -97,6 +97,7 @@ local TMW = _G.TMW
 local tocVersion = select(4, GetBuildInfo());
 TMW.isClassic = tocVersion <= 19999
 TMW.isWrath = tocVersion >= 30400 and tocVersion <= 30499
+TMW.isCata = tocVersion >= 40400 and tocVersion <= 40499
 TMW.isRetail = tocVersion >= 90000
 
 

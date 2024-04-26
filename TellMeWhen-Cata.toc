@@ -11,7 +11,7 @@
 #  -------------------- 
 
 
-## Interface: 11501
+## Interface: 40400
 # DONT FORGET TO TOC BUMP TELLMEWHEN_OPTIONS TOO!!
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
@@ -42,6 +42,8 @@
 
 includes.xml
 
-Components\Core\Spells\Equivalencies-Classic.lua
-Components\Core\Spells\ClassSpellCache-Classic.lua
+Components\Core\Spells\Equivalencies-Cata.lua
+Components\Core\Spells\ClassSpellCache-Cata.lua
 Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua
+
+Components\IconTypes\IconType_runes\runes-Wrath.lua

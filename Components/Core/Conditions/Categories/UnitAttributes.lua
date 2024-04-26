@@ -541,12 +541,14 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["NightElf"] = {order = 3, text = Name("Night Elf")},
 			["Gnome"] = {order = 4, text = Name("Gnome")},
 			["Draenei"] = {order = 5, text = Name("Draenei")},
+			["Worgen"] = {order = 6, text = Name("Worgen")},
 
 			["Orc"] = {order = 7, text = Name("Orc")},
 			["Scourge"] = {order = 8, text = Name("Undead")},
 			["Tauren"] = {order = 9, text = Name("Tauren")},
 			["Troll"] = {order = 10, text = Name("Troll")},
 			["BloodElf"] = {order = 11, text = Name("Blood Elf")},
+			["Goblin"] = {order = 12, text = Name("Goblin")},
 		}
 
 		if TMW.isRetail then

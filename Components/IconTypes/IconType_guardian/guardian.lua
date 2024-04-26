@@ -142,7 +142,7 @@ end
 Type.GuardianInfo = TMW.isClassic and {
 	[510] = Info(45, 31687, false), -- Water Elemental
 	[89] = Info(60 * 5, 1122, false), -- Inferno (warlock)
-} or TMW.isWrath and {
+} or (TMW.isWrath or TMW.isCata) and {
 	[510] = Info(45, 31687, false), -- Water Elemental
 	[19668] = Info(15, 34433, false), -- Shadowfiend
 	[15438] = Info(120, 32982, false), -- Fire ele totem

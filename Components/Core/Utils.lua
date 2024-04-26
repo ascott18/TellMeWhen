@@ -1410,6 +1410,11 @@ function TMW.GetSpellCost(spell)
 end
 
 if not GetSpecializationInfoByID then
+	local GetTalentTreeRoles = GetTalentTreeRoles
+	local GetActiveTalentGroup = GetActiveTalentGroup
+	local GetTalentTabInfo = GetTalentTabInfo
+	local GetTalentGroupRole = GetTalentGroupRole
+
 	local classInfo = {
 		[1] = C_CreatureInfo.GetClassInfo(1),
 		[2] = C_CreatureInfo.GetClassInfo(2),
@@ -1505,7 +1510,13 @@ if not GetSpecializationInfoByID then
 		local biggest = 0
 		local spec
 		for i = 1, #specIDs do
-			local _, _, points = GetTalentTabInfo(i)
+			local _, points
+			if TMW.isCata then
+				_, _, _, _, points = GetTalentTabInfo(i)
+			else
+				_, _, points = GetTalentTabInfo(i)
+			end
+
 			if points > biggest then
 				biggest = points
 				spec = i
@@ -1534,10 +1545,20 @@ if not GetSpecializationInfoByID then
 	function TMW.GetCurrentSpecializationRole()
 		-- Watch for PLAYER_SPECIALIZATION_CHANGED for changes to this func's return, and to
 	
+		if GetTalentTreeRoles then
+			-- cataclysm only??
+			-- note that for druids, this returns 2 roles (tank and dps) for feral.
+			local currentTree = TMW.GetCurrentSpecialization()
+			if currentTree then
+				return GetTalentTreeRoles(currentTree)
+			end
+		end
+
 		local activeSpec = GetActiveTalentGroup()
 		if not activeSpec or activeSpec == 0 then
 			return "DAMAGER"
 		end
+
 	
 		return GetTalentGroupRole(activeSpec) or "DAMAGER"
 	end
@@ -1573,7 +1594,7 @@ do	-- TMW:GetParser()
 	function TMW:GetParser()
 		if not Parser then
 			Parser = CreateFrame("GameTooltip", "TMWParser", nil, "GameTooltipTemplate")
-			if TooltipDataHandlerMixin then
+			if GameTooltipDataMixin then
 				-- in theory this could use TooltipDataHandlerMixin,
 				-- but the blizzard PTR tooltips explode if we dont use GameTooltipDataMixin
 				-- because somehow for some reason they need GetUnit?

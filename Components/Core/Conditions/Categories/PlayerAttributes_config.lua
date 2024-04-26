@@ -32,7 +32,7 @@ Module.noMin = true
 Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
-Module.stances = TMW.isWrath and {
+Module.stances = (TMW.isWrath or TMW.isCata) and {
 	WARRIOR = {
 		[2457] = 	GetSpellInfo(2457), 	-- Battle Stance
 		[71] = 		GetSpellInfo(71),		-- Defensive Stance

@@ -683,14 +683,29 @@ if GetGlyphSocketInfo then
 	function CNDT:GLYPH_UPDATED()
 		local GlyphLookup = Env.GlyphLookup
 		wipe(GlyphLookup)
-		for i = 1, 6 do
-			local _, _, spellID = GetGlyphSocketInfo(i)
-			if spellID then
-				GlyphLookup[spellID] = 1
-				
-				local name = GetSpellInfo(spellID)
-				name = strlowerCache[name]
-				GlyphLookup[name] = 1
+		if TMW.isCata then
+			-- Cata
+			for i = 1, 9 do
+				local _, _, _, spellID = GetGlyphSocketInfo(i)
+				if spellID then
+					GlyphLookup[spellID] = 1
+					
+					local name = GetSpellInfo(spellID)
+					name = strlowerCache[name]
+					GlyphLookup[name] = 1
+				end
+			end
+		else
+			-- Wrath
+			for i = 1, 6 do
+				local _, _, spellID = GetGlyphSocketInfo(i)
+				if spellID then
+					GlyphLookup[spellID] = 1
+					
+					local name = GetSpellInfo(spellID)
+					name = strlowerCache[name]
+					GlyphLookup[name] = 1
+				end
 			end
 		end
 	end

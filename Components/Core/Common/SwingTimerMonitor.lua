@@ -65,7 +65,7 @@ local swingSpells =
 	} 
 	or {}
 
-if TMW.isWrath then
+if GetSpellInfo(56815) then
 	swingSpells[strlowerCache[GetSpellInfo(56815)]] = 1 -- Rune Strike
 end
 

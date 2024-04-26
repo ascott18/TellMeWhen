@@ -2980,7 +2980,7 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	end,
 }
 
-if TMW.isWrath then 
+if TMW.isCata or TMW.isWrath then 
 	TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
 		-- Constructor
 		Runes = {

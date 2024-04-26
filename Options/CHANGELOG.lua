@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v10.2.5
+* Support for Cata Classic.
+
 ## v10.2.4
 * Fix: #2154 - Errors when tracking items by slot number when the slot is empty.
 * Fix: #2155 - Item cooldown API was broken by Blizzard in 10.2.6.
