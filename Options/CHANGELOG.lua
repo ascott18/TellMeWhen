@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v10.2.6
+* Additional updates for Cataclysm Classic, including handling for new player resource types.
+
 ## v10.2.5
 * Support for Cata Classic.
 

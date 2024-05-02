@@ -124,9 +124,7 @@ end
 ConditionCategory:RegisterSpacer(3)
 
 
-
--- Private Class Resources (other players can't see them)
-if TMW.isRetail then
+if TMW.isRetail or TMW.isCata then
 	ConditionCategory:RegisterCondition(23, "SOUL_SHARDS", {
 		text = SOUL_SHARDS_POWER,
 		min = 0,
@@ -141,20 +139,7 @@ if TMW.isRetail then
 		end,
 		hidden = pclass ~= "WARLOCK",
 	})
-	ConditionCategory:RegisterCondition(23.1, "SOUL_SHARD_FRAGMENTS", {
-		text = L["RESOURCE_FRAGMENTS"]:format(SOUL_SHARDS_POWER),
-		min = 0,
-		max = 60,
-		unit = PLAYER,
-		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
-		tcoords = CNDT.COMMON.standardtcoords,
-		funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
-		end,
-		hidden = pclass ~= "WARLOCK",
-	})
+
 	ConditionCategory:RegisterCondition(24, "HOLY_POWER", {
 		text = HOLY_POWER,
 		min = 0,
@@ -168,6 +153,24 @@ if TMW.isRetail then
 				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "HOLY_POWER")
 		end,
 		hidden = pclass ~= "PALADIN",
+	})
+end
+
+-- Private Class Resources (other players can't see them)
+if TMW.isRetail then
+	ConditionCategory:RegisterCondition(23.1, "SOUL_SHARD_FRAGMENTS", {
+		text = L["RESOURCE_FRAGMENTS"]:format(SOUL_SHARDS_POWER),
+		min = 0,
+		max = 60,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
+		end,
+		hidden = pclass ~= "WARLOCK",
 	})
 	ConditionCategory:RegisterCondition(25, "RUNES2", {
 		text = L["CONDITIONPANEL_RUNES"],
@@ -866,7 +869,7 @@ ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
 
 
 
-if TMW.isRetail then
+if TMW.isRetail or TMW.isCata then
 	ConditionCategory:RegisterSpacer(200)
 	-- Altpower was added in cata
 	ConditionCategory:RegisterCondition(208.0, "ALTPOWER", {
@@ -924,6 +927,47 @@ if TMW.isRetail then
 	})
 end
 
+if TMW.isCata then
+	ConditionCategory:RegisterCondition(0, "ECLIPSE", {
+		text = L["ECLIPSE"],
+		tooltip = L["CONDITIONPANEL_ECLIPSE_DESC"],
+		min = -100,
+		max = 100,
+		texttable = setmetatable({
+			[-100] = "-100 (" .. L["MOON"] .. ")",
+			[100] = "100 (" .. L["SUN"] .. ")",
+		}, {__index = function(tbl, k) return k end}),
+
+		unit = PLAYER,
+		icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
+		tcoords = {0.65625000, 0.74609375, 0.37500000, 0.55468750},
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Balance),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "BALANCE")
+		end,
+	})
+	
+	ConditionCategory:RegisterCondition(0, "ECLIPSE_DIRECTION", {
+		text = L["ECLIPSE_DIRECTION"],
+		min = 0,
+		max = 1,
+		texttable = {[0] = L["MOON"], [1] = L["SUN"]},
+		unit = PLAYER,
+		nooperator = true,
+		icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
+		tcoords = {0.55859375, 0.64843750, 0.57031250, 0.75000000},
+		Env = {
+			GetEclipseDirection = GetEclipseDirection,
+		},
+		funcstr = "c.Level == (GetEclipseDirection() == 'sun' and 1 or 0)",
+
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("ECLIPSE_DIRECTION_CHANGE")
+		end,
+	})
+end
 
 
 
@@ -941,35 +985,6 @@ end
 
 -- The graveyard....
 
-ConditionCategory:RegisterCondition(0, "ECLIPSE", {
-	text = L["ECLIPSE"],
-	tooltip = L["CONDITIONPANEL_ECLIPSE_DESC"],
-	min = -100,
-	max = 100,
-	texttable = setmetatable({
-		[-100] = "-100 (" .. L["MOON"] .. ")",
-		[100] = "100 (" .. L["SUN"] .. ")",
-	}, {__index = function(tbl, k) return k end}),
-
-	unit = PLAYER,
-	icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
-	tcoords = {0.65625000, 0.74609375, 0.37500000, 0.55468750},
-	funcstr = "DEPRECATED"
-})
-ConditionCategory:RegisterCondition(0, "ECLIPSE_DIRECTION", {
-	text = L["ECLIPSE_DIRECTION"],
-	min = 0,
-	max = 1,
-	texttable = {[0] = L["MOON"], [1] = L["SUN"]},
-	unit = PLAYER,
-	nooperator = true,
-	icon = "Interface\\PlayerFrame\\UI-DruidEclipse",
-	tcoords = {0.55859375, 0.64843750, 0.57031250, 0.75000000},
-	Env = {
-		GetEclipseDirection = GetEclipseDirection,
-	},
-	funcstr = "DEPRECATED"
-})
 ConditionCategory:RegisterCondition(0, "SHADOW_ORBS", {
 	text = SHADOW_ORBS,
 	min = 0,

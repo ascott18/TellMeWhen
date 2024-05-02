@@ -96,9 +96,13 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	if UnitStagger then
 		types[#types+1] = { order = 20,  id = -3, name = STAGGER, }
 	end
-	if TMW.isRetail then
+	if TMW.isCata or TMW.isRetail then
 		types[#types+1] = { order = 7,  id = Enum.PowerType.SoulShards, name = SOUL_SHARDS_POWER, }
 		types[#types+1] = { order = 8,  id = Enum.PowerType.HolyPower, name = HOLY_POWER, }
+		types[#types+1] = { order = 16,  id = Enum.PowerType.Alternate, name = L["CONDITIONPANEL_ALTPOWER"], }
+	end
+	
+	if TMW.isRetail then
 		types[#types+1] = { order = 9,  id = Enum.PowerType.Chi, name = CHI_POWER; }
 		types[#types+1] = { order = 10,  id = Enum.PowerType.Maelstrom, name = MAELSTROM_POWER, }
 		types[#types+1] = { order = 11,  id = Enum.PowerType.ArcaneCharges, name = ARCANE_CHARGES_POWER, }
@@ -106,7 +110,6 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 		types[#types+1] = { order = 13,  id = Enum.PowerType.Insanity, name = INSANITY_POWER, }
 		types[#types+1] = { order = 14,  id = Enum.PowerType.Fury, name = FURY, }
 		types[#types+1] = { order = 15,  id = Enum.PowerType.Pain, name = PAIN, }
-		types[#types+1] = { order = 16,  id = Enum.PowerType.Alternate, name = L["CONDITIONPANEL_ALTPOWER"], }
 		types[#types+1] = { order = 17,  id = Enum.PowerType.Essence, name = POWER_TYPE_ESSENCE, }
 	end
 
