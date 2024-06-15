@@ -1511,9 +1511,11 @@ if not GetSpecializationInfoByID then
 		local spec
 		for i = 1, #specIDs do
 			local _, points
-			if TMW.isCata then
+			if select('#', GetTalentTabInfo(i)) >= 8 then
+				-- Cata classic and SOD Phase 4
 				_, _, _, _, points = GetTalentTabInfo(i)
 			else
+				-- SOD Phase 3
 				_, _, points = GetTalentTabInfo(i)
 			end
 

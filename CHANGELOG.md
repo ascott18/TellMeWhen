@@ -1,3 +1,6 @@
+## v10.2.7
+* Fix GetTalentTabInfo call for SOD Phase 4
+
 ## v10.2.6
 * Additional updates for Cataclysm Classic, including handling for new player resource types.
 
