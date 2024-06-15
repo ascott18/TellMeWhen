@@ -445,63 +445,42 @@ function ConditionObject:GenerateUnitAuraString(unit, spell, onlyMine)
 		or ("arg1 == %q"):format(unit)
 
 
-	if TMW.COMMON.Auras then
-		local canUsePacked, auraEvent = TMW.COMMON.Auras:RequestUnits(unit)
-		
-		self:RequestEvent(auraEvent)
-		self:SetNumEventArgs(2)
+	local canUsePacked, auraEvent = TMW.COMMON.Auras:RequestUnits(unit)
+	
+	self:RequestEvent(auraEvent)
+	self:SetNumEventArgs(2)
 
-		if type(spell) == "table" then
-			-- If we were passed a spell set that only contains one spell,
-			-- inline that spell so we can avoid the function call to IsTmwAuraEventRelevant
-			if #spell.Array == 1 then
-				spell = spell.First
-			end
+	if type(spell) == "table" then
+		-- If we were passed a spell set that only contains one spell,
+		-- inline that spell so we can avoid the function call to IsTmwAuraEventRelevant
+		if #spell.Array == 1 then
+			spell = spell.First
 		end
-
-		local str = ("event == %q and %s and"):format(auraEvent, unitCheck)
-
-		-- arg2 is payload:
-		-- If it is nil, the event is a general update for the unit.
-		-- If it is a table, its keys are names/ids of what changed
-		-- and the values indicate if the aura might have been mine.
-		if type(spell) == "table" then
-			-- Spell is a SpellSet 
-			str = str .. " (not arg2 or ConditionObject:IsTmwAuraEventRelevant(arg2,"
-			.. CNDT:GetTableSubstitution(spell) 
-			.. ", "
-			.. tostring(onlyMine)
-			.. "))"
-		else
-			-- Spell is a name/id
-			str = str .. " (not arg2 or arg2["
-			.. (type(spell) == "string" and format("%q", spell) or tostring(spell))
-			.. "]"
-			.. (onlyMine and "" or " ~= nil")
-			.. ")"
-		end
-		
-		return str
-	else
-		self:RequestEvent("UNIT_AURA")
-		self:SetNumEventArgs(3)
-			
-		local str = ("event == %q and %s"):format("UNIT_AURA", unitCheck)
-
-		if type(spell) == "string" then
-			-- arg2 is isFullUpdate:
-			-- If it is nil, the client doesn't support the new UNIT_AURA payload.
-			-- If it is true, the event isn't about any particular aura.
-			-- If it is false, then arg3 is `updatedAuras`.
-			str = str .. " and (arg2 ~= false or ConditionObject:IsUnitAuraEventRelevant(arg3,"
-			.. (type(spell) == "string" and format("%q", spell) or tostring(spell))
-			.. ", "
-			.. tostring(onlyMine)
-			.. "))"
-		end
-		
-		return str
 	end
+
+	local str = ("event == %q and %s and"):format(auraEvent, unitCheck)
+
+	-- arg2 is payload:
+	-- If it is nil, the event is a general update for the unit.
+	-- If it is a table, its keys are names/ids of what changed
+	-- and the values indicate if the aura might have been mine.
+	if type(spell) == "table" then
+		-- Spell is a SpellSet 
+		str = str .. " (not arg2 or ConditionObject:IsTmwAuraEventRelevant(arg2,"
+		.. CNDT:GetTableSubstitution(spell) 
+		.. ", "
+		.. tostring(onlyMine)
+		.. "))"
+	else
+		-- Spell is a name/id
+		str = str .. " (not arg2 or arg2["
+		.. (type(spell) == "string" and format("%q", spell) or tostring(spell))
+		.. "]"
+		.. (onlyMine and "" or " ~= nil")
+		.. ")"
+	end
+	
+	return str
 end
 
 --- (//For use in the events function of a condition type declaration//)

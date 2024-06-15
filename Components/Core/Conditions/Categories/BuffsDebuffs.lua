@@ -25,7 +25,7 @@ local huge = math.huge
 local empty = {}
 
 local UnitAura = UnitAura
-local GetAuras = TMW.COMMON.Auras and TMW.COMMON.Auras.GetAuras
+local GetAuras = TMW.COMMON.Auras.GetAuras
 
 function Env.AuraStacks(unit, name, filter)
 	for i = 1, huge do
@@ -352,7 +352,6 @@ function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedInd
 end
 
 local function CanUsePackedAuras(c)
-	if not GetAuras then return false end
 	if not TMW.COMMON.Auras:RequestUnits(c.Unit) then return false end
 	return true
 end

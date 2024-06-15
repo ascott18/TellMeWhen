@@ -254,44 +254,7 @@ local NOT_ACTUALLY_SPELLSTEALABLE = {
 
 
 local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
-	if event == "UNIT_AURA" and icon.UnitSet.UnitsLookup[arg1] then
-		-- Still used by Wrath (even though Wrath doesn't have updatedAuras payload yet?)
-
-		-- If the icon is checking the unit, schedule an update for the icon.
-		if arg2 == false and icon.Spells.First ~= "" then
-			-- arg2: isFullUpdate
-			-- arg3: updatedAuras
-			local Hash, OnlyMine = icon.Spells.Hash, icon.OnlyMine
-			for i = 1, #arg3 do
-				local updatedAura = arg3[i]
-				-- Check if the aura fits into the icons filters.
-				-- Checking name/id + OnlyMine are the only 2 worthwhile checks here.
-				-- Anything else (like isHarmful/isHelpful) is just not likely to yield meaningful benefit
-
-				-- BLIZZ BUG NOTE: In UnitAura, the dispel type of enrage is "" but for typeless effects it is nil.
-				-- HOWEVER, in `updatedAura`, the dispel type of both enrages AND typeless effects are both "".
-				-- SO, sadly we have to treat all "" types as enrages, so icons checking Enrage won't really benefit much here.
-				local debuffType = updatedAura.debuffType
-				if
-					(
-						not OnlyMine or
-						updatedAura.sourceUnit == "player" or
-						updatedAura.sourceUnit == "pet"
-					) and
-					(
-						Hash[updatedAura.spellId] or
-						Hash[strlowerCache[updatedAura.name]] or
-						Hash[debuffType == "" and "Enraged" or debuffType]
-					)
-				then
-					icon.NextUpdateTime = 0
-					return
-				end
-			end
-		else
-			icon.NextUpdateTime = 0
-		end
-	elseif event == icon.auraEvent and icon.UnitSet.UnitsLookup[arg1] then
+	if event == icon.auraEvent and icon.UnitSet.UnitsLookup[arg1] then
 		-- Used by Dragonflight+
 
 		-- arg2: updatedAuras = { [name | id | dispelType] = mightBeMine(bool) }
@@ -402,7 +365,7 @@ local function Buff_OnUpdate(icon, time)
 	icon:YieldInfo(true, useUnit, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3)
 end
 
-local GetAuras = TMW.COMMON.Auras and TMW.COMMON.Auras.GetAuras
+local GetAuras = TMW.COMMON.Auras.GetAuras
 local function Buff_OnUpdate_Packed(icon, time)
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, SpellsArray, DurationSort, StackSort, KindKey
@@ -840,19 +803,15 @@ function Type:Setup(icon)
 		icon:SetScript("OnEvent", Buff_OnEvent)
 		icon:RegisterEvent(icon.UnitSet.event)
 
-		if TMW.COMMON.Auras then
-			local canUsePacked, auraEvent = TMW.COMMON.Auras:RequestUnits(icon.UnitSet)
-			icon.auraEvent = auraEvent
-			icon:RegisterEvent(auraEvent)
+		local canUsePacked, auraEvent = TMW.COMMON.Auras:RequestUnits(icon.UnitSet)
+		icon.auraEvent = auraEvent
+		icon:RegisterEvent(auraEvent)
 
-			if canUsePacked then
-				icon:SetUpdateFunction(icon:IsGroupController() 
-					and Buff_OnUpdate_Controller_Packed 
-					or Buff_OnUpdate_Packed
-				)
-			end
-		else
-			icon:RegisterEvent("UNIT_AURA")
+		if canUsePacked then
+			icon:SetUpdateFunction(icon:IsGroupController() 
+				and Buff_OnUpdate_Controller_Packed 
+				or Buff_OnUpdate_Packed
+			)
 		end
 	end
 
