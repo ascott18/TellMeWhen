@@ -27,8 +27,11 @@ local math, max, ceil, floor, random, abs =
 local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer =
 	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer
 
-local IsUsableSpell, GetRuneCooldown, GetSpecialization, GetSpecializationInfo, GetFramerate =
-	  IsUsableSpell, GetRuneCooldown, GetSpecialization, GetSpecializationInfo, GetFramerate
+local GetRuneCooldown, GetSpecialization, GetSpecializationInfo, GetFramerate =
+	  GetRuneCooldown, GetSpecialization, GetSpecializationInfo, GetFramerate
+
+local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
+local GetSpellPowerCost = C_Spell.GetSpellPowerCost or _G.GetSpellPowerCost
 
 local debugprofilestop = debugprofilestop_SAFE
 
@@ -1255,7 +1258,7 @@ function TMW:TT_Copy(src, dest)
 end
 
 function TMW:TT_Update(f)
-	if GetMouseFocus() == f and f:IsMouseOver() and f:IsVisible() then
+	if f:IsMouseMotionFocus() and f:IsMouseOver() and f:IsVisible() then
 		f:GetScript("OnLeave")(f)
 		if not f.IsEnabled or f:IsEnabled() or (f:IsObjectType("Button") and f:GetMotionScriptsWhileDisabled()) then
 			f:GetScript("OnEnter")(f)
@@ -1365,6 +1368,53 @@ function TMW.GetRuneCooldownDuration()
 	local _, duration = GetRuneCooldown(1)
 	if not duration then return 0 end
 	return floor(duration * 1e3 + 0.5) / 1e3
+end
+
+if C_Spell.GetSpellCharges then
+	local GetSpellCharges = C_Spell.GetSpellCharges
+	TMW.GetSpellCharges = function(spell)
+		local data = GetSpellCharges(spell)
+		if not data then return end
+
+		return data.currentCharges, data.maxCharges, data.cooldownStartTime, data.cooldownDuration
+	end
+else
+	TMW.GetSpellCharges = GetSpellCharges
+end
+
+if C_SpellBook and C_SpellBook.GetSpellBookItemType then
+	TMW.GetSpellBookItemInfo = function(index, book)
+		if book == "pet" then
+			book = Enum.SpellBookSpellBank.Pet
+		else 
+			book = Enum.SpellBookSpellBank.Player
+		end
+
+		local data = C_SpellBook.GetSpellBookItemInfo(index, book)
+		if not data then return end
+
+		-- typeName is for backwards compat
+		if data.itemType == Enum.SpellBookItemType.Spell then data.typeName = "SPELL" end
+		-- Nothing in TMW uses the other types besides SPELL
+
+		return data
+	end
+else
+	TMW.GetSpellBookItemInfo = function(index, book)
+		local type, baseSpellID = GetSpellBookItemInfo(index, book)
+		if not type then return end
+
+		if data.itemType == Enum.SpellBookItemType.Spell then data.typeName = "SPELL" end
+		
+		return {
+			-- Nothing in TMW uses the other types besides SPELL
+			-- itemType is for forward compat
+			itemType = type == "SPELL" and 1 or -1,
+			typeName = type,
+			actionId = baseSpellID,
+			name = GetSpellBookItemName(index, book)
+		}
+	end
 end
 
 local function spellCostSorter(a, b)

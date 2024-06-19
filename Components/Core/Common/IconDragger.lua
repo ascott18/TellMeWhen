@@ -102,7 +102,7 @@ function IconDragger:CompleteDrag(script, icon)
 	IconDragger:ScheduleTimer("SetIsDraggingFalse", 0.1)
 
 	-- icon is the destination
-	icon = icon or GetMouseFocus()
+	icon = icon or (GetMouseFoci and GetMouseFoci()[1] or GetMouseFocus())
 
 	if IconDragger.IsDragging then
 

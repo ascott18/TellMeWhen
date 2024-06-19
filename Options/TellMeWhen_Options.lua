@@ -261,14 +261,15 @@ function IE:OnInitialize()
 	TMW:Fire("TMW_OPTIONS_LOADING")
 	TMW:UnregisterAllCallbacks("TMW_OPTIONS_LOADING")
 
-	-- Make TMW.IE be the same as IE.
-	-- IE[0] = TellMeWhen_IconEditor[0] (already done in .xml)
-	-- local meta = CopyTable(getmetatable(IE))
-	-- meta.__index = getmetatable(TellMeWhen_IconEditor).__index
-	-- setmetatable(IE, meta)
+	if PickupSpellBookItem then
+		-- Pre wow 11.0
+		hooksecurefunc("PickupSpellBookItem", function(...) IE.DraggingInfo = {...} end)
+	end
+	if C_SpellBook and C_SpellBook.PickupSpellBookItem then
+		-- WoW 11.0+
+		hooksecurefunc(C_SpellBook, "PickupSpellBookItem", function(...) IE.DraggingInfo = {...} end)
+	end
 
-
-	hooksecurefunc("PickupSpellBookItem", function(...) IE.DraggingInfo = {...} end)
 	WorldFrame:HookScript("OnMouseDown", function()
 		IE.DraggingInfo = nil
 	end)

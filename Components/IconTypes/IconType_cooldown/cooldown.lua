@@ -15,8 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local GetSpellInfo, GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell =
-	  GetSpellInfo, GetSpellCooldown, GetSpellCharges, GetSpellCount, IsUsableSpell
+local GetSpellInfo, GetSpellCooldown =
+	  GetSpellInfo, GetSpellCooldown
 local UnitRangedDamage =
 	  UnitRangedDamage
 local pairs, wipe, strlower =
@@ -25,6 +25,9 @@ local pairs, wipe, strlower =
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
 local GetSpellTexture = TMW.GetSpellTexture
+local GetSpellCharges = TMW.GetSpellCharges
+local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
+local GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
 local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local _, pclass = UnitClass("Player")

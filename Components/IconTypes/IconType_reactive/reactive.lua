@@ -14,12 +14,17 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-local print = TMW.print
-local GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount =
-	  GetSpellCooldown, IsUsableSpell, GetSpellInfo, GetSpellCharges, GetSpellCount
 local _, pclass = UnitClass("player")
 
+local print = TMW.print
+local GetSpellCooldown, GetSpellInfo =
+	  GetSpellCooldown, GetSpellInfo
+
 local GetSpellTexture = TMW.GetSpellTexture
+local GetSpellCharges = TMW.GetSpellCharges
+local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
+local GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
+
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana

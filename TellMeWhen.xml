@@ -182,7 +182,14 @@
 				self.name = "TellMeWhen"
 				self.title:SetText("TellMeWhen v" .. TELLMEWHEN_VERSION_FULL)
 				self.title:SetFont("Fonts\\FRIZQT__.TTF", 40, "THINOUTLINE")
-				InterfaceOptions_AddCategory(self);
+				
+				if InterfaceOptions_AddCategory then
+					InterfaceOptions_AddCategory(self)	
+				else
+					-- WoW 11.0+
+					local category, layout = Settings.RegisterCanvasLayoutCategory(self, self.name);
+					Settings.RegisterAddOnCategory(category);
+				end
 			</OnLoad>
 		</Scripts>
 	</Frame>

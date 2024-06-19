@@ -160,8 +160,9 @@ end)
 -- GLOBALS: UIParent, CreateFrame, collectgarbage, geterrorhandler 
 
 ---------- Upvalues ----------
-local GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell =
-	  GetSpellCooldown, GetSpellInfo, GetSpellTexture, IsUsableSpell
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+local GetSpellCooldown, GetSpellInfo =
+	  GetSpellCooldown, GetSpellInfo
 local InCombatLockdown, GetTalentInfo =
 	  InCombatLockdown, GetTalentInfo
 local IsInGuild, IsInGroup, IsInInstance =
@@ -454,7 +455,6 @@ function TMW.GetSpellTexture(spell)
 		SpellTexturesMetaIndex[spell] or
 		rawget(SpellTexturesMetaIndex, strlowerCache[spell])
 end
-local GetSpellTexture = TMW.GetSpellTexture
 
 
 

@@ -118,7 +118,7 @@ function Module:Entry_AddToList_1(f, id)
 		f.tooltipmethod = "SetSpellByID"
 		f.tooltiparg = id
 	
-		f.Icon:SetTexture(GetSpellTexture(id))
+		f.Icon:SetTexture(TMW.GetSpellTexture(id))
 	elseif GetNumTalentTabs then
 		-- Wrath
 		local tab, talent = parseId(id)

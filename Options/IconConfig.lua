@@ -322,7 +322,7 @@ function IE:GetRealNames(Name)
 		else
 			local _
 			name, _, texture = GetSpellInfo(v)
-			texture = texture or GetSpellTexture(name or v)
+			texture = texture or TMW.GetSpellTexture(name or v)
 			
 			if not name and Cache then
 				local lowerv = strlower(v)
@@ -340,7 +340,7 @@ function IE:GetRealNames(Name)
 			
 			name = name or v or ""
 
-			texture = texture or GetSpellTexture(name)
+			texture = texture or TMW.GetSpellTexture(name)
 		end
 
 		local dur = ""
@@ -425,6 +425,7 @@ function IE:SpellItemToIcon(icon, func, arg1)
 	else
 		t, data, subType, param4 = GetCursorInfo()
 	end
+
 	IE.DraggingInfo = nil
 
 	if not t then

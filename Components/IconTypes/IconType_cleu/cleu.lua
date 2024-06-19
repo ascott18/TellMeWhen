@@ -21,6 +21,7 @@ local bit_band, bit_bor, tinsert, tremove, unpack, wipe =
 local UnitGUID, GetItemIcon, CombatLogGetCurrentEventInfo =
 	  UnitGUID, GetItemIcon, CombatLogGetCurrentEventInfo
 local GetSpellTexture = TMW.GetSpellTexture
+local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
 
 local pGUID = nil -- This can't be defined at load.
 local clientVersion = select(4, GetBuildInfo())

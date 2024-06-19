@@ -854,10 +854,10 @@ end
 
 if C_Covenants then
 	TMW.CovenantIcons = {
-		[1] = GetSpellTexture(321076),
-		[2] = GetSpellTexture(321079),
-		[3] = GetSpellTexture(299206),
-		[4] = GetSpellTexture(321078),
+		[1] = TMW.GetSpellTexture(321076),
+		[2] = TMW.GetSpellTexture(321079),
+		[3] = TMW.GetSpellTexture(299206),
+		[4] = TMW.GetSpellTexture(321078),
 	}
 	ConditionCategory:RegisterCondition(22, "COVENANT", {
 		text = L["CONDITIONPANEL_COVENANT"],

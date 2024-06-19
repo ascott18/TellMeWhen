@@ -24,11 +24,20 @@ function TellMeWhen_OnAddonCompartmentClick(addonName, button)
 	end
 end
 
-function TellMeWhen_AddonCompartmentFuncOnEnter() 
-	local f = GetMouseFocus()
-	while f and not f.dropdown do
-		f = f:GetParent()
+function TellMeWhen_AddonCompartmentFuncOnEnter(name, btn)
+	local f
+	if btn and type(btn[0]) == "userdata" then
+		-- MAYBE WORKS IN TWW - Addon compartment onEnter functions seem to currently not be called
+		f = btn
+	elseif GetMouseFocus then
+		f = GetMouseFocus()
+		while f and not f.dropdown do
+			f = f:GetParent()
+		end
 	end
+	
+	if not f then return end
+
 	GameTooltip:SetOwner(f, "ANCHOR_NONE")
 	GameTooltip:SetPoint("TOPRIGHT", f, "TOPLEFT", 0, 0)
 

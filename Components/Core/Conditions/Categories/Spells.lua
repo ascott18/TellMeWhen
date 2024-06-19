@@ -52,7 +52,7 @@ function Env.CooldownDuration(spell, gcdAsUnusable)
 	return 0, 0, 0
 end
 
-local GetSpellCharges = GetSpellCharges
+local GetSpellCharges = TMW.GetSpellCharges
 function Env.RechargeDuration(spell)
 	local charges, maxCharges, start, duration = GetSpellCharges(spell)
 	if charges and charges ~= maxCharges then
@@ -180,8 +180,8 @@ if TMW.isRetail then
 		icon = "Interface\\Icons\\ability_monk_roll",
 		tcoords = CNDT.COMMON.standardtcoords,
 		Env = {
-			GetSpellCharges = GetSpellCharges,
-			GetSpellCount = GetSpellCount,
+			GetSpellCharges = TMW.GetSpellCharges,
+			GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
 		},
 		funcstr = [[(GetSpellCharges(c.OwnSpells.First) or GetSpellCount(c.OwnSpells.First)) c.Operator c.Level]],
 		events = function(ConditionObject, c)
@@ -212,7 +212,7 @@ if TMW.isRetail then
 		icon = "Interface\\Icons\\ability_warlock_handofguldan",
 		tcoords = CNDT.COMMON.standardtcoords,
 		Env = {
-			GetSpellCharges = GetSpellCharges,
+			GetSpellCharges = TMW.GetSpellCharges,
 		},
 		funcstr = [[RechargeDuration(c.OwnSpells.First) c.Operator c.Level]],
 		events = function(ConditionObject, c)
@@ -301,7 +301,7 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 
 ConditionCategory:RegisterSpacer(2.9)
 
-local IsUsableSpell = IsUsableSpell
+local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
 function Env.ReactiveHelper(NameFirst, Checked)
 	local usable, nomana = IsUsableSpell(NameFirst)
 	if Checked then

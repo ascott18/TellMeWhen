@@ -23,6 +23,7 @@ local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("Player")
 
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
 local GetPetActionInfo = GetPetActionInfo
@@ -223,7 +224,7 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	icon = "Interface\\Icons\\ability_physical_taunt",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetSpellAutocast = GetSpellAutocast,
+		GetSpellAutocast = C_Spell.GetSpellAutocast or _G.GetSpellAutocast,
 	},
 	funcstr = [[BOOLCHECK( select(2, GetSpellAutocast(c.Spells.FirstString)) )]],
 	events = function(ConditionObject, c)

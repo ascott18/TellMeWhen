@@ -17,12 +17,14 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local GetSpellInfo, GetSpellLink, GetSpellBookItemInfo, GetSpellBookItemName
-	= GetSpellInfo, GetSpellLink, GetSpellBookItemInfo, GetSpellBookItemName
+local GetSpellInfo
+	= GetSpellInfo
 local pairs, ipairs, setmetatable, rawget, date, tinsert, type
 	= pairs, ipairs, setmetatable, rawget, date, tinsert, type
 	
+local GetSpellBookItemInfo = TMW.GetSpellBookItemInfo
 
+local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
 local GetSpellTexture = TMW.GetSpellTexture
 local tContains = TMW.tContains
 local tDeleteItem = TMW.tDeleteItem
@@ -215,17 +217,14 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 		-- It handles some special sort of spell, though, and is required.
 		input = GetSpellInfo(param4)
 	else
-		local type, baseSpellID = GetSpellBookItemInfo(data, subType)
-		
-		if not baseSpellID or type ~= "SPELL" then
+		local spellData = GetSpellBookItemInfo(data, subType)
+		if not spellData or spellData.typeName ~= "SPELL" then
 			return
 		end
 		
+		local baseSpellName = GetSpellInfo(spellData.actionId)
 		
-		local currentSpellName = GetSpellBookItemName(data, subType)		
-		local baseSpellName = GetSpellInfo(baseSpellID)
-		
-		input = baseSpellName or currentSpellName
+		input = baseSpellName or spellData.name
 	end
 
 	ics.Name = TMW:CleanString(ics.Name .. ";" .. input)

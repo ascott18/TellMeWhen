@@ -20,8 +20,8 @@ local print = TMW.print
 local type, pairs, gsub, strfind, strmatch, strsplit, strtrim, tonumber, tremove, ipairs, tinsert, CopyTable, setmetatable =
 	  type, pairs, gsub, strfind, strmatch, strsplit, strtrim, tonumber, tremove, ipairs, tinsert, CopyTable, setmetatable
 local tconcat = table.concat
-local GetSpellInfo = 
-	  GetSpellInfo
+local GetSpellInfo = GetSpellInfo
+local GetSpellTexture = TMW.GetSpellTexture
 
 local strlowerCache = TMW.strlowerCache
 

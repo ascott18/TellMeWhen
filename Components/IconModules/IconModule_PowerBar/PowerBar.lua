@@ -20,6 +20,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local _, pclass = UnitClass("Player")
 local GetSpellInfo, UnitPower =
 	  GetSpellInfo, UnitPower
+local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
 local pairs, wipe, _G =
 	  pairs, wipe, _G
 local PowerBarColor = PowerBarColor
@@ -100,14 +101,8 @@ end
 function PowerBar:SetSpell(spell)
 	local bar = self.bar
 	self.spell = spell
-	self.spellLink = GetSpellLink(spell)
-
 	
-	if self.spellLink then
-		-- We have to manually extract the spellID from the link because
-		-- GetSpellInfo doesn't work for spell links since wotlk.
-		self.spellID = self.spellLink:match("Hspell:(%d+)")
-		
+	if spell then
 		self:UpdateCost()
 
 		self:UpdateTable_Register()

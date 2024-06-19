@@ -24,12 +24,14 @@
 						end)
 						
 						
+						local GetSpellBookItemInfo = TMW.GetSpellBookItemInfo
 						function self:DragReceived(icon, t, data, subType)
 							local ics = icon:GetSettings()
 
 							local _, input
 							if t == "spell" then
-								_, input = GetSpellBookItemInfo(data, subType)
+								local spellData = GetSpellBookItemInfo(data, subType)
+								input = spellData and spellData.actionID
 							elseif t == "item" then
 								input = GetItemIcon(data)
 							end
