@@ -17,7 +17,7 @@ local L = TMW.L
 local print = TMW.print
 local tonumber, pairs, type, format, select =
 	  tonumber, pairs, type, format, select
-local UnitAura = UnitAura
+local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
@@ -75,7 +75,7 @@ Type:RegisterIconDefaults{
 	-- Only check stealable auras. This DOES function for non-mages.
 	Stealable				= false,
 
-	-- Show variable text. This is the extra return values at the end of UnitAura.
+	-- Show variable text. This is the values in `points` on AuraData instances.
 	-- It includes things like the strength of a shield spell. 
 	-- The first non-zero value from those variables will be reported as the icon's stack count.
 	ShowTTText				= false,
@@ -285,7 +285,7 @@ local function Buff_OnUpdate(icon, time)
 	local NotStealable = not icon.Stealable
 
 	-- These variables will hold all the attributes that we pass to YieldInfo().
-	local iconTexture, duration, expirationTime, caster, count, id, v1, v2, v3, useUnit, _
+	local foundInstance, foundUnit
 
 	local doesSort = DurationSort or StackSort
 
@@ -308,63 +308,75 @@ local function Buff_OnUpdate(icon, time)
 			local useFilter = Filter
 
 			while true do
-				local _buffName, _iconTexture, _count, _dispelType, _duration, _expirationTime, _caster, canSteal, _, _id, _, _, _, _, _, _v1, _v2, _v3 = UnitAura(unit, index, useFilter)
-				index = index + 1
-				
-				-- Bugfix: Enraged is an empty string.
-				if _dispelType == "" then
-					_dispelType = "Enraged"
-				end
+				local instance = GetAuraDataByIndex(unit, index, useFilter)
 
-				if not _buffName then
+				if not instance then
 					-- If we reached the end of auras found for Filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
 					-- iff we sort or haven't found anything yet.
-					if stage == 1 and Filterh and (doesSort or not id) then
+					if stage == 1 and Filterh and (doesSort or not foundInstance) then
 						index, stage = 1, 2
 						useFilter = Filterh
 					else
-						-- Break UnitAura loop (while true do ...)
+						-- Break GetAuraDataByIndex loop (while true do ...)
 						break
 					end
+				else
+					index = index + 1
 
-				elseif (Hash[_id] or Hash[_dispelType] or Hash[strlowerCache[_buffName]]) and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[_id])) then
-					if DurationSort then
-						local remaining = (_expirationTime == 0 and huge) or _expirationTime - time
+					-- Bugfix: Enraged is an empty string.
+					local _dispelType = instance.dispelName
+					if _dispelType == "" then
+						_dispelType = "Enraged"
+					end
 
-						if not id or curSortDur*DurationSort < remaining*DurationSort then
-							-- DurationSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
-							-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-							iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit, curSortDur =
-							_iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit,    remaining
+					if 
+						(Hash[instance.spellId] or Hash[_dispelType] or Hash[strlowerCache[instance.name]]) 
+					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
+					then
+						if DurationSort then
+							local remaining = (instance.expirationTime == 0 and huge) or instance.expirationTime - time
+
+							if not foundInstance or curSortDur*DurationSort < remaining*DurationSort then
+								-- DurationSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
+								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+								foundInstance = instance
+								foundUnit = unit
+								curSortDur = remaining
+							end
+						elseif StackSort then
+							local stack = instance.applications or 0
+
+							if not foundInstance or curSortStacks*StackSort < stack*StackSort then
+								-- StackSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
+								-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
+								foundInstance = instance
+								foundUnit = unit
+								curSortStacks = stack
+							end
+						else
+							-- We aren't sorting, and we haven't found anything yet, so record this
+							foundInstance = instance
+							foundUnit = unit
+
+							-- We don't need to look for anything else. Stop looking.
+							break
 						end
-					elseif StackSort then
-						local stack = _count or 0
-
-						if not id or curSortStacks*StackSort < stack*StackSort then
-							-- StackSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
-							-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-							iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit, curSortStacks =
-							_iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit,    stack
-						end
-					else
-						-- We aren't sorting, and we haven't found anything yet, so record this
-						iconTexture,  count,  duration,  expirationTime,  caster,  id,  v1,  v2,  v3, useUnit =
-						_iconTexture, _count, _duration, _expirationTime, _caster, _id, _v1, _v2, _v3, unit
-
-						-- We don't need to look for anything else. Stop looking.
-						break
 					end
 				end
 			end
 
 
-			if id and not doesSort then
+			if foundInstance and not doesSort then
 				break --  break unit loop
 			end
 		end
 	end
 	
-	icon:YieldInfo(true, useUnit, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3)
+	if foundInstance then
+		icon:YieldInfo(true, foundUnit, foundInstance)
+	else
+		icon:YieldInfo(true, nil)
+	end
 end
 
 local GetAuras = TMW.COMMON.Auras.GetAuras
@@ -441,21 +453,8 @@ local function Buff_OnUpdate_Packed(icon, time)
 	end
 	
 	-- sourceunit may end up stale if UNIT_AURA doesnt trigger when the sourceunit gets assigned a new unitid?
-	-- todo: switch HandleYieldedInfo to accept an instance
 	if foundInstance then
-		icon:YieldInfo(
-			true, 
-			foundUnit, 
-			foundInstance.icon, 
-			foundInstance.applications, 
-			foundInstance.duration, 
-			foundInstance.expirationTime, 
-			foundInstance.sourceUnit, 
-			foundInstance.spellId, 
-			foundInstance.points[1],
-			foundInstance.points[2],
-			foundInstance.points[3]
-		)
+		icon:YieldInfo(true, foundUnit, foundInstance)
 	else
 		icon:YieldInfo(true, nil)
 	end
@@ -478,15 +477,9 @@ local function Buff_OnUpdate_Controller(icon, time)
 			local filter = Filter
 
 			while true do
-				local buffName, iconTexture, count, dispelType, duration, expirationTime, caster, canSteal, _, id, _, _, _, _, _, v1, v2, v3 = UnitAura(unit, index, filter)
-				index = index + 1
-				
-				-- Bugfix: Enraged is an empty string.
-				if dispelType == "" then
-					dispelType = "Enraged"
-				end
+				local instance = GetAuraDataByIndex(unit, index, filter)
 
-				if not buffName then
+				if not instance then
 					-- If we reached the end of auras found for filter, and icon.BuffOrDebuff == "EITHER", switch to Filterh
 					-- iff we sort or haven't found anything yet.
 					if stage == 1 and Filterh then
@@ -495,14 +488,23 @@ local function Buff_OnUpdate_Controller(icon, time)
 					else
 						break
 					end
+				else
+					index = index + 1
+				
+					-- Bugfix: Enraged is an empty string.
+					local _dispelType = instance.dispelName
+					if _dispelType == "" then
+						_dispelType = "Enraged"
+					end
 
-				elseif  (NameFirst == '' or Hash[id] or Hash[dispelType] or Hash[strlowerCache[buffName]])
-					and (NotStealable or (canSteal and not NOT_ACTUALLY_SPELLSTEALABLE[id]))
-				then
-					
-					if not icon:YieldInfo(true, unit, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3) then
-						-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
-						return
+					if  (NameFirst == '' or Hash[instance.spellId] or Hash[_dispelType] or Hash[strlowerCache[instance.name]])
+					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId]))
+					then
+						
+						if not icon:YieldInfo(true, unit, instance) then
+							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
+							return
+						end
 					end
 				end
 			end
@@ -551,19 +553,7 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 
 				for i = 1, #results do
 					local instance = results[i]
-					if not icon:YieldInfo(
-						true, 
-						unit, 
-						instance.icon, 
-						instance.applications, 
-						instance.duration, 
-						instance.expirationTime, 
-						instance.sourceUnit, 
-						instance.spellId, 
-						instance.points[1],
-						instance.points[2],
-						instance.points[3]
-					) then
+					if not icon:YieldInfo(true, unit, instance) then
 						-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 						return
 					end
@@ -580,19 +570,7 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 						and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
 						then
 							
-							if not icon:YieldInfo(
-								true, 
-								unit, 
-								instance.icon, 
-								instance.applications, 
-								instance.duration, 
-								instance.expirationTime, 
-								instance.sourceUnit, 
-								instance.spellId, 
-								instance.points[1],
-								instance.points[2],
-								instance.points[3]
-							) then
+							if not icon:YieldInfo(true, unit, instance) then
 								-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 								return
 							end
@@ -607,26 +585,29 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 	icon:YieldInfo(false)
 end
 
-function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, caster, id, v1, v2, v3)
+function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	local Units = icon.Units
 
 	-- Check that unit is defined here in order to determine if we found something.
 	-- If icon.buffdebuff_iterateByAuraIndex == false, the code there might return a buffName
 	-- that shouldn't actually be used because it didn't pass checks for stealable.
-	-- Unit is only defined there (as useUnit) once something is found that definitely matches.
+	-- Unit is only defined there (as foundUnit) once something is found that definitely matches.
 	-- It is a bit bad that the code works this way, but it is nicer than manually nilling out all of the yielded info
 	-- after determining that no matching auras were found.
 	if unit then
+		local count = instance.count
+
 		if icon.ShowTTText then
 			if icon.ShowTTText == true then
-				if v1 and v1 > 0 then
-					count = v1
-				elseif v2 and v2 > 0 then
-					count = v2
-				elseif v3 and v3 > 0 then
-					count = v3
-				else
-					count = 0
+				count = 0
+
+				local points = instance.points
+				for i = 1, #points do
+					local v = points[i]
+					if v and v > 0 then 
+						count = v
+						break
+					end
 				end
 			else
 				-- icon.ShowTTText is a number if it isn't false and it isn't true
@@ -636,12 +617,12 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 
 		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			STATE_PRESENT,
-			iconTexture,
-			expirationTime - duration, duration,
+			instance.icon,
+			instance.expirationTime - instance.duration, instance.duration,
 			count, count,
-			id,
+			instance.spellId,
 			unit, nil,
-			caster, nil
+			instance.sourceUnit, nil
 		)
 
 	elseif not Units[1] and icon.HideIfNoUnits then

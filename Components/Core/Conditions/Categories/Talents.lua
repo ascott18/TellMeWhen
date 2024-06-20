@@ -31,8 +31,8 @@ local GetSpecializationInfo, GetNumClasses =
       GetSpecializationInfo, GetNumClasses
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
       GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec
-local UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID =
-	  UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID
+local IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID =
+	  IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID
 	  
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
@@ -815,19 +815,24 @@ if IsInJailersTower then
 			self.watching = false
 		end
 	end
+
+	local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 	function AnimaPowWatcher:UNIT_AURA(_, unit)
 		if unit ~= "player" then return end
 
 		for i=1, 300 do
-			local name, _, count, _, _, _, _, _, _, spellID = UnitAura("player", i, "MAW");
-			if not spellID then return end
+			local data = GetAuraDataByIndex("player", i, "MAW");
+			if not data then return end
+
+			local spellId = data.spellId
+			local count = data.count
 			if count == 0 then
-				count = 1;
+				count = 1
 			end
 
-			if currentAnimaPows[spellID] ~= count then
-				currentAnimaPows[spellID] = count;
-				currentAnimaPows[strlowerCache[name]] = count;
+			if currentAnimaPows[data.spellId] ~= count then
+				currentAnimaPows[data.spellId] = count;
+				currentAnimaPows[strlowerCache[data.name]] = count;
 				TMW:Fire("TMW_ANIMA_POWER_COUNT_CHANGED")
 			end
 		end

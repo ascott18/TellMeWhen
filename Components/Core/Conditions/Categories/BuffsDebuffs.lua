@@ -24,20 +24,20 @@ local strlowerCache = TMW.strlowerCache
 local huge = math.huge
 local empty = {}
 
-local UnitAura = UnitAura
+local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 local GetAuras = TMW.COMMON.Auras.GetAuras
 
 function Env.AuraStacks(unit, name, filter)
 	for i = 1, huge do
-		local buffName, _, count, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
+		local data = GetAuraDataByIndex(unit, i, filter)
 
-		if not buffName then
+		if not data then
 			return 0
-		elseif id == name or strlowerCache[buffName] == name then
-			if count == 0 then
+		elseif data.spellId == name or strlowerCache[data.name] == name then
+			if data.applications == 0 then
 				return 1
 			else
-				return count
+				return data.applications
 			end
 		end
 	end
@@ -66,10 +66,10 @@ function Env.AuraCount(units, spells, filter)
 
 	for u = 1, #units do
 		for i = 1, huge do
-			local buffName, _, _, _, _, _, _, _, _, id = UnitAura(units[u], i, filter)
-			if not buffName then
+			local data = GetAuraDataByIndex(units[u], i, filter)
+			if not data then
 				break
-			elseif names[id] or names[strlowerCache[buffName]] then
+			elseif names[data.spellId] or names[strlowerCache[data.name]] then
 				n = n + 1
 			end
 		end
@@ -100,18 +100,18 @@ function Env.AuraCountPacked(units, spells, kindKey, onlyMine)
 end
 
 function Env.AuraDur(unit, name, filter)
-	local buffName, _, duration, expirationTime, id 
+	local data
 	for i = 1, huge do
-		buffName, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, i, filter)
-		if not id or id == name or strlowerCache[buffName] == name then
+		data = GetAuraDataByIndex(unit, i, filter)
+		if not data or data.spellId == name or strlowerCache[data.name] == name then
 			break
 		end
 	end
 	
-	if not buffName then
+	if not data then
 		return 0, 0, 0
 	else
-		return expirationTime == 0 and huge or expirationTime - TMW.time, duration, expirationTime
+		return data.expirationTime == 0 and huge or data.expirationTime - TMW.time, data.duration, data.expirationTime
 	end
 end
 
@@ -132,20 +132,18 @@ function Env.AuraDurPacked(unit, name, kindKey, onlyMine)
 end
 
 function Env.AuraPercent(unit, name, filter)
-	local isID = isNumber[name]
-	
-	local buffName, duration, expirationTime, id, _
+	local data
 	for i = 1, huge do
-		buffName, _, _, _, duration, expirationTime, _, _, _, id = UnitAura(unit, i, filter)
-		if not id or id == name or strlowerCache[buffName] == name then
+		data = GetAuraDataByIndex(unit, i, filter)
+		if not data or data.spellId == name or strlowerCache[data.name] == name then
 			break
 		end
 	end
 	
-	if not buffName then
+	if not data then
 		return 0
 	else
-		return expirationTime == 0 and 1 or ((expirationTime - TMW.time) / duration)
+		return data.expirationTime == 0 and 1 or ((data.expirationTime - TMW.time) / data.duration)
 	end
 end
 
@@ -166,23 +164,17 @@ function Env.AuraPercentPacked(unit, name, kindKey, onlyMine)
 end
 
 function Env.AuraVariableNumber(unit, name, filter)
-	
-	local buffName, id, v1, v2, v3, v4, _
+	local data
 	for i = 1, huge do
-		buffName, _, _, _, _, _, _, _, _, id, _, _, _, _, _, v1, v2, v3, v4 = UnitAura(unit, i, filter)
-		if not id or id == name or strlowerCache[buffName] == name then
+		data = GetAuraDataByIndex(unit, i, filter)
+		if not data or data.spellId == name or strlowerCache[data.name] == name then
 			break
 		end
 	end
 	
-	if v1 and v1 > 0 then
-		return v1
-	elseif v2 and v2 > 0 then
-		return v2
-	elseif v3 and v3 > 0 then
-		return v3
-	elseif v4 and v4 > 0 then
-		return v4
+	for i = 1, #data.points do
+		local v = data.points[i]
+		if v and v > 0 then return v end
 	end
 		
 	return 0
@@ -255,10 +247,10 @@ function Env.AuraTooltipNumber(...)
 
 		local n
 		for i = 1, 60 do
-			local buffName, _, _, _, _, _, _, _, _, id = UnitAura(unit, i, filter)
-			if not buffName then 
+			local data = GetAuraDataByIndex(unit, i, filter)
+			if not data then 
 				break
-			elseif id == name or strlowerCache[buffName] == strlowerCache[name] then
+			elseif data.spellId == name or strlowerCache[data.name] == name then
 				n = i
 				break
 			end

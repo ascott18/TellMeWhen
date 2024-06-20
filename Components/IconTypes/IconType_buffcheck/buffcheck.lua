@@ -18,7 +18,7 @@ local print = TMW.print
 local tonumber, pairs =
 	  tonumber, pairs
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
-local UnitAura = UnitAura
+local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
@@ -139,7 +139,7 @@ local function BuffCheck_OnUpdate(icon, time)
 	local PresentAlpha = icon.States[STATE_PRESENT].Alpha
 
 	-- These variables will hold all the attributes that we pass to YieldInfo().
-	local iconTexture, id, count, duration, expirationTime, caster, useUnit
+	local foundInstance, foundUnit
 	local curSortDur = huge
 
 	for u = 1, #Units do
@@ -152,19 +152,20 @@ local function BuffCheck_OnUpdate(icon, time)
 			
 			local foundOnUnit = false
 			for index = 1, huge do
-				local _buffName, _iconTexture, _count, _, _duration, _expirationTime, _caster, _, _, _id = UnitAura(unit, index, Filter)
-				if not _id then
+				local instance = GetAuraDataByIndex(unit, index, Filter)
+				if not instance then
 					-- No more auras on the unit. Break spell loop.
 					break
-				elseif Hash[_id] or Hash[strlowerCache[_buffName]] then
+				elseif Hash[instance.spellId] or Hash[strlowerCache[instance.name]] then
 					foundOnUnit = true
-					local remaining = (_expirationTime == 0 and huge) or _expirationTime - time
+					local remaining = (instance.expirationTime == 0 and huge) or instance.expirationTime - time
 
 					-- This icon type automatically sorts by lowest duration.
-					if not id or remaining < curSortDur then
+					if not foundInstance or remaining < curSortDur then
 						-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-						iconTexture,  count,  duration,  expirationTime,  caster,  id,  useUnit, curSortDur =
-						_iconTexture, _count, _duration, _expirationTime, _caster, _id,  unit,    remaining
+						foundInstance = instance
+						foundUnit = unit
+						curSortDur = remaining
 					end
 
 					if PresentAlpha == 0 then
@@ -186,7 +187,7 @@ local function BuffCheck_OnUpdate(icon, time)
 
 	-- We didn't find any units that were missing all the auras being checked.
 	-- So, report the lowest duration aura that we did find.
-	icon:YieldInfo(false, useUnit, iconTexture, count, duration, expirationTime, caster, id)
+	icon:YieldInfo(false, foundUnit, foundInstance)
 end
 
 local GetAuras = TMW.COMMON.Auras.GetAuras
@@ -262,21 +263,13 @@ local function BuffCheck_OnUpdate_Packed(icon, time)
 	-- We didn't find any units that were missing all the auras being checked.
 	-- So, report the lowest duration aura that we did find.
 	if foundInstance then
-		icon:YieldInfo(false, 
-			foundUnit, 
-			foundInstance.icon, 
-			foundInstance.applications, 
-			foundInstance.duration, 
-			foundInstance.expirationTime, 
-			foundInstance.sourceUnit, 
-			foundInstance.spellId
-		)
+		icon:YieldInfo(false, foundUnit, foundInstance)
 	else
 		icon:YieldInfo(false, nil)
 	end
 end
 
-function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, duration, expirationTime, caster, id)
+function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	if not unit then
 		-- Unit is nil if the icon didn't check any living units.
 		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
@@ -288,7 +281,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 			nil, nil,
 			nil, nil
 		)
-	elseif not id then
+	elseif not instance then
 		-- ID is nil if we found a unit that is missing all of the auras that are being checked for.
 		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			STATE_ABSENT,
@@ -299,17 +292,17 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, iconTexture, count, durat
 			unit, nil,
 			nil, nil
 		)
-	elseif id then
+	elseif instance then
 		-- ID is defined if we didn't find any units that are missing all the auras being checked for.
 		-- In this case, the data is for the first matching aura found on the first unit checked.
 		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			STATE_PRESENT,
-			iconTexture,
-			expirationTime - duration, duration,
-			count, count,
-			id,
+			instance.icon,
+			instance.expirationTime - instance.duration, instance.duration,
+			instance.applications, instance.applications,
+			instance.spellId,
 			unit, nil,
-			caster, nil
+			instance.sourceUnit, nil
 		)
 	end
 end

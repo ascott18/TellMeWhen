@@ -16,6 +16,11 @@
 -- ---------------------------------
 
 local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+local LoadAddOn = C_AddOns and C_AddOns.LoadAddOn or LoadAddOn
+local EnableAddOn = C_AddOns and C_AddOns.EnableAddOn or EnableAddOn
+local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+
+
 TELLMEWHEN_VERSION = GetAddOnMetadata("TellMeWhen", "Version")
 
 TELLMEWHEN_VERSION_MINOR = ""
@@ -165,8 +170,6 @@ local InCombatLockdown, GetTalentInfo =
 	  InCombatLockdown, GetTalentInfo
 local IsInGuild, IsInGroup, IsInInstance =
 	  IsInGuild, IsInGroup, IsInInstance
-local GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn, GetBuildInfo =
-	  GetAddOnInfo, IsAddOnLoaded, LoadAddOn, EnableAddOn, GetBuildInfo
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack =
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack
 local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin, max, ceil, floor, random =

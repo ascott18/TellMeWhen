@@ -17,6 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local GetAddOnInfo = C_AddOns and C_AddOns.GetAddOnInfo or GetAddOnInfo
+
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 
 

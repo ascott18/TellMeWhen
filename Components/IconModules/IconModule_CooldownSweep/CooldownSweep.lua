@@ -19,6 +19,7 @@ local print = TMW.print
 
 local OnGCD = TMW.OnGCD
 
+local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
 local pairs, wipe = 
       pairs, wipe
 
