@@ -41,13 +41,13 @@
 				TMW:CInit(self)
 				
 
-				self:SetTitle(GetSpellInfo(75))
+				self:SetTitle(TMW.GetSpellName(75))
 				self.Text:SetText(TMW.L["ICONTYPE_SWINGTIMER_TIP"])
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 					local settings = self:GetSettingTable()
 					local supplementalData = panelInfo.supplementalData
 					local spellID = supplementalData.spellID
-					local name = GetSpellInfo(spellID)
+					local name = TMW.GetSpellName(spellID)
 					local descriptiveName = supplementalData.descriptiveName or name
 					self.spellIdToApply = spellID
 

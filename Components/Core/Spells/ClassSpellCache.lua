@@ -20,6 +20,8 @@ local print = TMW.print
 local pairs, type, ipairs, bit, select = 
       pairs, type, ipairs, bit, select
 
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 local GetClassInfo = TMW.GetClassInfo
 local GetMaxClassID = TMW.GetMaxClassID
 
@@ -144,7 +146,7 @@ function ClassSpellCache:GetNameCache()
 				local c = {}
 				NameCache[class] = c
 				for spellID, value in pairs(spells) do
-					local name = GetSpellInfo(spellID)
+					local name = GetSpellName(spellID)
 					if name then
 						c[name:lower()] = true
 					end

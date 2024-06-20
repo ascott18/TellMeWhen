@@ -18,6 +18,8 @@ local L = TMW.L
 local print = TMW.print
 
 local SUG = TMW.SUG
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 
 local Module_spell = SUG:GetModule("spell")
 local Module = SUG:NewModule("spellWithGCD", Module_spell)
@@ -34,7 +36,7 @@ function Module:Entry_AddToList_2(f, id)
 	if id == "GCD" then
 		local spellID = TMW.GCDSpell
 
-		local name = GetSpellInfo(spellID)
+		local name = GetSpellName(spellID)
 
 		f.Name:SetText(L["GCD"])
 		f.ID:SetText(nil)

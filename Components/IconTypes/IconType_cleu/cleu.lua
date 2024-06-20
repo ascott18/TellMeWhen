@@ -20,6 +20,8 @@ local bit_band, bit_bor, tinsert, tremove, unpack, wipe =
 	  bit.band, bit.bor, tinsert, tremove, unpack, wipe
 local UnitGUID, GetItemIcon, CombatLogGetCurrentEventInfo =
 	  UnitGUID, GetItemIcon, CombatLogGetCurrentEventInfo
+
+local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellTexture = TMW.GetSpellTexture
 local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
 

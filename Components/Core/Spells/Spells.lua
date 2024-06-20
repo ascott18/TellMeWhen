@@ -20,7 +20,8 @@ local print = TMW.print
 local type, pairs, gsub, strfind, strmatch, strsplit, strtrim, tonumber, tremove, ipairs, tinsert, CopyTable, setmetatable =
 	  type, pairs, gsub, strfind, strmatch, strsplit, strtrim, tonumber, tremove, ipairs, tinsert, CopyTable, setmetatable
 local tconcat = table.concat
-local GetSpellInfo = GetSpellInfo
+local GetSpellName = TMW.GetSpellName
+local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellTexture = TMW.GetSpellTexture
 
 local strlowerCache = TMW.strlowerCache
@@ -231,7 +232,7 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 		local hash = {}
 		for k, v in ipairs(spells) do
 			if convert == "name" and (allowRenaming or tonumber(v)) then
-				v = GetSpellInfo(v or "") or v -- Turn the value into a name if needed
+				v = GetSpellName(v or "") or v -- Turn the value into a name if needed
 			end
 
 			if doLower then
@@ -250,7 +251,7 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 			-- Turn the first value into a name and return it
 			local ret = spells[1] or ""
 			if (allowRenaming or tonumber(ret)) then
-				ret = GetSpellInfo(ret) or ret 
+				ret = GetSpellName(ret) or ret 
 			end
 
 			if doLower then
@@ -262,7 +263,7 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 			-- Convert everything to a name
 			for k, v in ipairs(spells) do
 				if (allowRenaming or tonumber(v)) then
-					spells[k] = GetSpellInfo(v or "") or v 
+					spells[k] = GetSpellName(v or "") or v 
 				end
 			end
 
@@ -579,13 +580,13 @@ TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 ---------------------------------
 if TMW.isCata then
 	if pclass == "PALADIN" then
-		local name = GetSpellInfo(26573) 
+		local name = GetSpellName(26573) 
 		TMW.COMMON.CurrentClassTotems = {
 			name = name,
 			desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name),
 			{
 				hasVariableNames = false,
-				name = GetSpellInfo(26573), --consecration
+				name = GetSpellName(26573), --consecration
 				texture = GetSpellTexture(26573)
 			}
 		}
@@ -598,7 +599,7 @@ if TMW.isCata then
 				return cachedName
 			end
 		end
-		local name = GetSpellInfo(46584)
+		local name = GetSpellName(46584)
 		TMW.COMMON.CurrentClassTotems = {
 			name = name,
 			desc = function() return L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name) end,
@@ -719,7 +720,7 @@ elseif not TMW.isRetail then
 			rankRoman = numerals[rank]
 		}
 		
-		data.spellName = GetSpellInfo(spellID)
+		data.spellName = GetSpellName(spellID)
 		if not data.spellName then
 			if not TMW.isClassic then
 				-- don't debug on classic - we use wrath's data and filter out totems that don't exist
@@ -907,18 +908,18 @@ else
 	}
 
 	if pclass == "PALADIN" then
-		local name = GetSpellInfo(26573) .. " & " .. GetSpellInfo(114158)
+		local name = GetSpellName(26573) .. " & " .. GetSpellName(114158)
 		TMW.COMMON.CurrentClassTotems = {
 			name = name,
 			desc = L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name),
 			{
 				hasVariableNames = false,
-				name = GetSpellInfo(26573), --consecration
+				name = GetSpellName(26573), --consecration
 				texture = GetSpellTexture(26573)
 			},
 			{
 				hasVariableNames = false,
-				name = GetSpellInfo(114158), --light's hammer
+				name = GetSpellName(114158), --light's hammer
 				texture = GetSpellTexture(114158)
 			}
 		}
@@ -931,7 +932,7 @@ else
 				return cachedName
 			end
 		end
-		local name = GetSpellInfo(49206)
+		local name = GetSpellName(49206)
 		TMW.COMMON.CurrentClassTotems = {
 			name = name,
 			desc = function() return L["ICONMENU_TOTEM_GENERIC_DESC"]:format(name) end,
@@ -1018,7 +1019,7 @@ local function ProcessEquivalencies()
 			end
 
 			for _, spell in pairs(tbl) do
-				if type(spell) == "number" and not GetSpellInfo(spell) then
+				if type(spell) == "number" and not GetSpellName(spell) then
 					TMW:Debug("Invalid spellID found: %s (%s - %s)!",
 						spell, category, equiv)
 				end

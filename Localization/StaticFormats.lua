@@ -3,6 +3,23 @@
 local pname = UnitName("player")
 local locale = GetLocale()
 
+local GetSpellInfo
+if C_Spell.GetSpellInfo then
+	GetSpellInfo = function(spellID)
+		if not spellID then
+			return nil;
+		end
+
+		local spellInfo = C_Spell.GetSpellInfo(spellID);
+		if spellInfo then
+			return spellInfo.name, nil, spellInfo.iconID;
+		end
+	end
+else
+	GetSpellInfo = _G.GetSpellInfo
+end
+
+
 local spellFmt = "|T%s:0|t%s"
 local function Spell(id, noTex)
     local name, _, tex = GetSpellInfo(id)

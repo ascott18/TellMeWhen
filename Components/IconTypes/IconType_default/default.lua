@@ -17,9 +17,9 @@ local L = TMW.L
 local print = TMW.print
 local type =
 	  type
-local GetSpellInfo =
-	  GetSpellInfo
 
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 local GetSpellBookItemInfo = TMW.GetSpellBookItemInfo
 
 local Type = TMW.Classes.IconType:New("")
@@ -64,7 +64,7 @@ function Type:DragReceived(icon, t, data, subType, param4)
 			-- I don't remember the purpose of this anymore.
 			-- It handles some special sort of spell, though, and is required.
 			-- param4 here is a spellID, obviously.
-			input = GetSpellInfo(param4)
+			input = GetSpellName(param4)
 		else
 			
 			local spellData = GetSpellBookItemInfo(data, subType)
@@ -72,7 +72,7 @@ function Type:DragReceived(icon, t, data, subType, param4)
 				return
 			end
 			
-			local baseSpellName = GetSpellInfo(spellData.actionId)
+			local baseSpellName = GetSpellName(spellData.actionId)
 			input = baseSpellName or spellData.name
 		end
 	

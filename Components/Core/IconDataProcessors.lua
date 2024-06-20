@@ -19,6 +19,8 @@ local print = TMW.print
 
 local format = format
 local isNumber = TMW.isNumber
+
+local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
 
 

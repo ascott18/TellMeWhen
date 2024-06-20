@@ -17,8 +17,8 @@ local L = TMW.L
 local print = TMW.print
 local pairs, ipairs =
 	  pairs, ipairs
-local GetSpellInfo, UnitCastingInfo, UnitChannelInfo =
-	  GetSpellInfo, UnitCastingInfo, UnitChannelInfo
+local UnitCastingInfo, UnitChannelInfo =
+	  UnitCastingInfo, UnitChannelInfo
 
 local strlowerCache = TMW.strlowerCache
 

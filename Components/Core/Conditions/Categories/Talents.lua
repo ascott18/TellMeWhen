@@ -25,8 +25,8 @@ local _, pclass = UnitClass("Player")
 
 local wipe = 
       wipe
-local GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo = 
-      GetTalentInfo, GetNumTalents, GetGlyphLink, GetSpellInfo
+local GetTalentInfo, GetNumTalents, GetGlyphLink = 
+      GetTalentInfo, GetNumTalents, GetGlyphLink
 local GetSpecializationInfo, GetNumClasses = 
       GetSpecializationInfo, GetNumClasses
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
@@ -34,6 +34,8 @@ local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore,
 local UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID =
 	  UnitAura, IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID
 	  
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 local GetClassInfo = TMW.GetClassInfo
 local GetMaxClassID = TMW.GetMaxClassID
 
@@ -690,7 +692,7 @@ if GetGlyphSocketInfo then
 				if spellID then
 					GlyphLookup[spellID] = 1
 					
-					local name = GetSpellInfo(spellID)
+					local name = GetSpellName(spellID)
 					name = strlowerCache[name]
 					GlyphLookup[name] = 1
 				end
@@ -702,7 +704,7 @@ if GetGlyphSocketInfo then
 				if spellID then
 					GlyphLookup[spellID] = 1
 					
-					local name = GetSpellInfo(spellID)
+					local name = GetSpellName(spellID)
 					name = strlowerCache[name]
 					GlyphLookup[name] = 1
 				end

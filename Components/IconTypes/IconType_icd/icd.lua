@@ -18,7 +18,9 @@ local print = TMW.print
 local UnitGUID = 
 	  UnitGUID
 
+local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellTexture = TMW.GetSpellTexture
+local GetSpellName = TMW.GetSpellName
 local strlowerCache = TMW.strlowerCache
 
 local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
@@ -132,7 +134,7 @@ local function ICD_OnEvent(icon, event, ...)
 			then
 		local unit
 		unit, _, spellID = ...
-		spellName = GetSpellInfo(spellID)
+		spellName = GetSpellName(spellID)
 
 		valid = unit == "player"
 	end

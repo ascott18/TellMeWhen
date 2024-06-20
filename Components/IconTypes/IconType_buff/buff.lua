@@ -19,6 +19,8 @@ local tonumber, pairs, type, format, select =
 	  tonumber, pairs, type, format, select
 local UnitAura = UnitAura
 
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
@@ -668,24 +670,24 @@ end
 
 local aurasWithNoSourceReported = {
 	-- Mists:
-	GetSpellInfo(104993),	-- Jade Spirit
-	GetSpellInfo(116660),	-- River's Song
-	GetSpellInfo(120032),	-- Dancing Steel
-	GetSpellInfo(116631),	-- Colossus
-	GetSpellInfo(104423),	-- Windsong
-	GetSpellInfo(109085),	-- Blastington's
+	GetSpellName(104993),	-- Jade Spirit
+	GetSpellName(116660),	-- River's Song
+	GetSpellName(120032),	-- Dancing Steel
+	GetSpellName(116631),	-- Colossus
+	GetSpellName(104423),	-- Windsong
+	GetSpellName(109085),	-- Blastington's
 
 	-- Warlords:
-	GetSpellInfo(156060),	-- Megawatt Filament
-	GetSpellInfo(156055),	-- Oglethorpe's Missile Splitter
-	GetSpellInfo(173288),	-- Hemet's Heartseeker (maybe unused?)
-	GetSpellInfo(159679),	-- Mark of Blackrock
-	GetSpellInfo(159678),	-- Mark of Shadowmoon
-	GetSpellInfo(159676),	-- Mark of the Frostwolf
-	GetSpellInfo(159239),	-- Mark of the Shattered Hand
-	GetSpellInfo(159234),	-- Mark of the Thunderlord
-	GetSpellInfo(173322),	-- Mark of Bleeding Hollow
-	GetSpellInfo(159675),	-- Mark of Warsong
+	GetSpellName(156060),	-- Megawatt Filament
+	GetSpellName(156055),	-- Oglethorpe's Missile Splitter
+	GetSpellName(173288),	-- Hemet's Heartseeker (maybe unused?)
+	GetSpellName(159679),	-- Mark of Blackrock
+	GetSpellName(159678),	-- Mark of Shadowmoon
+	GetSpellName(159676),	-- Mark of the Frostwolf
+	GetSpellName(159239),	-- Mark of the Shattered Hand
+	GetSpellName(159234),	-- Mark of the Thunderlord
+	GetSpellName(173322),	-- Mark of Bleeding Hollow
+	GetSpellName(159675),	-- Mark of Warsong
 	nil,	-- Terminate with nil to prevent all Warsong's return values from filling the table
 }
 

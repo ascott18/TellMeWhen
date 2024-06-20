@@ -18,8 +18,9 @@ local print = TMW.print
 local L = TMW.L
 local LSM = LibStub("LibSharedMedia-3.0")
 local _, pclass = UnitClass("Player")
-local GetSpellInfo, UnitPower =
-	  GetSpellInfo, UnitPower
+local UnitPower =
+	  UnitPower
+local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
 local pairs, wipe, _G =
 	  pairs, wipe, _G

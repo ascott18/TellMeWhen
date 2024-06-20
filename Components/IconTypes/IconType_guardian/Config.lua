@@ -50,7 +50,7 @@ end
 function Module:Entry_AddToList_1(f, id)
 	local data = Type.GuardianInfo[id]
 	local name = data.name
-	local triggerSpellName = GetSpellInfo(data.triggerSpell)
+	local triggerSpellName = TMW.GetSpellName(data.triggerSpell)
 
 	if data.nameKnown then
 		f.insert = SUG.inputType == "number" and id or name

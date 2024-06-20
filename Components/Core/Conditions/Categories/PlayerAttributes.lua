@@ -23,7 +23,9 @@ local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("Player")
 
+local GetSpellName = TMW.GetSpellName
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+
 local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
 local GetPetActionInfo = GetPetActionInfo
@@ -193,7 +195,7 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 				return strlowerCache[NONE]
 			else
 				local icons, active, catable, spellID = GetShapeshiftFormInfo(i)
-				return spellID and strlowerCache[GetSpellInfo(spellID)] or ""
+				return spellID and strlowerCache[GetSpellName(spellID)] or ""
 			end
 		end
 	},

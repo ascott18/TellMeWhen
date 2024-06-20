@@ -19,8 +19,12 @@ local print = TMW.print
 
 local strfind, strlower, pairs
     = strfind, strlower, pairs
-local GetSpellInfo, InCombatLockdown, C_TradeSkillUI
-    = GetSpellInfo, InCombatLockdown, C_TradeSkillUI
+local InCombatLockdown, C_TradeSkillUI
+    = InCombatLockdown, C_TradeSkillUI
+
+local GetSpellTexturePlain = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 
 local debugprofilestop = debugprofilestop_SAFE
 
@@ -265,9 +269,10 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 				spellID = spellID + skip
 			end
 
-			local name, _, icon = GetSpellInfo(spellID)
+			local name = GetSpellName(spellID)
 			local fail = false
 			if name then
+				local icon = GetSpellTexturePlain(spellID)
 				spellsFailed = 0
 
 				-- This is our best filter by far - about 70k spells are filtered out by this.
@@ -404,7 +409,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 				Cache[spellID] = nil
 			end
 			for spellID in pairs(CONST.WHITELIST) do
-				local name = GetSpellInfo(spellID)
+				local name = GetSpellName(spellID)
 				if name then
 					Cache[spellID] = strlower(name)
 				end

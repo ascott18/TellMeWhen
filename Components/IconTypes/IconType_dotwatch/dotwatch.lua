@@ -17,8 +17,8 @@ local L = TMW.L
 local print = TMW.print
 local type, wipe, pairs, rawget, abs, min, next, GetTime =
 	  type, wipe, pairs, rawget, abs, min, next, GetTime
-local UnitGUID, UnitAura, UnitName, GetSpellInfo =
-	  UnitGUID, UnitAura, UnitName, GetSpellInfo
+local UnitGUID, UnitAura, UnitName =
+	  UnitGUID, UnitAura, UnitName
 
 local C_Timer = C_Timer
 local huge = math.huge
@@ -28,6 +28,8 @@ local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
 local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local GetSpellTexture = TMW.GetSpellTexture
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 
 local Aura
 
@@ -338,7 +340,7 @@ Aura = TMW:NewClass("Aura"){
 		self.unitName = destName
 
 		self.spellID = spellID
-		self.spellName = GetSpellInfo(spellID)
+		self.spellName = GetSpellName(spellID)
 		self.start = TMW.time
 		self.lastSeen = TMW.time
 		local duration = BaseDurations[spellID]

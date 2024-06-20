@@ -27,9 +27,8 @@ local huge = math.huge
 local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local GetSpellTexture = TMW.GetSpellTexture
-
-local GetSpellInfo 
-    = GetSpellInfo
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 
 local classSpellNameCache
 
@@ -228,8 +227,8 @@ local resetsOnCast = {
 -- Map to names, since classic doesn't provide spellIDs to CLEU
 resetsOnCast = TMW.map(resetsOnCast, function(v, k)
 	return TMW.map(v, function(v, k)
-		return v, strlowerCache[GetSpellInfo(k)]
-	end), strlowerCache[GetSpellInfo(k)]
+		return v, strlowerCache[GetSpellName(k)]
+	end), strlowerCache[GetSpellName(k)]
 end)
 
 -- local resetsOnAura = {
@@ -319,7 +318,7 @@ function Type:UNIT_SPELLCAST_SUCCEEDED(event, unit, _, spellID)
 		-- so remove all errors and just ignore things without GUIDs.
 		
 		local c = Cooldowns[sourceGUID]
-		local spellName = GetSpellInfo(spellID)
+		local spellName = GetSpellName(spellID)
 		spellName = strlowerCache[spellName]
 		
 		c[spellName] = TMW.time

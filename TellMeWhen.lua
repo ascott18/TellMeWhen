@@ -161,8 +161,6 @@ end)
 
 ---------- Upvalues ----------
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
-local GetSpellCooldown, GetSpellInfo =
-	  GetSpellCooldown, GetSpellInfo
 local InCombatLockdown, GetTalentInfo =
 	  InCombatLockdown, GetTalentInfo
 local IsInGuild, IsInGroup, IsInInstance =
@@ -393,9 +391,42 @@ end
 
 
 
+if _G.GetSpellInfo then
+	TMW.GetSpellInfo = _G.GetSpellInfo
+else
+	local C_Spell_GetSpellInfo = C_Spell.GetSpellInfo
+	TMW.GetSpellInfo = function(spellID)
+		if not spellID then
+			return nil;
+		end
+
+		local spellInfo = C_Spell_GetSpellInfo(spellID);
+		if spellInfo then
+			return spellInfo.name, nil, spellInfo.iconID, spellInfo.castTime, spellInfo.minRange, spellInfo.maxRange, spellInfo.spellID, spellInfo.originalIconID;
+		end
+	end
+end
+
+if C_Spell.GetSpellName then
+	TMW.GetSpellName = C_Spell.GetSpellName
+else
+	TMW.GetSpellName = GetSpellInfo
+end
+local GetSpellName = TMW.GetSpellName
 
 
-
+if _G.GetSpellCooldown then
+	TMW.GetSpellCooldown = _G.GetSpellCooldown
+else
+	local C_Spell_GetSpellCooldown = C_Spell.GetSpellCooldown
+	TMW.GetSpellCooldown = function(spellID)
+		local spellCooldownInfo = C_Spell_GetSpellCooldown(spellID);
+		if spellCooldownInfo then
+			return spellCooldownInfo.startTime, spellCooldownInfo.duration, spellCooldownInfo.isEnabled, spellCooldownInfo.modRate;
+		end
+	end
+end
+local GetSpellCooldown = TMW.GetSpellCooldown
 
 ---------------------------------
 -- Caches
@@ -433,19 +464,19 @@ end})
 
 
 TMW.SpellTexturesMetaIndex = {}
-if GetSpellInfo(336126) then
+if GetSpellName(336126) then
 	--hack for pvp tinkets
 	TMW.SpellTexturesMetaIndex[336126] = GetSpellTexture(336126)
-	TMW.SpellTexturesMetaIndex[strlowerCache[GetSpellInfo(336126)]] = GetSpellTexture(336126)
+	TMW.SpellTexturesMetaIndex[strlowerCache[GetSpellName(336126)]] = GetSpellTexture(336126)
 end
 local SpellTexturesMetaIndex = TMW.SpellTexturesMetaIndex
 
-local avengingWrathName = GetSpellInfo(31884)
+local avengingWrathName = GetSpellName(31884)
 function TMW.GetSpellTexture(spell)
 	if not spell then return end
 
 	local spellTex = GetSpellTexture(spell)
-	if spellTex and (spellTex ~= 135875 or GetSpellInfo(spell) == avengingWrathName) then
+	if spellTex and (spellTex ~= 135875 or GetSpellName(spell) == avengingWrathName) then
 		-- Workaround https://github.com/ascott18/TellMeWhen/issues/2114 - 
 		-- don't return avenging wrath texture if the input wasn't the avenging wrath spell.
 		return spellTex

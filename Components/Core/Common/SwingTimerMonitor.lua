@@ -33,6 +33,8 @@ local strsub, pairs
 local UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 	= UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 
+local GetSpellInfo = TMW.GetSpellInfo
+local GetSpellName = TMW.GetSpellName
 local strlowerCache = TMW.strlowerCache
 
 -- Module creation
@@ -58,15 +60,15 @@ end)
 
 local swingSpells = 
 	not TMW.isRetail and {
-		[strlowerCache[GetSpellInfo(78)]] = 1, -- Heroic Strike
-		[strlowerCache[GetSpellInfo(845)]] = 1, -- Cleave
-		[strlowerCache[GetSpellInfo(6807)]] = 1, -- Maul
-		[strlowerCache[GetSpellInfo(2973)]] = 1, -- Raptor Strike
+		[strlowerCache[GetSpellName(78)]] = 1, -- Heroic Strike
+		[strlowerCache[GetSpellName(845)]] = 1, -- Cleave
+		[strlowerCache[GetSpellName(6807)]] = 1, -- Maul
+		[strlowerCache[GetSpellName(2973)]] = 1, -- Raptor Strike
 	} 
 	or {}
 
-if GetSpellInfo(56815) then
-	swingSpells[strlowerCache[GetSpellInfo(56815)]] = 1 -- Rune Strike
+if GetSpellName(56815) then
+	swingSpells[strlowerCache[GetSpellName(56815)]] = 1 -- Rune Strike
 end
 
 -- ---------------------------------

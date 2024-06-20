@@ -19,6 +19,7 @@ local print = TMW.print
 
 local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
+local GetSpellInfo = TMW.GetSpellInfo
 
 local _, pclass = UnitClass("Player")
 

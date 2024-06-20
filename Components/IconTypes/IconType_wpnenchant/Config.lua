@@ -127,7 +127,7 @@ function Module:OnInitialize()
 	self:Etc_DoItemLookups()
 
 	for _, id in pairs(self.SpellIDs) do
-		local name = GetSpellInfo(id)
+		local name = TMW.GetSpellName(id)
 		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
 			local dobreak
 			enchant = name:match(enchant)

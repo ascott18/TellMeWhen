@@ -19,6 +19,7 @@ local print = TMW.print
 local IE = TMW.IE
 local CI = TMW.CI
 
+local GetSpellInfo = TMW.GetSpellInfo
 
 
 

@@ -31,8 +31,6 @@ local AceDB = LibStub("AceDB-3.0")
 ---------- Upvalues ----------
 local TMW = TMW
 local L = TMW.L
-local GetSpellInfo =
-	  GetSpellInfo
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, pcall, assert, rawget, rawset, unpack, select =
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, pcall, assert, rawget, rawset, unpack, select
 local format, gsub, strlenutf8, strsplit, strlower, max, min, floor, ceil, log10 =
@@ -830,7 +828,7 @@ function IE:Equiv_GenerateTips(equiv)
 	local original = TMW.EquivOriginalLookup[equiv]
 
 	for k, v in pairs(IDs) do
-		local name, _, texture = GetSpellInfo(v)
+		local name, _, texture = TMW.GetSpellInfo(v)
 		if not name then
 			if TMW.debug then
 				TMW:Error("INVALID ID FOUND: %s:%s", equiv, v)
