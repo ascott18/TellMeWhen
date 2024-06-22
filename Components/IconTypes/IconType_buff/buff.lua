@@ -595,7 +595,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	-- It is a bit bad that the code works this way, but it is nicer than manually nilling out all of the yielded info
 	-- after determining that no matching auras were found.
 	if unit then
-		local count = instance.count
+		local count = instance.applications
 
 		if icon.ShowTTText then
 			if icon.ShowTTText == true then
