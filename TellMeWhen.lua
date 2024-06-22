@@ -1106,17 +1106,17 @@ function TMW:PLAYER_LOGIN()
 	TMW:UnregisterEvent("PLAYER_LOGIN")
 	TMW.PLAYER_LOGIN = nil
 
-	if not LibStub("DRList-1.0", true) then
-		StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
-			text = L["ERROR_MISSINGFILE_NOREQ"],
-			button1 = OKAY,
-			timeout = 0,
-			showAlert = true,
-			whileDead = true,
-			preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
-		}
-		StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Lib/DRList-1.0/DRList-1.0.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
-	end
+	-- if not LibStub("DRList-1.0", true) then
+	-- 	StaticPopupDialogs["TMW_RESTARTNEEDED"] = {
+	-- 		text = L["ERROR_MISSINGFILE_NOREQ"],
+	-- 		button1 = OKAY,
+	-- 		timeout = 0,
+	-- 		showAlert = true,
+	-- 		whileDead = true,
+	-- 		preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+	-- 	}
+	-- 	StaticPopup_Show("TMW_RESTARTNEEDED", TELLMEWHEN_VERSION_FULL, "TellMeWhen/Lib/DRList-1.0/DRList-1.0.lua") -- arg3 could also be L["ERROR_MISSINGFILE_REQFILE"]
+	-- end
 	
 
 

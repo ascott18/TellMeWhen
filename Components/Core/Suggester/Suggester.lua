@@ -29,8 +29,9 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, nex
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, assert, rawget, rawset, unpack, select
 local strfind, strmatch, strbyte, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
 	  strfind, strmatch, strbyte, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10
-local GetItemInfo, GetItemIcon = 
-      GetItemInfo, GetItemIcon
+
+local GetItemIcon = GetItemIcon or (C_Item and C_Item.GetItemIcon)
+local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
 
 
 -- GLOBALS: GameTooltip, GameTooltip_SetDefaultAnchor

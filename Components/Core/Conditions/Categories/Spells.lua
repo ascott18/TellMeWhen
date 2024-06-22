@@ -39,7 +39,7 @@ Env.GetSpellCooldown = GetSpellCooldown
 local GetSpellName = TMW.GetSpellName
 local GetSpellInfo = TMW.GetSpellInfo
 
-local GetItemCooldown = GetItemCooldown or (C_Container and C_Container.GetItemCooldown)
+local GetItemCooldown = GetItemCooldown or (C_Item and C_Item.GetItemCooldown) or (C_Container and C_Container.GetItemCooldown)
 
 function Env.CooldownDuration(spell, gcdAsUnusable)
 	if spell == "gcd" then

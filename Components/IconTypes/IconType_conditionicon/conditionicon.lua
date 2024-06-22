@@ -15,9 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local GetItemIcon = 
-	  GetItemIcon
 
+local GetItemIcon = GetItemIcon or (C_Item and C_Item.GetItemIcon)
 local GetSpellBookItemInfo = TMW.GetSpellBookItemInfo
 	  
 local Type = TMW.Classes.IconType:New("conditionicon")

@@ -17,6 +17,8 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local GetItemIcon = GetItemIcon or (C_Item and C_Item.GetItemIcon)
+local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
 
 local SUG = TMW.SUG
 

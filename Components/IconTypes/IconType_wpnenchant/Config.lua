@@ -20,6 +20,8 @@ local print = TMW.print
 local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
 local GetSpellTexture = TMW.GetSpellTexture
+local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
+local GetItemIcon = GetItemIcon or (C_Item and C_Item.GetItemIcon)
 
 local Type = rawget(TMW.Types, "wpnenchant")
 

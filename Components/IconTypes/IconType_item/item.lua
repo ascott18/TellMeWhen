@@ -17,11 +17,10 @@ local L = TMW.L
 local print = TMW.print
 local pairs, ipairs =
 	  pairs, ipairs
-local GetItemInfo =
-	  GetItemInfo
 
 local OnGCD = TMW.OnGCD
 local GetSpellTexture = TMW.GetSpellTexture
+local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
 
 
 

@@ -17,8 +17,10 @@ local L = TMW.L
 local print = TMW.print
 local _G, strmatch, strtrim, select, floor, ceil, pairs, wipe, type, max =
 	  _G, strmatch, strtrim, select, floor, ceil, pairs, wipe, type, max
-local GetInventoryItemTexture, GetInventorySlotInfo, GetInventoryItemID, GetItemInfo, GetWeaponEnchantInfo =
-	  GetInventoryItemTexture, GetInventorySlotInfo, GetInventoryItemID, GetItemInfo, GetWeaponEnchantInfo
+local GetInventoryItemTexture, GetInventorySlotInfo, GetInventoryItemID, GetWeaponEnchantInfo =
+	  GetInventoryItemTexture, GetInventorySlotInfo, GetInventoryItemID, GetWeaponEnchantInfo
+
+local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
 
 local strlowerCache = TMW.strlowerCache
 
