@@ -23,6 +23,7 @@ local Env = CNDT.Env
 local _, pclass = UnitClass("Player")
 
 local wow_900 = select(4, GetBuildInfo()) >= 90000
+local GetSpellName = TMW.GetSpellName
 
 Env.UnitHealth = UnitHealth
 Env.UnitHealthMax = UnitHealthMax
@@ -210,7 +211,7 @@ if TMW.isRetail then
 		hidden = pclass ~= "MONK",
 	})
 	ConditionCategory:RegisterCondition(26.1, "STAGGER", {
-		text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_PERCENTOFMAXHP"],
+		text = GetSpellName(115069) .. " - " .. L["CONDITIONPANEL_PERCENTOFMAXHP"],
 		percent = true,
 		formatter = TMW.C.Formatter.PERCENT,
 		min = 0,
@@ -230,7 +231,7 @@ if TMW.isRetail then
 		hidden = pclass ~= "MONK",
 	})
 	ConditionCategory:RegisterCondition(26.15, "STAGGER_CURPCT", {
-		text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_PERCENTOFCURHP"],
+		text = GetSpellName(115069) .. " - " .. L["CONDITIONPANEL_PERCENTOFCURHP"],
 		percent = true,
 		formatter = TMW.C.Formatter.PERCENT,
 		min = 0,
@@ -250,7 +251,7 @@ if TMW.isRetail then
 		hidden = pclass ~= "MONK",
 	})
 	ConditionCategory:RegisterCondition(26.2, "STAGGER_ABS", {
-		text = GetSpellInfo(115069) .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
+		text = GetSpellName(115069) .. " - " .. L["CONDITIONPANEL_ABSOLUTE"],
 		min = 0,
 		range = 1000000,
 		unit = PLAYER,

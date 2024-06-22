@@ -1899,7 +1899,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 		},
 		[48025] = {
 			icon = function(self, ics)
-				ics.Name = gsub(ics.Name, "(CrowdControl)", "%1; " .. GetSpellInfo(339))
+				ics.Name = gsub(ics.Name, "(CrowdControl)", "%1; " .. TMW.GetSpellName(339))
 			end,
 		},
 		[47002] = {
@@ -2085,7 +2085,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 
 				for _, stanceData in ipairs(self.stances) do
 					if stanceData.class == pclass then
-						local stanceName = GetSpellInfo(stanceData.id)
+						local stanceName = TMW.GetSpellName(stanceData.id)
 						tinsert(self.CSN, stanceName)
 					end
 				end
@@ -2272,7 +2272,7 @@ function TMW:GetBaseUpgrades()			-- upgrade functions
 
 				for _, stanceData in ipairs(self.stances) do
 					if stanceData.class == pclass then
-						local stanceName = GetSpellInfo(stanceData.id)
+						local stanceName = TMW.GetSpellName(stanceData.id)
 						tinsert(self.CSN, stanceName)
 					end
 				end
