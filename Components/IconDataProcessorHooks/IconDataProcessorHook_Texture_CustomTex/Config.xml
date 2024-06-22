@@ -24,7 +24,7 @@
 						end)
 						
 						
-						local GetItemIcon = GetItemIcon or (C_Item and C_Item.GetItemIcon)
+						local GetItemIcon = C_Item and C_Item.GetItemIconByID or GetItemIcon
 						local GetSpellBookItemInfo = TMW.GetSpellBookItemInfo
 						function self:DragReceived(icon, t, data, subType)
 							local ics = icon:GetSettings()

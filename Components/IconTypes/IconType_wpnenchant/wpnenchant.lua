@@ -20,7 +20,7 @@ local _G, strmatch, strtrim, select, floor, ceil, pairs, wipe, type, max =
 local GetInventoryItemTexture, GetInventorySlotInfo, GetInventoryItemID, GetWeaponEnchantInfo =
 	  GetInventoryItemTexture, GetInventorySlotInfo, GetInventoryItemID, GetWeaponEnchantInfo
 
-local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
+local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 
 local strlowerCache = TMW.strlowerCache
 

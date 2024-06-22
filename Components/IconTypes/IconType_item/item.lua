@@ -20,7 +20,7 @@ local pairs, ipairs =
 
 local OnGCD = TMW.OnGCD
 local GetSpellTexture = TMW.GetSpellTexture
-local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
+local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 
 
 

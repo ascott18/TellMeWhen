@@ -22,13 +22,13 @@ local GetInventoryItemTexture, GetInventoryItemCooldown, GetInventoryItemID, Get
 local tonumber, type, pairs, strfind, strmatch, ipairs, strtrim, error
 	= tonumber, type, pairs, strfind, strmatch, ipairs, strtrim, error
 
-local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
-local IsEquippedItem = IsEquippedItem or (C_Item and C_Item.IsEquippedItem)
-local GetItemCount = GetItemCount or (C_Item and C_Item.GetItemCount)
-local GetItemIcon = GetItemIcon or (C_Item and C_Item.GetItemIcon)
-local IsItemInRange = IsItemInRange or (C_Item and C_Item.IsItemInRange)
-local GetItemCooldown = GetItemCooldown or (C_Item and C_Item.GetItemCooldown) or (C_Container and C_Container.GetItemCooldown)
-local GetItemSpell = GetItemSpell or (C_Item and C_Item.GetItemSpell)
+local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
+local IsEquippedItem = C_Item and C_Item.IsEquippedItem or IsEquippedItem
+local GetItemCount = C_Item and C_Item.GetItemCount or GetItemCount
+local GetItemIcon = C_Item and C_Item.GetItemIconByID or GetItemIcon
+local IsItemInRange = C_Item and C_Item.IsItemInRange or IsItemInRange
+local GetItemCooldown = (C_Item and C_Item.GetItemCooldown) or (C_Container and C_Container.GetItemCooldown) or GetItemCooldown
+local GetItemSpell = C_Item and C_Item.GetItemSpell or GetItemSpell
 
 local INVSLOT_LAST_EQUIPPED = INVSLOT_LAST_EQUIPPED
 

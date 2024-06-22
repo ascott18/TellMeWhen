@@ -30,8 +30,8 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, nex
 local strfind, strmatch, strbyte, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
 	  strfind, strmatch, strbyte, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10
 
-local GetItemIcon = GetItemIcon or (C_Item and C_Item.GetItemIcon)
-local GetItemInfo = GetItemInfo or (C_Item and C_Item.GetItemInfo)
+local GetItemIcon = C_Item and C_Item.GetItemIconByID or GetItemIcon
+local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 
 
 -- GLOBALS: GameTooltip, GameTooltip_SetDefaultAnchor
