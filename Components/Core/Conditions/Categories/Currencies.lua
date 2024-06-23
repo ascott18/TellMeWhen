@@ -155,12 +155,18 @@ TMW:RegisterCallback("TMW_INITIALIZE", function()
 	local addedSpace = false
 	-- put an absolute cap of 10000 of the id just in case of weird infinite loop cases happening if this API changes.
 	while numFailed < 1000 and id < 10000 do
-		local name, _, _, _, _, _, hasSeen = GetCurrencyInfo(id)
+		local name, _, tex, _, _, _, hasSeen = GetCurrencyInfo(id)
 		if name and hasSeen then
 			name = strlower(name)
 
 			local shouldAdd = true
-			if TMW.tContains(blacklist, id) then
+			if 
+				strfind(name, "%[dnt%]")
+				-- There are a lot of "fake" currencies that don't have icons.
+				-- Since all real currencies do have icons, just skip any that don't have an icon.
+				or not tex 
+				or TMW.tContains(blacklist, id)
+			then
 				shouldAdd = false
 			else
 				for _, tbl in pairs(currencies) do
