@@ -442,19 +442,50 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 		local FlashPeriod = table.Period
 		local animation_flasher = icon.animation_flasher
 
+		-- --Leaving this debug code here in case it proves useful to future coders,
+		-- -- see http://thecodelesscode.com/case/41
+		-- --When the issue occurs, the dump line from _G.r won't be removed, so you can
+		-- -- just punch this into the WoW command line to see a half-assed stack dump:
+		-- -- /dump _G.r
+		-- if _G.r == nil then
+		-- 	_G.r = {}
+		-- end
+
 		local timePassed = TMW.time - table.Start
 		local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 1
 
 		if table.Fade and FlashPeriod ~= 0 then
 			local remainingFlash = timePassed % FlashPeriod
+			local newAlpha = 1
 			if fadingIn then
-				animation_flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
+				newAlpha = table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod)
 			else
-				animation_flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
+				newAlpha = table.Alpha*(remainingFlash/FlashPeriod)
 			end
+
+			-- local dump = {
+			-- 	timePassed= timePassed,
+			-- 	fadingIn= fadingIn,
+			-- 	FlashPeriod= FlashPeriod,
+			-- 	Alpha= table.Alpha,
+			-- 	newAlpha = newAlpha,
+			-- 	remainingFlash = remainingFlash,
+			-- 	animation_flasher = animation_flasher
+			-- }
+			-- _G.r[#_G.r+1] = dump;
+
+			--Turns out floating point issues were resulting in callilng SetAlpha
+			-- with a value of -5*10^20 or something like that
+			if (newAlpha < 0.0001) then
+				newAlpha = 0
+			end
+
+			animation_flasher:SetAlpha(newAlpha)
 		else
 			animation_flasher:SetAlpha(fadingIn and table.Alpha or 0)
 		end
+
+		--tremove(_G.r, #_G.r)
 
 		-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
 		if timePassed > table.Duration then
