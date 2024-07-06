@@ -428,14 +428,15 @@ if C_ClassTalents then
 							-- about what fields it has. Currently the only field I see is spellID.
 							local definitionInfo = C_Traits.GetDefinitionInfo(entryInfo.definitionID)
 							local spellID = definitionInfo.spellID
-	 
-							if spellID then
-								-- The ranks are stored on the node, but we
-								-- have to make sure that we're looking at the ranks for the
-								-- currently selected entry for the talent.
-								local ranks = nodeInfo.activeEntry and nodeInfo.activeEntry.entryID == entryID and nodeInfo.ranksPurchased or 0
-	
-								map[spellID] = ranks
+
+							if spellID 
+							-- The ranks are stored on the node, but we
+							-- have to make sure that we're looking at the ranks for the
+							-- currently selected entry for the talent.
+							and nodeInfo.activeEntry 
+							and nodeInfo.activeEntry.entryID == entryID 
+							then
+								map[spellID] = nodeInfo.ranksPurchased or 0
 							end
 						end
 					end
