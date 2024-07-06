@@ -420,6 +420,8 @@ TMW.BE = {
 			 223658, -- Safeguard                           (warrior, protection)
 			 287081, -- Lichborne                           (frost/unholy, PVP talent)
 			 319217, -- Podtender                           (night fae)
+			 363916, -- Obsidian Scales                     (evoker, general)
+			 374348, -- Renewing Blaze                      (evoker, general)
 		},
 		DamageBuffs = {
 			   1719, -- Recklessness                        (warrior, arms)
