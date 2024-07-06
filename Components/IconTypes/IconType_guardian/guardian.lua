@@ -176,6 +176,7 @@ Type.GuardianInfo = TMW.isClassic and {
 	[136407] = Info(15, 267995, true), -- Wrathguard (Inner Demons passive)
 	[136408] = Info(15, 267996, true), -- Darkhound (Inner Demons passive)
 
+	[210910] = Info(10, 423585, false), -- Doomfiend (Dragonflight s3/s4 warlock tier set bonus)
 
 	[135816] = Info(15, 264119, true), -- Summon Vilefiend
 	[135002] = Info(15, 265187, true), -- Summon Demonic Tyrant
