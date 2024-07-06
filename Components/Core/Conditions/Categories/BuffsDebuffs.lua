@@ -519,7 +519,6 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	end,
 	icon = "Interface\\Icons\\inv_elemental_primal_mana",
 	tcoords = CNDT.COMMON.standardtcoords,
-	hidden = not TMW.isRetail,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraVariableNumberPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -548,7 +547,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		icon = not TMW.isRetail and "Interface\\Icons\\spell_ice_lament" or "Interface\\Icons\\ability_priest_clarityofwill",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
-			if CanUsePackedAuras(c) then
+			if C_TooltipInfo and CanUsePackedAuras(c) then
 				return [[AuraTooltipNumberPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[, ]] .. i .. [[) c.Operator c.Level]]
 			end
 			return [[AuraTooltipNumber(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
@@ -786,7 +785,6 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	end,
 	icon = "Interface\\Icons\\spell_shadow_lifedrain",
 	tcoords = CNDT.COMMON.standardtcoords,
-	hidden = not TMW.isRetail,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraVariableNumberPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -815,7 +813,7 @@ for i = 1, 3 do -- DEBUFFTOOLTIPSCAN
 		icon = "Interface\\Icons\\spell_fire_flameshock",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
-			if CanUsePackedAuras(c) then
+			if C_TooltipInfo and CanUsePackedAuras(c) then
 				return [[AuraTooltipNumberPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[, ]] .. i .. [[) c.Operator c.Level]]
 			end
 			return [[AuraTooltipNumber(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]

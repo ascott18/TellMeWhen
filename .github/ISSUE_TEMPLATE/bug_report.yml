@@ -1,6 +1,7 @@
 name: Bug report
 description: Report a problem with TellMeWhen
-labels: defect
+labels:
+  - defect
 body:
   - type: dropdown
     id: wowversion
@@ -10,8 +11,8 @@ body:
       multiple: true
       options:
         - Retail
-        - Wrath Classic
-        - Classic/Classic SoM
+        - Cata Classic
+        - Classic or SoD
     validations:
       required: true
   - type: input
