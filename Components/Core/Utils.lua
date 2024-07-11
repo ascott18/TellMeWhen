@@ -1404,8 +1404,6 @@ else
 		local type, baseSpellID = GetSpellBookItemInfo(index, book)
 		if not type then return end
 
-		if data.itemType == Enum.SpellBookItemType.Spell then data.typeName = "SPELL" end
-		
 		return {
 			-- Nothing in TMW uses the other types besides SPELL
 			-- itemType is for forward compat
