@@ -265,6 +265,37 @@ Animations:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 		end
 	end,
 })
+
+local function MakeAlphaFlashOnUpdate(target)
+	return function(self, table)
+		local flashPeriod = table.Period
+		local timePassed = TMW.time - table.Start
+		local fadingIn = flashPeriod == 0 or floor(timePassed/flashPeriod) % 2 == 1
+
+		local alpha
+		if table.Fade and flashPeriod ~= 0 then
+			local remainingFlash = timePassed % flashPeriod
+			if fadingIn then
+				alpha = table.Alpha*((flashPeriod-remainingFlash)/flashPeriod)
+			else
+				alpha = table.Alpha*(remainingFlash/flashPeriod)
+			end
+		else
+			alpha = fadingIn and table.Alpha or 0
+		end
+
+		if alpha < 0 then alpha = 0
+		elseif alpha > 1 then alpha = 1 end
+
+		self[target]:SetAlpha(alpha)
+
+		-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
+		if timePassed > table.Duration then
+			self:Animations_Stop(table)
+		end
+	end
+end
+
 Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 	text = L["ANIM_SCREENFLASH"],
 	desc = L["ANIM_SCREENFLASH_DESC"],
@@ -310,29 +341,7 @@ Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 		}
 	end,
 	
-	OnUpdate = function(TMWFlashAnim, table)
-		local FlashPeriod = table.Period
-		local animation_flasher = TMWFlashAnim.animation_flasher
-
-		local timePassed = TMW.time - table.Start
-		local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 1
-
-		if table.Fade and FlashPeriod ~= 0 then
-			local remainingFlash = timePassed % FlashPeriod
-			if fadingIn then
-				animation_flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
-			else
-				animation_flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
-			end
-		else
-			animation_flasher:SetAlpha(fadingIn and table.Alpha or 0)
-		end
-
-		-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
-		if timePassed > table.Duration then
-			TMWFlashAnim:Animations_Stop(table)
-		end
-	end,
+	OnUpdate = MakeAlphaFlashOnUpdate("animation_flasher"),
 	OnStart = function(TMWFlashAnim, table)
 		local animation_flasher
 		if TMWFlashAnim.animation_flasher then
@@ -438,29 +447,7 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 		}
 	end,
 
-	OnUpdate = function(icon, table)
-		local FlashPeriod = table.Period
-		local animation_flasher = icon.animation_flasher
-
-		local timePassed = TMW.time - table.Start
-		local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 1
-
-		if table.Fade and FlashPeriod ~= 0 then
-			local remainingFlash = timePassed % FlashPeriod
-			if fadingIn then
-				animation_flasher:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
-			else
-				animation_flasher:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
-			end
-		else
-			animation_flasher:SetAlpha(fadingIn and table.Alpha or 0)
-		end
-
-		-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
-		if timePassed > table.Duration then
-			icon:Animations_Stop(table)
-		end
-	end,
+	OnUpdate = MakeAlphaFlashOnUpdate("animation_flasher"),
 	OnStart = function(icon, table)
 		local animation_flasher
 		if icon.animation_flasher then
@@ -529,29 +516,7 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		}
 	end,
 
-	OnUpdate = function(icon, table)
-		local FlashPeriod = table.Period
-		local animation_border = icon.animation_border
-
-		local timePassed = TMW.time - table.Start
-		local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 0
-
-		if table.Fade and FlashPeriod ~= 0 then
-			local remainingFlash = timePassed % FlashPeriod
-			if not fadingIn then
-				animation_border:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
-			else
-				animation_border:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
-			end
-		else
-			animation_border:SetAlpha(fadingIn and table.Alpha or 0)
-		end
-
-		-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
-		if timePassed > table.Duration then
-			icon:Animations_Stop(table)
-		end
-	end,
+	OnUpdate = MakeAlphaFlashOnUpdate("animation_border"),
 	OnStart = function(icon, table)
 		local animation_border
 		if icon.animation_border then
@@ -645,29 +610,7 @@ Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 		}
 	end,
 
-	OnUpdate = function(icon, table)
-		local FlashPeriod = table.Period
-		local animation_overlay = icon.animation_overlay
-
-		local timePassed = TMW.time - table.Start
-		local fadingIn = FlashPeriod == 0 or floor(timePassed/FlashPeriod) % 2 == 0
-
-		if table.Fade and FlashPeriod ~= 0 then
-			local remainingFlash = timePassed % FlashPeriod
-			if not fadingIn then
-				animation_overlay:SetAlpha(table.Alpha*((FlashPeriod-remainingFlash)/FlashPeriod))
-			else
-				animation_overlay:SetAlpha(table.Alpha*(remainingFlash/FlashPeriod))
-			end
-		else
-			animation_overlay:SetAlpha(fadingIn and table.Alpha or 0)
-		end
-
-		-- (mostly) generic expiration -- we just finished the last flash, so dont do any more
-		if timePassed > table.Duration then
-			icon:Animations_Stop(table)
-		end
-	end,
+	OnUpdate = MakeAlphaFlashOnUpdate("animation_overlay"),
 	OnStart = function(icon, table)
 		local animation_overlay
 		if icon.animation_overlay then
