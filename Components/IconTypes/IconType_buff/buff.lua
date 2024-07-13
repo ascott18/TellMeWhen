@@ -611,7 +611,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 				end
 			else
 				-- icon.ShowTTText is a number if it isn't false and it isn't true
-				count = select(icon.ShowTTText, v1, v2, v3)
+				count = instance.points[icon.ShowTTText]
 			end
 		end
 
