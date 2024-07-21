@@ -1,4 +1,5 @@
 ## v10.2.8
+* Added the original Lightwell icon type back to Cata Classic
 * Fix: dragging a spell to an icon not working in WoW 10.2.7.
 * Fix: #2168 floating point errors in alpha animations
 * Fix: Icon fade animations not always working on condition icons

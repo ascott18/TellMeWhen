@@ -47,3 +47,4 @@ Components\Core\Spells\ClassSpellCache-Cata.lua
 Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua
 
 Components\IconTypes\IconType_runes\runes-Wrath.lua
+Components\IconTypes\IconType_lightwell\lightwell.lua

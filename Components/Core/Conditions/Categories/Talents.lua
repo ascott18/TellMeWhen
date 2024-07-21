@@ -708,7 +708,7 @@ if GetGlyphSocketInfo then
 		wipe(GlyphLookup)
 		if TMW.isCata then
 			-- Cata
-			for i = 1, 9 do
+			for i = 1, GetNumGlyphSockets() do
 				local _, _, _, spellID = GetGlyphSocketInfo(i)
 				if spellID then
 					GlyphLookup[spellID] = 1
