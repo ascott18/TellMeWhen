@@ -3,7 +3,7 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
-## v10.2.8
+## v11.0.0
 * Added the original Lightwell icon type back to Cata Classic
 * Fix: dragging a spell to an icon not working in WoW 10.2.7.
 * Fix: #2168 floating point errors in alpha animations
