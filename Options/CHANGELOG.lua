@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v11.0.1
+* Fix: #2174 - Autocast conditions not working
+
 ## v11.0.0
 * Added the original Lightwell icon type back to Cata Classic
 * Fix: dragging a spell to an icon not working in WoW 10.2.7.

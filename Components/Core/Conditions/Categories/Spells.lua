@@ -403,7 +403,7 @@ ConditionCategory:RegisterCondition(3.2, "AUTOSPELL", {
 	icon = 135467,
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		IsAutoRepeatSpell = IsAutoRepeatSpell,
+		IsAutoRepeatSpell = C_Spell and C_Spell.IsAutoRepeatSpell or IsAutoRepeatSpell,
 	},
 	funcstr = [[BOOLCHECK( IsAutoRepeatSpell(c.OwnSpells.First) )]],
 	events = function(ConditionObject, c)

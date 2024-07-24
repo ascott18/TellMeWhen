@@ -226,7 +226,7 @@ ConditionCategory:RegisterCondition(12,	 "AUTOCAST", {
 	icon = "Interface\\Icons\\ability_physical_taunt",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetSpellAutocast = C_Spell.GetSpellAutocast or _G.GetSpellAutocast,
+		GetSpellAutocast = C_Spell and C_Spell.GetSpellAutoCast or _G.GetSpellAutocast,
 	},
 	funcstr = [[BOOLCHECK( select(2, GetSpellAutocast(c.Spells.FirstString)) )]],
 	events = function(ConditionObject, c)
