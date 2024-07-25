@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="7.4.0"
 
 TMW.CHANGELOG = [==[
+## v11.0.2
+* Fix spell dragging to icons (again)
+
 ## v11.0.1
 * Fix: #2174 - Autocast conditions not working
 * Fix: #2176, #2177, #2175, Many spells not tracking cooldowns properly

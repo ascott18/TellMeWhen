@@ -222,7 +222,7 @@ function IconType:DragReceived(icon, t, data, subType, param4)
 			return
 		end
 		
-		local baseSpellName = GetSpellName(spellData.actionId)
+		local baseSpellName = GetSpellName(spellData.actionID)
 		
 		input = baseSpellName or spellData.name
 	end

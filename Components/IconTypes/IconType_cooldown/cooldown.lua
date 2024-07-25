@@ -33,6 +33,9 @@ local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local _, pclass = UnitClass("Player")
 
+-- TODO: Preliminary testing has shown that C_Spell.IsSpellInRange behaves properly 
+-- with all inputs in wow 11.0+. Once it makes it to all game versions,
+-- we can probably remove LibSpellRange.
 local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
 
 

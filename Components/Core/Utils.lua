@@ -1409,7 +1409,7 @@ else
 			-- itemType is for forward compat
 			itemType = type == "SPELL" and 1 or -1,
 			typeName = type,
-			actionId = baseSpellID,
+			actionID = baseSpellID,
 			name = GetSpellBookItemName(index, book)
 		}
 	end
