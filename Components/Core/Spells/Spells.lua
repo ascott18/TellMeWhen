@@ -145,63 +145,6 @@ local function parseSpellsString(setting, doLower, keepDurations)
 end
 parseSpellsString = TMW:MakeNArgFunctionCached(3, parseSpellsString)
 
--- IDs of spells that can't be tracked properly because of blizzard bugs.
-local fixSpellMap = { 
-	[382614] = function()
-		-- Evoker https://github.com/ascott18/TellMeWhen/issues/2017
-		-- 375783: Font of Magic (talent)
-		-- 382614: Dream Breath (Preservation talent, with Font of Magic LEARNED)
-		-- 355936: Dream Breath (Preservation talent, with Font of Magic UNLEARNED)
-		if not IsPlayerSpell(382614) and not IsPlayerSpell(375783) then
-			return 355936
-		end
-	end,
-	[382731] = function()
-		-- Evoker https://github.com/ascott18/TellMeWhen/issues/2017
-		-- 375783: Font of Magic (talent)
-		-- 382731: Spiritbloom (Preservation talent, with Font of Magic LEARNED)
-		-- 367226: Spiritbloom (Preservation talent, with Font of Magic UNLEARNED)
-		if not IsPlayerSpell(382731) and not IsPlayerSpell(375783) then
-			return 367226
-		end
-	end,
-	[280735] = function()
-		-- Fury Execute https://github.com/ascott18/TellMeWhen/issues/2054
-		-- 206315: Massacre (fury talent)
-		-- 280735: Execute when Massacre is learned
-		--   5308: Execute when Massacre is unlearned.
-		-- Execute is not trackable by name when massacre is learned,
-		-- Despite the fact that GetSpellInfo("Execute") does always return the right ID
-		-- (unlike the evoker bugs where GetSpellInfo returns the wrong id)
-		if IsPlayerSpell(206315) and not IsPlayerSpell(280735) then
-			-- force to be the ID. Yes this is a weird case.
-			return 280735
-		end
-	end,
-}
-local function covenantFix(shadowlandsId, talentedId)
-	-- For covenant abilities that became talents,
-	-- there are two abilities with different cooldowns, names, ids, etc.
-	
-	-- However, the talent cannot be used while the covenant ability is on CD, and vice-versa.
-	-- Additionally, and the reason for this fix, is spell APIs by name will resolve to the covenant ability,
-	-- not to the talent. So, when both are learned, we'll assume that if the player has both abilities learned,
-	-- then the talent one is the one they're actually using, so we have TMW replace the spell with the ID of the talent.
-
-	-- Note: not all covenant abilities are broken in this way.
-	-- For example, Convoke the Spirits, while it does have two different spells,
-	-- resolves by-name to the correct spell based on talent learned vs unlearned.
-
-	fixSpellMap[shadowlandsId] = function()
-		if IsPlayerSpell(shadowlandsId) and IsPlayerSpell(talentedId) then
-			return talentedId
-		end
-	end
-end
-
-covenantFix(325727, 391888) -- Adaptive Swarm (druid, necrolord) https://github.com/ascott18/TellMeWhen/issues/2055
-covenantFix(325640, 386997) -- Soul Rot (warlock, nf) https://github.com/ascott18/TellMeWhen/issues/1978
-
 local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRenaming)
 	local spells = parseSpellsString(setting, doLower, false)
 
@@ -212,16 +155,17 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 		for k, v in ipairs(spells) do
 			-- Doesn't matter if the input is a name or an ID.
 			-- We need to map it to an ID to fix blizzard bugs
-			local name, _, _, _, _, _, spellID = GetSpellInfo(v or "")
-			if spellID then
-				if fixSpellMap[spellID] then
-					-- Attempt to fix blizzard bugs like https://github.com/Stanzilla/WoWUIBugs/issues/354
-					local newSpell = fixSpellMap[spellID]()
-					if newSpell then
-						print("fixing bugged spell", v, spellID, "=>", newSpell)
-						spells[k] = newSpell
-					end
-				elseif convert == "id" then
+
+			-- As of WoW 11.0, we have to always replace spells with the result of GetOverrideSpell.
+			-- Even the most simple spells like "Thrash" don't work anymore without this:
+			--    GetSpellInfo("Thrash") returns spellID 106832,
+			--    but the spellID that actually has Thrash's cooldown is 77758.
+			--    Thrash is NOT a "replacement spell", so this is bizarre.
+			--    Fortunately, GetOverrideSpell returns 77758 for both "Thrash" and 106832.
+
+			if C_Spell and C_Spell.GetOverrideSpell then
+				local spellID = C_Spell.GetOverrideSpell(v or "")
+				if spellID then
 					spells[k] = spellID
 				end
 			end
