@@ -29,8 +29,6 @@ local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 local IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetNumShapeshiftForms, GetShapeshiftFormInfo
 local GetPetActionInfo = GetPetActionInfo
-local GetNumTrackingTypes = GetNumTrackingTypes or C_Minimap.GetNumTrackingTypes
-local GetTrackingInfo = GetTrackingInfo or C_Minimap.GetTrackingInfo
 	  
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], false, false)
 
@@ -332,7 +330,19 @@ ConditionCategory:RegisterSpacer(15.5)
 
 
 Env.Tracking = {}
-if GetNumTrackingTypes and GetTrackingInfo and GetNumTrackingTypes() > 0 then
+
+if C_Minimap and C_Minimap.GetTrackingInfo then
+	local GetTrackingInfo = C_Minimap.GetTrackingInfo
+	local GetNumTrackingTypes = C_Minimap.GetNumTrackingTypes
+	-- Wow 11.0+
+	function CNDT:MINIMAP_UPDATE_TRACKING()
+		wipe(Env.Tracking)
+		for i = 1, GetNumTrackingTypes() do
+			local data = GetTrackingInfo(i)
+			Env.Tracking[strlower(data.name)] = data.active and 1 or nil
+		end
+	end
+elseif GetNumTrackingTypes and GetTrackingInfo and GetNumTrackingTypes() > 0 then
 	-- Wrath+
 	function CNDT:MINIMAP_UPDATE_TRACKING()
 		wipe(Env.Tracking)

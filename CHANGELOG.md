@@ -1,5 +1,6 @@
 ## v11.0.2
-* Fix spell dragging to icons (again)
+* Fix: #2178 Spell dragging to icons broken (again) in WoW 11.0
+* Fix: #2179 Tracking Active condition broken in WoW 11.0
 
 ## v11.0.1
 * Fix: #2174 - Autocast conditions not working
