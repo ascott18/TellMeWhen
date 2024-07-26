@@ -178,12 +178,19 @@ Type.GuardianInfo = TMW.isClassic and {
 
 	[210910] = Info(10, 423585, false), -- Doomfiend (Dragonflight s3/s4 warlock tier set bonus)
 
-	[135816] = Info(15, 264119, true), -- Summon Vilefiend
 	[135002] = Info(15, 265187, true), -- Summon Demonic Tyrant
 
 	[ 17252] = Info(17, 111898, true), -- Grimorie: Felguard
 	[107024] = Info(15, 212459, true), -- Call Fel Lord
 	[107100] = Info(20, 201996, true), -- Call Observer
+
+	[135816] = Info(15, 264119, true), -- Summon Vilefiend
+	-- wowhead.com/npc=226269/charhound
+	-- wowhead.com/spell=455476/summon-charhound
+	[226269] = Info(15, 455476, true),
+	-- wowhead.com/spell=455465/summon-gloomhound
+	-- wowhead.com/npc=226268/gloomhound
+	[226268] = Info(15, 455465, true),
 }
 
 local GuardianInfo = Type.GuardianInfo

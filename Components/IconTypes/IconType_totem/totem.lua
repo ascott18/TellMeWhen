@@ -210,7 +210,7 @@ function Type:Setup(icon)
 		name = ""
 	end
 
-	icon.Spells = TMW:GetSpells(name, true)
+	icon.Spells = TMW:GetSpells(name, false)
 
 	icon.FirstTexture = icon.Spells.FirstString and GetSpellTexture(icon.Spells.FirstString) 
 	if not icon.FirstTexture and onlySlot then

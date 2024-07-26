@@ -165,7 +165,7 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 
 			if C_Spell and C_Spell.GetOverrideSpell then
 				local spellID = C_Spell.GetOverrideSpell(v or "")
-				if spellID then
+				if spellID and spellID ~= 0 then
 					spells[k] = spellID
 				end
 			end

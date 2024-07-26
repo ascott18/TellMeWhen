@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 * Fix: #2178 Spell dragging to icons broken (again) in WoW 11.0
 * Fix: #2179 Tracking Active condition broken in WoW 11.0
 * Fix: #2182 Unlearned choice node talents missing from suggestion list
+* Fix: #2181 totem tracking by name broken, added new warlock talents to Guardians icon type
 
 ## v11.0.1
 * Fix: #2174 - Autocast conditions not working
