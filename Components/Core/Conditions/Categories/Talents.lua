@@ -437,6 +437,10 @@ if C_ClassTalents then
 							and nodeInfo.activeEntry.entryID == entryID 
 							then
 								map[spellID] = nodeInfo.ranksPurchased or 0
+							elseif not map[spellID] then
+								-- Always populate unlearned talents if there's no entry for them
+								-- so that the suggestion list contains unlearned choice nodes.
+								map[spellID] = 0
 							end
 						end
 					end
