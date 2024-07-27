@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.0.3
+* Fix activation overlays in Classic
+* Fix the Tracking ACtive condition (again)
+
 ## v11.0.2
 * Support Masque round spell activation overlays. 
   * Must be enabled in Masque -> General Settings -> Advanced -> Spell Alert Style (pick anything other than "None").

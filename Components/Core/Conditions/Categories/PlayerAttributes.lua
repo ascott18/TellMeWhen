@@ -331,10 +331,16 @@ ConditionCategory:RegisterSpacer(15.5)
 
 Env.Tracking = {}
 
-if C_Minimap and C_Minimap.GetTrackingInfo then
+-- As of 7/26/2024:
+-- C_Minimap.GetTrackingInfo exists in Retail, and data is provided through a single returned table
+-- C_Minimap.GetTrackingInfo exists in Cata, and data is provided through multiple return values
+-- C_Minimap.GetTrackingInfo exists in Classic Era, but never returns anything
+
+if C_Minimap and C_Minimap.GetTrackingInfo and C_Minimap.GetNumTrackingTypes() > 0 and type(C_Minimap.GetTrackingInfo(1)) == "table" then
+	-- Wow 11.0+
 	local GetTrackingInfo = C_Minimap.GetTrackingInfo
 	local GetNumTrackingTypes = C_Minimap.GetNumTrackingTypes
-	-- Wow 11.0+
+
 	function CNDT:MINIMAP_UPDATE_TRACKING()
 		wipe(Env.Tracking)
 		for i = 1, GetNumTrackingTypes() do
@@ -342,8 +348,11 @@ if C_Minimap and C_Minimap.GetTrackingInfo then
 			Env.Tracking[strlower(data.name)] = data.active and 1 or nil
 		end
 	end
-elseif GetNumTrackingTypes and GetTrackingInfo and GetNumTrackingTypes() > 0 then
-	-- Wrath+
+elseif C_Minimap and C_Minimap.GetTrackingInfo and C_Minimap.GetNumTrackingTypes() > 0 then
+	-- Cata Classic
+	local GetTrackingInfo = C_Minimap.GetTrackingInfo
+	local GetNumTrackingTypes = C_Minimap.GetNumTrackingTypes
+
 	function CNDT:MINIMAP_UPDATE_TRACKING()
 		wipe(Env.Tracking)
 		for i = 1, GetNumTrackingTypes() do

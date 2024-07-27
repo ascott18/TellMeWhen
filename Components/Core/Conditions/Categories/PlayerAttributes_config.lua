@@ -149,7 +149,7 @@ Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
 local TrackingCache = {}
-if C_Minimap and C_Minimap.GetTrackingInfo then
+if C_Minimap and C_Minimap.GetTrackingInfo and C_Minimap.GetNumTrackingTypes() > 0 and type(C_Minimap.GetTrackingInfo(1)) == "table" then
 	local GetTrackingInfo = C_Minimap.GetTrackingInfo
 	local GetNumTrackingTypes = C_Minimap.GetNumTrackingTypes
 	-- Wow 11.0+
@@ -176,7 +176,11 @@ if C_Minimap and C_Minimap.GetTrackingInfo then
 		f.Icon:SetTexture(info.texture)
 	end
 
-elseif GetNumTrackingTypes and GetTrackingInfo and GetNumTrackingTypes() > 0 then
+elseif C_Minimap and C_Minimap.GetTrackingInfo and C_Minimap.GetNumTrackingTypes() > 0 then
+	-- Cata Classic
+	local GetTrackingInfo = C_Minimap.GetTrackingInfo
+	local GetNumTrackingTypes = C_Minimap.GetNumTrackingTypes
+
 	function Module:Table_Get()
 		for i = 1, GetNumTrackingTypes() do
 			local name, _, active = GetTrackingInfo(i)
@@ -198,6 +202,7 @@ elseif GetNumTrackingTypes and GetTrackingInfo and GetNumTrackingTypes() > 0 the
 	
 		f.Icon:SetTexture(texture)
 	end
+	
 else
 	-- WoW Classic
 	for _, id in pairs{

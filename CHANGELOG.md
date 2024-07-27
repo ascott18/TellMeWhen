@@ -1,3 +1,6 @@
+## v11.0.3
+* Fix activation overlays in Classic
+
 ## v11.0.2
 * Support Masque round spell activation overlays. 
   * Must be enabled in Masque -> General Settings -> Advanced -> Spell Alert Style (pick anything other than "None").
