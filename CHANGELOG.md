@@ -1,5 +1,6 @@
 ## v11.0.3
 * Fix activation overlays in Classic
+* Fix the Tracking ACtive condition (again)
 
 ## v11.0.2
 * Support Masque round spell activation overlays. 

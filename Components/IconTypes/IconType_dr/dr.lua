@@ -234,14 +234,16 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 			end
 		end
 
-		local k = myCategories[category]
+		if category then
+			local k = myCategories[category]
 
-		if k then
-			usedCategories[category] = true
-			dr[k] = dr[k] or {}
-			tinsert(dr[k], spellID)
-		elseif TMW.debug and not ignored[category] then
-			TMW:Error("The DR category %q is undefined!", category)
+			if k then
+				usedCategories[category] = true
+				dr[k] = dr[k] or {}
+				tinsert(dr[k], spellID)
+			elseif TMW.debug and not ignored[category] then
+				TMW:Error("The DR category %q is undefined!", category)
+			end
 		end
 	end
 
