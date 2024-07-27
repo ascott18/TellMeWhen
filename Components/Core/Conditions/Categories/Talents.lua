@@ -429,18 +429,17 @@ if C_ClassTalents then
 							local definitionInfo = C_Traits.GetDefinitionInfo(entryInfo.definitionID)
 							local spellID = definitionInfo.spellID
 
-							if spellID 
-							-- The ranks are stored on the node, but we
-							-- have to make sure that we're looking at the ranks for the
-							-- currently selected entry for the talent.
-							and nodeInfo.activeEntry 
-							and nodeInfo.activeEntry.entryID == entryID 
-							then
-								map[spellID] = nodeInfo.ranksPurchased or 0
-							elseif not map[spellID] then
-								-- Always populate unlearned talents if there's no entry for them
-								-- so that the suggestion list contains unlearned choice nodes.
-								map[spellID] = 0
+							if spellID then
+								-- The ranks are stored on the node, but we
+								-- have to make sure that we're looking at the ranks for the
+								-- currently selected entry for the talent.
+								if nodeInfo.activeEntry and nodeInfo.activeEntry.entryID == entryID then
+									map[spellID] = nodeInfo.ranksPurchased or 0
+								elseif not map[spellID] then
+									-- Always populate unlearned talents if there's no entry for them
+									-- so that the suggestion list contains unlearned choice nodes.
+									map[spellID] = 0
+								end
 							end
 						end
 					end
