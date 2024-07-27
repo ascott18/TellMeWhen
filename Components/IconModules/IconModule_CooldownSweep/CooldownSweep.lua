@@ -173,6 +173,7 @@ function CooldownSweep:OnNewInstance(icon)
 	icon.chargeCooldown = self.cooldown2
 	
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
+	self:SetSkinnableComponent("ChargeCooldown", self.cooldown2)
 end
 
 local NeedsUpdate = {}
