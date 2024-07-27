@@ -1,4 +1,6 @@
 ## v11.0.2
+* Support Masque round spell activation overlays. 
+  * Must be enabled in Masque -> General Settings -> Advanced -> Spell Alert Style (pick anything other than "None").
 * Fix: #2178 Spell dragging to icons broken (again) in WoW 11.0
 * Fix: #2179 Tracking Active condition broken in WoW 11.0
 * Fix: #2182 Unlearned choice node talents missing from suggestion list

@@ -8,7 +8,7 @@ if [ ! -f "$INPUT" ]; then
 	exit 1
 fi
 
-LAST_VERSION="7.4.0"
+LAST_VERSION="10.0.0"
 OUTPUT="Options/CHANGELOG.lua"
 echo -e "if not TMW then return end\n\nTMW.CHANGELOG_LASTVER=\"$LAST_VERSION\"\n\nTMW.CHANGELOG = [==[" > $OUTPUT;
 IFS=''

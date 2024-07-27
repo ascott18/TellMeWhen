@@ -67,31 +67,9 @@ end
 
 
 
-if LMB.GetSpellAlert then
-	-- Copied (and slightly modified) from masque so that TMW's activation borders will get skinned properly when they aren't square.
+if LMB.UpdateSpellAlert then
 	IconContainer_Masque:PostHookMethod("ShowOverlayGlow", function(self)
-		local self = self.container
-		local Overlay = self.overlay
-		if not Overlay or not Overlay.spark then return end
-		if Overlay.__MSQ_Shape ~= self.__MSQ_Shape then
-			local Shape = self.__MSQ_Shape
-
-			local Glow, Ants
-			if Shape then
-				Glow, Ants = LMB:GetSpellAlert(Shape)
-			end
-			if not (Shape and (Glow or Ants)) then
-				Glow, Ants = LMB:GetSpellAlert("Square")
-			end
-
-			Overlay.innerGlow:SetTexture(Glow)
-			Overlay.innerGlowOver:SetTexture(Glow)
-			Overlay.outerGlow:SetTexture(Glow)
-			Overlay.outerGlowOver:SetTexture(Glow)
-			Overlay.spark:SetTexture(Glow)
-			Overlay.ants:SetTexture(Ants)
-			Overlay.__MSQ_Shape = self.__MSQ_Shape
-		end
+		LMB:UpdateSpellAlert(self.container)
 	end)
 end
 
