@@ -279,6 +279,8 @@ local tableArgs = {
 }
 local __index_old = nil
 
+local RenamingSpellSetInstances = {}
+setmetatable(RenamingSpellSetInstances, {__mode='kv'})
 
 TMW:NewClass("SpellSet"){
 	OnFirstInstance = function(self)
@@ -299,7 +301,9 @@ TMW:NewClass("SpellSet"){
 
 		self.Name = name
 		self.AllowRenaming = allowRenaming
-		
+		if allowRenaming then
+			RenamingSpellSetInstances[self] = true
+		end
 		setmetatable(self, self.betterMeta)
 	end,
 
@@ -342,6 +346,19 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 		instance:Wipe()
 	end
 end)
+
+if C_Spell and C_Spell.GetOverrideSpell then
+	-- When spell overrides might change,
+	-- we need to wipe all the data about spell overrides that are cached on SpellSet instances
+	-- so the can be recalculated. For example, Void Eruption <-> Void Bolt.
+	-- This used to work automatically through GetSpellCooldown prior to WoW 11.0,
+	-- but now we have to manage spell overrides ourselves.
+	TMW:RegisterEvent("SPELLS_CHANGED", function()
+		for instance in pairs(RenamingSpellSetInstances) do
+			instance:Wipe()
+		end
+	end)
+end
 
 
 --- Returns an instance of {{{TMW.C.SpellSet}}} for the given spellString.
