@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.0.5
+* Most cooldown icons with Range Check enabled now utilize more performant event-driven updates in WoW 11.0.
+
 ## v11.0.4
 * Fix: #2186 Activation overlays in Retail
 * The cooldown charge sweep is now skinned with Masque.

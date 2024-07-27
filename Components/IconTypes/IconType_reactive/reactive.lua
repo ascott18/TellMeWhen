@@ -30,7 +30,9 @@ local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
 local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
-local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
+
+local SpellRange = TMW.COMMON.SpellRange
+local IsSpellInRange = SpellRange.IsSpellInRange
 
 local Type = TMW.Classes.IconType:New("reactive")
 Type.name = L["ICONMENU_REACTIVE"]
@@ -176,10 +178,8 @@ local function Reactive_OnUpdate(icon, time)
 
 			if RangeCheck then
 				inrange = IsSpellInRange(iName, "target")
-				if inrange == 1 or inrange == nil then
+				if inrange == nil then
 					inrange = true
-				else
-					inrange = false
 				end
 			end
 
@@ -245,10 +245,8 @@ local function Reactive_OnUpdate(icon, time)
 		inrange, nomana = true, nil
 		if RangeCheck then
 			inrange = IsSpellInRange(NameFirst, "target")
-			if inrange == 1 or inrange == nil then
+			if inrange == nil then
 				inrange = true
-			else
-				inrange = false
 			end
 		end
 		if ManaCheck then
@@ -284,7 +282,15 @@ function Type:Setup(icon)
 		icon.IgnoreRunes = nil
 	end
 	
-
+	local isManual = true
+	if icon.RangeCheck then
+		for _, spell in pairs(icon.Spells.Array) do
+			if not SpellRange.HasRangeEvents(spell) then
+				isManual = false
+				break
+			end
+		end
+	end
 
 	-- Register events and setup update functions
 	if icon.UseActvtnOverlay then
@@ -293,12 +299,13 @@ function Type:Setup(icon)
 		icon:SetScript("OnEvent", Reactive_OnEvent)
 	end
 	
-	if not icon.RangeCheck then
-		-- There are no events for when you become in range/out of range for a spell
-
+	if isManual then
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
+		if icon.RangeCheck then
+			icon:RegisterSimpleUpdateEvent("TMW_SPELL_UPDATE_RANGE")
+		end
 		if icon.IgnoreRunes then
 			if GetRuneType then
 				icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")

@@ -33,11 +33,8 @@ local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local _, pclass = UnitClass("Player")
 
--- TODO: Preliminary testing has shown that C_Spell.IsSpellInRange behaves properly 
--- with all inputs in wow 11.0+. Once it makes it to all game versions,
--- we can probably remove LibSpellRange.
-local IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange
-
+local SpellRange = TMW.COMMON.SpellRange
+local IsSpellInRange = SpellRange.IsSpellInRange
 
 
 local Type = TMW.Classes.IconType:New("cooldown")
@@ -154,10 +151,8 @@ local function AutoShot_OnUpdate(icon, time)
 	local inrange = true
 	if icon.RangeCheck then
 		inrange = IsSpellInRange(NameString, "target")
-		if inrange == 1 or inrange == nil then
+		if inrange == nil then
 			inrange = true
-		else
-			inrange = false
 		end
 	end
 
@@ -212,10 +207,8 @@ local function SpellCooldown_OnUpdate(icon, time)
 			local inrange, nomana = true, nil
 			if RangeCheck then
 				inrange = IsSpellInRange(iName, "target")
-				if inrange == 1 or inrange == nil then
+				if inrange == nil then
 					inrange = true
-				else
-					inrange = false
 				end
 			end
 			if ManaCheck then
@@ -335,13 +328,23 @@ function Type:Setup(icon)
 	
 	icon:SetInfo("texture; reverse; spell", Type:GetConfigIconTexture(icon), false, icon.Spells.First)
 	
+	local isManual = true
+	if icon.RangeCheck then
+		for _, spell in pairs(icon.Spells.Array) do
+			if not SpellRange.HasRangeEvents(spell) then
+				isManual = false
+				break
+			end
+		end
+	end
 	
-	if not icon.RangeCheck then
-		-- There are no events for when you become in range/out of range for a spell
-
+	if isManual then
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
+		if icon.RangeCheck then
+			icon:RegisterSimpleUpdateEvent("TMW_SPELL_UPDATE_RANGE")
+		end
 		if icon.IgnoreRunes then
 			if GetRuneType then
 				icon:RegisterSimpleUpdateEvent("RUNE_TYPE_UPDATE")

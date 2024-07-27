@@ -512,16 +512,26 @@ ConditionCategory:RegisterCondition(5,	 "SPELLRANGE", {
 		editbox:SetTexts(L["CONDITIONPANEL_SPELLRANGE"], L["CNDT_ONLYFIRST"])
 		editbox:SetLabel(L["SPELLTOCHECK"])
 	end,
+	defaultUnit = "target",
 	useSUG = true,
 	nooperator = true,
 	texttable = {[0] = L["INRANGE"], [1] = L["NOTINRANGE"]},
 	icon = "Interface\\Icons\\ability_hunter_snipershot",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		IsSpellInRange = LibStub("SpellRange-1.0").IsSpellInRange,
+		IsSpellInRange = TMW.COMMON.SpellRange.IsSpellInRange,
 	},
 	funcstr = function(c)
-		return 1-c.Level .. [[ == (IsSpellInRange(c.OwnSpells.First, c.Unit) or 0)]]
+		return [[BOOLCHECK( IsSpellInRange(c.OwnSpells.First, c.Unit) )]]
+	end,
+	events = function(ConditionObject, c)
+		local SpellRange = TMW.COMMON.SpellRange
+		local spells = TMW:GetSpells(c.Name, true)
+		
+		if c.Unit == "target" and SpellRange.HasRangeEvents(spells.First) then
+			return ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_RANGE")
+		end
+		return nil
 	end,
 })
 ConditionCategory:RegisterCondition(6,	 "GCD", {
