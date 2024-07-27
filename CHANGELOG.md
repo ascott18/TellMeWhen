@@ -1,3 +1,6 @@
+## v11.0.4
+* Fix: #2186 Activation overlays in Retail
+
 ## v11.0.3
 * Fix activation overlays in Classic
 * Fix the Tracking ACtive condition (again)

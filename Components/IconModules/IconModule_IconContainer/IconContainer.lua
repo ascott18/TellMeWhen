@@ -83,6 +83,8 @@ if CreateFrame("Frame", nil, UIParent, "ActionBarButtonSpellActivationAlert").Pr
 			-- The intro animation to the new activation alert animation in wow 10.1.5 is extremely weird,
 			-- so we're electing to not use it and only use the loop animation (ProcLoop).
 			overlay.ProcStartFlipbook:Hide()
+			-- Masque will keep trying to re-show it, so prevent that.
+			overlay.ProcStartFlipbook.Show = function() end
 
 			-- Remove the default OnHide script that stops the animation when the overlay hides, 
 			-- as otherwise the animation will stop if the parent group hides, e.g. when leaving and entering combat rapidly.

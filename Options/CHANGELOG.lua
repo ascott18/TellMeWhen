@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.0.4
+* Fix: #2186 Activation overlays in Retail
+
 ## v11.0.3
 * Fix activation overlays in Classic
 * Fix the Tracking ACtive condition (again)
