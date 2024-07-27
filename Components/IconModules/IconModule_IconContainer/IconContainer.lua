@@ -137,12 +137,12 @@ else
 		local overlay = container.overlay
 
 		if overlay then
+			overlay:Show();
 			if overlay.animOut:IsPlaying() then
 				overlay.animOut:Stop();
-				overlay.animIn:Play();
 			end
 		else
-			overlay = CreateFrame("Frame", nil, UIParent, "ActionBarButtonSpellActivationAlert");
+			overlay = CreateFrame("Frame", nil, container, "ActionBarButtonSpellActivationAlert");
 			container.overlay = overlay
 
 			-- Override scripts from the blizzard template:
@@ -157,8 +157,9 @@ else
 			overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4);
 			overlay:SetPoint("TOPLEFT", container, "TOPLEFT", -frameWidth * 0.2, frameHeight * 0.2);
 			overlay:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", frameWidth * 0.2, -frameHeight * 0.2);
-			overlay.animIn:Play();
 		end
+
+		overlay.animIn:Play();
 	end
 
 	function IconContainer:HideOverlayGlow()
