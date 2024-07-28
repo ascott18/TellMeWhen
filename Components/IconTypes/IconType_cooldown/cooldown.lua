@@ -25,8 +25,9 @@ local SpellHasNoMana = TMW.SpellHasNoMana
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
 local GetSpellTexture = TMW.GetSpellTexture
-local GetSpellCharges = TMW.GetSpellCharges
-local GetSpellCooldown = TMW.GetSpellCooldown
+local spellTextureCache = TMW.spellTextureCache
+local GetSpellCharges = TMW.COMMON.Cooldowns.GetSpellCharges
+local GetSpellCooldown = TMW.COMMON.Cooldowns.GetSpellCooldown
 local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
 local GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
 local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
@@ -173,6 +174,8 @@ local function AutoShot_OnUpdate(icon, time)
 	end
 end
 
+local emptyTable = {}
+local offCooldown = { startTime = 0, duration = 0 }
 local usableData = {}
 local unusableData = {}
 local mindfreeze = GetSpellName(47528) and strlower(GetSpellName(47528))
@@ -189,19 +192,21 @@ local function SpellCooldown_OnUpdate(icon, time)
 	for i = 1, #NameArray do
 		local iName = NameArray[i]
 		
-		local start, duration = GetSpellCooldown(iName)
-		local charges, maxCharges, chargeStart, chargeDur = GetSpellCharges(iName)
-		local stack = charges or GetSpellCount(iName)
+		local cooldown = GetSpellCooldown(iName)
+		local charges = GetSpellCharges(iName)
+		local stack = charges and charges.currentCharges or GetSpellCount(iName)
 
 		
-		if duration then
+		if cooldown then
+			local duration = cooldown.duration
 			if IgnoreRunes and duration == runeCD and iName ~= mindfreeze and iName ~= 47528  then
 				-- DK abilities that are on cooldown because of runes are always reported
 				-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
 				
 				-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
 				-- so it is excluded from this logic.
-				start, duration = 0, 0
+				cooldown = offCooldown
+				duration = 0
 			end
 
 			local inrange, nomana = true, nil
@@ -224,7 +229,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 					-- If the cooldown duration is 0 and there arent charges, then its usable
 					(duration == 0 and not charges)
 					-- If the spell has charges and they aren't all depeleted, its usable
-					or (charges and charges > 0)
+					or (charges and charges.currentCharges > 0)
 					-- If we're just on a GCD, its usable
 					or (not GCDAsUnusable and OnGCD(duration))
 				)
@@ -232,15 +237,10 @@ local function SpellCooldown_OnUpdate(icon, time)
 				if not usableFound then
 					--wipe(usableData)
 					usableData.state = STATE_USABLE
-					usableData.tex = GetSpellTexture(iName)
 					usableData.iName = iName
 					usableData.stack = stack
-					usableData.charges = charges
-					usableData.maxCharges = maxCharges
-					usableData.chargeStart = chargeStart
-					usableData.chargeDur = chargeDur
-					usableData.start = start
-					usableData.duration = duration
+					usableData.charges = charges or emptyTable
+					usableData.cooldown = cooldown
 					
 					usableFound = true
 					
@@ -254,15 +254,10 @@ local function SpellCooldown_OnUpdate(icon, time)
 					not inrange and STATE_UNUSABLE_NORANGE or 
 					nomana and STATE_UNUSABLE_NOMANA or 
 					STATE_UNUSABLE
-				unusableData.tex = GetSpellTexture(iName)
 				unusableData.iName = iName
 				unusableData.stack = stack
-				unusableData.charges = charges
-				unusableData.maxCharges = maxCharges
-				unusableData.chargeStart = chargeStart
-				unusableData.chargeDur = chargeDur
-				unusableData.start = start
-				unusableData.duration = duration
+				unusableData.charges = charges or emptyTable
+				unusableData.cooldown = cooldown
 				
 				unusableFound = true
 				
@@ -286,9 +281,9 @@ local function SpellCooldown_OnUpdate(icon, time)
 		icon:SetInfo(
 			"state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 			dataToUse.state,
-			dataToUse.tex,
-			dataToUse.start, dataToUse.duration,
-			dataToUse.charges, dataToUse.maxCharges, dataToUse.chargeStart, dataToUse.chargeDur,
+			spellTextureCache[dataToUse.iName],
+			dataToUse.cooldown.startTime, dataToUse.cooldown.duration,
+			dataToUse.charges.currentCharges, dataToUse.charges.maxCharges, dataToUse.charges.cooldownStartTime, dataToUse.charges.cooldownDuration,
 			dataToUse.stack, dataToUse.stack,
 			dataToUse.iName
 		)
@@ -339,8 +334,23 @@ function Type:Setup(icon)
 	end
 	
 	if isManual then
+		local hasActionEvent = true
+		for _, spell in pairs(icon.Spells.Array) do
+			if not TMW.COMMON.Actions.GetActionsForSpell(spell) then
+				hasActionEvent = false
+				break
+			end
+		end
+
+		if hasActionEvent then
+			-- ACTIONBAR_UPDATE_USABLE is much more well-behaved than SPELL_UPDATE_USABLE,
+			-- so use it when we can. SPELL_UPDATE_USABLE fires about as often as UNIT_POWER_FREQUENT.
+			icon:RegisterSimpleUpdateEvent("ACTIONBAR_UPDATE_USABLE")
+		else
+			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
+		end
+
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
-		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
 		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
 		if icon.RangeCheck then
 			icon:RegisterSimpleUpdateEvent("TMW_SPELL_UPDATE_RANGE")
@@ -352,8 +362,12 @@ function Type:Setup(icon)
 			icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
 		end    
 		if icon.ManaCheck then
-			icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
-			-- icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")-- already registered
+			-- If the spell(s) are on the actionbar, we can use
+			-- ACTIONBAR_UPDATE_USABLE to listen for usability changes.
+			-- (which we already registered above).
+			if not hasActionEvent then
+				icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
+			end
 		end
 		
 		icon:SetUpdateMethod("manual")

@@ -22,6 +22,7 @@ local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellTexture = TMW.GetSpellTexture
 local GetSpellName = TMW.GetSpellName
 local strlowerCache = TMW.strlowerCache
+local spellTextureCache = TMW.spellTextureCache
 
 local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
 
@@ -153,7 +154,7 @@ local function ICD_OnEvent(icon, event, ...)
 			icon.ICDDuration = icon.Spells.Durations[Key]
 			icon:SetInfo("spell; texture", 
 				icon.ICDID,
-				GetSpellTexture(spellID == 0 and spellName or spellID)
+				spellTextureCache[spellID == 0 and spellName or spellID]
 			)
 			icon.NextUpdateTime = 0
 		end

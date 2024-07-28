@@ -25,6 +25,7 @@ local GetSpellName = TMW.GetSpellName
 
 TMW.COMMON.SpellRange = CreateFrame("Frame")
 local SpellRange = TMW.COMMON.SpellRange
+local Actions = TMW.COMMON.Actions
 
 if not C_ActionBar or not C_ActionBar.EnableActionRangeCheck then
     -- Older clients, Pre-11.0
@@ -45,14 +46,10 @@ end
 
 SpellRange.IsSpellInRange = C_Spell.IsSpellInRange
 
-SpellRange:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 SpellRange:RegisterEvent("ACTION_RANGE_CHECK_UPDATE")
 
-local SpellsToActions = {}
-SpellRange.SpellsToActions = SpellsToActions
-local ActionToSpells = {}
-SpellRange.ActionToSpells = ActionToSpells
-
+local SpellsToActions = Actions.SpellsToActions
+local ActionToSpells = Actions.ActionToSpells
 local EnabledSpells = {}
 local EnabledActions = {}
 
@@ -97,69 +94,25 @@ function SpellRange.IsSpellInRange(spell, unit)
     return IsSpellInRange(spell, unit)
 end
 
-
-local function MapSpellToAction(identifier, action)
-    local actions = SpellsToActions[identifier]
-    if not actions then 
-        SpellsToActions[identifier] = { action }
-    elseif not TMW.tContains(actions, action) then
-        actions[#actions+1] = action
-    end
-end
-
-local function UpdateActionSlots() 
-    wipe(SpellsToActions)
-    wipe(ActionToSpells)
+TMW:RegisterCallback("TMW_ACTIONS_UPDATED", function()
     wipe(CachedRange)
 
-    -- 200 chosen arbitrarily.
-    -- There's definitely more than 144 action slots.
-    -- Ive seen actions as high as 180
-    for action = 1, 200 do
-        local actionType, id, subType = GetActionInfo(action);
-        if actionType == "spell" or subType == "spell" then
-            local overrideId = C_Spell.GetOverrideSpell(id);
-            local baseId = FindBaseSpellByID(id);
-
-            local normalName = strlowerCache[(GetSpellName(id))]
-            local overrideName = strlowerCache[(GetSpellName(overrideId))]
-            local baseName = strlowerCache[(GetSpellName(baseId))]
-
-            MapSpellToAction(id, action)
-            MapSpellToAction(normalName, action)
-            MapSpellToAction(overrideId, action)
-            MapSpellToAction(baseId, action)
-            MapSpellToAction(normalName, action)
-            MapSpellToAction(overrideName, action)
-            MapSpellToAction(baseName, action)
-
-            ActionToSpells[action] = {
-                [id] = true,
-                [overrideId] = true,
-                [baseId] = true,
-                [normalName] = true,
-                [overrideName] = true,
-                [baseName] = true,
-            }
-
-            -- If a spell we previously requested has moved to a new action,
-            -- enable that new action.
-            if not EnabledActions[action] then
-                for spell in pairs(ActionToSpells[action]) do
-                    if EnabledSpells[spell] then
-                        EnabledActions[action] = true
-                        C_ActionBar.EnableActionRangeCheck(action, true)
-                    end
+    for action, spells in pairs(ActionToSpells) do
+        -- If a spell we previously requested has moved to a new action,
+        -- enable that new action.
+        if not EnabledActions[action] then
+            for spell in pairs(spells) do
+                if EnabledSpells[spell] then
+                    EnabledActions[action] = true
+                    C_ActionBar.EnableActionRangeCheck(action, true)
                 end
             end
         end
     end
-end
+end)
 
 SpellRange:SetScript("OnEvent", function(self, event, action, inRange, checksRange)
-    if event == "ACTIONBAR_SLOT_CHANGED" then
-        UpdateActionSlots()
-    elseif event == "ACTION_RANGE_CHECK_UPDATE" then
+    if event == "ACTION_RANGE_CHECK_UPDATE" then
         CachedRange[action] = { inRange, checksRange }
         TMW:Fire("TMW_SPELL_UPDATE_RANGE")
     end
@@ -181,5 +134,3 @@ function SpellRange.HasRangeEvents(spell)
         return true
     end
 end
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", UpdateActionSlots)

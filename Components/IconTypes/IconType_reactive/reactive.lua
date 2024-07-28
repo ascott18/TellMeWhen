@@ -21,11 +21,12 @@ local print = TMW.print
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
 local GetSpellTexture = TMW.GetSpellTexture
-local GetSpellCharges = TMW.GetSpellCharges
-local GetSpellCooldown = TMW.GetSpellCooldown
+local GetSpellCharges = TMW.COMMON.Cooldowns.GetSpellCharges
+local GetSpellCooldown = TMW.COMMON.Cooldowns.GetSpellCooldown
 local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
 local GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
 
+local spellTextureCache = TMW.spellTextureCache
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 local SpellHasNoMana = TMW.SpellHasNoMana
@@ -148,6 +149,7 @@ local function Reactive_OnEvent(icon, event, arg1)
 	end
 end
 
+local offCooldown = { startTime = 0, duration = 0 }
 local mindfreeze = GetSpellName(47528) and strlower(GetSpellName(47528))
 local function Reactive_OnUpdate(icon, time)
 
@@ -158,7 +160,7 @@ local function Reactive_OnUpdate(icon, time)
 	local activationOverlayActive = icon.activationOverlayActive
 
 	-- These variables will hold all the attributes that we pass to SetInfo().
-	local inrange, nomana, start, duration, CD, usable, charges, maxCharges, chargeStart, chargeDur, stack, start_charge, duration_charge
+	local inrange, nomana, cooldown, CD, usable, charges, stack, start_charge, duration_charge
 
 	local numChecked = 1
 	local runeCD = IgnoreRunes and GetRuneCooldownDuration()
@@ -169,11 +171,12 @@ local function Reactive_OnUpdate(icon, time)
 		numChecked = i
 		
 
-		start, duration = GetSpellCooldown(iName)
-		charges, maxCharges, chargeStart, chargeDur = GetSpellCharges(iName)
-		stack = charges or GetSpellCount(iName)
+		cooldown = GetSpellCooldown(iName)
+		charges = GetSpellCharges(iName) or emptyTable
+		stack = charges and charges.currentCharges or GetSpellCount(iName)
 		
-		if duration then
+		if cooldown then
+			local duration = cooldown.duration
 			inrange, CD = true, nil
 
 			if RangeCheck then
@@ -199,7 +202,8 @@ local function Reactive_OnUpdate(icon, time)
 					
 					-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
 					-- so it is excluded from this logic.
-					start, duration = 0, 0
+					cooldown = offCooldown
+					duration = 0
 				end
 				CD = not (duration == 0 or OnGCD(duration))
 			end
@@ -212,9 +216,9 @@ local function Reactive_OnUpdate(icon, time)
 			if usable and not CD and not nomana and inrange then --usable
 				icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 					STATE_USABLE,
-					GetSpellTexture(iName),
-					start, duration,
-					charges, maxCharges, chargeStart, chargeDur,
+					spellTextureCache[iName],
+					cooldown.startTime, cooldown.duration,
+					charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
 					stack, stack,
 					iName		
 				)
@@ -229,17 +233,17 @@ local function Reactive_OnUpdate(icon, time)
 	local NameFirst = icon.Spells.First
 	if numChecked > 1 then
 
-		start, duration = GetSpellCooldown(NameFirst)
-		charges, maxCharges, chargeStart, chargeDur = GetSpellCharges(NameFirst)
-		stack = charges or GetSpellCount(NameFirst)
+		cooldown = GetSpellCooldown(NameFirst)
+		charges = GetSpellCharges(NameFirst) or emptyTable
+		stack = charges and charges.currentCharges or GetSpellCount(NameFirst)
 
-		if IgnoreRunes and duration == runeCD and NameFirst ~= mindfreeze and NameFirst ~= 47528 then
+		if IgnoreRunes and (cooldown and cooldown.duration) == runeCD and NameFirst ~= mindfreeze and NameFirst ~= 47528 then
 			-- DK abilities that are on cooldown because of runes are always reported
 			-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
 			
 			-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
 			-- so it is excluded from this logic.
-			start, duration = 0, 0
+			cooldown = offCooldown
 		end
 
 		inrange, nomana = true, nil
@@ -254,12 +258,12 @@ local function Reactive_OnUpdate(icon, time)
 		end
 	end
 	
-	if duration then
+	if cooldown then
 		icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 			not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 			icon.FirstTexture,
-			start, duration,
-			charges, maxCharges, chargeStart, chargeDur,
+			cooldown.startTime, cooldown.duration,
+			charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
 			stack, stack,
 			NameFirst
 		)

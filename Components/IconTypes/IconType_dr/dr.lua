@@ -22,6 +22,7 @@ local UnitGUID =
 
 local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
+local spellTextureCache = TMW.spellTextureCache
 local GetSpellTexture = TMW.GetSpellTexture
 
 local huge = math.huge
@@ -288,7 +289,7 @@ local function DR_OnEvent(icon, event, arg1)
 								amt = 50,
 								start = TMW.time,
 								duration = icon.DRDuration,
-								tex = GetSpellTexture(spellID)
+								tex = spellTextureCache[spellID]
 							}
 							icon.DRInfo[destGUID] = dr
 						else
@@ -299,7 +300,7 @@ local function DR_OnEvent(icon, event, arg1)
 								dr.amt = amt > 25 and amt/2 or 0
 								dr.duration = icon.DRDuration
 								dr.start = TMW.time
-								dr.tex = GetSpellTexture(spellID)
+								dr.tex = spellTextureCache[spellID]
 							end
 						end
 					end

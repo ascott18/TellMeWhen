@@ -34,6 +34,7 @@ local GetSpellTexture = TMW.GetSpellTexture
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
 
+local spellTextureCache = TMW.spellTextureCache
 local classSpellNameCache
 
 
@@ -588,7 +589,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	if usename and usableAllAlpha > 0 and not unname then
 		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
 			STATE_USABLE_ALL,
-			GetSpellTexture(usename) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			spellTextureCache[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			0, 0,
 			usename,
 			useUnit, nil
@@ -597,7 +598,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	elseif usename and usableAlpha > 0 then
 		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
 			STATE_USABLE,
-			GetSpellTexture(usename) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			spellTextureCache[usename] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			0, 0,
 			usename,
 			useUnit, nil
@@ -606,7 +607,7 @@ local function UnitCooldown_OnUpdate(icon, time)
 	elseif unname then
 		icon:SetInfo("state; texture; start, duration; spell; unit, GUID",
 			STATE_UNUSABLE,
-			GetSpellTexture(unname),
+			spellTextureCache[unname],
 			unstart, unduration,
 			unname,
 			unUnit, nil
@@ -693,7 +694,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, name, start, duration, unit, GU
 	if name then
 		iconToSet:SetInfo("state; texture; start, duration; spell; unit, GUID",
 			state,
-			GetSpellTexture(name) or "Interface\\Icons\\INV_Misc_PocketWatch_01",
+			spellTextureCache[name] or "Interface\\Icons\\INV_Misc_PocketWatch_01",
 			start, duration,
 			name,
 			unit, GUID

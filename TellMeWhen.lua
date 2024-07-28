@@ -490,7 +490,24 @@ function TMW.GetSpellTexture(spell)
 		rawget(SpellTexturesMetaIndex, strlowerCache[spell])
 end
 
+TMW.spellTextureCache = setmetatable(
+{}, {
+	__mode = "kv",
+	__index = function(t, i)
+		if not i then return end
 
+		local tex = TMW.GetSpellTexture(i)
+		t[i] = tex
+		return tex
+	end,
+	__call = function(t, i)
+		return t[i]
+	end,
+}) 
+
+TMW:RegisterEvent("SPELLS_CHANGED", function()
+	wipe(TMW.spellTextureCache)
+end)
 
 
 
