@@ -55,7 +55,7 @@ local function UpdateActionSlots()
     -- Ive seen actions as high as 180
     for action = 1, 200 do
         local actionType, id, subType = GetActionInfo(action);
-        if actionType == "spell" then
+        if actionType == "spell" and id and id ~= 0 then
             -- Don't allow for `or subType == "spell" ` for now.
             -- This allows macros to be registered as the provider for a spell,
             -- but I can just imagine people with weird @focus macros
