@@ -128,7 +128,7 @@ local function TestType_OnUpdate(icon, time)
 	
 	if duration then
 		local inrange = true
-		local nomana
+		local noMana
 		
 		if icon.RangeCheck then
 			inrange = IsSpellInRange(NameFirst, "target")
@@ -139,10 +139,10 @@ local function TestType_OnUpdate(icon, time)
 			end
 		end
 		if icon.ManaCheck then
-			nomana = SpellHasNoMana(NameFirst)
+			noMana = SpellHasNoMana(NameFirst)
 		end
 		
-		if inrange and not nomana and (duration == 0 or OnGCD(duration)) then
+		if inrange and not noMana and (duration == 0 or OnGCD(duration)) then
 			-- Usable
 			
 			icon:SetInfo(
@@ -158,7 +158,7 @@ local function TestType_OnUpdate(icon, time)
 			
 			icon:SetInfo(
 				"state; texture; start, duration; spell; stack, stackText",
-				not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
+				not inrange and STATE_UNUSABLE_NORANGE or noMana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 				GetSpellTexture(NameFirst),
 				start, duration,
 				NameFirst,
@@ -301,7 +301,7 @@ local function TestType_OnUpdate(icon, time)
 	
 	if duration then
 		local inrange = true
-		local nomana
+		local noMana
 		
 		if icon.RangeCheck then
 			inrange = IsSpellInRange(NameFirst, "target")
@@ -312,10 +312,10 @@ local function TestType_OnUpdate(icon, time)
 			end
 		end
 		if icon.ManaCheck then
-			nomana = SpellHasNoMana(NameFirst)
+			noMana = SpellHasNoMana(NameFirst)
 		end
 		
-		if inrange and not nomana and (duration == 0 or OnGCD(duration)) then
+		if inrange and not noMana and (duration == 0 or OnGCD(duration)) then
 			-- Usable
 			
 			icon:SetInfo(
@@ -331,7 +331,7 @@ local function TestType_OnUpdate(icon, time)
 			
 			icon:SetInfo(
 				"state; texture; start, duration; spell; stack, stackText",
-				not inrange and STATE_UNUSABLE_NORANGE or nomana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
+				not inrange and STATE_UNUSABLE_NORANGE or noMana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 				GetSpellTexture(NameFirst),
 				start, duration,
 				NameFirst,

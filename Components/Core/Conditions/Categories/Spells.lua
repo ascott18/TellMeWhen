@@ -101,8 +101,7 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	funcstr = [[CooldownDuration(c.OwnSpells.First, c.Checked) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COOLDOWN")
 	end,
 	anticipate = function(c)
 		local str = [[
@@ -137,8 +136,7 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 	funcstr = [[CooldownDuration(c.OwnSpells.First, c.Checked) c.Operator CooldownDuration(c.OwnSpells2.First, c.Checked2)]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COOLDOWN")
 	end,
 	anticipate = function(c)
 		local str = [[
@@ -188,9 +186,7 @@ if TMW.isRetail then
 		funcstr = [[(GetSpellCharges(c.OwnSpells.First) or GetSpellCount(c.OwnSpells.First)) c.Operator c.Level]],
 		events = function(ConditionObject, c)
 			return
-				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
-				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
-				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_CHARGES")
+				ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_CHARGES")
 		end,	
 	})
 	ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
@@ -219,9 +215,7 @@ if TMW.isRetail then
 		funcstr = [[RechargeDuration(c.OwnSpells.First) c.Operator c.Level]],
 		events = function(ConditionObject, c)
 			return
-				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
-				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
-				ConditionObject:GenerateNormalEventString("SPELL_UPDATE_CHARGES")
+				ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_CHARGES")
 		end,
 		anticipate = [[
 			local _, _, start, duration = GetSpellCharges(c.OwnSpells.First)
@@ -303,11 +297,11 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 
 ConditionCategory:RegisterSpacer(2.9)
 
-local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
+local IsUsableSpell = TMW.COMMON.SpellUsable.IsUsableSpell
 function Env.ReactiveHelper(NameFirst, Checked)
-	local usable, nomana = IsUsableSpell(NameFirst)
+	local usable, noMana = IsUsableSpell(NameFirst)
 	if Checked then
-		return usable or nomana
+		return usable or noMana
 	else
 		return usable
 	end
@@ -360,7 +354,7 @@ ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	funcstr = [[BOOLCHECK( ReactiveHelper(c.OwnSpells.First, c.Checked) )]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_USABLE")
 	end,
 })
 ConditionCategory:RegisterCondition(3.1, "CURRENTSPELL", {
@@ -473,12 +467,14 @@ ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[not BOOLCHECK( SpellHasNoMana(c.OwnSpells.First) )]],
 	Env = {
-		SpellHasNoMana = TMW.SpellHasNoMana
+		SpellHasNoMana = function(spell)
+			local _, noMana = IsUsableSpell(spell)
+			return noMana
+		end
 	},
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
-			ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player")
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_USABLE")
 	end,
 })
 ConditionCategory:RegisterCondition(4.5, "SPELLCOST", {
@@ -543,8 +539,7 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 	funcstr = [[BOOLCHECK( (TMW.GCD > 0 and TMW.GCD < 1.7) )]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN"),
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE")
+			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
 		local start, duration = GetSpellCooldown(TMW.GCDSpell)

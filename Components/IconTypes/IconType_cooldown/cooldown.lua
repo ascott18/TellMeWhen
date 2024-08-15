@@ -21,21 +21,19 @@ local pairs, wipe, strlower =
 	  pairs, wipe, strlower
 
 local OnGCD = TMW.OnGCD
-local SpellHasNoMana = TMW.SpellHasNoMana
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
 local GetSpellTexture = TMW.GetSpellTexture
 local spellTextureCache = TMW.spellTextureCache
+local IsUsableSpell = TMW.COMMON.SpellUsable.IsUsableSpell
 local GetSpellCharges = TMW.COMMON.Cooldowns.GetSpellCharges
 local GetSpellCooldown = TMW.COMMON.Cooldowns.GetSpellCooldown
-local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
 local GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
 local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local _, pclass = UnitClass("Player")
 
-local SpellRange = TMW.COMMON.SpellRange
-local IsSpellInRange = SpellRange.IsSpellInRange
+local IsSpellInRange = TMW.COMMON.SpellRange.IsSpellInRange
 
 
 local Type = TMW.Classes.IconType:New("cooldown")
@@ -174,6 +172,22 @@ local function AutoShot_OnUpdate(icon, time)
 	end
 end
 
+local function SpellCooldown_OnEvent(icon, event, payload) 
+	if event == "TMW_SPELL_UPDATE_USABLE" then
+		if not payload then
+			icon.NextUpdateTime = 0
+		else
+			for _, spell in pairs(icon.Spells.Array) do
+				if payload[spell] then
+					icon.NextUpdateTime = 0
+					return
+				end
+			end
+		end
+	end
+end
+
+local _
 local emptyTable = {}
 local offCooldown = { startTime = 0, duration = 0 }
 local usableData = {}
@@ -209,7 +223,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				duration = 0
 			end
 
-			local inrange, nomana = true, nil
+			local inrange, noMana = true, nil
 			if RangeCheck then
 				inrange = IsSpellInRange(iName, "target")
 				if inrange == nil then
@@ -217,7 +231,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				end
 			end
 			if ManaCheck then
-				nomana = SpellHasNoMana(iName)
+				_, noMana = IsUsableSpell(iName)
 			end
 			
 
@@ -225,7 +239,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 			-- usable cooldown and the first unusable cooldown found. We can't always determine which we will
 			-- use until we've found one of each. 
 			if
-				inrange and not nomana and (
+				inrange and not noMana and (
 					-- If the cooldown duration is 0 and there arent charges, then its usable
 					(duration == 0 and not charges)
 					-- If the spell has charges and they aren't all depeleted, its usable
@@ -252,7 +266,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 				--wipe(unusableData)
 				unusableData.state = 
 					not inrange and STATE_UNUSABLE_NORANGE or 
-					nomana and STATE_UNUSABLE_NOMANA or 
+					noMana and STATE_UNUSABLE_NOMANA or 
 					STATE_UNUSABLE
 				unusableData.iName = iName
 				unusableData.stack = stack
@@ -326,7 +340,7 @@ function Type:Setup(icon)
 	local isManual = true
 	if icon.RangeCheck then
 		for _, spell in pairs(icon.Spells.Array) do
-			if not SpellRange.HasRangeEvents(spell) then
+			if not TMW.COMMON.SpellRange.HasRangeEvents(spell) then
 				isManual = false
 				break
 			end
@@ -342,16 +356,10 @@ function Type:Setup(icon)
 			end
 		end
 
-		if hasActionEvent then
-			-- ACTIONBAR_UPDATE_USABLE is much more well-behaved than SPELL_UPDATE_USABLE,
-			-- so use it when we can. SPELL_UPDATE_USABLE fires about as often as UNIT_POWER_FREQUENT.
-			icon:RegisterSimpleUpdateEvent("ACTIONBAR_UPDATE_USABLE")
-		else
-			icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_USABLE")
-		end
-
-		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_COOLDOWN")
-		icon:RegisterSimpleUpdateEvent("SPELL_UPDATE_CHARGES")
+		icon:SetScript("OnEvent", SpellCooldown_OnEvent)
+		
+		icon:RegisterSimpleUpdateEvent("TMW_SPELL_UPDATE_COOLDOWN")
+		icon:RegisterSimpleUpdateEvent("TMW_SPELL_UPDATE_CHARGES")
 		if icon.RangeCheck then
 			icon:RegisterSimpleUpdateEvent("TMW_SPELL_UPDATE_RANGE")
 		end
@@ -362,12 +370,7 @@ function Type:Setup(icon)
 			icon:RegisterSimpleUpdateEvent("RUNE_POWER_UPDATE")
 		end    
 		if icon.ManaCheck then
-			-- If the spell(s) are on the actionbar, we can use
-			-- ACTIONBAR_UPDATE_USABLE to listen for usability changes.
-			-- (which we already registered above).
-			if not hasActionEvent then
-				icon:RegisterSimpleUpdateEvent("UNIT_POWER_FREQUENT", "player")
-			end
+			icon:RegisterEvent("TMW_SPELL_UPDATE_USABLE")
 		end
 		
 		icon:SetUpdateMethod("manual")

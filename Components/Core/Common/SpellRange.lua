@@ -44,8 +44,6 @@ if not C_ActionBar or not C_ActionBar.EnableActionRangeCheck then
     return
 end
 
-SpellRange.IsSpellInRange = C_Spell.IsSpellInRange
-
 SpellRange:RegisterEvent("ACTION_RANGE_CHECK_UPDATE")
 
 local SpellsToActions = Actions.SpellsToActions
@@ -109,11 +107,15 @@ TMW:RegisterCallback("TMW_ACTIONS_UPDATED", function()
             end
         end
     end
+
+    TMW:Fire("TMW_SPELL_UPDATE_RANGE")
 end)
 
 SpellRange:SetScript("OnEvent", function(self, event, action, inRange, checksRange)
     if event == "ACTION_RANGE_CHECK_UPDATE" then
         CachedRange[action] = { inRange, checksRange }
+        -- We don't bother with a payload for this event because range check updates
+        -- are quite uncommon in combat, so it just isn't worth it.
         TMW:Fire("TMW_SPELL_UPDATE_RANGE")
     end
 end)

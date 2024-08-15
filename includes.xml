@@ -67,6 +67,7 @@
 <Script file="Components\Core\Common\Actions.lua" />
 <Script file="Components\Core\Common\Cooldowns.lua" />
 <Script file="Components\Core\Common\SpellRange.lua" />
+<Script file="Components\Core\Common\SpellUsable.lua" />
 <Script file="Components\Core\Common\DogTags\DogTags.lua" />
 
 <Script file="Components\Core\Conditions\Conditions.lua" />

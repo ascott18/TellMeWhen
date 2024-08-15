@@ -47,6 +47,10 @@ ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
 		IsMounted = IsMounted,
 	},
 	funcstr = [[BOOLCHECK( IsMounted() )]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("TMW_UNIT_AURA_PLAYER")
+	end,
 })
 ConditionCategory:RegisterCondition(4,	 "SWIMMING", {
 	text = L["CONDITIONPANEL_SWIMMING"],

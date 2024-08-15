@@ -35,7 +35,8 @@ if C_Spell.GetSpellCooldown then
         local cached = CachedCooldowns[spell]
         if cached then
             if cached == false then return end
-            if (cached.duration - (TMW.time - cached.startTime)) <= 0 then
+            local duration = cached.duration
+            if duration ~= 0 and (duration - (TMW.time - cached.startTime)) <= 0 then
                 -- Cooldown has elapsed. Discard this cache entry
             else
                 return cached
@@ -53,7 +54,8 @@ else
         local cached = CachedCooldowns[spell]
         if cached then
             if cached == false then return end
-            if (cached.duration - (TMW.time - cached.startTime)) <= 0 then
+            local duration = cached.duration
+            if duration ~= 0 and (duration - (TMW.time - cached.startTime)) <= 0 then
                 -- Cooldown has elapsed. Discard this cache entry
             else
                 return cached
@@ -102,12 +104,23 @@ else
     end
 end
 
+Cooldowns:RegisterEvent("SPELLS_CHANGED")
 Cooldowns:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 Cooldowns:RegisterEvent("SPELL_UPDATE_CHARGES")
 Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRange)
     if event == "SPELL_UPDATE_COOLDOWN" then
         wipe(CachedCooldowns)
+        TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
+
     elseif event == "SPELL_UPDATE_CHARGES" then
         wipe(CachedCharges)
+        TMW:Fire("TMW_SPELL_UPDATE_CHARGES")
+
+    elseif event == "SPELLS_CHANGED" then
+        -- Spells may have been learned/unlearned (e.g. pvp talents activating/deactivating)
+        wipe(CachedCooldowns)
+        wipe(CachedCharges)
+        TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
+        TMW:Fire("TMW_SPELL_UPDATE_CHARGES")
     end
 end)
