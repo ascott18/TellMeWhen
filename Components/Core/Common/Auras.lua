@@ -10,7 +10,7 @@
 -- Cybeloras of Aerie Peak
 -- --------------------
 
-if not TMW or not C_UnitAuras then return end
+if not TMW then return end
 
 
 local TMW = TMW
@@ -25,8 +25,6 @@ local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot
 local GetAuraSlots = C_UnitAuras.GetAuraSlots or UnitAuraSlots
 local UnitGUID = UnitGUID
-
-if not GetAuraDataByAuraInstanceID then return end
 
 local function getOrCreate(t, k)
     local ret = t[k]
