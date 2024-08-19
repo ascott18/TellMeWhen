@@ -61,7 +61,9 @@ local function UpdateActionSlots()
             -- but I can just imagine people with weird @focus macros
             -- wondering why their icon doesn't update sometimes.
 
-            local baseId = FindBaseSpellByID(id);
+            -- https://github.com/ascott18/TellMeWhen/issues/2198 
+            -- Sometimes, FindBaseSpellByID can return `nil`. Fall back to `id` if it does.
+            local baseId = FindBaseSpellByID(id) or id;
 
             local normalName = strlowerCache[(GetSpellName(id))]
             local baseName = strlowerCache[(GetSpellName(baseId))]

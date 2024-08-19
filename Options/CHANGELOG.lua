@@ -4,7 +4,8 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v11.0.5
-* Most cooldown icons with Range Check enabled now utilize more performant event-driven updates in WoW 11.0.
+* Spell Cooldown and Reactive Ability icons are vastly more efficient if the tracked ability is on your action bars (macros excluded).
+  * This is done by utilizing new WoW 11.0 APIs that are specific to abilities present on action bars.
 
 ## v11.0.4
 * Fix: #2186 Activation overlays in Retail
