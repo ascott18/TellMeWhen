@@ -6,6 +6,8 @@ TMW.CHANGELOG = [==[
 ## v11.0.5
 * Spell Cooldown and Reactive Ability icons are vastly more efficient if the tracked ability is on your action bars (macros excluded).
   * This is done by utilizing new WoW 11.0 APIs that are specific to abilities present on action bars.
+* Fix: #2197 upstream issue in LibSpellRange-1.0 with range checking in classic/cata.
+
 
 ## v11.0.4
 * Fix: #2186 Activation overlays in Retail
