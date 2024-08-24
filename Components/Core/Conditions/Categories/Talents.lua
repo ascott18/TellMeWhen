@@ -421,7 +421,6 @@ if C_ClassTalents then
 						if not entryInfo.definitionID then
 							-- No idea what causes this. Reported on discord as happening on TWW beta.
 							-- Doesn't happen on TWW PTR.
-							print("Missing definitionID for configId", configID, "entryId", entryID)
 						else
 							-- Definition seems a useless layer between entry and spellID.
 							-- Blizzard's in-game API help about them is currently completely wrong
@@ -433,7 +432,11 @@ if C_ClassTalents then
 								-- The ranks are stored on the node, but we
 								-- have to make sure that we're looking at the ranks for the
 								-- currently selected entry for the talent.
-								if nodeInfo.activeEntry and nodeInfo.activeEntry.entryID == entryID then
+								if nodeInfo.activeEntry 
+								and nodeInfo.activeEntry.entryID == entryID 
+								-- subTreeActive is false for inactive hero talent trees, true for active hero trees, nil for "regular" talents.
+								and nodeInfo.subTreeActive ~= false 
+								then
 									map[spellID] = nodeInfo.activeRank or 0
 								elseif not map[spellID] then
 									-- Always populate unlearned talents if there's no entry for them
