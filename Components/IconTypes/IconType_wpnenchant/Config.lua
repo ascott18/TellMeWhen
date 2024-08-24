@@ -116,6 +116,7 @@ Module.SpellIDs = TMW.isRetail and {
 	-- Shaman Enchants
 	318038,	--Flametongue Weapon
 	33757,	--Windfury Weapon
+	462757, -- Thunderstrike Ward
 } or {}
 
 local CurrentItems
@@ -130,26 +131,26 @@ function Module:OnInitialize()
 
 	for _, id in pairs(self.SpellIDs) do
 		local name = TMW.GetSpellName(id)
-		for _, enchant in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
-			local dobreak
-			enchant = name:match(enchant)
+		local found = false
+		for _, enchantMatch in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
+			local enchant = name:match(enchantMatch)
 			if enchant then
 				for ench in pairs(TMW.db.locale.WpnEnchDurs) do
 					if ench:lower():find(enchant:gsub("([%%%[%]%-%+])", "%%%1"):lower()) then
 						-- the enchant was found in the list of known enchants, so add it
 						self.Spells[ench] = id
-						dobreak = 1
+						found = true
 						break
 					end
 				end
-				if dobreak then
-					break
-				elseif GetLocale() ~= "ruRU" or (GetLocale() == "koKR" and id ~= 51730) then
-					-- the enchant was not found in the list of known enchants, so take a guess and add it (but not for ruRU because it is just screwed up
-					-- koKR is screwed up for earthliving, so dont try it either
-					self.Spells[enchant] = id
+				if not found then
+				   	self.Spells[enchant] = id
+					found = true
 				end
 			end
+		end
+		if not found then
+			self.Spells[name] = id
 		end
 	end
 
@@ -188,10 +189,11 @@ function Module:GET_ITEM_INFO_RECEIVED(event, id)
 	-- This prevents the infinite loop.
 	if gotItemInfo[id] then return end
 	gotItemInfo[id] = true
-
-	local name, link = GetItemInfo(id)
-	if name then
-		self.Items[name] = link
+	
+	local item = TMW.C.Item:GetRepresentation(id)
+	if item:GetLink() then
+		local name = item:GetName()
+		self.Items[name] = item
 		self.Table[name] = id
 	else
 		print("wpnenchant SUG: WoW Server seems to think that item doesn't exist", id)
@@ -202,9 +204,10 @@ function Module:Etc_DoItemLookups()
 	self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
 
 	for k, id in pairs(self.ItemIDs) do
-		local name, link = GetItemInfo(id)
-		if name then
-			self.Items[name] = link
+		local item = TMW.C.Item:GetRepresentation(id)
+		if item:GetLink() then
+			local name = item:GetName()
+			self.Items[name] = item
 		else
 			self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 		end
@@ -235,8 +238,9 @@ function Module:Entry_AddToList_1(f, name)
 
 		f.insert = name
 	elseif self.Items[name] then
-		local link = CurrentItems[strlowerCache[name]] or self.Items[name]
-		local name, link = GetItemInfo(link)
+		local item = self.Items[name]
+		local name = item:GetName()
+		local link = item:GetLink()
 
 		f.Name:SetText(link:gsub("[%[%]]", ""))
 		f.ID:SetText(nil)
@@ -261,7 +265,7 @@ function Module:Etc_GetTexture(name)
 	if self.Spells[name] then
 		tex = TMW.GetSpellTexture(self.Spells[name])
 	elseif self.Items[name] then
-		tex = GetItemIcon(self.Items[name])
+		tex = self.Items[name]:GetIcon()
 	else
 		if name:match(L["SUG_PATTERNMATCH_FISHINGLURE"]) then
 			tex = "Interface\\Icons\\inv_fishingpole_02"

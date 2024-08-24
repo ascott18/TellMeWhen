@@ -251,8 +251,16 @@ function ItemByID:GetName()
 	end
 end
 function ItemByID:GetLink()
+	-- It seems that around WoW 11.0, the game will "forget"
+	-- about items that it previously had returns for from GetItemInfo,
+	-- so use a cached return here if it comes back nil.
 	local _, itemLink = GetItemInfo(self.itemID)
-	return itemLink
+	if itemLink then
+		self.link = itemLink
+		return itemLink
+	else
+		return self.link
+	end
 end
 
 
