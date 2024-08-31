@@ -61,32 +61,40 @@ local function UpdateActionSlots()
             -- but I can just imagine people with weird @focus macros
             -- wondering why their icon doesn't update sometimes.
 
-            -- https://github.com/ascott18/TellMeWhen/issues/2198 
-            -- Sometimes, FindBaseSpellByID can return `nil`. Fall back to `id` if it does.
-            local baseId = FindBaseSpellByID(id) or id;
-
-            local normalName = strlowerCache[(GetSpellName(id))]
-            local baseName = strlowerCache[(GetSpellName(baseId))]
-
             MapSpellToAction(id, action)
-            MapSpellToAction(baseId, action)
-            MapSpellToAction(normalName, action)
-            MapSpellToAction(baseName, action)
-
             local spells = {
                 [id] = true,
-                [baseId] = true,
-                [normalName] = true,
-                [baseName] = true,
             }
 
+            local normalName = strlowerCache[GetSpellName(id)]
+            if normalName then
+                spells[normalName] = true
+                MapSpellToAction(normalName, action)
+            end
+
+            -- https://github.com/ascott18/TellMeWhen/issues/2198
+            -- Sometimes, FindBaseSpellByID can return `nil`.
+            local baseId = FindBaseSpellByID(id);
+            if baseId then
+                local baseName = strlowerCache[GetSpellName(baseId)]
+                spells[baseId] = true
+                spells[baseName] = true
+                MapSpellToAction(baseId, action)
+                MapSpellToAction(baseName, action)
+            end
+
             if C_Spell.GetOverrideSpell then
+                
+                -- https://github.com/ascott18/TellMeWhen/issues/2205
+                -- I suspect GetOverrideSpell was returning nil too?
                 local overrideId = C_Spell.GetOverrideSpell(id);
-                local overrideName = strlowerCache[(GetSpellName(overrideId))]
-                MapSpellToAction(overrideId, action)
-                MapSpellToAction(overrideName, action)
-                spells[overrideId] = true
-                spells[overrideName] = true
+                if overrideId then
+                    local overrideName = strlowerCache[GetSpellName(overrideId)]
+                    MapSpellToAction(overrideId, action)
+                    MapSpellToAction(overrideName, action)
+                    spells[overrideId] = true
+                    spells[overrideName] = true
+                end
             end
 
             ActionToSpells[action] = spells
