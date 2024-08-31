@@ -1,6 +1,6 @@
 ﻿-- --------------------
 -- TellMeWhen
--- Originally by Nephthys of Hyjal <lieandswell@yahoo.com>
+-- Originally by NephMakes
 
 -- Other contributions by:
 --        Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
