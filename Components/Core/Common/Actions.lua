@@ -76,24 +76,27 @@ local function UpdateActionSlots()
             -- Sometimes, FindBaseSpellByID can return `nil`.
             local baseId = FindBaseSpellByID(id);
             if baseId then
-                local baseName = strlowerCache[GetSpellName(baseId)]
                 spells[baseId] = true
-                spells[baseName] = true
                 MapSpellToAction(baseId, action)
-                MapSpellToAction(baseName, action)
+                if baseName then
+                    local baseName = strlowerCache[GetSpellName(baseId)]
+                    MapSpellToAction(baseName, action)
+                end
             end
 
             if C_Spell.GetOverrideSpell then
                 
-                -- https://github.com/ascott18/TellMeWhen/issues/2205
-                -- I suspect GetOverrideSpell was returning nil too?
                 local overrideId = C_Spell.GetOverrideSpell(id);
                 if overrideId then
-                    local overrideName = strlowerCache[GetSpellName(overrideId)]
                     MapSpellToAction(overrideId, action)
-                    MapSpellToAction(overrideName, action)
                     spells[overrideId] = true
-                    spells[overrideName] = true
+
+                    -- overrideName being nil was the root cause of https://github.com/ascott18/TellMeWhen/issues/2208
+                    local overrideName = strlowerCache[GetSpellName(overrideId)]
+                    if overrideName then
+                        MapSpellToAction(overrideName, action)
+                        spells[overrideName] = true
+                    end
                 end
             end
 
