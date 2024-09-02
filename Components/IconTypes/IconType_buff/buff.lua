@@ -17,7 +17,12 @@ local L = TMW.L
 local print = TMW.print
 local tonumber, pairs, type, format, select =
 	  tonumber, pairs, type, format, select
+
 local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+
+local Auras = TMW.COMMON.Auras
+local GetAuras = Auras.GetAuras
+local ParseTooltip = Auras.ParseTooltip
 
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
@@ -146,7 +151,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		TMW.IE:LoadIcon(1)
 	end
 	self.ShowTTText = TMW.C.Config_DropDownMenu:New("Frame", "$parentShowTTText", self, "TMW_DropDownMenuTemplate")
-	self.ShowTTText:SetTexts(L["ICONMENU_SHOWTTTEXT2"], L["ICONMENU_SHOWTTTEXT_DESC2"])
+	self.ShowTTText:SetTexts(L["STACKS"], L["ICONMENU_SHOWTTTEXT_DESC2"])
 	self.ShowTTText:SetWidth(135)
 	--self.ShowTTText:SetDropdownAnchor("TOPRIGHT", self.ShowTTText.Middle, "BOTTOMRIGHT")
 	self.ShowTTText:SetFunction(function(self)
@@ -159,6 +164,8 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		info.checked = info.arg1 == TMW.CI.ics.ShowTTText
 		TMW.DD:AddButton(info)
 
+		TMW.DD:AddSpacer()
+
 		local info = TMW.DD:CreateInfo()
 		info.text = L["ICONMENU_SHOWTTTEXT_FIRST"]
 		info.tooltipTitle = info.text
@@ -167,8 +174,6 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		info.arg1 = true
 		info.checked = info.arg1 == TMW.CI.ics.ShowTTText
 		TMW.DD:AddButton(info)
-
-		TMW.DD:AddSpacer()
 
 		for _, var in TMW:Vararg(1, 2, 3) do
 			local info = TMW.DD:CreateInfo()
@@ -180,10 +185,30 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			info.checked = info.arg1 == TMW.CI.ics.ShowTTText
 			TMW.DD:AddButton(info)
 		end
+
+		TMW.DD:AddSpacer()
+
+		-- Negative numbers for tooltip values
+		for _, var in TMW:Vararg(-1, -2, -3) do
+			local info = TMW.DD:CreateInfo()
+			info.text = L["ICONMENU_SHOWTTTEXT_TT"]:format(-var)
+			info.tooltipTitle = info.text
+			info.tooltipText = L["ICONMENU_SHOWTTTEXT_TT_DESC"]:format(-var)
+			info.func = OnClick
+			info.arg1 = var
+			info.checked = info.arg1 == TMW.CI.ics.ShowTTText
+			TMW.DD:AddButton(info)
+		end
 	end)
 
 	self:CScriptAdd("ReloadRequested", function(self, panel, panelInfo)
-		self.ShowTTText:SetText((TMW.CI.ics.ShowTTText ~= false and "|cffff5959" or "") .. L["ICONMENU_SHOWTTTEXT2"])
+		self.ShowTTText:SetText(
+			L["STACKS"] .. ": " .. (
+			TMW.CI.ics.ShowTTText == false and L["DEFAULT"] or
+			TMW.CI.ics.ShowTTText == true and L["ICONMENU_SHOWTTTEXT_FIRST"] or
+			TMW.CI.ics.ShowTTText > 0 and L["ICONMENU_SHOWTTTEXT_VAR"]:format(TMW.CI.ics.ShowTTText) or
+			TMW.CI.ics.ShowTTText < 0 and L["ICONMENU_SHOWTTTEXT_TT"]:format(-TMW.CI.ics.ShowTTText) or
+			""))
 	end)
 
 	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.HideIfNoUnits, self.ShowTTText)
@@ -379,7 +404,6 @@ local function Buff_OnUpdate(icon, time)
 	end
 end
 
-local GetAuras = TMW.COMMON.Auras.GetAuras
 local function Buff_OnUpdate_Packed(icon, time)
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, SpellsArray, DurationSort, StackSort, KindKey
@@ -609,8 +633,11 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 						break
 					end
 				end
+			elseif icon.ShowTTText < 0 then
+				-- Negative numbers represent indexes into tooltip scanning.
+				local tooltipNumbers = ParseTooltip(unit, instance)
+				count = tooltipNumbers[-icon.ShowTTText]
 			else
-				-- icon.ShowTTText is a number if it isn't false and it isn't true
 				count = instance.points[icon.ShowTTText]
 			end
 		end

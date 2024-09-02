@@ -25,7 +25,8 @@ local huge = math.huge
 local empty = {}
 
 local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
-local GetAuras = TMW.COMMON.Auras.GetAuras
+local Auras = TMW.COMMON.Auras
+local GetAuras = Auras.GetAuras
 
 function Env.AuraStacks(unit, name, filter)
 	for i = 1, huge do
@@ -200,104 +201,21 @@ function Env.AuraVariableNumberPacked(unit, name, kindKey, onlyMine)
 end
 
 
-function Env.AuraTooltipNumber(...)
-	local Parser, LT1, LT2 = TMW:GetParser()
-	local module = CNDT:NewModule("TooltipParser", "AceEvent-3.0")
+function Env.AuraTooltipNumber(unit, name, filter, requestedIndex)
+	requestedIndex = requestedIndex or 1
 
-	local watchedUnits = {}
-	local unitSets = {}
-	local cache = setmetatable({}, {
-		__mode = 'kv',
-		__index = function(s, k)
-			s[k] = {}
-			return s[k]
-		end
-	})
-
-	function module:UNIT_AURA(_, unit)
-		local unitCache = rawget(cache, unit)
-		if unitCache then wipe(unitCache) end
-	end
-	module:RegisterEvent("UNIT_AURA")
-
-	local function TMW_UNITSET_UPDATED(event, UnitSet)
-		local unit = unitSets[UnitSet]
-		if unit and UnitSet.allUnitsChangeOnEvent then
-			wipe(cache[unit])
+	for i = 1, 100 do
+		local data = GetAuraDataByIndex(unit, i, filter)
+		if not data then 
+			break
+		elseif data.spellId == name or strlowerCache[data.name] == name then
+			
+			local tooltipNumbers = Auras.ParseTooltip(unit, instance, i)
+			return tooltipNumbers[requestedIndex] or 0
 		end
 	end
 
-	function Env.AuraTooltipNumber(unit, name, filter, requestedIndex)
-		requestedIndex = requestedIndex or 1
-
-		local UnitSet, _ = watchedUnits[unit]
-		if not UnitSet then
-			_, UnitSet = TMW:GetUnits(nil, unit)
-			unitSets[UnitSet] = unit
-			watchedUnits[unit] = UnitSet
-			TMW:RegisterCallback(UnitSet.event, TMW_UNITSET_UPDATED)
-		end
-
-		local cacheable = UnitSet.allUnitsChangeOnEvent
-		local cachestr = name .. filter
-
-		if cacheable and cache[unit][cachestr] then
-			return isNumber[select(requestedIndex, strsplit(";", cache[unit][cachestr]))] or 0
-		end
-
-		local n
-		for i = 1, 60 do
-			local data = GetAuraDataByIndex(unit, i, filter)
-			if not data then 
-				break
-			elseif data.spellId == name or strlowerCache[data.name] == name then
-				n = i
-				break
-			end
-		end
-
-		if n then
-			local index = 0
-		    Parser:SetOwner(UIParent, "ANCHOR_NONE")
-		    Parser:SetUnitAura(unit, n, filter)
-			local text = LT2:GetText() or ""
-			Parser:Hide()
-
-			local number
-			local ret
-			local allNumbers = ""
-			repeat
-				number, text = (text):match("([0-9%" .. LARGE_NUMBER_SEPERATOR .. "]+%" .. DECIMAL_SEPERATOR .. "?[0-9]+)(.*)$")
-
-				if number then
-					-- Remove large number separators
-					number = number:gsub("%" .. LARGE_NUMBER_SEPERATOR, "")
-					-- Normalize decimal separators
-					number = number:gsub("%" .. DECIMAL_SEPERATOR, ".")
-
-					index = index + 1
-					if index == requestedIndex then
-						ret = isNumber[number]
-					end
-					allNumbers = allNumbers .. (index == 1 and "" or ";") .. number
-				end
-			until not number
-
-			if cacheable then
-				cache[unit][cachestr] = allNumbers
-			end
-
-			return ret or 0
-		else
-			if cacheable then
-				cache[unit][cachestr] = ""
-			end
-		end
-
-		return 0
-	end
-
-	return Env.AuraTooltipNumber(...)
+	return 0
 end
 
 function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedIndex)
@@ -308,34 +226,9 @@ function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedInd
 		if (isMine or not onlyMine) then
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
+				local tooltipNumbers = Auras.ParseTooltip(unit, instance)
 
-				if instance.tmwTooltipNumbers then
-					-- Return cached value if available
-					return instance.tmwTooltipNumbers[requestedIndex] or 0
-				end
-
-				local data = C_TooltipInfo[kindKey == "isHelpful" and "GetUnitBuffByAuraInstanceID" or "GetUnitDebuffByAuraInstanceID"](unit, auraInstanceID)
-				
-				local text = data.lines[2].leftText
-				instance.tmwTooltipNumbers = {}
-				local index = 0
-				local number
-				local allNumbers = ""
-				repeat
-					number, text = (text):match("([0-9%" .. LARGE_NUMBER_SEPERATOR .. "]+%" .. DECIMAL_SEPERATOR .. "?[0-9]+)(.*)$")
-
-					if number then
-						-- Remove large number separators
-						number = number:gsub("%" .. LARGE_NUMBER_SEPERATOR, "")
-						-- Normalize decimal separators
-						number = number:gsub("%" .. DECIMAL_SEPERATOR, ".")
-
-						index = index + 1
-						instance.tmwTooltipNumbers[index] = isNumber[number]
-					end
-				until not number
-
-				return instance.tmwTooltipNumbers[requestedIndex] or 0
+				return tooltipNumbers[requestedIndex] or 0
 			end
 		end
 	end
@@ -547,7 +440,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		icon = not TMW.isRetail and "Interface\\Icons\\spell_ice_lament" or "Interface\\Icons\\ability_priest_clarityofwill",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
-			if C_TooltipInfo and CanUsePackedAuras(c) then
+			if CanUsePackedAuras(c) then
 				return [[AuraTooltipNumberPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[, ]] .. i .. [[) c.Operator c.Level]]
 			end
 			return [[AuraTooltipNumber(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]
@@ -813,7 +706,7 @@ for i = 1, 3 do -- DEBUFFTOOLTIPSCAN
 		icon = "Interface\\Icons\\spell_fire_flameshock",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
-			if C_TooltipInfo and CanUsePackedAuras(c) then
+			if CanUsePackedAuras(c) then
 				return [[AuraTooltipNumberPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[, ]] .. i .. [[) c.Operator c.Level]]
 			end
 			return [[AuraTooltipNumber(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[", ]] .. i .. [[) c.Operator c.Level]]

@@ -17,6 +17,10 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
+local isNumber = TMW.isNumber
+
+local LARGE_NUMBER_SEPERATOR = LARGE_NUMBER_SEPERATOR
+local DECIMAL_SEPERATOR = DECIMAL_SEPERATOR
 
 local select = select
 local setmetatable = setmetatable
@@ -341,4 +345,85 @@ function Auras.GetAuras(unit)
         UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HARMFUL"))
     end
     return unitData
+end
+
+
+local function ParseTooltipText(text, instance)
+    instance.tmwTooltipNumbers = {}
+
+    local index = 0
+    local last = -1
+    local number, start
+    repeat
+        start, last, number = (text):find("([0-9%" .. LARGE_NUMBER_SEPERATOR .. "]+%" .. DECIMAL_SEPERATOR .. "?[0-9]*)", last + 1)
+        if number then
+            -- Remove large number separators
+            number = number:gsub("%" .. LARGE_NUMBER_SEPERATOR, "")
+            -- Normalize decimal separators
+            number = number:gsub("%" .. DECIMAL_SEPERATOR, ".")
+            number = number:trim(".")
+            
+            index = index + 1
+            instance.tmwTooltipNumbers[index] = isNumber[number]
+        end
+    until not number
+
+    return instance.tmwTooltipNumbers
+end
+
+if C_TooltipInfo and C_TooltipInfo.GetUnitBuffByAuraInstanceID then
+
+    function Auras.ParseTooltip(unit, instance) 
+        if instance.tmwTooltipNumbers then
+            -- Return cached value if available
+            return instance.tmwTooltipNumbers
+        end
+
+        local data = C_TooltipInfo[instance.isHelpful and "GetUnitBuffByAuraInstanceID" or "GetUnitDebuffByAuraInstanceID"](unit, instance.auraInstanceID)
+        
+        local text = data.lines[2].leftText
+        return ParseTooltipText(text, instance)
+    end
+
+else
+    local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+    local Parser, LT1, LT2 = TMW:GetParser()
+
+    function Auras.ParseTooltip(unit, instance, auraIndex) 
+        if instance.tmwTooltipNumbers then
+            -- Return cached value if available
+            return instance.tmwTooltipNumbers
+        end
+
+        local filter = instance.isHelpful and "HELPFUL" or "HARMFUL"
+
+        instance.tmwTooltipNumbers = {}
+        if not auraIndex then
+
+            -- Because classic doesn't have a way to set a tooltip from an aura instance,
+            -- we have to go find the index of the aura on the unit
+
+            for i = 1, 100 do
+                local data = GetAuraDataByIndex(unit, i, filter)
+                if not data then return end
+
+                if data.auraInstanceID == instance.auraInstanceID then
+                    auraIndex = i
+                    break
+                end
+            end
+        end
+
+        if auraIndex then
+            Parser:SetOwner(UIParent, "ANCHOR_NONE")
+            Parser:SetUnitAura(unit, auraIndex, filter)
+            local text = LT2:GetText() or ""
+            Parser:Hide()
+
+            return ParseTooltipText(text, instance)
+        end
+    
+        return instance.tmwTooltipNumbers
+    end
+
 end
