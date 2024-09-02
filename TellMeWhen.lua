@@ -1,4 +1,4 @@
-﻿-- ---------------------------------
+-- ---------------------------------
 -- TellMeWhen
 -- Originally by NephMakes
 
@@ -364,33 +364,6 @@ end
 
 
 
-
-
----------------------------------
--- Global Cooldown Data
----------------------------------
-
--- Rogue's Backstab. We don't need class spells anymore - any GCD spell works fine.
-local GCDSpell = 53
-TMW.GCDSpell = GCDSpell
-local GCD = 0
-TMW.GCD = 0
-
-function TMW.OnGCD(d)
-	if d <= 0.1 then
-		-- A cd of 0.001 is Blizzard's terrible way of indicating that something's cooldown hasn't started,
-		-- but is still unusable, and has a cooldown pending. It should not be considered a GCD.
-		-- In general, anything less than 0.1 isn't a GCD.
-		return false
-	elseif d <= 1 then
-		-- A cd of 1 (or less) is always a GCD (or at least isn't worth showing)
-		return true
-	else
-		-- If the duration passed in is the same as the GCD spell,
-		-- and the duration isnt zero, then it is a GCD
-		return GCD == d and d > 0 
-	end
-end
 
 
 

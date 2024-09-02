@@ -1,4 +1,4 @@
-﻿-- --------------------
+-- --------------------
 -- TellMeWhen
 -- Originally by NephMakes
 
@@ -536,10 +536,10 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_hunter_steadyshot",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[BOOLCHECK( (TMW.GCD > 0 and TMW.GCD < 1.7) )]],
+	funcstr = [[BOOLCHECK( (TMW.GetGCD() > 0 and TMW.GetGCD() < 1.7) )]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_COOLDOWN")
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
 		local start, duration = GetSpellCooldown(TMW.GCDSpell)
