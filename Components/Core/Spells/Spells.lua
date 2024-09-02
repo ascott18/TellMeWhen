@@ -145,6 +145,22 @@ local function parseSpellsString(setting, doLower, keepDurations)
 end
 parseSpellsString = TMW:MakeNArgFunctionCached(3, parseSpellsString)
 
+-- IDs of spells that can't be tracked properly because of blizzard bugs.
+local fixSpellMap = { 
+	[382266] = function()
+		-- Evoker https://github.com/ascott18/TellMeWhen/issues/2212
+		-- Fire Breath + font of magic
+		if 
+			not IsPlayerSpell(382266) -- The fire breath ID reported by blizzard is actually unlearned
+		and not IsPlayerSpell(408083) -- Font of magic (augmentation) talent unlearned
+		and not IsPlayerSpell(411212) -- Font of magic (devastation) talent unlearned
+		and not IsPlayerSpell(375783) -- Font of magic (preservation) talent unlearned
+		then
+			return 357208 -- Fire breath without font of magic
+		end
+	end,
+}
+
 local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRenaming)
 	local spells = parseSpellsString(setting, doLower, false)
 
@@ -166,7 +182,18 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 			if C_Spell and C_Spell.GetOverrideSpell then
 				local spellID = C_Spell.GetOverrideSpell(v or "")
 				if spellID and spellID ~= 0 then
-					spells[k] = spellID
+					if fixSpellMap[spellID] then
+						-- Attempt to fix blizzard bugs like https://github.com/Stanzilla/WoWUIBugs/issues/354
+						local newSpell = fixSpellMap[spellID]()
+						if newSpell then
+							print("fixing bugged spell", v, spellID, "=>", newSpell)
+							spells[k] = newSpell
+						else 
+							spells[k] = spellID
+						end
+					else
+						spells[k] = spellID
+					end
 				end
 			end
 		end
