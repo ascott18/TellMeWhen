@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by NephMakes
 
@@ -34,7 +34,7 @@ local bit_band = bit.band
 
 local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 
-local GetSpellCooldown = TMW.GetSpellCooldown
+local GetSpellCooldown = TMW.COMMON.Cooldowns.GetSpellCooldown
 Env.GetSpellCooldown = GetSpellCooldown
 local GetSpellName = TMW.GetSpellName
 local GetSpellInfo = TMW.GetSpellInfo
@@ -43,15 +43,17 @@ local GetItemCooldown = GetItemCooldown or (C_Item and C_Item.GetItemCooldown) o
 
 function Env.CooldownDuration(spell, gcdAsUnusable)
 	if spell == "gcd" then
-		local start, duration = GetSpellCooldown(TMW.GCDSpell)
-		return duration == 0 and 0 or (duration - (TMW.time - start)), start, duration
+		local cooldown = GetSpellCooldown(TMW.GCDSpell)
+		local duration = cooldown.duration
+		return duration == 0 and 0 or (duration - (TMW.time - cooldown.startTime))
 	end
 
-	local start, duration = GetSpellCooldown(spell)
-	if duration then
-		return ((duration == 0 or (not gcdAsUnusable and OnGCD(duration))) and 0) or (duration - (TMW.time - start)), start, duration
+	local cooldown = GetSpellCooldown(spell)
+	if cooldown then
+		local duration = cooldown.duration
+		return ((duration == 0 or (not gcdAsUnusable and OnGCD(duration))) and 0) or (duration - (TMW.time - cooldown.startTime))
 	end
-	return 0, 0, 0
+	return 0
 end
 
 local GetSpellCharges = TMW.GetSpellCharges
@@ -105,8 +107,8 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	end,
 	anticipate = function(c)
 		local str = [[
-			local start, duration = GetSpellCooldown(c.OwnSpells.First)
-			local VALUE = duration and start + (duration - c.Level) or huge
+			local cooldown = GetSpellCooldown(c.OwnSpells.First)
+			local VALUE = cooldown and cooldown.startTime + (cooldown.duration - c.Level) or huge
 		]]
 		if TMW:GetSpells(c.Name).First == "gcd" then
 			str = str:gsub("c.OwnSpells.First", TMW.GCDSpell)
@@ -140,16 +142,18 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 	end,
 	anticipate = function(c)
 		local str = [[
-			local start, duration = GetSpellCooldown(c.OwnSpells.First)
-			local start2, duration2 = GetSpellCooldown(c.OwnSpells2.First)
+			local cooldown = GetSpellCooldown(c.OwnSpells.First)
+			local cooldown2 = GetSpellCooldown(c.OwnSpells2.First)
+			local duration = cooldown and cooldown.duration
+			local duration2 = cooldown2 and cooldown2.duration
 			local VALUE
 			if duration and duration2 then
-				local v1, v2 = start + duration, start2 + duration2
+				local v1, v2 = cooldown.startTime + duration, cooldown2.startTime + duration2
 				VALUE = v1 < v2 and v1 or v2
 			elseif duration then
-				VALUE = start + duration
+				VALUE = cooldown.startTime + duration
 			elseif duration2 then
-				VALUE = start2 + duration2
+				VALUE = cooldown2.startTime + duration2
 			else
 				VALUE = huge
 			end
@@ -542,8 +546,8 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
-		local start, duration = GetSpellCooldown(TMW.GCDSpell)
-		local VALUE = start + duration -- the time at which we need to update again. (when the GCD ends)
+		local cooldown = GetSpellCooldown(TMW.GCDSpell)
+		local VALUE = cooldown.startTime + cooldown.duration -- the time at which we need to update again. (when the GCD ends)
 	]],
 })
 

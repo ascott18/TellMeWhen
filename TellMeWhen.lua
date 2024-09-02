@@ -1,4 +1,4 @@
--- ---------------------------------
+﻿-- ---------------------------------
 -- TellMeWhen
 -- Originally by NephMakes
 
@@ -389,20 +389,6 @@ else
 	TMW.GetSpellName = GetSpellInfo
 end
 local GetSpellName = TMW.GetSpellName
-
-
-if _G.GetSpellCooldown then
-	TMW.GetSpellCooldown = _G.GetSpellCooldown
-else
-	local C_Spell_GetSpellCooldown = C_Spell.GetSpellCooldown
-	TMW.GetSpellCooldown = function(spellID)
-		local spellCooldownInfo = C_Spell_GetSpellCooldown(spellID);
-		if spellCooldownInfo then
-			return spellCooldownInfo.startTime, spellCooldownInfo.duration, spellCooldownInfo.isEnabled, spellCooldownInfo.modRate;
-		end
-	end
-end
-local GetSpellCooldown = TMW.GetSpellCooldown
 
 ---------------------------------
 -- Caches
@@ -2582,15 +2568,11 @@ function TMW:CpuProfileReset()
 end
 
 --- Update variables that are used globally thoughout TMW.
--- This includes TMW.time and TMW.GCD.
 -- Call this manually when script execution starts in a context
 -- that needs these variables but isn't originating from TMW:OnUpdate().
 function TMW:UpdateGlobals()
 	time = GetTime()
 	TMW.time = time
-
-	_, GCD=GetSpellCooldown(GCDSpell)
-	TMW.GCD = GCD	
 end
 
 do	-- TMW:OnUpdate()

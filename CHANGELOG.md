@@ -4,6 +4,7 @@
 * #2190: Added options to Buff/Debuff icons to source stack count from tooltip numbers.
 * Fix: #2197 upstream issue in LibSpellRange-1.0 with range checking in classic/cata.
 * Fix: #2201 Don't treat inactive hero talent trees as learned talents
+* Fix: #2210 Fix desync of current GCD duration
 
 
 ## v11.0.4
