@@ -381,7 +381,8 @@ if C_TooltipInfo and C_TooltipInfo.GetUnitBuffByAuraInstanceID then
 
         local data = C_TooltipInfo[instance.isHelpful and "GetUnitBuffByAuraInstanceID" or "GetUnitDebuffByAuraInstanceID"](unit, instance.auraInstanceID)
         
-        local text = data.lines[2].leftText
+        local line = data.lines[2]
+        local text = line and line.leftText or ""
         return ParseTooltipText(text, instance)
     end
 
