@@ -745,14 +745,14 @@ CNDT.Substitutions = {
 		return conditionData.percent and conditionSettings.Level/100 or conditionSettings.Level
 	end,
 },{
-	src = "c.Checked",
-	rep = function(conditionData, conditionSettings, name, name2)
-		return tostring(conditionSettings.Checked)
-	end,
-},{
 	src = "c.Checked2",
 	rep = function(conditionData, conditionSettings, name, name2)
 		return tostring(conditionSettings.Checked2)
+	end,
+},{
+	src = "c.Checked",
+	rep = function(conditionData, conditionSettings, name, name2)
+		return tostring(conditionSettings.Checked)
 	end,
 },{
 	src = "c.Operator",
