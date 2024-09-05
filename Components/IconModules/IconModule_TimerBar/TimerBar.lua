@@ -22,10 +22,6 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local	pairs, wipe =
 		pairs, wipe
 
-local OnGCD = TMW.OnGCD
-
-
-
 local BarsToUpdate = {}
 
 

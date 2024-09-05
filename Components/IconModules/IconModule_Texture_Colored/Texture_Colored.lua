@@ -21,8 +21,6 @@ local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local type = type
 local bitband = bit.band
 
-local OnGCD = TMW.OnGCD
-
 local ColorMSQ, OnlyMSQ
 
 local Texture_Colored = TMW:NewClass("IconModule_Texture_Colored", "IconModule_Texture")

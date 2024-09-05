@@ -32,9 +32,6 @@ local GetItemSpell = C_Item and C_Item.GetItemSpell or GetItemSpell
 
 local INVSLOT_LAST_EQUIPPED = INVSLOT_LAST_EQUIPPED
 
-local OnGCD = TMW.OnGCD
-
-
 local Item = TMW:NewClass("Item")
 
 
@@ -165,7 +162,7 @@ function Item:GetCooldownDurationNoGCD()
 	if enable == 0 then
 		return math.huge
 	elseif duration then
-		return ((duration == 0 or OnGCD(duration)) and 0) or (duration - (TMW.time - start))
+		return ((duration == 0 or TMW.OnGCD(duration)) and 0) or (duration - (TMW.time - start))
 	end
 	return 0
 end

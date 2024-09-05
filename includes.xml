@@ -62,10 +62,10 @@
 <Script file="Components\Core\Common\SwingTimerMonitor.lua" />
 <Script file="Components\Core\Common\UpdateTableManager.lua" />
 <Script file="Components\Core\Common\PlayerNames.lua" />
-<Script file="Components\Core\Common\Item.lua" />
-<Script file="Components\Core\Common\Auras.lua" />
 <Script file="Components\Core\Common\Actions.lua" />
 <Script file="Components\Core\Common\Cooldowns.lua" />
+<Script file="Components\Core\Common\Item.lua" />
+<Script file="Components\Core\Common\Auras.lua" />
 <Script file="Components\Core\Common\SpellRange.lua" />
 <Script file="Components\Core\Common\SpellUsable.lua" />
 <Script file="Components\Core\Common\DogTags\DogTags.lua" />

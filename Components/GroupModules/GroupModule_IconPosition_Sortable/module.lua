@@ -17,8 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local OnGCD = TMW.OnGCD
-
 local IconPosition_Sortable = TMW:NewClass("GroupModule_IconPosition_Sortable", "GroupModule_IconPosition")
 
 
