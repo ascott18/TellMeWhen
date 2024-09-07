@@ -905,7 +905,7 @@ TMW:RegisterCallback("TMW_ICON_ANIMATION_START", function(_, self, table)
 		end
 	end
 	
-	if table.Duration == huge then
+	if not TMW.Locked and table.Duration == huge then
 		table.Duration = 5
 		TMW:Print("Restricted animation duration to 5 seconds for testing")
 	end
