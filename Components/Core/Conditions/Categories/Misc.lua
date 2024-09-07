@@ -59,20 +59,17 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	unit = false,
 	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function(c, icon)
-		if c.Icon == "" or c.Icon == icon:GetGUID() then
-			--return [[true]]
+	Env = {
+		IsIconShown = function(icon)
+			if not icon or not icon.attributes.shown then return false end
+			icon:Update()
+			return icon.attributes.realAlpha > 0
 		end
-
+	},
+	funcstr = function(c, icon)
 		TMW:QueueValidityCheck(icon, c.Icon, L["VALIDITY_CONDITION_DESC"])
 
-		local str = [[( c.Icon and c.Icon.attributes.shown and not c.Icon:Update())]]
-		if c.Level == 0 then
-			str = str .. [[and c.Icon.attributes.realAlpha > 0]]
-		else
-			str = str .. [[and c.Icon.attributes.realAlpha == 0]]
-		end
-		return str
+		return "BOOLCHECK(IsIconShown(c.Icon))"
 	end,
 	--[[events = function(ConditionObject, c)
 		local event = TMW.Classes.IconDataProcessor.ProcessorsByName.REALALPHA.changedEvent
