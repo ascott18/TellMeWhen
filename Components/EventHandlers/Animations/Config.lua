@@ -64,6 +64,7 @@ end
 TMW.IE:RegisterRapidSetting("Duration")
 TMW.IE:RegisterRapidSetting("Magnitude")
 TMW.IE:RegisterRapidSetting("Period")
+TMW.IE:RegisterRapidSetting("Speed")
 TMW.IE:RegisterRapidSetting("Thickness")
 TMW.IE:RegisterRapidSetting("Size_anim")
 TMW.IE:RegisterRapidSetting("Scale")

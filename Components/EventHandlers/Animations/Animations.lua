@@ -46,6 +46,7 @@ Animations:RegisterEventDefaults{
 	SizeY	  		= 30,
 	Thickness	  	= 2,
 	Scale           = 1,
+	Speed           = 1,
 	Fade	  		= true,
 	Infinite  		= false,
 	AnimColor	  	= "7fff0000",
@@ -564,6 +565,138 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		icon.animation_border:Hide()
 	end,
 })
+
+local LibCustomGlow = LibStub("LibCustomGlow-1.0", true)
+if LibCustomGlow then
+	Animations:RegisterEventHandlerDataNonSpecific(71, "LCG_PIXEL", {
+		text = L["ANIM_LCG_PIXEL"],
+		desc = L["ANIM_LCG_PIXEL_DESC"],
+		ConfigFrames = {
+			"Duration",
+			"Infinite",
+			"Color",
+			"Size_anim",
+			"Thickness",
+			"Speed",
+			"AnchorTo",
+		},
+	
+		Play = function(icon, eventSettings)
+			local Duration = 0
+			if eventSettings.Infinite then
+				Duration = huge
+			else
+				Duration = eventSettings.Duration
+			end
+	
+			local c = TMW:StringToCachedRGBATable(eventSettings.AnimColor)
+			icon:Animations_Start{
+				eventSettings = eventSettings,
+				Start = TMW.time,
+				Duration = Duration,
+	
+				Color = {c.r, c.g, c.b, c.a},
+				Thickness = eventSettings.Thickness,
+				Size = eventSettings.Size_anim,
+				Speed = eventSettings.Speed,
+				Key = tostring(eventSettings),
+				
+				AnchorTo = eventSettings.AnchorTo,
+			}
+		end,
+		OnUpdate = function(icon, table)
+			if table.Duration - (TMW.time - table.Start) < 0 then
+				icon:Animations_Stop(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			local target = GetAnchorOrWarn(icon, table.AnchorTo)
+			if not target.GetFrameLevel then target = icon end
+
+			LibCustomGlow.PixelGlow_Start(
+				target,
+				table.Color,
+				8, -- number of lines. Default value is 8;
+				0.25 * table.Speed, -- frequency, set to negative to inverse direction of rotation. Default value is 0.25;
+				nil, -- length of lines. Default value depends on region size and number of lines;
+				table.Thickness, -- thickness of lines. Default value is 2;
+				table.Size, table.Size, -- xOffset,yOffset - offset of glow relative to region border;
+				false, -- border - set to true to create border under lines;
+				table.Key -- key of glow, allows for multiple glows on one frame;
+			)
+		end,
+		OnStop = function(icon, table)
+			local target = GetAnchorOrWarn(icon, table.AnchorTo)
+			if not target.GetFrameLevel then target = icon end
+			
+			LibCustomGlow.PixelGlow_Stop(target, table.Key)
+		end,
+	})
+	
+	Animations:RegisterEventHandlerDataNonSpecific(72, "LCG_AUTOCAST", {
+		text = L["ANIM_LCG_AUTOCAST"],
+		desc = L["ANIM_LCG_AUTOCAST_DESC"],
+		ConfigFrames = {
+			"Duration",
+			"Infinite",
+			"Color",
+			"Size_anim",
+			"Thickness",
+			"Speed",
+			"AnchorTo",
+		},
+	
+		Play = function(icon, eventSettings)
+			local Duration = 0
+			if eventSettings.Infinite then
+				Duration = huge
+			else
+				Duration = eventSettings.Duration
+			end
+	
+			local c = TMW:StringToCachedRGBATable(eventSettings.AnimColor)
+			icon:Animations_Start{
+				eventSettings = eventSettings,
+				Start = TMW.time,
+				Duration = Duration,
+	
+				Color = {c.r, c.g, c.b, c.a},
+				Thickness = eventSettings.Thickness,
+				Size = eventSettings.Size_anim,
+				Speed = eventSettings.Speed,
+				Key = tostring(eventSettings),
+				
+				AnchorTo = eventSettings.AnchorTo,
+			}
+		end,
+		OnUpdate = function(icon, table)
+			if table.Duration - (TMW.time - table.Start) < 0 then
+				icon:Animations_Stop(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			local target = GetAnchorOrWarn(icon, table.AnchorTo)
+			if not target.GetFrameLevel then target = icon end
+
+			LibCustomGlow.AutoCastGlow_Start(
+				target,
+				table.Color,
+				4, -- number of particle groups. Each group contains 4 particles. Default value is 4;
+				0.25 * table.Speed, -- frequency, set to negative to inverse direction of rotation. Default value is 0.125;
+				table.Thickness, -- scale - scale of particles;
+				table.Size, table.Size, -- xOffset,yOffset - offset of glow relative to region border;
+				table.Key -- key of glow, allows for multiple glows on one frame;
+			)
+		end,
+		OnStop = function(icon, table)
+			local target = GetAnchorOrWarn(icon, table.AnchorTo)
+			if not target.GetFrameLevel then target = icon end
+			
+			LibCustomGlow.AutoCastGlow_Stop(target, table.Key)
+		end,
+	})
+end
+
 Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 	text = L["ANIM_ICONOVERLAYIMG"],
 	desc = L["ANIM_ICONOVERLAYIMG_DESC"],
@@ -769,10 +902,12 @@ TMW:RegisterCallback("TMW_ICON_ANIMATION_START", function(_, self, table)
 		if TMW.Locked then
 			-- Modify the table to play infinitely
 			table.Duration = math.huge
-		elseif table.Duration then
-			table.Duration = 5
-			TMW:Print("Restricted animation duration to 5 seconds for testing")
 		end
+	end
+	
+	if table.Duration == huge then
+		table.Duration = 5
+		TMW:Print("Restricted animation duration to 5 seconds for testing")
 	end
 end)
 

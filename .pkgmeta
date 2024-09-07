@@ -15,6 +15,7 @@ externals:
     Lib/LibDogTag-Stats-3.0: https://github.com/ascott18/LibDogTag-Stats-3.0.git
 
     Lib/LibSpellRange-1.0: https://github.com/ascott18/LibSpellRange-1.0.git
+    Lib/LibCustomGlow-1.0: https://github.com/Stanzilla/LibCustomGlow.git
     Lib/LibOO-1.0: https://github.com/ascott18/LibOO-1.0.git
     
     Lib/LibRangeCheck-3.0: https://github.com/WeakAuras/LibRangeCheck-3.0

@@ -1143,6 +1143,7 @@ L["UIPANEL_RELATIVEPOINT2_DESC"] = "Anchor the group to the %s of the anchor tar
 L["ASCENDING"] = "Ascending"
 L["DESCENDING"] = "Descending"
 L["UIPANEL_SCALE"] = "Scale"
+L["UIPANEL_SPEED"] = "Speed"
 L["UIPANEL_LEVEL"] = "Frame Level"
 L["UIPANEL_LEVEL_DESC"] = "The level within the group's strata that it should be drawn on."
 L["UIPANEL_STRATA"] = "Strata"
@@ -2433,6 +2434,12 @@ L["ANIM_ICONBORDER"] = "Icon: Border"
 L["ANIM_ICONBORDER_DESC"] = "Overlays a colored border on the icon."
 L["ANIM_ICONOVERLAYIMG"] = "Icon: Image Overlay"
 L["ANIM_ICONOVERLAYIMG_DESC"] = "Overlays a custom image over the icon."
+
+L["ANIM_LCG_PIXEL"] = "Icon: Pixel Border"
+L["ANIM_LCG_PIXEL_DESC"] = "Overlays the LibCustomGlow animated pixel border."
+L["ANIM_LCG_AUTOCAST"] = "Icon: Autocast Border"
+L["ANIM_LCG_AUTOCAST_DESC"] = "Overlays an effect similar to the pet autocasting indicator animation."
+
 L["ANIM_ICONCLEAR"] = "Icon: Stop Animations"
 L["ANIM_ICONCLEAR_DESC"] = "Stops all animations that are playing on the current icon."
 

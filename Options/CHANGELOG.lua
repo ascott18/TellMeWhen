@@ -4,6 +4,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v11.0.7
+* #1857 - Add LibCustomGlow animations.
 * Fix: #2215 - Spell Charges condition not updating for countable spells without true charges.
 * Fix: #2217 - Error in item cooldown conditions
 * Fix: #2220 - GCD state not ending when GCD ends.
