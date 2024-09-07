@@ -75,6 +75,7 @@ end
 
 function IconContainer_Masque:OnNewInstance_IconContainer_Masque(icon)
 	self.lmbGroup = GetLMBGroup(icon)
+	icon.lmbGroup = self.lmbGroup
 end
 
 

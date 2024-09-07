@@ -167,6 +167,9 @@ function CooldownSweep:OnNewInstance(icon)
 
 	-- cooldown2 displays charges.
 	self.cooldown2 = CreateFrame("Cooldown", self:GetChildNameBase() .. "Cooldown2", icon, "CooldownFrameTemplate")
+	self.cooldown2:SetDrawSwipe(false)
+	self.cooldown2:SetDrawBling(false)
+	self.cooldown2.SetDrawBling = TMW.NULLFUNC -- Prevent Masque from messing with this
 	
 	-- Let OmniCC detect this as the charge cooldown frame.
 	-- https://github.com/ascott18/TellMeWhen/issues/1784
@@ -174,6 +177,44 @@ function CooldownSweep:OnNewInstance(icon)
 	
 	self:SetSkinnableComponent("Cooldown", self.cooldown)
 	self:SetSkinnableComponent("ChargeCooldown", self.cooldown2)
+
+	
+	-- Workaround https://github.com/ascott18/TellMeWhen/issues/2065,
+	-- and https://github.com/ascott18/TellMeWhen/issues/2219
+	-- Because the bling effect entirely ignores the alpha of its ancestor tree,
+	-- manually show and hide the bling when the icon alpha changes.
+	-- We have to override the function entirely to prevent Masque from
+	-- showing it when it shouldn't be shown.
+	local blingShown = self.cooldown:GetDrawBling()
+	local iconShown = icon:GetAlpha() > 0
+	local SetDrawBling_old = self.cooldown.SetDrawBling
+	self.cooldown.SetDrawBling = function(cd, shown)
+		local shouldShowBling = self.shouldShowBling
+		if icon.lmbGroup and not icon.lmbGroup.db.Pulse then
+			-- Respect Masque pulse settings if present.
+			-- This has to be read on demand because it could change at any time
+			-- and also because the masque group isn't available during the instantiation
+			-- or first-time setup of IconModule_CooldownSweep
+			shouldShowBling = false
+		end
+
+		if shown and iconShown and shouldShowBling then
+			SetDrawBling_old(cd, true)
+			blingShown = true
+		elseif blingShown then
+			SetDrawBling_old(cd, false)
+			blingShown = false
+		end
+	end
+	hooksecurefunc(icon, "SetAlpha", function(icon, alpha)
+		iconShown = alpha > 0
+		if not iconShown and blingShown then
+			self.cooldown:SetDrawBling(false)
+		elseif iconShown and not blingShown and self.shouldShowBling then
+			self.cooldown:SetDrawBling(true)
+		end
+	end)
+
 end
 
 local NeedsUpdate = {}
@@ -192,7 +233,6 @@ end
 
 local omnicc_loaded = IsAddOnLoaded("OmniCC")
 local tullacc_loaded = IsAddOnLoaded("tullaCC")
-local shouldShowBling
 
 function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
@@ -231,33 +271,14 @@ function CooldownSweep:SetupForIcon(icon)
 	self.cooldown:SetHideCountdownNumbers(hideNumbers)
 	self.cooldown:SetDrawEdge(self.ShowTimer and TMW.db.profile.DrawEdge)
 	self.cooldown:SetDrawSwipe(self.ShowTimer)
-
-	shouldShowBling = not TMW.db.profile.HideBlizzCDBling
-	self.cooldown:SetDrawBling(shouldShowBling)
-	self.blingShown = shouldShowBling
-	if shouldShowBling and not self.hookedBling then
-		self.hookedBling = true
-
-		-- Workaround https://github.com/ascott18/TellMeWhen/issues/2065
-		-- because the bling effect entirely ignores the alpha of its ancestor tree.
-		-- So, hide the bling at the moment of CD finish if the icon is hidden.
-		self.cooldown:SetScript("OnCooldownDone", function()
-			if shouldShowBling and self.cooldown:GetEffectiveAlpha() > 0 then
-				if not self.blingShown then
-					self.blingShown = true
-					self.cooldown:SetDrawBling(true)
-				end
-			elseif self.blingShown then
-				self.blingShown = false
-				self.cooldown:SetDrawBling(false)
-			end
-		end)
-	end
+		
+	self.shouldShowBling = 
+		not TMW.db.profile.HideBlizzCDBling
+		and not self.icon.FakeHidden
+	self.cooldown:SetDrawBling(self.shouldShowBling)
 
 	self.cooldown2:SetHideCountdownNumbers(hideNumbers)
 	self.cooldown2:SetDrawEdge(self.ShowTimer)
-	self.cooldown2:SetDrawSwipe(false)
-	self.cooldown2:SetDrawBling(false)
 
 	-- https://github.com/ascott18/TellMeWhen/issues/1914:
 	-- If a meta icon switches between hidden/shown timer text
@@ -357,7 +378,6 @@ CooldownSweep:SetDataListener("REVERSE")
 
 TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", function()
 	for module in pairs(NeedsUpdate) do
-		module.cooldown:Clear()
 		module:UpdateCooldown()
 	end
 	wipe(NeedsUpdate)
