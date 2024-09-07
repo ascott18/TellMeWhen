@@ -23,8 +23,8 @@ local GetSpellName = TMW.GetSpellName
 local GetSpellTexture = TMW.GetSpellTexture
 local GetSpellCharges = TMW.COMMON.Cooldowns.GetSpellCharges
 local GetSpellCooldown = TMW.COMMON.Cooldowns.GetSpellCooldown
+local GetSpellCastCount = TMW.COMMON.Cooldowns.GetSpellCastCount
 local IsUsableSpell = TMW.COMMON.SpellUsable.IsUsableSpell
-local GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
 
 local spellTextureCache = TMW.spellTextureCache
 local strlowerCache = TMW.strlowerCache
@@ -190,7 +190,7 @@ local function Reactive_OnUpdate(icon, time)
 
 		cooldown = GetSpellCooldown(iName)
 		charges = GetSpellCharges(iName) or emptyTable
-		stack = charges and charges.currentCharges or GetSpellCount(iName)
+		stack = charges and charges.currentCharges or GetSpellCastCount(iName)
 		
 		if cooldown then
 			local duration = cooldown.duration

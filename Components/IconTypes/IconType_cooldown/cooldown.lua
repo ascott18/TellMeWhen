@@ -28,7 +28,7 @@ local spellTextureCache = TMW.spellTextureCache
 local IsUsableSpell = TMW.COMMON.SpellUsable.IsUsableSpell
 local GetSpellCharges = TMW.COMMON.Cooldowns.GetSpellCharges
 local GetSpellCooldown = TMW.COMMON.Cooldowns.GetSpellCooldown
-local GetSpellCount = C_Spell.GetSpellCastCount or _G.GetSpellCount
+local GetSpellCastCount = TMW.COMMON.Cooldowns.GetSpellCastCount
 local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local _, pclass = UnitClass("Player")
@@ -208,7 +208,7 @@ local function SpellCooldown_OnUpdate(icon, time)
 		
 		local cooldown = GetSpellCooldown(iName)
 		local charges = GetSpellCharges(iName)
-		local stack = charges and charges.currentCharges or GetSpellCount(iName)
+		local stack = charges and charges.currentCharges or GetSpellCastCount(iName)
 
 		
 		if cooldown then

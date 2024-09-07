@@ -18,8 +18,8 @@ local L = TMW.L
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
-local select, wipe, setmetatable 
-    = select, wipe, setmetatable
+local select, wipe, next, setmetatable 
+    = select, wipe, next, setmetatable
 
 TMW.COMMON.Cooldowns = CreateFrame("Frame")
 local Cooldowns = TMW.COMMON.Cooldowns
@@ -27,6 +27,7 @@ local Cooldowns = TMW.COMMON.Cooldowns
 local emptyCooldown = {}
 local CachedCooldowns = {}
 local CachedCharges = {}
+local CachedCounts = {}
 
 if C_Spell.GetSpellCooldown then
 	local C_Spell_GetSpellCooldown = C_Spell.GetSpellCooldown
@@ -105,6 +106,35 @@ else
 end
 
 
+
+
+if C_Spell.GetSpellCastCount then
+	local C_Spell_GetSpellCastCount = C_Spell.GetSpellCastCount
+
+    function Cooldowns.GetSpellCastCount(spell)
+        local cached = CachedCounts[spell]
+        if cached then return cached ~= false and cached or nil end
+
+        cached = C_Spell_GetSpellCastCount(spell) or false
+        CachedCounts[spell] = cached
+        return cached
+    end
+else
+    local GetSpellCount = _G.GetSpellCount
+
+    function Cooldowns.GetSpellCastCount(spell)
+        local cached = CachedCounts[spell]
+        if cached then return cached ~= false and cached or nil end
+        
+        local count = GetSpellCount(spell)
+        cached = count or false
+        CachedCounts[spell] = cached
+        return cached
+    end
+end
+
+
+
 ---------------------------------
 -- Global Cooldown Data
 ---------------------------------
@@ -144,6 +174,13 @@ Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRang
     if event == "SPELL_UPDATE_COOLDOWN" then
         wipe(CachedCooldowns)
         GCD = nil
+
+        if next(CachedCounts) then
+            -- There's not a great event for GetSpellCastCount. Cooldown is the closest we can get.
+            wipe(CachedCounts)
+            TMW:Fire("TMW_SPELL_UPDATE_COUNT")
+        end
+
         TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
 
     elseif event == "SPELL_UPDATE_CHARGES" then
@@ -154,7 +191,9 @@ Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRang
         -- Spells may have been learned/unlearned (e.g. pvp talents activating/deactivating)
         wipe(CachedCooldowns)
         wipe(CachedCharges)
+        wipe(CachedCounts)
         TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
         TMW:Fire("TMW_SPELL_UPDATE_CHARGES")
+        TMW:Fire("TMW_SPELL_UPDATE_COUNT")
     end
 end)

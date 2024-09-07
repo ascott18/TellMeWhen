@@ -1360,18 +1360,6 @@ function TMW.GetRuneCooldownDuration()
 	return floor(duration * 1e3 + 0.5) / 1e3
 end
 
-if C_Spell.GetSpellCharges then
-	local GetSpellCharges = C_Spell.GetSpellCharges
-	TMW.GetSpellCharges = function(spell)
-		local data = GetSpellCharges(spell)
-		if not data then return end
-
-		return data.currentCharges, data.maxCharges, data.cooldownStartTime, data.cooldownDuration
-	end
-else
-	TMW.GetSpellCharges = GetSpellCharges
-end
-
 if C_SpellBook and C_SpellBook.GetSpellBookItemType then
 	TMW.GetSpellBookItemInfo = function(index, book)
 		if book == "pet" then
