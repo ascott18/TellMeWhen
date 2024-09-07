@@ -266,11 +266,11 @@ Animations:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 	end,
 })
 
-local function MakeAlphaFlashOnUpdate(target)
+local function MakeAlphaFlashOnUpdate(target, startFadedOut)
 	return function(self, table)
 		local flashPeriod = table.Period
 		local timePassed = TMW.time - table.Start
-		local fadingIn = flashPeriod == 0 or floor(timePassed/flashPeriod) % 2 == 1
+		local fadingIn = flashPeriod == 0 or floor(timePassed/flashPeriod) % 2 == startFadedOut
 
 		local alpha
 		if table.Fade and flashPeriod ~= 0 then
@@ -341,7 +341,7 @@ Animations:RegisterEventHandlerDataNonSpecific(11, "SCREENFLASH", {
 		}
 	end,
 	
-	OnUpdate = MakeAlphaFlashOnUpdate("animation_flasher"),
+	OnUpdate = MakeAlphaFlashOnUpdate("animation_flasher", 1),
 	OnStart = function(TMWFlashAnim, table)
 		local animation_flasher
 		if TMWFlashAnim.animation_flasher then
@@ -447,7 +447,7 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 		}
 	end,
 
-	OnUpdate = MakeAlphaFlashOnUpdate("animation_flasher"),
+	OnUpdate = MakeAlphaFlashOnUpdate("animation_flasher", 1),
 	OnStart = function(icon, table)
 		local animation_flasher
 		if icon.animation_flasher then
@@ -516,7 +516,7 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		}
 	end,
 
-	OnUpdate = MakeAlphaFlashOnUpdate("animation_border"),
+	OnUpdate = MakeAlphaFlashOnUpdate("animation_border", 0),
 	OnStart = function(icon, table)
 		local animation_border
 		if icon.animation_border then
@@ -610,7 +610,7 @@ Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 		}
 	end,
 
-	OnUpdate = MakeAlphaFlashOnUpdate("animation_overlay"),
+	OnUpdate = MakeAlphaFlashOnUpdate("animation_overlay", 0),
 	OnStart = function(icon, table)
 		local animation_overlay
 		if icon.animation_overlay then
