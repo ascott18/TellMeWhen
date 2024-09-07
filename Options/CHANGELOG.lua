@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ## v11.0.7
 * Fix: #2215 - Spell Charges condition not updating for countable spells without true charges.
 * Fix: #2217 - Error in item cooldown conditions
+* Fix: #2220 - GCD state not ending when GCD ends.
 
 ## v11.0.6
 * #2190: Added options to Buff/Debuff icons to source stack count from tooltip numbers.

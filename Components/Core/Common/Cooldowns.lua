@@ -142,12 +142,9 @@ end
 -- Rogue's Backstab. We don't need class spells anymore - any GCD spell works fine.
 local GCDSpell = 53
 TMW.GCDSpell = GCDSpell
-local GCD
+local Cooldowns_GetSpellCooldown = Cooldowns.GetSpellCooldown
 function TMW.GetGCD()
-	if not GCD then
-		GCD = Cooldowns.GetSpellCooldown(GCDSpell).duration
-	end
-	return GCD
+	return Cooldowns_GetSpellCooldown(GCDSpell).duration
 end
 local GetGCD = TMW.GetGCD
 
@@ -161,9 +158,8 @@ function TMW.OnGCD(d)
 		-- A cd of 1 (or less) is always a GCD (or at least isn't worth showing)
 		return true
 	else
-		-- If the duration passed in is the same as the GCD spell,
-		-- and the duration isnt zero, then it is a GCD
-		return GetGCD() == d and d > 0 
+		-- If the duration passed in is the same as the GCD spell then it is a GCD
+		return GetGCD() == d
 	end
 end
 
@@ -173,7 +169,6 @@ Cooldowns:RegisterEvent("SPELL_UPDATE_CHARGES")
 Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRange)
     if event == "SPELL_UPDATE_COOLDOWN" then
         wipe(CachedCooldowns)
-        GCD = nil
 
         if next(CachedCounts) then
             -- There's not a great event for GetSpellCastCount. Cooldown is the closest we can get.
