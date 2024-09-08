@@ -99,6 +99,7 @@ else
             maxCharges = maxCharges,
             cooldownStartTime = cooldownStartTime,
             cooldownDuration = cooldownDuration,
+            chargeModRate = 1
         } or false
         CachedCharges[spell] = cached
         return cached

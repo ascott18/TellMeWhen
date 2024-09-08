@@ -359,7 +359,7 @@ local function Buff_OnUpdate(icon, time)
 					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
 					then
 						if DurationSort then
-							local remaining = (instance.expirationTime == 0 and huge) or instance.expirationTime - time
+							local remaining = (instance.expirationTime == 0 and huge) or ((instance.expirationTime - time) / instance.timeMod)
 
 							if not foundInstance or curSortDur*DurationSort < remaining*DurationSort then
 								-- DurationSort is either 1 or -1, so multiply by it to get the correct ordering. (multiplying by a negative flips inequalities)
@@ -439,7 +439,7 @@ local function Buff_OnUpdate_Packed(icon, time)
 					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
 					then
 						if DurationSort then
-							local remaining = (instance.expirationTime == 0 and huge) or instance.expirationTime - time
+							local remaining = (instance.expirationTime == 0 and huge) or ((instance.expirationTime - time) / instance.timeMod)
 	
 							-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
 							if not foundInstance or curSortDur*DurationSort < remaining*DurationSort then
@@ -642,10 +642,10 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 			end
 		end
 
-		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+		iconToSet:SetInfo("state; texture; start, duration, modRate; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			STATE_PRESENT,
 			instance.icon,
-			instance.expirationTime - instance.duration, instance.duration,
+			instance.expirationTime - instance.duration, instance.duration, instance.timeMod,
 			count, count,
 			instance.spellId,
 			unit, nil,

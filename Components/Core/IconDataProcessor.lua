@@ -47,9 +47,10 @@ IconDataProcessor.ProcessorsByName = {}
 -- local Processor = TMW.Classes.IconDataProcessor:New("STATE", "state")
 -- 
 -- local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration")
-function IconDataProcessor:OnNewInstance(name, attributes)
-	TMW:ValidateType("2 (name)", "IconDataProcessor:New(name, attributes)", name, "string")
-	TMW:ValidateType("3 (attributes)", "IconDataProcessor:New(name, attributes)", attributes, "string")
+function IconDataProcessor:OnNewInstance(name, attributes, altAttributes)
+	TMW:ValidateType("2 (name)", "IconDataProcessor:New(name, attributes, altAttributes?)", name, "string")
+	TMW:ValidateType("3 (attributes)", "IconDataProcessor:New(name, attributes, altAttributes?)", attributes, "string")
+	TMW:ValidateType("4 (altAttributes)", "IconDataProcessor:New(name, attributes, altAttributes?)", altAttributes, "table;nil")
 	
 	self.hooks = {}
 	
@@ -64,19 +65,36 @@ function IconDataProcessor:OnNewInstance(name, attributes)
 	self.name = name
 	self.attributesString = attributes
 	self.attributesStringNoSpaces = attributes:gsub(" ", "")
+	self.allAttributesStringNoSpaces = { self.attributesStringNoSpaces }
 	
 	for _, attribute in TMW:Vararg(strsplit(",", self.attributesStringNoSpaces)) do
 		if self.UsedTokens[attribute] then
 			error(("Attribute token %q is already in use by %q!"):format(attribute, self.UsedTokens[attribute].name))
 		else
 			self.UsedTokens[attribute] = self
+			self:DeclareUpValue(attribute) -- do this to prevent accidental leaked global accessing
 			self.NumAttributes = self.NumAttributes + 1
+		end
+	end
+
+	for _, altAttribute in pairs(altAttributes or {}) do
+		altAttribute = altAttribute:gsub(" ", "")
+		tinsert(self.allAttributesStringNoSpaces, altAttribute)
+		for i, attribute in TMW:Vararg(strsplit(",", altAttribute)) do
+			if self.UsedTokens[attribute] == self then
+				-- Already declared by the default attributes
+			elseif self.UsedTokens[attribute] then
+				error(("Attribute token %q is already in use by %q!"):format(attribute, self.UsedTokens[attribute].name))
+			else
+				self.UsedTokens[attribute] = self
+				self:DeclareUpValue(attribute) -- do this to prevent accidental leaked global accessing
+			end
+			self.NumAttributes = max(self.NumAttributes, i)
 		end
 	end
 	
 	self.ProcessorsByName[self.name] = self
 	self:DeclareUpValue(name, self)
-	self:DeclareUpValue(attributes) -- do this to prevent accidental leaked global accessing
 	
 	self.changedEvent = "TMW_ICON_DATA_CHANGED_" .. name
 	

@@ -223,6 +223,7 @@ local NeedsUpdate = {}
 function CooldownSweep:OnDisable()
 	self.start = 0
 	self.duration = 0
+	self.modRate = 1
 	self.charges = 0
 	self.maxCharges = 0
 	self.chargeStart = 0
@@ -293,7 +294,7 @@ function CooldownSweep:SetupForIcon(icon)
 
 	local attributes = icon.attributes
 	
-	self:DURATION(icon, attributes.start, attributes.duration)
+	self:DURATION(icon, attributes.start, attributes.duration, attributes.modRate)
 	self:SPELLCHARGES(icon, attributes.charges, attributes.maxCharges, attributes.chargeStart, attributes.chargeDur)
 	self:REVERSE(icon, attributes.reverse)
 end
@@ -326,7 +327,7 @@ function CooldownSweep:UpdateCooldown()
 			cd:SetDrawSwipe(false)
 		end
 
-		cd:SetCooldown(mainStart, mainDuration)
+		cd:SetCooldown(mainStart, mainDuration, self.modRate)
 		cd:Show()
 	else
 		cd:SetCooldown(0, 0)
@@ -335,21 +336,22 @@ function CooldownSweep:UpdateCooldown()
 	-- Handle charges of spells that aren't completely depleted.
 	local cd2 = self.cooldown2
 	if otherDuration > 0 then
-		cd2:SetCooldown(otherStart, otherDuration)
+		cd2:SetCooldown(otherStart, otherDuration, self.modRate)
 		cd2:Show()
 	else
 		cd2:SetCooldown(0, 0)
 	end
 end
 
-function CooldownSweep:DURATION(icon, start, duration)
+function CooldownSweep:DURATION(icon, start, duration, modRate)
 	if (not self.ClockGCD and OnGCD(duration)) or (duration - (TMW.time - start)) <= 0 or duration <= 0 then
 		start, duration = 0, 0
 	end
 	
-	if self.start ~= start or self.duration ~= duration then
+	if self.start ~= start or self.duration ~= duration or self.modRate ~= modRate then
 		self.start = start
 		self.duration = duration
+		self.modRate = modRate
 		
 		NeedsUpdate[self] = true
 	end

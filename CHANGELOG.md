@@ -1,5 +1,6 @@
 ## v11.0.7
 * #1857 - Add LibCustomGlow animations.
+* #2144 - TMW now accounts for adjusted-rate cooldowns and auras (e.g. timer freezes caused by talents or boss mechanics).
 * Fix: #2191 - Icon Shown condition ignoring Shown/Hidden checkboxes for disabled icons/groups.
 * Fix: #2193 - Icon overlay and border animations starting in the wrong state.
 * Fix: #2215 - Spell Charges condition not updating for countable spells without true charges.

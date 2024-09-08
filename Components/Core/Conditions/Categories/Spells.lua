@@ -50,13 +50,15 @@ function Env.CooldownDuration(spell, gcdAsUnusable)
 	if spell == "gcd" then
 		local cooldown = GetSpellCooldown(TMW.GCDSpell)
 		local duration = cooldown.duration
-		return duration == 0 and 0 or (duration - (TMW.time - cooldown.startTime))
+		return duration == 0 and 0 or ((duration - (TMW.time - cooldown.startTime)) / cooldown.modRate)
 	end
 
 	local cooldown = GetSpellCooldown(spell)
 	if cooldown then
 		local duration = cooldown.duration
-		return ((duration == 0 or (not gcdAsUnusable and OnGCD(duration))) and 0) or (duration - (TMW.time - cooldown.startTime))
+		return 
+			((duration == 0 or (not gcdAsUnusable and OnGCD(duration))) and 0) or 
+			((duration - (TMW.time - cooldown.startTime)) / cooldown.modRate)
 	end
 	return 0
 end
@@ -65,7 +67,7 @@ function Env.RechargeDuration(spell)
 	local charges = GetSpellCharges(spell)
 	if charges and charges.currentCharges ~= charges.maxCharges then
 		local duration = charges.cooldownDuration
-		return (duration == 0 and 0) or (duration - (TMW.time - charges.cooldownStartTime))
+		return (duration == 0 and 0) or ((duration - (TMW.time - charges.cooldownStartTime)) / charges.chargeModRate)
 	end
 	return 0
 end
@@ -113,7 +115,7 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	anticipate = function(c)
 		local str = [[
 			local cooldown = GetSpellCooldown(c.OwnSpells.First)
-			local VALUE = cooldown and cooldown.startTime + (cooldown.duration - c.Level) or huge
+			local VALUE = cooldown and cooldown.startTime + (cooldown.duration - (c.Level*cooldown.modRate)) or huge
 		]]
 		if TMW:GetSpells(c.Name).First == "gcd" then
 			str = str:gsub("c.OwnSpells.First", TMW.GCDSpell)
@@ -229,7 +231,7 @@ if TMW.isRetail then
 		end,
 		anticipate = [[
 			local data = GetSpellCharges(c.OwnSpells.First)
-			local VALUE = data and data.cooldownDuration and data.cooldownStartTime + (data.cooldownDuration - c.Level) or huge
+			local VALUE = data and data.cooldownDuration and data.cooldownStartTime + (data.cooldownDuration - (c.Level*data.chargeModRate)) or huge
 		]],
 	})
 end

@@ -292,12 +292,14 @@ local function SpellCooldown_OnUpdate(icon, time)
 	end
 	
 	if dataToUse then
+		local cooldown = dataToUse.cooldown
+		local charges = dataToUse.charges
 		icon:SetInfo(
-			"state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+			"state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 			dataToUse.state,
 			spellTextureCache[dataToUse.iName],
-			dataToUse.cooldown.startTime, dataToUse.cooldown.duration,
-			dataToUse.charges.currentCharges, dataToUse.charges.maxCharges, dataToUse.charges.cooldownStartTime, dataToUse.charges.cooldownDuration,
+			cooldown.startTime, cooldown.duration, cooldown.modRate,
+			charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
 			dataToUse.stack, dataToUse.stack,
 			dataToUse.iName
 		)

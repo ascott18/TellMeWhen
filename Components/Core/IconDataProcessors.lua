@@ -316,11 +316,12 @@ end
 
 -- DURATION: "start, duration"
 do
-	local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration")
+	local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration, modRate", {"start, duration"})
 	Processor:DeclareUpValue("OnGCD", TMW.OnGCD)
 
 	TMW.Classes.Icon.attributes.start = 0
 	TMW.Classes.Icon.attributes.duration = 0
+	TMW.Classes.Icon.attributes.modRate = 1
 	TMW.Classes.Icon.__realDuration = 0
 
 	Processor:RegisterIconEvent(21, "OnStart", {
@@ -358,7 +359,7 @@ do
 		valueName = L["DURATION"],
 		conditionChecker = function(icon, eventSettings)
 			local attributes = icon.attributes
-			local d = attributes.duration - (TMW.time - attributes.start)
+			local d = (attributes.duration - (TMW.time - attributes.start)) / attributes.modRate
 			d = d > 0 and d or 0
 
 			return TMW.CompareFuncs[eventSettings.Operator](d, eventSettings.Value)
@@ -370,15 +371,16 @@ do
 	})
 
 	function Processor:CompileFunctionSegment(t)
-		-- GLOBALS: start, duration
+		-- GLOBALS: start, duration, modRate
 		t[#t+1] = [[
 		duration = duration or 0
 		start = start or 0
+		modRate = modRate or 1
 		
 		if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
 
 		if EventHandlersSet.OnDuration then
-			local d = duration - (TMW.time - start)
+			local d = (duration - (TMW.time - start)) / modRate
 			d = d > 0 and d or 0
 			
 			if d ~= icon.__lastDur then
@@ -387,7 +389,7 @@ do
 			end
 		end
 
-		if attributes.start ~= start or attributes.duration ~= duration then
+		if attributes.start ~= start or attributes.duration ~= duration or attributes.modRate ~= modRate then
 
 			local realDuration = icon:OnGCD(duration) and 0 or duration -- the duration of the cooldown, ignoring the GCD
 			if icon.__realDuration ~= realDuration then
@@ -406,8 +408,9 @@ do
 
 			attributes.start = start
 			attributes.duration = duration
+			attributes.modRate = modRate
 
-			TMW:Fire(DURATION.changedEvent, icon, start, duration)
+			TMW:Fire(DURATION.changedEvent, icon, start, duration, modRate)
 			doFireIconUpdated = true
 		end
 		--]]
@@ -458,7 +461,7 @@ do
 			if #durations > 0 then
 				local lastCheckedDuration = durations.last or 0
 
-				local currentIconDuration = icon.attributes.duration - (time - icon.attributes.start)
+				local currentIconDuration = (icon.attributes.duration - (time - icon.attributes.start)) / icon.attributes.modRate
 				if currentIconDuration < 0 then currentIconDuration = 0 end
 				
 				-- If the duration didn't change (i.e. it is 0) then don't even try.
@@ -502,8 +505,8 @@ do
 				local durationA = attributesA.duration
 				local durationB = attributesB.duration
 
-				durationA = iconA:OnGCD(durationA) and 0 or durationA - (time - attributesA.start)
-				durationB = iconB:OnGCD(durationB) and 0 or durationB - (time - attributesB.start)
+				durationA = iconA:OnGCD(durationA) and 0 or ((durationA - (time - attributesA.start)) / attributesA.modRate)
+				durationB = iconB:OnGCD(durationB) and 0 or ((durationB - (time - attributesB.start)) / attributesA.modRate)
 
 				if durationA ~= durationB then
 					return durationA*order < durationB*order
@@ -539,7 +542,7 @@ do
 
 	TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
 		if not TMW.Locked then
-			icon:SetInfo("start, duration", 0, 0)
+			icon:SetInfo("start, duration, modRate", 0, 0, 1)
 		end
 	end)
 end
@@ -702,19 +705,19 @@ do
 
 			if icon then
 				local attributes = icon.attributes
+				local modRate = attributes.modRate
 
 				local chargeDur = attributes.chargeDur
 				if not ignoreCharges and chargeDur and chargeDur > 0 then
 
-					local remaining = chargeDur - (TMW.time - attributes.chargeStart)
+					local remaining = (chargeDur - (TMW.time - attributes.chargeStart)) / modRate
 					if remaining > 0 then
 						return isNumber[format("%.1f", remaining)] or 0
 					end
 				end
 
 				local duration = attributes.duration
-				
-				local remaining = duration - (TMW.time - attributes.start)
+				local remaining = (duration - (TMW.time - attributes.start)) / modRate
 				if remaining <= 0 or (not gcd and icon:OnGCD(duration)) then
 					return 0
 				end

@@ -238,7 +238,7 @@ local function Meta_OnUpdate(icon, time)
 				-- This icon is OK to be shown.
 				if Sort then
 					-- See if we can use this icon due to sorting.
-					local dur = attributes.duration - (time - attributes.start)
+					local dur = (attributes.duration - (time - attributes.start)) / attributes.timeMod
 					if dur < 0 then
 						dur = 0
 					end

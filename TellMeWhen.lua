@@ -437,14 +437,8 @@ local avengingWrathName = GetSpellName(31884)
 function TMW.GetSpellTexture(spell)
 	if not spell then return end
 
-	local spellTex = GetSpellTexture(spell)
-	if spellTex and (spellTex ~= 135875 or GetSpellName(spell) == avengingWrathName) then
-		-- Workaround https://github.com/ascott18/TellMeWhen/issues/2114 - 
-		-- don't return avenging wrath texture if the input wasn't the avenging wrath spell.
-		return spellTex
-	end
-
 	return
+		GetSpellTexture(spell) or
 		SpellTexturesMetaIndex[spell] or
 		rawget(SpellTexturesMetaIndex, strlowerCache[spell])
 end

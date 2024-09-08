@@ -316,6 +316,7 @@ function IconType:UsesAttributes(attributesString, uses)
 	
 	TMW:ValidateType("3 (uses)", "IconView:Register(attributesString, uses)", uses, "boolean;nil")
 	
+	attributesString = attributesString:gsub(" ", "")
 	if uses == false then
 		self.UsedAttributes[attributesString] = nil
 	else
@@ -328,9 +329,11 @@ function IconType:UpdateUsedProcessors()
 	self:AssertSelfIsInstance()
 	
 	for _, Processor in ipairs(TMW.Classes.IconDataProcessor.instances) do
-		if self.UsedAttributes[Processor.attributesString] then
-			self.UsedAttributes[Processor.attributesString] = nil
-			self.UsedProcessors[Processor] = true
+		for _, attributeString in pairs(Processor.allAttributesStringNoSpaces) do
+			if self.UsedAttributes[attributeString] then
+				self.UsedAttributes[attributeString] = nil
+				self.UsedProcessors[Processor] = true
+			end
 		end
 	end
 end

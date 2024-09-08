@@ -1343,28 +1343,33 @@ local function SetInfo_GenerateFunction(signature, isInternal)
 		local match
 		for _, Processor in ipairs(TMW.Classes.IconDataProcessor.instances) do
 		
-			match = signature:match("^(" .. Processor.attributesStringNoSpaces .. ")$") -- The attribute string is the only one in the signature
-				 or	signature:match("^(" .. Processor.attributesStringNoSpaces .. ";)") -- The attribute string is the first one in the signature
-				 or	signature:match("(;" .. Processor.attributesStringNoSpaces .. ")$") -- The attribute string is the last one in the signature
-				 or	signature:match(";(" .. Processor.attributesStringNoSpaces .. ";)") -- The attribute string is in the middle of the signature
-				 
+			for _, attributeString in pairs(Processor.allAttributesStringNoSpaces) do
+				match = signature:match("^(" .. attributeString .. ")$") -- The attribute string is the only one in the signature
+					or	signature:match("^(" .. attributeString .. ";)") -- The attribute string is the first one in the signature
+					or	signature:match("(;" .. attributeString .. ")$") -- The attribute string is the last one in the signature
+					or	signature:match(";(" .. attributeString .. ";)") -- The attribute string is in the middle of the signature
+					
+				if match then
+					t[#t+1] = "local Processor = "
+					t[#t+1] = Processor.name
+					t[#t+1] = "\n"
+					
+					-- Process any hooks that should go before the main function segment
+					Processor:CompileFunctionHooks(t, "pre")
+					
+					Processor:CompileFunctionSegment(t)
+					
+					-- Process any hooks that should go after the main function segment
+					Processor:CompileFunctionHooks(t, "post")
+					
+					t[#t+1] = "\n\n"  
+					
+					signature = signature:gsub(match, "", 1)
+					
+					break
+				end
+			end
 			if match then
-				t[#t+1] = "local Processor = "
-				t[#t+1] = Processor.name
-				t[#t+1] = "\n"
-				
-				-- Process any hooks that should go before the main function segment
-				Processor:CompileFunctionHooks(t, "pre")
-				
-				Processor:CompileFunctionSegment(t)
-				
-				-- Process any hooks that should go after the main function segment
-				Processor:CompileFunctionHooks(t, "post")
-				
-				t[#t+1] = "\n\n"  
-				
-				signature = signature:gsub(match, "", 1)
-				
 				break
 			end
 		end

@@ -112,7 +112,13 @@ function Env.AuraDur(unit, name, filter)
 	if not data then
 		return 0, 0, 0
 	else
-		return data.expirationTime == 0 and huge or data.expirationTime - TMW.time, data.duration, data.expirationTime
+		local expirationTime = instance.expirationTime
+		local timeMod = instance.timeMod
+		return
+			expirationTime == 0 and huge or ((expirationTime - TMW.time) / timeMod), 
+			data.duration, 
+			expirationTime,
+			timeMod
 	end
 end
 
@@ -125,7 +131,12 @@ function Env.AuraDurPacked(unit, name, kindKey, onlyMine)
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
 				local expirationTime = instance.expirationTime
-				return expirationTime == 0 and huge or expirationTime - TMW.time, instance.duration, expirationTime
+				local timeMod = instance.timeMod
+				return 
+					expirationTime == 0 and huge or ((expirationTime - TMW.time) / timeMod), 
+					instance.duration, 
+					expirationTime,
+					timeMod
 			end
 		end
 	end
@@ -273,10 +284,10 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 			and [[AuraDurPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. ")" 
 			or [[AuraDur(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")]]
 			
-		return [[local dur, duration, expirationTime = ]] .. getAura .. [[
+		return [[local dur, duration, expirationTime, timeMod = ]] .. getAura .. [[
 		local VALUE
 		if dur and dur > 0 then
-			VALUE = expirationTime and expirationTime - c.Level or 0
+			VALUE = expirationTime and expirationTime - (c.Level * timeMod) or 0
 		else
 			VALUE = 0
 		end]]
@@ -333,10 +344,10 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 			and [[AuraDurPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. ")" 
 			or [[AuraDur(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")]]
 			
-		return [[local dur, duration, expirationTime = ]] .. getAura .. [[
+		return [[local dur, duration, expirationTime, timeMod = ]] .. getAura .. [[
 		local VALUE
 		if dur and dur > 0 then
-			VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
+			VALUE = expirationTime and (expirationTime - c.Level*duration*timeMod) or 0
 		else
 			VALUE = 0
 		end]]
@@ -538,10 +549,10 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 			and [[AuraDurPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. ")" 
 			or [[AuraDur(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")]]
 			
-		return [[local dur, duration, expirationTime = ]] .. getAura .. [[
+		return [[local dur, duration, expirationTime, timeMod = ]] .. getAura .. [[
 		local VALUE
 		if dur and dur > 0 then
-			VALUE = expirationTime and expirationTime - c.Level or 0
+			VALUE = expirationTime and expirationTime - (c.Level*timeMod) or 0
 		else
 			VALUE = 0
 		end]]
@@ -598,10 +609,10 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 			and [[AuraDurPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. ")" 
 			or [[AuraDur(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")]]
 			
-		return [[local dur, duration, expirationTime = ]] .. getAura .. [[
+		return [[local dur, duration, expirationTime, timeMod = ]] .. getAura .. [[
 		local VALUE
 		if dur and dur > 0 then
-			VALUE = expirationTime and (expirationTime - c.Level*duration) or 0
+			VALUE = expirationTime and (expirationTime - c.Level*duration*timeMod) or 0
 		else
 			VALUE = 0
 		end]]

@@ -158,7 +158,7 @@ local function BuffCheck_OnUpdate(icon, time)
 					break
 				elseif Hash[instance.spellId] or Hash[strlowerCache[instance.name]] then
 					foundOnUnit = true
-					local remaining = (instance.expirationTime == 0 and huge) or instance.expirationTime - time
+					local remaining = (instance.expirationTime == 0 and huge) or ((instance.expirationTime - time) / instance.timeMod)
 
 					-- This icon type automatically sorts by lowest duration.
 					if not foundInstance or remaining < curSortDur then
@@ -227,7 +227,7 @@ local function BuffCheck_OnUpdate_Packed(icon, time)
 					and	(NotOnlyMine or isMine)
 					then
 						foundOnUnit = true
-						local remaining = (instance.expirationTime == 0 and huge) or instance.expirationTime - time
+						local remaining = (instance.expirationTime == 0 and huge) or ((instance.expirationTime - time) / instance.timeMod)
 	
 						-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
 						if not foundInstance or remaining < curSortDur then
@@ -295,10 +295,10 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	elseif instance then
 		-- ID is defined if we didn't find any units that are missing all the auras being checked for.
 		-- In this case, the data is for the first matching aura found on the first unit checked.
-		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+		iconToSet:SetInfo("state; texture; start, duration, modRate; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			STATE_PRESENT,
 			instance.icon,
-			instance.expirationTime - instance.duration, instance.duration,
+			instance.expirationTime - instance.duration, instance.duration, instance.timeMod,
 			instance.applications, instance.applications,
 			instance.spellId,
 			unit, nil,

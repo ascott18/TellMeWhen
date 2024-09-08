@@ -76,12 +76,12 @@ end)
 
 Hook:DeclareUpValue("STATE_DEFAULT_DURATIONFAILED", STATE)
 Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
-	-- GLOBALS: start, duration
+	-- GLOBALS: start, duration, modRate
 	t[#t+1] = [[
 
 	
 	if duration > 0 or doFireIconUpdated then
-		local d = duration - (TMW.time - start)
+		local d = (duration - (TMW.time - start)) / (modRate or 1)
 		
 		local state_durationFailed = nil
 		if
