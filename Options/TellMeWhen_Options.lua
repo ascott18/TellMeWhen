@@ -1953,7 +1953,7 @@ TMW:NewClass("Config_EditBox", "EditBox", "Config_Frame"){
 	
 	UpdateLabel = function(self, label)
 		local text = self:GetText()
-		if text and text:trim(" \t\r\n") == "" then
+		if text and text:trim(" \t\r\n"):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") == "" then
 			self.BackgroundText:SetText(self.label)
 		else
 			self.BackgroundText:SetText(nil)

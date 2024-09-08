@@ -648,11 +648,13 @@ function TEXT:CacheUsedStrings()
 end
 
 local function CopyString_DropDown_OnClick(button, dropdown)
-	local id = dropdown:GetParent():GetParent():GetID()
+	local copyButton = dropdown.Activator
+
+	local id = copyButton:GetParent():GetID()
 	
 	CI.icon:GetSettingsPerView().Texts[id] = button.value
 	
-	dropdown:OnSettingSaved()
+	copyButton:OnSettingSaved()
 end
 function TEXT.CopyString_DropDown(dropdown)
 	TEXT:CacheUsedStrings()

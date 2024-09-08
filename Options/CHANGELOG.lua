@@ -14,6 +14,7 @@ TMW.CHANGELOG = [==[
 * Fix: #2217 - Error in item cooldown conditions
 * Fix: #2219 - Prevent cooldown finish pulse from showing on hidden icons
 * Fix: #2220 - GCD state not ending when GCD ends.
+* Fix: #2221 - Error in text display copy menu.
 
 ## v11.0.6
 * #2190: Added options to Buff/Debuff icons to source stack count from tooltip numbers.

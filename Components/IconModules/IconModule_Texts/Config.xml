@@ -1026,7 +1026,10 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						TMW:CInit(self, "Config_Button")
+						
 						self.DD = TMW.C.Config_DropDownMenu_NoFrame:New()
+						self.DD.Activator = self
 						self.DD:SetFunction(TMW.TEXT.CopyString_DropDown)
 						self.DD:SetScrollable(true)
 
