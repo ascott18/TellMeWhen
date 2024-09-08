@@ -2865,12 +2865,10 @@ end
 -- TMW:Update() sets up all groups, icons, and anything else.
 function TMW:Update(forceCoroutine)
 
-	-- We check arena (and I threw BGs in as well)
-	-- in hopes of resolving https://wow.curseforge.com/projects/tellmewhen/issues/1572 -
-	-- a "script ran too long" error that appears to be happening outside of combat,
-	-- potentially when loading into an arena map.
-	local _, z = IsInInstance()
-	local needsCoroutineUpdate = forceCoroutine or InCombatLockdown() or z == "arena" or z == "pvp"
+	-- We check for instances to resolve https://github.com/ascott18/TellMeWhen/issues/1592
+	-- and https://github.com/ascott18/TellMeWhen/issues/2125 - "script ran too long" errors
+	-- that appears to be happening outside of combat when loading into an instance.
+	local needsCoroutineUpdate = forceCoroutine or InCombatLockdown() or IsInInstance()
 
 	if needsCoroutineUpdate then
 		TMW:UpdateViaCoroutine()
