@@ -1,6 +1,7 @@
 ## v11.0.7
 * #1857 - Add LibCustomGlow animations.
 * #2144 - TMW now accounts for adjusted-rate cooldowns and auras (e.g. timer freezes caused by talents or boss mechanics).
+* Fix: #2089 - Track swings with Crusading Strikes talent in swing timers
 * Fix: #2125 - "script ran too long" when zoning into instances.
 * Fix: #2191 - Icon Shown condition ignoring Shown/Hidden checkboxes for disabled icons/groups.
 * Fix: #2193 - Icon overlay and border animations starting in the wrong state.

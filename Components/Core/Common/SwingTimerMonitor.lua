@@ -64,8 +64,10 @@ local swingSpells =
 		[strlowerCache[GetSpellName(845)]] = 1, -- Cleave
 		[strlowerCache[GetSpellName(6807)]] = 1, -- Maul
 		[strlowerCache[GetSpellName(2973)]] = 1, -- Raptor Strike
-	} 
-	or {}
+	} or {
+		-- Retail spells:
+        [strlowerCache[GetSpellName(404542)]] = 1, -- Crusading Strikes (ret talent)
+    }
 
 if GetSpellName(56815) then
 	swingSpells[strlowerCache[GetSpellName(56815)]] = 1 -- Rune Strike
