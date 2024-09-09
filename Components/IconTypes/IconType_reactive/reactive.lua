@@ -252,7 +252,7 @@ local function Reactive_OnUpdate(icon, time)
 
 		cooldown = GetSpellCooldown(NameFirst)
 		charges = GetSpellCharges(NameFirst) or emptyTable
-		stack = charges and charges.currentCharges or GetSpellCount(NameFirst)
+		stack = charges and charges.currentCharges or GetSpellCastCount(NameFirst)
 
 		if IgnoreRunes and (cooldown and cooldown.duration) == runeCD and NameFirst ~= mindfreeze and NameFirst ~= 47528 then
 			-- DK abilities that are on cooldown because of runes are always reported
