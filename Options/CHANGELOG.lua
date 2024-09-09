@@ -4,8 +4,9 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v11.0.7
-* #1857 - Add LibCustomGlow animations.
-* #2144 - TMW now accounts for adjusted-rate cooldowns and auras (e.g. timer freezes caused by talents or boss mechanics).
+* #1857 - Added LibCustomGlow animations.
+* #2144 - Cooldowns and auras now accounts for time dilation. For example, timer freezes caused by talents, or boss mechanics like Jailer phase transitions or Chronomatic Anomaly fast/slow effects.
+* #2214 - New condition: Spell Overridden. For all those pesky new Paladin talents with no way to figure out which spell is active.
 * Fix: #2089 - Track swings with Crusading Strikes talent in swing timers
 * Fix: #2125 - "script ran too long" when zoning into instances.
 * Fix: #2191 - Icon Shown condition ignoring Shown/Hidden checkboxes for disabled icons/groups.

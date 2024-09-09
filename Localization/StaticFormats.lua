@@ -55,7 +55,7 @@ else
 end
 
 if GetSpellInfo(119996) then
-	L["ICONMENU_REACTIVE_DESC"] = L["ICONMENU_REACTIVE_DESC"]:format(Spell(5308), Spell(119996), Spell(32379))
+	L["ICONMENU_REACTIVE_DESC"] = L["ICONMENU_REACTIVE_DESC"]:format(Spell(5308), Spell(119996), Spell(24275))
 else
 	L["ICONMENU_REACTIVE_DESC"] = L["ICONMENU_REACTIVE_DESC"]:format(Spell(5308), Spell(7384), Spell(19306))
 end
@@ -70,7 +70,8 @@ L["HELP_MISSINGDURS"] = L["HELP_MISSINGDURS"]:format("%s", GetSpellInfo(1766)) -
 L["ICONTYPE_SWINGTIMER_TIP"] = L["ICONTYPE_SWINGTIMER_TIP"]:format(GetSpellInfo(75), L["ICONMENU_SPELLCOOLDOWN"], L["ICONMENU_SPELLCOOLDOWN"], GetSpellInfo(75), 75)
 L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"] = L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"]:format(GetSpellInfo(75))
 
-L["ICONMENU_IGNORENOMANA_DESC"]         = L["ICONMENU_IGNORENOMANA_DESC"]           :format(Spell(85288), Spell(5308))
+L["ICONMENU_IGNORENOMANA_DESC"]         = L["ICONMENU_IGNORENOMANA_DESC"]           :format(Spell(24275), Spell(5308))
+L["REACTIVECNDT_DESC"]                  = L["REACTIVECNDT_DESC"]                    :format(Spell(24275), Spell(5308))
 L["CLEU_DAMAGE_SHIELD_DESC"]            = L["CLEU_DAMAGE_SHIELD_DESC"]              :format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]     = L["CLEU_DAMAGE_SHIELD_MISSED_DESC"]       :format(Spell(31271), Spell(30482), Spell(324))
 L["CLEU_SPELL_STOLEN_DESC"]             = L["CLEU_SPELL_STOLEN_DESC"]               :format(Spell(30449))

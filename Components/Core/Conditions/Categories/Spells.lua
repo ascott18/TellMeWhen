@@ -321,6 +321,7 @@ end
 
 ConditionCategory:RegisterCondition(2.95, "SPELL_LEARNED", {
 	text = L["SPELL_LEARNED"],
+	tooltip = L["SPELL_LEARNED_DESC"],
 
 	bool = true,
 	
@@ -344,6 +345,42 @@ ConditionCategory:RegisterCondition(2.95, "SPELL_LEARNED", {
 			ConditionObject:GenerateNormalEventString("SPELLS_CHANGED")
 	end,
 })
+
+if C_Spell.GetOverrideSpell then
+ConditionCategory:RegisterCondition(2.97, "SPELL_OVERRIDE", {
+	text = L["SPELL_OVERRIDE"],
+	tooltip = L["SPELL_OVERRIDE_DESC"],
+
+	bool = true,
+	
+	name = function(editbox)
+		editbox:SetTexts(L["SPELL_OVERRIDE_BASE"], L["CNDT_ONLYFIRST"])
+	end,
+	name2 = function(editbox)
+		editbox:SetTexts(L["SPELL_OVERRIDE_TARGET"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = true,
+	unit = false,
+	formatter = TMW.C.Formatter.BOOL,
+	icon = 1112939,
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetOverrideSpell = C_Spell.GetOverrideSpell,
+		GetSpellName = TMW.GetSpellName
+	},
+	funcstr = function(c)
+		if isNumber[c.Name2] then
+			return [[BOOLCHECK( GetOverrideSpell(c.Spells.First) == c.Spells2.First )]]
+		else
+			return [[BOOLCHECK( strlowerCache[GetSpellName(GetOverrideSpell(c.Spells.First) or "")] == c.Spells2.First )]]
+		end
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("SPELLS_CHANGED")
+	end,
+})
+end
 
 ConditionCategory:RegisterCondition(3,	 "REACTIVE", {
 	text = L["SPELLREACTIVITY"],
