@@ -1,3 +1,6 @@
+## v11.0.9
+* Fix various Lua errors.
+
 ## v11.0.8
 * #1857 - Added LibCustomGlow animations.
 * #2144 - Cooldowns and auras now accounts for time dilation. For example, timer freezes caused by talents, or boss mechanics like Jailer phase transitions or Chronomatic Anomaly fast/slow effects.

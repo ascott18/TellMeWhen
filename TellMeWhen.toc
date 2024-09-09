@@ -18,7 +18,7 @@
 ## X-WoWI-ID: 10855
 ## X-Wago-ID: ZQ6aZqKW
 
-## Version: 11.0.8
+## Version: 11.0.9
 ## Author: Cybeloras of Aerie Peak
 ## IconTexture: Interface\Addons\TellMeWhen\Textures\LDB Icon
 ## AddonCompartmentFunc: TellMeWhen_OnAddonCompartmentClick

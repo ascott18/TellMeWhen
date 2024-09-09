@@ -101,22 +101,22 @@ function Env.AuraCountPacked(units, spells, kindKey, onlyMine)
 end
 
 function Env.AuraDur(unit, name, filter)
-	local data
+	local instance
 	for i = 1, huge do
-		data = GetAuraDataByIndex(unit, i, filter)
-		if not data or data.spellId == name or strlowerCache[data.name] == name then
+		instance = GetAuraDataByIndex(unit, i, filter)
+		if not instance or instance.spellId == name or strlowerCache[instance.name] == name then
 			break
 		end
 	end
 	
-	if not data then
+	if not instance then
 		return 0, 0, 0
 	else
 		local expirationTime = instance.expirationTime
 		local timeMod = instance.timeMod
 		return
 			expirationTime == 0 and huge or ((expirationTime - TMW.time) / timeMod), 
-			data.duration, 
+			instance.duration, 
 			expirationTime,
 			timeMod
 	end
