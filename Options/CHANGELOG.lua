@@ -3,7 +3,7 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
-## v11.0.7
+## v11.0.8
 * #1857 - Added LibCustomGlow animations.
 * #2144 - Cooldowns and auras now accounts for time dilation. For example, timer freezes caused by talents, or boss mechanics like Jailer phase transitions or Chronomatic Anomaly fast/slow effects.
 * #2214 - New condition: Spell Overridden. For all those pesky new Paladin talents with no way to figure out which spell is active.
@@ -12,10 +12,12 @@ TMW.CHANGELOG = [==[
 * Fix: #2191 - Icon Shown condition ignoring Shown/Hidden checkboxes for disabled icons/groups.
 * Fix: #2193 - Icon overlay and border animations starting in the wrong state.
 * Fix: #2215 - Spell Charges condition not updating for countable spells without true charges.
-* Fix: #2217 - Error in item cooldown conditions
 * Fix: #2219 - Prevent cooldown finish pulse from showing on hidden icons
 * Fix: #2220 - GCD state not ending when GCD ends.
 * Fix: #2221 - Error in text display copy menu.
+
+## v11.0.7
+* Fix: #2217 - Error in item cooldown conditions
 
 ## v11.0.6
 * #2190: Added options to Buff/Debuff icons to source stack count from tooltip numbers.
