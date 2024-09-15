@@ -1,3 +1,6 @@
+## v11.0.10
+* Fix: #2228 - Cooldown bling appearing on groups with 0% opacity.
+
 ## v11.0.9
 * Fix various Lua errors.
 
