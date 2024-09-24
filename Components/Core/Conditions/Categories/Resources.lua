@@ -554,7 +554,7 @@ if TMW.isRetail then
 	ConditionCategory:RegisterCondition(93 - offset, "MAELSTROM", {
 		text = MAELSTROM_POWER,
 		min = 0,
-		max = 150,
+		max = 200,
 		icon = "Interface\\Icons\\spell_shaman_maelstromweapon",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Maelstrom),
