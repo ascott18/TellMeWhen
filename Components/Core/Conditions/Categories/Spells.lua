@@ -422,7 +422,7 @@ ConditionCategory:RegisterCondition(3.1, "CURRENTSPELL", {
 	icon = "Interface\\Icons\\ability_rogue_ambush",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		IsCurrentSpell = IsCurrentSpell,
+		IsCurrentSpell = C_Spell and C_Spell.IsCurrentSpell or IsCurrentSpell,
 	},
 	funcstr = [[BOOLCHECK( IsCurrentSpell(c.OwnSpells.First) )]],
 	events = function(ConditionObject, c)
