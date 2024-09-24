@@ -104,9 +104,10 @@ SpellUsable:SetScript("OnEvent", function(self, event, payload)
 
     elseif event == "ACTIONBAR_SLOT_CHANGED" then
         -- When actions are dragged around the actionbar,
-        -- or when a spell becomes a different spell in combat (e.g. void eruption/void bolt)
+        -- or when a spell becomes a different spell in combat (e.g. void eruption/void bolt),
+        -- or also just regular power updates for some arbitrary abilities (Soul cleave, shield of the righteous, arcane shot, to name a few).
         local action = payload
-        local data = CachedActions[data]
+        local data = CachedActions[action]
         
         if not data then 
             -- Nobody was listening to this action if it isn't cached,

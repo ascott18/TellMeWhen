@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 TMW.CHANGELOG = [==[
 ## v11.0.10
 * Fix: #2228 - Cooldown bling appearing on groups with 0% opacity.
+* Fix: #2231 - Some abilities not reflecting out-of-power state correctly.
 
 ## v11.0.9
 * Fix various Lua errors.
