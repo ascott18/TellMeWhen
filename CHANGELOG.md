@@ -1,3 +1,6 @@
+## v11.0.11
+* Fix: #2239 - Talent API issues on era and classic.
+
 ## v11.0.10
 * Fix: #2228 - Cooldown bling appearing on groups with 0% opacity.
 * Fix: #2230 - Raised max value of Maelstrom condition.

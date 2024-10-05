@@ -1435,45 +1435,9 @@ function TMW.GetSpellCost(spell)
 	end
 end
 
-if not GetSpecializationInfoByID then
-	local GetTalentTreeRoles = GetTalentTreeRoles
-	local GetActiveTalentGroup = GetActiveTalentGroup
-	local GetTalentTabInfo = GetTalentTabInfo
-	local GetTalentGroupRole = GetTalentGroupRole
-
-	local classInfo = {
-		[1] = C_CreatureInfo.GetClassInfo(1),
-		[2] = C_CreatureInfo.GetClassInfo(2),
-		[3] = C_CreatureInfo.GetClassInfo(3),
-		[4] = C_CreatureInfo.GetClassInfo(4),
-		[5] = C_CreatureInfo.GetClassInfo(5),
-		[6] = C_CreatureInfo.GetClassInfo(6), -- Death Knight
-		[7] = C_CreatureInfo.GetClassInfo(7),
-		[8] = C_CreatureInfo.GetClassInfo(8),
-		[9] = C_CreatureInfo.GetClassInfo(9),
-		[11] = C_CreatureInfo.GetClassInfo(11),
-	}
-	function TMW.GetMaxClassID()
-		return 11
-	end
-	function TMW.GetClassInfo(classID)
-		local info = classInfo[classID]
-		if not info then return end
-		return info.className, info.classFile, info.classID
-	end
-	
-	local classSpecIds = {
-		DRUID = {102,103,105},
-		HUNTER = {253,254,255},
-		MAGE = {62,63,64},
-		PALADIN = {65,66,70},
-		PRIEST = {256,257,258},
-		ROGUE = {259,260,261},
-		SHAMAN = {262,263,264},
-		WARLOCK = {265,266,267},
-		WARRIOR = {71,72,73},
-		DEATHKNIGHT = {250,251,252},
-	}
+if GetSpecializationInfoByID then
+	TMW.GetSpecializationInfoByID = GetSpecializationInfoByID
+else
 	local specs = {
 		[253]	= {"Beast Mastery", 461112, "DAMAGER"},
 		[254]	= {"Marksmanship", 236179, "DAMAGER"},
@@ -1516,6 +1480,80 @@ if not GetSpecializationInfoByID then
 		[252]	= {"Unholy", 135775, "DAMAGER"},
 	}
 	
+	function TMW.GetSpecializationInfoByID(specID)
+		local data = specs[specID]
+		-- 3rd param is description... I didn't include it because TMW doesn't need it.
+		return specID, data[1], nil, data[2], data[3]
+	end
+end
+
+if GetSpecializationInfoForClassID then
+	-- Blizzard added GetSpecializationInfoForClassID in classic era/sod,
+	-- but it has an off-by-1 error with the spec index parameter,
+	-- using zero-based indexes instead of 1-based indexes
+	if not GetSpecializationInfoForClassID(9, 3) and TMW.isClassic then
+		function TMW.GetSpecializationInfoForClassID(classID, i) 
+			return GetSpecializationInfoForClassID(classID, i - 1)
+		end
+	else
+		TMW.GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
+	end
+else
+	local classSpecIds = {
+		DRUID = {102,103,105},
+		HUNTER = {253,254,255},
+		MAGE = {62,63,64},
+		PALADIN = {65,66,70},
+		PRIEST = {256,257,258},
+		ROGUE = {259,260,261},
+		SHAMAN = {262,263,264},
+		WARLOCK = {265,266,267},
+		WARRIOR = {71,72,73},
+		DEATHKNIGHT = {250,251,252},
+	}
+
+	function TMW.GetSpecializationInfoForClassID(classID, i) 
+		local _, slug = GetClassInfo(classID)
+		return TMW.GetSpecializationInfoByID(classSpecIds[slug][i])
+	end
+end
+
+if GetClassInfo then
+	TMW.GetClassInfo = GetClassInfo
+	TMW.GetMaxClassID = GetNumClasses
+else
+	local classInfo = {
+		[1] = C_CreatureInfo.GetClassInfo(1),
+		[2] = C_CreatureInfo.GetClassInfo(2),
+		[3] = C_CreatureInfo.GetClassInfo(3),
+		[4] = C_CreatureInfo.GetClassInfo(4),
+		[5] = C_CreatureInfo.GetClassInfo(5),
+		[6] = C_CreatureInfo.GetClassInfo(6), -- Death Knight
+		[7] = C_CreatureInfo.GetClassInfo(7),
+		[8] = C_CreatureInfo.GetClassInfo(8),
+		[9] = C_CreatureInfo.GetClassInfo(9),
+		[11] = C_CreatureInfo.GetClassInfo(11),
+	}
+
+	function TMW.GetMaxClassID()
+		return 11
+	end
+
+	function TMW.GetClassInfo(classID)
+		local info = classInfo[classID]
+		if not info then return end
+		return info.className, info.classFile, info.classID
+	end
+end
+
+if not GetSpecialization then
+	-- Cata-and-earlier style specs (pick and choose talents, dual spec):
+
+	local GetTalentTreeRoles = GetTalentTreeRoles
+	local GetActiveTalentGroup = GetActiveTalentGroup
+	local GetTalentTabInfo = GetTalentTabInfo
+	local GetTalentGroupRole = GetTalentGroupRole
+	
 	function TMW.GetNumSpecializations()
 		return 3
 	end
@@ -1524,18 +1562,12 @@ if not GetSpecializationInfoByID then
 		return 3
 	end
 	
-	function TMW.GetSpecializationInfoForClassID(classID, i) 
-		local _, slug = GetClassInfo(classID)
-		return TMW.GetSpecializationInfoByID(classSpecIds[slug][i])
-	end
-	
 	function TMW.GetCurrentSpecialization()
-		local _, pclass = UnitClass("player")
-		local specIDs = classSpecIds[pclass]
+		local _, pclass, classID = UnitClass("player")
 		
 		local biggest = 0
 		local spec
-		for i = 1, #specIDs do
+		for i = 1, TMW.GetNumSpecializationsForClassID(classID) do
 			local _, points
 			if select('#', GetTalentTabInfo(i)) >= 8 then
 				-- Cata classic and SOD Phase 4
@@ -1554,20 +1586,15 @@ if not GetSpecializationInfoByID then
 		return spec
 	end
 	
-	function TMW.GetCurrentSpecializationID()
-		local _, pclass = UnitClass("player")
-		return classSpecIds[pclass][TMW.GetCurrentSpecialization()]
-	end
-	
 	function TMW.GetSpecializationInfo(index)
-		local _, pclass = UnitClass("player")
-		return TMW.GetSpecializationInfoByID(classSpecIds[pclass][index])
+		local _, pclass, classID = UnitClass("player")
+		return TMW.GetSpecializationInfoForClassID(classID, index)
 	end
 	
-	function TMW.GetSpecializationInfoByID(specID)
-		local data = specs[specID]
-		-- 3rd param is description... I didn't include it because TMW doesn't need it.
-		return specID, data[1], nil, data[2], data[3]
+	function TMW.GetCurrentSpecializationID()
+		local _, pclass, classID = UnitClass("player")
+		local spec = TMW.GetCurrentSpecialization()
+		return TMW.GetSpecializationInfoForClassID(classID, spec)
 	end
 	
 	function TMW.GetCurrentSpecializationRole()
@@ -1591,15 +1618,12 @@ if not GetSpecializationInfoByID then
 		return GetTalentGroupRole(activeSpec) or "DAMAGER"
 	end
 else
-	TMW.GetSpecializationInfoByID = GetSpecializationInfoByID
-	TMW.GetCurrentSpecializationID = GetCurrentSpecializationID
-	TMW.GetSpecializationInfo = GetSpecializationInfo
-	TMW.GetCurrentSpecialization = GetCurrentSpecialization
-	TMW.GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
-	TMW.GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
+	-- MOP+ style specs (pick a talent tree):
+
 	TMW.GetNumSpecializations = GetNumSpecializations
-	TMW.GetMaxClassID = GetNumClasses
-	TMW.GetClassInfo = GetClassInfo
+	TMW.GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
+	TMW.GetCurrentSpecialization = GetCurrentSpecialization
+	TMW.GetSpecializationInfo = GetSpecializationInfo
 	function TMW.GetCurrentSpecializationID() 
 		return GetSpecializationInfo(GetSpecialization())
 	end
