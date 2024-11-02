@@ -1492,8 +1492,12 @@ if GetSpecializationInfoForClassID then
 	-- but it has an off-by-1 error with the spec index parameter,
 	-- using zero-based indexes instead of 1-based indexes
 	if not GetSpecializationInfoForClassID(9, 3) and TMW.isClassic then
-		function TMW.GetSpecializationInfoForClassID(classID, i) 
-			return GetSpecializationInfoForClassID(classID, i - 1)
+		function TMW.GetSpecializationInfoForClassID(classID, i)
+			if not i then
+				return GetSpecializationInfoForClassID(classID, i)
+			else
+				return GetSpecializationInfoForClassID(classID, i - 1)
+			end
 		end
 	else
 		TMW.GetSpecializationInfoForClassID = GetSpecializationInfoForClassID

@@ -1,3 +1,6 @@
+## v11.0.12
+* Fix: #2248 - Error on characters with no talents learned.
+
 ## v11.0.11
 * Fix: #2239 - Talent API issues on era and classic.
 
