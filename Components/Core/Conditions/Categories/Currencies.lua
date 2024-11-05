@@ -20,7 +20,7 @@ local print = TMW.print
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
-local GetCurrencyInfo = _G.GetCurrencyInfo or function(id)
+local GetCurrencyInfo = (C_CurrencyInfo and C_CurrencyInfo.GetCurrencyInfo and function(id)
 	local info = C_CurrencyInfo.GetCurrencyInfo(id)
 	if info then
 		return
@@ -34,7 +34,7 @@ local GetCurrencyInfo = _G.GetCurrencyInfo or function(id)
 			info.quality 
 	end
 	return nil
-end
+end) or _G.GetCurrencyInfo
 
 
 local currencies = {

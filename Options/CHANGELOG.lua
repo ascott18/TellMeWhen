@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.0.13
+* Fix: #2250 - Currency checking error in Cata clasic
+
 ## v11.0.12
 * Fix: #2248 - Error on characters with no talents learned.
 
