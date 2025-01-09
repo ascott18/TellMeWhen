@@ -79,8 +79,7 @@ end)
 -- Sometimes, if a group/icon does some things to itself while moving
 -- (Hiding/Showing seems to trigger this), OnDragStop won't fire when it should.
 -- Having these here makes sure that the user doesn't get a group permanantly stuck to their cursor.
-	
-WorldFrame:HookScript("OnMouseDown", function(WorldFrame, button)
+TMW:RegisterCallback("TMW_WORLD_FRAME_MOUSE_DOWN", function()
 	if isMoving then
 		stopMoving(isMoving)
 	end

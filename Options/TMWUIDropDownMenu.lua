@@ -740,8 +740,7 @@ function DD:GetScrollable()
 	return self.scrollable
 end
 
-
-WorldFrame:HookScript("OnMouseDown", function()
+TMW:RegisterCallback("TMW_WORLD_FRAME_MOUSE_DOWN", function()
 	DD:CloseDropDownMenus()
 end)
 

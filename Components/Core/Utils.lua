@@ -1353,6 +1353,11 @@ end
 -- WoW API Helpers
 ---------------------------------
 
+local GetMouseFoci = GetMouseFoci
+TMW.GetMouseFocus = GetMouseFocus or function()
+	return GetMouseFoci()[1]
+end
+
 function TMW.GetRuneCooldownDuration()
 	-- Round to a precision of 3 decimal points for comparison with returns from GetSpellCooldown
 	local _, duration = GetRuneCooldown(1)

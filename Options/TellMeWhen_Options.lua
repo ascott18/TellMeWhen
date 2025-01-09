@@ -267,8 +267,8 @@ function IE:OnInitialize()
 		-- WoW 11.0+
 		hooksecurefunc(C_SpellBook, "PickupSpellBookItem", function(...) IE.DraggingInfo = {...} end)
 	end
-
-	WorldFrame:HookScript("OnMouseDown", function()
+	
+	TMW:RegisterCallback("TMW_WORLD_FRAME_MOUSE_DOWN", function()
 		IE.DraggingInfo = nil
 	end)
 	hooksecurefunc("ClearCursor", IE.BAR_HIDEGRID)

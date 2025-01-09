@@ -1091,6 +1091,7 @@ function TMW:PLAYER_LOGIN()
 	TMW:UpdateTalentTextureCache()
 
 
+	TMW:RegisterEvent("GLOBAL_MOUSE_DOWN")
 	
 	if C_BarberShop then
 		TMW:RegisterEvent("BARBER_SHOP_OPEN")
@@ -2970,7 +2971,12 @@ function TMW:BARBER_SHOP_CLOSE()
 	TMW:Show()
 end
 
-
+function TMW:GLOBAL_MOUSE_DOWN(button)
+	local mouseFocus = TMW.GetMouseFocus()
+	if not mouseFocus or mouseFocus == WorldFrame then
+		TMW:Fire("TMW_WORLD_FRAME_MOUSE_DOWN", button)
+	end
+end
 
 
 

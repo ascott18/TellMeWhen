@@ -1,3 +1,6 @@
+## v11.1.0
+* Fixes for WoW 11.1
+
 ## v11.0.13
 * Fix: #2250 - Currency checking error in Cata clasic
 
