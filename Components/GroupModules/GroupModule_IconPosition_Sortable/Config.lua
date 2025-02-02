@@ -279,19 +279,26 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 		local parent = self:GetParent()
 		
 		parent.draggingFrame = nil
-
-		local SortPriorities = self:GetSettingTable()
-		local startDeleting = false
-		for i, data in ipairs(SortPriorities) do
-			if data.Method == "id" then
-				startDeleting = true
-			elseif startDeleting then
-				SortPriorities[i] = nil
+		
+			local SortPriorities = self:GetSettingTable()
+			local startDeleting = false
+			for i, data in ipairs(SortPriorities) do
+				if data.Method == "id" then
+					startDeleting = true
+				elseif startDeleting then
+					SortPriorities[i] = nil
+				end
 			end
-		end
-
-		self:OnSettingSaved()
-		IconPosition_Sortable:LoadConfig()
+			
+		-- Delay the call to OnSettingSaved, since doing that ultimately triggers `IE:PositionPanels`,
+		-- which will hide (and momentarily re-show) the parent config panel.
+		-- As of some recent WoW patch (11.0? 11.0.5? 11.0.7?), hiding a frame while in its OnDragStop
+		-- will trigger OnDragStop AGAIN (synchronously, so we end up with recursion inside IE:PositionPanels),
+		-- which then causes the error in https://github.com/ascott18/TellMeWhen/issues/2258
+	    C_Timer.After(0, function()
+			self:OnSettingSaved()
+			IconPosition_Sortable:LoadConfig()
+	    end)
 	end,
 
 	OnUpdate = function(self)

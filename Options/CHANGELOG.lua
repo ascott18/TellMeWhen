@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 TMW.CHANGELOG = [==[
 ## v11.1.0
 * Fixes for WoW 11.1
+* Fix: #2258 - Error when changing icon sorting within a group
 
 ## v11.0.13
 * Fix: #2250 - Currency checking error in Cata clasic
