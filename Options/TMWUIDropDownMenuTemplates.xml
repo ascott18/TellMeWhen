@@ -53,7 +53,11 @@
 
 						TMW.DD.StopCounting(button.listFrame);
 						TMW.DD:CloseDropDownMenus(button.listFrame:GetID() + 1);
-						if ( button.tooltipTitle and button.tooltipWhileDisabled) then
+						if button.tooltipFunc then
+							GameTooltip:SetOwner(button, "ANCHOR_RIGHT");
+							button:tooltipFunc()
+							GameTooltip:Show();
+						elseif ( button.tooltipTitle and button.tooltipWhileDisabled) then
 							GameTooltip:SetOwner(button, "ANCHOR_RIGHT");
 							GameTooltip:AddLine(button.tooltipTitle, 1.0, 1.0, 1.0);
 
@@ -98,7 +102,11 @@
 
 				TMW.DD.StopCounting(listFrame);
 
-				if ( self.tooltipTitle ) then
+				if self.tooltipFunc then
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+					self:tooltipFunc()
+					GameTooltip:Show();
+				elseif ( self.tooltipTitle ) then
 					GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 					GameTooltip:AddLine(self.tooltipTitle, 1.0, 1.0, 1.0);
 

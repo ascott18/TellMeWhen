@@ -212,6 +212,7 @@ local function AddConditionToDropDown(dropdown, conditionData)
 	
 	info.tooltipTitle = text
 	info.tooltipText = get(conditionData.tooltip)
+	info.tooltipFunc = conditionData.tooltipFunc
 	
 	info.value = conditionData.identifier
 	info.arg1 = dropdown
