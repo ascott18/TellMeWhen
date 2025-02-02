@@ -314,7 +314,13 @@ function Type:Setup(icon)
 	icon:SetUpdateFunction(WpnEnchant_OnUpdate)
 	icon:Update()
 
+	-- At some point in the past, UNIT_INVENTORY_CHANGED used to be sufficient.
+	-- However, as of https://github.com/ascott18/TellMeWhen/issues/2253 at least in SOD,
+	-- this event is too early and GetWeaponEnchantInfo() isn't returning all returns yet.
+	-- Sillily enough, UNIT_PORTRAIT_UPDATE seems to always fire here and be late enough to work.
 	icon:RegisterEvent("UNIT_INVENTORY_CHANGED")
+	icon:RegisterEvent("UNIT_PORTRAIT_UPDATE")
+
 	icon:SetScript("OnEvent", WpnEnchant_OnEvent)
 	icon:SetUpdateMethod("manual")
 	icon:OnEvent(nil, "player")

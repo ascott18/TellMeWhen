@@ -772,7 +772,9 @@ ConditionCategory:RegisterCondition(21,	 "MAINHAND", {
 	funcstr = [[(select(2, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
+			-- See comments in wpnenchant.lua about these events.
+			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player"),
+			ConditionObject:GenerateNormalEventString("UNIT_PORTRAIT_UPDATE", "player")
 	end,
 	anticipate = [[local _, dur = GetWeaponEnchantInfo()
 		local VALUE = time + ((dur or 0)/1000) - c.Level]],
@@ -787,7 +789,8 @@ ConditionCategory:RegisterCondition(22,	 "OFFHAND", {
 	funcstr = [[(select(6, GetWeaponEnchantInfo()) or 0)/1000 c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
+			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player"),
+			ConditionObject:GenerateNormalEventString("UNIT_PORTRAIT_UPDATE", "player")
 	end,
 	anticipate = [[local _, _, _, _, _, dur = GetWeaponEnchantInfo()
 		local VALUE = time + ((dur or 0)/1000) - c.Level]],

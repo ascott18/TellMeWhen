@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 * Fixes for WoW 11.1
 * Fix: #2258 - Error when changing icon sorting within a group
 * Fix: #2256 - Some currency conditions missing on characters that have never encountered a particular currency.
+* Fix: #2253 - Listen to better events to pick up all weapon enchant changes
 
 ## v11.0.13
 * Fix: #2250 - Currency checking error in Cata clasic
