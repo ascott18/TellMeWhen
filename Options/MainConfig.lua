@@ -263,7 +263,7 @@ function IE:ProcessChangelogData()
 			subEnd = subEnd - 1
 		end
 
-		local versionString = log:match("TellMeWhen v([0-9%.]+)", subStart):gsub("%.", "")
+		local versionString = log:match("TellMeWhen v([0-9%.]+)", subStart):gsub("%.([0-9]+)", function(d) return format("%02d", d) end)
 		local versionNumber = tonumber(versionString) * 100
 		
 		-- A full version's changelog is between subStart and subEnd. Store it.
