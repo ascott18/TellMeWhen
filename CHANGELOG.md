@@ -1,3 +1,6 @@
+## v11.1.1
+* Fix: Adjust some parameters to better handle the 7 digit spellIDs that Blizzard started adding in 11.0.7
+
 ## v11.1.0
 * Fixes for WoW 11.1
 * Fix: #2258 - Error when changing icon sorting within a group

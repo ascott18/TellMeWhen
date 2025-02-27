@@ -879,10 +879,7 @@ function Module:Table_GetNormalSuggestions(suggestions, tbl)
 		local len = #suggestions
 		for id in pairs(tbl) do if ]]
 
-		-- If WoW ever get spellIDs in the millions, this will break.
-		-- Just need to increment this number here to 6.
-		-- At current rates, that will be sometime in the 2040s.
-		local maxTrailingZeroes = 5
+		local maxTrailingZeroes = floor(log10(SpellCache.CONST.MAX_SPELLID_GUESS))
 
 		local endParens = ""
 		for i = maxTrailingZeroes - floor(log10(match)), 1, -1 do
