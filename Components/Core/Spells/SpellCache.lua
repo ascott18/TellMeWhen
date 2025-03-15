@@ -47,7 +47,7 @@ SpellCache.CONST = {
 	-- after retail spells, in the IDs around 430000.
 	-- Since we save ranges of invalid IDs to skip, this won't matter for perf at all
 	-- in any spell scan where SpellCacheInvalidRanges has nonstale data.
-	MAX_SPELLID_GUESS = 1732790,
+	MAX_SPELLID_GUESS = 1232790,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
 	-- This used to be a much smaller number, but Blizzard went off the rails around 11.0.7 and put huge gaps in the SpellIDs.

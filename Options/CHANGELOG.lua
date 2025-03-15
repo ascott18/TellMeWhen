@@ -4,6 +4,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v11.1.1
+* Added support to new WoW 11.1.5 spell range events
 * Fix: Adjust some parameters to better handle the 7 digit spellIDs that Blizzard started adding in 11.0.7
 
 ## v11.1.0

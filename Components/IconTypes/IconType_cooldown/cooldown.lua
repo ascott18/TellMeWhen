@@ -350,14 +350,6 @@ function Type:Setup(icon)
 	end
 	
 	if isManual then
-		local hasActionEvent = true
-		for _, spell in pairs(icon.Spells.Array) do
-			if not TMW.COMMON.Actions.GetActionsForSpell(spell) then
-				hasActionEvent = false
-				break
-			end
-		end
-
 		icon:SetScript("OnEvent", SpellCooldown_OnEvent)
 		
 		icon:RegisterSimpleUpdateEvent("TMW_SPELL_UPDATE_COOLDOWN")
