@@ -167,9 +167,17 @@ end
 Cooldowns:RegisterEvent("SPELLS_CHANGED")
 Cooldowns:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 Cooldowns:RegisterEvent("SPELL_UPDATE_CHARGES")
+
+-- See https://github.com/ascott18/TellMeWhen/issues/2266 for why we listen to haste events.
+Cooldowns:RegisterUnitEvent("UNIT_SPELL_HASTE", "player")
+
 Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRange)
     if event == "SPELL_UPDATE_COOLDOWN" then
         wipe(CachedCooldowns)
+
+        -- Wipe charges when cooldowns change because sometimes charge events don't fire.
+        -- See https://github.com/ascott18/TellMeWhen/issues/2266
+        wipe(CachedCharges)
 
         if next(CachedCounts) then
             -- There's not a great event for GetSpellCastCount. Cooldown is the closest we can get.
@@ -191,5 +199,14 @@ Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRang
         TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
         TMW:Fire("TMW_SPELL_UPDATE_CHARGES")
         TMW:Fire("TMW_SPELL_UPDATE_COUNT")
+
+    elseif event == "UNIT_SPELL_HASTE" then
+        -- Haste changes affect cooldowns, but per https://github.com/ascott18/TellMeWhen/issues/2266,
+        -- these occurrences don't ALWAYS fire SPELL_UPDATE_COOLDOWN/SPELL_UPDATE_CHARGES.
+        -- Sometimes they do, sometimes they don't.
+        wipe(CachedCooldowns)
+        wipe(CachedCharges)
+        TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
+        TMW:Fire("TMW_SPELL_UPDATE_CHARGES")
     end
 end)
