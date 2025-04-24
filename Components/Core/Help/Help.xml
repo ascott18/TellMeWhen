@@ -50,13 +50,13 @@
 
 				local arrow = self
 
-				arrow.arrow = _G[arrow:GetName() .. "Arrow"]
-				arrow.arrow:SetAllPoints(true)
-				arrow.arrow:SetTexCoord(0.78515625, 0.54687500, 0.99218750, 0.54687500, 0.78515625, 0.58789063, 0.99218750, 0.58789063)
+				arrow.Arrow = arrow.Arrow or _G[arrow:GetName() .. "Arrow"]
+				arrow.Arrow:SetAllPoints(true)
+				arrow.Arrow:SetTexCoord(0.78515625, 0.54687500, 0.99218750, 0.54687500, 0.78515625, 0.58789063, 0.99218750, 0.58789063)
 
-				arrow.glow = _G[arrow:GetName() .. "Glow"]
-				arrow.glow:SetAllPoints(true)
-				arrow.glow:SetTexCoord(0.40625000, 0.77343750, 0.66015625, 0.77343750, 0.40625000, 0.82812500, 0.66015625, 0.82812500)
+				arrow.Glow = arrow.Glow or _G[arrow:GetName() .. "Glow"]
+				arrow.Glow:SetAllPoints(true)
+				arrow.Glow:SetTexCoord(0.40625000, 0.77343750, 0.66015625, 0.77343750, 0.40625000, 0.82812500, 0.66015625, 0.82812500)
 
 				self.body.text:SetSpacing(4)
 			</OnLoad>

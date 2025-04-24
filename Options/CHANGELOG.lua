@@ -3,6 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.1.2
+* TOC bump for WoW 11.1.5
+* Fix #2269 - [string "*Help.xml:44_OnLoad"]:10: attempt to index field 'arrow' (a nil value)
+
 ## v11.1.1
 * Added support to new WoW 11.1.5 spell range events
 * Fix: Adjust some parameters to better handle the 7 digit spellIDs that Blizzard started adding in 11.0.7
