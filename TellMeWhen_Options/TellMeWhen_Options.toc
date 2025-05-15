@@ -1,4 +1,4 @@
-﻿## Interface: 110105
+﻿## Interface: 110105, 40402, 11507
 ## Title: TellMeWhen Options
 
 ## Author: Cybeloras of Aerie Peak
@@ -17,4 +17,8 @@
 # This makes the structure for modules and components that need their own config files much neater and nicer.
 
 ..\TellMeWhen\Options\includes.xml
-..\TellMeWhen\Options\includes-Retail.xml
+
+..\TellMeWhen\Components\IconTypes\IconType_runes\Config-Retail.xml [AllowLoadGameType standard]
+..\TellMeWhen\Components\IconTypes\IconType_runes\Config-Wrath.xml [AllowLoadGameType wrath, cata]
+..\TellMeWhen\Components\IconTypes\IconType_losecontrol\Config.xml [AllowLoadGameType standard]
+..\TellMeWhen\Components\IconTypes\IconType_losecontrol\Config.lua [AllowLoadGameType standard]

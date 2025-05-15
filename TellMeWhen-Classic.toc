@@ -42,6 +42,6 @@
 
 includes.xml
 
-Components\Core\Spells\Equivalencies-Classic.lua
-Components\Core\Spells\ClassSpellCache-Classic.lua
+Components\Core\Spells\Equivalencies-Vanilla.lua
+Components\Core\Spells\ClassSpellCache-Vanilla.lua
 Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua

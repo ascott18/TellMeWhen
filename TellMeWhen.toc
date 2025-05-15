@@ -11,14 +11,14 @@
 #  --------------------
 
 
-## Interface: 110105
+## Interface: 110105, 40402, 11507
 
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 10855
 ## X-Wago-ID: ZQ6aZqKW
 
-## Version: 11.1.2
+## Version: 11.1.3
 ## Author: Cybeloras of Aerie Peak
 ## IconTexture: Interface\Addons\TellMeWhen\Textures\LDB Icon
 ## AddonCompartmentFunc: TellMeWhen_OnAddonCompartmentClick
@@ -42,11 +42,17 @@
 
 includes.xml
 
-# Components\Core\Spells\includes.core.xml
-Components\Core\Spells\Equivalencies-Retail.lua
-Components\Core\Spells\ClassSpellCache-Retail.lua
-Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua
+# vanilla tbc wrath cata mists standard
 
-Components\IconTypes\IconType_runes\runes-Retail.lua
-Components\IconTypes\IconType_losecontrol\losecontrol.lua
+Components\Core\Spells\Equivalencies-[Game].lua
+Components\Core\Spells\ClassSpellCache-[Game].lua
+Components\Core\Spells\ClassSpellCache-Cata.lua [AllowLoadGameType cata]
 
+Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua [AllowLoadGameType standard]
+Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua [AllowLoadGameType vanilla, tbc, wrath, cata]
+
+Components\IconTypes\IconType_runes\runes-Retail.lua [AllowLoadGameType standard]
+Components\IconTypes\IconType_runes\runes-Wrath.lua [AllowLoadGameType wrath, cata]
+
+Components\IconTypes\IconType_losecontrol\losecontrol.lua [AllowLoadGameType standard]
+Components\IconTypes\IconType_lightwell\lightwell.lua [AllowLoadGameType cata]
