@@ -1527,25 +1527,18 @@ else
 	end
 end
 
-if GetClassInfo then
-	TMW.GetClassInfo = GetClassInfo
-	TMW.GetMaxClassID = GetNumClasses
-else
-	local classInfo = {
-		[1] = C_CreatureInfo.GetClassInfo(1),
-		[2] = C_CreatureInfo.GetClassInfo(2),
-		[3] = C_CreatureInfo.GetClassInfo(3),
-		[4] = C_CreatureInfo.GetClassInfo(4),
-		[5] = C_CreatureInfo.GetClassInfo(5),
-		[6] = C_CreatureInfo.GetClassInfo(6), -- Death Knight
-		[7] = C_CreatureInfo.GetClassInfo(7),
-		[8] = C_CreatureInfo.GetClassInfo(8),
-		[9] = C_CreatureInfo.GetClassInfo(9),
-		[11] = C_CreatureInfo.GetClassInfo(11),
-	}
+if C_CreatureInfo and C_CreatureInfo.GetClassInfo then
+	local classInfo = {}
 
 	function TMW.GetMaxClassID()
-		return 11
+		-- This is hardcoded to 13 (evoker is the 13th class) because
+		-- e.g. in classic there are 9 classes but their IDs go to 11.
+		-- Everywhere we use this guards against non-existant classes, so its fine.
+		return 13
+	end
+	
+	for i = 1, TMW.GetMaxClassID() do
+		classInfo[i] = C_CreatureInfo.GetClassInfo(i)
 	end
 
 	function TMW.GetClassInfo(classID)
@@ -1553,6 +1546,9 @@ else
 		if not info then return end
 		return info.className, info.classFile, info.classID
 	end
+else
+	TMW.GetClassInfo = GetClassInfo
+	TMW.GetMaxClassID = GetNumClasses
 end
 
 if not GetSpecialization then

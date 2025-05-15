@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.1.3
+* Fix: #2274 Unit Class condition missing/incorrect classes in Classic/SoD.
+
 ## v11.1.2
 * TOC bump for WoW 11.1.5
 * Fix #2269 - [string "*Help.xml:44_OnLoad"]:10: attempt to index field 'arrow' (a nil value)
