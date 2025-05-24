@@ -32,6 +32,7 @@ local GetPetActionInfo = GetPetActionInfo
 	  
 local ConditionCategory = CNDT:GetCategory("ATTRIBUTES_PLAYER", 2, L["CNDTCAT_ATTRIBUTES_PLAYER"], false, false)
 
+local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
 
 
 

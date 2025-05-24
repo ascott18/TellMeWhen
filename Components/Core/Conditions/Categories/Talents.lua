@@ -27,8 +27,8 @@ local wipe =
       wipe
 local GetTalentInfo, GetNumTalents, GetGlyphLink = 
       GetTalentInfo, GetNumTalents, GetGlyphLink
-local GetSpecializationInfo, GetNumClasses = 
-      GetSpecializationInfo, GetNumClasses
+local GetNumClasses = 
+      GetNumClasses
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
       GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec
 local IsInJailersTower, C_SpecializationInfo, GetPvpTalentInfoByID =
@@ -320,15 +320,15 @@ else
 	})
 end
 
-if GetNumSpecializations then
+if TMW.GetNumSpecializations then
 	ConditionCategory:RegisterCondition(8,	 "TREE", {
 		old = true,
 		text = L["UIPANEL_SPECIALIZATION"],
 		min = 1,
-		max = GetNumSpecializations,
-		texttable = function(i) return select(2, GetSpecializationInfo(i)) end,
+		max = TMW.GetNumSpecializations(),
+		texttable = function(i) return select(2, TMW.GetSpecializationInfo(i)) end,
 		unit = PLAYER,
-		icon = function() return select(4, GetSpecializationInfo(1)) end,
+		icon = function() return select(4, TMW.GetSpecializationInfo(1)) end,
 		tcoords = CNDT.COMMON.standardtcoords,
 		Env = {
 			GetSpecialization = GetSpecialization
@@ -391,7 +391,7 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 
 CNDT.Env.TalentMap = {}
 CNDT.Env.PvpTalentMap = {}
-if C_ClassTalents then
+if C_ClassTalents and C_ClassTalents.GetActiveConfigID and C_Traits.GetDefinitionInfo then
 	-- Dragonflight
 
 	function CNDT:GetTalentRanksBySpellID()
@@ -599,9 +599,80 @@ if C_ClassTalents then
 				ConditionObject:GenerateNormalEventString("TMW_TALENT_LOADOUT_NAME_UPDATE")
 		end,
 	})
+elseif select(4, GetBuildInfo()) >= 50500 then
+	-- Mop - Shadowlands
+
+	function CNDT:PLAYER_TALENT_UPDATE()
+		wipe(Env.TalentMap)
+		
+		local talentInfoQuery = {};
+		for tier = 1, MAX_NUM_TALENT_TIERS do
+			for column = 1, NUM_TALENT_COLUMNS do
+				talentInfoQuery.tier = tier;
+				talentInfoQuery.column = column;
+				local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
+
+				local name = talentInfo.name
+				local id = talentInfo.talentID
+				local lower = name and strlowerCache[name]
+				local selected = talentInfo.selected or talentInfo.grantedByAura
+				if lower then
+					Env.TalentMap[lower] = selected
+					Env.TalentMap[id] = selected
+				end
+			end
+		end
+
+		if GetPvpTalentInfoByID then
+			wipe(Env.PvpTalentMap)
+			local ids = C_SpecializationInfo.GetAllSelectedPvpTalentIDs()
+			for _, id in pairs(ids) do
+				local _, name = GetPvpTalentInfoByID(id);
+				local lower = name and strlowerCache[name]
+				if lower then
+					Env.PvpTalentMap[lower] = true
+					Env.PvpTalentMap[id] = true
+				end
+			end
+		end
+	end
+	ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
+		text = L["UIPANEL_TALENTLEARNED"],
+
+		bool = true,
+		
+		unit = PLAYER,
+		name = function(editbox)
+			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+		end,
+		useSUG = "talents",
+		icon = function() return C_SpecializationInfo.GetTalentInfo({tier = 1, column = 1}).icon end,
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = function(c)
+			-- this is handled externally because TalentMap is so extensive a process,
+			-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
+			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
+			CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
+			CNDT:PLAYER_TALENT_UPDATE()
+		
+			return [[BOOLCHECK( TalentMap[LOWER(c.Spells.First)] )]]
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
+				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
+		end,
+	})
+
+	ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
+		text = L["UIPANEL_PTSINTAL"],
+		funcstr = "DEPRECATED",
+		min = 0,
+		max = 5,
+	})
 
 elseif GetNumTalentTabs then
-	-- Wrath
+	-- Classic - Cata
 	Env.TalentMap = {}
 	function CNDT:CHARACTER_POINTS_CHANGED()
 		wipe(Env.TalentMap)
@@ -642,69 +713,6 @@ elseif GetNumTalentTabs then
 				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
 		end,
 	})
-else
-	-- MOP-Shadowlands
-	function CNDT:PLAYER_TALENT_UPDATE()
-		wipe(Env.TalentMap)
-		for tier = 1, MAX_TALENT_TIERS do
-			for column = 1, NUM_TALENT_COLUMNS do
-				local id, name, _, selected, available, _, _, _, _, _, grantedByAura = GetTalentInfo(tier, column, 1)
-				local lower = name and strlowerCache[name]
-				selected = selected or grantedByAura
-				if lower then
-					Env.TalentMap[lower] = selected
-					Env.TalentMap[id] = selected
-				end
-			end
-		end
-
-		if GetPvpTalentInfoByID then
-			wipe(Env.PvpTalentMap)
-			local ids = C_SpecializationInfo.GetAllSelectedPvpTalentIDs()
-			for _, id in pairs(ids) do
-				local _, name = GetPvpTalentInfoByID(id);
-				local lower = name and strlowerCache[name]
-				if lower then
-					Env.PvpTalentMap[lower] = true
-					Env.PvpTalentMap[id] = true
-				end
-			end
-		end
-	end
-	ConditionCategory:RegisterCondition(9,	 "TALENTLEARNED", {
-		text = L["UIPANEL_TALENTLEARNED"],
-
-		bool = true,
-		
-		unit = PLAYER,
-		name = function(editbox)
-			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
-		end,
-		useSUG = "talents",
-		icon = function() return select(3, GetTalentInfo(1, 1, 1)) end,
-		tcoords = CNDT.COMMON.standardtcoords,
-		funcstr = function(c)
-			-- this is handled externally because TalentMap is so extensive a process,
-			-- and if it ends up getting processed in an OnUpdate condition, it could be very bad.
-			CNDT:RegisterEvent("PLAYER_TALENT_UPDATE")
-			CNDT:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_TALENT_UPDATE")
-			CNDT:PLAYER_TALENT_UPDATE()
-		
-			return [[BOOLCHECK( TalentMap[LOWER(c.Spells.First)] )]]
-		end,
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
-				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED")
-		end,
-	})
-
-	ConditionCategory:RegisterCondition(9,	 "PTSINTAL", {
-		text = L["UIPANEL_PTSINTAL"],
-		funcstr = "DEPRECATED",
-		min = 0,
-		max = 5,
-	})
 end
 
 if GetGlyphSocketInfo then
@@ -712,8 +720,8 @@ if GetGlyphSocketInfo then
 	function CNDT:GLYPH_UPDATED()
 		local GlyphLookup = Env.GlyphLookup
 		wipe(GlyphLookup)
-		if TMW.isCata then
-			-- Cata
+		if TMW.isCata or TMW.isMop then
+			-- Cata/mop
 			for i = 1, GetNumGlyphSockets() do
 				local _, _, _, spellID = GetGlyphSocketInfo(i)
 				if spellID then

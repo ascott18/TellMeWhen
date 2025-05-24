@@ -566,7 +566,7 @@ TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 ---------------------------------
 -- Constant spell data
 ---------------------------------
-if TMW.isCata then
+if TMW.isCata or TMW.isMop then
 	if pclass == "PALADIN" then
 		local name = GetSpellName(26573) 
 		TMW.COMMON.CurrentClassTotems = {

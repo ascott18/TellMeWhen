@@ -125,7 +125,7 @@ end
 ConditionCategory:RegisterSpacer(3)
 
 
-if TMW.isRetail or TMW.isCata then
+if TMW.isCataOrGreater then
 	ConditionCategory:RegisterCondition(23, "SOUL_SHARDS", {
 		text = SOUL_SHARDS_POWER,
 		min = 0,
@@ -158,44 +158,8 @@ if TMW.isRetail or TMW.isCata then
 end
 
 -- Private Class Resources (other players can't see them)
-if TMW.isRetail then
-	ConditionCategory:RegisterCondition(23.1, "SOUL_SHARD_FRAGMENTS", {
-		text = L["RESOURCE_FRAGMENTS"]:format(SOUL_SHARDS_POWER),
-		min = 0,
-		max = 60,
-		unit = PLAYER,
-		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
-		tcoords = CNDT.COMMON.standardtcoords,
-		funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
-		end,
-		hidden = pclass ~= "WARLOCK",
-	})
-	ConditionCategory:RegisterCondition(25, "RUNES2", {
-		text = L["CONDITIONPANEL_RUNES"],
-		tooltip = L["CONDITIONPANEL_RUNES_DESC3"],
-		unit = false,
-		min = 0,
-		max = 6,
-		icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
-		Env = {
-			GetRuneCount = GetRuneCount,
-		},
-		funcstr = function(c)
-			local str = ""
-			for i = 1, 6 do
-				str = str .. [[ + (GetRuneCount(]]..i..[[) or 0)]]
-			end
-			return str:trim("+ ") .. " c.Operator c.Level" 
-		end,
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE")
-		end,
-		hidden = pclass ~= "DEATHKNIGHT",
-	})
+if TMW.isMopOrGreater then
+	
 	ConditionCategory:RegisterCondition(26, "CHI", {
 		text = CHI_POWER,
 		min = 0,
@@ -266,6 +230,46 @@ if TMW.isRetail then
 				ConditionObject:GenerateNormalEventString("UNIT_ABSORB_AMOUNT_CHANGED", "player")
 		end,
 		hidden = pclass ~= "MONK",
+	})
+end
+
+if TMW.isRetail then
+	ConditionCategory:RegisterCondition(23.1, "SOUL_SHARD_FRAGMENTS", {
+		text = L["RESOURCE_FRAGMENTS"]:format(SOUL_SHARDS_POWER),
+		min = 0,
+		max = 60,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SOUL_SHARDS")
+		end,
+		hidden = pclass ~= "WARLOCK",
+	})
+	ConditionCategory:RegisterCondition(25, "RUNES2", {
+		text = L["CONDITIONPANEL_RUNES"],
+		tooltip = L["CONDITIONPANEL_RUNES_DESC3"],
+		unit = false,
+		min = 0,
+		max = 6,
+		icon = "Interface\\PlayerFrame\\UI-PlayerFrame-Deathknight-Blood",
+		Env = {
+			GetRuneCount = GetRuneCount,
+		},
+		funcstr = function(c)
+			local str = ""
+			for i = 1, 6 do
+				str = str .. [[ + (GetRuneCount(]]..i..[[) or 0)]]
+			end
+			return str:trim("+ ") .. " c.Operator c.Level" 
+		end,
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("RUNE_POWER_UPDATE")
+		end,
+		hidden = pclass ~= "DEATHKNIGHT",
 	})
 	local offset = TMW.tContains({"ROGUE", "DRUID"}, pclass) and 0 or 62
 	ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
@@ -870,7 +874,7 @@ ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
 
 
 
-if TMW.isRetail or TMW.isCata then
+if TMW.isCataOrGreater then
 	ConditionCategory:RegisterSpacer(200)
 	-- Altpower was added in cata
 	ConditionCategory:RegisterCondition(208.0, "ALTPOWER", {
@@ -928,7 +932,7 @@ if TMW.isRetail or TMW.isCata then
 	})
 end
 
-if TMW.isCata then
+if TMW.isCataOrGreater and not TMW.isRetail then
 	ConditionCategory:RegisterCondition(0, "ECLIPSE", {
 		text = L["ECLIPSE"],
 		tooltip = L["CONDITIONPANEL_ECLIPSE_DESC"],
@@ -970,6 +974,105 @@ if TMW.isCata then
 	})
 end
 
+if TMW.isMop then
+	ConditionCategory:RegisterCondition(17,	 "SHADOW_ORBS", {
+		text = SHADOW_ORBS,
+		min = 0,
+		max = 5,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Spell_Priest_Shadoworbs",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ShadowOrbs),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "SHADOW_ORBS")
+		end,
+		hidden = pclass ~= "PRIEST",
+	})
+
+	ConditionCategory:RegisterCondition(19.1, "BURNING_EMBERS", {
+		text = BURNING_EMBERS,
+		min = 0,
+		max = 4,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\ability_warlock_burningembers",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.BurningEmbers),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "BURNING_EMBERS")
+		end,
+		hidden = pclass ~= "WARLOCK",
+	})
+	ConditionCategory:RegisterCondition(19.2, "BURNING_EMBERS_FRAGMENTS", {
+		text = L["BURNING_EMBERS_FRAGMENTS"],
+		tooltip = L["BURNING_EMBERS_FRAGMENTS_DESC"],
+		min = 0,
+		max = 40,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\INV_Elemental_Mote_Fire01",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.BurningEmbers),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "BURNING_EMBERS")
+		end,
+		hidden = pclass ~= "WARLOCK",
+	})
+	ConditionCategory:RegisterCondition(19.3, "DEMONIC_FURY", {
+		text = DEMONIC_FURY,
+		min = 0,
+		max = 1000,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Ability_Warlock_Eradication",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.DemonicFury),
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_POWER_FREQUENT", "player", "DEMONIC_FURY")
+		end,
+		hidden = pclass ~= "WARLOCK",
+	})
+else
+	-- The graveyard....
+	ConditionCategory:RegisterCondition(0, "SHADOW_ORBS", {
+		text = SHADOW_ORBS,
+		min = 0,
+		max = 5,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Spell_Priest_Shadoworbs",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = "DEPRECATED",
+	})
+	ConditionCategory:RegisterCondition(0, "BURNING_EMBERS", {
+		text = BURNING_EMBERS,
+		min = 0,
+		max = 4,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\ability_warlock_burningembers",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = "DEPRECATED",
+	})
+	ConditionCategory:RegisterCondition(0, "BURNING_EMBERS_FRAGMENTS", {
+		text = L["BURNING_EMBERS_FRAGMENTS"],
+		tooltip = L["BURNING_EMBERS_FRAGMENTS_DESC"],
+		min = 0,
+		max = 40,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\INV_Elemental_Mote_Fire01",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = "DEPRECATED",
+	})
+	ConditionCategory:RegisterCondition(0, "DEMONIC_FURY", {
+		text = DEMONIC_FURY,
+		min = 0,
+		max = 1000,
+		unit = PLAYER,
+		icon = "Interface\\Icons\\Ability_Warlock_Eradication",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = "DEPRECATED",
+	})
+end
 
 
 
@@ -978,48 +1081,3 @@ end
 
 
 
-
-
-
-
-
-
--- The graveyard....
-
-ConditionCategory:RegisterCondition(0, "SHADOW_ORBS", {
-	text = SHADOW_ORBS,
-	min = 0,
-	max = 5,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\Spell_Priest_Shadoworbs",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = "DEPRECATED",
-})
-ConditionCategory:RegisterCondition(0, "BURNING_EMBERS", {
-	text = BURNING_EMBERS,
-	min = 0,
-	max = 4,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\ability_warlock_burningembers",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = "DEPRECATED",
-})
-ConditionCategory:RegisterCondition(0, "BURNING_EMBERS_FRAGMENTS", {
-	text = L["BURNING_EMBERS_FRAGMENTS"],
-	tooltip = L["BURNING_EMBERS_FRAGMENTS_DESC"],
-	min = 0,
-	max = 40,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\INV_Elemental_Mote_Fire01",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = "DEPRECATED",
-})
-ConditionCategory:RegisterCondition(0, "DEMONIC_FURY", {
-	text = DEMONIC_FURY,
-	min = 0,
-	max = 1000,
-	unit = PLAYER,
-	icon = "Interface\\Icons\\Ability_Warlock_Eradication",
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = "DEPRECATED",
-})

@@ -31,7 +31,56 @@ Module.noMin = true
 Module.showColorHelp = false
 Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 
-Module.stances = (TMW.isWrath or TMW.isCata) and {
+Module.stances = TMW.isMop and {
+	WARRIOR = {
+		[2457] = 	GetSpellName(2457), 	-- Battle Stance
+		[71] = 		GetSpellName(71),		-- Defensive Stance
+		[2458] = 	GetSpellName(2458), 	-- Berserker Stance
+	},
+	DRUID = {
+		[5487] = 	GetSpellName(5487), 	-- Bear Form
+		[768] = 	GetSpellName(768),		-- Cat Form
+		[1066] = 	GetSpellName(1066), 	-- Aquatic Form
+		[783] = 	GetSpellName(783),		-- Travel Form
+		[24858] = 	GetSpellName(24858), 	-- Moonkin Form
+		[33891] = 	GetSpellName(33891), 	-- Tree of Life
+		[33943] = 	GetSpellName(33943), 	-- Flight Form
+		[40120] = 	GetSpellName(40120), 	-- Swift Flight Form	
+	},
+	PRIEST = {
+		[15473] = 	GetSpellName(15473), 	-- Shadowform	
+	},
+	ROGUE = {
+		[1784] = 	GetSpellName(1784), 	-- Stealth	
+	},
+	HUNTER = {
+		[13165] = 	GetSpellName(13165), 	-- Aspect of the Hawk
+		[109260] = 	GetSpellName(109260), 	-- Aspect of the Iron Hawk
+		[5118] = 	GetSpellName(5118), 	-- Aspect of the Cheetah
+		[13159] = 	GetSpellName(13159), 	-- Aspect of the Pack
+	},
+	DEATHKNIGHT = {
+		[48263] = 	GetSpellName(48263), 	-- Blood Presence
+		[48266] = 	GetSpellName(48266), 	-- Frost Presence
+		[48265] = 	GetSpellName(48265), 	-- Unholy Presence	
+	},
+	PALADIN = {
+		[105361] = 	GetSpellName(105361), 	-- Seal of Command
+		[20165] = 	GetSpellName(20165), 	-- Seal of Insight
+		[20164] = 	GetSpellName(20164),	-- Seal of Justice
+		[20154] = 	GetSpellName(20154), 	-- Seal of Righteousness
+		[31801] = 	GetSpellName(31801),	-- Seal of Truth
+	},
+	WARLOCK = {
+		[103958] = 	GetSpellName(103958),	-- Metamorphosis
+		[114168] = 	GetSpellName(114168),	-- Dark Apotheosis
+	},
+	MONK = {
+		[115069] = 	GetSpellName(115069),	-- Sturdy Ox
+		[115070] = 	GetSpellName(115070),	-- Wise Serpent
+		[103985] = 	GetSpellName(103985),	-- Fierce Tiger
+	},
+} or (TMW.isWrath or TMW.isCata) and {
 	WARRIOR = {
 		[2457] = 	GetSpellName(2457), 	-- Battle Stance
 		[71] = 		GetSpellName(71),		-- Defensive Stance

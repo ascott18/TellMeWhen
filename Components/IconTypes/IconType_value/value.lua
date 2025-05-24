@@ -94,16 +94,26 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	}
 
 	if UnitStagger then
-		types[#types+1] = { order = 20,  id = -3, name = STAGGER, }
+		types[#types+1] = { order = 20,  id = -3, name = STAGGER or "Stagger", }
 	end
-	if TMW.isCata or TMW.isRetail then
+
+	if TMW.isCataOrGreater then
 		types[#types+1] = { order = 7,  id = Enum.PowerType.SoulShards, name = SOUL_SHARDS_POWER, }
 		types[#types+1] = { order = 8,  id = Enum.PowerType.HolyPower, name = HOLY_POWER, }
 		types[#types+1] = { order = 16,  id = Enum.PowerType.Alternate, name = L["CONDITIONPANEL_ALTPOWER"], }
 	end
 	
-	if TMW.isRetail then
+	if TMW.isMopOrGreater then
 		types[#types+1] = { order = 9,  id = Enum.PowerType.Chi, name = CHI_POWER; }
+	end
+
+	if TMW.isMop then
+		types[#types+1] = { order = 21,  id = Enum.PowerType.ShadowOrbs, name = SHADOW_ORBS, }
+		types[#types+1] = { order = 22,  id = Enum.PowerType.DemonicFury, name = DEMONIC_FURY, }
+		types[#types+1] = { order = 23,  id = Enum.PowerType.BurningEmbers, name = BURNING_EMBERS, }
+	end
+
+	if TMW.isRetail then
 		types[#types+1] = { order = 10,  id = Enum.PowerType.Maelstrom, name = MAELSTROM_POWER, }
 		types[#types+1] = { order = 11,  id = Enum.PowerType.ArcaneCharges, name = ARCANE_CHARGES_POWER, }
 		types[#types+1] = { order = 12,  id = Enum.PowerType.LunarPower, name = LUNAR_POWER, }
@@ -123,7 +133,7 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 		TMW.IE:LoadIcon(1)
 	end
 	self.PowerType:SetFunction(function(self)
-		for _, data in TMW:OrderedPairs(types) do
+		for _, data in TMW:OrderedPairs(types, TMW.OrderSort, true) do
 			if data.id then
 				local info = TMW.DD:CreateInfo()
 				info.text = data.name

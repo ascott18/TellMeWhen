@@ -27,9 +27,11 @@ local math, max, ceil, floor, random, abs =
 local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer =
 	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer
 
-local GetRuneCooldown, GetSpecialization, GetSpecializationInfo, GetFramerate =
-	  GetRuneCooldown, GetSpecialization, GetSpecializationInfo, GetFramerate
+local GetRuneCooldown =
+	  GetRuneCooldown
 
+local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
+local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or _G.GetSpecializationInfo
 local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
 local GetSpellPowerCost = C_Spell.GetSpellPowerCost or _G.GetSpellPowerCost
 
@@ -1492,10 +1494,15 @@ else
 	end
 end
 
-if GetSpecializationInfoForClassID then
+if GetSpecializationInfoForClassID 
+-- in MOP classic beta, it just returns nothing for a lot of classes.
+and GetSpecializationInfoForClassID(1,1) 
+then
 	-- Blizzard added GetSpecializationInfoForClassID in classic era/sod,
 	-- but it has an off-by-1 error with the spec index parameter,
 	-- using zero-based indexes instead of 1-based indexes
+
+
 	if not GetSpecializationInfoForClassID(9, 3) and TMW.isClassic then
 		function TMW.GetSpecializationInfoForClassID(classID, i)
 			if not i then
@@ -1509,7 +1516,7 @@ if GetSpecializationInfoForClassID then
 	end
 else
 	local classSpecIds = {
-		DRUID = {102,103,105},
+		DRUID = select(4, GetBuildInfo()) > 50000 and {102,103,104,105} or {102,103,105},
 		HUNTER = {253,254,255},
 		MAGE = {62,63,64},
 		PALADIN = {65,66,70},
@@ -1519,10 +1526,13 @@ else
 		WARLOCK = {265,266,267},
 		WARRIOR = {71,72,73},
 		DEATHKNIGHT = {250,251,252},
+		MONK = {268,270,269},
 	}
 
 	function TMW.GetSpecializationInfoForClassID(classID, i) 
 		local _, slug = GetClassInfo(classID)
+		local specID = classSpecIds[slug][i]
+		if not specID then return end
 		return TMW.GetSpecializationInfoByID(classSpecIds[slug][i])
 	end
 end
@@ -1624,10 +1634,12 @@ if not GetSpecialization then
 	end
 else
 	-- MOP+ style specs (pick a talent tree):
+	local GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or _G.GetSpecialization
+	local GetNumSpecializationsForClassID = C_SpecializationInfo and C_SpecializationInfo.GetNumSpecializationsForClassID or _G.GetNumSpecializationsForClassID
 
 	TMW.GetNumSpecializations = GetNumSpecializations
 	TMW.GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
-	TMW.GetCurrentSpecialization = GetCurrentSpecialization
+	TMW.GetCurrentSpecialization = GetSpecialization
 	TMW.GetSpecializationInfo = GetSpecializationInfo
 	function TMW.GetCurrentSpecializationID() 
 		return GetSpecializationInfo(GetSpecialization())

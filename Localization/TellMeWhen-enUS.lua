@@ -1685,6 +1685,8 @@ L["PET_TYPE_TENACITY"] = "Tenacity"
 L["PET_TYPE_FEROCITY"] = "Ferocity"
 
 L["SWINGTIMER"] = "Swing Timer"
+L["RANGEDHASTE"] = "Ranged Haste"
+L["RANGEDCRIT"] = "Ranged Crit"
 L["ITEMINBAGS"] = "Item count (includes charges)"
 L["ITEMEQUIPPED"] = "Item is equipped"
 L["ITEMSPELL"] = "Item has on use effect"

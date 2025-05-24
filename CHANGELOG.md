@@ -1,4 +1,5 @@
 ## v11.1.3
+* Basic support for MoP Classic.
 * Fix: #2274 Unit Class condition missing/incorrect classes in Classic/SoD.
 
 ## v11.1.2

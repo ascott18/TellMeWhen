@@ -164,7 +164,109 @@ end})
 
 
 local resetsOnCast, resetsOnAura, spellBlacklist = {}, {}, {}
-if TMW.isCata or TMW.isWrath or TMW.isClassic then
+if TMW.isMop then
+	resetsOnCast = {
+	[23989] = { -- Readiness
+		[120697] = 1, -- Lynx Rush
+		[19574] = 1, -- Bestial Wrath
+		[6991] = 1, -- Feed Pet
+		[53271] = 1, -- Master's Call
+		[82726] = 1, -- Fervor
+		[3674] = 1, -- Black Arrow
+		[13809] = 1, -- Ice Trap
+		[13813] = 1, -- Explosive Trap
+		[53351] = 1, -- Kill Shot
+		[19503] = 1, -- Scatter Shot
+		[19386] = 1, -- Wyvern Sting
+		[19263] = 1, -- Deterrence
+		[130392] = 1, -- Blink Strike
+		[3045] = 1, -- Rapid Fire
+		[1499] = 1, -- Freezing Trap
+		[131894] = 1, -- A Murder of Crows
+		[53301] = 1, -- Explosive Shot
+		[109304] = 1, -- Exhilaration
+		[34490] = 1, -- Silencing Shot
+		[109248] = 1, -- Binding Shot
+		[5116] = 1, -- Concussive Shot
+		[34600] = 1, -- Snake Trap
+		[34477] = 1, -- Misdirection
+		[51753] = 1, -- Camouflage
+		[20736] = 1, -- Distracting Shot
+		[120679] = 1, -- Dire Beast
+		[34026] = 1, -- Kill Command
+		-- [121818] = 1, -- Stampeed (5 min cd, doesn't get reset)
+		[5384] = 1, -- Feign Death
+		[19577] = 1, -- Intimidation
+		[1543] = 1, -- Flare
+		[781] = 1, -- Disengage
+		[53209] = 1, -- Chimera Shot
+		[109259] = 1, -- Powershot
+		[117050] = 1, -- Glaive Toss
+		[120360] = 1, -- Barrrage
+	},
+	
+	[108285] = { -- Call of the Elements
+		[108269] = 1, -- Capacitor Totem
+		[8177] = 1, -- Grounding Totem
+		[51485] = 1, -- Earthgrab Totem
+		[8143] = 1, -- Tremor Totem
+		[5394] = 1, -- Healing Stream Totem
+	},
+	[11129] = { -- Combustion
+		[108853] = 1, -- Inferno Blast
+	},
+	[11958] = { -- coldsnap
+		[44572] = 1,
+		[120] = 1,
+		[122] = 1,
+	},
+	[14185] = { --prep
+		[5277] = 1, -- Evasion
+		[2983] = 1, -- Sprint
+		[1856] = 1, -- Vanish
+		[51722] = 1, -- Dismantle
+	},
+	[50334] = { --druid berserk or something
+		[33878] = 1,
+		[33917] = 1,
+	},
+}
+resetsOnAura = {
+	[81162] = { -- Will of the Necropolis
+		[48982] = 1, -- Rune Tap
+	},
+	[93622] = { -- Mangle! (from lacerate and thrash)
+		[33878] = 1, -- Mangle
+	},
+	[48518] = { -- lunar eclipse
+		[48505] = 1, -- Starfall
+	},
+	[50227] = { -- Sword and Board
+		[23922] = 1, -- Shield Slam
+	},
+	[59578] = { -- The Art of War
+		[879] = 1, -- Exorcism
+	},
+	[52437] = { -- Sudden Death
+		[86346] = 1, -- Colossus Smash
+	},
+	[124430] = { -- Divine Insight (Shadow version)
+		[8092] = 1, -- Mind Blast
+	},
+	[77762] = { -- Lava Surge
+		[51505] = 1, -- Lava Burst
+	},
+	[93400] = { -- Shooting Stars
+		[78674] = 1, -- Starsurge
+	},
+	[32216] = { -- Victorious
+		[103840] = 1, -- Impending Victory
+	},
+}
+spellBlacklist = {
+	[50288] = 1, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
+}
+elseif TMW.isCata or TMW.isWrath or TMW.isClassic then
 resetsOnCast = {
 	[23989] = { -- readiness
 		[19263] = 1, -- Deterrence
