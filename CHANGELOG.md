@@ -1,6 +1,7 @@
 ## v11.1.3
 * Basic support for MoP Classic.
 * Fix: #2274 Unit Class condition missing/incorrect classes in Classic/SoD.
+* New Condition: Spell is Assistant Suggestion (integration with 11.1.7 Combat Assist feature)
 
 ## v11.1.2
 * TOC bump for WoW 11.1.5

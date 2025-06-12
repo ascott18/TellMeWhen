@@ -499,6 +499,44 @@ ConditionCategory:RegisterCondition(3.5,  "OVERLAYED", {
 })
 end
 
+if C_AssistedCombat and C_AssistedCombat.GetNextCastSpell then
+ConditionCategory:RegisterCondition(3.6,  "ASSISTANTSPELL", {
+	text = L["CONDITIONPANEL_ASSISTANTSPELL"],
+	tooltip = L["CONDITIONPANEL_ASSISTANTSPELL_DESC"],
+	bool = true,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_ASSISTANTSPELL"], L["CNDT_MULTIPLEVALID"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
+	hidden = function() return not C_AssistedCombat:IsAvailable() end,
+	useSUG = true,
+	unit = false,
+	icon = "Interface\\Icons\\misc_arrowright",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		NextCastSpell = nil
+	},
+	funcstr = function(c)
+		if not Env.RegisteredNextCastSpell then
+			Env.RegisteredNextCastSpell = true
+			TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
+				local spell = C_AssistedCombat:GetNextCastSpell(false)
+				if spell ~= Env.NextCastSpell then
+					Env.NextCastSpell = spell and strlowerCache[TMW.GetSpellName(spell)]
+					TMW:Fire("TMW_CNDT_ASSISTANTSPELL_UPDATE")
+				end
+			end)
+		end
+
+		return [[BOOLCHECK( c.OwnSpells.StringHash[NextCastSpell] )]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("TMW_CNDT_ASSISTANTSPELL_UPDATE")
+	end,
+})
+end
+
 ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {
 	text = L["CONDITIONPANEL_MANAUSABLE"],
 	tooltip = L["CONDITIONPANEL_MANAUSABLE_DESC"],
