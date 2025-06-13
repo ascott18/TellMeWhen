@@ -5,8 +5,9 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 TMW.CHANGELOG = [==[
 ## v11.1.3
 * Basic support for MoP Classic.
-* Fix: #2274 Unit Class condition missing/incorrect classes in Classic/SoD.
 * New Condition: Spell is Assistant Suggestion (integration with 11.1.7 Combat Assist feature)
+* Fix: #2274 Unit Class condition missing/incorrect classes in Classic/SoD.
+* Fix: The missing duration warning was sometimes showing at the wrong time.
 
 ## v11.1.2
 * TOC bump for WoW 11.1.5
