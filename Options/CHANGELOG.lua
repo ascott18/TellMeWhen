@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 * Basic support for MoP Classic.
 * New Condition: Spell is Assistant Suggestion (integration with 11.1.7 Combat Assist feature)
 * Fix: #2274 Unit Class condition missing/incorrect classes in Classic/SoD.
+* Fix: #2275 Activation Border animation not working in WoW 11.1.7
 * Fix: The missing duration warning was sometimes showing at the wrong time.
 
 ## v11.1.2

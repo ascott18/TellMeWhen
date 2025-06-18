@@ -70,14 +70,20 @@ end
 
 
 -- SpellActivationAlert animation handling:
-if CreateFrame("Frame", nil, UIParent, "ActionBarButtonSpellActivationAlert").ProcStartAnim then
+local activationAlertTemplate = "ActionBarButtonSpellActivationAlert"
+if pcall(CreateFrame, "Frame", nil, UIParent, "ActionButtonSpellAlertTemplate") then
+	-- Wow 11.1.7 renamed ActionBarButtonSpellActivationAlert to ActionButtonSpellAlertTemplate
+	activationAlertTemplate = "ActionButtonSpellAlertTemplate"
+end
+
+if CreateFrame("Frame", nil, UIParent, activationAlertTemplate).ProcStartAnim then
 	-- Wow 10.1.5+
 	function IconContainer:ShowOverlayGlow()
 		local container = self.container
 		local overlay = container.overlay
 
 		if not overlay then
-			overlay = CreateFrame("Frame", nil, container, "ActionBarButtonSpellActivationAlert")
+			overlay = CreateFrame("Frame", nil, container, activationAlertTemplate)
 			container.overlay = overlay
 
 			-- The intro animation to the new activation alert animation in wow 10.1.5 is extremely weird,
