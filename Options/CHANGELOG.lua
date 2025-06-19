@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.1.4
+* Fix: #2276, #2277 broken Rune Cooldown configuration for Cata Classic
+
 ## v11.1.3
 * Basic support for MoP Classic.
 * New Condition: Spell is Assistant Suggestion (integration with 11.1.7 Combat Assist feature)

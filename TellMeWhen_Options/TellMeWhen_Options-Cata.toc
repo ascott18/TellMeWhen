@@ -17,4 +17,4 @@
 # This makes the structure for modules and components that need their own config files much neater and nicer.
 
 ..\TellMeWhen\Options\includes.xml
-..\TellMeWhen\Components\Options\includes-Wrath.xml
+..\TellMeWhen\Components\IconTypes\IconType_runes\Config-Wrath.xml
