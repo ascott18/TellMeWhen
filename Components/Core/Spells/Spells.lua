@@ -161,6 +161,9 @@ local fixSpellMap = {
 	end,
 }
 
+local assistantSpell = C_AssistedCombat and C_AssistedCombat.GetActionSpell and C_AssistedCombat.GetActionSpell()
+local assistantSpellNameLower = assistantSpell and TMW.strlowerCache[GetSpellName(assistantSpell)]
+
 local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRenaming)
 	local spells = parseSpellsString(setting, doLower, false)
 
@@ -182,7 +185,9 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 			if C_Spell and C_Spell.GetOverrideSpell then
 				local spellID = C_Spell.GetOverrideSpell(v or "")
 				if spellID and spellID ~= 0 then
-					if fixSpellMap[spellID] then
+					if spellID == assistantSpell then
+						spells[k] = TMW.AssistedCombatNextCastSpell
+					elseif fixSpellMap[spellID] then
 						-- Attempt to fix blizzard bugs like https://github.com/Stanzilla/WoWUIBugs/issues/354
 						local newSpell = fixSpellMap[spellID]()
 						if newSpell then
@@ -309,6 +314,10 @@ local __index_old = nil
 local RenamingSpellSetInstances = {}
 setmetatable(RenamingSpellSetInstances, {__mode='kv'})
 
+local hasSetupAssistantSpellUpdates = false
+local AssistedSpellSetInstances = {}
+setmetatable(AssistedSpellSetInstances, {__mode='kv'})
+
 TMW:NewClass("SpellSet"){
 	OnFirstInstance = function(self)
 		self:MakeInstancesWeak()
@@ -330,6 +339,11 @@ TMW:NewClass("SpellSet"){
 		self.AllowRenaming = allowRenaming
 		if allowRenaming then
 			RenamingSpellSetInstances[self] = true
+			local spells = parseSpellsString(name, true, false)
+			if TMW.tContains(spells, assistantSpell) or TMW.tContains(spells, assistantSpellNameLower) then
+				AssistedSpellSetInstances[self] = true
+				TMW:RequestAssistantSpellUpdates()
+			end
 		end
 		setmetatable(self, self.betterMeta)
 	end,
@@ -385,6 +399,32 @@ if C_Spell and C_Spell.GetOverrideSpell then
 			instance:Wipe()
 		end
 	end)
+end
+
+local assistantUpdatesRegistered = false
+function TMW:RequestAssistantSpellUpdates()
+	if assistantUpdatesRegistered then return true end
+
+	if not C_AssistedCombat or not C_AssistedCombat.GetNextCastSpell then return false end
+
+	TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
+		local spell = C_AssistedCombat:GetNextCastSpell(false)
+		if spell ~= TMW.AssistedCombatNextCastSpell then
+			TMW.AssistedCombatNextCastSpell = spell
+			TMW.AssistedCombatNextCastSpellName = spell and strlowerCache[GetSpellName(spell)]
+
+			for instance in pairs(AssistedSpellSetInstances) do
+				instance:Wipe()
+			end
+
+			TMW:Fire("TMW_ASSISTED_COMBAT_SPELL_UPDATE", spell)
+			-- Firing TMW_SPELL_UPDATE_COOLDOWN will allow all cooldown-like dependencies to update
+			TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
+		end
+	end)
+
+	assistantUpdatesRegistered = true
+	return true
 end
 
 

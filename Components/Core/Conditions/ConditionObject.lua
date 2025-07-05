@@ -127,7 +127,7 @@ function ConditionObject:CompileUpdateFunction(Conditions)
 			-- change VALUE to the appropriate ANTICIPATOR_RESULT#
 			thisstr = thisstr:gsub("VALUE", "ANTICIPATOR_RESULT" .. numAnticipatorResults)
 
-			thisstr = "-- Anticipator #" .. numAnticipatorResults .. "\r\n" .. thisstr
+			thisstr = "-- Anticipator #" .. numAnticipatorResults .. "\r\n" .. "local ANTICIPATOR_RESULT" .. numAnticipatorResults .. "\r\n" .. thisstr
 			
 			anticipatorstr = anticipatorstr .. "\r\n" .. thisstr
 		end

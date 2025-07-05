@@ -1,3 +1,7 @@
+## v11.1.5
+* Added support for tracking "Single-Button Assistant" (1229376) as a cooldown. Note that all suggestible abilities should be on your action bars for proper functioning.
+* Add missing localizations for some MoP spell equivalency groups
+
 ## v11.1.4
 * Fix: #2276, #2277 broken Rune Cooldown configuration for Cata Classic
 

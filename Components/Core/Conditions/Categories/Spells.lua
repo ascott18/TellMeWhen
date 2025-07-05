@@ -513,26 +513,13 @@ ConditionCategory:RegisterCondition(3.6,  "ASSISTANTSPELL", {
 	unit = false,
 	icon = "Interface\\Icons\\misc_arrowright",
 	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		NextCastSpell = nil
-	},
 	funcstr = function(c)
-		if not Env.RegisteredNextCastSpell then
-			Env.RegisteredNextCastSpell = true
-			TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
-				local spell = C_AssistedCombat:GetNextCastSpell(false)
-				if spell ~= Env.NextCastSpell then
-					Env.NextCastSpell = spell and strlowerCache[TMW.GetSpellName(spell)]
-					TMW:Fire("TMW_CNDT_ASSISTANTSPELL_UPDATE")
-				end
-			end)
-		end
-
-		return [[BOOLCHECK( c.OwnSpells.StringHash[NextCastSpell] )]]
+		TMW:RequestAssistantSpellUpdates()
+		return [[BOOLCHECK( c.OwnSpells.StringHash[TMW.AssistedCombatNextCastSpellName] )]]
 	end,
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("TMW_CNDT_ASSISTANTSPELL_UPDATE")
+			ConditionObject:GenerateNormalEventString("TMW_ASSISTED_COMBAT_SPELL_UPDATE")
 	end,
 })
 end
