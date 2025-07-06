@@ -1,5 +1,6 @@
 ## v11.1.9
-* Fix: #2286 incorrect DR categories for MoP Classic
+* Fix: #2286 - Incorrect DR categories for MoP Classic
+* Fix: #2285 - Perform extra spell cost calculations for monks to workaround bad data from Blizzard APIs while rolling.
 
 ## v11.1.8
 * Fix: #2284 "Single-Button Assistant" cooldown tracking only worked after performing a `/reload`.

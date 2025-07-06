@@ -51,6 +51,47 @@ SpellUsable.CachedActions = CachedActions
 local CachedNonActions = {}
 SpellUsable.CachedNonActions = CachedNonActions
 
+
+local GetSpellCost = TMW.GetSpellCost
+local UnitPower = UnitPower
+local GetActionInfo = GetActionInfo
+
+local function FixNoMana(spell, noMana)
+    local cost, data = GetSpellCost(spell)
+    if cost and data then
+        return UnitPower("player", data.type) < cost
+    end
+    return noMana
+end
+local function FixNoManaAction(action, noMana)
+    local type, id = GetActionInfo(action)
+    if type == "spell" then
+        return FixNoMana(id, noMana)
+    end
+    return noMana
+end
+
+local _, pclass = UnitClass("Player")
+if pclass == "MONK" then
+    -- Workaround https://github.com/ascott18/TellMeWhen/issues/2285
+    local IsUsableSpell_old = IsUsableSpell
+    IsUsableSpell = function(spell)
+        local usable, noMana = IsUsableSpell_old(spell)
+        noMana = FixNoMana(spell, noMana)
+        return usable, noMana
+    end
+
+    local IsUsableAction_old = IsUsableAction
+    IsUsableAction = function(action)
+        local usable, noMana = IsUsableAction_old(action)
+        noMana = FixNoManaAction(action, noMana)
+        return usable, noMana
+    end
+else
+    FixNoManaAction = function(action, noMana) return noMana end
+end
+
+
 function SpellUsable.IsUsableSpell(spell)
 
     local actions = SpellsToActions[spell]
@@ -68,7 +109,7 @@ function SpellUsable.IsUsableSpell(spell)
         end
         
         -- Cache miss, but the spell does map to an action, so populate the cache.
-        -- This path happens if `CachedRange` has been wiped and we haven't yet seen an event.
+        -- This path happens if `CachedActions` has been wiped and we haven't yet seen an event.
         local action = actions[1]
         local usable, noMana = IsUsableAction(action)
         CachedActions[action] = { usable = usable, noMana = noMana }
@@ -132,13 +173,21 @@ SpellUsable:SetScript("OnEvent", function(self, event, payload)
         -- Precise action updates. Added in WoW 11.0.
         for _, payloadSpell in pairs(payload) do
             -- payloadSpell is { usable: boolean, noMana: boolean }
+
             local action = payloadSpell.slot
-            CachedActions[action] = payloadSpell
-            
-            local actionSpells = ActionToSpells[action]
-            if actionSpells then
-                for spell in pairs(actionSpells) do
-                    spells[spell] = true
+
+            -- Nobody was listening to this action if it isn't cached,
+            -- so we don't care that it just changed.
+            -- Only handle actions in the payload that are already cached.
+            if CachedActions[action] then
+                payloadSpell.noMana = FixNoManaAction(action, payloadSpell.noMana)
+                CachedActions[action] = payloadSpell
+                
+                local actionSpells = ActionToSpells[action]
+                if actionSpells then
+                    for spell in pairs(actionSpells) do
+                        spells[spell] = true
+                    end
                 end
             end
         end
