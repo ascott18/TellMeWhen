@@ -439,6 +439,7 @@ function TMW:RequestAssistantSpellUpdates()
 		local oneButtonNextCast = (action and C_ActionBar.GetSpell(action)) or highlightNextCast
 		if oneButtonNextCast ~= TMW.AssistantButtonSpell then
 			TMW.AssistantButtonSpell = oneButtonNextCast
+			TMW.AssistantButtonSpellName = oneButtonNextCast and strlowerCache[GetSpellName(oneButtonNextCast)]
 
 			for instance in pairs(AssistedSpellSetInstances) do
 				instance:Wipe()

@@ -1,6 +1,7 @@
-## v11.1.7
+## v11.1.8
 * Fix: #2284 "Single-Button Assistant" cooldown tracking only worked after performing a `/reload`.
 * Improve "Single-Button Assistant" to include abilities not on the action bar.
+* New condition: Spell is Assistant Button action
 
 ## v11.1.5
 * Added support for tracking "Single-Button Assistant" (1229376) as a cooldown. Note that all suggestible abilities should be on your action bars for proper functioning.

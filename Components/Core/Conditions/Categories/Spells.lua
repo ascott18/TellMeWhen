@@ -522,6 +522,28 @@ ConditionCategory:RegisterCondition(3.6,  "ASSISTANTSPELL", {
 			ConditionObject:GenerateNormalEventString("TMW_ASSISTANT_HIGHLIGHT_SPELL_UPDATE")
 	end,
 })
+ConditionCategory:RegisterCondition(3.7,  "ASSISTANTBUTTON", {
+	text = L["CONDITIONPANEL_ASSISTANTBUTTON"],
+	tooltip = L["CONDITIONPANEL_ASSISTANTBUTTON_DESC"],
+	bool = true,
+	name = function(editbox)
+		editbox:SetTexts(L["CONDITIONPANEL_ASSISTANTBUTTON"], L["CNDT_MULTIPLEVALID"])
+		editbox:SetLabel(L["SPELLTOCHECK"])
+	end,
+	hidden = function() return not C_AssistedCombat:IsAvailable() end,
+	useSUG = true,
+	unit = false,
+	icon = "Interface\\Icons\\misc_arrowright",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = function(c)
+		TMW:RequestAssistantSpellUpdates()
+		return [[BOOLCHECK( c.OwnSpells.StringHash[TMW.AssistantButtonSpellName] )]]
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("TMW_ASSISTANT_BUTTON_SPELL_UPDATE")
+	end,
+})
 end
 
 ConditionCategory:RegisterCondition(4,	 "MANAUSABLE", {

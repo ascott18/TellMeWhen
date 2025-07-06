@@ -1460,8 +1460,10 @@ L["CONDITIONPANEL_LASTCAST_ISNTSPELL"] = "Doesn't Match"
 L["CONDITIONPANEL_OVERLAYED"] = "Spell Activation Overlay"
 L["CONDITIONPANEL_OVERLAYED_DESC"] = "Checks if a given spell has the activation overlay effect (the sparkly yellow border on your action bars)."
 
-L["CONDITIONPANEL_ASSISTANTSPELL"] = "Spell is Assistant Suggestion"
-L["CONDITIONPANEL_ASSISTANTSPELL_DESC"] = "Checks if a given spell is the current spell for the Blizzard Combat Assistant Highlight feature."
+L["CONDITIONPANEL_ASSISTANTSPELL"] = "Spell is Assistant Highlight"
+L["CONDITIONPANEL_ASSISTANTSPELL_DESC"] = "Checks if any of the given spells is the current spell for the Blizzard Combat Assistant Highlight feature. This can only track abilities that are present on your actionbars."
+L["CONDITIONPANEL_ASSISTANTBUTTON"] = "Spell is Assistant Button action"
+L["CONDITIONPANEL_ASSISTANTBUTTON_DESC"] = "Checks if any of the given spells is the current spell for the Blizzard Single-Button Assistant feature. This works best if the Single-Button Assistant button is placed on your action bars."
 
 L["CONDITIONPANEL_CURRENTSPELL"] = "Spell Queued"
 L["CONDITIONPANEL_CURRENTSPELL_DESC"] = "Checks if a given next-swing spell is currently activated."
