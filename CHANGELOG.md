@@ -1,3 +1,6 @@
+## v11.1.9
+* Fix: #2286 incorrect DR categories for MoP Classic
+
 ## v11.1.8
 * Fix: #2284 "Single-Button Assistant" cooldown tracking only worked after performing a `/reload`.
 * Improve "Single-Button Assistant" to include abilities not on the action bar.
