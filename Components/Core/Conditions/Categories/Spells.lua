@@ -515,11 +515,11 @@ ConditionCategory:RegisterCondition(3.6,  "ASSISTANTSPELL", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = function(c)
 		TMW:RequestAssistantSpellUpdates()
-		return [[BOOLCHECK( c.OwnSpells.StringHash[TMW.AssistedCombatNextCastSpellName] )]]
+		return [[BOOLCHECK( c.OwnSpells.StringHash[TMW.AssistantHighlightSpellName] )]]
 	end,
 	events = function(ConditionObject, c)
 		return
-			ConditionObject:GenerateNormalEventString("TMW_ASSISTED_COMBAT_SPELL_UPDATE")
+			ConditionObject:GenerateNormalEventString("TMW_ASSISTANT_HIGHLIGHT_SPELL_UPDATE")
 	end,
 })
 end

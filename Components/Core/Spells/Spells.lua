@@ -190,7 +190,7 @@ local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRe
 				local spellID = C_Spell.GetOverrideSpell(v or "")
 				if spellID and spellID ~= 0 then
 					if spellID == assistantSpell then
-						spells[k] = TMW.AssistedCombatNextCastSpell
+						spells[k] = TMW.AssistantButtonSpell
 					elseif fixSpellMap[spellID] then
 						-- Attempt to fix blizzard bugs like https://github.com/Stanzilla/WoWUIBugs/issues/354
 						local newSpell = fixSpellMap[spellID]()
@@ -413,18 +413,38 @@ function TMW:RequestAssistantSpellUpdates()
 	if not C_AssistedCombat or not C_AssistedCombat.GetNextCastSpell then return false end
 
 	loadAssistantSpell()
-	
+
+	-- An action slot that currently holds the assistant button spell,
+	-- so that we can pull the current recommended spell from that action slot.
+	local action
+	TMW:RegisterCallback("TMW_ACTIONS_UPDATED", function()
+		local actions = C_ActionBar.FindAssistedCombatActionButtons()
+		action = actions and actions[1] or nil
+	end)
+
 	TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
-		local spell = C_AssistedCombat:GetNextCastSpell(false)
-		if spell ~= TMW.AssistedCombatNextCastSpell then
-			TMW.AssistedCombatNextCastSpell = spell
-			TMW.AssistedCombatNextCastSpellName = spell and strlowerCache[GetSpellName(spell)]
+		-- Note: C_AssistedCombat:GetNextCastSpell only returns spells on the player's action bars
+		-- (the first parameter to this function, "checkForVisibleButton", seems to have no impact)
+		local highlightNextCast = C_AssistedCombat:GetNextCastSpell(false)
+
+		if highlightNextCast ~= TMW.AssistantHighlightSpell then
+			TMW.AssistantHighlightSpell = highlightNextCast
+			TMW.AssistantHighlightSpellName = highlightNextCast and strlowerCache[GetSpellName(highlightNextCast)]
+
+			TMW:Fire("TMW_ASSISTANT_HIGHLIGHT_SPELL_UPDATE", highlightNextCast)
+		end
+
+		-- Pull the one-button assistant next spell from the action bar if we can
+		-- in order to overcome the above described limitations of GetNextCastSpell
+		local oneButtonNextCast = (action and C_ActionBar.GetSpell(action)) or highlightNextCast
+		if oneButtonNextCast ~= TMW.AssistantButtonSpell then
+			TMW.AssistantButtonSpell = oneButtonNextCast
 
 			for instance in pairs(AssistedSpellSetInstances) do
 				instance:Wipe()
 			end
 
-			TMW:Fire("TMW_ASSISTED_COMBAT_SPELL_UPDATE", spell)
+			TMW:Fire("TMW_ASSISTANT_BUTTON_SPELL_UPDATE", oneButtonNextCast)
 			-- Firing TMW_SPELL_UPDATE_COOLDOWN will allow all cooldown-like dependencies to update
 			TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
 		end
