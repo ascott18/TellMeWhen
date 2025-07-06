@@ -161,8 +161,12 @@ local fixSpellMap = {
 	end,
 }
 
-local assistantSpell = C_AssistedCombat and C_AssistedCombat.GetActionSpell and C_AssistedCombat.GetActionSpell()
-local assistantSpellNameLower = assistantSpell and TMW.strlowerCache[GetSpellName(assistantSpell)]
+local assistantSpell
+local assistantSpellNameLower
+local function loadAssistantSpell()
+	assistantSpell = C_AssistedCombat and C_AssistedCombat.GetActionSpell and C_AssistedCombat.GetActionSpell()
+	assistantSpellNameLower = assistantSpell and TMW.strlowerCache[GetSpellName(assistantSpell)]
+end
 
 local function getSpellNames(setting, doLower, firstOnly, convert, hash, allowRenaming)
 	local spells = parseSpellsString(setting, doLower, false)
@@ -395,6 +399,7 @@ if C_Spell and C_Spell.GetOverrideSpell then
 	-- This used to work automatically through GetSpellCooldown prior to WoW 11.0,
 	-- but now we have to manage spell overrides ourselves.
 	TMW:RegisterEvent("SPELLS_CHANGED", function()
+		loadAssistantSpell()
 		for instance in pairs(RenamingSpellSetInstances) do
 			instance:Wipe()
 		end
@@ -407,6 +412,8 @@ function TMW:RequestAssistantSpellUpdates()
 
 	if not C_AssistedCombat or not C_AssistedCombat.GetNextCastSpell then return false end
 
+	loadAssistantSpell()
+	
 	TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
 		local spell = C_AssistedCombat:GetNextCastSpell(false)
 		if spell ~= TMW.AssistedCombatNextCastSpell then

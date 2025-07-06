@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.1.6
+* Fix: #2284 "Single-Button Assistant" only worked after performing a `/reload`.
+
 ## v11.1.5
 * Added support for tracking "Single-Button Assistant" (1229376) as a cooldown. Note that all suggestible abilities should be on your action bars for proper functioning.
 * Add missing localizations for some MoP spell equivalency groups
