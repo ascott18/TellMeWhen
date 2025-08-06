@@ -11,14 +11,14 @@
 #  --------------------
 
 
-## Interface: 110107, 50500, 40402, 11507
+## Interface: 110200, 50500, 40402, 11507
 
 ## Title: TellMeWhen
 ## X-Curse-Project-ID: 8025
 ## X-WoWI-ID: 10855
 ## X-Wago-ID: ZQ6aZqKW
 
-## Version: 11.1.9
+## Version: 11.2.0
 ## Author: Cybeloras of Aerie Peak
 ## IconTexture: Interface\Addons\TellMeWhen\Textures\LDB Icon
 ## AddonCompartmentFunc: TellMeWhen_OnAddonCompartmentClick

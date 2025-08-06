@@ -1,3 +1,6 @@
+## v11.2.0
+* Version Bump for WoW 11.2
+
 ## v11.1.9
 * Fix: #2286 - Incorrect DR categories for MoP Classic
 * Fix: #2285 - Perform extra spell cost calculations for monks to workaround bad data from Blizzard APIs while rolling.
