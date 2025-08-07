@@ -1,3 +1,6 @@
+## v11.2.1
+* Fix missing font in WoW 11.2
+
 ## v11.2.0
 * Version Bump for WoW 11.2
 

@@ -1,5 +1,8 @@
 <Ui>
 
+	<Font name="TMWFontNormalGraySmall" inherits="GameFontNormalSmall" virtual="true">
+		<Color r="0.50" g="0.50" b="0.50"/>
+	</Font>
 
 	<CheckButton name="TellMeWhen_GroupSelectTemplate" virtual="true">
 
@@ -11,7 +14,7 @@
 
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString parentKey="ID" inherits="GameFontNormalGraySmall" justifyH="RIGHT">
+				<FontString parentKey="ID" inherits="TMWFontNormalGraySmall" justifyH="RIGHT">
 					<Size x="20" />
 					<Anchors>
 						<Anchor point="LEFT" x="3" y="0"/>
