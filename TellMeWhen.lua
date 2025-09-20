@@ -80,6 +80,23 @@ This can happen especially if you use the Twitch app - ensure "Install Libraries
 
 	-- Stop trying to load TMW.
 	return
+elseif _G.GetLib and (not LibStub.libs or not pcall(LibStub.NewLibrary, LibStub, "__TMW_GetLib_test", "20250806041923")) then
+	local _, fault = issecurevariable("GetLib");
+	StaticPopupDialogs["TMW_MISSINGLIB"] = {
+		text = ([[TellMeWhen:
+
+You appear to have installed an AddOn that includes a piece of poorly functioning code called "RasuForge-GetLib". 
+
+This code attempts to replace LibStub, the registry of shared AddOn library code that is used by nearly every WoW AddOn for almost 20 years. Unfortunately, it is poorly made and interferes with the way that LibStub normally functions.
+
+TellMeWhen's best guess at where this came from is the addon %q. TellMeWhen will not function properly while this addon is installed and enabled.]]):format(fault), 
+		button1 = OKAY,
+		timeout = 0,
+		showAlert = true,
+		whileDead = true,
+		preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+	}
+	StaticPopup_Show("TMW_MISSINGLIB")
 end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
