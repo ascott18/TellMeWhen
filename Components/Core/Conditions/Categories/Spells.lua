@@ -1065,9 +1065,9 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	levelChecks = true,
 	nooperator = true,
 	texttable = {
-		[0] = L["CONDITIONPANEL_INTERRUPTIBLE"],
-		[1] = L["ICONMENU_PRESENT"],
-		[2] = L["ICONMENU_ABSENT"],
+		[0] = L["ICONMENU_ONLYINTERRUPTIBLE"],
+		[1] = L["CONDITIONPANEL_CAST_PRESENT"],
+		[2] = L["CONDITIONPANEL_CAST_ABSENT"],
 	},
 	icon = "Interface\\Icons\\Temp",
 	tcoords = CNDT.COMMON.standardtcoords,

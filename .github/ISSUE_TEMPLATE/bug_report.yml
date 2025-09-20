@@ -11,8 +11,8 @@ body:
       multiple: true
       options:
         - Retail
-        - Cata Classic
-        - Classic or SoD
+        - MoP
+        - Vanilla
     validations:
       required: true
   - type: input
@@ -22,7 +22,7 @@ body:
       description: |
         What version of TellMeWhen did you find this bug in? 
         
-        Found in-game at the top of TMW's configuration window. "The latest" is not a version.
+        TellMeWhen's version is listed in-game at the top of TMW's configuration window. "The latest" is not a version.
       placeholder: x.x.x
     validations:
       required: true

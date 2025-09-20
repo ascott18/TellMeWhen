@@ -1408,8 +1408,8 @@ L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"] = "Choose Specs..."
 
 L["CONDITIONPANEL_UNITSPEC_DESC"] = [[This condition ONLY works for:
 |cff7fffff-|r Yourself
-|cff7fffff-|r Battleground enemies
-|cff7fffff-|r Arena enemies
+|cff7fffff-|r Battleground enemies (Retail WoW only)
+|cff7fffff-|r Arena enemies (MoP+ only)
 
 It does NOT work for: |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t
 |cff7fffff-|r Group members
@@ -1471,7 +1471,8 @@ L["CONDITIONPANEL_CURRENTSPELL_DESC"] = "Checks if a given next-swing spell is c
 L["CONDITIONPANEL_AUTOSPELL"] = "Spell Autocasting"
 L["CONDITIONPANEL_AUTOSPELL_DESC"] = "Checks if a given spell or ability is autocasting."
 
-L["CONDITIONPANEL_INTERRUPTIBLE"] = "Interruptible"
+L["CONDITIONPANEL_CAST_PRESENT"] = "Casting"
+L["CONDITIONPANEL_CAST_ABSENT"] = "Not Casting"
 L["CONDITIONPANEL_NAME"] = "Unit Name"
 L["CONDITIONPANEL_NAMETOMATCH"] = "Name to Match"
 L["CONDITIONPANEL_NAMETOOLTIP"] = "You can enter multiple names to be matched by separating each one with a semicolon (;). The condition will pass if any names are matched."

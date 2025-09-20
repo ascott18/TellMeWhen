@@ -92,7 +92,7 @@ function SPECS:PrepareUnitSpecEvents()
 end
 ConditionCategory:RegisterCondition(0.1,  "UNITSPEC", {
 	text = L["CONDITIONPANEL_UNITSPEC"],
-	tooltip = TMW.isRetail and L["CONDITIONPANEL_UNITSPEC_DESC"] or L["CONDITIONPANEL_UNITSPEC_DESC_WRATH"],
+	tooltip = L["CONDITIONPANEL_UNITSPEC_DESC"],
 
 	bitFlagTitle = L["CONDITIONPANEL_UNITSPEC_CHOOSEMENU"],
 	bitFlags = (function()
