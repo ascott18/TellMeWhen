@@ -8,6 +8,7 @@ TMW.CHANGELOG = [==[
 * #2297: Shapeshift condition can now check by spellID.
 * #2294: Add Delves to instance type condition
 * Fix: #2298 Missing entry for 'DR-KidneyShot'
+* Fix: #2293 Rune icon type config not loading in MoP
 
 
 ## v11.2.1

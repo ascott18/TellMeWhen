@@ -19,6 +19,6 @@
 ..\TellMeWhen\Options\includes.xml
 
 ..\TellMeWhen\Components\IconTypes\IconType_runes\Config-Retail.xml [AllowLoadGameType standard]
-..\TellMeWhen\Components\IconTypes\IconType_runes\Config-Wrath.xml [AllowLoadGameType wrath, cata]
+..\TellMeWhen\Components\IconTypes\IconType_runes\Config-Wrath.xml [AllowLoadGameType wrath, cata, mists]
 ..\TellMeWhen\Components\IconTypes\IconType_losecontrol\Config.xml [AllowLoadGameType standard, cata, mists]
 ..\TellMeWhen\Components\IconTypes\IconType_losecontrol\Config.lua [AllowLoadGameType standard, cata, mists]
