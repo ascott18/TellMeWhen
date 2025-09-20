@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 TMW.CHANGELOG = [==[
 ## v11.2.2
 * Add detection and warning of malfunctioning code in MetaTracker addon that breaks TMW.
+* #2297: Shapeshift condition can now check by spellID.
 * Fix: #2298 Missing entry for 'DR-KidneyShot'
 
 

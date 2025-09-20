@@ -165,6 +165,7 @@ local FirstStances = not TMW.isRetail and {
 } or {
 	DRUID = 5487, 		-- Bear Form
 	ROGUE = 1784, 		-- Stealth
+	WARRIOR = 386208,   -- Defensive Stance
 }
 ConditionCategory:RegisterCondition(6,	 "STANCE", {
 	text = 	pclass == "DRUID" and L["SHAPESHIFT"] or
@@ -184,25 +185,40 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 	end,
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetShapeshiftForm = function()
+		StanceHelper = function(spellSet)
 			-- very hackey function because of inconsistencies in blizzard's GetShapeshiftForm
 			local i = GetShapeshiftForm()
-			if pclass == "ROGUE" and i > 1 then	--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
+			if pclass == "ROGUE" and i > 1 then
+				--vanish and shadow dance return 3 when active, vanish returns 2 when shadow dance isnt learned. Just treat everything as stealth
 				i = 1
 			end
-			if i > NumShapeshiftForms then 	--many Classes return an invalid number on login, but not anymore!
+			if i > NumShapeshiftForms then
+				--many Classes return an invalid number on login
 				i = 0
 			end
 
 			if i == 0 then
-				return strlowerCache[NONE]
+				local matchAny = not spellSet or spellSet.Name == ""
+				local Hash = not matchAny and spellSet.Hash
+				local noneLower = strlowerCache[NONE]
+				return matchAny or Hash[noneLower] or Hash[0]
 			else
 				local icons, active, catable, spellID = GetShapeshiftFormInfo(i)
-				return spellID and strlowerCache[GetSpellName(spellID)] or ""
+				if not spellID then
+					return false
+				end
+				
+				local spellName = GetSpellName(spellID)
+				local spellNameLower = strlowerCache[spellName]
+				
+				local matchAny = not spellSet or spellSet.Name == ""
+				local Hash = not matchAny and spellSet.Hash
+				
+				return matchAny or Hash[spellNameLower] or Hash[spellID]
 			end
 		end
 	},
-	funcstr = [[BOOLCHECK(c.Spells.StringHash[GetShapeshiftForm() or ""])]],
+	funcstr = [[BOOLCHECK( StanceHelper(c.Spells) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")

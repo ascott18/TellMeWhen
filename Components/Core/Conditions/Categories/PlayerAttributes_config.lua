@@ -147,13 +147,25 @@ Module.stances = TMW.isMop and {
 	ROGUE = {
 		[1784] = 	GetSpellName(1784), 	-- Stealth	
 	},
+	WARRIOR = {
+		[386164] = 	GetSpellName(386164), 	-- Battle Stance
+		[386208] = 	GetSpellName(386208),	-- Defensive Stance
+		[386196] = 	GetSpellName(386196), 	-- Berserker Stance
+	},
 }
 function Module:Table_Get()
-	return self.stances[pclass]
+	local allStances = {}
+	for class, stances in pairs(self.stances) do
+		for spellID, name in pairs(stances) do
+			allStances[spellID] = name
+		end
+	end
+	return allStances
 end
 function Module:Entry_AddToList_1(f, spellID)
 	if spellID == 0 then
 		f.Name:SetText(NONE)
+		f.ID:SetText(nil)
 
 		f.tooltiptitle = NONE
 
@@ -164,11 +176,13 @@ function Module:Entry_AddToList_1(f, spellID)
 		local name, _, tex = GetSpellInfo(spellID)
 
 		f.Name:SetText(name)
+		f.ID:SetText(spellID)
 
 		f.tooltipmethod = TMW.GameTooltip_SetSpellByIDWithClassIcon
 		f.tooltiparg = spellID
 
-		f.insert = name
+		f.insert = SUG.inputType == "number" and spellID or name
+		f.insert2 = SUG.inputType ~= "number" and spellID or name
 
 		f.Icon:SetTexture(tex)
 	end
