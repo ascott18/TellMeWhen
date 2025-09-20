@@ -88,7 +88,8 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 
 
 		[14] = {order=17, text=GUILD_CHALLENGE_TYPE4,                                                              }, -- Normal scenario
-		[13] = {order=18, text=HEROIC_SCENARIO,                                                      space=true,   }, -- Heroic scenario
+		[13] = {order=18, text=HEROIC_SCENARIO,                                                                    }, -- Heroic scenario
+		[208] = {order=19, text=DELVE_LABEL,                                                         space=true,   }, -- Delves
 
 
 		[18] = {order=21, text=format("%s (%s)", PLAYER_DIFFICULTY3, FLEX_RAID),                                   }, -- Warlords LFR Flex
