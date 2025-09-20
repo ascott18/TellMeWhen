@@ -42,6 +42,7 @@ L["DR-DeathCoil"] = GetSpellInfo(6789)
 L["DR-FreezingTrap"] = GetSpellInfo(3355)
 L["DR-Sleep"] = GetSpellInfo(700)
 L["DR-UnstableAffliction"] = GetSpellInfo(30108)
+L["DR-KidneyShot"] = GetSpellInfo(408) or "Kidney Shot"
 
 -- Blizzard has a typo in the English string ("Ecplise")
 L["ECLIPSE"] = (locale == "enUS" or locale == "enGB") and "Eclipse" or ECLIPSE

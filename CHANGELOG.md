@@ -1,3 +1,8 @@
+## v11.2.2
+* Add detection and warning of malfunctioning code in MetaTracker addon that breaks TMW.
+* Fix: #2298 Missing entry for 'DR-KidneyShot'
+
+
 ## v11.2.1
 * Fix missing font in WoW 11.2
 
