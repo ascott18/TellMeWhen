@@ -365,6 +365,12 @@ TMW.BE = {
 			-16874, -- Shadow Protection
 			27683, -- Prayer of Shadow Protection
 		},
+		Sigil = {
+			439155, -- Sigil of Innovation
+			446240, -- Sigil of Living Dreams
+			463864, -- Sigil of Flowing Waters
+			1214001, -- Scroll: Wrath of the Swarm
+		},
 		Songflower = {
 			-15366, -- Songflower Serenade
 			-1218071, -- Songflower Lullaby
@@ -418,6 +424,31 @@ TMW.BE = {
 			-16609, -- Warchief's Blessing
 			-460940, -- Might of Stormwind
 			-1218074, -- Might of Blackrock
+		},
+		WaterBreathing = {
+			5697, -- Unending Breath
+			16591, -- Noggenfogger Elixir
+			413548, -- Degreelessness Mode
+			-131, -- Water Breathing
+			425284, -- Spirit of the Redeemer
+			461137, -- Oath of the Sea
+			405688, -- Riptide Bubbles
+			-17443, -- Air Bubbles
+			1234, -- Tony's God Mode
+			5421, -- Aquatic Form (Passive)
+			22807, -- Greater Water Breathing
+			24347, -- Master Angler
+			24925, -- Hallow's End Candy
+			27827, -- Spirit of Redemption
+		},
+		WaterWalking =  {
+			-546, -- Water Walking
+			-1706, -- Levitate
+			10665, -- Water Walk
+			440804, -- Frozen Orb
+			460591, -- Chaos Chopper
+			461120, -- Treading Water
+			24927, -- Hallow's End Candy
 		},
 		Zandalar = {
 			-24425, -- Spirit of Zandalar
