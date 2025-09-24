@@ -122,6 +122,7 @@ Module.stances = TMW.isMop and {
 		[2457] = 	GetSpellName(2457), 	-- Battle Stance
 		[71] = 		GetSpellName(71),		-- Defensive Stance
 		[2458] = 	GetSpellName(2458), 	-- Berserker Stance
+		[412513] =  GetSpellName(412513),   -- Gladiator Stance
 	},
 	DRUID = {
 		[5487] = 	GetSpellName(5487), 	-- Bear Form
@@ -134,6 +135,9 @@ Module.stances = TMW.isMop and {
 	},
 	ROGUE = {
 		[1784] = 	GetSpellName(1784), 	-- Stealth	
+	},
+	WARLOCK = {
+		[403789] =  GetSpellName(403789),   -- Metamorphosis
 	},
 } or {
 	DRUID = {
@@ -341,3 +345,4 @@ if C_EquipmentSet then
 		f.Icon:SetTexture(icon)
 	end
 end
+
