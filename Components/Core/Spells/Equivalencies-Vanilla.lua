@@ -283,7 +283,7 @@ TMW.BE = {
 		},
 		Intellect = {
 			-1459, -- Arcane Intellect
-			23028 -- Arcane Brilliance
+			23028, -- Arcane Brilliance
 			16327, -- Juju Guile
 			17535, -- Elixir of the Sages
 			-11396, -- Greater Intellect
