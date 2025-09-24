@@ -51,6 +51,11 @@ TMW.BE = {
 			   -605, -- Mind Control                        (priest, PVE talent, general)
 			  -2094, -- Blind                               (rogue, general)
 		},
+		FaerieFire = {
+			-9907, -- Faerie Fire
+			-17392, -- Faerie Fire (Feral)
+			-17315, -- Puncture Armor
+		},
 		Feared = {
 			   5246, -- Intimidating Shout                  (warrior, general)
 			  -5782, -- Fear                                (warlock, general)
@@ -162,8 +167,51 @@ TMW.BE = {
 			   5530, -- Mace Stun Effect                    (Mace Specialization)
 			  15283, -- Stunning Blow                       (Weapon Proc)
 		},
+		SunderArmor = {
+			-11597, -- Sunder Armor
+			-11198, -- Expose Armor
+			439471, -- Sebacious Poison
+			402818, -- Degrade
+		},
 	},
 	buffs = {
+		Agility = {
+			17538, -- Elixir of the Mongoose
+			-11328, -- Agility
+			-11334, -- Greater Agility
+			-2374, -- Lesser Agility
+			1213904, -- Elixir of the Honey Badger
+		},
+		Alcohol = {
+			25804, -- Rumsey Rum Black Label
+			22789, -- Gordok Green Grog
+			5257, -- Thunderbrew
+			25037, -- Rumsey Rum Light
+			25722, -- Rumsey Rum Dark
+			20875, -- Rumsey Rum
+			460332, -- Warmed Rumsey with Cream
+		},
+		AllResistances = {
+			27652, -- Elixir of Resistance
+			-16878, -- Mark of the Wild
+			-21849, -- Gift of the Wild
+		},
+		Armor = {
+			-11349, -- Armor
+			-673, -- Lesser Armor
+			1213917, -- Elixir of the Ironside
+			11348, -- Greater Armor
+			15233, -- Crystal Ward
+		},
+		AttackPower = {
+			-17038, -- Winterfall Firewater
+			16329, -- Juju Might
+			473469, -- Cleansed Firewater
+		},
+		BloodPact = {
+			-11767, -- Blood Pact
+			403215, -- Commanding Shout
+		},
 		-- BurstHaste = {
 		-- 	   2825, -- Bloodlust                           (shaman, horde)
 		-- },
@@ -182,6 +230,17 @@ TMW.BE = {
 			 -11426, -- Ice Barrier                         (mage)
 			  -1463, -- Mana Shield                         (mage)
 		},
+		DarkFortune = {
+			23738, -- Sayge's Dark Fortune of Spirit
+			23767, -- Sayge's Dark Fortune of Armor
+			23737, -- Sayge's Dark Fortune of Stamina
+			23736, -- Sayge's Dark Fortune of Agility
+			23766, -- Sayge's Dark Fortune of Intellect
+			23735, -- Sayge's Dark Fortune of Strength
+			23769, -- Sayge's Dark Fortune of Resistance
+			23768, -- Sayge's Dark Fortune of Damage
+			-473450, -- Dark Fortune of Damage 
+		},
 		-- DefensiveBuffsAOE = {
 		-- },
 		DefensiveBuffsSingle = {
@@ -195,11 +254,80 @@ TMW.BE = {
 			  22812, -- Barkskin                            (druid, general)
 			  23920, -- Spell Reflection                    (warrior, PVP talent for arms/fury, baseline for protection)
 		},
+		DMTAttackPower = {
+			22817, -- Fengus' Ferocity
+			-473403, -- Blessing of Neptulon
+		},
+		DMTSpellCrit = {
+			22820, -- Slip'kik's Savvy
+			-473403, -- Blessing of Neptulon
+		},
+		DMTStamina = {
+			22818, -- Mol'dar's Moxie
+			-473403, -- Blessing of Neptulon
+		},
+		Dragonslayer = {
+			-22888, -- Rallying Cry of the Dragonslayer
+			461475, -- Valor of Azeroth
+			-473387, -- Horn of the Dawn
+		},
+		Health = {
+			3593, -- Health II
+			2378, -- Health
+		},
 		ImmuneToStun = {
 			    642, -- Divine Shield                       (paladin)
 			    710, -- Banish                              (warlock)
 			   1022, -- Blessing of Protection              (paladin)
 			   6615, -- Free Action                         (vanilla potion)
+		},
+		Intellect = {
+			-1459, -- Arcane Intellect
+			23028 -- Arcane Brilliance
+			16327, -- Juju Guile
+			17535, -- Elixir of the Sages
+			-11396, -- Greater Intellect
+			-3165, -- Lesser Intellect
+			-3167, -- Intellect
+			16888, -- Intellect IX
+		},
+		FireSpellPower = {
+			26276, -- Greater Firepower
+			7844, -- Fire Power
+		},
+		FireResistance = {
+			-10534, -- Fire Resistance (Totem)
+			-19900, -- Fire Resistance Aura
+		},
+		Flask = {
+			17628, -- Supreme Power
+			17626, -- Flask of the Titans
+			17627, -- Distilled Wisdom
+			17629, -- Chromatic Resistance
+			17624, -- Petrification
+			448084, -- Restless Dreams
+			446228, -- Nightmarish Power
+			1213892, -- Flask of Ancient Knowledge
+			1213897, -- Flask of Madness
+			1213901, -- Flask of the Old Gods
+			1213886, -- Flask of Unyielding Sorrow
+		},
+		Food = {
+			-19705, -- Well Fed
+			-25661, -- Increased Stamina
+			18141, -- Blessed Sunfruit Juice
+			18125, -- Blessed Sunfruit
+			18194, -- Mana Regeneration
+			18192, -- Increased Agility
+			22730, -- Increased Intellect
+		},
+		FrostResistance = {
+			 -19897, -- Frost Resistance Aura
+			 -8182, -- Frost Resistance (Totem)
+		},
+		HealthRegeneration = {
+			-24361, -- Regeneration
+			16890, -- Regeneration IV
 		},
 		ImmuneToInterrupts = {
 			   -642, -- Divine Shield                       (paladin, general)
@@ -214,12 +342,108 @@ TMW.BE = {
 			   -642, -- Divine Shield                       (paladin, general)
 			   1044, -- Blessing of Freedom                 (paladin, general)
 		},
+		Kings = {
+			25898, -- Greater Blessing of Kings
+			20217, -- Blessing of Kings
+			409583, -- Heart of the Lion
+		},
+		Might = {
+			-25916, -- Greater Blessing of Might
+			-25291, -- Blessing of Might
+ 			425600, -- Horn of Lordaeron
+			409583, -- Heart of the Lion
+		},
+		NatureResistance = {
+			-20190, -- Aspect of the Nature
+			-10599, -- Nature Resistance (Totem)
+		},
+		ShadowSpellPower = {
+			11474, -- Shadow Power
+			16587, -- Dark Whispers
+		},
+		ShadowResistance = {
+			-16874, -- Shadow Protection
+			27683, -- Prayer of Shadow Protection
+		},
+		Songflower = {
+			-15366, -- Songflower Serenade
+			-1218071, -- Songflower Lullaby
+		},
 		SpeedBoosts = {
 			    783, -- Travel Form                         (druid, baseline)
 			  -2983, -- Sprint                              (rogue, baseline)
 			  -2379, -- Speed                               (generic speed buff)
 			   2645, -- Ghost Wolf                          (shaman, general)
 			   7840, -- Swim Speed                          (Swim Speed Potion)
+		},
+		SpellPower = {
+			-17539, -- Greater Arcane Elixir
+			11390, -- Arcane Elixir
+			439959, -- Lesser Arcane Elixir
+			1213914, -- Elixir of the Mage-Lord
+			15288, -- Fury of Ragnaros
+			17150, -- Arcane Might
+		},
+		Spirit = {
+			27681, -- Prayer of Spirit
+			10767, -- Rising Spirit
+			17535, -- Elixir of the Sages
+			-14752, -- Divine Spirit
+			15231, -- Crystal Force
+			-8112, -- Spirit
+		},
+		Stamina = {
+			-21562, -- Prayer of Fortitude
+			-10938, -- Power Word: Fortitude
+			-8099, -- Stamina
+		},
+		Strength = {
+			16323, -- Juju Power
+			17537, -- Elixir of Brute Force
+			-3164, -- Strength
+			-2367, -- Lesser Strength
+			-8212, -- Enlarge
+			-16883, -- Elixir of the Giants
+		},
+		Thorns = {
+			-467, -- Thorns
+			-2947, -- Fire Shield
+			184, -- Fire Shield II
+			2602, -- Fire Shield IV
+			2601, -- Fire Shield III
+			15279, -- Crystal Spire
+			16610, -- Razorhide
+		},
+		WarchiefsBlessing = {
+			-16609, -- Warchief's Blessing
+			-460940, -- Might of Stormwind
+			-1218074, -- Might of Blackrock
+		},
+		Zandalar = {
+			-24425, -- Spirit of Zandalar
+			-473476, -- Dreams of Zandalar
+		},
+		Zanza = {
+			24383, -- Swiftness of Zanza
+			30338, -- Permanent Swiftness of Zanza
+			24382, -- Spirit of Zanza
+			30336, -- Permanent Spirit of Zanza
+			30331, -- Permanent Sheen of Zanza
+			-24417, -- Sheen of Zanza
+			-10690, -- Infallible Mind
+			-10691, -- Spiritual Domination
+			-10671, -- Spirit of Boar
+			-10667, -- Rage of Ages
+			-10669, -- Strike of the Scorpok
+			446396, -- Atal'ai Mojo of Life
+			446336, -- Atal'ai Mojo of War
+			446256, -- Atal'ai Mojo of Forbidden Magic
+			27665, -- Ironforge Gift of Friendship
+			27669, -- Orgrimmar Gift of Friendship
+			27671, -- Undercity Gift of Friendship
+			27666, -- Darnassus Gift of Friendship
+			27664, -- Stormwind Gift of Friendship
+			27670, -- Thunder Bluff Gift of Friendship
 		},
 	},
 	casts = {
