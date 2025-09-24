@@ -27,9 +27,13 @@ local pairs, type, ipairs, bit, select =
 
 TMW.BE = {
 	debuffs = {
-		ReducedHealing = {
-			 -13220, -- Wound Poison                        (rogue, assassination)
-			 -12294, -- Mortal Strike                       (warrior, arms)
+		Bleeding = {
+			   -703, -- Garrote                             (rogue, general)
+			  -1079, -- Rip                                 (druid, feral)
+			  -1822, -- Rake                                (druid, feral)
+			   1943, -- Rupture                             (rogue, general)
+			 -11977, -- Rend                                (warrior, arms)
+			  16511, -- Hemorrhage                          (rogue, subtlety)
 		},
 		CrowdControl = {
 			   -118, -- Polymorph                           (mage, general)
@@ -43,17 +47,9 @@ TMW.BE = {
 			  -9484, -- Shackle Undead                      (priest, general)
 			  20066, -- Repentance                          (paladin, general)
 		},
-		Shatterable = {
-			   -122, -- Frost Nova                          (mage, frost)
-			  -3355, -- Freezing Trap                       (hunter, general)
-		},
-		Bleeding = {
-			   -703, -- Garrote                             (rogue, general)
-			  -1079, -- Rip                                 (druid, feral)
-			  -1822, -- Rake                                (druid, feral)
-			   1943, -- Rupture                             (rogue, general)
-			 -11977, -- Rend                                (warrior, arms)
-			  16511, -- Hemorrhage                          (rogue, subtlety)
+		Disoriented = {
+			   -605, -- Mind Control                        (priest, PVE talent, general)
+			  -2094, -- Blind                               (rogue, general)
 		},
 		Feared = {
 			   5246, -- Intimidating Shout                  (warrior, general)
@@ -80,20 +76,10 @@ TMW.BE = {
 			  13327, -- Reckless Charge (Rocket Helmet)
 			  13181, -- Gnomish Mind Control Cap
 			  26108, -- Glimpse of Madness
-
 		},
-		Disoriented = {
-			   -605, -- Mind Control                        (priest, PVE talent, general)
-			  -2094, -- Blind                               (rogue, general)
-		},
-		Silenced = {
-			  -1330, -- Garrote - Silence                   (rogue, general)
-			 -15487, -- Silence                             (priest, shadow)
-			 -18469, -- Counterspell - Silenced
-			 -18425, -- Kick - Silenced
-			 -24259, -- Spell Lock
-			 -18498, -- Shield Bash - Silenced
-			  19821, -- Arcane Bomb Silence
+		ReducedHealing = {
+			 -13220, -- Wound Poison                        (rogue, assassination)
+			 -12294, -- Mortal Strike                       (warrior, arms)
 		},
 		Rooted = {
 			   -339, -- Entangling Roots                    (druid, general)
@@ -107,6 +93,19 @@ TMW.BE = {
 			 -19306, -- Counterattack
 			 -19185, -- Entrapment
 			 -23694, -- Improved Hamstring
+		},
+		Shatterable = {
+			   -122, -- Frost Nova                          (mage, frost)
+			  -3355, -- Freezing Trap                       (hunter, general)
+		},
+		Silenced = {
+			  -1330, -- Garrote - Silence                   (rogue, general)
+			 -15487, -- Silence                             (priest, shadow)
+			 -18469, -- Counterspell - Silenced
+			 -18425, -- Kick - Silenced
+			 -24259, -- Spell Lock
+			 -18498, -- Shield Bash - Silenced
+			  19821, -- Arcane Bomb Silence
 		},
 		Slowed = {
 			   -116, -- Frostbolt                           (mage, frost)
@@ -165,32 +164,9 @@ TMW.BE = {
 		},
 	},
 	buffs = {
-		SpeedBoosts = {
-			    783, -- Travel Form                         (druid, baseline)
-			  -2983, -- Sprint                              (rogue, baseline)
-			  -2379, -- Speed                               (generic speed buff)
-			   2645, -- Ghost Wolf                          (shaman, general)
-			   7840, -- Swim Speed                          (Swim Speed Potion)
-		},
-		ImmuneToStun = {
-			    642, -- Divine Shield                       (paladin)
-			    710, -- Banish                              (warlock)
-			   1022, -- Blessing of Protection              (paladin)
-			   6615, -- Free Action                         (vanilla potion)
-		},
-		-- DefensiveBuffsAOE = {
+		-- BurstHaste = {
+		-- 	   2825, -- Bloodlust                           (shaman, horde)
 		-- },
-		DefensiveBuffsSingle = {
-			    498, -- Divine Protection                   (paladin, general)
-			    642, -- Divine Shield                       (paladin, general)
-			    871, -- Shield Wall                         (warrior, protection)
-			   1022, -- Blessing of Protection              (paladin, general)
-			  -1966, -- Feint                               (rogue, general)
-			   5277, -- Evasion                             (rogue, assassination/subtlety)
-			   6940, -- Blessing of Sacrifice               (paladin, holy)
-			  22812, -- Barkskin                            (druid, general)
-			  23920, -- Spell Reflection                    (warrior, PVP talent for arms/fury, baseline for protection)
-		},
 		DamageBuffs = {
 			   1719, -- Recklessness                        (warrior, arms)
 			   5217, -- Tiger's Fury                        (druid, feral)
@@ -206,21 +182,44 @@ TMW.BE = {
 			 -11426, -- Ice Barrier                         (mage)
 			  -1463, -- Mana Shield                         (mage)
 		},
+		-- DefensiveBuffsAOE = {
+		-- },
+		DefensiveBuffsSingle = {
+			    498, -- Divine Protection                   (paladin, general)
+			    642, -- Divine Shield                       (paladin, general)
+			    871, -- Shield Wall                         (warrior, protection)
+			   1022, -- Blessing of Protection              (paladin, general)
+			  -1966, -- Feint                               (rogue, general)
+			   5277, -- Evasion                             (rogue, assassination/subtlety)
+			   6940, -- Blessing of Sacrifice               (paladin, holy)
+			  22812, -- Barkskin                            (druid, general)
+			  23920, -- Spell Reflection                    (warrior, PVP talent for arms/fury, baseline for protection)
+		},
+		ImmuneToStun = {
+			    642, -- Divine Shield                       (paladin)
+			    710, -- Banish                              (warlock)
+			   1022, -- Blessing of Protection              (paladin)
+			   6615, -- Free Action                         (vanilla potion)
+		},
+		ImmuneToInterrupts = {
+			   -642, -- Divine Shield                       (paladin, general)
+		},
 		ImmuneToMagicCC = {
 			    642, -- Divine Shield                       (paladin, general)
 			   -710, -- Banish                              (warlock, general)
 			   8178, -- Grounding Totem Effect              (shaman, PVP talent, general)
 			  23920, -- Spell Reflection                    (warrior, PVP talent for arms/fury, baseline for protection)
 		},
-		-- BurstHaste = {
-		-- 	   2825, -- Bloodlust                           (shaman, horde)
-		-- },
-		ImmuneToInterrupts = {
-			   -642, -- Divine Shield                       (paladin, general)
-		},
 		ImmuneToSlows = {
 			   -642, -- Divine Shield                       (paladin, general)
 			   1044, -- Blessing of Freedom                 (paladin, general)
+		},
+		SpeedBoosts = {
+			    783, -- Travel Form                         (druid, baseline)
+			  -2983, -- Sprint                              (rogue, baseline)
+			  -2379, -- Speed                               (generic speed buff)
+			   2645, -- Ghost Wolf                          (shaman, general)
+			   7840, -- Swim Speed                          (Swim Speed Potion)
 		},
 	},
 	casts = {
