@@ -24,8 +24,8 @@ local GetSpellName = TMW.GetSpellName
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellTexture = TMW.GetSpellTexture
 
-local spellBank = Enum.SpellBookSpellBank.Player;
 local IsPlayerSpell = _G.IsPlayerSpell or function(spellID)
+	local spellBank = Enum.SpellBookSpellBank.Player;
 	return C_SpellBook.IsSpellKnown(spellID, spellBank);
 end
 

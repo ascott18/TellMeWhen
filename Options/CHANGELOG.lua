@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.2.4
+* Fix Spells.lua:27: attempt to index field "SpellBookSpellBank" (a nil value)
+
 ## v11.2.3
 * Fix missing Spell Activation Overlay condition in MoP.
 
