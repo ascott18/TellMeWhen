@@ -24,6 +24,11 @@ local GetSpellName = TMW.GetSpellName
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellTexture = TMW.GetSpellTexture
 
+local spellBank = Enum.SpellBookSpellBank.Player;
+local IsPlayerSpell = _G.IsPlayerSpell or function(spellID)
+	return C_SpellBook.IsSpellKnown(spellID, spellBank);
+end
+
 local strlowerCache = TMW.strlowerCache
 
 local _, pclass = UnitClass("player")

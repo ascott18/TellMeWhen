@@ -24,14 +24,14 @@ local _G = _G
 local assert, pairs, ipairs, sort, tinsert, wipe, select =
 	  assert, pairs, ipairs, sort, tinsert, wipe, select
 	  
-local SendChatMessage, GetChannelList =
-      SendChatMessage, GetChannelList
+local GetChannelList =
+      GetChannelList
 local UnitInBattleground, IsInRaid, IsInGroup =
       UnitInBattleground, IsInRaid, IsInGroup
 local UnitInRaid, GetNumPartyMembers =
       UnitInRaid, GetNumPartyMembers
 	  
-
+local SendChatMessage = C_ChatInfo and C_ChatInfo.SendChatMessage or SendChatMessage
 
 
 

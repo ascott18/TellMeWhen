@@ -456,6 +456,7 @@ ConditionCategory:RegisterCondition(3.2, "AUTOSPELL", {
 	end,
 })
 
+local IsSpellOverlayed = C_SpellActivationOverlay and C_SpellActivationOverlay.IsSpellOverlayed or IsSpellOverlayed
 if IsSpellOverlayed then
 ConditionCategory:RegisterCondition(3.5,  "OVERLAYED", {
 	text = L["CONDITIONPANEL_OVERLAYED"],

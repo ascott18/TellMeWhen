@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.2.3
+* Fix missing Spell Activation Overlay condition in MoP.
+
 ## v11.2.2
 * Add detection and warning of malfunctioning code in MetaTracker addon that breaks TMW.
 * #2297: Shapeshift condition can now check by spellID.

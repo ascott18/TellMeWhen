@@ -231,7 +231,7 @@ ConditionCategory:RegisterCondition(1.2, "GROUPSIZE", {
 	end,
 })
 
-
+local GetZonePVPInfo = C_PvP and C_PvP.GetZonePVPInfo or GetZonePVPInfo;
 ConditionCategory:RegisterCondition(1.5, "ZONEPVP", {
 	text = L["CONDITIONPANEL_ZONEPVP"],
 	tooltip = L["CONDITIONPANEL_ZONEPVP_DESC"],
