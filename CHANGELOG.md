@@ -1,5 +1,5 @@
 ## v11.2.5
-* While Condition Set Passing triggers for notifications no longer evaluate while their icon's group is not active. This now matches the behavior of all other notification triggers.
+* While Condition Set Passing and On Condition Set Passing triggers for notifications no longer evaluate while their icon's group is not shown/active. This now matches the behavior of all other notification triggers.
 
 ## v11.2.4
 * Fix Spells.lua:27: attempt to index field "SpellBookSpellBank" (a nil value)

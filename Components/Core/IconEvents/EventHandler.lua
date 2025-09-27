@@ -511,27 +511,11 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler", "UpdateTableManager
 		
 		if targets then
 			-- Copy the targets array since we'll be modifying the indexed view during unregistration
-			local targetsToUnregister = {}
-			for _, target in ipairs(targets) do
+			for _, target in ipairs(TMW.shallowCopy(targets)) do
 				target.ConditionObject:RequestAutoUpdates(target.eventSettingsProxy, false)
-				targetsToUnregister[#targetsToUnregister + 1] = target
-			end
-			
-			-- Unregister all targets for this icon
-			for _, target in ipairs(targetsToUnregister) do
 				self:UpdateTable_Unregister(target)
 			end
-		end
-	end,
-
-	TMW_ICON_DATA_CHANGED_SHOWN = function(self, _, icon, shown)
-		-- Use the stored indexed view to find all targets for this icon
-		local targets = self.ByIcon[icon]
-		
-		if targets then
-			for _, target in ipairs(targets) do
-				target.ConditionObject:RequestAutoUpdates(target.eventSettingsProxy, shown)
-			end
+			
 		end
 	end,
 
@@ -566,20 +550,12 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler", "UpdateTableManager
 			
 			self:UpdateTable_Register(target)
 
-			-- Trigger the shown event handler to start watching for updates (if needed)
-			self:TMW_ICON_DATA_CHANGED_SHOWN(nil, icon, icon.attributes.shown)
-			
 			-- Listen for changes in condition state so that we can ask
 			-- the event handler to do what it needs to do.
 			TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", self)
 
-
 			-- DO NOT check the state right here, since animations might be missing required components. 
-			-- just let it happen during the queued update for TMW_ICON_SETUP_POST
-			-- self:CheckState(ConditionObject)
-
-			-- Queue an update during TMW_ICON_SETUP_POST, 
-			-- because animations might be missing required icon components when this is triggered.
+			-- Instead, queue an update during TMW_ICON_SETUP_POST.
 			self.UpdatesQueued[ConditionObject] = true
 		end
 	end,
@@ -589,9 +565,24 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler", "UpdateTableManager
 		-- There should only be one icon worth of ConditionObjects in here,
 		-- since TMW_ICON_SETUP_PRE and TMW_ICON_SETUP_POST are always called in pairs.
 		for ConditionObject in pairs(self.UpdatesQueued) do
+			self:TMW_ICON_DATA_CHANGED_SHOWN(nil, icon, icon.attributes.shown)
 			self:CheckState(ConditionObject)
 		end
 		wipe(self.UpdatesQueued)
+	end,
+
+	TMW_ICON_DATA_CHANGED_SHOWN = function(self, _, icon, shown)
+		-- Use the stored indexed view to find all targets for this icon
+		local targets = self.ByIcon[icon]
+		
+		if targets then
+			for _, target in ipairs(targets) do
+				target.ConditionObject:RequestAutoUpdates(target.eventSettingsProxy, shown)
+				-- Call CheckState to in turn call HandleConditionStateChange
+				-- and propagate the new shown state to the concrete handler.
+				self:CheckState(target.ConditionObject)
+			end
+		end
 	end,
 
 	TMW_CNDT_OBJ_PASSING_CHANGED = function(self, _, ConditionObject, failed)
