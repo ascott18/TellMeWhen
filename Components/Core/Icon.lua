@@ -172,14 +172,12 @@ function Icon.__tostring(icon)
 end
 
 function Icon.ScriptSort(iconA, iconB)
-	local gOrder = 1 -- -TMW.db.profile.CheckOrder
-	local gA = iconA.group.ID
-	local gB = iconB.group.ID
+	local gA = iconA.group.ID + (iconA.group.Domain == 'global' and 10000 or 0)
+	local gB = iconB.group.ID + (iconB.group.Domain == 'global' and 10000 or 0)
 	if gA == gB then
-		local iOrder = 1 -- -iconA.group.CheckOrder
-		return iconA.ID*iOrder < iconB.ID*iOrder
+		return iconA.ID < iconB.ID
 	end
-	return gA*gOrder < gB*gOrder
+	return gA < gB
 end
 Icon:UpdateTable_SetAutoSort(Icon.ScriptSort)
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", Icon, "UpdateTable_PerformAutoSort")

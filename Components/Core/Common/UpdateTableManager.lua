@@ -23,6 +23,12 @@ local UpdateTableManager = TMW:NewClass("UpdateTableManager")
 
 function UpdateTableManager:UpdateTable_Set(table)
 	self.UpdateTable_UpdateTable = table or {} -- create an anonymous table if one wasnt passed in
+	self.UpdateTable_Lookup = {} -- O(1) lookup table for registered items
+	if table then
+		for k,v in pairs(table) do
+			self.UpdateTable_Lookup[v] = true
+		end
+	end
 end
 
 function UpdateTableManager:UpdateTable_Register(target)
@@ -43,13 +49,15 @@ function UpdateTableManager:UpdateTable_Register(target)
 
 	local oldLength = #self.UpdateTable_UpdateTable
 
-	if not TMW.tContains(self.UpdateTable_UpdateTable, target) then
-
+	if not self.UpdateTable_Lookup[target] then
 		if self.UpdateTable_DoAutoSort then
 			TMW.binaryInsert(self.UpdateTable_UpdateTable, target, self.UpdateTable_AutoSortFunc)
 		else
 			tinsert(self.UpdateTable_UpdateTable, target)
 		end
+		
+		-- Add to lookup table
+		self.UpdateTable_Lookup[target] = true
 		
 		-- Update indexed views
 		self:UpdateTable_UpdateIndexedViews(target, "register")
@@ -67,25 +75,28 @@ function UpdateTableManager:UpdateTable_Unregister(target)
 	
 	target = target or self
 
+	-- Check lookup table first to avoid O(n) deletion if item doesn't exist
+	if not self.UpdateTable_Lookup[target] then
+		-- No removal was done
+		return false
+	end
+
 	local oldLength = #self.UpdateTable_UpdateTable
 
 	TMW.tDeleteItem(self.UpdateTable_UpdateTable, target, true)
 	
-	if oldLength ~= #self.UpdateTable_UpdateTable then
-		
-		-- Update indexed views
-		self:UpdateTable_UpdateIndexedViews(target, "unregister")
-		
-		if oldLength > 0 and #self.UpdateTable_UpdateTable == 0 and self.UpdateTable_OnUnused then
-			self:UpdateTable_OnUnused()
-		end
-
-		-- Notify that a removal was done
-		return true
+	-- Remove from lookup table
+	self.UpdateTable_Lookup[target] = nil
+	
+	-- Update indexed views
+	self:UpdateTable_UpdateIndexedViews(target, "unregister")
+	
+	if oldLength > 0 and #self.UpdateTable_UpdateTable == 0 and self.UpdateTable_OnUnused then
+		self:UpdateTable_OnUnused()
 	end
 
-	-- No removal was done
-	return false
+	-- Notify that a removal was done
+	return true
 end
 
 function UpdateTableManager:UpdateTable_UnregisterAll()
@@ -102,6 +113,7 @@ function UpdateTableManager:UpdateTable_UnregisterAll()
 	end
 	
 	wipe(self.UpdateTable_UpdateTable)
+	wipe(self.UpdateTable_Lookup)
 	
 	if oldLength > 0 and self.UpdateTable_OnUnused then
 		self:UpdateTable_OnUnused()

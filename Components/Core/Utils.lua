@@ -895,8 +895,16 @@ function TMW.binaryInsert(table, value, comp)
 	-- http://lua-users.org/wiki/BinaryInsert
 	comp = comp or comp_default
 
+	local tableSize = #table
+	
+	-- Check if we can insert at the end first (common case optimization)
+	if tableSize == 0 or not comp(value, table[tableSize]) then
+		table[tableSize + 1] = value
+		return tableSize + 1
+	end
+
 	local iStart, iEnd, iMid, iState =
-		  1, #table, 1, 0
+		  1, tableSize, 1, 0
 
 	while iStart <= iEnd do
 		iMid = floor((iStart+iEnd) / 2)

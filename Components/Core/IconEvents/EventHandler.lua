@@ -567,7 +567,6 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler", "UpdateTableManager
 			self:UpdateTable_Register(target)
 
 			-- Trigger the shown event handler to start watching for updates (if needed)
-			print('init', icon, icon.attributes.shown)
 			self:TMW_ICON_DATA_CHANGED_SHOWN(nil, icon, icon.attributes.shown)
 			
 			-- Listen for changes in condition state so that we can ask
