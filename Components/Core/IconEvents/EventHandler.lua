@@ -498,11 +498,10 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 
 	TMW_ICON_DISABLE = function(self, _, icon, soft)
 		for ConditionObject, matches in pairs(self.MapConditionObjectToEventSettings) do
-			for eventSettings, ic in pairs(matches) do
+			for eventSettingsProxy, ic in pairs(matches) do
 				if ic == icon then
-					ConditionObject:RequestAutoUpdates(eventSettings, false)
+					ConditionObject:RequestAutoUpdates(eventSettingsProxy, false)
 
-					local eventSettingsProxy = self:Proxy(eventSettings, icon)
 					matches[eventSettingsProxy] = nil
 					self.EventSettingsToConditionObject[eventSettingsProxy] = nil
 				end
@@ -534,8 +533,10 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 
 		-- ConditionObject is nil if there were no conditions at all.
 		if ConditionObject then
+			local eventSettingsProxy = self:Proxy(eventSettings, icon)
+
 			-- We won't request updates manually - let the condition engine take care of updating.
-			ConditionObject:RequestAutoUpdates(eventSettings, true)
+			ConditionObject:RequestAutoUpdates(eventSettingsProxy, true)
 			
 			-- Associate the condition object with the event settings and the icon that the event settings are from.
 			local matches = self.MapConditionObjectToEventSettings[ConditionObject]
@@ -543,10 +544,11 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 				matches = {}
 				self.MapConditionObjectToEventSettings[ConditionObject] = matches
 			end
-			matches[self:Proxy(eventSettings, icon)] = icon
+
+			matches[eventSettingsProxy] = icon
 
 			-- Allow backwards lookups of this, too.
-			self.EventSettingsToConditionObject[self:Proxy(eventSettings, icon)] = ConditionObject
+			self.EventSettingsToConditionObject[eventSettingsProxy] = ConditionObject
 
 			
 			-- Listen for changes in condition state so that we can ask
