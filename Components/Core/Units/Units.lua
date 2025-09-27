@@ -75,6 +75,52 @@ local unitSetsByEvent = setmetatable({}, {
 })
 
 
+
+-- Create a single UpdateTableManager instance to track all unit condition mappings
+local UpdateManager = TMW.Classes.UpdateTableManager:New()
+UpdateManager:UpdateTable_Set()
+local ByConditionObject = UpdateManager:UpdateTable_CreateIndexedView("ByConditionObject", function(target) return target.ConditionObject end)
+local ByUnitSet = UpdateManager:UpdateTable_CreateIndexedView("ByUnitSet", function(target) return target.UnitSet end)
+local ByRequester = UpdateManager:UpdateTable_CreateIndexedView("ByRequester", function(target) return target.Requester end)
+
+local function TMW_CNDT_OBJ_PASSING_CHANGED(event, ConditionObject, failed)
+	local targets = ByConditionObject[ConditionObject]
+	if targets then
+		for _, target in ipairs(targets) do
+			target.UnitSet:Update()
+		end
+	end
+end
+
+local function TMW_ICON_DATA_CHANGED_SHOWN(event, icon, shown)
+	local targets = ByRequester[icon]
+	if targets then
+		for _, target in ipairs(targets) do
+			target.ConditionObject:RequestAutoUpdates(icon, shown)
+		end
+	end
+end
+
+UpdateManager.UpdateTable_OnUsed = function(self)
+	TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED)
+	TMW:RegisterCallback("TMW_ICON_DATA_CHANGED_SHOWN", TMW_ICON_DATA_CHANGED_SHOWN)
+end
+
+UpdateManager.UpdateTable_OnUnused = function(self)
+	TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", TMW_CNDT_OBJ_PASSING_CHANGED)
+	TMW:UnregisterCallback("TMW_ICON_DATA_CHANGED_SHOWN", TMW_ICON_DATA_CHANGED_SHOWN)
+end
+
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	for _, target in ipairs(UpdateManager.UpdateTable_UpdateTable) do
+		target.ConditionObject:RequestAutoUpdates(target.Requester, false)
+	end
+
+	UpdateManager:UpdateTable_UnregisterAll()
+end)
+
+
+
 -- Public Methods/Stuff:
 function TMW:GetUnits(icon, setting, Conditions)
 	local iconName = (icon and icon:GetName() or "<icon>")
@@ -96,15 +142,26 @@ function TMW:GetUnits(icon, setting, Conditions)
 	local UnitSet = UNITS:GetUnitSet(setting, serializedConditions, nil, Conditions, conditionsParent)
 	
 	if UnitSet.ConditionObjects then
-		for i, ConditionObject in ipairs(UnitSet.ConditionObjects) do
-			ConditionObject:RequestAutoUpdates(UnitSet, true)
+		-- Only request condition updates for icons when they are shown
+		local shouldRequestUpdates = true
+		local requester = icon or UnitSet
+		if requester.IsIcon then
+			shouldRequestUpdates = icon.attributes.shown
 		end
-
-		-- Register for state changes AFTER requesting updates.
-		-- Requesting updates will trigger checks on all the objects.
-		-- We don't want each check to update the unit set one by one.
-		-- We'll update after they're all registered.
-		TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", UnitSet)
+		
+		-- Register condition objects with the shared UpdateManager
+		for i, ConditionObject in ipairs(UnitSet.ConditionObjects) do
+			ConditionObject:RequestAutoUpdates(requester, shouldRequestUpdates)
+			-- Register for state changes AFTER requesting updates.
+			-- Requesting updates will trigger checks on all the objects.
+			-- We don't want each check to update the unit set one by one.
+			-- We'll update after they're all registered.
+			UpdateManager:UpdateTable_Register({
+				UnitSet = UnitSet,
+				ConditionObject = ConditionObject,
+				Requester = requester
+			})
+		end
 
 		-- Perform an update now that all of the conditions (if any) are in their initial state.
 		UnitSet:Update()
@@ -329,11 +386,7 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		self:Update()
 	end,
 
-	TMW_CNDT_OBJ_PASSING_CHANGED = function(self, event, ConditionObject, failed)
-		if self.ConditionObjects[ConditionObject] then
-			self:Update()
-		end
-	end,
+
 
 	Update = function(self, forceNoExists)
 		local originalUnits,      exposedUnits,      translatedUnits =
@@ -445,17 +498,6 @@ local UnitSet = TMW:NewClass("UnitSet"){
 		TMW:Fire("TMW_UNITSET_UPDATED", self)
 	end,
 }
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	for i, unitSet in ipairs(UnitSet.instances) do
-		if unitSet.ConditionObjects then
-			for i, ConditionObject in ipairs(unitSet.ConditionObjects) do
-				ConditionObject:RequestAutoUpdates(unitSet, false)
-			end
-			TMW:UnregisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", unitSet)
-		end
-	end
-end)
 
 function UNITS:NormalizeUnitString(unitSettings)
 	unitSettings = TMW:CleanString(unitSettings)
