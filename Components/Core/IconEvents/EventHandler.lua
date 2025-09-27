@@ -523,7 +523,7 @@ TMW:NewClass("EventHandler_WhileConditions", "EventHandler"){
 		-- If the OnlyShown setting is enabled, add a condition to check that the icon is shown.
 		-- It is possible that the condition set is empty, in which case this will be the only condition.
 		if eventSettings.OnlyShown then
-			local condition = ConditionObjectConstructor:Modify_WrapExistingAndAppendNew()
+			local condition = ConditionObjectConstructor:Modify_WrapExistingAndPrependNew("AND")
 
 			condition.Type = "ICON"
 			condition.Icon = icon:GetGUID()

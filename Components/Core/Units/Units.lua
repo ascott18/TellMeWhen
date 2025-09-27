@@ -290,10 +290,10 @@ local UnitSet = TMW:NewClass("UnitSet"){
 				-- Add a UnitExists condition to the beginning, so the rest of the conditions
 				-- will short circuit to false if the unit being checked doesn't exist.
 				local ModifiableConditions = ConditionObjectConstructor:GetPostUserModifiableConditions()
-				local exists = ConditionObjectConstructor:Modify_WrapExistingAndPrependNew()
+				
+				local exists = ConditionObjectConstructor:Modify_WrapExistingAndPrependNew("AND")
 				exists.Type = "EXISTS"
 				exists.Unit = "unit" -- this will get replaced momentarily
-				ModifiableConditions[2].AndOr = "AND" -- AND together the exists condition and all subsequent conditions.
 
 				-- Substitute out "unit" with the actual unit being checked.
 				for _, condition in TMW:InNLengthTable(ModifiableConditions) do

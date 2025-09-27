@@ -75,14 +75,21 @@ end
 --- Calls :GetPostUserModifiableConditions(), wraps the existing conditions in parenthesis if needed,
 -- and then appends a new condition to the start that can be configured as desired.
 -- @return [table] The settings of a new single condition.
-function ConditionObjectConstructor:Modify_WrapExistingAndPrependNew()	
+function ConditionObjectConstructor:Modify_WrapExistingAndPrependNew(operator)	
 	local ModifiableConditions = self:GetPostUserModifiableConditions()
 	local mod = ModifiableConditions -- Alias for brevity
 	
 	mod.n = mod.n + 1
+
+	-- Invoke __index access to get proper condition setting instance
 	local new = mod[mod.n]
 	mod[mod.n] = nil
+
 	tinsert(mod, 1, new)
+
+	if operator then
+		mod[2].AndOr = operator -- Set the operator that will join the prepended condition with all subsequent conditions.
+	end
 
 	if mod.n > 2 then
 		mod[2].PrtsBefore = mod[2].PrtsBefore + 1
