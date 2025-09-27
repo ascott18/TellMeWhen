@@ -55,7 +55,7 @@ local Module = SUG:NewModule("wpnenchant", SUG:GetModule("default"), "AceEvent-3
 Module.noMin = true
 Module.showColorHelp = false
 
-Module.ItemIDs = TMW.isRetail and {
+Module.ItemIDs = {
 	-- item enhancements
 	--43233,	--Deadly Poison
 	--3775,	--Crippling Poison
@@ -63,8 +63,42 @@ Module.ItemIDs = TMW.isRetail and {
 	--43235,	--Wound Poison
 	--43231,	--Instant Poison
 
-	12404, -- Dense Sharpening Stone
-	12643, -- Dense Weightstone
+	  2862, -- Rough Sharpening Stone
+	  2863, -- Coarse Sharpening Stone
+	  2871, -- Heavy Sharpening Stone
+	  3239, -- Rough Weightstone
+	  3240, -- Coarse Weightstone
+	  3241, -- Heavy Weightstone
+	  3824, -- Shadow Oil
+	  3829, -- Frost Oil
+	  7964, -- Solid Sharpening Stone
+	  7965, -- Solid Weightstone
+	 12404, -- Dense Sharpening Stone
+	 12643, -- Dense Weightstone
+	 18262, -- Elemental Sharpening Stone
+	 20744, -- Minor Wizard Oil
+	 20745, -- Minor Mana Oil
+	 20746, -- Lesser Wizard Oil
+	 20747, -- Lesser Mana Oil
+	 20748, -- Brilliant Mana Oil
+	 20749, -- Brilliant Wizard Oil
+	 20750, -- Wizard Oil
+	 22521, -- Superior Mana Oil
+	 22522, -- Superior Wizard Oil
+	 23122, -- Consecrated Sharpening Stone
+	 23123, -- Blessed Wizard Oil
+	 23528, -- Fel Sharpening Stone
+	 23529, -- Adamantite Sharpening Stone
+	 23559, -- Lesser Rune of Warding
+	 23575, -- Lesser Ward of Shielding
+	 23576, -- Greater Ward of Shielding
+	 25521, -- Greater Rune of Warding
+	 28420, -- Fel Weightstone
+	 28421, -- Adamantite Weightstone
+	 31535, -- Bloodboil Poison
+	 34538, -- Blessed Weapon Coating
+	 34539, -- Righteous Weapon Coating
+	 36899, -- Exceptional Mana Oil
 	171285, -- Shadowcore Oil
 	171286, -- Embalmer's Oil
 	171436, -- Porous Sharpening Stone
@@ -72,47 +106,13 @@ Module.ItemIDs = TMW.isRetail and {
 	171438, -- Porous Weightstone
 	171439, -- Shaded Weightstone
 	172038, -- Grim Iron Shackles
-	18262, -- Elemental Sharpening Stone
-	20744, -- Minor Wizard Oil
-	20745, -- Minor Mana Oil
-	20746, -- Lesser Wizard Oil
-	20747, -- Lesser Mana Oil
-	20748, -- Brilliant Mana Oil
-	20749, -- Brilliant Wizard Oil
-	20750, -- Wizard Oil
-	22521, -- Superior Mana Oil
-	22522, -- Superior Wizard Oil
-	23122, -- Consecrated Sharpening Stone
-	23123, -- Blessed Wizard Oil
-	23528, -- Fel Sharpening Stone
-	23529, -- Adamantite Sharpening Stone
-	23559, -- Lesser Rune of Warding
-	23575, -- Lesser Ward of Shielding
-	23576, -- Greater Ward of Shielding
-	25521, -- Greater Rune of Warding
-	28420, -- Fel Weightstone
-	28421, -- Adamantite Weightstone
-	2862, -- Rough Sharpening Stone
-	2863, -- Coarse Sharpening Stone
-	2871, -- Heavy Sharpening Stone
-	31535, -- Bloodboil Poison
-	3239, -- Rough Weightstone
-	3240, -- Coarse Weightstone
-	3241, -- Heavy Weightstone
-	34538, -- Blessed Weapon Coating
-	34539, -- Righteous Weapon Coating
-	36899, -- Exceptional Mana Oil
-	3824, -- Shadow Oil
-	3829, -- Frost Oil
-	7964, -- Solid Sharpening Stone
-	7965, -- Solid Weightstone
 
 	-- ZHTW:
 	-- weightstone: ???
 	-- sharpening stone: ???
 	--25679,	--Comfortable Insoles
 } or {}
-Module.SpellIDs = TMW.isRetail and {
+Module.SpellIDs = {
 	-- Shaman Enchants
 	318038,	--Flametongue Weapon
 	33757,	--Windfury Weapon
@@ -131,26 +131,28 @@ function Module:OnInitialize()
 
 	for _, id in pairs(self.SpellIDs) do
 		local name = TMW.GetSpellName(id)
-		local found = false
-		for _, enchantMatch in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
-			local enchant = name:match(enchantMatch)
-			if enchant then
-				for ench in pairs(TMW.db.locale.WpnEnchDurs) do
-					if ench:lower():find(enchant:gsub("([%%%[%]%-%+])", "%%%1"):lower()) then
-						-- the enchant was found in the list of known enchants, so add it
-						self.Spells[ench] = id
+		if name then
+			local found = false
+			for _, enchantMatch in TMW:Vararg(strsplit("|", L["SUG_MATCH_WPNENCH_ENCH"])) do
+				local enchant = name:match(enchantMatch)
+				if enchant then
+					for ench in pairs(TMW.db.locale.WpnEnchDurs) do
+						if ench:lower():find(enchant:gsub("([%%%[%]%-%+])", "%%%1"):lower()) then
+							-- the enchant was found in the list of known enchants, so add it
+							self.Spells[ench] = id
+							found = true
+							break
+						end
+					end
+					if not found then
+						self.Spells[enchant] = id
 						found = true
-						break
 					end
 				end
-				if not found then
-				   	self.Spells[enchant] = id
-					found = true
-				end
 			end
-		end
-		if not found then
-			self.Spells[name] = id
+			if not found then
+				self.Spells[name] = id
+			end
 		end
 	end
 
@@ -195,8 +197,6 @@ function Module:GET_ITEM_INFO_RECEIVED(event, id)
 		local name = item:GetName()
 		self.Items[name] = item
 		self.Table[name] = id
-	else
-		print("wpnenchant SUG: WoW Server seems to think that item doesn't exist", id)
 	end
 end
 

@@ -61,7 +61,7 @@ if pclass == "HUNTER" then
 	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip", { 
 		spellID = 75
 	})
-elseif not TMW.isRetail and (pclass == "MAGE" or pclass == "PRIEST" or pclass == "WARLOCK") then
+elseif ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) and (pclass == "MAGE" or pclass == "PRIEST" or pclass == "WARLOCK") then
 	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip", { 
 		spellID = 5019,
 		descriptiveName = TMW.GetSpellName(5009) -- "Wands" (best i could do - couldnt find "Wand")

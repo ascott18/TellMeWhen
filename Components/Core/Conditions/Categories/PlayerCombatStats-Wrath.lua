@@ -186,7 +186,7 @@ if GetExpertise and CR_EXPERTISE then
 	})
 end
 
-if select(4, GetBuildInfo()) < 60000 and UnitRangedAttackPower and GetRangedCritChance and GetRangedHaste then
+if ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA) and UnitRangedAttackPower and GetRangedCritChance and GetRangedHaste then
 	-- Mop and below
 	ConditionCategory:RegisterSpacer(20)
 

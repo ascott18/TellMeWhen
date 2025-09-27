@@ -153,7 +153,7 @@ ConditionCategory:RegisterCondition(6,    "REACT", {
 	defaultUnit = "target",
 	texttable = {[1] = L["ICONMENU_HOSTILE"], [2] = L["ICONMENU_FRIEND"]},
 	nooperator = true,
-	icon = TMW.isRetail and "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood" or "Interface\\Icons\\spell_holy_blessingofstamina",
+	icon = ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood" or "Interface\\Icons\\spell_holy_blessingofstamina",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		UnitIsEnemy = UnitIsEnemy,
@@ -307,7 +307,7 @@ ConditionCategory:RegisterCondition(8.5,  "LIBRANGECHECK", {
 
 	customDeprecated = 
 		("NOTICE: Due to Blizzard restrictions, this condition doesn't allow checking the range of friendly units while in combat. For that scenario, it is recommended to use the %q condition instead."):format(L["CONDITIONPANEL_SPELLRANGE"]) .. 
-		(TMW.isRetail and (" \n\nIf checking your own spells against hostile targets, the %q condition is also usually much more CPU efficient."):format(L["CONDITIONPANEL_SPELLRANGE"]) or "")
+		(C_Spell.EnableSpellRangeCheck and (" \n\nIf checking your own spells against hostile targets, the %q condition is also usually much more CPU efficient."):format(L["CONDITIONPANEL_SPELLRANGE"]) or "")
 	-- events = absolutely no events
 })
 
@@ -544,6 +544,11 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["Gnome"] = {order = 4, text = Name("Gnome")},
 			["Draenei"] = {order = 5, text = Name("Draenei")},
 			["Worgen"] = {order = 6, text = Name("Worgen")},
+			["VoidElf"] = {order = 6.1, text = Name("Void Elf")},
+			["LightforgedDraenei"] = {order = 6.2, text = Name("Lightforged Draenei")},
+			["DarkIronDwarf"] = {order = 6.3, text = Name("Dark Iron Dwarf")},
+			["KulTiran"] = {order = 6.4, text = Name("Kul Tiran")},
+			["Mechagnome"] = {order = 6.5, text = Name("Mechagnome"), space = true},
 
 			["Orc"] = {order = 7, text = Name("Orc")},
 			["Scourge"] = {order = 8, text = Name("Undead")},
@@ -551,28 +556,16 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["Troll"] = {order = 10, text = Name("Troll")},
 			["BloodElf"] = {order = 11, text = Name("Blood Elf")},
 			["Goblin"] = {order = 12, text = Name("Goblin")},
+			["Nightborne"] = {order = 12.1, text = Name("Nightborne")},
+			["HighmountainTauren"] = {order = 12.2, text = Name("Highmountain Tauren")},
+			["MagharOrc"] = {order = 12.3, text = Name("Mag'har Orc")},
+			["ZandalariTroll"] = {order = 12.4, text = Name("Zandalari Troll")},
+			["Vulpera"] = {order = 12.5, text = Name("Vulpera"), space = true},
+
+			["Pandaren"] = {order = 13, text = Name("Pandaren")},
+			["Dracthyr"] = {order = 14, text = Name("Dracthyr")},
 		}
 
-		if TMW.isRetail then
-			TMW:CopyTableInPlaceUsingDestinationMeta({
-				["Worgen"] = {order = 6, text = Name("Worgen")},
-				["VoidElf"] = {order = 6.1, text = Name("Void Elf")},
-				["LightforgedDraenei"] = {order = 6.2, text = Name("Lightforged Draenei")},
-				["DarkIronDwarf"] = {order = 6.3, text = Name("Dark Iron Dwarf")},
-				["KulTiran"] = {order = 6.4, text = Name("Kul Tiran")},
-				["Mechagnome"] = {order = 6.5, text = Name("Mechagnome"), space = true},
-				
-				["Goblin"] = {order = 12, text = Name("Goblin")},
-				["Nightborne"] = {order = 12.1, text = Name("Nightborne")},
-				["HighmountainTauren"] = {order = 12.2, text = Name("Highmountain Tauren")},
-				["MagharOrc"] = {order = 12.3, text = Name("Mag'har Orc")},
-				["ZandalariTroll"] = {order = 12.4, text = Name("Zandalari Troll")},
-				["Vulpera"] = {order = 12.5, text = Name("Vulpera"), space = true},
-
-				["Pandaren"] = {order = 13, text = Name("Pandaren")},
-				["Dracthyr"] = {order = 14, text = Name("Dracthyr")},
-			}, bitFlags, true)
-		end
 
 		for token, data in pairs(bitFlags) do
 			data.atlas = TMW:GetRaceIconInfo(token)

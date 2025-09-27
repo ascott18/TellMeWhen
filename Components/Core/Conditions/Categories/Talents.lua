@@ -69,7 +69,8 @@ function SPECS:UpdateUnitSpecs()
 
 		TMW:Fire("TMW_UNITSPEC_UPDATE")
 
-	elseif z == "pvp" and TMW.isRetail then
+	elseif z == "pvp" and ClassicExpansionAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
+		-- NOTE: WOD is a guess here. Unclear on exactly when specs were added as returns of GetBattlefieldScore.
 		RequestBattlefieldScoreData()
 
 		for i = 1, GetNumBattlefieldScores() do
@@ -373,7 +374,7 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 	},
 	funcstr = [[BITFLAGSMAPANDCHECK( GetCurrentSpecializationRole() ) ]],
 	events = function(ConditionObject, c)
-		if not TMW.isRetail then
+		if ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
 			return
 				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
 				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED"),
@@ -599,7 +600,7 @@ if C_ClassTalents and C_ClassTalents.GetActiveConfigID and C_Traits.GetDefinitio
 				ConditionObject:GenerateNormalEventString("TMW_TALENT_LOADOUT_NAME_UPDATE")
 		end,
 	})
-elseif select(4, GetBuildInfo()) >= 50500 then
+elseif ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 	-- Mop - Shadowlands
 
 	function CNDT:PLAYER_TALENT_UPDATE()
@@ -720,7 +721,7 @@ if GetGlyphSocketInfo then
 	function CNDT:GLYPH_UPDATED()
 		local GlyphLookup = Env.GlyphLookup
 		wipe(GlyphLookup)
-		if TMW.isCata or TMW.isMop then
+		if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
 			-- Cata/mop
 			for i = 1, GetNumGlyphSockets() do
 				local _, _, _, spellID = GetGlyphSocketInfo(i)
@@ -972,8 +973,7 @@ if C_Soulbinds then
 	})
 end
 
--- C_AzeriteEssence exists in wrath... gg blizz
-if C_AzeriteEssence and TMW.isRetail then
+if C_AzeriteEssence and ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
 	CNDT.Env.AzeriteEssenceMap = {}
 	CNDT.Env.AzeriteEssenceMap_MAJOR = {}
 	local C_AzeriteEssence = C_AzeriteEssence

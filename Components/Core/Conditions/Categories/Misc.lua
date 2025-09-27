@@ -222,7 +222,7 @@ ConditionCategory:RegisterCondition(12,	 "TIMEOFDAY", {
 		--return CNDT.COMMON.formatSeconds(k*60)
 	end,
 	unit = false,
-	icon = not TMW.isRetail and "Interface\\Icons\\inv_misc_pocketwatch_02" or "Interface\\Icons\\Ability_Racial_TimeIsMoney",
+	icon = ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and "Interface\\Icons\\Ability_Racial_TimeIsMoney" or "Interface\\Icons\\inv_misc_pocketwatch_02",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetDaysElapsedMinutes = function()

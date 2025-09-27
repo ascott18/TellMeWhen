@@ -30,7 +30,7 @@ local SpellUsable = TMW.COMMON.SpellUsable
 local Actions = TMW.COMMON.Actions
 
 -- todo: can we feature detect hasPreciseActionEvents?
-local hasPreciseActionEvents = select(4, GetBuildInfo()) >= 110000
+local hasPreciseActionEvents = ClassicExpansionAtLeast(LE_EXPANSION_WAR_WITHIN)
 
 if hasPreciseActionEvents then
     SpellUsable:RegisterEvent("ACTION_USABLE_CHANGED")

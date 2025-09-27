@@ -27,12 +27,12 @@ local Type = TMW.Classes.IconType:New("guardian")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_GUARDIAN"]
 Type.desc = L["ICONMENU_GUARDIAN_DESC"]
-Type.menuIcon = GetSpellTexture(not TMW.isRetail and 31687 or 211158)
+Type.menuIcon = TMW.GetSpellTexture(211158) or TMW.GetSpellTexture(31687)
 Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.hasNoGCD = true
 Type.canControlGroup = true
-Type.hidden = TMW.isRetail and pclass ~= "WARLOCK"
+Type.hidden = ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) and pclass ~= "WARLOCK"
 
 local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
@@ -68,7 +68,7 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["ICONMENU_GUARDIAN_CHOOSENAME_DESC"],
 })
 
-if TMW.isRetail then
+if ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_GuardianDuration", function(self)
 		self:SetTitle(TMW.L["ICONMENU_GUARDIAN_DUR"])
 		self:BuildSimpleCheckSettingFrame({
@@ -111,7 +111,7 @@ end)
 
 
 
-if pclass == "WARLOCK" and TMW.isRetail then
+if pclass == "WARLOCK" and ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
 	Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 		[ STATE_PRESENT_EMPOWERED  ] = { order = 1, text = "|cFF00FF00" .. L["ICONMENU_PRESENT"] .. " - " .. L["ICONMENU_GUARDIAN_EMPOWERED"],  },
 		[ STATE_PRESENT ] = { order = 2, text = "|cFF00FF00" .. L["ICONMENU_PRESENT"] .. " - " .. L["ICONMENU_GUARDIAN_UNEMPOWERED"], },
@@ -139,10 +139,10 @@ local function Info(duration, spell, triggerMatch, extraData)
 	return data
 end
 
-Type.GuardianInfo = TMW.isClassic and {
+Type.GuardianInfo = ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
 	[510] = Info(45, 31687, false), -- Water Elemental
 	[89] = Info(60 * 5, 1122, false), -- Inferno (warlock)
-} or (TMW.isWrath or TMW.isCat or TMW.isMop) and {
+} or (ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA)) and {
 	-- Note: data not verified for MOP
 	[510] = Info(45, 31687, false), -- Water Elemental
 	[19668] = Info(15, 34433, false), -- Shadowfiend

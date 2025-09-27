@@ -58,22 +58,20 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	pGUID = UnitGUID("player")
 end)
 
-local swingSpells = 
-	not TMW.isRetail and {
-		[strlowerCache[GetSpellName(78)]] = 1, -- Heroic Strike
-		[strlowerCache[GetSpellName(845)]] = 1, -- Cleave
-		[strlowerCache[GetSpellName(6807)]] = 1, -- Maul
-	} or {
-		-- Retail spells:
-        [strlowerCache[GetSpellName(404542)]] = 1, -- Crusading Strikes (ret talent)
-    }
+local swingSpells = {}
+local function addSwingSpell(spell)
+	local name = GetSpellName(spell)
+	if name then
+		swingSpells[strlowerCache[name]] = 1
+	end
+end
 
-if GetSpellName(56815) then
-	swingSpells[strlowerCache[GetSpellName(56815)]] = 1 -- Rune Strike
-end
-if GetSpellName(2973) then
-	swingSpells[strlowerCache[GetSpellName(2973)]] = 1 -- Raptor Strike (vanilla - cata)
-end
+addSwingSpell(78) -- Heroic Strike
+addSwingSpell(845) -- Cleave
+addSwingSpell(6807) -- Maul
+addSwingSpell(56815) -- Rune Strike
+addSwingSpell(2973) -- Raptor Strike (vanilla - cata)
+addSwingSpell(404542) -- Crusading Strikes (ret talent)
 
 -- ---------------------------------
 -- Misc state update functions

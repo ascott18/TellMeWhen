@@ -24,9 +24,6 @@ local GetNumEvents = C_LossOfControl.GetNumEvents or C_LossOfControl.GetActiveLo
 
 local strlowerCache = TMW.strlowerCache
 
-local wow_900 = select(4, GetBuildInfo()) >= 90000
-
-
 local Type = TMW.Classes.IconType:New("losecontrol")
 Type.name = L["LOSECONTROL_ICONTYPE"]	
 Type.desc = L["LOSECONTROL_ICONTYPE_DESC"]

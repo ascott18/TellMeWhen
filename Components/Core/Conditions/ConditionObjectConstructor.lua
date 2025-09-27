@@ -87,7 +87,7 @@ function ConditionObjectConstructor:Modify_WrapExistingAndPrependNew(operator)
 
 	tinsert(mod, 1, new)
 
-	if operator then
+	if operator and mod.n >= 2 then
 		mod[2].AndOr = operator -- Set the operator that will join the prepended condition with all subsequent conditions.
 	end
 

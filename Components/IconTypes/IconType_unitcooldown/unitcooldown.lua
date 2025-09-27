@@ -164,8 +164,8 @@ end})
 
 
 local resetsOnCast, resetsOnAura, spellBlacklist = {}, {}, {}
-if TMW.isMop then
-	resetsOnCast = {
+if LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_MISTS_OF_PANDARIA then
+resetsOnCast = {
 	[23989] = { -- Readiness
 		[120697] = 1, -- Lynx Rush
 		[19574] = 1, -- Bestial Wrath
@@ -266,7 +266,7 @@ resetsOnAura = {
 spellBlacklist = {
 	[50288] = 1, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
 }
-elseif TMW.isCata or TMW.isWrath or TMW.isClassic then
+elseif ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
 resetsOnCast = {
 	[23989] = { -- readiness
 		[19263] = 1, -- Deterrence
@@ -332,7 +332,7 @@ resetsOnCast = {
 	},
 }
 else
-
+-- Retail
 resetsOnCast = {
 	
 	[108285] = { -- Call of the Elements

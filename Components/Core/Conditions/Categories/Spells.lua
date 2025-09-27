@@ -177,64 +177,62 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 
 ConditionCategory:RegisterSpacer(2.4)
 
-if TMW.isRetail then
-	ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
-		text = L["SPELLCHARGES"],
-		tooltip = L["SPELLCHARGES_DESC"],
-		min = 0,
-		range = 5,
-		name = function(editbox)
-			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
+	text = L["SPELLCHARGES"],
+	tooltip = L["SPELLCHARGES_DESC"],
+	min = 0,
+	range = 5,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = "spell",
+	unit = PLAYER,
+	icon = "Interface\\Icons\\ability_monk_roll",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetSpellChargesOrCount = function(spell)
+			local charges = GetSpellCharges(spell)
+			if charges then return charges.currentCharges end
+			return GetSpellCastCount(spell)
 		end,
-		useSUG = "spell",
-		unit = PLAYER,
-		icon = "Interface\\Icons\\ability_monk_roll",
-		tcoords = CNDT.COMMON.standardtcoords,
-		Env = {
-			GetSpellChargesOrCount = function(spell)
-				local charges = GetSpellCharges(spell)
-				if charges then return charges.currentCharges end
-				return GetSpellCastCount(spell)
-			end,
-		},
-		funcstr = [[(GetSpellChargesOrCount(c.OwnSpells.First)) c.Operator c.Level]],
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_CHARGES"),
-				ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COUNT")
-		end,	
-	})
-	ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
-		text = L["SPELLCHARGETIME"],
-		tooltip = L["SPELLCHARGETIME_DESC"],
-		min = 0,
-		range = 30,
-		step = 0.1,
-		name = function(editbox)
-			editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
-		end,
-		useSUG = "spell",
-		unit = PLAYER,
-		formatter = TMW.C.Formatter:New(function(value)
-			local s = TMW.C.Formatter.TIME_YDHMS:Format(value)
-			if value == 0 then
-				s = s .. " ("..L["SPELLCHARGES_FULLYCHARGED"]..")"
-			end
-			return s
-		end),
-		icon = "Interface\\Icons\\ability_warlock_handofguldan",
-		tcoords = CNDT.COMMON.standardtcoords,
-		funcstr = [[RechargeDuration(c.OwnSpells.First) c.Operator c.Level]],
-		events = function(ConditionObject, c)
-			return
-				ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_CHARGES")
-		end,
-		anticipate = [[
-			local data = GetSpellCharges(c.OwnSpells.First)
-			local VALUE = data and data.cooldownDuration and data.cooldownStartTime + (data.cooldownDuration - (c.Level*data.chargeModRate)) or huge
-		]],
-	})
-end
+	},
+	funcstr = [[(GetSpellChargesOrCount(c.OwnSpells.First)) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_CHARGES"),
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COUNT")
+	end,	
+})
+ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
+	text = L["SPELLCHARGETIME"],
+	tooltip = L["SPELLCHARGETIME_DESC"],
+	min = 0,
+	range = 30,
+	step = 0.1,
+	name = function(editbox)
+		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
+	end,
+	useSUG = "spell",
+	unit = PLAYER,
+	formatter = TMW.C.Formatter:New(function(value)
+		local s = TMW.C.Formatter.TIME_YDHMS:Format(value)
+		if value == 0 then
+			s = s .. " ("..L["SPELLCHARGES_FULLYCHARGED"]..")"
+		end
+		return s
+	end),
+	icon = "Interface\\Icons\\ability_warlock_handofguldan",
+	tcoords = CNDT.COMMON.standardtcoords,
+	funcstr = [[RechargeDuration(c.OwnSpells.First) c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_CHARGES")
+	end,
+	anticipate = [[
+		local data = GetSpellCharges(c.OwnSpells.First)
+		local VALUE = data and data.cooldownDuration and data.cooldownStartTime + (data.cooldownDuration - (c.Level*data.chargeModRate)) or huge
+	]],
+})
 
 ConditionCategory:RegisterSpacer(2.7)
 
@@ -1061,7 +1059,7 @@ end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
 	tooltip = L["ICONMENU_CAST_DESC"],
-	min = TMW.isClassic and 1 or 0,
+	min = ClassicExpansionAtMost(LE_EXPANSION_BURNING_CRUSADE) and 1 or 0,
 	max = 2,
 	levelChecks = true,
 	nooperator = true,

@@ -31,7 +31,6 @@ local NONE = NONE
 local _G = _G
 local print = TMW.print
 local get = TMW.get
-local clientVersion = select(4, GetBuildInfo())
 local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
 local huge = math.huge

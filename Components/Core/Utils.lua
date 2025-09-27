@@ -35,10 +35,6 @@ local GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetS
 local IsUsableSpell = C_Spell.IsSpellUsable or _G.IsUsableSpell
 local GetSpellPowerCost = C_Spell.GetSpellPowerCost or _G.GetSpellPowerCost
 
-local debugprofilestop = debugprofilestop_SAFE
-
-
-
 
 ---------------------------------
 -- TMW.Class.Formatter
@@ -1503,7 +1499,7 @@ then
 	-- using zero-based indexes instead of 1-based indexes
 
 
-	if not GetSpecializationInfoForClassID(9, 3) and TMW.isClassic then
+	if not GetSpecializationInfoForClassID(9, 3) and ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) then
 		function TMW.GetSpecializationInfoForClassID(classID, i)
 			if not i then
 				return GetSpecializationInfoForClassID(classID, i)
@@ -1516,7 +1512,7 @@ then
 	end
 else
 	local classSpecIds = {
-		DRUID = select(4, GetBuildInfo()) > 50000 and {102,103,104,105} or {102,103,105},
+		DRUID = ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and {102,103,104,105} or {102,103,105},
 		HUNTER = {253,254,255},
 		MAGE = {62,63,64},
 		PALADIN = {65,66,70},

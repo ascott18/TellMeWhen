@@ -97,29 +97,39 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 		types[#types+1] = { order = 20,  id = -3, name = STAGGER or "Stagger", }
 	end
 
-	if TMW.isCataOrGreater then
+	if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 		types[#types+1] = { order = 7,  id = Enum.PowerType.SoulShards, name = SOUL_SHARDS_POWER, }
 		types[#types+1] = { order = 8,  id = Enum.PowerType.HolyPower, name = HOLY_POWER, }
 		types[#types+1] = { order = 16,  id = Enum.PowerType.Alternate, name = L["CONDITIONPANEL_ALTPOWER"], }
 	end
 	
-	if TMW.isMopOrGreater then
+	if ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 		types[#types+1] = { order = 9,  id = Enum.PowerType.Chi, name = CHI_POWER; }
 	end
 
-	if TMW.isMop then
-		types[#types+1] = { order = 21,  id = Enum.PowerType.ShadowOrbs, name = SHADOW_ORBS, }
-		types[#types+1] = { order = 22,  id = Enum.PowerType.DemonicFury, name = DEMONIC_FURY, }
-		types[#types+1] = { order = 23,  id = Enum.PowerType.BurningEmbers, name = BURNING_EMBERS, }
+	-- Shadow Orbs: Cataclysm through Warlords
+	if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) 
+	and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
+		types[#types+1] = { order = 21, id = Enum.PowerType.ShadowOrbs,   name = SHADOW_ORBS }
 	end
 
-	if TMW.isRetail then
+	-- Burning Embers & Demonic Fury: MoP through Warlords
+	if ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) 
+	and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
+		types[#types+1] = { order = 22, id = Enum.PowerType.DemonicFury,   name = DEMONIC_FURY }
+		types[#types+1] = { order = 23, id = Enum.PowerType.BurningEmbers, name = BURNING_EMBERS }
+	end
+
+	if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 		types[#types+1] = { order = 10,  id = Enum.PowerType.Maelstrom, name = MAELSTROM_POWER, }
 		types[#types+1] = { order = 11,  id = Enum.PowerType.ArcaneCharges, name = ARCANE_CHARGES_POWER, }
 		types[#types+1] = { order = 12,  id = Enum.PowerType.LunarPower, name = LUNAR_POWER, }
 		types[#types+1] = { order = 13,  id = Enum.PowerType.Insanity, name = INSANITY_POWER, }
 		types[#types+1] = { order = 14,  id = Enum.PowerType.Fury, name = FURY, }
 		types[#types+1] = { order = 15,  id = Enum.PowerType.Pain, name = PAIN, }
+	end
+
+	if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 		types[#types+1] = { order = 17,  id = Enum.PowerType.Essence, name = POWER_TYPE_ESSENCE, }
 	end
 
@@ -203,6 +213,8 @@ local function Value_OnEvent(icon, event, arg1, arg2)
 	end
 end
 
+local comboPointsPerTarget = ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA)
+
 local function Value_OnUpdate(icon, time)
 	local PowerType = icon.PowerType
 	local ValueFragments = icon.ValueFragments
@@ -219,7 +231,7 @@ local function Value_OnUpdate(icon, time)
 				value, maxValue, valueColor = UnitHealth(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
 			elseif PowerType == -3 then
 				value, maxValue, valueColor = UnitStagger(unit) or 0, UnitHealthMax(unit), PowerBarColor[PowerType]
-			elseif not TMW.isRetail and PowerType == Enum.PowerType.ComboPoints then
+			elseif comboPointsPerTarget and PowerType == Enum.PowerType.ComboPoints then
 				-- combo points
 				value, maxValue, valueColor = GetComboPoints("player", unit), MAX_COMBO_POINTS, PowerBarColor[PowerType]
 			else
@@ -285,7 +297,7 @@ function Type:Setup(icon)
 			icon:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
 			icon:RegisterEvent("UNIT_MAXHEALTH")
 		elseif icon.PowerType == -1 then
-			icon:RegisterEvent(not TMW.isRetail and "UNIT_HEALTH_FREQUENT" or "UNIT_HEALTH")
+			icon:RegisterEvent(ClassicExpansionAtLeast(LE_EXPANSION_SHADOWLANDS) and "UNIT_HEALTH" or "UNIT_HEALTH_FREQUENT")
 			icon:RegisterEvent("UNIT_MAXHEALTH")
 		elseif icon.PowerType == -2 then
 			icon:RegisterEvent("UNIT_POWER_FREQUENT")

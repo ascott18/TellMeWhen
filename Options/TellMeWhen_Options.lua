@@ -13,8 +13,6 @@
 
 if not TMW then return end
 
-local clientVersion = select(4, GetBuildInfo())
-
 ---------- Libraries ----------
 local LSM = LibStub("LibSharedMedia-3.0")
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
@@ -2979,7 +2977,7 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	end,
 }
 
-if TMW.isMop or TMW.isCata or TMW.isWrath then 
+if ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then 
 	TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
 		-- Constructor
 		Runes = {
@@ -3020,7 +3018,7 @@ if TMW.isMop or TMW.isCata or TMW.isWrath then
 			end
 		end,
 	}
-elseif TMW.isRetail then
+elseif ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 	TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
 		-- Constructor
 

@@ -114,15 +114,6 @@ _G.TMW = LibStub("AceAddon-3.0"):NewAddon(TMW, "TellMeWhen", "AceEvent-3.0", "Ac
 _G.TellMeWhen = _G.TMW
 local TMW = _G.TMW
 
-local tocVersion = select(4, GetBuildInfo());
-TMW.isClassic = tocVersion <= 19999
-TMW.isWrath = tocVersion >= 30400 and tocVersion <= 30499
-TMW.isCata = tocVersion >= 40400 and tocVersion <= 40499
-TMW.isCataOrGreater = tocVersion >= 40400
-TMW.isMop = tocVersion >= 50500 and tocVersion <= 50599
-TMW.isMopOrGreater = tocVersion >= 50500
-TMW.isRetail = tocVersion >= 90000
-
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 
@@ -195,6 +186,7 @@ local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlow
 local _G, coroutine, table, GetTime, CopyTable =
 	  _G, coroutine, table, GetTime, CopyTable
 local tostringall = tostringall
+local debugprofilestop = debugprofilestop
 
 ---------- Locals ----------
 local Locked
@@ -633,22 +625,6 @@ function TMW:ValidateType(argN, methodName, var, reqType)
 		error(("Bad argument %s to %q. %s expected, got %s (%s)"):format(argN, methodName, reqType, varTypeName, tostring(var) or "[noval]"), 3)
 	end
 end
-
--- This code is here to prevent other addons from resetting
--- the high-precision timer. It isn't fool-proof (if someone upvalues debugprofilestart
--- then this won't have an effect on calls to that upvalue), but it helps.
-local start_old = debugprofilestart
-local lastReset = 0
-function _G.debugprofilestart()
-	lastReset = lastReset + debugprofilestop()
-
-	return start_old()
-end
-
-function _G.debugprofilestop_SAFE()
-	return debugprofilestop() + lastReset    
-end
-local debugprofilestop = debugprofilestop_SAFE
 
 
 
@@ -1119,12 +1095,9 @@ function TMW:PLAYER_LOGIN()
 	end
 	TMW:RegisterEvent("PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
-	if TMW.isRetail then
-		TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-		TMW:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_SPECIALIZATION_CHANGED")
-	else
-		TMW:RegisterEvent("CHARACTER_POINTS_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
-	end
+	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_SPECIALIZATION_CHANGED")
+	TMW:RegisterEvent("CHARACTER_POINTS_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
 
 
 

@@ -61,7 +61,7 @@ ConditionCategory:RegisterCondition(1,	 "INSTANCE2", {
 
 	unit = false,
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
-	bitFlags = not TMW.isRetail and {
+	bitFlags = ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and {
 		[01] = {order=01, text=L["CONDITIONPANEL_INSTANCETYPE_NONE"],                                space=true,   }, -- None (Outside)
 		[02] = {order=02, text=BATTLEGROUND,                                                                       }, -- Battleground
 		[03] = {order=03, text=ARENA,                                                                space=true,   }, -- Arena

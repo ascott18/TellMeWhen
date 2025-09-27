@@ -93,11 +93,13 @@ function NAMES:OnInitialize()
 	self:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 end
 
+local scoreHasRankReturn = type(select(7, GetBattlefieldScore(1))) == 'number'
 function NAMES:UPDATE_BATTLEFIELD_SCORE()
 	for i = 1, GetNumBattlefieldScores() do
 		local name, class, _
-		if not TMW.isRetail then
+		if scoreHasRankReturn then
 			-- There's an extra "rank" return that's not there in retail.
+			-- Its there in classic up through at least MOP.
 			name, _, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
 		else
 			name, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)

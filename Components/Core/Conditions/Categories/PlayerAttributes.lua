@@ -141,7 +141,7 @@ if C_PvP.IsWarModeDesired then
 		funcstr = [[BOOLCHECK( IsWarModeDesired() )]],
 		events = function(ConditionObject, c)
 			return
-				ConditionObject:GenerateNormalEventString("PLAYER_FLAGS_CHANGED")
+			ConditionObject:GenerateNormalEventString("PLAYER_FLAGS_CHANGED")
 		end,
 	})
 end
@@ -155,22 +155,9 @@ end)
 
 ConditionCategory:RegisterSpacer(5.5)
 
-local FirstStances = not TMW.isRetail and {
-	DRUID = 5487, 		-- Bear Form
-	PRIEST = 15473, 	-- Shadowform
-	ROGUE = 1784, 		-- Stealth
-	WARRIOR = 2457, 	-- Battle Stance
-	PALADIN = 19746, 	-- Concentration Aura
-	DEATHKNIGHT = 48266,-- Blood Presence
-} or {
-	DRUID = 5487, 		-- Bear Form
-	ROGUE = 1784, 		-- Stealth
-	WARRIOR = 386208,   -- Defensive Stance
-}
 ConditionCategory:RegisterCondition(6,	 "STANCE", {
-	text = 	pclass == "DRUID" and L["SHAPESHIFT"] or
-			L["STANCE"],
-
+	text = L["STANCE"],
+	
 	bool = true,
 	
 	name = function(editbox)
@@ -180,9 +167,7 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 	useSUG = "stances",
 	allowMultipleSUGEntires = true,
 	unit = PLAYER,
-	icon = function()
-		return GetSpellTexture(FirstStances[pclass] or FirstStances.WARRIOR) or GetSpellTexture(FirstStances.WARRIOR)
-	end,
+	icon = "Interface\\Icons\\Ability_warrior_offensivestance",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		StanceHelper = function(spellSet)
@@ -223,7 +208,6 @@ ConditionCategory:RegisterCondition(6,	 "STANCE", {
 		return
 			ConditionObject:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM")
 	end,
-	hidden = not FirstStances[pclass],
 })
 
 ConditionCategory:RegisterSpacer(6.5)
@@ -280,13 +264,13 @@ ConditionCategory:RegisterCondition(13.1, "PETMODE2", {
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
 	bitFlags = {
 		[0] = L["CONDITIONPANEL_PETMODE_NONE"],
-		[1] = not TMW.isRetail and PET_MODE_AGRESSIVE or PET_MODE_ASSIST,
+		[1] = ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and PET_MODE_AGRESSIVE or PET_MODE_ASSIST,
 		[2] = PET_MODE_DEFENSIVE,
 		[3] = PET_MODE_PASSIVE
 	},
 
 	unit = false,
-	icon = not TMW.isRetail and PET_PASSIVE_TEXTURE or PET_ASSIST_TEXTURE,
+	icon = ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and PET_PASSIVE_TEXTURE or PET_ASSIST_TEXTURE,
 	tcoords = CNDT.COMMON.standardtcoords,
 
 	Env = {

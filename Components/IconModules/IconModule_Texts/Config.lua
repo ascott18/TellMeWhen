@@ -36,12 +36,6 @@ local CI = TMW.CI
 if not TEXT then return end
 
 
-local clientVersion = select(4, GetBuildInfo())
-
-
-
-
-
 -------------------------------
 -- Layout Configuration
 -------------------------------

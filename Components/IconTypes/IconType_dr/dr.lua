@@ -159,7 +159,7 @@ end)
 TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	-- Create our own DR equivalencies in TMW using the data from DRList-1.0
 
-	local myCategories = TMW.isMop and {
+	local myCategories = LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_MISTS_OF_PANDARIA and {
 		incapacitate	= "DR-Incapacitate",
 		disorient		= "DR-Disorient",
 		stun			= "DR-ControlledStun",
@@ -173,7 +173,7 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		mc				= "DR-MindControl",
 		taunt			= "DR-Taunt",
 		cyclone			= "DR-Cyclone",
-	} or (TMW.isWrath or TMW.isCata) and {
+	} or (ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
 		incapacitate = "DR-Incapacitate",
 		stun =         "DR-ControlledStun",
 		fear =         "DR-Fear",
@@ -188,7 +188,7 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		scatter =      "DR-Scatter",
 		cyclone =      "DR-Cyclone",
 		entrapment =   "DR-Entrapment",
-	} or TMW.isClassic and {
+	} or ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
 		incapacitate = "DR-Incapacitate",
 		stun =         "DR-ControlledStun",
 		fear =         "DR-Fear",
@@ -207,14 +207,14 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		disarm 			= "DR-Disarm",
 	}
 
-	local ignored = TMW.isMop and {
+	local ignored = LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_MISTS_OF_PANDARIA and {
 		knockback = true,
-	} or (TMW.isCata or TMW.isWrath) and {
+	} or (ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
 		knockback = true,
 		counterattack = true,
 		charge = true,
 		dragons = true,
-	} or TMW.isClassic and {
+	} or ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
 		knockback = true,
 		frost_shock = true,
 	} or {
