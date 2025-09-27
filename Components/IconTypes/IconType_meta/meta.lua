@@ -189,24 +189,6 @@ TMW:RegisterCallback("TMW_ICON_UPDATED", function(event, icon)
 end)
 
 
--- Performs a type setup on a meta icon when an icon/group it's checking is setup.
-local function SETUP_POST(event, iconOrGroup)
-	local GUID = iconOrGroup:GetGUID()
-
-	local Icons = Type.Icons
-	for i = 1, #Icons do
-		local icon_meta = Icons[i]
-
-		-- Table lookup is faster than function call. Put it first for short circuiting.
-		if (icon_meta.IconsLookup and icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled()) then
-			Type:Setup(icon_meta)
-		end
-	end
-end	
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", SETUP_POST)
-TMW:RegisterCallback("TMW_GROUP_SETUP_POST", SETUP_POST)
-
-
 
 
 
@@ -404,8 +386,38 @@ function GetFullIconTable(icon, icons)
 	return icon.CompiledIcons
 end
 
+local function CompileIcons(icon)
+	wipe(alreadyinserted)
+	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
+	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
+	
+	icon.IconsLookup = wipe(icon.IconsLookup or {})
+	for n, GUID in pairs(icon.CompiledIcons) do
+		icon.IconsLookup[GUID] = n
+	end
+	for _, GUID in pairs(icon.Icons) do 
+		-- make sure to get meta icons in the table even if they get expanded.
+		-- this will also include items that weren't yet setup when we did GetFullIconTable
+		icon.IconsLookup[GUID] = icon.IconsLookup[GUID] or true
+	end
+	icon.metaUpdateQueued = true
+end
 
+-- Performs a type setup on a meta icon when an icon/group it's checking is setup.
+local function SETUP_POST(event, iconOrGroup)
+	local GUID = iconOrGroup:GetGUID()
 
+	local Icons = Type.Icons
+	for i = 1, #Icons do
+		local icon_meta = Icons[i]
+
+		if icon_meta.IconsLookup and icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled() then
+			CompileIcons(icon_meta)
+		end
+	end
+end	
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", SETUP_POST)
+TMW:RegisterCallback("TMW_GROUP_SETUP_POST", SETUP_POST)
 
 
 
@@ -425,18 +437,8 @@ function Type:Setup(icon)
 			end
 		end
 	end
-
-	wipe(alreadyinserted)
-	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
-	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
 	
-	icon.IconsLookup = wipe(icon.IconsLookup or {})
-	for n, GUID in pairs(icon.CompiledIcons) do
-		icon.IconsLookup[GUID] = n
-	end
-	for _, GUID in pairs(icon.Icons) do -- make sure to get meta icons in the table even if they get expanded
-		icon.IconsLookup[GUID] = icon.IconsLookup[GUID] or true
-	end
+	CompileIcons(icon)
 
 	--[[
 	-- This breaks dynamic enabling/disabling of icons, so don't do it.
@@ -469,8 +471,6 @@ function Type:Setup(icon)
 	end
 		
 	icon:SetUpdateFunction(Meta_OnUpdate)
-
-	icon.metaUpdateQueued = true
 end
 
 function Type:OnGCD(icon, duration)
