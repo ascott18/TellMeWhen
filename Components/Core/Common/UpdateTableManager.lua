@@ -51,6 +51,9 @@ function UpdateTableManager:UpdateTable_Register(target)
 			tinsert(self.UpdateTable_UpdateTable, target)
 		end
 		
+		-- Update indexed views
+		self:UpdateTable_UpdateIndexedViews(target, "register")
+		
 		if oldLength == 0 and self.UpdateTable_OnUsed then
 			self:UpdateTable_OnUsed()
 		end
@@ -70,6 +73,9 @@ function UpdateTableManager:UpdateTable_Unregister(target)
 	
 	if oldLength ~= #self.UpdateTable_UpdateTable then
 		
+		-- Update indexed views
+		self:UpdateTable_UpdateIndexedViews(target, "unregister")
+		
 		if oldLength > 0 and #self.UpdateTable_UpdateTable == 0 and self.UpdateTable_OnUnused then
 			self:UpdateTable_OnUnused()
 		end
@@ -87,6 +93,13 @@ function UpdateTableManager:UpdateTable_UnregisterAll()
 		error("No update table was found for " .. tostring(self.GetName and self[0] and self:GetName() or self) .. ". Set one using self:UpdateTable_Set(table).")
 	end
 	local oldLength = #self.UpdateTable_UpdateTable
+	
+	-- Clear all indexed views
+	if self.UpdateTable_IndexedViews then
+		for viewName, viewData in pairs(self.UpdateTable_IndexedViews) do
+			wipe(viewData.index)
+		end
+	end
 	
 	wipe(self.UpdateTable_UpdateTable)
 	
@@ -119,6 +132,72 @@ end
 function UpdateTableManager:UpdateTable_PerformAutoSort()
 	if self.UpdateTable_DoAutoSort then
 		self:UpdateTable_Sort(self.UpdateTable_AutoSortFunc)
+	end
+end
+
+function UpdateTableManager:UpdateTable_CreateIndexedView(viewName, keyMapDelegate)
+	TMW:ValidateType("2 (viewName)", "UpdateTableManager:UpdateTable_CreateIndexedView(viewName, keyMapDelegate)", viewName, "string")
+	TMW:ValidateType("3 (keyMapDelegate)", "UpdateTableManager:UpdateTable_CreateIndexedView(viewName, keyMapDelegate)", keyMapDelegate, "function")
+	
+	if not self.UpdateTable_IndexedViews then
+		self.UpdateTable_IndexedViews = {}
+	end
+	
+	-- Initialize the indexed view
+	self.UpdateTable_IndexedViews[viewName] = {
+		keyMapDelegate = keyMapDelegate,
+		index = {}
+	}
+	
+	-- Populate the index with existing targets
+	if self.UpdateTable_UpdateTable then
+		for _, target in ipairs(self.UpdateTable_UpdateTable) do
+			local key = keyMapDelegate(target)
+			if key ~= nil then
+				if not self.UpdateTable_IndexedViews[viewName].index[key] then
+					self.UpdateTable_IndexedViews[viewName].index[key] = {}
+				end
+				tinsert(self.UpdateTable_IndexedViews[viewName].index[key], target)
+			end
+		end
+	end
+
+	return self.UpdateTable_IndexedViews[viewName].index
+end
+
+function UpdateTableManager:UpdateTable_GetIndexedView(viewName)
+	TMW:ValidateType("2 (viewName)", "UpdateTableManager:UpdateTable_GetIndexedView(viewName)", viewName, "string")
+	
+	if not self.UpdateTable_IndexedViews or not self.UpdateTable_IndexedViews[viewName] then
+		error("No indexed view named '" .. viewName .. "' was found for " .. tostring(self.GetName and self[0] and self:GetName() or self) .. ". Create one using self:UpdateTable_CreateIndexedView(viewName, keyMapDelegate).")
+	end
+	
+	return self.UpdateTable_IndexedViews[viewName].index
+end
+
+--- @internal
+function UpdateTableManager:UpdateTable_UpdateIndexedViews(target, operation)
+	if not self.UpdateTable_IndexedViews then
+		return
+	end
+	
+	for viewName, viewData in pairs(self.UpdateTable_IndexedViews) do
+		local key = viewData.keyMapDelegate(target)
+		if key ~= nil then
+			if operation == "register" then
+				if not viewData.index[key] then
+					viewData.index[key] = {}
+				end
+				tinsert(viewData.index[key], target)
+			elseif operation == "unregister" then
+				if viewData.index[key] then
+					TMW.tDeleteItem(viewData.index[key], target, true)
+					if #viewData.index[key] == 0 then
+						viewData.index[key] = nil
+					end
+				end
+			end
+		end
 	end
 end
 

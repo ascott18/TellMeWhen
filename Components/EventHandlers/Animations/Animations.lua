@@ -912,22 +912,18 @@ TMW:RegisterCallback("TMW_ICON_ANIMATION_START", function(_, self, table)
 end)
 
 
-function Animations:HandleConditionStateChange(eventSettingsList, failed)
+function Animations:HandleConditionStateChange(icon, eventSettings, failed)
 	if not failed then
-		for eventSettings, icon in pairs(eventSettingsList) do
-			-- These event settings just started passing,
-			-- but check to see if we should actually play them,
-			-- or if there is something earlier in the list that
-			-- should be played instead.
-			Animations:DetermineNextPlayingAnimation(icon, eventSettings.Animation)
-		end
+		-- These event settings just started passing,
+		-- but check to see if we should actually play them,
+		-- or if there is something earlier in the list that
+		-- should be played instead.
+		Animations:DetermineNextPlayingAnimation(icon, eventSettings.Animation)
 	else
-		for eventSettings, icon in pairs(eventSettingsList) do
-			local animationTable = MapEventSettingsToAnimationTable[eventSettings]
-			if animationTable then
-				animationTable.HALTED = true
-				MapEventSettingsToAnimationTable[eventSettings] = nil
-			end
+		local animationTable = MapEventSettingsToAnimationTable[eventSettings]
+		if animationTable then
+			animationTable.HALTED = true
+			MapEventSettingsToAnimationTable[eventSettings] = nil
 		end
 	end
 end
@@ -960,12 +956,18 @@ function Animations:DetermineNextPlayingAnimation(icon, Animation)
 
 		-- This eventSettings is the animation type we're asking at.
 		if eventSettings.Type == "Animations" and eventSettings.Animation == Animation then
-			local ConditionObject = self.EventSettingsToConditionObject[self:Proxy(eventSettings, icon)]
-
-			if ConditionObject and not ConditionObject.Failed then
-				-- We found a WCSP-triggered animation of the requested type, and its conditions are passing, so play it.
-				self:HandleEvent(icon, eventSettings)
-				return
+			local eventSettingsProxy = self:Proxy(eventSettings, icon)
+			local targets = self.ByEventSettingsProxy[eventSettingsProxy]
+			
+			if targets and targets[1] then
+				local target = targets[1] -- Should only be one target per eventSettingsProxy
+				local ConditionObject = target.ConditionObject
+				
+				if ConditionObject and not ConditionObject.Failed then
+					-- We found a WCSP-triggered animation of the requested type, and its conditions are passing, so play it.
+					self:HandleEvent(icon, eventSettings)
+					return
+				end
 			end
 		end
 	end

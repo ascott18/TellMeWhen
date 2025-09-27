@@ -828,8 +828,11 @@ end
 function TMW.tDeleteItem(table, item, onlyOne)
 	local i = 1
 	local removed
-	while table[i] do
-		if item == table[i] then
+	while true do
+		local tItem = table[i]
+		if not tItem then return removed end
+		
+		if item == tItem then
 			tremove(table, i)
 			if onlyOne then
 				return true
