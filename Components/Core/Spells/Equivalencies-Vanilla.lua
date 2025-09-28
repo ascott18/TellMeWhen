@@ -27,9 +27,13 @@ local pairs, type, ipairs, bit, select =
 
 TMW.BE = {
 	debuffs = {
-		ReducedHealing = {
-			 -13220, -- Wound Poison                        (rogue, assassination)
-			 -12294, -- Mortal Strike                       (warrior, arms)
+		Bleeding = {
+			   -703, -- Garrote                             (rogue, general)
+			  -1079, -- Rip                                 (druid, feral)
+			  -1822, -- Rake                                (druid, feral)
+			   1943, -- Rupture                             (rogue, general)
+			 -11977, -- Rend                                (warrior, arms)
+			  16511, -- Hemorrhage                          (rogue, subtlety)
 		},
 		CrowdControl = {
 			   -118, -- Polymorph                           (mage, general)
@@ -43,17 +47,9 @@ TMW.BE = {
 			  -9484, -- Shackle Undead                      (priest, general)
 			  20066, -- Repentance                          (paladin, general)
 		},
-		Shatterable = {
-			   -122, -- Frost Nova                          (mage, frost)
-			  -3355, -- Freezing Trap                       (hunter, general)
-		},
-		Bleeding = {
-			   -703, -- Garrote                             (rogue, general)
-			  -1079, -- Rip                                 (druid, feral)
-			  -1822, -- Rake                                (druid, feral)
-			   1943, -- Rupture                             (rogue, general)
-			 -11977, -- Rend                                (warrior, arms)
-			  16511, -- Hemorrhage                          (rogue, subtlety)
+		Disoriented = {
+			   -605, -- Mind Control                        (priest, PVE talent, general)
+			  -2094, -- Blind                               (rogue, general)
 		},
 		Feared = {
 			   5246, -- Intimidating Shout                  (warrior, general)
@@ -80,20 +76,10 @@ TMW.BE = {
 			  13327, -- Reckless Charge (Rocket Helmet)
 			  13181, -- Gnomish Mind Control Cap
 			  26108, -- Glimpse of Madness
-
 		},
-		Disoriented = {
-			   -605, -- Mind Control                        (priest, PVE talent, general)
-			  -2094, -- Blind                               (rogue, general)
-		},
-		Silenced = {
-			  -1330, -- Garrote - Silence                   (rogue, general)
-			 -15487, -- Silence                             (priest, shadow)
-			 -18469, -- Counterspell - Silenced
-			 -18425, -- Kick - Silenced
-			 -24259, -- Spell Lock
-			 -18498, -- Shield Bash - Silenced
-			  19821, -- Arcane Bomb Silence
+		ReducedHealing = {
+			 -13220, -- Wound Poison                        (rogue, assassination)
+			 -12294, -- Mortal Strike                       (warrior, arms)
 		},
 		Rooted = {
 			   -339, -- Entangling Roots                    (druid, general)
@@ -107,6 +93,19 @@ TMW.BE = {
 			 -19306, -- Counterattack
 			 -19185, -- Entrapment
 			 -23694, -- Improved Hamstring
+		},
+		Shatterable = {
+			   -122, -- Frost Nova                          (mage, frost)
+			  -3355, -- Freezing Trap                       (hunter, general)
+		},
+		Silenced = {
+			  -1330, -- Garrote - Silence                   (rogue, general)
+			 -15487, -- Silence                             (priest, shadow)
+			 -18469, -- Counterspell - Silenced
+			 -18425, -- Kick - Silenced
+			 -24259, -- Spell Lock
+			 -18498, -- Shield Bash - Silenced
+			  19821, -- Arcane Bomb Silence
 		},
 		Slowed = {
 			   -116, -- Frostbolt                           (mage, frost)
@@ -163,34 +162,85 @@ TMW.BE = {
 			   5530, -- Mace Stun Effect                    (Mace Specialization)
 			  15283, -- Stunning Blow                       (Weapon Proc)
 		},
+		ReducedArmor = {
+			-11597, -- Sunder Armor
+			-11198, -- Expose Armor
+			439471, -- Sebacious Poison
+			402818, -- Degrade
+			-9907, -- Faerie Fire
+			-17392, -- Faerie Fire (Feral)
+			-17315, -- Puncture Armor
+		},
+		
 	},
 	buffs = {
-		SpeedBoosts = {
-			    783, -- Travel Form                         (druid, baseline)
-			  -2983, -- Sprint                              (rogue, baseline)
-			  -2379, -- Speed                               (generic speed buff)
-			   2645, -- Ghost Wolf                          (shaman, general)
-			   7840, -- Swim Speed                          (Swim Speed Potion)
+		IncreasedAgility = {
+			17538, -- Elixir of the Mongoose
+			-11328, -- Agility
+			-11334, -- Greater Agility
+			-2374, -- Lesser Agility
+			1213904, -- Elixir of the Honey Badger
 		},
-		ImmuneToStun = {
-			    642, -- Divine Shield                       (paladin)
-			    710, -- Banish                              (warlock)
-			   1022, -- Blessing of Protection              (paladin)
-			   6615, -- Free Action                         (vanilla potion)
+		IncreasedStats = {
+			-16878, -- Mark of the Wild
+			-21849, -- Gift of the Wild
+			25898, -- Greater Blessing of Kings
+			20217, -- Blessing of Kings
+			409583, -- Heart of the Lion
 		},
-		-- DefensiveBuffsAOE = {
+		IncreasedArmor = {
+			-11349, -- Armor
+			-673, -- Lesser Armor
+			1213917, -- Elixir of the Ironside
+			11348, -- Greater Armor
+			15233, -- Crystal Ward
+		},
+		IncreasedAP = {
+			-17038, -- Winterfall Firewater
+			16329, -- Juju Might
+			473469, -- Cleansed Firewater
+		},
+		IncreasedHealth = {
+			3593, -- Health II
+			2378, -- Health
+		},
+		IncreasedIntellect = {
+			-1459, -- Arcane Intellect
+			23028, -- Arcane Brilliance
+			16327, -- Juju Guile
+			17535, -- Elixir of the Sages
+			-11396, -- Greater Intellect
+			-3165, -- Lesser Intellect
+			-3167, -- Intellect
+			16888, -- Intellect IX
+		},
+		IncreasedSP = {
+			-17539, -- Greater Arcane Elixir
+			11390, -- Arcane Elixir
+			439959, -- Lesser Arcane Elixir
+			1213914, -- Elixir of the Mage-Lord
+			15288, -- Fury of Ragnaros
+			17150, -- Arcane Might
+		},
+		IncreasedSpirit = {
+			27681, -- Prayer of Spirit
+			10767, -- Rising Spirit
+			17535, -- Elixir of the Sages
+			-14752, -- Divine Spirit
+			15231, -- Crystal Force
+			-8112, -- Spirit
+		},
+		IncreasedStrength = {
+			16323, -- Juju Power
+			17537, -- Elixir of Brute Force
+			-3164, -- Strength
+			-2367, -- Lesser Strength
+			-8212, -- Enlarge
+			-16883, -- Elixir of the Giants
+		},
+		-- BurstHaste = {
+		-- 	   2825, -- Bloodlust                           (shaman, horde)
 		-- },
-		DefensiveBuffsSingle = {
-			    498, -- Divine Protection                   (paladin, general)
-			    642, -- Divine Shield                       (paladin, general)
-			    871, -- Shield Wall                         (warrior, protection)
-			   1022, -- Blessing of Protection              (paladin, general)
-			  -1966, -- Feint                               (rogue, general)
-			   5277, -- Evasion                             (rogue, assassination/subtlety)
-			   6940, -- Blessing of Sacrifice               (paladin, holy)
-			  22812, -- Barkskin                            (druid, general)
-			  23920, -- Spell Reflection                    (warrior, PVP talent for arms/fury, baseline for protection)
-		},
 		DamageBuffs = {
 			   1719, -- Recklessness                        (warrior, arms)
 			   5217, -- Tiger's Fury                        (druid, feral)
@@ -206,21 +256,199 @@ TMW.BE = {
 			 -11426, -- Ice Barrier                         (mage)
 			  -1463, -- Mana Shield                         (mage)
 		},
+		DarkFortune = {
+			23738, -- Sayge's Dark Fortune of Spirit
+			23767, -- Sayge's Dark Fortune of Armor
+			23737, -- Sayge's Dark Fortune of Stamina
+			23736, -- Sayge's Dark Fortune of Agility
+			23766, -- Sayge's Dark Fortune of Intellect
+			23735, -- Sayge's Dark Fortune of Strength
+			23769, -- Sayge's Dark Fortune of Resistance
+			23768, -- Sayge's Dark Fortune of Damage
+			-473450, -- Dark Fortune of Damage 
+		},
+		-- DefensiveBuffsAOE = {
+		-- },
+		DefensiveBuffsSingle = {
+			    498, -- Divine Protection                   (paladin, general)
+			    642, -- Divine Shield                       (paladin, general)
+			    871, -- Shield Wall                         (warrior, protection)
+			   1022, -- Blessing of Protection              (paladin, general)
+			  -1966, -- Feint                               (rogue, general)
+			   5277, -- Evasion                             (rogue, assassination/subtlety)
+			   6940, -- Blessing of Sacrifice               (paladin, holy)
+			  22812, -- Barkskin                            (druid, general)
+			  23920, -- Spell Reflection                    (warrior, PVP talent for arms/fury, baseline for protection)
+		},
+		ImmuneToStun = {
+			    642, -- Divine Shield                       (paladin)
+			    710, -- Banish                              (warlock)
+			   1022, -- Blessing of Protection              (paladin)
+			   6615, -- Free Action                         (vanilla potion)
+		},
+		FireSpellPower = {
+			26276, -- Greater Firepower
+			7844, -- Fire Power
+		},
+		FlaskBuffs = {
+			17628, -- Supreme Power
+			17626, -- Flask of the Titans
+			17627, -- Distilled Wisdom
+			17629, -- Chromatic Resistance
+			17624, -- Petrification
+			448084, -- Restless Dreams
+			446228, -- Nightmarish Power
+			1213892, -- Flask of Ancient Knowledge
+			1213897, -- Flask of Madness
+			1213901, -- Flask of the Old Gods
+			1213886, -- Flask of Unyielding Sorrow
+		},
+		FoodBuffs = {
+			-19705, -- Well Fed
+			-25661, -- Increased Stamina
+			18141, -- Blessed Sunfruit Juice
+			18125, -- Blessed Sunfruit
+			18194, -- Mana Regeneration
+			18192, -- Increased Agility
+			22730, -- Increased Intellect
+		},
+		HealthRegeneration = {
+			-24361, -- Regeneration
+			16890, -- Regeneration IV
+		},
+		ImmuneToInterrupts = {
+			   -642, -- Divine Shield                       (paladin, general)
+		},
 		ImmuneToMagicCC = {
 			    642, -- Divine Shield                       (paladin, general)
 			   -710, -- Banish                              (warlock, general)
 			   8178, -- Grounding Totem Effect              (shaman, PVP talent, general)
 			  23920, -- Spell Reflection                    (warrior, PVP talent for arms/fury, baseline for protection)
 		},
-		-- BurstHaste = {
-		-- 	   2825, -- Bloodlust                           (shaman, horde)
-		-- },
-		ImmuneToInterrupts = {
-			   -642, -- Divine Shield                       (paladin, general)
-		},
 		ImmuneToSlows = {
 			   -642, -- Divine Shield                       (paladin, general)
 			   1044, -- Blessing of Freedom                 (paladin, general)
+		},
+		Kings = {
+			25898, -- Greater Blessing of Kings
+			20217, -- Blessing of Kings
+			409583, -- Heart of the Lion
+		},
+		Might = {
+			-25916, -- Greater Blessing of Might
+			-25291, -- Blessing of Might
+ 			425600, -- Horn of Lordaeron
+			409583, -- Heart of the Lion
+		},
+		ResistAll = {
+			27652, -- Elixir of Resistance
+			-16878, -- Mark of the Wild
+			-21849, -- Gift of the Wild
+		},
+		ResistFire = {
+			-10534, -- Fire Resistance (Totem)
+			-19900, -- Fire Resistance Aura
+		},
+		ResistFrost = {
+			 -19897, -- Frost Resistance Aura
+			 -8182, -- Frost Resistance (Totem)
+		},
+		ResistNature = {
+			-20190, -- Aspect of the Nature
+			-10599, -- Nature Resistance (Totem)
+		},
+		ResistShadow = {
+			-16874, -- Shadow Protection
+			27683, -- Prayer of Shadow Protection
+		},
+		ShadowSpellPower = {
+			11474, -- Shadow Power
+			16587, -- Dark Whispers
+		},
+		Sigils = {
+			439155, -- Sigil of Innovation
+			446240, -- Sigil of Living Dreams
+			463864, -- Sigil of Flowing Waters
+			1214001, -- Scroll: Wrath of the Swarm
+		},
+		Songflower = {
+			-15366, -- Songflower Serenade
+			-1218071, -- Songflower Lullaby
+		},
+		SpeedBoosts = {
+			    783, -- Travel Form                         (druid, baseline)
+			  -2983, -- Sprint                              (rogue, baseline)
+			  -2379, -- Speed                               (generic speed buff)
+			   2645, -- Ghost Wolf                          (shaman, general)
+			   7840, -- Swim Speed                          (Swim Speed Potion)
+		},
+		BonusStamina = {
+			-11767, -- Blood Pact
+			403215, -- Commanding Shout
+			-21562, -- Prayer of Fortitude
+			-10938, -- Power Word: Fortitude
+			-8099, -- Stamina
+		},
+		DamageReflect = {
+			-467, -- Thorns
+			-2947, -- Fire Shield
+			184, -- Fire Shield II
+			2602, -- Fire Shield IV
+			2601, -- Fire Shield III
+			15279, -- Crystal Spire
+			16610, -- Razorhide
+		},
+		WarchiefsBlessing = {
+			-16609, -- Warchief's Blessing
+			-460940, -- Might of Stormwind
+			-1218074, -- Might of Blackrock
+		},
+		WaterBreathing = {
+			5697, -- Unending Breath
+			16591, -- Noggenfogger Elixir
+			413548, -- Degreelessness Mode
+			-131, -- Water Breathing
+			425284, -- Spirit of the Redeemer
+			461137, -- Oath of the Sea
+			405688, -- Riptide Bubbles
+			-17443, -- Air Bubbles
+			1234, -- Tony's God Mode
+			5421, -- Aquatic Form (Passive)
+			22807, -- Greater Water Breathing
+			24347, -- Master Angler
+			24925, -- Hallow's End Candy
+			27827, -- Spirit of Redemption
+		},
+		WaterWalking =  {
+			-546, -- Water Walking
+			-1706, -- Levitate
+			10665, -- Water Walk
+			440804, -- Frozen Orb
+			460591, -- Chaos Chopper
+			461120, -- Treading Water
+			24927, -- Hallow's End Candy
+		},
+		Zanza = {
+			24383, -- Swiftness of Zanza
+			30338, -- Permanent Swiftness of Zanza
+			24382, -- Spirit of Zanza
+			30336, -- Permanent Spirit of Zanza
+			30331, -- Permanent Sheen of Zanza
+			-24417, -- Sheen of Zanza
+			-10690, -- Infallible Mind
+			-10691, -- Spiritual Domination
+			-10671, -- Spirit of Boar
+			-10667, -- Rage of Ages
+			-10669, -- Strike of the Scorpok
+			446396, -- Atal'ai Mojo of Life
+			446336, -- Atal'ai Mojo of War
+			446256, -- Atal'ai Mojo of Forbidden Magic
+			27665, -- Ironforge Gift of Friendship
+			27669, -- Orgrimmar Gift of Friendship
+			27671, -- Undercity Gift of Friendship
+			27666, -- Darnassus Gift of Friendship
+			27664, -- Stormwind Gift of Friendship
+			27670, -- Thunder Bluff Gift of Friendship
 		},
 	},
 	casts = {
