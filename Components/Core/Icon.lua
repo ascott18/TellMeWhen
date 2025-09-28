@@ -179,8 +179,116 @@ function Icon.ScriptSort(iconA, iconB)
 	end
 	return gA < gB
 end
-Icon:UpdateTable_SetAutoSort(Icon.ScriptSort)
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", Icon, "UpdateTable_PerformAutoSort")
+
+-- Dependency-aware sorting function
+local function SortIconUpdateTable(icons)
+	-- First, collect all dependencies for all icons
+	local iconDependencies = {}
+	local iconsByGUID = {}
+	local iconsInTable = {}
+	
+	-- Build lookup tables
+	for i = 1, #icons do
+		local icon = icons[i]
+		iconsInTable[icon] = i
+		local iconGUID = icon:GetGUID()
+		if iconGUID then
+			iconsByGUID[iconGUID] = icon
+		end
+	end
+	
+	-- Collect dependencies for each icon
+	for i = 1, #icons do
+		local icon = icons[i]
+		local dependencies = {}
+		
+		-- Fire the dependency collection event
+		TMW:Fire("TMW_COLLECT_ICON_DEPENDENCIES", icon, dependencies)
+		
+		-- Filter dependencies to only include icons that are actually in the update table
+		local filteredDeps = {}
+		for _, depGUID in ipairs(dependencies) do
+			local depIcon = TMW.GUIDToOwner[depGUID]
+			if depIcon and iconsInTable[depIcon] then
+				tinsert(filteredDeps, depIcon)
+			end
+		end
+		
+		iconDependencies[icon] = filteredDeps
+	end
+	
+	-- Perform topological sort with fallback to original sort for cycles
+	local sorted = {}
+	local visiting = {}
+	local visited = {}
+	local hasCycle = {}
+	
+	local function visit(icon)
+		if visiting[icon] then
+			-- Cycle detected
+			hasCycle[icon] = true
+			return
+		end
+		if visited[icon] then
+			return
+		end
+		
+		visiting[icon] = true
+		
+		-- Visit all dependencies first
+		local deps = iconDependencies[icon] or {}
+		for _, depIcon in ipairs(deps) do
+			if not hasCycle[depIcon] then
+				visit(depIcon)
+			end
+		end
+		
+		visiting[icon] = nil
+		visited[icon] = true
+		tinsert(sorted, icon)
+	end
+	
+	-- Sort icons by the original criteria first to maintain deterministic order
+	local iconsCopy = {}
+	for i = 1, #icons do
+		iconsCopy[i] = icons[i]
+	end
+	sort(iconsCopy, Icon.ScriptSort)
+	
+	-- Visit all icons in the original sort order
+	for _, icon in ipairs(iconsCopy) do
+		if not visited[icon] and not hasCycle[icon] then
+			visit(icon)
+		end
+	end
+	
+	-- Add any icons that were part of cycles at the end, in original sort order
+	for _, icon in ipairs(iconsCopy) do
+		if hasCycle[icon] and not visited[icon] then
+			tinsert(sorted, icon)
+			visited[icon] = true
+		end
+	end
+	
+	-- Copy the sorted result back to the original array
+	for i = 1, #sorted do
+		icons[i] = sorted[i]
+	end
+end
+
+-- Debounced sorting triggered by icon setup changes
+-- By triggering on icon setup instead of TMW_GLOBAL_UPDATE_POST,
+-- we can perform sorting after icons and groups are enabled/disabled with slash commands.
+local sortUpdateQueued = false
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function()
+	if not sortUpdateQueued then
+		sortUpdateQueued = true
+		C_Timer.After(0, function()
+			sortUpdateQueued = false
+			SortIconUpdateTable(TMW.IconsToUpdate)
+		end)
+	end
+end)
 
 -- [WRAPPER] (no documentation needed)
 Icon.SetScript_Blizz = Icon.SetScript
@@ -579,6 +687,14 @@ function Icon.SetUpdateMethod(icon, method)
 	else
 		error("Unknown update method " .. method)
 	end
+end
+
+--- Gets the update method that is being used by the icon.
+-- @name Icon:GetUpdateMethod
+-- @paramsig
+-- @return [string] The update method being used by the icon ("auto" or "manual")
+function Icon.GetUpdateMethod(icon)
+	return icon.Update_Method or "auto"
 end
 
 -- [INTERNAL] (no documentation needed)

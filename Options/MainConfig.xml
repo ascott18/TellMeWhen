@@ -421,7 +421,7 @@
 
 						self:SetMinMaxValues(0, 0.5)
 						self:SetValueStep(0.01)
-						self:SetTextFormatter(TMW.C.Formatter.S_SECONDS, TMW.C.Formatter.F_1)
+						self:SetTextFormatter(TMW.C.Formatter.S_SECONDS_UPS, TMW.C.Formatter.F_1)
 					</OnLoad>
 				</Scripts>
 			</Slider>

@@ -917,9 +917,11 @@ L["UIPANEL_OPENCPUPROFILE_DESC"] = [[View detailed CPU usage metrics about each 
 
 Also accessible via '/tmw cpu']]
 L["UIPANEL_UPDATEINTERVAL"] = "Update Interval"
+L["UIPANEL_UPDATEINTERVAL_UPS"] = [[%s sec. 
+(≤ %s UPS)]]
 L["UIPANEL_TOOLTIP_UPDATEINTERVAL"] = [[Sets how often (in seconds) icons are checked for show/hide, alpha, conditions, etc.
 
-Zero is as fast as possible (every frame). Lower values may have a slight impact on framerate for low-end computers.]]
+Updates occur at most once per frame. Lower values may have a slight impact on framerate for low-end computers.]]
 L["UIPANEL_EFFTHRESHOLD"] = "Buff Efficiency Threshold"
 L["UIPANEL_EFFTHRESHOLD_DESC"] = [[Sets a threshold based on the number of buffs/debuffs configured to be checked by buff/debuff icons.
 

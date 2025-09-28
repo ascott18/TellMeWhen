@@ -87,6 +87,13 @@ Formatter{
 
 	D_SECONDS = Formatter:New(D_SECONDS),
 	S_SECONDS = Formatter:New(L["ANIM_SECONDS"]),
+	S_SECONDS_UPS = Formatter:New(function(value)
+		if value == 0 then
+			return L["UIPANEL_UPDATEINTERVAL_UPS"]:format(0.001, 1000)
+		else
+			return L["UIPANEL_UPDATEINTERVAL_UPS"]:format(value, ("%d"):format(1/value))
+		end
+	end),
 
 	PIXELS = Formatter:New(L["ANIM_PIXELS"]),
 

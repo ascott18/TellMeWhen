@@ -59,25 +59,21 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	unit = false,
 	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
 	tcoords = CNDT.COMMON.standardtcoords,
-	Env = {
-		IsIconShown = function(icon)
-			if not icon or not icon.attributes.shown then return false end
-			icon:Update()
-			return icon.attributes.realAlpha > 0
-		end
-	},
 	funcstr = function(c, icon)
 		TMW:QueueValidityCheck(icon, c.Icon, L["VALIDITY_CONDITION_DESC"])
 
-		return "BOOLCHECK(IsIconShown(c.Icon))"
+		return "BOOLCHECK(c.Icon and c.Icon.attributes.shown and c.Icon.attributes.realAlpha > 0)"
 	end,
-	--[[events = function(ConditionObject, c)
+	events = function(ConditionObject, c)
 		local event = TMW.Classes.IconDataProcessor.ProcessorsByName.REALALPHA.changedEvent
 		ConditionObject:RequestEvent(event)
+		local event2 = TMW.Classes.IconDataProcessor.ProcessorsByName.SHOWN.changedEvent
+		ConditionObject:RequestEvent(event2)
+
 		ConditionObject:SetNumEventArgs(1)
 		return
-			"event == '" .. event .. "' and arg1:GetGUID() == " .. format("%q", c.Icon)
-	end,]]
+			"(event == '" .. event .. "' or event == '" .. event2 .. "') and arg1:GetGUID() == " .. format("%q", c.Icon)
+	end,
 })
 
 local function RegisterShownHiddenTimerCallback()
@@ -162,6 +158,19 @@ TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, t
 		end
 	end
 end)
+
+-- Collect icon dependencies from conditions
+TMW:RegisterCallback("TMW_COLLECT_ICON_DEPENDENCIES", function(event, icon, dependencies)
+	if icon and icon.Conditions then
+		for n, conditionSettings in TMW:InNLengthTable(icon.Conditions) do
+			local GUID = conditionSettings.Icon
+			if GUID and GUID ~= "" then
+				tinsert(dependencies, GUID)
+			end
+		end
+	end
+end)
+
 
 
 ConditionCategory:RegisterCondition(3,	 "MOUSEOVER", {

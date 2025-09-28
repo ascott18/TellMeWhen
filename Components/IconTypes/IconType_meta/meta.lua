@@ -123,13 +123,24 @@ end
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
 	for _, icon in pairs(Type.Icons) do
-		icon.metaUpdateQueued = true
+		icon.NextUpdateTime = 0
 		
 		local success, err = pcall(CheckCompiledIcons, icon)
 		if err and err:find("stack overflow") then
 			local err = format("Meta icon recursion was detected in %s - there is an endless loop between the icon and its sub icons.", CCI_icon:GetName())
 			TMW:Error(err)
 			TMW:Warn(err)
+		end
+	end
+end)
+
+
+-- Collect icon dependencies for meta icons
+TMW:RegisterCallback("TMW_COLLECT_ICON_DEPENDENCIES", function(event, icon, dependencies)
+	if icon.Type == "meta" and icon.CompiledIcons then
+		-- Add all compiled icon dependencies to the dependencies table
+		for _, GUID in pairs(icon.CompiledIcons) do
+			tinsert(dependencies, GUID)
 		end
 	end
 end)
@@ -170,30 +181,34 @@ if TMW.EVENTS:GetEventHandler("Animations") then
 	end)
 end
 
--- Queues meta icons for updates when an icon they're checking is updated.
-TMW:RegisterCallback("TMW_ICON_UPDATED", function(event, icon)
-	local GUID = icon:GetGUID()
-
-	local Icons = Type.Icons
-	for i = 1, #Icons do
-		local icon_meta = Icons[i]
-
-		-- Table lookup is faster than function call. Put it first for short circuiting.
-		-- We check that icon_meta.IconsLookup exists because after turning off the group controller setting
-		-- on a meta icon, there will be some icons in Type.Icons that aren't really meta icons,
-		-- but are still reporting as not being controlled since that has already been disabled.
-		if icon_meta == icon or (icon_meta.IconsLookup and icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled()) then
-			icon_meta.metaUpdateQueued = true
-		end
-	end
-end)
-
 
 
 
 
 
 ------- Update Functions -------
+
+local CompileIcons
+
+-- Event handler for meta icons
+local function Meta_OnEvent(icon, event, arg1)
+	if event == "TMW_ICON_UPDATED" then
+		-- Check if this updated icon is one that we're monitoring
+		local GUID = arg1:GetGUID()
+		if icon.IconsLookup and icon.IconsLookup[GUID] then
+			icon.UpdatedIcons[arg1] = true
+			icon.NextUpdateTime = 0
+		end
+	elseif event == "TMW_ICON_SETUP_POST" or event == "TMW_GROUP_SETUP_POST" then
+		-- Re-compile icons when dependencies are setup
+		local GUID = arg1:GetGUID()
+		if icon.IconsLookup and icon.IconsLookup[GUID] then
+			icon.UpdatedIcons[arg1] = true
+			CompileIcons(icon)
+			icon.NextUpdateTime = 0
+		end
+	end
+end
 
 local huge = math.huge
 local function Meta_OnUpdate(icon, time)
@@ -207,37 +222,29 @@ local function Meta_OnUpdate(icon, time)
 		local ic = TMW.GUIDToOwner[GUID]
 		
 		local attributes = ic and ic.attributes
-		
+
 		if	ic
 			and ic.Enabled
 			and attributes.shown
+			and attributes.realAlpha > 0
 			and not (CheckNext and ic.__lastMetaCheck == time)
 			and ic.viewData == icon.viewData
 		then
-			ic:Update()
-
-			if attributes.realAlpha > 0 and attributes.shown then -- make sure to re-check attributes.shown (it might have changed from the ic:Update() call)
-				-- This icon is OK to be shown.
-				if Sort then
-					-- See if we can use this icon due to sorting.
-					local dur = (attributes.duration - (time - attributes.start)) / (attributes.modRate or 1)
-					if dur < 0 then
-						dur = 0
-					end
-					if not icToUse or curSortDur*Sort < dur*Sort then
-						icToUse = ic
-						curSortDur = dur
-					end
-				else
-					if not icon:YieldInfo(true, ic) then
-						-- icon:YieldInfo() returns false if we don't need to keep harvesting icons to use.
-						break
-					end
+			if Sort then
+				-- See if we can use this icon due to sorting.
+				local dur = (attributes.duration - (time - attributes.start)) / (attributes.modRate or 1)
+				if dur < 0 then
+					dur = 0
+				end
+				if not icToUse or curSortDur*Sort < dur*Sort then
+					icToUse = ic
+					curSortDur = dur
 				end
 			else
-				-- Record that the icon has been checked in this update cycle,
-				-- so that other icons don't waste their time trying to check it again only to find it doesn't work.
-				ic.__lastMetaCheck = time
+				if not icon:YieldInfo(true, ic) then
+					-- icon:YieldInfo() returns false if we don't need to keep harvesting icons to use.
+					break
+				end
 			end
 		end
 	end
@@ -250,7 +257,7 @@ local function Meta_OnUpdate(icon, time)
 		icon:YieldInfo(false)
 	end
 
-	icon.metaUpdateQueued = nil
+	wipe(icon.UpdatedIcons)
 end
 
 function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
@@ -286,10 +293,10 @@ function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 		end
 
 		-- Record that the icon has been shown in a meta icon for this update cycle
-		-- so that no other meta icons try to show it.
+		-- so that no other CheckNext meta icons try to show it.
 		dataSource.__lastMetaCheck = TMW.time
 
-		if needUpdate or icon.metaUpdateQueued then
+		if needUpdate or icon.UpdatedIcons[dataSource] then
 			-- Inherit the alpha of the icon. Don't SetInfo_INTERNAL here because the
 			-- call to :InheritDataFromIcon might not call TMW_ICON_UPDATED
 			iconToSet:SetInfo("state_metaChild", dataSource.attributes.calculatedState)
@@ -297,7 +304,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, icToUse)
 			iconToSet:InheritDataFromIcon(dataSource)
 		end
 
-	elseif iconToSet.attributes.realAlpha ~= 0 and icon.metaUpdateQueued then
+	elseif iconToSet.attributes.realAlpha ~= 0 then
+		-- Nothing to show - hide the meta icon.
 		iconToSet:SetInfo("state; state_metaChild; start, duration",
 			0,
 			nil,
@@ -386,7 +394,7 @@ function GetFullIconTable(icon, icons)
 	return icon.CompiledIcons
 end
 
-local function CompileIcons(icon)
+function CompileIcons(icon)
 	wipe(alreadyinserted)
 	icon.CompiledIcons = wipe(icon.CompiledIcons or {})
 	icon.CompiledIcons = GetFullIconTable(icon, icon.Icons)
@@ -400,24 +408,10 @@ local function CompileIcons(icon)
 		-- this will also include items that weren't yet setup when we did GetFullIconTable
 		icon.IconsLookup[GUID] = icon.IconsLookup[GUID] or true
 	end
-	icon.metaUpdateQueued = true
+	icon.NextUpdateTime = 0
 end
 
--- Performs a type setup on a meta icon when an icon/group it's checking is setup.
-local function SETUP_POST(event, iconOrGroup)
-	local GUID = iconOrGroup:GetGUID()
 
-	local Icons = Type.Icons
-	for i = 1, #Icons do
-		local icon_meta = Icons[i]
-
-		if icon_meta.IconsLookup and icon_meta.IconsLookup[GUID] and not icon_meta:IsControlled() then
-			CompileIcons(icon_meta)
-		end
-	end
-end	
-TMW:RegisterCallback("TMW_ICON_SETUP_POST", SETUP_POST)
-TMW:RegisterCallback("TMW_GROUP_SETUP_POST", SETUP_POST)
 
 
 
@@ -426,7 +420,6 @@ TMW:RegisterCallback("TMW_GROUP_SETUP_POST", SETUP_POST)
 function Type:Setup(icon)
 	icon.__currentIcon = nil -- reset this
 	icon.__metaModuleSource = nil -- reset this
-	icon.metaUpdateQueued = true -- force this
 
 	-- validity check:
 	if icon.Enabled then
@@ -438,29 +431,33 @@ function Type:Setup(icon)
 		end
 	end
 	
-	CompileIcons(icon)
+	-- Holds the set of constituent icons that we had update event triggers
+	-- for since the last update. Prevents doing a redundant SetInfo() call
+	-- if we didn't change the data source. Ensures we DO a SetInfo() if the
+	-- unchanged data source had attribute updates we need to copy.
+	icon.UpdatedIcons = {}
 
-	--[[
-	-- This breaks dynamic enabling/disabling of icons, so don't do it.
-	local dontUpdate = true
-	for _, GUID in pairs(icon.CompiledIcons) do
-		local ics = TMW:GetSettingsFromGUID(GUID)
-		if ics and ics.Enabled then
-			dontUpdate = nil
-			break
-		end
-	end]]
+	CompileIcons(icon)
 
 	icon:SetInfo("state; texture", 
 		0, 
 		"Interface\\AddOns\\TellMeWhen\\Textures\\levelupicon-lfd"
 	)
 	
-	-- DONT DO THIS! (manual updates) ive tried for many hours to get it working,
-	-- but there is no possible way because meta icons update
-	-- the icons they are checking from within them to check for changes,
-	-- so everything will be delayed by at least one update cycle if we do manual updating.
-	-- icon:SetUpdateMethod("manual") 
+	-- Setup event-driven updates
+	if icon.CheckNext then
+		-- If Expand sub-metas is enabled, we have to also trigger on any meta source change
+		-- because any other random meta icon in TMW could affect and shift around
+		-- which icon gets chosen by this icon.
+		-- TODO: Consider deleting this option since group controllers exist now.
+		icon:RegisterSimpleUpdateEvent("TMW_ICON_META_INHERITED_ICON_CHANGED")
+	end
+	icon:SetUpdateMethod("manual")
+	icon:SetScript("OnEvent", Meta_OnEvent)
+		
+	icon:RegisterEvent("TMW_ICON_UPDATED")
+	icon:RegisterEvent("TMW_ICON_SETUP_POST")
+	icon:RegisterEvent("TMW_GROUP_SETUP_POST")
 
 	if icon:IsGroupController() then
 		icon.Sort = false
