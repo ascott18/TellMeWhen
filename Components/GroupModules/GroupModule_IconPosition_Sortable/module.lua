@@ -189,7 +189,7 @@ function IconPosition_Sortable:OnEnable()
 end
 	
 function IconPosition_Sortable:OnDisable()
-	wipe(self.SortedIcons)
+	self.SortedIconsManager:UpdateTable_UnregisterAll()
 	
 	TMW:UnregisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_POST", self)
 	TMW:UnregisterCallback("TMW_ICON_UPDATED", self)
