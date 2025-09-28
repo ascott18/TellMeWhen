@@ -38,6 +38,7 @@ Module.stances = {
 	[386164] = 	GetSpellName(386164), 	-- Battle Stance (dragonflight)
 	[386208] = 	GetSpellName(386208),	-- Defensive Stance (dragonflight)
 	[386196] = 	GetSpellName(386196), 	-- Berserker Stance (dragonflight)
+	[412513] =  GetSpellName(412513),   -- Gladiator Stance (SOD)
 	
 	[5487] = 	GetSpellName(5487), 	-- Bear Form
 	[768] = 	GetSpellName(768),		-- Cat Form
@@ -62,6 +63,7 @@ Module.stances = {
 	[48265] = 	GetSpellName(48265), 	-- Unholy Presence	
 
 	[103958] = 	GetSpellName(103958),	-- Metamorphosis
+	[403789] =  GetSpellName(403789),   -- Metamorphosis (SOD)
 	[114168] = 	GetSpellName(114168),	-- Dark Apotheosis
 
 	[15473] = 	GetSpellName(15473), 	-- Shadowform	
