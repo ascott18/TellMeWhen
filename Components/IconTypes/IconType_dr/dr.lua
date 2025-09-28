@@ -165,12 +165,12 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		stun			= "DR-ControlledStun",
 		random_stun		= "DR-RandomStun",
 		fear			= "DR-Fear",
+		mind_control    = "DR-MindControl",
 		root			= "DR-ControlledRoot",
 		random_root		= "DR-RandomRoot",
 		disarm			= "DR-Disarm",
 		silence			= "DR-Silence",
 		horror			= "DR-Horrify",
-		mc				= "DR-MindControl",
 		taunt			= "DR-Taunt",
 		cyclone			= "DR-Cyclone",
 	} or (ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
