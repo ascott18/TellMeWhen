@@ -439,3 +439,40 @@ if C_EquipmentSet then
 		end,
 	})
 end
+
+local GetInventoryItemDurability = GetInventoryItemDurability
+local INVSLOT_FIRST_EQUIPPED = INVSLOT_FIRST_EQUIPPED
+local INVSLOT_LAST_EQUIPPED = INVSLOT_LAST_EQUIPPED
+ConditionCategory:RegisterCondition(19, "ARMORREPAIR", {
+	text = L["CONDITIONPANEL_ARMORREPAIR"],
+	tooltip = L["CONDITIONPANEL_ARMORREPAIR_DESC"],
+
+	percent = true,
+	formatter = TMW.C.Formatter.PERCENT,
+	min = 0,
+	max = 100,
+	
+	unit = PLAYER,
+	icon = "Interface\\Icons\\trade_blacksmithing",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		GetLowestArmorRepair = function()
+			local lowest = 1
+			for slot = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED do
+				local current, max = GetInventoryItemDurability(slot)
+				if current and max and max > 0 then
+					local percent = (current / max)
+					if percent < lowest then
+						lowest = percent
+					end
+				end
+			end
+			return lowest
+		end,
+	},
+	funcstr = [[GetLowestArmorRepair() c.Operator c.Level]],
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("UPDATE_INVENTORY_DURABILITY")
+	end,
+})

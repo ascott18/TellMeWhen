@@ -1,4 +1,5 @@
 ## v11.2.5
+* New condition: Armor Repair Level - Checks the lowest durability percentage of any equipped gear.
 * Meta Icons and Icon Shown conditions now use pure event-driven updates. This is made possible by dynamic, dependency-aware ordering of icon update checks. If you have circular dependencies between icons, you may find that some updates may be delayed by at least one update interval. 
 * While Condition Set Passing and On Condition Set Passing triggers for notifications no longer evaluate while their icon's group is not shown/active. This now matches the behavior of all other notification triggers.
 * Unit Conditions no longer evaluate while the icon that requested them is not shown/active.

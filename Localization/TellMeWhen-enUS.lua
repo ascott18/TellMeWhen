@@ -1530,6 +1530,8 @@ L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT"] = "Equipment set name"
 L["CONDITIONPANEL_BLIZZEQUIPSET_INPUT_DESC"] = [[Enter the name of the Blizzard equipment set that you wish to check.
 
 Only one equipment set may be entered, and it is |cFFFF5959CASE SENSITIVE|r]]
+L["CONDITIONPANEL_ARMORREPAIR"] = "Armor Repair Level"
+L["CONDITIONPANEL_ARMORREPAIR_DESC"] = "Checks the lowest durability percentage of any equipped gear."
 L["EQUIPSETTOCHECK"] = "Equipment set to check (|cFFFF5959CASE SENSITIVE|r)"
 L["ONLYCHECKMINE"] = "Only Cast By Me"
 L["ONLYCHECKMINE_DESC"] = "Check this to cause this condition to only check for buffs/debuffs that you cast"
