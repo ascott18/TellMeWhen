@@ -160,7 +160,7 @@ TMW:RegisterCallback("TMW_EXPORT_SETTINGS_REQUESTED", function(event, strings, t
 end)
 
 -- Collect icon dependencies from conditions
-TMW:RegisterCallback("TMW_COLLECT_ICON_DEPENDENCIES", function(event, icon, dependencies)
+TMW:RegisterCallback("TMW_ICON_COLLECT_DEPENDENCIES", function(event, icon, dependencies)
 	if icon and icon.Conditions then
 		for n, conditionSettings in TMW:InNLengthTable(icon.Conditions) do
 			local GUID = conditionSettings.Icon

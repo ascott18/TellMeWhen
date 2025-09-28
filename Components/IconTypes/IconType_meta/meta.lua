@@ -136,7 +136,7 @@ end)
 
 
 -- Collect icon dependencies for meta icons
-TMW:RegisterCallback("TMW_COLLECT_ICON_DEPENDENCIES", function(event, icon, dependencies)
+TMW:RegisterCallback("TMW_ICON_COLLECT_DEPENDENCIES", function(event, icon, dependencies)
 	if icon.Type == "meta" and icon.CompiledIcons then
 		-- Add all compiled icon dependencies to the dependencies table
 		for _, GUID in pairs(icon.CompiledIcons) do

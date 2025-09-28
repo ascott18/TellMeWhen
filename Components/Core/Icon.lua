@@ -203,7 +203,7 @@ local function SortIconUpdateTable(icons)
 		local dependencies = {}
 		
 		-- Fire the dependency collection event
-		TMW:Fire("TMW_COLLECT_ICON_DEPENDENCIES", icon, dependencies)
+		TMW:Fire("TMW_ICON_COLLECT_DEPENDENCIES", icon, dependencies)
 		
 		-- Filter dependencies to only include icons that are actually in the update table
 		local filteredDeps = {}
