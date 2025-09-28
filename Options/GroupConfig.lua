@@ -333,9 +333,15 @@ TMW:NewClass("Config_GroupListButton", "Config_CheckButton"){
 		local groupSelect = self:CScriptBubbleGet("GetGroupListContainer")
 		
 		local group, domain, ID = groupSelect:GetDraggingGroup()
-		groupSelect:SetDraggingGroup(nil, nil, nil)
+		
+		-- Only process if we actually have a group (prevents multiple OnDragStop calls)
+		-- As of some recent WoW patch (11.0? 11.0.5? 11.0.7?), hiding a frame while in its OnDragStop
+		-- will trigger OnDragStop AGAIN 
 
-		TMW:Group_Insert(group, domain, ID)
+		if group then
+			groupSelect:SetDraggingGroup(nil, nil, nil)
+			TMW:Group_Insert(group, domain, ID)
+		end
 
 		-- It will be hidden when the global update happens.
 		-- We should keep it shown, though.
@@ -467,6 +473,7 @@ function TMW:Group_Add(domain, view)
 end
 
 function TMW:Group_Insert(group, targetDomain, targetID)
+	print(group, targetDomain, targetID)
 	if InCombatLockdown() then
 		-- Error if we are in combat because TMW:Update() won't update the groups instantly if we are.
 		error("TMW: Can't swap groups while in combat")
