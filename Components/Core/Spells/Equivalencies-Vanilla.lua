@@ -10,6 +10,7 @@
 -- Cybeloras of Aerie Peak
 -- --------------------
 
+-- Some items in this file contributed by https://github.com/Alessandro-Barbieri
 
 if not TMW then return end
 
