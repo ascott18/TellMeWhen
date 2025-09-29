@@ -174,35 +174,29 @@ TMW.BE = {
 		
 	},
 	buffs = {
-		IncreasedAgility = {
-			17538, -- Elixir of the Mongoose
-			-11328, -- Agility
-			-11334, -- Greater Agility
-			-2374, -- Lesser Agility
-			1213904, -- Elixir of the Honey Badger
-		},
 		IncreasedStats = {
 			-16878, -- Mark of the Wild
 			-21849, -- Gift of the Wild
 			25898, -- Greater Blessing of Kings
 			20217, -- Blessing of Kings
 			409583, -- Heart of the Lion
+			-15366, -- Songflower Serenade
+			-1218071, -- Songflower Lullaby
 		},
-		IncreasedArmor = {
-			-11349, -- Armor
-			-673, -- Lesser Armor
-			1213917, -- Elixir of the Ironside
-			11348, -- Greater Armor
-			15233, -- Crystal Ward
+		BonusStamina = {
+			-11767, -- Blood Pact
+			403215, -- Commanding Shout
+			-21562, -- Prayer of Fortitude
+			-10938, -- Power Word: Fortitude
+			-8099, -- Stamina
 		},
-		IncreasedAP = {
-			-17038, -- Winterfall Firewater
-			16329, -- Juju Might
-			473469, -- Cleansed Firewater
-		},
-		IncreasedHealth = {
-			3593, -- Health II
-			2378, -- Health
+		IncreasedAgility = {
+			17538, -- Elixir of the Mongoose
+			-11328, -- Agility
+			-11334, -- Greater Agility
+			-2374, -- Lesser Agility
+			1213904, -- Elixir of the Honey Badger
+ 			425600, -- Horn of Lordaeron
 		},
 		IncreasedIntellect = {
 			-1459, -- Arcane Intellect
@@ -214,13 +208,14 @@ TMW.BE = {
 			-3167, -- Intellect
 			16888, -- Intellect IX
 		},
-		IncreasedSP = {
-			-17539, -- Greater Arcane Elixir
-			11390, -- Arcane Elixir
-			439959, -- Lesser Arcane Elixir
-			1213914, -- Elixir of the Mage-Lord
-			15288, -- Fury of Ragnaros
-			17150, -- Arcane Might
+		IncreasedStrength = {
+			16323, -- Juju Power
+			17537, -- Elixir of Brute Force
+			-3164, -- Strength
+			-2367, -- Lesser Strength
+			-8212, -- Enlarge
+			-16883, -- Elixir of the Giants
+ 			425600, -- Horn of Lordaeron
 		},
 		IncreasedSpirit = {
 			27681, -- Prayer of Spirit
@@ -230,13 +225,41 @@ TMW.BE = {
 			15231, -- Crystal Force
 			-8112, -- Spirit
 		},
-		IncreasedStrength = {
-			16323, -- Juju Power
-			17537, -- Elixir of Brute Force
-			-3164, -- Strength
-			-2367, -- Lesser Strength
-			-8212, -- Enlarge
-			-16883, -- Elixir of the Giants
+		IncreasedAP = {
+			-25916, -- Greater Blessing of Might
+			-25291, -- Blessing of Might
+			-17038, -- Winterfall Firewater
+			16329, -- Juju Might
+			473469, -- Cleansed Firewater
+		},
+		IncreasedSP = {
+			-17539, -- Greater Arcane Elixir
+			11390, -- Arcane Elixir
+			439959, -- Lesser Arcane Elixir
+			1213914, -- Elixir of the Mage-Lord
+			15288, -- Fury of Ragnaros
+			17150, -- Arcane Might
+		},
+		IncreasedCrit = {
+			-15366, -- Songflower Serenade
+			-1218071, -- Songflower Lullaby
+		},
+		IncreasedPhysHaste = {
+			-16609, -- Warchief's Blessing
+			-460940, -- Might of Stormwind
+			-1218074, -- Might of Blackrock
+		},
+
+		IncreasedArmor = {
+			-11349, -- Armor
+			-673, -- Lesser Armor
+			1213917, -- Elixir of the Ironside
+			11348, -- Greater Armor
+			15233, -- Crystal Ward
+		},
+		IncreasedHealth = {
+			3593, -- Health II
+			2378, -- Health
 		},
 		-- BurstHaste = {
 		-- 	   2825, -- Bloodlust                           (shaman, horde)
@@ -286,10 +309,6 @@ TMW.BE = {
 			   1022, -- Blessing of Protection              (paladin)
 			   6615, -- Free Action                         (vanilla potion)
 		},
-		FireSpellPower = {
-			26276, -- Greater Firepower
-			7844, -- Fire Power
-		},
 		FlaskBuffs = {
 			17628, -- Supreme Power
 			17626, -- Flask of the Titans
@@ -329,51 +348,22 @@ TMW.BE = {
 			   -642, -- Divine Shield                       (paladin, general)
 			   1044, -- Blessing of Freedom                 (paladin, general)
 		},
-		Kings = {
-			25898, -- Greater Blessing of Kings
-			20217, -- Blessing of Kings
-			409583, -- Heart of the Lion
-		},
-		Might = {
-			-25916, -- Greater Blessing of Might
-			-25291, -- Blessing of Might
- 			425600, -- Horn of Lordaeron
-			409583, -- Heart of the Lion
-		},
-		ResistAll = {
+		Resistances = {
 			27652, -- Elixir of Resistance
 			-16878, -- Mark of the Wild
 			-21849, -- Gift of the Wild
-		},
-		ResistFire = {
+			
 			-10534, -- Fire Resistance (Totem)
 			-19900, -- Fire Resistance Aura
-		},
-		ResistFrost = {
+			
 			 -19897, -- Frost Resistance Aura
 			 -8182, -- Frost Resistance (Totem)
-		},
-		ResistNature = {
+			 
 			-20190, -- Aspect of the Nature
 			-10599, -- Nature Resistance (Totem)
-		},
-		ResistShadow = {
+			
 			-16874, -- Shadow Protection
 			27683, -- Prayer of Shadow Protection
-		},
-		ShadowSpellPower = {
-			11474, -- Shadow Power
-			16587, -- Dark Whispers
-		},
-		Sigils = {
-			439155, -- Sigil of Innovation
-			446240, -- Sigil of Living Dreams
-			463864, -- Sigil of Flowing Waters
-			1214001, -- Scroll: Wrath of the Swarm
-		},
-		Songflower = {
-			-15366, -- Songflower Serenade
-			-1218071, -- Songflower Lullaby
 		},
 		SpeedBoosts = {
 			    783, -- Travel Form                         (druid, baseline)
@@ -381,13 +371,6 @@ TMW.BE = {
 			  -2379, -- Speed                               (generic speed buff)
 			   2645, -- Ghost Wolf                          (shaman, general)
 			   7840, -- Swim Speed                          (Swim Speed Potion)
-		},
-		BonusStamina = {
-			-11767, -- Blood Pact
-			403215, -- Commanding Shout
-			-21562, -- Prayer of Fortitude
-			-10938, -- Power Word: Fortitude
-			-8099, -- Stamina
 		},
 		DamageReflect = {
 			-467, -- Thorns
@@ -398,33 +381,22 @@ TMW.BE = {
 			15279, -- Crystal Spire
 			16610, -- Razorhide
 		},
-		WarchiefsBlessing = {
-			-16609, -- Warchief's Blessing
-			-460940, -- Might of Stormwind
-			-1218074, -- Might of Blackrock
-		},
 		WaterBreathing = {
 			5697, -- Unending Breath
 			16591, -- Noggenfogger Elixir
-			413548, -- Degreelessness Mode
 			-131, -- Water Breathing
-			425284, -- Spirit of the Redeemer
 			461137, -- Oath of the Sea
 			405688, -- Riptide Bubbles
 			-17443, -- Air Bubbles
-			1234, -- Tony's God Mode
 			5421, -- Aquatic Form (Passive)
 			22807, -- Greater Water Breathing
 			24347, -- Master Angler
 			24925, -- Hallow's End Candy
-			27827, -- Spirit of Redemption
 		},
 		WaterWalking =  {
 			-546, -- Water Walking
 			-1706, -- Levitate
 			10665, -- Water Walk
-			440804, -- Frozen Orb
-			460591, -- Chaos Chopper
 			461120, -- Treading Water
 			24927, -- Hallow's End Candy
 		},
