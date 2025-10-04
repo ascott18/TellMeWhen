@@ -517,7 +517,7 @@
 						self:SetLabel(TMW.L["SOUND_CHANNEL"])
 
 						local values = {
-							SFX = SOUND_VOLUME,
+							SFX = SOUND_VOLUME or FX_VOLUME,
 							Music = MUSIC_VOLUME,
 							Ambience = AMBIENCE_VOLUME,
 							Dialog = DIALOG_VOLUME,
