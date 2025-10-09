@@ -2849,7 +2849,7 @@ function TMW:UpdateTalentTextureCache()
 				end
 			end
 		end
-	elseif MAX_TALENT_TIERS then
+	elseif MAX_TALENT_TIERS and NUM_TALENT_COLUMNS and GetTalentInfo then
 		for tier = 1, MAX_TALENT_TIERS do
 			for column = 1, NUM_TALENT_COLUMNS do
 				local id, name, tex = GetTalentInfo(tier, column, 1)

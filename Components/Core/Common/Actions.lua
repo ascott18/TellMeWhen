@@ -22,6 +22,7 @@ local select, wipe, setmetatable
     = select, wipe, setmetatable
 
 local GetSpellName = TMW.GetSpellName
+local FindBaseSpellByID = C_SpellBook and C_SpellBook.FindBaseSpellByID or _G.FindBaseSpellByID
 
 TMW.COMMON.Actions = CreateFrame("Frame")
 local Actions = TMW.COMMON.Actions
