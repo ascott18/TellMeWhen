@@ -339,7 +339,8 @@ function IconType:UpdateUsedProcessors()
 end
 
 -- [INTERNAL]
-function IconType:OnImplementIntoIcon(icon)	
+function IconType:OnImplementIntoIcon(icon)
+
 	self.Icons[#self.Icons + 1] = icon
 
 	-- Implement all of the Processors that the Icon Type uses into the icon.
@@ -486,6 +487,27 @@ IconType:RegisterConfigPanel_ConstructorFunc(1, "TellMeWhen_IsViewAllowed", func
 
 	self:CScriptAdd("PanelSetup", function()
 		if TMW.CI.icon.typeData:IsAllowedByView(TMW.CI.icon.group.View) then
+			self:Hide()
+		end
+	end)
+end)
+
+IconType:RegisterConfigPanel_ConstructorFunc(2, "TellMeWhen_IsObsolete", function(self)
+	self:SetTitle(L["ICONMENU_OBSOLETE"])
+
+	self.text = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	self.text:SetWordWrap(true)
+	self.text:SetPoint("TOP", 0, -10)
+	self.text:SetText(L["ICONMENU_OBSOLETE_DESC"])
+	self.text:SetWidth(self:GetWidth() - 15)
+	self:SetHeight(self.text:GetStringHeight() + 20)
+
+	self:SetScript("OnSizeChanged", function()
+		self:SetHeight(self.text:GetStringHeight() + 20)
+	end)
+
+	self:CScriptAdd("PanelSetup", function()
+		if not TMW.CI.icon.typeData.obsolete then
 			self:Hide()
 		end
 	end)

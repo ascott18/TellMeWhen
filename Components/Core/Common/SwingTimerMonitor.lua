@@ -22,6 +22,7 @@
 ]]
 
 if not TMW then return end
+if not CombatLogGetCurrentEventInfo then return end
 
 local TMW = TMW
 local L = TMW.L
@@ -32,6 +33,7 @@ local strsub, pairs
 	= strsub, pairs
 local UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 	= UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
+local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName

@@ -10,7 +10,6 @@
 -- Cybeloras of Aerie Peak
 -- --------------------
 
-
 if not TMW then return end
 
 local TMW = TMW
@@ -154,32 +153,6 @@ Config.Flags = {
     "COMBATLOG_OBJECT_NONE",
 }
 
-Config.BetterMasks = {
-	-- some of the default masks contain bits that arent used by any flags (read: they suck), so we will make our own
-	COMBATLOG_OBJECT_REACTION_MASK = bit.bor(
-		COMBATLOG_OBJECT_REACTION_FRIENDLY,
-		COMBATLOG_OBJECT_REACTION_NEUTRAL,
-		COMBATLOG_OBJECT_REACTION_HOSTILE
-	),
-    COMBATLOG_OBJECT_TYPE_MASK = bit.bor(
-		COMBATLOG_OBJECT_TYPE_PLAYER,
-		COMBATLOG_OBJECT_TYPE_NPC,
-		COMBATLOG_OBJECT_TYPE_PET,
-		COMBATLOG_OBJECT_TYPE_GUARDIAN,
-		COMBATLOG_OBJECT_TYPE_OBJECT
-	),
-	COMBATLOG_OBJECT_CONTROL_MASK = bit.bor(
-		COMBATLOG_OBJECT_CONTROL_PLAYER,
-		COMBATLOG_OBJECT_CONTROL_NPC
-	),
-	COMBATLOG_OBJECT_AFFILIATION_MASK = bit.bor(
-		COMBATLOG_OBJECT_AFFILIATION_MINE,
-		COMBATLOG_OBJECT_AFFILIATION_PARTY,
-		COMBATLOG_OBJECT_AFFILIATION_RAID,
-		COMBATLOG_OBJECT_AFFILIATION_OUTSIDER
-	),
-}
-
 
 function Config:LoadConfig()
 	if TellMeWhen_CLEUOptions then
@@ -193,6 +166,34 @@ end
 --- Warn the user if they have disabled all flags in a single category.
 function Config:CheckMasks()
 	TMW.HELP:Hide("CLEU_WHOLECATEGORYEXCLUDED")
+	
+	if not COMBATLOG_OBJECT_REACTION_FRIENDLY then return end
+
+	local BetterMasks = {
+		-- some of the default masks contain bits that arent used by any flags (read: they suck), so we will make our own
+		COMBATLOG_OBJECT_REACTION_MASK = bit.bor(
+			COMBATLOG_OBJECT_REACTION_FRIENDLY,
+			COMBATLOG_OBJECT_REACTION_NEUTRAL,
+			COMBATLOG_OBJECT_REACTION_HOSTILE
+		),
+		COMBATLOG_OBJECT_TYPE_MASK = bit.bor(
+			COMBATLOG_OBJECT_TYPE_PLAYER,
+			COMBATLOG_OBJECT_TYPE_NPC,
+			COMBATLOG_OBJECT_TYPE_PET,
+			COMBATLOG_OBJECT_TYPE_GUARDIAN,
+			COMBATLOG_OBJECT_TYPE_OBJECT
+		),
+		COMBATLOG_OBJECT_CONTROL_MASK = bit.bor(
+			COMBATLOG_OBJECT_CONTROL_PLAYER,
+			COMBATLOG_OBJECT_CONTROL_NPC
+		),
+		COMBATLOG_OBJECT_AFFILIATION_MASK = bit.bor(
+			COMBATLOG_OBJECT_AFFILIATION_MINE,
+			COMBATLOG_OBJECT_AFFILIATION_PARTY,
+			COMBATLOG_OBJECT_AFFILIATION_RAID,
+			COMBATLOG_OBJECT_AFFILIATION_OUTSIDER
+		),
+	}
 
 	-- Check the flags of the icon to make sure that the user hasn't excluded every flag in a given category.
 	-- If they have, then they have effectively disabled the icon. Tell the user if they have done this.

@@ -215,7 +215,7 @@ end
 ----------------------
 function IE:IconType_DropDown()
 	for _, typeData in ipairs(TMW.OrderedTypes) do
-		if CI.ics.Type == typeData.type or not TMW.get(typeData.hidden) then
+		if CI.ics.Type == typeData.type or (not TMW.get(typeData.hidden) and not typeData.obsolete) then
 			if typeData.menuSpaceBefore then
 				TMW.DD:AddSpacer()
 			end

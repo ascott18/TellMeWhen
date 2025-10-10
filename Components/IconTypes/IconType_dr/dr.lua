@@ -36,6 +36,7 @@ local DRList = LibStub("DRList-1.0")
 
 local Type = TMW.Classes.IconType:New("dr")
 LibStub("AceEvent-3.0"):Embed(Type)
+Type.obsolete = not CombatLogGetCurrentEventInfo
 Type.name = L["ICONMENU_DR"]
 Type.desc = L["ICONMENU_DR_DESC"]
 Type.menuIcon = GetSpellTexture(408)

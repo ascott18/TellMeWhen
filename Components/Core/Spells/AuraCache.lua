@@ -70,7 +70,9 @@ TMW:RegisterCallback("TMW_DB_INITIALIZED", function()
 	
 	-- Always be listening for new auras,
 	-- store them in the main DB until the options DB is loaded.
-	AuraCache:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	if CombatLogGetCurrentEventInfo then
+		AuraCache:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	end
 end)
 
 function AuraCache:COMBAT_LOG_EVENT_UNFILTERED()

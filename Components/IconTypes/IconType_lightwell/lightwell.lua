@@ -26,6 +26,7 @@ local NUM_GLYPH_SLOTS = NUM_GLYPH_SLOTS
 
 local Type = TMW.Classes.IconType:New("lightwell")
 LibStub("AceEvent-3.0"):Embed(Type)
+Type.obsolete = not CombatLogGetCurrentEventInfo
 Type.name = L["ICONMENU_LIGHTWELL"]
 Type.desc = L["ICONMENU_LIGHTWELL_DESC"]
 Type.hidden = pclass ~= "PRIEST"

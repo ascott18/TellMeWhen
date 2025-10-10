@@ -1109,54 +1109,52 @@ end
 
 
 
-
--- DOGTAGUNIT: "dogTagUnit"
-do
-	local DogTag_Unit = LibStub("LibDogTag-Unit-3.0")
-
-		
+do 
+	
 	local Processor = TMW.Classes.IconDataProcessor:New("DOGTAGUNIT", "dogTagUnit")
 	Processor:AssertDependency("UNIT")
 
+	-- DOGTAGUNIT: "dogTagUnit"
+	local DogTag_Unit = LibStub("LibDogTag-Unit-3.0", true)
+	if DogTag_Unit then
+		--Here's the hook (the whole point of this thing)
+		local Hook = TMW.Classes.IconDataProcessorHook:New("UNIT_DOGTAGUNIT", "UNIT")
 
-	--Here's the hook (the whole point of this thing)
+		Hook:DeclareUpValue("DogTag_Unit", DogTag_Unit)
+		Hook:DeclareUpValue("TMW_UNITS", TMW.UNITS)
 
-	local Hook = TMW.Classes.IconDataProcessorHook:New("UNIT_DOGTAGUNIT", "UNIT")
+		Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
+			-- GLOBALS: unit
 
-	Hook:DeclareUpValue("DogTag_Unit", DogTag_Unit)
-	Hook:DeclareUpValue("TMW_UNITS", TMW.UNITS)
+			-- We shouldn't do this for meta icons.
+			-- If we do, the typeData.unitType will be wrong.
+			-- Instead, just let this be inherited normally from the DOGTAGUNIT processor.
+			-- I don't like coupling meta icons to this, but I can't see any other way that won't require
+			-- sweeping changes to the way that attribute inheriting works.
+			t[#t+1] = [[
+			if icon.Type ~= "meta" then
+				local dogTagUnit
+				local typeData = icon.typeData
 
-	Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
-		-- GLOBALS: unit
-
-		-- We shouldn't do this for meta icons.
-		-- If we do, the typeData.unitType will be wrong.
-		-- Instead, just let this be inherited normally from the DOGTAGUNIT processor.
-		-- I don't like coupling meta icons to this, but I can't see any other way that won't require
-		-- sweeping changes to the way that attribute inheriting works.
-		t[#t+1] = [[
-		if icon.Type ~= "meta" then
-			local dogTagUnit
-			local typeData = icon.typeData
-
-			if not typeData or typeData.unitType == "unitid" then
-				dogTagUnit = unit
-				if not DogTag_Unit.IsLegitimateUnit[dogTagUnit] then
-					dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
+				if not typeData or typeData.unitType == "unitid" then
+					dogTagUnit = unit
 					if not DogTag_Unit.IsLegitimateUnit[dogTagUnit] then
-						dogTagUnit = "player"
+						dogTagUnit = dogTagUnit and TMW_UNITS:TestUnit(dogTagUnit)
+						if not DogTag_Unit.IsLegitimateUnit[dogTagUnit] then
+							dogTagUnit = "player"
+						end
 					end
+				else
+					dogTagUnit = "player"
 				end
-			else
-				dogTagUnit = "player"
+				
+				if attributes.dogTagUnit ~= dogTagUnit then
+					doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdated
+				end
 			end
-			
-			if attributes.dogTagUnit ~= dogTagUnit then
-				doFireIconUpdated = icon:SetInfo_INTERNAL("dogTagUnit", dogTagUnit) or doFireIconUpdated
-			end
-		end
-		--]]
-	end)
+			--]]
+		end)
+	end
 end
 
 

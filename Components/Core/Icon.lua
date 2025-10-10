@@ -1143,28 +1143,31 @@ function Icon.Setup(icon)
 
 		------------ Icon Type ------------
 		typeData:ImplementIntoIcon(icon)
-			
-		-- Only perform a setup for icons that aren't controlled.
-		-- Controlled icons shouldn't be setup because they aren't autonomous.
-		if not icon:IsControlled() then 
-			icon.LastUpdate = 0
-			icon.NextUpdateTime = 0
-			TMW.safecall(typeData.Setup, typeData, icon)
-		end
 
+		if typeData.obsolete then
+			icon:SetInfo("texture", 237555)
+		else
+			-- Only perform a setup for icons that aren't controlled.
+			-- Controlled icons shouldn't be setup because they aren't autonomous.
+			if not icon:IsControlled() then 
+				icon.LastUpdate = 0
+				icon.NextUpdateTime = 0
+				TMW.safecall(typeData.Setup, typeData, icon)
+			end
 
-		------------ Conditions ------------
-		-- Don't setup conditions to untyped icons.
-		if icon.typeData.type ~= "" then
-			-- Create our condition object for the icon.
-			local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
-			icon.ConditionObject = ConditionObjectConstructor:Construct()
-			
-			if icon.ConditionObject then
-				-- If this icon has valid conditions, listen for updates to them.
-				icon.ConditionObject:DeclareExternalUpdater(icon, true)
-				TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
-				icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
+			------------ Conditions ------------
+			-- Don't setup conditions to untyped icons.
+			if typeData.type ~= "" then
+				-- Create our condition object for the icon.
+				local ConditionObjectConstructor = icon:Conditions_GetConstructor(icon.Conditions)
+				icon.ConditionObject = ConditionObjectConstructor:Construct()
+				
+				if icon.ConditionObject then
+					-- If this icon has valid conditions, listen for updates to them.
+					icon.ConditionObject:DeclareExternalUpdater(icon, true)
+					TMW:RegisterCallback("TMW_CNDT_OBJ_PASSING_CHANGED", icon)
+					icon:SetInfo("conditionFailed", icon.ConditionObject.Failed)
+				end
 			end
 		end
 	else

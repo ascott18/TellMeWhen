@@ -72,23 +72,6 @@ function Env.RechargeDuration(spell)
 	return 0
 end
 
-local SwingTimers = TMW.COMMON.SwingTimerMonitor.SwingTimers
-function Env.SwingDuration(slot)
-	local SwingTimer = SwingTimers[slot]
-	
-	if SwingTimer then
-		return max(SwingTimer.duration - (TMW.time - SwingTimer.startTime), 0)
-	end
-	return 0
-end
-function Env.SwingInfo(slot)
-	local SwingTimer = SwingTimers[slot]
-	if SwingTimer then
-		return SwingTimer.startTime, SwingTimer.duration
-	end
-	return nil, nil
-end
-
 local ConditionCategory = CNDT:GetCategory("SPELLSABILITIES", 4, L["CNDTCAT_SPELLSABILITIES"], true, false)
 
 ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
@@ -251,7 +234,7 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
 	end,
 	useSUG = true,
-	funcstr = function(c)
+	funcstr = not CombatLogGetCurrentEventInfo and "DEPRECATED" or function(c)
 		local module = CNDT:GetModule("LASTCAST", true)
 		if not module then
 			module = CNDT:NewModule("LASTCAST", "AceEvent-3.0")
@@ -799,52 +782,70 @@ ConditionCategory:RegisterCondition(16,	 "ITEMSPELL", {
 ConditionCategory:RegisterSpacer(18)
 
 
-ConditionCategory:RegisterCondition(19,	 "MHSWING", {
-	text = L["SWINGTIMER"] .. " - " .. INVTYPE_WEAPONMAINHAND,
-	min = 0,
-	range = 3,
-	step = 0.1,
-	unit = PLAYER,
-	formatter = TMW.C.Formatter.TIME_0USABLE,
-	icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("MainHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_14" end,
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[SwingDuration(]] .. GetInventorySlotInfo("MainHandSlot") .. [[) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		ConditionObject:RequestEvent("TMW_COMMON_SWINGTIMER_CHANGED")
-		ConditionObject:SetNumEventArgs(1)
+local SwingTimerMonitor = TMW.COMMON.SwingTimerMonitor
+if SwingTimerMonitor then
+	local SwingTimers = SwingTimerMonitor.SwingTimers
+	function Env.SwingDuration(slot)
+		local SwingTimer = SwingTimers[slot]
 		
-		return
-			"event == 'TMW_COMMON_SWINGTIMER_CHANGED' and arg1.slot == " .. GetInventorySlotInfo("MainHandSlot")
-	end,
-	hidden = not TMW.COMMON.SwingTimerMonitor,
-	anticipate = [[
-		local start, duration = SwingInfo(]] .. GetInventorySlotInfo("MainHandSlot") .. [[)
-		local VALUE = duration and start + (duration - c.Level) or huge
-	]],
-})
-ConditionCategory:RegisterCondition(19.5,	 "OHSWING", {
-	text = L["SWINGTIMER"] .. " - " .. INVTYPE_WEAPONOFFHAND,
-	min = 0,
-	range = 3,
-	step = 0.1,
-	unit = PLAYER,
-	formatter = TMW.C.Formatter.TIME_0USABLE,
-	icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("SecondaryHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_15" end,
-	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[SwingDuration(]] .. GetInventorySlotInfo("SecondaryHandSlot") .. [[) c.Operator c.Level]],
-	events = function(ConditionObject, c)
-		ConditionObject:RequestEvent("TMW_COMMON_SWINGTIMER_CHANGED")
-		ConditionObject:SetNumEventArgs(1)
-		
-		return
-			"event == 'TMW_COMMON_SWINGTIMER_CHANGED' and arg1.slot == " .. GetInventorySlotInfo("SecondaryHandSlot")
-	end,
-	hidden = not TMW.COMMON.SwingTimerMonitor,
-	anticipate = [[
-		local start, duration = SwingInfo(]] .. GetInventorySlotInfo("SecondaryHandSlot") .. [[)
-		local VALUE = duration and start + (duration - c.Level) or huge
-	]],
-})
+		if SwingTimer then
+			return max(SwingTimer.duration - (TMW.time - SwingTimer.startTime), 0)
+		end
+		return 0
+	end
+	function Env.SwingInfo(slot)
+		local SwingTimer = SwingTimers[slot]
+		if SwingTimer then
+			return SwingTimer.startTime, SwingTimer.duration
+		end
+		return nil, nil
+	end
+
+	ConditionCategory:RegisterCondition(19,	 "MHSWING", {
+		text = L["SWINGTIMER"] .. " - " .. INVTYPE_WEAPONMAINHAND,
+		min = 0,
+		range = 3,
+		step = 0.1,
+		unit = PLAYER,
+		formatter = TMW.C.Formatter.TIME_0USABLE,
+		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("MainHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_14" end,
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = [[SwingDuration(]] .. GetInventorySlotInfo("MainHandSlot") .. [[) c.Operator c.Level]],
+		events = function(ConditionObject, c)
+			ConditionObject:RequestEvent("TMW_COMMON_SWINGTIMER_CHANGED")
+			ConditionObject:SetNumEventArgs(1)
+			
+			return
+				"event == 'TMW_COMMON_SWINGTIMER_CHANGED' and arg1.slot == " .. GetInventorySlotInfo("MainHandSlot")
+		end,
+		anticipate = [[
+			local start, duration = SwingInfo(]] .. GetInventorySlotInfo("MainHandSlot") .. [[)
+			local VALUE = duration and start + (duration - c.Level) or huge
+		]],
+	})
+	ConditionCategory:RegisterCondition(19.5,	 "OHSWING", {
+		text = L["SWINGTIMER"] .. " - " .. INVTYPE_WEAPONOFFHAND,
+		min = 0,
+		range = 3,
+		step = 0.1,
+		unit = PLAYER,
+		formatter = TMW.C.Formatter.TIME_0USABLE,
+		icon = function() return GetInventoryItemTexture("player", GetInventorySlotInfo("SecondaryHandSlot")) or "Interface\\Icons\\inv_weapon_shortblade_15" end,
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = [[SwingDuration(]] .. GetInventorySlotInfo("SecondaryHandSlot") .. [[) c.Operator c.Level]],
+		events = function(ConditionObject, c)
+			ConditionObject:RequestEvent("TMW_COMMON_SWINGTIMER_CHANGED")
+			ConditionObject:SetNumEventArgs(1)
+			
+			return
+				"event == 'TMW_COMMON_SWINGTIMER_CHANGED' and arg1.slot == " .. GetInventorySlotInfo("SecondaryHandSlot")
+		end,
+		anticipate = [[
+			local start, duration = SwingInfo(]] .. GetInventorySlotInfo("SecondaryHandSlot") .. [[)
+			local VALUE = duration and start + (duration - c.Level) or huge
+		]],
+	})
+end
 
 
 ConditionCategory:RegisterSpacer(20)
@@ -1223,7 +1224,7 @@ ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 	end,
 	useSUG = true,
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = function()
+	funcstr = not CombatLogGetCurrentEventInfo and "DEPRECATED" or function()
 		-- attempt initialization if it hasn't been done already
 		Env.UnitCastCount("none", "none")
 		

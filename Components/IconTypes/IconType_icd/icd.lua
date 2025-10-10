@@ -28,6 +28,7 @@ local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
 
 
 local Type = TMW.Classes.IconType:New("icd")
+Type.obsolete = not CombatLogGetCurrentEventInfo
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
 Type.menuIcon = GetSpellTexture(28093)

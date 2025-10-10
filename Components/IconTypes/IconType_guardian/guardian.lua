@@ -25,6 +25,7 @@ local strlowerCache = TMW.strlowerCache
 
 local Type = TMW.Classes.IconType:New("guardian")
 LibStub("AceEvent-3.0"):Embed(Type)
+Type.obsolete = not CombatLogGetCurrentEventInfo
 Type.name = L["ICONMENU_GUARDIAN"]
 Type.desc = L["ICONMENU_GUARDIAN_DESC"]
 Type.menuIcon = TMW.GetSpellTexture(211158) or TMW.GetSpellTexture(31687)

@@ -26,15 +26,10 @@ local GetSpellTexture = TMW.GetSpellTexture
 local INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND =
 	  INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND
 
-
-if not TMW.COMMON.SwingTimerMonitor then
-	return
-end
-
-local SwingTimers = TMW.COMMON.SwingTimerMonitor.SwingTimers
-
+local SwingTimerMonitor = TMW.COMMON.SwingTimerMonitor
 
 local Type = TMW.Classes.IconType:New("swingtimer")
+Type.obsolete = not SwingTimerMonitor
 Type.name = L["ICONMENU_SWINGTIMER"]
 Type.desc = L["ICONMENU_SWINGTIMER_DESC"]
 Type.menuIcon = "Interface\\Icons\\INV_Gauntlets_04"
@@ -55,7 +50,6 @@ Type:RegisterIconDefaults{
 	-- Weapon slot to monitor the swing of. Can also be "SecondaryHandSlot".
 	SwingTimerSlot			= "MainHandSlot",
 }
-
 
 if pclass == "HUNTER" then
 	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip", { 
@@ -98,6 +92,8 @@ local function SwingTimer_OnEvent(icon, event, unit, _, _, _, spellID)
 	end
 end
 
+
+local SwingTimers = SwingTimerMonitor and SwingTimerMonitor.SwingTimers
 local function SwingTimer_OnUpdate(icon, time)
 
 	-- Get the SwingTimer object for the slow from TMW's common swing timer module

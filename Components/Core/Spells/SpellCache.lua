@@ -45,7 +45,7 @@ SpellCache.CONST = {
 	-- after retail spells, in the IDs around 430000.
 	-- Since we save ranges of invalid IDs to skip, this won't matter for perf at all
 	-- in any spell scan where SpellCacheInvalidRanges has nonstale data.
-	MAX_SPELLID_GUESS = 1232790,
+	MAX_SPELLID_GUESS = 1732790,
 	
 	-- Maximum number of non-existant spellIDs that will be checked before the cache is declared complete.
 	-- This used to be a much smaller number, but Blizzard went off the rails around 11.0.7 and put huge gaps in the SpellIDs.
@@ -74,6 +74,8 @@ SpellCache.CONST = {
 	INVALID_SPELLS = {
 		[1852] = true, -- GM spell named silenced
 	  [250168] = true, -- Crashes the 9.0 PTR
+	  [255616] = LE_EXPANSION_LEVEL_CURRENT == 11, -- Crashes the 12.0 Alpha
+	 [1249911] = LE_EXPANSION_LEVEL_CURRENT == 11, -- Crashes the 12.0 Alpha
 	},
 
 	BLACKLIST_TRADESKILL_TEXTURES = {
@@ -258,6 +260,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	-- nil if the last spellID was a success.
 	local lastFail = nil
 	local excludeEffect = ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+	local INVALID_SPELLS = CONST.INVALID_SPELLS
 
 	local function SpellCacher()
 		local numToCheck = InCombatLockdown() and 10 or NumCachePerFrame
@@ -270,7 +273,8 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 				spellID = spellID + skip
 			end
 
-			local name = GetSpellName(spellID)
+			local name = not INVALID_SPELLS[spellID] and GetSpellName(spellID)
+
 			local fail = false
 			if name then
 				local icon = GetSpellTexturePlain(spellID)
@@ -389,7 +393,13 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	f:SetScript("OnUpdate", function()
 		local start = debugprofilestop()
 
-		local success = TMW.safecall(SpellCacher)
+		local success = TMW.safecall(SpellCacher)		
+		
+		-- if LE_EXPANSION_LEVEL_CURRENT == 11 and spellID >= 1230000 and TELLMEWHEN_VERSION_MINOR == "dev" then
+		-- 	print("cache skip due to crash")
+		-- 	success = false
+		-- end
+		
 		if success and (spellsFailed < MAX_FAILED_SPELLS or spellID < CONST.MAX_SPELLID_GUESS) then
 			-- Carry on. Keep iterating.
 		else

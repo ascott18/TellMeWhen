@@ -253,7 +253,7 @@ ConditionCategory:RegisterCondition(8.5,  "LIBRANGECHECK", {
 	max = 100,
 	defaultUnit = "target",
 	formatter = TMW.C.Formatter:New(function(val)
-		local LRC = LibStub("LibRangeCheck-3.0")
+		local LRC = LibStub("LibRangeCheck-3.0", true)
 		if not LRC then
 			return val
 		end
@@ -290,7 +290,7 @@ ConditionCategory:RegisterCondition(8.5,  "LIBRANGECHECK", {
 	end,
 
 	funcstr = function(c, parent)
-		Env.LibRangeCheck = LibStub("LibRangeCheck-3.0")
+		Env.LibRangeCheck = LibStub("LibRangeCheck-3.0", true)
 		if not Env.LibRangeCheck then
 			TMW:Error("The %s condition requires LibRangeCheck-3.0", L["CNDT_RANGE"])
 			return "false"

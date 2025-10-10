@@ -253,8 +253,11 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	-- if another addon (like ThreatPlates) loads LDT-Unit after TMW,
 	-- and if this other addon has a newer version of LDT-Unit than what
 	-- was already loaded (by TMW or some other addon),
-	-- then it'll wipe out this tag when it ugprades itself.
+	-- then it'll wipe out this tag when it upgrades itself.
+		
+	if not DogTag.Tags.Unit then return end
 	if DogTag.Tags.Unit.TMWName then return end
+
 	DogTag:AddTag("Unit", "TMWName", {
 		code = function(unit, color, server)
 			if NAMES.dogTag_forceUncolored then

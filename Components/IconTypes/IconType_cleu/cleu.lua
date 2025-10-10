@@ -33,6 +33,7 @@ local COMBATLOG_OBJECT_NONE, ACTION_SWING =
 	  COMBATLOG_OBJECT_NONE, ACTION_SWING
 
 local Type = TMW.Classes.IconType:New("cleu")
+Type.obsolete = not CombatLogGetCurrentEventInfo
 Type.name = L["ICONMENU_CLEU"]
 Type.desc = L["ICONMENU_CLEU_DESC"]
 Type.menuIcon = GetSpellTexture(20066)

@@ -22,7 +22,12 @@ local DogTag = LibStub("LibDogTag-3.0")
 local DOGTAG = TMW:NewModule("DogTags")
 TMW.DOGTAG = DOGTAG
 
-TMW.DOGTAG.nsList = "Base;TMW;Unit;Stats"
+if LE_EXPANSION_LEVEL_CURRENT >= 11 then 
+	TMW.DOGTAG.nsList = "Base;TMW;Stats"
+else
+	TMW.DOGTAG.nsList = "Base;TMW;Unit;Stats"
+end
+
 
 local abs = math.abs
 

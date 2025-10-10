@@ -41,6 +41,7 @@ local classSpellNameCache
 
 local Type = TMW.Classes.IconType:New("unitcooldown")
 LibStub("AceEvent-3.0"):Embed(Type)
+Type.obsolete = not CombatLogGetCurrentEventInfo
 Type.name = L["ICONMENU_UNITCOOLDOWN"]
 Type.desc = L["ICONMENU_UNITCOOLDOWN_DESC"]
 Type.menuIcon = GetSpellTexture(19263)

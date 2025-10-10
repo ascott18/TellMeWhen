@@ -36,6 +36,7 @@ local Aura
 
 
 local Type = TMW.Classes.IconType:New("dotwatch")
+Type.obsolete = not CombatLogGetCurrentEventInfo
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_DOTWATCH"]
 Type.desc = L["ICONMENU_DOTWATCH_DESC"]
