@@ -489,14 +489,16 @@ function Type:TMW_ONUPDATE_TIMECONSTRAINED_PRE(event, time)
 	end
 end
 
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
-	-- UnitGUID() returns nil at load time, so we need to run this later in order to get pGUID.
-	-- TMW_GLOBAL_UPDATE is good enough.
-	pGUID = UnitGUID("player")
-	Type:RefreshNames()
+if not Type.obsolete then
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+		-- UnitGUID() returns nil at load time, so we need to run this later in order to get pGUID.
+		-- TMW_GLOBAL_UPDATE is good enough.
+		pGUID = UnitGUID("player")
+		Type:RefreshNames()
 
-	Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-end)
+		Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	end)
+end
 
 function Type:TMW_ICON_DISABLE(event, icon)
 	ManualIconsManager:UpdateTable_Unregister(icon)

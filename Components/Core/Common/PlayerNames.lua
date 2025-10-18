@@ -120,7 +120,10 @@ end
 
 function NAMES:UPDATE_MOUSEOVER_UNIT()
 	local name, server = UnitName("mouseover")
+	
+	if issecretvalue(name) then return end
 	if not name then return end
+
 	if server then
 		name = name .. "-" .. server
 	end

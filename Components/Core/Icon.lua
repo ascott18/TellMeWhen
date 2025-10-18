@@ -1538,7 +1538,6 @@ local SetInfoFuncs = setmetatable({}, { __index = function(self, signature)
 	return func
 end})
 
-
 --- Sets attributes of an icon.
 -- 
 -- The attributes passed to this function will be processed by a [[api/icon-data-processor/api-documentation/|IconDataProcessor]] (and possibly one or more [[api/icon-data-processor-hook/api-documentation/|IconDataProcessorHook]]) and interested [[api/icon-module/api-documentation/|IconModule]]s will be notified of any changes to the attributes.

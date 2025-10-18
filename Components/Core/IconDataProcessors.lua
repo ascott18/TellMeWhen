@@ -789,7 +789,13 @@ do
 		-- GLOBALS: value, maxValue, valueColor
 		t[#t+1] = [[
 		
-		if attributes.value ~= value or attributes.maxValue ~= maxValue or attributes.valueColor ~= valueColor then
+		if 
+			issecretvalue(value) or 
+			issecretvalue(attributes.value) or 
+			attributes.value ~= value or 
+			attributes.maxValue ~= maxValue or 
+			attributes.valueColor ~= valueColor 
+		then
 
 			attributes.value = value
 			attributes.maxValue = maxValue
@@ -838,10 +844,16 @@ do
 	Processor:RegisterDogTag("TMW", "Value", {
 		code = function(icon)
 			icon = TMW.GUIDToOwner[icon]
+			if not icon then return 0 end
 			
-			local value = icon and icon.attributes.value or 0
-			
-			return isNumber[value] or value
+			local value = icon.attributes.value
+
+			if issecretvalue(value) then 
+				if type(value) == 'nil' then return 0 end
+				return value 
+			end
+
+			return isNumber[value] or value or 0
 		end,
 		arg = {
 			'icon', 'string', '@req',
@@ -1035,24 +1047,53 @@ do
 
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: unit, GUID
-		t[#t+1] = [[
-		
-		GUID = GUID or (unit and (unit == "player" and playerGUID or UnitGUID(unit)))
-		
-		if attributes.unit ~= unit or attributes.GUID ~= GUID then
-			local previousUnit = attributes.unit
-			attributes.previousUnit = previousUnit
-			attributes.unit = unit
-			attributes.GUID = GUID
 
-			if EventHandlersSet.OnUnit then
-				icon:QueueEvent("OnUnit")
+		-- TODO: What was ever using GUID from this processor?
+		-- Is it just the OnUnit notification event? I think it was...
+
+		-- Note on "not GUID": Any other case of missing GUID is useless to handle because
+		-- we can't do any logic against it.
+		if issecretvalue then
+			t[#t+1] = [[
+			
+			if type(GUID) == 'nil' and unit == "player" then
+				GUID = playerGUID
 			end
 			
-			TMW:Fire(UNIT.changedEvent, icon, unit, previousUnit, GUID)
-			doFireIconUpdated = true
+			if attributes.unit ~= unit then
+				local previousUnit = attributes.unit
+				attributes.previousUnit = previousUnit
+				attributes.unit = unit
+				attributes.GUID = GUID
+
+				if EventHandlersSet.OnUnit then
+					icon:QueueEvent("OnUnit")
+				end
+				
+				TMW:Fire(UNIT.changedEvent, icon, unit, previousUnit, GUID)
+				doFireIconUpdated = true
+			end
+			--]]
+		else
+			t[#t+1] = [[
+			
+			GUID = GUID or (unit and (unit == "player" and playerGUID or UnitGUID(unit)))
+			
+			if attributes.unit ~= unit or attributes.GUID ~= GUID then
+				local previousUnit = attributes.unit
+				attributes.previousUnit = previousUnit
+				attributes.unit = unit
+				attributes.GUID = GUID
+
+				if EventHandlersSet.OnUnit then
+					icon:QueueEvent("OnUnit")
+				end
+				
+				TMW:Fire(UNIT.changedEvent, icon, unit, previousUnit, GUID)
+				doFireIconUpdated = true
+			end
+			--]]
 		end
-		--]]
 	end
 
 	Processor:RegisterIconEvent(41, "OnUnit", {

@@ -130,6 +130,7 @@ function TimerBar:UpdateValue(force)
 	local Invert = self.Invert
 
 	local value, doTerminate = self:GetValue()
+	local maxValue = self.Max
 
 	if doTerminate then
 		self:UpdateTable_Unregister()
@@ -140,71 +141,79 @@ function TimerBar:UpdateValue(force)
 			value = 0
 		end
 	end
-
-	local percent = self.Max == 0 and 0 or value / self.Max
-	if percent < 0 then
-		percent = 0
-	elseif percent > 1 then
-		percent = 1
-	end
-
-	if force or value ~= self.__value then
-		local bar = self.bar
-		bar:SetValue(value)
-
-		if abs(self.__oldPercent - percent) > 0.02 then
-			-- If the percentage of the bar changed by more than 2%, force an instant redraw of the texture.
-			-- For some reason, blizzard defers the updating of status bar textures until sometimes 1 or 2 frames after it is set.
-			self:UpdateStatusBarImmediate(percent)
-		elseif bar:GetReverseFill() then
-			-- Bliizard goofed (or forgot) when they implemented reverse filling,
-			-- the tex coords are messed up. We'll just have to fix them ourselves.
-			if bar:GetOrientation() == "VERTICAL" then
-				self.texture:SetTexCoord(0, 0, percent, 0, 0, 1, percent, 1)
-			else
-				self.texture:SetTexCoord(1 - percent, 1, 0, 1)
-			end
+	
+	if issecretvalue(value) or issecretvalue(maxValue) then
+		self.bar:SetValue(value)
+		
+		-- TODO: Update with C_CurveUtil
+		local co = self.completeColor
+		self.bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
+	else
+		local percent = maxValue == 0 and 0 or value / maxValue
+		if percent < 0 then
+			percent = 0
+		elseif percent > 1 then
+			percent = 1
 		end
 
-		-- This line is here to fix an issue with the bar texture
-		-- not being in the correct location/correct size if
-		-- the bar is modified while it, or a parent, is hidden.
-		--self.texture:GetSize()
+		if force or value ~= self.__value then
+			local bar = self.bar
+			bar:SetValue(value)
 
-		if value ~= 0 then
-			local completeColor = self.completeColor
-			local halfColor = self.halfColor
-			local startColor = self.startColor
-
-			if Invert then
-				completeColor, startColor = startColor, completeColor
-			end
-			
-			-- This is multiplied by 2 because we subtract 100% if it ends up being past
-			-- the point where halfColor will be used.
-			-- If we don't multiply by 2, we would check if (percent > 0.5), but then
-			-- we would have to multiply that percentage by 2 later anyway in order to use the
-			-- full range of colors available (we would only get half the range of colors otherwise, which looks bad)
-			local doublePercent = percent * 2
-
-			if doublePercent > 1 then
-				completeColor = halfColor
-				doublePercent = doublePercent - 1
-			else
-				startColor = halfColor
+			if abs(self.__oldPercent - percent) > 0.02 then
+				-- If the percentage of the bar changed by more than 2%, force an instant redraw of the texture.
+				-- For some reason, blizzard defers the updating of status bar textures until sometimes 1 or 2 frames after it is set.
+				self:UpdateStatusBarImmediate(percent)
+			elseif bar:GetReverseFill() then
+				-- Bliizard goofed (or forgot) when they implemented reverse filling,
+				-- the tex coords are messed up. We'll just have to fix them ourselves.
+				if bar:GetOrientation() == "VERTICAL" then
+					self.texture:SetTexCoord(0, 0, percent, 0, 0, 1, percent, 1)
+				else
+					self.texture:SetTexCoord(1 - percent, 1, 0, 1)
+				end
 			end
 
-			local inv = 1-doublePercent
+			-- This line is here to fix an issue with the bar texture
+			-- not being in the correct location/correct size if
+			-- the bar is modified while it, or a parent, is hidden.
+			--self.texture:GetSize()
 
-			bar:SetStatusBarColor(
-				(startColor.r * doublePercent) + (completeColor.r * inv),
-				(startColor.g * doublePercent) + (completeColor.g * inv),
-				(startColor.b * doublePercent) + (completeColor.b * inv),
-				(startColor.a * doublePercent) + (completeColor.a * inv)
-			)
+			if value ~= 0 then
+				local completeColor = self.completeColor
+				local halfColor = self.halfColor
+				local startColor = self.startColor
+
+				if Invert then
+					completeColor, startColor = startColor, completeColor
+				end
+				
+				-- This is multiplied by 2 because we subtract 100% if it ends up being past
+				-- the point where halfColor will be used.
+				-- If we don't multiply by 2, we would check if (percent > 0.5), but then
+				-- we would have to multiply that percentage by 2 later anyway in order to use the
+				-- full range of colors available (we would only get half the range of colors otherwise, which looks bad)
+				local doublePercent = percent * 2
+
+				if doublePercent > 1 then
+					completeColor = halfColor
+					doublePercent = doublePercent - 1
+				else
+					startColor = halfColor
+				end
+
+				local inv = 1-doublePercent
+
+				bar:SetStatusBarColor(
+					(startColor.r * doublePercent) + (completeColor.r * inv),
+					(startColor.g * doublePercent) + (completeColor.g * inv),
+					(startColor.b * doublePercent) + (completeColor.b * inv),
+					(startColor.a * doublePercent) + (completeColor.a * inv)
+				)
+			end
+			self.__value = value
+			self.__oldPercent = percent
 		end
-		self.__value = value
-		self.__oldPercent = percent
 	end
 	
 	return ret

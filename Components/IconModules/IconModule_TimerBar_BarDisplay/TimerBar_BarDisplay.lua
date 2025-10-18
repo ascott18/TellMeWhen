@@ -49,7 +49,6 @@ TimerBar_BarDisplay:RegisterConfigPanel_XMLTemplate(210, "TellMeWhen_BarDisplayB
 TimerBar_BarDisplay:PostHookMethod("OnEnable", function(self)
 	local icon = self.icon
 	local attributes = icon.attributes
-	self.Invert = self.Invert_base
 
 	if TMW.Locked then
 		self:VALUE(icon, attributes.value, attributes.maxValue, attributes.valueColor)
@@ -58,62 +57,128 @@ TimerBar_BarDisplay:PostHookMethod("OnEnable", function(self)
 	end
 end)
 
-function TimerBar_BarDisplay:GetValue()
-	-- returns value, doTerminate
+if issecretvalue then
 
-	local duration = self.duration
+	function TimerBar_BarDisplay:GetValue()
+		-- returns value, doTerminate
 
-	if duration then
-		-- Display a timer.
-		if self.Invert then
-			if duration == 0 then
-				return self.Max, true
+		local duration = self.duration
+
+		if duration then
+			-- Display a timer.
+			if self.Invert then
+				if duration == 0 then
+					return self.Max, true
+				else
+					local value = TMW.time - self.start + self.Offset
+					return value, value >= self.Max
+				end
 			else
-				local value = TMW.time - self.start + self.Offset
-				return value, value >= self.Max
+				if duration == 0 then
+					return 0, true
+				else
+					local value = duration - (TMW.time - self.start) + self.Offset
+					return value, value <= 0
+				end
+			end
+			return 
+		end
+		
+		local value = self.value
+		if type(value) ~= 'nil' then
+			if issecretvalue(value) then
+				return self.value, false
+			else
+				if self.Invert then
+					return self.Max - self.value + self.Offset, false
+				else
+					return self.value + self.Offset, false
+				end
 			end
 		else
-			if duration == 0 then
-				return 0, true
-			else
-				local value = duration - (TMW.time - self.start) + self.Offset
-				return value, value <= 0
-			end
+			return 0, true
 		end
-
-	elseif self.value then
-		-- Display a set value.
-		if self.Invert then
-			return self.value + self.Offset, false
-		else
-			return self.Max - self.value + self.Offset, false
-		end
-	else
-		return 0, true
 	end
-end
 
-function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
-	if value and maxValue then
-		self.duration = nil
-		self.start = nil
-		self.Invert = not self.Invert_base
+	function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
+		if type(value) ~= 'nil' and type(maxValue) ~= 'nil' then
+			self.duration = nil
+			self.start = nil
+			self.value = value
+			self.maxValue = maxValue
 
-		self.value = value
-
-		local oldMax = self.Max
-		self.Max = self.FakeMax or maxValue
-		if oldMax ~= self.Max then
+			if self.FakeMax then
+				self.Max = self.FakeMax
+			else
+				self.Max = maxValue
+			end
 			self.bar:SetMinMaxValues(0, self.Max)
+
+			self:SetupColors(self.sourceIcon, valueColor, icon.attributes.unit)
+
+			-- Force an update here since it won't get updated if the color changes and the value doesnt.
+			-- This is harmless, because 99% of the the time, the value has changed, so an update would be performed anyway.
+			self:UpdateValue(true)
+		else
+			self.value = value
 		end
+	end
+else
+	function TimerBar_BarDisplay:GetValue()
+		-- returns value, doTerminate
 
-		self:SetupColors(self.sourceIcon, valueColor, icon.attributes.unit)
+		local duration = self.duration
 
-		-- Force an update here since it won't get updated if the color changes and the value doesnt.
-		-- This is harmless, because 99% of the the time, the value has changed, so an update would be performed anyway.
-		self:UpdateValue(true)
-	else
-		self.value = value
+		if duration then
+			-- Display a timer.
+			if self.Invert then
+				if duration == 0 then
+					return self.Max, true
+				else
+					local value = TMW.time - self.start + self.Offset
+					return value, value >= self.Max
+				end
+			else
+				if duration == 0 then
+					return 0, true
+				else
+					local value = duration - (TMW.time - self.start) + self.Offset
+					return value, value <= 0
+				end
+			end
+
+		elseif self.value then
+			-- Display a set value.
+			if self.Invert then
+				return self.Max - self.value + self.Offset, false
+			else
+				return self.value + self.Offset, false
+			end
+		else
+			return 0, true
+		end
+	end
+
+	function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
+		if value and maxValue then
+			self.duration = nil
+			self.start = nil
+			self.value = value
+
+			local oldMax = self.Max
+			self.Max = self.FakeMax or maxValue
+			if oldMax ~= self.Max then
+				self.bar:SetMinMaxValues(0, self.Max)
+			end
+
+			self:SetupColors(self.sourceIcon, valueColor, icon.attributes.unit)
+
+			-- Force an update here since it won't get updated if the color changes and the value doesnt.
+			-- This is harmless, because 99% of the the time, the value has changed, so an update would be performed anyway.
+			self:UpdateValue(true)
+		else
+			self.value = value
+		end
 	end
 end
 TimerBar_BarDisplay:SetDataListener("VALUE")
@@ -191,11 +256,7 @@ function TimerBar_BarDisplay:SetupColors(icon, valueColor, unit)
 end
 
 function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
-	self.Invert_base = sourceIcon.BarDisplay_Invert
-	self.Invert = self.Invert_base
-	if self.value then
-		self.Invert = not self.Invert_base
-	end
+	self.Invert = sourceIcon.BarDisplay_Invert
 	
 	self.BarGCD = sourceIcon.BarDisplay_BarGCD
 	if sourceIcon.typeData.hasNoGCD then
@@ -204,7 +265,7 @@ function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 
 	self.Offset = 0
 
-	if self.Invert_base or sourceIcon.BarDisplay_FakeMax == 0 then
+	if sourceIcon.BarDisplay_FakeMax == 0 then
 		self.FakeMax = nil
 	else
 		self.FakeMax = sourceIcon.BarDisplay_FakeMax
