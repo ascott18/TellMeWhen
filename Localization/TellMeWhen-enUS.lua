@@ -1922,7 +1922,7 @@ L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER"] = [[|cff7fffffRight-Click|r to switch t
 L["CNDT_SLIDER_DESC_CLICKSWAP_TOSLIDER_DISALLOWED"] = [[Only manual input is allowed for values over %s (Blizzard's sliders can behave strangely with large values.)]]
 
 
-L["CNDT_DEPRECATED_DESC"] = "The %s condition no longer functions. This is probably the result of a change in game mechanics. Remove it or change it to something else."
+L["CNDT_DEPRECATED_DESC"] = "The %s condition no longer functions. This is probably the result of a change in game mechanics, or Blizzard's addon restrictions. Remove it or change it to something else."
 L["CNDT_UNKNOWN_DESC"] = "Your settings contain a condition with the identifier %s, but no such condition could be found. You may be using an old version of TMW, or this condition may have been removed."
 
 

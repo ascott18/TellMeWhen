@@ -19,6 +19,7 @@ local L = TMW.L
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
 
+local issecretvalue = issecretvalue or TMW.NULLFUNC
 local tonumber, pairs, wipe, assert =
       tonumber, pairs, wipe, assert
 local strfind, strmatch, strtrim, gsub, gmatch, strsplit, abs =

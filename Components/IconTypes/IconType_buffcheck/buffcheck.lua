@@ -307,6 +307,20 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	end
 end
 
+if ClassicExpansionAtLeast(11) then
+	local function wrapUpdate(update)
+		return function(icon, time)
+			if GetRestrictedActionStatus(0) then
+				-- Force hide icon
+				icon:YieldInfo(false, nil)
+				return
+			end
+			return update(icon, time)
+		end
+	end
+	BuffCheck_OnUpdate = wrapUpdate(BuffCheck_OnUpdate)
+	BuffCheck_OnUpdate_Packed = wrapUpdate(BuffCheck_OnUpdate_Packed)
+end
 
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)

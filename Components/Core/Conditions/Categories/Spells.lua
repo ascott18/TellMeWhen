@@ -234,7 +234,8 @@ ConditionCategory:RegisterCondition(2.8, "LASTCAST", {
 		editbox:SetTexts(L["SPELLTOCHECK"], L["CNDT_ONLYFIRST"])
 	end,
 	useSUG = true,
-	funcstr = not CombatLogGetCurrentEventInfo and "DEPRECATED" or function(c)
+	deprecated = not CombatLogGetCurrentEventInfo,
+	funcstr = function(c)
 		local module = CNDT:GetModule("LASTCAST", true)
 		if not module then
 			module = CNDT:NewModule("LASTCAST", "AceEvent-3.0")
@@ -1076,6 +1077,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
 	useSUG = true,
+	deprecated = ClassicExpansionAtLeast(11),
 	funcstr = [[UnitCast(c.Unit, c.Level, c.Spells.FirstString)]],
 	events = castEvents,
 })
@@ -1094,6 +1096,7 @@ ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
 		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
 	useSUG = true,
+	deprecated = ClassicExpansionAtLeast(11),
 	funcstr = [[UnitCastPercent(c.Unit, c.Spells.FirstString) c.Operator c.Level]],
 	events = castEvents,
 	anticipate = [[
@@ -1224,7 +1227,8 @@ ConditionCategory:RegisterCondition(32,	 "CASTCOUNT", {
 	end,
 	useSUG = true,
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = not CombatLogGetCurrentEventInfo and "DEPRECATED" or function()
+	deprecated = not CombatLogGetCurrentEventInfo,
+	funcstr = function()
 		-- attempt initialization if it hasn't been done already
 		Env.UnitCastCount("none", "none")
 		

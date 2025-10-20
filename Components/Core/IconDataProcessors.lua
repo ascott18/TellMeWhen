@@ -19,6 +19,7 @@ local print = TMW.print
 
 local format = format
 local isNumber = TMW.isNumber
+local issecretvalue = issecretvalue or TMW.NULLFUNC
 
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
@@ -1048,12 +1049,9 @@ do
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: unit, GUID
 
-		-- TODO: What was ever using GUID from this processor?
-		-- Is it just the OnUnit notification event? I think it was...
-
 		-- Note on "not GUID": Any other case of missing GUID is useless to handle because
 		-- we can't do any logic against it.
-		if issecretvalue then
+		if ClassicExpansionAtLeast(11) then
 			t[#t+1] = [[
 			
 			if type(GUID) == 'nil' and unit == "player" then

@@ -24,11 +24,17 @@ local strlowerCache = TMW.strlowerCache
 local huge = math.huge
 local empty = {}
 
+local GetRestrictedActionStatus = GetRestrictedActionStatus or TMW.NULLFUNC
 local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 local Auras = TMW.COMMON.Auras
 local GetAuras = Auras.GetAuras
 
+-- TODO: Add UI displays that aura stuff (conditions and icon types) only work
+-- outside of restrictions
+
 function Env.AuraStacks(unit, name, filter)
+	if GetRestrictedActionStatus(0) then return 0 end
+
 	for i = 1, huge do
 		local data = GetAuraDataByIndex(unit, i, filter)
 
@@ -62,6 +68,8 @@ function Env.AuraStacksPacked(unit, name, kindKey, onlyMine)
 end
 
 function Env.AuraCount(units, spells, filter)
+	if GetRestrictedActionStatus(0) then return 0 end
+
 	local n = 0
 	local names = spells.Hash
 
@@ -101,6 +109,8 @@ function Env.AuraCountPacked(units, spells, kindKey, onlyMine)
 end
 
 function Env.AuraDur(unit, name, filter)
+	if GetRestrictedActionStatus(0) then return 0 end
+
 	local instance
 	for i = 1, huge do
 		instance = GetAuraDataByIndex(unit, i, filter)
@@ -144,6 +154,8 @@ function Env.AuraDurPacked(unit, name, kindKey, onlyMine)
 end
 
 function Env.AuraPercent(unit, name, filter)
+	if GetRestrictedActionStatus(0) then return 0 end
+
 	local data
 	for i = 1, huge do
 		data = GetAuraDataByIndex(unit, i, filter)
@@ -176,6 +188,8 @@ function Env.AuraPercentPacked(unit, name, kindKey, onlyMine)
 end
 
 function Env.AuraVariableNumber(unit, name, filter)
+	if GetRestrictedActionStatus(0) then return 0 end
+
 	local data
 	for i = 1, huge do
 		data = GetAuraDataByIndex(unit, i, filter)
@@ -213,6 +227,8 @@ end
 
 
 function Env.AuraTooltipNumber(unit, name, filter, requestedIndex)
+	if GetRestrictedActionStatus(0) then return 0 end
+
 	requestedIndex = requestedIndex or 1
 
 	for i = 1, 100 do
@@ -230,6 +246,8 @@ function Env.AuraTooltipNumber(unit, name, filter, requestedIndex)
 end
 
 function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedIndex)
+	if GetRestrictedActionStatus(0) then return 0 end
+
 	local auras = GetAuras(unit)
 	local instances = auras.instances
 	

@@ -652,7 +652,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 			instance.sourceUnit, nil
 		)
 
-	elseif not Units[1] and icon.HideIfNoUnits then
+	elseif instance == "_secrets" or (not Units[1] and icon.HideIfNoUnits) then
 		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			0,
 			icon.FirstTexture,
@@ -699,24 +699,56 @@ local aurasWithNoSourceReported = {
 	nil,	-- Terminate with nil to prevent all Warsong's return values from filling the table
 }
 
-
+if ClassicExpansionAtLeast(11) then
+	local function wrapUpdate(update)
+		return function(icon, time)
+			if GetRestrictedActionStatus(0) then
+				-- Force hide icon
+				icon:YieldInfo(false, nil, "_secrets")
+				return
+			end
+			return update(icon, time)
+		end
+	end
+	Buff_OnUpdate = wrapUpdate(Buff_OnUpdate)
+	Buff_OnUpdate_Packed = wrapUpdate(Buff_OnUpdate_Packed)
+	Buff_OnUpdate_Controller = wrapUpdate(Buff_OnUpdate_Controller)
+	Buff_OnUpdate_Controller_Packed = wrapUpdate(Buff_OnUpdate_Controller_Packed)
+end
 
 -- This IDP is used to hold the source of the aura being repoted by the icon. Used by the [AuraSource] DogTag.
 local Processor = TMW.Classes.IconDataProcessor:New("BUFF_SOURCEUNIT", "auraSourceUnit, auraSourceGUID")
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: auraSourceUnit, auraSourceGUID
-	t[#t+1] = [[
-	
-	auraSourceGUID = auraSourceGUID or (unit and (unit == "player" and playerGUID or UnitGUID(unit)))
-	
-	if attributes.auraSourceUnit ~= auraSourceUnit or attributes.auraSourceGUID ~= auraSourceGUID then
-		attributes.auraSourceUnit = auraSourceUnit
-		attributes.auraSourceGUID = auraSourceGUID
+	if ClassicExpansionAtLeast(11) then
+		t[#t+1] = [[
 		
-		TMW:Fire(BUFF_SOURCEUNIT.changedEvent, icon, auraSourceUnit, auraSourceGUID)
-		doFireIconUpdated = true
+		if type(auraSourceGUID) == 'nil' and unit == "player" then
+			auraSourceGUID = playerGUID
+		end
+
+		if attributes.auraSourceUnit ~= auraSourceUnit then
+			attributes.auraSourceUnit = auraSourceUnit
+			attributes.auraSourceGUID = auraSourceGUID
+			
+			TMW:Fire(BUFF_SOURCEUNIT.changedEvent, icon, auraSourceUnit, auraSourceGUID)
+			doFireIconUpdated = true
+		end
+		--]]
+	else
+		t[#t+1] = [[
+		
+		auraSourceGUID = auraSourceGUID or (unit and (unit == "player" and playerGUID or UnitGUID(unit)))
+		
+		if attributes.auraSourceUnit ~= auraSourceUnit or attributes.auraSourceGUID ~= auraSourceGUID then
+			attributes.auraSourceUnit = auraSourceUnit
+			attributes.auraSourceGUID = auraSourceGUID
+			
+			TMW:Fire(BUFF_SOURCEUNIT.changedEvent, icon, auraSourceUnit, auraSourceGUID)
+			doFireIconUpdated = true
+		end
+		--]]
 	end
-	--]]
 end
 Processor:RegisterDogTag("TMW", "AuraSource", {
 	code = function(icon)

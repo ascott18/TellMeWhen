@@ -57,7 +57,8 @@ TimerBar_BarDisplay:PostHookMethod("OnEnable", function(self)
 	end
 end)
 
-if issecretvalue then
+if ClassicExpansionAtLeast(11) then
+	-- Handle possible secret values
 
 	function TimerBar_BarDisplay:GetValue()
 		-- returns value, doTerminate

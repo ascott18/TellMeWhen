@@ -24,6 +24,7 @@ local DECIMAL_SEPERATOR = DECIMAL_SEPERATOR
 
 local select = select
 local setmetatable = setmetatable
+local issecretvalue = issecretvalue or TMW.NULLFUNC
 
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot
@@ -42,11 +43,10 @@ end
 TMW.COMMON.Auras = CreateFrame("Frame")
 local Auras = TMW.COMMON.Auras
 
-
 --[[
 
 Design notes:
-This cannot be keyed by GUID because a particular GUID fall off of any available unitID
+This cannot be keyed by GUID because a particular GUID could fall off of any available unitID
 and stop receiving aura updates, and we would have no way of knowing that GUID's data is stale.
 
 data = {
@@ -66,6 +66,8 @@ data = {
 local data = {}
 Auras.data = data
 
+local blockedUnits = {}
+
 -- Optimization: have specific events for the most common units
 -- to avoid all consumers having to listen to all UNIT_AURA events.
 local dedicatedEventUnits = {
@@ -80,8 +82,38 @@ local function FireUnitAura(unit, payload)
     end
     TMW:Fire("TMW_UNIT_AURA", unit, payload)
 end
+
+
+if ClassicExpansionAtLeast(11) then
+    -- TODO: WARNING: DOGSHIT. NEED AN EVENT FOR GetRestrictedActionStatus changes
+    local GetRestrictedActionStatus = GetRestrictedActionStatus
+    local blocked = false
+    TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
+        local newBlocked = GetRestrictedActionStatus(0)
+        if blocked ~= newBlocked then
+            blocked = newBlocked
+
+            if blocked then
+                for unit in pairs(data) do
+                    blockedUnits[unit] = true
+                    data[unit] = nil
+                    FireUnitAura(unit)
+                end
+            else
+                for unit in pairs(blockedUnits) do
+                    data[unit] = nil
+                    FireUnitAura(unit)
+                end
+                blockedUnits = {}
+            end
+        end
+    end)
+end
+
+-- NOTE: This is our own frame and event reg because we modify the aura instance tables.
+-- and so don't want to share with other AceEvent registrations.
 Auras:RegisterEvent("UNIT_AURA")
-Auras:SetScript("OnEvent", function(_, _, unit, unitAuraUpdateInfo)
+Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
     local unitData = data[unit]
     if not unitData then
         -- we have no cached unit data for this unitID,
@@ -92,6 +124,16 @@ Auras:SetScript("OnEvent", function(_, _, unit, unitAuraUpdateInfo)
         -- do use TMW_UNIT_AURA in order to avoid the excessive allocations from blizz's UNIT_AURA
         FireUnitAura(unit)
         return
+    end
+ 
+    if issecretvalue(unitAuraUpdateInfo) then 
+        if data[unit] then
+            -- Let consumers know we can't get aura data anymore.
+            data[unit] = nil
+            blockedUnits[unit] = true
+            FireUnitAura(unit)
+        end
+        return 
     end
 
     if unitAuraUpdateInfo.isFullUpdate then
@@ -260,13 +302,18 @@ local function TMW_UNITSET_UPDATED(event, unitSet)
         else
             local guid = UnitGUID(currentUnit)
             auraKnownUnits[i] = currentUnit
-            if guid ~= auraKnownUnitGuids[i] then
-                -- The unitID is now referring to a different entity.
-                -- Clear out its saved auras so they'll be repopulated
-                -- the next time someone asks for that unit's auras.
-                --print("wiping unit (new guid)", currentUnit)
-                auraKnownUnitGuids[i] = guid
+            if issecretvalue(guid) then
+                -- ¯\_(ツ)_/¯
                 data[currentUnit] = nil
+            else
+                if guid ~= auraKnownUnitGuids[i] then
+                    -- The unitID is now referring to a different entity.
+                    -- Clear out its saved auras so they'll be repopulated
+                    -- the next time someone asks for that unit's auras.
+                    --print("wiping unit (new guid)", currentUnit)
+                    auraKnownUnitGuids[i] = guid
+                    data[currentUnit] = nil
+                end
             end
         end
     end
@@ -303,6 +350,8 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
     for i = 1, n do
         local slot = select(i, ...)
         local instance = GetAuraDataBySlot(unit, slot)
+
+        if issecretvalue(instance) then return end
 
         -- Check `if instance` because sometimes GetAuraSlots returns invalid slots I guess?
         -- Only ever seen this happen in arena.

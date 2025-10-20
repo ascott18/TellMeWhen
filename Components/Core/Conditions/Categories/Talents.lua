@@ -842,23 +842,29 @@ if IsInJailersTower then
 	function AnimaPowWatcher:OnLocationUpdate()
 		if IsInJailersTower() and not self.watching then
 			self:RegisterEvent("UNIT_AURA")
+			self:RegisterEvent("PLAYER_REGEN_ENABLED", "Update")
 			self.watching = true
-			self:UNIT_AURA(nil, "player")
+			AnimaPowWatcher:Update()
 		elseif not IsInJailersTower() and self.watching then
 			wipe(currentAnimaPows)
 			TMW:Fire("TMW_ANIMA_POWER_COUNT_CHANGED")
 			self:UnregisterEvent("UNIT_AURA")
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED", "Update")
 			self.watching = false
 		end
 	end
 
+	local issecretvalue = issecretvalue or TMW.NULLFUNC
 	local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 	function AnimaPowWatcher:UNIT_AURA(_, unit)
 		if unit ~= "player" then return end
+		AnimaPowWatcher:Update()
+	end
 
+	function AnimaPowWatcher:Update()
 		for i=1, 300 do
 			local data = GetAuraDataByIndex("player", i, "MAW");
-			if not data then return end
+			if issecretvalue(data) or not data then return end
 
 			local spellId = data.spellId
 			local count = data.applications

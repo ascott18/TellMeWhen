@@ -19,6 +19,8 @@ local print = TMW.print
 
 
 local LSM = LibStub("LibSharedMedia-3.0")
+
+local issecretvalue = issecretvalue or TMW.NULLFUNC
 local	pairs, wipe =
 		pairs, wipe
 

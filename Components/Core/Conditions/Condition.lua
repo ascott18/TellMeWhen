@@ -106,7 +106,7 @@ function Condition:ShouldHide()
 end
 
 function Condition:IsDeprecated()
-	return self.funcstr == "DEPRECATED"
+	return self.funcstr == "DEPRECATED" or self.deprecated
 end
 
 function Condition:UsesTabularBitflags() 
