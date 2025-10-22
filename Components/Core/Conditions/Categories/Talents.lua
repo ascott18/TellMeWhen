@@ -607,6 +607,7 @@ elseif ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 		wipe(Env.TalentMap)
 		
 		local talentInfoQuery = {};
+		talentInfoQuery.specializationIndex = TMW.GetCurrentSpecialization();
 		for tier = 1, MAX_NUM_TALENT_TIERS do
 			for column = 1, NUM_TALENT_COLUMNS do
 				talentInfoQuery.tier = tier;
