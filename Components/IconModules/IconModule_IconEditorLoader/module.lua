@@ -126,7 +126,9 @@ Module:SetScriptHandler("OnMouseUp", function(Module, icon, button)
 			local GUID = icon:GetGUID()
 			local link = format("|H%s|h%s|h", GUID, GUID)
 
-			local inserted = ChatEdit_InsertLink(link)
+			local insert = ChatFrameUtil and ChatFrameUtil.InsertLink or ChatEdit_InsertLink
+
+			local inserted = insert(link)
 
 			-- If the insertion was successful, make the GUID permanant.
 			icon:GetGUID(1)

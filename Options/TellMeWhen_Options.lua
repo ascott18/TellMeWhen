@@ -198,10 +198,11 @@ local function hook_ChatEdit_InsertLink(text)
 	return false
 end
 
-hooksecurefunc("ChatEdit_InsertLink", function(...)
-	TMW.safecall(hook_ChatEdit_InsertLink, ...)
-end)
-
+if ChatFrameUtil and ChatFrameUtil.InsertLink then
+	hooksecurefunc(ChatFrameUtil, "InsertLink", function(...) TMW.safecall(hook_ChatEdit_InsertLink, ...) end)
+elseif ChatEdit_InsertLink then
+	hooksecurefunc("ChatEdit_InsertLink", function(...) TMW.safecall(hook_ChatEdit_InsertLink, ...) end)
+end
 
 
 
