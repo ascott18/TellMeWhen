@@ -2832,23 +2832,26 @@ function TMW:UpdateTalentTextureCache()
 	if C_SpecializationInfo.GetTalentInfo and MAX_NUM_TALENT_TIERS and NUM_TALENT_COLUMNS then
 		-- Should handle all classic versions mop and below?
 		local talentInfoQuery = {};
-		
-		for tier = 1, MAX_NUM_TALENT_TIERS do
-			for column = 1, NUM_TALENT_COLUMNS do
-				talentInfoQuery.tier = tier;
-				talentInfoQuery.column = column;
-				local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
 
-				local name = talentInfo.name
-				local tex = talentInfo.fileID
+		for spec = 1, TMW.GetNumSpecializations() do
+        for tier = 1, MAX_NUM_TALENT_TIERS do
+            for column = 1, NUM_TALENT_COLUMNS do
+                talentInfoQuery.tier = tier;
+                talentInfoQuery.column = column;
+                talentInfoQuery.specializationIndex = spec;
+                local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
 
-				local lower = name and strlowerCache[name]
-				
-				if lower then
-					SpellTexturesMetaIndex[lower] = tex
-				end
-			end
-		end
+                local name = talentInfo.name
+                local tex = talentInfo.fileID
+
+                local lower = name and strlowerCache[name]
+
+                if lower then
+                    SpellTexturesMetaIndex[lower] = tex
+                end
+            end
+        end
+    end
 	elseif MAX_TALENT_TIERS and NUM_TALENT_COLUMNS and GetTalentInfo then
 		for tier = 1, MAX_TALENT_TIERS do
 			for column = 1, NUM_TALENT_COLUMNS do
