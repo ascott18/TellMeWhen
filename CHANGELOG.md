@@ -1,3 +1,6 @@
+## v11.2.8
+* Fix #2310 spec checking broken below level 10 on Classic Era.
+
 ## v11.2.7
 * Fix #2309 Additional assorted talent/spec errors on Classic Era.
 

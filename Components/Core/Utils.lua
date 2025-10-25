@@ -1640,6 +1640,7 @@ if ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
 	function TMW.GetCurrentSpecializationID()
 		local _, pclass, classID = UnitClass("player")
 		local spec = TMW.GetCurrentSpecialization()
+		if not spec then return end
 		return TMW.GetSpecializationInfoForClassID(classID, spec)
 	end
 	
