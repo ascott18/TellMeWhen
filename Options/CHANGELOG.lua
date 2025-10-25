@@ -3,9 +3,10 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v11.2.7
+
 ## v11.2.6
 * Fix #2307 C_SpecializationInfo.GetTalent: query.specializationIndex must be specified.
-
 
 ## v11.2.5
 * New condition: Armor Repair Level - Checks the lowest durability percentage of any equipped gear.
