@@ -25,8 +25,6 @@ local _, pclass = UnitClass("Player")
 
 local wipe = 
       wipe
-local GetTalentInfo, GetNumTalents, GetGlyphLink = 
-      GetTalentInfo, GetNumTalents, GetGlyphLink
 local GetNumClasses = 
       GetNumClasses
 local GetNumBattlefieldScores, RequestBattlefieldScoreData, GetBattlefieldScore, GetNumArenaOpponents, GetArenaOpponentSpec =
@@ -392,7 +390,7 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 
 CNDT.Env.TalentMap = {}
 CNDT.Env.PvpTalentMap = {}
-if C_ClassTalents and C_ClassTalents.GetActiveConfigID and C_Traits.GetDefinitionInfo then
+if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 	-- Dragonflight
 
 	function CNDT:GetTalentRanksBySpellID()
@@ -606,14 +604,9 @@ elseif ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 	function CNDT:PLAYER_TALENT_UPDATE()
 		wipe(Env.TalentMap)
 		
-		local talentInfoQuery = {};
-		talentInfoQuery.specializationIndex = TMW.GetCurrentSpecialization();
-		for tier = 1, MAX_NUM_TALENT_TIERS do
-			for column = 1, NUM_TALENT_COLUMNS do
-				talentInfoQuery.tier = tier;
-				talentInfoQuery.column = column;
-				local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
-
+		for _, talentInfoQuery in TMW.GetTalentQueries(TMW.GetCurrentSpecialization()) do
+			local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
+			if talentInfo then
 				local name = talentInfo.name
 				local id = talentInfo.talentID
 				local lower = name and strlowerCache[name]
@@ -673,17 +666,19 @@ elseif ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 		max = 5,
 	})
 
-elseif GetNumTalentTabs then
+else
 	-- Classic - Cata
 	Env.TalentMap = {}
 	function CNDT:CHARACTER_POINTS_CHANGED()
 		wipe(Env.TalentMap)
-		for tab = 1, GetNumTalentTabs() do
-			for talent = 1, GetNumTalents(tab) do
-				local name, _, _, _, rank = GetTalentInfo(tab, talent)
+		
+		for _, talentInfoQuery in TMW.GetTalentQueries() do
+			local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
+			if talentInfo then
+				local name = talentInfo.name
 				local lower = name and strlowerCache[name]
 				if lower then
-					Env.TalentMap[lower] = rank or 0
+					Env.TalentMap[lower] = talentInfo.rank or 0
 				end
 			end
 		end
@@ -698,7 +693,7 @@ elseif GetNumTalentTabs then
 			editbox:SetLabel(L["SPELLTOCHECK"])
 		end,
 		useSUG = "talents",
-		icon = function() return select(2, GetTalentInfo(1, 1)) end,
+		icon = "interface\\icons\\spell_fire_immolation",
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c) 
 			-- this is handled externally because TalentMap is so extensive a process,

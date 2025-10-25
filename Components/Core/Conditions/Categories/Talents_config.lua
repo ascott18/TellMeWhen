@@ -43,7 +43,7 @@ end
 function Module:Table_Get()
 	wipe(self.table)
 
-	if C_ClassTalents then
+	if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 		local ranksbySpellId = TMW.CNDT:GetTalentRanksBySpellID()
 		for spellID, ranks in pairs(ranksbySpellId) do
 			local name = GetSpellName(spellID)
@@ -56,33 +56,26 @@ function Module:Table_Get()
 	elseif ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 		-- Mop - Shadowlands
 
-		local talentInfoQuery = {};
-		for spec = 1, TMW.GetNumSpecializations() do
-			for tier = 1, MAX_NUM_TALENT_TIERS do
-				for column = 1, NUM_TALENT_COLUMNS do
-					talentInfoQuery.tier = tier;
-					talentInfoQuery.column = column;
-					talentInfoQuery.specializationIndex = spec;
-					local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
-
-					local name = talentInfo.name
-					local id = talentInfo.talentID
-					local lower = name and strlowerCache[name]
-					if lower then
-						self.table[id] = lower
-					end
+		for _, talentInfoQuery in TMW.GetTalentQueries() do
+			local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
+			if talentInfo then
+				local name = talentInfo.name
+				local id = talentInfo.talentID
+				local lower = name and strlowerCache[name]
+				if lower then
+					self.table[id] = lower
 				end
 			end
 		end
 	else
 		-- Classic - Cata
-		for tab = 1, GetNumTalentTabs() do
-			for talent = 1, GetNumTalents(tab) do
-				local name, iconTexture = GetTalentInfo(tab, talent)
-				
+		for _, talentInfoQuery in TMW.GetTalentQueries() do
+			local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
+			if talentInfo then
+				local name = talentInfo.name
 				local lower = name and strlowerCache[name]
 				if lower then
-					self.table[makeId(tab, talent)] = lower
+					self.table[makeId(talentInfoQuery.specializationIndex, talentInfoQuery.talentIndex)] = lower
 				end
 			end
 		end
@@ -92,7 +85,7 @@ function Module:Table_Get()
 	return self.table
 end
 function Module:Entry_AddToList_1(f, id)
-	if C_ClassTalents then
+	if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 		local name = GetSpellName(id)
 	
 		f.Name:SetText(name)
@@ -119,23 +112,24 @@ function Module:Entry_AddToList_1(f, id)
 		f.tooltiparg = GetTalentLink(id)
 	
 		f.Icon:SetTexture(iconTexture)
-	elseif GetNumTalentTabs then
+	else
 		-- Classic - Cata
 		local tab, talent = parseId(id)
-		local name, iconTexture = GetTalentInfo(tab, talent)
+		local talentInfoQuery = {specializationIndex = tonumber(tab), talentIndex = tonumber(talent)}
+		local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery)
 
-		f.insert = name
-		f.Name:SetText(name)
+		f.insert = talentInfo.name
+		f.Name:SetText(talentInfo.name)
 
 		f.tooltipmethod = "SetTalent"
-		f.tooltiparg = {tab, talent}
+		f.tooltiparg = talentInfo.talentID
 
-		f.Icon:SetTexture(iconTexture)
+		f.Icon:SetTexture(talentInfo.icon)
 	end
 end
 Module.Entry_Colorize_1 = TMW.NULLFUNC
 
-if C_ClassTalents then
+if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 	local Module = SUG:NewModule("talentloadout", SUG:GetModule("default"))
 	Module.noMin = true
 	Module.showColorHelp = false

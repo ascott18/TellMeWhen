@@ -1575,7 +1575,9 @@ else
 	TMW.GetMaxClassID = GetNumClasses
 end
 
-if not GetSpecialization then
+
+
+if ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
 	-- Cata-and-earlier style specs (pick and choose talents, dual spec):
 
 	local GetTalentTreeRoles = GetTalentTreeRoles
@@ -1589,6 +1591,21 @@ if not GetSpecialization then
 	
 	function TMW.GetNumSpecializationsForClassID(classID)
 		return 3
+	end
+
+	function TMW.GetTalentQueries(specFilter)
+		local ret = {}
+		for spec = 1, TMW.GetNumSpecializations() do
+			if not specFilter or specFilter == spec then
+				for i = 1, MAX_NUM_TALENTS do
+					local talentInfoQuery = {};
+					talentInfoQuery.specializationIndex = spec;
+					talentInfoQuery.talentIndex = i;
+					ret[#ret + 1] = talentInfoQuery
+				end
+			end
+		end
+		return pairs(ret)
 	end
 	
 	function TMW.GetCurrentSpecialization()
@@ -1668,6 +1685,34 @@ else
 
 		local _, _, _, _, role = GetSpecializationInfo(currentSpec)
 		return role
+	end
+
+	if ClassicExpansionAtMost(LE_EXPANSION_SHADOWLANDS) then
+		-- Mop-shadowlands style talents
+		function TMW.GetTalentQueries(specFilter)
+			local ret = {}
+			for spec = 1, TMW.GetNumSpecializations() do
+				if not specFilter or spec == specFilter then
+					for tier = 1, MAX_NUM_TALENT_TIERS do
+						for column = 1, NUM_TALENT_COLUMNS do
+							local talentInfoQuery = {};
+							talentInfoQuery.tier = tier;
+							talentInfoQuery.column = column;
+							talentInfoQuery.specializationIndex = spec;
+							ret[#ret + 1] = talentInfoQuery
+						end
+					end
+				end
+			end
+			return pairs(ret)
+		end
+	else
+		-- Dragonflight+
+		function TMW.GetTalentQueries(specFilter)
+			local ret = {}
+			
+			return pairs(ret)
+		end
 	end
 end
 

@@ -1583,6 +1583,10 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		local lastCheckButton
 		local numFrames = 0
 		local numPerRow = allData.numPerRow or min(#allData, 2)
+		if numPerRow == 0 then
+			return
+		end
+		
 		self.checks = {}
 		for i, data in ipairs(allData) do
 			if data then -- skip over falses (dont freak out about them, they are probably intentional)
