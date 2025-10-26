@@ -27,6 +27,7 @@ local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 
+local GetRestrictedActionStatus = GetRestrictedActionStatus or TMW.NULLFUNC
 local GetTotemInfo = GetTotemInfo
 local UnitGUID = UnitGUID
 local max, strfind, format = max, strfind, format
@@ -37,6 +38,7 @@ local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local GetSpellCooldown = TMW.COMMON.Cooldowns.GetSpellCooldown
 local GetSpellCharges = TMW.COMMON.Cooldowns.GetSpellCharges
 local GetSpellCastCount = TMW.COMMON.Cooldowns.GetSpellCastCount
+Env.GetRestrictedActionStatus = GetRestrictedActionStatus
 Env.GetSpellCooldown = GetSpellCooldown
 Env.GetSpellCharges = GetSpellCharges
 Env.GetSpellCastCount = GetSpellCastCount
@@ -47,6 +49,8 @@ local GetSpellInfo = TMW.GetSpellInfo
 local GetItemCooldown = GetItemCooldown or (C_Item and C_Item.GetItemCooldown) or (C_Container and C_Container.GetItemCooldown)
 
 function Env.CooldownDuration(spell, gcdAsUnusable)
+	if GetRestrictedActionStatus(1) then return 0 end
+
 	if spell == "gcd" then
 		local cooldown = GetSpellCooldown(TMW.GCDSpell)
 		local duration = cooldown.duration
@@ -64,6 +68,8 @@ function Env.CooldownDuration(spell, gcdAsUnusable)
 end
 
 function Env.RechargeDuration(spell)
+	if GetRestrictedActionStatus(1) then return 0 end
+
 	local charges = GetSpellCharges(spell)
 	if charges and charges.currentCharges ~= charges.maxCharges then
 		local duration = charges.cooldownDuration
@@ -97,8 +103,9 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	end,
 	anticipate = function(c)
 		local str = [[
+			if GetRestrictedActionStatus(1) then VALUE = huge return end
 			local cooldown = GetSpellCooldown(c.OwnSpells.First)
-			local VALUE = cooldown and cooldown.startTime + (cooldown.duration - (c.Level*cooldown.modRate)) or huge
+			VALUE = cooldown and cooldown.startTime + (cooldown.duration - (c.Level*cooldown.modRate)) or huge
 		]]
 		if TMW:GetSpells(c.Name).First == "gcd" then
 			str = str:gsub("c.OwnSpells.First", TMW.GCDSpell)
@@ -132,11 +139,11 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 	end,
 	anticipate = function(c)
 		local str = [[
+			if GetRestrictedActionStatus(1) then VALUE = huge return end
 			local cooldown = GetSpellCooldown(c.OwnSpells.First)
 			local cooldown2 = GetSpellCooldown(c.OwnSpells2.First)
 			local duration = cooldown and cooldown.duration
 			local duration2 = cooldown2 and cooldown2.duration
-			local VALUE
 			if duration and duration2 then
 				local v1, v2 = cooldown.startTime + duration, cooldown2.startTime + duration2
 				VALUE = v1 < v2 and v1 or v2
@@ -174,6 +181,7 @@ ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetSpellChargesOrCount = function(spell)
+			if GetRestrictedActionStatus(1) then return GetSpellCastCount(spell) end
 			local charges = GetSpellCharges(spell)
 			if charges then return charges.currentCharges end
 			return GetSpellCastCount(spell)
@@ -212,8 +220,9 @@ ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
 			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_CHARGES")
 	end,
 	anticipate = [[
+		if GetRestrictedActionStatus(1) then VALUE = huge return end
 		local data = GetSpellCharges(c.OwnSpells.First)
-		local VALUE = data and data.cooldownDuration and data.cooldownStartTime + (data.cooldownDuration - (c.Level*data.chargeModRate)) or huge
+		VALUE = data and data.cooldownDuration and data.cooldownStartTime + (data.cooldownDuration - (c.Level*data.chargeModRate)) or huge
 	]],
 })
 
@@ -621,8 +630,9 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
+		if GetRestrictedActionStatus(1) then VALUE = huge return end
 		local cooldown = GetSpellCooldown(TMW.GCDSpell)
-		local VALUE = cooldown.startTime + cooldown.duration -- the time at which we need to update again. (when the GCD ends)
+		VALUE = cooldown.startTime + cooldown.duration -- the time at which we need to update again. (when the GCD ends)
 	]],
 })
 
@@ -656,7 +666,7 @@ ConditionCategory:RegisterCondition(11,	 "ITEMCD", {
 	end,
 	anticipate = [[
 		local start, duration, enable = c.Item:GetCooldown()
-		local VALUE = (enable == 1 or enable == true) and duration and start + (duration - c.Level) or huge
+		VALUE = (enable == 1 or enable == true) and duration and start + (duration - c.Level) or huge
 	]],
 })
 ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
@@ -680,7 +690,7 @@ ConditionCategory:RegisterCondition(12,	 "ITEMCDCOMP", {
 	anticipate = [[
 		local start, duration, enable = c.Item:GetCooldown()
 		local start2, duration2, enable2 = c.Item2:GetCooldown()
-		local VALUE
+		
 		if enable == 0 or enable == false or enable2 == 0 or enable2 == false then
 			VALUE = huge
 		elseif duration and duration2 then
@@ -821,7 +831,7 @@ if SwingTimerMonitor then
 		end,
 		anticipate = [[
 			local start, duration = SwingInfo(]] .. GetInventorySlotInfo("MainHandSlot") .. [[)
-			local VALUE = duration and start + (duration - c.Level) or huge
+			VALUE = duration and start + (duration - c.Level) or huge
 		]],
 	})
 	ConditionCategory:RegisterCondition(19.5,	 "OHSWING", {
@@ -843,7 +853,7 @@ if SwingTimerMonitor then
 		end,
 		anticipate = [[
 			local start, duration = SwingInfo(]] .. GetInventorySlotInfo("SecondaryHandSlot") .. [[)
-			local VALUE = duration and start + (duration - c.Level) or huge
+			VALUE = duration and start + (duration - c.Level) or huge
 		]],
 	})
 end
@@ -944,7 +954,7 @@ ConditionCategory:RegisterCondition(20.1,	 "TOTEM_ANY", {
 			ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
 	end,
 	anticipate = function(c)
-		return [[local VALUE = time + TotemHelperAny(c.Spells) - c.Level]]
+		return [[VALUE = time + TotemHelperAny(c.Spells) - c.Level]]
 	end,
 })
 
@@ -971,7 +981,7 @@ for i = 1, 5 do
 				ConditionObject:GenerateNormalEventString("PLAYER_TOTEM_UPDATE")
 		end,
 		anticipate = function(c)
-			return [[local VALUE = time + TotemHelper(]] .. i .. [[) - c.Level]]
+			return [[VALUE = time + TotemHelper(]] .. i .. [[) - c.Level]]
 		end,
 		hidden = not totem,
 	})
@@ -1101,7 +1111,7 @@ ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
 	events = castEvents,
 	anticipate = [[
 		local percent, percentPerSecond = UnitCastPercent(c.Unit, c.Spells.FirstString)
-		local VALUE = 
+		VALUE = 
 			percentPerSecond == nil and huge or 
 			((c.Level - percent) / percentPerSecond) + time
 	]],

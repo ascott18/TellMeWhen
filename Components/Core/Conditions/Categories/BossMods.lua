@@ -267,7 +267,6 @@ ConditionCategory:RegisterCondition(1,	 "BIGWIGS_TIMER", {
 
 		return [[local dur, expirationTime = BigWigs_GetTimeRemaining(]] .. name .. [[)
 
-		local VALUE
 		if dur and dur > 0 then
 			if not expirationTime then
 				VALUE = 0
@@ -461,7 +460,6 @@ ConditionCategory:RegisterCondition(10,	 "DBM_TIMER", {
 
 		return [[local dur, expirationTime = DBM_GetTimeRemaining(]] .. name .. [[)
 
-		local VALUE
 		if dur and dur > 0 then
 			if not expirationTime then
 				VALUE = 0

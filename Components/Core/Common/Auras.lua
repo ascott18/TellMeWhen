@@ -126,14 +126,14 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
         return
     end
  
-    if issecretvalue(unitAuraUpdateInfo) then 
+    if issecretvalue(unitAuraUpdateInfo) then
         if data[unit] then
             -- Let consumers know we can't get aura data anymore.
             data[unit] = nil
             blockedUnits[unit] = true
             FireUnitAura(unit)
         end
-        return 
+        return
     end
 
     if unitAuraUpdateInfo.isFullUpdate then
@@ -351,12 +351,13 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
         local slot = select(i, ...)
         local instance = GetAuraDataBySlot(unit, slot)
 
-        if issecretvalue(instance) then return end
-
         -- Check `if instance` because sometimes GetAuraSlots returns invalid slots I guess?
         -- Only ever seen this happen in arena.
         if instance then
             local auraInstanceID = instance.auraInstanceID
+
+            if issecretvalue(auraInstanceID) then return end
+
             local isMine = 
                 instance.sourceUnit == "player" or
                 instance.sourceUnit == "pet"

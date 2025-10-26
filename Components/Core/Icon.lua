@@ -710,12 +710,14 @@ function Icon.ScheduleNextUpdate(icon)
 			
 			if not attributes.shown then
 				break
-			end
+			end 
 
-			local d = attributes.duration - (time - attributes.start)
+			if not issecretvalue(attributes.duration) then
+				local d = attributes.duration - (time - attributes.start)
 
-			if d > 0 and d < duration then
-				duration = d
+				if d > 0 and d < duration then
+					duration = d
+				end
 			end
 		end
 
@@ -725,8 +727,12 @@ function Icon.ScheduleNextUpdate(icon)
 	else
 		local attributes = icon.attributes
 
-		duration = attributes.duration - (time - attributes.start)
-		if duration < 0 then duration = 0 end
+		if issecretvalue(attributes.duration) then
+			duration = 0
+		else
+			duration = attributes.duration - (time - attributes.start)
+			if duration < 0 then duration = 0 end
+		end
 	end
 
 	if duration == 0 then

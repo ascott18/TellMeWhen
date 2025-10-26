@@ -502,12 +502,7 @@ function TMW.print(...)
 		local prefix = format("|cffff0000 %s", linenum(3, true)) .. ":|r "
 
 		local func = TMW.debug and TMW.debug.print or _G.print
-		if ... == TMW then
-			prefix = "s" .. prefix
-			func(prefix, select(2,...))
-		else
-			func(prefix, ...)
-		end
+		func(prefix, ...)
 	end
 	return ...
 end

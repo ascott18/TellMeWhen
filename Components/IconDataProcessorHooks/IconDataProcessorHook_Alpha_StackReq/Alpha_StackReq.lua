@@ -96,16 +96,23 @@ Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 	-- Only run if doFireIconUpdated is set. We use it to detect if `stack` might have changed.
 	-- If `stack` didn't change, we definitely don't need to run this.
 	if doFireIconUpdated then
-		local state_stackFailed = nil
-		if
-			stack and ((icon.StackMinEnabled and icon.StackMin > stack) or (icon.StackMaxEnabled and stack > icon.StackMax))
-		then
-			state_stackFailed = icon.States[STATE_DEFAULT_STACKSFAILED]
-		end
-		
-		if attributes.state_stackFailed ~= state_stackFailed then
-			icon:SetInfo_INTERNAL("state_stackFailed", state_stackFailed)
-			doFireIconUpdated = true
+		if issecretvalue(stack) then
+			if attributes.state_stackFailed then
+				icon:SetInfo_INTERNAL("state_stackFailed", nil)
+				doFireIconUpdated = true
+			end
+		else
+			local state_stackFailed = nil
+			if
+				stack and ((icon.StackMinEnabled and icon.StackMin > stack) or (icon.StackMaxEnabled and stack > icon.StackMax))
+			then
+				state_stackFailed = icon.States[STATE_DEFAULT_STACKSFAILED]
+			end
+			
+			if attributes.state_stackFailed ~= state_stackFailed then
+				icon:SetInfo_INTERNAL("state_stackFailed", state_stackFailed)
+				doFireIconUpdated = true
+			end
 		end
 	end
 	--]]

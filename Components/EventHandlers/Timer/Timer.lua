@@ -143,7 +143,7 @@ ConditionCategory:RegisterCondition(0.51,	"TIMER", {
 
 		return [[
 			local timer = TIMERS[]] .. timer .. [[]
-			local VALUE = not timer.started and huge or (time + (c.Level - timer:GetTime()))
+			VALUE = not timer.started and huge or (time + (c.Level - timer:GetTime()))
 		]]
 	end,
 })

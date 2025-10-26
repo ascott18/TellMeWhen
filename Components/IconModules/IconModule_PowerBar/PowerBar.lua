@@ -159,6 +159,7 @@ function PowerBar:Update(power, powerTypeNum)
 		local value
 
 		if not self.Invert then
+			if issecretvalue(power) then power = 10e6 end -- TODO: dumb, dumb, dumb
 			value = Max - power + self.PBarOffs
 		else
 			value = power + self.PBarOffs

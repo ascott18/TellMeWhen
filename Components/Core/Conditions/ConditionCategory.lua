@@ -76,7 +76,7 @@ end
 --    end,
 --    anticipate = [[
 --      local start, duration = GetSpellCooldown(c.NameFirst)
---      local VALUE = duration and start + (duration - c.Level) or huge
+--      VALUE = duration and start + (duration - c.Level) or huge
 --    ]],
 --  })
 function ConditionCategory:RegisterCondition(order, identifier, conditionData)

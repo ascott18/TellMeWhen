@@ -180,10 +180,10 @@ end <</code>>
 ** Some examples of {{{anticipate}}} functions:
 *** <<code lua>>anticipate = [[
   local start, duration = GetSpellCooldown(c.NameFirst)
-  local VALUE = duration and start + (duration - c.Level) or huge
+  VALUE = duration and start + (duration - c.Level) or huge
 ]]<</code>>
 *** <<code lua>>anticipate = [[local _, dur = GetWeaponEnchantInfo()
-  local VALUE = time + ((dur or 0)/1000) - c.Level]] <</code>>
+  VALUE = time + ((dur or 0)/1000) - c.Level]] <</code>>
 *** <<code lua>>anticipate = function(c)
   return [[local dur, duration, expirationTime = AuraDur(c.Unit, c.NameFirst, c.NameString, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")
   local VALUE

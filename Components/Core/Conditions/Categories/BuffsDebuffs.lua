@@ -303,7 +303,6 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 			or [[AuraDur(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")]]
 			
 		return [[local dur, duration, expirationTime, timeMod = ]] .. getAura .. [[
-		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and expirationTime - (c.Level * timeMod) or 0
 		else
@@ -363,7 +362,6 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 			or [[AuraDur(c.Unit, c.Spells.First, "HELPFUL]] .. (c.Checked and " PLAYER" or "") .. [[")]]
 			
 		return [[local dur, duration, expirationTime, timeMod = ]] .. getAura .. [[
-		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and (expirationTime - c.Level*duration*timeMod) or 0
 		else
@@ -568,7 +566,6 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 			or [[AuraDur(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")]]
 			
 		return [[local dur, duration, expirationTime, timeMod = ]] .. getAura .. [[
-		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and expirationTime - (c.Level*timeMod) or 0
 		else
@@ -628,7 +625,6 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 			or [[AuraDur(c.Unit, c.Spells.First, "HARMFUL]] .. (c.Checked and " PLAYER" or "") .. [[")]]
 			
 		return [[local dur, duration, expirationTime, timeMod = ]] .. getAura .. [[
-		local VALUE
 		if dur and dur > 0 then
 			VALUE = expirationTime and (expirationTime - c.Level*duration*timeMod) or 0
 		else
@@ -795,7 +791,7 @@ ConditionCategory:RegisterCondition(21,	 "MAINHAND", {
 			ConditionObject:GenerateNormalEventString("UNIT_PORTRAIT_UPDATE", "player")
 	end,
 	anticipate = [[local _, dur = GetWeaponEnchantInfo()
-		local VALUE = time + ((dur or 0)/1000) - c.Level]],
+		VALUE = time + ((dur or 0)/1000) - c.Level]],
 })
 ConditionCategory:RegisterCondition(22,	 "OFFHAND", {
 	text = L["ICONMENU_WPNENCHANT"] .. " - " .. INVTYPE_WEAPONOFFHAND,
@@ -811,5 +807,5 @@ ConditionCategory:RegisterCondition(22,	 "OFFHAND", {
 			ConditionObject:GenerateNormalEventString("UNIT_PORTRAIT_UPDATE", "player")
 	end,
 	anticipate = [[local _, _, _, _, _, dur = GetWeaponEnchantInfo()
-		local VALUE = time + ((dur or 0)/1000) - c.Level]],
+		VALUE = time + ((dur or 0)/1000) - c.Level]],
 })

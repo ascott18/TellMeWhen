@@ -32,29 +32,41 @@ local CachedCounts = {}
 if C_Spell.GetSpellCooldown then
 	local C_Spell_GetSpellCooldown = C_Spell.GetSpellCooldown
 
-    function Cooldowns.GetSpellCooldown(spell)
-        local cached = CachedCooldowns[spell]
-        if cached then
-            if cached == false then return end
-            local duration = cached.duration
-            if duration ~= 0 and (duration - (TMW.time - cached.startTime)) <= 0 then
-                -- Cooldown has elapsed. Discard this cache entry
-            else
-                return cached
-            end
+    if ClassicExpansionAtLeast(11) then
+        -- Assume cooldowns are always secrets. No point doing anything else.
+        function Cooldowns.GetSpellCooldown(spell)
+            local cached = CachedCooldowns[spell]
+            if cached ~= nil then return cached ~= false and cached or nil end
+            
+            cached = C_Spell_GetSpellCooldown(spell) or false
+            CachedCooldowns[spell] = cached
+            return cached
         end
-        
-        cached = C_Spell_GetSpellCooldown(spell) or false
-        CachedCooldowns[spell] = cached
-        return cached
+    else
+        function Cooldowns.GetSpellCooldown(spell)
+            local cached = CachedCooldowns[spell]
+            if cached ~= nil then
+                if not cached then return end
+                local duration = cached.duration
+                if duration ~= 0 and (duration - (TMW.time - cached.startTime)) <= 0 then
+                    -- Cooldown has elapsed. Discard this cache entry
+                else
+                    return cached
+                end
+            end
+            
+            cached = C_Spell_GetSpellCooldown(spell) or false
+            CachedCooldowns[spell] = cached
+            return cached
+        end
     end
 else
     local GetSpellCooldown = _G.GetSpellCooldown
 
     function Cooldowns.GetSpellCooldown(spell)
         local cached = CachedCooldowns[spell]
-        if cached then
-            if cached == false then return end
+        if cached ~= nil then
+            if not cached then return end
             local duration = cached.duration
             if duration ~= 0 and (duration - (TMW.time - cached.startTime)) <= 0 then
                 -- Cooldown has elapsed. Discard this cache entry
@@ -80,7 +92,7 @@ if C_Spell.GetSpellCharges then
 
     function Cooldowns.GetSpellCharges(spell)
         local cached = CachedCharges[spell]
-        if cached then return cached ~= false and cached or nil end
+        if cached ~= nil then return cached ~= false and cached or nil end
         
         cached = C_Spell_GetSpellCharges(spell) or false
         CachedCharges[spell] = cached
@@ -91,10 +103,10 @@ else
 
     function Cooldowns.GetSpellCharges(spell)
         local cached = CachedCharges[spell]
-        if cached then return cached ~= false and cached or nil end
+        if cached ~= nil then return cached ~= false and cached or nil end
         
         local currentCharges, maxCharges, cooldownStartTime, cooldownDuration = GetSpellCharges(spell)
-        cached = startTime and {
+        cached = cooldownStartTime and {
             currentCharges = currentCharges,
             maxCharges = maxCharges,
             cooldownStartTime = cooldownStartTime,
@@ -114,9 +126,16 @@ if C_Spell.GetSpellCastCount then
 
     function Cooldowns.GetSpellCastCount(spell)
         local cached = CachedCounts[spell]
-        if cached then return cached ~= false and cached or nil end
+        if type(cached) ~= nil then 
+            if type(cached) ~= 'boolean' then
+                return cached
+            else
+                return nil
+            end
+        end
 
-        cached = C_Spell_GetSpellCastCount(spell) or false
+        cached = C_Spell_GetSpellCastCount(spell)
+        if type(cached) ~= 'number' then cached = false end
         CachedCounts[spell] = cached
         return cached
     end
@@ -125,7 +144,7 @@ else
 
     function Cooldowns.GetSpellCastCount(spell)
         local cached = CachedCounts[spell]
-        if cached then return cached ~= false and cached or nil end
+        if cached ~= nil then return cached ~= false and cached or nil end
         
         local count = GetSpellCount(spell)
         cached = count or false
@@ -150,7 +169,9 @@ end
 local GetGCD = TMW.GetGCD
 
 function TMW.OnGCD(d)
-	if d <= 0.1 then
+    if issecretvalue(d) then 
+        return false
+	elseif d <= 0.1 then
 		-- A cd of 0.001 is Blizzard's terrible way of indicating that something's cooldown hasn't started,
 		-- but is still unusable, and has a cooldown pending. It should not be considered a GCD.
 		-- In general, anything less than 0.1 isn't a GCD.

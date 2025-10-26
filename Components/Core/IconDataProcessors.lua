@@ -374,45 +374,54 @@ do
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: start, duration, modRate
 		t[#t+1] = [[
-		duration = duration or 0
-		start = start or 0
-		modRate = modRate or 1
-		
-		if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
-
-		if EventHandlersSet.OnDuration then
-			local d = (duration - (TMW.time - start)) / modRate
-			d = d > 0 and d or 0
-			
-			if d ~= icon.__lastDur then
-				icon:QueueEvent("OnDuration")
-				icon.__lastDur = d
-			end
-		end
-
-		if attributes.start ~= start or attributes.duration ~= duration or attributes.modRate ~= modRate then
-
-			local realDuration = icon:OnGCD(duration) and 0 or duration -- the duration of the cooldown, ignoring the GCD
-			if icon.__realDuration ~= realDuration then
-				-- detect events that occured, and handle them if they did
-				if realDuration == 0 then
-					if EventHandlersSet.OnFinish then
-						icon:QueueEvent("OnFinish")
-					end
-				else
-					if EventHandlersSet.OnStart then
-						icon:QueueEvent("OnStart")
-					end
-				end
-				icon.__realDuration = realDuration
-			end
-
+		if issecretvalue(duration) or issecretvalue(attributes.duration) then
 			attributes.start = start
 			attributes.duration = duration
 			attributes.modRate = modRate
 
 			TMW:Fire(DURATION.changedEvent, icon, start, duration, modRate)
 			doFireIconUpdated = true
+		else
+			duration = duration or 0
+			start = start or 0
+			modRate = modRate or 1
+			
+			if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
+
+			if EventHandlersSet.OnDuration then
+				local d = (duration - (TMW.time - start)) / modRate
+				d = d > 0 and d or 0
+				
+				if d ~= icon.__lastDur then
+					icon:QueueEvent("OnDuration")
+					icon.__lastDur = d
+				end
+			end
+
+			if attributes.start ~= start or attributes.duration ~= duration or attributes.modRate ~= modRate then
+
+				local realDuration = icon:OnGCD(duration) and 0 or duration -- the duration of the cooldown, ignoring the GCD
+				if icon.__realDuration ~= realDuration then
+					-- detect events that occured, and handle them if they did
+					if realDuration == 0 then
+						if EventHandlersSet.OnFinish then
+							icon:QueueEvent("OnFinish")
+						end
+					else
+						if EventHandlersSet.OnStart then
+							icon:QueueEvent("OnStart")
+						end
+					end
+					icon.__realDuration = realDuration
+				end
+
+				attributes.start = start
+				attributes.duration = duration
+				attributes.modRate = modRate
+
+				TMW:Fire(DURATION.changedEvent, icon, start, duration, modRate)
+				doFireIconUpdated = true
+			end
 		end
 		--]]
 	end
@@ -648,29 +657,7 @@ do
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: charges, maxCharges, chargeStart, chargeDur
 		t[#t+1] = [[
-		
-		if charges == maxCharges then
-			chargeStart, chargeDur = 0, 0
-		end
-			
-		if attributes.charges ~= charges
-		or attributes.maxCharges ~= maxCharges
-		or attributes.chargeStart ~= chargeStart
-		or attributes.chargeDur ~= chargeDur then
-
-			local oldCharges = attributes.charges
-			if charges and oldCharges then
-				if oldCharges > charges then
-					if EventHandlersSet.OnChargeLost then
-						icon:QueueEvent("OnChargeLost")
-					end
-				elseif oldCharges < charges then
-					if EventHandlersSet.OnChargeGained then
-						icon:QueueEvent("OnChargeGained")
-					end
-				end
-			end
-
+		if issecretvalue(charges) or issecretvalue(attributes.charges) then
 			attributes.charges = charges
 			attributes.maxCharges = maxCharges
 			attributes.chargeStart = chargeStart
@@ -678,6 +665,37 @@ do
 			
 			TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges, chargeStart, chargeDur)
 			doFireIconUpdated = true
+		else
+			if charges == maxCharges then
+				chargeStart, chargeDur = 0, 0
+			end
+				
+			if attributes.charges ~= charges
+			or attributes.maxCharges ~= maxCharges
+			or attributes.chargeStart ~= chargeStart
+			or attributes.chargeDur ~= chargeDur then
+
+				local oldCharges = attributes.charges
+				if charges and oldCharges then
+					if oldCharges > charges then
+						if EventHandlersSet.OnChargeLost then
+							icon:QueueEvent("OnChargeLost")
+						end
+					elseif oldCharges < charges then
+						if EventHandlersSet.OnChargeGained then
+							icon:QueueEvent("OnChargeGained")
+						end
+					end
+				end
+
+				attributes.charges = charges
+				attributes.maxCharges = maxCharges
+				attributes.chargeStart = chargeStart
+				attributes.chargeDur = chargeDur
+				
+				TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges, chargeStart, chargeDur)
+				doFireIconUpdated = true
+			end
 		end
 		--]]
 	end
@@ -869,10 +887,16 @@ do
 	Processor:RegisterDogTag("TMW", "ValueMax", {
 		code = function(icon)
 			icon = TMW.GUIDToOwner[icon]
+			if not icon then return 0 end
 			
-			local maxValue = icon and icon.attributes.maxValue or 0
-			
-			return isNumber[maxValue] or maxValue
+			local value = icon.attributes.maxValue
+
+			if issecretvalue(value) then 
+				if type(value) == 'nil' then return 0 end
+				return value 
+			end
+
+			return isNumber[value] or value or 0
 		end,
 		arg = {
 			'icon', 'string', '@req',
@@ -897,7 +921,13 @@ do
 	function Processor:CompileFunctionSegment(t)
 		--GLOBALS: stack, stackText
 		t[#t+1] = [[
-		if attributes.stack ~= stack or attributes.stackText ~= stackText then
+		if issecretvalue(stack) or issecretvalue(attributes.stack) then
+			attributes.stack = stack
+			attributes.stackText = stackText
+			TMW:Fire(STACK.changedEvent, icon, stack, stackText)
+			doFireIconUpdated = true
+
+		elseif attributes.stack ~= stack or attributes.stackText ~= stackText then
 			local old = attributes.stack
 			attributes.stack = stack
 			attributes.stackText = stackText
@@ -971,10 +1001,16 @@ do
 	Processor:RegisterDogTag("TMW", "Stacks", {
 		code = function(icon)
 			icon = TMW.GUIDToOwner[icon]
+			if not icon then return 0 end
 			
-			local stacks = icon and icon.attributes.stackText or 0
-			
-			return isNumber[stacks] or stacks
+			local stack = icon.attributes.stack
+
+			if issecretvalue(stack) then
+				if type(stack) == 'nil' then return 0 end
+				return stack
+			end
+
+			return isNumber[stack] or stack or 0
 		end,
 		arg = {
 			'icon', 'string', '@req',

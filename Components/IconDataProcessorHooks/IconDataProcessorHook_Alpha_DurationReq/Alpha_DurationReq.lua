@@ -79,20 +79,26 @@ Hook:RegisterCompileFunctionSegmentHook("post", function(Processor, t)
 	-- GLOBALS: start, duration, modRate
 	t[#t+1] = [[
 
-	
-	if duration > 0 or doFireIconUpdated then
-		local d = (duration - (TMW.time - start)) / (modRate or 1)
-		
-		local state_durationFailed = nil
-		if
-			d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))
-		then
-			state_durationFailed = icon.States[STATE_DEFAULT_DURATIONFAILED]
-		end
-		
-		if attributes.state_durationFailed ~= state_durationFailed then
-			icon:SetInfo_INTERNAL("state_durationFailed", state_durationFailed)
+	if issecretvalue(duration) then
+		if attributes.state_durationFailed then
+			icon:SetInfo_INTERNAL("state_durationFailed", nil)
 			doFireIconUpdated = true
+		end
+	else
+		if duration > 0 or doFireIconUpdated then
+			local d = (duration - (TMW.time - start)) / (modRate or 1)
+			
+			local state_durationFailed = nil
+			if
+				d > 0 and ((icon.DurationMinEnabled and icon.DurationMin > d) or (icon.DurationMaxEnabled and d > icon.DurationMax))
+			then
+				state_durationFailed = icon.States[STATE_DEFAULT_DURATIONFAILED]
+			end
+			
+			if attributes.state_durationFailed ~= state_durationFailed then
+				icon:SetInfo_INTERNAL("state_durationFailed", state_durationFailed)
+				doFireIconUpdated = true
+			end
 		end
 	end
 	--]]

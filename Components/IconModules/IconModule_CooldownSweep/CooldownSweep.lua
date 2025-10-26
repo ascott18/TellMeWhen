@@ -20,6 +20,7 @@ local print = TMW.print
 local OnGCD = TMW.OnGCD
 
 local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+local issecretvalue = issecretvalue or TMW.NULLFUNC
 local pairs, wipe = 
       pairs, wipe
 
@@ -309,41 +310,42 @@ function CooldownSweep:UpdateCooldown()
 	local mainStart, mainDuration
 	local otherStart, otherDuration = 0, 0
 
-	if self.maxCharges ~= 0 and self.charges == 0 then
+	-- can't show charges as the primary if charges are secret
+	if not issecretvalue(self.charges) and self.maxCharges ~= 0 and self.charges == 0 then
 		mainStart, mainDuration = self.chargeStart, self.chargeDur
 	else
 		mainStart, mainDuration = self.start, duration
-		if self.charges ~= self.maxCharges then
+		-- if charges are secret, assume they exist and display them.
+		if issecretvalue(self.charges) or self.charges ~= self.maxCharges then
 			otherStart, otherDuration = self.chargeStart, self.chargeDur
 		end
 	end
 
-	if mainDuration > 0 then
-		if self.ShowTimer then
-			cd:SetDrawEdge(TMW.db.profile.DrawEdge)
-			cd:SetDrawSwipe(true)
-		else
-			cd:SetDrawEdge(false)
-			cd:SetDrawSwipe(false)
-		end
-
+	if issecretvalue(mainDuration) or mainDuration > 0 then
 		cd:SetCooldown(mainStart, mainDuration, self.modRate)
-		cd:Show()
 	else
 		cd:SetCooldown(0, 0)
 	end
 
 	-- Handle charges of spells that aren't completely depleted.
 	local cd2 = self.cooldown2
-	if otherDuration > 0 then
+	if issecretvalue(otherDuration) or otherDuration > 0 then
 		cd2:SetCooldown(otherStart, otherDuration, self.modRate)
-		cd2:Show()
 	else
 		cd2:SetCooldown(0, 0)
 	end
 end
 
 function CooldownSweep:DURATION(icon, start, duration, modRate)
+	if issecretvalue(duration) or issecretvalue(self.duration) then
+		self.start = start
+		self.duration = duration
+		self.modRate = modRate
+		
+		NeedsUpdate[self] = true
+		return
+	end
+	
 	if (not self.ClockGCD and OnGCD(duration)) or (duration - (TMW.time - start)) <= 0 or duration <= 0 then
 		start, duration = 0, 0
 	end
@@ -359,10 +361,10 @@ end
 CooldownSweep:SetDataListener("DURATION")
 
 function CooldownSweep:SPELLCHARGES(icon, charges, maxCharges, chargeStart, chargeDur)
-	self.charges = charges or 0
-	self.maxCharges = maxCharges or 0
-	self.chargeStart = chargeStart or 0
-	self.chargeDur = chargeDur or 0
+	self.charges = charges
+	self.maxCharges = maxCharges
+	self.chargeStart = chargeStart
+	self.chargeDur = chargeDur
 	
 	NeedsUpdate[self] = true
 end
