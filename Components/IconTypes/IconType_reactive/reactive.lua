@@ -168,124 +168,231 @@ end
 local emptyTable = {}
 local offCooldown = { startTime = 0, duration = 0 }
 local mindfreeze = GetSpellName(47528) and strlower(GetSpellName(47528))
-local function Reactive_OnUpdate(icon, time)
+local Reactive_OnUpdate
+if ClassicExpansionAtLeast(11) then
+	function Reactive_OnUpdate(icon, time)
 
-	-- Upvalue things that will be referenced a lot in our loops.
-	local NameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, IgnoreNomana, UseActvtnOverlay, OnlyActvtnOverlay =
-	 icon.Spells.Array, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.IgnoreNomana, icon.UseActvtnOverlay, icon.OnlyActvtnOverlay
+		-- Upvalue things that will be referenced a lot in our loops.
+		local NameArray, RangeCheck, ManaCheck, IgnoreNomana, UseActvtnOverlay, OnlyActvtnOverlay =
+		icon.Spells.Array, icon.RangeCheck, icon.ManaCheck, icon.IgnoreNomana, icon.UseActvtnOverlay, icon.OnlyActvtnOverlay
 
-	local activationOverlayActive = icon.activationOverlayActive
+		local activationOverlayActive = icon.activationOverlayActive
 
-	-- These variables will hold all the attributes that we pass to SetInfo().
-	local inrange, noMana, cooldown, CD, usable, charges, stack, start_charge, duration_charge
+		-- These variables will hold all the attributes that we pass to SetInfo().
+		local inrange, noMana, cooldown, CD, usable, charges, stack
 
-	local numChecked = 1
-	local runeCD = IgnoreRunes and GetRuneCooldownDuration()
-	
+		local numChecked = 1
 
-	for i = 1, #NameArray do
-		local iName = NameArray[i]
-		numChecked = i
-		
+		for i = 1, #NameArray do
+			local iName = NameArray[i]
+			numChecked = i
+			cooldown = GetSpellCooldown(iName)
+			
+			if cooldown then
+				charges = GetSpellCharges(iName)
+				if charges then
+					stack = charges.currentCharges
+				else
+					charges = emptyTable
+				end
 
-		cooldown = GetSpellCooldown(iName)
-		charges = GetSpellCharges(iName) or emptyTable
-		stack = charges and charges.currentCharges or GetSpellCastCount(iName)
-		
-		if cooldown then
-			local duration = cooldown.duration
-			inrange, CD = true, nil
+				inrange, CD = true, nil
+				if RangeCheck then
+					inrange = IsSpellInRange(iName, "target")
+					if inrange == nil then
+						inrange = true
+					end
+				end
 
+				usable, noMana = IsUsableSpell(iName)
+				if IgnoreNomana then
+					usable = usable or noMana
+				end
+
+				if not ManaCheck then
+					noMana = nil
+				end
+
+				if UseActvtnOverlay and OnlyActvtnOverlay then
+					usable = activationOverlayActive
+				else
+					usable = activationOverlayActive or usable
+				end
+				if usable and not CD and not noMana and inrange then --usable
+					icon:SetInfo("state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+						STATE_USABLE,
+						spellTextureCache[iName],
+						cooldown.startTime, cooldown.duration, cooldown.modRate,
+						charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
+						stack, stack,
+						iName		
+					)
+					return
+				end
+			end
+		end
+
+		-- if there is more than 1 spell that was checked
+		-- then we need to get these again for the first spell,
+		-- otherwise reuse the values obtained above since they are just for the first one
+		local NameFirst = icon.Spells.First
+		if numChecked > 1 then
+
+			cooldown = GetSpellCooldown(NameFirst)
+			charges = GetSpellCharges(NameFirst) or emptyTable
+			stack = charges and charges.currentCharges or GetSpellCastCount(NameFirst)
+
+			inrange, noMana = true, nil
 			if RangeCheck then
-				inrange = IsSpellInRange(iName, "target")
+				inrange = IsSpellInRange(NameFirst, "target")
 				if inrange == nil then
 					inrange = true
 				end
 			end
-
-			usable, noMana = IsUsableSpell(iName)
-			if IgnoreNomana then
-				usable = usable or noMana
-			end
-
-			if not ManaCheck then
-				noMana = nil
-			end
-
-			if CooldownCheck then
-				if IgnoreRunes and duration == runeCD and iName ~= mindfreeze and iName ~= 47528 then
-					-- DK abilities that are on cooldown because of runes are always reported
-					-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
-					
-					-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
-					-- so it is excluded from this logic.
-					cooldown = offCooldown
-					duration = 0
-				end
-				CD = not (duration == 0 or OnGCD(duration))
-			end
-
-			if UseActvtnOverlay and OnlyActvtnOverlay then
-				usable = activationOverlayActive
-			else
-				usable = activationOverlayActive or usable
-			end
-			if usable and not CD and not noMana and inrange then --usable
-				icon:SetInfo("state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
-					STATE_USABLE,
-					spellTextureCache[iName],
-					cooldown.startTime, cooldown.duration, cooldown.modRate,
-					charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
-					stack, stack,
-					iName		
-				)
-				return
+			if ManaCheck then
+				usable, noMana = IsUsableSpell(NameFirst)
 			end
 		end
+		
+		if cooldown then
+			icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+				not inrange and STATE_UNUSABLE_NORANGE or noMana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
+				icon.FirstTexture,
+				cooldown.startTime, cooldown.duration,
+				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
+				stack, stack,
+				NameFirst
+			)
+		else
+			icon:SetInfo("state", 0)
+		end
 	end
+else
+	function Reactive_OnUpdate(icon, time)
 
-	-- if there is more than 1 spell that was checked
-	-- then we need to get these again for the first spell,
-	-- otherwise reuse the values obtained above since they are just for the first one
-	local NameFirst = icon.Spells.First
-	if numChecked > 1 then
+		-- Upvalue things that will be referenced a lot in our loops.
+		local NameArray, RangeCheck, ManaCheck, CooldownCheck, IgnoreRunes, IgnoreNomana, UseActvtnOverlay, OnlyActvtnOverlay =
+		icon.Spells.Array, icon.RangeCheck, icon.ManaCheck, icon.CooldownCheck, icon.IgnoreRunes, icon.IgnoreNomana, icon.UseActvtnOverlay, icon.OnlyActvtnOverlay
 
-		cooldown = GetSpellCooldown(NameFirst)
-		charges = GetSpellCharges(NameFirst) or emptyTable
-		stack = charges and charges.currentCharges or GetSpellCastCount(NameFirst)
+		local activationOverlayActive = icon.activationOverlayActive
 
-		if IgnoreRunes and (cooldown and cooldown.duration) == runeCD and NameFirst ~= mindfreeze and NameFirst ~= 47528 then
-			-- DK abilities that are on cooldown because of runes are always reported
-			-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
+		-- These variables will hold all the attributes that we pass to SetInfo().
+		local inrange, noMana, cooldown, CD, usable, charges, stack
+
+		local numChecked = 1
+		local runeCD = IgnoreRunes and GetRuneCooldownDuration()
+		
+
+		for i = 1, #NameArray do
+			local iName = NameArray[i]
+			numChecked = i
 			
-			-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
-			-- so it is excluded from this logic.
-			cooldown = offCooldown
-		end
 
-		inrange, noMana = true, nil
-		if RangeCheck then
-			inrange = IsSpellInRange(NameFirst, "target")
-			if inrange == nil then
-				inrange = true
+			cooldown = GetSpellCooldown(iName)
+			
+			if cooldown then
+				local charges = GetSpellCharges(iName)
+				local stack
+				if charges then
+					stack = charges.currentCharges
+				else
+					charges = emptyTable
+				end
+
+				local duration = cooldown.duration
+				inrange, CD = true, nil
+
+				if RangeCheck then
+					inrange = IsSpellInRange(iName, "target")
+					if inrange == nil then
+						inrange = true
+					end
+				end
+
+				usable, noMana = IsUsableSpell(iName)
+				if IgnoreNomana then
+					usable = usable or noMana
+				end
+
+				if not ManaCheck then
+					noMana = nil
+				end
+
+				if CooldownCheck then
+					if IgnoreRunes and duration == runeCD and iName ~= mindfreeze and iName ~= 47528 then
+						-- DK abilities that are on cooldown because of runes are always reported
+						-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
+						
+						-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
+						-- so it is excluded from this logic.
+						cooldown = offCooldown
+						duration = 0
+					end
+					CD = not (duration == 0 or OnGCD(duration))
+				end
+
+				if UseActvtnOverlay and OnlyActvtnOverlay then
+					usable = activationOverlayActive
+				else
+					usable = activationOverlayActive or usable
+				end
+				if usable and not CD and not noMana and inrange then --usable
+					icon:SetInfo("state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+						STATE_USABLE,
+						spellTextureCache[iName],
+						cooldown.startTime, cooldown.duration, cooldown.modRate,
+						charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
+						stack, stack,
+						iName		
+					)
+					return
+				end
 			end
 		end
-		if ManaCheck then
-			usable, noMana = IsUsableSpell(NameFirst)
+
+		-- if there is more than 1 spell that was checked
+		-- then we need to get these again for the first spell,
+		-- otherwise reuse the values obtained above since they are just for the first one
+		local NameFirst = icon.Spells.First
+		if numChecked > 1 then
+
+			cooldown = GetSpellCooldown(NameFirst)
+			charges = GetSpellCharges(NameFirst) or emptyTable
+			stack = charges and charges.currentCharges or GetSpellCastCount(NameFirst)
+
+			if IgnoreRunes and (cooldown and cooldown.duration) == runeCD and NameFirst ~= mindfreeze and NameFirst ~= 47528 then
+				-- DK abilities that are on cooldown because of runes are always reported
+				-- as having a cooldown duration of 10 seconds. We use this fact to filter out rune cooldowns.
+				
+				-- In Wrath, mind Freeze has an actual CD of 10 seconds though, and doesn't cost runes,
+				-- so it is excluded from this logic.
+				cooldown = offCooldown
+			end
+
+			inrange, noMana = true, nil
+			if RangeCheck then
+				inrange = IsSpellInRange(NameFirst, "target")
+				if inrange == nil then
+					inrange = true
+				end
+			end
+			if ManaCheck then
+				usable, noMana = IsUsableSpell(NameFirst)
+			end
 		end
-	end
-	
-	if cooldown then
-		icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
-			not inrange and STATE_UNUSABLE_NORANGE or noMana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
-			icon.FirstTexture,
-			cooldown.startTime, cooldown.duration,
-			charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
-			stack, stack,
-			NameFirst
-		)
-	else
-		icon:SetInfo("state", 0)
+		
+		if cooldown then
+			icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+				not inrange and STATE_UNUSABLE_NORANGE or noMana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
+				icon.FirstTexture,
+				cooldown.startTime, cooldown.duration,
+				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
+				stack, stack,
+				NameFirst
+			)
+		else
+			icon:SetInfo("state", 0)
+		end
 	end
 end
 

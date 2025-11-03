@@ -281,7 +281,6 @@ if ClassicExpansionAtLeast(11) then
 			local charges = dataToUse.charges
 			icon:SetInfo(
 				"state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
-				--"state; texture; start, duration, modRate; stack, stackText; spell",
 				dataToUse.state,
 				spellTextureCache[dataToUse.iName],
 				cooldown.startTime, cooldown.duration, cooldown.modRate,
