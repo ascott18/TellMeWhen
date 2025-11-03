@@ -1,3 +1,6 @@
+## v11.2.9
+* Fix: #2311 error caused by IconModule_IconEventConditionHandler enabling unconditionally
+
 ## v11.2.8
 * Fix #2310 spec checking broken below level 10 on Classic Era.
 

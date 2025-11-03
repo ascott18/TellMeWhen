@@ -20,7 +20,6 @@ local print = TMW.print
 local UpdateManager = TMW.Classes.UpdateTableManager:New()
 UpdateManager:UpdateTable_Set()
 local ByConditionObject = UpdateManager:UpdateTable_CreateIndexedView("ByConditionObject", function(target) return target.ConditionObject end)
-local ByEventSettingsProxy = UpdateManager:UpdateTable_CreateIndexedView("ByEventSettingsProxy", function(target) return target.eventSettingsProxy end)
 local ByIcon = UpdateManager:UpdateTable_CreateIndexedView("ByIcon", function(target) return target.icon end)
 
 local Module = TMW:NewClass("IconModule_IconEventConditionHandler", "IconModule")
