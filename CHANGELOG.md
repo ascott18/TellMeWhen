@@ -1,4 +1,14 @@
+## v11.2.9
+* Fix: #2311 error caused by IconModule_IconEventConditionHandler enabling unconditionally
+
+## v11.2.8
+* Fix #2310 spec checking broken below level 10 on Classic Era.
+
+## v11.2.7
+* Fix #2309 Additional assorted talent/spec errors on Classic Era.
+
 ## v11.2.6
+* Fix #2307 C_SpecializationInfo.GetTalent: query.specializationIndex must be specified.
 
 ## v11.2.5
 * New condition: Armor Repair Level - Checks the lowest durability percentage of any equipped gear.

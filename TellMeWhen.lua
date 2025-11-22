@@ -177,8 +177,8 @@ end)
 
 ---------- Upvalues ----------
 local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
-local InCombatLockdown, GetTalentInfo =
-	  InCombatLockdown, GetTalentInfo
+local InCombatLockdown =
+	  InCombatLockdown
 local IsInGuild, IsInGroup, IsInInstance =
 	  IsInGuild, IsInGroup, IsInInstance
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack =
@@ -512,49 +512,14 @@ local print = TMW.print
 
 
 do	-- TMW.safecall
-	--[[
-		xpcall safecall implementation
-	]]
 	local xpcall = xpcall
 
-	local function errorhandler(err)
-		return geterrorhandler()(err)
-	end
-
-	local function CreateDispatcher(argCount)
-		local code = [[
-			local xpcall, eh = ...
-			local method, ARGS
-			local function call() return method(ARGS) end
-		
-			local function dispatch(func, ...)
-				method = func
-				if not method then return end
-				ARGS = ...
-				return xpcall(call, eh)
-			end
-		
-			return dispatch
-		]]
-		
-		local ARGS = {}
-		for i = 1, argCount do ARGS[i] = "arg"..i end
-		ARGS = table.concat(ARGS, ", ")
-		code = code:gsub("ARGS", ARGS)
-		return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
-	end
-
-	local Dispatchers = setmetatable({}, {__index=function(self, argCount)
-		local dispatcher = CreateDispatcher(argCount)
-		rawset(self, argCount, dispatcher)
-		return dispatcher
-	end})
-	Dispatchers[0] = function(func)
-		return xpcall(func, errorhandler)
+	local errorhandler = _G.CallErrorHandler or function(...)
+		return geterrorhandler()(...)
 	end
 
 	function TMW.safecall(func, ...)
-		return Dispatchers[select('#', ...)](func, ...)
+		return xpcall(func, errorhandler, ...)
 	end
 end
 local safecall = TMW.safecall
@@ -1080,9 +1045,7 @@ function TMW:PLAYER_LOGIN()
 	-- end
 	
 
-
-	TMW:UpdateTalentTextureCache()
-
+	safecall(TMW.UpdateTalentTextureCache, TMW)
 
 	TMW:RegisterEvent("GLOBAL_MOUSE_DOWN")
 	
@@ -2826,48 +2789,16 @@ function TMW:ScheduleUpdate(delay)
 end
 
 function TMW:UpdateTalentTextureCache()
-	if C_SpecializationInfo.GetTalentInfo and MAX_NUM_TALENT_TIERS and NUM_TALENT_COLUMNS then
-		-- Should handle all classic versions mop and below?
-		local talentInfoQuery = {};
-		
-		for tier = 1, MAX_NUM_TALENT_TIERS do
-			for column = 1, NUM_TALENT_COLUMNS do
-				talentInfoQuery.tier = tier;
-				talentInfoQuery.column = column;
-				local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
+	for _, talentInfoQuery in TMW.GetTalentQueries() do
+		local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
+		if talentInfo then
+			local name = talentInfo.name
+			local tex = talentInfo.fileID
 
-				local name = talentInfo.name
-				local tex = talentInfo.fileID
+			local lower = name and strlowerCache[name]
 
-				local lower = name and strlowerCache[name]
-				
-				if lower then
-					SpellTexturesMetaIndex[lower] = tex
-				end
-			end
-		end
-	elseif MAX_TALENT_TIERS and NUM_TALENT_COLUMNS and GetTalentInfo then
-		for tier = 1, MAX_TALENT_TIERS do
-			for column = 1, NUM_TALENT_COLUMNS do
-				local id, name, tex = GetTalentInfo(tier, column, 1)
-
-				local lower = name and strlowerCache[name]
-				
-				if lower then
-					SpellTexturesMetaIndex[lower] = tex
-				end
-			end
-		end
-	elseif GetNumTalentTabs then
-		for tab = 1, GetNumTalentTabs() do
-			for index = 1, GetNumTalents(tab) do
-				local name, iconTexture = GetTalentInfo(tab, index)
-
-				local lower = name and strlowerCache[name]
-				
-				if lower then
-					SpellTexturesMetaIndex[lower] = iconTexture
-				end
+			if lower then
+				SpellTexturesMetaIndex[lower] = tex
 			end
 		end
 	end
