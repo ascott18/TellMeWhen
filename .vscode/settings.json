@@ -263,7 +263,8 @@
         "ENABLE",
         "RELOADUI",
         "ReloadUI",
-        "MAX_TALENT_TIERS"
+        "MAX_TALENT_TIERS",
+        "LE_EXPANSION_LEVEL_CURRENT"
     ],
     "cSpell.words": [
         "cooldown",

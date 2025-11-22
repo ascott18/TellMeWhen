@@ -74,8 +74,8 @@ SpellCache.CONST = {
 	INVALID_SPELLS = {
 		[1852] = true, -- GM spell named silenced
 	  [250168] = true, -- Crashes the 9.0 PTR
-	  [255616] = TMW.wowMajor == 11, -- Crashes the 12.0 Alpha
-	 [1249911] = TMW.wowMajor == 11, -- Crashes the 12.0 Alpha
+	  [255616] = TMW.wowMajor == 12, -- Crashes the 12.0 Alpha
+	 [1249911] = TMW.wowMajor == 12, -- Crashes the 12.0 Alpha
 	},
 
 	BLACKLIST_TRADESKILL_TEXTURES = {
@@ -395,7 +395,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 
 		local success = TMW.safecall(SpellCacher)		
 		
-		-- if TMW.wowMajor == 11 and spellID >= 1230000 and TELLMEWHEN_VERSION_MINOR == "dev" then
+		-- if TMW.wowMajor == 12 and spellID >= 1230000 and TELLMEWHEN_VERSION_MINOR == "dev" then
 		-- 	print("cache skip due to crash")
 		-- 	success = false
 		-- end
