@@ -141,7 +141,7 @@
         "SOUNDKIT",
         "COMBATLOG_OBJECT_CONTROL_PLAYER",
         "NUM_BAG_SLOTS",
-        "LE_EXPANSION_LEVEL_CURRENT",
+        "TMW.wowMajor",
         "LE_EXPANSION_CLASSIC",
         "INVSLOT_RANGED",
         "SPELL_RECAST_TIME_MIN",
@@ -268,5 +268,6 @@
     "cSpell.words": [
         "cooldown",
         "inrange"
-    ]
+    ],
+    "Lua.type.weakUnionCheck": true
 }

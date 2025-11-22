@@ -307,7 +307,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	end
 end
 
-if ClassicExpansionAtLeast(11) then
+if TMW.wowMajor >= 12 then
 	local function wrapUpdate(update)
 		return function(icon, time)
 			if GetRestrictedActionStatus(0) then

@@ -16,6 +16,7 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+local issecretvalue = issecretvalue or TMW.NULLFUNC
 	
 
 local TimerBar_BarDisplay = TMW:NewClass("IconModule_TimerBar_BarDisplay", "IconModule_TimerBar")
@@ -57,7 +58,7 @@ TimerBar_BarDisplay:PostHookMethod("OnEnable", function(self)
 	end
 end)
 
-if ClassicExpansionAtLeast(11) then
+if TMW.wowMajor >= 12 then
 	-- Handle possible secret values
 
 	function TimerBar_BarDisplay:GetValue()

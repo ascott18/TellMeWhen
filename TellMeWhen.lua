@@ -114,6 +114,8 @@ _G.TMW = LibStub("AceAddon-3.0"):NewAddon(TMW, "TellMeWhen", "AceEvent-3.0", "Ac
 _G.TellMeWhen = _G.TMW
 local TMW = _G.TMW
 
+TMW.wowMajor = math.floor(select(4, GetBuildInfo()) / 10000)
+
 
 local DogTag = LibStub("LibDogTag-3.0", true)
 

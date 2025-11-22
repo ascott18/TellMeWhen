@@ -17,6 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
+local issecretvalue = issecretvalue or TMW.NULLFUNC
 
 local select, wipe, next, setmetatable 
     = select, wipe, next, setmetatable
@@ -32,7 +33,7 @@ local CachedCounts = {}
 if C_Spell.GetSpellCooldown then
 	local C_Spell_GetSpellCooldown = C_Spell.GetSpellCooldown
 
-    if ClassicExpansionAtLeast(11) then
+    if TMW.wowMajor >= 12 then
         -- Assume cooldowns are always secrets. No point doing anything else.
         function Cooldowns.GetSpellCooldown(spell)
             local cached = CachedCooldowns[spell]

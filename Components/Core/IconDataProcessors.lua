@@ -1087,7 +1087,7 @@ do
 
 		-- Note on "not GUID": Any other case of missing GUID is useless to handle because
 		-- we can't do any logic against it.
-		if ClassicExpansionAtLeast(11) then
+		if TMW.wowMajor >= 12 then
 			t[#t+1] = [[
 			
 			if type(GUID) == 'nil' and unit == "player" then

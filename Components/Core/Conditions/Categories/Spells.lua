@@ -1087,7 +1087,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
 	useSUG = true,
-	deprecated = ClassicExpansionAtLeast(11),
+	deprecated = TMW.wowMajor >= 12,
 	funcstr = [[UnitCast(c.Unit, c.Level, c.Spells.FirstString)]],
 	events = castEvents,
 })
@@ -1106,7 +1106,7 @@ ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
 		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
 	useSUG = true,
-	deprecated = ClassicExpansionAtLeast(11),
+	deprecated = TMW.wowMajor >= 12,
 	funcstr = [[UnitCastPercent(c.Unit, c.Spells.FirstString) c.Operator c.Level]],
 	events = castEvents,
 	anticipate = [[

@@ -699,7 +699,7 @@ local aurasWithNoSourceReported = {
 	nil,	-- Terminate with nil to prevent all Warsong's return values from filling the table
 }
 
-if ClassicExpansionAtLeast(11) then
+if TMW.wowMajor >= 12 then
 	local function wrapUpdate(update)
 		return function(icon, time)
 			if GetRestrictedActionStatus(0) then
@@ -720,7 +720,7 @@ end
 local Processor = TMW.Classes.IconDataProcessor:New("BUFF_SOURCEUNIT", "auraSourceUnit, auraSourceGUID")
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: auraSourceUnit, auraSourceGUID
-	if ClassicExpansionAtLeast(11) then
+	if TMW.wowMajor >= 12 then
 		t[#t+1] = [[
 		
 		if type(auraSourceGUID) == 'nil' and unit == "player" then

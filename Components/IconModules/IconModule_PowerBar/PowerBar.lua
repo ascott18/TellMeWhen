@@ -20,6 +20,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local _, pclass = UnitClass("Player")
 local UnitPower =
 	  UnitPower
+local issecretvalue = issecretvalue or TMW.NULLFUNC
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
 local pairs, wipe, _G =

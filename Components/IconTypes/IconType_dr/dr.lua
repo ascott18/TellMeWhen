@@ -160,7 +160,7 @@ end)
 TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 	-- Create our own DR equivalencies in TMW using the data from DRList-1.0
 
-	local myCategories = LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_MISTS_OF_PANDARIA and {
+	local myCategories = TMW.wowMajor == LE_EXPANSION_MISTS_OF_PANDARIA and {
 		incapacitate	= "DR-Incapacitate",
 		disorient		= "DR-Disorient",
 		stun			= "DR-ControlledStun",
@@ -208,7 +208,7 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		disarm 			= "DR-Disarm",
 	}
 
-	local ignored = LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_MISTS_OF_PANDARIA and {
+	local ignored = TMW.wowMajor == LE_EXPANSION_MISTS_OF_PANDARIA and {
 		knockback = true,
 	} or (ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
 		knockback = true,

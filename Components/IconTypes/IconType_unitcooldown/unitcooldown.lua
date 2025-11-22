@@ -165,7 +165,7 @@ end})
 
 
 local resetsOnCast, resetsOnAura, spellBlacklist = {}, {}, {}
-if LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_MISTS_OF_PANDARIA then
+if TMW.wowMajor == LE_EXPANSION_MISTS_OF_PANDARIA then
 resetsOnCast = {
 	[23989] = { -- Readiness
 		[120697] = 1, -- Lynx Rush
