@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - midnight
     tags:
       - "*"
 
@@ -57,7 +58,7 @@ jobs:
       - name: Create Package
         uses: BigWigsMods/packager@master
         env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+          # CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          # WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+          # WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
