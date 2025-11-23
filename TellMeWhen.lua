@@ -114,7 +114,7 @@ _G.TMW = LibStub("AceAddon-3.0"):NewAddon(TMW, "TellMeWhen", "AceEvent-3.0", "Ac
 _G.TellMeWhen = _G.TMW
 local TMW = _G.TMW
 
-TMW.issecretvalue = _G.issecretvalue or TMW.NULLFUNC
+TMW.issecretvalue = _G.issecretvalue or function() end
 TMW.wowMajor = math.floor(select(4, GetBuildInfo()) / 10000)
 
 
