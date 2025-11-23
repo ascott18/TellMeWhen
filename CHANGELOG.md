@@ -4,11 +4,12 @@
 ### Possible future fixes
 The following known issues may be fixed if Blizzard makes necessary changes:
 
-* Timer bars cannot be made to work.
 * Recharging cooldowns show the main cooldown sweep.
 * Can't hide a charge count of zero.
 * Some resource conditions (e.g. secondary resources) will be brought back.
 * GCDs cannot be suppressed
+* Timer bars do not work with restricted values.
+* "Fill bar up" and value-based coloring are not supported by Resource Display icons.
 
 ### Guaranteed dead features
 The following items cannot and will not be fixed.

@@ -227,6 +227,16 @@ function IE:ProcessChangelogData()
 	-- Convert asterisks to colored dashes
 	log = log:gsub(">([ \t]*%*)%s*(.-)<", bullets)
 
+	-- Wrap plain text lines (not already in tags) in <p> tags
+	-- Match any closing tag followed by plain text followed by <br/>
+	log = log:gsub("(>)([^<]+)<br/>", function(closingBracket, text)
+		text = text:trim()
+		if text == "" then
+			return closingBracket .. text .. "<br/>"
+		end
+		return closingBracket .. "<p>" .. text .. "</p> <br/>"
+	end)
+
 	-- Remove double breaks 
 	log = log:gsub("<br/><br/>", "<br/>")
 

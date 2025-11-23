@@ -539,7 +539,7 @@ CNDT.Env = {
 	TMW = TMW,
 	GCDSpell = TMW.GCDSpell,
 	GUIDToOwner = TMW.GUIDToOwner,
-	issecretvalue = issecretvalue or TMW.NULLFUNC,
+	issecretvalue = TMW.issecretvalue,
 	
 	SemicolonConcatCache = setmetatable(
 	{}, {

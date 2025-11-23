@@ -1484,40 +1484,6 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self.Background:SetColorTexture(.66, .66, .66, 0.09)
 	end,
 
-	Flash = function(self, dur)
-		local start = GetTime()
-		local duration = 0
-		local period = 0.2
-
-		while duration < dur do
-			duration = duration + (period * 2)
-		end
-		local ticker
-		ticker = C_Timer.NewTicker(0.01, function() 
-			local bg = TellMeWhen_DotwatchSettings.Background
-
-			local timePassed = GetTime() - start
-			local fadingIn = FlashPeriod == 0 or floor(timePassed/period) % 2 == 1
-
-			if FlashPeriod ~= 0 then
-				local remainingFlash = timePassed % period
-				local offs
-				if fadingIn then
-					offs = (period-remainingFlash)/period
-				else
-					offs = (remainingFlash/period)
-				end
-				offs = offs*0.3
-				bg:SetColorTexture(.66, .66, .66, 0.08 + offs)
-			end
-
-			if timePassed > duration then
-				bg:SetColorTexture(.66, .66, .66, 0.08)
-				ticker:Cancel()
-			end	
-		end)
-	end,
-
 	SetTitle = function(self, text)
 		self.Header:SetText(text)
 
