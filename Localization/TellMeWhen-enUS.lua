@@ -973,6 +973,13 @@ L["UIPANEL_TOOLTIP_ROWS"] = "Set the number of rows in this group"
 L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"
 L["UIPANEL_TOOLTIP_ONLYINCOMBAT"] = "Check to cause this group to only be shown in combat"
 
+L["UIPANEL_SECRETS_DISALLOWED"] = [[This feature cannot operate on restricted data. In such situations, the setting or feature will be ignored.
+
+Examples of restricted data include cooldowns and buffs/debuffs while in combat.]]
+L["UIPANEL_SECRETS_AURAS_DISALLOWED"] = "Disallowed in Combat"
+L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[Buffs and debuffs cannot be tracked in restricted situations (in combat, Mythic+, or PvP match).
+
+When restrictions are active, this icon will be hidden.]]
 
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"

@@ -41,7 +41,7 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
-				self:SetTitle(TMW.L["DURATIONPANEL_TITLE2"])
+				self:SetTitle(TMW.L["DURATIONPANEL_TITLE2"], true)
 			</OnLoad>
 		</Scripts>
 	</Frame>

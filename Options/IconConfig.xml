@@ -660,4 +660,50 @@
 		</Scripts>
 	</Frame>
 
+	<Frame name="TellMeWhen_TextPanel" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+		<Size y="50"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="text" wordwrap="true" inherits="GameFontHighlightSmall">
+					<Anchors>
+						<Anchor point="TOP" y="-10"/>
+						<Anchor point="LEFT" x="10"/>
+						<Anchor point="RIGHT" x="-10"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+			</OnLoad>
+			<OnUpdate>
+				--self:GetParent():AdjustHeight()
+				self:SetHeight(self.text:GetStringHeight() + 20)
+			</OnUpdate>
+		</Scripts>
+	</Frame>
+
+	<Frame name="TellMeWhen_IsObsoleteWarning" inherits="TellMeWhen_TextPanel" virtual="true">
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["ICONMENU_OBSOLETE"])
+				self.text:SetText(TMW.L["ICONMENU_OBSOLETE_DESC"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Frame name="TellMeWhen_SecretAurasWarning" inherits="TellMeWhen_TextPanel" virtual="true">
+		<Scripts>
+			<OnLoad>
+				TMW:CInit(self)
+				
+				self:SetTitle(TMW.L["UIPANEL_SECRETS_AURAS_DISALLOWED"], true)
+				self.text:SetText(TMW.L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"])
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
 </Ui>

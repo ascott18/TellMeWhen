@@ -22,6 +22,13 @@
 						<Anchor point="RIGHT" x="-1" />
 					</Anchors>
 				</FontString>
+				<Texture parentKey="RestrictedIcon" file="Interface\AddOns\TellMeWhen\Textures\restricted.png" hidden="true">
+					<Size x="12" y="12"/>
+					<Anchors>
+						<Anchor point="RIGHT" relativeKey="$parent.Header" relativePoint="RIGHT" x="-2" y="0"/>
+					</Anchors>
+					<Color r="1" g="0.82" b="0"/>
+				</Texture>
 			</Layer>
 		</Layers>
 	</Frame>

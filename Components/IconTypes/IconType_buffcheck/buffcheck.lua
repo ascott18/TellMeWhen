@@ -308,6 +308,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 end
 
 if TMW.wowMajor >= 12 then
+	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
 	local function wrapUpdate(update)
 		return function(icon, time)
 			if GetRestrictedActionStatus(0) then

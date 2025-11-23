@@ -1484,14 +1484,24 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self.Background:SetColorTexture(.66, .66, .66, 0.09)
 	end,
 
-	SetTitle = function(self, text)
+	SetTitle = function(self, text, showRestricted)
 		self.Header:SetText(text)
+
+		if TMW.wowMajor < 12 then showRestricted = false end
+
+		if showRestricted then
+			self.RestrictedIcon:Show()
+			TMW:TT(self.Header, text, "UIPANEL_SECRETS_DISALLOWED", 1, nil)
+		else
+			self.RestrictedIcon:Hide()
+		end
 
 		local font, size, flags = self.Header:GetFont()
 		size = 12
 		self.Header:SetFont(font, size, flags)
 
-		while size > 6 and self.Header:GetStringWidth() > self:GetWidth() - 10 do
+		local iconWidth = showRestricted and (self.RestrictedIcon:GetWidth() + 2) or 0
+		while size > 6 and self.Header:GetStringWidth() > self:GetWidth() - 10 - iconWidth do
 			size = size - 1
 			self.Header:SetFont(font, size, flags)
 		end
@@ -1612,7 +1622,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 
 	OnSizeChanged = function(self)
 		-- This method does resizing of the header to make it fit without truncation.
-		self:SetTitle(self.Header:GetText())
+		self:SetTitle(self.Header:GetText(), self.RestrictedIcon:IsShown())
 	end,
 }
 
