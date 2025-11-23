@@ -25,7 +25,7 @@ local UnitPowerMissing = UnitPowerMissing or function(unit, powerType)
 	return UnitPowerMax(unit, powerType) - UnitPower(unit, powerType)
 end
 
-local issecretvalue = issecretvalue or TMW.NULLFUNC
+local issecretvalue = TMW.issecretvalue
 local pairs, wipe, _G =
 	  pairs, wipe, _G
 local PowerBarColor = PowerBarColor

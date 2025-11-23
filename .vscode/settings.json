@@ -268,7 +268,8 @@
     ],
     "cSpell.words": [
         "cooldown",
-        "inrange"
+        "inrange",
+        "issecretvalue"
     ],
     "Lua.type.weakUnionCheck": true
 }

@@ -24,7 +24,7 @@ local DECIMAL_SEPERATOR = DECIMAL_SEPERATOR
 
 local select = select
 local setmetatable = setmetatable
-local issecretvalue = issecretvalue or TMW.NULLFUNC
+local issecretvalue = TMW.issecretvalue
 
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot

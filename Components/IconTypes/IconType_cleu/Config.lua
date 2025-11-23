@@ -198,7 +198,7 @@ function Config:CheckMasks()
 	-- Check the flags of the icon to make sure that the user hasn't excluded every flag in a given category.
 	-- If they have, then they have effectively disabled the icon. Tell the user if they have done this.
 	for _, key in TMW:Vararg("SourceFlags", "DestFlags") do
-		for maskName, mask in pairs(Config.BetterMasks) do
+		for maskName, mask in pairs(BetterMasks) do
 			if bit.band(TMW.CI.ics[key], mask) == 0 then
 				local category = L["CLEU_" .. maskName]
 				TMW.HELP:Show{

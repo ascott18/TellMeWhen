@@ -850,7 +850,7 @@ if IsInJailersTower then
 		end
 	end
 
-	local issecretvalue = issecretvalue or TMW.NULLFUNC
+	local issecretvalue = TMW.issecretvalue
 	local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 	function AnimaPowWatcher:UNIT_AURA(_, unit)
 		if unit ~= "player" then return end

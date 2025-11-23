@@ -19,7 +19,7 @@ local print = TMW.print
 
 local format = format
 local isNumber = TMW.isNumber
-local issecretvalue = issecretvalue or TMW.NULLFUNC
+local issecretvalue = TMW.issecretvalue
 
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink

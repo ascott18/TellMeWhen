@@ -17,6 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+local issecretvalue = TMW.issecretvalue
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 local isNumber = TMW.isNumber
@@ -24,7 +25,6 @@ local strlowerCache = TMW.strlowerCache
 local huge = math.huge
 local empty = {}
 
-local GetRestrictedActionStatus = GetRestrictedActionStatus or TMW.NULLFUNC
 local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 local Auras = TMW.COMMON.Auras
 local GetAuras = Auras.GetAuras
@@ -33,14 +33,12 @@ local GetAuras = Auras.GetAuras
 -- outside of restrictions
 
 function Env.AuraStacks(unit, name, filter)
-	if GetRestrictedActionStatus(0) then return 0 end
-
 	for i = 1, huge do
 		local data = GetAuraDataByIndex(unit, i, filter)
 
 		if not data then
 			return 0
-		elseif data.spellId == name or strlowerCache[data.name] == name then
+		elseif not issecretvalue(data.spellId) and (data.spellId == name or strlowerCache[data.name] == name) then
 			if data.applications == 0 then
 				return 1
 			else
@@ -68,17 +66,15 @@ function Env.AuraStacksPacked(unit, name, kindKey, onlyMine)
 end
 
 function Env.AuraCount(units, spells, filter)
-	if GetRestrictedActionStatus(0) then return 0 end
-
 	local n = 0
 	local names = spells.Hash
 
 	for u = 1, #units do
 		for i = 1, huge do
-			local data = GetAuraDataByIndex(units[u], i, filter)
-			if not data then
+			local instance = GetAuraDataByIndex(units[u], i, filter)
+			if not instance then
 				break
-			elseif names[data.spellId] or names[strlowerCache[data.name]] then
+			elseif not issecretvalue(instance.spellId) and (names[instance.spellId] or names[strlowerCache[instance.name]]) then
 				n = n + 1
 			end
 		end
@@ -109,12 +105,10 @@ function Env.AuraCountPacked(units, spells, kindKey, onlyMine)
 end
 
 function Env.AuraDur(unit, name, filter)
-	if GetRestrictedActionStatus(0) then return 0 end
-
 	local instance
 	for i = 1, huge do
 		instance = GetAuraDataByIndex(unit, i, filter)
-		if not instance or instance.spellId == name or strlowerCache[instance.name] == name then
+		if not instance or (not issecretvalue(instance.spellId) and (instance.spellId == name or strlowerCache[instance.name] == name)) then
 			break
 		end
 	end
@@ -154,20 +148,18 @@ function Env.AuraDurPacked(unit, name, kindKey, onlyMine)
 end
 
 function Env.AuraPercent(unit, name, filter)
-	if GetRestrictedActionStatus(0) then return 0 end
-
-	local data
+	local instance
 	for i = 1, huge do
-		data = GetAuraDataByIndex(unit, i, filter)
-		if not data or data.spellId == name or strlowerCache[data.name] == name then
+		instance = GetAuraDataByIndex(unit, i, filter)
+		if not instance or (not issecretvalue(instance.spellId) and (instance.spellId == name or strlowerCache[instance.name] == name)) then
 			break
 		end
 	end
 	
-	if not data then
+	if not instance then
 		return 0
 	else
-		return data.expirationTime == 0 and 1 or ((data.expirationTime - TMW.time) / data.duration)
+		return instance.expirationTime == 0 and 1 or ((instance.expirationTime - TMW.time) / instance.duration)
 	end
 end
 
@@ -188,18 +180,16 @@ function Env.AuraPercentPacked(unit, name, kindKey, onlyMine)
 end
 
 function Env.AuraVariableNumber(unit, name, filter)
-	if GetRestrictedActionStatus(0) then return 0 end
-
-	local data
+	local instance
 	for i = 1, huge do
-		data = GetAuraDataByIndex(unit, i, filter)
-		if not data or data.spellId == name or strlowerCache[data.name] == name then
+		instance = GetAuraDataByIndex(unit, i, filter)
+		if not instance or (not issecretvalue(instance.spellId) and (instance.spellId == name or strlowerCache[instance.name] == name)) then
 			break
 		end
 	end
 	
-	for i = 1, #data.points do
-		local v = data.points[i]
+	for i = 1, #instance.points do
+		local v = instance.points[i]
 		if v and v > 0 then return v end
 	end
 		
@@ -227,15 +217,13 @@ end
 
 
 function Env.AuraTooltipNumber(unit, name, filter, requestedIndex)
-	if GetRestrictedActionStatus(0) then return 0 end
-
 	requestedIndex = requestedIndex or 1
 
 	for i = 1, 100 do
-		local data = GetAuraDataByIndex(unit, i, filter)
-		if not data then 
+		local instance = GetAuraDataByIndex(unit, i, filter)
+		if not instance then 
 			break
-		elseif data.spellId == name or strlowerCache[data.name] == name then
+		elseif not issecretvalue(instance.spellId) and (instance.spellId == name or strlowerCache[instance.name] == name) then
 			
 			local tooltipNumbers = Auras.ParseTooltip(unit, instance, i)
 			return tooltipNumbers[requestedIndex] or 0
@@ -246,8 +234,6 @@ function Env.AuraTooltipNumber(unit, name, filter, requestedIndex)
 end
 
 function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedIndex)
-	if GetRestrictedActionStatus(0) then return 0 end
-
 	local auras = GetAuras(unit)
 	local instances = auras.instances
 	

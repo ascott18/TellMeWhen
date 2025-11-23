@@ -17,6 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 local get = TMW.get
+local issecretvalue = TMW.issecretvalue
 
 local _, pclass = UnitClass("player")
 
@@ -27,7 +28,6 @@ local isNumber = TMW.isNumber
 local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 
-local GetRestrictedActionStatus = GetRestrictedActionStatus or TMW.NULLFUNC
 local GetTotemInfo = GetTotemInfo
 local UnitGUID = UnitGUID
 local max, strfind, format = max, strfind, format
@@ -38,7 +38,6 @@ local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local GetSpellCooldown = TMW.COMMON.Cooldowns.GetSpellCooldown
 local GetSpellCharges = TMW.COMMON.Cooldowns.GetSpellCharges
 local GetSpellCastCount = TMW.COMMON.Cooldowns.GetSpellCastCount
-Env.GetRestrictedActionStatus = GetRestrictedActionStatus
 Env.GetSpellCooldown = GetSpellCooldown
 Env.GetSpellCharges = GetSpellCharges
 Env.GetSpellCastCount = GetSpellCastCount
@@ -49,17 +48,17 @@ local GetSpellInfo = TMW.GetSpellInfo
 local GetItemCooldown = GetItemCooldown or (C_Item and C_Item.GetItemCooldown) or (C_Container and C_Container.GetItemCooldown)
 
 function Env.CooldownDuration(spell, gcdAsUnusable)
-	if GetRestrictedActionStatus(1) then return 0 end
-
 	if spell == "gcd" then
 		local cooldown = GetSpellCooldown(TMW.GCDSpell)
 		local duration = cooldown.duration
+		if issecretvalue(duration) then return 0 end
 		return duration == 0 and 0 or ((duration - (TMW.time - cooldown.startTime)) / cooldown.modRate)
 	end
 
 	local cooldown = GetSpellCooldown(spell)
 	if cooldown then
 		local duration = cooldown.duration
+		if issecretvalue(duration) then return 0 end
 		return 
 			((duration == 0 or (not gcdAsUnusable and OnGCD(duration))) and 0) or 
 			((duration - (TMW.time - cooldown.startTime)) / cooldown.modRate)
@@ -68,10 +67,8 @@ function Env.CooldownDuration(spell, gcdAsUnusable)
 end
 
 function Env.RechargeDuration(spell)
-	if GetRestrictedActionStatus(1) then return 0 end
-
 	local charges = GetSpellCharges(spell)
-	if charges and charges.currentCharges ~= charges.maxCharges then
+	if charges and not issecretvalue(charges.currentCharges) and charges.currentCharges ~= charges.maxCharges then
 		local duration = charges.cooldownDuration
 		return (duration == 0 and 0) or ((duration - (TMW.time - charges.cooldownStartTime)) / charges.chargeModRate)
 	end
@@ -103,9 +100,8 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	end,
 	anticipate = function(c)
 		local str = [[
-			if GetRestrictedActionStatus(1) then VALUE = huge return end
 			local cooldown = GetSpellCooldown(c.OwnSpells.First)
-			VALUE = cooldown and cooldown.startTime + (cooldown.duration - (c.Level*cooldown.modRate)) or huge
+			VALUE = cooldown and not issecretvalue(cooldown.startTime) and cooldown.startTime + (cooldown.duration - (c.Level*cooldown.modRate)) or huge
 		]]
 		if TMW:GetSpells(c.Name).First == "gcd" then
 			str = str:gsub("c.OwnSpells.First", TMW.GCDSpell)
@@ -139,11 +135,10 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 	end,
 	anticipate = function(c)
 		local str = [[
-			if GetRestrictedActionStatus(1) then VALUE = huge return end
 			local cooldown = GetSpellCooldown(c.OwnSpells.First)
 			local cooldown2 = GetSpellCooldown(c.OwnSpells2.First)
-			local duration = cooldown and cooldown.duration
-			local duration2 = cooldown2 and cooldown2.duration
+			local duration = cooldown and not issecretvalue(cooldown.duration) and cooldown.duration
+			local duration2 = cooldown2 and not issecretvalue(cooldown2.duration) and cooldown2.duration
 			if duration and duration2 then
 				local v1, v2 = cooldown.startTime + duration, cooldown2.startTime + duration2
 				VALUE = v1 < v2 and v1 or v2
@@ -181,9 +176,8 @@ ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		GetSpellChargesOrCount = function(spell)
-			if GetRestrictedActionStatus(1) then return GetSpellCastCount(spell) end
 			local charges = GetSpellCharges(spell)
-			if charges then return charges.currentCharges end
+			if charges and not issecretvalue(charges.currentCharges) then return charges.currentCharges end
 			return GetSpellCastCount(spell)
 		end,
 	},
@@ -220,9 +214,8 @@ ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
 			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_CHARGES")
 	end,
 	anticipate = [[
-		if GetRestrictedActionStatus(1) then VALUE = huge return end
 		local data = GetSpellCharges(c.OwnSpells.First)
-		VALUE = data and data.cooldownDuration and data.cooldownStartTime + (data.cooldownDuration - (c.Level*data.chargeModRate)) or huge
+		VALUE = data and not issecretvalue(data.cooldownDuration) and data.cooldownDuration and data.cooldownStartTime + (data.cooldownDuration - (c.Level*data.chargeModRate)) or huge
 	]],
 })
 
@@ -630,8 +623,8 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
-		if GetRestrictedActionStatus(1) then VALUE = huge return end
 		local cooldown = GetSpellCooldown(TMW.GCDSpell)
+		if issecretvalue(cooldown.duration) then VALUE = huge return end
 		VALUE = cooldown.startTime + cooldown.duration -- the time at which we need to update again. (when the GCD ends)
 	]],
 })

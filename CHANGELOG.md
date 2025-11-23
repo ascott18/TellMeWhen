@@ -1,3 +1,23 @@
+## v12.0.0
+* Experimental WoW Midnight support. 
+
+### Possible future fixes
+The following known issues may be fixed if Blizzard makes necessary changes:
+
+* Timer bars cannot be made to work.
+* Recharging cooldowns show the main cooldown sweep.
+* Can't hide a charge count of zero.
+* Some resource conditions (e.g. secondary resources) will be brought back.
+* GCDs cannot be suppressed
+
+### Guaranteed dead features
+The following items cannot and will not be fixed.
+
+* Buff/debuff icons while in combat or other restricted situations.
+* Conditions that check restricted data (cooldowns, auras, resources, unit identity)
+* Duration/Stack requirements against restricted data
+* Ignore Runes setting for DKs.
+
 ## v11.2.9
 * Fix: #2311 error caused by IconModule_IconEventConditionHandler enabling unconditionally
 

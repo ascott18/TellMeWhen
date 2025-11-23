@@ -15,6 +15,7 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
+local issecretvalue = TMW.issecretvalue
 local tonumber, pairs, type, format, select =
 	  tonumber, pairs, type, format, select
 
@@ -345,6 +346,8 @@ local function Buff_OnUpdate(icon, time)
 						-- Break GetAuraDataByIndex loop (while true do ...)
 						break
 					end
+				elseif issecretvalue(instance.spellId) then
+					index = index + 1
 				else
 					index = index + 1
 
@@ -512,6 +515,8 @@ local function Buff_OnUpdate_Controller(icon, time)
 					else
 						break
 					end
+				elseif issecretvalue(instance.spellId) then
+					index = index + 1
 				else
 					index = index + 1
 				

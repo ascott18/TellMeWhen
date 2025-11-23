@@ -17,7 +17,7 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 local strlowerCache = TMW.strlowerCache
-local issecretvalue = issecretvalue or TMW.NULLFUNC
+local issecretvalue = TMW.issecretvalue
 
 local select, wipe, next, setmetatable 
     = select, wipe, next, setmetatable
@@ -182,7 +182,9 @@ function TMW.OnGCD(d)
 		return true
 	else
 		-- If the duration passed in is the same as the GCD spell then it is a GCD
-		return GetGCD() == d
+        local gcd = GetGCD()
+        if issecretvalue(gcd) then return false end
+		return gcd == d
 	end
 end
 

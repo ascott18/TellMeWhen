@@ -20,7 +20,7 @@ local print = TMW.print
 local OnGCD = TMW.OnGCD
 
 local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
-local issecretvalue = issecretvalue or TMW.NULLFUNC
+local issecretvalue = TMW.issecretvalue
 local pairs, wipe = 
       pairs, wipe
 
