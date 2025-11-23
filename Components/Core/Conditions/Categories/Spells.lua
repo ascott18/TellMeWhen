@@ -93,6 +93,7 @@ ConditionCategory:RegisterCondition(1,	 "SPELLCD", {
 	formatter = TMW.C.Formatter.TIME_0USABLE,
 	icon = "Interface\\Icons\\spell_holy_divineintervention",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[CooldownDuration(c.OwnSpells.First, c.Checked) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -128,6 +129,7 @@ ConditionCategory:RegisterCondition(2,	 "SPELLCDCOMP", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\spell_holy_divineintervention",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[CooldownDuration(c.OwnSpells.First, c.Checked) c.Operator CooldownDuration(c.OwnSpells2.First, c.Checked2)]],
 	events = function(ConditionObject, c)
 		return
@@ -174,6 +176,7 @@ ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_monk_roll",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	Env = {
 		GetSpellChargesOrCount = function(spell)
 			local charges = GetSpellCharges(spell)
@@ -199,6 +202,7 @@ ConditionCategory:RegisterCondition(2.6, "SPELLCHARGETIME", {
 	end,
 	useSUG = "spell",
 	unit = PLAYER,
+	maybeSecret = true,
 	formatter = TMW.C.Formatter:New(function(value)
 		local s = TMW.C.Formatter.TIME_YDHMS:Format(value)
 		if value == 0 then
@@ -617,6 +621,7 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_hunter_steadyshot",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[BOOLCHECK( (TMW.GetGCD() > 0 and TMW.GetGCD() < 1.7) )]],
 	events = function(ConditionObject, c)
 		return

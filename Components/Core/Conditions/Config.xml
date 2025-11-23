@@ -71,6 +71,17 @@
 				<Anchors>
 					<Anchor point="TOPLEFT" x="28" y="-10"/>
 				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="RestrictedIcon" file="Interface\AddOns\TellMeWhen\Textures\restricted.png" hidden="true">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" x="2" y="0"/>
+							</Anchors>
+							<Color r="1" g="0.82" b="0"/>
+						</Texture>
+					</Layer>
+				</Layers>
 				<Frames>
 					<EditBox parentKey="EditBox" inherits="TellMeWhen_InputBoxTemplate">
 						<Anchors>
@@ -121,7 +132,7 @@
 			</Frame>
 			<Frame parentKey="Icon" inherits="TMW_IconDropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="6"/>
+					<Anchor point="LEFT" relativeKey="$parent.Type.RestrictedIcon" relativePoint="RIGHT" x="4"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -137,7 +148,7 @@
 			<EditBox parentKey="Unit" inherits="TellMeWhen_InputBoxTemplate">
 				<Size x="120" y="18"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.Type" relativePoint="RIGHT" x="10" y="0"/>
+					<Anchor point="LEFT" relativeKey="$parent.Type.RestrictedIcon" relativePoint="RIGHT" x="8" y="0"/>
 				</Anchors>
 				
 				<Scripts>
@@ -411,7 +422,7 @@
 
 			<Frame parentKey="BitFlags" inherits="TMW_DropDownMenuTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.Type" relativePoint="TOPRIGHT" x="15" y="0"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.Type.RestrictedIcon" relativePoint="TOPRIGHT" x="13" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>

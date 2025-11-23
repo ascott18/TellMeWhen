@@ -866,6 +866,17 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 
 	TMW:TT(CndtGroup.Type, text, tooltip, 1, 1)
 	TMW:TT(CndtGroup.Type.EditBox, text, tooltip, 1, 1)
+	
+	if TMW.wowMajor >= 12 and conditionData and conditionData.maybeSecret then
+		CndtGroup.Type.RestrictedIcon:Show()
+		CndtGroup.Type.RestrictedIcon:SetWidth(16)
+		CndtGroup.Type:SetWidth(176-16)
+		TMW:TT(CndtGroup.Type.RestrictedIcon, "UIPANEL_SECRETS_DISALLOWED", "UIPANEL_SECRETS_CNDT_DISALLOWED_DESC")
+	else
+		CndtGroup.Type.RestrictedIcon:Hide()
+		CndtGroup.Type.RestrictedIcon:SetWidth(0.1)
+		CndtGroup.Type:SetWidth(176)
+	end
 end)
 
 -- Operator
@@ -1137,7 +1148,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 			CndtGroup.BitFlags:SetWidth(150)
 			CndtGroup.Unit:SetWidth(90)
 		else
-			CndtGroup.BitFlags:SetPoint("TOPLEFT", CndtGroup.Type, "TOPRIGHT", 15, 0)
+			CndtGroup.BitFlags:SetPoint("TOPLEFT", CndtGroup.Type.RestrictedIcon, "TOPRIGHT", 13, 0)
 			CndtGroup.BitFlags:SetWidth(190)
 		end
 

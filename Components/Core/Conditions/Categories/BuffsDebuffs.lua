@@ -272,6 +272,7 @@ ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraDurPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -331,6 +332,7 @@ ConditionCategory:RegisterCondition(2.5, "BUFFPERC", {
 	formatter = TMW.C.Formatter.PERCENT,
 	icon = "Interface\\Icons\\spell_holy_circleofrenewal",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraPercentPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -373,6 +375,7 @@ ConditionCategory:RegisterCondition(2,	 "BUFFDURCOMP", {
 	useSUG = true,
 	icon = "Interface\\Icons\\spell_nature_rejuvenation",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraDurPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator AuraDurPacked(c.Unit, c.Spells2.First, "isHelpful", ]] .. (tostring(c.Checked2)) .. [[)]]
@@ -396,9 +399,10 @@ ConditionCategory:RegisterCondition(3,	 "BUFFSTACKS", {
 	check = function(check)
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
-	texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
+	texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"},  {__index = function(tbl, k) return format(STACKS, k) end}),
 	icon = "Interface\\Icons\\inv_misc_herb_felblossom",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraStacksPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -425,6 +429,7 @@ ConditionCategory:RegisterCondition(4,	 "BUFFTOOLTIP", {
 	end,
 	icon = "Interface\\Icons\\inv_elemental_primal_mana",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraVariableNumberPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -452,6 +457,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		end,
 		icon = ClassicExpansionAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR) and "Interface\\Icons\\ability_priest_clarityofwill" or "Interface\\Icons\\spell_ice_lament",
 		tcoords = CNDT.COMMON.standardtcoords,
+		maybeSecret = true,
 		funcstr = function(c)
 			if CanUsePackedAuras(c) then
 				return [[AuraTooltipNumberPacked(c.Unit, c.Spells.First, "isHelpful", ]] .. (tostring(c.Checked)) .. [[, ]] .. i .. [[) c.Operator c.Level]]
@@ -481,6 +487,7 @@ ConditionCategory:RegisterCondition(5,	 "BUFFNUMBER", {
 	texttable = function(k) return format(L["ACTIVE"], k) end,
 	icon = "Interface\\Icons\\ability_paladin_sacredcleansing",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraCountPacked(c.Units, c.Spells, "isHelpful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -505,6 +512,7 @@ if UnitGetTotalAbsorbs then
 		icon = "Interface\\Icons\\spell_holy_powerwordshield",
 		formatter = TMW.C.Formatter.COMMANUMBER,
 		tcoords = CNDT.COMMON.standardtcoords,
+		maybeSecret = true,
 		Env = {
 			UnitGetTotalAbsorbs = UnitGetTotalAbsorbs,
 		},
@@ -535,6 +543,7 @@ ConditionCategory:RegisterCondition(11,	 "DEBUFFDUR", {
 	formatter = TMW.C.Formatter.TIME_0ABSENT,
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraDurPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -594,6 +603,7 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 	formatter = TMW.C.Formatter.PERCENT,
 	icon = ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and "Interface\\Icons\\spell_priest_voidshift" or "Interface\\Icons\\ability_rogue_dualweild",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraPercentPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -636,6 +646,7 @@ ConditionCategory:RegisterCondition(12,	 "DEBUFFDURCOMP", {
 	useSUG = true,
 	icon = "Interface\\Icons\\spell_shadow_abominationexplosion",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraDurPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator AuraDurPacked(c.Unit, c.Spells2.First, "isHarmful", ]] .. (tostring(c.Checked2)) .. [[)]]
@@ -663,6 +674,7 @@ ConditionCategory:RegisterCondition(13,	 "DEBUFFSTACKS", {
 	texttable = setmetatable({[0] = format(STACKS, 0).." ("..L["ICONMENU_ABSENT"]..")"}, {__index = function(tbl, k) return format(STACKS, k) end}),
 	icon = "Interface\\Icons\\ability_warrior_sunder",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraStacksPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -689,6 +701,7 @@ ConditionCategory:RegisterCondition(14,	 "DEBUFFTOOLTIP", {
 	end,
 	icon = "Interface\\Icons\\spell_shadow_lifedrain",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraVariableNumberPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]
@@ -716,6 +729,7 @@ for i = 1, 3 do -- DEBUFFTOOLTIPSCAN
 		end,
 		icon = "Interface\\Icons\\spell_fire_flameshock",
 		tcoords = CNDT.COMMON.standardtcoords,
+		maybeSecret = true,
 		funcstr = function(c)
 			if CanUsePackedAuras(c) then
 				return [[AuraTooltipNumberPacked(c.Unit, c.Spells.First, "isHarmful", ]] .. (tostring(c.Checked)) .. [[, ]] .. i .. [[) c.Operator c.Level]]
@@ -745,6 +759,7 @@ ConditionCategory:RegisterCondition(15,	 "DEBUFFNUMBER", {
 	texttable = function(k) return format(L["ACTIVE"], k) end,
 	icon = "Interface\\Icons\\spell_deathknight_frostfever",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = function(c)
 		if CanUsePackedAuras(c) then
 			return [[AuraCountPacked(c.Units, c.Spells, "isHarmful", ]] .. (tostring(c.Checked)) .. [[) c.Operator c.Level]]

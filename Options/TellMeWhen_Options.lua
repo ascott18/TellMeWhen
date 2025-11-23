@@ -1491,7 +1491,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 
 		if showRestricted then
 			self.RestrictedIcon:Show()
-			TMW:TT(self.Header, text, "UIPANEL_SECRETS_DISALLOWED", 1, nil)
+			TMW:TT(self.Header, text, "UIPANEL_SECRETS_DISALLOWED_DESC", 1, nil)
 		else
 			self.RestrictedIcon:Hide()
 		end

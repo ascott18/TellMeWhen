@@ -860,18 +860,20 @@ if IsInJailersTower then
 	function AnimaPowWatcher:Update()
 		for i=1, 300 do
 			local data = GetAuraDataByIndex("player", i, "MAW");
-			if issecretvalue(data) or not data then return end
-
+			if not data then return end
+			
 			local spellId = data.spellId
-			local count = data.applications
-			if count == 0 then
-				count = 1
-			end
+			if not issecretvalue(spellId) then
+				local count = data.applications
+				if count == 0 then
+					count = 1
+				end
 
-			if currentAnimaPows[data.spellId] ~= count then
-				currentAnimaPows[data.spellId] = count;
-				currentAnimaPows[strlowerCache[data.name]] = count;
-				TMW:Fire("TMW_ANIMA_POWER_COUNT_CHANGED")
+				if currentAnimaPows[spellId] ~= count then
+					currentAnimaPows[spellId] = count;
+					currentAnimaPows[strlowerCache[data.name]] = count;
+					TMW:Fire("TMW_ANIMA_POWER_COUNT_CHANGED")
+				end
 			end
 		end
 	end

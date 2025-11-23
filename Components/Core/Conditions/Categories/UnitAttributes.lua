@@ -16,6 +16,9 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+local issecretvalue = TMW.issecretvalue
+
+local UnitIsUnit = UnitIsUnit
 
 local _, pclass = UnitClass("Player")
 
@@ -330,8 +333,16 @@ ConditionCategory:RegisterCondition(8.95, "UNITISUNIT", {
 	icon = "Interface\\Icons\\spell_holy_prayerofhealing",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitIsUnit = UnitIsUnit,
+		UnitIsUnit = TMW.wowMajor < 12 and UnitIsUnit or function(unit, unit2)
+			local ret = UnitIsUnit(unit, unit2)
+			if issecretvalue(ret) then
+				return false
+			else
+				return ret
+			end
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[BOOLCHECK( UnitIsUnit(c.Unit, c.Unit2) )]],
 	events = function(ConditionObject, c)
 		return
@@ -352,8 +363,16 @@ ConditionCategory:RegisterCondition(9,    "NAME", {
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitName = UnitName,
+		UnitName = TMW.wowMajor < 12 and UnitName or function(unit)
+			local ret = UnitName(unit)
+			if issecretvalue(ret) then
+				return ""
+			else
+				return ret
+			end
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[BOOLCHECK(MULTINAMECHECK(  UnitName(c.Unit) or ""  ))]],
 	events = function(ConditionObject, c)
 		return
@@ -361,6 +380,10 @@ ConditionCategory:RegisterCondition(9,    "NAME", {
 			ConditionObject:GenerateNormalEventString("UNIT_NAME_UPDATE", CNDT:GetUnit(c.Unit))
 	end,
 })
+
+local UnitNpcId = UnitCreatureID or function(unit)
+	return tonumber((UnitGUID(unit) or ""):match(".-%-%d+%-%d+%-%d+%-%d+%-(%d+)"))
+end
 
 ConditionCategory:RegisterCondition(9.5,  "NPCID", {
 	text = L["CONDITIONPANEL_NPCID"],
@@ -375,9 +398,13 @@ ConditionCategory:RegisterCondition(9.5,  "NPCID", {
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitGUID = UnitGUID,
+		UnitNpcId = TMW.wowMajor < 12 and UnitNpcId or function(unit)
+			local id = UnitNpcId(unit)
+			return issecretvalue(id) and 0 or id
+		end,
 	},
-	funcstr = [[BOOLCHECK(MULTINAMECHECK(  tonumber((UnitGUID(c.Unit) or ""):match(".-%-%d+%-%d+%-%d+%-%d+%-(%d+)")) ))]],
+	maybeSecret = true,
+	funcstr = [[BOOLCHECK(MULTINAMECHECK(  UnitNpcId(c.Unit) ))]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -512,8 +539,16 @@ ConditionCategory:RegisterCondition(13,   "CREATURETYPE", {
 	icon = "Interface\\Icons\\spell_shadow_summonfelhunter",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitCreatureType = UnitCreatureType,
+		UnitCreatureType = TMW.wowMajor < 12 and UnitCreatureType or function(unit)
+			local creatureType = UnitCreatureType(unit)
+			if issecretvalue(creatureType) then
+				return ""
+			else
+				return creatureType
+			end
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[BOOLCHECK(MULTINAMECHECK(  UnitCreatureType(c.Unit) or ""  ))]],
 	events = function(ConditionObject, c)
 		return
