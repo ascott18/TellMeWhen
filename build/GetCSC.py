@@ -13,7 +13,7 @@ from slpp import slpp as lua
 # Example: '.*shaman.*' to match all shaman URLs, or None to disable
 debug_only_id = None #'.*shaman.*'
 
-VERSION = 'classic'
+VERSION = 'tbc'
 
 # Game version configurations
 GAME_VERSIONS = {
@@ -71,6 +71,26 @@ GAME_VERSIONS = {
     'classic': {
         'base_url': 'https://www.wowhead.com/classic',
         'output_file': 'CSC-Classic.lua',
+        'classes': {
+            'druid': 11,
+            'hunter': 3,
+            'mage': 8,
+            'paladin': 2,
+            'priest': 5,
+            'rogue': 4,
+            'shaman': 7,
+            'warlock': 9,
+            'warrior': 1,
+        },
+        'pet_classes': ['hunter', 'shaman', 'warlock'],
+        'class_spells_urls': [
+            '/spells/abilities/',
+            '/spells/talents/',
+        ]
+    },
+    'tbc': {
+        'base_url': 'https://www.wowhead.com/tbc',
+        'output_file': 'CSC-TBC.lua',
         'classes': {
             'druid': 11,
             'hunter': 3,

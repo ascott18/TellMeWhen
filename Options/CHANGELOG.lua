@@ -4,6 +4,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v11.2.9
+* TBC Classic Anniversary support.
 * Fix: #2311 error caused by IconModule_IconEventConditionHandler enabling unconditionally
 
 ## v11.2.8

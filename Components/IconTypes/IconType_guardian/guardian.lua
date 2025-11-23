@@ -140,9 +140,8 @@ local function Info(duration, spell, triggerMatch, extraData)
 end
 
 Type.GuardianInfo = ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
-	[510] = Info(45, 31687, false), -- Water Elemental
 	[89] = Info(60 * 5, 1122, false), -- Inferno (warlock)
-} or (ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA)) and {
+} or (ClassicExpansionAtLeast(LE_EXPANSION_BURNING_CRUSADE) and ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA)) and {
 	-- Note: data not verified for MOP
 	[510] = Info(45, 31687, false), -- Water Elemental
 	[19668] = Info(15, 34433, false), -- Shadowfiend
