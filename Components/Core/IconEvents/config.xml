@@ -224,6 +224,13 @@
 						<Anchor point="RIGHT" x="0"/>
 					</Anchors>
 				</FontString>
+				<Texture parentKey="RestrictedIcon" file="Interface\AddOns\TellMeWhen\Textures\restricted.png" hidden="true">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="RIGHT" x="-6" y="0"/>
+					</Anchors>
+					<Color r="1" g="0.82" b="0"/>
+				</Texture>
 			</Layer>
 		</Layers>
 

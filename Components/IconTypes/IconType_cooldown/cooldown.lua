@@ -99,11 +99,16 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], order = 3, },
-	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], order = 4, },
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", TMW.wowMajor >= 12 and {
 	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck", order = 1 },
 	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck", order = 2 },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["DEFAULT"], order = 3, },
+	-- No ability to detect or show STATE_UNUSABLE with secret cooldowns
+} or {
+	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck", order = 1 },
+	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck", order = 2 },
+	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], order = 3, },
+	[STATE_UNUSABLE]         = { text = "|cFFFF0000" .. L["ICONMENU_UNUSABLE"], order = 4, },
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", function(self)

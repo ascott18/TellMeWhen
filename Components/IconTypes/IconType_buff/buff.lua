@@ -730,7 +730,7 @@ function Processor:CompileFunctionSegment(t)
 	if TMW.wowMajor >= 12 then
 		t[#t+1] = [[
 		
-		if type(auraSourceGUID) == 'nil' and unit == "player" then
+		if not auraSourceGUID and unit == "player" then
 			auraSourceGUID = playerGUID
 		end
 

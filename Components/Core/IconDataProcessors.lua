@@ -329,12 +329,14 @@ do
 		category = L["EVENT_CATEGORY_TIMER"],
 		text = L["SOUND_EVENT_ONSTART"],
 		desc = L["SOUND_EVENT_ONSTART_DESC"],
+		maybeSecret = true,
 	})
 
 	Processor:RegisterIconEvent(22, "OnFinish", {
 		category = L["EVENT_CATEGORY_TIMER"],
 		text = L["SOUND_EVENT_ONFINISH"],
 		desc = L["SOUND_EVENT_ONFINISH_DESC"],
+		maybeSecret = true,
 	})
 
 	Processor:RegisterIconEvent(23, "OnDuration", {
@@ -369,6 +371,7 @@ do
 			EventSettings.CndtJustPassed = true
 			EventSettings.PassingCndt = true
 		end,
+		maybeSecret = true,
 	})
 
 	function Processor:CompileFunctionSegment(t)
@@ -646,12 +649,14 @@ do
 		category = L["EVENT_CATEGORY_CHARGES"],
 		text = L["SOUND_EVENT_ONCHARGEGAINED"],
 		desc = L["SOUND_EVENT_ONCHARGEGAINED_DESC"],
+		maybeSecret = true,
 	})
 
 	Processor:RegisterIconEvent(27, "OnChargeLost", {
 		category = L["EVENT_CATEGORY_CHARGES"],
 		text = L["SOUND_EVENT_ONCHARGELOST"],
 		desc = L["SOUND_EVENT_ONCHARGELOST_DESC"],
+		maybeSecret = true,
 	})
 
 	function Processor:CompileFunctionSegment(t)
@@ -962,6 +967,7 @@ do
 			local count = icon.attributes.stack or 0
 			return TMW.CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
 		end,
+		maybeSecret = true,
 	})
 
 	Processor:RegisterIconEvent(51.1, "OnStackIncrease", {
@@ -979,6 +985,7 @@ do
 			local count = icon.attributes.stack or 0
 			return TMW.CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
 		end,
+		maybeSecret = true,
 	})
 
 	Processor:RegisterIconEvent(51.2, "OnStackDecrease", {
@@ -996,6 +1003,7 @@ do
 			local count = icon.attributes.stack or 0
 			return TMW.CompareFuncs[eventSettings.Operator](count, eventSettings.Value)
 		end,
+		maybeSecret = true,
 	})
 		
 	Processor:RegisterDogTag("TMW", "Stacks", {
@@ -1090,7 +1098,7 @@ do
 		if TMW.wowMajor >= 12 then
 			t[#t+1] = [[
 			
-			if type(GUID) == 'nil' and unit == "player" then
+			if not GUID and unit == "player" then
 				GUID = playerGUID
 			end
 			

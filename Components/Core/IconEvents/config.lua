@@ -423,6 +423,13 @@ function EVENTS:LoadEventPickerButtons()
 		frame.Title:SetText(get(eventData.text))
 		TMW:TT(frame, eventData.text, eventData.desc, 1, 1)
 
+		if TMW.wowMajor >= 12 and eventData.maybeSecret then
+			frame.RestrictedIcon:Show()
+			TMW:TT(frame.RestrictedIcon, "UIPANEL_SECRETS_DISALLOWED", "UIPANEL_SECRETS_EVENT_DISALLOWED_DESC")
+		else
+			frame.RestrictedIcon:Hide()
+		end
+
 		previousFrame = frame
 	end
 end

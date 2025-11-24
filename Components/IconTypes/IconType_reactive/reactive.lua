@@ -291,8 +291,7 @@ else
 			cooldown = GetSpellCooldown(iName)
 			
 			if cooldown then
-				local charges = GetSpellCharges(iName)
-				local stack
+				charges = GetSpellCharges(iName)
 				if charges then
 					stack = charges.currentCharges
 				else
