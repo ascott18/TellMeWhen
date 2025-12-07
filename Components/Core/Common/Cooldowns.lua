@@ -127,7 +127,7 @@ if C_Spell.GetSpellCastCount then
 
     function Cooldowns.GetSpellCastCount(spell)
         local cached = CachedCounts[spell]
-        if type(cached) ~= nil then 
+        if type(cached) ~= 'nil' then 
             if type(cached) ~= 'boolean' then
                 return cached
             else
