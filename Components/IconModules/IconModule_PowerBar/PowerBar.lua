@@ -69,8 +69,9 @@ function PowerBar:OnNewInstance(icon)
 	bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 	self.powerType = defaultPowerType
 	
+	self.Min = 0
 	self.Max = 1
-	bar:SetMinMaxValues(0, self.Max)
+	bar:SetMinMaxValues(self.Min, self.Max)
 	
 	self.Offset = 0
 end
