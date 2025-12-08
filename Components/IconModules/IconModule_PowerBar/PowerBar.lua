@@ -151,7 +151,6 @@ function PowerBar:UpdateCost()
 				bar:SetMinMaxValues(min, max)
 			end
 		
-
 			powerType = powerType or defaultPowerType
 			if powerType ~= self.powerType then
 				local colorinfo = PowerBarColor[powerType] or PowerBarColor[defaultPowerType]
@@ -159,6 +158,8 @@ function PowerBar:UpdateCost()
 				bar:SetStatusBarColor(colorinfo.r, colorinfo.g, colorinfo.b, 0.9)
 				self.powerType = powerType
 			end
+
+			self:Update()
 		end
 	end
 end
