@@ -125,6 +125,8 @@ function PowerBar:SetSpell(spell)
 	end
 end
 
+local wowMajor = TMW.wowMajor
+
 function PowerBar:UpdateCost()
 	local bar = self.bar
 	local spell = self.spell
@@ -134,7 +136,13 @@ function PowerBar:UpdateCost()
 		
 		if cost then
 			local powerType = costData.type
-			cost = powerType == (Enum.PowerType.HolyPower) and 3 or cost or 0 -- holy power hack: always use a max of 3
+
+			if wowMajor <= 9 then
+				-- holy power hack: always use a max of 3 to account for variable cost spenders.
+				-- This version check might not be right. Not sure when this was added, nor when it was removed.
+				cost = powerType == (Enum.PowerType.HolyPower) and 3 or cost or 0 
+			end
+
 			self.__value = nil -- the displayed value might change when we change the max, so force an update
 			
 			if not self.Invert then
