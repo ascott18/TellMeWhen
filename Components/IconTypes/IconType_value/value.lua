@@ -280,7 +280,7 @@ end
 function Type:Setup(icon)
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
-	icon:SetInfo("texture", "Interface/Icons/inv_potion_49")
+	icon:SetInfo("texture; reverse", "Interface/Icons/inv_potion_49", true)
 	
 	icon:SetUpdateMethod("auto")
 

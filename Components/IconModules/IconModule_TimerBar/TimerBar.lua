@@ -186,7 +186,7 @@ function TimerBar:UpdateValue(force)
 				local halfColor = self.halfColor
 				local startColor = self.startColor
 
-				if Invert then
+				if self.invertColors ~= Invert then
 					completeColor, startColor = startColor, completeColor
 				end
 				
@@ -301,6 +301,10 @@ function TimerBar:SPELLCHARGES(icon, charges, maxCharges, chargeStart, chargeDur
 end
 TimerBar:SetDataListener("SPELLCHARGES")
 
+function TimerBar:REVERSE(icon, reverse)
+	self.invertColors = reverse
+end
+TimerBar:SetDataListener("REVERSE")
 
 TMW:RegisterCallback("TMW_LOCK_TOGGLED", function(event, Locked)
 	if not Locked then

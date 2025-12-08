@@ -1,5 +1,6 @@
 ## v12.0.0
 * Experimental WoW Midnight support. 
+* Timer bars now choose their start/completion color based on the default shading style of the cooldown sweep for the icon type. This means that buff/debuff and similar icons start at the Completion Color (default green) and move towards the Start Color (default red) as they expire.
 
 ### Possible future fixes
 The following known issues may be fixed if Blizzard makes necessary changes:
