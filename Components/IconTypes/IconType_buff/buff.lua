@@ -20,6 +20,8 @@ local tonumber, pairs, type, format, select =
 	  tonumber, pairs, type, format, select
 
 local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+local GetAuraDuration = C_UnitAuras.GetAuraDuration
+local IsAuraFilteredOutByInstanceID = C_UnitAuras.IsAuraFilteredOutByInstanceID
 
 local Auras = TMW.COMMON.Auras
 local GetAuras = Auras.GetAuras
@@ -30,6 +32,9 @@ local GetSpellName = TMW.GetSpellName
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
+
+local clientHasSecrets = false
+
 local empty = {}
 
 -- GLOBALS: TellMeWhen_ChooseName
@@ -89,6 +94,9 @@ Type:RegisterIconDefaults{
 	-- Only check auras casted by the player. Appends "|PLAYER" to the UnitAura filter.
 	OnlyMine				= false,
 
+	-- Only check auras that appear on nameplates. Appends "|INCLUDE_NAME_PLATE_ONLY" to the UnitAura filter.
+	IncludeNameplateOnly	= false,
+
 	-- Hide the icon if TMW's unit system left icon.Units empty.
 	-- This can happen, for example, if checking only raid units while not in a raid.
 	HideIfNoUnits			= false,
@@ -138,9 +146,25 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			check:SetSetting("OnlyMine")
 		end,
 		function(check)
-			check:SetTexts(L["ICONMENU_STEALABLE"], L["ICONMENU_STEALABLE_DESC"])
+			local name = L["ICONMENU_STEALABLE"]
+			local desc = L["ICONMENU_STEALABLE_DESC"]
+			
+			if clientHasSecrets then
+				name = name .. " |TInterface\\AddOns\\TellMeWhen\\Textures\\restricted.png:14:14:0:0:64:64:4:60:4:60:255:209:0|t"
+				desc = desc .. "\n\n" .. L["UIPANEL_SECRETS_DISALLOWED_DESC"]
+			end
+			
+			check:SetTexts(name, desc)
 			check:SetSetting("Stealable")
 		end,
+		-- IncludeNameplateOnly is basically useless. Blizz nameplates use nameplateShowPersonal, which is secret.
+		-- function(check)
+		-- 	check:SetTexts(L["ICONMENU_INCLUDENAMEPLATE"], L["ICONMENU_INCLUDENAMEPLATE_DESC"])
+		-- 	check:SetSetting("IncludeNameplateOnly")
+		-- end,
+		-- function(check)
+		-- 	check:Hide()
+		-- end,
 		function(check)
 			check:SetTexts(L["ICONMENU_HIDENOUNITS"], L["ICONMENU_HIDENOUNITS_DESC"])
 			check:SetSetting("HideIfNoUnits")
@@ -170,6 +194,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		local info = TMW.DD:CreateInfo()
 		info.text = L["ICONMENU_SHOWTTTEXT_FIRST"]
 		info.tooltipTitle = info.text
+		info.icon = "Interface\\AddOns\\TellMeWhen\\Textures\\restricted.png"
 		info.tooltipText = L["ICONMENU_SHOWTTTEXT_FIRST_DESC"]
 		info.func = OnClick
 		info.arg1 = true
@@ -194,6 +219,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			local info = TMW.DD:CreateInfo()
 			info.text = L["ICONMENU_SHOWTTTEXT_TT"]:format(-var)
 			info.tooltipTitle = info.text
+			info.icon = "Interface\\AddOns\\TellMeWhen\\Textures\\restricted.png"
 			info.tooltipText = L["ICONMENU_SHOWTTTEXT_TT_DESC"]:format(-var)
 			info.func = OnClick
 			info.arg1 = var
@@ -517,6 +543,13 @@ local function Buff_OnUpdate_Controller(icon, time)
 					end
 				elseif issecretvalue(instance.spellId) then
 					index = index + 1
+				
+					if (NameFirst == '') then
+						if not icon:YieldInfo(true, unit, instance) then
+							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
+							return
+						end
+					end
 				else
 					index = index + 1
 				
@@ -571,12 +604,20 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 				for auraInstanceID, instance in next, instances do
 					local sourceUnit = instance.sourceUnit
 					
-					if 
-						(not KindKey or instance[KindKey])
-					and	(NotOnlyMine or sourceUnit == "player" or sourceUnit == "pet")
-					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
-					then
-						binaryInsert(results, instance, auraInstanceCompare)
+					if issecretvalue(instance.spellId)  then
+						if 
+							(not KindKey or not IsAuraFilteredOutByInstanceID(unit, auraInstanceID, icon.Filter))
+						then
+							binaryInsert(results, instance, auraInstanceCompare)
+						end
+					else
+						if 
+							(not KindKey or instance[KindKey])
+						and	(NotOnlyMine or sourceUnit == "player" or sourceUnit == "pet")
+						and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId]))
+						then
+							binaryInsert(results, instance, auraInstanceCompare)
+						end
 					end
 				end
 
@@ -647,14 +688,21 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 			end
 		end
 
+		local start
+		if clientHasSecrets then
+			start = GetAuraDuration(unit, instance.auraInstanceID):GetStartTime()
+		else
+			start = instance.expirationTime - instance.duration
+		end
+		
 		iconToSet:SetInfo("state; texture; start, duration, modRate; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			STATE_PRESENT,
 			instance.icon,
-			instance.expirationTime - instance.duration, instance.duration, instance.timeMod,
+			start, instance.duration, instance.timeMod,
 			count, count,
 			instance.spellId,
 			unit, nil,
-			instance.sourceUnit, nil
+			not issecretvalue(instance.sourceUnit) and instance.sourceUnit or nil, nil
 		)
 
 	elseif instance == "_secrets" or (not Units[1] and icon.HideIfNoUnits) then
@@ -704,15 +752,30 @@ local aurasWithNoSourceReported = {
 	nil,	-- Terminate with nil to prevent all Warsong's return values from filling the table
 }
 
-if TMW.wowMajor >= 12 then
+if C_Secrets and C_Secrets.HasSecretRestrictions() then
+	clientHasSecrets = true
 	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
 
 	local function wrapUpdate(update)
 		return function(icon, time)
-			if GetRestrictedActionStatus(0) then
-				-- Force hide icon
-				icon:YieldInfo(false, nil, "_secrets")
-				return
+			if C_Secrets.ShouldAurasBeSecret() then
+				if icon.isAllSecrets == nil then
+					local SpellsArray = icon.Spells.Array
+					local len = #SpellsArray
+					local secrets = 0
+					for i = 1, len do
+						local spell = SpellsArray[i]
+						if C_Secrets.ShouldSpellAuraBeSecret(spell) then
+							secrets = secrets + 1
+						end
+					end
+					icon.isAllSecrets = len > 0 and len == secrets
+				end
+				if icon.isAllSecrets then
+					-- Force hide icon
+					icon:YieldInfo(false, nil, "_secrets")
+					return
+				end
 			end
 			return update(icon, time)
 		end
@@ -787,6 +850,7 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
+	icon.isAllSecrets = nil
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
@@ -798,6 +862,10 @@ function Type:Setup(icon)
 	if icon.OnlyMine then
 		icon.Filter = icon.Filter .. "|PLAYER"
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
+	end
+	if icon.IncludeNameplateOnly then
+		icon.Filter = icon.Filter .. "|INCLUDE_NAME_PLATE_ONLY"
+		if icon.Filterh then icon.Filterh = icon.Filterh .. "|INCLUDE_NAME_PLATE_ONLY" end
 	end
 	icon.KindKey = nil
 	if icon.BuffOrDebuff == "HELPFUL" then

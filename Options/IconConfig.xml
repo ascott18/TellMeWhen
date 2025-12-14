@@ -337,6 +337,12 @@
 						self:CScriptAdd("ReloadRequested", function()
 							local textureSetting = self:GetSettingTable().Texture
 							local base = TMW.CI.icon.attributes.texture
+							
+							if TMW.issecretvalue(base) then
+								-- Don't taint the icon editor with secrets
+								base = nil
+							end
+
 							if textureSetting ~= "" then
 								local texture = TMW.COMMON.Textures:EvaluateTexturePath(textureSetting, TMW.NULLFUNC)
 								self:SetSwatchTexture(base, texture)

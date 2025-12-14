@@ -134,7 +134,6 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 		unit = PLAYER,
 		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
 		events = function(ConditionObject, c)
 			return
@@ -150,7 +149,6 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 		unit = PLAYER,
 		icon = "Interface\\Icons\\Spell_Holy_Rune",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.HolyPower),
 		events = function(ConditionObject, c)
 			return
@@ -168,7 +166,6 @@ if ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 		unit = PLAYER,
 		icon = "Interface\\Icons\\ability_monk_chiwave",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Chi),
 		events = function(ConditionObject, c)
 			return
@@ -437,7 +434,6 @@ if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 		max = 6,
 		icon = "Interface\\Icons\\ability_evoker_essenceburst",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Essence),
 		events = function(ConditionObject, c)
 			return
@@ -474,7 +470,6 @@ else
 		unit = PLAYER,
 		icon = "Interface\\Icons\\ability_rogue_eviscerate",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
 		Env = {
 			UnitPower = UnitPower,
 		},
@@ -580,7 +575,6 @@ if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 		max = 4,
 		icon = "Interface\\Icons\\spell_arcane_arcanetorrent",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ArcaneCharges),
 		events = function(ConditionObject, c)
 			return
@@ -597,7 +591,6 @@ if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 		unit = PLAYER,
 		icon = "Interface\\Icons\\inv_misc_gem_amethyst_02",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
 		funcstr = ([[UnitPower("player", %d, true) c.Operator c.Level]]):format(Enum.PowerType.SoulShards),
 		events = function(ConditionObject, c)
 			return

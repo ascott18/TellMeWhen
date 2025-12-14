@@ -57,7 +57,12 @@ local TabGroup = TMW.IE:RegisterTabGroup("ICON", L["ICON"], 1, function(tabGroup
 			end
 		end
 
-		IE.icontexture:SetTexture(icon.attributes.texture)
+		local texture = icon.attributes.texture
+		if TMW.issecretvalue(texture) then
+			-- Don't taint the icon editor with secrets
+			texture = nil
+		end
+		IE.icontexture:SetTexture(texture)
 	end
 end)
 TabGroup:SetTexts(L["ICON"], L["TABGROUP_ICON_DESC"])

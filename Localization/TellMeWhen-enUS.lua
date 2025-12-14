@@ -535,6 +535,9 @@ L["ICONMENU_NOPOCKETWATCH_DESC"] = "Check this box to show no texture instead of
 L["ICONMENU_ONLYMINE"] = "Only cast by me"
 L["ICONMENU_ONLYMINE_DESC"] = "Check this option to cause this icon to only check for buffs/debuffs that you cast"
 
+L["ICONMENU_INCLUDENAMEPLATE"] = "Only nameplate auras"
+L["ICONMENU_INCLUDENAMEPLATE_DESC"] = "Check this option to cause this icon to only check for buffs/debuffs that appear on nameplates"
+
 
 
 L["ICONMENU_SHOWTIMER"] = "Show timer"
@@ -981,9 +984,9 @@ L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"] = [[This condition cannot operate on r
 
 In such situations, the data will be assumed to be in a default state (cooldown ready, aura absent, etc).]]
 L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by restricted data. Examples of restricted data include spell cooldowns and buffs/debuffs while in combat, M+, or PvP; or unit identity in instances.]]
-L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[Buffs and debuffs cannot be tracked in restricted situations (in combat, Mythic+, or PvP match).
+L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[Buffs and debuffs generally cannot be tracked in restricted situations (in combat, Mythic+, or PvP match). When restrictions are active, this icon will be hidden.
 
-When restrictions are active, this icon will be hidden.]]
+One exception is if this icon is a %s, with %q left blank, which will allow a dynamic set of auras to be displayed.]]
 
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"

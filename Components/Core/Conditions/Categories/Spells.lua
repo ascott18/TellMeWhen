@@ -181,7 +181,9 @@ ConditionCategory:RegisterCondition(2.5, "SPELLCHARGES", {
 		GetSpellChargesOrCount = function(spell)
 			local charges = GetSpellCharges(spell)
 			if charges and not issecretvalue(charges.currentCharges) then return charges.currentCharges end
-			return GetSpellCastCount(spell)
+			local count = GetSpellCastCount(spell)
+			if issecretvalue(count) then return 0 end
+			return count
 		end,
 	},
 	funcstr = [[(GetSpellChargesOrCount(c.OwnSpells.First)) c.Operator c.Level]],

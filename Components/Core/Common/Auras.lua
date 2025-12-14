@@ -84,12 +84,12 @@ local function FireUnitAura(unit, payload)
 end
 
 
-if TMW.wowMajor >= 12 then
+if C_Secrets and C_Secrets.HasSecretRestrictions() then
     -- TODO: WARNING: DOGSHIT. NEED AN EVENT FOR GetRestrictedActionStatus changes
-    local GetRestrictedActionStatus = GetRestrictedActionStatus
+    local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
     local blocked = false
     TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
-        local newBlocked = GetRestrictedActionStatus(0)
+        local newBlocked = ShouldAurasBeSecret()
         if blocked ~= newBlocked then
             blocked = newBlocked
 
@@ -123,16 +123,6 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
         -- Still fire TMW_UNIT_AURA because even things in TMW that don't use Auras:GetAuras 
         -- do use TMW_UNIT_AURA in order to avoid the excessive allocations from blizz's UNIT_AURA
         FireUnitAura(unit)
-        return
-    end
-
-    if issecretvalue(unitAuraUpdateInfo) then
-        if data[unit] then
-            -- Let consumers know we can't get aura data anymore.
-            data[unit] = nil
-            blockedUnits[unit] = true
-            FireUnitAura(unit)
-        end
         return
     end
 
@@ -203,27 +193,29 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
 
                 -- local oldInstance = instances[auraInstanceID]
                 -- print("UPDATED AURA INSTANCE NIL", unit, auraInstanceID, oldInstance, oldInstance and oldInstance.name, oldInstance and oldInstance.spellId)
-            elseif not issecretvalue(instance.name) then
+            else
                 instances[auraInstanceID] = instance
 
-                local name = strlowerCache[instance.name]
-                local spellId = instance.spellId
-                local dispelType = instance.dispelName
-                local isMine = 
-                    instance.sourceUnit == "player" or
-                    instance.sourceUnit == "pet"
-                eventHasMine = eventHasMine or isMine
+                if not issecretvalue(instance.name) then
+                    local name = strlowerCache[instance.name]
+                    local spellId = instance.spellId
+                    local dispelType = instance.dispelName
+                    local isMine = 
+                        instance.sourceUnit == "player" or
+                        instance.sourceUnit == "pet"
+                    eventHasMine = eventHasMine or isMine
 
-                --print("updated", unit, name, auraInstanceID)
+                    --print("updated", unit, name, auraInstanceID)
 
-                payload[name] = eventHasMine
-                payload[spellId] = eventHasMine
-                if dispelType then
-                    if dispelType == "" then
-                        -- Bugfix: Enraged is an empty string.
-                        dispelType = "Enraged"
+                    payload[name] = eventHasMine
+                    payload[spellId] = eventHasMine
+                    if dispelType then
+                        if dispelType == "" then
+                            -- Bugfix: Enraged is an empty string.
+                            dispelType = "Enraged"
+                        end
+                        payload[dispelType] = eventHasMine
                     end
-                    payload[dispelType] = eventHasMine
                 end
             end
         end
@@ -360,22 +352,22 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
         if instance then
             local auraInstanceID = instance.auraInstanceID
 
-            if issecretvalue(instance.name) then return end
-            
-            local isMine = 
-            instance.sourceUnit == "player" or
-            instance.sourceUnit == "pet"
-            
             instances[auraInstanceID] = instance
-            getOrCreate(lookup, strlowerCache[instance.name])[auraInstanceID] = isMine
-            getOrCreate(lookup, instance.spellId)[auraInstanceID] = isMine
-            local dispelType = instance.dispelName
-            if dispelType then
-                if dispelType == "" then
-                    -- Bugfix: Enraged is an empty string.
-                    dispelType = "Enraged"
+            if not issecretvalue(instance.name) then 
+                local isMine = 
+                instance.sourceUnit == "player" or
+                instance.sourceUnit == "pet"
+                
+                getOrCreate(lookup, strlowerCache[instance.name])[auraInstanceID] = isMine
+                getOrCreate(lookup, instance.spellId)[auraInstanceID] = isMine
+                local dispelType = instance.dispelName
+                if dispelType then
+                    if dispelType == "" then
+                        -- Bugfix: Enraged is an empty string.
+                        dispelType = "Enraged"
+                    end
+                    getOrCreate(lookup, dispelType)[auraInstanceID] = isMine
                 end
-                getOrCreate(lookup, dispelType)[auraInstanceID] = isMine
             end
         end
     end
@@ -427,9 +419,14 @@ end
 
 if C_TooltipInfo and C_TooltipInfo.GetUnitBuffByAuraInstanceID then
 
-    function Auras.ParseTooltip(unit, instance) 
+    function Auras.ParseTooltip(unit, instance)
         if instance.tmwTooltipNumbers then
             -- Return cached value if available
+            return instance.tmwTooltipNumbers
+        end
+
+        if issecretvalue(instance.spellId) then
+            instance.tmwTooltipNumbers = {}
             return instance.tmwTooltipNumbers
         end
 

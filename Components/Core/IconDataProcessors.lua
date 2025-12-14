@@ -586,7 +586,12 @@ do
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: spell
 		t[#t+1] = [[
-		if attributes.spell ~= spell then
+		if issecretvalue(spell) or issecretvalue(attributes.spell) then
+			attributes.spell = spell
+			TMW:Fire(SPELL.changedEvent, icon, spell)
+			doFireIconUpdated = true
+
+		elseif attributes.spell ~= spell then
 			attributes.spell = spell
 			
 			if EventHandlersSet.OnSpell then
@@ -1069,7 +1074,14 @@ do
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: texture
 		t[#t+1] = [[
-		if texture ~= nil and attributes.texture ~= texture then
+		if texture == nil then
+			-- do nothing
+		elseif issecretvalue(texture) or issecretvalue(attributes.texture) then
+			attributes.texture = texture
+			TMW:Fire(TEXTURE.changedEvent, icon, texture)
+			doFireIconUpdated = true
+
+		elseif attributes.texture ~= texture then
 			attributes.texture = texture
 
 			TMW:Fire(TEXTURE.changedEvent, icon, texture)

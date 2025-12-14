@@ -190,6 +190,7 @@ local function BuffCheck_OnUpdate(icon, time)
 	icon:YieldInfo(false, foundUnit, foundInstance)
 end
 
+local clientHasSecrets = false
 local GetAuras = TMW.COMMON.Auras.GetAuras
 local function BuffCheck_OnUpdate_Packed(icon, time)
 
@@ -293,12 +294,20 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 			nil, nil
 		)
 	elseif instance then
+
+		local start
+		if clientHasSecrets then
+			start = C_UnitAuras.GetAuraDuration(unit, instance.auraInstanceID):GetStartTime()
+		else
+			start = instance.expirationTime - instance.duration
+		end
+
 		-- ID is defined if we didn't find any units that are missing all the auras being checked for.
 		-- In this case, the data is for the first matching aura found on the first unit checked.
 		iconToSet:SetInfo("state; texture; start, duration, modRate; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			STATE_PRESENT,
 			instance.icon,
-			instance.expirationTime - instance.duration, instance.duration, instance.timeMod,
+			start, instance.duration, instance.timeMod,
 			instance.applications, instance.applications,
 			instance.spellId,
 			unit, nil,
@@ -307,17 +316,32 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	end
 end
 
-if TMW.wowMajor >= 12 then
+if C_Secrets and C_Secrets.HasSecretRestrictions() then
+	clientHasSecrets = true
 	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
 	local function wrapUpdate(update)
 		return function(icon, time)
-			if GetRestrictedActionStatus(0) then
-				-- Force hide icon
-				icon:YieldInfo(false, nil)
-				return
+			if C_Secrets.ShouldAurasBeSecret() then
+				if icon.isAllSecrets == nil then
+					local SpellsArray = icon.Spells.Array
+					local len = #SpellsArray
+					local secrets = 0
+					for i = 1, len do
+						local spell = SpellsArray[i]
+						if C_Secrets.ShouldSpellAuraBeSecret(spell) then
+							secrets = secrets + 1
+						end
+					end
+					icon.isAllSecrets = len == secrets
+				end
+				if icon.isAllSecrets then
+					-- Force hide icon
+					icon:YieldInfo(false, nil)
+					return
+					end
+				end
+				return update(icon, time)
 			end
-			return update(icon, time)
-		end
 	end
 	BuffCheck_OnUpdate = wrapUpdate(BuffCheck_OnUpdate)
 	BuffCheck_OnUpdate_Packed = wrapUpdate(BuffCheck_OnUpdate_Packed)
@@ -325,6 +349,7 @@ end
 
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
+	icon.isAllSecrets = nil
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
