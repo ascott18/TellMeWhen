@@ -68,6 +68,11 @@ function TimerBar:OnNewInstance(icon)
 	
 	self.texture = bar:CreateTexture(nil, "OVERLAY")
 	bar:SetStatusBarTexture(self.texture)
+
+	-- Overlay used in secret world to show a full bar
+	-- for a zero duration.
+	self.texture2 = bar:CreateTexture(nil, "OVERLAY")
+	self.texture2:SetAllPoints()
 	
 	self.Max = 1
 	bar:SetMinMaxValues(0, self.Max)
@@ -94,6 +99,9 @@ function TimerBar:OnEnable()
 		texture = TMW.db.profile.TextureName
 	end
 	self.texture:SetTexture(LSM:Fetch("statusbar", texture))
+
+	self.texture2:SetTexture(LSM:Fetch("statusbar", texture))
+	self.texture2:SetAlpha(0)
 	
 	self:SetCooldown(attributes.start, attributes.duration, attributes.durObj, attributes.chargeStart, attributes.chargeDur)
 end
@@ -107,7 +115,18 @@ end
 function TimerBar:GetValue()
 	-- returns value, doTerminate
 
-	local start, duration, Invert = self.start, self.duration, self.Invert
+	local Invert = self.Invert
+	local durObj = self.durObj
+
+	if durObj then
+		if Invert then
+			return durObj:GetElapsedDuration(), false
+		else
+			return durObj:GetRemainingDuration(), false
+		end
+	end
+
+	local start, duration = self.start, self.duration
 
 	if Invert then
 		if duration == 0 then
@@ -130,18 +149,7 @@ function TimerBar:UpdateValue(force)
 	local ret = 0
 
 	local Invert = self.Invert
-	local invertColors = self.invertColors ~= Invert
-	
-	if self.durObj then
-		local color = invertColors and
-			self.durObj:EvaluateRemainingPercent(self.colorCurve) or
-			self.durObj:EvaluateElapsedPercent(self.colorCurve)
-		self.texture:SetVertexColor(color:GetRGBA())
-
-		-- We can't return a doTerminate (-1) here because we can't know if the duration is done.
-		-- We'd love if blizzard would auto update the color.
-		return 0
-	end
+	local invertColors = self.invertColors --~= Invert
 
 	local value, doTerminate = self:GetValue()
 	local maxValue = self.Max
@@ -156,12 +164,45 @@ function TimerBar:UpdateValue(force)
 		end
 	end
 	
-	if issecretvalue(value) or issecretvalue(maxValue) then
-		self.bar:SetValue(value)
+	local bar = self.bar
+	local durObj = self.durObj
+
+	if issecretvalue(value) or issecretvalue(maxValue) or durObj then
+		bar:SetValue(value)
+
 		
-		-- TODO: Update with C_CurveUtil
-		local co = self.completeColor
-		self.bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
+		if durObj then
+			local color = invertColors and
+				durObj:EvaluateRemainingPercent(self.colorCurve) or
+				durObj:EvaluateElapsedPercent(self.colorCurve)
+			self.texture:SetVertexColor(color:GetRGBA())
+
+			if Invert then
+				-- This is the only way to set the bar to "full" when the duration is zero/expired.
+				self.texture2:SetAlphaFromBoolean(durObj:IsZero(), 1, 0)
+				self.texture2:SetVertexColor(self.completeColor.r, self.completeColor.g, self.completeColor.b)
+			end
+
+			if bar:GetReverseFill() then
+				local percent = durObj:EvaluateElapsedPercent(CurveConstants.ZeroToOne)
+				local inversePercent = durObj:EvaluateRemainingPercent(CurveConstants.ZeroToOne)
+				if Invert then
+					percent, inversePercent = inversePercent, percent
+				end
+
+				-- Blizzard goofed (or forgot) when they implemented reverse filling,
+				-- the tex coords are messed up. We'll just have to fix them ourselves.
+				if bar:GetOrientation() == "VERTICAL" then
+					self.texture:SetTexCoord(0, 0, percent, 0, 0, 1, percent, 1)
+				else
+					self.texture:SetTexCoord(inversePercent, 1, 0, 1)
+				end
+			end
+		else
+			-- TODO: Update with C_CurveUtil
+			local co = self.completeColor
+			self.bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
+		end
 	else
 		local percent = maxValue == 0 and 0 or value / maxValue
 		if percent < 0 then
@@ -179,7 +220,7 @@ function TimerBar:UpdateValue(force)
 				-- For some reason, blizzard defers the updating of status bar textures until sometimes 1 or 2 frames after it is set.
 				self:UpdateStatusBarImmediate(percent)
 			elseif bar:GetReverseFill() then
-				-- Bliizard goofed (or forgot) when they implemented reverse filling,
+				-- Blizzard goofed (or forgot) when they implemented reverse filling,
 				-- the tex coords are messed up. We'll just have to fix them ourselves.
 				if bar:GetOrientation() == "VERTICAL" then
 					self.texture:SetTexCoord(0, 0, percent, 0, 0, 1, percent, 1)
@@ -271,20 +312,27 @@ function TimerBar:UpdateStatusBarImmediate(percent)
 end
 
 function TimerBar:SetCooldown(start, duration, durObj, chargeStart, chargeDur)
-	self.durObj = durObj
 	self.normalStart, self.normalDuration = start, duration
 	self.chargeStart, self.chargeDur = chargeStart, chargeDur
+	self.durObj = durObj
+	self.value = nil
 
 	if durObj then
-		self.duration = 0
-		self.start = 0
 		if not self.BarGCD and durObj.isOnGCD then
-			self.bar:SetValue(0)
-		else
-			-- TODO: Don't use SetTimerDuration, too many assorted issues and limitations.
-			-- Evaluate the duration object's remaining/elapsed and update the regular way.
-			self.bar:SetTimerDuration(durObj)
+			durObj = C_DurationUtil.CreateDuration()
+			self.durObj = durObj
 		end
+
+		local duration = durObj:GetTotalDuration()
+
+		if self.FakeMax then
+			self.Max = self.FakeMax
+		else
+			self.Max = duration
+		end
+		self.bar:SetMinMaxValues(0, self.Max)
+		self.__value = nil -- the displayed value might change when we change the max, so force an update
+
 		self:UpdateTable_Register()
 		return
 	end
