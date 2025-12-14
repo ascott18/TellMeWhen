@@ -219,10 +219,13 @@ if TMW.wowMajor >= 12 then
 					usable = activationOverlayActive or usable
 				end
 				if usable and not CD and not noMana and inrange then --usable
-					icon:SetInfo("state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+					local durObj = C_Spell.GetSpellCooldownDuration(iName)
+					durObj.isOnGCD = cooldown.isOnGCD
+
+					icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 						STATE_USABLE,
 						spellTextureCache[iName],
-						cooldown.startTime, cooldown.duration, cooldown.modRate,
+						cooldown.startTime, cooldown.duration, cooldown.modRate, durObj,
 						charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
 						stack, stack,
 						iName		
@@ -255,10 +258,13 @@ if TMW.wowMajor >= 12 then
 		end
 		
 		if cooldown then
-			icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+			local durObj = C_Spell.GetSpellCooldownDuration(NameFirst)
+			durObj.isOnGCD = cooldown.isOnGCD
+
+			icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 				not inrange and STATE_UNUSABLE_NORANGE or noMana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 				icon.FirstTexture,
-				cooldown.startTime, cooldown.duration,
+				cooldown.startTime, cooldown.duration, cooldown.modRate, durObj,
 				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
 				stack, stack,
 				NameFirst
@@ -336,7 +342,7 @@ else
 					usable = activationOverlayActive or usable
 				end
 				if usable and not CD and not noMana and inrange then --usable
-					icon:SetInfo("state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+					icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 						STATE_USABLE,
 						spellTextureCache[iName],
 						cooldown.startTime, cooldown.duration, cooldown.modRate,
@@ -381,10 +387,10 @@ else
 		end
 		
 		if cooldown then
-			icon:SetInfo("state; texture; start, duration; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+			icon:SetInfo("state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 				not inrange and STATE_UNUSABLE_NORANGE or noMana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 				icon.FirstTexture,
-				cooldown.startTime, cooldown.duration,
+				cooldown.startTime, cooldown.duration, cooldown.modRate,
 				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
 				stack, stack,
 				NameFirst

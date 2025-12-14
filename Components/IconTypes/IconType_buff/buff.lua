@@ -688,22 +688,30 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 			end
 		end
 
-		local start
 		if clientHasSecrets then
-			start = GetAuraDuration(unit, instance.auraInstanceID):GetStartTime()
+			local durObj = GetAuraDuration(unit, instance.auraInstanceID)
+			local start = durObj:GetStartTime()
+
+			iconToSet:SetInfo("state; texture; start, duration, modRate, durObj; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+				STATE_PRESENT,
+				instance.icon,
+				start, instance.duration, instance.timeMod, durObj,
+				count, count,
+				instance.spellId,
+				unit, nil,
+				not issecretvalue(instance.sourceUnit) and instance.sourceUnit or nil, nil
+			)
 		else
-			start = instance.expirationTime - instance.duration
+			iconToSet:SetInfo("state; texture; start, duration, modRate; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+				STATE_PRESENT,
+				instance.icon,
+				instance.expirationTime - instance.duration, instance.duration, instance.timeMod,
+				count, count,
+				instance.spellId,
+				unit, nil,
+				instance.sourceUnit, nil
+			)
 		end
-		
-		iconToSet:SetInfo("state; texture; start, duration, modRate; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
-			STATE_PRESENT,
-			instance.icon,
-			start, instance.duration, instance.timeMod,
-			count, count,
-			instance.spellId,
-			unit, nil,
-			not issecretvalue(instance.sourceUnit) and instance.sourceUnit or nil, nil
-		)
 
 	elseif instance == "_secrets" or (not Units[1] and icon.HideIfNoUnits) then
 		iconToSet:SetInfo("state; texture; start, duration; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",

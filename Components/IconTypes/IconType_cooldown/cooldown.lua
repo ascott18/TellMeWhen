@@ -284,11 +284,15 @@ if TMW.wowMajor >= 12 then
 		if dataToUse then
 			local cooldown = dataToUse.cooldown
 			local charges = dataToUse.charges
+
+			local durObj = C_Spell.GetSpellCooldownDuration(dataToUse.iName)
+			durObj.isOnGCD = cooldown.isOnGCD
+
 			icon:SetInfo(
-				"state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+				"state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 				dataToUse.state,
 				spellTextureCache[dataToUse.iName],
-				cooldown.startTime, cooldown.duration, cooldown.modRate,
+				cooldown.startTime, cooldown.duration, cooldown.modRate, durObj,
 				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
 				dataToUse.stack, dataToUse.stack,
 				dataToUse.iName

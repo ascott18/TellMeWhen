@@ -95,7 +95,7 @@ function TimerBar:OnEnable()
 	end
 	self.texture:SetTexture(LSM:Fetch("statusbar", texture))
 	
-	self:SetCooldown(attributes.start, attributes.duration, attributes.chargeStart, attributes.chargeDur)
+	self:SetCooldown(attributes.start, attributes.duration, attributes.durObj, attributes.chargeStart, attributes.chargeDur)
 end
 function TimerBar:OnDisable()
 	self.__oldPercent = -1
@@ -128,8 +128,20 @@ end
 
 function TimerBar:UpdateValue(force)
 	local ret = 0
-	
+
 	local Invert = self.Invert
+	local invertColors = self.invertColors ~= Invert
+	
+	if self.durObj then
+		local color = invertColors and
+			self.durObj:EvaluateRemainingPercent(self.colorCurve) or
+			self.durObj:EvaluateElapsedPercent(self.colorCurve)
+		self.texture:SetVertexColor(color:GetRGBA())
+
+		-- We can't return a doTerminate (-1) here because we can't know if the duration is done.
+		-- We'd love if blizzard would auto update the color.
+		return 0
+	end
 
 	local value, doTerminate = self:GetValue()
 	local maxValue = self.Max
@@ -186,7 +198,7 @@ function TimerBar:UpdateValue(force)
 				local halfColor = self.halfColor
 				local startColor = self.startColor
 
-				if self.invertColors ~= Invert then
+				if invertColors then
 					completeColor, startColor = startColor, completeColor
 				end
 				
@@ -258,11 +270,26 @@ function TimerBar:UpdateStatusBarImmediate(percent)
 	end
 end
 
-function TimerBar:SetCooldown(start, duration, chargeStart, chargeDur)
+function TimerBar:SetCooldown(start, duration, durObj, chargeStart, chargeDur)
+	self.durObj = durObj
 	self.normalStart, self.normalDuration = start, duration
 	self.chargeStart, self.chargeDur = chargeStart, chargeDur
 
-	if chargeDur and chargeDur > 0 then
+	if durObj then
+		self.duration = 0
+		self.start = 0
+		if not self.BarGCD and durObj.isOnGCD then
+			self.bar:SetValue(0)
+		else
+			-- TODO: Don't use SetTimerDuration, too many assorted issues and limitations.
+			-- Evaluate the duration object's remaining/elapsed and update the regular way.
+			self.bar:SetTimerDuration(durObj)
+		end
+		self:UpdateTable_Register()
+		return
+	end
+
+	if chargeDur and not issecretvalue(chargeDur) and chargeDur > 0 then
 		duration = chargeDur
 
 		self.duration = chargeDur
@@ -272,7 +299,7 @@ function TimerBar:SetCooldown(start, duration, chargeStart, chargeDur)
 		self.start = start
 	end
 	
-	if duration > 0 then
+	if not issecretvalue(duration) and duration > 0 then
 		if not self.BarGCD and self.icon:OnGCD(duration) then
 			self.duration = 0
 		end
@@ -286,18 +313,31 @@ function TimerBar:SetCooldown(start, duration, chargeStart, chargeDur)
 end
 
 function TimerBar:SetColors(startColor, halfColor, completeColor)
-	self.startColor    = startColor and TMW:StringToCachedRGBATable(startColor)
-	self.halfColor     = halfColor and TMW:StringToCachedRGBATable(halfColor)
-	self.completeColor = completeColor and TMW:StringToCachedRGBATable(completeColor)
+	startColor    = startColor and TMW:StringToCachedRGBATable(startColor)
+	halfColor     = halfColor and TMW:StringToCachedRGBATable(halfColor)
+	completeColor = completeColor and TMW:StringToCachedRGBATable(completeColor)
+
+	self.startColor    = startColor
+	self.halfColor     = halfColor
+	self.completeColor = completeColor
+
+	if C_CurveUtil then
+		local curve = C_CurveUtil.CreateColorCurve()
+		curve:SetType(Enum.LuaCurveType.Linear)
+		curve:AddPoint(0, CreateColor(startColor.r, startColor.g, startColor.b, startColor.a))
+		curve:AddPoint(0.5, CreateColor(halfColor.r, halfColor.g, halfColor.b, halfColor.a))
+		curve:AddPoint(1, CreateColor(completeColor.r, completeColor.g, completeColor.b, completeColor.a))
+		self.colorCurve = curve
+	end
 end
 
-function TimerBar:DURATION(icon, start, duration)
-	self:SetCooldown(start, duration, self.chargeStart, self.chargeDur)
+function TimerBar:DURATION(icon, start, duration, modRate, durObj)
+	self:SetCooldown(start, duration, durObj, self.chargeStart, self.chargeDur)
 end
 TimerBar:SetDataListener("DURATION")
 
 function TimerBar:SPELLCHARGES(icon, charges, maxCharges, chargeStart, chargeDur)
-	self:SetCooldown(self.normalStart, self.normalDuration, chargeStart, chargeDur)
+	self:SetCooldown(self.normalStart, self.normalDuration, self.durObj, chargeStart, chargeDur)
 end
 TimerBar:SetDataListener("SPELLCHARGES")
 

@@ -317,7 +317,7 @@ end
 
 -- DURATION: "start, duration"
 do
-	local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration, modRate", {"start, duration"})
+	local Processor = TMW.Classes.IconDataProcessor:New("DURATION", "start, duration, modRate, durObj", {"start, duration", "start, duration, modRate"})
 	Processor:DeclareUpValue("OnGCD", TMW.OnGCD)
 
 	TMW.Classes.Icon.attributes.start = 0
@@ -381,8 +381,9 @@ do
 			attributes.start = start
 			attributes.duration = duration
 			attributes.modRate = modRate
+			attributes.durObj = durObj
 
-			TMW:Fire(DURATION.changedEvent, icon, start, duration, modRate)
+			TMW:Fire(DURATION.changedEvent, icon, start, duration, modRate, durObj)
 			doFireIconUpdated = true
 		else
 			duration = duration or 0
@@ -402,7 +403,6 @@ do
 			end
 
 			if attributes.start ~= start or attributes.duration ~= duration or attributes.modRate ~= modRate then
-
 				local realDuration = icon:OnGCD(duration) and 0 or duration -- the duration of the cooldown, ignoring the GCD
 				if icon.__realDuration ~= realDuration then
 					-- detect events that occured, and handle them if they did
@@ -734,7 +734,10 @@ do
 
 			if icon then
 				local attributes = icon.attributes
+
+				-- TODO: use durOjb to produce a string
 				local modRate = attributes.modRate
+				if issecretvalue(modRate) then return 0 end
 
 				local chargeDur = attributes.chargeDur
 				if not ignoreCharges and chargeDur and chargeDur > 0 then

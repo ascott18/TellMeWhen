@@ -61,33 +61,11 @@ end)
 if TMW.wowMajor >= 12 then
 	-- Handle possible secret values
 
+	local GetValue_Base = TimerBar_BarDisplay.GetValue
 	function TimerBar_BarDisplay:GetValue()
 		-- returns value, doTerminate
-
-		local duration = self.duration
-
-		if duration then
-			-- Display a timer.
-			if self.Invert then
-				if duration == 0 then
-					return self.Max, true
-				else
-					local value = TMW.time - self.start + self.Offset
-					return value, value >= self.Max
-				end
-			else
-				if duration == 0 then
-					return 0, true
-				else
-					local value = duration - (TMW.time - self.start) + self.Offset
-					return value, value <= 0
-				end
-			end
-			return 
-		end
-		
 		local value = self.value
-		if type(value) ~= 'nil' then
+		if value then
 			if issecretvalue(value) then
 				return self.value, false
 			else
@@ -97,9 +75,9 @@ if TMW.wowMajor >= 12 then
 					return self.value + self.Offset, false
 				end
 			end
-		else
-			return 0, true
 		end
+
+		return GetValue_Base(self)
 	end
 
 	function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
@@ -126,39 +104,20 @@ if TMW.wowMajor >= 12 then
 		end
 	end
 else
+	local GetValue_Base = TimerBar_BarDisplay.GetValue
 	function TimerBar_BarDisplay:GetValue()
 		-- returns value, doTerminate
 
-		local duration = self.duration
-
-		if duration then
-			-- Display a timer.
-			if self.Invert then
-				if duration == 0 then
-					return self.Max, true
-				else
-					local value = TMW.time - self.start + self.Offset
-					return value, value >= self.Max
-				end
-			else
-				if duration == 0 then
-					return 0, true
-				else
-					local value = duration - (TMW.time - self.start) + self.Offset
-					return value, value <= 0
-				end
-			end
-
-		elseif self.value then
+		if self.value then
 			-- Display a set value.
 			if self.Invert then
 				return self.Max - self.value + self.Offset, false
 			else
 				return self.value + self.Offset, false
 			end
-		else
-			return 0, true
 		end
+
+		return GetValue_Base(self)
 	end
 
 	function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)

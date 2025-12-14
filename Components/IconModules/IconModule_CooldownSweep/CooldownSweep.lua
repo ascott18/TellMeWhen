@@ -236,6 +236,8 @@ end
 local omnicc_loaded = IsAddOnLoaded("OmniCC")
 local tullacc_loaded = IsAddOnLoaded("tullaCC")
 
+local useBlizzSetCooldown = C_Secrets and C_Secrets.HasSecretRestrictions() and ActionButton_ApplyCooldown
+
 function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
 	self.ShowTimerText = icon.ShowTimerText
@@ -279,7 +281,13 @@ function CooldownSweep:SetupForIcon(icon)
 		and not self.icon.FakeHidden
 	self.cooldown:SetDrawBling(self.shouldShowBling)
 
-	self.cooldown2:SetHideCountdownNumbers(hideNumbers)
+	if useBlizzSetCooldown then
+		-- ActionButton_ApplyCooldown always puts charges on cd2
+		self.cooldown2:SetHideCountdownNumbers(true)
+	else
+		self.cooldown2:SetHideCountdownNumbers(hideNumbers)
+	end
+
 	self.cooldown2:SetDrawEdge(self.ShowTimer)
 
 	-- https://github.com/ascott18/TellMeWhen/issues/1914:
@@ -300,44 +308,73 @@ function CooldownSweep:SetupForIcon(icon)
 	self:REVERSE(icon, attributes.reverse)
 end
 
-function CooldownSweep:UpdateCooldown()
-	local cd = self.cooldown
-	local icon = self.icon
+-- function ActionButton_ApplyCooldown(normalCooldown, cooldownInfo, chargeCooldown, chargeInfo, lossOfControlCooldown, lossOfControlInfo)
+if ActionButton_ApplyCooldown then
+	function CooldownSweep:UpdateCooldown()
+		ActionButton_ApplyCooldown(
+			-- Regular
+			self.cooldown, {
+				startTime = self.start,
+				duration = self.duration,
+				modRate = self.modRate,
+				isEnabled = true,
+			}, 
+			-- Charges
+			self.cooldown2, {
+				maxCharges = self.maxCharges or 0,
+				currentCharges = self.charges or 0,
+				cooldownStartTime = self.chargeStart or 0,
+				cooldownDuration = self.chargeDur or 0,
+				chargeModRate = self.modRate
+			},
+			-- Loss of control
+			nil, {
+				startTime = 0,
+				duration = 0,
+			})
+	end
+else
+	function CooldownSweep:UpdateCooldown()
+		local cd = self.cooldown
+		local cd2 = self.cooldown2
 
-	local duration = self.duration
+		local duration = self.duration
 
+		local mainStart, mainDuration
+		local otherStart, otherDuration = 0, 0
 
-	local mainStart, mainDuration
-	local otherStart, otherDuration = 0, 0
-
-	-- can't show charges as the primary if charges are secret
-	if not issecretvalue(self.charges) and self.maxCharges ~= 0 and self.charges == 0 then
-		mainStart, mainDuration = self.chargeStart, self.chargeDur
-	else
-		mainStart, mainDuration = self.start, duration
-		-- if charges are secret, assume they exist and display them.
-		if issecretvalue(self.charges) or self.charges ~= self.maxCharges then
-			otherStart, otherDuration = self.chargeStart, self.chargeDur
+		-- can't show charges as the primary if charges are secret
+		if not issecretvalue(self.charges) and self.maxCharges ~= 0 and self.charges == 0 then
+			mainStart, mainDuration = self.chargeStart, self.chargeDur
+		else
+			mainStart, mainDuration = self.start, duration
+			-- if charges are secret, assume they exist and display them.
+			if issecretvalue(self.charges) or self.charges ~= self.maxCharges then
+				otherStart, otherDuration = self.chargeStart, self.chargeDur
+			end
 		end
-	end
 
-	if issecretvalue(mainDuration) or mainDuration > 0 then
-		cd:SetCooldown(mainStart, mainDuration, self.modRate)
-	else
-		cd:SetCooldown(0, 0)
-	end
+		if issecretvalue(mainDuration) or mainDuration > 0 then
+			cd:SetCooldown(mainStart, mainDuration, self.modRate)
+		else
+			cd:SetCooldown(0, 0)
+		end
 
-	-- Handle charges of spells that aren't completely depleted.
-	local cd2 = self.cooldown2
-	if issecretvalue(otherDuration) or otherDuration > 0 then
-		cd2:SetCooldown(otherStart, otherDuration, self.modRate)
-	else
-		cd2:SetCooldown(0, 0)
+		-- Handle charges of spells that aren't completely depleted.
+		if issecretvalue(otherDuration) or otherDuration > 0 then
+			cd2:SetCooldown(otherStart, otherDuration, self.modRate)
+		else
+			cd2:SetCooldown(0, 0)
+		end
 	end
 end
 
-function CooldownSweep:DURATION(icon, start, duration, modRate)
-	if issecretvalue(duration) or issecretvalue(self.duration) then
+function CooldownSweep:DURATION(icon, start, duration, modRate, durObj)
+	if issecretvalue(duration) or issecretvalue(self.duration) or issecretvalue(self.modRate) then
+		if durObj and durObj.isOnGCD and not self.ClockGCD then
+			start, duration = 0, 0
+		end
+
 		self.start = start
 		self.duration = duration
 		self.modRate = modRate
