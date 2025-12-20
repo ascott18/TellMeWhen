@@ -196,7 +196,7 @@ if TMW.wowMajor >= 12 then
 					charges = emptyTable
 				end
 
-				inrange, CD = true, nil
+				inrange = true
 				if RangeCheck then
 					inrange = IsSpellInRange(iName, "target")
 					if inrange == nil then
@@ -218,12 +218,21 @@ if TMW.wowMajor >= 12 then
 				else
 					usable = activationOverlayActive or usable
 				end
-				if usable and not CD and not noMana and inrange then --usable
+				if usable and not noMana and inrange then --usable
 					local durObj = C_Spell.GetSpellCooldownDuration(iName)
 					durObj.isOnGCD = cooldown.isOnGCD
 
+					local state = STATE_USABLE
+					if not cooldown.isOnGCD then
+						state = {
+							secretBool = durObj:IsZero(),
+							trueState = icon.States[STATE_USABLE],
+							falseState = icon.States[STATE_UNUSABLE]
+						}
+					end
+
 					icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
-						STATE_USABLE,
+						state,
 						spellTextureCache[iName],
 						cooldown.startTime, cooldown.duration, cooldown.modRate, durObj,
 						charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,

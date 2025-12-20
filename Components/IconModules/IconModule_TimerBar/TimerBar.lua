@@ -361,9 +361,9 @@ function TimerBar:SetCooldown(start, duration, durObj, chargeStart, chargeDur)
 end
 
 function TimerBar:SetColors(startColor, halfColor, completeColor)
-	startColor    = startColor and TMW:StringToCachedRGBATable(startColor)
-	halfColor     = halfColor and TMW:StringToCachedRGBATable(halfColor)
-	completeColor = completeColor and TMW:StringToCachedRGBATable(completeColor)
+	startColor    = startColor and TMW:StringToCachedColorMixin(startColor)
+	halfColor     = halfColor and TMW:StringToCachedColorMixin(halfColor)
+	completeColor = completeColor and TMW:StringToCachedColorMixin(completeColor)
 
 	self.startColor    = startColor
 	self.halfColor     = halfColor
@@ -372,9 +372,9 @@ function TimerBar:SetColors(startColor, halfColor, completeColor)
 	if C_CurveUtil then
 		local curve = C_CurveUtil.CreateColorCurve()
 		curve:SetType(Enum.LuaCurveType.Linear)
-		curve:AddPoint(0, CreateColor(startColor.r, startColor.g, startColor.b, startColor.a))
-		curve:AddPoint(0.5, CreateColor(halfColor.r, halfColor.g, halfColor.b, halfColor.a))
-		curve:AddPoint(1, CreateColor(completeColor.r, completeColor.g, completeColor.b, completeColor.a))
+		curve:AddPoint(0, startColor)
+		curve:AddPoint(0.5, halfColor)
+		curve:AddPoint(1, completeColor)
 		self.colorCurve = curve
 	end
 end

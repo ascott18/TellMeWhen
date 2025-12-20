@@ -72,10 +72,44 @@ local COLOR_UNLOCKED = {
 }
 function Texture_Colored:STATE(icon, stateData)
 	local color
-	if not TMW.Locked or not stateData then
+	if not TMW.Locked then
 		color = "ffffffff"
 	else
 		color = stateData.Color or "ffffffff"
+	end
+
+	if stateData.secretBool ~= nil then
+		local trueC = TMW:StringToCachedColorMixin(stateData.trueState.Color)
+		local falseC = TMW:StringToCachedColorMixin(stateData.falseState.Color)
+		self.texture:SetVertexColorFromBoolean(stateData.secretBool, trueC, falseC)
+
+		if trueC.flags.desaturate and falseC.flags.desaturate then
+			self.texture:SetDesaturated(true)
+		elseif trueC.flags.desaturate then
+			-- Desaturate only when true:
+			self.texture:SetDesaturated(stateData.secretBool)
+		elseif falseC.flags.desaturate then
+			-- TODO: C_CurveUtil.EvaluateColorValueFromBoolean() will be needed to make
+			-- desaturate fully functional here, since we have to invert the bool.
+			-- Combine it with SetDesaturation.
+			-- We can then get rid of all this if/else.
+			self.texture:SetDesaturated(false)
+		else
+			self.texture:SetDesaturated(false)
+		end
+		
+		if LMB and ColorMSQ then
+			-- This gets set by IconModule_IconContainer_Masque
+			local normaltex = icon.normaltex
+			if normaltex then
+				normaltex:SetVertexColorFromBoolean(stateData.secretBool, trueC, falseC)
+			end
+		end
+
+		-- Can't evaluate texture overrides from secrets.
+		self.texture:SetTexture(icon.attributes.texture)
+
+		return
 	end
 
 	local texture = stateData.Texture

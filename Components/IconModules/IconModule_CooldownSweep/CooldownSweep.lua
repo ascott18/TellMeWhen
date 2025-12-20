@@ -208,7 +208,7 @@ function CooldownSweep:OnNewInstance(icon)
 		end
 	end
 	hooksecurefunc(icon, "SetAlpha", function(icon, alpha)
-		iconShown = alpha > 0 and icon:GetEffectiveAlpha() > 0
+		iconShown = alpha > 0 and icon.group:GetEffectiveAlpha() > 0
 		if not iconShown and blingShown then
 			self.cooldown:SetDrawBling(false)
 		elseif iconShown and not blingShown and self.shouldShowBling then

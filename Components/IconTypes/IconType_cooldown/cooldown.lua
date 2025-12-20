@@ -99,12 +99,7 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["CHOOSENAME_DIALOG"] .. "\r\n\r\n" .. L["CHOOSENAME_DIALOG_PETABILITIES"],
 })
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", TMW.wowMajor >= 12 and {
-	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck", order = 1 },
-	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck", order = 2 },
-	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["DEFAULT"], order = 3, },
-	-- No ability to detect or show STATE_UNUSABLE with secret cooldowns
-} or {
+Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 	[STATE_UNUSABLE_NORANGE] = { text = "|cFFFFff00" .. L["ICONMENU_OORANGE"], requires = "RangeCheck", order = 1 },
 	[STATE_UNUSABLE_NOMANA]  = { text = "|cFFFFff00" .. L["ICONMENU_OOPOWER"], requires = "ManaCheck", order = 2 },
 	[STATE_USABLE]           = { text = "|cFF00FF00" .. L["ICONMENU_USABLE"], order = 3, },
@@ -122,7 +117,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", fun
 			check:SetTexts(L["ICONMENU_MANACHECK"], L["ICONMENU_MANACHECK_DESC"])
 			check:SetSetting("ManaCheck")
 		end,
-		TMW.wowMajor < 12 and function(check)
+		function(check)
 			check:SetTexts(L["ICONMENU_GCDASUNUSABLE"], L["ICONMENU_GCDASUNUSABLE_DESC"])
 			check:SetSetting("GCDAsUnusable")
 		end,
@@ -203,8 +198,8 @@ local SpellCooldown_OnUpdate
 if TMW.wowMajor >= 12 then
 	function SpellCooldown_OnUpdate(icon, time)
 		-- Upvalue things that will be referenced a lot in our loops.
-		local RangeCheck, ManaCheck, NameArray =
-		icon.RangeCheck, icon.ManaCheck, icon.Spells.Array
+		local RangeCheck, ManaCheck, GCDAsUnusable, NameArray =
+		icon.RangeCheck, icon.ManaCheck, icon.GCDAsUnusable, icon.Spells.Array
 
 		local usableAlpha = icon.States[STATE_USABLE].Alpha
 
@@ -232,11 +227,14 @@ if TMW.wowMajor >= 12 then
 					_, noMana = IsUsableSpell(iName)
 				end
 
+				-- TODO: (MIDNIGHT): SPELL_UPDATE_COOLDOWN doesn't fire on GCD end anymore.
+				-- Once 61304 is made non-secret, we're going to have to poll it and fire extra TMW_SPELL_UPDATE_COOLDOWN.
+
 				-- We store all our data in tables here because we need to keep track of both the first
 				-- usable cooldown and the first unusable cooldown found. We can't always determine which we will
 				-- use until we've found one of each. 
 				if
-					inrange and not noMana
+					inrange and not noMana and (not GCDAsUnusable or not cooldown.isOnGCD)
 				then --usable
 					if not usableFound then
 						--wipe(usableData)
@@ -288,9 +286,18 @@ if TMW.wowMajor >= 12 then
 			local durObj = C_Spell.GetSpellCooldownDuration(dataToUse.iName)
 			durObj.isOnGCD = cooldown.isOnGCD
 
+			local state = dataToUse.state
+			if state == STATE_USABLE and not cooldown.isOnGCD then
+				state = {
+					secretBool = durObj:IsZero(),
+					trueState = icon.States[STATE_USABLE],
+					falseState = icon.States[STATE_UNUSABLE]
+				}
+			end
+
 			icon:SetInfo(
 				"state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
-				dataToUse.state,
+				state,
 				spellTextureCache[dataToUse.iName],
 				cooldown.startTime, cooldown.duration, cooldown.modRate, durObj,
 				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,

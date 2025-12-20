@@ -202,6 +202,10 @@ View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, function(Module, ico
 		Module.bar:SetPoint("LEFT", IconContainer.container, "RIGHT", gspv.Padding + inset + iconInset, 0)
 	end
 
+	-- Workaround blizzard having choppy animations on bars with high scale.
+	-- Set the bar's effective scale to exactly align to to screen resolution.
+	Module.bar:SetScale(PixelUtil.GetPixelToUIUnitFactor() / icon:GetEffectiveScale())
+
 	-- We can only query the size of the bar if the icon has had its position set.
 	if icon:GetNumPoints() == 0 or Module.bar:GetWidth() > 0 then
 		Module:Enable()

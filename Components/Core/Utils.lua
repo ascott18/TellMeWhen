@@ -675,20 +675,28 @@ function TMW:RGBAToString(r, g, b, a, flags)
 end
 
 function TMW:StringToRGBA(str)
+	if type(str) == "table" then
+		return str.r, str.g, str.b, str.a, str.flags
+	end
+
 	local a, r, g, b, flagString = str:match("(%x%x)(%x%x)(%x%x)(%x%x)(.*)")
 
 	return tonumber(r, 0x10) / 0xFF, tonumber(g, 0x10) / 0xFF, tonumber(b, 0x10) / 0xFF, tonumber(a, 0x10) / 0xFF, parseFlagString(flagString)
 end
 
 function TMW:StringToCachedRGBATable(str)
-	if type(str) == "table" then
-		return str
-	end
-
 	local r, g, b, a, flags = TMW:StringToRGBA(str)
 	return {r=r,g=g,b=b,a=a, flags=flags}
 end
 TMW:MakeSingleArgFunctionCached(TMW, "StringToCachedRGBATable")
+
+function TMW:StringToCachedColorMixin(str)
+	local r, g, b, a, flags = TMW:StringToRGBA(str)
+	local ret = CreateColor(r, g, b, a)
+	ret.flags = flags or {}
+	return ret
+end
+TMW:MakeSingleArgFunctionCached(TMW, "StringToCachedColorMixin")
 
 
 -- Adapted from https://github.com/mjackson/mjijackson.github.com/blob/master/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript.txt

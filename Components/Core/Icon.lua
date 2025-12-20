@@ -1325,16 +1325,20 @@ TMW.IconStateArbitrator = {
 			-- realAlpha does the same for the alpha. We use it on top of calculatedState in favor of backwards compatibility.
 			local state = attributes[handlerToUse.attribute]
 
-			if not state.Alpha then
-				-- Attempting to catch an elusive bug. Remove this if it doesn't seem to be happening anymore.
+			if state.secretBool ~= nil then
+				icon:SetInfo_INTERNAL("realAlpha; calculatedState", 1, state)
+			else
+				if not state.Alpha then
+					-- Attempting to catch an elusive bug. Remove this if it doesn't seem to be happening anymore.
 
-				-- One case I've seen is doing an undo/redo while TMW is locked. 
-				-- The underlying data on the setting table that gets passed as a state gets nilled out,
-				-- so there may be no value.
-				-- This happens when undoing to a blank icon from a non-blank icon, for example.
-				print("NO ALPHA ON STATE:", handlerToUse.attribute, icon, icon:GetName(), state.Alpha, state)
+					-- One case I've seen is doing an undo/redo while TMW is locked. 
+					-- The underlying data on the setting table that gets passed as a state gets nilled out,
+					-- so there may be no value.
+					-- This happens when undoing to a blank icon from a non-blank icon, for example.
+					print("NO ALPHA ON STATE:", handlerToUse.attribute, icon, icon:GetName(), state.Alpha, state)
+				end
+				icon:SetInfo_INTERNAL("realAlpha; calculatedState", state.Alpha or 0, state)
 			end
-			icon:SetInfo_INTERNAL("realAlpha; calculatedState", state.Alpha or 0, state)
 		end
 	end,
 

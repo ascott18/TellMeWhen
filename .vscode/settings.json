@@ -264,10 +264,13 @@
         "RELOADUI",
         "ReloadUI",
         "MAX_TALENT_TIERS",
-        "LE_EXPANSION_LEVEL_CURRENT"
+        "LE_EXPANSION_LEVEL_CURRENT",
+        "PixelUtil"
     ],
     "cSpell.words": [
         "cooldown",
+        "desaturate",
+        "Desaturation",
         "inrange",
         "issecretvalue"
     ],
