@@ -197,8 +197,6 @@ function TimerBar_BarDisplay:SetupColors(icon, valueColor, unit)
 	end
 
 	if valueColor then
-		-- TODO: add a setting to the value icon type called "use color", and don't ever pass this value color if they disable that setting?
-		-- This will make color overriding much more intuitive, since the icon.TimerBar_EnableColors is labeled as "Override group colors".
 		if type(valueColor) == "table" and #valueColor == 3 then
 			self:SetColors(unpack(valueColor))
 		else

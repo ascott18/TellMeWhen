@@ -35,11 +35,6 @@ TMW.HELP:NewCode("CNDT_UNIT_ONLYONE", 20, false)
 local CNDT = TMW.CNDT -- created in TellMeWhen/conditions.lua
 
 
---TODO: there needs to be a way for condition config to intelligently run a setup on a parent object using the current ConditionSet.
---TODO: try to get rid of all manual calls to LoadConfig (on other TMW modules too), and have these functions only be called from ReloadRequsted.
-
-
-
 ---------- Interface/Data ----------
 function CNDT:LoadConfig(conditionSetName)
 	local ConditionSet

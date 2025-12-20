@@ -1110,7 +1110,6 @@ function Icon.Setup(icon)
 
 	-- Store all of the icon's relevant settings on the icon,
 	-- and nil out any settings that aren't relevant.
-	-- TODO: (really big TODO) get rid of this behavior.
 	for k in pairs(TMW.Icon_Defaults) do
 		if typeData.RelevantSettings[k] then
 			icon[k] = ics[k]

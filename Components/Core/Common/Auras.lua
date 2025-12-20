@@ -66,8 +66,6 @@ data = {
 local data = {}
 Auras.data = data
 
-local blockedUnits = {}
-
 -- Optimization: have specific events for the most common units
 -- to avoid all consumers having to listen to all UNIT_AURA events.
 local dedicatedEventUnits = {
@@ -85,7 +83,8 @@ end
 
 
 if C_Secrets and C_Secrets.HasSecretRestrictions() then
-    -- TODO: WARNING: DOGSHIT. NEED AN EVENT FOR GetRestrictedActionStatus changes
+    local blockedUnits = {}
+    -- TODO: (MIDNIGHT): WARNING: DOGSHIT. NEED AN EVENT FOR GetRestrictedActionStatus changes
     local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
     local blocked = false
     TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()

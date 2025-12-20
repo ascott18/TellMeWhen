@@ -89,7 +89,7 @@ function Texture_Colored:STATE(icon, stateData)
 			-- Desaturate only when true:
 			self.texture:SetDesaturated(stateData.secretBool)
 		elseif falseC.flags.desaturate then
-			-- TODO: C_CurveUtil.EvaluateColorValueFromBoolean() will be needed to make
+			-- TODO: (MIDNIGHT): C_CurveUtil.EvaluateColorValueFromBoolean() will be needed to make
 			-- desaturate fully functional here, since we have to invert the bool.
 			-- Combine it with SetDesaturation.
 			-- We can then get rid of all this if/else.

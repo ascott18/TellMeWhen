@@ -29,8 +29,8 @@ local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 local Auras = TMW.COMMON.Auras
 local GetAuras = Auras.GetAuras
 
--- TODO: Add UI displays that aura stuff (conditions and icon types) only work
--- outside of restrictions
+-- TODO: (MIDNIGHT): Add UI displays that aura stuff (conditions and icon types) only work
+-- outside of restrictions. Clarify these around never-secret auras.
 
 function Env.AuraStacks(unit, name, filter)
 	for i = 1, huge do

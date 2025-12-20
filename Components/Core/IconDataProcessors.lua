@@ -735,7 +735,8 @@ do
 			if icon then
 				local attributes = icon.attributes
 
-				-- TODO: use durOjb to produce a string
+				-- TODO: (MIDNIGHT): use durOjb to produce a string
+				-- "We are adding a new SecondsFormatter Lua object that will allow addons to format secret time values into strings."
 				local modRate = attributes.modRate
 				if issecretvalue(modRate) then return 0 end
 

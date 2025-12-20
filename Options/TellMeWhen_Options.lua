@@ -789,7 +789,6 @@ function IE:Load(isRefresh)
 end
 
 
--- TODO: integrate this with history sets
 function IE:Reset()	
 	IE:SaveSettings() -- this is here just to clear the focus of editboxes, not to actually save things
 	
@@ -3242,7 +3241,6 @@ TMW:NewClass("Config_ColorPicker", "Config_Frame"){
 			return
 		end
 
-		-- TODO: HANDLE ALPHA
 		local h = self.HueSlider:GetValue()
 		local s = self.SaturationSlider:GetValue()
 		local v = self.ValueSlider:GetValue()
@@ -4029,7 +4027,6 @@ IE.RapidSettings = {
 	-- settings that can be changed very rapidly, i.e. via mouse wheel or in a color picker
 	-- consecutive changes of these settings will be ignored by the undo/redo module
 
-	-- TODO: auto register these when they are used by a slider, and kill this table.
 	Size = true,
 	Level = true,
 	Alpha = true,
