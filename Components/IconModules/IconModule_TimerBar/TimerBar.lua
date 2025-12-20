@@ -149,7 +149,7 @@ function TimerBar:UpdateValue(force)
 	local ret = 0
 
 	local Invert = self.Invert
-	local invertColors = self.invertColors --~= Invert
+	local invertColors = self.invertColors
 
 	local value, doTerminate = self:GetValue()
 	local maxValue = self.Max
@@ -169,7 +169,6 @@ function TimerBar:UpdateValue(force)
 
 	if issecretvalue(value) or issecretvalue(maxValue) or durObj then
 		bar:SetValue(value)
-
 		
 		if durObj then
 			local color = invertColors and
@@ -179,8 +178,8 @@ function TimerBar:UpdateValue(force)
 
 			if Invert then
 				-- This is the only way to set the bar to "full" when the duration is zero/expired.
+				self.texture2:SetVertexColor(self.completeColor:GetRGBA())
 				self.texture2:SetAlphaFromBoolean(durObj:IsZero(), 1, 0)
-				self.texture2:SetVertexColor(self.completeColor.r, self.completeColor.g, self.completeColor.b)
 			end
 
 			if bar:GetReverseFill() then
@@ -199,7 +198,7 @@ function TimerBar:UpdateValue(force)
 				end
 			end
 		else
-			-- TODO: Update with C_CurveUtil
+			-- TODO: Update to use curves for non-duration-objects (i.e. values)
 			local co = self.completeColor
 			self.bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
 		end
@@ -239,6 +238,7 @@ function TimerBar:UpdateValue(force)
 				local halfColor = self.halfColor
 				local startColor = self.startColor
 
+				if Invert then invertColors = not invertColors end
 				if invertColors then
 					completeColor, startColor = startColor, completeColor
 				end
