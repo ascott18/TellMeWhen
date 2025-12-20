@@ -197,8 +197,10 @@ function TimerBar:UpdateValue(force)
 					self.texture:SetTexCoord(inversePercent, 1, 0, 1)
 				end
 			end
+		elseif self.valueCurveFunc then
+			local color = self.valueCurveFunc(self.colorCurve)
+			self.texture:SetVertexColor(color:GetRGBA())
 		else
-			-- TODO: Update to use curves for non-duration-objects (i.e. values)
 			local co = self.completeColor
 			self.bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
 		end

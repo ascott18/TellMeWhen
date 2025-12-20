@@ -23,7 +23,7 @@ Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 Type:UsesAttributes("texture")
 
-Type:UsesAttributes("value, maxValue, valueColor")
+Type:UsesAttributes("value, maxValue, valueColor, valueCurveFunc")
 Type:UsesAttributes("state")
 
 local BarColors = {{r=0, g=0, b=1, a=1}, {r=0, g=1, b=1, a=1}, {r=0, g=1, b=0, a=1}}
@@ -45,7 +45,7 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_IconStates", {
 local function LuaValue_OnUpdate(icon)
 	local func = icon.luaFunc
 
-	local value, maxValue = func()
+	local value, maxValue, valueCurveFunc = func()
 	value = tonumber(value)
 	maxValue = tonumber(maxValue)
 
@@ -62,7 +62,7 @@ local function LuaValue_OnUpdate(icon)
 		maxValue = value
 	end
 
-	icon:SetInfo("state; value, maxValue, valueColor", STATE_SUCCEED, value, maxValue, BarColors)
+	icon:SetInfo("state; value, maxValue, valueColor, valueCurveFunc", STATE_SUCCEED, value, maxValue, BarColors, valueCurveFunc)
 end
 
 function Type:Setup(icon)

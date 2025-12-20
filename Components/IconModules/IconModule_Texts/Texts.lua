@@ -218,6 +218,25 @@ TMW:RegisterUpgrade(70010, {
 	end
 })
 
+TMW:RegisterUpgrade(12000002, {
+	-- Value / ValueMax * 100 is now just ValuePercent
+	-- so that it can handle secrets, which requires curve evaluation.
+	icon = function(self, ics)
+		for viewName, settingsPerView in pairs(ics.SettingsPerView) do
+			for displayID, text in pairs(settingsPerView.Texts) do
+				settingsPerView.Texts[displayID] = text
+					:gsub("Value / ValueMax %* 100", "ValuePercent")
+			end
+		end
+	end,
+	textlayout = function(self, settings, GUID)
+		for i, displaySettings in ipairs(settings) do
+			displaySettings.DefaultText = displaySettings.DefaultText and displaySettings.DefaultText
+				:gsub("Value / ValueMax %* 100", "ValuePercent")
+		end
+	end,
+})
+
 TMW:RegisterUpgrade(60448, {
 	textlayout = function(self, settings, GUID)
 		if not settings.NoEdit then

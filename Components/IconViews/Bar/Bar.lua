@@ -104,11 +104,11 @@ TMW:RegisterCallback("TMW_CONFIG_ICON_TYPE_CHANGED", function(event, icon, type,
 		local layout = TMW.TEXT:GetTextLayoutForIcon(icon)
 
 		if layout == "bar1" or layout == "bar2" then
-			icspv.Texts[1] = "[(Value / ValueMax * 100):Round:Percent]"
+			icspv.Texts[1] = "[ValuePercent:Round:Percent]"
 			icspv.Texts[2] = "[Value:Short \"/\" ValueMax:Short]"
 		end
 	elseif TMW.Types[oldType].barIsValue and not TMW.Types[type].barIsValue then
-		if icspv.Texts[1] == "[(Value / ValueMax * 100):Round:Percent]" then
+		if icspv.Texts[1] == "[ValuePercent:Round:Percent]" then
 			icspv.Texts[1] = nil
 		end
 		if icspv.Texts[2] == "[Value:Short \"/\" ValueMax:Short]" then

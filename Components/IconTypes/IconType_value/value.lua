@@ -20,6 +20,8 @@ local UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoint
 
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
+local UnitHealthPercent = UnitHealthPercent
+local UnitPowerPercent = UnitPowerPercent
 
 local pairs
 	= pairs  
@@ -27,6 +29,17 @@ local pairs
 local _, pclass = UnitClass("Player")
 local GetSpellTexture = TMW.GetSpellTexture
 
+local getHealthCurveFunc = TMW:MakeSingleArgFunctionCached(function(unit)
+	return function(curve)
+		return UnitHealthPercent(unit, true, curve)
+	end
+end)
+
+local getPowerCurveFunc = TMW:MakeNArgFunctionCached(2, function(unit, powerType)
+	return function(curve)
+		return UnitPowerPercent(unit, powerType, true, curve)
+	end
+end)
 
 
 local Type = TMW.Classes.IconType:New("value")
@@ -226,32 +239,40 @@ local function Value_OnUpdate(icon, time)
 		-- is known by TMW.UNITS to definitely exist.
 		if icon.UnitSet:UnitExists(unit) then
 
-			local value, maxValue, valueColor
+			local value, maxValue, valueColor, valueCurveFunc
 			if PowerType == -1 then
 				value, maxValue, valueColor = UnitHealth(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
+				if TMW.wowMajor >= 12 then
+					valueCurveFunc = getHealthCurveFunc(unit)
+				end
 			elseif PowerType == -3 then
 				value, maxValue, valueColor = UnitStagger(unit) or 0, UnitHealthMax(unit), PowerBarColor[PowerType]
 			elseif comboPointsPerTarget and PowerType == Enum.PowerType.ComboPoints then
 				-- combo points
 				value, maxValue, valueColor = GetComboPoints("player", unit), MAX_COMBO_POINTS, PowerBarColor[PowerType]
 			else
-				if PowerType == -2 then
-					PowerType = UnitPowerType(unit)
+				local pt = PowerType
+				if pt == -2 then
+					pt = UnitPowerType(unit)
 				end
-				if PowerType == Enum.PowerType.ComboPoints then
+				if pt == Enum.PowerType.ComboPoints then
 					unit = "player"
 				end
 				
-				value, maxValue, valueColor = UnitPower(unit, PowerType, ValueFragments), UnitPowerMax(unit, PowerType, ValueFragments), PowerBarColor[PowerType]
+				value, maxValue, valueColor = UnitPower(unit, pt, ValueFragments), UnitPowerMax(unit, pt, ValueFragments), PowerBarColor[pt]
 
 				if ValueFragments then
-					local mod = UnitPowerDisplayMod(PowerType)
+					local mod = UnitPowerDisplayMod(pt)
 					value = value / mod
 					maxValue = maxValue / mod
 				end
+
+				if TMW.wowMajor >= 12 then
+					valueCurveFunc = getPowerCurveFunc(unit, pt)
+				end
 			end
 
-			if not icon:YieldInfo(true, unit, value, maxValue, valueColor) then
+			if not icon:YieldInfo(true, unit, value, maxValue, valueColor, valueCurveFunc) then
 				return
 			end
 		end
@@ -260,11 +281,11 @@ local function Value_OnUpdate(icon, time)
 	icon:YieldInfo(false)
 end
 
-function Type:HandleYieldedInfo(icon, iconToSet, unit, value, maxValue, valueColor)
+function Type:HandleYieldedInfo(icon, iconToSet, unit, value, maxValue, valueColor, valueCurveFunc)
 	if unit then
-		iconToSet:SetInfo("state; value, maxValue, valueColor; unit, GUID",
+		iconToSet:SetInfo("state; value, maxValue, valueColor, valueCurveFunc; unit, GUID",
 			STATE_UNITFOUND,
-			value, maxValue, valueColor,
+			value, maxValue, valueColor, valueCurveFunc,
 			unit, nil
 		)
 	else

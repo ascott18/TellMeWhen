@@ -80,8 +80,9 @@ if TMW.wowMajor >= 12 then
 		return GetValue_Base(self)
 	end
 
-	function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
-		if type(value) ~= 'nil' and type(maxValue) ~= 'nil' then
+	function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor, valueCurveFunc)
+		self.valueCurveFunc = valueCurveFunc
+		if value ~= nil and maxValue ~= nil then
 			self.duration = nil
 			self.start = nil
 			self.value = value

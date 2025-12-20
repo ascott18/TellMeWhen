@@ -815,10 +815,10 @@ end
 
 -- VALUE: "value, maxValue, valueColor"
 do
-	local Processor = TMW.Classes.IconDataProcessor:New("VALUE", "value, maxValue, valueColor")
+	local Processor = TMW.Classes.IconDataProcessor:New("VALUE", "value, maxValue, valueColor, valueCurveFunc", { "value, maxValue, valueColor" })
 
 	function Processor:CompileFunctionSegment(t)
-		-- GLOBALS: value, maxValue, valueColor
+		-- GLOBALS: value, maxValue, valueColor, valueCurveFunc
 		t[#t+1] = [[
 		
 		if 
@@ -826,14 +826,16 @@ do
 			issecretvalue(attributes.value) or 
 			attributes.value ~= value or 
 			attributes.maxValue ~= maxValue or 
-			attributes.valueColor ~= valueColor 
+			attributes.valueColor ~= valueColor or
+			attributes.valueCurveFunc ~= valueCurveFunc
 		then
 
 			attributes.value = value
 			attributes.maxValue = maxValue
 			attributes.valueColor = valueColor
+			attributes.valueCurveFunc = valueCurveFunc
 			
-			TMW:Fire(VALUE.changedEvent, icon, value, maxValue, valueColor)
+			TMW:Fire(VALUE.changedEvent, icon, value, maxValue, valueColor, valueCurveFunc)
 			doFireIconUpdated = true
 		end
 		--]]
@@ -881,7 +883,7 @@ do
 			local value = icon.attributes.value
 
 			if issecretvalue(value) then 
-				if type(value) == 'nil' then return 0 end
+				if value == nil then return 0 end
 				return value 
 			end
 
@@ -905,7 +907,7 @@ do
 			local value = icon.attributes.maxValue
 
 			if issecretvalue(value) then 
-				if type(value) == 'nil' then return 0 end
+				if value == nil then return 0 end
 				return value 
 			end
 
@@ -918,6 +920,41 @@ do
 		ret = "number",
 		doc = L["DT_DOC_ValueMax"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
 		example = '[ValueMax] => "312856"; [ValueMax(icon="TMW:icon:1I7MnrXDCz8T")] => "3"',
+		category = L["ICON"],
+	})
+
+	Processor:RegisterDogTag("TMW", "ValuePercent", {
+		code = function(icon)
+			icon = TMW.GUIDToOwner[icon]
+			if not icon then return 0 end
+			
+			local valueCurveFunc = icon.attributes.valueCurveFunc
+			if valueCurveFunc then
+				return valueCurveFunc(CurveConstants.ScaleTo100)
+			end
+
+			local value = icon.attributes.value
+			local maxValue = icon.attributes.maxValue
+
+			if 
+				issecretvalue(value) or
+				issecretvalue(maxValue) or
+				not value or
+				not maxValue or
+				maxValue == 0
+			then
+				return 0
+			end
+
+			return value / maxValue * 100
+		end,
+		arg = {
+			'icon', 'string', '@req',
+		},
+		events = TMW:CreateDogTagEventString("VALUE"),
+		ret = "number",
+		doc = L["DT_DOC_ValuePercent"] .. "\r\n \r\n" .. L["DT_INSERTGUID_GENERIC_DESC"],
+		example = '[ValuePercent] => "82.5"; [ValuePercent(icon="TMW:icon:1I7MnrXDCz8T")] => "66.7"',
 		category = L["ICON"],
 	})
 end

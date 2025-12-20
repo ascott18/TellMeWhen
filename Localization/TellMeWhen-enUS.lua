@@ -2031,6 +2031,7 @@ L["DT_DOC_Unit"] = "Returns the unit or the name of the unit that the icon is ch
 L["DT_DOC_PreviousUnit"] = "Returns the unit or the name of the unit that the icon is checked prior to the current unit. Best use in conjunction with the [Name] tag."
 L["DT_DOC_Value"] = "Returns the numerical value that the icon is displaying. This is only used by a small number of icon types."
 L["DT_DOC_ValueMax"] = "Returns the maximum of the numerical value that the icon is displaying. This is only used by a small number of icon types."
+L["DT_DOC_ValuePercent"] = "Returns the percentage (0-100) of the numerical value that the icon is displaying. This is only used by a small number of icon types."
 
 L["DT_INSERTGUID_TOOLTIP"] = "|cff7fffffShift-click|r to insert this icon's identifier into a DogTag."
 L["DT_INSERTGUID_GENERIC_DESC"] = [[If you would like one icon to display information about another, |cff7fffffShift-click|r that icon to insert its unique identifier that you can pass as the tag's "icon" parameter.]]
@@ -3024,6 +3025,8 @@ The Lua code must be in the form of a function body that returns two values: the
 
 |cfffffffflocal lat = select(4, GetNetStats())|r
 |cffffffffreturn lat, 1000|r
+
+Optionally, you can return a third value: a function for interpolating secret values. This is a function with the signature |cfffffffffunction(curveConstant) -> LuaCurveEvaluatedResult|r, and will typically be a wrapper around APIs like UnitHealthPercent or UnitPowerPercent.
 
 If the function did not return two numeric values (or a Lua syntax error is encountered), the Icon will be displayed as set in "Unusable result".
 If more help is needed (but not help about how to write Lua code), try the TMW Discord. For help on how to write Lua, go to the internet.]]
