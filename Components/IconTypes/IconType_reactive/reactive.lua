@@ -351,7 +351,7 @@ else
 					usable = activationOverlayActive or usable
 				end
 				if usable and not CD and not noMana and inrange then --usable
-					icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+					icon:SetInfo("state; texture; start, duration, modRate; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
 						STATE_USABLE,
 						spellTextureCache[iName],
 						cooldown.startTime, cooldown.duration, cooldown.modRate,
