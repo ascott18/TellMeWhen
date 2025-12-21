@@ -4,26 +4,9 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v12.0.0
-* Experimental WoW Midnight support. 
+* WoW Midnight support. 
 * Timer bars now choose their start/completion color based on the default shading style of the cooldown sweep for the icon type. This means that buff/debuff and similar icons start at the Completion Color (default green) and move towards the Start Color (default red) as they expire.
-
-### Possible future fixes
-The following known issues may be fixed if Blizzard makes necessary changes:
-
-* Recharging cooldowns show the main cooldown sweep.
-* Can't hide a charge count of zero.
-* Some resource conditions (e.g. secondary resources) will be brought back.
-* GCDs cannot be suppressed
-* Timer bars do not work with restricted values.
-* "Fill bar up" and value-based coloring are not supported by Resource Display icons.
-
-### Guaranteed dead features
-The following items cannot and will not be fixed.
-
-* Buff/debuff icons while in combat or other restricted situations.
-* Conditions that check restricted data (cooldowns, auras, resources, unit identity)
-* Duration/Stack requirements against restricted data
-* Ignore Runes setting for DKs.
+* Bar icons can now have smoothing enabled (most useful on Resource Display icons). Midnight only.
 
 ## v11.2.9
 * TBC Classic Anniversary support.

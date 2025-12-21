@@ -554,7 +554,7 @@ L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"] = [[Check this option to display ElvUI's 
 This setting only affects ElvUI's timer. If you have another addon that provides timers (like OmniCC), you can control those timers with the %q setting. It is not recommended to have both of these settings enabled.]]
 
 
-L["ICONMENU_ALLOWGCD"] = "Allow Global Cooldown"
+L["ICONMENU_ALLOWGCD"] = "Allow GCD"
 L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the global cooldown instead of simply ignoring it.]]
 
 
@@ -566,6 +566,8 @@ L["ICONMENU_INVERTBARS"] = "Fill bar up"
 L["ICONMENU_INVERTCBAR_DESC"] = "Causes the bar to fill up as duration reaches zero."
 L["ICONMENU_INVERTPBAR_DESC"] = "Causes the bar to fill up as power become sufficient."
 L["ICONMENU_INVERTBARDISPLAYBAR_DESC"] = "Causes the bar to fill up as its value reaches zero."
+L["ICONMENU_SMOOTHING"] = "Smoothing"
+L["ICONMENU_SMOOTHING_DESC"] = "Applies smooth interpolation to the bar's value changes."
 L["ICONMENU_OFFS"] = "Offset"
 L["ICONMENU_FAKEMAX"] = "Artificial Maximum"
 L["ICONMENU_FAKEMAX_DESC"] = [[Set an artificial maximum value for the timer.

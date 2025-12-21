@@ -111,6 +111,22 @@
 				</Scripts>
 			</CheckButton>
 			
+			<CheckButton parentKey="Smoothing" inherits="TellMeWhen_CheckTemplate">
+				<!-- Anchoring is handled by DistributeFrameAnchorsLaterally in parent's OnLoad -->
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["ICONMENU_SMOOTHING"], TMW.L["ICONMENU_SMOOTHING_DESC"])
+						self:SetCheckedValues(1, 0)
+						self:SetSetting("BarDisplay_Smoothing")
+						
+						self:CScriptAdd("ReloadRequested", function()
+							self:SetShown(Enum.StatusBarInterpolation ~= nil)
+						end)
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
 			
 			<CheckButton parentKey="EnableColors" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
@@ -184,13 +200,22 @@
 				self.Invert:ConstrainLabel(self.FakeMax)
 
 				self.Reverse:ConstrainLabel(self.BarGCD)
-				self.BarGCD:ConstrainLabel(self, "RIGHT")
+				if Enum.StatusBarInterpolation then
+					self.BarGCD:ConstrainLabel(self.Smoothing)
+					self.Smoothing:ConstrainLabel(self, "RIGHT")
+				else
+					self.BarGCD:ConstrainLabel(self, "RIGHT")
+				end
 
 				self.EnableColors:ConstrainLabel(self.ClassColor)
 				self.ClassColor:ConstrainLabel(self, "RIGHT")
 
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Invert, self.FakeMax)
-				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Reverse, self.BarGCD)
+				if Enum.StatusBarInterpolation then
+					TMW.IE:DistributeFrameAnchorsLaterally(self, 3, self.Reverse, self.BarGCD, self.Smoothing)
+				else
+					TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Reverse, self.BarGCD)
+				end
 				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.EnableColors, self.ClassColor)
 			</OnLoad>
 		</Scripts>

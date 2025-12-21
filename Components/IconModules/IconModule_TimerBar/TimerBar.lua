@@ -168,7 +168,7 @@ function TimerBar:UpdateValue(force)
 	local durObj = self.durObj
 
 	if issecretvalue(value) or issecretvalue(maxValue) or durObj then
-		bar:SetValue(value)
+		bar:SetValue(value, self.Smoothing)
 		
 		if durObj then
 			local color = invertColors and
@@ -214,7 +214,7 @@ function TimerBar:UpdateValue(force)
 
 		if force or value ~= self.__value then
 			local bar = self.bar
-			bar:SetValue(value)
+			bar:SetValue(value, self.Smoothing)
 
 			if abs(self.__oldPercent - percent) > 0.02 then
 				-- If the percentage of the bar changed by more than 2%, force an instant redraw of the texture.

@@ -1844,6 +1844,9 @@ TMW:NewClass("Config_Button", "Button", "Config_Frame"){
 }
 
 TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
+	checkedValue = true,
+	uncheckedValue = false,
+
 	-- Constructor
 	OnNewInstance_CheckButton = function(self)
 		self:SetMotionScriptsWhileDisabled(true)
@@ -1866,6 +1869,10 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 		self.text:SetText(label)
 	end,
 
+	SetCheckedValues = function(self, checkedValue, uncheckedValue)
+		self.checkedValue = checkedValue
+		self.uncheckedValue = uncheckedValue
+	end,
 
 	SetSetting = function(self, key, value)
 		self.setting = key
@@ -1881,7 +1888,7 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 
 		if settings and self.setting then
 			if self.value == nil then
-				settings[self.setting] = checked
+				settings[self.setting] = checked and self.checkedValue or self.uncheckedValue
 			else
 				settings[self.setting] = self.value
 				self:SetChecked(true)
@@ -1898,7 +1905,7 @@ TMW:NewClass("Config_CheckButton", "CheckButton", "Config_Frame"){
 			if self.value ~= nil then
 				self:SetChecked(settings[self.setting] == self.value)
 			else
-				self:SetChecked(settings[self.setting])
+				self:SetChecked(settings[self.setting] == self.checkedValue)
 			end
 		end
 	end,

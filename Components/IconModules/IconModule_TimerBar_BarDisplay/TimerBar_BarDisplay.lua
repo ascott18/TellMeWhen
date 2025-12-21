@@ -27,6 +27,7 @@ TimerBar_BarDisplay:RegisterIconDefaults{
 	BarDisplay_BarGCD			= false,
 	BarDisplay_ClassColor		= false,
 	BarDisplay_FakeMax			= 0,
+	BarDisplay_Smoothing		= 0,
 }
 
 TMW:RegisterUpgrade(80006, {
@@ -217,6 +218,7 @@ end
 
 function TimerBar_BarDisplay:SetupForIcon(sourceIcon)
 	self.Invert = sourceIcon.BarDisplay_Invert
+	self.Smoothing = sourceIcon.BarDisplay_Smoothing
 	
 	self.BarGCD = sourceIcon.BarDisplay_BarGCD
 	if sourceIcon.typeData.hasNoGCD then

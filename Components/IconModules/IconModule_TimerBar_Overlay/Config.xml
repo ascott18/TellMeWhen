@@ -112,7 +112,7 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
-				self:SetTitle(TMW.L["CONFIGPANEL_CBAR_HEADER"], true)
+				self:SetTitle(TMW.L["CONFIGPANEL_CBAR_HEADER"])
 				
 				self.ShowCBar:ConstrainLabel(self.InvertCBar)
 				self.InvertCBar:ConstrainLabel(self.CBarOffs)
