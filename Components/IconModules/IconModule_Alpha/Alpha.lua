@@ -234,9 +234,9 @@ function Alpha:CALCULATEDSTATE(icon, state)
 	local realAlpha = state.Alpha
 	if not self.FadeHandlers[1] then
 		icon:SetAlpha(self.FakeHidden and 0 or realAlpha)
+	else
+		icon:SetAlpha(realAlpha)
 	end
-	
-	icon:SetAlpha(realAlpha)
 	
 end
 
