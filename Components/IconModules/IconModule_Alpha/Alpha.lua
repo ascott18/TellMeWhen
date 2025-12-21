@@ -226,18 +226,19 @@ function Alpha:CALCULATEDSTATE(icon, state)
 		self.actualAlphaAtLastChange = icon:GetAlpha()
 	end
 
+	if self.FakeHidden then
+		icon:SetAlpha(0)
+		return
+	end
+
 	if state.secretBool ~= nil then
 		icon:SetAlphaFromBoolean(state.secretBool, state.trueState.Alpha, state.falseState.Alpha)
 		return
 	end
 	
-	local realAlpha = state.Alpha
 	if not self.FadeHandlers[1] then
-		icon:SetAlpha(self.FakeHidden and 0 or realAlpha)
-	else
-		icon:SetAlpha(realAlpha)
+		icon:SetAlpha(state.Alpha)
 	end
-	
 end
 
 Alpha:SetDataListener("CALCULATEDSTATE")
