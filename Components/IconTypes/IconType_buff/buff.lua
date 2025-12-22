@@ -15,7 +15,6 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local issecretvalue = TMW.issecretvalue
 local tonumber, pairs, type, format, select =
 	  tonumber, pairs, type, format, select
 
@@ -33,7 +32,8 @@ local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
 
-local clientHasSecrets = false
+local issecretvalue = TMW.issecretvalue
+local clientHasSecrets = C_Secrets and C_Secrets.HasSecretRestrictions()
 
 local empty = {}
 
@@ -100,8 +100,16 @@ Type:RegisterIconDefaults{
 	-- Hide the icon if TMW's unit system left icon.Units empty.
 	-- This can happen, for example, if checking only raid units while not in a raid.
 	HideIfNoUnits			= false,
+
+	-- Hide the icon while auras are secret.
+	HideWhileSecret			= false,
 }
 
+
+
+if clientHasSecrets then
+	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
+end
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	OnSetup = function(self, panelInfo, supplementalData)
@@ -168,6 +176,10 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		function(check)
 			check:SetTexts(L["ICONMENU_HIDENOUNITS"], L["ICONMENU_HIDENOUNITS_DESC"])
 			check:SetSetting("HideIfNoUnits")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_HIDEWHILESECRET"], L["ICONMENU_HIDEWHILESECRET_DESC"])
+			check:SetSetting("HideWhileSecret")
 		end,
 	})
 
@@ -243,6 +255,14 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 	self.ShowTTText:SetPoint("TOPLEFT", self.Stealable, "BOTTOMLEFT", 4, 0)
 	self.ShowTTText:SetPoint("RIGHT", -7, 0)
 	self.HideIfNoUnits:ConstrainLabel(self.ShowTTText)
+	
+	if clientHasSecrets then
+		self.HideWhileSecret:ClearAllPoints()
+		self.HideWhileSecret:SetPoint("TOPLEFT", self.HideIfNoUnits, "BOTTOMLEFT", 0, 0)
+		self:AdjustHeight()
+	else
+		self.HideWhileSecret:Hide()
+	end
 end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
@@ -331,6 +351,12 @@ end
 
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
+	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+		-- Force hide icon
+		icon:YieldInfo(false, nil, "_secrets")
+		return
+	end
+
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, Hash, Filter, Filterh, DurationSort, StackSort
 	= icon.Units, icon.Spells.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
@@ -434,6 +460,12 @@ local function Buff_OnUpdate(icon, time)
 end
 
 local function Buff_OnUpdate_Packed(icon, time)
+	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+		-- Force hide icon
+		icon:YieldInfo(false, nil, "_secrets")
+		return
+	end
+
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, SpellsArray, DurationSort, StackSort, KindKey
 	    = icon.Units, icon.Spells.Array, icon.Sort, icon.StackSort, icon.KindKey
@@ -514,7 +546,12 @@ local function Buff_OnUpdate_Packed(icon, time)
 end
 
 local function Buff_OnUpdate_Controller(icon, time)
-	
+	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+		-- Force hide icon
+		icon:YieldInfo(false, nil, "_secrets")
+		return
+	end
+
 	-- Upvalue things that will be used in our loops.
 	local Units, NameFirst, Hash, Filter, Filterh
 	= icon.Units, icon.Spells.First, icon.Spells.Hash, icon.Filter, icon.Filterh
@@ -582,7 +619,12 @@ local function auraInstanceCompare(a,b)
 end
 local binaryInsert = TMW.binaryInsert
 local function Buff_OnUpdate_Controller_Packed(icon, time)
-	
+	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+		-- Force hide icon
+		icon:YieldInfo(false, nil, "_secrets")
+		return
+	end
+
 	-- Upvalue things that will be used in our loops.
 	local Units, NameFirst, SpellsArray, KindKey
 	= icon.Units, icon.Spells.First, icon.Spells.Array, icon.KindKey
@@ -595,7 +637,7 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 		-- is known by TMW.UNITS to definitely exist.
 		if icon.UnitSet:UnitExists(unit) then
 			local auras = GetAuras(unit)
-			local lookup, instances = auras.lookup, auras.instances
+			local instances = auras.instances
 
 			if NameFirst == '' then
 				-- I don't feel bad about allocation here because this OnUpdate
@@ -760,40 +802,6 @@ local aurasWithNoSourceReported = {
 	nil,	-- Terminate with nil to prevent all Warsong's return values from filling the table
 }
 
-if C_Secrets and C_Secrets.HasSecretRestrictions() then
-	clientHasSecrets = true
-	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
-
-	local function wrapUpdate(update)
-		return function(icon, time)
-			if C_Secrets.ShouldAurasBeSecret() then
-				if icon.isAllSecrets == nil then
-					local SpellsArray = icon.Spells.Array
-					local len = #SpellsArray
-					local secrets = 0
-					for i = 1, len do
-						local spell = SpellsArray[i]
-						if C_Secrets.ShouldSpellAuraBeSecret(spell) then
-							secrets = secrets + 1
-						end
-					end
-					icon.isAllSecrets = len > 0 and len == secrets
-				end
-				if icon.isAllSecrets then
-					-- Force hide icon
-					icon:YieldInfo(false, nil, "_secrets")
-					return
-				end
-			end
-			return update(icon, time)
-		end
-	end
-	Buff_OnUpdate = wrapUpdate(Buff_OnUpdate)
-	Buff_OnUpdate_Packed = wrapUpdate(Buff_OnUpdate_Packed)
-	Buff_OnUpdate_Controller = wrapUpdate(Buff_OnUpdate_Controller)
-	Buff_OnUpdate_Controller_Packed = wrapUpdate(Buff_OnUpdate_Controller_Packed)
-end
-
 -- This IDP is used to hold the source of the aura being repoted by the icon. Used by the [AuraSource] DogTag.
 local Processor = TMW.Classes.IconDataProcessor:New("BUFF_SOURCEUNIT", "auraSourceUnit, auraSourceGUID")
 function Processor:CompileFunctionSegment(t)
@@ -858,7 +866,9 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
-	icon.isAllSecrets = nil
+	if not clientHasSecrets then
+		icon.HideWhileSecret = false
+	end
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 

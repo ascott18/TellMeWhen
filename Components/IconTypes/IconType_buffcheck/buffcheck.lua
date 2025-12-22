@@ -25,6 +25,9 @@ local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
 local empty = {}
 
+local issecretvalue = TMW.issecretvalue
+local clientHasSecrets = C_Secrets and C_Secrets.HasSecretRestrictions()
+
 local Type = TMW.Classes.IconType:New("buffcheck")
 Type.name = L["ICONMENU_BUFFCHECK"]
 Type.desc = L["ICONMENU_BUFFCHECK_DESC"]
@@ -63,8 +66,16 @@ Type:RegisterIconDefaults{
 
 	-- Only check auras casted by the player. Appends "|PLAYER" to the UnitAura filter.
 	OnlyMine				= false,
+
+	-- Hide the icon while auras are secret.
+	HideWhileSecret			= false,
 }
 
+
+
+if clientHasSecrets then
+	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
+end
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = "buffNoDS",
@@ -95,6 +106,11 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffCheckSettings", fu
 		function(check)
 			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
 			check:SetSetting("OnlyMine")
+		end,
+		function(check)
+			check:SetTexts(L["ICONMENU_HIDEWHILESECRET"], L["ICONMENU_HIDEWHILESECRET_DESC"])
+			check:SetSetting("HideWhileSecret")
+			check:SetShown(clientHasSecrets)
 		end,
 	})
 end)
@@ -130,6 +146,11 @@ end
 
 local huge = math.huge
 local function BuffCheck_OnUpdate(icon, time)
+	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+		-- Force hide icon
+		icon:YieldInfo(false, nil)
+		return
+	end
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, Hash, Filter
@@ -156,6 +177,8 @@ local function BuffCheck_OnUpdate(icon, time)
 				if not instance then
 					-- No more auras on the unit. Break spell loop.
 					break
+				elseif issecretvalue(instance.spellId) then
+					-- Skip secret auras
 				elseif Hash[instance.spellId] or Hash[strlowerCache[instance.name]] then
 					foundOnUnit = true
 					local remaining = (instance.expirationTime == 0 and huge) or ((instance.expirationTime - time) / instance.timeMod)
@@ -190,9 +213,13 @@ local function BuffCheck_OnUpdate(icon, time)
 	icon:YieldInfo(false, foundUnit, foundInstance)
 end
 
-local clientHasSecrets = false
 local GetAuras = TMW.COMMON.Auras.GetAuras
 local function BuffCheck_OnUpdate_Packed(icon, time)
+	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+		-- Force hide icon
+		icon:YieldInfo(false, nil)
+		return
+	end
 
 	-- Upvalue things that will be referenced a lot in our loops.
 	local Units, SpellsArray, KindKey
@@ -316,40 +343,11 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	end
 end
 
-if C_Secrets and C_Secrets.HasSecretRestrictions() then
-	clientHasSecrets = true
-	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
-	local function wrapUpdate(update)
-		return function(icon, time)
-			if C_Secrets.ShouldAurasBeSecret() then
-				if icon.isAllSecrets == nil then
-					local SpellsArray = icon.Spells.Array
-					local len = #SpellsArray
-					local secrets = 0
-					for i = 1, len do
-						local spell = SpellsArray[i]
-						if C_Secrets.ShouldSpellAuraBeSecret(spell) then
-							secrets = secrets + 1
-						end
-					end
-					icon.isAllSecrets = len == secrets
-				end
-				if icon.isAllSecrets then
-					-- Force hide icon
-					icon:YieldInfo(false, nil)
-					return
-					end
-				end
-				return update(icon, time)
-			end
-	end
-	BuffCheck_OnUpdate = wrapUpdate(BuffCheck_OnUpdate)
-	BuffCheck_OnUpdate_Packed = wrapUpdate(BuffCheck_OnUpdate_Packed)
-end
-
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
-	icon.isAllSecrets = nil
+	if not clientHasSecrets then
+		icon.HideWhileSecret = false
+	end
 	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
