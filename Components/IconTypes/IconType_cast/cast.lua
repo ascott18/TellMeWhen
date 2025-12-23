@@ -27,7 +27,6 @@ local Type = TMW.Classes.IconType:New("cast")
 LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_CAST"]
 Type.desc = L["ICONMENU_CAST_DESC"]
-Type.obsolete = TMW.wowMajor >= 12
 Type.menuIcon = "Interface\\Icons\\Temp"
 Type.AllowNoName = true
 Type.usePocketWatch = 1
@@ -65,11 +64,12 @@ Type:RegisterIconDefaults{
 	NoPocketwatch			= false,
 }
 
-
+if TMW.wowMajor < 12 then
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	SUGType = "cast",
 })
+end
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 	implementsConditions = true,
@@ -188,14 +188,70 @@ local function Cast_OnUpdate(icon, time)
 	icon:YieldInfo(false)
 end
 
-function Type:HandleYieldedInfo(icon, iconToSet, spell, unit, GUID, texture, start, duration, reverse)
+local function Cast_OnUpdate_Secrets(icon, time)
+	-- Upvalue things that will be referenced a lot in our loops.
+	local Units, Interruptible = icon.Units, icon.Interruptible
+
+	for u = 1, #Units do
+		local unit = Units[u]
+		local GUID = UnitGUID(unit)
+
+		if GUID then
+
+			local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+			local durObj = name and UnitCastingDuration(unit)
+			-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
+			local reverse = false
+
+			-- There is no regular spellcast. Check for a channel.
+			if not name then
+				name, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
+				durObj = name and UnitChannelDuration(unit)
+				-- Channeled casts should reverse the timer sweep behavior.
+				reverse = true
+			end
+
+			if name then
+				-- Times reported by the cast APIs are in milliseconds for some reason.
+				icon.LastTextures[GUID] = iconTexture
+
+				local state
+				if Interruptible then
+					state = {
+						secretBool = notInterruptible,
+						trueState = icon.States[STATE_ABSENTEACH],
+						falseState = icon.States[STATE_PRESENT]
+					}
+				end
+
+				local start = durObj:GetStartTime()
+				local duration = durObj:GetTotalDuration()
+
+				if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse, durObj, state) then
+					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+					return
+				end
+			elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
+				if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
+					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+					return
+				end
+			end
+		end
+	end
+
+	-- Signal the group controller that we are at the end of our data harvesting.
+	icon:YieldInfo(false)
+end
+
+function Type:HandleYieldedInfo(icon, iconToSet, spell, unit, GUID, texture, start, duration, reverse, durObj, state)
 	if spell then
 		-- There was a spellcast or channel present on one of the icon's units.
 		iconToSet:SetInfo(
-			"state; texture; start, duration; reverse; spell; unit, GUID",
-			STATE_PRESENT,
+			"state; texture; start, duration, modRate, durObj; reverse; spell; unit, GUID",
+			state or STATE_PRESENT,
 			texture,
-			start, duration,
+			start, duration, 1, durObj,
 			reverse,
 			spell,
 			unit, GUID
@@ -254,7 +310,7 @@ function Type:Setup(icon)
 		icon:RegisterEvent(icon.UnitSet.event)
 	end
 
-	icon:SetUpdateFunction(Cast_OnUpdate)
+	icon:SetUpdateFunction(TMW.wowMajor >= 12 and Cast_OnUpdate_Secrets or Cast_OnUpdate)
 	icon:Update()
 end
 

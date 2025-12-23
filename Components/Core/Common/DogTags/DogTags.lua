@@ -16,6 +16,7 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+local issecretvalue = TMW.issecretvalue
 
 local DogTag = LibStub("LibDogTag-3.0")
 
@@ -60,10 +61,29 @@ end
 
 TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", DogTag.FireEvent, DogTag)
 
+
+local secondsOptions = {
+    breakpointData = {
+        { breakpoint = 10, abbreviation = "", significandDivisor = 1, fractionDivisor = 1, abbreviationIsGlobal = false },
+        { breakpoint = 0, abbreviation = "", significandDivisor = 0.1, fractionDivisor = 10, abbreviationIsGlobal = false },
+    }
+}
+
+if CreateAbbreviateConfig then
+	-- High perf API
+	secondsOptions = { config = CreateAbbreviateConfig(secondsOptions.breakpointData) }
+end
+
 DogTag:AddTag("TMW", "TMWFormatDuration", {
-	code = TMW:MakeSingleArgFunctionCached(function(seconds)
+	code = function(seconds)
+		
+		-- TODO: (MIDNIGHT): 
+		-- "We are adding a new SecondsFormatter Lua object that will allow addons to format secret time values into strings."
+		-- The following is a rough approximation, but fails to preserve ".0" on a whole numbers.
+		if issecretvalue(seconds) then return AbbreviateNumbers(seconds, secondsOptions) end
+		
 		return TMW:FormatSeconds(seconds, seconds == 0 or abs(seconds) > 10, true)
-	end),
+	end,
 	arg = {
 		'seconds', 'number', '@req',
 	},

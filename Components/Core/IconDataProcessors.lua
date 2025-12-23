@@ -617,7 +617,7 @@ do
 			if icon then
 				local name, checkcase = icon.typeData:FormatSpellForOutput(icon, icon.attributes.spell, link)
 				name = name or ""
-				if checkcase and name ~= "" then
+				if checkcase and not issecretvalue(name) and name ~= "" then
 					name = TMW:RestoreCase(name)
 				end
 				return name
@@ -735,13 +735,15 @@ do
 			if icon then
 				local attributes = icon.attributes
 
-				-- TODO: (MIDNIGHT): use durOjb to produce a string
-				-- "We are adding a new SecondsFormatter Lua object that will allow addons to format secret time values into strings."
+				if attributes.durObj then
+					return attributes.durObj:GetRemainingDuration()
+				end
+
 				local modRate = attributes.modRate
 				if issecretvalue(modRate) then return 0 end
 
 				local chargeDur = attributes.chargeDur
-				if not ignoreCharges and chargeDur and chargeDur > 0 then
+				if not ignoreCharges and chargeDur and not issecretvalue(chargeDur) and chargeDur > 0 then
 
 					local remaining = (chargeDur - (TMW.time - attributes.chargeStart)) / modRate
 					if remaining > 0 then
@@ -750,6 +752,8 @@ do
 				end
 
 				local duration = attributes.duration
+				if issecretvalue(duration) then return 0 end
+				
 				local remaining = (duration - (TMW.time - attributes.start)) / modRate
 				if remaining <= 0 or (not gcd and icon:OnGCD(duration)) then
 					return 0
