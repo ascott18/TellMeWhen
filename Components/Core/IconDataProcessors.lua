@@ -736,6 +736,7 @@ do
 				local attributes = icon.attributes
 
 				if attributes.durObj then
+					if not gcd and attributes.durObj.isOnGCD then return 0 end
 					return attributes.durObj:GetRemainingDuration()
 				end
 
@@ -784,10 +785,14 @@ do
 			if icon then
 				local attributes = icon.attributes
 
+				if attributes.durObj then
+					return attributes.durObj:GetTotalDuration()
+				end
+
 				local duration = attributes.duration
 				
 				local chargeDur = attributes.chargeDur
-				if not ignoreCharges and chargeDur and chargeDur > 0 then
+				if not ignoreCharges and chargeDur and not issecretvalue(chargeDur) and chargeDur > 0 then
 					duration = chargeDur;
 				end
 
