@@ -15,8 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
-local UnitGUID = 
-	  UnitGUID
+local UnitGUID = UnitGUID
+local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellTexture = TMW.GetSpellTexture
@@ -28,7 +28,6 @@ local pGUID = nil -- UnitGUID() returns nil at load time, so we set this later.
 
 
 local Type = TMW.Classes.IconType:New("icd")
-Type.obsolete = not CombatLogGetCurrentEventInfo
 Type.name = L["ICONMENU_ICD"]
 Type.desc = L["ICONMENU_ICD_DESC"]
 Type.menuIcon = GetSpellTexture(28093)
@@ -69,20 +68,29 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_ICDType", function(self)
-	self:SetTitle(TMW.L["ICONMENU_ICDTYPE"])
+	self:SetTitle(L["ICONMENU_ICDTYPE"])
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 1,
 		function(check)
-			check:SetTexts(TMW.L["ICONMENU_ICDBDE"], TMW.L["ICONMENU_ICDAURA_DESC"])
-			check:SetSetting("ICDType", "aura")
-		end,
-		function(check)
-			check:SetTexts(TMW.L["ICONMENU_SPELLCAST_COMPLETE"], TMW.L["ICONMENU_SPELLCAST_COMPLETE_DESC"])
+			check:SetTexts(L["ICONMENU_SPELLCAST_COMPLETE"], L["ICONMENU_SPELLCAST_COMPLETE_DESC"])
 			check:SetSetting("ICDType", "spellcast")
 		end,
 		function(check)
-			check:SetTexts(TMW.L["ICONMENU_SPELLCAST_START"], TMW.L["ICONMENU_SPELLCAST_START_DESC"])
+			check:SetTexts(L["ICONMENU_SPELLCAST_START"], L["ICONMENU_SPELLCAST_START_DESC"])
 			check:SetSetting("ICDType", "caststart")
+		end,
+		function(check)
+			if not CombatLogGetCurrentEventInfo then
+				check:SetTexts(L["ICONMENU_ICDBDE"] .. " (" .. L["ICONMENU_OBSOLETE_SHORT"] .. ")", L["ICONMENU_OBSOLETE_DESC"])
+			else
+				check:SetTexts(L["ICONMENU_ICDBDE"], L["ICONMENU_ICDAURA_DESC"])
+			end
+			check:SetSetting("ICDType", "aura")
+			
+			check:CScriptAdd("ReloadRequested", function()				
+				check:SetShown(CombatLogGetCurrentEventInfo or TMW.CI.ics.ICDType == "aura")
+				check:GetParent():AdjustHeight()
+			end)
 		end,
 	})
 end)
@@ -196,8 +204,13 @@ function Type:Setup(icon)
 	elseif icon.ICDType == "caststart" then
 		icon:RegisterEvent("UNIT_SPELLCAST_START")
 		icon:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-	elseif icon.ICDType == "aura" then
-		icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	elseif icon.ICDType == "aura" and CombatLogGetCurrentEventInfo then
+		if CombatLogGetCurrentEventInfo then
+			icon:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		else
+			icon:SetInfo("texture", 237555)
+			return
+		end
 	end
 	icon:SetScript("OnEvent", ICD_OnEvent)
 

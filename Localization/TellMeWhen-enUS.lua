@@ -390,6 +390,7 @@ L["ICONMENU_VIEWREQ_DESC"] = [[This icon type cannot be used with this group's c
 Change the group's display method or create a new group to use this icon type.]]
 
 L["ICONMENU_OBSOLETE"] = "Obsolete Icon Type"
+L["ICONMENU_OBSOLETE_SHORT"] = "Obsolete/Unsupported"
 L["ICONMENU_OBSOLETE_DESC"] = [[This icon type is not supported in the current version of the game.
 
 Your original settings are preserved here so you can remember what this used to do :(]]

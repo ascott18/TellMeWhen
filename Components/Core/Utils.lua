@@ -1737,6 +1737,12 @@ do	-- TMW:GetParser()
 				-- because somehow for some reason they need GetUnit?
 				Mixin(Parser, GameTooltipDataMixin)
 			end
+
+			-- Ensure all lines get eagerly created.
+			Parser:SetOwner(UIParent, "ANCHOR_NONE")
+			Parser:AddLine("lt1", "rt1")
+			Parser:AddLine("lt2", "rt2")
+			Parser:AddLine("lt3", "rt3")
 		end
 		return 
 			Parser, 
