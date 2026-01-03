@@ -701,13 +701,17 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="TellMeWhen_SecretAurasWarning" inherits="TellMeWhen_TextPanel" virtual="true">
+	<Frame name="TellMeWhen_SecretsWarning" inherits="TellMeWhen_TextPanel" virtual="true">
 		<Scripts>
 			<OnLoad>
 				TMW:CInit(self)
 				
 				self:SetTitle(TMW.L["UIPANEL_SECRETS_DISALLOWED"], true)
-				self.text:SetText(TMW.L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"])
+				
+				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
+					self.text:SetText(panelInfo.supplementalData.text)
+					self:AdjustHeight()
+				end)
 			</OnLoad>
 		</Scripts>
 	</Frame>

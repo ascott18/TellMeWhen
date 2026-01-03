@@ -323,15 +323,24 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 			local data = IconPosition_Sortable.Sorters[settings.Method]
 
 			local title = L["UIPANEL_GROUPSORT_" .. settings.Method]
-			self.Name:SetText(title)
 
 			if data then
 				self.Order:SetText(data[settings.Order] or "<UNKNOWN ORDER>")
+				
+				if data.maybeSecret and TMW.wowMajor >= 12 then
+					title = title .. " " .. TMW:GetRestrictedTString()
+				end
 			else
 				self.Order:SetText("")
 			end
 
-			self:SetTooltip(title, L["UIPANEL_GROUPSORT_" .. settings.Method .. "_DESC"] .. "\r\n\r\n" .. L["UIPANEL_GROUPSORT_ALLDESC"])
+			self.Name:SetText(title)
+			self:SetTooltip(title, 
+				L["UIPANEL_GROUPSORT_" .. settings.Method .. "_DESC"] .. 
+				"\r\n\r\n" .. 
+				L["UIPANEL_GROUPSORT_ALLDESC"] .. 
+				(not data.maybeSecret and "" or "\n\n" .. L["UIPANEL_SECRETS_DISALLOWED_DESC"])
+			)
 		end
 	end,
 }
@@ -401,8 +410,12 @@ function IconPosition_Sortable:AddDropdown()
 			local info = TMW.DD:CreateInfo()
 
 			info.text = L["UIPANEL_GROUPSORT_" .. identifier]
-			info.tooltipTitle = info.text
 			info.tooltipText = L["UIPANEL_GROUPSORT_" .. identifier .. "_DESC"]
+			if data and data.maybeSecret and TMW.wowMajor >= 12 then
+				info.text = info.text .. " " .. TMW:GetRestrictedTString()
+				info.tooltipText = info.tooltipText .. "\n\n" .. L["UIPANEL_SECRETS_DISALLOWED_DESC"]
+			end
+			info.tooltipTitle = info.text
 			info.notCheckable = true
 			info.arg1 = identifier
 			info.arg2 = data

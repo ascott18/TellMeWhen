@@ -108,7 +108,9 @@ Type:RegisterIconDefaults{
 
 
 if clientHasSecrets then
-	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
+	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
+		text = L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] .. "\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"]
+	})
 end
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
@@ -158,7 +160,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			local desc = L["ICONMENU_STEALABLE_DESC"]
 			
 			if clientHasSecrets then
-				name = name .. " |TInterface\\AddOns\\TellMeWhen\\Textures\\restricted.png:14:14:0:0:64:64:4:60:4:60:255:209:0|t"
+				name = name .. " " .. TMW:GetRestrictedTString()
 				desc = desc .. "\n\n" .. L["UIPANEL_SECRETS_DISALLOWED_DESC"]
 			end
 			

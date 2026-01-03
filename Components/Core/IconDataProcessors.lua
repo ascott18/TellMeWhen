@@ -227,6 +227,7 @@ do
 		if IconPosition_Sortable then
 			IconPosition_Sortable:RegisterIconSorter("alpha", {
 				DefaultOrder = -1,
+				maybeSecret = true,
 				[1] = L["UIPANEL_GROUPSORT_alpha_1"],
 				[-1] = L["UIPANEL_GROUPSORT_alpha_-1"],
 			}, function(iconA, iconB, attributesA, attributesB, order)
@@ -238,6 +239,7 @@ do
 
 			IconPosition_Sortable:RegisterIconSorter("shown", {
 				DefaultOrder = -1,
+				maybeSecret = true,
 				[1] = L["UIPANEL_GROUPSORT_shown_1"],
 				[-1] = L["UIPANEL_GROUPSORT_shown_-1"],
 			}, function(iconA, iconB, attributesA, attributesB, order)
@@ -512,14 +514,24 @@ do
 				DefaultOrder = 1,
 				[1] = L["UIPANEL_GROUPSORT_duration_1"],
 				[-1] = L["UIPANEL_GROUPSORT_duration_-1"],
+				maybeSecret = true,
 			}, function(iconA, iconB, attributesA, attributesB, order)
 				local time = TMW.time
 				
 				local durationA = attributesA.duration
 				local durationB = attributesB.duration
 
-				durationA = iconA:OnGCD(durationA) and 0 or ((durationA - (time - attributesA.start)) / attributesA.modRate)
-				durationB = iconB:OnGCD(durationB) and 0 or ((durationB - (time - attributesB.start)) / attributesA.modRate)
+				if issecretvalue(durationA) then
+					durationA = 0
+				else
+					durationA = iconA:OnGCD(durationA) and 0 or ((durationA - (time - attributesA.start)) / attributesA.modRate)
+				end
+				
+				if issecretvalue(durationB) then
+					durationB = 0
+				else
+					durationB = iconB:OnGCD(durationB) and 0 or ((durationB - (time - attributesB.start)) / attributesA.modRate)
+				end
 
 				if durationA ~= durationB then
 					return durationA*order < durationB*order
@@ -530,12 +542,22 @@ do
 				DefaultOrder = 1,
 				[1] = L["UIPANEL_GROUPSORT_start_1"],
 				[-1] = L["UIPANEL_GROUPSORT_start_-1"],
+				maybeSecret = true,
 			}, function(iconA, iconB, attributesA, attributesB, order)
 				local startA = attributesA.start
 				local startB = attributesB.start
 
-				startA = iconA:OnGCD(attributesA.duration) and 0 or startA
-				startB = iconB:OnGCD(attributesB.duration) and 0 or startB
+				if issecretvalue(startA) then
+					startA = 0
+				else
+					startA = iconA:OnGCD(attributesA.duration) and 0 or startA
+				end
+				
+				if issecretvalue(startB) then
+					startB = 0
+				else
+					startB = iconB:OnGCD(attributesB.duration) and 0 or startB
+				end
 
 				if startA ~= startB then
 					return startA*order < startB*order
@@ -863,8 +885,11 @@ do
 				DefaultOrder = -1,
 				[1] = L["UIPANEL_GROUPSORT_value_1"],
 				[-1] = L["UIPANEL_GROUPSORT_value_-1"],
+				maybeSecret = true,
 			}, function(iconA, iconB, attributesA, attributesB, order)
 				local a, b = attributesA.value, attributesB.value
+				if issecretvalue(a) then a = 0 end
+				if issecretvalue(b) then b = 0 end
 				if a ~= b then
 					return (a or 0)*order < (b or 0)*order
 				end
@@ -874,10 +899,20 @@ do
 				DefaultOrder = -1,
 				[1] = L["UIPANEL_GROUPSORT_valuep_1"],
 				[-1] = L["UIPANEL_GROUPSORT_valuep_-1"],
+				maybeSecret = true,
 			}, function(iconA, iconB, attributesA, attributesB, order)
 				
-				local a, b = attributesA.maxValue == 0 and 0 or attributesA.value / attributesA.maxValue,
-				             attributesB.maxValue == 0 and 0 or attributesB.value / attributesB.maxValue
+				local a, b
+				if issecretvalue(attributesA.value) then
+					a = 0
+				else
+					a = attributesA.maxValue == 0 and 0 or attributesA.value / attributesA.maxValue
+				end
+				if issecretvalue(attributesB.value) then
+					b = 0
+				else
+					b = attributesB.maxValue == 0 and 0 or attributesB.value / attributesB.maxValue
+				end
 				if a ~= b then
 					return (a or 0)*order < (b or 0)*order
 				end
@@ -1092,8 +1127,13 @@ do
 				DefaultOrder = -1,
 				[1] = L["UIPANEL_GROUPSORT_stacks_1"],
 				[-1] = L["UIPANEL_GROUPSORT_stacks_-1"],
+				maybeSecret = true,
 			}, function(iconA, iconB, attributesA, attributesB, order)
-				local a, b = attributesA.stack or 0, attributesB.stack or 0
+				local a, b = attributesA.stack, attributesB.stack
+				if issecretvalue(a) then a = 0 end
+				if issecretvalue(b) then b = 0 end
+				a = a or 0
+				b = b or 0
 				if a ~= b then
 					return a*order < b*order
 				end

@@ -74,7 +74,9 @@ Type:RegisterIconDefaults{
 
 
 if clientHasSecrets then
-	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretAurasWarning")
+	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
+		text = L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"]
+	})
 end
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {

@@ -984,16 +984,17 @@ L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"
 L["UIPANEL_TOOLTIP_ONLYINCOMBAT"] = "Check to cause this group to only be shown in combat"
 
 L["UIPANEL_SECRETS_DISALLOWED"] = "Disallowed in Combat"
-L["UIPANEL_SECRETS_DISALLOWED_DESC"] = [[This feature cannot operate on restricted data. 
+L["UIPANEL_SECRETS_DISALLOWED_DESC"] = [[This feature cannot operate on secret data. 
 
-Examples of restricted data include cooldowns and buffs/debuffs while in combat, M+, or PvP. In such situations, the setting or feature will be ignored.]]
-L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"] = [[This condition cannot operate on restricted data. Examples of restricted data include spell cooldowns and buffs/debuffs while in combat, M+, or PvP; or unit identity in instances.
+Examples of secret data include cooldowns and buffs/debuffs while in combat, Mythic+, or PvP. In such situations, the setting or feature will be ignored, or assume a default state.]]
+L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"] = [[This condition cannot operate on secret data. Examples of secret data include spell cooldowns and buffs/debuffs while in combat, Mythic+, or PvP; or unit identity in instances.
 
 In such situations, the data will be assumed to be in a default state (cooldown ready, aura absent, etc).]]
-L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by restricted data. Examples of restricted data include spell cooldowns and buffs/debuffs while in combat, M+, or PvP; or unit identity in instances.]]
-L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[Buffs and debuffs generally cannot be tracked in restricted situations (in combat, Mythic+, or PvP match). When restrictions are active, this icon will be hidden.
+L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by secret data. Examples of secret data include spell cooldowns and buffs/debuffs while in combat, Mythic+, or PvP; or unit identity in instances.]]
+L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[Buffs and debuffs generally cannot be tracked in restricted situations (in combat, Mythic+, or PvP match), except for a small number of spells allowed by Blizzard.
 
-One exception is if this icon is a %s, with %q left blank, which will allow a dynamic set of auras to be displayed.]]
+Enable the %q setting below to hide this icon when auras are secret.]]
+L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is if this icon is a %s, with %q left blank, which will allow a dynamic set of auras to be displayed.]]
 
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"

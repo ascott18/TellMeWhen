@@ -606,6 +606,9 @@ function TMW:FormatSeconds(seconds, skipSmall, keepTrailing)
 	return ret
 end
 
+function TMW:GetRestrictedTString() 
+	return "|TInterface\\AddOns\\TellMeWhen\\Textures\\restricted.png:14:14:0:0:64:64:4:60:4:60:255:209:0|t"
+end
 
 
 
