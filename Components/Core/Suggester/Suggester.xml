@@ -268,7 +268,7 @@
 								end
 							</OnUpdate>
 							<OnClick>
-								TMW:GetModule("SpellCache"):SetNumCachePerFrame(15000)
+								TMW:GetModule("SpellCache"):SetNumCachePerFrame(25000)
 							</OnClick>
 						</Scripts>
 					</Button>

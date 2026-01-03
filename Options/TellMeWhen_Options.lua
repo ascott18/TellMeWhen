@@ -763,7 +763,7 @@ function IE:Load(isRefresh)
 		-- Users aren't going to care about their FPS so much when it gets opened.
 		-- It doesn't do much good to increase this too far - the more cached per frame,
 		-- the slower each frame will be.
-		TMW:GetModule("SpellCache"):SetNumCachePerFrame(3000)
+		TMW:GetModule("SpellCache"):SetNumCachePerFrame(5000)
 
 		IE:Show()
 	end
