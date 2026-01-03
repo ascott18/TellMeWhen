@@ -862,7 +862,7 @@ TMW:RegisterCallback("TMW_CNDT_GROUP_DRAWGROUP", function(event, CndtGroup, cond
 	TMW:TT(CndtGroup.Type, text, tooltip, 1, 1)
 	TMW:TT(CndtGroup.Type.EditBox, text, tooltip, 1, 1)
 	
-	if TMW.wowMajor >= 12 and conditionData and conditionData.maybeSecret then
+	if TMW.clientHasSecrets and conditionData and conditionData.maybeSecret then
 		CndtGroup.Type.RestrictedIcon:Show()
 		CndtGroup.Type.RestrictedIcon:SetWidth(16)
 		CndtGroup.Type:SetWidth(176-16)

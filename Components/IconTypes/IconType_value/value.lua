@@ -15,6 +15,7 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
+local clientHasSecrets = TMW.clientHasSecrets
 local UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
     = UnitPower, UnitPowerMax, UnitPowerType, UnitPowerDisplayMod, GetComboPoints, MAX_COMBO_POINTS
 
@@ -242,7 +243,7 @@ local function Value_OnUpdate(icon, time)
 			local value, maxValue, valueColor, valueCurveFunc
 			if PowerType == -1 then
 				value, maxValue, valueColor = UnitHealth(unit), UnitHealthMax(unit), PowerBarColor[PowerType]
-				if TMW.wowMajor >= 12 then
+				if clientHasSecrets then
 					valueCurveFunc = getHealthCurveFunc(unit)
 				end
 			elseif PowerType == -3 then
@@ -267,7 +268,7 @@ local function Value_OnUpdate(icon, time)
 					maxValue = maxValue / mod
 				end
 
-				if TMW.wowMajor >= 12 then
+				if clientHasSecrets then
 					valueCurveFunc = getPowerCurveFunc(unit, pt)
 				end
 			end

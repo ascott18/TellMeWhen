@@ -141,107 +141,110 @@ local function Cast_OnEvent(icon, event, arg1)
 	end
 end
 
-local function Cast_OnUpdate(icon, time)
+local Cast_OnUpdate
+if TMW.clientHasSecrets then
+	function Cast_OnUpdate_Secrets(icon, time)
+		-- Upvalue things that will be referenced a lot in our loops.
+		local Units, Interruptible = icon.Units, icon.Interruptible
 
-	-- Upvalue things that will be referenced a lot in our loops.
-	local NameFirst, NameStringHash, Units, Interruptible =
-	icon.Spells.First, icon.Spells.StringHash, icon.Units, icon.Interruptible
+		for u = 1, #Units do
+			local unit = Units[u]
+			local GUID = UnitGUID(unit)
 
-	for u = 1, #Units do
-		local unit = Units[u]
-		local GUID = UnitGUID(unit)
+			if GUID then
 
-		if GUID then
+				local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+				local durObj = name and UnitCastingDuration(unit)
+				-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
+				local reverse = false
 
-			local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
-			-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
-			local reverse = false
-
-			-- There is no regular spellcast. Check for a channel.
-			if not name then
-				name, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
-				-- Channeled casts should reverse the timer sweep behavior.
-				reverse = true
-			end
-
-			if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
-				
-				-- Times reported by the cast APIs are in milliseconds for some reason.
-				start, endTime = start/1000, endTime/1000
-				local duration = endTime - start
-				icon.LastTextures[GUID] = iconTexture
-
-				if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse) then
-					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-					return
-				end
-			elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
-				if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
-					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-					return
-				end
-			end
-		end
-	end
-
-	-- Signal the group controller that we are at the end of our data harvesting.
-	icon:YieldInfo(false)
-end
-
-local function Cast_OnUpdate_Secrets(icon, time)
-	-- Upvalue things that will be referenced a lot in our loops.
-	local Units, Interruptible = icon.Units, icon.Interruptible
-
-	for u = 1, #Units do
-		local unit = Units[u]
-		local GUID = UnitGUID(unit)
-
-		if GUID then
-
-			local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
-			local durObj = name and UnitCastingDuration(unit)
-			-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
-			local reverse = false
-
-			-- There is no regular spellcast. Check for a channel.
-			if not name then
-				name, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
-				durObj = name and UnitChannelDuration(unit)
-				-- Channeled casts should reverse the timer sweep behavior.
-				reverse = true
-			end
-
-			if name then
-				-- Times reported by the cast APIs are in milliseconds for some reason.
-				icon.LastTextures[GUID] = iconTexture
-
-				local state
-				if Interruptible then
-					state = {
-						secretBool = notInterruptible,
-						trueState = icon.States[STATE_ABSENTEACH],
-						falseState = icon.States[STATE_PRESENT]
-					}
+				-- There is no regular spellcast. Check for a channel.
+				if not name then
+					name, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
+					durObj = name and UnitChannelDuration(unit)
+					-- Channeled casts should reverse the timer sweep behavior.
+					reverse = true
 				end
 
-				local start = durObj:GetStartTime()
-				local duration = durObj:GetTotalDuration()
+				if name then
+					-- Times reported by the cast APIs are in milliseconds for some reason.
+					icon.LastTextures[GUID] = iconTexture
 
-				if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse, durObj, state) then
-					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-					return
-				end
-			elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
-				if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
-					-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-					return
+					local state
+					if Interruptible then
+						state = {
+							secretBool = notInterruptible,
+							trueState = icon.States[STATE_ABSENTEACH],
+							falseState = icon.States[STATE_PRESENT]
+						}
+					end
+
+					local start = durObj:GetStartTime()
+					local duration = durObj:GetTotalDuration()
+
+					if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse, durObj, state) then
+						-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+						return
+					end
+				elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
+					if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
+						-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+						return
+					end
 				end
 			end
 		end
-	end
 
-	-- Signal the group controller that we are at the end of our data harvesting.
-	icon:YieldInfo(false)
+		-- Signal the group controller that we are at the end of our data harvesting.
+		icon:YieldInfo(false)
+	end
+else
+	function Cast_OnUpdate(icon, time)
+
+		-- Upvalue things that will be referenced a lot in our loops.
+		local NameFirst, NameStringHash, Units, Interruptible =
+		icon.Spells.First, icon.Spells.StringHash, icon.Units, icon.Interruptible
+
+		for u = 1, #Units do
+			local unit = Units[u]
+			local GUID = UnitGUID(unit)
+
+			if GUID then
+
+				local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+				-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
+				local reverse = false
+
+				-- There is no regular spellcast. Check for a channel.
+				if not name then
+					name, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
+					-- Channeled casts should reverse the timer sweep behavior.
+					reverse = true
+				end
+
+				if name and not (notInterruptible and Interruptible) and (NameFirst == "" or NameStringHash[strlowerCache[name]]) then
+					
+					-- Times reported by the cast APIs are in milliseconds for some reason.
+					start, endTime = start/1000, endTime/1000
+					local duration = endTime - start
+					icon.LastTextures[GUID] = iconTexture
+
+					if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse) then
+						-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+						return
+					end
+				elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
+					if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTextures[GUID], 0, 0, false) then
+						-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
+						return
+					end
+				end
+			end
+		end
+
+		-- Signal the group controller that we are at the end of our data harvesting.
+		icon:YieldInfo(false)
+	end
 end
 
 function Type:HandleYieldedInfo(icon, iconToSet, spell, unit, GUID, texture, start, duration, reverse, durObj, state)
@@ -310,7 +313,7 @@ function Type:Setup(icon)
 		icon:RegisterEvent(icon.UnitSet.event)
 	end
 
-	icon:SetUpdateFunction(TMW.wowMajor >= 12 and Cast_OnUpdate_Secrets or Cast_OnUpdate)
+	icon:SetUpdateFunction(TMW.clientHasSecrets and Cast_OnUpdate_Secrets or Cast_OnUpdate)
 	icon:Update()
 end
 

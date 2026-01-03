@@ -327,7 +327,7 @@ TMW:NewClass("Config_IconSortFrame", "Button", "Config_Frame") {
 			if data then
 				self.Order:SetText(data[settings.Order] or "<UNKNOWN ORDER>")
 				
-				if data.maybeSecret and TMW.wowMajor >= 12 then
+				if data.maybeSecret and TMW.clientHasSecrets then
 					title = title .. " " .. TMW:GetRestrictedTString()
 				end
 			else
@@ -411,7 +411,7 @@ function IconPosition_Sortable:AddDropdown()
 
 			info.text = L["UIPANEL_GROUPSORT_" .. identifier]
 			info.tooltipText = L["UIPANEL_GROUPSORT_" .. identifier .. "_DESC"]
-			if data and data.maybeSecret and TMW.wowMajor >= 12 then
+			if data and data.maybeSecret and TMW.clientHasSecrets then
 				info.text = info.text .. " " .. TMW:GetRestrictedTString()
 				info.tooltipText = info.tooltipText .. "\n\n" .. L["UIPANEL_SECRETS_DISALLOWED_DESC"]
 			end

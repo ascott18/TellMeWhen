@@ -115,6 +115,7 @@ _G.TellMeWhen = _G.TMW
 local TMW = _G.TMW
 
 TMW.issecretvalue = _G.issecretvalue or function() end
+TMW.clientHasSecrets = C_Secrets and C_Secrets.HasSecretRestrictions()
 TMW.wowMajor = math.floor(select(4, GetBuildInfo()) / 10000)
 
 

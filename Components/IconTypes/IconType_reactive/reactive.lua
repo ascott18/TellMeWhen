@@ -169,7 +169,7 @@ local emptyTable = {}
 local offCooldown = { startTime = 0, duration = 0 }
 local mindfreeze = GetSpellName(47528) and strlower(GetSpellName(47528))
 local Reactive_OnUpdate
-if TMW.wowMajor >= 12 then
+if TMW.clientHasSecrets then
 	function Reactive_OnUpdate(icon, time)
 
 		-- Upvalue things that will be referenced a lot in our loops.

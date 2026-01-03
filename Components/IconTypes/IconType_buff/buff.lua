@@ -33,7 +33,7 @@ local strlowerCache = TMW.strlowerCache
 local isNumber = TMW.isNumber
 
 local issecretvalue = TMW.issecretvalue
-local clientHasSecrets = C_Secrets and C_Secrets.HasSecretRestrictions()
+local clientHasSecrets = TMW.clientHasSecrets
 
 local empty = {}
 
@@ -808,7 +808,7 @@ local aurasWithNoSourceReported = {
 local Processor = TMW.Classes.IconDataProcessor:New("BUFF_SOURCEUNIT", "auraSourceUnit, auraSourceGUID")
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: auraSourceUnit, auraSourceGUID
-	if TMW.wowMajor >= 12 then
+	if TMW.clientHasSecrets then
 		t[#t+1] = [[
 		
 		if not auraSourceGUID and unit == "player" then

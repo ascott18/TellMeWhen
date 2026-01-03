@@ -983,7 +983,7 @@ L["UIPANEL_TOOLTIP_ROWS"] = "Set the number of rows in this group"
 L["UIPANEL_TOOLTIP_COLUMNS"] = "Set the number of columns in this group"
 L["UIPANEL_TOOLTIP_ONLYINCOMBAT"] = "Check to cause this group to only be shown in combat"
 
-L["UIPANEL_SECRETS_DISALLOWED"] = "Disallowed in Combat"
+L["UIPANEL_SECRETS_DISALLOWED"] = "Restricted in Combat"
 L["UIPANEL_SECRETS_DISALLOWED_DESC"] = [[This feature cannot operate on secret data. 
 
 Examples of secret data include cooldowns and buffs/debuffs while in combat, Mythic+, or PvP. In such situations, the setting or feature will be ignored, or assume a default state.]]
@@ -995,6 +995,9 @@ L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[Buffs and debuffs generally canno
 
 Enable the %q setting below to hide this icon when auras are secret.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is if this icon is a %s, with %q left blank, which will allow a dynamic set of auras to be displayed.]]
+L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
+
+Additionally, duration sorting cannot be performed on any secret durations.]]
 
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"

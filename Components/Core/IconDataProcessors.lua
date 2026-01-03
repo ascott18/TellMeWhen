@@ -1197,7 +1197,7 @@ do
 
 		-- Note on "not GUID": Any other case of missing GUID is useless to handle because
 		-- we can't do any logic against it.
-		if TMW.wowMajor >= 12 then
+		if TMW.clientHasSecrets then
 			t[#t+1] = [[
 			
 			if not GUID and unit == "player" then

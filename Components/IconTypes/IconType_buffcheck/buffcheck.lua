@@ -26,7 +26,7 @@ local isNumber = TMW.isNumber
 local empty = {}
 
 local issecretvalue = TMW.issecretvalue
-local clientHasSecrets = C_Secrets and C_Secrets.HasSecretRestrictions()
+local clientHasSecrets = TMW.clientHasSecrets
 
 local Type = TMW.Classes.IconType:New("buffcheck")
 Type.name = L["ICONMENU_BUFFCHECK"]

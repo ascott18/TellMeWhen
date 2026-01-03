@@ -33,14 +33,15 @@ local CachedCounts = {}
 if C_Spell.GetSpellCooldown then
 	local C_Spell_GetSpellCooldown = C_Spell.GetSpellCooldown
 
-    if TMW.wowMajor >= 12 then
+    if TMW.clientHasSecrets then
         -- Assume cooldowns are always secrets. No point doing anything else.
+        -- Can't cache because we can't discard stale entries after cache expiration.
         function Cooldowns.GetSpellCooldown(spell)
-            local cached = CachedCooldowns[spell]
-            if cached ~= nil then return cached ~= false and cached or nil end
+            --local cached = CachedCooldowns[spell]
+            --if cached ~= nil then return cached ~= false and cached or nil end
             
             cached = C_Spell_GetSpellCooldown(spell) or false
-            CachedCooldowns[spell] = cached
+            --CachedCooldowns[spell] = cached
             return cached
         end
     else
@@ -127,8 +128,8 @@ if C_Spell.GetSpellCastCount then
 
     function Cooldowns.GetSpellCastCount(spell)
         local cached = CachedCounts[spell]
-        if type(cached) ~= 'nil' then 
-            if type(cached) ~= 'boolean' then
+        if cached then 
+            if cached ~= false then
                 return cached
             else
                 return nil
@@ -161,6 +162,7 @@ end
 ---------------------------------
 
 -- Rogue's Backstab. We don't need class spells anymore - any GCD spell works fine.
+-- TODO: MIDNIGHT: Update to the Global Cooldown spell once it is never-secret.
 local GCDSpell = 53
 TMW.GCDSpell = GCDSpell
 local Cooldowns_GetSpellCooldown = Cooldowns.GetSpellCooldown

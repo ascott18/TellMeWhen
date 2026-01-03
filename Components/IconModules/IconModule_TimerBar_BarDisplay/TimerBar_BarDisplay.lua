@@ -59,27 +59,25 @@ TimerBar_BarDisplay:PostHookMethod("OnEnable", function(self)
 	end
 end)
 
-if TMW.wowMajor >= 12 then
-	-- Handle possible secret values
-
-	local GetValue_Base = TimerBar_BarDisplay.GetValue
-	function TimerBar_BarDisplay:GetValue()
-		-- returns value, doTerminate
-		local value = self.value
-		if value then
-			if issecretvalue(value) then
-				return self.value, false
-			else
-				if self.Invert then
-					return self.Max - self.value + self.Offset, false
-				else
-					return self.value + self.Offset, false
-				end
-			end
+local GetValue_Base = TimerBar_BarDisplay.GetValue
+function TimerBar_BarDisplay:GetValue()
+	-- returns value, doTerminate
+	local value = self.value
+	if value then
+		if issecretvalue(value) then
+			return self.value, false
+		elseif self.Invert then
+			return self.Max - self.value + self.Offset, false
+		else
+			return self.value + self.Offset, false
 		end
-
-		return GetValue_Base(self)
 	end
+
+	return GetValue_Base(self)
+end
+
+if TMW.clientHasSecrets then
+	-- Handle possible secret values
 
 	function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor, valueCurveFunc)
 		self.valueCurveFunc = valueCurveFunc
@@ -106,22 +104,6 @@ if TMW.wowMajor >= 12 then
 		end
 	end
 else
-	local GetValue_Base = TimerBar_BarDisplay.GetValue
-	function TimerBar_BarDisplay:GetValue()
-		-- returns value, doTerminate
-
-		if self.value then
-			-- Display a set value.
-			if self.Invert then
-				return self.Max - self.value + self.Offset, false
-			else
-				return self.value + self.Offset, false
-			end
-		end
-
-		return GetValue_Base(self)
-	end
-
 	function TimerBar_BarDisplay:VALUE(icon, value, maxValue, valueColor)
 		if value and maxValue then
 			self.duration = nil

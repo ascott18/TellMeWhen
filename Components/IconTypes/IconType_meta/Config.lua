@@ -33,6 +33,11 @@ if not Type then return end
 -- GLOBALS: CreateFrame
 
 
+if TMW.clientHasSecrets then
+	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
+		text = L["UIPANEL_SECRETS_META_DESC"]
+	})
+end
 
 Type:RegisterConfigPanel_XMLTemplate(145, "TellMeWhen_IconStates", { })
 
