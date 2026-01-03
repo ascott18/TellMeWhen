@@ -16,6 +16,7 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+local issecretvalue = TMW.issecretvalue
 
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
@@ -24,10 +25,46 @@ local _, pclass = UnitClass("Player")
 
 local GetSpellName = TMW.GetSpellName
 
-Env.UnitHealth = UnitHealth
-Env.UnitHealthMax = UnitHealthMax
-Env.UnitPower = UnitPower
-Env.UnitPowerMax = UnitPowerMax
+if TMW.clientHasSecrets then
+	local UnitHealth = UnitHealth
+	local UnitHealthMax = UnitHealthMax
+	local UnitPower = UnitPower
+	local UnitPowerMax = UnitPowerMax
+	
+	Env.UnitHealth = function(...)
+		local result = UnitHealth(...)
+		if issecretvalue(result) then
+			return 0
+		end
+		return result
+	end
+	Env.UnitHealthMax = function(...)
+		local result = UnitHealthMax(...)
+		if issecretvalue(result) then
+			return 0
+		end
+		return result
+	end
+	Env.UnitPower = function(...)
+		local result = UnitPower(...)
+		if issecretvalue(result) then
+			return 0
+		end
+		return result
+	end
+	Env.UnitPowerMax = function(...)
+		local result = UnitPowerMax(...)
+		if issecretvalue(result) then
+			return 0
+		end
+		return result
+	end
+else
+	Env.UnitHealth = UnitHealth
+	Env.UnitHealthMax = UnitHealthMax
+	Env.UnitPower = UnitPower
+	Env.UnitPowerMax = UnitPowerMax
+end
 
 TMW:RegisterUpgrade(62032, {
 	condition = function(self, condition)
@@ -50,7 +87,7 @@ ConditionCategory:RegisterCondition(1.0, "HEALTH", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = [[UnitHealth(c.Unit)/(UnitHealthMax(c.Unit)+epsilon) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -66,7 +103,7 @@ ConditionCategory:RegisterCondition(1.1, "HEALTH_ABS", {
 	range = 100000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = [[UnitHealth(c.Unit) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -81,7 +118,7 @@ ConditionCategory:RegisterCondition(1.2, "HEALTH_MAX", {
 	range = 100000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_05",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = [[UnitHealthMax(c.Unit) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -497,7 +534,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 		max = 150, -- 150 with talent Voidtouched
 		icon = "Interface\\Icons\\spell_shadow_painandsuffering",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
+		maybeSecret = true,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Insanity),
 		events = function(ConditionObject, c)
 			return
@@ -513,7 +550,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 		range = 200,
 		icon = "Interface\\Icons\\ability_warlock_demonicpower",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
+		maybeSecret = true,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Fury),
 		events = function(ConditionObject, c)
 			return
@@ -527,7 +564,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 		range = 200,
 		icon = "Interface\\Icons\\ability_demonhunter_torment",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
+		maybeSecret = true,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Pain),
 		events = function(ConditionObject, c)
 			return
@@ -543,7 +580,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 		max = 200,
 		icon = "Interface\\Icons\\spell_shaman_maelstromweapon",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
+		maybeSecret = true,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.Maelstrom),
 		events = function(ConditionObject, c)
 			return
@@ -559,7 +596,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 		max = 130, -- Druid tier set increases this to 130
 		icon = "Interface\\Icons\\talentspec_druid_balance",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
+		maybeSecret = true,
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.LunarPower),
 		events = function(ConditionObject, c)
 			return
@@ -614,7 +651,7 @@ ConditionCategory:RegisterCondition(102.0, "DEFAULT", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = [[UnitPower(c.Unit)/(UnitPowerMax(c.Unit)+epsilon) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -632,7 +669,7 @@ ConditionCategory:RegisterCondition(102.1, "DEFAULT_ABS", {
 	range = 40000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = [[UnitPower(c.Unit) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -649,7 +686,7 @@ ConditionCategory:RegisterCondition(102.2, "DEFAULT_MAX", {
 	range = 40000,
 	icon = "Interface\\Icons\\inv_alchemy_elixir_02",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = [[UnitPowerMax(c.Unit) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -668,7 +705,7 @@ ConditionCategory:RegisterCondition(103.0 - offset, "MANA", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_126",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(Enum.PowerType.Mana, Enum.PowerType.Mana),
 	events = function(ConditionObject, c)
 		return
@@ -684,7 +721,7 @@ ConditionCategory:RegisterCondition(103.1 - offset, "MANA_ABS", {
 	range = 40000,
 	icon = "Interface\\Icons\\inv_potion_126",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Mana),
 	events = function(ConditionObject, c)
 		return
@@ -699,7 +736,7 @@ ConditionCategory:RegisterCondition(103.2 - offset, "MANA_MAX", {
 	range = 40000,
 	icon = "Interface\\Icons\\inv_potion_126",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPowerMax(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Mana),
 	events = function(ConditionObject, c)
 		return
@@ -717,7 +754,7 @@ ConditionCategory:RegisterCondition(104.0 - offset, "ENERGY", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_125",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(Enum.PowerType.Energy, Enum.PowerType.Energy),
 	events = function(ConditionObject, c)
 		return
@@ -733,7 +770,7 @@ ConditionCategory:RegisterCondition(104.1 - offset, "ENERGY_ABS", {
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_125",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Energy),
 	events = function(ConditionObject, c)
 		return
@@ -748,7 +785,7 @@ ConditionCategory:RegisterCondition(104.2 - offset, "ENERGY_MAX", {
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_125",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPowerMax(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Energy),
 	events = function(ConditionObject, c)
 		return
@@ -766,7 +803,7 @@ ConditionCategory:RegisterCondition(105.0 - offset, "RAGE", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_120",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(Enum.PowerType.Rage, Enum.PowerType.Rage),
 	events = function(ConditionObject, c)
 		return
@@ -782,7 +819,7 @@ ConditionCategory:RegisterCondition(105.1 - offset, "RAGE_ABS", {
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_120",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Rage),
 	events = function(ConditionObject, c)
 		return
@@ -797,7 +834,7 @@ ConditionCategory:RegisterCondition(105.2 - offset, "RAGE_MAX", {
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_120",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPowerMax(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Rage),
 	events = function(ConditionObject, c)
 		return
@@ -815,7 +852,7 @@ ConditionCategory:RegisterCondition(106.0 - offset, "FOCUS", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_124",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(Enum.PowerType.Focus, Enum.PowerType.Focus),
 	events = function(ConditionObject, c)
 		return
@@ -831,7 +868,7 @@ ConditionCategory:RegisterCondition(106.1 - offset, "FOCUS_ABS", {
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_124",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Focus),
 	events = function(ConditionObject, c)
 		return
@@ -846,7 +883,7 @@ ConditionCategory:RegisterCondition(106.2 - offset, "FOCUS_MAX", {
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_124",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPowerMax(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Focus),
 	events = function(ConditionObject, c)
 		return
@@ -864,7 +901,7 @@ ConditionCategory:RegisterCondition(107.0 - offset, "RUNIC_POWER", {
 	max = 100,
 	icon = "Interface\\Icons\\inv_potion_128",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(Enum.PowerType.RunicPower, Enum.PowerType.RunicPower),
 	events = function(ConditionObject, c)
 		return
@@ -880,7 +917,7 @@ ConditionCategory:RegisterCondition(107.1 - offset, "RUNIC_POWER_ABS", {
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_128",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPower(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.RunicPower),
 	events = function(ConditionObject, c)
 		return
@@ -895,7 +932,7 @@ ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
 	range = 200,
 	icon = "Interface\\Icons\\inv_potion_128",
 	tcoords = CNDT.COMMON.standardtcoords,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = ([[UnitPowerMax(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.RunicPower),
 	events = function(ConditionObject, c)
 		return
@@ -919,7 +956,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 		max = 100,
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
+		maybeSecret = true,
 		funcstr = ([[UnitPower(c.Unit, %d)/(UnitPowerMax(c.Unit, %d)+epsilon) c.Operator c.Level]]):format(Enum.PowerType.Alternate, Enum.PowerType.Alternate),
 		events = function(ConditionObject, c)
 			return
@@ -938,7 +975,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 		range = 200,
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
+		maybeSecret = true,
 		funcstr = ([[UnitPower(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Alternate),
 		events = function(ConditionObject, c)
 			return
@@ -956,7 +993,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 		range = 200,
 		icon = "Interface\\Icons\\spell_shadow_mindflay",
 		tcoords = CNDT.COMMON.standardtcoords,
-		deprecated = TMW.wowMajor >= 12,
+		maybeSecret = true,
 		funcstr = ([[UnitPowerMax(c.Unit, %d) c.Operator c.Level]]):format(Enum.PowerType.Alternate),
 		events = function(ConditionObject, c)
 			return

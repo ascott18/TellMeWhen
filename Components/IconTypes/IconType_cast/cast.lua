@@ -64,7 +64,7 @@ Type:RegisterIconDefaults{
 	NoPocketwatch			= false,
 }
 
-if TMW.wowMajor < 12 then
+if not TMW.clientHasSecrets then
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	SUGType = "cast",

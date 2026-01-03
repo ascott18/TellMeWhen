@@ -120,11 +120,11 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_ReactiveSettings", fun
 			check:SetTexts(L["ICONMENU_MANACHECK"], L["ICONMENU_MANACHECK_DESC"])
 			check:SetSetting("ManaCheck")
 		end,
-		TMW.wowMajor < 12 and function(check)
+		not TMW.clientHasSecrets and function(check)
 			check:SetTexts(L["ICONMENU_COOLDOWNCHECK"], L["ICONMENU_COOLDOWNCHECK_DESC"])
 			check:SetSetting("CooldownCheck")
 		end,
-		TMW.wowMajor < 12 and pclass == "DEATHKNIGHT" and function(check)
+		not TMW.clientHasSecrets and pclass == "DEATHKNIGHT" and function(check)
 			check:SetSetting("IgnoreRunes")
 
 			check:CScriptAdd("ReloadRequested", function()

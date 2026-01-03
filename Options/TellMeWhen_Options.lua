@@ -1486,7 +1486,7 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 	SetTitle = function(self, text, showRestricted)
 		self.Header:SetText(text)
 
-		if TMW.wowMajor < 12 then showRestricted = false end
+		if not TMW.clientHasSecrets then showRestricted = false end
 
 		if showRestricted then
 			self.RestrictedIcon:Show()

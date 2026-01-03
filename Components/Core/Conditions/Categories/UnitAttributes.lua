@@ -333,7 +333,7 @@ ConditionCategory:RegisterCondition(8.95, "UNITISUNIT", {
 	icon = "Interface\\Icons\\spell_holy_prayerofhealing",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitIsUnit = TMW.wowMajor < 12 and UnitIsUnit or function(unit, unit2)
+		UnitIsUnit = not TMW.clientHasSecrets and UnitIsUnit or function(unit, unit2)
 			local ret = UnitIsUnit(unit, unit2)
 			if issecretvalue(ret) then
 				return false
@@ -363,7 +363,7 @@ ConditionCategory:RegisterCondition(9,    "NAME", {
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitName = TMW.wowMajor < 12 and UnitName or function(unit)
+		UnitName = not TMW.clientHasSecrets and UnitName or function(unit)
 			local ret = UnitName(unit)
 			if issecretvalue(ret) then
 				return ""
@@ -398,7 +398,7 @@ ConditionCategory:RegisterCondition(9.5,  "NPCID", {
 	icon = "Interface\\LFGFrame\\LFGFrame-SearchIcon-Background",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitNpcId = TMW.wowMajor < 12 and UnitNpcId or function(unit)
+		UnitNpcId = not TMW.clientHasSecrets and UnitNpcId or function(unit)
 			local id = UnitNpcId(unit)
 			return issecretvalue(id) and 0 or id
 		end,
@@ -468,8 +468,12 @@ ConditionCategory:RegisterCondition(10.1,  "RAIDICON2", {
 	icon = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_8",
 
 	Env = {
-		GetRaidTargetIndex = GetRaidTargetIndex,
+		GetRaidTargetIndex = not TMW.clientHasSecrets and GetRaidTargetIndex or function(unit)
+			local index = GetRaidTargetIndex(unit)
+			return issecretvalue(index) and 0 or index
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[ BITFLAGSMAPANDCHECK( GetRaidTargetIndex(c.Unit) or 0 ) ]],
 	events = function(ConditionObject, c)
 		return
@@ -539,7 +543,7 @@ ConditionCategory:RegisterCondition(13,   "CREATURETYPE", {
 	icon = "Interface\\Icons\\spell_shadow_summonfelhunter",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		UnitCreatureType = TMW.wowMajor < 12 and UnitCreatureType or function(unit)
+		UnitCreatureType = not TMW.clientHasSecrets and UnitCreatureType or function(unit)
 			local creatureType = UnitCreatureType(unit)
 			if issecretvalue(creatureType) then
 				return ""

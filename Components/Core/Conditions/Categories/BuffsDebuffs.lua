@@ -514,7 +514,10 @@ if UnitGetTotalAbsorbs then
 		tcoords = CNDT.COMMON.standardtcoords,
 		maybeSecret = true,
 		Env = {
-			UnitGetTotalAbsorbs = UnitGetTotalAbsorbs,
+			UnitGetTotalAbsorbs = not TMW.clientHasSecrets and UnitGetTotalAbsorbs or function(unit)
+				local absorbs = UnitGetTotalAbsorbs(unit)
+				return issecretvalue(absorbs) and 0 or absorbs
+			end,
 		},
 		funcstr = function(c)
 			return [[UnitGetTotalAbsorbs(c.Unit) c.Operator c.Level]]

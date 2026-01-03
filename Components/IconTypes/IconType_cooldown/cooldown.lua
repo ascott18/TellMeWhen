@@ -121,7 +121,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CooldownSettings", fun
 			check:SetTexts(L["ICONMENU_GCDASUNUSABLE"], L["ICONMENU_GCDASUNUSABLE_DESC"])
 			check:SetSetting("GCDAsUnusable")
 		end,
-		TMW.wowMajor < 12 and pclass == "DEATHKNIGHT" and function(check)
+		not TMW.clientHasSecrets and pclass == "DEATHKNIGHT" and function(check)
 			check:SetTexts(L["ICONMENU_IGNORERUNES"], L["ICONMENU_IGNORERUNES_DESC"])
 			check:SetSetting("IgnoreRunes")
 		end,
