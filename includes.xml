@@ -31,13 +31,13 @@
 
 <!-- 
 <Script file="Localization\TellMeWhen-deDE.lua" />
-<Script file="Localization\TellMeWhen-esMX.lua" />
 <Script file="Localization\TellMeWhen-frFR.lua" />
 <Script file="Localization\TellMeWhen-koKR.lua" />
 <Script file="Localization\TellMeWhen-ptBR.lua" />
 <Script file="Localization\TellMeWhen-itIT.lua" /> -->
 <Script file="Localization\TellMeWhen-enUS.lua" />
 <Script file="Localization\TellMeWhen-esES.lua" />
+<Script file="Localization\TellMeWhen-esMX.lua" />
 <Script file="Localization\TellMeWhen-ruRU.lua" />
 <Script file="Localization\TellMeWhen-zhCN.lua" />
 <Script file="Localization\TellMeWhen-zhTW.lua" />
@@ -172,5 +172,3 @@
 
 <Include file="TellMeWhen.xml" />
 </Ui>
-
-
