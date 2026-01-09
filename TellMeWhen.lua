@@ -2884,6 +2884,25 @@ end
 
 function TMW:AssertOptionsInitialized()
 	if not TMW.IE or not TMW.IE.Initialized then
+
+		-- Detect https://github.com/KaspOu/K-Cursor-Cooldown/issues/23 and warn users.
+		if AceAddon30Frame._RegisterUnitEvents and IsAddOnLoaded("CursorCooldown") then
+			StaticPopupDialogs["TMW_CCR"] = {
+				text = 
+[[TellMeWhen has detected that you have installed "Cursor Cooldown Reloaded". 
+
+Unfortunately, this addon tampers with the shared library AceAddon-3.0 in a way that breaks TellMeWhen, Dominos, and probably other addons. 
+
+TellMeWhen's options cannot load unless you disable or uninstall Cursor Cooldown Reloaded.]], 
+				button1 = OKAY,
+				timeout = 0,
+				showAlert = true,
+				whileDead = true,
+				preferredIndex = 3, -- http://forums.wowace.com/showthread.php?p=320956
+			}
+			StaticPopup_Show("TMW_CCR")
+		end
+		
 		TMW:Print(L["ERROR_NOTINITIALIZED_OPT_NO_ACTION"])
 		
 		return true
