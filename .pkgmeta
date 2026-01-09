@@ -12,10 +12,10 @@ externals:
 
     Lib/LibDogTag-3.0:
         url: https://github.com/parnic/LibDogTag-3.0.git
-        branch: midnight
+        branch: main
     Lib/LibDogTag-Unit-3.0:
         url: https://github.com/parnic/LibDogTag-Unit-3.0.git
-        branch: midnight
+        branch: main
     Lib/LibDogTag-Stats-3.0: https://github.com/ascott18/LibDogTag-Stats-3.0.git
 
     Lib/LibSpellRange-1.0: https://github.com/ascott18/LibSpellRange-1.0.git
