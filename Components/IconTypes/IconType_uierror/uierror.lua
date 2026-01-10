@@ -74,14 +74,6 @@ Type:RegisterIconEvent(5, "OnUIErrorEvent", {
 
 
 local function UIError_OnEvent(icon, _, messageType, message)
-	-- TODO: consider updating this icon type to store the messageType as config instead
-	-- of the literal messages? Not sure if this is safe though - no indication that
-	-- the messageType numbers are going to be stable from patch to patch.
-	-- Its likely, but not a risk I want to take until we can be sure that they aren't going to shift around.
-	-- Plus, the configuration would have to be a massive dropdown if we were to use the IDs, 
-	-- which is a usability nightmare. Letting the user type them in manually (and use the SUG, of course)
-	-- does seem better from a usability standpoint.
-
 	if icon.CLEUNoRefresh then
 		-- Don't handle the event if CLEUNoRefresh is set and the icon's timer is still running.
 		local attributes = icon.attributes

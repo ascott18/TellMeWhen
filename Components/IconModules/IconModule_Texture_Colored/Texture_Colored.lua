@@ -85,7 +85,7 @@ function Texture_Colored:STATE(icon, stateData)
 		local falseC = TMW:StringToCachedColorMixin(stateData.falseState.Color)
 		self.texture:SetVertexColorFromBoolean(stateData.secretBool, trueC, falseC)
 
-		-- TODO: MIDNIGHT: Remove if and fallbacks once C_CurveUtil.EvaluateColorValueFromBoolean exists on beta.
+		-- TODO: MIDNIGHT: fallbacks once C_CurveUtil.EvaluateColorValueFromBoolean exists on beta.
 		if EvaluateColorValueFromBoolean then
 			self.texture:SetDesaturation(EvaluateColorValueFromBoolean(
 				stateData.secretBool,

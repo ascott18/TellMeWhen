@@ -222,8 +222,6 @@ SpellUsable:SetScript("OnEvent", function(self, event, payload)
                 spells[spell] = true
             end
         end
-        -- todo: do we still have to listen to UNIT_POWER_FREQUENT?
-        -- In all my testing, it doesn't seem so - SPELL_UPDATE_USABLE is sufficient for all spells.
     end
 
     if next(spells) then

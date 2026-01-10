@@ -27,6 +27,10 @@ local DD = TMW:NewClass("Config_DropDownMenu_NoFrame"){
 	ForceScale = function(self, scale)
 		self.FORCE_SCALE = scale
 	end,
+
+	SetShowTime = function(self, showTime)
+		self.SHOW_TIME = showTime
+	end,
 	
 	SetFunction = function(self, func)
 		self.initialize = func

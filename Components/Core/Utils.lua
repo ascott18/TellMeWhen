@@ -1774,13 +1774,22 @@ function TMW:GetRaceIconInfo(race)
 end
 TMW:MakeSingleArgFunctionCached(TMW, "GetRaceIconInfo")
 
-function TMW:TryGetNPCName(id)
-	-- TODO: Replace GetParser with direct usage of C_TooltipInfo when available
-    local tooltip, LT1 = TMW:GetParser()
-    tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-    tooltip:SetHyperlink( string.format( "unit:Creature-0-0-0-0-%d:0000000000", id))
-    
-    return LT1:GetText()
+if C_TooltipInfo and C_TooltipInfo.GetHyperlink then
+	function TMW:TryGetNPCName(id)
+		local hyperlink = string.format("unit:Creature-0-0-0-0-%d:0000000000", id)
+		local tooltipData = C_TooltipInfo.GetHyperlink(hyperlink)
+		if tooltipData and tooltipData.lines and tooltipData.lines[1] then
+			return tooltipData.lines[1].leftText
+		end
+		return nil
+	end
+else
+	function TMW:TryGetNPCName(id)
+		local tooltip, LT1 = TMW:GetParser()
+		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+		tooltip:SetHyperlink(string.format("unit:Creature-0-0-0-0-%d:0000000000", id))
+		return LT1:GetText()
+	end
 end
 
 -- From Blizzard_TutorialLogic.lua
