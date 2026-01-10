@@ -410,7 +410,7 @@ ConditionCategory:RegisterCondition(14,   "LOC_ZONE", {
 	Env = {
 		GetZoneText = GetZoneText,
 	},
-	funcstr = [[BOOLCHECK(MULTINAMECHECK(  GetZoneText()  ))]],
+	funcstr = [=[BOOLCHECK(c.Spells.Hash[strlowerCache[GetZoneText()]])]=],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("ZONE_CHANGED"),
@@ -437,7 +437,7 @@ ConditionCategory:RegisterCondition(15,   "LOC_SUBZONE", {
 	Env = {
 		GetSubZoneText = GetSubZoneText,
 	},
-	funcstr = [[BOOLCHECK(MULTINAMECHECK(  GetSubZoneText()  ))]],
+	funcstr = [=[BOOLCHECK(c.Spells.Hash[strlowerCache[GetSubZoneText()]])]=],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("ZONE_CHANGED"),

@@ -373,7 +373,7 @@ ConditionCategory:RegisterCondition(9,    "NAME", {
 		end,
 	},
 	maybeSecret = true,
-	funcstr = [[BOOLCHECK(MULTINAMECHECK(  UnitName(c.Unit) or ""  ))]],
+	funcstr = [=[BOOLCHECK(c.Spells.Hash[strlowerCache[UnitName(c.Unit) or ""]])]=],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit)),
@@ -404,7 +404,7 @@ ConditionCategory:RegisterCondition(9.5,  "NPCID", {
 		end,
 	},
 	maybeSecret = true,
-	funcstr = [[BOOLCHECK(MULTINAMECHECK(  UnitNpcId(c.Unit) ))]],
+	funcstr = [=[BOOLCHECK(c.Spells.Hash[UnitNpcId(c.Unit)])]=],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))
@@ -553,7 +553,7 @@ ConditionCategory:RegisterCondition(13,   "CREATURETYPE", {
 		end,
 	},
 	maybeSecret = true,
-	funcstr = [[BOOLCHECK(MULTINAMECHECK(  UnitCreatureType(c.Unit) or ""  ))]],
+	funcstr = [=[BOOLCHECK(c.Spells.Hash[strlowerCache[UnitCreatureType(c.Unit) or ""]])]=],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GetUnitChangedEventString(CNDT:GetUnit(c.Unit))

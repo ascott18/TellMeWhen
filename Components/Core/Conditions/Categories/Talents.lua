@@ -591,7 +591,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 		tcoords = CNDT.COMMON.standardtcoords,
 		funcstr = function(c)
 			setupTalentEvents()
-			return [[BOOLCHECK(MULTINAMECHECK( CurrentLoadoutName ))]]
+			return [=[BOOLCHECK(c.Spells.Hash[CurrentLoadoutName])]=]
 		end,
 		events = function(ConditionObject, c)
 			return

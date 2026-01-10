@@ -84,7 +84,6 @@ end
 
 if C_Secrets and C_Secrets.HasSecretRestrictions() then
     local blockedUnits = {}
-    -- TODO: (MIDNIGHT): WARNING: DOGSHIT. NEED AN EVENT FOR GetRestrictedActionStatus changes
     local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
     local blocked = false
     TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()

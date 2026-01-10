@@ -236,7 +236,3 @@ end<</code>>
 * "BOOLCHECK(...)"
 ** A preprocessor function that will check that the vararg evaulates to true if c.Level == 0, or false if c.Level == 1.
 
-* "MULTINAMECHECK(...)"
-** A preprocessor function that will check that the vararg is contained within c.Name if c.Name is a semicolon-delimited string and the vararg is a lowercase, trimmed string.
-
-	
