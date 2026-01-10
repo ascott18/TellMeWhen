@@ -623,7 +623,6 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_hunter_steadyshot",
 	tcoords = CNDT.COMMON.standardtcoords,
-	maybeSecret = true,
 	funcstr = [[BOOLCHECK( (TMW.GetGCD() > 0 and TMW.GetGCD() < 1.7) )]],
 	events = function(ConditionObject, c)
 		return
@@ -631,7 +630,6 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 	end,
 	anticipate = [[
 		local cooldown = GetSpellCooldown(TMW.GCDSpell)
-		if issecretvalue(cooldown.duration) then VALUE = huge return end
 		VALUE = cooldown.startTime + cooldown.duration -- the time at which we need to update again. (when the GCD ends)
 	]],
 })
