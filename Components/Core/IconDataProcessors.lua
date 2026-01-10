@@ -530,7 +530,7 @@ do
 				if issecretvalue(durationB) then
 					durationB = 0
 				else
-					durationB = iconB:OnGCD(durationB) and 0 or ((durationB - (time - attributesB.start)) / attributesA.modRate)
+					durationB = iconB:OnGCD(durationB) and 0 or ((durationB - (time - attributesB.start)) / attributesB.modRate)
 				end
 
 				if durationA ~= durationB then
