@@ -70,6 +70,8 @@ local COLOR_UNLOCKED = {
 	Texture = "",
 	Gray = false,
 }
+
+local EvaluateColorValueFromBoolean = C_CurveUtil and C_CurveUtil.EvaluateColorValueFromBoolean
 function Texture_Colored:STATE(icon, stateData)
 	local color
 	if not TMW.Locked then
@@ -83,16 +85,19 @@ function Texture_Colored:STATE(icon, stateData)
 		local falseC = TMW:StringToCachedColorMixin(stateData.falseState.Color)
 		self.texture:SetVertexColorFromBoolean(stateData.secretBool, trueC, falseC)
 
-		if trueC.flags.desaturate and falseC.flags.desaturate then
+		-- TODO: MIDNIGHT: Remove if and fallbacks once C_CurveUtil.EvaluateColorValueFromBoolean exists on beta.
+		if EvaluateColorValueFromBoolean then
+			self.texture:SetDesaturation(EvaluateColorValueFromBoolean(
+				stateData.secretBool,
+				trueC.flags.desaturate and 1 or 0,
+				falseC.flags.desaturate and 1 or 0
+			))
+		elseif trueC.flags.desaturate and falseC.flags.desaturate then
 			self.texture:SetDesaturated(true)
 		elseif trueC.flags.desaturate then
 			-- Desaturate only when true:
 			self.texture:SetDesaturated(stateData.secretBool)
 		elseif falseC.flags.desaturate then
-			-- TODO: (MIDNIGHT): C_CurveUtil.EvaluateColorValueFromBoolean() will be needed to make
-			-- desaturate fully functional here, since we have to invert the bool.
-			-- Combine it with SetDesaturation.
-			-- We can then get rid of all this if/else.
 			self.texture:SetDesaturated(false)
 		else
 			self.texture:SetDesaturated(false)

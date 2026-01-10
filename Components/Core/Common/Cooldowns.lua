@@ -161,9 +161,7 @@ end
 -- Global Cooldown Data
 ---------------------------------
 
--- Rogue's Backstab. We don't need class spells anymore - any GCD spell works fine.
--- TODO: MIDNIGHT: Update to the Global Cooldown spell once it is never-secret.
-local GCDSpell = 53
+local GCDSpell = 61304
 TMW.GCDSpell = GCDSpell
 local Cooldowns_GetSpellCooldown = Cooldowns.GetSpellCooldown
 function TMW.GetGCD()
