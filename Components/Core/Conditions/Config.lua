@@ -199,6 +199,10 @@ local function AddConditionToDropDown(dropdown, conditionData)
 
 	local append = TMW.debug and not conditionData:ShouldList() and "(DBG)" or ""
 	
+	if TMW.clientHasSecrets and conditionData.maybeSecret then
+		append = append .. " " .. TMW:GetRestrictedTString()
+	end
+	
 	local info = TMW.DD:CreateInfo()
 	
 	local text = get(conditionData.text)
@@ -206,7 +210,11 @@ local function AddConditionToDropDown(dropdown, conditionData)
 	info.text = (text or "??") .. append
 	
 	info.tooltipTitle = text
-	info.tooltipText = get(conditionData.tooltip)
+	local tooltip = get(conditionData.tooltip)
+	if TMW.clientHasSecrets and conditionData.maybeSecret then
+		tooltip = (tooltip and tooltip .. "\r\n\r\n" or "") .. L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"]
+	end
+	info.tooltipText = tooltip
 	info.tooltipFunc = conditionData.tooltipFunc
 	
 	info.value = conditionData.identifier
@@ -1340,7 +1348,11 @@ end
 function Module:Entry_AddToList_1(f, identifier)
 	local conditionData = CNDT.ConditionsByType[identifier]
 
-	f.Name:SetText(get(conditionData.text))
+	local text = get(conditionData.text)
+	if TMW.clientHasSecrets and conditionData.maybeSecret then
+		text = text .. " " .. TMW:GetRestrictedTString()
+	end
+	f.Name:SetText(text)
 
 	f.insert = identifier
 
@@ -1348,6 +1360,9 @@ function Module:Entry_AddToList_1(f, identifier)
 	f.tooltiptext = conditionData.category.name
 	if conditionData.tooltip then
 		f.tooltiptext = f.tooltiptext .. "\r\n\r\n" .. get(conditionData.tooltip)
+	end
+	if TMW.clientHasSecrets and conditionData.maybeSecret then
+		f.tooltiptext = f.tooltiptext .. "\r\n\r\n" .. L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"]
 	end
 
 	if conditionData.atlas then
