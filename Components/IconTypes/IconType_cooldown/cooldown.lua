@@ -227,9 +227,6 @@ if TMW.clientHasSecrets then
 					_, noMana = IsUsableSpell(iName)
 				end
 
-				-- TODO: (MIDNIGHT): SPELL_UPDATE_COOLDOWN doesn't fire on GCD end anymore.
-				-- Once 61304 is made non-secret, we're going to have to poll it and fire extra TMW_SPELL_UPDATE_COOLDOWN.
-
 				-- We store all our data in tables here because we need to keep track of both the first
 				-- usable cooldown and the first unusable cooldown found. We can't always determine which we will
 				-- use until we've found one of each. 

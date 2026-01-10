@@ -195,6 +195,7 @@ Cooldowns:RegisterEvent("SPELL_UPDATE_CHARGES")
 -- See https://github.com/ascott18/TellMeWhen/issues/2266 for why we listen to haste events.
 Cooldowns:RegisterUnitEvent("UNIT_SPELL_HASTE", "player")
 
+local currentGCD
 Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRange)
     if event == "SPELL_UPDATE_COOLDOWN" then
         wipe(CachedCooldowns)
@@ -207,6 +208,10 @@ Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRang
             -- There's not a great event for GetSpellCastCount. Cooldown is the closest we can get.
             wipe(CachedCounts)
             TMW:Fire("TMW_SPELL_UPDATE_COUNT")
+        end
+
+        if TMW.clientHasSecrets then
+            currentGCD = Cooldowns_GetSpellCooldown(GCDSpell);
         end
 
         TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
@@ -234,3 +239,31 @@ Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRang
         TMW:Fire("TMW_SPELL_UPDATE_CHARGES")
     end
 end)
+
+if TMW.clientHasSecrets then
+    -- If we have to deal with secrets, it means that cooldown icons
+    -- can't know when their cooldown ends for purposes of NextUpdateTime.
+    
+    -- So, we need to fire an event when cooldowns end.
+    -- we can't do this for everything, but for the most common cooldown (GCD),
+    -- we can since GCD isn't secret.
+    TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
+        if not currentGCD then return end
+
+        local duration = currentGCD.duration
+        
+        -- TODO: MIDNIGHT This works on PTR, but not on beta yet.
+        -- Remove this check once gcd spell isn't secret on beta.
+        if issecretvalue(duration) then return end
+
+        if duration == 0 then
+            -- If the duration was zero, it means GCD never actually started, 
+            -- so don't fire the event.
+            currentGCD = nil
+        elseif (duration - (TMW.time - currentGCD.startTime)) <= 0 then
+            -- GCD has elapsed.
+            currentGCD = nil
+            TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
+        end
+    end)
+end
