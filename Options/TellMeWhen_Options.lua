@@ -1356,12 +1356,12 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 
 		-- Find child frames.
 		for _, child in TMW:Vararg(self:GetChildren()) do
-			if not child:GetBottom() then
+			if child:IsShown() and not child:GetBottom() then
 				-- If there are children that we can't get the edges of,
 				-- don't try to resize anything, because it will almost certainly be wrong.
 				return -1
 			end
-
+			
 			if child:IsShown()
 			and (not exclusions or not TMW.tContains(exclusions, child))
 			then
