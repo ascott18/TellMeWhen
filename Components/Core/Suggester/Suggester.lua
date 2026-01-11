@@ -330,8 +330,6 @@ function SUG:NameOnCursor(isClick)
 	SUG.lastName = strlower(TMW:CleanString(strsub(text, SUG.startpos, SUG.endpos)))
 	SUG.lastName_unmodified = SUG.lastName
 
-	printstack(SUG.lastName, SUG.startpos, SUG.endpos, text)
-
 	if strfind(SUG.lastName, ":[%d:%s%.]*$") then
 		SUG.lastName, SUG.duration = strmatch(SUG.lastName, "(.-):([%d:%s%.]*)$")
 		SUG.duration = strtrim(SUG.duration, " :;.")
