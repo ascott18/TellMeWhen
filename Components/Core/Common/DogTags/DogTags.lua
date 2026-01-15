@@ -65,7 +65,8 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", DogTag.FireEvent, DogTag)
 local secondsOptions = {
     breakpointData = {
         { breakpoint = 10, abbreviation = "", significandDivisor = 1, fractionDivisor = 1, abbreviationIsGlobal = false },
-        { breakpoint = 0, abbreviation = "", significandDivisor = 0.1, fractionDivisor = 10, abbreviationIsGlobal = false },
+		-- Breakpoint can't be 0 as of 2026-01-14 Midnight beta patch.
+        { breakpoint = 0.0001, abbreviation = "", significandDivisor = 0.1, fractionDivisor = 10, abbreviationIsGlobal = false },
     }
 }
 

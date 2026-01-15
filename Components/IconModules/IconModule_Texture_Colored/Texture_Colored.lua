@@ -83,25 +83,13 @@ function Texture_Colored:STATE(icon, stateData)
 	if stateData.secretBool ~= nil then
 		local trueC = TMW:StringToCachedColorMixin(stateData.trueState.Color)
 		local falseC = TMW:StringToCachedColorMixin(stateData.falseState.Color)
-		self.texture:SetVertexColorFromBoolean(stateData.secretBool, trueC, falseC)
 
-		-- TODO: MIDNIGHT: fallbacks once C_CurveUtil.EvaluateColorValueFromBoolean exists on beta.
-		if EvaluateColorValueFromBoolean then
-			self.texture:SetDesaturation(EvaluateColorValueFromBoolean(
-				stateData.secretBool,
-				trueC.flags.desaturate and 1 or 0,
-				falseC.flags.desaturate and 1 or 0
-			))
-		elseif trueC.flags.desaturate and falseC.flags.desaturate then
-			self.texture:SetDesaturated(true)
-		elseif trueC.flags.desaturate then
-			-- Desaturate only when true:
-			self.texture:SetDesaturated(stateData.secretBool)
-		elseif falseC.flags.desaturate then
-			self.texture:SetDesaturated(false)
-		else
-			self.texture:SetDesaturated(false)
-		end
+		self.texture:SetVertexColorFromBoolean(stateData.secretBool, trueC, falseC)
+		self.texture:SetDesaturation(EvaluateColorValueFromBoolean(
+			stateData.secretBool,
+			trueC.flags.desaturate and 1 or 0,
+			falseC.flags.desaturate and 1 or 0
+		))
 		
 		if LMB and ColorMSQ then
 			-- This gets set by IconModule_IconContainer_Masque

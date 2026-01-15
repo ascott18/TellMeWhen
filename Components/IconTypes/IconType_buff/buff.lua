@@ -734,7 +734,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 
 		if clientHasSecrets then
 			local durObj = GetAuraDuration(unit, instance.auraInstanceID)
-			local start = durObj:GetStartTime()
+			-- Sometimes durObj comes out nil????
+			local start = durObj and durObj:GetStartTime() or 0
 
 			iconToSet:SetInfo("state; texture; start, duration, modRate, durObj; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 				STATE_PRESENT,

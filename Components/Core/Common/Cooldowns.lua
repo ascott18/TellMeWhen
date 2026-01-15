@@ -246,11 +246,6 @@ if TMW.clientHasSecrets then
         if not currentGCD then return end
 
         local duration = currentGCD.duration
-        
-        -- TODO: MIDNIGHT This works on PTR, but not on beta yet.
-        -- Remove this check once gcd spell isn't secret on beta.
-        if issecretvalue(duration) then return end
-
         if duration == 0 then
             -- If the duration was zero, it means GCD never actually started, 
             -- so don't fire the event.
