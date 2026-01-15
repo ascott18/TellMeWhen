@@ -37,12 +37,7 @@ if C_Spell.GetSpellCooldown then
         -- Assume cooldowns are always secrets. No point doing anything else.
         -- Can't cache because we can't discard stale entries after cache expiration.
         function Cooldowns.GetSpellCooldown(spell)
-            --local cached = CachedCooldowns[spell]
-            --if cached ~= nil then return cached ~= false and cached or nil end
-            
-            cached = C_Spell_GetSpellCooldown(spell) or false
-            --CachedCooldowns[spell] = cached
-            return cached
+            return C_Spell_GetSpellCooldown(spell)
         end
     else
         function Cooldowns.GetSpellCooldown(spell)
@@ -161,7 +156,7 @@ end
 -- Global Cooldown Data
 ---------------------------------
 
-local GCDSpell = 61304
+local GCDSpell = TMW.GetSpellInfo(61304) and 61304 or 53
 TMW.GCDSpell = GCDSpell
 local Cooldowns_GetSpellCooldown = Cooldowns.GetSpellCooldown
 function TMW.GetGCD()
