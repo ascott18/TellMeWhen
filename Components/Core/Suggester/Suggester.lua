@@ -1216,7 +1216,7 @@ function Module:OnSuggest()
 	EquivFirstIDLookup = TMW.EquivFirstIDLookup
 end
 function Module:Table_Get()
-	return SpellCache_Cache
+	return SpellCache:GetCache()
 end
 
 local function spellSort(a, b)
