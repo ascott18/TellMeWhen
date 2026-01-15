@@ -13,12 +13,12 @@ from slpp import slpp as lua
 # Example: '.*shaman.*' to match all shaman URLs, or None to disable
 debug_only_id = None #'.*shaman.*'
 
-VERSION = 'tbc'
+VERSION = 'retail'
 
 # Game version configurations
 GAME_VERSIONS = {
     'retail': {
-        'base_url': 'https://www.wowhead.com',
+        'base_url': 'https://www.wowhead.com/beta',
         'output_file': 'CSC.lua',
         'classes': {
             'death-knight': 6,
@@ -136,6 +136,7 @@ race_skill_map = {
 	2774: [37], # mechagnome
 	2808: [52, 70], # dracthyr alliance/horde
 	2895: [84, 85], # earthen alliance/horde
+	2930: [86, 91], # haranir
 }
 
 # Race ID to bitmask mapping for reqrace field
@@ -170,6 +171,8 @@ race_bitmasks = {
 	70: 32768,     # dracthyr
 	84: 131072,    # earthen alliance
 	85: 262144,    # earthen horde
+    86: 1048576,   # haranir alliance
+    91: 524288,    # haranir horde
 }
 
 def parse_reqrace_bitmask(reqrace_value):

@@ -604,6 +604,7 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 			["Pandaren"] = {order = 13, text = Name("Pandaren")},
 			["Dracthyr"] = {order = 14, text = Name("Dracthyr")},
 			["Earthen"] = {order = 15, text = Name("Earthen")},
+			["Haranir"] = {order = 16, text = Name("Haranir")},
 		}
 
 

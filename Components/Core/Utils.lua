@@ -1770,7 +1770,8 @@ function TMW:GetRaceIconInfo(race)
 	race = race:lower()
 	race = fixedRaceAtlasNames[race] or race
 	local gender = UnitSex('player') == 2 and "male" or "female"
-	return ("raceicon-%s-%s"):format(race, gender)
+	-- TODO: new races only get raceicon128 (haranir). Do 128 icons exist in classic?
+	return ("raceicon128-%s-%s"):format(race, gender)
 end
 TMW:MakeSingleArgFunctionCached(TMW, "GetRaceIconInfo")
 
