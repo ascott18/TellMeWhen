@@ -5,11 +5,9 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 TMW.CHANGELOG = [==[
 ## v12.0.0
 * WoW Midnight support. 
+* TBC Classic Anniversary support.
 * Timer bars now choose their start/completion color based on the default shading style of the cooldown sweep for the icon type. This means that buff/debuff and similar icons start at the Completion Color (default green) and move towards the Start Color (default red) as they expire.
 * Bar icons can now have smoothing enabled (most useful on Resource Display icons). Midnight only.
-
-## v11.2.9
-* TBC Classic Anniversary support.
 * Fix: #2311 error caused by IconModule_IconEventConditionHandler enabling unconditionally
 
 ## v11.2.8
