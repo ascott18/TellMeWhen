@@ -21,6 +21,7 @@ local UnitCastingInfo, UnitChannelInfo =
 	  UnitCastingInfo, UnitChannelInfo
 
 local strlowerCache = TMW.strlowerCache
+local issecretvalue = TMW.issecretvalue
 
 
 local Type = TMW.Classes.IconType:New("cast")
