@@ -82,7 +82,7 @@ local function FireUnitAura(unit, payload)
 end
 
 
-if C_Secrets and C_Secrets.HasSecretRestrictions() then
+if TMW.clientHasSecrets then
     local blockedUnits = {}
     local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
     local blocked = false

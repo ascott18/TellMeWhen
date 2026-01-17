@@ -236,7 +236,7 @@ end
 local omnicc_loaded = IsAddOnLoaded("OmniCC")
 local tullacc_loaded = IsAddOnLoaded("tullaCC")
 
-local useBlizzSetCooldown = C_Secrets and C_Secrets.HasSecretRestrictions() and ActionButton_ApplyCooldown
+local useBlizzSetCooldown = TMW.clientHasSecrets
 
 function CooldownSweep:SetupForIcon(icon)
 	self.ShowTimer = icon.ShowTimer
@@ -308,8 +308,9 @@ function CooldownSweep:SetupForIcon(icon)
 	self:REVERSE(icon, attributes.reverse)
 end
 
--- function ActionButton_ApplyCooldown(normalCooldown, cooldownInfo, chargeCooldown, chargeInfo, lossOfControlCooldown, lossOfControlInfo)
-if ActionButton_ApplyCooldown then
+if useBlizzSetCooldown then
+	local ActionButton_ApplyCooldown = ActionButton_ApplyCooldown
+	-- function ActionButton_ApplyCooldown(normalCooldown, cooldownInfo, chargeCooldown, chargeInfo, lossOfControlCooldown, lossOfControlInfo)
 	function CooldownSweep:UpdateCooldown()
 		ActionButton_ApplyCooldown(
 			-- Regular
@@ -343,25 +344,23 @@ else
 		local mainStart, mainDuration
 		local otherStart, otherDuration = 0, 0
 
-		-- can't show charges as the primary if charges are secret
-		if not issecretvalue(self.charges) and self.maxCharges ~= 0 and self.charges == 0 then
+		if self.maxCharges ~= 0 and self.charges == 0 then
 			mainStart, mainDuration = self.chargeStart, self.chargeDur
 		else
 			mainStart, mainDuration = self.start, duration
-			-- if charges are secret, assume they exist and display them.
-			if issecretvalue(self.charges) or self.charges ~= self.maxCharges then
+			if self.charges ~= self.maxCharges then
 				otherStart, otherDuration = self.chargeStart, self.chargeDur
 			end
 		end
 
-		if issecretvalue(mainDuration) or mainDuration > 0 then
+		if mainDuration > 0 then
 			cd:SetCooldown(mainStart, mainDuration, self.modRate)
 		else
 			cd:SetCooldown(0, 0)
 		end
 
 		-- Handle charges of spells that aren't completely depleted.
-		if issecretvalue(otherDuration) or otherDuration > 0 then
+		if otherDuration > 0 then
 			cd2:SetCooldown(otherStart, otherDuration, self.modRate)
 		else
 			cd2:SetCooldown(0, 0)
