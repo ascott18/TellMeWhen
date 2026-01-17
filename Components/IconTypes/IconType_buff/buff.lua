@@ -109,7 +109,12 @@ Type:RegisterIconDefaults{
 
 if clientHasSecrets then
 	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
-		text = L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] .. "\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"]
+		text = L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] .. "\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"],
+		OnSetup = function(self)
+			if TMW.CI.icon:IsGroupController() and TMW.CI.ics.Name == "" then
+				self:Hide()
+			end
+		end,
 	})
 end
 

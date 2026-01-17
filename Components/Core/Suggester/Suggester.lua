@@ -1516,7 +1516,12 @@ end
 
 local Module = SUG:NewModule("buff", SUG:GetModule("spell"))
 function Module:Table_Get()
-	return SpellCache:GetCache(), TMW.BE.buffs, TMW.BE.debuffs
+	if TMW.clientHasSecrets then
+		-- Equivalencies are effectively useless in secret world
+		return SpellCache:GetCache()
+	else
+		return SpellCache:GetCache(), TMW.BE.buffs, TMW.BE.debuffs
+	end
 end
 function Module:Entry_Colorize_2(f, id)
 	if TMW.DS[id] then
