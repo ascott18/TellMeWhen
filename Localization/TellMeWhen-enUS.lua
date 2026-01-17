@@ -2061,6 +2061,7 @@ L["PLAYER_DESC"] = "The 'player' unit is you."
 
 
 L["IMPORT_EXPORT"] = "Import/Export/Restore"
+L["IMPORT_EXPORT_LABEL"] = "Paste import strings here"
 L["IMPORT_EXPORT_DESC"] = [[Click the button to the right to import and export icons, groups, and profiles.
 
 Importing to or from a string, or exporting to another player, will require the use of this editbox. See the tooltips within the dropdown menu for details.]]

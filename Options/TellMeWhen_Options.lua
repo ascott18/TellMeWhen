@@ -3814,20 +3814,102 @@ function TMW:ImportPendingConfirmation(SettingsItem, luaDetections, callArgsAfte
 end
 
 ---------- Serialization ----------
+local USE_CBOR_SERIALIZATION = false -- TODO: Enable after a month or two.
+local CBOR_PREFIX = "!TMW1!"
+
 function TMW:SerializeData(data, type, ...)
-	-- nothing more than a wrapper for AceSerializer-3.0
 	assert(data, "No data to serialize!")
 	assert(type, "No data type specified!")
+
+	if USE_CBOR_SERIALIZATION then
+		-- New format: CBOR + Deflate + Base64
+		local payload = {
+			data = data,
+			version = TELLMEWHEN_VERSIONNUMBER,
+			type = type,
+			...
+		}
+		local serialized = C_EncodingUtil.SerializeCBOR(payload)
+		assert(serialized ~= nil, "Unable to serialize data")
+
+		local compressed = C_EncodingUtil.CompressString(serialized, Enum.CompressionMethod.Deflate)
+		local encoded = C_EncodingUtil.EncodeBase64(compressed)
+		assert(encoded ~= nil, "Unable to encode data")
+
+		return CBOR_PREFIX .. encoded .. "!"
+	end
+
+	-- Legacy format: AceSerializer
 	return TMW:Serialize(data, TELLMEWHEN_VERSIONNUMBER, " ~", type, ...)
 end
 
 function TMW:MakeSerializedDataPretty(string)
+	if string:sub(1, #CBOR_PREFIX) == CBOR_PREFIX then
+		-- CBOR format
+		return string
+	end
+
 	return string:
-	gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "): -- add spaces between tables to clean it up a little
-	gsub("~J", "~J "): -- ~J is the escape for a newline
-	gsub("%^ ^", "^^") -- remove double space at the end
+		gsub("(^[^tT%d][^^]*^[^^]*)", "%1 "): -- add spaces between tables to clean it up a little
+		gsub("~J", "~J "): -- ~J is the escape for a newline
+		gsub("%^ ^", "^^") -- remove double space at the end
 end
 
+--- Deserializes a single CBOR-encoded datum.
+-- Example format: !TMW1!<base64 encoded data>!
+function TMW:DeserializeCborDatum(encoded, silent)
+	local decoded = C_EncodingUtil.DecodeBase64(encoded)
+	if not decoded then
+		if not silent then
+			TMW:Warn("Unable to decode base64 data")
+		end
+		return nil
+	end
+
+	local decompressed = C_EncodingUtil.DecompressString(decoded, Enum.CompressionMethod.Deflate)
+	if not decompressed then
+		if not silent then
+			TMW:Warn("Unable to decompress data")
+		end
+		return nil
+	end
+
+	local payload = C_EncodingUtil.DeserializeCBOR(decompressed)
+	if not payload then
+		if not silent then
+			TMW:Warn("Unable to deserialize CBOR data")
+		end
+		return nil
+	end
+
+	local data = payload.data
+	local version = payload.version
+	local type = payload.type
+
+	if not version then
+		version = TELLMEWHEN_VERSIONNUMBER
+	end
+
+	if not TMW.Classes.SharableDataType.types[type] then
+		-- unknown data type
+		return nil
+	end
+
+	local result = {
+		data = data,
+		type = type,
+		version = version,
+	}
+	-- Append any extra args from payload (indices 4+)
+	for i = 1, #payload do
+		tinsert(result, payload[i])
+	end
+
+	return result
+end
+
+--- Deserializes a single serialized string (legacy AceSerializer format).
+-- Example format: ^1...^Sgroup^N1 ^^
 function TMW:DeserializeDatum(string, silent)
 	local success, data, version, spaceControl, type = TMW:Deserialize(string)
 	if not success or not data then
@@ -3887,6 +3969,15 @@ function TMW:DeserializeDatum(string, silent)
 	return result
 end
 
+--- Deserializes a string that contains one or more serialized strings.
+-- Supports two formats:
+-- 1. Legacy format (AceSerializer): ^1...^Sgroup^N1 ^^
+-- 2. CBOR format: !TMW1!<base64 encoded data>!
+-- 
+-- Example legacy format:
+-- ^1...^Sgroup^N1 ^^
+-- 
+-- ^1...^Stextlayout^STMW:textlayout:,?yX(oV%h9(+ ^^
 function TMW:DeserializeData(str, silent)
 	if not str then
 		return
@@ -3894,8 +3985,21 @@ function TMW:DeserializeData(str, silent)
 
 	local results
 
+	-- Check for CBOR format (!TMW1!...!) BEFORE stripping whitespace,
+	-- since whitespace separates multiple strings.
+	for encoded in gmatch(str, "!TMW1!([^!]+)!") do
+		results = results or {}
+
+		local result = TMW:DeserializeCborDatum(encoded, silent)
+		if result then
+			tinsert(results, result)
+		end
+	end
+
+	-- Strip whitespace for legacy format parsing
 	str = gsub(str, "[%c ]", "")
 
+	-- Check for legacy format (^...^^)
 	for string in gmatch(str, "(^%d+.-^^)") do
 		results = results or {}
 

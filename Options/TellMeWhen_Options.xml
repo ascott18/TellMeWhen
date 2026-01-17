@@ -907,9 +907,10 @@
 		<Scripts>
 			<OnLoad>
 				TMW:CInit(self)
-				self:SetLabel("")
+				self:SetLabel(TMW.L["IMPORT_EXPORT_LABEL"])
 				self:SetTexts(TMW.L["IMPORT_EXPORT"], TMW.L["IMPORT_EXPORT_DESC"])
 
+				self.BackgroundText:SetPoint("RIGHT", self.Button, "LEFT")
 				self:SetTextInsets(3, self.Button:GetWidth() + 5, 0, 0)
 
 				function self.callback(nAndMaxN, soFar, total)
