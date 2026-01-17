@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.0.1
+* Minor clarifications of secret behavior
+
 ## v12.0.0
 * WoW Midnight support. 
 * TBC Classic Anniversary support.

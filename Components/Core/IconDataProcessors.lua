@@ -143,11 +143,13 @@ do
 		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONSHOW"],
 		desc = L["SOUND_EVENT_ONSHOW_DESC"],
+		maybeSecret = true,
 	})
 	Processor:RegisterIconEvent(12, "OnHide", {
 		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONHIDE"],
 		desc = L["SOUND_EVENT_ONHIDE_DESC"],
+		maybeSecret = true,
 		settings = {
 			OnlyShown = false,
 		},
@@ -159,6 +161,7 @@ do
 		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONALPHAINC"],
 		desc = L["SOUND_EVENT_ONALPHAINC_DESC"],
+		maybeSecret = true,
 		settings = {
 			Operator = true,
 			Value = true,
@@ -175,6 +178,7 @@ do
 		category = L["EVENT_CATEGORY_VISIBILITY"],
 		text = L["SOUND_EVENT_ONALPHADEC"],
 		desc = L["SOUND_EVENT_ONALPHADEC_DESC"],
+		maybeSecret = true,
 		settings = {
 			Operator = true,
 			Value = true,

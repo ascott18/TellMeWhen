@@ -1,3 +1,6 @@
+## v12.0.1
+* Minor clarifications of secret behavior
+
 ## v12.0.0
 * WoW Midnight support. 
 * TBC Classic Anniversary support.
