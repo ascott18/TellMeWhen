@@ -1,3 +1,6 @@
+## v12.0.2
+* Midnight: Restored spell cast conditions since they still work against `player`.
+
 ## v12.0.1
 * Midnight: Minor clarifications of secret behavior
 * Midnight: Add cooldown numbers on charge CDs

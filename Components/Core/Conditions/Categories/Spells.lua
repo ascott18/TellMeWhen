@@ -995,6 +995,9 @@ Env.UnitCast = function(unit, level, matchname)
 	if not name then
 		name, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
 	end
+	if issecretvalue(name) then
+		return false
+	end
 	name = strlowerCache[name]
 	if matchname == "" and name then
 		matchname = name
@@ -1015,6 +1018,9 @@ Env.UnitCastTime = function(unit, level, matchname)
 	if not name then
 		name, _, _, _, endTime, _, notInterruptible = UnitChannelInfo(unit)
 	end
+	if issecretvalue(name) then
+		return 0
+	end
 	name = strlowerCache[name]
 	if matchname == "" and name then
 		matchname = name
@@ -1034,7 +1040,7 @@ Env.UnitCastPercent = function(unit, matchname)
 	if not name then
 		name, _, _, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
 	end
-	if not name then 
+	if not name or issecretvalue(name) then 
 		return 0, nil
 	end
 	if matchname ~= "" and strlowerCache[name] ~= matchname then
@@ -1085,7 +1091,7 @@ ConditionCategory:RegisterCondition(31,	 "CASTING", {
 		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
 	useSUG = true,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = [[UnitCast(c.Unit, c.Level, c.Spells.FirstString)]],
 	events = castEvents,
 })
@@ -1104,7 +1110,7 @@ ConditionCategory:RegisterCondition(31.1,	 "CASTPERCENT", {
 		editbox:SetLabel(L["CONDITIONPANEL_CASTTOMATCH"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
 	end,
 	useSUG = true,
-	deprecated = TMW.wowMajor >= 12,
+	maybeSecret = true,
 	funcstr = [[UnitCastPercent(c.Unit, c.Spells.FirstString) c.Operator c.Level]],
 	events = castEvents,
 	anticipate = [[
