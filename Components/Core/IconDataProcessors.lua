@@ -368,6 +368,9 @@ do
 		valueName = L["DURATION"],
 		conditionChecker = function(icon, eventSettings)
 			local attributes = icon.attributes
+			if issecretvalue(attributes.start) or issecretvalue(attributes.duration) then
+				return false
+			end
 			local d = (attributes.duration - (TMW.time - attributes.start)) / attributes.modRate
 			d = d > 0 and d or 0
 
@@ -478,11 +481,15 @@ do
 	TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function(event, time, Locked)
 		for icon, durations in pairs(DurationTriggers) do
 			if #durations > 0 then
+				local start, duration = icon.attributes.start, icon.attributes.duration
 				local lastCheckedDuration = durations.last or 0
 
-				local currentIconDuration = (icon.attributes.duration - (time - icon.attributes.start)) / icon.attributes.modRate
+				local currentIconDuration = 
+					((issecretvalue(start) or issecretvalue(duration)) and 0)
+					or (duration - (time - start)) / icon.attributes.modRate
+
 				if currentIconDuration < 0 then currentIconDuration = 0 end
-				
+			
 				-- If the duration didn't change (i.e. it is 0) then don't even try.
 				if currentIconDuration ~= lastCheckedDuration then
 
