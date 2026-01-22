@@ -199,8 +199,16 @@ if UnitGetIncomingHeals then
 		tcoords = CNDT.COMMON.standardtcoords,
 		formatter = TMW.C.Formatter.COMMANUMBER,
 		Env = {
-			UnitGetIncomingHeals = UnitGetIncomingHeals,
+			UnitGetIncomingHeals = not TMW.clientHasSecrets and UnitGetIncomingHeals or function(unit, healerGUID)
+				local heals = UnitGetIncomingHeals(unit, healerGUID)
+				if issecretvalue(heals) then
+					return 0
+				else
+					return heals
+				end
+			end,
 		},
+		maybeSecret = true,
 		funcstr = function(c)
 			return [[(UnitGetIncomingHeals(c.Unit) or 0) c.Operator c.Level]]
 		end,
