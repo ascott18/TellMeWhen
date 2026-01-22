@@ -3814,7 +3814,7 @@ function TMW:ImportPendingConfirmation(SettingsItem, luaDetections, callArgsAfte
 end
 
 ---------- Serialization ----------
-local USE_CBOR_SERIALIZATION = false -- TODO: Enable after a month or two.
+local USE_CBOR_SERIALIZATION = true
 local CBOR_PREFIX = "!TMW1!"
 
 function TMW:SerializeData(data, type, ...)
@@ -3858,24 +3858,24 @@ end
 --- Deserializes a single CBOR-encoded datum.
 -- Example format: !TMW1!<base64 encoded data>!
 function TMW:DeserializeCborDatum(encoded, silent)
-	local decoded = C_EncodingUtil.DecodeBase64(encoded)
-	if not decoded then
+	local success, decoded = pcall(C_EncodingUtil.DecodeBase64, encoded)
+	if not success or not decoded then
 		if not silent then
 			TMW:Warn("Unable to decode base64 data")
 		end
 		return nil
 	end
 
-	local decompressed = C_EncodingUtil.DecompressString(decoded, Enum.CompressionMethod.Deflate)
-	if not decompressed then
+	local success, decompressed = pcall(C_EncodingUtil.DecompressString, decoded, Enum.CompressionMethod.Deflate)
+	if not success or not decompressed then
 		if not silent then
 			TMW:Warn("Unable to decompress data")
 		end
 		return nil
 	end
 
-	local payload = C_EncodingUtil.DeserializeCBOR(decompressed)
-	if not payload then
+	local success, payload = pcall(C_EncodingUtil.DeserializeCBOR, decompressed)
+	if not success or not payload then
 		if not silent then
 			TMW:Warn("Unable to deserialize CBOR data")
 		end
