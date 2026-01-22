@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 TMW.CHANGELOG = [==[
 ## v12.0.2
 * Midnight: Restored spell cast conditions since they still work against `player`.
+* Midnight: Fully obsolete health and power conditions that are always secret.
 
 ## v12.0.1
 * Midnight: Minor clarifications of secret behavior
