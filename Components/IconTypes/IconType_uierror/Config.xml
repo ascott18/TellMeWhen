@@ -5,9 +5,10 @@
 		<Frames>
 		
 			
-			<EditBox parentKey="CLEUDur" name="$parentCLEUDur" inherits="TellMeWhen_TimeEditBoxTemplate">
+			<EditBox parentKey="Duration" name="$parentDuration" inherits="TellMeWhen_TimeEditBoxTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentCLEUEvents" relativePoint="BOTTOMLEFT" y="3"/>
+					<Anchor point="TOP" y="-7"/>
+					<Anchor point="LEFT" x="9" />
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -31,9 +32,9 @@
 				</Scripts>
 			</EditBox>
 
-			<CheckButton parentKey="CLEUNoRefresh" name="$parentCLEUNoRefresh" inherits="TellMeWhen_CheckTemplate">
+			<CheckButton parentKey="NoRefresh" name="$parentNoRefresh" inherits="TellMeWhen_CheckTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentCLEUDur" relativePoint="RIGHT" x="2" y="-1"/>
+					<Anchor point="LEFT" relativeTo="$parentDuration" relativePoint="RIGHT" x="2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -55,13 +56,12 @@
 				
 				self:SetTitle(TMW.L["ICONMENU_UIERROR"])
 				
-				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.CLEUDur, self.CLEUNoRefresh)
-				self.CLEUDur:SetPoint("LEFT", 8, 0)
+				TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.Duration, self.NoRefresh)
 				
-				self.CLEUNoRefresh:ConstrainLabel(self, "RIGHT")
+				self.NoRefresh:ConstrainLabel(self, "RIGHT")
 
-				self.CLEUDur.text2:SetPoint("RIGHT", self.CLEUNoRefresh, "LEFT")
-				self.CLEUDur.text2:SetHeight(30)
+				self.Duration.text2:SetPoint("RIGHT", self.NoRefresh, "LEFT")
+				self.Duration.text2:SetHeight(30)
 			</OnLoad>
 		</Scripts>
 	</Frame>
