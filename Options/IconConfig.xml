@@ -710,9 +710,58 @@
 				
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 					self.text:SetText(panelInfo.supplementalData.text)
-					self:AdjustHeight()
+					self:SetHeight(self.text:GetHeight() + 5)
 				end)
+				
+				-- Initialize LibCustomGlow reference
+				self.LibCustomGlow = LibStub("LibCustomGlow-1.0", true)
+				self.isReallyShown = false
 			</OnLoad>
+			<OnShow>
+				if self.showTimer then
+					self.showTimer:Cancel()
+				end
+				self.showTimer = C_Timer.NewTimer(0.1, function()
+					if self:IsVisible() then
+						local wasHidden = not self.isReallyShown
+						self.isReallyShown = true
+						if wasHidden and self.LibCustomGlow then
+							self.LibCustomGlow.PixelGlow_Start(self, {1, 0.1, 0.1, 1}, 8, 0.25, nil, 2, 0, 0, false, "SecretsWarning")
+							
+							-- sometimes won't show without doing something to the frame???
+							self:SetHeight(self:GetHeight() + 1)
+							
+							for _, child in pairs({self:GetChildren()}) do
+								local name = child:GetName()
+								if name and name:match("PixelGlow") then
+									self:SetAdjustHeightExclusion(child, true)
+								end
+							end
+							self.glowStopTimer = C_Timer.After(3, function()
+								self.LibCustomGlow.PixelGlow_Stop(self, "SecretsWarning")
+							end)
+						end
+					end
+					self.showTimer = nil
+				end)
+			</OnShow>
+			<OnHide>
+				if self.LibCustomGlow then
+					self.LibCustomGlow.PixelGlow_Stop(self, "SecretsWarning")
+				end
+				if self.hideTimer then
+					self.hideTimer:Cancel()
+				end
+				self.hideTimer = C_Timer.NewTimer(0.1, function()
+					if not self:IsVisible() then
+						self.isReallyShown = false
+						if self.glowStopTimer then
+							self.glowStopTimer:Cancel()
+						end
+					end
+					self.hideTimer = nil
+				end)
+			</OnHide>
 		</Scripts>
 	</Frame>
 

@@ -991,9 +991,7 @@ L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"] = [[This condition cannot operate on s
 
 In such situations, the data will be assumed to be in a default state (cooldown ready, aura absent, etc).]]
 L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by secret data. Examples of secret data include spell cooldowns and buffs/debuffs while in combat, Mythic+, or PvP; or unit identity in instances.]]
-L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[Buffs and debuffs generally cannot be tracked in restricted situations (in combat, Mythic+, or PvP match), except for a small number of spells allowed by Blizzard.
-
-Enable the %q setting below to hide this icon when auras are secret.]]
+L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[You CANNOT track any specific buff or debuff WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP).]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is if this icon is a %s, with %q left blank, which will allow a dynamic set of auras to be displayed.]]
 L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
 
