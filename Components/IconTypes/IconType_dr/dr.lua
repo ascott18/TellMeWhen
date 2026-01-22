@@ -31,7 +31,7 @@ local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 -- GLOBALS: TellMeWhen_ChooseName
 
 local PvEDRs = {}
-local DRList = LibStub("DRList-1.0")
+local DRList = LibStub("DRList-1.0", true)
 
 
 local Type = TMW.Classes.IconType:New("dr")
@@ -158,6 +158,12 @@ end)
 
 
 TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
+	if Type.obsolete then return end
+	if not DRList then
+		TMW:Error("The DRList-1.0 library is missing! DR spell equivalencies will be missing.")
+		return
+	end
+
 	-- Create our own DR equivalencies in TMW using the data from DRList-1.0
 
 	local myCategories = LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_MISTS_OF_PANDARIA and {
