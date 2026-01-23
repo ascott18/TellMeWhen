@@ -56,6 +56,7 @@ ConditionCategory:RegisterCondition(1,	 "ICON", {
 	
 	isicon = true,
 	nooperator = true,
+	maybeSecret = true,
 	unit = false,
 	icon = "Interface\\Icons\\INV_Misc_PocketWatch_01",
 	tcoords = CNDT.COMMON.standardtcoords,
