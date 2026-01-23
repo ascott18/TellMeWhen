@@ -309,62 +309,6 @@ end
 
 
 
-local function IconMenu_DropDown_OnClick(button, dropdown)
-	local icon = button.value
-	local GUID = icon:GetGUID(true)
-
-	local conditionSettings = dropdown:GetSettingTable()
-	conditionSettings.Icon = GUID
-
-	dropdown:OnSettingSaved()
-
-	TMW.DD:CloseDropDownMenus()
-end
-function CNDT.IconMenu_DropDown(dropdown)
-	if TMW.DD.MENU_LEVEL == 2 then
-		local conditionSettings = dropdown:GetSettingTable()
-
-		for icon in TMW.DD.MENU_VALUE:InIcons() do
-			if icon:IsValid() then
-				local info = TMW.DD:CreateInfo()
-
-				local text, textshort, tooltip = icon:GetIconMenuText()
-				info.text = textshort
-				info.tooltipTitle = text
-				info.tooltipText = tooltip
-
-				info.arg1 = dropdown
-				info.value = icon
-				info.func = IconMenu_DropDown_OnClick
-
-				info.checked = conditionSettings.Icon == icon:GetGUID()
-
-				info.tCoordLeft = 0.07
-				info.tCoordRight = 0.93
-				info.tCoordTop = 0.07
-				info.tCoordBottom = 0.93
-				info.icon = icon.attributes.texture
-
-				TMW.DD:AddButton(info)
-			end
-		end
-
-	elseif TMW.DD.MENU_LEVEL == 1 then
-		for group in TMW:InGroups() do
-			if group:ShouldUpdateIcons() then
-				local info = TMW.DD:CreateInfo()
-
-				info.text = group:GetGroupName()
-				info.hasArrow = true
-				info.notCheckable = true
-				info.value = group
-
-				TMW.DD:AddButton(info)
-			end
-		end
-	end
-end
-
 local function OperatorMenu_DropDown_OnClick(button, dropdown)
 	local conditionSettings = dropdown:GetSettingTable()
 	conditionSettings.Operator = button.value

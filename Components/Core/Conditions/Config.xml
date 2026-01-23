@@ -139,7 +139,7 @@
 						TMW:CInit(self)
 
 						self:SetTexts(TMW.L["CHOOSEICON"], nil)
-						self:SetFunction(TMW.CNDT.IconMenu_DropDown)
+						self:SetSetting("Icon")
 
 						-- Width is set in the TMW_CNDT_GROUP_DRAWGROUP handler for this frame.
 					</OnLoad>

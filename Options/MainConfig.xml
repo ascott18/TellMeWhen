@@ -321,6 +321,7 @@
 						TMW:CInit(self)
 
 						self:SetTexts(TMW.L["PROFILES_SET"], TMW.L["PROFILES_SET_DESC"])
+						self:SetTextPrefix(TMW.L["PROFILES_SET_LABEL"])
 
 						self:SetEasyFunctions(
 							function()
@@ -340,7 +341,7 @@
 						)
 
 						self:CScriptAdd("ReloadRequested", function()
-							self:SetText("|cff666666" .. TMW.L["PROFILES_SET_LABEL"] .. ": |r" .. TMW.db:GetCurrentProfile())
+							self:SetText(TMW.db:GetCurrentProfile())
 						end)
 
 						self:SetScrollable(true)

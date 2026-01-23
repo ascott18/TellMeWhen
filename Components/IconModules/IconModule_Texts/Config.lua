@@ -759,7 +759,7 @@ function TEXT:LoadConfig()
 	end
 
 	-- Set the text of the dropdown to pick the text layout.
-	TellMeWhen_TextDisplayOptions.Layout.PickLayout:SetText("|cff666666" .. L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
+	TellMeWhen_TextDisplayOptions.Layout.PickLayout:SetText(layoutName)
 	
 
 	-- Set the error text for the entire layout (show if we are using a fallback layout)

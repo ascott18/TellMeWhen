@@ -559,7 +559,7 @@
 										self:SetLabel(TMW.L["TEXTLAYOUTS_SKINAS"])
 
 										self:SetSetting("SkinAs")
-										--self:SetEasyTitlePrepend(TMW.L["TEXTLAYOUTS_SKINAS"])
+										--self:SetTextPrefix(TMW.L["TEXTLAYOUTS_SKINAS"])
 										self:SetEasyFunctions(
 											function()
 												return TMW:OrderedPairs(TMW.TEXT.MasqueSkinnableTexts)
@@ -765,7 +765,7 @@
 										self:SetLabel(TMW.L["UIPANEL_FONT_JUSTIFY"])
 
 										self:SetSetting("Justify")
-										--self:SetEasyTitlePrepend(TMW.L["UIPANEL_ICONSPACINGX"])
+										--self:SetTextPrefix(TMW.L["UIPANEL_ICONSPACINGX"])
 										self:SetEasyFunctions(
 											function()
 												return TMW:OrderedPairs(TMW.justifyPoints)
@@ -793,7 +793,7 @@
 										self:SetLabel(TMW.L["UIPANEL_FONT_JUSTIFYV"])
 
 										self:SetSetting("JustifyV")
-										--self:SetEasyTitlePrepend(TMW.L["UIPANEL_ICONSPACINGY"])
+										--self:SetTextPrefix(TMW.L["UIPANEL_ICONSPACINGY"])
 										self:SetEasyFunctions(
 											function()
 												return TMW:OrderedPairs(TMW.justifyVPoints)
@@ -1199,6 +1199,7 @@
 								TMW:CInit(self)
 						
 								self:SetTexts(TMW.L["TEXTLAYOUTS_CHOOSELAYOUT"], TMW.L["TEXTLAYOUTS_CHOOSELAYOUT_DESC"])
+								self:SetTextPrefix(TMW.L["TEXTLAYOUTS_HEADER_LAYOUT"])
 								self:SetFunction(TMW.TEXT.Layout_DropDown)
 
 								self:SetScrollable(true)
@@ -1255,6 +1256,7 @@
 					TMW:CInit(self)
 			
 					self:SetTexts(TMW.L["TEXTLAYOUTS_SETGROUPLAYOUT"], TMW.L["TEXTLAYOUTS_SETGROUPLAYOUT_DESC"])
+					self:SetTextPrefix(TMW.L["TEXTLAYOUTS_HEADER_LAYOUT"])
 					self:SetFunction(TMW.TEXT.Layout_Group_DropDown)
 
 					self:SetScrollable(true)
@@ -1268,7 +1270,7 @@
 						local gspv = TMW.CI.group and TMW.CI.group:GetSettingsPerView()
 						if gspv and gspv.TextLayout then
 							local layoutName = TMW.TEXT:GetLayoutName(nil, gspv.TextLayout, true)
-							self:SetText("|cff666666" .. TMW.L["TEXTLAYOUTS_HEADER_LAYOUT"] .. ": |r" .. layoutName)
+							self:SetText(layoutName)
 						end
 					end)
 				</OnLoad>

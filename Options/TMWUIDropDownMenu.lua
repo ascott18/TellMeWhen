@@ -785,7 +785,14 @@ local DD_Frame = TMW:NewClass("Config_DropDownMenu", "Config_Frame", "Config_Dro
 	end,
 }
 
+function DD_Frame:SetTextPrefix(prefix)
+	self.textPrefix = prefix
+end
+
 function DD_Frame:SetText(text)
+	if self.textPrefix then
+		text = "|cff666666" .. self.textPrefix .. ": |r" .. text
+	end
 	self.Text:SetText(text)
 end
 
@@ -861,10 +868,6 @@ local function EasyFunction(self)
 	end
 end
 
-function DD_Frame:SetEasyTitlePrepend(easyTitlePrepend)
-	self.easyTitlePrepend = easyTitlePrepend
-end
-
 function DD_Frame:SetEasyFunctions(dataGenerator, buttonGenerator, clickFunction)
 	self.dataGenerator = dataGenerator
 	self.buttonGenerator = buttonGenerator
@@ -888,11 +891,7 @@ function DD_Frame:ReloadSetting()
 			if info.value == settings[self.setting] then
 
 				local text = info.text
-				if self.easyTitlePrepend then
-					text = "|cff666666" .. self.easyTitlePrepend .. ": |r" .. text
-				end
 				self:SetText(text)
-
 				if info.font then
 					local oldFont, size, flags = self.Text:GetFont()
 					self.Text:SetFont(info.font or oldFont, size, flags)
@@ -920,6 +919,11 @@ TMW:NewClass("Config_DropDownMenu_Icon", "Config_DropDownMenu"){
 
 	OnNewInstance_DropDownMenu_Icon = function(self, data)
 		self:SetPreviewSize(self.previewSize)
+		
+		-- Set default function if none provided
+		if not self.func then
+			self:SetFunction(self.DefaultIconMenu)
+		end
 	end,
 
 	SetPreviewSize = function(self, size)
@@ -1010,15 +1014,88 @@ TMW:NewClass("Config_DropDownMenu_Icon", "Config_DropDownMenu"){
 	SetGUID = function(self, GUID)
 		local icon = TMW.GUIDToOwner[GUID]
 
-		self:SetUIDropdownGUIDText(GUID, L["CHOOSEICON"])
+		self:SetUIDropdownGUIDText(GUID, self.emptyText or L["CHOOSEICON"])
 		self:SetIconPreviewIcon(GUID)
 	end,
 
 	SetIcon = function(self, icon)
 		local GUID = icon:GetGUID()
 
-		self:SetUIDropdownGUIDText(GUID, L["CHOOSEICON"])
+		self:SetUIDropdownGUIDText(GUID, self.emptyText or L["CHOOSEICON"])
 		self:SetIconPreviewIcon(GUID)
+	end,
+
+	SetEmptyText = function(self, text)
+		self.emptyText = text
+	end,
+
+	ReloadSetting = function(self)
+		if not self.setting then
+			return
+		end
+
+		local settingTable = self:GetSettingTable()
+		if settingTable then
+			local GUID = settingTable[self.setting]
+			self:SetGUID(GUID or "")
+		end
+	end,
+
+	DefaultIconMenu = function(dropdown)
+		if TMW.DD.MENU_LEVEL == 2 then
+			local conditionSettings = dropdown:GetSettingTable()
+
+			for icon in TMW.DD.MENU_VALUE:InIcons() do
+				if icon:IsValid() then
+					local info = TMW.DD:CreateInfo()
+
+					local text, textshort, tooltip = icon:GetIconMenuText()
+					info.text = textshort
+					info.tooltipTitle = text
+					info.tooltipText = tooltip
+
+					info.arg1 = dropdown
+					info.value = icon
+					info.func = function(button, dropdown)
+						local icon = button.value
+						local GUID = icon:GetGUID(true)
+
+						local settingTable = dropdown:GetSettingTable()
+						settingTable[dropdown.setting] = GUID
+
+						dropdown:OnSettingSaved()
+
+						TMW.DD:CloseDropDownMenus()
+					end
+
+					info.checked = conditionSettings[dropdown.setting] == icon:GetGUID()
+
+					info.tCoordLeft = 0.07
+					info.tCoordRight = 0.93
+					info.tCoordTop = 0.07
+					info.tCoordBottom = 0.93
+					if not TMW.issecretvalue(icon.attributes.texture) then
+						info.icon = icon.attributes.texture
+					end
+
+					TMW.DD:AddButton(info)
+				end
+			end
+
+		elseif TMW.DD.MENU_LEVEL == 1 then
+			for group in TMW:InGroups() do
+				if group:ShouldUpdateIcons() then
+					local info = TMW.DD:CreateInfo()
+
+					info.text = group:GetGroupName()
+					info.hasArrow = true
+					info.notCheckable = true
+					info.value = group
+
+					TMW.DD:AddButton(info)
+				end
+			end
+		end
 	end,
 
 }
