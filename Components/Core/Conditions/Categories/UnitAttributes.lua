@@ -579,7 +579,6 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 		local function Name(name)
 			-- Look up the race name without throwing LibBabble errors.
 			if not lookup[name] then
-				TMW:Debug("Missing LibBabble-Race-3.0 phrase for: " .. name)
 				return name
 			end
 			return lookup[name]

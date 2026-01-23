@@ -916,7 +916,9 @@ function icon:Export_SetButtonAttributes(editbox, info)
 	info.text = text
 	info.tooltipTitle = text
 
-	info.icon = icon.attributes.texture
+	if not TMW.issecretvalue(icon.attributes.texture) then
+		info.icon = icon.attributes.texture
+	end
 	info.tCoordLeft = 0.07
 	info.tCoordRight = 0.93
 	info.tCoordTop = 0.07

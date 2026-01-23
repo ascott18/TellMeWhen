@@ -1066,7 +1066,10 @@ local function ProcessEquivalencies()
 
 						tbl[i] = name
 					else
-						TMW:Debug("Invalid spellID found: %s (%s - %s)!", realSpellID, category, equiv)
+						if not TMW.clientHasSecrets then
+							-- Equivs are useless in secret world
+							TMW:Debug("Invalid spellID found: %s (%s - %s)!", realSpellID, category, equiv)
+						end
 
 						tbl[i] = realSpellID
 					end
@@ -1076,9 +1079,11 @@ local function ProcessEquivalencies()
 			end
 
 			for _, spell in pairs(tbl) do
-				if type(spell) == "number" and not GetSpellName(spell) then
-					TMW:Debug("Invalid spellID found: %s (%s - %s)!",
-						spell, category, equiv)
+				if type(spell) == "number" and not GetSpellName(spell) and not TMW.clientHasSecrets then
+					if not TMW.clientHasSecrets then
+						-- Equivs are useless in secret world
+						TMW:Debug("Invalid spellID found: %s (%s - %s)!", spell, category, equiv)
+					end
 				end
 			end
 		end

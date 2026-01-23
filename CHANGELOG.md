@@ -1,3 +1,6 @@
+## v12.0.3
+* Prevent secrets in the import/export menu, which would break scrolling.
+
 ## v12.0.2
 * Midnight: Restored spell cast conditions since they still work against `player`.
 * Midnight: Fully obsolete health and power conditions that are always secret.

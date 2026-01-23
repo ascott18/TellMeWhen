@@ -990,6 +990,9 @@ TMW:NewClass("Config_DropDownMenu_Icon", "Config_DropDownMenu"){
 			title = textshort
 			desc = tooltip .. "\r\n\r\n" .. L["ICON_TOOLTIP2NEWSHORT"]
 			texture = icon and icon.attributes.texture
+			if TMW.issecretvalue(texture) then
+				texture = nil
+			end
 		end
 
 		if TMW.db.global.ShowGUIDs then

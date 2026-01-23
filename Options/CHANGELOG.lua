@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.0.3
+* Prevent secrets in the import/export menu, which would break scrolling.
+
 ## v12.0.2
 * Midnight: Restored spell cast conditions since they still work against `player`.
 * Midnight: Fully obsolete health and power conditions that are always secret.
