@@ -1,10 +1,48 @@
 ﻿<Ui>
 
 	<Frame name="TellMeWhen_GM_Alpha" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="34"/>
+		<Size y="65"/>
 		<Frames>
+			<Frame parentKey="AlphaInherit" inherits="TMW_IconDropDownMenuTemplate">
+				<Anchors>
+					<Anchor point="TOP" y="-7"/>
+					<Anchor point="LEFT" x="10" />
+					<Anchor point="RIGHT" x="-10" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						TMW:CInit(self)
+
+						self:SetTexts(TMW.L["UIPANEL_GROUPALPHA_INHERIT"], TMW.L["UIPANEL_GROUPALPHA_INHERIT_DESC"])
+						self:SetEmptyText(TMW.L["UIPANEL_GROUPALPHA_STATIC"])
+						self:SetSetting("AlphaInherit")
+
+						self:SetFunction(function(dropdown)
+							if TMW.DD.MENU_LEVEL == 1 then
+								-- Add "Use Static Group Opacity" option
+								local settingTable = dropdown:GetSettingTable()
+								local info = TMW.DD:CreateInfo()
+								info.text = TMW.L["UIPANEL_GROUPALPHA_STATIC"]
+								info.checked = settingTable[dropdown.setting] == ""
+								info.func = function()
+									settingTable[dropdown.setting] = ""
+									dropdown:OnSettingSaved()
+									TMW.DD:CloseDropDownMenus()
+								end
+								TMW.DD:AddButton(info)
+								TMW.DD:AddSpacer()
+							end
+
+							-- Call the default icon menu
+							dropdown:DefaultIconMenu()
+						end)
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
 			<Slider parentKey="Alpha" inherits="TellMeWhen_SliderTemplate_Alpha">
 				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.AlphaInherit" relativePoint="BOTTOM" y="-10"/>
 					<Anchor point="LEFT" x="10" />
 					<Anchor point="RIGHT" x="-10" />
 				</Anchors>
@@ -14,6 +52,18 @@
 
 						self:SetTexts(TMW.L["UIPANEL_GROUPALPHA"], TMW.L["UIPANEL_GROUPALPHA_DESC"])
 						self:SetSetting("Alpha")
+
+						self:CScriptAdd("ReloadRequested", function()
+							local settings = self:GetSettingTable()
+							local dropdown = self:GetParent().AlphaInherit
+							if settings and settings.AlphaInherit and settings.AlphaInherit ~= "" then
+								self:Disable()
+								dropdown:SetPreviewSize(18)
+							else
+								self:Enable()
+								dropdown:SetPreviewSize(0)
+							end
+						end)
 					</OnLoad>
 				</Scripts>
 			</Slider>

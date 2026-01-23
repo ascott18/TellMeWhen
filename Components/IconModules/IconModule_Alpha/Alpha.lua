@@ -210,8 +210,6 @@ end
 function Alpha:SetupForIcon(icon)
 	self.FakeHidden = icon.FakeHidden
 	
-	local attributes = icon.attributes
-	
 	self:CALCULATEDSTATE(icon, icon.attributes.calculatedState)
 end
 
@@ -228,6 +226,12 @@ function Alpha:CALCULATEDSTATE(icon, state)
 
 	if self.FakeHidden then
 		icon:SetAlpha(0)
+		return
+	end
+
+	if icon.group.AlphaInherit == icon:GetGUID() then
+		-- Prevent double-applying alpha when the group inherits 
+		-- one of its own icon's alpha
 		return
 	end
 

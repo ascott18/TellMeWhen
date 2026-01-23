@@ -894,6 +894,10 @@ This setting has no effect on the functionality of icons themselves. It only cha
 
 Set this setting to 0 if you want to hide the entire group will still allowing it to remain fully functional (similar to the %q setting for icons).]]
 
+L["UIPANEL_GROUPALPHA_STATIC"] = "Use Static Group Opacity"
+L["UIPANEL_GROUPALPHA_INHERIT"] = "Inherit Opacity from Icon"
+L["UIPANEL_GROUPALPHA_INHERIT_DESC"] = [[If set, the group will inherit its opacity from the specified icon, overriding the static Group Opacity setting below.]]
+
 L["UIPANEL_ONLYINCOMBAT"] = "Only show in combat"
 L["UIPANEL_SPEC"] = "Dual Spec"
 L["UIPANEL_SPECIALIZATION"] = "Talent Specialization"

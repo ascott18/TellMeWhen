@@ -2733,13 +2733,6 @@ TMW:NewClass("Config_Slider_Alpha", "Config_Slider"){
 
 		self:UpdateTexts()
 	end,
-
-	METHOD_EXTENSIONS = {
-		OnDisable = function(self)
-			self:SetValue(0)
-			self:UpdateTexts()
-		end,
-	},
 	
 	Formatter = TMW.C.Formatter:New(function(value)
 		if value == 0 then
