@@ -185,17 +185,12 @@ end
 local function SortIconUpdateTable(icons)
 	-- First, collect all dependencies for all icons
 	local iconDependencies = {}
-	local iconsByGUID = {}
 	local iconsInTable = {}
 	
 	-- Build lookup tables
 	for i = 1, #icons do
 		local icon = icons[i]
 		iconsInTable[icon] = i
-		local iconGUID = icon:GetGUID()
-		if iconGUID then
-			iconsByGUID[iconGUID] = icon
-		end
 	end
 	
 	-- Collect dependencies for each icon
@@ -418,26 +413,16 @@ end
 -- @return [String] The GUID of the icon.
 -- @usage local GUID = icon:GetGUID()
 function Icon.GetGUID(icon, generate)
-	local GUID = icon:GetRealSettings().GUID
+	local GUID = icon._GUID
+	if GUID and not generate then return GUID end
+
+	GUID = icon:GetRealSettings().GUID
 	if GUID == "" then
 		GUID = nil
 	end
 
 	if not GUID then
-		if not icon.TempGUID then
-			icon.TempGUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
-			GUID = icon.TempGUID
-		end
-		if generate then
-			GUID = icon.TempGUID
-			icon.TempGUID = nil
-
-			icon:GetRealSettings().GUID = GUID
-			icon.GUID = GUID
-			icon:Setup()
-		else
-			return icon.TempGUID
-		end
+		GUID = icon.TempGUID
 	else
 		-- Nil this out for icons that are imported that have a GUID.
 		-- There will be a tempGUID already for the icon, but it won't match
@@ -445,6 +430,18 @@ function Icon.GetGUID(icon, generate)
 		icon.TempGUID = nil
 	end
 
+	if not GUID then
+		GUID = TMW:GenerateGUID("icon", TMW.CONST.GUID_SIZE)
+		icon.TempGUID = GUID
+	end
+
+	if generate then
+		icon.TempGUID = nil
+		icon:GetRealSettings().GUID = GUID
+		-- icon:Setup()
+	end
+
+	icon._GUID = GUID
 	return GUID
 end
 
@@ -1057,7 +1054,8 @@ end
 -- @paramsig 
 function Icon.Setup(icon)
 	if not icon or not icon[0] then return end
-	
+	icon._GUID = nil -- clear cached guid
+
 	local group = icon.group
 	local ics = icon:GetSettings()
 	local typeData = TMW.Types[ics.Type]
