@@ -112,6 +112,15 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	pGUID = UnitGUID("player")
 end)
 
+if not CombatLogGetCurrentEventInfo then
+	-- Default to a non-deprecated option in Midnight.
+	TMW:RegisterCallback("TMW_CONFIG_ICON_TYPE_CHANGED", function(event, icon, type)
+		if type == "icd" then
+			icon:GetSettings().ICDType = "spellcast"
+		end
+	end)
+end
+
 
 -- Auras that don't report a source, but can only be self-applied,
 -- so if the destination is the player, we know its the player's proc.
