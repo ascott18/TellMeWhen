@@ -1,6 +1,7 @@
 ## v12.0.3
 * Groups can now inherit their opacity from an icon. This allows an entire group to take on opacity that is driven by a secret aspect, like cooldown readiness or spell casting state. This also allows using an icon's conditions to drive group opacity.
-* Prevent secrets in the import/export menu, which would break scrolling.
+* The Spell Cast condition can detect secret casts if the spell filter is empty and the "Casting" checkbox is chosen.
+* Fix: prevent secrets in the import/export menu, which would break scrolling.
 
 ## v12.0.2
 * Midnight: Restored spell cast conditions since they still work against `player`.

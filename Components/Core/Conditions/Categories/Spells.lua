@@ -996,6 +996,10 @@ Env.UnitCast = function(unit, level, matchname)
 		name, _, _, _, _, _, notInterruptible = UnitChannelInfo(unit)
 	end
 	if issecretvalue(name) then
+		if matchname == "" and level == 1 then
+			-- casting any spell, without preference to interruptability
+			return true
+		end
 		return false
 	end
 	name = strlowerCache[name]
