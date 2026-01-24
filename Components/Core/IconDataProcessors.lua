@@ -1112,10 +1112,10 @@ do
 			icon = TMW.GUIDToOwner[icon]
 			if not icon then return 0 end
 			
-			local stack = icon.attributes.stack
+			local stack = icon.attributes.stackText
 
 			if issecretvalue(stack) then
-				if type(stack) == 'nil' then return 0 end
+				if stack == nil then return 0 end
 				return stack
 			end
 
