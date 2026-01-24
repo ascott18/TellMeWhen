@@ -409,7 +409,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(70, "FRAME", {
 		local Location = eventSettings.Location
 
 		if eventSettings.ShowIconTex then
-			Text = "|T" .. (icon.attributes.texture or "") .. ":0|t " .. Text
+			Text = "|T" .. (icon.attributes.texture) .. ":0|t " .. Text
 		end
 
 		local i = 1
@@ -439,14 +439,18 @@ Announcements:RegisterEventHandlerDataNonSpecific(71, "RAID_WARNING_FAKE", {
 		local Location = eventSettings.Location
 
 		if eventSettings.ShowIconTex then
-			Text = "|T" .. (icon.attributes.texture or "") .. ":0|t " .. Text
+			Text = "|T" .. (icon.attributes.texture) .. ":0|t " .. Text
 		end
 
 		-- GLOBALS: RaidWarningFrame, RaidNotice_AddMessage
 		
-		-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
-		-- The gsub here is so that text that appears after a link of some kind will be the correct color instead of black (caused by the |r at the end of the link).
-		Text = "|c" .. eventSettings.TextColor .. Text:gsub("|r", "|c" .. eventSettings.TextColor) .. "|r"
+		if not TMW.issecretvalue(Text) then
+			-- workaround: blizzard's code doesnt manage colors correctly when there are 2 messages being displayed with different colors.
+			-- The gsub here is so that text that appears after a link of some kind will be the correct color instead of black (caused by the |r at the end of the link).
+			Text = Text:gsub("|r", "|c" .. eventSettings.TextColor)
+		end
+
+		Text = "|c" .. eventSettings.TextColor .. Text .. "|r"
 
 		RaidNotice_AddMessage(RaidWarningFrame, Text, TMW:StringToCachedRGBATable(eventSettings.TextColor), eventSettings.TextDuration) -- arg3 still demands a valid table for the color info
 		
@@ -464,7 +468,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(72, "ERRORS_FRAME", {
 
 	handler = function(icon, eventSettings, Text)
 		if eventSettings.ShowIconTex then
-			Text = "|T" .. (icon.attributes.texture or "") .. ":0|t " .. Text
+			Text = "|T" .. (icon.attributes.texture) .. ":0|t " .. Text
 		end
 
 		-- GLOBALS: UIErrorsFrame
@@ -615,7 +619,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 
 	handler = function(icon, eventSettings, Text)
 		if eventSettings.ShowIconTex then
-			Text = "|T" .. (icon.attributes.texture or "") .. ":20:20:-5|t " .. Text
+			Text = "|T" .. (icon.attributes.texture) .. ":20:20:-5|t " .. Text
 		end
 		
 		local c = TMW:StringToCachedRGBATable(eventSettings.TextColor)
