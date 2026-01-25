@@ -507,9 +507,6 @@ else
 		unit = PLAYER,
 		icon = "Interface\\Icons\\ability_rogue_eviscerate",
 		tcoords = CNDT.COMMON.standardtcoords,
-		Env = {
-			UnitPower = UnitPower,
-		},
 		funcstr = ([[UnitPower("player", %d) c.Operator c.Level]]):format(Enum.PowerType.ComboPoints),
 		events = function(ConditionObject, c)
 			return
