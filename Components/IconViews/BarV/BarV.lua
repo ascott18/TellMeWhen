@@ -162,27 +162,25 @@ View:ImplementsModule("IconModule_TimerBar_BarDisplay", 50, function(Module, ico
 	
 	Module.bar:SetOrientation("VERTICAL")
 	Module.bar:SetRotatesTexture(true)
-	
-	Module.bar:SetFrameLevel(icon:GetFrameLevel())
+	Module.container:SetFrameLevel(icon:GetFrameLevel())
 
 	local inset = gspv.BorderBar
 	local iconInset = gspv.BorderInset and 0 or gspv.BorderIcon
 	
-
-	Module.bar:ClearAllPoints()
+	Module.container:ClearAllPoints()
 	if not gspv.Icon then
-		Module.bar:SetPoint("TOPLEFT", inset, -inset)
-		Module.bar:SetPoint("BOTTOMRIGHT", -inset, inset)
+		Module.container:SetPoint("TOPLEFT", inset, -inset)
+		Module.container:SetPoint("BOTTOMRIGHT", -inset, inset)
 
 	elseif gspv.Flip then
-		Module.bar:SetPoint("BOTTOMLEFT", inset, inset)
-		Module.bar:SetPoint("BOTTOMRIGHT", -inset, inset)
-		Module.bar:SetPoint("TOP", IconContainer.container, "BOTTOM", 0, -gspv.Padding - inset - iconInset)
+		Module.container:SetPoint("BOTTOMLEFT", inset, inset)
+		Module.container:SetPoint("BOTTOMRIGHT", -inset, inset)
+		Module.container:SetPoint("TOP", IconContainer.container, "BOTTOM", 0, -gspv.Padding - inset - iconInset)
 
 	elseif not gspv.Flip then
-		Module.bar:SetPoint("TOPLEFT", inset, -inset)
-		Module.bar:SetPoint("TOPRIGHT", -inset, -inset)
-		Module.bar:SetPoint("BOTTOM", IconContainer.container, "TOP", 0, gspv.Padding + inset + iconInset)
+		Module.container:SetPoint("TOPLEFT", inset, -inset)
+		Module.container:SetPoint("TOPRIGHT", -inset, -inset)
+		Module.container:SetPoint("BOTTOM", IconContainer.container, "TOP", 0, gspv.Padding + inset + iconInset)
 	end
 
 	-- We can only query the size of the bar if the icon has had its position set.

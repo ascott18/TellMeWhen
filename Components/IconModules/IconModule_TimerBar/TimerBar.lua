@@ -63,7 +63,11 @@ TimerBar:RegisterAnchorableFrame("TimerBar")
 
 
 function TimerBar:OnNewInstance(icon)	
-	local bar = CreateFrame("StatusBar", self:GetChildNameBase() .. "TimerBar", icon)
+	self.container = CreateFrame("Frame", nil, icon)
+	self.container:SetAllPoints()
+
+	local bar = CreateFrame("StatusBar", self:GetChildNameBase() .. "TimerBar", self.container)
+	bar:SetAllPoints()
 	self.bar = bar
 	
 	self.texture = bar:CreateTexture(nil, "OVERLAY")
@@ -102,6 +106,10 @@ function TimerBar:OnEnable()
 
 	self.texture2:SetTexture(LSM:Fetch("statusbar", texture))
 	self.texture2:SetAlpha(0)
+
+	-- Workaround blizzard having choppy animations on bars with high scale.
+	-- Set the bar's effective scale to exactly align to to screen resolution.
+	self.bar:SetScale(PixelUtil.GetPixelToUIUnitFactor() / icon:GetEffectiveScale())
 	
 	self:SetCooldown(attributes.start, attributes.duration, attributes.durObj, attributes.chargeStart, attributes.chargeDur)
 end

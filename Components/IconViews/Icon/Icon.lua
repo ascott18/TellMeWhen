@@ -177,11 +177,11 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	end
 	
 	if TimerBar_Overlay then
-		TimerBar_Overlay.bar:SetFrameLevel(icon:GetFrameLevel() + 1 + frameLevelOffset)
-		TimerBar_Overlay.bar:ClearAllPoints()
-		TimerBar_Overlay.bar:SetPoint("TOP", anchorTo, "CENTER", 0, -0.5)
-		TimerBar_Overlay.bar:SetPoint("BOTTOMLEFT", anchorTo, "BOTTOMLEFT", insets, insets)
-		TimerBar_Overlay.bar:SetPoint("BOTTOMRIGHT", anchorTo, "BOTTOMRIGHT", -insets, insets)
+		TimerBar_Overlay.container:SetFrameLevel(icon:GetFrameLevel() + 1 + frameLevelOffset)
+		TimerBar_Overlay.container:ClearAllPoints()
+		TimerBar_Overlay.container:SetPoint("TOP", anchorTo, "CENTER", 0, -0.5)
+		TimerBar_Overlay.container:SetPoint("BOTTOMLEFT", anchorTo, "BOTTOMLEFT", insets, insets)
+		TimerBar_Overlay.container:SetPoint("BOTTOMRIGHT", anchorTo, "BOTTOMRIGHT", -insets, insets)
 	end
 	
 	if PowerBar_Overlay then
