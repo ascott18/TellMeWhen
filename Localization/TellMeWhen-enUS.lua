@@ -370,6 +370,12 @@ L["ICONMENU_VALUE_POWERTYPE_DESC"] = "Configure what resource you want the icon 
 L["ICONMENU_VALUE_HASUNIT"] = "Unit Found"
 L["ICONMENU_VALUE_NOUNIT"] = "No Units Found"
 
+L["ICONMENU_VALUE_LOW"] = "Value Percentage < %s%%"
+L["ICONMENU_VALUE_HIGH"] = "Value Percentage > %s%%"
+L["ICONMENU_VALUE_THRESHOLD_TITLE"] = "Percentage Thresholds"
+L["ICONMENU_VALUE_THRESHOLD_MIN_DESC"] = "Percentage threshold, below which a custom Opacity & Color can be applied"
+L["ICONMENU_VALUE_THRESHOLD_MAX_DESC"] = "Percentage threshold, above which a custom Opacity & Color can be applied"
+
 L["ICONMENU_META"] = "Meta Icon"
 L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
 

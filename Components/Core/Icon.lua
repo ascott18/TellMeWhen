@@ -1299,7 +1299,7 @@ TMW.IconStateArbitrator = {
 			
 			local stateData = attributes[handler.attribute]
 			
-			if stateData and stateData.Alpha == 0 then
+			if stateData and (issecretvalue(stateData.Alpha) or stateData.Alpha == 0) then
 				-- If an alpha is set to 0, then the icon should be hidden no matter what, 
 				-- so use it as the final alpha value and stop looking for more.
 				-- This functionality has existed in TMW since practically day one, by the way. So don't be clever and remove it.
@@ -1322,7 +1322,7 @@ TMW.IconStateArbitrator = {
 			-- realAlpha does the same for the alpha. We use it on top of calculatedState in favor of backwards compatibility.
 			local state = attributes[handlerToUse.attribute]
 
-			if state.secretBool ~= nil then
+			if state.secretBool ~= nil or issecretvalue(state.Alpha) then
 				icon:SetInfo_INTERNAL("realAlpha; calculatedState", 1, state)
 			else
 				if not state.Alpha then

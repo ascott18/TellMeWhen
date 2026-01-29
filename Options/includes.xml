@@ -144,6 +144,5 @@
 <Include file="..\Components\IconTypes\IconType_uierror\Config.xml" />
 <Script  file="..\Components\IconTypes\IconType_wpnenchant\Config.lua" />
 <Include file="..\Components\IconTypes\IconType_luavalue\Config.xml" />
+<Include file="..\Components\IconTypes\IconType_value\Config.xml" />
 </Ui>
-
-

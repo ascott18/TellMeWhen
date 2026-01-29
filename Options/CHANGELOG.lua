@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.0.4
+* Resource Display now have secret-compatible percentage threshold settings for applying custom Opacity & Color above or below certain values.
+
 ## v12.0.3
 * Groups can now inherit their opacity from an icon. This allows an entire group to take on opacity that is driven by a secret aspect, like cooldown readiness or spell casting state. This also allows using an icon's conditions to drive group opacity.
 * The Spell Cast condition can detect secret casts if the spell filter is empty and the "Casting" checkbox is chosen.

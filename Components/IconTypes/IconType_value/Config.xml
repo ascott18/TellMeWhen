@@ -1,6 +1,6 @@
-﻿<Ui>
+<Ui>
 
-	<Frame name="TellMeWhen_ValueRequirements" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
+	<Frame name="TellMeWhen_ValuePcts" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
 		<Size y="40"/>
 		<Frames>
 			<Frame parentKey="ValueMin" inherits="TellMeWhen_EditBoxWithCheckTemplate">
@@ -13,8 +13,8 @@
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:SetSettings("ValueMinEnabled", "ValueMin")
-						self:SetTexts(MINIMUM, TMW.L["ICONMENU_VALUE_MIN_DESC"])
+						self:SetSettings("ValuePctMinEnabled", "ValuePctMin")
+						self:SetTexts(MINIMUM, TMW.L["ICONMENU_VALUE_THRESHOLD_MIN_DESC"])
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -30,8 +30,8 @@
 					<OnLoad>
 						TMW:CInit(self)
 
-						self:SetSettings("ValueMaxEnabled", "ValueMax")
-						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_VALUE_MAX_DESC"])
+						self:SetSettings("ValuePctMaxEnabled", "ValuePctMax")
+						self:SetTexts(MAXIMUM, TMW.L["ICONMENU_VALUE_THRESHOLD_MAX_DESC"])
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -40,7 +40,7 @@
 			<OnLoad>
 				TMW:CInit(self)
 				
-				self:SetTitle(TMW.L["VALUEPANEL_TITLE2"], true)
+				self:SetTitle(TMW.L["ICONMENU_VALUE_THRESHOLD_TITLE"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

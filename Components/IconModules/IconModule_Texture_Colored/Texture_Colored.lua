@@ -20,6 +20,7 @@ local print = TMW.print
 local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
 local type = type
 local bitband = bit.band
+local issecretvalue = TMW.issecretvalue
 
 local ColorMSQ, OnlyMSQ
 
@@ -121,7 +122,12 @@ function Texture_Colored:STATE(icon, stateData)
 		self.texture:SetVertexColor(1, 1, 1, 1)
 	end
 
-	self.texture:SetDesaturated(c.flags and c.flags.desaturate or false)
+
+	if stateData.Desaturation then
+		self.texture:SetDesaturation(stateData.Desaturation)
+	else
+		self.texture:SetDesaturated(c.flags and c.flags.desaturate or false)
+	end
 	
 	if LMB and ColorMSQ then
 		-- This gets set by IconModule_IconContainer_Masque

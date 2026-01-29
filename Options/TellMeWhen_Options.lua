@@ -2824,10 +2824,13 @@ TMW:NewClass("Config_Frame_IconStateSet", "Config_Frame"){
 	-- Methods
 
 	SetConfigData = function(self, configData)
-		self.Alpha:SetTexts(configData.text)
+		local text = TMW.get(configData.text)
+		local tooltipText = TMW.get(configData.tooltipText)
+
+		self.Alpha:SetTexts(text)
 		self.Alpha:SetTooltip(
-			L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(configData.text),
-			configData.tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
+			L["ICONMENU_SHOWWHEN_OPACITYWHEN_WRAP"]:format(text),
+			tooltipText or L["ICONMENU_SHOWWHEN_OPACITY_GENERIC_DESC"]
 		)
 	end,
 
