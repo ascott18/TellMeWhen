@@ -91,6 +91,8 @@ if not TMW.clientHasSecrets then
     else
         FixNoManaAction = function(action, noMana) return noMana end
     end
+else
+    FixNoManaAction = function(action, noMana) return noMana end
 end
 
 
