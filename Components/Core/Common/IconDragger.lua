@@ -287,11 +287,6 @@ IconDragger:RegisterIconDragHandler(4,	-- Insert
 )
 
 local function Split(IconDragger, domain)
-	if InCombatLockdown() then
-		-- Groups can't be added in combat
-		error("TMW: Can't create groups while in combat")
-	end
-
 	local group = TMW:Group_Add(domain)
 
 	-- back up the icon data of the source group
@@ -354,12 +349,6 @@ IconDragger:RegisterIconDragHandler(40,	-- Split to profile
 			info.tooltipTitle = L["ICONMENU_SPLIT"]
 			info.tooltipText = L["ICONMENU_SPLIT_DESC"]
 
-			if InCombatLockdown() then
-				info.tooltipWhileDisabled = true
-				info.tooltipText = L["ICONMENU_SPLIT_NOCOMBAT_DESC"]
-				info.disabled = true
-			end
-
 			return true
 		end
 	end,
@@ -373,12 +362,6 @@ IconDragger:RegisterIconDragHandler(41,	-- Split to global
 			info.text = L["ICONMENU_SPLIT_GLOBAL"]
 			info.tooltipTitle = L["ICONMENU_SPLIT_GLOBAL"]
 			info.tooltipText = L["ICONMENU_SPLIT_DESC"] .. "\r\n\r\n" .. L["GLOBAL_GROUP_GENERIC_DESC"]
-
-			if InCombatLockdown() then
-				info.tooltipWhileDisabled = true
-				info.tooltipText = L["ICONMENU_SPLIT_NOCOMBAT_DESC"]
-				info.disabled = true
-			end
 
 			return true
 		end

@@ -419,11 +419,6 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", noGroupsChecker)
 
 ---------- Add/Delete ----------
 function TMW:Group_Delete(group)
-	if InCombatLockdown() then
-		-- Error if we are in combat because TMW:Update() won't update the groups instantly if we are.
-		error("TMW: Can't delete groups while in combat")
-	end
-
 	TMW:ValidateType("group", "TMW:Group_Delete(group)", group, "Group")
 
 	local domain = group.Domain
@@ -435,18 +430,15 @@ function TMW:Group_Delete(group)
 	tremove(TMW.db[domain].Groups, groupID)
 	TMW.db[domain].NumGroups = TMW.db[domain].NumGroups - 1
 
-	TMW:UpdateNormally()
+	TMW:RegisterSelfDestructingCallback("TMW_GLOBAL_UPDATE_POST", function()
+		-- Do this again so the group list will update to reflect the missing group.
+		IE:LoadGroup(1, false)
+	end)
+	TMW:Update()
 
-	-- Do this again so the group list will update to reflect the missing group.
-	IE:LoadGroup(1, false)
 end
 
 function TMW:Group_Add(domain, view)
-	if InCombatLockdown() then
-		-- Error if we are in combat because TMW:Update() won't create the group instantly if we are.
-		error("TMW: Can't add groups while in combat")
-	end
-
 	TMW:ValidateType("domain", "TMW:Group_Add(domain [,view]", domain, "string")
 	TMW:ValidateType("view", "TMW:Group_Add(domain [,view]", view, "string;nil")
 
@@ -465,20 +457,12 @@ function TMW:Group_Add(domain, view)
 		end
 	end
 
-	TMW:UpdateNormally()
-
-	local group = TMW[domain][groupID]
-
+	local group = TMW.Classes.Group:GetOrCreate(domain, groupID)
+	group:Setup()
 	return group
 end
 
 function TMW:Group_Insert(group, targetDomain, targetID)
-	print(group, targetDomain, targetID)
-	if InCombatLockdown() then
-		-- Error if we are in combat because TMW:Update() won't update the groups instantly if we are.
-		error("TMW: Can't swap groups while in combat")
-	end
-
 	TMW:ValidateType("group", "TMW:Group_Insert(group, targetDomain, targetID)", group, "Group")
 	TMW:ValidateType("targetDomain", "TMW:Group_Insert(group, targetDomain, targetID)", targetDomain, "string")
 	TMW:ValidateType("targetID", "TMW:Group_Insert(group, targetDomain, targetID)", targetID, "number")
@@ -505,10 +489,11 @@ function TMW:Group_Insert(group, targetDomain, targetID)
 	TMW.db[oldDomain].NumGroups = TMW.db[oldDomain].NumGroups - 1
 	TMW.db[targetDomain].NumGroups = TMW.db[targetDomain].NumGroups + 1
 
-	TMW:UpdateNormally()
-
-	IE:LoadGroup(1, groupGUID and TMW:GetDataOwner(groupGUID))
-	IE:LoadIcon(1, iconGUID and TMW:GetDataOwner(iconGUID))
+	TMW:RegisterSelfDestructingCallback("TMW_GLOBAL_UPDATE_POST", function()
+		IE:LoadGroup(1, groupGUID and TMW:GetDataOwner(groupGUID))
+		IE:LoadIcon(1, iconGUID and TMW:GetDataOwner(iconGUID))
+	end)
+	TMW:Update()
 end
 
 ---------- Etc ----------

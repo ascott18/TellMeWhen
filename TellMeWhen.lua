@@ -2617,23 +2617,13 @@ function TMW:UpdateNormally()
 
 	for groupID = 1, max(TMW.db.profile.NumGroups, #TMW.profile) do
 		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
-		local group = TMW.profile[groupID] or
-			TMW.Classes.Group:New("Frame", "TellMeWhen_Group" .. groupID, TMW, "TellMeWhen_GroupTemplate", groupID)
-
-		group.Domain = "profile"
-		TMW[group.Domain][groupID] = group
-
+		local group = TMW.Classes.Group:GetOrCreate("profile", groupID)
 		TMW.safecall(group.Setup, group)
 	end
 
 	for groupID = 1, max(TMW.db.global.NumGroups, #TMW.global) do
 		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
-		local group = TMW.global[groupID] or
-			TMW.Classes.Group:New("Frame", "TellMeWhen_GlobalGroup" .. groupID, TMW, "TellMeWhen_GlobalGroupTemplate", groupID)
-
-		group.Domain = "global"
-		TMW[group.Domain][groupID] = group
-
+		local group = TMW.Classes.Group:GetOrCreate("global", groupID)
 		TMW.safecall(group.Setup, group)
 	end
 

@@ -114,8 +114,29 @@ do	-- TMW.CNDT implementation
 end
 
 -- [INTERNAL]
-function Group.OnNewInstance(group)
-	group.ID = group:GetID()
+-- Gets or instantiates the group frame. Not to be confused with TMW:Group_Add(),
+-- which adds a new group to settings.
+function Group:GetOrCreate(domain, groupID)
+	local group = TMW[domain][groupID]
+	if group then return group end
+
+	group = TMW.Classes.Group:New(
+		"Frame",
+		(domain == "global"
+			and "TellMeWhen_GlobalGroup"
+			or  "TellMeWhen_Group"
+		) .. groupID,
+		TMW,
+		domain == "global"
+			and "TellMeWhen_GlobalGroupTemplate"
+			or  "TellMeWhen_GroupTemplate",
+		groupID)
+
+	group.Domain = domain
+	group.ID = groupID
+	TMW[domain][groupID] = group
+
+	return group
 end
 
 -- [INTERNAL]
