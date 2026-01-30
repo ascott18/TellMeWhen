@@ -164,6 +164,27 @@ local fixSpellMap = {
 			return 357208 -- Fire breath without font of magic
 		end
 	end,
+
+
+	[194249] = function()
+		-- Shadow priest https://github.com/Stanzilla/WoWUIBugs/issues/813
+		-- 228260 is Voidform
+		-- 232698 is Shadowform
+		-- 194249 is a weird Voidform that isn't learned
+		-- 1242173 is Void Volley
+
+		-- When Voidform IS UP, the following overrides are active:
+		-- GetOverrideSpell(228260) -> 1242173 -- Correct
+		-- GetOverrideSpell('Voidform') -> 194249 -- Wrong
+		-- GetOverrideSpell(232698) -> 194249  -- Wrong
+		-- GetOverrideSpell('Shadowform') -> 194249  -- Wrong
+
+		-- This fix causes shadowform to become void volley during voidform,
+		-- but there's no reason for anyone to be tracking shadowform's CD,
+		-- so it doesn't matter.
+
+		return 1242173
+	end,
 }
 
 local assistantSpell
