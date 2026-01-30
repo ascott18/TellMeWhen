@@ -538,8 +538,20 @@ function Type:PLAYER_ENTERING_WORLD()
 		Type:UnregisterEvent("ARENA_OPPONENT_UPDATE")
 	end
 end
-Type:RegisterEvent("PLAYER_ENTERING_WORLD")
-Type:RegisterEvent("ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD")
+
+if not Type.obsolete then
+	Type:RegisterEvent("PLAYER_ENTERING_WORLD")
+	Type:RegisterEvent("ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD")
+		
+	TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, icon)
+		Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		Type:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	end)
+
+	TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
+		ManualIconsManager:UpdateTable_Unregister(icon)
+	end)
+end
 
 function Type:GROUP_ROSTER_UPDATE()
 	for i = 1, 40 do
@@ -843,14 +855,5 @@ function Type:Setup(icon)
 
 	icon:Update()
 end
-
-TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function(event, icon)
-	Type:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	Type:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-end)
-
-TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
-	ManualIconsManager:UpdateTable_Unregister(icon)
-end)
 
 Type:Register(40)
