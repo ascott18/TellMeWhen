@@ -26,6 +26,7 @@ TMW.DOGTAG.nsList = "Base;TMW;Unit;Stats"
 
 
 local abs = math.abs
+local type = type
 
 
 ---------------------------------
@@ -81,7 +82,12 @@ DogTag:AddTag("TMW", "TMWFormatDuration", {
 		-- TODO: (MIDNIGHT): 
 		-- "We are adding a new SecondsFormatter Lua object that will allow addons to format secret time values into strings."
 		-- The following is a rough approximation, but fails to preserve ".0" on a whole numbers.
-		if issecretvalue(seconds) then return AbbreviateNumbers(seconds, secondsOptions) end
+		if issecretvalue(seconds) then
+			if type(seconds) == 'number' then
+				return AbbreviateNumbers(seconds, secondsOptions)
+			end
+			return seconds
+		end
 		
 		return TMW:FormatSeconds(seconds, seconds == 0 or abs(seconds) > 10, true)
 	end,
