@@ -864,9 +864,14 @@ local totemRanks = TMW.COMMON.TotemRanks or {}
 
 function Env.TotemHelper(slot, spellSet)
 	local _, totemName, start, duration = GetTotemInfo(slot)
+	
+	if issecretvalue(totemName) then
+		return 0
+	end
+	
 	local totemNameLower = strlowerCache[totemName]
 	local totemInfo = totemRanks[totemNameLower]
-
+	
 	local matchAny = not spellSet or spellSet.Name == ""
 	local Hash = not matchAny and spellSet.Hash
 	
@@ -899,6 +904,10 @@ function Env.TotemHelperAny(spellSet)
 		local have, totemName, start, duration = GetTotemInfo(slot)
 		if have == nil then
 			return 0 -- `have` will be nil if the slot doesn't exist.
+		end
+		
+		if issecretvalue(totemName) then
+			return 0
 		end
 		
 		local totemNameLower = strlowerCache[totemName]
@@ -937,6 +946,7 @@ ConditionCategory:RegisterCondition(20.1,	 "TOTEM_ANY", {
 	min = 0,
 	range = 60,
 	unit = false,
+	maybeSecret = true,
 	name = function(editbox)
 		editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
 		editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])
@@ -964,6 +974,7 @@ for i = 1, 5 do
 		min = 0,
 		range = 60,
 		unit = false,
+		maybeSecret = true,
 		name = (not totem or totem.hasVariableNames) and function(editbox)
 			editbox:SetTexts(L["CNDT_TOTEMNAME"], L["CNDT_TOTEMNAME_DESC"])
 			editbox:SetLabel(L["CNDT_TOTEMNAME"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"])

@@ -1007,6 +1007,9 @@ L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is if this i
 L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
 
 Additionally, duration sorting cannot be performed on any secret durations.]]
+L["UIPANEL_SECRETS_TOTEM_DESC"] = [[You CANNOT track any specific totem name WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP).
+
+You CAN leave "What to track" blank to track any totem. Totem slot filters still work while secret.]]
 
 L["UIPANEL_DRAWEDGE"] = "Highlight timer edge"
 L["UIPANEL_DRAWEDGE_DESC"] = "Highlights the edge of the cooldown timer (clock animation) to increase visibility"
