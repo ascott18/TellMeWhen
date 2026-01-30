@@ -214,6 +214,8 @@ if TMW.clientHasSecrets then
 				local stack
 				if charges then
 					stack = charges.currentCharges
+				else
+					stack = GetSpellCastCount(iName)
 				end
 				
 				local inrange, noMana = true, nil

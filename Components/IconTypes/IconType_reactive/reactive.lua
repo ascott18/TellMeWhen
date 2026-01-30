@@ -193,6 +193,7 @@ if TMW.clientHasSecrets then
 				if charges then
 					stack = charges.currentCharges
 				else
+					stack = GetSpellCastCount(iName)
 					charges = emptyTable
 				end
 
@@ -251,8 +252,13 @@ if TMW.clientHasSecrets then
 		if numChecked > 1 then
 
 			cooldown = GetSpellCooldown(NameFirst)
-			charges = GetSpellCharges(NameFirst) or emptyTable
-			stack = charges and charges.currentCharges or GetSpellCastCount(NameFirst)
+			charges = GetSpellCharges(NameFirst)
+			if charges then
+				stack = charges.currentCharges
+			else
+				stack = GetSpellCastCount(NameFirst)
+				charges = emptyTable
+			end
 
 			inrange, noMana = true, nil
 			if RangeCheck then
@@ -310,6 +316,7 @@ else
 				if charges then
 					stack = charges.currentCharges
 				else
+					stack = GetSpellCastCount(iName)
 					charges = emptyTable
 				end
 
@@ -371,8 +378,13 @@ else
 		if numChecked > 1 then
 
 			cooldown = GetSpellCooldown(NameFirst)
-			charges = GetSpellCharges(NameFirst) or emptyTable
-			stack = charges and charges.currentCharges or GetSpellCastCount(NameFirst)
+			charges = GetSpellCharges(NameFirst)
+			if charges then
+				stack = charges.currentCharges
+			else
+				stack = GetSpellCastCount(NameFirst)
+				charges = emptyTable
+			end
 
 			if IgnoreRunes and (cooldown and cooldown.duration) == runeCD and NameFirst ~= mindfreeze and NameFirst ~= 47528 then
 				-- DK abilities that are on cooldown because of runes are always reported
