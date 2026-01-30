@@ -56,39 +56,41 @@ local GetSpellCost = TMW.GetSpellCost
 local UnitPower = UnitPower
 local GetActionInfo = GetActionInfo
 
-local function FixNoMana(spell, noMana)
-    local cost, data = GetSpellCost(spell)
-    if cost and data then
-        return UnitPower("player", data.type) < cost
+if not TMW.clientHasSecrets then
+    local function FixNoMana(spell, noMana)
+        local cost, data = GetSpellCost(spell)
+        if cost and data then
+            return UnitPower("player", data.type) < cost
+        end
+        return noMana
     end
-    return noMana
-end
-local function FixNoManaAction(action, noMana)
-    local type, id = GetActionInfo(action)
-    if type == "spell" then
-        return FixNoMana(id, noMana)
-    end
-    return noMana
-end
-
-local _, pclass = UnitClass("Player")
-if pclass == "MONK" then
-    -- Workaround https://github.com/ascott18/TellMeWhen/issues/2285
-    local IsUsableSpell_old = IsUsableSpell
-    IsUsableSpell = function(spell)
-        local usable, noMana = IsUsableSpell_old(spell)
-        noMana = FixNoMana(spell, noMana)
-        return usable, noMana
+    local function FixNoManaAction(action, noMana)
+        local type, id = GetActionInfo(action)
+        if type == "spell" then
+            return FixNoMana(id, noMana)
+        end
+        return noMana
     end
 
-    local IsUsableAction_old = IsUsableAction
-    IsUsableAction = function(action)
-        local usable, noMana = IsUsableAction_old(action)
-        noMana = FixNoManaAction(action, noMana)
-        return usable, noMana
+    local _, pclass = UnitClass("Player")
+    if pclass == "MONK" then
+        -- Workaround https://github.com/ascott18/TellMeWhen/issues/2285
+        local IsUsableSpell_old = IsUsableSpell
+        IsUsableSpell = function(spell)
+            local usable, noMana = IsUsableSpell_old(spell)
+            noMana = FixNoMana(spell, noMana)
+            return usable, noMana
+        end
+
+        local IsUsableAction_old = IsUsableAction
+        IsUsableAction = function(action)
+            local usable, noMana = IsUsableAction_old(action)
+            noMana = FixNoManaAction(action, noMana)
+            return usable, noMana
+        end
+    else
+        FixNoManaAction = function(action, noMana) return noMana end
     end
-else
-    FixNoManaAction = function(action, noMana) return noMana end
 end
 
 
