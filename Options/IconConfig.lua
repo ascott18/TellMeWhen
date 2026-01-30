@@ -394,8 +394,12 @@ function IE:TooltipAddSpellBreakdown(tbl)
 	local i = 1
 	
 	while i <= #tbl do
-		while _G["GameTooltipTextLeft" .. numLines]:GetStringWidth() < longest and i <= #tbl do
-			local fs = _G["GameTooltipTextLeft" .. numLines]
+		local fs = _G["GameTooltipTextLeft" .. numLines]
+
+		-- Clear lingering secret aspect that might be present from combat state
+		fs:SetText("")
+
+		while fs:GetStringWidth() < longest and i <= #tbl do
 			local s = tostring(tbl[i]):trim(" ")
 			if fs:GetText() == nil then
 				GameTooltip:AddLine(s, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
