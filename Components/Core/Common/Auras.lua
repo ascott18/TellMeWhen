@@ -198,6 +198,8 @@ if TMW.clientHasSecrets then
                 HookFrame(viewer, frame)
             end
         end
+
+        printstack('deliberate mistake to test build detection of debug calls')
     end)
 end
 

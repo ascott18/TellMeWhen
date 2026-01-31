@@ -287,7 +287,8 @@
         "EssentialCooldownViewer",
         "UtilityCooldownViewer",
         "BuffIconCooldownViewer",
-        "BuffBarCooldownViewer"
+        "BuffBarCooldownViewer",
+        "EditModeSettingDisplayInfoManager"
     ],
     "cSpell.words": [
         "cooldown",

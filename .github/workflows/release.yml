@@ -47,6 +47,13 @@ jobs:
             echo "More than 1 distinct ##Interface version found in .toc files." 1>&2
             exit 1
           fi;
+
+      - name: "Check for Debugging Code"
+        run: |
+          if grep -rnE '\b(printstack|wlp)\s*\(' --exclude-dir=.release --exclude-dir=.git --include="*.lua" .; then
+            echo "Found debugging code (printstack or wlp calls) in the codebase." 1>&2
+            exit 1
+          fi
                 
       - name: "Build In-Game Changelog"
         run: sudo chmod +x ./build/create-lua-changelog.sh && ./build/create-lua-changelog.sh
