@@ -3037,6 +3037,13 @@ function TMW:SlashCommand(str)
 end
 TMW:RegisterChatCommand("tmw", "SlashCommand")
 TMW:RegisterChatCommand("tellmewhen", "SlashCommand")
+TMW:RegisterChatCommand("rl", ReloadUI)
+if _G.CooldownViewerSettings then
+	TMW:RegisterChatCommand("cdm", function()
+		_G.CooldownViewerSettings:SetShown(not _G.CooldownViewerSettings:IsShown())
+	end)
+end
+
 
 function TMW:LoadOptions(recursed)
 	--[[ Here's the story of some taint. A better version is at

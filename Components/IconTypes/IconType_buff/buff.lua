@@ -108,13 +108,34 @@ Type:RegisterIconDefaults{
 
 
 if clientHasSecrets then
-	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
+	Type:RegisterConfigPanel_XMLTemplate(121, "TellMeWhen_SecretsWarning", {
 		text = L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] .. "\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"],
 		OnSetup = function(self)
 			if TMW.CI.ics.Name == "" then
 				self:Hide()
 				return
 			end
+
+			-- If all spells entered pass TMW.COMMON.Auras.SpellHasCDMHook(spell), hide.
+			local ics = TMW.CI.ics
+			local spells = TMW:GetSpells(ics.Name, false).Array
+			local _, unitSet = TMW:GetUnits(TMW.CI.icon, ics.Unit)
+			local pass = false
+			if unitSet.unitSettings == "player" then
+				pass = ics.BuffOrDebuff == "HELPFUL" or ics.BuffOrDebuff == "EITHER"
+			elseif unitSet.unitSettings == "target" then
+				pass = ics.BuffOrDebuff == "HARMFUL" or ics.BuffOrDebuff == "EITHER"
+			end
+			for i = 1, #spells do
+				if not Auras.SpellHasCDMHook(spells[i]) then
+					pass = false
+					break;
+				end
+			end
+			if pass then
+				self:Hide()
+			end
+			
 		end,
 	})
 end

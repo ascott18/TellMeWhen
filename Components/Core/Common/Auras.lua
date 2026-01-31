@@ -23,6 +23,7 @@ local LARGE_NUMBER_SEPERATOR = LARGE_NUMBER_SEPERATOR
 local DECIMAL_SEPERATOR = DECIMAL_SEPERATOR
 
 local select = select
+local wipe = wipe
 local setmetatable = setmetatable
 local issecretvalue = TMW.issecretvalue
 
@@ -31,6 +32,8 @@ local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot
 local GetAuraSlots = C_UnitAuras.GetAuraSlots or UnitAuraSlots
 local UnitGUID = UnitGUID
+
+local GetSpellName = TMW.GetSpellName
 
 local function getOrCreate(t, k)
     local ret = t[k]
@@ -84,6 +87,9 @@ local function FireUnitAura(unit, payload)
     TMW:Fire("TMW_UNIT_AURA", unit, payload)
 end
 
+function Auras.SpellHasCDMHook(spell)
+    return false
+end
 
 local ApplyCDMData
 local OnUnitAura
@@ -126,6 +132,7 @@ if TMW.clientHasSecrets then
                 -- on a different unit, since auraInstanceIds are only unique per-unit.
                 and not IsAuraFilteredOutByInstanceID(unit, auraInstance.auraInstanceID, data.filter)
             then
+                -- print("Applying CDM data to", unit, data.spellId, data.name)
                 auraInstance.spellId = data.spellId
                 auraInstance.name = data.name
                 auraInstance.sourceUnit = data.sourceUnit
@@ -138,12 +145,13 @@ if TMW.clientHasSecrets then
         end
     end
 
+    local hookedFrames = {}
     local function HookFrame(viewer, frame)
-        if not frame.SetAuraInstanceInfo or frame.__tmwHooked then
+        if not frame.SetAuraInstanceInfo or hookedFrames[frame] then
             return
         end
 
-        frame.__tmwHooked = true
+        hookedFrames[frame] = true
 
         -- -- Add hooks for ShowPandemicStateFrame and HidePandemicStateFrame
         -- hooksecurefunc(frame, "ShowPandemicStateFrame", function(frame)
@@ -168,9 +176,10 @@ if TMW.clientHasSecrets then
 
             -- Always collect CDM data even if not blocked
             -- so that its ready to go if we become blocked.
+            -- print("Collecting CDM data for", unit, spellID, GetSpellName(spellID))
             cdmData[unit][auraInstanceID] = {
                 spellId = spellID,
-                name = TMW.GetSpellName(spellID),
+                name = GetSpellName(spellID),
                 sourceUnit = "player",
                 isHelpful = unit == "player",
                 isHarmful = unit == "target",
@@ -185,21 +194,59 @@ if TMW.clientHasSecrets then
         end)
     end
 
+    local viewers = {
+        EssentialCooldownViewer,
+        BuffIconCooldownViewer,
+        BuffBarCooldownViewer,
+        UtilityCooldownViewer
+    }
+    -- Remove nil viewers
+    for i = #viewers, 1, -1 do
+        if not viewers[i] then
+            table.remove(viewers, i)
+        end
+    end
+
+    local function SpellHasCDMHook(spell)
+        if not CVarCallbackRegistry:GetCVarValueBool("cooldownViewerEnabled") then
+            -- Don't try to show frames if CDM is disabled.
+            return false
+        end
+
+        -- If viewer hasn't shown yet, hooks might not be in place.
+        for _, viewer in pairs(viewers) do
+            local shown = viewer:IsShown()
+            if not shown then
+                viewer:Show()
+                viewer:Hide()
+            end
+        end
+        
+        for frame in pairs(hookedFrames) do
+            -- frame.cooldownID is a canary for whether the frame is active in its pool.
+            -- It gets cleared when items are released from the pool.
+            if frame.cooldownID and frame.cooldownInfo and (
+                frame.cooldownInfo.spellID == spell or 
+                GetSpellName(frame.cooldownInfo.spellID):lower() == tostring(spell):lower()
+            ) then
+                return true
+            end
+        end
+        return false
+    end
+
+    function Auras.SpellHasCDMHook(spell)
+        local _, result = TMW.safecall(SpellHasCDMHook, spell)
+        return result
+    end
+
     TMW.safecall(function()
-        local viewers = {
-            BuffIconCooldownViewer,
-            UtilityCooldownViewer,
-            BuffBarCooldownViewer,
-            EssentialCooldownViewer
-        }
         for _, viewer in pairs(viewers) do
             hooksecurefunc(viewer, "OnAcquireItemFrame", HookFrame)
             for _, frame in TMW:Vararg(viewer:GetChildren()) do
                 HookFrame(viewer, frame)
             end
         end
-
-        printstack('deliberate mistake to test build detection of debug calls')
     end)
 end
 

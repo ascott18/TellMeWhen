@@ -132,18 +132,20 @@ function Env.AuraDurPacked(unit, name, kindKey, onlyMine)
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
 				local expirationTime = instance.expirationTime
-				if not issecretvalue(expirationTime) then
+				if issecretvalue(expirationTime) then
+					return huge, 0, 0, 1
+				else
 					local timeMod = instance.timeMod
-					return 
+					return
 						expirationTime == 0 and huge or ((expirationTime - TMW.time) / timeMod), 
-						instance.duration, 
+						instance.duration,
 						expirationTime,
 						timeMod
 				end
 			end
 		end
 	end
-	return 0, 0, 0
+	return 0, 0, 0, 1
 end
 
 function Env.AuraPercent(unit, name, filter)

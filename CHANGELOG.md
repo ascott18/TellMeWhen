@@ -1,4 +1,13 @@
 ## v12.0.4
+
+### Midnight Aura Improvements
+* Buff/Debuff icons can now filter auras by name/id if those auras are displayed by the Blizzard Cooldown Manager. This requires the CDM to be enabled, shown, and have the spell tracked by at least one of the CDM's icon or bar groups.
+* Buff/Debuff icons can now have a blank spell filter without having to be a Group Controller.
+* Buff and debuff duration conditions can also check for specific spell names. If the aura is detectable by name via CDM data and is present, its duration will be assumed to be infinite.
+
+* Tip: Use the "Tracked Buffs" CDM group for this, make it small, and stick it in an unused corner of your screen, turn off Show Timer and Show Tooltips.
+
+### Other
 * Resource Display now have secret-compatible percentage threshold settings for applying custom Opacity & Color above or below certain values.
 * Workaround broken Blizzard spell override behavior for Voidform/Void Volley.
 * Fixed numerous secret errors.

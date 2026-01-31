@@ -288,7 +288,20 @@
         "UtilityCooldownViewer",
         "BuffIconCooldownViewer",
         "BuffBarCooldownViewer",
-        "EditModeSettingDisplayInfoManager"
+        "EditModeSettingDisplayInfoManager",
+        "EditModeManagerFrame",
+        "UIDropDownMenu_SetWidth",
+        "UIDropDownMenu_Initialize",
+        "UIDropDownMenu_SetText",
+        "UIDropDownMenu_AddButton",
+        "HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_ICON_SIZE",
+        "UIDropDownMenu_CreateInfo",
+        "UIDropDownMenu_EnableDropDown",
+        "UIDropDownMenu_DisableDropDown",
+        "UIDropDownMenu_SetSelectedValue",
+        "ColorPickerFrame",
+        "SlashCmdList",
+        "CVarCallbackRegistry"
     ],
     "cSpell.words": [
         "cooldown",
