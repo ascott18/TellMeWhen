@@ -26,6 +26,7 @@ local select = select
 local setmetatable = setmetatable
 local issecretvalue = TMW.issecretvalue
 
+local IsAuraFilteredOutByInstanceID = C_UnitAuras.IsAuraFilteredOutByInstanceID
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot
 local GetAuraSlots = C_UnitAuras.GetAuraSlots or UnitAuraSlots
@@ -64,7 +65,9 @@ data = {
 
 ]]
 local data = {}
+local cdmData = { player = {}, target = {} }
 Auras.data = data
+Auras.cdmData = cdmData
 
 -- Optimization: have specific events for the most common units
 -- to avoid all consumers having to listen to all UNIT_AURA events.
@@ -82,10 +85,14 @@ local function FireUnitAura(unit, payload)
 end
 
 
+local ApplyCDMData
+local OnUnitAura
 if TMW.clientHasSecrets then
+
     local blockedUnits = {}
     local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
     local blocked = false
+
     TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
         local newBlocked = ShouldAurasBeSecret()
         if blocked ~= newBlocked then
@@ -106,12 +113,95 @@ if TMW.clientHasSecrets then
             end
         end
     end)
+
+    ApplyCDMData = function(unit, auraInstance)
+        if unit == "target" or unit == "player" then
+            local data = cdmData[unit][auraInstance.auraInstanceID]
+            if data 
+                -- Don't apply to already non-secret auras
+                and issecretvalue(auraInstance.expirationTime)
+                -- Don't apply CDM data to other players' auras
+                -- that happen to have reused an auraInstanceID
+                -- that currently or previously belonged to one of our auras
+                -- on a different unit, since auraInstanceIds are only unique per-unit.
+                and not IsAuraFilteredOutByInstanceID(unit, auraInstance.auraInstanceID, data.filter)
+            then
+                auraInstance.spellId = data.spellId
+                auraInstance.name = data.name
+                auraInstance.sourceUnit = data.sourceUnit
+                auraInstance.isHelpful = data.isHelpful
+                auraInstance.isHarmful = data.isHarmful
+                -- just avoid ugly secret checks in buff.lua for stealable.
+                -- if secret we would assume false anyway.
+                auraInstance.isStealable = false
+            end
+        end
+    end
+
+    local function HookFrame(viewer, frame)
+        if not frame.SetAuraInstanceInfo or frame.__tmwHooked then
+            return
+        end
+
+        frame.__tmwHooked = true
+
+        -- -- Add hooks for ShowPandemicStateFrame and HidePandemicStateFrame
+        -- hooksecurefunc(frame, "ShowPandemicStateFrame", function(frame)
+        --     local spellID = frame.cooldownInfo.spellID
+        --     local auraInstanceID = frame.auraInstanceID
+        --     print("Pandemic! at the disco", spellID, auraInstanceID)
+        -- end)
+
+        hooksecurefunc(frame, "SetAuraInstanceInfo", function(frame, cdmAuraInstance)
+            local spellID = frame.cooldownInfo.spellID
+            local auraInstanceID = cdmAuraInstance.auraInstanceID
+            local unit = frame.auraDataUnit
+            printstack(spellID)
+            -- Before collecting, we need to trigger a remove of the old aura with this instance ID
+            -- because the reuse of instance IDs means the lookup tables might experience
+            -- an aura seemingly changing its name/id, which will prevent old lookups
+            -- from properly purging when the aura expires.
+            OnUnitAura(unit, {
+                isFullUpdate = false,
+                removedAuraInstanceIDs = { auraInstanceID }
+            })
+
+            -- Always collect CDM data even if not blocked
+            -- so that its ready to go if we become blocked.
+            cdmData[unit][auraInstanceID] = {
+                spellId = spellID,
+                name = TMW.GetSpellName(spellID),
+                sourceUnit = "player",
+                isHelpful = unit == "player",
+                isHarmful = unit == "target",
+                filter = "PLAYER|" .. (unit == "player" and "HELPFUL" or "HARMFUL"),
+            }
+            
+            -- Re-populate lookups with the new non-secret CDM data.
+            OnUnitAura(unit, {
+                isFullUpdate = false,
+                addedAuras = { GetAuraDataByAuraInstanceID(unit, auraInstanceID) }
+            })
+        end)
+    end
+
+    TMW.safecall(function()
+        local viewers = {
+            BuffIconCooldownViewer,
+            UtilityCooldownViewer,
+            BuffBarCooldownViewer,
+            EssentialCooldownViewer
+        }
+        for _, viewer in pairs(viewers) do
+            hooksecurefunc(viewer, "OnAcquireItemFrame", HookFrame)
+            for _, frame in TMW:Vararg(viewer:GetChildren()) do
+                HookFrame(viewer, frame)
+            end
+        end
+    end)
 end
 
--- NOTE: This is our own frame and event reg because we modify the aura instance tables.
--- and so don't want to share with other AceEvent registrations.
-Auras:RegisterEvent("UNIT_AURA")
-Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
+OnUnitAura = function(unit, unitAuraUpdateInfo)
     local unitData = data[unit]
     if not unitData then
         -- we have no cached unit data for this unitID,
@@ -151,10 +241,13 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
 
             instances[auraInstanceID] = instance
 
+            if ApplyCDMData then
+                ApplyCDMData(unit, instance)
+            end
+
             if not issecretvalue(instance.name) then
                 local name = strlowerCache[instance.name]
                 local spellId = instance.spellId
-                local dispelType = instance.dispelName
                 local isMine = 
                     instance.sourceUnit == "player" or
                     instance.sourceUnit == "pet"
@@ -166,7 +259,9 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
                 payload[spellId] = eventHasMine
                 getOrCreate(lookup, name)[auraInstanceID] = isMine
                 getOrCreate(lookup, spellId)[auraInstanceID] = isMine
-                if dispelType then
+
+                local dispelType = instance.dispelName
+                if dispelType and not issecretvalue(dispelType) then
                     if dispelType == "" then
                         -- Bugfix: Enraged is an empty string.
                         dispelType = "Enraged"
@@ -194,6 +289,10 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
             else
                 instances[auraInstanceID] = instance
 
+                if ApplyCDMData then
+                    ApplyCDMData(unit, instance)
+                end
+
                 if not issecretvalue(instance.name) then
                     local name = strlowerCache[instance.name]
                     local spellId = instance.spellId
@@ -207,7 +306,7 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
 
                     payload[name] = eventHasMine
                     payload[spellId] = eventHasMine
-                    if dispelType then
+                    if dispelType and not issecretvalue(dispelType) then
                         if dispelType == "" then
                             -- Bugfix: Enraged is an empty string.
                             dispelType = "Enraged"
@@ -250,7 +349,7 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
                         idLookup[auraInstanceID] = nil
                     end
 
-                    if dispelType then
+                    if dispelType and not issecretvalue(dispelType) then
                         if dispelType == "" then
                             -- Bugfix: Enraged is an empty string.
                             dispelType = "Enraged"
@@ -263,12 +362,39 @@ Auras:SetScript("OnEvent", function(_, event, unit, unitAuraUpdateInfo)
                     end
                 end
                 instances[auraInstanceID] = nil
+                if cdmData and cdmData[unit] then
+                    cdmData[unit][auraInstanceID] = nil
+                end
             end
         end
     end
 
     FireUnitAura(unit, payload)
+end
+
+-- NOTE: This is our own frame and event reg because we modify the aura instance tables.
+-- and so don't want to share with other AceEvent registrations.
+Auras:RegisterEvent("UNIT_AURA")
+Auras:RegisterEvent("PLAYER_ENTERING_WORLD")
+-- Auras:RegisterEvent("PLAYER_TARGET_CHANGED")
+-- Auras:RegisterUnitEvent("UNIT_TARGET", "player")
+Auras:SetScript("OnEvent", function (self, event, ...)
+    if event == "UNIT_AURA" then
+        OnUnitAura(...)
+    elseif event == "PLAYER_TARGET_CHANGED" then
+        -- We cannot clear CDM data on target change because
+        -- https://github.com/Stanzilla/WoWUIBugs/issues/815
+        -- causes an unpleasant user experience if you switch targets
+        -- back and forth quickly.
+        -- wipe(cdmData.target)
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        wipe(data)
+        wipe(cdmData.player)
+        wipe(cdmData.target)
+    end
 end)
+
+
 
 local registeredUnitSets = {}
 
@@ -350,8 +476,12 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
         if instance then
             local auraInstanceID = instance.auraInstanceID
 
+            if ApplyCDMData then
+                ApplyCDMData(unit, instance)
+            end
+
             instances[auraInstanceID] = instance
-            if not issecretvalue(instance.name) then 
+            if not issecretvalue(instance.name) then
                 local isMine = 
                 instance.sourceUnit == "player" or
                 instance.sourceUnit == "pet"
@@ -359,7 +489,7 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
                 getOrCreate(lookup, strlowerCache[instance.name])[auraInstanceID] = isMine
                 getOrCreate(lookup, instance.spellId)[auraInstanceID] = isMine
                 local dispelType = instance.dispelName
-                if dispelType then
+                if dispelType and not issecretvalue(dispelType) then
                     if dispelType == "" then
                         -- Bugfix: Enraged is an empty string.
                         dispelType = "Enraged"

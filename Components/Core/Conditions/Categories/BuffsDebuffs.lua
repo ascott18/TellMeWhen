@@ -54,7 +54,7 @@ function Env.AuraStacksPacked(unit, name, kindKey, onlyMine)
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
 				local count = instance.applications
-				return count == 0 and 1 or count
+				return (count == 0 or issecretvalue(count)) and 1 or count
 			end
 		end
 	end
@@ -132,12 +132,14 @@ function Env.AuraDurPacked(unit, name, kindKey, onlyMine)
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
 				local expirationTime = instance.expirationTime
-				local timeMod = instance.timeMod
-				return 
-					expirationTime == 0 and huge or ((expirationTime - TMW.time) / timeMod), 
-					instance.duration, 
-					expirationTime,
-					timeMod
+				if not issecretvalue(expirationTime) then
+					local timeMod = instance.timeMod
+					return 
+						expirationTime == 0 and huge or ((expirationTime - TMW.time) / timeMod), 
+						instance.duration, 
+						expirationTime,
+						timeMod
+				end
 			end
 		end
 	end
@@ -169,7 +171,9 @@ function Env.AuraPercentPacked(unit, name, kindKey, onlyMine)
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
 				local expirationTime = instance.expirationTime
-				return expirationTime == 0 and 1 or ((expirationTime - TMW.time) / instance.duration)
+				if not issecretvalue(expirationTime) then
+					return expirationTime == 0 and 1 or ((expirationTime - TMW.time) / instance.duration)
+				end
 			end
 		end
 	end
@@ -202,9 +206,11 @@ function Env.AuraVariableNumberPacked(unit, name, kindKey, onlyMine)
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
 				local points = instance.points
-				for i = 1, #points do
-					local v = points[i]
-					if v and v > 0 then return v end
+				if not issecretvalue(points) then
+					for i = 1, #points do
+						local v = points[i]
+						if v and v > 0 then return v end
+					end
 				end
 			end
 		end

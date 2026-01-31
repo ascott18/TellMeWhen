@@ -498,15 +498,21 @@ local function Buff_OnUpdate_Packed(icon, time)
 
 			for i = 1, #SpellsArray do
 				local spell = SpellsArray[i]
-				for auraInstanceID, isMine in next, auras.lookup[spell] or empty do
+				for auraInstanceID, isMine in next, lookup[spell] or empty do
 					local instance = instances[auraInstanceID]
-
+					
 					if 
 						(not KindKey or instance[KindKey])
 					and	(NotOnlyMine or isMine)
 					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
 					then
-						if DurationSort then
+						if issecretvalue(instance.expirationTime) then
+							-- Can't sort secrets.
+							-- Instance could be partially secret due to CDM leaks.
+							foundInstance = instance
+							foundUnit = unit
+							break
+						elseif DurationSort then
 							local remaining = (instance.expirationTime == 0 and huge) or ((instance.expirationTime - time) / instance.timeMod)
 	
 							-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.

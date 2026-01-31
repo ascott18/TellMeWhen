@@ -257,7 +257,10 @@ local function BuffCheck_OnUpdate_Packed(icon, time)
 					and	(NotOnlyMine or isMine)
 					then
 						foundOnUnit = true
-						local remaining = (instance.expirationTime == 0 and huge) or ((instance.expirationTime - time) / instance.timeMod)
+						local remaining = 
+							(issecretvalue(instance.expirationTime) and huge) or
+							(instance.expirationTime == 0 and huge) or
+							((instance.expirationTime - time) / instance.timeMod)
 	
 						-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
 						if not foundInstance or remaining < curSortDur then
