@@ -111,22 +111,16 @@ if clientHasSecrets then
 	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
 		text = L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] .. "\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"],
 		OnSetup = function(self)
-			if TMW.CI.icon:IsGroupController() and TMW.CI.ics.Name == "" then
+			if TMW.CI.ics.Name == "" then
 				self:Hide()
+				return
 			end
 		end,
 	})
 end
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	OnSetup = function(self, panelInfo, supplementalData)
-		if TMW.CI.icon:IsGroupController() then
-			self:SetTexts(L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"], L["CHOOSENAME_DIALOG"])
-		else
-			self:SetTexts(L["ICONMENU_CHOOSENAME3"], L["CHOOSENAME_DIALOG"])
-		end
-	end,
-
+	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
 	SUGType = "buff",
 })
 
@@ -278,7 +272,7 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_SortSettingsWithStacks", function(self)
-	self:SetTitle(TMW.L["SORTBY"])
+	self:SetTitle(TMW.L["SORTBY"], true)
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)
@@ -940,7 +934,7 @@ function Type:Setup(icon)
 
 	-- Setup events and update functions.
 
-	if icon:IsGroupController() then
+	if icon:IsGroupController() or icon.Spells.First == '' then
 		icon:SetUpdateFunction(Buff_OnUpdate_Controller)
 	else
 		icon:SetUpdateFunction(Buff_OnUpdate)
@@ -957,10 +951,11 @@ function Type:Setup(icon)
 		icon:RegisterEvent(auraEvent)
 
 		if canUsePacked then
-			icon:SetUpdateFunction(icon:IsGroupController() 
-				and Buff_OnUpdate_Controller_Packed 
-				or Buff_OnUpdate_Packed
-			)
+			if icon:IsGroupController() or icon.Spells.First == '' then
+				icon:SetUpdateFunction(Buff_OnUpdate_Controller_Packed)
+			else
+				icon:SetUpdateFunction(Buff_OnUpdate_Packed)
+			end
 		end
 	end
 
