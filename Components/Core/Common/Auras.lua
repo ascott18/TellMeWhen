@@ -156,7 +156,7 @@ if TMW.clientHasSecrets then
             local spellID = frame.cooldownInfo.spellID
             local auraInstanceID = cdmAuraInstance.auraInstanceID
             local unit = frame.auraDataUnit
-            printstack(spellID)
+            
             -- Before collecting, we need to trigger a remove of the old aura with this instance ID
             -- because the reuse of instance IDs means the lookup tables might experience
             -- an aura seemingly changing its name/id, which will prevent old lookups

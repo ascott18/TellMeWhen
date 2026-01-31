@@ -66,7 +66,8 @@ Module.stances = {
 	[403789] =  GetSpellName(403789),   -- Metamorphosis (SOD)
 	[114168] = 	GetSpellName(114168),	-- Dark Apotheosis
 
-	[15473] = 	GetSpellName(15473), 	-- Shadowform	
+	[15473] = 	GetSpellName(15473), 	-- Shadowform	(classic-ish)
+	[232698] = 	GetSpellName(232698), 	-- Shadowform	(retail)
 
 	[115069] = 	GetSpellName(115069),	-- Sturdy Ox
 	[115070] = 	GetSpellName(115070),	-- Wise Serpent
