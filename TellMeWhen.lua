@@ -118,9 +118,6 @@ TMW.issecretvalue = _G.issecretvalue or function() end
 TMW.clientHasSecrets = C_Secrets and C_Secrets.HasSecretRestrictions()
 TMW.wowMajor = math.floor(select(4, GetBuildInfo()) / 10000)
 
-
-local DogTag = LibStub("LibDogTag-3.0", true)
-
 if false then
 	 -- stress testing for text widths
 	local s = ""

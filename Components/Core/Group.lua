@@ -488,11 +488,15 @@ function Group.Setup(group, noIconSetup)
 		
 		viewData_old:UnimplementFromGroup(group)
 	end
-	
-	-- Setup the current view
-	viewData:ImplementIntoGroup(group)
-	if viewData then
-		viewData:Group_Setup(group)
+
+	if group:ShouldUpdateIcons() or (TMW.CI and TMW.IE:IsShown() and TMW.CI.group == group) then
+		-- Setup when icon editor is currently editing
+		-- so the editing UX of disabled groups isn't missing all the group's modules.
+		-- Setup the current view
+		viewData:ImplementIntoGroup(group)
+		if viewData then
+			viewData:Group_Setup(group)
+		end
 	end
 
 	-- Must be before we update icons
@@ -512,10 +516,6 @@ function Group.Setup(group, noIconSetup)
 					icon = TMW.Classes.Icon:New("Button", group:GetName() .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 				end
 
-				if iconID == 1 and group.Controlled then
-					local ics = icon:GetSettings()
-				end
-
 				TMW.safecall(icon.Setup, icon)
 			end
 
@@ -531,8 +531,8 @@ function Group.Setup(group, noIconSetup)
 			icon:DisableIcon()
 		end
 	end
-	
-	if group.OnlyInCombat then
+
+	if group.OnlyInCombat and group:ShouldUpdateIcons() then
 		group:RegisterEvent("PLAYER_REGEN_ENABLED")
 		group:RegisterEvent("PLAYER_REGEN_DISABLED")
 	else
@@ -540,16 +540,16 @@ function Group.Setup(group, noIconSetup)
 		group:UnregisterEvent("PLAYER_REGEN_DISABLED")
 	end
 
-	if pclass == "WARRIOR" and group.Role ~= 0x7 then
-		-- Check for entering/leaving gladiator stance.
-		group:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
-	else
-		group:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
-	end
+	-- Gladiator stance stuff
+	-- if pclass == "WARRIOR" and group.Role ~= 0x7 then
+	-- 	-- Check for entering/leaving gladiator stance.
+	-- 	group:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+	-- else
+	-- 	group:UnregisterEvent("UPDATE_SHAPESHIFT_FORM")
+	-- end
 
 	group:SetScript("OnEvent", group.OnEvent)
 
-	
 	TMW:Fire("TMW_GROUP_SETUP_POST", group)
 end
 
