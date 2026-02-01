@@ -264,8 +264,10 @@ if TMW.clientHasSecrets then
     end)
 
     -- Add an extra setting checkbox to edit mode on the CDM frames we want to be hidable.
-    local check = CreateFrame("CheckButton", "TMWEditModeCDMHide", EditModeSystemSettingsDialog.Settings, "EditModeSettingCheckboxTemplate")
+    local check = CreateFrame("CheckButton", "TMWEditModeCDMHide", EditModeSystemSettingsDialog, "EditModeSettingCheckboxTemplate")
     check.Label:SetText("TMW: Always Hide")
+    check.Label:SetWidth(140)
+    check:SetWidth(140)
     check.layoutIndex = 15
     TMW:TT(check, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
     TMW:TT(check.Button, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
@@ -275,8 +277,9 @@ if TMW.clientHasSecrets then
         if not tContains(viewers, systemFrame) then
             -- Not a CDM viewer
             check:Hide()
-            self.Settings:Layout()
-            self:Layout()
+            -- Parenting `check` to EditModeSystemSettingsDialog.Settings and putting it in the layout causes taint.
+            -- self.Settings:Layout()
+            -- self:Layout()
             return
         end
 
@@ -284,7 +287,13 @@ if TMW.clientHasSecrets then
         local settingTable = TMW.db.global.EditModeLayouts[layoutName].CDMHide
         local settingName = systemFrame.systemIndex
 
-        check:SetPoint("TOPLEFT")
+        -- Position next to "Show timer"
+        for _, frame in TMW:Vararg(self.Settings:GetChildren()) do
+            if frame.setting == Enum.EditModeCooldownViewerSetting.ShowTimer then
+                check:SetPoint("LEFT", frame, "LEFT", frame:GetWidth() / 2 + 5, 0)
+                break
+            end
+        end
         check:Show()
         check.Button:SetChecked(settingTable[settingName] or false)
         check.Button:SetScript("OnClick", function(btn)
@@ -293,8 +302,8 @@ if TMW.clientHasSecrets then
             ApplyViewerOverride(systemFrame)
         end)
 
-        self.Settings:Layout()
-        self:Layout()
+        -- self.Settings:Layout()
+        -- self:Layout()
     end)
 
     TMW.safecall(function()
