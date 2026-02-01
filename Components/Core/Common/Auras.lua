@@ -209,13 +209,14 @@ if TMW.clientHasSecrets then
         end
 
         -- If viewer hasn't shown yet, hooks might not be in place.
-        for _, viewer in pairs(viewers) do
-            local shown = viewer:IsShown()
-            if not shown then
-                viewer:Show()
-                viewer:Hide()
-            end
-        end
+        -- Can't do this, it will taint
+        -- for _, viewer in pairs(viewers) do
+        --     local shown = viewer:IsShown()
+        --     if not shown then
+        --         viewer:Show()
+        --         viewer:Hide()
+        --     end
+        -- end
         
         for frame in pairs(hookedFrames) do
             -- frame.cooldownID is a canary for whether the frame is active in its pool.
