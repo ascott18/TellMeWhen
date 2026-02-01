@@ -411,7 +411,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 			end
 
 			-- We're done, or we errored.
-			print("Cache complete in " .. totalTime)
+			--print("Cache complete in " .. totalTime)
 
 			f:SetScript("OnUpdate", nil)
 

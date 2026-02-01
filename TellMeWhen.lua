@@ -2471,7 +2471,7 @@ do	-- TMW:OnUpdate()
 	local updateInProgress, shouldSafeUpdate
 	local start
 	-- Assume in combat unless we find out otherwise.
-	local inCombatLockdown = 1
+	local inCombatLockdown = true
 
 	-- Limit in milliseconds for each OnUpdate cycle.
 	local CoroutineLimit = 50
@@ -2490,7 +2490,7 @@ do	-- TMW:OnUpdate()
 
 	local function checkYield()
 		if inCombatLockdown and debugprofilestop() - start > CoroutineLimit then
-			TMW:Debug("OnUpdate yielded early at %s", time)
+			--TMW:Debug("OnUpdate yielded early at %s", time)
 
 			coroutine.yield()
 		end
@@ -2657,7 +2657,7 @@ do -- TMW:UpdateViaCoroutine()
 
 	local function CheckCoroutineTermination()
 		if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
-			TMW:Debug("Update() yielded early at %s", time)
+			--TMW:Debug("Update() yielded early at %s", time)
 			coroutine.yield(UpdateCoroutine)
 		end
 	end
@@ -3141,7 +3141,7 @@ function TMW:LoadOptions(recursed)
 		return;
 	end
 
-	TMW:Debug(L["LOADINGOPT"])
+	--TMW:Debug(L["LOADINGOPT"])
 
 	local loaded, reason = LoadAddOn("TellMeWhen_Options")
 	if not loaded then
