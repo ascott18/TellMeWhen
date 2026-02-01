@@ -19,6 +19,7 @@ local print = TMW.print
 local IE = TMW.IE
 local CI = TMW.CI
 
+local issecretvalue = TMW.issecretvalue
 local GetSpellInfo = TMW.GetSpellInfo
 
 
@@ -58,7 +59,7 @@ local TabGroup = TMW.IE:RegisterTabGroup("ICON", L["ICON"], 1, function(tabGroup
 		end
 
 		local texture = icon.attributes.texture
-		if TMW.issecretvalue(texture) then
+		if issecretvalue(texture) then
 			-- Don't taint the icon editor with secrets
 			texture = nil
 		end
