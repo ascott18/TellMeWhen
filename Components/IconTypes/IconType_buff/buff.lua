@@ -240,6 +240,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			info.text = L["ICONMENU_SHOWTTTEXT_VAR"]:format(var)
 			info.tooltipTitle = info.text
 			info.tooltipText = L["ICONMENU_SHOWTTTEXT_VAR_DESC"]
+			info.icon = TMW.clientHasSecrets and "Interface\\AddOns\\TellMeWhen\\Textures\\restricted.png"
 			info.func = OnClick
 			info.arg1 = var
 			info.checked = info.arg1 == TMW.CI.ics.ShowTTText
@@ -253,7 +254,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			local info = TMW.DD:CreateInfo()
 			info.text = L["ICONMENU_SHOWTTTEXT_TT"]:format(-var)
 			info.tooltipTitle = info.text
-			info.icon = "Interface\\AddOns\\TellMeWhen\\Textures\\restricted.png"
+			info.icon = TMW.clientHasSecrets and "Interface\\AddOns\\TellMeWhen\\Textures\\restricted.png"
 			info.tooltipText = L["ICONMENU_SHOWTTTEXT_TT_DESC"]:format(-var)
 			info.func = OnClick
 			info.arg1 = var
@@ -753,7 +754,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 				-- Negative numbers represent indexes into tooltip scanning.
 				local tooltipNumbers = ParseTooltip(unit, instance)
 				count = tooltipNumbers[-icon.ShowTTText]
-			else
+			elseif not issecretvalue(instance.points) then
 				count = instance.points[icon.ShowTTText]
 			end
 		end
