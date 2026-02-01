@@ -147,6 +147,11 @@ function TMW_CursorAnchor:Initialize()
 end
 
 
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	TMW_CursorAnchor.Started = false
+	TMW_CursorAnchor:SetScript("OnUpdate", nil)
+end)
+
 TMW:RegisterCallback("TMW_OPTIONS_LOADING", function()
 	TMW.IE:RegisterDatabaseDefaults({
 		profile = {
