@@ -135,9 +135,9 @@ if TMW.clientHasSecrets then
                 -- print("Applying CDM data to", unit, data.spellId, data.name)
                 auraInstance.spellId = data.spellId
                 auraInstance.name = data.name
-                auraInstance.sourceUnit = data.sourceUnit
-                auraInstance.isHelpful = data.isHelpful
-                auraInstance.isHarmful = data.isHarmful
+                auraInstance.sourceUnit = "player"
+                auraInstance.isHelpful = unit == "player"
+                auraInstance.isHarmful = unit == "target"
                 -- just avoid ugly secret checks in buff.lua for stealable.
                 -- if secret we would assume false anyway.
                 auraInstance.isStealable = false
@@ -164,6 +164,13 @@ if TMW.clientHasSecrets then
             local spellID = frame.cooldownInfo.spellID
             local auraInstanceID = cdmAuraInstance.auraInstanceID
             local unit = frame.auraDataUnit
+            local unitData = cdmData[unit]
+
+            local existing = unitData[auraInstanceID]
+            if existing and existing.spellId == spellID then
+                -- Already have up-to-date aura identity.
+                return
+            end
             
             -- Before collecting, we need to trigger a remove of the old aura with this instance ID
             -- because the reuse of instance IDs means the lookup tables might experience
@@ -177,12 +184,9 @@ if TMW.clientHasSecrets then
             -- Always collect CDM data even if not blocked
             -- so that its ready to go if we become blocked.
             -- print("Collecting CDM data for", unit, spellID, GetSpellName(spellID))
-            cdmData[unit][auraInstanceID] = {
+            unitData[auraInstanceID] = {
                 spellId = spellID,
                 name = GetSpellName(spellID),
-                sourceUnit = "player",
-                isHelpful = unit == "player",
-                isHarmful = unit == "target",
                 filter = "PLAYER|" .. (unit == "player" and "HELPFUL" or "HARMFUL"),
             }
             
@@ -421,9 +425,7 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
     FireUnitAura(unit, payload)
 end
 
--- NOTE: This is our own frame and event reg because we modify the aura instance tables.
--- and so don't want to share with other AceEvent registrations.
-Auras:RegisterEvent("UNIT_AURA")
+
 Auras:RegisterEvent("PLAYER_ENTERING_WORLD")
 -- Auras:RegisterEvent("PLAYER_TARGET_CHANGED")
 -- Auras:RegisterUnitEvent("UNIT_TARGET", "player")
@@ -444,8 +446,6 @@ Auras:SetScript("OnEvent", function (self, event, ...)
 end)
 
 
-
-local registeredUnitSets = {}
 
 local function TMW_UNITSET_UPDATED(event, unitSet)
     local originalUnits = unitSet.originalUnits
@@ -488,6 +488,10 @@ local function TMW_UNITSET_UPDATED(event, unitSet)
     end
 end
 
+local needsAllUnits = false
+local registeredUnits = {}
+local registeredUnitSets = {}
+
 function Auras:RequestUnits(unitSet)
     if type(unitSet) == "string" then
         -- Allow a unit string to be passed directly.
@@ -497,11 +501,28 @@ function Auras:RequestUnits(unitSet)
         _, unitSet = TMW:GetUnits(nil, unitSet.unitSettings)
     end
 
-    if not registeredUnitSets[unitSet] then
+    if not registeredUnitSets[unitSet] then 
         registeredUnitSets[unitSet] = true
         TMW:RegisterCallback(unitSet.event, TMW_UNITSET_UPDATED)
         unitSet.auraKnownUnits = {}
         unitSet.auraKnownUnitGuids = {}
+
+        if not unitSet.allUnitsChangeOnEvent then
+            needsAllUnits = true
+        elseif not needsAllUnits then
+            for i = 1, #unitSet.originalUnits do
+                local unit = unitSet.originalUnits[i]
+                if not TMW.tContains(registeredUnits, unit) then
+                    tinsert(registeredUnits, unit)
+                end
+            end
+        end
+
+        if needsAllUnits then
+            Auras:RegisterEvent("UNIT_AURA")
+        else
+            Auras:RegisterUnitEvent("UNIT_AURA", unpack(registeredUnits))
+        end
     end
 
     if not unitSet.allUnitsChangeOnEvent then
