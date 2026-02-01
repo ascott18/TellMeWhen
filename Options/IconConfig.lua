@@ -399,6 +399,11 @@ function IE:TooltipAddSpellBreakdown(tbl)
 		-- Clear lingering secret aspect that might be present from combat state
 		fs:SetText("")
 
+		if issecretvalue(fs:GetStringWidth()) then
+			GameTooltip:AddLine("<secret tooltip error>", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, nil)
+			break
+		end
+
 		while fs:GetStringWidth() < longest and i <= #tbl do
 			local s = tostring(tbl[i]):trim(" ")
 			if fs:GetText() == nil then
