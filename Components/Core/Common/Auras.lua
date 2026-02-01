@@ -243,10 +243,73 @@ if TMW.clientHasSecrets then
         local _, result = TMW.safecall(SpellHasCDMHook, spell)
         return result
     end
+    
+    local function ApplyViewerOverride(viewer)
+        local settingName = viewer.systemIndex
+        local layoutName = EditModeManagerFrame:GetActiveLayoutInfo().layoutName
+        if not TMW.db then return end
+
+        -- DONT call UpdateSystemSettingShowTooltips, it will taint.
+        viewer:UpdateSystemSettingOpacity()
+        if EditModeManagerFrame:IsEditModeActive() then
+            return
+        end
+
+        if TMW.db.global.EditModeLayouts[layoutName].CDMHide[settingName] then
+            viewer:SetAlpha(0)
+            -- DONT call SetTooltipsShown, it will taint.
+            -- Instead, manually iterate and disable mouse motion so tooltips don't appears on invisible frames.
+            for itemFrame in viewer.itemFramePool:EnumerateActive() do
+                itemFrame:SetMouseMotionEnabled(false);
+            end
+        end
+    end
+
+    TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+        for _, viewer in pairs(viewers) do
+            TMW.safecall(ApplyViewerOverride, viewer)
+        end
+    end)
+
+    -- Add an extra setting checkbox to edit mode on the CDM frames we want to be hidable.
+    local check = CreateFrame("CheckButton", "TMWEditModeCDMHide", EditModeSystemSettingsDialog.Settings, "EditModeSettingCheckboxTemplate")
+    check.Label:SetText("TMW: Always Hide")
+    check.layoutIndex = 15
+    TMW:TT(check, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
+    TMW:TT(check.Button, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
+
+    -- Add the checkbox to the edit mode dialog when appropriate
+    hooksecurefunc(EditModeSystemSettingsDialog, "AttachToSystemFrame", function(self, systemFrame)
+        if not tContains(viewers, systemFrame) then
+            -- Not a CDM viewer
+            check:Hide()
+            self.Settings:Layout()
+            self:Layout()
+            return
+        end
+
+        local layoutName = EditModeManagerFrame:GetActiveLayoutInfo().layoutName
+        local settingTable = TMW.db.global.EditModeLayouts[layoutName].CDMHide
+        local settingName = systemFrame.systemIndex
+
+        check:SetPoint("TOPLEFT")
+        check:Show()
+        check.Button:SetChecked(settingTable[settingName] or false)
+        check.Button:SetScript("OnClick", function(btn)
+            settingTable[settingName] = btn:GetChecked()
+
+            ApplyViewerOverride(systemFrame)
+        end)
+
+        self.Settings:Layout()
+        self:Layout()
+    end)
 
     TMW.safecall(function()
         for _, viewer in pairs(viewers) do
             hooksecurefunc(viewer, "OnAcquireItemFrame", HookFrame)
+            hooksecurefunc(viewer, "RefreshLayout", ApplyViewerOverride)
+
             for _, frame in TMW:Vararg(viewer:GetChildren()) do
                 HookFrame(viewer, frame)
             end

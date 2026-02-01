@@ -265,6 +265,13 @@ TMW.Defaults = {
 		EffThreshold      = 15,
 		BackupDbInOptions = true,
 		CreateImportBackup = true,
+		EditModeLayouts = {
+			["**"] = {
+				CDMHide = {
+					["*"] = false,
+				}
+			}
+		},
 
 		NumGroups         = 0,
 		-- Groups = {} -- this will be set to the profile group defaults in a second.

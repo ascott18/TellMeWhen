@@ -935,6 +935,10 @@ Note that this will force the options module to be loaded all the time, resultin
 This option is account-wide: all of your profiles will share this setting.
 
 |cffff5959Changes will only be reflected after you |cff7fffffreload your UI|cffff5959.|r]]
+L["UIPANEL_HIDE_CDM"] = "TMW: Always Hide"
+L["UIPANEL_HIDE_CDM_DESC"] = [[Hides this Cooldown Manager frame while still allowing TellMeWhen to access buff/debuff information from it.
+
+For TMW to best be able to access aura information from the CDM, you should set the Visibility setting above to Always Visible.]]
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
 L["UIPANEL_USE_PROFILE"] = "Use Profile Setting"
 L["UIPANEL_PERFORMANCE"] = "Performance"
