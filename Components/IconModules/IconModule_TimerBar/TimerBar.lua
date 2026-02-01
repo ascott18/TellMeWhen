@@ -24,6 +24,10 @@ local issecretvalue = TMW.issecretvalue
 local	pairs, wipe =
 		pairs, wipe
 
+local CurveConstants_ZeroToOne = CurveConstants and CurveConstants.ZeroToOne
+local CurveConstants_Reverse = CurveConstants and CurveConstants.Reverse
+local zeroDurationObject = C_DurationUtil and C_DurationUtil.CreateDuration()
+
 local BarsToUpdate = {}
 
 
@@ -178,21 +182,39 @@ function TimerBar:UpdateValue(force)
 	if issecretvalue(value) or issecretvalue(maxValue) or durObj then
 		bar:SetValue(value, self.Smoothing)
 		
-		if durObj then
-			local color = invertColors and
-				durObj:EvaluateRemainingPercent(self.colorCurve) or
-				durObj:EvaluateElapsedPercent(self.colorCurve)
-			self.texture:SetVertexColor(color:GetRGBA())
+		local valueCurveFunc = self.valueCurveFunc
+		local defaultColor = invertColors and self.startColor or self.completeColor
 
-			if Invert then
+		if valueCurveFunc then
+			local rCurve, gCurve, bCurve, aCurve
+			if invertColors then
+				rCurve = self.rCurveInverted
+				gCurve = self.gCurveInverted
+				bCurve = self.bCurveInverted
+				aCurve = self.aCurveInverted
+			else
+				rCurve = self.rCurve
+				gCurve = self.gCurve
+				bCurve = self.bCurve
+				aCurve = self.aCurve
+			end
+			-- NB: When a curve is not defined, it means that all steps on it are equal,
+			-- so we can just use the default color component. 
+			local r = rCurve and valueCurveFunc(rCurve) or defaultColor.r
+			local g = gCurve and valueCurveFunc(gCurve) or defaultColor.g
+			local b = bCurve and valueCurveFunc(bCurve) or defaultColor.b
+			local a = aCurve and valueCurveFunc(aCurve) or defaultColor.a
+			self.texture:SetVertexColor(r, g, b, a)
+
+			if Invert and durObj then
 				-- This is the only way to set the bar to "full" when the duration is zero/expired.
-				self.texture2:SetVertexColor(self.completeColor:GetRGBA())
+				self.texture2:SetVertexColor(defaultColor:GetRGBA())
 				self.texture2:SetAlphaFromBoolean(durObj:IsZero(), 1, 0)
 			end
 
 			if bar:GetReverseFill() then
-				local percent = durObj:EvaluateElapsedPercent(CurveConstants.ZeroToOne)
-				local inversePercent = durObj:EvaluateRemainingPercent(CurveConstants.ZeroToOne)
+				local percent = valueCurveFunc(CurveConstants_ZeroToOne)
+				local inversePercent = valueCurveFunc(CurveConstants_Reverse)
 				if Invert then
 					percent, inversePercent = inversePercent, percent
 				end
@@ -205,12 +227,8 @@ function TimerBar:UpdateValue(force)
 					self.texture:SetTexCoord(inversePercent, 1, 0, 1)
 				end
 			end
-		elseif self.valueCurveFunc then
-			local color = self.valueCurveFunc(self.colorCurve)
-			self.texture:SetVertexColor(color:GetRGBA())
 		else
-			local co = self.completeColor
-			self.bar:SetStatusBarColor(co.r, co.g, co.b, co.a)
+			self.bar:SetStatusBarColor(defaultColor:GetRGBA())
 		end
 	else
 		local percent = maxValue == 0 and 0 or value / maxValue
@@ -321,16 +339,42 @@ function TimerBar:UpdateStatusBarImmediate(percent)
 	end
 end
 
+
+local function CreateColorCurves(completeValue, halfValue, startValue)
+	if completeValue == halfValue and halfValue == startValue then
+		return nil, nil
+	end
+	
+	local curve = C_CurveUtil.CreateCurve()
+	curve:SetType(Enum.LuaCurveType.Linear)
+	curve:AddPoint(0, completeValue)
+	curve:AddPoint(0.5, halfValue)
+	curve:AddPoint(1, startValue)
+	
+	local curveInverted = C_CurveUtil.CreateCurve()
+	curveInverted:SetType(Enum.LuaCurveType.Linear)
+	curveInverted:AddPoint(0, startValue)
+	curveInverted:AddPoint(0.5, halfValue)
+	curveInverted:AddPoint(1, completeValue)
+	
+	return curve, curveInverted
+end
+
 function TimerBar:SetCooldown(start, duration, durObj, chargeStart, chargeDur)
 	self.normalStart, self.normalDuration = start, duration
 	self.chargeStart, self.chargeDur = chargeStart, chargeDur
 	self.durObj = durObj
 	self.value = nil
+	self.valueCurveFunc = nil
 
 	if durObj then
 		if not self.BarGCD and durObj.isOnGCD then
-			durObj = C_DurationUtil.CreateDuration()
+			durObj = zeroDurationObject
 			self.durObj = durObj
+		end
+		
+		self.valueCurveFunc = function(curve)
+			return durObj:EvaluateRemainingPercent(curve)
 		end
 
 		local duration = durObj:GetTotalDuration()
@@ -375,17 +419,20 @@ function TimerBar:SetColors(startColor, halfColor, completeColor)
 	halfColor     = halfColor and TMW:StringToCachedColorMixin(halfColor)
 	completeColor = completeColor and TMW:StringToCachedColorMixin(completeColor)
 
+	-- Skip curve creation if colors haven't changed
+	if self.startColor == startColor and self.halfColor == halfColor and self.completeColor == completeColor then
+		return
+	end
+
 	self.startColor    = startColor
 	self.halfColor     = halfColor
 	self.completeColor = completeColor
 
 	if C_CurveUtil then
-		local curve = C_CurveUtil.CreateColorCurve()
-		curve:SetType(Enum.LuaCurveType.Linear)
-		curve:AddPoint(0, startColor)
-		curve:AddPoint(0.5, halfColor)
-		curve:AddPoint(1, completeColor)
-		self.colorCurve = curve
+		self.rCurve, self.rCurveInverted = CreateColorCurves(completeColor.r, halfColor.r, startColor.r)
+		self.gCurve, self.gCurveInverted = CreateColorCurves(completeColor.g, halfColor.g, startColor.g)
+		self.bCurve, self.bCurveInverted = CreateColorCurves(completeColor.b, halfColor.b, startColor.b)
+		self.aCurve, self.aCurveInverted = CreateColorCurves(completeColor.a, halfColor.a, startColor.a)
 	end
 end
 

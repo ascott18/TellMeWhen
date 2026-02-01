@@ -84,14 +84,24 @@ if TMW.clientHasSecrets then
 		if value ~= nil and maxValue ~= nil then
 			self.duration = nil
 			self.start = nil
-			self.value = value
-			self.maxValue = maxValue
-
-			if self.FakeMax then
-				self.Max = self.FakeMax
+			if self.Invert and issecretvalue(value) then
+				self.value = valueCurveFunc(CurveConstants.Reverse)
+				self.maxValue = 1
+				self.Max = 1
+				-- Can't do fakeMax when we need to invert a value
+				-- because we don't pass through the inverse value.
+				-- This is probably ok until someone complains.
 			else
-				self.Max = maxValue
+				self.value = value
+				self.maxValue = maxValue
+
+				if self.FakeMax then
+					self.Max = self.FakeMax
+				else
+					self.Max = maxValue
+				end
 			end
+
 			self.bar:SetMinMaxValues(0, self.Max)
 
 			self:SetupColors(self.sourceIcon, valueColor, icon.attributes.unit)
