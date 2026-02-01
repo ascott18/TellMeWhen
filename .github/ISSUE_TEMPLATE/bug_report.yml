@@ -12,7 +12,7 @@ body:
       options:
         - Retail
         - MoP
-        - Vanilla
+        - Vanilla/Anniversary
     validations:
       required: true
   - type: input
@@ -44,6 +44,26 @@ body:
         
         To get an export string, open the icon editor and click the button at the bottom labeled "Import/Export/Backup". Select the "To String" option for the appropriate export type (icon, group, or profile), and then press CTRL+C to copy it to your clipboard.
       placeholder: If your issue does not pertain to a specific icon or group, please enter "N/A".
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: buggrabber
+    attributes:
+      label: Error Capture
+      description: "[BugGrabber](https://www.curseforge.com/wow/addons/bug-grabber) and [BugSack](https://www.curseforge.com/wow/addons/bugsack) are essential addons for capturing Lua errors that may be causing issues with TellMeWhen."
+      options:
+        - label: I have installed BugGrabber and BugSack, and either there are no errors, or I am including them below.
+          required: true
+  - type: textarea
+    id: lua-errors
+    attributes:
+      label: Lua Errors
+      description: |
+        If BugSack captured any Lua errors related to this issue, please paste them here. Otherwise, please enter "N/A".
+        
+        To view errors in BugSack, type `/bugsack show` in-game or click the BugSack minimap icon.
+      placeholder: Paste any Lua errors here, or enter "N/A" if there are no errors.
       render: text
     validations:
       required: true
