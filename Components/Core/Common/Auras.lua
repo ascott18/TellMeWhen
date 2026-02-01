@@ -98,8 +98,29 @@ if TMW.clientHasSecrets then
             if blocked then
                 for unit in pairs(data) do
                     blockedUnits[unit] = true
-                    data[unit] = nil
-                    FireUnitAura(unit)
+                    if cdmData[unit] then
+                        -- Surgically remove only auras that aren't hijacked from CDM.
+                        -- This lets us avoid instantly deleting an aura that was the
+                        -- reason that combat started, e.g. paladin "Crusading Strikes"
+                        local purge = {}
+                        local update = {}
+                        for auraInstanceID, instance in pairs(data[unit].instances) do
+                            if not cdmData[unit][auraInstanceID] then
+                                purge[#purge + 1] = auraInstanceID
+                            else
+                                update[#update + 1] = auraInstanceID
+                                -- print("Preserving CDM aura:", unit, instance.spellId, instance.name, auraInstanceID)
+                            end
+                        end
+                        OnUnitAura(unit, {
+                            isFullUpdate = false,
+                            removedAuraInstanceIDs = purge,
+                            updatedAuraInstanceIDs = update,
+                        })
+                    else
+                        data[unit] = nil
+                        FireUnitAura(unit)
+                    end
                 end
             else
                 for unit in pairs(blockedUnits) do
@@ -117,13 +138,17 @@ if TMW.clientHasSecrets then
             if data 
                 -- Don't apply to already non-secret auras
                 and issecretvalue(auraInstance.expirationTime)
-                -- Don't apply CDM data to other players' auras
-                -- that happen to have reused an auraInstanceID
-                -- that currently or previously belonged to one of our auras
-                -- on a different unit, since auraInstanceIds are only unique per-unit.
-                and not IsAuraFilteredOutByInstanceID(unit, auraInstance.auraInstanceID, data.filter)
+                and (
+                    -- Crusading Strikes (ret pally) - weird hidden self aura that always fails all filters
+                    data.spellId == 404542 or
+                    -- Don't apply CDM data to other players' auras
+                    -- that happen to have reused an auraInstanceID
+                    -- that currently or previously belonged to one of our auras
+                    -- on a different unit, since auraInstanceIds are only unique per-unit.
+                    not IsAuraFilteredOutByInstanceID(unit, auraInstance.auraInstanceID, data.filter)
+                )
             then
-                -- print("Applying CDM data to", unit, data.spellId, data.name)
+                -- print("Applying CDM data to", unit, data.spellId, data.name, auraInstance.auraInstanceID)
                 auraInstance.spellId = data.spellId
                 auraInstance.name = data.name
                 auraInstance.sourceUnit = "player"
@@ -174,7 +199,7 @@ if TMW.clientHasSecrets then
 
             -- Always collect CDM data even if not blocked
             -- so that its ready to go if we become blocked.
-            -- print("Collecting CDM data for", unit, spellID, GetSpellName(spellID))
+            -- print("Collecting CDM data for", unit, spellID, GetSpellName(spellID), auraInstanceID)
             unitData[auraInstanceID] = {
                 spellId = spellID,
                 name = GetSpellName(spellID),
