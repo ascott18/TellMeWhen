@@ -49,7 +49,7 @@ function Env.AuraStacksPacked(unit, name, kindKey, onlyMine)
 	local auras = GetAuras(unit)
 	local instances = auras.instances
 	
-	for auraInstanceID, isMine in next, auras.lookup[name] or empty do
+	for auraInstanceID, isMine in next, auras.lookup[name] do
 		if (isMine or not onlyMine) then
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
@@ -89,7 +89,7 @@ function Env.AuraCountPacked(units, spells, kindKey, onlyMine)
 		local lookup = auras.lookup
 		
 		for i = 1, #SpellsArray do
-			for auraInstanceID, isMine in next, lookup[SpellsArray[i]] or empty do
+			for auraInstanceID, isMine in next, lookup[SpellsArray[i]] do
 				if (isMine or not onlyMine) then
 					if instances[auraInstanceID][kindKey] then
 						n = n + 1
@@ -127,7 +127,7 @@ function Env.AuraDurPacked(unit, name, kindKey, onlyMine)
 	local auras = GetAuras(unit)
 	local instances = auras.instances
 	
-	for auraInstanceID, isMine in next, auras.lookup[name] or empty do
+	for auraInstanceID, isMine in next, auras.lookup[name] do
 		if (isMine or not onlyMine) then
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
@@ -168,7 +168,7 @@ function Env.AuraPercentPacked(unit, name, kindKey, onlyMine)
 	local auras = GetAuras(unit)
 	local instances = auras.instances
 	
-	for auraInstanceID, isMine in next, auras.lookup[name] or empty do
+	for auraInstanceID, isMine in next, auras.lookup[name] do
 		if (isMine or not onlyMine) then
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
@@ -203,7 +203,7 @@ function Env.AuraVariableNumberPacked(unit, name, kindKey, onlyMine)
 	local auras = GetAuras(unit)
 	local instances = auras.instances
 	
-	for auraInstanceID, isMine in next, auras.lookup[name] or empty do
+	for auraInstanceID, isMine in next, auras.lookup[name] do
 		if (isMine or not onlyMine) then
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
@@ -242,7 +242,7 @@ function Env.AuraTooltipNumberPacked(unit, name, kindKey, onlyMine, requestedInd
 	local auras = GetAuras(unit)
 	local instances = auras.instances
 	
-	for auraInstanceID, isMine in next, auras.lookup[name] or empty do
+	for auraInstanceID, isMine in next, auras.lookup[name] do
 		if (isMine or not onlyMine) then
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then

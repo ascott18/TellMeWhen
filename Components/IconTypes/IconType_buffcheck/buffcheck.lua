@@ -249,7 +249,7 @@ local function BuffCheck_OnUpdate_Packed(icon, time)
 			
 			for i = 1, #SpellsArray do
 				local spell = SpellsArray[i]
-				for auraInstanceID, isMine in next, auras.lookup[spell] or empty do
+				for auraInstanceID, isMine in next, lookup[spell] do
 					local instance = instances[auraInstanceID]
 
 					if 

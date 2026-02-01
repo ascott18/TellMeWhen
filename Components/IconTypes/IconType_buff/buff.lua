@@ -514,7 +514,7 @@ local function Buff_OnUpdate_Packed(icon, time)
 
 			for i = 1, #SpellsArray do
 				local spell = SpellsArray[i]
-				for auraInstanceID, isMine in next, lookup[spell] or empty do
+				for auraInstanceID, isMine in next, lookup[spell] do
 					local instance = instances[auraInstanceID]
 					
 					if 
@@ -700,9 +700,10 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 					end
 				end
 			else
+				local lookup = auras.lookup
 				for i = 1, #SpellsArray do
 					local spell = SpellsArray[i]
-					for auraInstanceID, isMine in next, auras.lookup[spell] or empty do
+					for auraInstanceID, isMine in next, lookup[spell] do
 						local instance = instances[auraInstanceID]
 
 						if 

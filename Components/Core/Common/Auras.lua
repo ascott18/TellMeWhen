@@ -35,15 +35,6 @@ local UnitGUID = UnitGUID
 
 local GetSpellName = TMW.GetSpellName
 
-local function getOrCreate(t, k)
-    local ret = t[k]
-    if not ret then 
-        ret = {}
-        t[k] = ret
-    end
-    return ret
-end
-
 TMW.COMMON.Auras = CreateFrame("Frame")
 local Auras = TMW.COMMON.Auras
 
@@ -373,8 +364,8 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
 
                 payload[name] = eventHasMine
                 payload[spellId] = eventHasMine
-                getOrCreate(lookup, name)[auraInstanceID] = isMine
-                getOrCreate(lookup, spellId)[auraInstanceID] = isMine
+                lookup[name][auraInstanceID] = isMine
+                lookup[spellId][auraInstanceID] = isMine
 
                 local dispelType = instance.dispelName
                 if dispelType and not issecretvalue(dispelType) then
@@ -383,7 +374,7 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
                         dispelType = "Enraged"
                     end
                     payload[dispelType] = eventHasMine
-                    getOrCreate(lookup, dispelType)[auraInstanceID] = isMine
+                    lookup[dispelType][auraInstanceID] = isMine
                 end
             end
         end
@@ -454,26 +445,17 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
                     --print("remove", unit, name, auraInstanceID)
 
                     payload[name] = eventHasMine
-                    local nameLookup = lookup[name]
-                    if nameLookup then
-                        nameLookup[auraInstanceID] = nil
-                    end
+                    lookup[name][auraInstanceID] = nil
 
                     payload[spellId] = eventHasMine
-                    local idLookup = lookup[spellId]
-                    if idLookup then
-                        idLookup[auraInstanceID] = nil
-                    end
+                    lookup[spellId][auraInstanceID] = nil
 
                     if dispelType and not issecretvalue(dispelType) then
                         if dispelType == "" then
                             -- Bugfix: Enraged is an empty string.
                             dispelType = "Enraged"
                         end
-                        local dsLookup = lookup[dispelType]
-                        if dsLookup then
-                            dsLookup[auraInstanceID] = nil
-                        end
+                        lookup[dispelType][auraInstanceID] = nil
                         payload[dispelType] = eventHasMine
                     end
                 end
@@ -619,20 +601,28 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
                 instance.sourceUnit == "player" or
                 instance.sourceUnit == "pet"
                 
-                getOrCreate(lookup, strlowerCache[instance.name])[auraInstanceID] = isMine
-                getOrCreate(lookup, instance.spellId)[auraInstanceID] = isMine
+                lookup[strlowerCache[instance.name]][auraInstanceID] = isMine
+                lookup[instance.spellId][auraInstanceID] = isMine
                 local dispelType = instance.dispelName
                 if dispelType and not issecretvalue(dispelType) then
                     if dispelType == "" then
                         -- Bugfix: Enraged is an empty string.
                         dispelType = "Enraged"
                     end
-                    getOrCreate(lookup, dispelType)[auraInstanceID] = isMine
+                    lookup[dispelType][auraInstanceID] = isMine
                 end
             end
         end
     end
 end
+
+local lookupMeta = {
+    __index = function(t, k)
+        local ret = {}
+        t[k] = ret
+        return ret
+    end
+}
 
 --- It is assumed that the caller has previously called Auras:RequestUnit(unitSet) on a
 --- unitSet that contained the provided unit, and that unitSet.allUnitsChangeOnEvent == true.
@@ -640,7 +630,7 @@ function Auras.GetAuras(unit)
     local unitData = data[unit]
     if not unitData then
         local instances = {}
-        local lookup = {}
+        local lookup = setmetatable({}, lookupMeta)
         unitData = {
             instances = instances,
             lookup = lookup
