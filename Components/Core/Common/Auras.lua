@@ -86,6 +86,12 @@ local ApplyCDMData
 local OnUnitAura
 if TMW.clientHasSecrets then
 
+    -- Auras that can't be scanned via slots and are ONLY acquired from the CDM
+    -- through its use of GetPlayerAuraBySpellID. Don't delete these when entering combat.
+    local unScannableAuras = {
+        [1226662] = true -- Crusading Strikes (ret)
+    }
+
     local blockedUnits = {}
     local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
     local blocked = false
@@ -98,29 +104,24 @@ if TMW.clientHasSecrets then
             if blocked then
                 for unit in pairs(data) do
                     blockedUnits[unit] = true
+
+                    --print("wiping unit (blocked)", unit)
+                    data[unit] = nil
+
                     if cdmData[unit] then
-                        -- Surgically remove only auras that aren't hijacked from CDM.
-                        -- This lets us avoid instantly deleting an aura that was the
-                        -- reason that combat started, e.g. paladin "Crusading Strikes"
-                        local purge = {}
-                        local update = {}
-                        for auraInstanceID, instance in pairs(data[unit].instances) do
-                            if not cdmData[unit][auraInstanceID] then
-                                purge[#purge + 1] = auraInstanceID
-                            else
-                                update[#update + 1] = auraInstanceID
-                                -- print("Preserving CDM aura:", unit, instance.spellId, instance.name, auraInstanceID)
+                        for auraInstanceID, data in pairs(cdmData[unit]) do
+                            if unScannableAuras[data.spellId] then
+                                -- Rebuild auras for unit so OnUnitAura doesn't immediately bail.
+                                Auras.GetAuras(unit)
+                                -- Add back the hidden, unscannable aura.
+                                OnUnitAura(unit, {
+                                    isFullUpdate = false,
+                                    addedAuras = { GetAuraDataByAuraInstanceID(unit, auraInstanceID) },
+                                })
                             end
                         end
-                        OnUnitAura(unit, {
-                            isFullUpdate = false,
-                            removedAuraInstanceIDs = purge,
-                            updatedAuraInstanceIDs = update,
-                        })
-                    else
-                        data[unit] = nil
-                        FireUnitAura(unit)
                     end
+                    FireUnitAura(unit)
                 end
             else
                 for unit in pairs(blockedUnits) do
@@ -132,6 +133,29 @@ if TMW.clientHasSecrets then
         end
     end)
 
+    local function GetViewerItemSpellId(frame)
+        -- NOTE: Cannot use frame:GetSpellID() because it'll be secret-tainted with actual AuraData.spellId values.
+        -- Similarly can't use frame.cooldownInfo.linkedSpellID for the same reason - it'll receive secrets in combat.
+
+        -- frame.cooldownID is a canary for whether the frame is active in its pool.
+        -- It gets cleared when items are released from the pool.
+        if not frame.cooldownInfo or not frame.cooldownID then
+            return nil
+        end
+
+        local cooldownInfo = frame.cooldownInfo
+        if cooldownInfo.linkedSpellIDs and cooldownInfo.linkedSpellIDs[1] then
+            -- Are there ever more than one linked spell?
+            -- Nobody knows. Just pick the first one I guess.
+            -- Example cases where this matters:
+            -- Outlaw "Coup de Grace" 441423 is a passive that links to buff "Escalating Blade" 441786
+            -- Ret "Crusading Strikes" 404542 links to buff "Crusading Strikes" 1226662
+            return cooldownInfo.linkedSpellIDs[1]
+        end
+
+        return cooldownInfo.spellID
+    end
+
     ApplyCDMData = function(unit, auraInstance)
         if unit == "target" or unit == "player" then
             local data = cdmData[unit][auraInstance.auraInstanceID]
@@ -139,8 +163,12 @@ if TMW.clientHasSecrets then
                 -- Don't apply to already non-secret auras
                 and issecretvalue(auraInstance.expirationTime)
                 and (
-                    -- Crusading Strikes (ret pally) - weird hidden self aura that always fails all filters
-                    data.spellId == 404542 or
+                    -- Don't need to apply filters to player's own auras
+                    -- because we'll never have to worry about colliding
+                    -- auraInstanceIDs on the player like we do with target switching.
+                    -- Skipping this filtering for player fixes auras like Crusading Strikes (ret pally)
+                    -- that are weird hidden self auras that always fails all filters.
+                    unit == "player" or
                     -- Don't apply CDM data to other players' auras
                     -- that happen to have reused an auraInstanceID
                     -- that currently or previously belonged to one of our auras
@@ -171,13 +199,13 @@ if TMW.clientHasSecrets then
 
         -- -- Add hooks for ShowPandemicStateFrame and HidePandemicStateFrame
         -- hooksecurefunc(frame, "ShowPandemicStateFrame", function(frame)
-        --     local spellID = frame.cooldownInfo.spellID
+        --     local spellID = GetViewerItemSpellId(frame)
         --     local auraInstanceID = frame.auraInstanceID
         --     print("Pandemic! at the disco", spellID, auraInstanceID)
         -- end)
 
         hooksecurefunc(frame, "SetAuraInstanceInfo", function(frame, cdmAuraInstance)
-            local spellID = frame.cooldownInfo.spellID
+            local spellID = GetViewerItemSpellId(frame)
             local auraInstanceID = cdmAuraInstance.auraInstanceID
             local unit = frame.auraDataUnit
             local unitData = cdmData[unit]
@@ -246,9 +274,10 @@ if TMW.clientHasSecrets then
         for frame in pairs(hookedFrames) do
             -- frame.cooldownID is a canary for whether the frame is active in its pool.
             -- It gets cleared when items are released from the pool.
-            if frame.cooldownID and frame.cooldownInfo and (
-                frame.cooldownInfo.spellID == spell or 
-                GetSpellName(frame.cooldownInfo.spellID):lower() == tostring(spell):lower()
+            local spellID = GetViewerItemSpellId(frame)
+            if spellID and (
+                spellID == spell or 
+                GetSpellName(spellID):lower() == tostring(spell):lower()
             ) then
                 return true
             end
@@ -629,6 +658,8 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
             if ApplyCDMData then
                 ApplyCDMData(unit, instance)
             end
+
+            --print("scanned", unit, instance.name, auraInstanceID)
 
             instances[auraInstanceID] = instance
             if not issecretvalue(instance.name) then
