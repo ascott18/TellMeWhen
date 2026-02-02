@@ -182,6 +182,10 @@ function IconComponent:RegisterIconEvent(order, event, eventData)
 	
 	eventData.event = event
 	eventData.order = order
+
+	if TMW.clientHasSecrets and eventData.maybeSecret then
+		eventData.desc = eventData.desc .. "\r\n\r\n" .. L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"]
+	end
 	
 	if TMW.EventList[event] then
 		error(("An event with the event identifier %q already exists!"):format(event), 2)
