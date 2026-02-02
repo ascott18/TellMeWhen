@@ -85,13 +85,6 @@ end
 local ApplyCDMData
 local OnUnitAura
 if TMW.clientHasSecrets then
-
-    -- Auras that can't be scanned via slots and are ONLY acquired from the CDM
-    -- through its use of GetPlayerAuraBySpellID. Don't delete these when entering combat.
-    local unScannableAuras = {
-        [1226662] = true -- Crusading Strikes (ret)
-    }
-
     local blockedUnits = {}
     local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
     local blocked = false
@@ -107,20 +100,6 @@ if TMW.clientHasSecrets then
 
                     --print("wiping unit (blocked)", unit)
                     data[unit] = nil
-
-                    if cdmData[unit] then
-                        for auraInstanceID, data in pairs(cdmData[unit]) do
-                            if unScannableAuras[data.spellId] then
-                                -- Rebuild auras for unit so OnUnitAura doesn't immediately bail.
-                                Auras.GetAuras(unit)
-                                -- Add back the hidden, unscannable aura.
-                                OnUnitAura(unit, {
-                                    isFullUpdate = false,
-                                    addedAuras = { GetAuraDataByAuraInstanceID(unit, auraInstanceID) },
-                                })
-                            end
-                        end
-                    end
                     FireUnitAura(unit)
                 end
             else
@@ -166,8 +145,6 @@ if TMW.clientHasSecrets then
                     -- Don't need to apply filters to player's own auras
                     -- because we'll never have to worry about colliding
                     -- auraInstanceIDs on the player like we do with target switching.
-                    -- Skipping this filtering for player fixes auras like Crusading Strikes (ret pally)
-                    -- that are weird hidden self auras that always fails all filters.
                     unit == "player" or
                     -- Don't apply CDM data to other players' auras
                     -- that happen to have reused an auraInstanceID
@@ -231,7 +208,7 @@ if TMW.clientHasSecrets then
             unitData[auraInstanceID] = {
                 spellId = spellID,
                 name = GetSpellName(spellID),
-                filter = "PLAYER|" .. (unit == "player" and "HELPFUL" or "HARMFUL"),
+                filter = "PLAYER|INCLUDE_NAME_PLATE_ONLY|" .. (unit == "player" and "HELPFUL" or "HARMFUL"),
             }
             
             -- Re-populate lookups with the new non-secret CDM data.
@@ -705,8 +682,11 @@ function Auras.GetAuras(unit)
         data[unit] = unitData
 
         --print("full updating unit", unit)
-        UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HELPFUL"))
-        UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HARMFUL"))
+
+        -- INCLUDE_NAME_PLATE_ONLY adds additional auras that are otherwise hidden,
+        -- like 1226662 Crusading Strikes (ret pally hidden buff)
+        UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HELPFUL|INCLUDE_NAME_PLATE_ONLY"))
+        UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HARMFUL|INCLUDE_NAME_PLATE_ONLY"))
     end
     return unitData
 end
