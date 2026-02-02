@@ -317,23 +317,38 @@ if TMW.clientHasSecrets then
         end
     end)
 
-    -- Add an extra setting checkbox to edit mode on the CDM frames we want to be hidable.
-    local check = CreateFrame("CheckButton", "TMWEditModeCDMHide", EditModeSystemSettingsDialog, "EditModeSettingCheckboxTemplate")
-    check.Label:SetText("TMW: Always Hide")
-    check.Label:SetWidth(140)
-    check:SetWidth(140)
-    check.layoutIndex = 15
-    TMW:TT(check, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
-    TMW:TT(check.Button, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
+    local alwaysHideCheck
+    TMW.safecall(function()
+        for _, viewer in pairs(viewers) do
+            hooksecurefunc(viewer, "OnAcquireItemFrame", HookFrame)
+            hooksecurefunc(viewer, "RefreshLayout", ApplyViewerOverride)
+
+            for _, frame in TMW:Vararg(viewer:GetChildren()) do
+                HookFrame(viewer, frame)
+            end
+        end
+
+        -- Add an extra setting checkbox to edit mode on the CDM frames we want to be hidable.
+        -- Don't parent to EditModeSystemSettingsDialog, it'll glitch out EditModeSystemSettingsDialog
+        -- when `check` is hidden and make it go super wide for some reason.
+        alwaysHideCheck = CreateFrame("CheckButton", "TMWEditModeCDMHide", TMW, "EditModeSettingCheckboxTemplate")
+        alwaysHideCheck:SetFrameStrata("FULLSCREEN")
+        alwaysHideCheck:SetWidth(140)
+        alwaysHideCheck.Label:SetText("TMW: Always Hide")
+        alwaysHideCheck.Label:SetWidth(140)
+        TMW:TT(alwaysHideCheck, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
+        TMW:TT(alwaysHideCheck.Button, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
+        EditModeSystemSettingsDialog:HookScript("OnHide", function(self)
+            alwaysHideCheck:Hide()
+        end)
+    end)
 
     -- Add the checkbox to the edit mode dialog when appropriate
     hooksecurefunc(EditModeSystemSettingsDialog, "AttachToSystemFrame", function(self, systemFrame)
+        if not alwaysHideCheck then return end
         if not tContains(viewers, systemFrame) then
             -- Not a CDM viewer
-            check:Hide()
-            -- Parenting `check` to EditModeSystemSettingsDialog.Settings and putting it in the layout causes taint.
-            -- self.Settings:Layout()
-            -- self:Layout()
+            alwaysHideCheck:Hide()
             return
         end
 
@@ -344,31 +359,17 @@ if TMW.clientHasSecrets then
         -- Position next to "Show timer"
         for _, frame in TMW:Vararg(self.Settings:GetChildren()) do
             if frame.setting == Enum.EditModeCooldownViewerSetting.ShowTimer then
-                check:SetPoint("LEFT", frame, "LEFT", frame:GetWidth() / 2 + 5, 0)
+                alwaysHideCheck:SetPoint("LEFT", frame, "LEFT", frame:GetWidth() / 2 + 5, 0)
                 break
             end
         end
-        check:Show()
-        check.Button:SetChecked(settingTable[settingName] or false)
-        check.Button:SetScript("OnClick", function(btn)
+        alwaysHideCheck:Show()
+        alwaysHideCheck.Button:SetChecked(settingTable[settingName] or false)
+        alwaysHideCheck.Button:SetScript("OnClick", function(btn)
             settingTable[settingName] = btn:GetChecked()
 
             ApplyViewerOverride(systemFrame)
         end)
-
-        -- self.Settings:Layout()
-        -- self:Layout()
-    end)
-
-    TMW.safecall(function()
-        for _, viewer in pairs(viewers) do
-            hooksecurefunc(viewer, "OnAcquireItemFrame", HookFrame)
-            hooksecurefunc(viewer, "RefreshLayout", ApplyViewerOverride)
-
-            for _, frame in TMW:Vararg(viewer:GetChildren()) do
-                HookFrame(viewer, frame)
-            end
-        end
     end)
 end
 

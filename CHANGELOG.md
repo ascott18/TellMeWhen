@@ -1,3 +1,6 @@
+## v12.0.5
+* Fixed an issue that could cause some edit mode dialogs to be really wide.
+
 ## v12.0.4
 
 ### Midnight Aura Improvements
