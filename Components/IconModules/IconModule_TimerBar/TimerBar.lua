@@ -140,6 +140,12 @@ function TimerBar:GetValue()
 
 	local start, duration = self.start, self.duration
 
+	if issecretvalue(duration) then
+		-- Not sure why this happened once, but it did.
+		-- Secret durations should always be handled by durObj above.
+		return 0, true
+	end
+
 	if Invert then
 		if duration == 0 then
 			return self.Max, true
