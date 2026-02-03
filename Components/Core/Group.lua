@@ -489,14 +489,11 @@ function Group.Setup(group, noIconSetup)
 		viewData_old:UnimplementFromGroup(group)
 	end
 
-	if group:ShouldUpdateIcons() or (TMW.CI and TMW.IE:IsShown() and TMW.CI.group == group) then
-		-- Setup when icon editor is currently editing
-		-- so the editing UX of disabled groups isn't missing all the group's modules.
-		-- Setup the current view
-		viewData:ImplementIntoGroup(group)
-		if viewData then
-			viewData:Group_Setup(group)
-		end
+	-- Setup the current view. Do this even when the group isn't going to update icons
+	-- so that the group can be positioned and therefore be anchored to by other groups.
+	viewData:ImplementIntoGroup(group)
+	if viewData then
+		viewData:Group_Setup(group)
 	end
 
 	-- Must be before we update icons
