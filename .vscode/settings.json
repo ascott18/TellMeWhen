@@ -305,7 +305,9 @@
         "HUD_EDIT_MODE_SYSTEM_TRACKED_BUFFS",
         "HUD_EDIT_MODE_SYSTEM_TRACKED_BUFF_BARS",
         "EditModeSystemSettingsDialog",
-        "HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_HIDE_WHEN_INACTIVE"
+        "HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_HIDE_WHEN_INACTIVE",
+        "SPEC_MAGE_ARCANE",
+        "SPEC_MONK_WINDWALKER"
     ],
     "cSpell.words": [
         "cooldown",

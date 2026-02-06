@@ -133,7 +133,8 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	self:SetTitle(L["ICONMENU_VALUE_POWERTYPE"])
 
 	local types = {
-		{ order = -2, id = -2, name = L["CONDITIONPANEL_POWER"], },
+		{ order = -3, id = -2, name = L["CONDITIONPANEL_POWER"], },
+		{ order = -2, id = -4, name = L["CONDITIONPANEL_CLASS_POWER"], },
 		{ order = -1, id = -1, name = HEALTH, },
 	    { order = 1,  id = Enum.PowerType.Mana, name = MANA, },
 		{ order = 2,  id = Enum.PowerType.Rage, name = RAGE, },
@@ -194,6 +195,9 @@ Type:RegisterConfigPanel_ConstructorFunc(100, "TellMeWhen_ValueSettings", functi
 	end
 	self.PowerType:SetFunction(function(self)
 		for _, data in TMW:OrderedPairs(types, TMW.OrderSort, true) do
+			if data.id == 0 then
+				TMW.DD:AddSpacer()
+			end
 			if data.id then
 				local info = TMW.DD:CreateInfo()
 				info.text = data.name
@@ -253,6 +257,7 @@ for k, v in pairs(PowerBarColor) do
 end
 PowerBarColor[-1] = {{r=1, g=0, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=0, g=1, b=0, a=1}}
 PowerBarColor[-3] = {{r=0, g=1, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=1, g=0, b=0, a=1}}
+PowerBarColor[Enum.PowerType.ArcaneCharges] = PowerBarColor["ARCANE_CHARGES"]
 
 local function Value_OnEvent(icon, event, arg1, arg2)
 	if event == icon.UnitSet.event then
@@ -395,6 +400,21 @@ function Type:Setup(icon)
 			okColor.flags.desaturate and 1 or 0,
 			highColor.flags.desaturate and 1 or 0
 		)
+	end
+
+	if icon.PowerType == -4 then
+		if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) and pclass == "MAGE" and TMW.GetCurrentSpecialization() == SPEC_MAGE_ARCANE then
+			icon.PowerType = Enum.PowerType.ArcaneCharges
+		elseif pclass == "MONK" and TMW.GetCurrentSpecialization() == SPEC_MONK_WINDWALKER then
+			icon.PowerType = Enum.PowerType.Chi
+		else
+			local ClassPowers = {
+				PALADIN = ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and Enum.PowerType.HolyPower,
+				WARLOCK = ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and Enum.PowerType.SoulShards,
+				EVOKER = Enum.PowerType.Essence,
+			}
+			icon.PowerType = ClassPowers[pclass] or -2
+		end
 	end
 	
 	icon:SetUpdateMethod("auto")
