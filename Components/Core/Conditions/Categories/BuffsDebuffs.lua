@@ -54,7 +54,7 @@ function Env.AuraStacksPacked(unit, name, kindKey, onlyMine)
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
 				local count = instance.applications
-				return (count == 0 or issecretvalue(count)) and 1 or count
+				return (issecretvalue(count) or count == 0) and 1 or count
 			end
 		end
 	end
