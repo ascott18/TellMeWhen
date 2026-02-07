@@ -45,7 +45,7 @@ Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
 
 Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_MetaSortSettings", function(self)
-	self:SetTitle(TMW.L["SORTBY"])
+	self:SetTitle(TMW.L["SORTBY"], true)
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 3,
 		function(check)

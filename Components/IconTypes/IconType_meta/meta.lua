@@ -15,6 +15,8 @@ if not TMW then return end
 local L = TMW.L
 
 local print = TMW.print
+local issecretvalue = TMW.issecretvalue
+
 local _G, strmatch, tonumber, ipairs, pairs, next, type, tinsert, pcall, format, error, wipe =
 	  _G, strmatch, tonumber, ipairs, pairs, next, type, tinsert, pcall, format, error, wipe
 
@@ -232,7 +234,7 @@ local function Meta_OnUpdate(icon, time)
 		then
 			if Sort then
 				-- See if we can use this icon due to sorting.
-				local dur = (attributes.duration - (time - attributes.start)) / (attributes.modRate or 1)
+				local dur = issecretvalue(attributes.duration) and 0 or (attributes.duration - (time - attributes.start)) / (attributes.modRate or 1)
 				if dur < 0 then
 					dur = 0
 				end
