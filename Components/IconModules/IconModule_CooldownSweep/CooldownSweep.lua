@@ -314,13 +314,17 @@ if TMW.clientHasSecrets then
 		cd:SetCooldown(mainStart, mainDuration, self.modRate)
 
 		-- Handle charges of spells that aren't completely depleted.
-		if otherStart == nil or otherDuration == nil then
+		if otherStart == nil or otherDuration == nil or not self.charges then
 			cd2:SetCooldown(0, 0)
 		else
+			-- When charges aren't charging, start will be zero but duration will be non-zero (???)
+			-- and SetCooldown ignores calls when that's the case, keeping the existing values ticking.
+			-- So, annoyingly, we have to reset the sweep on every call.
+			-- https://github.com/ascott18/TellMeWhen/issues/2340
+			cd2:SetCooldown(0, 0)
 			cd2:SetCooldown(otherStart, otherDuration, self.modRate)
-			if not self.charges then
-				cd2:SetAlpha(0)
-			elseif not issecretvalue(mainStart) and mainStart == 0 then
+			
+			if not issecretvalue(mainStart) and mainStart == 0 then
 				-- When the main duration is forced to a non-secret zero
 				-- due to GCD ignoring, always allow charges to show if there are any.
 				-- This avoids a missing sweep if you deplete charges of an ability 

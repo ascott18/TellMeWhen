@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 * Added "Class or Primary Resource" as an option to Resource Display icons.
 * Fix aura events not getting registered when tracking auras on many different units across all TMW icons.
 * Fix items sometimes showing with a ? texture.
+* Workaround a Blizzard bug where secret recharge durations for a max-charge ability are ignored.
 
 ## v12.0.5
 * Fixed an issue that could cause some edit mode dialogs to be really wide.
