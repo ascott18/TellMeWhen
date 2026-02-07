@@ -31,6 +31,7 @@ local GetItemCooldown = (C_Item and C_Item.GetItemCooldown) or (C_Container and 
 local GetItemSpell = C_Item and C_Item.GetItemSpell or GetItemSpell
 
 local INVSLOT_LAST_EQUIPPED = INVSLOT_LAST_EQUIPPED
+local questionMarkId = 134400
 
 local Item = TMW:NewClass("Item")
 
@@ -224,7 +225,7 @@ end
 
 function ItemByID:GetIcon()
 	local icon = GetItemIcon(self.itemID)
-	if icon then
+	if icon and icon ~= questionMarkId then
 		self.icon = icon
 		self.GetIcon = self.GetIcon_saved
 		return icon
@@ -277,7 +278,7 @@ end
 
 function ItemByName:GetIcon()
 	local icon = GetItemIcon(self.name)
-	if icon then
+	if icon and icon ~= questionMarkId then
 		self.icon = icon
 		self.GetIcon = self.GetIcon_saved
 		return icon
@@ -416,7 +417,7 @@ end
 
 function ItemByLink:GetIcon()
 	local icon = GetItemIcon(self.link)
-	if icon then
+	if icon and icon ~= questionMarkId then
 		self.icon = icon
 		self.GetIcon = self.GetIcon_saved
 		return icon

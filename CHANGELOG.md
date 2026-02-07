@@ -1,6 +1,7 @@
 ## v12.0.6
 * Added "Class or Primary Resource" as an option to Resource Display icons.
 * Fix aura events not getting registered when tracking auras on many different units across all TMW icons.
+* Fix items sometimes showing with a ? texture.
 
 ## v12.0.5
 * Fixed an issue that could cause some edit mode dialogs to be really wide.
