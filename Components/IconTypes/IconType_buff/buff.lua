@@ -963,7 +963,7 @@ function Type:Setup(icon)
 		icon:SetUpdateFunction(Buff_OnUpdate)
 	end
 
-	if icon.UnitSet.allUnitsChangeOnEvent then
+	if icon.UnitSet.allUnitsChangeOnEvent and icon.Enabled then
 		icon:SetUpdateMethod("manual")
 		
 		icon:SetScript("OnEvent", Buff_OnEvent)

@@ -381,7 +381,7 @@ function Type:Setup(icon)
 
 	-- Setup events and update functions.
 	icon:SetUpdateFunction(BuffCheck_OnUpdate)
-	if icon.UnitSet.allUnitsChangeOnEvent then
+	if icon.UnitSet.allUnitsChangeOnEvent and icon.Enabled then
 		icon:SetUpdateMethod("manual")
 		icon:SetScript("OnEvent", Buff_OnEvent)
 		icon:RegisterEvent(icon.UnitSet.event)

@@ -594,13 +594,22 @@ function Auras:RequestUnits(unitSet)
         unitSet.auraKnownUnits = {}
         unitSet.auraKnownUnitGuids = {}
 
-        if not unitSet.allUnitsChangeOnEvent then
+        if needsAllUnits then
+            -- pass
+        elseif not unitSet.allUnitsChangeOnEvent or unitSet.hasSpecialUnitRefs then
             needsAllUnits = true
-        elseif not needsAllUnits then
+        else
             for i = 1, #unitSet.originalUnits do
                 local unit = unitSet.originalUnits[i]
                 if not TMW.tContains(registeredUnits, unit) then
                     tinsert(registeredUnits, unit)
+                end
+                if #registeredUnits > 4 then
+                    -- RegisterUnitEvent maxes out at 4 units.
+                    -- That's enough to cover efficiency for the most common player/target/pet/focus.
+                    -- If people are tracking more than that, they're probably tracking LOTS more, like raid 1-40.
+                    needsAllUnits = true
+                    break
                 end
             end
         end
