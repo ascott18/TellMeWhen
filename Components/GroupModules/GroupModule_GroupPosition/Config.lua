@@ -19,6 +19,7 @@ local print = TMW.print
 
 local SUG = TMW.SUG
 local strlowerCache = TMW.strlowerCache
+local issecretvalue = TMW.issecretvalue
 
 TMW.Classes.SharableDataType.types.group:RegisterMenuBuilder(10, function(Item_group)
 	local gs = Item_group.Settings
@@ -67,9 +68,17 @@ function Module:OnSuggest()
 		if name 
 		and _G[name] == frame 
 		and frame:GetNumPoints() > 0 
-		and frame:GetHeight() > 0 
-		and frame:GetWidth() > 0 
 		and not frame:IsForbidden()
+		and (
+			-- Don't measure secure frames because reading frame size can 
+			-- trigger size change (???), which can then in turn cause taint.
+			issecurevariable(name)
+			or (
+				(issecretvalue(frame:GetHeight()) or frame:GetHeight() > 0) and
+				(issecretvalue(frame:GetWidth()) or frame:GetWidth() > 0)
+			)
+		)
+
 		then
 			self.Table[frame] = name
 		end

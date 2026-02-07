@@ -188,7 +188,7 @@ function CooldownSweep:OnNewInstance(icon)
 	-- We have to override the function entirely to prevent Masque from
 	-- showing it when it shouldn't be shown.
 	local blingShown = self.cooldown:GetDrawBling()
-	local iconShown = icon:GetAlpha() > 0
+	local iconShown = issecretvalue(icon:GetAlpha()) or icon:GetAlpha() > 0
 	local SetDrawBling_old = self.cooldown.SetDrawBling
 	self.cooldown.SetDrawBling = function(cd, shown)
 		local shouldShowBling = self.shouldShowBling
