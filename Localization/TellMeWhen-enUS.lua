@@ -954,6 +954,13 @@ L["UIPANEL_HIDE_CDM"] = "TMW: Always Hide"
 L["UIPANEL_HIDE_CDM_DESC"] = [[Hides this Cooldown Manager frame while still allowing TellMeWhen to access buff/debuff information from it.
 
 For TMW to best be able to access aura information from the CDM, you should set the Visibility setting above to Always Visible.]]
+L["UIPANEL_GROUP_CDM_HIDE"] = "Hide CDM Viewers"
+L["UIPANEL_GROUP_CDM_HIDE_DESC"] = [[Select which Cooldown Manager viewers should be hidden when this group is active. 
+
+The CDM will remain functional for aura data extraction even while hidden by this setting.
+
+For TMW to best be able to access aura information from the CDM, you should set the Visibility setting on the CDM to Always Visible.]]
+L["CDM_HIDDEN_BY_GROUP"] = "Hidden by TMW %s"
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
 L["UIPANEL_USE_PROFILE"] = "Use Profile Setting"
 L["UIPANEL_PERFORMANCE"] = "Performance"

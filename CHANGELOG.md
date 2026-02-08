@@ -6,6 +6,7 @@
 * Fix items sometimes showing with a ? texture.
 * Workaround a Blizzard bug where secret recharge durations for a max-charge ability are ignored.
 * Masque settings are now stored against TMW groups' unique identifiers instead of against group IDs. Masque will absorb any per-group customizations into the first TMW profile you log in with.
+* The Edit Mode "TMW: Always Hide" CDM setting has been deprecated in favor of new settings on TMW groups that allow greater flexibility.
 
 ## v12.0.5
 * Fixed an issue that could cause some edit mode dialogs to be really wide.

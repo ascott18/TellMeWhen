@@ -303,6 +303,9 @@ TMW.Defaults = {
 				EnabledSpecs	= {
 					["*"]		= true,
 				},
+				CDMViewerHide	= {
+					["*"]		= false,
+				},
 				Role 			= 0x7,
 				SettingsPerView	= {
 					["**"] = {
