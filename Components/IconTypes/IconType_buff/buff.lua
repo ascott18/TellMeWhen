@@ -285,6 +285,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 		"BigDefensive",
 		"ExternalDefensive",
 		"RaidPlayerDispellable",
+		"Raid",
 		"RaidInCombat",
 	}
 

@@ -1,3 +1,5 @@
+## v12.0.7
+
 ## v12.0.6
 * Added "Class or Primary Resource" as an option to Resource Display icons.
 * Added new WoW 12.0.1 filters to the Buff/Debuff icon type.
