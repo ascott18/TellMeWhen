@@ -33,7 +33,7 @@ end
 
 TELLMEWHEN_VERSION_FULL = TELLMEWHEN_VERSION .. " " .. TELLMEWHEN_VERSION_MINOR
 
-local REVISION = 2
+local REVISION = 3
 if #TELLMEWHEN_VERSION > 7 or REVISION >= 100 then
 	return error("TELLMEWHEN: UNEXPECTEDLY HIGH VERSION/REVISION")
 end
@@ -1476,6 +1476,15 @@ TMW.C.TMW:Inherit("Core_Upgrades")
 
 function TMW:GetBaseUpgrades()			-- upgrade functions
 	return {
+		[12000603] = {
+			group = function(self, gs, domain, groupID)
+				-- EnabledSpecs was previously not applied to global groups.
+				-- Wipe out any lingering so groups aren't suddenly hidden.
+				if domain == "global" then
+					wipe(gs.EnabledSpecs)
+				end
+			end,
+		},
 
 		[92400] = {
 			-- The lua import detector for the luavalue icon type

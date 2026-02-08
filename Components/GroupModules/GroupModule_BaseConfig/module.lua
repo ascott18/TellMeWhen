@@ -123,12 +123,6 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", functio
 	self:CScriptAdd("SettingTableRequested", function()
 		return TMW.CI.gs and TMW.CI.gs.EnabledSpecs or false
 	end)
-
-	self:CScriptAdd("PanelSetup", function()
-		if TMW.CI.group.Domain == "global" then
-			self:Hide()
-		end
-	end)
 end)
 
 

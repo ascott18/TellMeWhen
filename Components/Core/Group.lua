@@ -370,8 +370,7 @@ function Group.ShouldUpdateIcons(group)
 		return false
 
 	elseif
-		group.Domain == "profile"
-		and GetCurrentSpecializationID()
+		GetCurrentSpecializationID()
 		and not gs.EnabledSpecs[GetCurrentSpecializationID()]
 	then
 		return false
