@@ -813,6 +813,21 @@ L["ICONMENU_HIDEWHILESECRET"] = "Hide while secret"
 L["ICONMENU_HIDEWHILESECRET_DESC"] = [[Check this to cause the icon to hide while aura information is secret.
 
 TellMeWhen cannot automatically determine if an aura will definitely be secret or non-secret in lockdown, so this setting will let you avoid showing an aura as 'Absent' when TMW just isn't allowed to know about it.]]
+L["ICONMENU_AURAFILTER"] = "Aura Filters"
+L["ICONMENU_AURAFILTER_DESC"] = "Only show auras that match any of the selected filters."
+L["ICONMENU_AURAFILTER_NONE"] = "No Filter"
+L["ICONMENU_AURAFILTER_IMPORTANT"] = "Important"
+L["ICONMENU_AURAFILTER_IMPORTANT_DESC"] = "Only include auras that Blizzard has flagged as being important."
+L["ICONMENU_AURAFILTER_CROWD_CONTROL"] = "Crowd Control"
+L["ICONMENU_AURAFILTER_CROWD_CONTROL_DESC"] = "Only include auras that Blizzard has flagged as being crowd control."
+L["ICONMENU_AURAFILTER_BIG_DEFENSIVE"] = "Big Defensive"
+L["ICONMENU_AURAFILTER_BIG_DEFENSIVE_DESC"] = "Only include auras that Blizzard has classified as a 'Big Defensive'."
+L["ICONMENU_AURAFILTER_EXTERNAL_DEFENSIVE"] = "External Defensive"
+L["ICONMENU_AURAFILTER_EXTERNAL_DEFENSIVE_DESC"] = "Only include auras that Blizzard has classified as an 'External Defensive'."
+L["ICONMENU_AURAFILTER_RAID_PLAYER_DISPELLABLE"] = "Dispellable"
+L["ICONMENU_AURAFILTER_RAID_PLAYER_DISPELLABLE_DESC"] = "Only include auras that you can dispel."
+L["ICONMENU_AURAFILTER_RAID_IN_COMBAT"] = "Raid In Combat"
+L["ICONMENU_AURAFILTER_RAID_IN_COMBAT_DESC"] = "Only include auras that Blizzard has flagged to show on raid frames in combat. This includes things like HoTs, but not raid buffs."
 L["ICONMENU_ONLYBAGS"] = "Only if in bags"
 L["ICONMENU_ONLYBAGS_DESC"] = "Check this to make the icon show only if the item is in your bags (or equipped). If 'Only if equipped' is enabled, this is also forcibly enabled."
 

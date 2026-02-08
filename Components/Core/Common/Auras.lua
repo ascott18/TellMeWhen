@@ -82,7 +82,14 @@ function Auras.SpellHasCDMHook(spell)
     return false
 end
 
-local ApplyCDMData
+local function AugmentInstance(unit, auraInstance)
+    auraInstance.isMine = auraInstance.sourceUnit == "player" or auraInstance.sourceUnit == "pet"
+    if auraInstance.dispelName == "" then
+        -- Bugfix: Enraged is an empty string.
+        auraInstance.dispelName = "Enraged"
+    end
+end
+
 local OnUnitAura
 if TMW.clientHasSecrets then
     local blockedUnits = {}
@@ -135,9 +142,22 @@ if TMW.clientHasSecrets then
         return cooldownInfo.spellID
     end
 
-    ApplyCDMData = function(unit, auraInstance)
+    local AugmentInstance_base = AugmentInstance
+    AugmentInstance = function(unit, auraInstance)
+        local auraInstanceID = auraInstance.auraInstanceID
+
+        if not issecretvalue(auraInstance.expirationTime) then
+            -- Whole aura is non-secret. Just apply normal non-secret augments and bail.
+            AugmentInstance_base(unit, auraInstance)
+            return
+        end
+
+        -- just avoid ugly secret checks in buff.lua for stealable.
+        -- We never do anything in TMW with secret `isStealable`.
+        auraInstance.isStealable = false
+
         if unit == "target" or unit == "player" then
-            local data = cdmData[unit][auraInstance.auraInstanceID]
+            local data = cdmData[unit][auraInstanceID]
             if data 
                 -- Don't apply to already non-secret auras
                 and issecretvalue(auraInstance.expirationTime)
@@ -150,20 +170,27 @@ if TMW.clientHasSecrets then
                     -- that happen to have reused an auraInstanceID
                     -- that currently or previously belonged to one of our auras
                     -- on a different unit, since auraInstanceIds are only unique per-unit.
-                    not IsAuraFilteredOutByInstanceID(unit, auraInstance.auraInstanceID, data.filter)
+                    not IsAuraFilteredOutByInstanceID(unit, auraInstanceID, data.filter)
                 )
             then
-                -- print("Applying CDM data to", unit, data.spellId, data.name, auraInstance.auraInstanceID)
+                -- print("Applying CDM data to", unit, data.spellId, data.name, auraInstanceID)
                 auraInstance.spellId = data.spellId
                 auraInstance.name = data.name
                 auraInstance.sourceUnit = "player"
+                auraInstance.isMine = true
                 auraInstance.isHelpful = unit == "player"
                 auraInstance.isHarmful = unit == "target"
-                -- just avoid ugly secret checks in buff.lua for stealable.
-                -- if secret we would assume false anyway.
-                auraInstance.isStealable = false
+                return
             end
         end
+
+        -- Unsecret some fields that have no business being secret
+        local helpful = not IsAuraFilteredOutByInstanceID(unit, auraInstanceID, "HELPFUL|INCLUDE_NAME_PLATE_ONLY")
+        auraInstance.isHelpful = helpful
+        auraInstance.isHarmful = not helpful
+        auraInstance.isMine = not IsAuraFilteredOutByInstanceID(unit, auraInstanceID,
+            "PLAYER|INCLUDE_NAME_PLATE_ONLY" .. (helpful and "|HELPFUL" or "|HARMFUL")
+        )
     end
 
     local hookedFrames = {}
@@ -390,16 +417,12 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
 
             instances[auraInstanceID] = instance
 
-            if ApplyCDMData then
-                ApplyCDMData(unit, instance)
-            end
+            AugmentInstance(unit, instance)
 
             if not issecretvalue(instance.name) then
                 local name = strlowerCache[instance.name]
                 local spellId = instance.spellId
-                local isMine = 
-                    instance.sourceUnit == "player" or
-                    instance.sourceUnit == "pet"
+                local isMine = instance.isMine
                 eventHasMine = eventHasMine or isMine
                 
                 --print("added", unit, name, auraInstanceID)
@@ -411,10 +434,6 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
 
                 local dispelType = instance.dispelName
                 if dispelType and not issecretvalue(dispelType) then
-                    if dispelType == "" then
-                        -- Bugfix: Enraged is an empty string.
-                        dispelType = "Enraged"
-                    end
                     payload[dispelType] = eventHasMine
                     lookup[dispelType][auraInstanceID] = isMine
                 end
@@ -438,17 +457,13 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
             else
                 instances[auraInstanceID] = instance
 
-                if ApplyCDMData then
-                    ApplyCDMData(unit, instance)
-                end
+                AugmentInstance(unit, instance)
 
                 if not issecretvalue(instance.name) then
                     local name = strlowerCache[instance.name]
                     local spellId = instance.spellId
                     local dispelType = instance.dispelName
-                    local isMine = 
-                        instance.sourceUnit == "player" or
-                        instance.sourceUnit == "pet"
+                    local isMine = instance.isMine
                     eventHasMine = eventHasMine or isMine
 
                     --print("updated", unit, name, auraInstanceID)
@@ -456,10 +471,6 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
                     payload[name] = eventHasMine
                     payload[spellId] = eventHasMine
                     if dispelType and not issecretvalue(dispelType) then
-                        if dispelType == "" then
-                            -- Bugfix: Enraged is an empty string.
-                            dispelType = "Enraged"
-                        end
                         payload[dispelType] = eventHasMine
                     end
                 end
@@ -479,9 +490,7 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
                     local name = strlowerCache[instance.name]
                     local spellId = instance.spellId
                     local dispelType = instance.dispelName
-                    local isMine = 
-                        instance.sourceUnit == "player" or
-                        instance.sourceUnit == "pet"
+                    local isMine = instance.isMine
                     eventHasMine = eventHasMine or isMine
                         
                     --print("remove", unit, name, auraInstanceID)
@@ -493,10 +502,6 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
                     lookup[spellId][auraInstanceID] = nil
 
                     if dispelType and not issecretvalue(dispelType) then
-                        if dispelType == "" then
-                            -- Bugfix: Enraged is an empty string.
-                            dispelType = "Enraged"
-                        end
                         lookup[dispelType][auraInstanceID] = nil
                         payload[dispelType] = eventHasMine
                     end
@@ -601,7 +606,7 @@ function Auras:RequestUnits(unitSet)
         else
             for i = 1, #unitSet.originalUnits do
                 local unit = unitSet.originalUnits[i]
-                if not TMW.tContains(registeredUnits, unit) then
+                if not tContains(registeredUnits, unit) then
                     tinsert(registeredUnits, unit)
                 end
                 if #registeredUnits > 4 then
@@ -642,26 +647,18 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
         if instance then
             local auraInstanceID = instance.auraInstanceID
 
-            if ApplyCDMData then
-                ApplyCDMData(unit, instance)
-            end
+            AugmentInstance(unit, instance)
 
             --print("scanned", unit, instance.name, auraInstanceID)
 
             instances[auraInstanceID] = instance
             if not issecretvalue(instance.name) then
-                local isMine = 
-                instance.sourceUnit == "player" or
-                instance.sourceUnit == "pet"
+                local isMine = instance.isMine
                 
                 lookup[strlowerCache[instance.name]][auraInstanceID] = isMine
                 lookup[instance.spellId][auraInstanceID] = isMine
                 local dispelType = instance.dispelName
                 if dispelType and not issecretvalue(dispelType) then
-                    if dispelType == "" then
-                        -- Bugfix: Enraged is an empty string.
-                        dispelType = "Enraged"
-                    end
                     lookup[dispelType][auraInstanceID] = isMine
                 end
             end

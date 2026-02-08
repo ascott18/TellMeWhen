@@ -45,6 +45,7 @@ Type.name = L["ICONMENU_BUFFDEBUFF"]
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
+Type.AllowNoName = true
 Type.menuSpaceBefore = true
 Type.unitType = "unitid"
 Type.hasNoGCD = true
@@ -94,15 +95,15 @@ Type:RegisterIconDefaults{
 	-- Only check auras casted by the player. Appends "|PLAYER" to the UnitAura filter.
 	OnlyMine				= false,
 
-	-- Only check auras that appear on nameplates. Appends "|INCLUDE_NAME_PLATE_ONLY" to the UnitAura filter.
-	IncludeNameplateOnly	= false,
-
 	-- Hide the icon if TMW's unit system left icon.Units empty.
 	-- This can happen, for example, if checking only raid units while not in a raid.
 	HideIfNoUnits			= false,
 
 	-- Hide the icon while auras are secret.
 	HideWhileSecret			= false,
+
+	-- Filter auras by specific ExtraFilters (IMPORTANT, CROWD_CONTROL, etc.)
+	ExtraFilter				= { ["*"] = false },
 }
 
 
@@ -187,14 +188,6 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			check:SetTexts(name, desc)
 			check:SetSetting("Stealable")
 		end,
-		-- IncludeNameplateOnly is basically useless. Blizz nameplates use nameplateShowPersonal, which is secret.
-		-- function(check)
-		-- 	check:SetTexts(L["ICONMENU_INCLUDENAMEPLATE"], L["ICONMENU_INCLUDENAMEPLATE_DESC"])
-		-- 	check:SetSetting("IncludeNameplateOnly")
-		-- end,
-		-- function(check)
-		-- 	check:Hide()
-		-- end,
 		function(check)
 			check:SetTexts(L["ICONMENU_HIDENOUNITS"], L["ICONMENU_HIDENOUNITS_DESC"])
 			check:SetSetting("HideIfNoUnits")
@@ -275,17 +268,89 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 
 	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.HideIfNoUnits, self.ShowTTText)
 	self.ShowTTText:ClearAllPoints()
-	self.ShowTTText:SetPoint("TOPLEFT", self.Stealable, "BOTTOMLEFT", 4, 0)
+	self.ShowTTText:SetPoint("TOPLEFT", self.Stealable, "BOTTOMLEFT", 4, -3)
 	self.ShowTTText:SetPoint("RIGHT", -7, 0)
 	self.HideIfNoUnits:ConstrainLabel(self.ShowTTText)
-	
+
 	if clientHasSecrets then
 		self.HideWhileSecret:ClearAllPoints()
 		self.HideWhileSecret:SetPoint("TOPLEFT", self.HideIfNoUnits, "BOTTOMLEFT", 0, 0)
-		self:AdjustHeight()
 	else
 		self.HideWhileSecret:Hide()
 	end
+
+	local AuraFilterKeys = {
+		"Important",
+		"CrowdControl",
+		"BigDefensive",
+		"ExternalDefensive",
+		"RaidPlayerDispellable",
+		"RaidInCombat",
+	}
+
+	local AuraFilterData = {}
+	for _, key in ipairs(AuraFilterKeys) do
+		local filterValue = AuraUtil.AuraFilters[key]
+		if filterValue then
+			local localeBase = "ICONMENU_AURAFILTER_" .. filterValue
+			table.insert(AuraFilterData, {
+				key = filterValue,
+				text = L[localeBase],
+				desc = L[localeBase .. "_DESC"]
+			})
+		end
+	end
+
+	if #AuraFilterData > 0 then
+		local function ExtraFilter_OnClick(button, dropdown)
+			local filterKey = button.value
+			TMW.CI.ics.ExtraFilter[filterKey] = not TMW.CI.ics.ExtraFilter[filterKey]
+			dropdown:OnSettingSaved()
+		end
+		
+		self.ExtraFilter = TMW.C.Config_DropDownMenu:New("Frame", "$parentAuraFilter", self, "TMW_DropDownMenuTemplate")
+		self.ExtraFilter:SetTexts(L["ICONMENU_AURAFILTER"], L["ICONMENU_AURAFILTER_DESC"])
+		self.ExtraFilter:SetWidth(200)
+		self.ExtraFilter:SetFunction(function(dropdown)
+			for _, filter in ipairs(AuraFilterData) do
+				local info = TMW.DD:CreateInfo()
+				info.text = filter.text
+				info.tooltipTitle = filter.text
+				info.tooltipText = filter.desc
+				info.value = filter.key
+				info.func = ExtraFilter_OnClick
+				info.arg1 = dropdown
+				info.keepShownOnClick = true
+				info.isNotRadio = true
+				info.checked = TMW.CI.ics.ExtraFilter[filter.key]
+				
+				TMW.DD:AddButton(info)
+			end
+		end)
+
+		TMW.IE:DistributeFrameAnchorsLaterally(self, 2, self.HideWhileSecret, self.ExtraFilter)
+		self.ExtraFilter:ClearAllPoints()
+		self.ExtraFilter:SetPoint("TOPLEFT", self.ShowTTText, "BOTTOMLEFT", 0, -10)
+		self.ExtraFilter:SetPoint("RIGHT", -7, 0)
+		self.HideWhileSecret:ConstrainLabel(self.ExtraFilter)
+		
+		self:CScriptAdd("ReloadRequested", function(self, panel, panelInfo)
+			local n = 0
+			for k, v in pairs(TMW.CI.ics.ExtraFilter) do
+				if v then
+					n = n + 1
+				end
+			end
+			
+			if n == 0 then
+				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER_NONE"])
+			else
+				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": |cFFFF5959" .. n)
+			end
+		end)
+	end
+
+	self:AdjustHeight()
 end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
@@ -349,6 +414,43 @@ local NOT_ACTUALLY_SPELLSTEALABLE = {
 	[642] = true,	-- Divine Shield
 }
 
+local function CheckExtraFilter(unit, instance, filterNames)
+	local cached = instance[filterNames]
+	if cached ~= nil then
+		return cached
+	end
+
+	-- Check if any of the selected filters allow this aura
+	for i = 1, #filterNames do
+		local filterName = filterNames[i]
+		local cached = instance[filterName]
+		
+		if cached == nil then
+			-- The new filters must be accompanied by HELPFUL or HARMFUL,
+			-- but since isHelpful/isHarmful might be secret on the instance (WHY, BLIZZARD, WHY),
+			-- just try both. We cache it anyway so don't really care about perf.
+			local filter = filterName .. "|HELPFUL|INCLUDE_NAME_PLATE_ONLY"
+			local filterH = filterName .. "|HARMFUL|INCLUDE_NAME_PLATE_ONLY"
+			
+			cached = 
+				not IsAuraFilteredOutByInstanceID(unit, instance.auraInstanceID, filter) or
+				not IsAuraFilteredOutByInstanceID(unit, instance.auraInstanceID, filterH)
+
+			instance[filterName] = cached
+		end
+		
+		-- If any filter passes, return true
+		if cached then
+			instance[filterNames] = true
+			return true
+		end
+	end
+	
+	-- None of the filters passed
+	instance[filterNames] = false
+	return false
+end
+
 
 local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 	if event == icon.auraEvent and icon.UnitSet.UnitsLookup[arg1] then
@@ -381,8 +483,8 @@ local function Buff_OnUpdate(icon, time)
 	end
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local Units, Hash, Filter, Filterh, DurationSort, StackSort
-	= icon.Units, icon.Spells.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort
+	local Units, Hash, Filter, Filterh, DurationSort, StackSort, ExtraFilters
+	= icon.Units, icon.Spells.Hash, icon.Filter, icon.Filterh, icon.Sort, icon.StackSort, icon.ExtraFilters
 	local NotStealable = not icon.Stealable
 
 	-- These variables will hold all the attributes that we pass to YieldInfo().
@@ -434,7 +536,8 @@ local function Buff_OnUpdate(icon, time)
 
 					if 
 						(Hash[instance.spellId] or Hash[_dispelType] or Hash[strlowerCache[instance.name]]) 
-					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
+					and (not ExtraFilters or CheckExtraFilter(unit, instance, ExtraFilters))
+					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId]))
 					then
 						if DurationSort then
 							local remaining = (instance.expirationTime == 0 and huge) or ((instance.expirationTime - time) / instance.timeMod)
@@ -490,8 +593,8 @@ local function Buff_OnUpdate_Packed(icon, time)
 	end
 
 	-- Upvalue things that will be referenced a lot in our loops.
-	local Units, SpellsArray, DurationSort, StackSort, KindKey
-	    = icon.Units, icon.Spells.Array, icon.Sort, icon.StackSort, icon.KindKey
+	local Units, SpellsArray, DurationSort, StackSort, KindKey, ExtraFilters
+	    = icon.Units, icon.Spells.Array, icon.Sort, icon.StackSort, icon.KindKey, icon.ExtraFilters
 	local NotStealable = not icon.Stealable
 	local NotOnlyMine = not icon.OnlyMine
 		
@@ -520,7 +623,8 @@ local function Buff_OnUpdate_Packed(icon, time)
 					if 
 						(not KindKey or instance[KindKey])
 					and	(NotOnlyMine or isMine)
-					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
+					and (not ExtraFilters or CheckExtraFilter(unit, instance, ExtraFilters))
+					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId]))
 					then
 						if issecretvalue(instance.expirationTime) then
 							-- Can't sort secrets.
@@ -582,8 +686,8 @@ local function Buff_OnUpdate_Controller(icon, time)
 	end
 
 	-- Upvalue things that will be used in our loops.
-	local Units, NameFirst, Hash, Filter, Filterh
-	= icon.Units, icon.Spells.First, icon.Spells.Hash, icon.Filter, icon.Filterh
+	local Units, NameFirst, Hash, Filter, Filterh, ExtraFilters
+	= icon.Units, icon.Spells.First, icon.Spells.Hash, icon.Filter, icon.Filterh, icon.ExtraFilters
 	local NotStealable = not icon.Stealable
 	
 	for u = 1, #Units do
@@ -610,7 +714,9 @@ local function Buff_OnUpdate_Controller(icon, time)
 				elseif issecretvalue(instance.spellId) then
 					index = index + 1
 				
-					if (NameFirst == '') then
+					if  (NameFirst == '')
+					and (not ExtraFilters or CheckExtraFilter(unit, instance, ExtraFilters))
+					then
 						if not icon:YieldInfo(true, unit, instance) then
 							-- YieldInfo returns true if we need to keep harvesting data. Otherwise, it returns false.
 							return
@@ -626,6 +732,7 @@ local function Buff_OnUpdate_Controller(icon, time)
 					end
 
 					if  (NameFirst == '' or Hash[instance.spellId] or Hash[_dispelType] or Hash[strlowerCache[instance.name]])
+					and (not ExtraFilters or CheckExtraFilter(unit, instance, ExtraFilters))
 					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId]))
 					then
 						
@@ -655,8 +762,8 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 	end
 
 	-- Upvalue things that will be used in our loops.
-	local Units, NameFirst, SpellsArray, KindKey
-	= icon.Units, icon.Spells.First, icon.Spells.Array, icon.KindKey
+	local Units, NameFirst, SpellsArray, KindKey, ExtraFilters
+	= icon.Units, icon.Spells.First, icon.Spells.Array, icon.KindKey, icon.ExtraFilters
 	local NotStealable = not icon.Stealable
 	local NotOnlyMine = not icon.OnlyMine
 	
@@ -673,22 +780,14 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 				-- method is always 100% event driven. We have to sort here because otherwise new auras will jump around.
 				local results = {}
 				for auraInstanceID, instance in next, instances do
-					local sourceUnit = instance.sourceUnit
 					
-					if issecretvalue(instance.spellId)  then
-						if 
-							(not KindKey or not IsAuraFilteredOutByInstanceID(unit, auraInstanceID, icon.Filter))
-						then
-							binaryInsert(results, instance, auraInstanceCompare)
-						end
-					else
-						if 
-							(not KindKey or instance[KindKey])
-						and	(NotOnlyMine or sourceUnit == "player" or sourceUnit == "pet")
-						and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId]))
-						then
-							binaryInsert(results, instance, auraInstanceCompare)
-						end
+					if 
+						(not KindKey or instance[KindKey])
+					and	(NotOnlyMine or instance.isMine)
+					and (not ExtraFilters or CheckExtraFilter(unit, instance, ExtraFilters))
+					and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId]))
+					then
+						binaryInsert(results, instance, auraInstanceCompare)
 					end
 				end
 
@@ -709,7 +808,8 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 						if 
 							(not KindKey or instance[KindKey])
 						and	(NotOnlyMine or isMine)
-						and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId])) 
+						and (NotStealable or (instance.isStealable and not NOT_ACTUALLY_SPELLSTEALABLE[instance.spellId]))
+						and (not ExtraFilters or CheckExtraFilter(unit, instance, ExtraFilters))
 						then
 							
 							if not icon:YieldInfo(true, unit, instance) then
@@ -901,6 +1001,14 @@ function Type:Setup(icon)
 		icon.HideWhileSecret = false
 	end
 	
+	icon.ExtraFilters = nil
+	for k, v in pairs(icon.ExtraFilter) do
+		if v and tContains(AuraUtil.AuraFilters, k) then
+			icon.ExtraFilters = icon.ExtraFilters or {}
+			tinsert(icon.ExtraFilters, k)
+		end
+	end
+	
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 
 
@@ -912,15 +1020,11 @@ function Type:Setup(icon)
 		icon.Filter = icon.Filter .. "|PLAYER"
 		if icon.Filterh then icon.Filterh = icon.Filterh .. "|PLAYER" end
 	end
-	if icon.IncludeNameplateOnly then
-		icon.Filter = icon.Filter .. "|INCLUDE_NAME_PLATE_ONLY"
-		if icon.Filterh then icon.Filterh = icon.Filterh .. "|INCLUDE_NAME_PLATE_ONLY" end
-	end
 	icon.KindKey = nil
 	if icon.BuffOrDebuff == "HELPFUL" then
-		icon.KindKey = "isHelpful" 
+		icon.KindKey = "isHelpful"
 	elseif icon.BuffOrDebuff == "HARMFUL" then
-		icon.KindKey = "isHarmful" 
+		icon.KindKey = "isHarmful"
 	end
 
 	-- There are lots of spells (RPPM enchants) that don't report a source.
