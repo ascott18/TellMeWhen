@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ## v12.0.6
 * Added "Class or Primary Resource" as an option to Resource Display icons.
 * Added new WoW 12.0.1 filters to the Buff/Debuff icon type.
+* Added native integration with TullaCTC for styling timer text.
 * Specialization settings are now available to global groups.
 * Fix aura events not getting registered when tracking auras on many different units across all TMW icons.
 * Fix items sometimes showing with a ? texture.

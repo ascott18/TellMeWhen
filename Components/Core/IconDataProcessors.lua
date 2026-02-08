@@ -430,8 +430,9 @@ do
 				attributes.start = start
 				attributes.duration = duration
 				attributes.modRate = modRate
+				attributes.durObj = durObj
 
-				TMW:Fire(DURATION.changedEvent, icon, start, duration, modRate)
+				TMW:Fire(DURATION.changedEvent, icon, start, duration, modRate, durObj)
 				doFireIconUpdated = true
 			end
 		end
@@ -681,7 +682,10 @@ end
 
 -- SPELLCHARGES: "charges, maxCharges, chargeStart, chargeDur"
 do
-	local Processor = TMW.Classes.IconDataProcessor:New("SPELLCHARGES", "charges, maxCharges, chargeStart, chargeDur")
+	local Processor = TMW.Classes.IconDataProcessor:New("SPELLCHARGES", 
+	"charges, maxCharges, chargeStart, chargeDur, chargeDurObj", {
+	"charges, maxCharges, chargeStart, chargeDur"
+	})
 
 	Processor:RegisterIconEvent(26, "OnChargeGained", {
 		category = L["EVENT_CATEGORY_CHARGES"],
@@ -705,8 +709,9 @@ do
 			attributes.maxCharges = maxCharges
 			attributes.chargeStart = chargeStart
 			attributes.chargeDur = chargeDur
+			attributes.chargeDurObj = chargeDurObj
 			
-			TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges, chargeStart, chargeDur)
+			TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges, chargeStart, chargeDur, chargeDurObj)
 			doFireIconUpdated = true
 		else
 			if charges == maxCharges then
@@ -735,8 +740,9 @@ do
 				attributes.maxCharges = maxCharges
 				attributes.chargeStart = chargeStart
 				attributes.chargeDur = chargeDur
+				attributes.chargeDurObj = chargeDurObj
 				
-				TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges, chargeStart, chargeDur)
+				TMW:Fire(SPELLCHARGES.changedEvent, icon, charges, maxCharges, chargeStart, chargeDur, chargeDurObj)
 				doFireIconUpdated = true
 			end
 		end

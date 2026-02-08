@@ -295,11 +295,11 @@ if TMW.clientHasSecrets then
 			end
 
 			icon:SetInfo(
-				"state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+				"state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur, chargeDurObj; stack, stackText; spell",
 				state,
 				spellTextureCache[dataToUse.iName],
 				cooldown.startTime, cooldown.duration, cooldown.modRate, durObj,
-				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
+				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration, C_Spell.GetSpellChargeDuration(dataToUse.iName),
 				dataToUse.stack, dataToUse.stack,
 				dataToUse.iName
 			)

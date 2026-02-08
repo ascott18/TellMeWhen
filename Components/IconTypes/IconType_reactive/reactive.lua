@@ -232,11 +232,11 @@ if TMW.clientHasSecrets then
 						}
 					end
 
-					icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+					icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur, chargeDurObj; stack, stackText; spell",
 						state,
 						spellTextureCache[iName],
 						cooldown.startTime, cooldown.duration, cooldown.modRate, durObj,
-						charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
+						charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration, C_Spell.GetSpellChargeDuration(iName),
 						stack, stack,
 						iName		
 					)
@@ -276,11 +276,11 @@ if TMW.clientHasSecrets then
 			local durObj = C_Spell.GetSpellCooldownDuration(NameFirst)
 			durObj.isOnGCD = cooldown.isOnGCD
 
-			icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur; stack, stackText; spell",
+			icon:SetInfo("state; texture; start, duration, modRate, durObj; charges, maxCharges, chargeStart, chargeDur, chargeDurObj; stack, stackText; spell",
 				not inrange and STATE_UNUSABLE_NORANGE or noMana and STATE_UNUSABLE_NOMANA or STATE_UNUSABLE,
 				icon.FirstTexture,
 				cooldown.startTime, cooldown.duration, cooldown.modRate, durObj,
-				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration,
+				charges.currentCharges, charges.maxCharges, charges.cooldownStartTime, charges.cooldownDuration, C_Spell.GetSpellChargeDuration(NameFirst),
 				stack, stack,
 				NameFirst
 			)
