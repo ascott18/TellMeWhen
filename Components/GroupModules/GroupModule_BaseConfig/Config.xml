@@ -30,25 +30,11 @@
 					</OnTextChanged>
 				</Scripts>
 			</EditBox>
-		</Frames>
-		<Scripts>
-			<OnLoad>		
-				TMW:CInit(self)
-				
-				self:SetTitle(TMW.L["UIPANEL_GROUPNAME"])
-			</OnLoad>
-		</Scripts>
-	</Frame>
-
-
-	<Frame name="TellMeWhen_GM_Delete" inherits="TellMeWhen_OptionsModuleContainer" virtual="true">
-		<Size y="29"/>
-		<Frames>
 
 			<Button parentKey="Delete" inherits="TellMeWhen_ButtonTemplate">
 				<Size y="15"/>
 				<Anchors>
-					<Anchor point="TOP" y="-7"/>
+					<Anchor point="TOP" relativeKey="$parent.Name" relativePoint="BOTTOM" y="-7"/>
 					<Anchor point="LEFT" x="25" />
 					<Anchor point="RIGHT" x="-25" />
 				</Anchors>
@@ -79,10 +65,10 @@
 			</Button>
 		</Frames>
 		<Scripts>
-			<OnLoad>
+			<OnLoad>		
 				TMW:CInit(self)
 				
-				self:SetTitle(DELETE)
+				self:SetTitle(TMW.L["UIPANEL_MANAGEGROUP"])
 			</OnLoad>
 		</Scripts>
 	</Frame>

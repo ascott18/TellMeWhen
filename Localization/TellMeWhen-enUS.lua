@@ -906,6 +906,7 @@ L["UIPANEL_BAR_SIZE_Y_DESC"] = "Modifies the height of icons in this group."
 
 L["UIPANEL_ICONS"] = "Icons"
 L["UIPANEL_GROUPNAME"] = "Rename Group"
+L["UIPANEL_MANAGEGROUP"] = "Rename/Delete Group"
 L["UIPANEL_DIMENSIONS"] = "Dimensions"
 L["UIPANEL_ROWS"] = "Rows"
 L["UIPANEL_COLUMNS"] = "Columns"
@@ -955,7 +956,7 @@ L["UIPANEL_HIDE_CDM_DESC"] = [[Hides this Cooldown Manager frame while still all
 
 For TMW to best be able to access aura information from the CDM, you should set the Visibility setting above to Always Visible.]]
 L["UIPANEL_GROUP_CDM_HIDE"] = "Hide CDM Viewers"
-L["UIPANEL_GROUP_CDM_HIDE_DESC"] = [[Select which Cooldown Manager viewers should be hidden when this group is active. 
+L["UIPANEL_GROUP_CDM_HIDE_DESC"] = [[Select which Cooldown Manager viewers should be hidden when this group is enabled and matches Role/Specialization filters. 
 
 The CDM will remain functional for aura data extraction even while hidden by this setting.
 
