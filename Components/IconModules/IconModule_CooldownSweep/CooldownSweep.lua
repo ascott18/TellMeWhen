@@ -421,6 +421,7 @@ function CooldownSweep:DURATION(icon, start, duration, modRate, durObj)
 		self.start = start
 		self.duration = duration
 		self.modRate = modRate
+		self.durObj = durObj
 		
 		NeedsUpdate[self] = true
 	end
