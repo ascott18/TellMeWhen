@@ -31,10 +31,12 @@ end
 
 
 local function GetLMBGroup(icon)
+	-- TODO: Since we're now passing GUIDs to masque, we can at some point switch
+	-- to passing real group names in as well since Masque will now store settings against the GUID.
 	if icon.group.Domain == "global" then
-		return LMB:Group("TellMeWhen", L["DOMAIN_GLOBAL"] .. " " .. L["fGROUP"]:format(icon.group:GetID()))
+		return LMB:Group("TellMeWhen", L["DOMAIN_GLOBAL"] .. " " .. L["fGROUP"]:format(icon.group:GetID()), icon.group:GetGUID())
 	else
-		return LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()))
+		return LMB:Group("TellMeWhen", L["fGROUP"]:format(icon.group:GetID()), icon.group:GetGUID())
 	end
 end
 

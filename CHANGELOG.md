@@ -4,6 +4,7 @@
 * Fix aura events not getting registered when tracking auras on many different units across all TMW icons.
 * Fix items sometimes showing with a ? texture.
 * Workaround a Blizzard bug where secret recharge durations for a max-charge ability are ignored.
+* Masque settings are now stored against TMW groups' unique identifiers instead of against group IDs. Masque will absorb any per-group customizations into the first TMW profile you log in with.
 
 ## v12.0.5
 * Fixed an issue that could cause some edit mode dialogs to be really wide.
