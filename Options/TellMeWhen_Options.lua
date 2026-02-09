@@ -766,6 +766,7 @@ function IE:Load(isRefresh)
 		TMW:GetModule("SpellCache"):SetNumCachePerFrame(5000)
 
 		IE:Show()
+		TMW.DD:CloseDropDownMenus()
 	end
 	
 	if IE:GetBottom() <= 0 then
