@@ -258,6 +258,9 @@ end
 PowerBarColor[-1] = {{r=1, g=0, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=0, g=1, b=0, a=1}}
 PowerBarColor[-3] = {{r=0, g=1, b=0, a=1}, {r=1, g=1, b=0, a=1}, {r=1, g=0, b=0, a=1}}
 PowerBarColor[Enum.PowerType.ArcaneCharges] = PowerBarColor["ARCANE_CHARGES"]
+-- Better mana color from Blizzard_ClassNameplateBar
+PowerBarColor[Enum.PowerType.Mana] = { r = 0.1, g = 0.25, b = 1.00, a = 1 }
+
 
 local function Value_OnEvent(icon, event, arg1, arg2)
 	if event == icon.UnitSet.event then
