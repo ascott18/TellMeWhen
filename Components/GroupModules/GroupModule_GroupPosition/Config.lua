@@ -67,7 +67,7 @@ function Module:OnSuggest()
 		local name = frame:GetName()
 		if name 
 		and _G[name] == frame 
-		and frame:GetNumPoints() > 0 
+		and (issecretvalue(frame:GetNumPoints()) or frame:GetNumPoints() > 0)
 		and not frame:IsForbidden()
 		and (
 			-- Don't measure secure frames because reading frame size can 
