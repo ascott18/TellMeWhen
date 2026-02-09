@@ -307,7 +307,8 @@
         "EditModeSystemSettingsDialog",
         "HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_HIDE_WHEN_INACTIVE",
         "SPEC_MAGE_ARCANE",
-        "SPEC_MONK_WINDWALKER"
+        "SPEC_MONK_WINDWALKER",
+        "Settings"
     ],
     "cSpell.words": [
         "cooldown",

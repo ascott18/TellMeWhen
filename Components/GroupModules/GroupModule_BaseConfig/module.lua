@@ -231,12 +231,6 @@ if TMW.clientHasSecrets then
         end
     end
 
-    TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
-        for _, viewer in pairs(viewers) do
-            TMW.safecall(ApplyViewerOverride, viewer)
-        end
-    end)
-
     local alwaysHideCheck
     local groupHideAnchor
     local groupHideText
@@ -274,47 +268,59 @@ if TMW.clientHasSecrets then
         end)
     end)
 
-    -- Add the checkbox to the edit mode dialog when appropriate
-    hooksecurefunc(EditModeSystemSettingsDialog, "AttachToSystemFrame", function(self, systemFrame)
-        if not groupHideText then return end
-        if not tContains(viewers, systemFrame) then
-            alwaysHideCheck:Hide()
-            return
-        end
+	local function DrawEditModeSettings()
+		local self = EditModeSystemSettingsDialog
+		local systemFrame = self.attachedToSystem
+		if not groupHideText then return end
+		if not tContains(viewers, systemFrame) or not self:IsShown() then
+			alwaysHideCheck:Hide()
+			groupHideAnchor:Hide()
+			return
+		end
 
-        local layoutName = EditModeManagerFrame:GetActiveLayoutInfo().layoutName
-        local settingTable = TMW.db.global.EditModeLayouts[layoutName].CDMHide
-        local settingName = systemFrame.systemIndex
+		local layoutName = EditModeManagerFrame:GetActiveLayoutInfo().layoutName
+		local settingTable = TMW.db.global.EditModeLayouts[layoutName].CDMHide
+		local settingName = systemFrame.systemIndex
 
-        if not settingTable[settingName] then
-            -- This deprecated setting isn't enabled.
-            alwaysHideCheck:Hide()
-        else
-            -- Position next to "Show timer"
-            for _, frame in TMW:Vararg(self.Settings:GetChildren()) do
-                if frame.setting == Enum.EditModeCooldownViewerSetting.ShowTimer then
-                    alwaysHideCheck:SetPoint("LEFT", frame, "LEFT", frame:GetWidth() / 2 + 5, 0)
-                    break
-                end
-            end
-            alwaysHideCheck:Show()
-            alwaysHideCheck.Button:SetChecked(settingTable[settingName] or false)
-            alwaysHideCheck.Button:SetScript("OnClick", function(btn)
-                settingTable[settingName] = btn:GetChecked()
-            end)
-        end
+		if not settingTable[settingName] then
+			-- This deprecated setting isn't enabled.
+			alwaysHideCheck:Hide()
+		else
+			-- Position next to "Show timer"
+			for _, frame in TMW:Vararg(self.Settings:GetChildren()) do
+				if frame.setting == Enum.EditModeCooldownViewerSetting.ShowTimer then
+					alwaysHideCheck:SetPoint("LEFT", frame, "LEFT", frame:GetWidth() / 2 + 5, 0)
+					break
+				end
+			end
+			alwaysHideCheck:Show()
+			alwaysHideCheck.Button:SetChecked(settingTable[settingName] or false)
+			alwaysHideCheck.Button:SetScript("OnClick", function(btn)
+				settingTable[settingName] = btn:GetChecked()
+			end)
+		end
 
-        -- Show which group is hiding this viewer, if any
-        if groupHideText then
-            local hidingGroup = GetGroupHidingViewer(settingName)
-            if hidingGroup then
-                groupHideText:SetText("|cFFFF5050" .. L["CDM_HIDDEN_BY_GROUP"]:format(hidingGroup:GetGroupName()))
-                groupHideAnchor:Show()
-            else
-                groupHideAnchor:Hide()
-            end
+		-- Show which group is hiding this viewer, if any
+		if groupHideText then
+			local hidingGroup = GetGroupHidingViewer(settingName)
+			if hidingGroup then
+				groupHideText:SetText("|cFFFF5050" .. L["CDM_HIDDEN_BY_GROUP"]:format(hidingGroup:GetGroupName()))
+				groupHideAnchor:Show()
+			else
+				groupHideAnchor:Hide()
+			end
+		end
+	end
+
+    TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+        for _, viewer in pairs(viewers) do
+            TMW.safecall(ApplyViewerOverride, viewer)
         end
+		TMW.safecall(DrawEditModeSettings)
     end)
+
+    -- Add the checkbox to the edit mode dialog when appropriate
+    hooksecurefunc(EditModeSystemSettingsDialog, "AttachToSystemFrame", DrawEditModeSettings)
 end
 
 BaseConfig:RegisterConfigPanel_XMLTemplate(20, "TellMeWhen_GM_Dims")
