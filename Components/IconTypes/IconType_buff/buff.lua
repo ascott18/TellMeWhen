@@ -862,9 +862,18 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 		end
 
 		if clientHasSecrets then
+			local start
 			local durObj = GetAuraDuration(unit, instance.auraInstanceID)
-			-- Sometimes durObj comes out nil????
-			local start = durObj and durObj:GetStartTime() or 0
+			if duration then
+				start = durObj:GetStartTime()
+			else
+				-- Sometimes durObj comes out nil????
+				start = 0
+				if issecretvalue(instance.duration) then
+					-- Match secret state of unknown start so secret tests don't mismatch between start + duration
+					start = secretwrap(start)
+				end
+			end
 
 			iconToSet:SetInfo("state; texture; start, duration, modRate, durObj; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 				STATE_PRESENT,

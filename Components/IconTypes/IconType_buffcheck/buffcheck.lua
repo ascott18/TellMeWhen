@@ -18,6 +18,7 @@ local print = TMW.print
 local tonumber, pairs =
 	  tonumber, pairs
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local GetAuraDuration = C_UnitAuras.GetAuraDuration
 local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 
 local GetSpellTexture = TMW.GetSpellTexture
@@ -327,19 +328,28 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 		)
 	elseif instance then
 
-		local start
+		local start, durObj
 		if clientHasSecrets then
-			start = C_UnitAuras.GetAuraDuration(unit, instance.auraInstanceID):GetStartTime()
+			durObj = GetAuraDuration(unit, instance.auraInstanceID)
+			if durObj then
+				start = durObj:GetStartTime()
+			else
+				start = 0
+				if issecretvalue(instance.duration) then
+					-- Match secret state of unknown start so secret tests don't mismatch between start + duration
+					start = secretwrap(start)
+				end
+			end
 		else
 			start = instance.expirationTime - instance.duration
 		end
 
 		-- ID is defined if we didn't find any units that are missing all the auras being checked for.
 		-- In this case, the data is for the first matching aura found on the first unit checked.
-		iconToSet:SetInfo("state; texture; start, duration, modRate; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
+		iconToSet:SetInfo("state; texture; start, duration, modRate, durObj; stack, stackText; spell; unit, GUID; auraSourceUnit, auraSourceGUID",
 			STATE_PRESENT,
 			instance.icon,
-			start, instance.duration, instance.timeMod,
+			start, instance.duration, instance.timeMod, durObj,
 			instance.applications, instance.applications,
 			instance.spellId,
 			unit, nil,
