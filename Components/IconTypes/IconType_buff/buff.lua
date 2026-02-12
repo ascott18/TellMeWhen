@@ -864,7 +864,7 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 		if clientHasSecrets then
 			local start
 			local durObj = GetAuraDuration(unit, instance.auraInstanceID)
-			if duration then
+			if durObj then
 				start = durObj:GetStartTime()
 			else
 				-- Sometimes durObj comes out nil????
