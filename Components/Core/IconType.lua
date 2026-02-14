@@ -118,7 +118,11 @@ function IconType:FormatSpellForOutput(icon, data, doInsertLink)
 	
 	if data then
 		local name
-		if doInsertLink then
+		if issecretvalue(data) and type(data) == "string" then
+			-- Neither of these functions accept secret strings.
+			-- They do accept secret numbers though.
+			name = data
+		elseif doInsertLink then
 			name = GetSpellLink(data)
 		else
 			name = GetSpellName(data)
