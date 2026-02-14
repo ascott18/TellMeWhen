@@ -119,6 +119,18 @@ if TMW.clientHasSecrets then
         end
     end)
 
+    local fixes = {
+        [445474] = function()
+            -- 445474: Wither (Hellcaller warlock) (overrides Immolate)
+            -- 348: Immolation
+            -- IsPlayerSpell doesn't work on wither, so we have to check overrides.
+            -- If Wither isn't the active override, don't use wither, force this to immolate.
+            if C_Spell.GetOverrideSpell(348) == 348 then
+                return 348
+            end
+        end
+    }
+
     local function GetViewerItemSpellId(frame)
         -- NOTE: Cannot use frame:GetSpellID() because it'll be secret-tainted with actual AuraData.spellId values.
         -- Similarly can't use frame.cooldownInfo.linkedSpellID for the same reason - it'll receive secrets in combat.
@@ -130,16 +142,19 @@ if TMW.clientHasSecrets then
         end
 
         local cooldownInfo = frame.cooldownInfo
+        local ret = cooldownInfo.spellID
         if cooldownInfo.linkedSpellIDs and cooldownInfo.linkedSpellIDs[1] then
             -- Are there ever more than one linked spell?
             -- Nobody knows. Just pick the first one I guess.
             -- Example cases where this matters:
             -- Outlaw "Coup de Grace" 441423 is a passive that links to buff "Escalating Blade" 441786
             -- Ret "Crusading Strikes" 404542 links to buff "Crusading Strikes" 1226662
-            return cooldownInfo.linkedSpellIDs[1]
+            ret = cooldownInfo.linkedSpellIDs[1]
         end
 
-        return cooldownInfo.spellID
+        if fixes[ret] then ret = fixes[ret]() end
+
+        return ret
     end
 
     local AugmentInstance_base = AugmentInstance
