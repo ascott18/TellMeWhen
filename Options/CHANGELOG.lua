@@ -4,6 +4,9 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v12.0.7
+* Fix assorted errors
+* Adjusted mana bar color on Resource Display icons
+* Added "Raid" aura filter
 
 ## v12.0.6
 * Added "Class or Primary Resource" as an option to Resource Display icons.
