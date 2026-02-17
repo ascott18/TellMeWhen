@@ -152,7 +152,7 @@ if TMW.clientHasSecrets then
             ret = cooldownInfo.linkedSpellIDs[1]
         end
 
-        if fixes[ret] then ret = fixes[ret]() end
+        if fixes[ret] then ret = fixes[ret]() or ret end
 
         return ret
     end
