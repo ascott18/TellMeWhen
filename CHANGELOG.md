@@ -1,3 +1,6 @@
+## v12.0.8
+* Fix assorted errors
+
 ## v12.0.7
 * Fix assorted errors
 * Adjusted mana bar color on Resource Display icons

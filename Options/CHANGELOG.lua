@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.0.8
+* Fix assorted errors
+
 ## v12.0.7
 * Fix assorted errors
 * Adjusted mana bar color on Resource Display icons

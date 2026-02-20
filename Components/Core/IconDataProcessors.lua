@@ -386,6 +386,9 @@ do
 	function Processor:CompileFunctionSegment(t)
 		-- GLOBALS: start, duration, modRate
 		t[#t+1] = [[
+		duration = duration or 0
+		start = start or 0
+		modRate = modRate or 1
 		if issecretvalue(duration) or issecretvalue(attributes.duration) then
 			attributes.start = start
 			attributes.duration = duration
@@ -395,9 +398,6 @@ do
 			TMW:Fire(DURATION.changedEvent, icon, start, duration, modRate, durObj)
 			doFireIconUpdated = true
 		else
-			duration = duration or 0
-			start = start or 0
-			modRate = modRate or 1
 			
 			if duration == 0.001 then duration = 0 end -- hardcode fix for tricks of the trade. nice hardcoding on your part too, blizzard
 
