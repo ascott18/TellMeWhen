@@ -36,6 +36,27 @@ jobs:
           fi
           echo "✓ TOC version ($TOC_VERSION) matches CHANGELOG version"
 
+      - name: "Validate Version Not Duplicate"
+        run: |
+          TOC_VERSION=$(grep -oP '## Version: \K[^\s]+' TellMeWhen.toc)
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+          
+          # Check if we're building a tag
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+            echo "✓ Building tag: $CURRENT_TAG"
+          else
+            # Not building a tag - verify version was bumped
+            if [[ "$TOC_VERSION" == "$LATEST_TAG" ]]; then
+              echo "Version not bumped after release!" 1>&2
+              echo "  TOC Version:  $TOC_VERSION" 1>&2
+              echo "  Latest Tag:   $LATEST_TAG" 1>&2
+              echo "  Please bump the version in TOC and CHANGELOG before pushing to master." 1>&2
+              exit 1
+            fi
+            echo "✓ TOC version ($TOC_VERSION) is different from latest tag ($LATEST_TAG)"
+          fi
+
       - name: "Validate TOC Classic"
         run: |
           if [[ "$(grep -hroP '## X?-?\KInterface.*' --exclude-dir=.release --include="*-Classic.toc" . | sort --unique | wc -l)" -gt 1 ]]; then
