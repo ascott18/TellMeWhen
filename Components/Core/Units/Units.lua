@@ -766,7 +766,7 @@ end
 if UnitTokenFromGUID then
 	-- wow 10.0+
 	local UnitTokenFromGUID = UnitTokenFromGUID;
-	local UnitGUID = UnitGUID;
+	local UnitGUID = TMW.UnitGUID
 	function UNITS:TestUnit(unit)
 		local guid = unit and UnitGUID(unit)
 		return guid and UnitTokenFromGUID(guid)

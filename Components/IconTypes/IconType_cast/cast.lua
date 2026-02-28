@@ -17,12 +17,12 @@ local L = TMW.L
 local print = TMW.print
 local pairs, ipairs =
 	  pairs, ipairs
-local UnitCastingInfo, UnitChannelInfo =
-	  UnitCastingInfo, UnitChannelInfo
+local UnitCastingInfo, UnitChannelInfo, UnitExists =
+	  UnitCastingInfo, UnitChannelInfo, UnitExists
 
 local strlowerCache = TMW.strlowerCache
 local issecretvalue = TMW.issecretvalue
-
+local UnitGUID = TMW.UnitGUID
 
 local Type = TMW.Classes.IconType:New("cast")
 LibStub("AceEvent-3.0"):Embed(Type)
@@ -150,9 +150,8 @@ if TMW.clientHasSecrets then
 
 		for u = 1, #Units do
 			local unit = Units[u]
-			local GUID = UnitGUID(unit)
 
-			if GUID then
+			if UnitExists(unit) then
 
 				local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 				local durObj = name and UnitCastingDuration(unit)
@@ -182,12 +181,12 @@ if TMW.clientHasSecrets then
 					local start = durObj:GetStartTime()
 					local duration = durObj:GetTotalDuration()
 
-					if not icon:YieldInfo(true, name, unit, GUID, iconTexture, start, duration, reverse, durObj, state) then
+					if not icon:YieldInfo(true, name, unit, nil, iconTexture, start, duration, reverse, durObj, state) then
 						-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
 						return
 					end
 				elseif icon.States[STATE_ABSENTEACH].Alpha > 0 then
-					if not icon:YieldInfo(true, nil, unit, GUID, icon.LastTexture, 0, 0, false) then
+					if not icon:YieldInfo(true, nil, unit, nil, icon.LastTexture, 0, 0, false) then
 						-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
 						return
 					end

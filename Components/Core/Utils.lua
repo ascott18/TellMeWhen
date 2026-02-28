@@ -1379,6 +1379,18 @@ end
 ---------------------------------
 -- WoW API Helpers
 ---------------------------------
+---
+local UnitGUID, UnitExists = UnitGUID, UnitExists
+TMW.UnitGUID = not TMW.clientHasSecrets and UnitGUID or function(unit)
+	-- Workaround https://github.com/ascott18/TellMeWhen/issues/2375,
+	-- https://github.com/parnic/LibDogTag-Unit-3.0/issues/25,
+	-- and other similar issues
+	if not UnitExists(unit) then return nil end
+
+	local success, guid = pcall(UnitGUID, unit)
+	if not success then return nil end
+	return guid
+end
 
 local GetMouseFoci = GetMouseFoci
 TMW.GetMouseFocus = GetMouseFocus or function()

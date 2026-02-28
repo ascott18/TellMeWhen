@@ -31,7 +31,7 @@ local IsAuraFilteredOutByInstanceID = C_UnitAuras.IsAuraFilteredOutByInstanceID
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot
 local GetAuraSlots = C_UnitAuras.GetAuraSlots or UnitAuraSlots
-local UnitGUID = UnitGUID
+local UnitGUID = TMW.UnitGUID
 
 local GetSpellName = TMW.GetSpellName
 
