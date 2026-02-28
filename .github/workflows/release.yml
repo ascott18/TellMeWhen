@@ -26,8 +26,8 @@ jobs:
 
       - name: "Validate Changelog Version"
         run: |
-          TOC_VERSION=$(grep -hroP '## Version: \K.*' TellMeWhen.toc | head -n1 | xargs)
-          CHANGELOG_VERSION=$(grep -hroP '## v\K.*' CHANGELOG.md | head -n1 | xargs)
+          TOC_VERSION=$(grep -oP '## Version: \K[^\s]+' TellMeWhen.toc)
+          CHANGELOG_VERSION=$(grep -oP '## v\K[^\s]+' CHANGELOG.md | head -n1)
           if [[ "$TOC_VERSION" != "$CHANGELOG_VERSION" ]]; then
             echo "Version mismatch between TOC and CHANGELOG:" 1>&2
             echo "  TOC Version:       '$TOC_VERSION'" 1>&2
