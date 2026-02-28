@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.0.9
+* Fix #2371 - Corruption treated as Immolate
+
 ## v12.0.8
 * Fix assorted errors
 

@@ -1,3 +1,6 @@
+## v12.0.9
+* Fix #2371 - Corruption treated as Immolate
+
 ## v12.0.8
 * Fix assorted errors
 
