@@ -29,6 +29,7 @@ local GetSpellTexture = TMW.GetSpellTexture
 local tContains = TMW.tContains
 local tDeleteItem = TMW.tDeleteItem
 local OnGCD = TMW.OnGCD
+local issecretvalue = TMW.issecretvalue
 
 local RelevantToAll = {
 	__index = {
