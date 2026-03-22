@@ -389,7 +389,8 @@ do
 		duration = duration or 0
 		start = start or 0
 		modRate = modRate or 1
-		if issecretvalue(duration) or issecretvalue(attributes.duration) then
+		if issecretvalue(duration) or issecretvalue(attributes.duration)
+		or issecretvalue(start) or issecretvalue(attributes.start) then
 			attributes.start = start
 			attributes.duration = duration
 			attributes.modRate = modRate
