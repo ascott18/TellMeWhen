@@ -1649,7 +1649,7 @@ Examples:
 	"[@target, help][mod:ctrl]" - target is friendly OR holding down ctrl
 	"[@focus, harm, nomod:shift]" - focus is hostile AND not holding down shift
 
-For more help, go to http://www.wowpedia.org/Making_a_macro]]
+For more help, go to https://warcraft.wiki.gg/wiki/Macro_conditionals]]
 L["MACROCONDITION_EB_DESC"] = "If using a single condition, opening and closing brackets are optional. Brackets are required if using multiple conditionals."
 L["MOUSEOVERCONDITION"] = "Mouse is Over"
 L["MOUSEOVERCONDITION_DESC"] = "This condition checks if your mouse is over the icon or group that the condition is attached to."
