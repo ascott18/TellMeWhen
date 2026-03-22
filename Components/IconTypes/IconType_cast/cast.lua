@@ -151,7 +151,9 @@ if TMW.clientHasSecrets then
 		for u = 1, #Units do
 			local unit = Units[u]
 
-			if UnitExists(unit) then
+			-- Using TMW's safe UnitGUID here guards against illegal compound unit tokens too
+			local GUID = UnitGUID(unit)
+			if GUID then
 
 				local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 				local durObj = name and UnitCastingDuration(unit)

@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.0.10
+* Fix #2378 - cast.lua compound unit tokens are not allowed for this call
+
 ## v12.0.9
 * Fix #2371 - Corruption treated as Immolate
 * Fix #2375 - cast.lua:153: bad argument #1 to 'UnitGUID'
