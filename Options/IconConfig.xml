@@ -708,6 +708,8 @@
 				
 				self:SetTitle(TMW.L["UIPANEL_SECRETS_DISALLOWED"], true)
 				
+				self:SetHyperlinksEnabled(true)
+				
 				self:CScriptAdd("PanelSetup", function(self, panel, panelInfo)
 					self.text:SetText(panelInfo.supplementalData.text)
 					self:SetHeight(self.text:GetHeight() + 5)
@@ -717,6 +719,37 @@
 				self.LibCustomGlow = LibStub("LibCustomGlow-1.0", true)
 				self.isReallyShown = false
 			</OnLoad>
+			<OnHyperlinkClick>
+				if not StaticPopupDialogs["TMW_COPYURL"] then
+					StaticPopupDialogs["TMW_COPYURL"] = {
+						text = "Copy URL:",
+						button1 = OKAY,
+						hasEditBox = 1,
+						editBoxWidth = 350,
+						OnShow = function(dialog)
+							local editBox = _G[dialog:GetName().."EditBox"]
+							if editBox then
+								editBox:SetText(dialog.data or "")
+								editBox:SetFocus()
+								editBox:HighlightText()
+							end
+						end,
+						EditBoxOnEscapePressed = function(self)
+							self:GetParent():Hide()
+						end,
+						timeout = 0,
+						whileDead = true,
+						preferredIndex = 3,
+					}
+				end
+				StaticPopup_Show("TMW_COPYURL", nil, nil, link)
+			</OnHyperlinkClick>
+			<OnHyperlinkEnter>
+				SetCursor("Interface\\CURSOR\\Interact")
+			</OnHyperlinkEnter>
+			<OnHyperlinkLeave>
+				SetCursor(nil)
+			</OnHyperlinkLeave>
 			<OnShow>
 				if self.showTimer then
 					self.showTimer:Cancel()
