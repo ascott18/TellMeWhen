@@ -4,7 +4,8 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v12.0.11
-* Fix Lua Value icon type to not break when the user code returns secrets.
+* Fix #2401 - Lua Value icon type to not break when the user code returns secrets.
+* Fix #2381 - Icon sometimes has a delay in showing as ready 
 
 ## v12.0.10
 * Support timer bars for totems once Blizzard releases GetTotemDuration

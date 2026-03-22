@@ -38,6 +38,7 @@ local Type = TMW.Classes.IconType:New("reactive")
 Type.name = L["ICONMENU_REACTIVE"]
 Type.desc = L["ICONMENU_REACTIVE_DESC"]
 Type.menuIcon = "Interface\\Icons\\ability_warrior_revenge"
+Type.hasNoDurationEndEvent = true
 
 local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE

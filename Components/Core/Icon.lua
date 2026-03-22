@@ -727,6 +727,22 @@ function Icon.ScheduleNextUpdate(icon)
 
 		if issecretvalue(attributes.duration) then
 			duration = 0
+
+			-- Use a hidden Cooldown frame to detect when the secret duration expires,
+			-- since we can't do arithmetic on secret values to schedule a future update.
+			local durObj = attributes.durObj
+			if durObj and icon.typeData.hasNoDurationEndEvent then
+				local cd = icon.__secretDurCD
+				if not cd then
+					cd = CreateFrame("Cooldown", nil, icon)
+					cd:SetAlpha(0)
+					cd:SetScript("OnCooldownDone", function()
+						icon.NextUpdateTime = 0
+					end)
+					icon.__secretDurCD = cd
+				end
+				cd:SetCooldownFromDurationObject(durObj, true)
+			end
 		else
 			duration = attributes.duration - (time - attributes.start)
 			if duration < 0 then duration = 0 end

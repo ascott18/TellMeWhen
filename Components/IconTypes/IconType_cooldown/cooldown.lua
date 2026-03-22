@@ -41,6 +41,7 @@ LibStub("AceEvent-3.0"):Embed(Type)
 Type.name = L["ICONMENU_SPELLCOOLDOWN"]
 Type.desc = L["ICONMENU_SPELLCOOLDOWN_DESC"]
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
+Type.hasNoDurationEndEvent = true
 
 local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE
