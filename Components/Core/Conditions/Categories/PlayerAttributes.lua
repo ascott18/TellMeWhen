@@ -49,6 +49,7 @@ ConditionCategory:RegisterCondition(3,	 "MOUNTED", {
 	},
 	funcstr = [[BOOLCHECK( IsMounted() )]],
 	events = function(ConditionObject, c)
+		TMW.COMMON.Auras:RequestUnits("player")
 		return
 			ConditionObject:GenerateNormalEventString("TMW_UNIT_AURA_PLAYER")
 	end,
