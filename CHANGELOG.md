@@ -1,3 +1,6 @@
+## v12.0.11
+* Fix Lua Value icon type to not break when the user code returns secrets.
+
 ## v12.0.10
 * Support timer bars for totems once Blizzard releases GetTotemDuration
 * Fix #2378 - cast.lua compound unit tokens are not allowed for this call
