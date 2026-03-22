@@ -1017,7 +1017,7 @@ function Icon.DisableIcon(icon, soft)
 
 	if not soft then
 		local iconGUID = icon:GetGUID()
-		if iconGUID then
+		if iconGUID and TMW:GetDataOwner(iconGUID) == icon then
 			TMW:DeclareDataOwner(iconGUID, nil)
 		end
 	end

@@ -5,6 +5,7 @@
 * Fix #2380 - PlayerNames.lua:112: table index is secret
 * Fix #2385 - Mounted condition doesn't update if no other icon is tracking player auras.
 * Fix #2386 - attempt to compare local 'start' a secret number value tainted by ForceTaint_Strong
+* Fix #2379 - Deleting groups temporarily clobbers some icons from the GUID lookup
 
 ## v12.0.9
 * Fix #2371 - Corruption treated as Immolate
