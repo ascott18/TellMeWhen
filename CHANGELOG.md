@@ -1,4 +1,5 @@
 ## v12.0.10
+* Support timer bars for totems once Blizzard releases GetTotemDuration
 * Fix #2378 - cast.lua compound unit tokens are not allowed for this call
 * Fix #2398 - Auras.lua:303: attempt to index a nil value
 * Fix #2380 - PlayerNames.lua:112: table index is secret

@@ -19,8 +19,8 @@ local print = TMW.print
 
 local format, type, tonumber, wipe, bit =
 	  format, type, tonumber, wipe, bit
-local GetTotemInfo =
-	  GetTotemInfo
+local GetTotemInfo = GetTotemInfo
+local GetTotemDuration = GetTotemDuration
 
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache
@@ -138,14 +138,15 @@ local function Totem_OnUpdate(icon, time)
 			if issecretvalue(totemName) then
 				-- If totems are secret, return data if not filtering by name.
 				if NameFirst == "" then
-					icon:SetInfo("state; texture; start, duration; spell",
+					local durObj = GetTotemDuration and GetTotemDuration(iSlot)
+					icon:SetInfo("state; texture; start, duration, modRate, durObj; spell",
 						{
 							secretBool = active,
 							trueState = icon.States[STATE_PRESENT],
 							falseState = icon.States[STATE_ABSENT]
 						},
 						totemIcon,
-						start, duration,
+						start, duration, 1, durObj,
 						totemName
 					)
 					return
