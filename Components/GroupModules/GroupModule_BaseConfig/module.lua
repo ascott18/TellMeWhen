@@ -211,24 +211,25 @@ if TMW.clientHasSecrets then
         local layoutName = EditModeManagerFrame:GetActiveLayoutInfo().layoutName
         if not TMW.db then return end
 
-        -- DONT call UpdateSystemSettingShowTooltips, it will taint.
-        -- viewer:UpdateSystemSettingShowTooltips()
-        viewer:UpdateSystemSettingOpacity()
-        if EditModeManagerFrame:IsEditModeActive() then
-            return
-        end
-
-        local shouldHide = TMW.db.global.EditModeLayouts[layoutName].CDMHide[settingName]
+        local shouldHide = not EditModeManagerFrame:IsEditModeActive() and (
+			TMW.db.global.EditModeLayouts[layoutName].CDMHide[settingName]
             or GetGroupHidingViewer(settingName) ~= nil
+		)
 
         if shouldHide then
             viewer:SetAlpha(0)
+			viewer._tmwHidden = 1
             -- DONT call SetTooltipsShown, it will taint.
             -- Instead, manually iterate and disable mouse motion so tooltips don't appears on invisible frames.
             for itemFrame in viewer.itemFramePool:EnumerateActive() do
                 itemFrame:SetMouseMotionEnabled(false);
             end
-        end
+        elseif viewer._tmwHidden then
+			viewer._tmwHidden = false
+			-- DONT call UpdateSystemSettingShowTooltips, it will taint.
+			-- viewer:UpdateSystemSettingShowTooltips()
+			viewer:UpdateSystemSettingOpacity()
+		end
     end
 
     local alwaysHideCheck
