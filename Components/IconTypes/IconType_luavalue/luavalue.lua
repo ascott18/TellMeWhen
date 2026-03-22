@@ -49,17 +49,9 @@ local function LuaValue_OnUpdate(icon)
 	value = tonumber(value)
 	maxValue = tonumber(maxValue)
 
-	if value == nil or maxValue == nil or maxValue < 0 then
+	if value == nil or maxValue == nil then
 		icon:SetInfo("state", STATE_FAIL)
 		return
-	end
-
-	if value < 0 then
-		value = 0
-	end
-
-	if value > maxValue then
-		maxValue = value
 	end
 
 	icon:SetInfo("state; value, maxValue, valueColor, valueCurveFunc", STATE_SUCCEED, value, maxValue, BarColors, valueCurveFunc)
