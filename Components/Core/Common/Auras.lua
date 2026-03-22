@@ -279,6 +279,7 @@ if TMW.clientHasSecrets then
     end
 
     local function SpellHasCDMHook(spell)
+        if not spell then return false end
         if not CVarCallbackRegistry:GetCVarValueBool("cooldownViewerEnabled") then
             -- Don't try to show frames if CDM is disabled.
             return false
@@ -299,8 +300,8 @@ if TMW.clientHasSecrets then
             -- It gets cleared when items are released from the pool.
             local spellID = GetViewerItemSpellId(frame)
             if spellID and (
-                spellID == spell or 
-                GetSpellName(spellID):lower() == tostring(spell):lower()
+                spellID == spell or
+                (GetSpellName(spellID) and GetSpellName(spellID):lower() == tostring(spell):lower())
             ) then
                 return true
             end
