@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ## v12.0.10
 * Fix #2378 - cast.lua compound unit tokens are not allowed for this call
 * Fix #2398 - Auras.lua:303: attempt to index a nil value
+* Fix #2380 - PlayerNames.lua:112: table index is secret
 
 ## v12.0.9
 * Fix #2371 - Corruption treated as Immolate

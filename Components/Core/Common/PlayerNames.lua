@@ -106,7 +106,7 @@ function NAMES:UPDATE_BATTLEFIELD_SCORE()
 			name, _, _, _, _, _, _, _, class = GetBattlefieldScore(i)
 		end
 
-		if name and class then -- sometimes this returns nil??
+		if name and class and not issecretvalue(name) then -- sometimes this returns nil??
 			local color = self.ClassColors[class]
 			if color then
 				self.ClassColoredNameCache[name] = color .. name .. "|r"
