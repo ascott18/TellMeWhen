@@ -333,7 +333,7 @@ if TMW.clientHasSecrets then
 			cd:SetCooldownFromDurationObject(self.durObj)
 		else
 			if issecretvalue(mainStart) or issecretvalue(mainDuration) or issecretvalue(self.modRate) then
-				error(("TMW: Unexpected secret to SetCooldown. %s, %s, %s, %s, %s"):format(self.icon, self.icon.Type, issecretvalue(mainStart), issecretvalue(mainDuration), issecretvalue(self.modRate)))
+				error(("TMW: Unexpected secret to SetCooldown. %s, %s, %s, %s, %s"):format(tostring(self.icon), self.icon.Type, tostring(issecretvalue(mainStart)), tostring(issecretvalue(mainDuration)), tostring(issecretvalue(self.modRate))))
 			end
 			cd:SetCooldown(mainStart, mainDuration, self.modRate)
 		end
