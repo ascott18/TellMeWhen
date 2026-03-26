@@ -139,17 +139,19 @@ local function Totem_OnUpdate(icon, time)
 				-- If totems are secret, return data if not filtering by name.
 				if NameFirst == "" then
 					local durObj = GetTotemDuration and GetTotemDuration(iSlot)
-					icon:SetInfo("state; texture; start, duration, modRate, durObj; spell",
-						{
-							secretBool = active,
-							trueState = icon.States[STATE_PRESENT],
-							falseState = icon.States[STATE_ABSENT]
-						},
-						totemIcon,
-						start, duration, 1, durObj,
-						totemName
-					)
-					return
+					if durObj then
+						icon:SetInfo("state; texture; start, duration, modRate, durObj; spell",
+							{
+								secretBool = active,
+								trueState = icon.States[STATE_PRESENT],
+								falseState = icon.States[STATE_ABSENT]
+							},
+							totemIcon,
+							start, duration, 1, durObj,
+							totemName
+						)
+						return
+					end
 				end
 			else
 				local totemNameLower = strlowerCache[totemName]
