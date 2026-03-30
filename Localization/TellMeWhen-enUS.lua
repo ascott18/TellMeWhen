@@ -538,6 +538,9 @@ L["ICONMENU_ONSUCCEED"] = "On Succeed"
 L["ICONMENU_ONLYINTERRUPTIBLE"] = "Only Interruptible"
 L["ICONMENU_ONLYINTERRUPTIBLE_DESC"] = "Check this box to only show spell casts that are interruptible"
 
+L["ICONMENU_ONLYIMPORTANT"] = "Only Important"
+L["ICONMENU_ONLYIMPORTANT_DESC"] = "Check this box to only show spell casts that Blizzard flags as important"
+
 L["ICONMENU_NOPOCKETWATCH"] = "Blank Texture for Unknown"
 L["ICONMENU_NOPOCKETWATCH_DESC"] = "Check this box to show no texture instead of the Pocketwatch texture."
 
