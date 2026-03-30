@@ -1,4 +1,5 @@
 ## v12.0.12
+* Added Only Important filter to Spell Cast icon type
 * Fix #2410 - Buff/Debuff icons rarely failing to emit a duration object
 
 ## v12.0.11
