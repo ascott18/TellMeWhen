@@ -872,6 +872,8 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 				if issecretvalue(instance.duration) then
 					-- Match secret state of unknown start so secret tests don't mismatch between start + duration
 					start = secretwrap(start)
+					-- Ensure non-nil durObj so we don't attempt SetCooldown with secrets.
+					durObj = C_DurationUtil.CreateDuration()
 				end
 			end
 

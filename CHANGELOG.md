@@ -1,3 +1,6 @@
+## v12.0.12
+* Fix #2410 - Buff/Debuff icons rarely failing to emit a duration object
+
 ## v12.0.11
 * Fix #2401 - Lua Value icon type to not break when the user code returns secrets.
 * Fix #2381 - Icon sometimes has a delay in showing as ready.

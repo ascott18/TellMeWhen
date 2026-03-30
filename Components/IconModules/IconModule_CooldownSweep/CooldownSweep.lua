@@ -333,9 +333,10 @@ if TMW.clientHasSecrets then
 			cd:SetCooldownFromDurationObject(self.durObj)
 		else
 			if issecretvalue(mainStart) or issecretvalue(mainDuration) or issecretvalue(self.modRate) then
-				error(("TMW %s: Unexpected secret to SetCooldown. %s, %s, %s, %s, %s"):format(TELLMEWHEN_VERSIONNUMBER, tostring(self.icon), self.icon.Type, tostring(issecretvalue(mainStart)), tostring(issecretvalue(mainDuration)), tostring(issecretvalue(self.modRate))))
+				TMW:Error(("Unexpected secret to SetCooldown. %s, %s, %s, %s, %s"):format(tostring(self.icon), self.icon.Type, tostring(issecretvalue(mainStart)), tostring(issecretvalue(mainDuration)), tostring(issecretvalue(self.modRate))))
+			else
+				cd:SetCooldown(mainStart, mainDuration, self.modRate)
 			end
-			cd:SetCooldown(mainStart, mainDuration, self.modRate)
 		end
 
 		-- Handle charges of spells that aren't completely depleted.
