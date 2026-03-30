@@ -63,6 +63,9 @@ Type:RegisterIconDefaults{
 
 	-- True if the icon should display blanks instead of the pocketwatch texture.
 	NoPocketwatch			= false,
+
+	-- True if the icon should only check casts of spells flagged as important.
+	OnlyImportant			= false,
 }
 
 if not TMW.clientHasSecrets then
@@ -95,13 +98,20 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CastSettings", functio
 			noPocketwatch,
 		})
 	else
-		self:BuildSimpleCheckSettingFrame({
+		local checks = {
 			function(check)
 				check:SetTexts(L["ICONMENU_ONLYINTERRUPTIBLE"], L["ICONMENU_ONLYINTERRUPTIBLE_DESC"])
 				check:SetSetting("Interruptible")
 			end,
 			noPocketwatch,
-		})
+		}
+		if TMW.clientHasSecrets then
+			checks[#checks + 1] = function(check)
+				check:SetTexts(L["ICONMENU_ONLYIMPORTANT"], L["ICONMENU_ONLYIMPORTANT_DESC"])
+				check:SetSetting("OnlyImportant")
+			end
+		end
+		self:BuildSimpleCheckSettingFrame(checks)
 	end
 end)
 
@@ -144,9 +154,10 @@ end
 
 local Cast_OnUpdate
 if TMW.clientHasSecrets then
+	local IsSpellImportant = C_Spell.IsSpellImportant
 	function Cast_OnUpdate_Secrets(icon, time)
 		-- Upvalue things that will be referenced a lot in our loops.
-		local Units, Interruptible = icon.Units, icon.Interruptible
+		local Units, Interruptible, OnlyImportant = icon.Units, icon.Interruptible, icon.OnlyImportant
 
 		for u = 1, #Units do
 			local unit = Units[u]
@@ -155,20 +166,21 @@ if TMW.clientHasSecrets then
 			local GUID = UnitGUID(unit)
 			if GUID then
 
-				local name, _, iconTexture, start, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+				local name, _, iconTexture, start, endTime, _, _, notInterruptible, castingSpellID = UnitCastingInfo(unit)
 				local durObj = name and UnitCastingDuration(unit)
 				-- Reverse is used to reverse the timer sweep masking behavior. Regular casts should have it be false.
 				local reverse = false
 
 				-- There is no regular spellcast. Check for a channel.
 				if not name then
-					name, _, iconTexture, start, endTime, _, notInterruptible = UnitChannelInfo(unit)
+					name, _, iconTexture, start, endTime, _, notInterruptible, castingSpellID = UnitChannelInfo(unit)
 					durObj = name and UnitChannelDuration(unit)
 					-- Channeled casts should reverse the timer sweep behavior.
 					reverse = true
 				end
 
-				if name then
+				local isImportant = not OnlyImportant or (castingSpellID and IsSpellImportant(castingSpellID))
+				if name and isImportant then
 					icon.LastTexture = iconTexture
 
 					local state
