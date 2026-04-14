@@ -38,6 +38,19 @@ local GetSpellName = TMW.GetSpellName
 TMW.COMMON.Auras = CreateFrame("Frame")
 local Auras = TMW.COMMON.Auras
 
+-- When the client has secret value restrictions, unit tokens can be secret values
+-- that cause C_UnitAuras.GetAuraDataByIndex to throw an error because it receives
+-- a player/pet name instead of a valid unit token. Wrap in pcall to safely return nil.
+if TMW.clientHasSecrets then
+	local _GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+	function Auras.GetAuraDataByIndex(unit, index, filter)
+		local ok, result = pcall(_GetAuraDataByIndex, unit, index, filter)
+		if ok then return result end
+	end
+else
+	Auras.GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+end
+
 --[[
 
 Design notes:
@@ -690,7 +703,7 @@ if C_TooltipInfo and C_TooltipInfo.GetUnitBuffByAuraInstanceID then
     end
 
 else
-    local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+    local GetAuraDataByIndex = Auras.GetAuraDataByIndex
     local Parser, LT1, LT2 = TMW:GetParser()
 
     function Auras.ParseTooltip(unit, instance, auraIndex) 

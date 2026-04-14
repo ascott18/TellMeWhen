@@ -18,11 +18,11 @@ local print = TMW.print
 local tonumber, pairs, type, format, select =
 	  tonumber, pairs, type, format, select
 
-local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 local GetAuraDuration = C_UnitAuras.GetAuraDuration
 local IsAuraFilteredOutByInstanceID = C_UnitAuras.IsAuraFilteredOutByInstanceID
 
 local Auras = TMW.COMMON.Auras
+local GetAuraDataByIndex = Auras.GetAuraDataByIndex
 local GetAuras = Auras.GetAuras
 local ParseTooltip = Auras.ParseTooltip
 

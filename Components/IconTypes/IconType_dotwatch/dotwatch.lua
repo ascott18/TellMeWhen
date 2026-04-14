@@ -20,7 +20,7 @@ local type, wipe, pairs, rawget, abs, min, next, GetTime =
 local UnitGUID, UnitName =
 	  UnitGUID, UnitName
 
-local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+local GetAuraDataByIndex = TMW.COMMON.Auras.GetAuraDataByIndex
 local C_Timer = C_Timer
 local huge = math.huge
 

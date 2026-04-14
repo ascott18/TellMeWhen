@@ -19,7 +19,7 @@ local tonumber, pairs =
 	  tonumber, pairs
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local GetAuraDuration = C_UnitAuras.GetAuraDuration
-local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+local GetAuraDataByIndex = TMW.COMMON.Auras.GetAuraDataByIndex
 
 local GetSpellTexture = TMW.GetSpellTexture
 local strlowerCache = TMW.strlowerCache

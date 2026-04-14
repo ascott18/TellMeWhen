@@ -25,8 +25,8 @@ local strlowerCache = TMW.strlowerCache
 local huge = math.huge
 local empty = {}
 
-local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 local Auras = TMW.COMMON.Auras
+local GetAuraDataByIndex = Auras.GetAuraDataByIndex
 local GetAuras = Auras.GetAuras
 
 function Env.AuraStacks(unit, name, filter)

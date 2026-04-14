@@ -851,7 +851,7 @@ if IsInJailersTower then
 	end
 
 	local issecretvalue = TMW.issecretvalue
-	local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+	local GetAuraDataByIndex = TMW.COMMON.Auras.GetAuraDataByIndex
 	function AnimaPowWatcher:UNIT_AURA(_, unit)
 		if unit ~= "player" then return end
 		AnimaPowWatcher:Update()
