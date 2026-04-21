@@ -1,16 +1,3 @@
-#  --------------------
-#  TellMeWhen
-#  Originally by NephMakes
-# 
-#  Other contributions by:
-# 		Sweetmms of Blackrock, Oozebull of Twisting Nether, Oodyboo of Mug'thol,
-# 		Banjankri of Blackrock, Predeter of Proudmoore, Xenyr of Aszune
-# 
-#  Currently maintained by
-#  Cybeloras of Aerie Peak
-#  --------------------
-
-
 ## Interface: 120000, 120001, 110205, 50500, 40402, 20505, 11507
 
 ## Title: TellMeWhen
