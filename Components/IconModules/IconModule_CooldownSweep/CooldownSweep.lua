@@ -343,15 +343,10 @@ if TMW.clientHasSecrets then
 		if otherStart == nil or otherDuration == nil or not self.charges then
 			cd2:SetCooldown(0, 0)
 		else
-			-- When charges aren't charging, start will be zero but duration will be non-zero (???)
-			-- and SetCooldown ignores calls when that's the case, keeping the existing values ticking.
-			-- So, annoyingly, we have to reset the sweep on every call.
-			-- https://github.com/ascott18/TellMeWhen/issues/2340
-			cd2:SetCooldown(0, 0)
-
 			if self.chargeDurObj then
-				cd2:SetCooldownFromDurationObject(self.chargeDurObj)
+				cd2:SetCooldownFromDurationObject(self.chargeDurObj, true)
 			else
+				cd2:SetCooldown(0, 0)
 				cd2:SetCooldown(otherStart, otherDuration, self.modRate)
 			end
 			
