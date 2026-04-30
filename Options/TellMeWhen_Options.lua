@@ -40,6 +40,7 @@ local _G, bit, CopyTable, hooksecurefunc, IsAddOnLoaded, IsControlKeyDown, PlayS
 
 local strlowerCache = TMW.strlowerCache
 local GetSpellTexture = TMW.GetSpellTexture
+local issecretvalue = TMW.issecretvalue
 local print = TMW.print
 local Types = TMW.Types
 local IE
@@ -1372,10 +1373,9 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 
 				local childTop = (child:GetTop() - topInset) * child:GetEffectiveScale()
 
-				-- Only look at children that have their top below the parent.
-				-- Otherwise, we'll get weird things for the highest value because
-				-- of things like header font strings.
-				if childTop <= top then
+				if issecretvalue(childTop) then
+					-- Skip children with secret dimensions
+				elseif childTop <= top then
 					lowest = min(lowest, (child:GetBottom() + bottomInset) * child:GetEffectiveScale())
 					highest = max(highest, childTop)
 				end
@@ -1391,6 +1391,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 			and child:GetObjectType() == "FontString"
 			and (not exclusions or not TMW.tContains(exclusions, child))
 			and child:GetText()
+			and not issecretvalue(child:GetText())
 			and child:GetText() ~= ""
 			then
 				self:__AdjustHeightCheckBottom(child)
@@ -1432,7 +1433,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	AdjustHeightUnanimated = function(self, bottomPadding)
 		local height = self:CalculateAutoHeight(bottomPadding)
 
-		if height == -1 then return end
+		if height == -1 or issecretvalue(height) then return end
 
 		self:SetHeight(height)
 	end,
@@ -1440,7 +1441,7 @@ TMW:NewClass("Config_Frame", "Frame", "CScriptProvider"){
 	AdjustHeightAnimated = function(self, bottomPadding, duration)
 		local height = self:CalculateAutoHeight(bottomPadding)
 
-		if height == -1 then return end
+		if height == -1 or issecretvalue(height) then return end
 
 		TMW:AnimateHeightChange(self, height, duration or 0.1)
 	end,
@@ -1501,9 +1502,13 @@ TMW:NewClass("Config_Panel", "Config_Frame"){
 		self.Header:SetFont(font, size, flags)
 
 		local iconWidth = showRestricted and (self.RestrictedIcon:GetWidth() + 2) or 0
-		while size > 6 and self.Header:GetStringWidth() > self:GetWidth() - 10 - iconWidth do
-			size = size - 1
-			self.Header:SetFont(font, size, flags)
+		local headerWidth = self.Header:GetStringWidth()
+		if not issecretvalue(headerWidth) then
+			while size > 6 and headerWidth > self:GetWidth() - 10 - iconWidth do
+				size = size - 1
+				self.Header:SetFont(font, size, flags)
+				headerWidth = self.Header:GetStringWidth()
+			end
 		end
 	end,
 
@@ -1692,6 +1697,8 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 		local targetBottom = targetFrame:GetBottom()
 		local targetTop = targetFrame:GetTop()
 
+		if issecretvalue(targetBottom) or issecretvalue(targetTop) then return end
+
 		local scrollBottom = self:GetBottom()
 		local scrollTop = self:GetTop()
 
@@ -1712,8 +1719,9 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 
 		if scroll then
 			local yrange = self:GetVerticalScrollRange()
+			if issecretvalue(yrange) then return end
 			scroll = max(scroll, 0)
-			scroll = min(scroll, self:GetVerticalScrollRange())
+			scroll = min(scroll, yrange)
 
 			self:SetVerticalScroll(scroll)
 		end
@@ -1723,6 +1731,11 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 
 	OnScrollRangeChanged = function(self)
 		local yrange = self:GetVerticalScrollRange()
+
+		if issecretvalue(yrange) then
+			-- Secret values have leaked into scroll content dimensions. Bail out.
+			return
+		end
 
 		if floor(yrange) == 0 then
 			self.ScrollBar:Hide()
@@ -1747,6 +1760,7 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 	end,
 
 	OnVerticalScroll = function(self, offset)
+		if issecretvalue(offset) or not self.percentage then return end
 		self.ScrollBar.Thumb:SetPoint("TOP", self, "TOP", 0, -(offset * self.percentage))
 	end,
 
@@ -1760,10 +1774,13 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 			newScroll = self:GetVerticalScroll() + scrollStep
 		end
 
+		local yrange = self:GetVerticalScrollRange()
+		if issecretvalue(newScroll) or issecretvalue(yrange) then return end
+
 		if newScroll < 0 then
 			newScroll = 0
-		elseif newScroll > self:GetVerticalScrollRange() then
-			newScroll = self:GetVerticalScrollRange()
+		elseif newScroll > yrange then
+			newScroll = yrange
 		end
 
 		self.LastWheelScrollX, self.LastWheelScrollY = GetCursorPosition()
@@ -1816,11 +1833,13 @@ TMW:NewClass("Config_ScrollFrame", "ScrollFrame", "Config_Frame"){
 
 			if scrollStep then
 				local newScroll = self:GetVerticalScroll() - scrollStep
+				local yrange = self:GetVerticalScrollRange()
+				if issecretvalue(newScroll) or issecretvalue(yrange) then return end
 
 				if 0 > newScroll then
 					newScroll = 0
-				elseif newScroll > self:GetVerticalScrollRange() then
-					newScroll = self:GetVerticalScrollRange()
+				elseif newScroll > yrange then
+					newScroll = yrange
 				end
 				self:SetVerticalScroll(newScroll)
 			end

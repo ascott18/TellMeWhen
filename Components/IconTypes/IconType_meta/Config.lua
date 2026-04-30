@@ -236,7 +236,9 @@ function Config:IconMenu()
 				info.tCoordRight = 0.93
 				info.tCoordTop = 0.07
 				info.tCoordBottom = 0.93
-				info.icon = icon.attributes.texture
+				if not TMW.issecretvalue(icon.attributes.texture) then
+					info.icon = icon.attributes.texture
+				end
 				TMW.DD:AddButton(info)
 			end
 		end
