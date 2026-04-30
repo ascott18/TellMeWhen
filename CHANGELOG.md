@@ -1,5 +1,4 @@
 ## v12.0.12
-* Added Only Important filter to Spell Cast icon type
 * Added "Addon Restriction Active" condition (#2414) - checks if any selected restriction types (Combat, Encounter, Challenge Mode, PvP, Map, Chat) are active.
 * Fix #2410 - Buff/Debuff icons rarely failing to emit a duration object
 * Fix #2423 - Player stats and similar are now secret
