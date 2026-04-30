@@ -828,6 +828,8 @@ local function Buff_OnUpdate_Controller_Packed(icon, time)
 	icon:YieldInfo(false)
 end
 
+local issecrettable = issecrettable or TMW.NULLFUNC
+
 function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 	local Units = icon.Units
 
@@ -841,23 +843,25 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 		local count = instance.applications
 
 		if icon.ShowTTText then
+			local points = instance.points
 			if icon.ShowTTText == true then
 				count = 0
 
-				local points = instance.points
-				for i = 1, #points do
-					local v = points[i]
-					if v and v > 0 then 
-						count = v
-						break
+				if not issecrettable(points) then
+					for i = 1, #points do
+						local v = points[i]
+						if v and v > 0 then
+							count = v
+							break
+						end
 					end
 				end
 			elseif icon.ShowTTText < 0 then
 				-- Negative numbers represent indexes into tooltip scanning.
 				local tooltipNumbers = ParseTooltip(unit, instance)
 				count = tooltipNumbers[-icon.ShowTTText]
-			elseif not issecretvalue(instance.points) then
-				count = instance.points[icon.ShowTTText]
+			elseif not issecrettable(points) then
+				count = points[icon.ShowTTText]
 			end
 		end
 

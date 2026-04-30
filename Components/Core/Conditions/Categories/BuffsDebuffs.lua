@@ -18,6 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 local issecretvalue = TMW.issecretvalue
+local issecrettable = issecrettable or TMW.NULLFUNC
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 local isNumber = TMW.isNumber
@@ -208,7 +209,7 @@ function Env.AuraVariableNumberPacked(unit, name, kindKey, onlyMine)
 			local instance = instances[auraInstanceID]
 			if instance[kindKey] then
 				local points = instance.points
-				if not issecretvalue(points) then
+				if not issecrettable(points) then
 					for i = 1, #points do
 						local v = points[i]
 						if v and v > 0 then return v end

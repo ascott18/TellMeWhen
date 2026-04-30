@@ -6,6 +6,7 @@ TMW.CHANGELOG = [==[
 ## v12.0.12
 * Added Only Important filter to Spell Cast icon type
 * Fix #2410 - Buff/Debuff icons rarely failing to emit a duration object
+* Fix #2428 - buff.lua:848: attempt to get length of local 'points'
 
 ## v12.0.11
 * Fix #2401 - Lua Value icon type to not break when the user code returns secrets.
