@@ -2862,7 +2862,9 @@ This texture is being used because the first valid spell being checked was enter
 
 The correct texture will be used once you have seen the spell as you play.
 
-To see the correct texture now, change the first spell being checked into a Spell ID. You can easily do this by clicking on the entry in the editbox and right-clicking the correct corresponding entry in the suggestion list.]]
+To see the correct texture now, change the first spell being checked into a Spell ID. You can easily do this by clicking on the entry in the editbox and right-clicking the correct corresponding entry in the suggestion list.
+
+Alternatively, set a Custom Texture on the icon.]]
 
 L["HELP_NOUNITS"] = [[You must enter at least one unit!]]
 L["HELP_NOUNIT"] = [[You must enter a unit!]]
