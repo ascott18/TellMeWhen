@@ -721,6 +721,28 @@ CNDT.Substitutions = {
 			return conditionSettings.BitFlags
 		end
 	end,
+},{	src = "c.BitFlagTable",
+	rep = function(conditionData, conditionSettings, name, name2)
+		TMW:ValidateType("c.BitFlagTable", conditionData.identifier, conditionSettings.BitFlags, "table;number")
+
+		if type(conditionSettings.BitFlags) == "table" then
+			return CNDT:GetTableSubstitution(conditionSettings.BitFlags, "BitFlags")
+		else
+			-- Convert numeric BitFlags to table form for conditions that need table iteration
+			local tbl = {}
+			if conditionData.bitFlags then
+				for key in pairs(conditionData.bitFlags) do
+					if type(key) == "number" and key >= 1 then
+						local flag = bit.lshift(1, key - 1)
+						if bit.band(conditionSettings.BitFlags, flag) == flag then
+							tbl[key] = true
+						end
+					end
+				end
+			end
+			return CNDT:GetTableSubstitution(tbl, "BitFlags")
+		end
+	end,
 },
 
 {	src = "BOOLCHECK(%b())",

@@ -300,6 +300,51 @@ ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 })
 
 
+if C_RestrictedActions and C_RestrictedActions.IsAddOnRestrictionActive then
+ConditionCategory:RegisterCondition(20, "ADDON_RESTRICTION", {
+	text = L["CONDITIONPANEL_ADDON_RESTRICTION"],
+	tooltip = L["CONDITIONPANEL_ADDON_RESTRICTION_DESC"],
+
+	unit = false,
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
+	bitFlags = {
+		[1] = {order = 1, text = L["CONDITIONPANEL_ADDON_RESTRICTION_COMBAT"],    tooltip = L["CONDITIONPANEL_ADDON_RESTRICTION_COMBAT_DESC"]},
+		[2] = {order = 2, text = L["CONDITIONPANEL_ADDON_RESTRICTION_ENCOUNTER"], tooltip = L["CONDITIONPANEL_ADDON_RESTRICTION_ENCOUNTER_DESC"]},
+		[3] = {order = 3, text = L["CONDITIONPANEL_ADDON_RESTRICTION_CHALLENGE"], tooltip = L["CONDITIONPANEL_ADDON_RESTRICTION_CHALLENGE_DESC"]},
+		[4] = {order = 4, text = L["CONDITIONPANEL_ADDON_RESTRICTION_PVP"],       tooltip = L["CONDITIONPANEL_ADDON_RESTRICTION_PVP_DESC"]},
+		[5] = {order = 5, text = L["CONDITIONPANEL_ADDON_RESTRICTION_MAP"],       tooltip = L["CONDITIONPANEL_ADDON_RESTRICTION_MAP_DESC"]},
+		[6] = {order = 6, text = L["CONDITIONPANEL_ADDON_RESTRICTION_CHAT"],      tooltip = L["CONDITIONPANEL_ADDON_RESTRICTION_CHAT_DESC"]},
+	},
+
+	icon = "Interface\\Icons\\INV_Misc_Key_03",
+	tcoords = CNDT.COMMON.standardtcoords,
+	Env = {
+		CheckAnyRestrictionActive = function(bitFlags)
+			if type(bitFlags) ~= "table" then return false end
+			for key in pairs(bitFlags) do
+				-- Keys are 1-based, AddOnRestrictionType enum is 0-based
+				if C_RestrictedActions.IsAddOnRestrictionActive(key - 1) then
+					return true
+				end
+			end
+			return false
+		end,
+	},
+	funcstr = function(c)
+		if c.Checked then
+			return [[ not CheckAnyRestrictionActive(c.BitFlagTable) ]]
+		else
+			return [[ CheckAnyRestrictionActive(c.BitFlagTable) ]]
+		end
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("ADDON_RESTRICTION_STATE_CHANGED")
+	end,
+})
+end
+
+
 
 ConditionCategory:RegisterSpacer(10)
 
