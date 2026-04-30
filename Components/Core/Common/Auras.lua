@@ -210,16 +210,12 @@ if TMW.clientHasSecrets then
                 auraInstance.name = data.name
                 auraInstance.sourceUnit = "player"
                 auraInstance.isMine = true
-                auraInstance.isHelpful = unit == "player"
-                auraInstance.isHarmful = unit == "target"
                 return
             end
         end
 
         -- Unsecret some fields that have no business being secret
         local helpful = not IsAuraFilteredOutByInstanceID(unit, auraInstanceID, "HELPFUL|INCLUDE_NAME_PLATE_ONLY")
-        auraInstance.isHelpful = helpful
-        auraInstance.isHarmful = not helpful
         auraInstance.isMine = not IsAuraFilteredOutByInstanceID(unit, auraInstanceID,
             "PLAYER|INCLUDE_NAME_PLATE_ONLY" .. (helpful and "|HELPFUL" or "|HARMFUL")
         )
