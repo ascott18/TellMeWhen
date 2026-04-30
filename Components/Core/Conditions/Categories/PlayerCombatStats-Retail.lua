@@ -16,20 +16,56 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+local issecretvalue = TMW.issecretvalue
 
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 
 local min, format = min, format
 
-Env.UnitStat = UnitStat
-Env.GetHaste = GetHaste
-Env.GetExpertise = GetExpertise
-Env.GetCritChance = GetCritChance
-Env.GetSpellCritChance = GetSpellCritChance
-Env.GetMasteryEffect = GetMasteryEffect
-Env.GetSpellBonusDamage = GetSpellBonusDamage
-Env.GetSpellBonusHealing = GetSpellBonusHealing
+if not TMW.clientHasSecrets then
+	Env.UnitStat = UnitStat
+	Env.GetHaste = GetHaste
+	Env.GetExpertise = GetExpertise
+	Env.GetCritChance = GetCritChance
+	Env.GetSpellCritChance = GetSpellCritChance
+	Env.GetMasteryEffect = GetMasteryEffect
+	Env.GetSpellBonusDamage = GetSpellBonusDamage
+	Env.GetSpellBonusHealing = GetSpellBonusHealing
+else
+	Env.UnitStat = function(unit, index)
+		local ret = UnitStat(unit, index)
+		return issecretvalue(ret) and 0 or ret
+	end
+	Env.GetHaste = function()
+		local ret = GetHaste()
+		return issecretvalue(ret) and 0 or ret
+	end
+	Env.GetExpertise = function()
+		local ret = GetExpertise()
+		return issecretvalue(ret) and 0 or ret
+	end
+	Env.GetCritChance = function()
+		local ret = GetCritChance()
+		return issecretvalue(ret) and 0 or ret
+	end
+	Env.GetSpellCritChance = function(school)
+		local ret = GetSpellCritChance(school)
+		return issecretvalue(ret) and 0 or ret
+	end
+	Env.GetMasteryEffect = function()
+		local ret = GetMasteryEffect()
+		return issecretvalue(ret) and 0 or ret
+	end
+	Env.GetSpellBonusDamage = function(school)
+		local ret = GetSpellBonusDamage(school)
+		return issecretvalue(ret) and 0 or ret
+	end
+	Env.GetSpellBonusHealing = function()
+		local ret = GetSpellBonusHealing()
+		return issecretvalue(ret) and 0 or ret
+	end
+end
 	
 
 TMW:RegisterUpgrade(71008, {
@@ -58,6 +94,7 @@ ConditionCategory:RegisterCondition(1,	 "STRENGTH", {
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	icon = "Interface\\Icons\\spell_nature_strength",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[UnitStat("player", 1) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -71,6 +108,7 @@ ConditionCategory:RegisterCondition(2,	 "AGILITY", {
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	icon = "Interface\\Icons\\spell_holy_blessingofagility",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[UnitStat("player", 2) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -84,6 +122,7 @@ ConditionCategory:RegisterCondition(3,	 "STAMINA", {
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	icon = "Interface\\Icons\\spell_holy_wordfortitude",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[UnitStat("player", 3) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -97,6 +136,7 @@ ConditionCategory:RegisterCondition(4,	 "INTELLECT", {
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	icon = "Interface\\Icons\\spell_holy_magicalsentry",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[UnitStat("player", 4) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -117,6 +157,7 @@ ConditionCategory:RegisterCondition(6,	 "MELEECRIT", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\Ability_CriticalStrike",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[max(GetCritChance(), GetSpellCritChance(2))/100 c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -132,6 +173,7 @@ ConditionCategory:RegisterCondition(7,	 "MELEEHASTE", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\spell_nature_bloodlust",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[GetHaste()/100 c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -146,6 +188,7 @@ ConditionCategory:RegisterCondition(8,	 "MASTERY", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\spell_holy_championsbond",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[GetMasteryEffect() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -170,6 +213,7 @@ ConditionCategory:RegisterCondition(11,	"SPIRIT", {
 	formatter = TMW.C.Formatter.COMMANUMBER,
 	icon = "Interface\\Icons\\spell_shadow_burningspirit",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[UnitStat("player", 5) c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -198,8 +242,12 @@ ConditionCategory:RegisterCondition(14, "LIFESTEAL", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[GetLifesteal() c.Operator c.Level]],
 	Env = {
-		GetLifesteal = GetLifesteal,
+		GetLifesteal = not TMW.clientHasSecrets and GetLifesteal or function()
+			local ret = GetLifesteal()
+			return issecretvalue(ret) and 0 or ret
+		end,
 	},
+	maybeSecret = true,
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("LIFESTEAL_UPDATE")
@@ -217,9 +265,16 @@ ConditionCategory:RegisterCondition(15, "VERSATILITY", {
 	funcstr = [[GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_DONE) + GetVersatilityBonus(CR_VERSATILITY_DAMAGE_DONE) c.Operator c.Level]],
 	Env = {
 		CR_VERSATILITY_DAMAGE_DONE = CR_VERSATILITY_DAMAGE_DONE,
-		GetCombatRatingBonus = GetCombatRatingBonus,
-		GetVersatilityBonus = GetVersatilityBonus,
+		GetCombatRatingBonus = not TMW.clientHasSecrets and GetCombatRatingBonus or function(rating)
+			local ret = GetCombatRatingBonus(rating)
+			return issecretvalue(ret) and 0 or ret
+		end,
+		GetVersatilityBonus = not TMW.clientHasSecrets and GetVersatilityBonus or function(rating)
+			local ret = GetVersatilityBonus(rating)
+			return issecretvalue(ret) and 0 or ret
+		end,
 	},
+	maybeSecret = true,
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("COMBAT_RATING_UPDATE")
@@ -236,8 +291,12 @@ ConditionCategory:RegisterCondition(16, "AVOIDANCE", {
 	tcoords = CNDT.COMMON.standardtcoords,
 	funcstr = [[GetAvoidance() c.Operator c.Level]],
 	Env = {
-		GetAvoidance = GetAvoidance,
+		GetAvoidance = not TMW.clientHasSecrets and GetAvoidance or function()
+			local ret = GetAvoidance()
+			return issecretvalue(ret) and 0 or ret
+		end,
 	},
+	maybeSecret = true,
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("AVOIDANCE_UPDATE")
@@ -256,11 +315,16 @@ ConditionCategory:RegisterCondition(30.5, "MELEEAP", {
 	icon = "Interface\\Icons\\INV_Sword_04",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		MELEEAP_UnitAttackPower = function(unit)
+		MELEEAP_UnitAttackPower = not TMW.clientHasSecrets and function(unit)
 			local base, pos, neg = UnitAttackPower(unit)
+			return base + pos + neg
+		end or function(unit)
+			local base, pos, neg = UnitAttackPower(unit)
+			if issecretvalue(base) then return 0 end
 			return base + pos + neg
 		end,
 	},
+	maybeSecret = true,
 	funcstr = [[MELEEAP_UnitAttackPower("player") c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -281,7 +345,7 @@ ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 	icon = "Interface\\Icons\\spell_fire_flamebolt",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		SPELLDMG_GetSpellBonusDamage = function()
+		SPELLDMG_GetSpellBonusDamage = not TMW.clientHasSecrets and function()
 			return min(
 				GetSpellBonusDamage(2),
 				GetSpellBonusDamage(3),
@@ -290,8 +354,20 @@ ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 				GetSpellBonusDamage(6),
 				GetSpellBonusDamage(7)
 			)
+		end or function()
+			local val = GetSpellBonusDamage(2)
+			if issecretvalue(val) then return 0 end
+			return min(
+				val,
+				GetSpellBonusDamage(3),
+				GetSpellBonusDamage(4),
+				GetSpellBonusDamage(5),
+				GetSpellBonusDamage(6),
+				GetSpellBonusDamage(7)
+			)
 		end,
 	},
+	maybeSecret = true,
 	funcstr = [[SPELLDMG_GetSpellBonusDamage() c.Operator c.Level]],
 	events = function(ConditionObject, c)
 		return
@@ -301,7 +377,15 @@ ConditionCategory:RegisterCondition(31,	 "SPELLDMG", {
 })
 
 
-Env.GetManaRegen = GetManaRegen
+if not TMW.clientHasSecrets then
+	Env.GetManaRegen = GetManaRegen
+else
+	Env.GetManaRegen = function()
+		local base, combat = GetManaRegen()
+		if issecretvalue(base) then return 0, 0 end
+		return base, combat
+	end
+end
 ConditionCategory:RegisterCondition(35,	 "MANAREGEN", {
 	text = MANA_REGEN,
 	range = 1000/5,
@@ -309,6 +393,7 @@ ConditionCategory:RegisterCondition(35,	 "MANAREGEN", {
 	texttable = function(k) return format(L["MP5"], TMW.C.Formatter.COMMANUMBER:Format(k)*5) end,
 	icon = "Interface\\Icons\\spell_magic_managain",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[GetManaRegen() c.Operator c.Level]], -- anyone know of an event that can be reliably listened to to get this?
 })
 ConditionCategory:RegisterCondition(36,	 "MANAREGENCOMBAT", {
@@ -318,6 +403,7 @@ ConditionCategory:RegisterCondition(36,	 "MANAREGENCOMBAT", {
 	texttable = function(k) return format(L["MP5"], TMW.C.Formatter.COMMANUMBER:Format(k)*5) end,
 	icon = "Interface\\Icons\\spell_frost_summonwaterelemental",
 	tcoords = CNDT.COMMON.standardtcoords,
+	maybeSecret = true,
 	funcstr = [[select(2, GetManaRegen()) c.Operator c.Level]],
 })
 

@@ -235,8 +235,13 @@ ConditionCategory:RegisterCondition(7,    "SPEED", {
 	icon = "Interface\\Icons\\ability_rogue_sprint",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetUnitSpeed = GetUnitSpeed,
+		GetUnitSpeed = not TMW.clientHasSecrets and GetUnitSpeed or function(unit)
+			local current, runSpeed, flightSpeed, swimSpeed = GetUnitSpeed(unit)
+			if issecretvalue(current) then return 0, 0, 0, 0 end
+			return current, runSpeed, flightSpeed, swimSpeed
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[GetUnitSpeed(c.Unit)/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
 	-- events = absolutely no events
 })
@@ -251,8 +256,13 @@ ConditionCategory:RegisterCondition(8,    "RUNSPEED", {
 	icon = "Interface\\Icons\\ability_rogue_sprint",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		GetUnitSpeed = GetUnitSpeed,
+		GetUnitSpeed = not TMW.clientHasSecrets and GetUnitSpeed or function(unit)
+			local current, runSpeed, flightSpeed, swimSpeed = GetUnitSpeed(unit)
+			if issecretvalue(current) then return 0, 0, 0, 0 end
+			return current, runSpeed, flightSpeed, swimSpeed
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[select(2, GetUnitSpeed(c.Unit))/]].. BASE_MOVEMENT_SPEED ..[[ c.Operator c.Level]],
 	-- events = absolutely no events
 })
