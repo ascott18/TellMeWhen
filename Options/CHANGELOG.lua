@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.0.13
+* Fix #2444 - Auras.lua:245: attempt to index local 'unitData' (a nil value)
+
 ## v12.0.12
 * Added "Addon Restriction Active" condition (#2414) - checks if any selected restriction types (Combat, Encounter, Challenge Mode, PvP, Map, Chat) are active.
 * Fix #2410 - Buff/Debuff icons rarely failing to emit a duration object

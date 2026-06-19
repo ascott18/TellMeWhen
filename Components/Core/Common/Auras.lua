@@ -237,10 +237,13 @@ if TMW.clientHasSecrets then
         -- end)
 
         hooksecurefunc(frame, "SetAuraInstanceInfo", function(frame, cdmAuraInstance)
+            if not cdmAuraInstance then return end
+
             local spellID = GetViewerItemSpellId(frame)
             local auraInstanceID = cdmAuraInstance.auraInstanceID
             local unit = frame.auraDataUnit
             local unitData = cdmData[unit]
+            if not unitData or not spellID then return end
 
             local existing = unitData[auraInstanceID]
             if existing and existing.spellId == spellID then
