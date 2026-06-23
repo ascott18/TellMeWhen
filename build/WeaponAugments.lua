@@ -1,4 +1,4 @@
-{	12404, -- Dense Sharpening Stone
+return {	12404, -- Dense Sharpening Stone
 	124674, -- Day-Old Darkmoon Doughnut
 	12643, -- Dense Weightstone
 	171285, -- Shadowcore Oil
