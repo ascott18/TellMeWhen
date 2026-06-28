@@ -65,6 +65,9 @@ Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
+-- Static spec consumed by IconModule_AuraContainer (12.1 secret-safe display).
+Type:UsesAttributes("auraSpec")
+
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
@@ -139,6 +142,24 @@ if clientHasSecrets then
 			
 		end,
 	})
+end
+
+if clientHasSecrets then
+	Type:RegisterConfigPanel_ConstructorFunc(122, "TellMeWhen_AuraContainerSettings", function(self)
+		self:SetTitle("Aura Container (12.1)")
+		self:BuildSimpleCheckSettingFrame({
+			numPerRow = 1,
+			function(check)
+				check:SetTexts(
+					"Display via Blizzard Aura Container",
+					"Render auras using Blizzard's AuraContainer/AuraButton objects. This is the only aura display that keeps working while auras are secret (combat, encounters, M+, PvP).\n\n" ..
+					"Limitations: it can only filter by category (buff/debuff, Only Mine, and the Aura Filters), NOT by specific spell name, and it cannot show an 'absent' state, sort, or drive conditions/text from the aura."
+				)
+				check:SetSetting("UseAuraContainer")
+			end,
+		})
+		self:AdjustHeight()
+	end)
 end
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
@@ -1011,6 +1032,68 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 
 
 
+-- Build the aura-display spec consumed by IconModule_AuraContainer.
+-- The AuraContainer can only filter by category, so the icon's spell list is
+-- intentionally ignored here - it shows everything matching the configured
+-- buff/debuff kind, Only Mine, and Aura Filter selections.
+local function BuildAuraSpec(icon)
+	local filters = {}
+
+	-- Selected ExtraFilters (IMPORTANT, CrowdControl, ...) are OR'd, so each one
+	-- becomes its own AddAuraFilter entry. With none selected we add the bare
+	-- category filter.
+	local extras = icon.ExtraFilters
+
+	local function addKind(kind)
+		local base = kind
+		if icon.OnlyMine then
+			base = base .. "|PLAYER"
+		end
+		base = base .. "|INCLUDE_NAME_PLATE_ONLY"
+
+		if extras then
+			for i = 1, #extras do
+				filters[#filters + 1] = { filterString = extras[i] .. "|" .. base, maxFrameCount = 1 }
+			end
+		else
+			filters[#filters + 1] = { filterString = base, maxFrameCount = 1 }
+		end
+	end
+
+	if icon.BuffOrDebuff == "HELPFUL" or icon.BuffOrDebuff == "EITHER" then
+		addKind("HELPFUL")
+	end
+	if icon.BuffOrDebuff == "HARMFUL" or icon.BuffOrDebuff == "EITHER" then
+		addKind("HARMFUL")
+	end
+
+	return {
+		-- Use the configured unit TOKEN, not icon.Units[1]: the resolved Units
+		-- list only contains units that currently exist, so at login with no
+		-- target it would be empty and silently fall back to "player". The token
+		-- (e.g. "target") is stable, and the container tracks it as it changes.
+		unit = icon.UnitSet.unitSettings or icon.Units[1] or "player",
+		filters = filters,
+	}
+end
+
+-- The icon type's only job in this mode is to publish the spec via SetInfo;
+-- IconModule_AuraContainer consumes it and owns the container, and the container
+-- handles ongoing UNIT_AURA updates itself. We hold a shown state so the
+-- AuraButtons are free to show/hide their own contents.
+local function Buff_OnUpdate_AuraContainer(icon, time)
+	icon:SetInfo("state; auraSpec", STATE_PRESENT, BuildAuraSpec(icon))
+end
+
+-- We only need to re-publish when the unit set changes (target swap, units
+-- added/removed); ongoing aura changes on the current unit are the container's
+-- job, not ours.
+local function Buff_OnEvent_AuraContainer(icon, event)
+	if event == icon.UnitSet.event then
+		icon.NextUpdateTime = 0
+	end
+end
+
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
 	if not clientHasSecrets then
@@ -1072,7 +1155,25 @@ function Type:Setup(icon)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
-	
+
+
+
+	-- AuraContainer display path (12.1 secret-safe).
+	-- The container/buttons drive themselves off UNIT_AURA internally, so TMW
+	-- runs no scan loop here; we just hand the module a spec and hold the icon
+	-- in a shown state so the AuraButtons are free to show/hide their contents.
+	if icon.UseAuraContainer and clientHasSecrets then
+		icon:SetUpdateMethod("manual")
+		icon:SetUpdateFunction(Buff_OnUpdate_AuraContainer)
+
+		-- The container tracks UNIT_AURA itself; we only re-publish the spec when
+		-- the unit set changes (e.g. target swap).
+		icon:SetScript("OnEvent", Buff_OnEvent_AuraContainer)
+		icon:RegisterEvent(icon.UnitSet.event)
+
+		icon:Update()
+		return
+	end
 
 
 	-- Setup events and update functions.

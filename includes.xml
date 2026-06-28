@@ -137,6 +137,7 @@
 <Script file="Components\IconModules\IconModule_Backdrop\Backdrop.lua" />
 <Script file="Components\IconModules\IconModule_Texture\Texture.lua" />
 <Script file="Components\IconModules\IconModule_Texture_Colored\Texture_Colored.lua" />
+<Script file="Components\IconModules\IconModule_AuraContainer\AuraContainer.lua" />
 <Script file="Components\IconModules\IconModule_TimerBar\TimerBar.lua" />
 <Script file="Components\IconModules\IconModule_TimerBar_BarDisplay\TimerBar_BarDisplay.lua" />
 <Script file="Components\IconModules\IconModule_TimerBar_Overlay\TimerBar_Overlay.lua" />
