@@ -76,7 +76,9 @@ Type:RegisterIconDefaults{
 
 if clientHasSecrets then
 	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
-		text = L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"]
+		text = TMW.wowMajorMinor >= 12.1 
+			and L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] 
+			 or L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"]
 	})
 end
 

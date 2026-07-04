@@ -224,6 +224,17 @@ View:ImplementsModule("IconModule_Backdrop", 51, function(Module, icon)
 	end
 end)
 
+-- Only allowed on aura-container types (IconModule_AuraContainer defaults to
+-- disallowed); Enable() no-ops elsewhere. The layout hook positions the button's
+-- widgets over the icon square + bar region (buttons don't exist until after
+-- Type:Setup, so the module applies this at TMW_ICON_SETUP_POST).
+View:ImplementsModule("IconModule_AuraContainer", 60, function(Module, icon)
+	Module:Enable()
+	Module.LayoutButton = function(self, icon, button)
+		self:LayoutButtonForBar(icon, button, false)
+	end
+end)
+
 View:ImplementsModule("IconModule_Texts", 70, true)
 
 

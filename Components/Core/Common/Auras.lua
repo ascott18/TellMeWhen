@@ -31,9 +31,11 @@ local IsAuraFilteredOutByInstanceID = C_UnitAuras.IsAuraFilteredOutByInstanceID
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot
 local GetAuraSlots = C_UnitAuras.GetAuraSlots or UnitAuraSlots
+local ShouldAurasBeSecret = C_Secrets and C_Secrets.ShouldAurasBeSecret
 local UnitGUID = TMW.UnitGUID
 
 local GetSpellName = TMW.GetSpellName
+local isWoW12_1 = TMW.wowMajorMinor >= 12.1
 
 TMW.COMMON.Auras = CreateFrame("Frame")
 local Auras = TMW.COMMON.Auras
@@ -42,11 +44,15 @@ local Auras = TMW.COMMON.Auras
 -- that cause C_UnitAuras.GetAuraDataByIndex to throw an error because it receives
 -- a player/pet name instead of a valid unit token. Wrap in pcall to safely return nil.
 if TMW.clientHasSecrets then
-	local _GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
-	function Auras.GetAuraDataByIndex(unit, index, filter)
-		local ok, result = pcall(_GetAuraDataByIndex, unit, index, filter)
-		if ok then return result end
-	end
+    if isWoW12_1 then
+        Auras.GetAuraDataByIndex = TMW.NULLFUNC
+    else
+        local _GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
+        function Auras.GetAuraDataByIndex(unit, index, filter)
+            local ok, result = pcall(_GetAuraDataByIndex, unit, index, filter)
+            if ok then return result end
+        end
+    end
 else
 	Auras.GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
 end
@@ -106,7 +112,6 @@ end
 local OnUnitAura
 if TMW.clientHasSecrets then
     local blockedUnits = {}
-    local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
     local blocked = false
 
     TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
@@ -322,19 +327,24 @@ if TMW.clientHasSecrets then
     end
 
     function Auras.SpellHasCDMHook(spell)
+        if isWoW12_1 then
+            return false
+        end
         local _, result = TMW.safecall(SpellHasCDMHook, spell)
         return result
     end
 
-    TMW.safecall(function()
-        for _, viewer in pairs(viewers) do
-            hooksecurefunc(viewer, "OnAcquireItemFrame", HookFrame)
+    if not isWoW12_1 then
+        TMW.safecall(function()
+            for _, viewer in pairs(viewers) do
+                hooksecurefunc(viewer, "OnAcquireItemFrame", HookFrame)
 
-            for _, frame in TMW:Vararg(viewer:GetChildren()) do
-                HookFrame(viewer, frame)
+                for _, frame in TMW:Vararg(viewer:GetChildren()) do
+                    HookFrame(viewer, frame)
+                end
             end
-        end
-    end)
+        end)
+    end
 end
 
 OnUnitAura = function(unit, unitAuraUpdateInfo)
@@ -483,6 +493,9 @@ Auras:RegisterEvent("PLAYER_ENTERING_WORLD")
 -- Auras:RegisterUnitEvent("UNIT_TARGET", "player")
 Auras:SetScript("OnEvent", function (self, event, ...)
     if event == "UNIT_AURA" then
+        if isWoW12_1 and ShouldAurasBeSecret() then
+            return
+        end
         OnUnitAura(...)
     elseif event == "PLAYER_TARGET_CHANGED" then
         -- We cannot clear CDM data on target change because
@@ -646,6 +659,10 @@ function Auras.GetAuras(unit)
             lookup = lookup
         }
         data[unit] = unitData
+
+        if isWoW12_1 and ShouldAurasBeSecret() then
+            return unitData
+        end
 
         --print("full updating unit", unit)
 

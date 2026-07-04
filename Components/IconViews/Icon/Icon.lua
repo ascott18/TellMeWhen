@@ -108,9 +108,7 @@ View:RegisterConfigPanel_XMLTemplate(50, "TellMeWhen_GM_IconView")
 
 View:ImplementsModule("IconModule_Alpha", 10, true)
 View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
-	-- When the icon renders via Blizzard's AuraContainer, the AuraButton owns
-	-- the cooldown swipe, so leave TMW's own cooldown module disabled.
-	if not icon.UseAuraContainer and (icon.ShowTimer or icon.ShowTimerText) then
+	if icon.ShowTimer or icon.ShowTimerText then
 		Module:Enable()
 	end
 
@@ -122,16 +120,11 @@ View:ImplementsModule("IconModule_CooldownSweep", 20, function(Module, icon)
 	Module.cooldown2:SetPoint("CENTER", icon)
 end)
 View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
-	-- The AuraButton owns the icon texture in AuraContainer mode.
-	if not icon.UseAuraContainer then
-		Module:Enable()
-	end
+	Module:Enable()
 end)
-View:ImplementsModule("IconModule_AuraContainer", 35, function(Module, icon)
-	if icon.UseAuraContainer then
-		Module:Enable()
-	end
-end)
+-- Only allowed on aura-container types (see IconModule_AuraContainer's
+-- SetDefaultAllowanceForTypes(false)); Enable() no-ops on every other type.
+View:ImplementsModule("IconModule_AuraContainer", 35, true)
 View:ImplementsModule("IconModule_PowerBar_Overlay", 40, function(Module, icon)
 	if icon.ShowPBar then
 		Module:Enable()

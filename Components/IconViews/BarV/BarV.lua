@@ -206,6 +206,15 @@ View:ImplementsModule("IconModule_Backdrop", 51, function(Module, icon)
 	end
 end)
 
+-- Only allowed on aura-container types (IconModule_AuraContainer defaults to
+-- disallowed); Enable() no-ops elsewhere. Layout applied at TMW_ICON_SETUP_POST.
+View:ImplementsModule("IconModule_AuraContainer", 60, function(Module, icon)
+	Module:Enable()
+	Module.LayoutButton = function(self, icon, button)
+		self:LayoutButtonForBar(icon, button, true)
+	end
+end)
+
 View:ImplementsModule("IconModule_Texts", 70, true)
 
 

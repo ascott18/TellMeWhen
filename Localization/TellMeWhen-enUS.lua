@@ -246,7 +246,11 @@ L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"] = "Apply %s Settings"
 L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
 L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effects.]]
 
+L["ICONMENU_BUFFDEBUFF_CONTAINER"] = "Buff/Debuff (combat allowed)"
+L["ICONMENU_BUFFDEBUFF_CONTAINER_DESC"] = [[Tracks buffs and/or debuffs. Safe to use when in combat.]]
+
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
+L["ICONMENU_BUFFDEBUFF_RESTRICTED"] = "Buff/Debuff (combat restricted)"
 L["ICONMENU_BUFFDEBUFF_DESC"] = [[Tracks buffs and/or debuffs.]]
 
 L["ICONMENU_DOTWATCH"] = "All-Unit Buffs/Debuffs"
@@ -1032,6 +1036,9 @@ L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"] = [[This condition cannot operate on s
 In such situations, the data will be assumed to be in a default state (cooldown ready, aura absent, etc).]]
 L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by secret data. Examples of secret data include spell cooldowns and buffs/debuffs while in combat, Mythic+, or PvP; or unit identity in instances.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[You CANNOT track any specific buff or debuff WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP), except |Hhttps://www.wowhead.com/spells?filter=131;1;0|h|cff3588ffthose flagged as always non-secret|r|h by Blizzard.]]
+L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] = [[You CANNOT track any specific buff or debuff WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP) with this icon type.
+
+Use the "Buff/Debuff (combat-safe)" icon type instead for those situations.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is when tracking player buffs or target debuffs that are also displayed by the Blizzard Cooldown Manager. The CDM must be enabled, shown, and have the spell tracked for this to work.]]
 L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
 

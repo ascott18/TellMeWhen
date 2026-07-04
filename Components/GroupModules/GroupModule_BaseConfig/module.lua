@@ -125,7 +125,7 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(12, "TellMeWhen_GS_Tree", functio
 	end)
 end)
 
-if TMW.clientHasSecrets then
+if TMW.clientHasSecrets and TMW.wowMajorMinor < 12.1 then
 
     local viewers = {
         EssentialCooldownViewer,
