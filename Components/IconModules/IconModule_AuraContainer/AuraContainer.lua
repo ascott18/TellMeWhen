@@ -72,10 +72,14 @@ end
 --     spec = {
 --         unit = "target",
 --         filters = {
---             { filterString = "HARMFUL|INCLUDE_NAME_PLATE_ONLY", maxFrameCount = 1 },
+--             { filterString = "HARMFUL|INCLUDE_NAME_PLATE_ONLY" },
 --             ...
 --         },
 --     }
+--
+-- The number of aura buttons (and therefore how many auras show) is owned by this
+-- module, not the spec: a normal icon shows one, and a group controller fills its
+-- whole group with one button per icon. See GetWantedButtonCount.
 -- ----------------------------------------------------------------------------
 
 
@@ -131,6 +135,18 @@ function Module:OnNewInstance(icon)
 	-- so icons that never opt in don't allocate an AuraContainer frame.
 end
 
+-- How many aura buttons this module should own. A group-controller buffcontainer
+-- fills the whole group - one button per icon - so it can show that many auras at
+-- once (Blizzard's container distributes matching auras across the button pool).
+-- Every other icon shows a single aura.
+function Module:GetWantedButtonCount()
+	local icon = self.icon
+	if icon:IsGroupController() then
+		return icon.group.numIcons
+	end
+	return 1
+end
+
 function Module:EnsureButtons(count)
 	local icon = self.icon
 	for i = #self.buttons + 1, count do
@@ -182,8 +198,10 @@ end
 -- the skin's native dimensions and the button comes out oversized. The Icon region
 -- is a child of the button (created, not re-parented), so Masque only re-anchors /
 -- texcoords it - none of which trips the button's forbidden aspects.
-function Module:SkinButton(button)
-	local icon = self.icon
+-- `icon` is the icon whose cell this button sits over (self.icon normally; a
+-- group controller passes each controlled icon in turn).
+function Module:SkinButton(button, icon)
+	icon = icon or self.icon
 	local lmbGroup = icon.lmbGroup
 
 	-- The button covers the icon, so text strings that anchor to the icon remap to
@@ -240,25 +258,49 @@ end
 -- EnsureButtons created new buttons or we were (re)enabled (needsLayout), so meta icons
 -- swapping between same-shaped sources don't re-skin needlessly. No-op until enabled.
 function Module:LayoutButtons(force)
+	-- Controlled icons render through the controller's buttons, not their own, so
+	-- they never own a container (see OnEnable). Nothing to lay out.
+	if not self.IsEnabled or not self.container or self.icon:IsControlled() then
+		return
+	end
+
+	self:EnsureButtons(self:GetWantedButtonCount())
+
+	-- A group controller places one button over each icon in the group, so it can
+	-- only be laid out once every icon in the group has been set up. The controller
+	-- (icon 1) is set up first, so its own setup is too early: the group-setup-post
+	-- path (which passes force) drives it. Ignore earlier, non-forced calls.
+	if self.icon:IsGroupController() and not force then
+		return
+	end
+
 	if not (force or self.needsLayout) then
 		return
 	end
 	self.needsLayout = nil
 
-	local icon = self.icon
+	local isController = self.icon:IsGroupController()
+	local group = self.icon.group
 	for i = 1, #self.buttons do
 		local button = self.buttons[i]
-		-- Views that lay auras out themselves (bars) set self.LayoutButton in their
-		-- implementor; the icon view leaves it nil and gets Masque skinning. Both
-		-- return a frame remap (icon/square/bar -> our button-owned equivalents) so
-		-- WireAuraText can position the aura-driven text the same way.
-		local remap
-		if self.LayoutButton then
-			remap = self:LayoutButton(icon, button)
-		else
-			remap = self:SkinButton(button)
+		-- For a group controller, button i sits over group icon i; otherwise the
+		-- single button sits over our own icon.
+		local icon = isController and group[i] or self.icon
+		if icon then
+			-- Views that lay auras out themselves (bars) set self.LayoutButton in their
+			-- implementor; the icon view leaves it nil and gets Masque skinning. Both
+			-- return a frame remap (icon/square/bar -> our button-owned equivalents) so
+			-- WireAuraText can position the aura-driven text the same way.
+			local remap
+			if self.LayoutButton then
+				remap = self:LayoutButton(icon, button)
+			else
+				remap = self:SkinButton(button, icon)
+			end
+			self:LayoutAuraText(icon, button, remap or { [icon] = button })
 		end
-		self:LayoutAuraText(icon, button, remap or { [icon] = button })
+		-- Surplus buttons (the group shrank) get no target; Blizzard's container
+		-- clears/hides any frame beyond maxFrameCount, so leave them be.
 	end
 end
 
@@ -569,18 +611,29 @@ end
 function Module:SetAuraSpec(auraSpec)
 	local container = self.container
 
+	-- Controlled icons don't own a container; the controller drives the shared one.
+	if not container or self.icon:IsControlled() then
+		return
+	end
+
 	if not TMW.Locked or not auraSpec or not auraSpec.filters or #auraSpec.filters == 0 then
 		container:ClearAuraFilters()
 		container:SetEnabled(false)
 		return
 	end
 
+	-- maxFrameCount caps the GLOBAL running count of assigned auras across all
+	-- filters (see CustomAuraContainer.RefreshAuraFrames), so giving every filter the
+	-- full button count lets a single filter fill the group while the pool caps the
+	-- total. Any button beyond it (e.g. after the group shrank) is auto-cleared.
+	local maxFrameCount = self:GetWantedButtonCount()
+
 	container:ClearAuraFilters()
 	container:SetUnit(auraSpec.unit or "player")
 	container:SetEnabled(true)
 	for i = 1, #auraSpec.filters do
 		local f = auraSpec.filters[i]
-		container:AddAuraFilter(f.filterString, { maxFrameCount = f.maxFrameCount or 1 })
+		container:AddAuraFilter(f.filterString, { maxFrameCount = maxFrameCount })
 	end
 end
 
@@ -589,16 +642,38 @@ function Module:AURASPEC(icon, auraSpec)
 end
 Module:SetDataListener("AURASPEC")
 
--- The normal setup path: Type:Setup has published the spec and Configure created the
--- buttons by now, and icon.lmbGroup exists. Apply settings and (force-)lay out once per
+-- The normal setup path: Type:Setup has published the spec and OnEnable created the
+-- container by now, and icon.lmbGroup exists. Apply settings and (force-)lay out once per
 -- setup so Masque/view/size changes re-apply. Meta icons never reach here - they set us
 -- up via SetupForIcon without a full icon setup, so SETUP_POST never fires for them.
+--
+-- Group controllers are the exception: their buttons sit over the OTHER icons in the
+-- group, which aren't set up yet when the controller's own setup fires (icon 1 is
+-- first). They lay out at TMW_GROUP_SETUP_POST instead (below), once the whole group
+-- is set up.
 Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(self, icon)
-	if not self.IsEnabled then
+	if not self.IsEnabled or icon:IsGroupController() then
 		return
 	end
 	self:ApplyButtonSettings(icon)
 	self:LayoutButtons(true)
+end)
+
+-- Lay out a group controller's buttons once every icon in the group has been set up.
+-- Each button sits over a different icon (see LayoutButtons), so we can't do this from
+-- the controller's own TMW_ICON_SETUP_POST - it fires before the rest of the group is
+-- ready. Button positions are live anchors to the group icons, so this is order-safe
+-- with respect to the icon-positioning group modules (which also run here).
+TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
+	local controller = group.Controller
+	if not controller then
+		return
+	end
+	local module = controller.Modules and controller.Modules.IconModule_AuraContainer
+	if module and module.IsEnabled then
+		module:ApplyButtonSettings(controller)
+		module:LayoutButtons(true)
+	end
 end)
 
 function Module:SetupForIcon(icon)
@@ -609,10 +684,24 @@ end
 
 function Module:OnEnable()
 	self.needsLayout = true
-	
-	local container = self.container
+
 	local icon = self.icon
-	if not self.container then
+
+	-- A controlled icon in a group-controller buffcontainer doesn't own a container;
+	-- the controller places one of its buttons over this icon's cell. Stay enabled
+	-- (so IconModule_Texts still suppresses this icon's DogTag-driven aura strings -
+	-- the controller's button draws the real values) but keep any leftover container
+	-- from a prior standalone setup inert.
+	if icon:IsControlled() then
+		if self.container then
+			self.container:ClearAuraFilters()
+			self.container:SetEnabled(false)
+		end
+		return
+	end
+
+	local container = self.container
+	if not container then
 		container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, CONTAINER_TEMPLATE)
 		container:SetSize(1, 1)
 		container:SetAllPoints(icon)

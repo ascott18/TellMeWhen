@@ -213,10 +213,10 @@ local function BuildAuraSpec(icon)
 
 		if extras then
 			for i = 1, #extras do
-				filters[#filters + 1] = { filterString = extras[i] .. "|" .. base, maxFrameCount = 1 }
+				filters[#filters + 1] = { filterString = extras[i] .. "|" .. base }
 			end
 		else
-			filters[#filters + 1] = { filterString = base, maxFrameCount = 1 }
+			filters[#filters + 1] = { filterString = base }
 		end
 	end
 
@@ -243,6 +243,17 @@ end
 -- AuraButtons are free to show/hide their own contents.
 local function Buff_OnUpdate_AuraContainer(icon, time)
 	icon:SetInfo("state; auraSpec", STATE_PRESENT, BuildAuraSpec(icon))
+
+	if icon:IsGroupController() then
+		-- As a group controller we don't harvest aura data ourselves - Blizzard's
+		-- AuraContainer does, and it owns each button's show/hide - so there's no
+		-- per-icon info to YieldInfo(). Claim every icon in the group directly so
+		-- the controller path (Icon:Update) doesn't force the controlled icons to
+		-- alpha 0. That matters most for the controller icon itself (icon 1), which
+		-- parents the shared container: hiding it would hide every aura button.
+		-- IconModule_AuraContainer fills the group with one button per icon.
+		icon.__controlledIconIndex = icon.group.numIcons
+	end
 end
 
 -- We only need to re-publish when the unit set changes (target swap, units
