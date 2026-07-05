@@ -54,12 +54,14 @@ TEXT.AuraContainerTexts = {
 	stacks   = L["TEXTLAYOUTS_AURA_STACKS"],
 }
 
--- True if the icon's type renders auras via IconModule_AuraContainer (the module
--- is allowed for the type). Evaluated at call time - the AuraContainer class loads
--- after this file. Used to decide whether the Aura string setting is meaningful.
+-- True if the icon is actually rendering auras via IconModule_AuraContainer right now -
+-- i.e. its instance of the module is enabled. Checked against the live instance, not
+-- module-allowance-by-type, because a meta icon late-enables the module while inheriting
+-- an aura container even though its own type ("meta") doesn't allow it. Used to decide
+-- whether the Aura string setting is live (so those strings skip their DogTag value).
 function TEXT:IconUsesAuraContainer(icon)
-	local class = TMW.Classes.IconModule_AuraContainer
-	return class and class:IsAllowedByType(icon.Type) or false
+	local module = icon.Modules and icon.Modules.IconModule_AuraContainer
+	return module and module.IsEnabled or false
 end
 
 

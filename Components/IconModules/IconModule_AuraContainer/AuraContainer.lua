@@ -235,6 +235,33 @@ local function MirrorPoints(region, source, remap, default, divisor)
 	return true
 end
 
+-- Lay out + skin + text-wire every button. `force` re-does them all (the setup path,
+-- for when the view/Masque skin/size may have changed); otherwise it only runs when
+-- EnsureButtons created new buttons or we were (re)enabled (needsLayout), so meta icons
+-- swapping between same-shaped sources don't re-skin needlessly. No-op until enabled.
+function Module:LayoutButtons(force)
+	if not (force or self.needsLayout) then
+		return
+	end
+	self.needsLayout = nil
+
+	local icon = self.icon
+	for i = 1, #self.buttons do
+		local button = self.buttons[i]
+		-- Views that lay auras out themselves (bars) set self.LayoutButton in their
+		-- implementor; the icon view leaves it nil and gets Masque skinning. Both
+		-- return a frame remap (icon/square/bar -> our button-owned equivalents) so
+		-- WireAuraText can position the aura-driven text the same way.
+		local remap
+		if self.LayoutButton then
+			remap = self:LayoutButton(icon, button)
+		else
+			remap = self:SkinButton(button)
+		end
+		self:LayoutAuraText(icon, button, remap or { [icon] = button })
+	end
+end
+
 -- Lay a button out for the bar / barv views: the button spans the whole cell, the
 -- aura texture/cooldown sit over the icon square, and the duration StatusBar fills
 -- the bar region (driven via SetDurationBar). Rather than duplicate the views'
@@ -421,105 +448,6 @@ function Module:LayoutIconBorder(icon, button, iconRegion)
 	end
 end
 
--- Configure each button's texture/cooldown/count display from the icon settings.
-function Module:ApplyButtonSettings(icon)
-	local showTimer = icon.ShowTimer
-	local showText = icon.ShowTimerText
-
-	-- If the icon has a texture override configured (Custom Texture), let
-	-- IconModule_Texture_Colored show it on the icon and suppress the container's
-	-- own aura icon so the override wins.
-	local hasTextureOverride = icon.CustomTex and icon.CustomTex:trim() ~= ""
-
-	for i = 1, #self.buttons do
-		local button = self.buttons[i]
-
-		if hasTextureOverride then
-			button:ClearIcon()
-			button.tmwIcon:Hide()
-		else
-			button.tmwIcon:Show()
-			button:SetIcon(button.tmwIcon)
-		end
-
-		local cd = button.tmwCooldown
-
-		if cd then
-			if showTimer or showText then
-				cd:SetDrawSwipe(showTimer)
-				cd:SetHideCountdownNumbers(not showText)
-				cd:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
-				cd:SetDrawEdge(TMW.db.profile.DrawEdge)
-				button:SetDurationCooldown(cd)
-			else
-				button:ClearDurationCooldown()
-			end
-		end
-	end
-end
-
-function Module:SetAuraSpec(auraSpec)
-	local container = self.container
-
-	if not TMW.Locked or not auraSpec or not auraSpec.filters or #auraSpec.filters == 0 then
-		container:ClearAuraFilters()
-		container:SetEnabled(false)
-		return
-	end
-
-	container:ClearAuraFilters()
-	container:SetUnit(auraSpec.unit or "player")
-	container:SetEnabled(true)
-	for i = 1, #auraSpec.filters do
-		local f = auraSpec.filters[i]
-		container:AddAuraFilter(f.filterString, { maxFrameCount = f.maxFrameCount or 1 })
-	end
-end
-
-function Module:AURASPEC(icon, auraSpec)
-	self:SetAuraSpec(auraSpec)
-end
-Module:SetDataListener("AURASPEC")
-
--- Lay out + skin + text-wire every button. `force` re-does them all (the setup path,
--- for when the view/Masque skin/size may have changed); otherwise it only runs when
--- EnsureButtons created new buttons or we were (re)enabled (needsLayout), so meta icons
--- swapping between same-shaped sources don't re-skin needlessly. No-op until enabled.
-function Module:LayoutButtons(force)
-	if not (force or self.needsLayout) then
-		return
-	end
-	self.needsLayout = nil
-
-	local icon = self.icon
-	for i = 1, #self.buttons do
-		local button = self.buttons[i]
-		-- Views that lay auras out themselves (bars) set self.LayoutButton in their
-		-- implementor; the icon view leaves it nil and gets Masque skinning. Both
-		-- return a frame remap (icon/square/bar -> our button-owned equivalents) so
-		-- WireAuraText can position the aura-driven text the same way.
-		local remap
-		if self.LayoutButton then
-			remap = self:LayoutButton(icon, button)
-		else
-			remap = self:SkinButton(button)
-		end
-		self:LayoutAuraText(icon, button, remap or { [icon] = button })
-	end
-end
-
--- The normal setup path: Type:Setup has published the spec and Configure created the
--- buttons by now, and icon.lmbGroup exists. Apply settings and (force-)lay out once per
--- setup so Masque/view/size changes re-apply. Meta icons never reach here - they set us
--- up via SetupForIcon without a full icon setup, so SETUP_POST never fires for them.
-Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(self, icon)
-	if not self.IsEnabled then
-		return
-	end
-	self:ApplyButtonSettings(icon)
-	self:LayoutButtons(true)
-end)
-
 -- Drive layout strings flagged with an Aura purpose (see TEXT.AuraContainerTexts)
 -- with the AuraButton's real value. IconModule_Texts creates + positions its own
 -- (now DogTag-less) fontstring per such string; we create a button-owned fontstring,
@@ -600,6 +528,78 @@ function Module:LayoutAuraText(icon, button, remap)
 		end
 	end
 end
+
+-- Configure each button's texture/cooldown/count display from the icon settings.
+function Module:ApplyButtonSettings(icon)
+	local showTimer = icon.ShowTimer
+	local showText = icon.ShowTimerText
+
+	-- If the icon has a texture override configured (Custom Texture), let
+	-- IconModule_Texture_Colored show it on the icon and suppress the container's
+	-- own aura icon so the override wins.
+	local hasTextureOverride = icon.CustomTex and icon.CustomTex:trim() ~= ""
+
+	for i = 1, #self.buttons do
+		local button = self.buttons[i]
+
+		if hasTextureOverride then
+			button:ClearIcon()
+			button.tmwIcon:Hide()
+		else
+			button.tmwIcon:Show()
+			button:SetIcon(button.tmwIcon)
+		end
+
+		local cd = button.tmwCooldown
+
+		if cd then
+			if showTimer or showText then
+				cd:SetDrawSwipe(showTimer)
+				cd:SetHideCountdownNumbers(not showText)
+				cd:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
+				cd:SetDrawEdge(TMW.db.profile.DrawEdge)
+				button:SetDurationCooldown(cd)
+			else
+				button:ClearDurationCooldown()
+			end
+		end
+	end
+end
+
+function Module:SetAuraSpec(auraSpec)
+	local container = self.container
+
+	if not TMW.Locked or not auraSpec or not auraSpec.filters or #auraSpec.filters == 0 then
+		container:ClearAuraFilters()
+		container:SetEnabled(false)
+		return
+	end
+
+	container:ClearAuraFilters()
+	container:SetUnit(auraSpec.unit or "player")
+	container:SetEnabled(true)
+	for i = 1, #auraSpec.filters do
+		local f = auraSpec.filters[i]
+		container:AddAuraFilter(f.filterString, { maxFrameCount = f.maxFrameCount or 1 })
+	end
+end
+
+function Module:AURASPEC(icon, auraSpec)
+	self:SetAuraSpec(auraSpec)
+end
+Module:SetDataListener("AURASPEC")
+
+-- The normal setup path: Type:Setup has published the spec and Configure created the
+-- buttons by now, and icon.lmbGroup exists. Apply settings and (force-)lay out once per
+-- setup so Masque/view/size changes re-apply. Meta icons never reach here - they set us
+-- up via SetupForIcon without a full icon setup, so SETUP_POST never fires for them.
+Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(self, icon)
+	if not self.IsEnabled then
+		return
+	end
+	self:ApplyButtonSettings(icon)
+	self:LayoutButtons(true)
+end)
 
 function Module:SetupForIcon(icon)
 	self:ApplyButtonSettings(icon)
