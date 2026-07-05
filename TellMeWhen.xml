@@ -31,43 +31,11 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				function self:SetBorderSize(pixels)
-					if not TMW then return end
-
-					self.size = pixels
-					self.borderTop:ClearAllPoints()
-					self.borderBottom:ClearAllPoints()
-
-					for i, tex in TMW:Vararg(self:GetRegions()) do
-						tex:SetShown(pixels ~= 0)
-						tex:SetSize(math.abs(pixels), math.abs(pixels))
-					end
-
-					-- Negative sizes should make inset borders.
-					-- Positive sizes will make outset borders
-					if 0 > pixels then
-						pixels = 0
-					end
-
-					self.borderTop:SetPoint("TOPLEFT", -pixels, pixels)
-					self.borderTop:SetPoint("TOPRIGHT", pixels, pixels)
-					
-					self.borderBottom:SetPoint("BOTTOMLEFT", -pixels, -pixels)
-					self.borderBottom:SetPoint("BOTTOMRIGHT", pixels, -pixels)
-
-				end
-
-				function self:SetColor(r, g, b, a)
-					if not TMW then return end
-					a = a or 1
-
-					for i, tex in TMW:Vararg(self:GetRegions()) do
-						tex:SetColorTexture(r, g, b, a)
-					end
-				end
-
-				self:SetBorderSize(1)
-				self:SetColor(0, 0, 0, 1)
+				-- SetBorderSize/SetColor and the default 1px black border come from the
+				-- GenericBorder class (see Utils.lua). Restricted frames don't run OnLoad,
+				-- so anything parenting a border under a forbidden frame creates it directly
+				-- via TMW.Classes.GenericBorder:New(..., "TellMeWhen_GenericBorder") instead.
+				TMW:CInit(self, "GenericBorder")
 			</OnLoad>
 		</Scripts>
 	</Frame>

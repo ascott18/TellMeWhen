@@ -84,24 +84,6 @@ end
 local CONTAINER_TEMPLATE = "CustomAuraContainerTemplate"
 local BUTTON_TEMPLATE = "CustomAuraButtonTemplate"
 
-local LoadAddOn = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
-
-local blizzAddonChecked, blizzAddonAvailable
-local function IsBlizzardAuraContainerAvailable()
-	if blizzAddonChecked then
-		return blizzAddonAvailable
-	end
-	blizzAddonChecked = true
-
-	-- AuraContainerInbound is the global table exported by Blizzard_AuraContainer.
-	if not AuraContainerInbound and LoadAddOn then
-		LoadAddOn("Blizzard_AuraContainer")
-	end
-	blizzAddonAvailable = AuraContainerInbound ~= nil
-	return blizzAddonAvailable
-end
-
-
 local Processor = TMW.Classes.IconDataProcessor:New("AURASPEC", "auraSpec")
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: auraSpec
@@ -149,28 +131,7 @@ function Module:OnNewInstance(icon)
 	-- so icons that never opt in don't allocate an AuraContainer frame.
 end
 
-function Module:EnsureContainer()
-	if self.container then
-		return true
-	end
-	if not IsBlizzardAuraContainerAvailable() then
-		return false
-	end
-
-	local icon = self.icon
-	local container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, CONTAINER_TEMPLATE)
-
-	container:SetSize(1, 1)
-	container:SetAllPoints(icon)
-	self.container = container
-	return true
-end
-
 function Module:EnsureButtons(count)
-	if not self.container then
-		return
-	end
-
 	local icon = self.icon
 	for i = #self.buttons + 1, count do
 		local button = CreateFrame("AuraButton", nil, self.container, BUTTON_TEMPLATE)
@@ -185,9 +146,10 @@ function Module:EnsureButtons(count)
 		-- Widgets handed to an AuraButton must be CREATED as children of it:
 		-- re-parenting an existing region onto the button is banned, since it
 		-- can't inherit the button's forbidden aspects that way. So each button
-		-- owns its own texture/cooldown/count rather than reusing the icon's.
-		-- (SetIcon is applied in ApplyButtonSettings so it can respect a texture
-		-- override.)
+		-- owns its own texture/cooldown rather than reusing the icon's. (SetIcon is
+		-- applied in ApplyButtonSettings so it can respect a texture override.) Text
+		-- (spell/duration/stacks) is created on demand in WireAuraText from the
+		-- layout strings flagged with an Aura purpose.
 		local tex = button:CreateTexture(nil, "ARTWORK")
 		tex:SetAllPoints(button)
 		button.tmwIcon = tex
@@ -195,14 +157,8 @@ function Module:EnsureButtons(count)
 		local cd = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
 		cd:SetAllPoints(button)
 		cd:SetReverse(true)
-		cd:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
-		cd:SetDrawEdge(TMW.db.profile.DrawEdge)
 		cd:SetFrameLevel(button:GetFrameLevel() + 1)
 		button.tmwCooldown = cd
-
-		local countText = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
-		countText:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -2, 2)
-		button.tmwCountText = countText
 
 		-- A StatusBar for the duration, used by the bar views (driven via
 		-- SetDurationBar). Hidden by default; the icon view never shows it.
@@ -214,6 +170,9 @@ function Module:EnsureButtons(count)
 
 		self.container:AddAuraFrame(button)
 		self.buttons[i] = button
+
+		-- A freshly created button hasn't been laid out/skinned yet.
+		self.needsLayout = true
 	end
 end
 
@@ -226,37 +185,52 @@ end
 function Module:SkinButton(button)
 	local icon = self.icon
 	local lmbGroup = icon.lmbGroup
-	if not lmbGroup then
-		return
+
+	-- The button covers the icon, so text strings that anchor to the icon remap to
+	-- the button. Returned for WireAuraText.
+	local remap = { [icon] = button }
+
+	if lmbGroup then
+		local w, h = icon:GetSize()
+		if w and w > 0 then
+			button:ClearAllPoints()
+			button:SetSize(w, h)
+			button:SetPoint("CENTER", icon)
+		end
+
+		lmbGroup:AddButton(button, {
+			Icon = button.tmwIcon,
+			Cooldown = button.tmwCooldown,
+		}, "Legacy")
 	end
 
-	local w, h = icon:GetSize()
-	if w and w > 0 then
-		button:ClearAllPoints()
-		button:SetSize(w, h)
-		button:SetPoint("CENTER", icon)
-	end
+	-- The button is the icon square in this view, so border it directly.
+	self:LayoutIconBorder(icon, button, button)
 
-	lmbGroup:AddButton(button, {
-		Icon = button.tmwIcon,
-		Cooldown = button.tmwCooldown,
-	}, "Legacy")
+	return remap
 end
 
 -- Copy `source`'s anchor points (and size) onto `region`, remapping each point's
 -- relativeTo frame through `remap` (falling back to `default`). This reproduces a
 -- frame the view already positioned, but anchored to the button (and its children)
 -- so it stays valid on the forbidden button - no duplicated geometry math.
-local function MirrorPoints(region, source, remap, default)
+--
+-- `divisor` (default 1) divides the copied size and offsets. Pass `region`'s own
+-- SetScale factor here: SetPoint offsets are measured in the scaled frame's coordinate
+-- space, so a scaled region needs its mirrored offsets divided by that scale to land at
+-- the same screen positions the unscaled source occupies.
+local function MirrorPoints(region, source, remap, default, divisor)
 	local n = source:GetNumPoints()
 	if n == 0 then
 		return false
 	end
+	divisor = divisor or 1
+	local w, h = source:GetSize()
 	region:ClearAllPoints()
-	region:SetSize(source:GetSize())
+	region:SetSize(w / divisor, h / divisor)
 	for i = 1, n do
 		local point, relTo, relPoint, x, y = source:GetPoint(i)
-		region:SetPoint(point, remap[relTo] or default, relPoint, x, y)
+		region:SetPoint(point, remap[relTo] or default, relPoint, x / divisor, y / divisor)
 	end
 	return true
 end
@@ -295,7 +269,9 @@ function Module:LayoutButtonForBar(icon, button, vertical)
 	cd:SetFrameLevel(base + 2)
 	bar:SetFrameLevel(base + 1)
 
-	-- Icon square.
+	-- Icon square. `iconRegion` is whatever ends up playing it (the Masque holder or
+	-- the bare texture), used to anchor the recreated icon border below.
+	local iconRegion
 	if icon.group:GetSettingsPerView().Icon and iconSquare then
 		tex:Show()
 		if lmbGroup then
@@ -313,10 +289,12 @@ function Module:LayoutButtonForBar(icon, button, vertical)
 			MirrorPoints(holder, iconSquare, remap, button)
 			lmbGroup:AddButton(holder, { Icon = tex, Cooldown = cd }, "Legacy")
 			remap[iconSquare] = holder
+			iconRegion = holder
 		else
 			MirrorPoints(tex, iconSquare, remap, button)
 			MirrorPoints(cd, iconSquare, remap, button)
 			remap[iconSquare] = tex
+			iconRegion = tex
 		end
 	else
 		tex:Hide()
@@ -327,18 +305,28 @@ function Module:LayoutButtonForBar(icon, button, vertical)
 		cd:SetAllPoints(button)
 	end
 
+	self:LayoutIconBorder(icon, button, iconRegion)
+
 	-- Duration bar: mirror the view's TimerBar container (anchored to the icon and
-	-- the icon square, both remapped above).
-	if barRef and MirrorPoints(bar, barRef, remap, button) then
+	-- the icon square, both remapped above). The bar is scaled to whole screen pixels
+	-- so Blizzard's SetDurationBar fill animates smoothly; because that scale distorts
+	-- SetPoint offsets, the mirror divides them back out (see MirrorPoints's `divisor`).
+	local barScale = PixelUtil.GetPixelToUIUnitFactor() / icon:GetEffectiveScale()
+	if barRef and MirrorPoints(bar, barRef, remap, button, barScale) then
 		bar:Show()
+		bar:SetScale(barScale)
 		bar:SetOrientation(vertical and "VERTICAL" or "HORIZONTAL")
 		bar:SetRotatesTexture(vertical)
 		bar:SetStatusBarTexture(GetBarTexture(icon))
 		bar:SetStatusBarColor(GetBarColor(icon))
-		-- Workaround blizzard having choppy animations on bars with high scale.
-		-- Set the bar's effective scale to exactly align to to screen resolution.
-		bar:SetScale(PixelUtil.GetPixelToUIUnitFactor() / icon:GetEffectiveScale())
 		button:SetDurationBar(bar, {direction = Enum.StatusBarTimerDirection.RemainingTime})
+
+		-- Bar text (bar1/bar2 layouts) anchors to the TimerBar's bar frame; remap
+		-- both it and the container to our StatusBar so WireAuraText places text.
+		remap[barRef] = bar
+		if timerBar.bar then
+			remap[timerBar.bar] = bar
+		end
 
 		self:LayoutBarBackdrop(icon, button, bar, vertical)
 	else
@@ -347,11 +335,17 @@ function Module:LayoutButtonForBar(icon, button, vertical)
 			button.tmwBarBackdrop:Hide()
 		end
 	end
+
+	return remap
 end
 
 -- Recreate IconModule_Backdrop's bar backdrop + border as children of the button,
 -- so they're parented to the AuraButton and hide with it when there's no aura.
 -- IconModule_Backdrop is disallowed on aura-container types (buffcontainer).
+--
+-- Exception: in config mode (unlocked) the button is hidden (no aura is assigned),
+-- so parent the backdrop to the ICON instead, so it stays visible as a preview
+-- while editing. In locked mode it's a button child and hides with the aura.
 function Module:LayoutBarBackdrop(icon, button, bar, vertical)
 	local base = icon:GetFrameLevel()
 
@@ -362,6 +356,7 @@ function Module:LayoutBarBackdrop(icon, button, bar, vertical)
 		frame.tex:SetAllPoints(frame)
 		button.tmwBarBackdrop = frame
 	end
+	frame:SetParent(TMW.Locked and button or icon)
 	frame:ClearAllPoints()
 	frame:SetAllPoints(bar)
 	frame:SetFrameLevel(base)          -- behind the bar's fill (base + 1)
@@ -381,7 +376,12 @@ function Module:LayoutBarBackdrop(icon, button, bar, vertical)
 	if gspv.BorderBar and gspv.BorderBar ~= 0 then
 		local border = frame.border
 		if not border then
-			border = CreateFrame("Frame", nil, frame, "TellMeWhen_GenericBorder")
+			-- Build it from the GenericBorder class (which supplies SetBorderSize/SetColor)
+			-- plus the TellMeWhen_GenericBorder template (which supplies the edge textures).
+			-- We instantiate in Lua rather than relying on the template's OnLoad because this
+			-- border is parented to the forbidden AuraButton, and restricted frames never
+			-- fire OnLoad.
+			border = TMW.Classes.GenericBorder:New("Frame", nil, frame, "TellMeWhen_GenericBorder")
 			frame.border = border
 		end
 		border:SetFrameLevel(base + 2)  -- on top of the bar
@@ -390,6 +390,34 @@ function Module:LayoutBarBackdrop(icon, button, bar, vertical)
 		border:Show()
 	elseif frame.border then
 		frame.border:Hide()
+	end
+end
+
+-- Recreate IconContainer's icon-square border (BorderIcon) around the recreated icon
+-- square. IconContainer_Masque is disallowed on aura-container types, so its own border
+-- would never show. Parented to the button so it hides with the aura when locked;
+-- re-parented to the icon in config mode (where the button is hidden) so it stays a
+-- visible preview, matching LayoutBarBackdrop. `iconRegion` is whatever plays the icon
+-- square in this view (the Masque holder or the bare texture); pass nil to hide it.
+function Module:LayoutIconBorder(icon, button, iconRegion)
+	local border = button.tmwIconBorder
+	local gspv = icon.group:GetSettingsPerView()
+
+	if iconRegion and gspv.BorderIcon and gspv.BorderIcon ~= 0 then
+		if not border then
+			border = TMW.Classes.GenericBorder:New("Frame", nil, button, "TellMeWhen_GenericBorder")
+			button.tmwIconBorder = border
+		end
+		border:SetParent(TMW.Locked and button or icon)
+		border:ClearAllPoints()
+		border:SetAllPoints(iconRegion)
+		border:SetFrameLevel(button:GetFrameLevel() + 4)  -- on top of the icon square
+		-- Inset borders use a negative size (matching IconContainer:SetBorder).
+		border:SetBorderSize(gspv.BorderInset and -gspv.BorderIcon or gspv.BorderIcon)
+		border:SetColor(TMW:StringToRGBA(gspv.BorderColor))
+		border:Show()
+	elseif border then
+		border:Hide()
 	end
 end
 
@@ -420,122 +448,184 @@ function Module:ApplyButtonSettings(icon)
 			if showTimer or showText then
 				cd:SetDrawSwipe(showTimer)
 				cd:SetHideCountdownNumbers(not showText)
+				cd:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
+				cd:SetDrawEdge(TMW.db.profile.DrawEdge)
 				button:SetDurationCooldown(cd)
 			else
 				button:ClearDurationCooldown()
 			end
 		end
-
-		button:SetApplicationCount(button.tmwCountText, {})
 	end
 end
 
--- Fully stand the container down: clear the display, then stop tracking.
--- Shared by Configure's no-spec path and OnDisable.
---
--- ClearAuraFilters FIRST so the SetEnabled(false) parse runs over an empty filter
--- set (trivial) instead of re-parsing every real filter on the way out. We never
--- Hide - visibility follows the icon (the container is a 1x1 child), and toggling
--- Hide would just cost another full parse via OnHide; SetEnabled(false) alone
--- unregisters UNIT_AURA (ShouldRegisterForEvents = IsVisible() and IsEnabled()).
-function Module:StandDown()
+function Module:SetAuraSpec(auraSpec)
 	local container = self.container
-	if container then
+
+	if not TMW.Locked or not auraSpec or not auraSpec.filters or #auraSpec.filters == 0 then
 		container:ClearAuraFilters()
 		container:SetEnabled(false)
-	end
-end
-
--- The single authority for the container's live state, driven entirely by the
--- spec: a valid spec brings it up (enabled + tracking); anything else (no spec
--- yet, config mode, misconfigured) stands it down.
-function Module:Configure(icon)
-	local spec = icon.attributes.auraSpec
-	-- The container is a live-play display, so also stand it down in config mode
-	-- (unlocked): BuildAuraSpec always returns a valid spec, so without this the
-	-- container keeps tracking and showing real auras while you're editing.
-	if not TMW.Locked or not spec or not spec.filters or #spec.filters == 0 then
-		self:StandDown()
 		return
 	end
 
-	if not self:EnsureContainer() then
-		return
-	end
-	local container = self.container
-
-	-- Create enough buttons to satisfy the largest per-filter frame count.
-	local count = 1
-	for i = 1, #spec.filters do
-		count = max(count, spec.filters[i].maxFrameCount or 1)
-	end
-	self:EnsureButtons(count)
-	self:ApplyButtonSettings(icon)
-
-	-- Efficient ordering (each of Show/Hide/SetUnit/SetEnabled/AddAuraFilter that
-	-- changes state triggers a full ParseAllAuras):
-	--  * We never Show/Hide - the container inherits the icon's visibility, and
-	--    `enabled` is our on/off. Registration is IsVisible() and IsEnabled().
-	--  * ClearAuraFilters first, so the SetUnit/SetEnabled parses run over an empty
-	--    filter set (trivial). SetUnit before SetEnabled so we register once for the
-	--    right unit. On a target swap both are no-ops (guarded by ~=), so the only
-	--    real work is the ClearAuraFilters + AddAuraFilter re-parse.
-	--  * Add the real filters LAST; those are the only full-cost parses. The final
-	--    AddAuraFilter is what populates the buttons.
-	--
-	-- SetUnit / ClearAuraFilters / AddAuraFilter are SECURE DELEGATES
-	-- (ApplySecureDelegatesToTable), so their bodies run UNTAINTED and the
-	-- ParseAllAuras they trigger can legally reach the container's private
-	-- partition. We must NOT call container:UpdateAllAuras() directly: external
-	-- resolution lands on the non-delegated private override and errors under taint.
 	container:ClearAuraFilters()
-	container:SetUnit(spec.unit or "player")
+	container:SetUnit(auraSpec.unit or "player")
 	container:SetEnabled(true)
-	for i = 1, #spec.filters do
-		local f = spec.filters[i]
+	for i = 1, #auraSpec.filters do
+		local f = auraSpec.filters[i]
 		container:AddAuraFilter(f.filterString, { maxFrameCount = f.maxFrameCount or 1 })
 	end
 end
 
 function Module:AURASPEC(icon, auraSpec)
-	if self.IsEnabled then
-		self:Configure(icon)
-	end
+	self:SetAuraSpec(auraSpec)
 end
 Module:SetDataListener("AURASPEC")
 
--- Skin at SETUP_POST - the same hook IconContainer_Masque uses for its own
--- skinning. This is the first point where both things we need exist: the buttons
--- (created lazily from the spec in Type:Setup, after all modules implement) and
--- icon.lmbGroup. It also runs once per setup, so Masque skin changes re-apply
--- without us re-skinning on every target swap.
+-- Lay out + skin + text-wire every button. `force` re-does them all (the setup path,
+-- for when the view/Masque skin/size may have changed); otherwise it only runs when
+-- EnsureButtons created new buttons or we were (re)enabled (needsLayout), so meta icons
+-- swapping between same-shaped sources don't re-skin needlessly. No-op until enabled.
+function Module:LayoutButtons(force)
+	if not (force or self.needsLayout) then
+		return
+	end
+	self.needsLayout = nil
+
+	local icon = self.icon
+	for i = 1, #self.buttons do
+		local button = self.buttons[i]
+		-- Views that lay auras out themselves (bars) set self.LayoutButton in their
+		-- implementor; the icon view leaves it nil and gets Masque skinning. Both
+		-- return a frame remap (icon/square/bar -> our button-owned equivalents) so
+		-- WireAuraText can position the aura-driven text the same way.
+		local remap
+		if self.LayoutButton then
+			remap = self:LayoutButton(icon, button)
+		else
+			remap = self:SkinButton(button)
+		end
+		self:LayoutAuraText(icon, button, remap or { [icon] = button })
+	end
+end
+
+-- The normal setup path: Type:Setup has published the spec and Configure created the
+-- buttons by now, and icon.lmbGroup exists. Apply settings and (force-)lay out once per
+-- setup so Masque/view/size changes re-apply. Meta icons never reach here - they set us
+-- up via SetupForIcon without a full icon setup, so SETUP_POST never fires for them.
 Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(self, icon)
 	if not self.IsEnabled then
 		return
 	end
-	for i = 1, #self.buttons do
-		local button = self.buttons[i]
-		-- Views that lay auras out themselves (bars) set self.LayoutButton in their
-		-- implementor; the icon view leaves it nil and gets Masque skinning.
-		if self.LayoutButton then
-			self:LayoutButton(icon, button)
-		else
-			self:SkinButton(button)
-		end
-	end
+	self:ApplyButtonSettings(icon)
+	self:LayoutButtons(true)
 end)
 
+-- Drive layout strings flagged with an Aura purpose (see TEXT.AuraContainerTexts)
+-- with the AuraButton's real value. IconModule_Texts creates + positions its own
+-- (now DogTag-less) fontstring per such string; we create a button-owned fontstring,
+-- copy that string's font/justify, mirror its position onto the button, and hand it
+-- to the matching AuraButton API.
+function Module:LayoutAuraText(icon, button, remap)
+	local realTexts = icon.Modules and icon.Modules.IconModule_Texts
+	local layout = realTexts and realTexts.layoutSettings
+	button.tmwAuraText = button.tmwAuraText or {}
+
+	-- The fontstrings live on a dedicated frame above everything else on the button
+	-- (the bar/backdrop are child frames that would otherwise draw over button-layer
+	-- text). Matches where IconModule_Texts sits (icon frame level + 3).
+	local textFrame = button.tmwTextFrame
+	if not textFrame then
+		textFrame = CreateFrame("Frame", nil, button)
+		button.tmwTextFrame = textFrame
+	end
+	textFrame:SetAllPoints(button)
+	textFrame:SetFrameLevel(button:GetFrameLevel() + 3)
+
+	-- Hide any strings we no longer use.
+	for _, fs in pairs(button.tmwAuraText) do
+		fs.tmwUsed = nil
+	end
+
+	if layout then
+		for textID, stringSettings in TMW:InNLengthTable(layout) do
+			local aura = stringSettings.Aura
+			if aura and aura ~= "" then
+				local realFs = realTexts.fontStrings[realTexts:GetFontStringID(textID, stringSettings)]
+
+				local auraFs = button.tmwAuraText[aura]
+				if not auraFs then
+					auraFs = textFrame:CreateFontString(nil, "OVERLAY")
+					button.tmwAuraText[aura] = auraFs
+				end
+				auraFs.tmwUsed = true
+				auraFs:Show()
+
+				-- Look from the layout settings; position mirrored from the (now
+				-- DogTag-less) Texts fontstring the layout already placed.
+				auraFs:SetFont(LSM:Fetch("font", stringSettings.Name), stringSettings.Size, stringSettings.Outline)
+				auraFs:SetJustifyH(stringSettings.Justify)
+				auraFs:SetJustifyV(stringSettings.JustifyV)
+				auraFs:SetShadowOffset(stringSettings.Shadow, -stringSettings.Shadow)
+				auraFs:SetRotation(math.rad(stringSettings.Rotate or 0))
+
+				if realFs then
+					MirrorPoints(auraFs, realFs, remap, button)
+					-- MirrorPoints copies the source's current size; restore the
+					-- layout's intent (0 = auto-size to the text).
+					auraFs:SetWidth(stringSettings.Width)
+					auraFs:SetHeight(stringSettings.Height)
+					-- Later strings can anchor to this one ($$N); redirect to our copy.
+					remap[realFs] = auraFs
+				else
+					-- No source to mirror; still needs to be anchored to the button or
+					-- the SetSpellName/etc. forbidden-object validation fails.
+					auraFs:ClearAllPoints()
+					auraFs:SetPoint("CENTER", button)
+				end
+
+				if aura == "spell" then
+					button:SetSpellName(auraFs)
+				elseif aura == "duration" then
+					button:SetDurationText(auraFs, {})
+				elseif aura == "stacks" then
+					button:SetApplicationCount(auraFs, {})
+				end
+			end
+		end
+	end
+
+	for _, fs in pairs(button.tmwAuraText) do
+		if not fs.tmwUsed then
+			fs:Hide()
+		end
+	end
+end
+
 function Module:SetupForIcon(icon)
-	self:Configure(icon)
+	self:ApplyButtonSettings(icon)
+	self:LayoutButtons()
+	self:SetAuraSpec(icon.attributes.auraSpec)
 end
 
 function Module:OnEnable()
-	-- Cleared each setup; the view's implementor re-sets it (bar views) or leaves
-	-- it nil (icon view -> Masque skinning in SETUP_POST).
-	self.LayoutButton = nil
-	self:Configure(self.icon)
+	self.needsLayout = true
+	
+	local container = self.container
+	local icon = self.icon
+	if not self.container then
+		container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, CONTAINER_TEMPLATE)
+		container:SetSize(1, 1)
+		container:SetAllPoints(icon)
+		self.container = container
+	end
+
+	self:EnsureButtons(1)
 end
 
 function Module:OnDisable()
-	self:StandDown()
+	local container = self.container
+	if container then
+		container:ClearAuraFilters()
+		container:SetEnabled(false)
+	end
 end

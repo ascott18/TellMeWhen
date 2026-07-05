@@ -84,6 +84,10 @@ Backdrop:RegisterConfigPanel_XMLTemplate(53, "TellMeWhen_BackdropOptions_Global"
 
 function Backdrop:OnNewInstance(icon)
 	self.container = CreateFrame("Frame", nil, icon)
+	-- Start hidden so the backdrop/border only ever show while the module is enabled
+	-- (shown in OnEnable, hidden in OnDisable). A type that disallows this module leaves
+	-- it never-enabled, and thus hidden, rather than showing an orphaned backdrop/border.
+	self.container:Hide()
 	self.backdrop = self.container:CreateTexture(self:GetChildNameBase() .. "Backdrop", "BACKGROUND", nil, -8)
 	self.backdrop:SetAllPoints(self.container)
 	self.backdrop:Show()

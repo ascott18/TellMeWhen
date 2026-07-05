@@ -1346,6 +1346,14 @@ L["TEXTLAYOUTS_SKINAS_NONE"] = "None"
 L["TEXTLAYOUTS_SKINAS_COUNT"] = "Stack Text"
 L["TEXTLAYOUTS_SKINAS_HOTKEY"] = "Binding Text"
 
+L["TEXTLAYOUTS_AURA"] = "Aura Value"
+L["TEXTLAYOUTS_AURA_DESC"] = [[On aura container icons, drive this text with a real aura value (spell name, duration, or stacks) provided by Blizzard's aura display, instead of a DogTag string. The layout still controls its position and appearance. On all other icon types this setting is ignored and the text works as a normal DogTag string.]]
+L["TEXTLAYOUTS_AURA_NONE"] = "None (DogTag)"
+L["TEXTLAYOUTS_AURA_SPELL"] = "Aura: Spell Name"
+L["TEXTLAYOUTS_AURA_DURATION"] = "Aura: Duration"
+L["TEXTLAYOUTS_AURA_STACKS"] = "Aura: Stacks"
+L["TEXTLAYOUTS_AURA_DRIVENINFO"] = "%s (Controlled by Blizzard)"
+
 L["TEXTLAYOUTS_SKINAS_SKINNEDINFO"] = [[This text display is set to be skinned by Masque.
 
 As a result, none of the settings below will have any effect when this layout is used on TellMeWhen icons that are skinned by Masque.]]

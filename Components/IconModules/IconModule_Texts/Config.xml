@@ -505,7 +505,7 @@
 					</Frame>
 
 					<Frame parentKey="DisplaySettings" inherits="TellMeWhen_OptionsModuleContainer" >
-						<Size y="200"/>
+						<Size y="240"/>
 
 						<Frames>
 							<EditBox parentKey="StringName" inherits="TellMeWhen_InputBoxTemplate" >
@@ -597,13 +597,58 @@
 								</Scripts>
 							</Frame>
 
+							<Frame parentKey="Aura" inherits="TMW_DropDownMenuTemplate">
+								<Anchors>
+									<Anchor point="TOP" relativeKey="$parent.SkinAs" relativePoint="BOTTOM" y="-10"/>
+									<Anchor point="LEFT" relativeKey="$parent.SkinAs" />
+									<Anchor point="RIGHT" relativeKey="$parent.SkinAs" />
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										TMW:CInit(self)
+
+										self:SetTexts(TMW.L["TEXTLAYOUTS_AURA"], TMW.L["TEXTLAYOUTS_AURA_DESC"])
+										self:SetLabel(TMW.L["TEXTLAYOUTS_AURA"])
+
+										self:SetSetting("Aura")
+										self:SetEasyFunctions(
+											function()
+												return TMW:OrderedPairs(TMW.TEXT.AuraContainerTexts)
+											end,
+											function(info, value, text)
+												info.text = text
+												info.value = value
+											end
+										)
+
+										-- Only one string per layout may claim a given aura purpose,
+										-- since the aura container binds one fontstring per purpose.
+										self:CScriptAddPre("SettingSaved", function()
+											local TEXT = TMW.TEXT
+											local layoutSettings, displaySettings = TEXT:GetCurrentLayoutAndDisplaySettings()
+											local displayID = TMW.tContains(layoutSettings, displaySettings)
+											local newValue = displaySettings[self.setting]
+
+											for otherDisplayID, otherDisplaySettings in TMW:InNLengthTable(layoutSettings) do
+												if otherDisplaySettings[self.setting] == newValue
+												   and newValue ~= ""
+												   and otherDisplayID ~= displayID
+												then
+													otherDisplaySettings[self.setting] = ""
+												end
+											end
+										end)
+									</OnLoad>
+								</Scripts>
+							</Frame>
+
 							<Button parentKey="Delete" inherits="TellMeWhen_ButtonTemplate">
 								<Size y="15"/>
 								<Anchors>
 									<Anchor point="LEFT" relativeKey="$parent.SkinAs" relativePoint="RIGHT" x="30"/>
 									<Anchor point="RIGHT" x="-10" />
 								</Anchors>
-								
+
 								<NormalFont style="GameFontNormal"/>
 								<HighlightFont style="GameFontRed"/>
 

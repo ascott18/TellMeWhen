@@ -77,6 +77,7 @@ TMW:RegisterDatabaseDefaults{
 					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
 					DefaultText		= "[Stacks:Hide(0)]",
 					SkinAs			= "Count",
+					Aura			= "stacks",
 				},
 			},
 			icon2 = {
@@ -123,8 +124,13 @@ View:ImplementsModule("IconModule_Texture_Colored", 30, function(Module, icon)
 	Module:Enable()
 end)
 -- Only allowed on aura-container types (see IconModule_AuraContainer's
--- SetDefaultAllowanceForTypes(false)); Enable() no-ops on every other type.
-View:ImplementsModule("IconModule_AuraContainer", 35, true)
+-- SetDefaultAllowanceForTypes(false)); Enable() no-ops on every other type. Clear
+-- LayoutButton so this view gets Masque skinning (SkinButton), not a bar layout left
+-- over from a previous view - OnEnable no longer resets it (meta icons need it kept).
+View:ImplementsModule("IconModule_AuraContainer", 35, function(Module, icon)
+	Module:Enable()
+	Module.LayoutButton = nil
+end)
 View:ImplementsModule("IconModule_PowerBar_Overlay", 40, function(Module, icon)
 	if icon.ShowPBar then
 		Module:Enable()

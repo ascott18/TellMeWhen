@@ -1867,3 +1867,53 @@ end
 function TMW:ClickSound()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
 end
+
+
+-- A rectangular border built from four edge textures. Its methods live on this class
+-- rather than being attached to the frame by the TellMeWhen_GenericBorder template's
+-- OnLoad handler. That lets a border be built without OnLoad ever running - notably one
+-- parented to a forbidden frame (e.g. an AuraButton), where restricted frames never fire
+-- script handlers. The edge textures always come from the template's <Layers>; create a
+-- border with TMW.Classes.GenericBorder:New("Frame", name, parent, "TellMeWhen_GenericBorder"),
+-- or (for frames the XML system builds) let the template's OnLoad TMW:CInit this class.
+local GenericBorder = TMW:NewClass("GenericBorder", "Frame")
+
+function GenericBorder:OnNewInstance()
+	self:SetBorderSize(1)
+	self:SetColor(0, 0, 0, 1)
+end
+
+function GenericBorder:SetBorderSize(pixels)
+	if not TMW then return end
+
+	self.size = pixels
+	self.borderTop:ClearAllPoints()
+	self.borderBottom:ClearAllPoints()
+
+	for i, tex in TMW:Vararg(self:GetRegions()) do
+		tex:SetShown(pixels ~= 0)
+		tex:SetSize(math.abs(pixels), math.abs(pixels))
+	end
+
+	-- Negative sizes should make inset borders.
+	-- Positive sizes will make outset borders
+	if 0 > pixels then
+		pixels = 0
+	end
+
+	self.borderTop:SetPoint("TOPLEFT", -pixels, pixels)
+	self.borderTop:SetPoint("TOPRIGHT", pixels, pixels)
+
+	self.borderBottom:SetPoint("BOTTOMLEFT", -pixels, -pixels)
+	self.borderBottom:SetPoint("BOTTOMRIGHT", pixels, -pixels)
+
+end
+
+function GenericBorder:SetColor(r, g, b, a)
+	if not TMW then return end
+	a = a or 1
+
+	for i, tex in TMW:Vararg(self:GetRegions()) do
+		tex:SetColorTexture(r, g, b, a)
+	end
+end

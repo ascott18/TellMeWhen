@@ -57,6 +57,12 @@ Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
 Type:SetModuleAllowance("IconModule_Backdrop", false)
 
+-- IconModule_AuraContainer recreates the icon square (Masque-skinned) on the AuraButton
+-- so it hides with the aura. The real icon container would otherwise sit behind it and
+-- leak its border. It's never enabled here, so it stays hidden - but icon.lmbGroup, set
+-- in its OnNewInstance, is still available for the recreated square to skin against.
+Type:SetModuleAllowance("IconModule_IconContainer_Masque", false)
+
 Type:RegisterIconDefaults{
 	-- The unit(s) to check for auras
 	Unit					= "player",

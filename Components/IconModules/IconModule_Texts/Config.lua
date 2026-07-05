@@ -729,20 +729,40 @@ function TEXT:LoadConfig()
 			frame.EditBox:SetTexts(display_N_stringName, L["TEXTLAYOUTS_SETTEXT_DESC"])
 			frame.EditBox:SetLabel(display_N_stringName)
 
-			frame.EditBox:SetText(text)
-			
-			-- DefaultText is the text that the string will be reverted to if the user pressed the rest button.
-			local DefaultText = stringSettings.DefaultText
-			if DefaultText == "" then
-				DefaultText = L["TEXTLAYOUTS_BLANK"]
+			-- On aura-container icons, a string flagged with an Aura purpose is driven
+			-- by the aura display, not a DogTag - reflect that instead of showing an
+			-- editable DogTag input.
+			local aura = stringSettings.Aura
+			if aura and aura ~= "" and TEXT:IconUsesAuraContainer(CI.icon) then
+				local purpose = TEXT.AuraContainerTexts[aura] or aura
+				-- Show it in the (disabled) input, not the red Error field.
+				frame.EditBox:SetText(L["TEXTLAYOUTS_AURA_DRIVENINFO"]:format(purpose))
+				if frame.EditBox.SetEnabled then
+					frame.EditBox:SetEnabled(false)
+					frame.EditBox:SetAlpha(0.8)
+				end
+				frame.Default.DefaultText = L["TEXTLAYOUTS_BLANK"]
+				frame.Error:SetText("")
 			else
-				DefaultText = DogTag:ColorizeCode(DefaultText)
+				if frame.EditBox.SetEnabled then
+					frame.EditBox:SetEnabled(true)
+				end
+
+				frame.EditBox:SetText(text)
+
+				-- DefaultText is the text that the string will be reverted to if the user pressed the rest button.
+				local DefaultText = stringSettings.DefaultText
+				if DefaultText == "" then
+					DefaultText = L["TEXTLAYOUTS_BLANK"]
+				else
+					DefaultText = DogTag:ColorizeCode(DefaultText)
+				end
+				frame.Default.DefaultText = DefaultText
+
+				-- Test the string and its tags & syntax
+				frame.Error:SetText(TMW:TestDogTagString(CI.icon, text))
 			end
-			frame.Default.DefaultText = DefaultText
-			
-			-- Test the string and its tags & syntax
-			frame.Error:SetText(TMW:TestDogTagString(CI.icon, text))
-			
+
 			previousFrame = frame
 			
 			-- Update the height of the text display so that there is room for errors to be displayed.

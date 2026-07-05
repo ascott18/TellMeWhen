@@ -35,12 +35,32 @@ TMW.TEXT = TEXT
 TEXT.MasqueSkinnableTexts = {
 	-- A list of available SkinAs settings,
 	-- paired with their localized name (for easy use in dropdowns)
-	
+
 	[""] = L["TEXTLAYOUTS_SKINAS_NONE"],
-	
+
 	Count = L["TEXTLAYOUTS_SKINAS_COUNT"],
 	HotKey = L["TEXTLAYOUTS_SKINAS_HOTKEY"],
 }
+
+-- Analogous to MasqueSkinnableTexts (SkinAs), but for the "Aura" string setting:
+-- on aura-container icon types, a string with an Aura purpose is driven by the
+-- Blizzard AuraButton (IconModule_AuraContainer) with the aura's real value instead
+-- of a DogTag string. The layout still controls its position/look. Keyed by the
+-- value passed to the matching AuraButton API.
+TEXT.AuraContainerTexts = {
+	[""]     = L["TEXTLAYOUTS_AURA_NONE"],
+	spell    = L["TEXTLAYOUTS_AURA_SPELL"],
+	duration = L["TEXTLAYOUTS_AURA_DURATION"],
+	stacks   = L["TEXTLAYOUTS_AURA_STACKS"],
+}
+
+-- True if the icon's type renders auras via IconModule_AuraContainer (the module
+-- is allowed for the type). Evaluated at call time - the AuraContainer class loads
+-- after this file. Used to decide whether the Aura string setting is meaningful.
+function TEXT:IconUsesAuraContainer(icon)
+	local class = TMW.Classes.IconModule_AuraContainer
+	return class and class:IsAllowedByType(icon.Type) or false
+end
 
 
 
@@ -84,8 +104,9 @@ TMW:RegisterDatabaseDefaults{
 							relativePoint 	= "CENTER",         -- Anchor setting
 						},
 					},
-					DefaultText		= "",               -- 
-					SkinAs			= "",               -- 
+					DefaultText		= "",               --
+					SkinAs			= "",               --
+					Aura			= "",               -- Aura-container purpose (see TEXT.AuraContainerTexts): "", "spell", "duration", "stacks"
 				},
 			},
 			
@@ -701,36 +722,6 @@ local function reSetup(self, event, icon)
 	return true -- Signal RegisterSelfDestructingCallback to unregister.
 end
 
-local function rotate(self, degrees)
-	if self.SetRotation then
-		self:SetRotation(degrees * (math.pi/180))
-	else
-		local anim = self.anim
-		if not anim then
-			if degrees == 0 then
-				return
-			end
-
-			self.animGroup = self:CreateAnimationGroup()
-
-			anim = self.animGroup:CreateAnimation("Rotation")
-			anim:SetDuration(0)
-			anim:SetEndDelay(2^42)
-
-			self.anim = anim
-		end
-		
-		if degrees ~= 0 then
-			anim:SetDegrees(degrees)
-			anim:SetOrigin("CENTER", 0, 0)
-			
-			self.animGroup:Play()
-		else
-			self.animGroup:Stop()
-		end
-	end
-end
-
 
 function Texts:GetAnchor(layoutSettings, anchorSettings, fontStringID)
 	local icon = self.icon
@@ -881,9 +872,7 @@ function Texts:SetupForIcon(sourceIcon)
 				-- Position settings:
 				fontString:SetWidth(fontStringSettings.Width)
 				fontString:SetHeight(fontStringSettings.Height)
-
-				rotate(fontString, fontStringSettings.Rotate)
-
+				fontString:SetRotation(fontStringSettings.Rotate * (math.pi/180))
 
 				fontString:ClearAllPoints()
 				local setPoint = fontString.__MSQ_SetPoint or fontString.SetPoint
@@ -936,12 +925,19 @@ end
 
 function Texts:OnKwargsUpdated()
 	if self.layoutSettings and self.Texts then
+		local auraContainer = TEXT:IconUsesAuraContainer(self.icon)
 		for textID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
 			local fontString = self.fontStrings[self:GetFontStringID(textID, fontStringSettings)]
-			
+
 			local text = TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, textID)
-			
-			if fontString and text and text ~= "" then
+
+			-- On aura-container icons, an Aura-purpose string is driven by the
+			-- AuraButton (IconModule_AuraContainer), not DogTag - skip it here. Our
+			-- fontString still gets created and positioned by SetupForIcon, which is
+			-- what the AuraContainer mirrors onto its own button-owned fontstring.
+			if auraContainer and fontStringSettings.Aura ~= "" then
+				-- not DogTag-driven
+			elseif fontString and text and text ~= "" then
 				-- We let DogTag do the styling of the outline on our texts.
 				-- Convert the style setting to a DogTag for the same style.
 				local styleString = ""

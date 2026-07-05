@@ -31,12 +31,13 @@ TMW:RegisterDatabaseDefaults{
 				Name = L["TEXTLAYOUTS_DEFAULTS_BAR1"],
 				GUID = "bar1",
 				NoEdit = true,
-				n = 2,
+				n = 3,
 				
 				-- Default Layout 1
-				{	-- [1] Duration		
+				{	-- [1] Duration
 					StringName = L["TEXTLAYOUTS_DEFAULTS_DURATION"],
-					DefaultText = "[Duration(gcd=true):TMWFormatDuration]",	
+					DefaultText = "[Duration(gcd=true):TMWFormatDuration]",
+					Aura = "duration",
 					Anchors = {
 						{
 							x = -2,
@@ -47,9 +48,10 @@ TMW:RegisterDatabaseDefaults{
 					},
 				},
 				{	-- [2] Spell
-					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],		
-					DefaultText = "[Spell] [Stacks:Hide(0):Paren]",
-					
+					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],
+					DefaultText = "[Spell]",
+					Aura = "spell",
+
 					Height = 1, -- This is needed in 6.1 - texts with a height of 0 default to wordwrapping now.
 
 					Justify = "LEFT",
@@ -66,6 +68,22 @@ TMW:RegisterDatabaseDefaults{
 							relativeTo = "$$1",
 							relativePoint = "LEFT",
 						}, -- [2]
+					},
+				},
+				{	-- [3] Stacks
+					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
+					DefaultText		= "[Stacks:Hide(0)]",
+					SkinAs			= "Count",
+					Aura			= "stacks",
+					Anchors = {
+						n = 1,
+						{
+							x 	 		  	= -2,
+							y 	 		  	= 2,
+							point 		  	= "BOTTOMRIGHT",
+							relativeTo	 	= "IconModule_IconContainer_MasqueIconContainer",
+							relativePoint 	= "BOTTOMRIGHT",
+						},
 					},
 				},
 			},
@@ -231,7 +249,7 @@ end)
 View:ImplementsModule("IconModule_AuraContainer", 60, function(Module, icon)
 	Module:Enable()
 	Module.LayoutButton = function(self, icon, button)
-		self:LayoutButtonForBar(icon, button, false)
+		return self:LayoutButtonForBar(icon, button, false)
 	end
 end)
 
