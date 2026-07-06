@@ -24,8 +24,8 @@ local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlow
 	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin
 local math, max, ceil, floor, random, abs =
 	  math, max, ceil, floor, random, abs
-local _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer =
-	  _G, coroutine, table, GetTime, CopyTable, tostringall, geterrorhandler, C_Timer
+local _G, tostringall, geterrorhandler, C_Timer =
+	  _G, tostringall, geterrorhandler, C_Timer
 
 local GetRuneCooldown =
 	  GetRuneCooldown

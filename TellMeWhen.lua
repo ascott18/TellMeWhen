@@ -184,8 +184,8 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, w
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, loadstring, unpack, debugstack
 local strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin, max, ceil, floor, random =
 	  strfind, strmatch, format, gsub, gmatch, strsub, strtrim, strsplit, strlower, strrep, strchar, strconcat, strjoin, max, ceil, floor, random
-local _G, coroutine, table, GetTime, CopyTable =
-	  _G, coroutine, table, GetTime, CopyTable
+local _G, table, GetTime, CopyTable =
+	  _G, table, GetTime, CopyTable
 local tostringall = tostringall
 local debugprofilestop = debugprofilestop
 
@@ -2489,8 +2489,19 @@ do	-- TMW:OnUpdate()
 	-- Assume in combat unless we find out otherwise.
 	local inCombatLockdown = true
 
-	-- Limit in milliseconds for each OnUpdate cycle.
-	local CoroutineLimit = 50
+	-- Limit in milliseconds for how long a single frame's slice of an update cycle may run.
+	local UPDATE_TIME_LIMIT = 50
+
+	-- Cursor state for the update engine's state machine (see TMW:OnUpdate below).
+	-- A cycle is walked one phase at a time; in combat it can be suspended mid-loop (at a
+	-- condition or icon boundary) and resumed at the same spot on the next frame.
+	local phase = "begin"
+	local condIndex = 1
+	local iconIndex = 1
+	local timeConstrained = false
+	-- True only when we suspended a cycle intentionally (hit the frame budget). If we find
+	-- ourselves mid-cycle without this set, the previous frame must have errored out.
+	local cleanYield = false
 
 	TMW:RegisterEvent("UNIT_FLAGS", function(event, unit)
 		if unit == "player" then
@@ -2504,17 +2515,39 @@ do	-- TMW:OnUpdate()
 		end
 	end)
 
-	local function checkYield()
-		if inCombatLockdown and debugprofilestop() - start > CoroutineLimit then
-			--TMW:Debug("OnUpdate yielded early at %s", time)
-
-			coroutine.yield()
-		end
+	-- Whether this frame's slice of the update has used up its time budget. Callers gate this
+	-- with `inCombatLockdown and ...` so that out of combat (no watchdog) we skip the timer call
+	-- entirely and always run a whole cycle in one frame.
+	local function overBudget()
+		return debugprofilestop() - start > UPDATE_TIME_LIMIT
 	end
-	
-	-- This is the main update engine of TMW.
-	local function OnUpdate()
-		while true do
+
+	-- This is the main update engine of TMW. It runs one update cycle per frame: fire the PRE
+	-- events, (when time-constrained and locked) check group conditions and update icons, then
+	-- fire the POST events.
+	--
+	-- In combat we time-slice: if a cycle exceeds UPDATE_TIME_LIMIT for the frame, we suspend
+	-- mid-cycle and resume at the same spot next frame, so we never trip Blizzard's in-combat
+	-- "script ran too long" watchdog. This used to be a coroutine that yielded mid-loop, but
+	-- coroutines errors often lack callstack details and also just randomly blow up in WoW 12.1. So
+	-- instead we keep an explicit cursor (phase + condIndex/iconIndex) and just return from
+	-- OnUpdate to "yield", resuming from the cursor on the next frame. `time` is sampled once per
+	-- cycle (in "begin") and deliberately not refreshed while resuming, so a slow cycle stays
+	-- internally consistent.
+	function TMW:OnUpdate()
+		start = debugprofilestop()
+
+		-- If a previous frame left us mid-cycle without a clean (budget) suspend, that cycle
+		-- errored -- e.g. an icon's Update() threw in the non-safe path. Restart the cycle from
+		-- the top, exactly as the old design rebirthed a dead coroutine: the updateInProgress
+		-- check below then flips us into safe-update mode so one bad icon can't wedge the engine.
+		if phase ~= "begin" and not cleanYield then
+			TMW:Debug("Restarted OnUpdate after an error at %s", time)
+			phase = "begin"
+		end
+		cleanYield = false
+
+		if phase == "begin" then
 			TMW:UpdateGlobals()
 
 			if updateInProgress then
@@ -2527,71 +2560,90 @@ do	-- TMW:OnUpdate()
 				end
 			end
 			updateInProgress = true
-			
+
 			TMW:Fire("TMW_ONUPDATE_PRE", time, Locked)
-			
+
 			if LastUpdate <= time - UPD_INTV then
 				LastUpdate = time
 				wipe(cpuProfileTimeStack)
 
 				TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_PRE", time, Locked)
-				
+
+				timeConstrained = true
+
 				if Locked then
-					for i = 1, #GroupsToUpdate do
-						-- GroupsToUpdate only contains groups with conditions
-						local group = GroupsToUpdate[i]
-						local ConditionObject = group.ConditionObject
-						if ConditionObject and (ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time) then
-							ConditionObject:Check()
-
-							if inCombatLockdown then checkYield() end
-						end
-					end
-			
-					if shouldSafeUpdate then
-						for i = 1, #IconsToUpdate do
-							local icon = IconsToUpdate[i]
-							safecall(icon.Update, icon)
-							if inCombatLockdown then checkYield() end
-						end
-					else
-						for i = 1, #IconsToUpdate do
-							--local icon = IconsToUpdate[i]
-							IconsToUpdate[i]:Update()
-
-							-- inCombatLockdown check here to avoid a function call.
-							if inCombatLockdown then checkYield() end
-						end
-					end
+					condIndex = 1
+					iconIndex = 1
+					phase = "conditions"
+				else
+					phase = "finish"
 				end
+			else
+				timeConstrained = false
+				phase = "finish"
+			end
+		end
 
+		if phase == "conditions" then
+			-- GroupsToUpdate only contains groups with conditions.
+			local count = #GroupsToUpdate
+			while condIndex <= count do
+				local group = GroupsToUpdate[condIndex]
+				condIndex = condIndex + 1
+
+				local ConditionObject = group.ConditionObject
+				if ConditionObject and (ConditionObject.UpdateNeeded or ConditionObject.NextUpdateTime < time) then
+					ConditionObject:Check()
+
+					-- inCombatLockdown check here to avoid a function call out of combat.
+					if inCombatLockdown and overBudget() then cleanYield = true return end
+				end
+			end
+			phase = "icons"
+		end
+
+		if phase == "icons" then
+			local count = #IconsToUpdate
+			if shouldSafeUpdate then
+				while iconIndex <= count do
+					local icon = IconsToUpdate[iconIndex]
+					iconIndex = iconIndex + 1
+
+					safecall(icon.Update, icon)
+					if inCombatLockdown and overBudget() then cleanYield = true return end
+				end
+			else
+				while iconIndex <= count do
+					local icon = IconsToUpdate[iconIndex]
+					iconIndex = iconIndex + 1
+
+					icon:Update()
+
+					-- inCombatLockdown check here to avoid a function call.
+					if inCombatLockdown and overBudget() then cleanYield = true return end
+				end
+			end
+			phase = "finish"
+		end
+
+		if phase == "finish" then
+			if timeConstrained then
 				TMW:Fire("TMW_ONUPDATE_TIMECONSTRAINED_POST", time, Locked)
 			end
 
 			updateInProgress = nil
-			
-			if inCombatLockdown then checkYield() end
 
+			phase = "post"
+
+			-- Matches the old pre-POST yield: if we're still over budget after the whole update,
+			-- defer firing TMW_ONUPDATE_POST to the next frame.
+			if inCombatLockdown and overBudget() then cleanYield = true return end
+		end
+
+		if phase == "post" then
 			TMW:Fire("TMW_ONUPDATE_POST", time, Locked)
-
-			coroutine.yield()
+			phase = "begin"
 		end
-	end
-
-	
-	local Coroutine
-	function TMW:OnUpdate()
-		start = debugprofilestop()
-
-		if not Coroutine or coroutine.status(Coroutine) == "dead" then
-			if Coroutine then
-				TMW:Debug("Rebirthed OnUpdate coroutine at %s", time)
-			end
-
-			Coroutine = coroutine.create(OnUpdate)
-		end
-
-		assert(coroutine.resume(Coroutine))
 	end
 end
 
@@ -2610,9 +2662,10 @@ do -- TMW:Update()
 	--
 	-- We deliberately do NOT use coroutines. A coroutine could yield from deep inside Group.Setup's
 	-- icon loop, but yielding across a pcall is illegal, which forced the old design to disable all
-	-- error protection mid-update, and also coroutines love to discard stack traces when there are 
-	-- errors. Instead the setup flow is walked from the
-	-- top level, so TMW.safecall keeps its real error protection for every group/icon step.
+	-- error protection mid-update -- and worse, coroutines obliterate the callstack when something
+	-- errors (turning bugs into indecipherable reports) and provoke new, weird errors under
+	-- WoW 12.1. Instead the setup flow is walked from the top level, so TMW.safecall keeps its
+	-- real error protection for every group/icon step.
 	--
 	-- A single step (LoadOptions in the prologue, one icon, or a nested controller re-setup) may
 	-- run long, but the budget is re-checked *after* each step, so we always make progress and
