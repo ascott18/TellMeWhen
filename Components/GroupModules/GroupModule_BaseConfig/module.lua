@@ -31,11 +31,11 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(2, "TellMeWhen_GM_View", function
 	local data = { numPerRow = 3, }
 
 	local function Reload()
-		TMW:Update()
-
-		-- We need to call this so that we make sure to get the correct panels
+		-- Reload the group config once setup finishes so that we get the correct panels
 		-- after the view changes.
-		TMW.IE:LoadGroup(1)
+		TMW:Update(function()
+			TMW.IE:LoadGroup(1)
+		end)
 	end
 
 	for view, viewData in TMW:OrderedPairs(TMW.Views, TMW.OrderSort, true) do

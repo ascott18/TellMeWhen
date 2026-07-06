@@ -3814,9 +3814,10 @@ function TMW:Import(SettingsItem, ...)
 	if SharableDataType and SharableDataType.Import_ImportData then
 		SharableDataType:Import_ImportData(SettingsItem, ...)
 
-		TMW:Update()
-		IE:RefreshTabs()
-		
+		TMW:Update(function()
+			IE:RefreshTabs()
+		end)
+
 		TMW:Print(L["IMPORT_SUCCESSFUL"])
 	else
 		TMW:Print(L["IMPORTERROR_INVALIDTYPE"])

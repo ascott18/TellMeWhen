@@ -1107,10 +1107,10 @@ function TMW:PLAYER_LOGIN()
 	
 	TMW:SetScript("OnUpdate", TMW.OnUpdate)
 
-	-- Pass true to update via coroutine to try to fix 
+	-- Updates are always chunked across frames now, which fixes the "script ran too long"
+	-- errors that could otherwise happen when logging in.
 	-- https://wow.curseforge.com/projects/tellmewhen/issues/1643
-	-- It appears there can be "script ran too long" errors when logging in.
-	TMW:Update(true)
+	TMW:Update()
 end
 TMW:RegisterEvent("PLAYER_LOGIN")
 
@@ -2596,147 +2596,231 @@ do	-- TMW:OnUpdate()
 end
 
 
-function TMW:UpdateNormally()	
-	if not TMW.Initialized then
-		return
+do -- TMW:Update()
+
+	-- TMW:Update() sets up all groups, icons, and anything else. The work (creating/setting up
+	-- every group and icon) is chunked across multiple frames by an explicit cursor state machine,
+	-- so it can't trip Blizzard's in-combat "script ran too long" watchdog (~200ms cap) whether
+	-- we're in combat, zoning into an instance, or logging in.
+	--
+	-- This is ALWAYS asynchronous: the work never happens synchronously within the TMW:Update()
+	-- call (the first step runs on the next OnUpdate). If you need to run code once the setup has
+	-- fully completed, pass an onComplete callback to TMW:Update (JS-style) rather than assuming
+	-- the world is set up when TMW:Update() returns.
+	--
+	-- We deliberately do NOT use coroutines. A coroutine could yield from deep inside Group.Setup's
+	-- icon loop, but yielding across a pcall is illegal, which forced the old design to disable all
+	-- error protection mid-update, and also coroutines love to discard stack traces when there are 
+	-- errors. Instead the setup flow is walked from the
+	-- top level, so TMW.safecall keeps its real error protection for every group/icon step.
+	--
+	-- A single step (LoadOptions in the prologue, one icon, or a nested controller re-setup) may
+	-- run long, but the budget is re-checked *after* each step, so we always make progress and
+	-- never chain two heavy steps in one frame.
+	local MAX_TIME_PER_FRAME = 50
+
+	-- The domains a full update walks, in order.
+	local UPDATE_SCOPES = { "profile", "global" }
+
+	local running = false             -- a run is currently in flight (owns the OnUpdate script)
+	local rerunRequested = false      -- coalesced request(s) arrived while a run was in flight
+	local cursor
+	local completionCallbacks = {}    -- onComplete callbacks to fire when the run fully finishes
+
+	local function NewCursor()
+		return { phase = "prologue", scopeIndex = 1, groupID = 1, iconID = 1 }
 	end
-	
-	time = GetTime()
-	TMW.time = time
-	LastUpdate = 0
 
-	
-	if not TMW.db.profile.Locked then
-		TMW:LoadOptions()
-
-		if TMW:AssertOptionsInitialized() then
-			TMW.db.profile.Locked = true
+	-- The group-level portion of a group's setup, run as one unit so it can be safecall'd
+	-- together (mirroring the original TMW.safecall(group.Setup, group)). Returns whether the
+	-- group's icons should be set up. ShouldUpdateIcons must be read here because it depends on
+	-- group.viewData, which SetupBeforeIcons assigns.
+	local function SetupGroupLevel(group)
+		group:SetupBeforeIcons()
+		local shouldSetupIcons = group:ShouldUpdateIcons()
+		if not shouldSetupIcons then
+			group.Controller = nil
 		end
+		return shouldSetupIcons
 	end
 
-	TMW.Locked = TMW.db.profile.Locked
-	Locked = TMW.Locked
-	
-	wipe(TMW.PreviousGUIDToOwner)
-	for k, v in pairs(TMW.GUIDToOwner) do
-		TMW.PreviousGUIDToOwner[k] = v
-	end
-	wipe(TMW.GUIDToOwner)
-	
-	-- Add a very small amount so that we don't call the same icon multiple times
-	-- in the same frame if the interval has been set 0.
-	UPD_INTV = TMW.db.global.Interval + 0.001
-	TMW.UPD_INTV = UPD_INTV
-	
-	TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
+	-- Performs exactly ONE unit of work and advances the cursor. Sets c.phase = "done" when the
+	-- whole setup is finished (or aborted because TMW isn't initialized).
+	local function Step(c)
+		local phase = c.phase
 
-
-	for groupID = 1, max(TMW.db.profile.NumGroups, #TMW.profile) do
-		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
-		local group = TMW.Classes.Group:GetOrCreate("profile", groupID)
-		TMW.safecall(group.Setup, group)
-	end
-
-	for groupID = 1, max(TMW.db.global.NumGroups, #TMW.global) do
-		-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
-		local group = TMW.Classes.Group:GetOrCreate("global", groupID)
-		TMW.safecall(group.Setup, group)
-	end
-
-
-
-	if not Locked then
-		TMW:DoValidityCheck()
-	end
-
-	TMW:ScheduleTimer("DoInitialWarn", 3)
-
-	TMW:Fire("TMW_GLOBAL_UPDATE_POST")
-end
-
-do -- TMW:UpdateViaCoroutine()
-
-	-- Blizzard's execution cap in combat is 200ms.
-	-- We will be extra safe and go for 100ms.
-	-- But actually, we will use 50ms, because somehow we are still getting extremely rare 'script ran too long' errors
-	local COROUTINE_MAX_TIME_PER_FRAME = 50
-
-	local NumCoroutinesQueued = 0
-	local CoroutineStartTime
-	local UpdateCoroutine
-
-	local safecall_safe = TMW.safecall
-
-	local function safecall_coroutine(func, ...)
-		return true, func(...)
-	end
-
-	local function CheckCoroutineTermination()
-		if UpdateCoroutine and debugprofilestop() - CoroutineStartTime > COROUTINE_MAX_TIME_PER_FRAME then
-			--TMW:Debug("Update() yielded early at %s", time)
-			coroutine.yield(UpdateCoroutine)
-		end
-	end
-
-	local function OnUpdateDuringCoroutine(self)
-		-- This is an OnUpdate script, but don't be too concerned with performance because it is only used
-		-- when lock toggling in combat. Safety of the code (don't let it error!) is far more important than performance here.
-		time = GetTime()
-		TMW.time = time
-		
-		CoroutineStartTime = debugprofilestop()
-		
-		--if not IsAddOnLoaded("TellMeWhen_Options") then
-		--	error("TellMeWhen_Options was not loaded before a coroutine update happened. It is supposed to load before PLAYER_ENTERING_WORLD if the AllowCombatConfig setting is enabled!")
-		--end
-		
-		if NumCoroutinesQueued == 0 then
-			TMW.safecall = safecall_safe
-			safecall = safecall_safe
-			
-			--TMW:Print(L["SAFESETUP_COMPLETE"])
-			TMW:Fire("TMW_SAFESETUP_COMPLETE")
-			
-			TMW:SetScript("OnUpdate", TMW.OnUpdate)
-		else
-			-- Yielding a coroutine inside a pcall/xpcall isn't permitted,
-			-- so we will just have to temporarily throw all error protection out the window.
-			TMW.safecall = safecall_coroutine
-			safecall = safecall_coroutine
-			
-			if not UpdateCoroutine then
-				UpdateCoroutine = coroutine.create(TMW.UpdateNormally)
-				CheckCoroutineTermination() -- Make sure we haven't already exceeded this frame's threshold (from loading options, creating the coroutine, etc.)
+		if phase == "prologue" then
+			-- Load options if needed, reset per-update state, and fire TMW_GLOBAL_UPDATE.
+			-- This is a large atomic step (LoadOptions lives here); it can't be chunked, but the
+			-- post-step budget check defers the first group to the next frame.
+			if not TMW.Initialized then
+				c.phase = "done"        -- not initialized: abort cleanly
+				return
 			end
-			
-			TMW:RegisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
-			TMW:RegisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
 
-			
-			if coroutine.status(UpdateCoroutine) == "dead" then
-				UpdateCoroutine = nil
-				NumCoroutinesQueued = NumCoroutinesQueued - 1
-			else
-				local success, err = coroutine.resume(UpdateCoroutine)
-				if not success then
-					--TMW:Printf(L["SAFESETUP_FAILED"], err)
-					TMW:Fire("TMW_SAFESETUP_COMPLETE")
-					TMW:Error(err)
+			time = GetTime()
+			TMW.time = time
+			LastUpdate = 0
+
+			if not TMW.db.profile.Locked then
+				TMW:LoadOptions()
+
+				if TMW:AssertOptionsInitialized() then
+					TMW.db.profile.Locked = true
 				end
 			end
-			
-			TMW:UnregisterCallback("TMW_ICON_SETUP_POST", CheckCoroutineTermination)
-			TMW:UnregisterCallback("TMW_GROUP_SETUP_POST", CheckCoroutineTermination)
+
+			TMW.Locked = TMW.db.profile.Locked
+			Locked = TMW.Locked
+
+			wipe(TMW.PreviousGUIDToOwner)
+			for k, v in pairs(TMW.GUIDToOwner) do
+				TMW.PreviousGUIDToOwner[k] = v
+			end
+			wipe(TMW.GUIDToOwner)
+
+			-- Add a very small amount so that we don't call the same icon multiple times
+			-- in the same frame if the interval has been set 0.
+			UPD_INTV = TMW.db.global.Interval + 0.001
+			TMW.UPD_INTV = UPD_INTV
+
+			TMW:Fire("TMW_GLOBAL_UPDATE") -- the placement of this matters. Must be after options load, but before icons are updated
+
+			c.phase, c.scopeIndex, c.groupID = "group_before", 1, 1
+
+		elseif phase == "group_before" then
+			local scope = UPDATE_SCOPES[c.scopeIndex]
+			if not scope then
+				c.phase = "epilogue"
+				return
+			end
+			if c.groupID > max(TMW.db[scope].NumGroups, #TMW[scope]) then
+				c.scopeIndex, c.groupID = c.scopeIndex + 1, 1
+				return
+			end
+
+			-- Cant use TMW.InGroups() because groups wont exist yet on the first call of this.
+			local group = TMW.Classes.Group:GetOrCreate(scope, c.groupID)
+			c.group = group
+
+			-- Run the group-level setup as one protected unit, mirroring the original
+			-- TMW.safecall(group.Setup, group): if it errors, skip the whole group (no icons,
+			-- no TMW_GROUP_SETUP_POST) and move on, rather than firing events for a broken group
+			-- or trapping the cursor on it forever.
+			local ok, shouldSetupIcons = TMW.safecall(SetupGroupLevel, group)
+			if not ok then
+				c.group = nil
+				c.groupID = c.groupID + 1
+				return
+			end
+
+			c.shouldSetupIcons = shouldSetupIcons
+			c.iconID = 1
+			c.phase = "group_icons"
+
+		elseif phase == "group_icons" then
+			local group = c.group
+			if c.shouldSetupIcons then
+				if c.iconID <= group.numIcons then
+					TMW.safecall(group.SetupIcon, group, c.iconID)   -- one icon per step
+					c.iconID = c.iconID + 1
+					return                                           -- stay in this phase
+				end
+				TMW.safecall(group.DisableIconsFrom, group, group.numIcons + 1)
+			else
+				TMW.safecall(group.DisableIconsFrom, group, 1)
+			end
+			c.phase = "group_after"
+
+		elseif phase == "group_after" then
+			TMW.safecall(c.group.SetupAfterIcons, c.group)   -- fires TMW_GROUP_SETUP_POST, after icons
+			c.group = nil
+			c.groupID = c.groupID + 1
+			c.phase = "group_before"
+
+		elseif phase == "epilogue" then
+			-- Validity check, schedule the version warning, and fire TMW_GLOBAL_UPDATE_POST.
+			if not Locked then
+				TMW:DoValidityCheck()
+			end
+
+			TMW:ScheduleTimer("DoInitialWarn", 3)
+
+			TMW:Fire("TMW_GLOBAL_UPDATE_POST")
+
+			c.phase = "done"
 		end
 	end
 
-	function TMW:UpdateViaCoroutine()
-		if NumCoroutinesQueued == 0 then
-			--TMW:Print(L["SAFESETUP_TRIGGERED"])
-			TMW:Fire("TMW_SAFESETUP_TRIGGERED")
-			TMW:SetScript("OnUpdate", OnUpdateDuringCoroutine)
+	local function Finish()
+		running = false
+		cursor = nil
+
+		--TMW:Print(L["SAFESETUP_COMPLETE"])
+		TMW:Fire("TMW_SAFESETUP_COMPLETE")
+
+		TMW:SetScript("OnUpdate", TMW.OnUpdate)
+
+		-- Invoke onComplete callbacks. Snapshot & clear the list first so that a
+		-- callback which itself calls TMW:Update() starts a clean run and queues into a fresh list.
+		local callbacks = completionCallbacks
+		completionCallbacks = {}
+		for i = 1, #callbacks do
+			TMW.safecall(callbacks[i])
 		end
-		NumCoroutinesQueued = NumCoroutinesQueued + 1
+	end
+
+	local function DriverOnUpdate()
+		-- This is an OnUpdate script, but don't be too concerned with performance because it is only
+		-- used while a setup is in flight. Safety of the code (don't let it error!) is far more
+		-- important than performance here.
+		time = GetTime()
+		TMW.time = time
+
+		local start = debugprofilestop()
+		while true do
+			Step(cursor)
+
+			if cursor.phase == "done" then
+				if rerunRequested then
+					-- Coalesced request(s) arrived mid-flight: do exactly one more full pass with
+					-- a fresh cursor (fresh prologue => latest settings). See TMW:Update.
+					rerunRequested = false
+					cursor = NewCursor()
+				else
+					Finish()
+					return
+				end
+			end
+
+			if debugprofilestop() - start > MAX_TIME_PER_FRAME then
+				return   -- yield the rest to the next frame
+			end
+		end
+	end
+
+	-- Sets up all groups, icons, and anything else. Always chunked across frames (never runs the
+	-- work synchronously). Pass onComplete to run code once the setup has fully finished; multiple
+	-- callers' callbacks are all invoked when the (possibly coalesced) run completes.
+	function TMW:Update(onComplete)
+		if onComplete then
+			tinsert(completionCallbacks, onComplete)
+		end
+
+		if running then
+			-- A run is already in flight. Coalesce this into a single re-run once it finishes; any
+			-- onComplete above still fires when everything (including the re-run) is done.
+			rerunRequested = true
+			return
+		end
+
+		running = true
+		rerunRequested = false
+		cursor = NewCursor()
+
+		--TMW:Print(L["SAFESETUP_TRIGGERED"])
+		TMW:Fire("TMW_SAFESETUP_TRIGGERED")
+		TMW:SetScript("OnUpdate", DriverOnUpdate)
 	end
 
 	local function TryPreloadOptions()
@@ -2763,21 +2847,6 @@ do -- TMW:UpdateViaCoroutine()
 			return TryPreloadOptions()
 		end
 	end)
-end
-
--- TMW:Update() sets up all groups, icons, and anything else.
-function TMW:Update(forceCoroutine)
-
-	-- We check for instances to resolve https://github.com/ascott18/TellMeWhen/issues/1592
-	-- and https://github.com/ascott18/TellMeWhen/issues/2125 - "script ran too long" errors
-	-- that appears to be happening outside of combat when loading into an instance.
-	local needsCoroutineUpdate = forceCoroutine or InCombatLockdown() or IsInInstance()
-
-	if needsCoroutineUpdate then
-		TMW:UpdateViaCoroutine()
-	else
-		TMW:UpdateNormally()
-	end
 end
 
 
@@ -2930,8 +2999,9 @@ function TMW:LockToggle()
 	TMW:Fire("TMW_LOCK_TOGGLED", TMW.Locked)
 
 	PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
-	TMW:Update()
-	TMW:CpuProfileReset()
+	TMW:Update(function()
+		TMW:CpuProfileReset()
+	end)
 end
 
 function TMW:SlashCommand(str)
@@ -3039,10 +3109,12 @@ function TMW:SlashCommand(str)
 
 					-- Do a reset before we :Update() so that when we do the :Update(),
 					-- icons can be setup with the knowledge that CPU profiling is on
-					-- (so that event handlers for example can get setup with profiling)
+					-- (so that event handlers for example can get setup with profiling).
+					-- Reset again once setup finishes so the freshly-created icons get counters.
 					TMW:CpuProfileReset()
-					TMW:Update()
-					TMW:CpuProfileReset()
+					TMW:Update(function()
+						TMW:CpuProfileReset()
+					end)
 				end
 				TellMeWhen_CpuProfileDialog:Show()
 			end

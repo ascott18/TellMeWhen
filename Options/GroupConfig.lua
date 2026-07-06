@@ -428,11 +428,10 @@ function TMW:Group_Delete(group)
 	tremove(TMW.db[domain].Groups, groupID)
 	TMW.db[domain].NumGroups = TMW.db[domain].NumGroups - 1
 
-	TMW:RegisterSelfDestructingCallback("TMW_GLOBAL_UPDATE_POST", function()
+	TMW:Update(function()
 		-- Do this again so the group list will update to reflect the missing group.
 		IE:LoadGroup(1, false)
 	end)
-	TMW:Update()
 
 end
 
@@ -487,11 +486,10 @@ function TMW:Group_Insert(group, targetDomain, targetID)
 	TMW.db[oldDomain].NumGroups = TMW.db[oldDomain].NumGroups - 1
 	TMW.db[targetDomain].NumGroups = TMW.db[targetDomain].NumGroups + 1
 
-	TMW:RegisterSelfDestructingCallback("TMW_GLOBAL_UPDATE_POST", function()
+	TMW:Update(function()
 		IE:LoadGroup(1, groupGUID and TMW:GetDataOwner(groupGUID))
 		IE:LoadIcon(1, iconGUID and TMW:GetDataOwner(iconGUID))
 	end)
-	TMW:Update()
 end
 
 ---------- Etc ----------

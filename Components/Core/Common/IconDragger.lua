@@ -388,8 +388,9 @@ function IconDragger:Handler(method)
 	-- finally, invoke the method to handle the operation.
 	method(IconDragger)
 
-	-- then, update things
-	TMW:Update()
-	TMW.IE:LoadIcon(1)
+	-- then, update things (reload the icon editor once setup has finished)
+	TMW:Update(function()
+		TMW.IE:LoadIcon(1)
+	end)
 end
 

@@ -435,36 +435,33 @@ function Group.Setup_Conditions(group)
 end
 
 
---- Completely sets up a group.
--- 
--- Implements all requested [[api/base-classes/group-component/|GroupComponent]]s, processes settings, sets up conditions, and then sets up all the icons that it contains.
--- 
--- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
--- @name Group:Setup
--- @paramsig noIconSetup
--- @param noIconSetup [boolean] True to prevent the group from setting up all of its icons. Nil/false to update all icons along with the group.
-function Group.Setup(group, noIconSetup)
+-- [INTERNAL]
+-- The group-level portion of setup: everything up to (but not including) icon setup.
+-- Split out from Group:Setup so that the coroutine-free incremental update engine
+-- (TMW:Update) can drive the icon loop itself from the top level and still fire
+-- TMW_GROUP_SETUP_POST *after* the icons. Does NOT fire TMW_GROUP_SETUP_POST.
+function Group.SetupBeforeIcons(group)
 	local gs = group:GetSettings()
 	local GUID = group:GetGUID()
 
 	if GUID then
 		TMW:DeclareDataOwner(GUID, group)
 	end
-	
+
 	for k, v in pairs(TMW.Group_Defaults) do
 		group[k] = gs[k]
 	end
-	
+
 	group.__shown = group:IsShown()
-	
+
 	group.numIcons = group.Rows * group.Columns
-	
+
 	local viewData_old = group.viewData
 	local viewData = TMW.Views[gs.View]
 	group.viewData = viewData
 
 	TMW:Fire("TMW_GROUP_SETUP_PRE", group)
-	
+
 
 	-- The green border for global groups
 	if group.border then
@@ -474,17 +471,17 @@ function Group.Setup(group, noIconSetup)
 			group.border:Show()
 		end
 	end
-	
+
 	group:DisableAllModules()
-	
+
 	-- Setup the groups's view:
-	
+
 	-- UnSetup the old view
 	if viewData_old then
 		if viewData_old ~= viewData and viewData_old.Group_UnSetup then
 			viewData_old:Group_UnSetup(group)
 		end
-		
+
 		viewData_old:UnimplementFromGroup(group)
 	end
 
@@ -498,36 +495,37 @@ function Group.Setup(group, noIconSetup)
 	-- Must be before we update icons
 	group:Setup_Conditions()
 	group:Update()
-		
+
 	if not group.Controlled then
 		group.Controller = nil
 	end
+end
 
-	if group:ShouldUpdateIcons() then
-		if not noIconSetup then
-			-- Setup icons
-			for iconID = 1, group.numIcons do
-				local icon = group[iconID]
-				if not icon then
-					icon = TMW.Classes.Icon:New("Button", group:GetName() .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
-				end
-
-				TMW.safecall(icon.Setup, icon)
-			end
-
-			for iconID = group.numIcons+1, #group do
-				local icon = group[iconID]
-				icon:DisableIcon()
-			end
-		end
-	else
-		group.Controller = nil
-		for iconID = 1, #group do
-			local icon = group[iconID]
-			icon:DisableIcon()
-		end
+-- [INTERNAL]
+-- Sets up a single icon by ID, creating it if it doesn't exist yet.
+-- This is the unit of work the incremental update engine steps through.
+function Group.SetupIcon(group, iconID)
+	local icon = group[iconID]
+	if not icon then
+		icon = TMW.Classes.Icon:New("Button", group:GetName() .. "_Icon" .. iconID, group, "TellMeWhen_IconTemplate", iconID)
 	end
 
+	TMW.safecall(icon.Setup, icon)
+end
+
+-- [INTERNAL]
+-- Disables every icon in the group from startID upwards. Used both to disable icons
+-- beyond group.numIcons and to disable all icons when the group shouldn't update.
+function Group.DisableIconsFrom(group, startID)
+	for iconID = startID, #group do
+		group[iconID]:DisableIcon()
+	end
+end
+
+-- [INTERNAL]
+-- The tail portion of setup that must run *after* a group's icons are set up.
+-- Fires TMW_GROUP_SETUP_POST last, which many listeners rely on to reposition icons.
+function Group.SetupAfterIcons(group)
 	if group.OnlyInCombat and group:ShouldUpdateIcons() then
 		group:RegisterEvent("PLAYER_REGEN_ENABLED")
 		group:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -547,6 +545,33 @@ function Group.Setup(group, noIconSetup)
 	group:SetScript("OnEvent", group.OnEvent)
 
 	TMW:Fire("TMW_GROUP_SETUP_POST", group)
+end
+
+--- Completely sets up a group.
+--
+-- Implements all requested [[api/base-classes/group-component/|GroupComponent]]s, processes settings, sets up conditions, and then sets up all the icons that it contains.
+--
+-- This method should not be called manually while TellMeWhen is locked. It may be called liberally from wherever you see fit when in configuration mode.
+-- @name Group:Setup
+-- @paramsig noIconSetup
+-- @param noIconSetup [boolean] True to prevent the group from setting up all of its icons. Nil/false to update all icons along with the group.
+function Group.Setup(group, noIconSetup)
+	group:SetupBeforeIcons()
+
+	if group:ShouldUpdateIcons() then
+		-- ShouldUpdateIcons must be evaluated after SetupBeforeIcons, which assigns group.viewData.
+		if not noIconSetup then
+			for iconID = 1, group.numIcons do
+				group:SetupIcon(iconID)
+			end
+			group:DisableIconsFrom(group.numIcons + 1)
+		end
+	else
+		group.Controller = nil
+		group:DisableIconsFrom(1)
+	end
+
+	group:SetupAfterIcons()
 end
 
  
