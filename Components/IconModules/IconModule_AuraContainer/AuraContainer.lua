@@ -16,9 +16,57 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+	
+local Module = TMW:NewClass("IconModule_AuraContainer", "IconModule")
+
+-- Off for every icon type unless explicitly allowed. Aura-container icon types
+-- opt in with Type:SetModuleAllowance("IconModule_AuraContainer", true).
+Module:SetDefaultAllowanceForTypes(false)
+
+if TMW.wowMajorMinor < 12.1 then return end
 
 local max = math.max
 local LSM = LibStub("LibSharedMedia-3.0")
+
+-- A NumericRuleFormatter that mirrors TMW:FormatSeconds / the TMWFormatDuration
+-- DogTag, so the AuraButton's (secret) duration text reads the same as every other
+-- TMW timer: "9.9" under ten seconds, "42" under a minute, then "M:SS", "H:MM:SS",
+-- "D:HH:MM:SS". Blizzard's DefaultAuraDurationFormatter (a SecondsFormatter) instead
+-- renders one abbreviated unit ("1m", "2h"), which looks out of place next to the
+-- rest of TMW.
+--
+-- Each breakpoint picks the highest threshold <= value; its components carve the value
+-- into the numbers its format string consumes (Down rounding = floor, matching
+-- FormatSeconds' integer fields). The sub-10 rule has no components so %.1f formats the
+-- raw value.
+local Down = Enum.NumericRuleFormatRounding.Down
+local durationFormatter = C_StringUtil.CreateNumericRuleFormatter()
+durationFormatter:SetBreakpoints({
+	-- < 10s: one decimal place, e.g. "9.9" / "0.5".
+	{ threshold = 0, format = "%.1f" },
+	-- 10s..1m: whole seconds, e.g. "42".
+	{ threshold = 10, format = "%d", components = {
+		{ step = 1, rounding = Down },
+	} },
+	-- 1m..1h: "M:SS".
+	{ threshold = 60, format = "%d:%02d", components = {
+		{ div = 60, rounding = Down },
+		{ mod = 60, step = 1, rounding = Down },
+	} },
+	-- 1h..1d: "H:MM:SS".
+	{ threshold = 3600, format = "%d:%02d:%02d", components = {
+		{ div = 3600, rounding = Down },
+		{ div = 60, mod = 60, rounding = Down },
+		{ mod = 60, step = 1, rounding = Down },
+	} },
+	-- 1d+: "D:HH:MM:SS".
+	{ threshold = 86400, format = "%d:%02d:%02d:%02d", components = {
+		{ div = 86400, rounding = Down },
+		{ div = 3600, mod = 24, rounding = Down },
+		{ div = 60, mod = 60, rounding = Down },
+		{ mod = 60, step = 1, rounding = Down },
+	} },
+})
 
 -- The bar views' StatusBar texture (the configured LSM statusbar), matching
 -- IconModule_TimerBar's OnEnable.
@@ -100,13 +148,6 @@ function Processor:CompileFunctionSegment(t)
 	end
 	--]]
 end
-
-
-local Module = TMW:NewClass("IconModule_AuraContainer", "IconModule")
-
--- Off for every icon type unless explicitly allowed. Aura-container icon types
--- opt in with Type:SetModuleAllowance("IconModule_AuraContainer", true).
-Module:SetDefaultAllowanceForTypes(false)
 
 -- The AuraButton owns the cooldown, so aura-container types disable
 -- IconModule_CooldownSweep - which also hides its timer settings. Reintroduce the
@@ -555,7 +596,8 @@ function Module:Emulate_IconModule_Texts(icon, button, remap)
 				if aura == "spell" then
 					button:SetSpellName(auraFs)
 				elseif aura == "duration" then
-					button:SetDurationText(auraFs, {})
+					-- Format the AuraButton's secret duration the TMW way (see durationFormatter).
+					button:SetDurationText(auraFs, { formatter = durationFormatter })
 				elseif aura == "stacks" then
 					button:SetApplicationCount(auraFs, {})
 				end
