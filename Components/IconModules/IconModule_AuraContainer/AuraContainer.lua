@@ -192,42 +192,6 @@ function Module:EnsureButtons(count)
 	end
 end
 
--- Skin a button's own regions with the icon's Masque group. Masque sizes the
--- skin against the button's explicit size, so give it one first (the same way the
--- view sizes its IconContainer before AddButton); without it Masque falls back to
--- the skin's native dimensions and the button comes out oversized. The Icon region
--- is a child of the button (created, not re-parented), so Masque only re-anchors /
--- texcoords it - none of which trips the button's forbidden aspects.
--- `icon` is the icon whose cell this button sits over (self.icon normally; a
--- group controller passes each controlled icon in turn).
-function Module:SkinButton(button, icon)
-	icon = icon or self.icon
-	local lmbGroup = icon.lmbGroup
-
-	-- The button covers the icon, so text strings that anchor to the icon remap to
-	-- the button. Returned for WireAuraText.
-	local remap = { [icon] = button }
-
-	if lmbGroup then
-		local w, h = icon:GetSize()
-		if w and w > 0 then
-			button:ClearAllPoints()
-			button:SetSize(w, h)
-			button:SetPoint("CENTER", icon)
-		end
-
-		lmbGroup:AddButton(button, {
-			Icon = button.tmwIcon,
-			Cooldown = button.tmwCooldown,
-		}, "Legacy")
-	end
-
-	-- The button is the icon square in this view, so border it directly.
-	self:LayoutIconBorder(icon, button, button)
-
-	return remap
-end
-
 -- Copy `source`'s anchor points (and size) onto `region`, remapping each point's
 -- relativeTo frame through `remap` (falling back to `default`). This reproduces a
 -- frame the view already positioned, but anchored to the button (and its children)
@@ -258,8 +222,7 @@ end
 -- EnsureButtons created new buttons or we were (re)enabled (needsLayout), so meta icons
 -- swapping between same-shaped sources don't re-skin needlessly. No-op until enabled.
 function Module:LayoutButtons(force)
-	-- Controlled icons render through the controller's buttons, not their own, so
-	-- they never own a container (see OnEnable). Nothing to lay out.
+	-- Controlled icons render through the controller's buttons, not their own.
 	if not self.IsEnabled or not self.container or self.icon:IsControlled() then
 		return
 	end
@@ -287,21 +250,44 @@ function Module:LayoutButtons(force)
 		-- single button sits over our own icon.
 		local icon = isController and group[i] or self.icon
 		if icon then
-			-- Views that lay auras out themselves (bars) set self.LayoutButton in their
+			-- Views that lay auras out themselves (bars) set self.ViewEmulationHandler in their
 			-- implementor; the icon view leaves it nil and gets Masque skinning. Both
 			-- return a frame remap (icon/square/bar -> our button-owned equivalents) so
 			-- WireAuraText can position the aura-driven text the same way.
-			local remap
-			if self.LayoutButton then
-				remap = self:LayoutButton(icon, button)
-			else
-				remap = self:SkinButton(button, icon)
-			end
-			self:LayoutAuraText(icon, button, remap or { [icon] = button })
+			local remap = self.ViewEmulationHandler(self, icon, button)
+			self:Emulate_IconModule_Texts(icon, button, remap or { [icon] = button })
 		end
 		-- Surplus buttons (the group shrank) get no target; Blizzard's container
 		-- clears/hides any frame beyond maxFrameCount, so leave them be.
 	end
+end
+
+function Module:Emulate_IconView_Icon(icon, button)
+	icon = icon or self.icon
+
+	-- The button covers the icon, so text strings that anchor to the icon remap to
+	-- the button. Returned for WireAuraText.
+	local remap = { [icon] = button }
+
+	local lmbGroup = icon.lmbGroup
+	if lmbGroup then
+		local w, h = icon:GetSize()
+		if w and w > 0 then
+			button:ClearAllPoints()
+			button:SetSize(w, h)
+			button:SetPoint("CENTER", icon)
+		end
+
+		lmbGroup:AddButton(button, {
+			Icon = button.tmwIcon,
+			Cooldown = button.tmwCooldown,
+		}, "Legacy")
+	end
+
+	-- The button is the icon square in this view, so border it directly.
+	self:Emulate_IconModule_IconContainer(icon, button, button)
+
+	return remap
 end
 
 -- Lay a button out for the bar / barv views: the button spans the whole cell, the
@@ -311,7 +297,7 @@ end
 -- and TimerBar's container - remapping their relativeTo so the anchors stay valid
 -- on the forbidden button: the icon -> our button, the icon square -> our mirrored
 -- copy of it. `vertical` only selects the bar's orientation (barv).
-function Module:LayoutButtonForBar(icon, button, vertical)
+function Module:Emulate_IconView_Bar(icon, button, vertical)
 	local Modules = icon.Modules
 	local iconContainer = Modules.IconModule_IconContainer_Masque
 	local iconSquare = iconContainer and iconContainer.container
@@ -374,7 +360,7 @@ function Module:LayoutButtonForBar(icon, button, vertical)
 		cd:SetAllPoints(button)
 	end
 
-	self:LayoutIconBorder(icon, button, iconRegion)
+	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 
 	-- Duration bar: mirror the view's TimerBar container (anchored to the icon and
 	-- the icon square, both remapped above). The bar is scaled to whole screen pixels
@@ -397,7 +383,7 @@ function Module:LayoutButtonForBar(icon, button, vertical)
 			remap[timerBar.bar] = bar
 		end
 
-		self:LayoutBarBackdrop(icon, button, bar, vertical)
+		self:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 	else
 		bar:Hide()
 		if button.tmwBarBackdrop then
@@ -415,7 +401,7 @@ end
 -- Exception: in config mode (unlocked) the button is hidden (no aura is assigned),
 -- so parent the backdrop to the ICON instead, so it stays visible as a preview
 -- while editing. In locked mode it's a button child and hides with the aura.
-function Module:LayoutBarBackdrop(icon, button, bar, vertical)
+function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 	local base = icon:GetFrameLevel()
 
 	local frame = button.tmwBarBackdrop
@@ -462,14 +448,27 @@ function Module:LayoutBarBackdrop(icon, button, bar, vertical)
 	end
 end
 
--- Recreate IconContainer's icon-square border (BorderIcon) around the recreated icon
--- square. IconContainer_Masque is disallowed on aura-container types, so its own border
--- would never show. Parented to the button so it hides with the aura when locked;
--- re-parented to the icon in config mode (where the button is hidden) so it stays a
--- visible preview, matching LayoutBarBackdrop. `iconRegion` is whatever plays the icon
--- square in this view (the Masque holder or the bare texture); pass nil to hide it.
-function Module:LayoutIconBorder(icon, button, iconRegion)
+function Module:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 	local border = button.tmwIconBorder
+
+	local container = self.icon:GetModuleOrModuleChild("IconModule_IconContainer")
+	if container then
+		if not TMW.Locked then
+			-- In config mode, use the real icon container and disable emulated elements.
+			-- This allows regular masque skinning to apply to the icon container elements
+			-- in config mode, which is needed since the aura container's texture depends
+			-- on actual auras being present.
+			if border then
+				border:Hide()
+			end
+
+			container:Enable(true)
+			return
+		else
+			container:Disable()
+		end
+	end
+
 	local gspv = icon.group:GetSettingsPerView()
 
 	if iconRegion and gspv.BorderIcon and gspv.BorderIcon ~= 0 then
@@ -477,7 +476,7 @@ function Module:LayoutIconBorder(icon, button, iconRegion)
 			border = TMW.Classes.GenericBorder:New("Frame", nil, button, "TellMeWhen_GenericBorder")
 			button.tmwIconBorder = border
 		end
-		border:SetParent(TMW.Locked and button or icon)
+		border:SetParent(button)
 		border:ClearAllPoints()
 		border:SetAllPoints(iconRegion)
 		border:SetFrameLevel(button:GetFrameLevel() + 4)  -- on top of the icon square
@@ -495,7 +494,7 @@ end
 -- (now DogTag-less) fontstring per such string; we create a button-owned fontstring,
 -- copy that string's font/justify, mirror its position onto the button, and hand it
 -- to the matching AuraButton API.
-function Module:LayoutAuraText(icon, button, remap)
+function Module:Emulate_IconModule_Texts(icon, button, remap)
 	local realTexts = icon.Modules and icon.Modules.IconModule_Texts
 	local layout = realTexts and realTexts.layoutSettings
 	button.tmwAuraText = button.tmwAuraText or {}

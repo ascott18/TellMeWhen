@@ -248,8 +248,8 @@ end)
 -- Type:Setup, so the module applies this at TMW_ICON_SETUP_POST).
 View:ImplementsModule("IconModule_AuraContainer", 60, function(Module, icon)
 	Module:Enable()
-	Module.LayoutButton = function(self, icon, button)
-		return self:LayoutButtonForBar(icon, button, false)
+	Module.ViewEmulationHandler = function(self, icon, button)
+		return self:Emulate_IconView_Bar(icon, button, false)
 	end
 end)
 

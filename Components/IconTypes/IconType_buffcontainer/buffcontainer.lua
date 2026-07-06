@@ -50,18 +50,11 @@ Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
 -- suppresses its own aura icon when an override is configured.
 Type:SetModuleAllowance("IconModule_AuraContainer", true)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
--- Type:SetModuleAllowance("IconModule_Texture_Colored", false)
 -- In the bar views the AuraButton owns the duration bar (via SetDurationBar) and
 -- recreates the backdrop/border as its own children, so both hide with the aura.
 -- Disable TMW's versions of both.
 Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
 Type:SetModuleAllowance("IconModule_Backdrop", false)
-
--- IconModule_AuraContainer recreates the icon square (Masque-skinned) on the AuraButton
--- so it hides with the aura. The real icon container would otherwise sit behind it and
--- leak its border. It's never enabled here, so it stays hidden - but icon.lmbGroup, set
--- in its OnNewInstance, is still available for the recreated square to skin against.
-Type:SetModuleAllowance("IconModule_IconContainer_Masque", false)
 
 Type:RegisterIconDefaults{
 	-- The unit(s) to check for auras

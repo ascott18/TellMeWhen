@@ -228,8 +228,8 @@ end)
 -- disallowed); Enable() no-ops elsewhere. Layout applied at TMW_ICON_SETUP_POST.
 View:ImplementsModule("IconModule_AuraContainer", 60, function(Module, icon)
 	Module:Enable()
-	Module.LayoutButton = function(self, icon, button)
-		return self:LayoutButtonForBar(icon, button, true)
+	Module.ViewEmulationHandler = function(self, icon, button)
+		return self:Emulate_IconView_Bar(icon, button, true)
 	end
 end)
 
