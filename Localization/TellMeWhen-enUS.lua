@@ -247,7 +247,7 @@ L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
 L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effects.]]
 
 L["ICONMENU_BUFFDEBUFF_CONTAINER"] = "Buff/Debuff (combat allowed)"
-L["ICONMENU_BUFFDEBUFF_CONTAINER_DESC"] = [[Tracks buffs and/or debuffs. Safe to use when in combat.]]
+L["ICONMENU_BUFFDEBUFF_CONTAINER_DESC"] = [[Tracks buffs and/or debuffs via Blizzard's Aura Container system. Safe to use when in combat.]]
 
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_BUFFDEBUFF_RESTRICTED"] = "Buff/Debuff (combat restricted)"
@@ -1349,10 +1349,10 @@ L["TEXTLAYOUTS_SKINAS_HOTKEY"] = "Binding Text"
 L["TEXTLAYOUTS_AURA"] = "Aura Value"
 L["TEXTLAYOUTS_AURA_DESC"] = [[On aura container icons, drive this text with a real aura value (spell name, duration, or stacks) provided by Blizzard's aura display, instead of a DogTag string. The layout still controls its position and appearance. On all other icon types this setting is ignored and the text works as a normal DogTag string.]]
 L["TEXTLAYOUTS_AURA_NONE"] = "None (DogTag)"
-L["TEXTLAYOUTS_AURA_SPELL"] = "Aura: Spell Name"
-L["TEXTLAYOUTS_AURA_DURATION"] = "Aura: Duration"
-L["TEXTLAYOUTS_AURA_STACKS"] = "Aura: Stacks"
-L["TEXTLAYOUTS_AURA_DRIVENINFO"] = "%s (Controlled by Blizzard)"
+L["TEXTLAYOUTS_AURA_SPELL"] = "Aura Name"
+L["TEXTLAYOUTS_AURA_DURATION"] = "Aura Duration"
+L["TEXTLAYOUTS_AURA_STACKS"] = "Aura Stacks"
+L["TEXTLAYOUTS_AURA_DRIVENINFO"] = "%s (from Blizzard)"
 
 L["TEXTLAYOUTS_SKINAS_SKINNEDINFO"] = [[This text display is set to be skinned by Masque.
 

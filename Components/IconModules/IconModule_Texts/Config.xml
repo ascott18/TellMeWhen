@@ -599,7 +599,7 @@
 
 							<Frame parentKey="Aura" inherits="TMW_DropDownMenuTemplate">
 								<Anchors>
-									<Anchor point="TOP" relativeKey="$parent.SkinAs" relativePoint="BOTTOM" y="-10"/>
+									<Anchor point="TOP" relativeKey="$parent.SkinAs" relativePoint="BOTTOM" y="-15"/>
 									<Anchor point="LEFT" relativeKey="$parent.SkinAs" />
 									<Anchor point="RIGHT" relativeKey="$parent.SkinAs" />
 								</Anchors>
