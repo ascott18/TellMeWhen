@@ -60,8 +60,9 @@ Type:RegisterIconDefaults{
 	-- The unit(s) to check for auras
 	Unit					= "player",
 
-	-- What type of aura to check for. Values are "HELPFUL", "HARMFUL", or "EITHER".
-	-- EITHER is handled specially by TMW by having looping a second time for a second filter (FilterH in the code).
+	-- What type of aura to check for: "HELPFUL" or "HARMFUL". There's no "both" - no single
+	-- aura filter string matches both categories, and two groups have no shared frame cap
+	-- so they overflow the icon (see BuildAuraSpec). A legacy "EITHER" is treated as HELPFUL.
 	BuffOrDebuff			= "HELPFUL",
 
 	-- Only check auras casted by the player. Appends "|PLAYER" to the UnitAura filter.
@@ -95,10 +96,10 @@ Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 	implementsConditions = true,
 })
 
-Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", function(self)
+Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuffContainer", function(self)
 	self:SetTitle(TMW.L["ICONMENU_BUFFTYPE"])
 	self:BuildSimpleCheckSettingFrame({
-		numPerRow = 3,
+		numPerRow = 2,
 		function(check)
 			check:SetTexts("|cFF00FF00" .. L["ICONMENU_BUFF"], nil)
 			check:SetSetting("BuffOrDebuff", "HELPFUL")
@@ -106,10 +107,6 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", functio
 		function(check)
 			check:SetTexts("|cFFFF0000" .. L["ICONMENU_DEBUFF"], nil)
 			check:SetSetting("BuffOrDebuff", "HARMFUL")
-		end,
-		function(check)
-			check:SetTexts(L["ICONMENU_BOTH"], nil)
-			check:SetSetting("BuffOrDebuff", "EITHER")
 		end,
 	})
 end)
@@ -363,11 +360,14 @@ local function BuildAuraSpec(icon)
 		end
 	end
 
-	if icon.BuffOrDebuff == "HELPFUL" or icon.BuffOrDebuff == "EITHER" then
-		addKind("HELPFUL", true)
-	end
-	if icon.BuffOrDebuff == "HARMFUL" or icon.BuffOrDebuff == "EITHER" then
+	-- Only HELPFUL or HARMFUL - there's no "both". No single aura filter string matches
+	-- both categories (a category-less string and "HELPFUL|HARMFUL" both match nothing),
+	-- and two separate filter groups would overflow a one-cell icon / a controller's grid
+	-- (the container has no container-wide frame cap). A legacy "EITHER" -> HELPFUL.
+	if icon.BuffOrDebuff == "HARMFUL" then
 		addKind("HARMFUL", false)
+	else
+		addKind("HELPFUL", true)
 	end
 
 	-- Duration sort. Use ExpirationOnly (pure remaining-time order) rather than Expiration,
