@@ -747,29 +747,84 @@ end
 -- Container setup + aura spec
 -- ----------------------------------------------------------------------------
 
--- The container's flow layout: a single cell over the icon for a normal icon, or a
--- Columns-wide uniform grid anchored at the (controller) icon for a group controller.
--- TMW's own per-icon positions can't be reproduced - Blizzard owns the layout now -
--- so a controller gets a plain left-to-right, top-to-bottom grid of the group's shape.
+-- Map a group's LayoutDirection to the anchor corner + flow growth directions its
+-- icons use (see IconPosition_Sortable:Icon_SetPoint). Only the corner and the two
+-- growth axes are honored (from LayoutDirection % 4); the row-vs-column fill order of
+-- directions 5-8 isn't reproduced - Blizzard's flow layout is always row-major - so a
+-- column-major group is approximated by the matching corner/axes.
+local function LayoutDirectionAnchor(layoutDirection)
+	local m = (layoutDirection or 1) % 4
+	if m == 1 then
+		return "TOPLEFT", FlowDirection.Right, FlowDirection.Down
+	elseif m == 2 then
+		return "TOPRIGHT", FlowDirection.Left, FlowDirection.Down
+	elseif m == 3 then
+		return "BOTTOMRIGHT", FlowDirection.Left, FlowDirection.Up
+	else -- m == 0 (LayoutDirection 4 / 8)
+		return "BOTTOMLEFT", FlowDirection.Right, FlowDirection.Up
+	end
+end
+
+-- The container's flow layout. TMW's own per-icon positions can't be reproduced -
+-- Blizzard owns the layout now - so we approximate with a uniform grid. Three cases:
+--   * Single icon: one cell over the icon.
+--   * Fixed-grid controller: pin to the group at the LayoutDirection corner (where icon
+--     1 sits) so the auras land on the group's normal fixed icon positions, Columns wide.
+--   * ShrinkGroup controller: pin to the group at the group's OWN anchor point (its
+--     Point) so it grows from where the group is pinned - a CENTER pin expands
+--     symmetrically - as auras come and go.
+-- In every controller case the auras FILL in the icon layout direction (the
+-- LayoutDirection corner + growth), matching Columns and icon spacing.
 function Module:ConfigureContainerLayout()
 	local container = self.container
 	if not container then
 		return
 	end
 	local icon = self.icon
-	local w = icon:GetSize()
+	local w, h = icon:GetSize()
 	w = (w and w > 0) and w or 1
+	h = (h and h > 0) and h or 1
 
-	container:SetAuraLayoutAnchorPoint("TOPLEFT")
-	container:SetAuraLayoutGrowthDirection(FlowDirection.Right, FlowDirection.Down)
 	container:SetAuraLayoutPadding(0, 0, 0, 0)
+	container:ClearAllPoints()
 
+	local spacingX, spacingY = 0, 0
+	local group = icon.group
 	if icon:IsGroupController() then
-		local columns = max(icon.group.Columns or 1, 1)
-		-- Wrap after `columns` cells (element width w, no spacing) -> a Columns-wide grid.
-		container:SetAuraLayoutRowWidth(columns * w)
+		local gs = group:GetSettings()
+		local gspv = group:GetSettingsPerView()
+		spacingX = gspv.SpacingX or 0
+		spacingY = gspv.SpacingY or 0
+
+		local flowPoint, hGrow, vGrow = LayoutDirectionAnchor(group.LayoutDirection)
+		local columns = max(group.Columns or 1, 1)
+
+		-- The auras fill from the LayoutDirection corner; where that block is pinned to
+		-- the group differs. Fixed grid: pin to the LayoutDirection corner itself, so the
+		-- auras sit on the group's normal fixed icon positions. ShrinkGroup: pin to the
+		-- group's own anchor point, so the (auto-resizing) block grows from the pin.
+		local anchorPoint = flowPoint
+		if group.ShrinkGroup then
+			anchorPoint = gs.Point and gs.Point.point or "CENTER"
+		end
+		container:SetPoint(anchorPoint, group, anchorPoint)
+		container:SetAuraLayoutAnchorPoint(flowPoint)
+		container:SetAuraLayoutGrowthDirection(hGrow, vGrow)
+		-- Wrap after `columns` cells (cell = icon size + spacing).
+		container:SetAuraLayoutRowWidth(columns * (w + spacingX))
 	else
+		container:SetPoint("TOPLEFT", icon, "TOPLEFT")
+		container:SetAuraLayoutAnchorPoint("TOPLEFT")
+		container:SetAuraLayoutGrowthDirection(FlowDirection.Right, FlowDirection.Down)
 		container:SetAuraLayoutRowWidth(w)
+	end
+
+	-- Match the group's icon spacing between cells (per active group's frames).
+	for filterString in pairs(self.groups) do
+		container:SetAuraGroupLayout(filterString, {
+			elementSpacingX = spacingX,
+			elementSpacingY = spacingY,
+		})
 	end
 end
 
@@ -908,12 +963,13 @@ function Module:OnEnable()
 	if not container then
 		container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, CONTAINER_TEMPLATE)
 		container:SetSize(1, 1)
-		-- Anchored by one corner only: the container auto-resizes to fit its
-		-- flow-laid-out buttons, so SetAllPoints(icon) would fight that.
-		container:ClearAllPoints()
-		container:SetPoint("TOPLEFT", icon, "TOPLEFT")
 		container:SetFrameLevel(icon:GetFrameLevel() + 5)
 		self.container = container
+		-- Anchored by one corner only (ConfigureContainerLayout picks the corner): the
+		-- container auto-resizes to fit its flow-laid-out buttons, so SetAllPoints would
+		-- fight that. Set a default so it's always anchored before the first layout pass.
+		container:SetPoint("TOPLEFT", icon, "TOPLEFT")
+		self:ConfigureContainerLayout()
 	end
 end
 
