@@ -449,6 +449,21 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 
+	-- The button owns the backdrop track (recreated as its own child in
+	-- Emulate_IconModule_Backdrop, so it hides with the aura). The icon's own
+	-- IconModule_Backdrop is allowed only to draw the config-mode track preview, so
+	-- enable it while unlocked and disable it while locked - this runs in both modes
+	-- (via ReskinButtons at setup), so it must toggle, not just disable. No-op in the
+	-- icon view, which has no Backdrop module.
+	local nativeBackdrop = icon:GetModuleOrModuleChild("IconModule_Backdrop")
+	if nativeBackdrop then
+		if TMW.Locked then
+			nativeBackdrop:Disable()
+		else
+			nativeBackdrop:Enable(true)
+		end
+	end
+
 	-- Duration bar: mirror the view's TimerBar container (anchored to the icon and
 	-- the icon square, both remapped above). The bar is scaled to whole screen pixels
 	-- so Blizzard's SetDurationBar fill animates smoothly; because that scale distorts
@@ -482,9 +497,10 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 	return remap
 end
 
--- Recreate IconModule_Backdrop's bar backdrop + border as children of the button,
--- so they're parented to the AuraButton and hide with it when there's no aura.
--- IconModule_Backdrop's own display is disabled on aura-container types (buffcontainer).
+-- Recreate IconModule_Backdrop's bar backdrop + border as children of the button, so
+-- they're parented to the AuraButton and hide with it when there's no aura. (The icon's
+-- own IconModule_Backdrop is disabled while locked - see Emulate_IconView_Bar - so this
+-- button-owned copy is the live one; the native one only draws the config preview.)
 function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 	local base = button:GetFrameLevel()
 

@@ -54,7 +54,6 @@ Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 -- recreates the backdrop/border as its own children, so both hide with the aura.
 -- Disable TMW's versions of both.
 Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
-Type:SetModuleAllowance("IconModule_Backdrop", false)
 
 Type:RegisterIconDefaults{
 	-- The unit(s) to check for auras
