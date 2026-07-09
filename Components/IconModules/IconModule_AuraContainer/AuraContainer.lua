@@ -924,6 +924,13 @@ function Module:SetAuraSpec(auraSpec)
 	self:ConfigureContainerLayout()
 	container:SetUnit(auraSpec.unit or "player")
 	container:SetEnabled(true)
+
+	-- Force a full re-read of the current unit's auras. SetUnit only refreshes when the
+	-- unit TOKEN changes, but a target swap keeps the token ("target") while the actual
+	-- unit changes - and that unit-set change is exactly why we were re-published (the
+	-- icon rebuilds a fresh auraSpec table then). Without this the container keeps the
+	-- previous target's cached auras.
+	container:UpdateAllAuras()
 end
 
 function Module:AURASPEC(icon, auraSpec)
