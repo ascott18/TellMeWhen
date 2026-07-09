@@ -225,7 +225,8 @@ View:ImplementsModule("IconModule_Backdrop", 51, function(Module, icon)
 end)
 
 -- Only allowed on aura-container types (IconModule_AuraContainer defaults to
--- disallowed); Enable() no-ops elsewhere. Layout applied at TMW_ICON_SETUP_POST.
+-- disallowed); Enable() no-ops elsewhere. The emulation handler skins each aura button
+-- as a vertical bar by mirroring this view's icon square + TimerBar/backdrop frames.
 View:ImplementsModule("IconModule_AuraContainer", 60, function(Module, icon)
 	Module:Enable()
 	Module.ViewEmulationHandler = function(self, icon, button)

@@ -16,7 +16,7 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
-	
+
 local Module = TMW:NewClass("IconModule_AuraContainer", "IconModule")
 
 -- Off for every icon type unless explicitly allowed. Aura-container icon types
@@ -27,6 +27,9 @@ if TMW.wowMajorMinor < 12.1 then return end
 
 local max = math.max
 local LSM = LibStub("LibSharedMedia-3.0")
+
+-- GLOBALS: AnchorUtil
+local FlowDirection = AnchorUtil.FlowDirection
 
 -- A NumericRuleFormatter that mirrors TMW:FormatSeconds / the TMWFormatDuration
 -- DogTag, so the AuraButton's (secret) duration text reads the same as every other
@@ -115,6 +118,26 @@ end
 -- a specific spell id or name, and TMW cannot react to presence/absence,
 -- sort, run conditions, or feed DogTags from it.
 --
+-- The 12.1 AuraGroup redesign moved frame CREATION + LAYOUT into the container:
+-- addons can no longer create AuraButtons or anchor them, only register aura groups
+-- and let the container flow-lay-out their frames. So the split of responsibility is:
+--
+--   * WHERE the buttons go is the container's: we register one AuraGroup per aura
+--     filter string (AddAuraGroup); the group creates AuraButtons in batches (via an
+--     initializeFrame callback that just records each one for us) and flow-lays them
+--     out inside the container, which auto-resizes to fit. A group's filter string is
+--     immutable and groups can't be removed, so we key groups by filter string, add
+--     each once, and activate/deactivate them by toggling maxFrameCount (0 = hide).
+--
+--   * HOW each button LOOKS is still ours, and still done by MIRRORING the icon's own
+--     modules so Masque, borders, padding, the bar/icon-square geometry and the text
+--     layout all match a normal TMW icon exactly. SkinButton reproduces, as children
+--     of the (container-owned) button: the Masque-skinned icon square + cooldown, the
+--     duration bar (mirroring the view's TimerBar frame and driven by SetDurationBar),
+--     the backdrop/borders, and the Aura-purpose text strings. This runs in a deferred
+--     INSECURE pass, never inside initializeFrame - that callback runs in the
+--     container's secure context where the button's state is secret and can't be read.
+--
 -- The icon type feeds this module a static "aura spec" via the AURASPEC
 -- IconDataProcessor:
 --     spec = {
@@ -125,16 +148,15 @@ end
 --         },
 --     }
 --
--- The number of aura buttons (and therefore how many auras show) is owned by this
+-- The number of auras shown (maxFrameCount per active group) is owned by this
 -- module, not the spec: a normal icon shows one, and a group controller fills its
--- whole group with one button per icon. See GetWantedButtonCount.
+-- whole group. See GetWantedButtonCount.
 -- ----------------------------------------------------------------------------
 
 
--- The AuraContainer/AuraButton frame types and the Custom*Template templates
--- live in Blizzard's Blizzard_AuraContainer addon, which may be load-on-demand.
+-- The AuraContainer frame type and the CustomAuraContainerTemplate live in Blizzard's
+-- Blizzard_AuraContainer addon, which may be load-on-demand.
 local CONTAINER_TEMPLATE = "CustomAuraContainerTemplate"
-local BUTTON_TEMPLATE = "CustomAuraButtonTemplate"
 
 local Processor = TMW.Classes.IconDataProcessor:New("AURASPEC", "auraSpec")
 function Processor:CompileFunctionSegment(t)
@@ -171,15 +193,23 @@ Module:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_AuraContainerTimerSe
 end)
 
 function Module:OnNewInstance(icon)
+	-- Buttons are created by the container (not us); we record each one the
+	-- container hands to our initializeFrame callback so we can (re-)skin them all.
+	-- Keyed by the frame itself.
 	self.buttons = {}
+
+	-- Aura groups we've registered on the container, keyed by filter string. A
+	-- group's filter string is immutable and groups can't be removed, so we only
+	-- ever add a new one and toggle maxFrameCount to (de)activate it.
+	self.groups = {}
+
 	-- Container is created lazily the first time the module is actually used,
 	-- so icons that never opt in don't allocate an AuraContainer frame.
 end
 
--- How many aura buttons this module should own. A group-controller buffcontainer
--- fills the whole group - one button per icon - so it can show that many auras at
--- once (Blizzard's container distributes matching auras across the button pool).
--- Every other icon shows a single aura.
+-- How many auras this module should show (the active groups' maxFrameCount). A
+-- group-controller buffcontainer fills the whole group; every other icon shows a
+-- single aura.
 function Module:GetWantedButtonCount()
 	local icon = self.icon
 	if icon:IsGroupController() then
@@ -188,50 +218,19 @@ function Module:GetWantedButtonCount()
 	return 1
 end
 
-function Module:EnsureButtons(count)
-	local icon = self.icon
-	for i = #self.buttons + 1, count do
-		local button = CreateFrame("AuraButton", nil, self.container, BUTTON_TEMPLATE)
-		button:SetAllPoints(self.container)
-		button:SetFrameLevel(icon:GetFrameLevel() + 5)
 
-		-- The AuraButton drives its own (secret) show/hide based on whether an
-		-- aura is assigned. We don't want it intercepting mouse from the icon's
-		-- own click/drag handling, so leave input disabled.
-		button:EnableMouse(false)
-
-		-- Widgets handed to an AuraButton must be CREATED as children of it:
-		-- re-parenting an existing region onto the button is banned, since it
-		-- can't inherit the button's forbidden aspects that way. So each button
-		-- owns its own texture/cooldown rather than reusing the icon's. (SetIcon is
-		-- applied in ApplyButtonSettings so it can respect a texture override.) Text
-		-- (spell/duration/stacks) is created on demand in WireAuraText from the
-		-- layout strings flagged with an Aura purpose.
-		local tex = button:CreateTexture(nil, "ARTWORK")
-		tex:SetAllPoints(button)
-		button.tmwIcon = tex
-
-		local cd = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
-		cd:SetAllPoints(button)
-		cd:SetReverse(true)
-		cd:SetFrameLevel(button:GetFrameLevel() + 1)
-		button.tmwCooldown = cd
-
-		-- A StatusBar for the duration, used by the bar views (driven via
-		-- SetDurationBar). Hidden by default; the icon view never shows it.
-		local bar = CreateFrame("StatusBar", nil, button)
-		bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-		bar:SetAllPoints(button)
-		bar:Hide()
-		button.tmwStatusBar = bar
-
-		self.container:AddAuraFrame(button)
-		self.buttons[i] = button
-
-		-- A freshly created button hasn't been laid out/skinned yet.
-		self.needsLayout = true
-	end
-end
+-- ----------------------------------------------------------------------------
+-- Per-button skinning
+--
+-- Each button is a container-owned AuraButton, sized to (and skinned like) the icon,
+-- but placed by the container's flow layout. Its widgets (icon texture, cooldown,
+-- duration bar, borders, backdrop, aura text) are built as children of the button -
+-- they MUST be created as children so they inherit the button's forbidden aspects -
+-- and handed to the CustomAuraButton APIs. The look is produced by MIRRORING the
+-- icon's real (Masque-skinned, bordered, padded) module frames, so it matches a
+-- normal TMW icon. SkinButton is idempotent and runs insecurely (never inside the
+-- secure initializeFrame).
+-- ----------------------------------------------------------------------------
 
 -- Copy `source`'s anchor points (and size) onto `region`, remapping each point's
 -- relativeTo frame through `remap` (falling back to `default`). This reproduces a
@@ -299,67 +298,82 @@ local function AnchorFromSettings(region, stringSettings, realTexts, icon, remap
 	return true
 end
 
--- Lay out + skin + text-wire every button. `force` re-does them all (the setup path,
--- for when the view/Masque skin/size may have changed); otherwise it only runs when
--- EnsureButtons created new buttons or we were (re)enabled (needsLayout), so meta icons
--- swapping between same-shaped sources don't re-skin needlessly. No-op until enabled.
-function Module:LayoutButtons(force)
-	-- Controlled icons render through the controller's buttons, not their own.
-	if not self.IsEnabled or not self.container or self.icon:IsControlled() then
-		return
+-- Create the button's icon texture / cooldown / status bar (once). They live as
+-- children of the container-owned button so they inherit its forbidden aspects.
+function Module:EnsureButtonWidgets(button)
+	if not button.tmwIcon then
+		local tex = button:CreateTexture(nil, "ARTWORK")
+		tex:SetAllPoints(button)
+		button.tmwIcon = tex
 	end
 
-	self:EnsureButtons(self:GetWantedButtonCount())
-
-	-- A group controller places one button over each icon in the group, so it can
-	-- only be laid out once every icon in the group has been set up. The controller
-	-- (icon 1) is set up first, so its own setup is too early: the group-setup-post
-	-- path (which passes force) drives it. Ignore earlier, non-forced calls.
-	if self.icon:IsGroupController() and not force then
-		return
+	if not button.tmwCooldown then
+		local cd = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
+		cd:SetAllPoints(button)
+		cd:SetReverse(true)
+		cd:SetFrameLevel(button:GetFrameLevel() + 1)
+		button.tmwCooldown = cd
 	end
 
-	if not (force or self.needsLayout) then
-		return
-	end
-	self.needsLayout = nil
-
-	local isController = self.icon:IsGroupController()
-	local group = self.icon.group
-	for i = 1, #self.buttons do
-		local button = self.buttons[i]
-		-- For a group controller, button i sits over group icon i; otherwise the
-		-- single button sits over our own icon.
-		local icon = isController and group[i] or self.icon
-		if icon then
-			-- Views that lay auras out themselves (bars) set self.ViewEmulationHandler in their
-			-- implementor; the icon view leaves it nil and gets Masque skinning. Both
-			-- return a frame remap (icon/square/bar -> our button-owned equivalents) so
-			-- WireAuraText can position the aura-driven text the same way.
-			local remap = self.ViewEmulationHandler(self, icon, button)
-			self:Emulate_IconModule_Texts(icon, button, remap or { [icon] = button })
-		end
-		-- Surplus buttons (the group shrank) get no target; Blizzard's container
-		-- clears/hides any frame beyond maxFrameCount, so leave them be.
+	if not button.tmwStatusBar then
+		-- A StatusBar for the duration, used by the bar views (driven via
+		-- SetDurationBar). Hidden by default; the icon view never shows it.
+		local bar = CreateFrame("StatusBar", nil, button)
+		bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+		bar:SetAllPoints(button)
+		bar:Hide()
+		button.tmwStatusBar = bar
 	end
 end
 
-function Module:Emulate_IconView_Icon(icon, button)
-	icon = icon or self.icon
+-- Configure the button's icon texture / cooldown from the icon settings (texture
+-- override suppression, ShowTimer/ShowTimerText). Runs before the view emulation,
+-- which owns the icon texture's final visibility (bar views hide it when there's no
+-- icon square). No frame-state reads - the button's shown state is secret.
+--
+-- `settingsIcon` is the icon these settings are READ from - self.icon normally, but
+-- the inherited source icon for a meta icon (SetupForIcon hands us that). The view /
+-- text / size still come from self.icon; only these settings are inherited.
+function Module:ApplyButtonSettings(button, settingsIcon)
+	settingsIcon = settingsIcon or self.icon
+	local showTimer = settingsIcon.ShowTimer
+	local showText = settingsIcon.ShowTimerText
 
+	-- If the icon has a texture override configured (Custom Texture), let
+	-- IconModule_Texture_Colored show it on the icon and suppress the container's
+	-- own aura icon so the override wins.
+	local hasTextureOverride = settingsIcon.CustomTex and settingsIcon.CustomTex:trim() ~= ""
+
+	if hasTextureOverride then
+		button:ClearIcon()
+		button.tmwIcon:Hide()
+	else
+		button.tmwIcon:Show()
+		button:SetIcon(button.tmwIcon)
+	end
+
+	local cd = button.tmwCooldown
+	if cd then
+		if showTimer or showText then
+			cd:SetDrawSwipe(showTimer)
+			cd:SetHideCountdownNumbers(not showText)
+			cd:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
+			cd:SetDrawEdge(TMW.db.profile.DrawEdge)
+			button:SetDurationCooldown(cd)
+		else
+			button:ClearDurationCooldown()
+		end
+	end
+end
+
+-- Icon view: the button IS the icon square. Masque-skin it directly and border it.
+function Module:Emulate_IconView_Icon(icon, button)
 	-- The button covers the icon, so text strings that anchor to the icon remap to
-	-- the button. Returned for WireAuraText.
+	-- the button. Returned for the text wiring.
 	local remap = { [icon] = button }
 
 	local lmbGroup = icon.lmbGroup
 	if lmbGroup then
-		local w, h = icon:GetSize()
-		if w and w > 0 then
-			button:ClearAllPoints()
-			button:SetSize(w, h)
-			button:SetPoint("CENTER", icon)
-		end
-
 		lmbGroup:AddButton(button, {
 			Icon = button.tmwIcon,
 			Cooldown = button.tmwCooldown,
@@ -372,13 +386,12 @@ function Module:Emulate_IconView_Icon(icon, button)
 	return remap
 end
 
--- Lay a button out for the bar / barv views: the button spans the whole cell, the
--- aura texture/cooldown sit over the icon square, and the duration StatusBar fills
--- the bar region (driven via SetDurationBar). Rather than duplicate the views'
--- geometry we MIRROR the frames they already positioned - IconContainer's square
--- and TimerBar's container - remapping their relativeTo so the anchors stay valid
--- on the forbidden button: the icon -> our button, the icon square -> our mirrored
--- copy of it. `vertical` only selects the bar's orientation (barv).
+-- Bar / barv views: mirror the frames the view already positioned - IconContainer's
+-- Masque square and TimerBar's bar container (both laid out with the user's padding,
+-- inset, flip and borders) - onto the button, remapping their relativeTo so the
+-- anchors stay valid on the forbidden button: the icon -> our button, the icon square
+-- -> our mirrored copy of it. The duration StatusBar fills the mirrored bar region and
+-- is driven via SetDurationBar. `vertical` only selects the bar's orientation (barv).
 function Module:Emulate_IconView_Bar(icon, button, vertical)
 	local Modules = icon.Modules
 	local iconContainer = Modules.IconModule_IconContainer_Masque
@@ -386,18 +399,10 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 	local timerBar = Modules.IconModule_TimerBar_BarDisplay
 	local barRef = timerBar and timerBar.container
 
-	button:ClearAllPoints()
-	button:SetAllPoints(icon)
-
-	-- Frame levels: EnsureButtons put the button at icon+5, but IconModule_Texts
-	-- sits at icon+3, so the bar would draw over the bar's text. TMW's own bar sits
-	-- at the icon's frame level; keep the whole button (and its children) below the
-	-- text. The button sits at the icon's base level so its children can occupy
-	-- base..base+2 (the backdrop needs to be BELOW the bar, and a child can't go
-	-- below its parent). Set children explicitly - lowering the parent doesn't
-	-- cascade to children created earlier.
-	local base = icon:GetFrameLevel()
-	button:SetFrameLevel(base)
+	-- Frame levels within the button: the fill/backdrop sit below the cooldown, and
+	-- the button's own children stay below the (button-owned) text frame. base is the
+	-- button's level (set by the container); we only order the children under it.
+	local base = button:GetFrameLevel()
 
 	local tex, cd, bar = button.tmwIcon, button.tmwCooldown, button.tmwStatusBar
 	local lmbGroup = icon.lmbGroup
@@ -459,7 +464,7 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 		button:SetDurationBar(bar, {direction = Enum.StatusBarTimerDirection.RemainingTime})
 
 		-- Bar text (bar1/bar2 layouts) anchors to the TimerBar's bar frame; remap
-		-- both it and the container to our StatusBar so WireAuraText places text.
+		-- both it and the container to our StatusBar so the text wiring places text.
 		remap[barRef] = bar
 		if timerBar.bar then
 			remap[timerBar.bar] = bar
@@ -471,6 +476,7 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 		if button.tmwBarBackdrop then
 			button.tmwBarBackdrop:Hide()
 		end
+		button:ClearDurationBar()
 	end
 
 	return remap
@@ -478,13 +484,9 @@ end
 
 -- Recreate IconModule_Backdrop's bar backdrop + border as children of the button,
 -- so they're parented to the AuraButton and hide with it when there's no aura.
--- IconModule_Backdrop is disallowed on aura-container types (buffcontainer).
---
--- Exception: in config mode (unlocked) the button is hidden (no aura is assigned),
--- so parent the backdrop to the ICON instead, so it stays visible as a preview
--- while editing. In locked mode it's a button child and hides with the aura.
+-- IconModule_Backdrop's own display is disabled on aura-container types (buffcontainer).
 function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
-	local base = icon:GetFrameLevel()
+	local base = button:GetFrameLevel()
 
 	local frame = button.tmwBarBackdrop
 	if not frame then
@@ -493,7 +495,7 @@ function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 		frame.tex:SetAllPoints(frame)
 		button.tmwBarBackdrop = frame
 	end
-	frame:SetParent(TMW.Locked and button or icon)
+	frame:SetParent(button)
 	frame:ClearAllPoints()
 	frame:SetAllPoints(bar)
 	frame:SetFrameLevel(base)          -- behind the bar's fill (base + 1)
@@ -662,41 +664,120 @@ function Module:Emulate_IconModule_Texts(icon, button, remap)
 	end
 end
 
--- Configure each button's texture/cooldown/count display from the icon settings.
-function Module:ApplyButtonSettings(icon)
-	local showTimer = icon.ShowTimer
-	local showText = icon.ShowTimerText
+-- Skin one container-owned AuraButton to the current icon settings + view. Idempotent;
+-- runs for each recorded button in ReskinButtons. Every button mirrors self.icon (all
+-- icons in a group controller share the same view/skin/size), so it looks like a
+-- normal TMW icon regardless of where the container placed it.
+function Module:SkinButton(button)
+	local icon = self.icon
+	self:EnsureButtonWidgets(button)
 
-	-- If the icon has a texture override configured (Custom Texture), let
-	-- IconModule_Texture_Colored show it on the icon and suppress the container's
-	-- own aura icon so the override wins.
-	local hasTextureOverride = icon.CustomTex and icon.CustomTex:trim() ~= ""
-
-	for i = 1, #self.buttons do
-		local button = self.buttons[i]
-
-		if hasTextureOverride then
-			button:ClearIcon()
-			button.tmwIcon:Hide()
-		else
-			button.tmwIcon:Show()
-			button:SetIcon(button.tmwIcon)
-		end
-
-		local cd = button.tmwCooldown
-
-		if cd then
-			if showTimer or showText then
-				cd:SetDrawSwipe(showTimer)
-				cd:SetHideCountdownNumbers(not showText)
-				cd:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
-				cd:SetDrawEdge(TMW.db.profile.DrawEdge)
-				button:SetDurationCooldown(cd)
-			else
-				button:ClearDurationCooldown()
-			end
-		end
+	-- The flow layout only anchors the button (single point) + auto-sizes the
+	-- container; the button itself needs an explicit size or it's 0x0. Match the cell.
+	local w, h = icon:GetSize()
+	if w and w > 0 then
+		button:SetSize(w, h)
 	end
+
+	-- Icon/cooldown settings first; the view emulation then owns the icon texture's
+	-- final visibility and the bar/border/text geometry. Timer/texture settings are
+	-- read from self.settingsIcon (the inherited source for a meta icon).
+	self:ApplyButtonSettings(button, self.settingsIcon)
+
+	-- Each view registers its own emulation handler (see the view files); it skins the
+	-- button for that view and returns a frame remap (icon/square/bar -> our button-
+	-- owned equivalents) so the text wiring can position the aura-driven text the same way.
+	local remap = self.ViewEmulationHandler and self.ViewEmulationHandler(self, icon, button)
+
+	self:Emulate_IconModule_Texts(icon, button, remap or { [icon] = button })
+end
+
+-- (Re-)skin every button the container has created for us. Runs insecurely (at setup,
+-- and deferred out of the secure initializeFrame for runtime-created batches). No-op
+-- for controlled icons - the controller drives the shared container's buttons.
+--
+-- `settingsIcon`, when given, becomes the icon ApplyButtonSettings inherits timer/
+-- texture settings from (the source icon for a meta). It's persisted so the deferred
+-- reskin of a later runtime batch uses the same source.
+function Module:ReskinButtons(settingsIcon)
+	if not self.IsEnabled or self.icon:IsControlled() then
+		return
+	end
+	if settingsIcon then
+		self.settingsIcon = settingsIcon
+	end
+	for button in pairs(self.buttons) do
+		self:SkinButton(button)
+	end
+end
+
+-- The container creates aura frames in secure batches and calls initializeFrame for
+-- each (in a context where the button's state is secret). We only RECORD the frame
+-- there and defer the actual skinning to the next frame's insecure execution, so
+-- runtime-created batches get skinned without touching secret state mid-creation.
+function Module:ScheduleReskin()
+	if self.reskinScheduled then
+		return
+	end
+	self.reskinScheduled = true
+	C_Timer.After(0, function()
+		self.reskinScheduled = nil
+		self:ReskinButtons()
+	end)
+end
+
+
+-- ----------------------------------------------------------------------------
+-- Container setup + aura spec
+-- ----------------------------------------------------------------------------
+
+-- The container's flow layout: a single cell over the icon for a normal icon, or a
+-- Columns-wide uniform grid anchored at the (controller) icon for a group controller.
+-- TMW's own per-icon positions can't be reproduced - Blizzard owns the layout now -
+-- so a controller gets a plain left-to-right, top-to-bottom grid of the group's shape.
+function Module:ConfigureContainerLayout()
+	local container = self.container
+	if not container then
+		return
+	end
+	local icon = self.icon
+	local w = icon:GetSize()
+	w = (w and w > 0) and w or 1
+
+	container:SetAuraLayoutAnchorPoint("TOPLEFT")
+	container:SetAuraLayoutGrowthDirection(FlowDirection.Right, FlowDirection.Down)
+	container:SetAuraLayoutPadding(0, 0, 0, 0)
+
+	if icon:IsGroupController() then
+		local columns = max(icon.group.Columns or 1, 1)
+		-- Wrap after `columns` cells (element width w, no spacing) -> a Columns-wide grid.
+		container:SetAuraLayoutRowWidth(columns * w)
+	else
+		container:SetAuraLayoutRowWidth(w)
+	end
+end
+
+-- Ensure an aura group exists for `filterString`. Groups are added once (the filter
+-- string is immutable and groups can't be removed) and (de)activated via maxFrameCount.
+function Module:EnsureGroup(filterString, maxFrameCount)
+	local container = self.container
+	if self.groups[filterString] then
+		return
+	end
+
+	-- Record (but don't skin) each button the container creates for this group, then
+	-- schedule an insecure skinning pass. Runs immediately for the up-front batch and
+	-- again as more are created on demand.
+	local function initializeFrame(frame)
+		self.buttons[frame] = true
+		self:ScheduleReskin()
+	end
+
+	container:AddAuraGroup(filterString, filterString, {
+		maxFrameCount = maxFrameCount,
+		initializeFrame = initializeFrame,
+	})
+	self.groups[filterString] = true
 end
 
 function Module:SetAuraSpec(auraSpec)
@@ -708,24 +789,38 @@ function Module:SetAuraSpec(auraSpec)
 	end
 
 	if not TMW.Locked or not auraSpec or not auraSpec.filters or #auraSpec.filters == 0 then
-		container:ClearAuraFilters()
+		-- Deactivate everything; the icon's own modules show the config preview.
+		for filterString in pairs(self.groups) do
+			container:SetAuraGroupMaxFrameCount(filterString, 0)
+		end
 		container:SetEnabled(false)
 		return
 	end
 
-	-- maxFrameCount caps the GLOBAL running count of assigned auras across all
-	-- filters (see CustomAuraContainer.RefreshAuraFrames), so giving every filter the
-	-- full button count lets a single filter fill the group while the pool caps the
-	-- total. Any button beyond it (e.g. after the group shrank) is auto-cleared.
+	-- Each active group shows up to maxFrameCount auras. maxFrameCount caps PER group
+	-- (there's no global cap across filter strings anymore), so a multi-filter icon -
+	-- EITHER, or several OR'd ExtraFilters - shows one set of auras per filter, flow-
+	-- laid-out together by the container.
 	local maxFrameCount = self:GetWantedButtonCount()
 
-	container:ClearAuraFilters()
+	local wanted = {}
+	for i = 1, #auraSpec.filters do
+		local filterString = auraSpec.filters[i].filterString
+		wanted[filterString] = true
+		self:EnsureGroup(filterString, maxFrameCount)
+		container:SetAuraGroupMaxFrameCount(filterString, maxFrameCount)
+	end
+
+	-- Deactivate any group whose filter string is no longer part of the spec.
+	for filterString in pairs(self.groups) do
+		if not wanted[filterString] then
+			container:SetAuraGroupMaxFrameCount(filterString, 0)
+		end
+	end
+
+	self:ConfigureContainerLayout()
 	container:SetUnit(auraSpec.unit or "player")
 	container:SetEnabled(true)
-	for i = 1, #auraSpec.filters do
-		local f = auraSpec.filters[i]
-		container:AddAuraFilter(f.filterString, { maxFrameCount = maxFrameCount })
-	end
 end
 
 function Module:AURASPEC(icon, auraSpec)
@@ -734,27 +829,25 @@ end
 Module:SetDataListener("AURASPEC")
 
 -- The normal setup path: Type:Setup has published the spec and OnEnable created the
--- container by now, and icon.lmbGroup exists. Apply settings and (force-)lay out once per
--- setup so Masque/view/size changes re-apply. Meta icons never reach here - they set us
--- up via SetupForIcon without a full icon setup, so SETUP_POST never fires for them.
+-- container by now, and icon.lmbGroup exists. (Re-)configure layout and re-skin once
+-- per setup so Masque/view/size changes re-apply. Meta icons never reach here - they
+-- set us up via SetupForIcon without a full icon setup, so SETUP_POST never fires.
 --
--- Group controllers are the exception: their buttons sit over the OTHER icons in the
+-- Group controllers are the exception: their container covers the OTHER icons in the
 -- group, which aren't set up yet when the controller's own setup fires (icon 1 is
--- first). They lay out at TMW_GROUP_SETUP_POST instead (below), once the whole group
+-- first). They finish at TMW_GROUP_SETUP_POST instead (below), once the whole group
 -- is set up.
 Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(self, icon)
 	if not self.IsEnabled or icon:IsGroupController() then
 		return
 	end
-	self:ApplyButtonSettings(icon)
-	self:LayoutButtons(true)
+	self:ConfigureContainerLayout()
+	self:ReskinButtons()
 end)
 
--- Lay out a group controller's buttons once every icon in the group has been set up.
--- Each button sits over a different icon (see LayoutButtons), so we can't do this from
--- the controller's own TMW_ICON_SETUP_POST - it fires before the rest of the group is
--- ready. Button positions are live anchors to the group icons, so this is order-safe
--- with respect to the icon-positioning group modules (which also run here).
+-- Finish a group controller's setup once every icon in the group has been set up: its
+-- container's grid size (Columns/cell size) and per-button skinning depend on the
+-- group being ready.
 TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
 	local controller = group.Controller
 	if not controller then
@@ -762,30 +855,34 @@ TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
 	end
 	local module = controller.Modules and controller.Modules.IconModule_AuraContainer
 	if module and module.IsEnabled then
-		module:ApplyButtonSettings(controller)
-		module:LayoutButtons(true)
+		module:ConfigureContainerLayout()
+		module:ReskinButtons()
 	end
 end)
 
+-- Meta-icon setup: `icon` is the SOURCE icon whose display this meta inherits. Its
+-- timer/texture settings and aura spec come from that source; the view/size/text come
+-- from self.icon (the meta). ReskinButtons records the source as self.settingsIcon so
+-- the deferred skin of any runtime batch inherits from it too.
 function Module:SetupForIcon(icon)
-	self:ApplyButtonSettings(icon)
-	self:LayoutButtons()
+	self:ConfigureContainerLayout()
+	self:ReskinButtons(icon)
 	self:SetAuraSpec(icon.attributes.auraSpec)
 end
 
 function Module:OnEnable()
-	self.needsLayout = true
-
 	local icon = self.icon
 
 	-- A controlled icon in a group-controller buffcontainer doesn't own a container;
-	-- the controller places one of its buttons over this icon's cell. Stay enabled
-	-- (so IconModule_Texts still suppresses this icon's DogTag-driven aura strings -
-	-- the controller's button draws the real values) but keep any leftover container
-	-- from a prior standalone setup inert.
+	-- the controller's container covers this icon's cell. Stay enabled (so
+	-- IconModule_Texts still suppresses this icon's DogTag-driven aura strings - the
+	-- controller's buttons draw the real values) but keep any leftover container from
+	-- a prior standalone setup inert.
 	if icon:IsControlled() then
 		if self.container then
-			self.container:ClearAuraFilters()
+			for filterString in pairs(self.groups) do
+				self.container:SetAuraGroupMaxFrameCount(filterString, 0)
+			end
 			self.container:SetEnabled(false)
 		end
 		return
@@ -795,17 +892,21 @@ function Module:OnEnable()
 	if not container then
 		container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, CONTAINER_TEMPLATE)
 		container:SetSize(1, 1)
-		container:SetAllPoints(icon)
+		-- Anchored by one corner only: the container auto-resizes to fit its
+		-- flow-laid-out buttons, so SetAllPoints(icon) would fight that.
+		container:ClearAllPoints()
+		container:SetPoint("TOPLEFT", icon, "TOPLEFT")
+		container:SetFrameLevel(icon:GetFrameLevel() + 5)
 		self.container = container
 	end
-
-	self:EnsureButtons(1)
 end
 
 function Module:OnDisable()
 	local container = self.container
 	if container then
-		container:ClearAuraFilters()
+		for filterString in pairs(self.groups) do
+			container:SetAuraGroupMaxFrameCount(filterString, 0)
+		end
 		container:SetEnabled(false)
 	end
 end
