@@ -28,7 +28,7 @@ if TMW.wowMajorMinor < 12.1 then return end
 local max = math.max
 local LSM = LibStub("LibSharedMedia-3.0")
 
--- GLOBALS: AnchorUtil
+-- GLOBALS: AnchorUtil, AuraContainerSortDirection, AuraContainerSortMethod
 local FlowDirection = AnchorUtil.FlowDirection
 
 -- A NumericRuleFormatter that mirrors TMW:FormatSeconds / the TMWFormatDuration
@@ -905,13 +905,24 @@ function Module:SetAuraSpec(auraSpec)
 	-- EITHER, or several OR'd ExtraFilters - shows one set of auras per filter, flow-
 	-- laid-out together by the container.
 	local maxFrameCount = self:GetWantedButtonCount()
+	local sortMethod = auraSpec.sortMethod
+	local sortDirection = auraSpec.sortDirection or AuraContainerSortDirection.Normal
 
 	local wanted = {}
 	for i = 1, #auraSpec.filters do
-		local filterString = auraSpec.filters[i].filterString
+		local f = auraSpec.filters[i]
+		local filterString = f.filterString
 		wanted[filterString] = true
 		self:EnsureGroup(filterString, maxFrameCount)
 		container:SetAuraGroupMaxFrameCount(filterString, maxFrameCount)
+
+		-- Per-filter candidate filters (spell IDs, stealable, dispel type, max duration -
+		-- see the spec built by the icon type) and the shared sort. Re-applied on every
+		-- publish so config changes take effect on the existing (unremovable) group.
+		container:SetAuraGroupCandidateFilters(filterString, f.candidateFilters)
+		if sortMethod then
+			container:SetAuraGroupSortMethod(filterString, sortMethod, sortDirection)
+		end
 	end
 
 	-- Deactivate any group whose filter string is no longer part of the spec.

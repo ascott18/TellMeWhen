@@ -22,7 +22,8 @@ local tonumber, pairs, type, format, select =
 
 local GetSpellTexture = TMW.GetSpellTexture
 
--- GLOBALS: TellMeWhen_ChooseName
+local AuraContainerSortMethod = _G.AuraContainerSortMethod
+local AuraContainerSortDirection = _G.AuraContainerSortDirection
 
 local Type = TMW.Classes.IconType:New("buffcontainer")
 Type.name = L["ICONMENU_BUFFDEBUFF_CONTAINER"]
@@ -68,11 +69,26 @@ Type:RegisterIconDefaults{
 
 	-- Filter auras by specific ExtraFilters (IMPORTANT, CROWD_CONTROL, etc.)
 	ExtraFilter				= { ["*"] = false },
+
+	-- Only show stealable auras. Helpful auras only (candidateFilters.isStealable).
+	Stealable				= false,
+
+	-- Sort shown auras by remaining duration: false / 1 (longest first) / -1 (shortest
+	-- first). Maps to AuraContainerSortMethod.Expiration.
+	Sort					= false,
+
+	-- Hide auras whose maximum duration exceeds this many seconds (0 = no limit).
+	-- Maps to candidateFilters.maxDuration (which also implicitly hides permanent auras).
+	DurationMax				= 0,
+
+	-- Restrict to these dispel types, keyed by dispel name ("Magic"/"Curse"/"Poison"/
+	-- "Disease"). None selected = no dispel-type restriction.
+	DispelType				= { ["*"] = false },
 }
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
-	SUGType = "buff",
+	SUGType = "buffNoDS",
 })
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
@@ -101,9 +117,15 @@ end)
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings", function(self)
 	self:SetTitle(Type.name)
 	self:BuildSimpleCheckSettingFrame({
+		numPerRow = 2,
 		function(check)
 			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
 			check:SetSetting("OnlyMine")
+		end,
+		function(check)
+			-- Helpful auras only (see BuildAuraSpec / candidateFilters.isStealable).
+			check:SetTexts(L["ICONMENU_STEALABLE"], L["ICONMENU_STEALABLE_DESC"])
+			check:SetSetting("Stealable")
 		end,
 	})
 
@@ -157,10 +179,11 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings"
 			end
 		end)
 
+		-- Left half of a shared row with the dispel-type filter (anchored to our right).
 		self.ExtraFilter:ClearAllPoints()
 		self.ExtraFilter:SetPoint("TOPLEFT", self.OnlyMine, "BOTTOMLEFT", 0, -0)
-		self.ExtraFilter:SetPoint("RIGHT", -7, 0)
-		
+		self.ExtraFilter:SetPoint("RIGHT", self, "CENTER", -4, 0)
+
 		self:CScriptAdd("ReloadRequested", function(self, panel, panelInfo)
 			local n = 0
 			for k, v in pairs(TMW.CI.ics.ExtraFilter) do
@@ -168,16 +191,100 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings"
 					n = n + 1
 				end
 			end
-			
+
 			if n == 0 then
-				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER_NONE"])
+				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": " .. NONE)
 			else
 				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": |cFFFF5959" .. n)
 			end
 		end)
 	end
 
-	self:AdjustHeight(3)
+	-- Dispel-type filter (candidateFilters.includeDispelTypes). Dispel names are the
+	-- English values UnitAura reports (auraData.dispelName), so they double as the
+	-- setting keys; display them raw for now.
+	local DispelTypes = { "Magic", "Curse", "Poison", "Disease" }
+
+	local function DispelType_OnClick(button, dropdown)
+		local ics = TMW.CI.ics
+		ics.DispelType[button.value] = not ics.DispelType[button.value]
+		dropdown:OnSettingSaved()
+	end
+
+	self.DispelType = TMW.C.Config_DropDownMenu:New("Frame", "$parentDispelType", self, "TMW_DropDownMenuTemplate")
+	self.DispelType:SetTexts(L["ICONMENU_DISPELTYPE"], L["ICONMENU_DISPELTYPE_DESC"])
+	self.DispelType:SetWidth(200)
+	self.DispelType:SetFunction(function(dropdown)
+		for _, dispelType in ipairs(DispelTypes) do
+			local info = TMW.DD:CreateInfo()
+			info.text = dispelType
+			info.value = dispelType
+			info.func = DispelType_OnClick
+			info.arg1 = dropdown
+			info.keepShownOnClick = true
+			info.isNotRadio = true
+			info.checked = TMW.CI.ics.DispelType[dispelType]
+
+			TMW.DD:AddButton(info)
+		end
+	end)
+	self.DispelType:ClearAllPoints()
+	if self.ExtraFilter then
+		-- Right half of the aura-filters row.
+		self.DispelType:SetPoint("TOPLEFT", self.ExtraFilter, "TOPRIGHT", 8, 0)
+	else
+		self.DispelType:SetPoint("TOPLEFT", self.OnlyMine, "BOTTOMLEFT", 0, -8)
+	end
+	self.DispelType:SetPoint("RIGHT", -7, 0)
+
+	self:CScriptAdd("ReloadRequested", function()
+		local n = 0
+		for _, v in pairs(TMW.CI.ics.DispelType) do
+			if v then n = n + 1 end
+		end
+		if n == 0 then
+			self.DispelType:SetText(L["ICONMENU_DISPELTYPE"] .. ": " .. NONE)
+		else
+			self.DispelType:SetText(L["ICONMENU_DISPELTYPE"] .. ": |cFFFF5959" .. n)
+		end
+	end)
+
+	-- Max-duration cutoff (candidateFilters.maxDuration). 0 = no limit.
+	local slider = TMW.C.Config_Slider:New("Slider", "$parentDurationMax", self, "TellMeWhen_SliderTemplate")
+	self.DurationMax = slider
+	slider:SetTexts(L["ICONMENU_DURATIONMAX"], L["ICONMENU_DURATIONMAX_DESC"])
+	slider:ClearAllPoints()
+	-- Below the filter row, spanning full width from its left element's bottom.
+	slider:SetPoint("TOPLEFT", self.ExtraFilter or self.DispelType, "BOTTOMLEFT", 0, -14)
+	slider:SetPoint("RIGHT", -10, 0)
+	slider:SetSetting("DurationMax")
+	slider:SetMode(slider.MODE_ADJUSTING)
+	slider:SetMinMaxValues(0, math.huge)
+	slider:SetRange(120)
+	slider:SetValueStep(1)
+
+	self:AdjustHeight(6)
+end)
+
+-- Sort shown auras by remaining duration (buff.lua's Sort, minus stack sort - the
+-- container has no stack sort method).
+Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_BuffContainerSort", function(self)
+	self:SetTitle(TMW.L["SORTBY"])
+	self:BuildSimpleCheckSettingFrame({
+		numPerRow = 3,
+		function(check)
+			check:SetTexts(TMW.L["SORTBYNONE_DURATION"], TMW.L["SORTBYNONE_DESC"])
+			check:SetSetting("Sort", false)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTASC"], TMW.L["ICONMENU_SORTASC_DESC"])
+			check:SetSetting("Sort", -1)
+		end,
+		function(check)
+			check:SetTexts(TMW.L["ICONMENU_SORTDESC"], TMW.L["ICONMENU_SORTDESC_DESC"])
+			check:SetSetting("Sort", 1)
+		end,
+	})
 end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
@@ -185,38 +292,95 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 })
 
 -- Build the aura-display spec consumed by IconModule_AuraContainer.
--- The AuraContainer can only filter by category, so the icon's spell list is
--- intentionally ignored here - it shows everything matching the configured
--- buff/debuff kind, Only Mine, and Aura Filter selections.
+--
+-- The AuraContainer filters by category (the filter string) plus a set of per-filter
+-- candidate filters the container evaluates internally:
+--   * Spell IDs (from numeric entries in the Name field). Aura spell IDs don't map to
+--     learned-spell overrides, so only entries the user typed as raw IDs are usable -
+--     names can't be filtered yet (pending Blizzard support). The container itself only
+--     honors spell-ID matching for buffs on assistable units and debuffs on
+--     non-assistable units, so it silently no-ops for debuffs-on-friendly / buffs-on-
+--     enemy; we send it on every filter and let the container gate.
+--   * Stealable (helpful auras only - a harmful filter with isStealable shows nothing).
+--   * Max duration and dispel types.
+-- Sorting (by remaining duration) is a container-level sort method, shared by all filters.
 local function BuildAuraSpec(icon)
 	local filters = {}
 
-	-- Selected ExtraFilters (IMPORTANT, CrowdControl, ...) are OR'd, so each one
-	-- becomes its own AddAuraFilter entry. With none selected we add the bare
-	-- category filter.
+	-- Numeric spell IDs from the Name field (names aren't filterable yet).
+	local includeSpellIDs, hasSpellIDs
+	for _, entry in ipairs(icon.Spells.Array) do
+		local id = tonumber(entry)
+		if id then
+			includeSpellIDs = includeSpellIDs or {}
+			includeSpellIDs[id] = true
+			hasSpellIDs = true
+		end
+	end
+
+	-- Selected dispel types (keyed by dispel name).
+	local includeDispelTypes
+	for dispelType, on in pairs(icon.DispelType) do
+		if on then
+			includeDispelTypes = includeDispelTypes or {}
+			includeDispelTypes[dispelType] = true
+		end
+	end
+
+	local maxDuration = (icon.DurationMax and icon.DurationMax > 0) and icon.DurationMax or nil
+
+	-- Candidate filters for a filter of the given kind. Stealable is helpful-only; the
+	-- rest apply to both kinds. Returns nil when nothing is restricted (so the group
+	-- keeps its default, unrestricted candidate filters).
+	local function candidateFiltersFor(helpful)
+		local cf
+		if hasSpellIDs then cf = cf or {}; cf.includeSpellIDs = includeSpellIDs end
+		if includeDispelTypes then cf = cf or {}; cf.includeDispelTypes = includeDispelTypes end
+		if maxDuration then cf = cf or {}; cf.maxDuration = maxDuration end
+		if helpful and icon.Stealable then cf = cf or {}; cf.isStealable = true end
+		return cf
+	end
+
+	-- Selected ExtraFilters (IMPORTANT, CrowdControl, ...) are OR'd, so each one becomes
+	-- its own filter entry. With none selected we add the bare category filter.
 	local extras = icon.ExtraFilters
 
-	local function addKind(kind)
+	local function addKind(kind, helpful)
 		local base = kind
 		if icon.OnlyMine then
 			base = base .. "|PLAYER"
 		end
 		base = base .. "|INCLUDE_NAME_PLATE_ONLY"
 
+		local candidateFilters = candidateFiltersFor(helpful)
+
 		if extras then
 			for i = 1, #extras do
-				filters[#filters + 1] = { filterString = extras[i] .. "|" .. base }
+				filters[#filters + 1] = { filterString = extras[i] .. "|" .. base, candidateFilters = candidateFilters }
 			end
 		else
-			filters[#filters + 1] = { filterString = base }
+			filters[#filters + 1] = { filterString = base, candidateFilters = candidateFilters }
 		end
 	end
 
 	if icon.BuffOrDebuff == "HELPFUL" or icon.BuffOrDebuff == "EITHER" then
-		addKind("HELPFUL")
+		addKind("HELPFUL", true)
 	end
 	if icon.BuffOrDebuff == "HARMFUL" or icon.BuffOrDebuff == "EITHER" then
-		addKind("HARMFUL")
+		addKind("HARMFUL", false)
+	end
+
+	-- Duration sort. Use ExpirationOnly (pure remaining-time order) rather than Expiration,
+	-- which - like Blizzard's default unit-frame sort - floats player-cast / priority /
+	-- self-applicable auras to the front before considering duration. Map the icon's Sort
+	-- (1 = longest first, -1 = shortest first, matching buff.lua) onto the sort direction.
+	-- (Verify direction in-game - flip the Normal/Reverse choice if reversed.) Always emit
+	-- a method (Default when off) so turning Sort off reverts the group.
+	local sortMethod = AuraContainerSortMethod.Default
+	local sortDirection = AuraContainerSortDirection.Normal
+	if icon.Sort then
+		sortMethod = AuraContainerSortMethod.ExpirationOnly
+		sortDirection = icon.Sort == -1 and AuraContainerSortDirection.Normal or AuraContainerSortDirection.Reverse
 	end
 
 	return {
@@ -226,6 +390,8 @@ local function BuildAuraSpec(icon)
 		-- (e.g. "target") is stable, and the container tracks it as it changes.
 		unit = icon.UnitSet.unitSettings or icon.Units[1] or "player",
 		filters = filters,
+		sortMethod = sortMethod,
+		sortDirection = sortDirection,
 	}
 end
 
