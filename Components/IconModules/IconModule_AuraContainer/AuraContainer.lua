@@ -366,22 +366,48 @@ function Module:ApplyButtonSettings(button, settingsIcon)
 	end
 end
 
--- Icon view: the button IS the icon square. Masque-skin it directly and border it.
+-- Get-or-create the button's Masque holder and Masque-skin the given icon/cooldown into
+-- it, returning the holder. The container-owned AuraButton can't be Masque'd directly:
+-- it's forbidden, so its GetSize() reads back as a secret and Masque's UpdateScale divides
+-- by it (taint). The holder (a child of the button, so it can anchor to the button and
+-- stay correctly placed - group controllers included) stands in, and we shadow its GetSize
+-- with the known non-secret size so Masque never touches the secret. `positioner(holder)`
+-- positions + sizes the holder for the view and returns that (non-secret) size.
+function Module:SkinMasqueHolder(button, lmbGroup, tex, cd, frameLevel, positioner)
+	local holder = button.tmwIconHolder
+	if not holder then
+		holder = CreateFrame("Button", nil, button)
+		button.tmwIconHolder = holder
+	end
+	holder:Show()
+	holder:SetFrameLevel(frameLevel)
+	local w, h = positioner(holder)
+	holder.GetSize = function() return w, h end
+	lmbGroup:AddButton(holder, { Icon = tex, Cooldown = cd }, "Legacy")
+	return holder
+end
+
+-- Icon view: the button IS the icon square. Masque-skins it (via a holder) and borders it.
 function Module:Emulate_IconView_Icon(icon, button)
 	-- The button covers the icon, so text strings that anchor to the icon remap to
 	-- the button. Returned for the text wiring.
 	local remap = { [icon] = button }
 
+	-- Default to bordering the button itself (no-Masque path).
+	local iconRegion = button
+
 	local lmbGroup = icon.lmbGroup
 	if lmbGroup then
-		lmbGroup:AddButton(button, {
-			Icon = button.tmwIcon,
-			Cooldown = button.tmwCooldown,
-		}, "Legacy")
+		iconRegion = self:SkinMasqueHolder(button, lmbGroup, button.tmwIcon, button.tmwCooldown,
+			button:GetFrameLevel() + 1, function(holder)
+				holder:SetAllPoints(button)
+				return icon:GetSize()
+			end)
+	elseif button.tmwIconHolder then
+		button.tmwIconHolder:Hide()
 	end
 
-	-- The button is the icon square in this view, so border it directly.
-	self:Emulate_IconModule_IconContainer(icon, button, button)
+	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 
 	return remap
 end
@@ -417,21 +443,12 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 	if icon.group:GetSettingsPerView().Icon and iconSquare then
 		tex:Show()
 		if lmbGroup then
-			-- Masque-skin the icon square. The button spans the whole cell, so we
-			-- can't AddButton the button itself (Masque would size the icon to the
-			-- cell); instead a holder sized to the square is the Masque button, and
-			-- Masque anchors + skins the icon/cooldown within it.
-			local holder = button.tmwIconHolder
-			if not holder then
-				holder = CreateFrame("Button", nil, button)
-				button.tmwIconHolder = holder
-			end
-			holder:Show()
-			holder:SetFrameLevel(base + 1)
-			MirrorPoints(holder, iconSquare, remap, button)
-			lmbGroup:AddButton(holder, { Icon = tex, Cooldown = cd }, "Legacy")
-			remap[iconSquare] = holder
-			iconRegion = holder
+			-- Masque-skin the icon square via a holder sized to the mirrored square.
+			iconRegion = self:SkinMasqueHolder(button, lmbGroup, tex, cd, base + 1, function(holder)
+				MirrorPoints(holder, iconSquare, remap, button)
+				return iconSquare:GetSize()
+			end)
+			remap[iconSquare] = iconRegion
 		else
 			MirrorPoints(tex, iconSquare, remap, button)
 			MirrorPoints(cd, iconSquare, remap, button)
