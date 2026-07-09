@@ -347,9 +347,10 @@ if TMW.clientHasSecrets then
     end
 end
 
+local canaccessvalue = canaccessvalue or function() return true end
 OnUnitAura = function(unit, unitAuraUpdateInfo)
     local unitData = data[unit]
-    if not unitData then
+    if not unitData or canaccessvalue(unitAuraUpdateInfo) then
         -- we have no cached unit data for this unitID,
         -- probably because the unitID recently changed to another unit
         -- so there's no compelling reason to process the event.
@@ -493,9 +494,6 @@ Auras:RegisterEvent("PLAYER_ENTERING_WORLD")
 -- Auras:RegisterUnitEvent("UNIT_TARGET", "player")
 Auras:SetScript("OnEvent", function (self, event, ...)
     if event == "UNIT_AURA" then
-        if isWoW12_1 and ShouldAurasBeSecret() then
-            return
-        end
         OnUnitAura(...)
     elseif event == "PLAYER_TARGET_CHANGED" then
         -- We cannot clear CDM data on target change because
