@@ -258,6 +258,47 @@ local function MirrorPoints(region, source, remap, default, divisor)
 	return true
 end
 
+-- Anchor a text fontstring straight from a layout string's Anchor settings, rather than
+-- mirroring the Texts module's fontstring. Masque-skinned strings (SkinAs ~= "", e.g. the
+-- default stacks string's "Count") are positioned by MASQUE relative to its own button, NOT
+-- by the layout's SetPoint (see IconModule_Texts:SetupForIcon), so their fontstring geometry
+-- is Masque's and mirrors to the wrong place on our button. The layout's Anchors are the
+-- position the user actually configured, so use them directly.
+--
+-- Each anchor's relativeTo is resolved the way Texts:GetAnchor does, then remapped onto our
+-- button and its children the same way MirrorPoints does: "" is the icon frame (-> button);
+-- "$$N" points at layout string N (-> our copy of it, remap[realFsOfN]); anything else names
+-- an icon-module frame, icon:GetName()..relativeTo (e.g. the TimerBar/IconContainer frames
+-- the bar views mirror into remap). Unresolved names fall back to the button.
+local function AnchorFromSettings(region, stringSettings, realTexts, icon, remap, button)
+	local anchors = stringSettings.Anchors
+	if not anchors or anchors.n == 0 then
+		return false
+	end
+	region:ClearAllPoints()
+	for _, a in TMW:InNLengthTable(anchors) do
+		local relTo = a.relativeTo
+		local target
+		if relTo == "" then
+			target = button
+		elseif relTo:sub(1, 2) == "$$" then
+			local index = tonumber(relTo:sub(3))
+			local layout = realTexts.layoutSettings
+			local relSettings = index and layout and index <= layout.n and layout[index]
+			local relFs = relSettings and realTexts.fontStrings[realTexts:GetFontStringID(index, relSettings)]
+			target = remap[relFs] or button
+		else
+			-- An icon-module frame. Resolve it to the real frame, then remap to our
+			-- button-side equivalent (the bar views mirror TimerBar/IconContainer into
+			-- remap); no equivalent -> the button.
+			local frame = _G[icon:GetName() .. relTo]
+			target = (frame and remap[frame]) or button
+		end
+		region:SetPoint(a.point, target, a.relativePoint, a.x, a.y)
+	end
+	return true
+end
+
 -- Lay out + skin + text-wire every button. `force` re-does them all (the setup path,
 -- for when the view/Masque skin/size may have changed); otherwise it only runs when
 -- EnsureButtons created new buttons or we were (re)enabled (needsLayout), so meta icons
@@ -570,27 +611,36 @@ function Module:Emulate_IconModule_Texts(icon, button, remap)
 				auraFs.tmwUsed = true
 				auraFs:Show()
 
-				-- Look from the layout settings; position mirrored from the (now
-				-- DogTag-less) Texts fontstring the layout already placed.
+				-- Font/justify/size all come from the layout settings directly.
 				auraFs:SetFont(LSM:Fetch("font", stringSettings.Name), stringSettings.Size, stringSettings.Outline)
 				auraFs:SetJustifyH(stringSettings.Justify)
 				auraFs:SetJustifyV(stringSettings.JustifyV)
 				auraFs:SetShadowOffset(stringSettings.Shadow, -stringSettings.Shadow)
 				auraFs:SetRotation(math.rad(stringSettings.Rotate or 0))
+				-- 0 = auto-size to the text (default layout behavior).
+				auraFs:SetWidth(stringSettings.Width)
+				auraFs:SetHeight(stringSettings.Height)
 
+				-- Position from the layout's own Anchors, not by mirroring realFs: a
+				-- Masque-skinned string (SkinAs ~= "", like the stacks "Count") is
+				-- positioned by Masque relative to its button, so realFs's geometry
+				-- would mirror to the wrong spot. Fall back to mirroring realFs (for a
+				-- string with no anchors) or a plain CENTER (no source at all) - either
+				-- way it must be anchored to the button or SetSpellName/etc. rejects it.
+				if not AnchorFromSettings(auraFs, stringSettings, realTexts, icon, remap, button) then
+					if realFs then
+						MirrorPoints(auraFs, realFs, remap, button)
+						auraFs:SetWidth(stringSettings.Width)
+						auraFs:SetHeight(stringSettings.Height)
+					else
+						auraFs:ClearAllPoints()
+						auraFs:SetPoint("CENTER", button)
+					end
+				end
+
+				-- Later strings can anchor to this one ($$N); redirect to our copy.
 				if realFs then
-					MirrorPoints(auraFs, realFs, remap, button)
-					-- MirrorPoints copies the source's current size; restore the
-					-- layout's intent (0 = auto-size to the text).
-					auraFs:SetWidth(stringSettings.Width)
-					auraFs:SetHeight(stringSettings.Height)
-					-- Later strings can anchor to this one ($$N); redirect to our copy.
 					remap[realFs] = auraFs
-				else
-					-- No source to mirror; still needs to be anchored to the button or
-					-- the SetSpellName/etc. forbidden-object validation fails.
-					auraFs:ClearAllPoints()
-					auraFs:SetPoint("CENTER", button)
 				end
 
 				if aura == "spell" then
