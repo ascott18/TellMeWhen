@@ -851,11 +851,43 @@ function Module:EnsureGroup(filterString, maxFrameCount)
 	self.groups[filterString] = true
 end
 
-function Module:SetAuraSpec(auraSpec)
+-- Create the AuraContainer if it doesn't exist yet, returning it (or nil). Deferred
+-- while in combat: the container is a secure/forbidden frame, and one created during
+-- combat has its OnLoad deferred, leaving its internal state (dirtyFlags / event lists)
+-- nil - so the first SetAuraLayout*/SetEnabled call on it errors. SetAuraSpec runs every
+-- update, so the first update out of combat creates it. Controlled icons never own one.
+function Module:EnsureContainer()
 	local container = self.container
+	if container then
+		return container
+	end
+	if self.icon:IsControlled() or InCombatLockdown() then
+		return nil
+	end
 
+	local icon = self.icon
+	container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, CONTAINER_TEMPLATE)
+	container:SetSize(1, 1)
+	container:SetFrameLevel(icon:GetFrameLevel() + 5)
+	self.container = container
+	-- Anchored by one corner only (ConfigureContainerLayout picks the corner): the
+	-- container auto-resizes to fit its flow-laid-out buttons, so SetAllPoints would
+	-- fight that. Set a default so it's always anchored before the first layout pass.
+	container:SetPoint("TOPLEFT", icon, "TOPLEFT")
+	self:ConfigureContainerLayout()
+	return container
+end
+
+function Module:SetAuraSpec(auraSpec)
 	-- Controlled icons don't own a container; the controller drives the shared one.
-	if not container or self.icon:IsControlled() then
+	if self.icon:IsControlled() then
+		return
+	end
+
+	-- Deferred while in combat (see EnsureContainer); the next out-of-combat update
+	-- creates it and re-runs this.
+	local container = self:EnsureContainer()
+	if not container then
 		return
 	end
 
@@ -959,18 +991,9 @@ function Module:OnEnable()
 		return
 	end
 
-	local container = self.container
-	if not container then
-		container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, CONTAINER_TEMPLATE)
-		container:SetSize(1, 1)
-		container:SetFrameLevel(icon:GetFrameLevel() + 5)
-		self.container = container
-		-- Anchored by one corner only (ConfigureContainerLayout picks the corner): the
-		-- container auto-resizes to fit its flow-laid-out buttons, so SetAllPoints would
-		-- fight that. Set a default so it's always anchored before the first layout pass.
-		container:SetPoint("TOPLEFT", icon, "TOPLEFT")
-		self:ConfigureContainerLayout()
-	end
+	-- Create the container now if we can; if we're in combat it's deferred to the first
+	-- out-of-combat update (see EnsureContainer).
+	self:EnsureContainer()
 end
 
 function Module:OnDisable()
