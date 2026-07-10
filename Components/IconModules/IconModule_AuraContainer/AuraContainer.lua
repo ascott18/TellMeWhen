@@ -198,10 +198,14 @@ function Module:OnNewInstance(icon)
 	-- Keyed by the frame itself.
 	self.buttons = {}
 
-	-- Aura groups we've registered on the container, keyed by filter string. A
-	-- group's filter string is immutable and groups can't be removed, so we only
-	-- ever add a new one and toggle maxFrameCount to (de)activate it.
+	-- Group controllers distribute N distinct auras across the group, so they use aura
+	-- GROUPS (keyed by filter string; the string is immutable and groups can't be removed,
+	-- so we add each once and toggle maxFrameCount to (de)activate). A single icon shows
+	-- one aura, so it uses aura SLOTS instead - one frame each, not a group's 10-frame
+	-- batch. Slots are a fixed pool keyed by index (their filter string IS mutable, so we
+	-- reassign rather than accumulate); unused ones are parked with a filter matching none.
 	self.groups = {}
+	self.slots = {}
 
 	-- Container is created lazily the first time the module is actually used,
 	-- so icons that never opt in don't allocate an AuraContainer frame.
@@ -868,6 +872,56 @@ function Module:EnsureGroup(filterString, maxFrameCount)
 	self.groups[filterString] = true
 end
 
+-- A deliberately self-contradictory filter (an aura can't be both HELPFUL and HARMFUL),
+-- used to park an unused slot so it shows nothing - slots have no maxFrameCount = 0 knob.
+local SLOT_PARK_FILTER = "HELPFUL|HARMFUL"
+
+-- Ensure the index'th aura slot exists (single-aura icons), set its filter string, and
+-- return its frame. Slots create ONE frame (no group batch) and are manually anchored, so
+-- we place the frame over the icon and record it for skinning. The slot pool is reused
+-- across specs: a slot's filter string is mutable, so we reassign by index rather than
+-- accumulate one per (unremovable) filter string the way groups must.
+function Module:EnsureSlot(index, filterString)
+	local container = self.container
+	local slot = self.slots[index]
+	if slot then
+		container:SetAuraSlotFilterString(slot.key, filterString)
+		return slot
+	end
+
+	local key = "tmwSlot" .. index
+	local frame = container:AddAuraSlot(key, filterString, {})
+	-- Slots aren't part of the container's flow layout; anchor the frame over the icon
+	-- ourselves. SkinButton sizes it. (Multiple slots on one icon overlap - a single icon
+	-- is meant to show one aura; multiple OR'd ExtraFilters are the uncommon exception.)
+	frame:ClearAllPoints()
+	frame:SetPoint("CENTER", self.icon)
+
+	slot = { key = key, frame = frame }
+	self.slots[index] = slot
+	self.buttons[frame] = true
+	self:ScheduleReskin()
+	return slot
+end
+
+-- Park all groups (maxFrameCount 0) / slots (no-match filter) so they hold/show nothing.
+-- Used when deactivating and to clear the mode an icon isn't currently using (an icon that
+-- switched between single and controller keeps the other mode's frames, inert). Frames are
+-- hidden by hiding the whole container (see SetAuraSpec) - hiding an individual slot frame
+-- from here doesn't stick (the container owns its shown state), and a disabled container
+-- won't run the slot refresh that would hide it.
+function Module:DeactivateGroups()
+	for filterString in pairs(self.groups) do
+		self.container:SetAuraGroupMaxFrameCount(filterString, 0)
+	end
+end
+
+function Module:DeactivateSlots()
+	for i = 1, #self.slots do
+		self.container:SetAuraSlotFilterString(self.slots[i].key, SLOT_PARK_FILTER)
+	end
+end
+
 -- Create the AuraContainer if it doesn't exist yet, returning it (or nil). Deferred
 -- while in combat: the container is a secure/forbidden frame, and one created during
 -- combat has its OnLoad deferred, leaving its internal state (dirtyFlags / event lists)
@@ -909,47 +963,71 @@ function Module:SetAuraSpec(auraSpec)
 	end
 
 	if not TMW.Locked or not auraSpec or not auraSpec.filters or #auraSpec.filters == 0 then
-		-- Deactivate everything; the icon's own modules show the config preview.
-		for filterString in pairs(self.groups) do
-			container:SetAuraGroupMaxFrameCount(filterString, 0)
-		end
+		-- Deactivate everything; the icon's own modules show the config preview. Hiding the
+		-- whole container is what actually clears the display: a child of a hidden frame
+		-- doesn't render regardless of its own shown state, so it doesn't matter that the
+		-- container keeps (re-)showing individual slot frames while disabled.
+		self:DeactivateGroups()
+		self:DeactivateSlots()
 		container:SetEnabled(false)
+		container:Hide()
 		return
 	end
 
-	-- Each active group shows up to maxFrameCount auras. maxFrameCount caps PER group
-	-- (there's no global cap across filter strings anymore), so a multi-filter icon -
-	-- EITHER, or several OR'd ExtraFilters - shows one set of auras per filter, flow-
-	-- laid-out together by the container.
-	local maxFrameCount = self:GetWantedButtonCount()
+	local filters = auraSpec.filters
 	local sortMethod = auraSpec.sortMethod
 	local sortDirection = auraSpec.sortDirection or AuraContainerSortDirection.Normal
 
-	local wanted = {}
-	for i = 1, #auraSpec.filters do
-		local f = auraSpec.filters[i]
-		local filterString = f.filterString
-		wanted[filterString] = true
-		self:EnsureGroup(filterString, maxFrameCount)
-		container:SetAuraGroupMaxFrameCount(filterString, maxFrameCount)
+	if self.icon:IsGroupController() then
+		-- Controller: one AuraGroup per filter string, distributing distinct auras across
+		-- the group's cells. Park any slots left from a prior standalone setup.
+		self:DeactivateSlots()
 
-		-- Per-filter candidate filters (spell IDs, stealable, dispel type, max duration -
-		-- see the spec built by the icon type) and the shared sort. Re-applied on every
-		-- publish so config changes take effect on the existing (unremovable) group.
-		container:SetAuraGroupCandidateFilters(filterString, f.candidateFilters)
-		if sortMethod then
-			container:SetAuraGroupSortMethod(filterString, sortMethod, sortDirection)
+		-- maxFrameCount caps PER group (no container-wide cap), so with multiple filters
+		-- each contributes up to this many, flow-laid-out together by the container.
+		local maxFrameCount = self:GetWantedButtonCount()
+		local wanted = {}
+		for i = 1, #filters do
+			local f = filters[i]
+			local filterString = f.filterString
+			wanted[filterString] = true
+			self:EnsureGroup(filterString, maxFrameCount)
+			container:SetAuraGroupMaxFrameCount(filterString, maxFrameCount)
+			-- Per-filter candidate filters + shared sort, re-applied every publish so
+			-- config changes take on the existing (unremovable) group.
+			container:SetAuraGroupCandidateFilters(filterString, f.candidateFilters)
+			if sortMethod then
+				container:SetAuraGroupSortMethod(filterString, sortMethod, sortDirection)
+			end
+		end
+		-- Deactivate groups whose filter string is no longer in the spec.
+		for filterString in pairs(self.groups) do
+			if not wanted[filterString] then
+				container:SetAuraGroupMaxFrameCount(filterString, 0)
+			end
+		end
+
+		self:ConfigureContainerLayout()
+	else
+		-- Single icon: one AuraSlot per filter string (a single frame each, not a group's
+		-- 10-frame batch). Park any groups left from a prior controller setup.
+		self:DeactivateGroups()
+
+		for i = 1, #filters do
+			local f = filters[i]
+			local slot = self:EnsureSlot(i, f.filterString)
+			container:SetAuraSlotCandidateFilters(slot.key, f.candidateFilters)
+			if sortMethod then
+				container:SetAuraSlotSortMethod(slot.key, sortMethod, sortDirection)
+			end
+		end
+		-- Park pooled slots beyond the current filter count.
+		for i = #filters + 1, #self.slots do
+			container:SetAuraSlotFilterString(self.slots[i].key, SLOT_PARK_FILTER)
 		end
 	end
 
-	-- Deactivate any group whose filter string is no longer part of the spec.
-	for filterString in pairs(self.groups) do
-		if not wanted[filterString] then
-			container:SetAuraGroupMaxFrameCount(filterString, 0)
-		end
-	end
-
-	self:ConfigureContainerLayout()
+	container:Show()  -- undo the config-mode hide (see the disable path above)
 	container:SetUnit(auraSpec.unit or "player")
 	container:SetEnabled(true)
 
@@ -1018,10 +1096,10 @@ function Module:OnEnable()
 	-- a prior standalone setup inert.
 	if icon:IsControlled() then
 		if self.container then
-			for filterString in pairs(self.groups) do
-				self.container:SetAuraGroupMaxFrameCount(filterString, 0)
-			end
+			self:DeactivateGroups()
+			self:DeactivateSlots()
 			self.container:SetEnabled(false)
+			self.container:Hide()
 		end
 		return
 	end
@@ -1032,11 +1110,10 @@ function Module:OnEnable()
 end
 
 function Module:OnDisable()
-	local container = self.container
-	if container then
-		for filterString in pairs(self.groups) do
-			container:SetAuraGroupMaxFrameCount(filterString, 0)
-		end
-		container:SetEnabled(false)
+	if self.container then
+		self:DeactivateGroups()
+		self:DeactivateSlots()
+		self.container:SetEnabled(false)
+		self.container:Hide()
 	end
 end
