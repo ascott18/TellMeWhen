@@ -11,6 +11,7 @@ TMW.CHANGELOG = [==[
     * Only one unit can be checked
     * Spell filters can only filter buffs on friendly units, and debuffs on enemies.
     * Currently, only spell IDs (not spell names) can be filtered for.
+* The deprecated Edit Mode setting to hide Blizzard Cooldown Manager viewers per edit mode layout has been fully removed. The per-group setting remains.
 
 ## v12.0.13
 * Fix #2444 - Auras.lua:245: attempt to index local 'unitData' (a nil value)
