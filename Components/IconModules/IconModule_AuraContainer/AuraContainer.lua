@@ -278,6 +278,7 @@ function Module:ApplyButtonSettings(button, settingsIcon)
 	local cd = button.tmwCooldown
 	if cd then
 		if showTimer or showText then
+			cd:Show()
 			cd:SetDrawSwipe(showTimer)
 			cd:SetHideCountdownNumbers(not showText)
 			cd:SetDrawBling(not TMW.db.profile.HideBlizzCDBling)
@@ -409,8 +410,8 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 		if button.tmwIconHolder then
 			button.tmwIconHolder:Hide()
 		end
-		cd:ClearAllPoints()
-		cd:SetAllPoints(button)
+		button:ClearDurationCooldown()
+		cd:Hide()
 	end
 
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
