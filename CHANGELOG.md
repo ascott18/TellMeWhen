@@ -1,3 +1,12 @@
+## v12.1.0
+* Added support for Blizzard's new 12.1 aura system via a new "Buff/Debuff (combat allowed)" icon type.
+  * The existing Buff/Debuff icon type has been renamed to "...(combat restricted)" and no longer functions in combat under any circumstances due to new restrictions.
+  * Cooldown Manager is not needed or used to provide data to these new icons.
+  * These new icons have a few limitations:
+    * Only one unit can be checked
+    * Spell filters can only filter buffs on friendly units, and debuffs on enemies.
+    * Currently, only spell IDs (not spell names) can be filtered for.
+
 ## v12.0.13
 * Fix #2444 - Auras.lua:245: attempt to index local 'unitData' (a nil value)
 
