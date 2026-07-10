@@ -737,16 +737,12 @@ function TEXT:LoadConfig()
 				local purpose = TEXT.AuraContainerTexts[aura] or aura
 				-- Show it in the (disabled) input, not the red Error field.
 				frame.EditBox:SetText(L["TEXTLAYOUTS_AURA_DRIVENINFO"]:format(purpose))
-				if frame.EditBox.SetEnabled then
-					frame.EditBox:SetEnabled(false)
-					frame.EditBox:SetAlpha(0.8)
-				end
+				frame.EditBox:SetEnabled(false)
+				frame.EditBox:SetAlpha(0.8)
 				frame.Default.DefaultText = L["TEXTLAYOUTS_BLANK"]
 				frame.Error:SetText("")
 			else
-				if frame.EditBox.SetEnabled then
-					frame.EditBox:SetEnabled(true)
-				end
+				frame.EditBox:SetEnabled(true)
 
 				frame.EditBox:SetText(text)
 

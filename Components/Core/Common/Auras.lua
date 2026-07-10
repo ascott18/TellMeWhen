@@ -350,7 +350,7 @@ end
 local canaccessvalue = canaccessvalue or function() return true end
 OnUnitAura = function(unit, unitAuraUpdateInfo)
     local unitData = data[unit]
-    if not unitData or canaccessvalue(unitAuraUpdateInfo) then
+    if not unitData or issecretvalue(unitAuraUpdateInfo.isFullUpdate) then
         -- we have no cached unit data for this unitID,
         -- probably because the unitID recently changed to another unit
         -- so there's no compelling reason to process the event.

@@ -65,9 +65,6 @@ Type:UsesAttributes("stack, stackText")
 Type:UsesAttributes("texture")
 -- END AUTOMATICALLY GENERATED: UsesAttributes
 
--- Static spec consumed by IconModule_AuraContainer (12.1 secret-safe display).
-Type:UsesAttributes("auraSpec")
-
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
 
@@ -1017,6 +1014,7 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 
 
 
+
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
 	if not clientHasSecrets then
@@ -1078,6 +1076,7 @@ function Type:Setup(icon)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
+	
 
 
 	-- Setup events and update functions.

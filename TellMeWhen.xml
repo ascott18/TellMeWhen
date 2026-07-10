@@ -31,10 +31,6 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				-- SetBorderSize/SetColor and the default 1px black border come from the
-				-- GenericBorder class (see Utils.lua). Restricted frames don't run OnLoad,
-				-- so anything parenting a border under a forbidden frame creates it directly
-				-- via TMW.Classes.GenericBorder:New(..., "TellMeWhen_GenericBorder") instead.
 				TMW:CInit(self, "GenericBorder")
 			</OnLoad>
 		</Scripts>
@@ -162,7 +158,3 @@
 		</Scripts>
 	</Frame>
 </Ui>
-
-
-
-

@@ -55,6 +55,7 @@ Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua [AllowLoadGam
 Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua [AllowLoadGameType vanilla, tbc, wrath, cata, mists]
 
 Components\IconTypes\IconType_buffcontainer\buffcontainer.lua [AllowLoadGameType standard]
+Components\IconModules\IconModule_AuraContainer\AuraContainer.lua [AllowLoadGameType standard]
 
 Components\IconTypes\IconType_runes\runes-Retail.lua [AllowLoadGameType standard]
 Components\IconTypes\IconType_runes\runes-Wrath.lua [AllowLoadGameType wrath, cata, mists]
