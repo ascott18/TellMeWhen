@@ -41,7 +41,7 @@ local empty = {}
 
 
 local Type = TMW.Classes.IconType:New("buff")
-Type.name = TMW.wowMajorMinor >= 12.1 and L["ICONMENU_BUFFDEBUFF_RESTRICTED"] or L["ICONMENU_BUFFDEBUFF"]
+Type.name = L["ICONMENU_BUFFDEBUFF"] .. (TMW.wowMajorMinor >= 12.1 and (" " .. L["ICONMENU_BUFFDEBUFF_RESTRICTED"]) or "")
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
@@ -351,7 +351,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			end
 			
 			if n == 0 then
-				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER_NONE"])
+				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": " .. NONE)
 			else
 				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": |cFFFF5959" .. n)
 			end

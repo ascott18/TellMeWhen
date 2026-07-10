@@ -895,7 +895,9 @@ TMW.C.ConfigPanelInfo {
 
 TMW.C.XmlConfigPanelInfo {
 	GetFrameName = function(self)
-		return self.xmlTemplateName
+		-- The frame name defaults to the template name, but supplementalData.frameName
+		-- can override it so that multiple panels can share a single template.
+		return self.supplementalData and self.supplementalData.frameName or self.xmlTemplateName
 	end,
 
 	MakePanel = function(self, panelColumn)

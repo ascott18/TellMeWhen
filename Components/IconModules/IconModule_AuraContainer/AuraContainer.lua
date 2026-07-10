@@ -232,8 +232,7 @@ end
 -- they MUST be created as children so they inherit the button's forbidden aspects -
 -- and handed to the CustomAuraButton APIs. The look is produced by MIRRORING the
 -- icon's real (Masque-skinned, bordered, padded) module frames, so it matches a
--- normal TMW icon. SkinButton is idempotent and runs insecurely (never inside the
--- secure initializeFrame).
+-- normal TMW icon.
 -- ----------------------------------------------------------------------------
 
 -- Copy `source`'s anchor points (and size) onto `region`, remapping each point's
@@ -470,21 +469,6 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 
-	-- The button owns the backdrop track (recreated as its own child in
-	-- Emulate_IconModule_Backdrop, so it hides with the aura). The icon's own
-	-- IconModule_Backdrop is allowed only to draw the config-mode track preview, so
-	-- enable it while unlocked and disable it while locked - this runs in both modes
-	-- (via ReskinButtons at setup), so it must toggle, not just disable. No-op in the
-	-- icon view, which has no Backdrop module.
-	local nativeBackdrop = icon:GetModuleOrModuleChild("IconModule_Backdrop")
-	if nativeBackdrop then
-		if TMW.Locked then
-			nativeBackdrop:Disable()
-		else
-			nativeBackdrop:Enable(true)
-		end
-	end
-
 	-- Duration bar: mirror the view's TimerBar container (anchored to the icon and
 	-- the icon square, both remapped above). The bar is scaled to whole screen pixels
 	-- so Blizzard's SetDurationBar fill animates smoothly; because that scale distorts
@@ -518,10 +502,7 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 	return remap
 end
 
--- Recreate IconModule_Backdrop's bar backdrop + border as children of the button, so
--- they're parented to the AuraButton and hide with it when there's no aura. (The icon's
--- own IconModule_Backdrop is disabled while locked - see Emulate_IconView_Bar - so this
--- button-owned copy is the live one; the native one only draws the config preview.)
+-- Emulate visual aspects of the IconModule_Backdrop into the aura container.
 function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 	local base = button:GetFrameLevel()
 
@@ -569,27 +550,9 @@ function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 	end
 end
 
+-- Emulate visual aspects of the IconContainer into the aura container.
 function Module:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 	local border = button.tmwIconBorder
-
-	local container = self.icon:GetModuleOrModuleChild("IconModule_IconContainer")
-	if container then
-		if not TMW.Locked then
-			-- In config mode, use the real icon container and disable emulated elements.
-			-- This allows regular masque skinning to apply to the icon container elements
-			-- in config mode, which is needed since the aura container's texture depends
-			-- on actual auras being present.
-			if border then
-				border:Hide()
-			end
-
-			container:Enable(true)
-			return
-		else
-			container:Disable()
-		end
-	end
-
 	local gspv = icon.group:GetSettingsPerView()
 
 	if iconRegion and gspv.BorderIcon and gspv.BorderIcon ~= 0 then
@@ -610,9 +573,9 @@ function Module:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 	end
 end
 
--- Drive layout strings flagged with an Aura purpose (see TEXT.AuraContainerTexts)
+-- Drive text strings flagged with an Aura purpose (see TEXT.AuraContainerTexts)
 -- with the AuraButton's real value. IconModule_Texts creates + positions its own
--- (now DogTag-less) fontstring per such string; we create a button-owned fontstring,
+-- fontstring per such string; we create a aura-button-owned fontstring,
 -- copy that string's font/justify, mirror its position onto the button, and hand it
 -- to the matching AuraButton API.
 function Module:Emulate_IconModule_Texts(icon, button, remap)
@@ -729,8 +692,7 @@ function Module:SkinButton(button)
 	self:Emulate_IconModule_Texts(icon, button, remap or { [icon] = button })
 end
 
--- (Re-)skin every button the container has created for us. Runs insecurely (at setup,
--- and deferred out of the secure initializeFrame for runtime-created batches). No-op
+-- (Re-)skin every button the container has created for us. No-op
 -- for controlled icons - the controller drives the shared container's buttons.
 --
 -- `settingsIcon`, when given, becomes the icon ApplyButtonSettings inherits timer/
@@ -740,27 +702,28 @@ function Module:ReskinButtons(settingsIcon)
 	if not self.IsEnabled or self.icon:IsControlled() then
 		return
 	end
+
+	-- IconContainer and Backdrop are emulated into the aura buttons
+	-- so the show/hide according to aura presence. They're still used in config mode,
+	-- but need to be disabled in locked mode so the aura buttons can take over.
+	local locked = TMW.Locked
+	local iconContainer = self.icon:GetModuleOrModuleChild("IconModule_IconContainer")
+	if iconContainer then
+		if locked then iconContainer:Disable() else iconContainer:Enable(true) end
+	end
+	local backdrop = self.icon:GetModuleOrModuleChild("IconModule_Backdrop")
+	if backdrop then
+		if locked then backdrop:Disable() else backdrop:Enable(true) end
+	end
+
+	self:ConfigureContainerLayout()
+
 	if settingsIcon then
 		self.settingsIcon = settingsIcon
 	end
 	for button in pairs(self.buttons) do
 		self:SkinButton(button)
 	end
-end
-
--- The container creates aura frames in secure batches and calls initializeFrame for
--- each (in a context where the button's state is secret). We only RECORD the frame
--- there and defer the actual skinning to the next frame's insecure execution, so
--- runtime-created batches get skinned without touching secret state mid-creation.
-function Module:ScheduleReskin()
-	if self.reskinScheduled then
-		return
-	end
-	self.reskinScheduled = true
-	C_Timer.After(0, function()
-		self.reskinScheduled = nil
-		self:ReskinButtons()
-	end)
 end
 
 
@@ -857,12 +820,9 @@ function Module:EnsureGroup(filterString, maxFrameCount)
 		return
 	end
 
-	-- Record (but don't skin) each button the container creates for this group, then
-	-- schedule an insecure skinning pass. Runs immediately for the up-front batch and
-	-- again as more are created on demand.
 	local function initializeFrame(frame)
 		self.buttons[frame] = true
-		self:ScheduleReskin()
+		self:SkinButton(frame)
 	end
 
 	container:AddAuraGroup(filterString, filterString, {
@@ -900,7 +860,7 @@ function Module:EnsureSlot(index, filterString)
 	slot = { key = key, frame = frame }
 	self.slots[index] = slot
 	self.buttons[frame] = true
-	self:ScheduleReskin()
+	self:SkinButton(frame)
 	return slot
 end
 
@@ -1057,7 +1017,6 @@ Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(self, icon)
 	if not self.IsEnabled or icon:IsGroupController() then
 		return
 	end
-	self:ConfigureContainerLayout()
 	self:ReskinButtons()
 end)
 
@@ -1071,7 +1030,6 @@ TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
 	end
 	local module = controller.Modules and controller.Modules.IconModule_AuraContainer
 	if module and module.IsEnabled then
-		module:ConfigureContainerLayout()
 		module:ReskinButtons()
 	end
 end)
@@ -1081,7 +1039,6 @@ end)
 -- from self.icon (the meta). ReskinButtons records the source as self.settingsIcon so
 -- the deferred skin of any runtime batch inherits from it too.
 function Module:SetupForIcon(icon)
-	self:ConfigureContainerLayout()
 	self:ReskinButtons(icon)
 	self:SetAuraSpec(icon.attributes.auraSpec)
 end

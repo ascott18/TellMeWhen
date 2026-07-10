@@ -938,7 +938,19 @@ function Texts:OnKwargsUpdated()
 			-- fontString still gets created and positioned by SetupForIcon, which is
 			-- what the AuraContainer mirrors onto its own button-owned fontstring.
 			if auraContainer and fontStringSettings.Aura ~= "" then
-				-- not DogTag-driven
+				if not TMW.Locked and not self.icon:IsControlled() then
+					-- Config placeholders
+					if fontStringSettings.Aura == "spell" then
+						fontString:SetText(
+							(self.icon.Spells and self.icon.Spells.NameFirst) or
+							(self.icon.Name ~= "" and TMW:SplitNames(self.icon.Name)[1]) or
+							L["TEXTLAYOUTS_AURA_SPELL"])
+					elseif fontStringSettings.Aura == "duration" then
+						fontString:SetText("0")
+					end
+					fontString:Show()
+					fontString.TMW_QueueForRemoval = nil
+				end
 			elseif fontString and text and text ~= "" then
 				-- We let DogTag do the styling of the outline on our texts.
 				-- Convert the style setting to a DogTag for the same style.

@@ -42,7 +42,7 @@ Type:UsesAttributes("state")
 Type:UsesAttributes("auraSpec")
 Type:UsesAttributes("texture")
 
-Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
+Type:SetModuleAllowance("IconModule_PowerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
 
 -- The AuraButtons own the cooldown swipe, so disable TMW's version; its timer
@@ -94,6 +94,14 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
 	implementsConditions = true,
+})
+
+Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_TextPanel", {
+	frameName = "TellMeWhen_BuffContainerLimitations",
+	OnSetup = function(self)
+		self:SetTitle(L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"])
+		self.text:SetText(L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"])
+	end,
 })
 
 Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuffContainer", function(self)
@@ -255,6 +263,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings"
 	slider:SetPoint("TOPLEFT", self.ExtraFilter or self.DispelType, "BOTTOMLEFT", 0, -14)
 	slider:SetPoint("RIGHT", -10, 0)
 	slider:SetSetting("DurationMax")
+	slider:SetTextFormatter(TMW.C.Formatter.TIME_YDHMS)
 	slider:SetMode(slider.MODE_ADJUSTING)
 	slider:SetMinMaxValues(0, math.huge)
 	slider:SetRange(120)
@@ -302,6 +311,12 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 --   * Max duration and dispel types.
 -- Sorting (by remaining duration) is a container-level sort method, shared by all filters.
 local function BuildAuraSpec(icon)
+	-- No unit to watch (e.g. no target) -> no spec; the module hides its display.
+	local unit = icon.Units[1]
+	if not unit then
+		return nil
+	end
+
 	local filters = {}
 
 	-- Numeric spell IDs from the Name field (names aren't filterable yet).
@@ -326,48 +341,36 @@ local function BuildAuraSpec(icon)
 
 	local maxDuration = (icon.DurationMax and icon.DurationMax > 0) and icon.DurationMax or nil
 
-	-- Candidate filters for a filter of the given kind. Stealable is helpful-only; the
-	-- rest apply to both kinds. Returns nil when nothing is restricted (so the group
-	-- keeps its default, unrestricted candidate filters).
-	local function candidateFiltersFor(helpful)
-		local cf
-		if hasSpellIDs then cf = cf or {}; cf.includeSpellIDs = includeSpellIDs end
-		if includeDispelTypes then cf = cf or {}; cf.includeDispelTypes = includeDispelTypes end
-		if maxDuration then cf = cf or {}; cf.maxDuration = maxDuration end
-		if helpful and icon.Stealable then cf = cf or {}; cf.isStealable = true end
-		return cf
-	end
-
-	-- Selected ExtraFilters (IMPORTANT, CrowdControl, ...) are OR'd, so each one becomes
-	-- its own filter entry. With none selected we add the bare category filter.
-	local extras = icon.ExtraFilters
-
-	local function addKind(kind, helpful)
-		local base = kind
-		if icon.OnlyMine then
-			base = base .. "|PLAYER"
-		end
-		base = base .. "|INCLUDE_NAME_PLATE_ONLY"
-
-		local candidateFilters = candidateFiltersFor(helpful)
-
-		if extras then
-			for i = 1, #extras do
-				filters[#filters + 1] = { filterString = extras[i] .. "|" .. base, candidateFilters = candidateFilters }
-			end
-		else
-			filters[#filters + 1] = { filterString = base, candidateFilters = candidateFilters }
-		end
-	end
-
 	-- Only HELPFUL or HARMFUL - there's no "both". No single aura filter string matches
 	-- both categories (a category-less string and "HELPFUL|HARMFUL" both match nothing),
 	-- and two separate filter groups would overflow a one-cell icon / a controller's grid
 	-- (the container has no container-wide frame cap). A legacy "EITHER" -> HELPFUL.
-	if icon.BuffOrDebuff == "HARMFUL" then
-		addKind("HARMFUL", false)
+	local harmful = icon.BuffOrDebuff == "HARMFUL"
+
+	-- Candidate filters, or nil when nothing is restricted (so the group keeps its default,
+	-- unrestricted filters). isStealable is helpful-only - on a harmful filter it hides all.
+	local cf
+	if hasSpellIDs then cf = cf or {}; cf.includeSpellIDs = includeSpellIDs end
+	if includeDispelTypes then cf = cf or {}; cf.includeDispelTypes = includeDispelTypes end
+	if maxDuration then cf = cf or {}; cf.maxDuration = maxDuration end
+	if not harmful and icon.Stealable then cf = cf or {}; cf.isStealable = true end
+
+	-- Base filter: category, plus |PLAYER (Only Mine) and |INCLUDE_NAME_PLATE_ONLY.
+	local base = harmful and "HARMFUL" or "HELPFUL"
+	if icon.OnlyMine then
+		base = base .. "|PLAYER"
+	end
+	base = base .. "|INCLUDE_NAME_PLATE_ONLY"
+
+	-- Selected ExtraFilters (IMPORTANT, CrowdControl, ...) are OR'd - one filter entry each;
+	-- with none selected, the bare category filter.
+	local extras = icon.ExtraFilters
+	if extras then
+		for i = 1, #extras do
+			filters[#filters + 1] = { filterString = extras[i] .. "|" .. base, candidateFilters = cf }
+		end
 	else
-		addKind("HELPFUL", true)
+		filters[#filters + 1] = { filterString = base, candidateFilters = cf }
 	end
 
 	-- Duration sort. Use ExpirationOnly (pure remaining-time order) rather than Expiration,
@@ -384,11 +387,7 @@ local function BuildAuraSpec(icon)
 	end
 
 	return {
-		-- Use the configured unit TOKEN, not icon.Units[1]: the resolved Units
-		-- list only contains units that currently exist, so at login with no
-		-- target it would be empty and silently fall back to "player". The token
-		-- (e.g. "target") is stable, and the container tracks it as it changes.
-		unit = icon.UnitSet.unitSettings or icon.Units[1] or "player",
+		unit = unit,
 		filters = filters,
 		sortMethod = sortMethod,
 		sortDirection = sortDirection,
