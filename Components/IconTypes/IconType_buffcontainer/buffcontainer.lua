@@ -42,19 +42,17 @@ Type:UsesAttributes("state")
 Type:UsesAttributes("auraSpec")
 Type:UsesAttributes("texture")
 
+
+Type:SetModuleAllowance("IconModule_AuraContainer", true)
+
+-- Time displays live entirely inside the aura container. 
+-- There's nothing we need from in config mode nor locked mode.
+Type:SetModuleAllowance("IconModule_CooldownSweep", false)
+Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
+-- Overlay bars aren't meaningfully possible.
+-- Technically TimerBar is on icon views, but whatever.
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
-
--- The AuraButtons own the cooldown swipe, so disable TMW's version; its timer
--- settings are reintroduced on IconModule_AuraContainer. Texture_Colored stays
--- allowed so its texture override keeps working - IconModule_AuraContainer
--- suppresses its own aura icon when an override is configured.
-Type:SetModuleAllowance("IconModule_AuraContainer", true)
-Type:SetModuleAllowance("IconModule_CooldownSweep", false)
--- In the bar views the AuraButton owns the duration bar (via SetDurationBar) and
--- recreates the backdrop/border as its own children, so both hide with the aura.
--- Disable TMW's versions of both.
-Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
 
 Type:RegisterIconDefaults{
 	-- The unit(s) to check for auras
@@ -74,16 +72,14 @@ Type:RegisterIconDefaults{
 	-- Only show stealable auras. Helpful auras only (candidateFilters.isStealable).
 	Stealable				= false,
 
-	-- Sort shown auras by remaining duration: false / 1 (longest first) / -1 (shortest
-	-- first). Maps to AuraContainerSortMethod.Expiration.
+	-- Sort shown auras by remaining duration: false / 1 (longest first) / -1 (shortest first).
 	Sort					= false,
 
 	-- Hide auras whose maximum duration exceeds this many seconds (0 = no limit).
 	-- Maps to candidateFilters.maxDuration (which also implicitly hides permanent auras).
 	DurationMax				= 0,
 
-	-- Restrict to these dispel types, keyed by dispel name ("Magic"/"Curse"/"Poison"/
-	-- "Disease"). None selected = no dispel-type restriction.
+	-- Restrict to these dispel types, keyed by dispel name. None selected = no dispel-type restriction.
 	DispelType				= { ["*"] = false },
 }
 
@@ -296,19 +292,6 @@ Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 	[ STATE_PRESENT ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
 })
 
--- Build the aura-display spec consumed by IconModule_AuraContainer.
---
--- The AuraContainer filters by category (the filter string) plus a set of per-filter
--- candidate filters the container evaluates internally:
---   * Spell IDs (from numeric entries in the Name field). Aura spell IDs don't map to
---     learned-spell overrides, so only entries the user typed as raw IDs are usable -
---     names can't be filtered yet (pending Blizzard support). The container itself only
---     honors spell-ID matching for buffs on assistable units and debuffs on
---     non-assistable units, so it silently no-ops for debuffs-on-friendly / buffs-on-
---     enemy; we send it on every filter and let the container gate.
---   * Stealable (helpful auras only - a harmful filter with isStealable shows nothing).
---   * Max duration and dispel types.
--- Sorting (by remaining duration) is a container-level sort method, shared by all filters.
 local function BuildAuraSpec(icon)
 	-- No unit to watch (e.g. no target) -> no spec; the module hides its display.
 	local unit = icon.Units[1]
@@ -357,42 +340,46 @@ local function BuildAuraSpec(icon)
 	if maxDuration then cf = cf or {}; cf.maxDuration = maxDuration end
 	if not harmful and icon.Stealable then cf = cf or {}; cf.isStealable = true end
 
-	-- Base filter: category, plus |PLAYER (Only Mine) and |INCLUDE_NAME_PLATE_ONLY.
-	local base = harmful and "HARMFUL" or "HELPFUL"
-	if icon.OnlyMine then
-		base = base .. "|PLAYER"
-	end
-	base = base .. "|INCLUDE_NAME_PLATE_ONLY"
-
-	-- Selected ExtraFilters (IMPORTANT, CrowdControl, ...) are OR'd - one filter entry each;
-	-- with none selected, the bare category filter.
-	local extras = icon.ExtraFilters
-	if extras then
-		for i = 1, #extras do
-			filters[#filters + 1] = { filterString = extras[i] .. "|" .. base, candidateFilters = cf }
-		end
-	else
-		filters[#filters + 1] = { filterString = base, candidateFilters = cf }
-	end
-
-	-- Duration sort. Use ExpirationOnly (pure remaining-time order) rather than Expiration,
-	-- which - like Blizzard's default unit-frame sort - floats player-cast / priority /
+	-- Duration sort. Sort is applied per group/slot, so it rides on each filter entry
+	-- below. Use ExpirationOnly (pure remaining-time order) rather than Expiration, which
+	-- - like Blizzard's default unit-frame sort - floats player-cast / priority /
 	-- self-applicable auras to the front before considering duration. Map the icon's Sort
 	-- (1 = longest first, -1 = shortest first, matching buff.lua) onto the sort direction.
-	-- (Verify direction in-game - flip the Normal/Reverse choice if reversed.) Always emit
-	-- a method (Default when off) so turning Sort off reverts the group.
-	local sortMethod = AuraContainerSortMethod.Default
-	local sortDirection = AuraContainerSortDirection.Normal
+	local sortMethod, sortDirection
 	if icon.Sort then
 		sortMethod = AuraContainerSortMethod.ExpirationOnly
 		sortDirection = icon.Sort == -1 and AuraContainerSortDirection.Normal or AuraContainerSortDirection.Reverse
+	else
+		sortDirection = AuraContainerSortDirection.Normal
 	end
+
+	-- One filter string: the category, |PLAYER (Only Mine), any selected ExtraFilters
+	-- (IMPORTANT, CrowdControl, ...), and |INCLUDE_NAME_PLATE_ONLY. Pipe-joined flags are
+	-- OR'd by the UnitAura filter grammar, so listing several ExtraFilters matches auras
+	-- passing any of them (same as buff.lua's CheckExtraFilter) - all in a single group/slot.
+	-- They could maybe be separate filters if there was a container-level aura dedupe,
+	-- but there isn't.
+	local filterString = harmful and "HARMFUL" or "HELPFUL"
+	if icon.OnlyMine then
+		filterString = filterString .. "|PLAYER"
+	end
+	for k, v in pairs(icon.ExtraFilter) do
+		if v and tContains(AuraUtil.AuraFilters, k) then
+			filterString = filterString .. "|" .. k
+		end
+	end
+	filterString = filterString .. "|INCLUDE_NAME_PLATE_ONLY"
+
+	filters[1] = {
+		filterString = filterString,
+		candidateFilters = cf,
+		sortMethod = sortMethod,
+		sortDirection = sortDirection,
+	}
 
 	return {
 		unit = unit,
 		filters = filters,
-		sortMethod = sortMethod,
-		sortDirection = sortDirection,
 	}
 end
 
@@ -426,15 +413,7 @@ end
 
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
-	
-	icon.ExtraFilters = nil
-	for k, v in pairs(icon.ExtraFilter) do
-		if v and tContains(AuraUtil.AuraFilters, k) then
-			icon.ExtraFilters = icon.ExtraFilters or {}
-			tinsert(icon.ExtraFilters, k)
-		end
-	end
-	
+
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 

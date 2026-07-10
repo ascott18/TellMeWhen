@@ -11,6 +11,8 @@ TMW.CHANGELOG = [==[
     * Only one unit can be checked
     * Spell filters can only filter buffs on friendly units, and debuffs on enemies.
     * Currently, only spell IDs (not spell names) can be filtered for.
+    * There is no "Absent" state. Information can only be conveyed when auras are present.
+    * tullaCTC is not yet able to style the cooldown swipes on these icons.
 * The deprecated Edit Mode setting to hide Blizzard Cooldown Manager viewers per edit mode layout has been fully removed. The per-group setting remains.
 * Default text layouts for horizontal and vertical bar groups now show stack text in a separate display.
 

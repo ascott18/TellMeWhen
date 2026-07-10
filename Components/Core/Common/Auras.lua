@@ -347,7 +347,6 @@ if TMW.clientHasSecrets then
     end
 end
 
-local canaccessvalue = canaccessvalue or function() return true end
 OnUnitAura = function(unit, unitAuraUpdateInfo)
     local unitData = data[unit]
     if not unitData or issecretvalue(unitAuraUpdateInfo.isFullUpdate) then

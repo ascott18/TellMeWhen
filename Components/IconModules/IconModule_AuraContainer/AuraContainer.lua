@@ -17,6 +17,25 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
+
+-- ----------------------------------------------------------------------------
+-- IconModule_AuraContainer
+--
+-- Renders auras using Blizzard's 12.1 AuraContainer / AuraButton objects instead
+-- of TMW's own scan loop + texture/cooldown/text modules.
+--
+-- The icon type feeds this module a static "aura spec" via the AURASPEC
+-- IconDataProcessor:
+--     spec = {
+--         unit = "target",
+--         filters = {
+--             { filterString = "HARMFUL|INCLUDE_NAME_PLATE_ONLY", ... },
+--             ...
+--         },
+--     }
+--
+-- ----------------------------------------------------------------------------
+
 local Module = TMW:NewClass("IconModule_AuraContainer", "IconModule")
 
 -- Off for every icon type unless explicitly allowed. Aura-container icon types
@@ -71,92 +90,6 @@ durationFormatter:SetBreakpoints({
 	} },
 })
 
--- The bar views' StatusBar texture (the configured LSM statusbar), matching
--- IconModule_TimerBar's OnEnable.
-local function GetBarTexture(icon)
-	local name = icon.group.TextureName
-	if not name or name == "" then
-		name = TMW.db.profile.TextureName
-	end
-	return LSM:Fetch("statusbar", name)
-end
-
--- A single static bar color. TMW's normal bar gradients start->complete over the
--- remaining time, but we can't do that here (the remaining time is secret), so we
--- use the "full" (start) color, or the unit's class color if configured.
-local function GetBarColor(icon)
-	local spec = icon.attributes.auraSpec
-	local unit = spec and spec.unit
-	if icon.BarDisplay_ClassColor and unit then
-		local _, class = UnitClass(unit)
-		local c = class and (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
-		if c then
-			return c.r, c.g, c.b, 1
-		end
-	end
-	return TMW:StringToCachedColorMixin(icon.TimerBar_StartColor or "ffff0000"):GetRGBA()
-end
-
--- The bar backdrop color, matching IconModule_Backdrop:SetupForIcon.
-local function GetBackdropColor(icon)
-	local color = TMW:GetColors("BackdropColor", "BackdropColor_Enable",
-		icon:GetSettings(), icon.group:GetSettings(), TMW.db.global)
-	return TMW:StringToCachedRGBATable(color)
-end
-
--- ----------------------------------------------------------------------------
--- IconModule_AuraContainer
---
--- Renders auras using Blizzard's 12.1 AuraContainer / AuraButton objects instead
--- of TMW's own scan loop + texture/cooldown/text modules.
---
--- This is the ONLY aura display path that keeps working while auras are secret
--- (combat, encounters, M+, PvP), because the AuraContainer reads and filters the
--- aura data internally and only ever hands the addon presentation widgets. The
--- tradeoff is that addon code never sees the aura data: the container can only
--- filter by broad category (HELPFUL/HARMFUL/PLAYER/IMPORTANT/dispel/...), NOT by
--- a specific spell id or name, and TMW cannot react to presence/absence,
--- sort, run conditions, or feed DogTags from it.
---
--- The 12.1 AuraGroup redesign moved frame CREATION + LAYOUT into the container:
--- addons can no longer create AuraButtons or anchor them, only register aura groups
--- and let the container flow-lay-out their frames. So the split of responsibility is:
---
---   * WHERE the buttons go is the container's: we register one AuraGroup per aura
---     filter string (AddAuraGroup); the group creates AuraButtons in batches (via an
---     initializeFrame callback that just records each one for us) and flow-lays them
---     out inside the container, which auto-resizes to fit. A group's filter string is
---     immutable and groups can't be removed, so we key groups by filter string, add
---     each once, and activate/deactivate them by toggling maxFrameCount (0 = hide).
---
---   * HOW each button LOOKS is still ours, and still done by MIRRORING the icon's own
---     modules so Masque, borders, padding, the bar/icon-square geometry and the text
---     layout all match a normal TMW icon exactly. SkinButton reproduces, as children
---     of the (container-owned) button: the Masque-skinned icon square + cooldown, the
---     duration bar (mirroring the view's TimerBar frame and driven by SetDurationBar),
---     the backdrop/borders, and the Aura-purpose text strings. This runs in a deferred
---     INSECURE pass, never inside initializeFrame - that callback runs in the
---     container's secure context where the button's state is secret and can't be read.
---
--- The icon type feeds this module a static "aura spec" via the AURASPEC
--- IconDataProcessor:
---     spec = {
---         unit = "target",
---         filters = {
---             { filterString = "HARMFUL|INCLUDE_NAME_PLATE_ONLY" },
---             ...
---         },
---     }
---
--- The number of auras shown (maxFrameCount per active group) is owned by this
--- module, not the spec: a normal icon shows one, and a group controller fills its
--- whole group. See GetWantedButtonCount.
--- ----------------------------------------------------------------------------
-
-
--- The AuraContainer frame type and the CustomAuraContainerTemplate live in Blizzard's
--- Blizzard_AuraContainer addon, which may be load-on-demand.
-local CONTAINER_TEMPLATE = "CustomAuraContainerTemplate"
 
 local Processor = TMW.Classes.IconDataProcessor:New("AURASPEC", "auraSpec")
 function Processor:CompileFunctionSegment(t)
@@ -200,26 +133,13 @@ function Module:OnNewInstance(icon)
 
 	-- Group controllers distribute N distinct auras across the group, so they use aura
 	-- GROUPS (keyed by filter string; the string is immutable and groups can't be removed,
-	-- so we add each once and toggle maxFrameCount to (de)activate). A single icon shows
-	-- one aura, so it uses aura SLOTS instead - one frame each, not a group's 10-frame
-	-- batch. Slots are a fixed pool keyed by index (their filter string IS mutable, so we
-	-- reassign rather than accumulate); unused ones are parked with a filter matching none.
+	-- so we add each once and toggle maxFrameCount to (de)activate). 
 	self.groups = {}
+	
+	-- A single icon shows one aura, so it uses aura SLOTS instead - one frame each.
+	-- Slots are a fixed pool keyed by index (their filter string IS mutable, so we
+	-- reassign rather than accumulate); unused ones are parked with a filter matching none.
 	self.slots = {}
-
-	-- Container is created lazily the first time the module is actually used,
-	-- so icons that never opt in don't allocate an AuraContainer frame.
-end
-
--- How many auras this module should show (the active groups' maxFrameCount). A
--- group-controller buffcontainer fills the whole group; every other icon shows a
--- single aura.
-function Module:GetWantedButtonCount()
-	local icon = self.icon
-	if icon:IsGroupController() then
-		return icon.group.numIcons
-	end
-	return 1
 end
 
 
@@ -415,6 +335,32 @@ function Module:Emulate_IconView_Icon(icon, button)
 	return remap
 end
 
+-- The bar views' StatusBar texture (the configured LSM statusbar), matching
+-- IconModule_TimerBar's OnEnable.
+local function GetBarTexture(icon)
+	local name = icon.group.TextureName
+	if not name or name == "" then
+		name = TMW.db.profile.TextureName
+	end
+	return LSM:Fetch("statusbar", name)
+end
+
+-- A single static bar color. TMW's normal bar gradients start->complete over the
+-- remaining time, but we can't do that here (the remaining time is secret), so we
+-- use the "full" (start) color, or the unit's class color if configured.
+local function GetBarColor(icon)
+	local spec = icon.attributes.auraSpec
+	local unit = spec and spec.unit
+	if icon.BarDisplay_ClassColor and unit then
+		local _, class = UnitClass(unit)
+		local c = class and (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
+		if c then
+			return c.r, c.g, c.b, 1
+		end
+	end
+	return TMW:StringToCachedColorMixin(icon.TimerBar_StartColor or "ffff0000"):GetRGBA()
+end
+
 -- Bar / barv views: mirror the frames the view already positioned - IconContainer's
 -- Masque square and TimerBar's bar container (both laid out with the user's padding,
 -- inset, flip and borders) - onto the button, remapping their relativeTo so the
@@ -525,7 +471,9 @@ function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 	else
 		frame.tex:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
 	end
-	local c = GetBackdropColor(icon)
+	local c = TMW:StringToCachedRGBATable(
+		TMW:GetColors("BackdropColor", "BackdropColor_Enable", icon:GetSettings(), icon.group:GetSettings(), TMW.db.global)
+	)
 	frame.tex:SetVertexColor(c.r, c.g, c.b, 1)
 	frame.tex:SetAlpha(c.a)
 
@@ -795,7 +743,9 @@ function Module:ConfigureContainerLayout()
 		container:SetAuraLayoutAnchorPoint(flowPoint)
 		container:SetAuraLayoutGrowthDirection(hGrow, vGrow)
 		-- Wrap after `columns` cells (cell = icon size + spacing).
-		container:SetAuraLayoutRowWidth(columns * (w + spacingX))
+		-- A tiny epsilon is added to fight occasional floating point errors that
+		-- cause premature wrapping that makes a row skip placing its last icon.
+		container:SetAuraLayoutRowWidth(columns * (w + spacingX) + 0.1)
 	else
 		container:SetPoint("TOPLEFT", icon, "TOPLEFT")
 		container:SetAuraLayoutAnchorPoint("TOPLEFT")
@@ -864,12 +814,6 @@ function Module:EnsureSlot(index, filterString)
 	return slot
 end
 
--- Park all groups (maxFrameCount 0) / slots (no-match filter) so they hold/show nothing.
--- Used when deactivating and to clear the mode an icon isn't currently using (an icon that
--- switched between single and controller keeps the other mode's frames, inert). Frames are
--- hidden by hiding the whole container (see SetAuraSpec) - hiding an individual slot frame
--- from here doesn't stick (the container owns its shown state), and a disabled container
--- won't run the slot refresh that would hide it.
 function Module:DeactivateGroups()
 	for filterString in pairs(self.groups) do
 		self.container:SetAuraGroupMaxFrameCount(filterString, 0)
@@ -878,6 +822,8 @@ end
 
 function Module:DeactivateSlots()
 	for i = 1, #self.slots do
+		-- Note: There's no real API to deactivate a slot.
+		-- Best you can do is give it junk filters.
 		self.container:SetAuraSlotFilterString(self.slots[i].key, SLOT_PARK_FILTER)
 	end
 end
@@ -897,7 +843,7 @@ function Module:EnsureContainer()
 	end
 
 	local icon = self.icon
-	container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, CONTAINER_TEMPLATE)
+	container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, "CustomAuraContainerTemplate")
 	container:SetSize(1, 1)
 	container:SetFrameLevel(icon:GetFrameLevel() + 5)
 	self.container = container
@@ -910,13 +856,15 @@ function Module:EnsureContainer()
 end
 
 function Module:SetAuraSpec(auraSpec)
+	local icon = self.icon
+
 	-- Controlled icons don't own a container; the controller drives the shared one.
-	if self.icon:IsControlled() then
+	if icon:IsControlled() then
 		return
 	end
 
-	-- Deferred while in combat (see EnsureContainer); the next out-of-combat update
-	-- creates it and re-runs this.
+	-- NB: Container creation deferred while in combat (see EnsureContainer); 
+	-- the next out-of-combat update creates it and re-runs this.
 	local container = self:EnsureContainer()
 	if not container then
 		return
@@ -935,29 +883,26 @@ function Module:SetAuraSpec(auraSpec)
 	end
 
 	local filters = auraSpec.filters
-	local sortMethod = auraSpec.sortMethod
-	local sortDirection = auraSpec.sortDirection or AuraContainerSortDirection.Normal
 
-	if self.icon:IsGroupController() then
+	if icon:IsGroupController() then
 		-- Controller: one AuraGroup per filter string, distributing distinct auras across
 		-- the group's cells. Park any slots left from a prior standalone setup.
 		self:DeactivateSlots()
 
 		-- maxFrameCount caps PER group (no container-wide cap), so with multiple filters
 		-- each contributes up to this many, flow-laid-out together by the container.
-		local maxFrameCount = self:GetWantedButtonCount()
+		local maxFrameCount = icon.group.numIcons
 		local wanted = {}
 		for i = 1, #filters do
 			local f = filters[i]
 			local filterString = f.filterString
 			wanted[filterString] = true
 			self:EnsureGroup(filterString, maxFrameCount)
+
 			container:SetAuraGroupMaxFrameCount(filterString, maxFrameCount)
-			-- Per-filter candidate filters + shared sort, re-applied every publish so
-			-- config changes take on the existing (unremovable) group.
 			container:SetAuraGroupCandidateFilters(filterString, f.candidateFilters)
-			if sortMethod then
-				container:SetAuraGroupSortMethod(filterString, sortMethod, sortDirection)
+			if f.sortMethod then
+				container:SetAuraGroupSortMethod(filterString, f.sortMethod, f.sortDirection)
 			end
 		end
 		-- Deactivate groups whose filter string is no longer in the spec.
@@ -977,8 +922,8 @@ function Module:SetAuraSpec(auraSpec)
 			local f = filters[i]
 			local slot = self:EnsureSlot(i, f.filterString)
 			container:SetAuraSlotCandidateFilters(slot.key, f.candidateFilters)
-			if sortMethod then
-				container:SetAuraSlotSortMethod(slot.key, sortMethod, sortDirection)
+			if f.sortMethod then
+				container:SetAuraSlotSortMethod(slot.key, f.sortMethod, f.sortDirection)
 			end
 		end
 		-- Park pooled slots beyond the current filter count.
@@ -1004,36 +949,6 @@ function Module:AURASPEC(icon, auraSpec)
 end
 Module:SetDataListener("AURASPEC")
 
--- The normal setup path: Type:Setup has published the spec and OnEnable created the
--- container by now, and icon.lmbGroup exists. (Re-)configure layout and re-skin once
--- per setup so Masque/view/size changes re-apply. Meta icons never reach here - they
--- set us up via SetupForIcon without a full icon setup, so SETUP_POST never fires.
---
--- Group controllers are the exception: their container covers the OTHER icons in the
--- group, which aren't set up yet when the controller's own setup fires (icon 1 is
--- first). They finish at TMW_GROUP_SETUP_POST instead (below), once the whole group
--- is set up.
-Module:SetIconEventListner("TMW_ICON_SETUP_POST", function(self, icon)
-	if not self.IsEnabled or icon:IsGroupController() then
-		return
-	end
-	self:ReskinButtons()
-end)
-
--- Finish a group controller's setup once every icon in the group has been set up: its
--- container's grid size (Columns/cell size) and per-button skinning depend on the
--- group being ready.
-TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function(event, group)
-	local controller = group.Controller
-	if not controller then
-		return
-	end
-	local module = controller.Modules and controller.Modules.IconModule_AuraContainer
-	if module and module.IsEnabled then
-		module:ReskinButtons()
-	end
-end)
-
 -- Meta-icon setup: `icon` is the SOURCE icon whose display this meta inherits. Its
 -- timer/texture settings and aura spec come from that source; the view/size/text come
 -- from self.icon (the meta). ReskinButtons records the source as self.settingsIcon so
@@ -1052,12 +967,7 @@ function Module:OnEnable()
 	-- controller's buttons draw the real values) but keep any leftover container from
 	-- a prior standalone setup inert.
 	if icon:IsControlled() then
-		if self.container then
-			self:DeactivateGroups()
-			self:DeactivateSlots()
-			self.container:SetEnabled(false)
-			self.container:Hide()
-		end
+		self:Disable()
 		return
 	end
 
