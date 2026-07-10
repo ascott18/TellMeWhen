@@ -103,8 +103,8 @@ end
 
 local function AugmentInstance(unit, auraInstance)
     auraInstance.isMine = auraInstance.sourceUnit == "player" or auraInstance.sourceUnit == "pet"
-    if auraInstance.dispelName == "" then
-        -- Bugfix: Enraged is an empty string.
+    if auraInstance.dispelName == "" or auraInstance.dispelName == "Enrage" then
+        -- Bugfix: Enraged is an empty string (2026 finally fixed to "Enrage").
         auraInstance.dispelName = "Enraged"
     end
 end

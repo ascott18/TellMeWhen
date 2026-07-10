@@ -205,11 +205,9 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings"
 		end)
 	end
 
-	-- Dispel-type filter (candidateFilters.includeDispelTypes). Dispel names are the
-	-- English values UnitAura reports (auraData.dispelName), so they double as the
-	-- setting keys; display them raw for now.
-	local DispelTypes = { "Magic", "Curse", "Poison", "Disease" }
-
+	-- Dispel-type filter (candidateFilters.includeDispelTypes). The filter is a plain
+	-- map keyed by auraData.dispelName, so TMW.DS (dispel name -> icon) is exactly the
+	-- set of valid keys.
 	local function DispelType_OnClick(button, dropdown)
 		local ics = TMW.CI.ics
 		ics.DispelType[button.value] = not ics.DispelType[button.value]
@@ -220,9 +218,10 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings"
 	self.DispelType:SetTexts(L["ICONMENU_DISPELTYPE"], L["ICONMENU_DISPELTYPE_DESC"])
 	self.DispelType:SetWidth(200)
 	self.DispelType:SetFunction(function(dropdown)
-		for _, dispelType in ipairs(DispelTypes) do
+		for dispelType, texture in TMW:OrderedPairs(TMW.DS) do
 			local info = TMW.DD:CreateInfo()
 			info.text = dispelType
+			info.icon = texture
 			info.value = dispelType
 			info.func = DispelType_OnClick
 			info.arg1 = dropdown
@@ -334,6 +333,9 @@ local function BuildAuraSpec(icon)
 	local includeDispelTypes
 	for dispelType, on in pairs(icon.DispelType) do
 		if on then
+			-- TMW has always used "Enraged", but WoW 12.1 finally fixed this from emptystring to "Enrage".
+			if dispelType == "Enraged" then dispelType = "Enrage" end
+
 			includeDispelTypes = includeDispelTypes or {}
 			includeDispelTypes[dispelType] = true
 		end

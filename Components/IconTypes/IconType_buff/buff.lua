@@ -536,9 +536,9 @@ local function Buff_OnUpdate(icon, time)
 				else
 					index = index + 1
 
-					-- Bugfix: Enraged is an empty string.
+					-- Bugfix: Enraged is an empty string (2026 finally fixed to "Enrage").
 					local _dispelType = instance.dispelName
-					if _dispelType == "" then
+					if _dispelType == "" or _dispelType == "Enrage" then
 						_dispelType = "Enraged"
 					end
 
@@ -733,9 +733,9 @@ local function Buff_OnUpdate_Controller(icon, time)
 				else
 					index = index + 1
 				
-					-- Bugfix: Enraged is an empty string.
+					-- Bugfix: Enraged is an empty string (2026 finally fixed to "Enrage").
 					local _dispelType = instance.dispelName
-					if _dispelType == "" then
+					if _dispelType == "" or _dispelType == "Enrage" then
 						_dispelType = "Enraged"
 					end
 
