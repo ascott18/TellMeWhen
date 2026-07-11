@@ -63,6 +63,9 @@ local TabGroup = TMW.IE:RegisterTabGroup("ICON", L["ICON"], 1, function(tabGroup
 			-- Don't taint the icon editor with secrets
 			texture = nil
 		end
+		if not texture or texture == "" then
+			texture = "Interface\\Icons\\INV_Misc_PocketWatch_01"
+		end
 		IE.icontexture:SetTexture(texture)
 	end
 end)

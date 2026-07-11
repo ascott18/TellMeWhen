@@ -21,16 +21,22 @@ local IconContainer = TMW:NewClass("IconModule_IconContainer", "IconModule")
 
 IconContainer:RegisterAnchorableFrame("IconContainer")
 
-function IconContainer:OnNewInstance_IconContainer(icon)	
+function IconContainer:OnNewInstance_IconContainer(icon)
 	local container = CreateFrame("Button", self:GetChildNameBase() .. "IconContainer", icon)
-	
+
 	container:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
 	container:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress")
 
 	self.container = container
 	container.module = self
-	
+
 	container:EnableMouse(false)
+
+	-- Start hidden so the container (and its child border) only ever show while the
+	-- module is enabled (shown in OnEnable, hidden in OnDisableDelayed). A type that
+	-- disallows this module leaves it never-enabled, and thus hidden, rather than
+	-- showing an orphaned icon square/border.
+	container:Hide()
 end
 
 function IconContainer:OnEnable()

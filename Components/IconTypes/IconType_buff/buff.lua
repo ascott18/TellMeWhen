@@ -41,7 +41,7 @@ local empty = {}
 
 
 local Type = TMW.Classes.IconType:New("buff")
-Type.name = L["ICONMENU_BUFFDEBUFF"]
+Type.name = L["ICONMENU_BUFFDEBUFF"] .. (TMW.wowMajorMinor >= 12.1 and (" " .. L["ICONMENU_BUFFDEBUFF_RESTRICTED"]) or "")
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
@@ -110,8 +110,14 @@ Type:RegisterIconDefaults{
 
 if clientHasSecrets then
 	Type:RegisterConfigPanel_XMLTemplate(121, "TellMeWhen_SecretsWarning", {
-		text = L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] .. "\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"],
+		text = TMW.wowMajorMinor >= 12.1 
+			and L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] 
+			 or (L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] .. 
+			"\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"])
+			,
 		OnSetup = function(self)
+			if TMW.wowMajorMinor >= 12.1 then return end
+			
 			if TMW.CI.ics.Name == "" then
 				self:Hide()
 				return
@@ -344,7 +350,7 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			end
 			
 			if n == 0 then
-				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER_NONE"])
+				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": " .. NONE)
 			else
 				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": |cFFFF5959" .. n)
 			end
@@ -529,9 +535,9 @@ local function Buff_OnUpdate(icon, time)
 				else
 					index = index + 1
 
-					-- Bugfix: Enraged is an empty string.
+					-- Bugfix: Enraged is an empty string (2026 finally fixed to "Enrage").
 					local _dispelType = instance.dispelName
-					if _dispelType == "" then
+					if _dispelType == "" or _dispelType == "Enrage" then
 						_dispelType = "Enraged"
 					end
 
@@ -726,9 +732,9 @@ local function Buff_OnUpdate_Controller(icon, time)
 				else
 					index = index + 1
 				
-					-- Bugfix: Enraged is an empty string.
+					-- Bugfix: Enraged is an empty string (2026 finally fixed to "Enrage").
 					local _dispelType = instance.dispelName
-					if _dispelType == "" then
+					if _dispelType == "" or _dispelType == "Enrage" then
 						_dispelType = "Enraged"
 					end
 
@@ -1072,7 +1078,7 @@ function Type:Setup(icon)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
-	
+
 
 
 	-- Setup events and update functions.

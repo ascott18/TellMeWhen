@@ -31,12 +31,13 @@ TMW:RegisterDatabaseDefaults{
 				Name = L["TEXTLAYOUTS_DEFAULTS_BAR2"],
 				GUID = "bar2",
 				NoEdit = true,
-				n = 2,
+				n = 3,
 				
 				-- Bar Layout 2
-				{    -- [1] Duration        
+				{    -- [1] Duration
 					StringName = L["TEXTLAYOUTS_DEFAULTS_DURATION"],
-					DefaultText = "[Duration(gcd=true):TMWFormatDuration]",    
+					DefaultText = "[Duration(gcd=true):TMWFormatDuration]",
+					Aura = "duration",
 					Anchors = {
 						{
 							point = "TOP",
@@ -47,9 +48,10 @@ TMW:RegisterDatabaseDefaults{
 					},
 				},
 				{    -- [2] Spell
-					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],        
-					DefaultText = "[Spell] [Stacks:Hide(0):Paren]",
-					
+					StringName = L["TEXTLAYOUTS_DEFAULTS_SPELL"],
+					DefaultText = "[Spell]",
+					Aura = "spell",
+
 					Rotate = 90,
 					Justify = "LEFT",
 					Anchors = {
@@ -65,6 +67,22 @@ TMW:RegisterDatabaseDefaults{
 							relativeTo = "$$1",
 							relativePoint = "LEFT",
 						}, -- [2]
+					},
+				},
+				{    -- [3] Stacks
+					StringName		= L["TEXTLAYOUTS_DEFAULTS_STACKS"],
+					DefaultText		= "[Stacks:Hide(0)]",
+					SkinAs			= "Count",
+					Aura			= "stacks",
+					Anchors = {
+						n = 1,
+						{
+							x 	 		  	= -2,
+							y 	 		  	= 2,
+							point 		  	= "BOTTOMRIGHT",
+							relativeTo	 	= "IconModule_IconContainer_MasqueIconContainer",
+							relativePoint 	= "BOTTOMRIGHT",
+						},
 					},
 				},
 			},
@@ -203,6 +221,16 @@ View:ImplementsModule("IconModule_Backdrop", 51, function(Module, icon)
 	-- We can only query the size of the bar if the icon has had its position set.
 	if icon:GetNumPoints() == 0 or Module.container:GetHeight() > 0 then
 		Module:Enable()
+	end
+end)
+
+-- Only allowed on aura-container types (IconModule_AuraContainer defaults to
+-- disallowed); Enable() no-ops elsewhere. The emulation handler skins each aura button
+-- as a vertical bar by mirroring this view's icon square + TimerBar/backdrop frames.
+View:ImplementsModule("IconModule_AuraContainer", 60, function(Module, icon)
+	Module:Enable()
+	Module.ViewEmulationHandler = function(self, icon, button)
+		return self:Emulate_IconView_Bar(icon, button, true)
 	end
 end)
 

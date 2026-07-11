@@ -208,13 +208,9 @@ if TMW.clientHasSecrets then
 
     local function ApplyViewerOverride(viewer)
         local settingName = viewer.systemIndex
-        local layoutName = EditModeManagerFrame:GetActiveLayoutInfo().layoutName
         if not TMW.db then return end
 
-        local shouldHide = not EditModeManagerFrame:IsEditModeActive() and (
-			TMW.db.global.EditModeLayouts[layoutName].CDMHide[settingName]
-            or GetGroupHidingViewer(settingName) ~= nil
-		)
+        local shouldHide = not EditModeManagerFrame:IsEditModeActive() and (GetGroupHidingViewer(settingName) ~= nil)
 
         if shouldHide then
             viewer:SetAlpha(0)
@@ -232,25 +228,12 @@ if TMW.clientHasSecrets then
 		end
     end
 
-    local alwaysHideCheck
     local groupHideAnchor
     local groupHideText
     TMW.safecall(function()
         for _, viewer in pairs(viewers) do
             hooksecurefunc(viewer, "RefreshLayout", ApplyViewerOverride)
         end
-
-        -- Add an extra setting checkbox to edit mode on the CDM frames we want to be hidable.
-        -- Don't parent to EditModeSystemSettingsDialog, it'll glitch out EditModeSystemSettingsDialog
-        -- when `check` is hidden and make it go super wide for some reason.
-		-- Note: alwaysHideCheck is deprecated in favor of groupHideText.
-        alwaysHideCheck = CreateFrame("CheckButton", "TMWEditModeCDMHide", TMW, "EditModeSettingCheckboxTemplate")
-        alwaysHideCheck:SetFrameStrata("FULLSCREEN")
-        alwaysHideCheck:SetWidth(140)
-        alwaysHideCheck.Label:SetText("TMW: Always Hide")
-        alwaysHideCheck.Label:SetWidth(140)
-        TMW:TT(alwaysHideCheck, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
-        TMW:TT(alwaysHideCheck.Button, "UIPANEL_HIDE_CDM", "UIPANEL_HIDE_CDM_DESC")
 
         -- Create an anchor frame and a text label to show which group is hiding this viewer
         groupHideAnchor = CreateFrame("Frame", "TMWEditModeCDMHidden", TMW)
@@ -264,7 +247,6 @@ if TMW.clientHasSecrets then
         groupHideText:SetJustifyH("LEFT")
 
         EditModeSystemSettingsDialog:HookScript("OnHide", function(self)
-            alwaysHideCheck:Hide()
             groupHideAnchor:Hide()
         end)
     end)
@@ -274,32 +256,11 @@ if TMW.clientHasSecrets then
 		local systemFrame = self.attachedToSystem
 		if not groupHideText then return end
 		if not tContains(viewers, systemFrame) or not self:IsShown() then
-			alwaysHideCheck:Hide()
 			groupHideAnchor:Hide()
 			return
 		end
 
-		local layoutName = EditModeManagerFrame:GetActiveLayoutInfo().layoutName
-		local settingTable = TMW.db.global.EditModeLayouts[layoutName].CDMHide
 		local settingName = systemFrame.systemIndex
-
-		if not settingTable[settingName] then
-			-- This deprecated setting isn't enabled.
-			alwaysHideCheck:Hide()
-		else
-			-- Position next to "Show timer"
-			for _, frame in TMW:Vararg(self.Settings:GetChildren()) do
-				if frame.setting == Enum.EditModeCooldownViewerSetting.ShowTimer then
-					alwaysHideCheck:SetPoint("LEFT", frame, "LEFT", frame:GetWidth() / 2 + 5, 0)
-					break
-				end
-			end
-			alwaysHideCheck:Show()
-			alwaysHideCheck.Button:SetChecked(settingTable[settingName] or false)
-			alwaysHideCheck.Button:SetScript("OnClick", function(btn)
-				settingTable[settingName] = btn:GetChecked()
-			end)
-		end
 
 		-- Show which group is hiding this viewer, if any
 		if groupHideText then
@@ -311,7 +272,7 @@ if TMW.clientHasSecrets then
 				groupHideAnchor:Hide()
 			end
 		end
-	end
+    end
 
     TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
         for _, viewer in pairs(viewers) do

@@ -116,7 +116,9 @@ local TMW = _G.TMW
 
 TMW.issecretvalue = _G.issecretvalue or function() end
 TMW.clientHasSecrets = C_Secrets and C_Secrets.HasSecretRestrictions()
-TMW.wowMajor = math.floor(select(4, GetBuildInfo()) / 10000)
+local wowToc = select(4, GetBuildInfo())
+TMW.wowMajor = math.floor(wowToc / 10000)
+TMW.wowMajorMinor = tonumber(TMW.wowMajor .. "." .. (math.floor(wowToc / 100) % 100))
 
 if false then
 	 -- stress testing for text widths
@@ -265,13 +267,6 @@ TMW.Defaults = {
 		EffThreshold      = 15,
 		BackupDbInOptions = true,
 		CreateImportBackup = true,
-		EditModeLayouts = {
-			["**"] = {
-				CDMHide = {
-					["*"] = false,
-				}
-			}
-		},
 
 		NumGroups         = 0,
 		-- Groups = {} -- this will be set to the profile group defaults in a second.

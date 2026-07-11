@@ -52,22 +52,19 @@ TMW:NewClass("Resizer_Generic"){
 		
 		self.resizeButton:SetScript("OnMouseDown", self.StartSizing)
 		self.resizeButton:SetScript("OnMouseUp", self.OnMouseUp)
-		
-		-- A new function is required for each resizeButton/parent combo because it has to be able to reference both.
-		parent:HookScript("OnSizeChanged", function(parent)
-			local scale = 1.6 / parent:GetEffectiveScale()
-			scale = max(scale, 0.6)
-			self.resizeButton:SetScale(scale)
-		end)
 
-		-- Initial value. Should be good enough.
-		self.resizeButton:SetScale(2)
+		self:UpdateScale()
 
-		self.resizeButton:HookScript("OnShow", function(self)
-			self:SetFrameLevel(self:GetParent():GetFrameLevel() + 5)
+		self.resizeButton:HookScript("OnShow", function(resizeButton)
+			resizeButton:SetFrameLevel(resizeButton:GetParent():GetFrameLevel() + 5)
+			resizeButton.module:UpdateScale()
 		end)
 
 		TMW:TT(self.resizeButton, self.tooltipTitle, self.tooltipText, 1, 1)
+	end,
+
+	UpdateScale = function(self)
+		self.resizeButton:SetScale(max(1.6 / self.parent:GetEffectiveScale(), 0.6))
 	end,
 
 	-- These are here so this class can be inherited with a TMW.C.ObjectModule
@@ -248,6 +245,7 @@ TMW:NewClass("Resizer_Generic"){
 		parent:ClearAllPoints()
 		parent:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newX, newY)
 
+		self:UpdateScale()
 		self:SizeUpdated()
 
 	end,

@@ -246,7 +246,17 @@ L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"] = "Apply %s Settings"
 L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
 L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effects.]]
 
+L["ICONMENU_BUFFDEBUFF_CONTAINER"] = "Buff/Debuff (combat allowed)"
+L["ICONMENU_BUFFDEBUFF_CONTAINER_DESC"] = [[Tracks buffs and/or debuffs via Blizzard's Aura Container system. Safe to use when in combat.]]
+L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"] = "Limitations"
+L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"] = [[This icon uses Blizzard's Aura Container system, so it works in combat, but has some limitations:
+
+- Filtered spells must be IDs - cannot filter by name.
+- Spell filters can only filter for buffs on friendly units and debuffs on enemy units.
+- Only the first of the icon's units is checked; multiple units are not supported.]]
+
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
+L["ICONMENU_BUFFDEBUFF_RESTRICTED"] = "(combat restricted)"
 L["ICONMENU_BUFFDEBUFF_DESC"] = [[Tracks buffs and/or debuffs.]]
 
 L["ICONMENU_DOTWATCH"] = "All-Unit Buffs/Debuffs"
@@ -806,7 +816,7 @@ L["ICONMENU_ONLYEQPPD_DESC"] = "Check this to make the icon show only if the ite
 L["ICONMENU_SHOWSTACKS"] = "Show stacks"
 L["ICONMENU_SHOWSTACKS_DESC"] = "Check this to show the number of stacks of the item you have."
 L["ICONMENU_STEALABLE"] = "Only stealable"
-L["ICONMENU_STEALABLE_DESC"] = "Check this to only show buffs that can be spellstolen. Best used when checking for the 'Magic' dispel type"
+L["ICONMENU_STEALABLE_DESC"] = "Check this to only show buffs that can be spellstolen."
 L["ICONMENU_HIDENOUNITS"] = "Hide if no units"
 L["ICONMENU_HIDENOUNITS_DESC"] = "Check this to cause the icon to hide if all the units that this icon is checking have been invalidated because of unit conditions and/or units not existing."
 L["ICONMENU_HIDEWHILESECRET"] = "Hide while secret"
@@ -815,7 +825,10 @@ L["ICONMENU_HIDEWHILESECRET_DESC"] = [[Check this to cause the icon to hide whil
 TellMeWhen cannot automatically determine if an aura will definitely be secret or non-secret in lockdown, so this setting will let you avoid showing an aura as 'Absent' when TMW just isn't allowed to know about it.]]
 L["ICONMENU_AURAFILTER"] = "Aura Filters"
 L["ICONMENU_AURAFILTER_DESC"] = "Only show auras that match any of the selected filters."
-L["ICONMENU_AURAFILTER_NONE"] = "No Filter"
+L["ICONMENU_DISPELTYPE"] = "Dispel Type"
+L["ICONMENU_DISPELTYPE_DESC"] = "Only show auras of the selected dispel types. Select none to show auras of any dispel type."
+L["ICONMENU_DURATIONMAX"] = "Maximum duration"
+L["ICONMENU_DURATIONMAX_DESC"] = "Only show auras whose maximum duration is no longer than this many seconds. Set to 0 for no limit. Any non-zero value also hides permanent auras. This DOES NOT filter by CURRENT duration."
 L["ICONMENU_AURAFILTER_IMPORTANT"] = "Important"
 L["ICONMENU_AURAFILTER_IMPORTANT_DESC"] = "Include auras that Blizzard has flagged as being important."
 L["ICONMENU_AURAFILTER_CROWD_CONTROL"] = "Crowd Control"
@@ -958,11 +971,7 @@ L["UIPANEL_HIDE_CDM_DESC"] = [[Hides this Cooldown Manager frame while still all
 
 For TMW to best be able to access aura information from the CDM, you should set the Visibility setting above to Always Visible.]]
 L["UIPANEL_GROUP_CDM_HIDE"] = "Hide CDM Viewers"
-L["UIPANEL_GROUP_CDM_HIDE_DESC"] = [[Select which Cooldown Manager viewers should be hidden when this group is enabled and matches Role/Specialization filters. 
-
-The CDM will remain functional for aura data extraction even while hidden by this setting.
-
-For TMW to best be able to access aura information from the CDM, you should set the Visibility setting on the CDM to Always Visible.]]
+L["UIPANEL_GROUP_CDM_HIDE_DESC"] = [[Select which Cooldown Manager viewers should be hidden when this group is enabled and matches Role/Specialization filters.]]
 L["CDM_HIDDEN_BY_GROUP"] = "Hidden by TMW %s"
 L["UIPANEL_BARTEXTURE"] = "Bar Texture"
 L["UIPANEL_USE_PROFILE"] = "Use Profile Setting"
@@ -1032,6 +1041,11 @@ L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"] = [[This condition cannot operate on s
 In such situations, the data will be assumed to be in a default state (cooldown ready, aura absent, etc).]]
 L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by secret data. Examples of secret data include spell cooldowns and buffs/debuffs while in combat, Mythic+, or PvP; or unit identity in instances.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[You CANNOT track any specific buff or debuff WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP), except |Hhttps://www.wowhead.com/spells?filter=131;1;0|h|cff3588ffthose flagged as always non-secret|r|h by Blizzard.]]
+L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] = [[---- UNAVAILABLE IN COMBAT ----
+
+This icon type DOES NOT WORK IN COMBAT, nor in combat-focused content (Mythic+ or PvP).
+
+Use the "Buff/Debuff (combat allowed)" icon type instead for those situations.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is when tracking player buffs or target debuffs that are also displayed by the Blizzard Cooldown Manager. The CDM must be enabled, shown, and have the spell tracked for this to work.]]
 L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
 
@@ -1338,6 +1352,14 @@ L["TEXTLAYOUTS_SKINAS_DESC"] = [[Choose the Masque element that you wish to skin
 L["TEXTLAYOUTS_SKINAS_NONE"] = "None"
 L["TEXTLAYOUTS_SKINAS_COUNT"] = "Stack Text"
 L["TEXTLAYOUTS_SKINAS_HOTKEY"] = "Binding Text"
+
+L["TEXTLAYOUTS_AURA"] = "Aura Value"
+L["TEXTLAYOUTS_AURA_DESC"] = [[On aura container icons, drive this text with a real aura value (spell name, duration, or stacks) provided by Blizzard's aura display, instead of a DogTag string. The layout still controls its position and appearance. On all other icon types this setting is ignored and the text works as a normal DogTag string.]]
+L["TEXTLAYOUTS_AURA_NONE"] = "None (DogTag)"
+L["TEXTLAYOUTS_AURA_SPELL"] = "Aura Name"
+L["TEXTLAYOUTS_AURA_DURATION"] = "Aura Duration"
+L["TEXTLAYOUTS_AURA_STACKS"] = "Aura Stacks"
+L["TEXTLAYOUTS_AURA_DRIVENINFO"] = "%s (from Blizzard)"
 
 L["TEXTLAYOUTS_SKINAS_SKINNEDINFO"] = [[This text display is set to be skinned by Masque.
 
