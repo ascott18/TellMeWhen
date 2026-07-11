@@ -252,7 +252,7 @@ L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"] = "Limitations"
 L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"] = [[This icon uses Blizzard's Aura Container system, so it works in combat, but has some limitations:
 
 - Filtered spells must be IDs - cannot filter by name.
-- Spell ID filters can only filter for buffs on friendly units and debuffs on enemy units.
+- Spell filters can only filter for buffs on friendly units and debuffs on enemy units.
 - Only the first of the icon's units is checked; multiple units are not supported.]]
 
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
@@ -1041,7 +1041,9 @@ L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"] = [[This condition cannot operate on s
 In such situations, the data will be assumed to be in a default state (cooldown ready, aura absent, etc).]]
 L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by secret data. Examples of secret data include spell cooldowns and buffs/debuffs while in combat, Mythic+, or PvP; or unit identity in instances.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[You CANNOT track any specific buff or debuff WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP), except |Hhttps://www.wowhead.com/spells?filter=131;1;0|h|cff3588ffthose flagged as always non-secret|r|h by Blizzard.]]
-L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] = [[You CANNOT track any specific buff or debuff WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP) with this icon type.
+L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] = [[---- UNAVAILABLE IN COMBAT ----
+
+This icon type DOES NOT WORK IN COMBAT, nor in combat-focused content (Mythic+ or PvP).
 
 Use the "Buff/Debuff (combat allowed)" icon type instead for those situations.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is when tracking player buffs or target debuffs that are also displayed by the Blizzard Cooldown Manager. The CDM must be enabled, shown, and have the spell tracked for this to work.]]

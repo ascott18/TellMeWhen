@@ -658,11 +658,17 @@ function Module:ReskinButtons(settingsIcon)
 	local locked = TMW.Locked
 	local iconContainer = self.icon:GetModuleOrModuleChild("IconModule_IconContainer")
 	if iconContainer then
-		if locked then iconContainer:Disable() else iconContainer:Enable(true) end
+		if locked then iconContainer:Disable() else iconContainer:Enable() end
 	end
+
 	local backdrop = self.icon:GetModuleOrModuleChild("IconModule_Backdrop")
 	if backdrop then
-		if locked then backdrop:Disable() else backdrop:Enable(true) end
+		if locked then backdrop:Disable() else backdrop:Enable() end
+	end
+
+	local texture = self.icon:GetModuleOrModuleChild("IconModule_Texture")
+	if texture then
+		if locked then texture:Disable() else texture:Enable() end
 	end
 
 	self:ConfigureContainerLayout()

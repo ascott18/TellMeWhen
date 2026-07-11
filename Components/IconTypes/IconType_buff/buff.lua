@@ -116,6 +116,8 @@ if clientHasSecrets then
 			"\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"])
 			,
 		OnSetup = function(self)
+			if TMW.wowMajorMinor >= 12.1 then return end
+			
 			if TMW.CI.ics.Name == "" then
 				self:Hide()
 				return
@@ -1076,7 +1078,7 @@ function Type:Setup(icon)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
-	
+
 
 
 	-- Setup events and update functions.

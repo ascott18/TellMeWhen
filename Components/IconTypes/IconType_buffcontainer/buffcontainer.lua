@@ -417,7 +417,7 @@ function Type:Setup(icon)
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
-	icon:SetInfo("texture; reverse", TMW.Locked and "" or Type:GetConfigIconTexture(icon), true)
+	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 
 	icon:SetUpdateMethod("manual")
 	icon:SetUpdateFunction(Buff_OnUpdate_AuraContainer)
@@ -428,10 +428,6 @@ function Type:Setup(icon)
 	icon:RegisterEvent(icon.UnitSet.event)
 
 	icon:Update()
-	if TMW.Locked then
-		icon:SetInfo("auraSpec", nil)
-	end
 end
-	
-Type:Register(100)
 
+Type:Register(100)
