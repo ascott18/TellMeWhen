@@ -420,7 +420,7 @@ function Type:Setup(icon)
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
-	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
+	icon:SetInfo("texture; reverse; state", Type:GetConfigIconTexture(icon), true, STATE_ABSENT)
 
 	icon:SetUpdateMethod("manual")
 	icon:SetUpdateFunction(Buff_OnUpdate_AuraContainer)
