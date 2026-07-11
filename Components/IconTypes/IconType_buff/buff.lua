@@ -46,7 +46,6 @@ Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
 Type.AllowNoName = true
-Type.menuSpaceBefore = true
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
@@ -1115,5 +1114,5 @@ function Type:Setup(icon)
 	icon:Update()
 end
 	
-Type:Register(100)
+Type:Register(211)
 

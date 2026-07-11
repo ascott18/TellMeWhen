@@ -524,5 +524,5 @@ function Type:GuessIconTexture(ics)
 end
 
 	
-Type:Register(119)
+Type:Register(310)
 

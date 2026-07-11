@@ -147,5 +147,5 @@ function Type:Setup(icon)
 end
 
 
-Type:Register(155)
+Type:Register(360)
 

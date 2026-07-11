@@ -481,4 +481,4 @@ function Type:OnGCD(icon, duration)
 end
 
 
-Type:Register(310)
+Type:Register(710)

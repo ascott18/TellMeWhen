@@ -62,7 +62,6 @@ Type.menuIcon = "Interface/Icons/inv_potion_49"
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
-Type.menuSpaceBefore = true
 Type.barIsValue = true
 
 local STATE_UNITFOUND = TMW.CONST.STATE.DEFAULT_SHOW
@@ -455,5 +454,5 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-Type:Register(157)
+Type:Register(410)
 

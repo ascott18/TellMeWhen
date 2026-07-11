@@ -333,4 +333,4 @@ function Type:GuessIconTexture(ics)
 	return "Interface\\Icons\\Spell_Deathknight_BloodPresence"
 end
 
-Type:Register(30)
+Type:Register(130)

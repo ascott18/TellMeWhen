@@ -491,5 +491,5 @@ function Type:Setup(icon)
 end
 
 
-Type:Register(10)
+Type:Register(110)
 

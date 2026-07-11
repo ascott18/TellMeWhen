@@ -27,7 +27,6 @@ Type.AllowNoName = true
 Type.hasNoGCD = true
 Type.unitType = "unitid"
 Type.canControlGroup = true
-Type.menuSpaceAfter = true
 
 local STATE_SUCCEED = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_FAIL = TMW.CONST.STATE.DEFAULT_HIDE
@@ -219,4 +218,4 @@ function Type:GetIconMenuText(ics)
 	return text, "", true
 end
 
-Type:Register(301)
+Type:Register(620)

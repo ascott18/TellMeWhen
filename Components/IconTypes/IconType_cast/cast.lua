@@ -331,5 +331,5 @@ function Type:GuessIconTexture(ics)
 	return "Interface\\Icons\\Temp"
 end
 
-Type:Register(150)
+Type:Register(350)
 

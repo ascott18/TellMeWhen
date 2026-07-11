@@ -90,4 +90,4 @@ TMW:RegisterLuaImportDetector(function(table)
 	end
 end)
 
-Type:Register(158)
+Type:Register(420)

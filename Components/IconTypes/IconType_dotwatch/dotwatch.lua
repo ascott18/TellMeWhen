@@ -591,4 +591,4 @@ TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
 	end
 end)
 
-Type:Register(102)
+Type:Register(213)

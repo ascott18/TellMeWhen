@@ -265,4 +265,4 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-Type:Register(120)
+Type:Register(320)

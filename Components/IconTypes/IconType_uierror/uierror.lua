@@ -155,7 +155,7 @@ function Type:Setup(icon)
 end
 
 
-Type:Register(205)
+Type:Register(520)
 
 
 TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()

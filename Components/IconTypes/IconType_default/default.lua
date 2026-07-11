@@ -24,7 +24,6 @@ local GetSpellBookItemInfo = TMW.GetSpellBookItemInfo
 
 local Type = TMW.Classes.IconType:New("")
 Type.name = L["ICONMENU_TYPE"]
-Type.menuSpaceAfter = true
 
 
 -- AUTOMATICALLY GENERATED: UsesAttributes

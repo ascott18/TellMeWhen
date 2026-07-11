@@ -181,4 +181,4 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-Type:Register(130)
+Type:Register(330)

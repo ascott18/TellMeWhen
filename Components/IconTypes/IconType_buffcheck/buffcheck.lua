@@ -416,5 +416,5 @@ function Type:Setup(icon)
 	icon:Update()
 end
 	
-Type:Register(101)
+Type:Register(212)
 

@@ -1045,7 +1045,7 @@ L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by secre
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[You CANNOT track any specific buff or debuff WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP), except |Hhttps://www.wowhead.com/spells?filter=131;1;0|h|cff3588ffthose flagged as always non-secret|r|h by Blizzard.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] = [[---- UNAVAILABLE IN COMBAT ----
 
-This icon type DOES NOT WORK IN COMBAT, nor in combat-focused content (Mythic+ or PvP).
+This icon type DOES NOT WORK IN COMBAT, nor in combat zones (Mythic+ or PvP).
 
 Use the %s icon type instead for those situations.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is when tracking player buffs or target debuffs that are also displayed by the Blizzard Cooldown Manager. The CDM must be enabled, shown, and have the spell tracked for this to work.]]

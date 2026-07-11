@@ -27,7 +27,6 @@ ITs require that you declare at least their .name and .desc fields before they c
 Type.name = "Test Type"
 Type.desc = "An Icon Type created to demonstrate the TMW IconType API"
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
-Type.menuSpaceBefore = true
 <</code>>
 
 === Upvalue States Used
@@ -210,7 +209,7 @@ end
 <</code>>
 
 === Register the IconType
-We are now done creating our IT. All we have to do now is register it with TMW:
+We are now done creating our IT. All we have to do now is register it with TMW. The number passed to Register() determines the order of the IconType in the type selection menu. A spacer is automatically inserted in the menu wherever consecutive IconTypes cross into a new multiple of 100, so use the hundreds digit to place your IconType into the desired visual group:
 
 <<code lua>>
 Type:Register(200)
@@ -234,7 +233,6 @@ local Type = TMW.Classes.IconType:New("test")
 Type.name = "Test Type"
 Type.desc = "An Icon Type created to demonstrate the TMW IconType API"
 Type.menuIcon = "Interface\\Icons\\spell_holy_divineintervention"
-Type.menuSpaceBefore = true
 
 local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE

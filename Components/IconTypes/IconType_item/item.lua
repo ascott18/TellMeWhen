@@ -268,4 +268,4 @@ function Type:GetConfigIconTexture(icon)
 end
 
 
-Type:Register(20)
+Type:Register(120)

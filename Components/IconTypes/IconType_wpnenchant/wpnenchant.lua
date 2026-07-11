@@ -39,7 +39,6 @@ Type.name = L["ICONMENU_WPNENCHANT"]
 Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.menuIcon = TMW.GetSpellTexture(8024) or TMW.GetSpellTexture(318038)
 Type.AllowNoName = true
-Type.menuSpaceAfter = true
 
 local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
@@ -330,4 +329,4 @@ function Type:FormatSpellForOutput(icon, data, doInsertLink)
 	return icon.LastEnchantName or data or icon.EnchantName
 end
 
-Type:Register(110)
+Type:Register(220)

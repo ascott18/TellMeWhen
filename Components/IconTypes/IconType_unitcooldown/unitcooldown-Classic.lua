@@ -652,4 +652,4 @@ TMW:RegisterCallback("TMW_ICON_DISABLE", function(event, icon)
 	ManualIconsManager:UpdateTable_Unregister(icon)
 end)
 
-Type:Register(40)
+Type:Register(140)

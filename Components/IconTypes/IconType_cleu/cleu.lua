@@ -37,7 +37,6 @@ Type.obsolete = not CombatLogGetCurrentEventInfo
 Type.name = L["ICONMENU_CLEU"]
 Type.desc = L["ICONMENU_CLEU_DESC"]
 Type.menuIcon = GetSpellTexture(20066)
-Type.menuSpaceBefore = true
 Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.unitType = "name"
@@ -596,7 +595,7 @@ function Type:Setup(icon)
 end
 
 
-Type:Register(200)
+Type:Register(510)
 
 
 

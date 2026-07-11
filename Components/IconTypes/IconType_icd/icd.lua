@@ -230,4 +230,4 @@ function Type:Setup(icon)
 end
 
 
-Type:Register(50)
+Type:Register(150)

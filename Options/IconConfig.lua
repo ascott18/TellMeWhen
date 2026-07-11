@@ -223,11 +223,17 @@ end
 -- Dropdowns
 ----------------------
 function IE:IconType_DropDown()
+	local prevHundred
 	for _, typeData in ipairs(TMW.OrderedTypes) do
 		if CI.ics.Type == typeData.type or (not TMW.get(typeData.hidden) and not typeData.obsolete) then
-			if typeData.menuSpaceBefore then
+			-- Insert a spacer between IconTypes each time their order crosses into
+			-- a new multiple of 100. This groups related IconTypes into visual
+			-- blocks based purely on the order passed to IconType:Register().
+			local hundred = math.floor(typeData.order / 100)
+			if prevHundred and hundred > prevHundred then
 				TMW.DD:AddSpacer()
 			end
+			prevHundred = hundred
 
 			local info = TMW.DD:CreateInfo()
 			
@@ -264,10 +270,6 @@ function IE:IconType_DropDown()
 			info.tCoordBottom = 0.93
 				
 			TMW.DD:AddButton(info)
-
-			if typeData.menuSpaceAfter then
-				TMW.DD:AddSpacer()
-			end
 		end
 	end
 end

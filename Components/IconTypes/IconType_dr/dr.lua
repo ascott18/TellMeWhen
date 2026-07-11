@@ -553,4 +553,4 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-Type:Register(140)
+Type:Register(340)

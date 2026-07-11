@@ -479,4 +479,4 @@ function Type:Setup(icon)
 	icon:Update()
 end
 
-Type:Register(70)
+Type:Register(170)
