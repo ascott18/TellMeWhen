@@ -35,6 +35,8 @@ Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
+-- Group controllers publish this baseline present state; single icons get their present/
+-- absent state from IconModule_AuraContainer instead (driven by the aura slot's shown state).
 local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
 
@@ -290,6 +292,7 @@ end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 	[ STATE_PRESENT ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
+	[ STATE_ABSENT ] = { text = "|cFFFF0000" .. L["ICONMENU_ABSENTONALL"],  tooltipText = L["ICONMENU_ABSENTONALL_DESC"],	},
 })
 
 local function BuildAuraSpec(icon)
@@ -385,12 +388,12 @@ end
 
 -- The icon type's only job in this mode is to publish the spec via SetInfo;
 -- IconModule_AuraContainer consumes it and owns the container, and the container
--- handles ongoing UNIT_AURA updates itself. We hold a shown state so the
--- AuraButtons are free to show/hide their own contents.
+-- handles ongoing UNIT_AURA updates itself.
 local function Buff_OnUpdate_AuraContainer(icon, time)
-	icon:SetInfo("state; auraSpec", STATE_PRESENT, BuildAuraSpec(icon))
+	icon:SetInfo("auraSpec", BuildAuraSpec(icon))
 
 	if icon:IsGroupController() then
+		icon:SetInfo("state", STATE_PRESENT)
 		-- As a group controller we don't harvest aura data ourselves - Blizzard's
 		-- AuraContainer does, and it owns each button's show/hide - so there's no
 		-- per-icon info to YieldInfo(). Claim every icon in the group directly so

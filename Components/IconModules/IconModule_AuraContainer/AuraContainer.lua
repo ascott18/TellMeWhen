@@ -660,24 +660,16 @@ function Module:ReskinButtons(settingsIcon)
 		return
 	end
 
-	-- IconContainer and Backdrop are emulated into the aura buttons
-	-- so the show/hide according to aura presence. They're still used in config mode,
-	-- but need to be disabled in locked mode so the aura buttons can take over.
-	local locked = TMW.Locked
-	local iconContainer = self.icon:GetModuleOrModuleChild("IconModule_IconContainer")
-	if iconContainer then
-		if locked then iconContainer:Disable() else iconContainer:Enable() end
-	end
-
-	local backdrop = self.icon:GetModuleOrModuleChild("IconModule_Backdrop")
-	if backdrop then
-		if locked then backdrop:Disable() else backdrop:Enable() end
-	end
-
-	local texture = self.icon:GetModuleOrModuleChild("IconModule_Texture")
-	if texture then
-		if locked then texture:Disable() else texture:Enable() end
-	end
+	-- The native IconContainer / Backdrop / Texture are the icon's default (no-aura) display.
+	-- A single-aura icon keeps them ENABLED even when locked and gates them by aura presence
+	-- (ApplyState) so the default shows only while the tracked aura is absent - the aura
+	-- button covers the present case. A group controller instead fills every cell with aura
+	-- buttons, so it disables the native layer when locked. In config mode everything is enabled
+	-- to show the preview.
+	local disableNative = TMW.Locked and self.icon:IsGroupController()
+	self:ForEachDefaultLayerFrame(function(module)
+		if disableNative then module:Disable() else module:Enable() end
+	end)
 
 	self:ConfigureContainerLayout()
 
@@ -686,6 +678,125 @@ function Module:ReskinButtons(settingsIcon)
 	end
 	for button in pairs(self.buttons) do
 		self:SkinButton(button)
+	end
+end
+
+-- The native default layer is three separate frames/regions: the Texture module's texture
+-- (a child of the icon, not the IconContainer), the IconContainer's container (icon border /
+-- Masque square) and the Backdrop's container. Run `fn` over each one that exists.
+function Module:ForEachDefaultLayerFrame(fn, allowDisabled)
+	local icon = self.icon
+	local texture = icon:GetModuleOrModuleChild("IconModule_Texture", allowDisabled)
+	if texture and texture.texture then
+		fn(texture, texture.texture)
+	end
+	local iconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", allowDisabled)
+	if iconContainer and iconContainer.container then
+		fn(iconContainer, iconContainer.container)
+	end
+	local backdrop = icon:GetModuleOrModuleChild("IconModule_Backdrop", allowDisabled)
+	if backdrop and backdrop.container then
+		fn(backdrop, backdrop.container)
+	end
+end
+
+local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
+
+-- Single icons show their configured "default" (no-aura) look when the tracked aura is absent.
+-- We can't know if an aura is present (it's secret), but the aura slot frame's shown state IS
+-- that (secret) bool, and it may be fed to secret-safe APIs. So:
+--   * SetInfo("state") with secretBool = present -> the Alpha / Texture_Colored modules render
+--     the icon's configured present vs absent look (dim/desaturate/etc. when absent), with
+--     group + icon alpha flowing through as usual.
+--   * Gate the native default layer off the SAME bool so it hides when the aura is present -
+--     the aura button covers that case, and leaving the native layer up would double a
+--     semi-transparent backdrop/border (Masque may have drawn one we can't detect, so the gate
+--     is unconditional).
+-- present is secret, so it is only ever PASSED to secret-safe APIs, never tested.
+function Module:ApplyState()
+	local icon = self.icon
+	local slot = self.slots[1]
+	if not slot then
+		return
+	end
+	local present = slot.frame:IsShown()
+
+	icon:SetInfo("state", {
+		secretBool = present,
+		trueState = icon.States[STATE_PRESENT],
+		falseState = icon.States[STATE_ABSENT],
+	})
+
+	-- The native gate only matters while locked; config mode shows the preview at full alpha.
+	if TMW.Locked then
+		self:ForEachDefaultLayerFrame(function(module, f)
+			f:SetAlphaFromBoolean(present, 0, 1)
+		end)
+	end
+end
+
+-- Force the native default layer fully visible. The gate above leaves a SECRET alpha on those
+-- frames, so if an aura was showing when the spec went away (auraSpec -> nil) they'd be stuck
+-- hidden (alpha 0 from present). With no aura there's nothing to hide behind, so clear the gate
+-- back to a plain visible alpha.
+function Module:ResetDefaultLayer()
+	self:ForEachDefaultLayerFrame(function(module, f)
+		f:SetAlpha(1)
+	end, true)
+end
+
+-- The container defers a slot's show/hide to its OWN OnUpdate - one frame after the UNIT_AURA
+-- that changed it (Blizzard_ManagedAuraContainer marks dirty on the event, processes in
+-- ProcessDirtyFlags) - so the settled shown state can't be read inside the UNIT_AURA handler.
+-- Instead an aura event schedules a short burst: ApplyState re-runs for the next few
+-- frames, enough to land after the container has processed the change regardless of OnUpdate
+-- ordering. Idle (no OnUpdate) otherwise, so this only costs anything right after auras move.
+local STATE_UPDATE_FRAMES = 3
+
+function Module:EnsureStateUpdater()
+	local updater = self.stateUpdater
+	if updater then
+		return updater
+	end
+	updater = CreateFrame("Frame")
+	self.stateUpdater = updater
+
+	updater:SetScript("OnEvent", function()
+		self:ScheduleStateUpdate()
+	end)
+	updater.Tick = function()
+		self:ApplyState()
+		self.stateUpdateFrames = self.stateUpdateFrames - 1
+		if self.stateUpdateFrames <= 0 then
+			updater:SetScript("OnUpdate", nil)
+		end
+	end
+	return updater
+end
+
+-- Run a burst of ApplyState over the next few frames (see STATE_UPDATE_FRAMES).
+function Module:ScheduleStateUpdate()
+	local updater = self:EnsureStateUpdater()
+	self.stateUpdateFrames = STATE_UPDATE_FRAMES
+	updater:SetScript("OnUpdate", updater.Tick)
+end
+
+-- Watch the tracked unit's auras (re-registering is a no-op for the same unit), set an initial
+-- state now, and schedule the settle burst.
+function Module:StartWatchingUnit(unit)
+	local updater = self:EnsureStateUpdater()
+	updater:RegisterUnitEvent("UNIT_AURA", unit or "player")
+	self:ApplyState()
+	self:ScheduleStateUpdate()
+end
+
+function Module:StopWatchingUnit()
+	local updater = self.stateUpdater
+	if updater then
+		updater:UnregisterAllEvents()
+		updater:SetScript("OnUpdate", nil)
+		self.icon:SetInfo("state", STATE_ABSENT)
 	end
 end
 
@@ -886,14 +997,7 @@ function Module:SetAuraSpec(auraSpec)
 	end
 
 	if not TMW.Locked or not auraSpec or not auraSpec.filters or #auraSpec.filters == 0 then
-		-- Deactivate everything; the icon's own modules show the config preview. Hiding the
-		-- whole container is what actually clears the display: a child of a hidden frame
-		-- doesn't render regardless of its own shown state, so it doesn't matter that the
-		-- container keeps (re-)showing individual slot frames while disabled.
-		self:DeactivateGroups()
-		self:DeactivateSlots()
-		container:SetEnabled(false)
-		container:Hide()
+		self:TeardownContainer()
 		return
 	end
 
@@ -957,6 +1061,12 @@ function Module:SetAuraSpec(auraSpec)
 	-- icon rebuilds a fresh auraSpec table then). Without this the container keeps the
 	-- previous target's cached auras.
 	container:UpdateAllAuras()
+
+	-- Single-aura icons drive a default (no-aura) state off the slot's shown state; watch the
+	-- tracked unit's auras to refresh it. Controllers have no single aura to be absent.
+	if not icon:IsGroupController() then
+		self:StartWatchingUnit(auraSpec.unit)
+	end
 end
 
 function Module:AURASPEC(icon, auraSpec)
@@ -991,11 +1101,17 @@ function Module:OnEnable()
 	self:EnsureContainer()
 end
 
-function Module:OnDisable()
+function Module:TeardownContainer()
+	self:StopWatchingUnit()
+	self:ResetDefaultLayer()
 	if self.container then
 		self:DeactivateGroups()
 		self:DeactivateSlots()
 		self.container:SetEnabled(false)
 		self.container:Hide()
 	end
+end
+
+function Module:OnDisable()
+	self:TeardownContainer()
 end
