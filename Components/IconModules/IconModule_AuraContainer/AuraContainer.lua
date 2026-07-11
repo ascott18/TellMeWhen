@@ -262,16 +262,19 @@ function Module:ApplyButtonSettings(button, settingsIcon)
 	local showTimer = settingsIcon.ShowTimer
 	local showText = settingsIcon.ShowTimerText
 
-	-- If the icon has a texture override configured (Custom Texture), let
-	-- IconModule_Texture_Colored show it on the icon and suppress the container's
-	-- own aura icon so the override wins.
-	local hasTextureOverride = settingsIcon.CustomTex and settingsIcon.CustomTex:trim() ~= ""
-
+	-- Custom Texture override: paint it onto our icon and ClearIcon so the container stops
+	-- painting the aura's icon into it (the native Texture_Colored can't help - it can't evaluate
+	-- overrides under our secret state and is gated hidden while the aura is present). Decide off
+	-- the SETTING, not the resolved texture: neither CustomTex_OverrideTex nor attributes.texture
+	-- is populated until the CustomTex hook implements (after our reskin), so Module:TEXTURE
+	-- re-applies the texture once it resolves.
+	button.tmwIcon:SetTexture(settingsIcon.attributes.texture)
+	button.tmwIcon:Show()
+	local customTex = settingsIcon and settingsIcon:GetSettings().CustomTex
+	local hasTextureOverride = customTex and customTex:trim() ~= ""
 	if hasTextureOverride then
 		button:ClearIcon()
-		button.tmwIcon:Hide()
 	else
-		button.tmwIcon:Show()
 		button:SetIcon(button.tmwIcon)
 	end
 
@@ -1073,6 +1076,17 @@ function Module:AURASPEC(icon, auraSpec)
 	self:SetAuraSpec(auraSpec)
 end
 Module:SetDataListener("AURASPEC")
+
+-- attributes.texture (which folds in a Custom Texture override) is resolved by the CustomTex
+-- hook, which implements AFTER our SetupForIcon reskin - so at reskin time the override may not
+-- be on attributes.texture yet, and it also updates later for dynamic ($item/$spell) textures.
+-- Re-apply the button icon textures whenever it changes so the override actually lands.
+function Module:TEXTURE(icon, texture)
+	for button in pairs(self.buttons) do
+		self:ApplyButtonSettings(button, self.settingsIcon)
+	end
+end
+Module:SetDataListener("TEXTURE")
 
 -- Meta-icon setup: `icon` is the SOURCE icon whose display this meta inherits. Its
 -- timer/texture settings and aura spec come from that source; the view/size/text come
