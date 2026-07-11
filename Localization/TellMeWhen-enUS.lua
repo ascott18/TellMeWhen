@@ -1360,6 +1360,7 @@ L["TEXTLAYOUTS_AURA_SPELL"] = "Aura Name"
 L["TEXTLAYOUTS_AURA_DURATION"] = "Aura Duration"
 L["TEXTLAYOUTS_AURA_STACKS"] = "Aura Stacks"
 L["TEXTLAYOUTS_AURA_DRIVENINFO"] = "%s (from Blizzard)"
+L["TEXTLAYOUTS_AURA_TAGWARNING"] = "The %s does not work on combat-ready Buff/Debuff icons. To show aura data, configure this display's Aura Value within the text layout's settings."
 
 L["TEXTLAYOUTS_SKINAS_SKINNEDINFO"] = [[This text display is set to be skinned by Masque.
 

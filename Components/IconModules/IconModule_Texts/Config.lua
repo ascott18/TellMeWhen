@@ -756,7 +756,20 @@ function TEXT:LoadConfig()
 				frame.Default.DefaultText = DefaultText
 
 				-- Test the string and its tags & syntax
-				frame.Error:SetText(TMW:TestDogTagString(CI.icon, text))
+				local errorText = TMW:TestDogTagString(CI.icon, text) or ""
+
+				-- On an aura-container icon (and no Aura purpose set - or we'd be in the branch
+				-- above), the Duration/Spell/Stacks tags have no value: that data is on the
+				-- AuraButton, not the icon. Warn and point at the Aura Value setting instead.
+				if TEXT:IconUsesAuraContainer(CI.icon) then
+					local auraTags = TEXT:GetAuraTagsUsed(text)
+					if auraTags then
+						local warning = "|cffffcc00" .. L["TEXTLAYOUTS_AURA_TAGWARNING"]:format(auraTags) .. "|r"
+						errorText = errorText ~= "" and (errorText .. "\n" .. warning) or warning
+					end
+				end
+
+				frame.Error:SetText(errorText)
 			end
 
 			previousFrame = frame

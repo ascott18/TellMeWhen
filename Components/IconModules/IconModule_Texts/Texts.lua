@@ -64,6 +64,25 @@ function TEXT:IconUsesAuraContainer(icon)
 	return module and module.IsEnabled or false
 end
 
+-- The DogTag tags whose value comes from per-aura data. On an aura-container icon that data
+-- lives on the AuraButton, not the icon, so these tags resolve to nothing there - the string
+-- has to set an Aura purpose instead. Returns a display list of the ones used (e.g.
+-- "[Duration], [Spell]"), or nil. Used to warn in the config. Whole-word match so e.g.
+-- [MaxDuration] doesn't trip the "Duration" check.
+local AURA_TAGS = { "Duration", "Spell", "Stacks" }
+function TEXT:GetAuraTagsUsed(text)
+	if not text or text == "" then
+		return nil
+	end
+	local found
+	for _, tag in ipairs(AURA_TAGS) do
+		if text:find("%f[%w_]" .. tag .. "%f[^%w_]") then
+			found = found and (found .. ", [" .. tag .. "]") or ("[" .. tag .. "]")
+		end
+	end
+	return found
+end
+
 
 
 
