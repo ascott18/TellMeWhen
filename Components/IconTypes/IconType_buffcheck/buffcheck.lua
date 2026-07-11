@@ -75,9 +75,13 @@ Type:RegisterIconDefaults{
 
 
 if clientHasSecrets then
+	-- Clickable link that switches this icon to the combat-ready Buff/Debuff type (handled in
+	-- TellMeWhen_SecretsWarning's OnHyperlinkClick). Named from L so it tracks the type's name.
+	local combatReadyLink = "|HTMW_ICONTYPE:buffcontainer|h|cff3588ff" .. L["ICONMENU_BUFFDEBUFF_CONTAINER"] .. "|r|h"
+
 	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
-		text = TMW.wowMajorMinor >= 12.1 
-			and L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] 
+		text = TMW.wowMajorMinor >= 12.1
+			and L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"]:format(combatReadyLink)
 			 or L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"]
 	})
 end

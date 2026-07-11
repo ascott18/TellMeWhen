@@ -246,10 +246,10 @@ L["ICONTYPE_SWINGTIMER_TIP_APPLYSETTINGS"] = "Apply %s Settings"
 L["ICONMENU_ITEMCOOLDOWN"] = "Item Cooldown"
 L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effects.]]
 
-L["ICONMENU_BUFFDEBUFF_CONTAINER"] = "Buff/Debuff (combat allowed)"
+L["ICONMENU_BUFFDEBUFF_CONTAINER"] = "Buff/Debuff (combat ready)"
 L["ICONMENU_BUFFDEBUFF_CONTAINER_DESC"] = [[Tracks buffs and/or debuffs via Blizzard's Aura Container system. Safe to use when in combat.]]
 L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"] = "Limitations"
-L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"] = [[This icon uses Blizzard's Aura Container system, so it works in combat, but has some limitations:
+L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"] = [[This icon works in combat, but is subject to the following Blizzard-enforced limitations:
 
 - Filtered spells must be IDs - cannot filter by name.
 - Spell filters can only filter for buffs on friendly units and debuffs on enemy units.
@@ -828,7 +828,9 @@ L["ICONMENU_AURAFILTER_DESC"] = "Only show auras that match any of the selected 
 L["ICONMENU_DISPELTYPE"] = "Dispel Type"
 L["ICONMENU_DISPELTYPE_DESC"] = "Only show auras of the selected dispel types. Select none to show auras of any dispel type."
 L["ICONMENU_DURATIONMAX"] = "Maximum duration"
-L["ICONMENU_DURATIONMAX_DESC"] = "Only show auras whose maximum duration is no longer than this many seconds. Set to 0 for no limit. Any non-zero value also hides permanent auras. This DOES NOT filter by CURRENT duration."
+L["ICONMENU_DURATIONMAX_DESC"] = [[Only show auras whose maximum duration is no longer than this many seconds. Set to 0 for no limit. Any non-zero value also hides permanent auras.
+
+This DOES NOT filter by CURRENT duration - it filters TOTAL duration.]]
 L["ICONMENU_AURAFILTER_IMPORTANT"] = "Important"
 L["ICONMENU_AURAFILTER_IMPORTANT_DESC"] = "Include auras that Blizzard has flagged as being important."
 L["ICONMENU_AURAFILTER_CROWD_CONTROL"] = "Crowd Control"
@@ -1045,7 +1047,7 @@ L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] = [[---- UNAVAILABLE IN COMBAT --
 
 This icon type DOES NOT WORK IN COMBAT, nor in combat-focused content (Mythic+ or PvP).
 
-Use the "Buff/Debuff (combat allowed)" icon type instead for those situations.]]
+Use the %s icon type instead for those situations.]]
 L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is when tracking player buffs or target debuffs that are also displayed by the Blizzard Cooldown Manager. The CDM must be enabled, shown, and have the spell tracked for this to work.]]
 L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
 
@@ -1354,7 +1356,7 @@ L["TEXTLAYOUTS_SKINAS_COUNT"] = "Stack Text"
 L["TEXTLAYOUTS_SKINAS_HOTKEY"] = "Binding Text"
 
 L["TEXTLAYOUTS_AURA"] = "Aura Value"
-L["TEXTLAYOUTS_AURA_DESC"] = [[On aura container icons, drive this text with a real aura value (spell name, duration, or stacks) provided by Blizzard's aura display, instead of a DogTag string. The layout still controls its position and appearance. On all other icon types this setting is ignored and the text works as a normal DogTag string.]]
+L["TEXTLAYOUTS_AURA_DESC"] = [[On combat-ready Buff/Debuff icons, drive this text with a real aura value (spell name, duration, or stacks) provided by Blizzard's aura display, instead of a DogTag string. The layout still controls its position and appearance. On all other icon types this setting is ignored and the text works as a normal DogTag string.]]
 L["TEXTLAYOUTS_AURA_NONE"] = "None (DogTag)"
 L["TEXTLAYOUTS_AURA_SPELL"] = "Aura Name"
 L["TEXTLAYOUTS_AURA_DURATION"] = "Aura Duration"

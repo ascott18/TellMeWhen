@@ -690,6 +690,39 @@
 				--self:GetParent():AdjustHeight()
 				self:SetHeight(self.text:GetStringHeight() + 20)
 			</OnUpdate>
+			<OnHyperlinkClick>
+				-- Custom links that switch the icon to another type (e.g. the pointer from the
+				-- combat-restricted Buff/Debuff type to the combat-ready one).
+				local iconType = link:match("^TMW_ICONTYPE:(.+)$")
+				if iconType then
+					TMW.IE:ChangeIconType(iconType)
+					return
+				end
+
+				if not StaticPopupDialogs["TMW_COPYURL"] then
+					StaticPopupDialogs["TMW_COPYURL"] = {
+						text = "Copy URL:",
+						button1 = OKAY,
+						hasEditBox = 1,
+						editBoxWidth = 350,
+						OnShow = function(dialog)
+							local editBox = _G[dialog:GetName().."EditBox"]
+							if editBox then
+								editBox:SetText(dialog.data or "")
+								editBox:SetFocus()
+								editBox:HighlightText()
+							end
+						end,
+						EditBoxOnEscapePressed = function(self)
+							self:GetParent():Hide()
+						end,
+						timeout = 0,
+						whileDead = true,
+						preferredIndex = 3,
+					}
+				end
+				StaticPopup_Show("TMW_COPYURL", nil, nil, link)
+			</OnHyperlinkClick>
 		</Scripts>
 	</Frame>
 
@@ -722,31 +755,6 @@
 				self.LibCustomGlow = LibStub("LibCustomGlow-1.0", true)
 				self.isReallyShown = false
 			</OnLoad>
-			<OnHyperlinkClick>
-				if not StaticPopupDialogs["TMW_COPYURL"] then
-					StaticPopupDialogs["TMW_COPYURL"] = {
-						text = "Copy URL:",
-						button1 = OKAY,
-						hasEditBox = 1,
-						editBoxWidth = 350,
-						OnShow = function(dialog)
-							local editBox = _G[dialog:GetName().."EditBox"]
-							if editBox then
-								editBox:SetText(dialog.data or "")
-								editBox:SetFocus()
-								editBox:HighlightText()
-							end
-						end,
-						EditBoxOnEscapePressed = function(self)
-							self:GetParent():Hide()
-						end,
-						timeout = 0,
-						whileDead = true,
-						preferredIndex = 3,
-					}
-				end
-				StaticPopup_Show("TMW_COPYURL", nil, nil, link)
-			</OnHyperlinkClick>
 			<OnHyperlinkEnter>
 				SetCursor("Interface\\CURSOR\\Interact")
 			</OnHyperlinkEnter>

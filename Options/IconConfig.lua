@@ -272,9 +272,9 @@ function IE:IconType_DropDown()
 	end
 end
 
-function IE:IconType_DropDown_OnClick()
-	-- Automatically enable the icon when the user chooses an icon type
-	-- when the icon was of the default (unconfigured) type.
+function IE:ChangeIconType(newType)
+	-- Automatically enable the icon when it's switched away from the default
+	-- (unconfigured) type.
 	if CI.ics.Type == "" then
 		CI.ics.Enabled = true
 	end
@@ -282,13 +282,17 @@ function IE:IconType_DropDown_OnClick()
 	CI.icon:SetInfo("texture", nil)
 
 	local oldType = CI.ics.Type
-	CI.ics.Type = self.value
+	CI.ics.Type = newType
 
 	TMW:Fire("TMW_CONFIG_ICON_TYPE_CHANGED", CI.icon, CI.ics.Type, oldType)
-	
+
 	CI.icon:Setup()
-	
+
 	IE:LoadIcon(1)
+end
+
+function IE:IconType_DropDown_OnClick()
+	IE:ChangeIconType(self.value)
 end
 
 
