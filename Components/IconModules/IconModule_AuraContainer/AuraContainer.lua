@@ -307,7 +307,15 @@ function Module:SkinMasqueHolder(button, lmbGroup, tex, cd, frameLevel, position
 	holder:SetFrameLevel(frameLevel)
 	local w, h = positioner(holder)
 	holder.GetSize = function() return w, h end
+	-- AddButton registers the holder the first time; on later calls it early-returns
+	-- (already in the group) without re-skinning. Masque otherwise re-scales via the
+	-- frame's OnSizeChanged hook, but our GetSize is a shadow updated only just above -
+	-- after the positioner's SetSize already fired OnSizeChanged with the stale value - so
+	-- the icon/cooldown scale would freeze at the size from the first skin. ReSkin re-runs
+	-- SkinButton now, reading the current (shadowed) size, so they track the Icon
+	-- width/height and border-inset changes.
 	lmbGroup:AddButton(holder, { Icon = tex, Cooldown = cd }, "Legacy")
+	lmbGroup:ReSkin(holder)
 	return holder
 end
 
