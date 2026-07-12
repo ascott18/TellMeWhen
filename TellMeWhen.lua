@@ -1062,10 +1062,6 @@ function TMW:PLAYER_LOGIN()
 	TMW:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("TRAIT_CONFIG_UPDATED", "PLAYER_SPECIALIZATION_CHANGED")
 	TMW:RegisterEvent("CHARACTER_POINTS_CHANGED", "PLAYER_SPECIALIZATION_CHANGED")
-
-
-
-
 	
 	TMW:InitializeDatabase()
 	
@@ -1073,10 +1069,6 @@ function TMW:PLAYER_LOGIN()
 	-- most commonly used to see if the user has configured an icon at all.
 	TMW.DEFAULT_ICON_SETTINGS = TMW.db.profile.Groups[0].Icons[0]
 	TMW.db.profile.Groups[0] = nil
-	
-
-
-
 	
 	--------------- Communications ---------------
 	-- Channel TMW is used for sharing data.
@@ -1090,21 +1082,11 @@ function TMW:PLAYER_LOGIN()
 	-- PLAYER_ENTERING_WORLD handles sending version warnings
 	TMW:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-
-
-
-
-	
 	TMW:Fire("TMW_INITIALIZE")
 	TMW:UnregisterAllCallbacks("TMW_INITIALIZE")
 
 	TMW.Initialized = true
 	
-	TMW:SetScript("OnUpdate", TMW.OnUpdate)
-
-	-- Updates are always chunked across frames now, which fixes the "script ran too long"
-	-- errors that could otherwise happen when logging in.
-	-- https://wow.curseforge.com/projects/tellmewhen/issues/1643
 	TMW:Update()
 end
 TMW:RegisterEvent("PLAYER_LOGIN")
