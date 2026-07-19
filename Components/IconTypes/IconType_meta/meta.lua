@@ -207,6 +207,9 @@ local function Meta_OnEvent(icon, event, arg1)
 		if icon.IconsLookup and icon.IconsLookup[GUID] then
 			icon.UpdatedIcons[arg1] = true
 			CompileIcons(icon)
+			-- A re-setup source may have fresh settings,
+			-- so force a re-inherit on next update
+			icon.__metaModuleSource = nil
 			icon.NextUpdateTime = 0
 		end
 	end
