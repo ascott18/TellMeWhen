@@ -46,9 +46,41 @@ if TMW.wowMajorMinor < 12.1 then return end
 
 local max = math.max
 local LSM = LibStub("LibSharedMedia-3.0")
+local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
 
 -- GLOBALS: AnchorUtil, AuraContainerSortDirection, AuraContainerSortMethod
 local FlowDirection = AnchorUtil.FlowDirection
+
+-- The container stamps every aura frame with DenyTaintedAccessWhenAurasAreSecret the moment
+-- its initializeFrame callback returns (AuraContainerCustomFrameProviderMixin:CreateFrame).
+-- While auras are secret that denies us EVERY call on the frame - not just secret-valued
+-- reads - so `button:SetSize()` from tainted code is a hard error, not a taint warning. Two
+-- consequences run through this file:
+--   * A new button can only be skinned inside initializeFrame, before the stamp lands. Both
+--     creation paths (EnsureGroup, EnsureSlot) therefore do all their frame work there.
+--   * An existing button can only be re-skinned while auras aren't secret. Reskins that
+--     arrive at a bad time park their module here and replay once the restriction lifts
+--     (leaving combat / an encounter / M+ / PvP).
+-- There's no event for the flip, so poll it off TMW's update the way Common/Auras.lua does.
+local pendingReskin = {}
+local aurasWereSecret = ShouldAurasBeSecret()
+
+TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
+	local secret = ShouldAurasBeSecret()
+	if secret == aurasWereSecret then
+		return
+	end
+	aurasWereSecret = secret
+	if secret then
+		return
+	end
+
+	local flush = pendingReskin
+	pendingReskin = {}
+	for module in pairs(flush) do
+		module:ReskinButtons()
+	end
+end)
 
 -- A NumericRuleFormatter that mirrors TMW:FormatSeconds / the TMWFormatDuration
 -- DogTag, so the AuraButton's (secret) duration text reads the same as every other
@@ -288,7 +320,12 @@ function Module:ApplyButtonSettings(button, settingsIcon)
 			cd:SetDrawEdge(TMW.db.profile.DrawEdge)
 			button:SetDurationCooldown(cd)
 		else
+			-- ClearDurationCooldown only drops the button's reference to our frame; it
+			-- never touches the frame, so a sweep already running on it would keep
+			-- playing out to its end. Stop it ourselves.
 			button:ClearDurationCooldown()
+			cd:Clear()
+			cd:Hide()
 		end
 	end
 end
@@ -628,6 +665,9 @@ end
 -- runs for each recorded button in ReskinButtons. Every button mirrors self.icon (all
 -- icons in a group controller share the same view/skin/size), so it looks like a
 -- normal TMW icon regardless of where the container placed it.
+--
+-- Callers must reach this either from an initializeFrame callback or with auras non-secret
+-- (see pendingReskin) - every call below is on a frame the container restricts otherwise.
 function Module:SkinButton(button)
 	local icon = self.icon
 	self:EnsureButtonWidgets(button)
@@ -684,8 +724,15 @@ function Module:ReskinButtons(settingsIcon)
 
 	self:ConfigureContainerLayout()
 
+	-- Recorded before the secret bail so a deferred replay inherits from the same source.
 	if settingsIcon then
 		self.settingsIcon = settingsIcon
+	end
+
+	-- Every button here already carries the access restriction (see pendingReskin).
+	if ShouldAurasBeSecret() then
+		pendingReskin[self] = true
+		return
 	end
 	for button in pairs(self.buttons) do
 		self:SkinButton(button)
@@ -818,17 +865,26 @@ function Module:EnsureSlot(index, filterString)
 	end
 
 	local key = "tmwSlot" .. index
-	local frame = container:AddAuraSlot(key, filterString, {})
+
 	-- Slots aren't part of the container's flow layout; anchor the frame over the icon
 	-- ourselves. SkinButton sizes it. (Multiple slots on one icon overlap - a single icon
 	-- is meant to show one aura; multiple OR'd ExtraFilters are the uncommon exception.)
-	frame:ClearAllPoints()
-	frame:SetPoint("CENTER", self.icon)
+	-- Like the group path, this all has to happen in initializeFrame - AddAuraSlot returns
+	-- a frame the container has already restricted (see pendingReskin), so anchoring or
+	-- skinning it off the return value errors outright whenever auras are secret.
+	local function initializeFrame(frame)
+		self.buttons[frame] = true
+		frame:ClearAllPoints()
+		frame:SetPoint("CENTER", self.icon)
+		self:SkinButton(frame)
+	end
 
-	slot = { key = key, frame = frame }
+	container:AddAuraSlot(key, filterString, { initializeFrame = initializeFrame })
+
+	-- No frame reference kept: outside its initializeFrame window there's nothing we're
+	-- allowed to do with one, and the container is addressed by slot key anyway.
+	slot = { key = key }
 	self.slots[index] = slot
-	self.buttons[frame] = true
-	self:SkinButton(frame)
 	return slot
 end
 
@@ -969,6 +1025,12 @@ Module:SetDataListener("AURASPEC")
 -- be on attributes.texture yet, and it also updates later for dynamic ($item/$spell) textures.
 -- Re-apply the button icon textures whenever it changes so the override actually lands.
 function Module:TEXTURE(icon, texture)
+	-- ApplyButtonSettings calls SetIcon/ClearIcon on the button itself, so it's restricted
+	-- while auras are secret just like a full reskin (see pendingReskin).
+	if ShouldAurasBeSecret() then
+		pendingReskin[self] = true
+		return
+	end
 	for button in pairs(self.buttons) do
 		self:ApplyButtonSettings(button, self.settingsIcon)
 	end
