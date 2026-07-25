@@ -15,6 +15,7 @@ TMW.CHANGELOG = [==[
     * tullaCTC is not yet able to style the cooldown swipes on these icons.
 * The deprecated Edit Mode setting to hide Blizzard Cooldown Manager viewers per edit mode layout has been fully removed. The per-group setting remains.
 * Default text layouts for horizontal and vertical bar groups now show stack text in a separate display.
+* Fix totem.lua:159: attempt to perform arithmetic on local 'start' (a secret number value)
 
 ## v12.0.13
 * Fix #2444 - Auras.lua:245: attempt to index local 'unitData' (a nil value)

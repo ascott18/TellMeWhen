@@ -864,11 +864,13 @@ local totemRanks = TMW.COMMON.TotemRanks or {}
 
 function Env.TotemHelper(slot, spellSet)
 	local _, totemName, start, duration = GetTotemInfo(slot)
-	
-	if issecretvalue(totemName) then
+
+	-- Each of these returns can be secret independently of the others,
+	-- so a readable name doesn't mean the timings are readable too.
+	if issecretvalue(totemName) or issecretvalue(start) or issecretvalue(duration) then
 		return 0
 	end
-	
+
 	local totemNameLower = strlowerCache[totemName]
 	local totemInfo = totemRanks[totemNameLower]
 	
@@ -906,10 +908,12 @@ function Env.TotemHelperAny(spellSet)
 			return 0 -- `have` will be nil if the slot doesn't exist.
 		end
 		
-		if issecretvalue(totemName) then
+		-- Each of these returns can be secret independently of the others,
+		-- so a readable name doesn't mean the timings are readable too.
+		if issecretvalue(totemName) or issecretvalue(start) or issecretvalue(duration) then
 			return 0
 		end
-		
+
 		local totemNameLower = strlowerCache[totemName]
 		local totemInfo = totemRanks[totemNameLower]
 

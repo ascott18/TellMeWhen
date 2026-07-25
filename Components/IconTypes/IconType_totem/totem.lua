@@ -128,14 +128,18 @@ TMW:RegisterUpgrade(48017, {
 local function Totem_OnUpdate(icon, time)
 	-- Upvalue things that will be referenced in our loops.
 	local Slots, NameHash, NameFirst = icon.Slots, icon.Spells.Hash, icon.Spells.First
-	
+
 	-- Be careful here. Slots that are explicitly disabled by the user are set false.
 	-- Slots that are disabled internally are set nil (which could change table length).
 	for iSlot = 1, 5 do
 		if Slots[iSlot] then
 			local active, totemName, start, duration, totemIcon = GetTotemInfo(iSlot)
-			
-			if issecretvalue(totemName) then
+
+			-- Each of these returns can be secret independently of the others,
+			-- so a readable name doesn't mean the timings are readable too.
+			if issecretvalue(active) or issecretvalue(totemName)
+				or issecretvalue(start) or issecretvalue(duration)
+			then
 				-- If totems are secret, return data if not filtering by name.
 				if NameFirst == "" then
 					local durObj = GetTotemDuration and GetTotemDuration(iSlot)
