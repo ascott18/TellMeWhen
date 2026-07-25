@@ -48,19 +48,22 @@ local max = math.max
 local LSM = LibStub("LibSharedMedia-3.0")
 local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
 
--- GLOBALS: AnchorUtil, AuraContainerSortDirection, AuraContainerSortMethod
+-- GLOBALS: AnchorUtil, AuraContainerSortDirection, AuraContainerSortMethod, CUSTOM_CLASS_COLORS
 local FlowDirection = AnchorUtil.FlowDirection
+local FlowLayoutAxis = AnchorUtil.FlowLayoutAxis
 
--- The container stamps every aura frame with DenyTaintedAccessWhenAurasAreSecret the moment
--- its initializeFrame callback returns (AuraContainerCustomFrameProviderMixin:CreateFrame).
--- While auras are secret that denies us EVERY call on the frame - not just secret-valued
+-- The container stamps every aura frame with DenyTaintedAccessWhenAurasAreSecret as soon as
+-- its initializeFrame callback returns (AuraContainerCustomFrameProviderMixin:CreateFrame,
+-- which defers the stamp to PLAYER_ENTERING_WORLD for frames created before login). While
+-- auras are secret that stamp denies us EVERY call on the frame - not just secret-valued
 -- reads - so `button:SetSize()` from tainted code is a hard error, not a taint warning. Two
 -- consequences run through this file:
 --   * A new button can only be skinned inside initializeFrame, before the stamp lands. Both
 --     creation paths (EnsureGroup, EnsureSlot) therefore do all their frame work there.
---   * An existing button can only be re-skinned while auras aren't secret. Reskins that
---     arrive at a bad time park their module here and replay once the restriction lifts
---     (leaving combat / an encounter / M+ / PvP).
+--   * An existing button can only be re-skinned while we're allowed to touch it. While auras
+--     are secret each button answers that itself (CanBeAccessedInContext) - one still waiting
+--     for its stamp is fair game. Reskins that arrive at a bad time park their module here
+--     and replay once the restriction lifts (leaving combat / an encounter / M+ / PvP).
 -- There's no event for the flip, so poll it off TMW's update the way Common/Auras.lua does.
 local pendingReskin = {}
 local aurasWereSecret = ShouldAurasBeSecret()
@@ -164,13 +167,13 @@ function Module:OnNewInstance(icon)
 	self.buttons = {}
 
 	-- Group controllers distribute N distinct auras across the group, so they use aura
-	-- GROUPS (keyed by filter string; the string is immutable and groups can't be removed,
-	-- so we add each once and toggle maxFrameCount to (de)activate). 
+	-- GROUPS. Both pools are keyed by index: neither a group nor a slot can be removed, but
+	-- their filter strings ARE mutable, so we reassign by index rather than accumulate one
+	-- per filter string the icon has ever used. Unused groups are parked with maxFrameCount 0.
 	self.groups = {}
-	
+
 	-- A single icon shows one aura, so it uses aura SLOTS instead - one frame each.
-	-- Slots are a fixed pool keyed by index (their filter string IS mutable, so we
-	-- reassign rather than accumulate); unused ones are parked with a filter matching none.
+	-- Unused ones are parked with a filter matching nothing (a slot has no frame cap).
 	self.slots = {}
 end
 
@@ -253,12 +256,27 @@ local function AnchorFromSettings(region, stringSettings, realTexts, icon, remap
 	return true
 end
 
--- Create the button's icon texture / cooldown / status bar (once). They live as
+-- Create the button's icon holder / texture / cooldown / status bar (once). They live as
 -- children of the container-owned button so they inherit its forbidden aspects.
 function Module:EnsureButtonWidgets(button)
+	-- The icon texture hangs off the holder Masque skins rather than off the button
+	-- directly. Masque's icon skinning re-parents the region it's given onto that holder
+	-- (Masque/Core/Regions/Icon.lua), and the button stamps ChangeParent on everything handed
+	-- to SetIcon, which makes the re-parent a hard error rather than a no-op. Starting the
+	-- texture where Masque wants it leaves nothing for that call to do, and swallowing it
+	-- keeps Masque from erroring. The holder exists even without Masque - it's then just the
+	-- texture's parent, covering the button (see ResetIconHolder).
+	local holder = button.tmwIconHolder
+	if not holder then
+		holder = CreateFrame("Button", nil, button)
+		holder:SetAllPoints(button)
+		button.tmwIconHolder = holder
+	end
+
 	if not button.tmwIcon then
-		local tex = button:CreateTexture(nil, "ARTWORK")
+		local tex = holder:CreateTexture(nil, "ARTWORK")
 		tex:SetAllPoints(button)
+		tex.SetParent = TMW.NULLFUNC
 		button.tmwIcon = tex
 	end
 
@@ -330,19 +348,25 @@ function Module:ApplyButtonSettings(button, settingsIcon)
 	end
 end
 
--- Get-or-create the button's Masque holder and Masque-skin the given icon/cooldown into
--- it, returning the holder. The container-owned AuraButton can't be Masque'd directly:
--- it's forbidden, so its GetSize() reads back as a secret and Masque's UpdateScale divides
--- by it (taint). The holder (a child of the button, so it can anchor to the button and
--- stay correctly placed - group controllers included) stands in, and we shadow its GetSize
--- with the known non-secret size so Masque never touches the secret. `positioner(holder)`
--- positions + sizes the holder for the view and returns that (non-secret) size.
+-- Return the icon holder to its unskinned state: covering the button at the button's own
+-- level, shown, since it parents the icon texture whether Masque is involved or not.
+local function ResetIconHolder(button)
+	local holder = button.tmwIconHolder
+	holder:ClearAllPoints()
+	holder:SetAllPoints(button)
+	holder:SetFrameLevel(button:GetFrameLevel())
+	holder:Show()
+end
+
+-- Masque-skin the button's holder (and the icon/cooldown handed to it), returning the
+-- holder. The container-owned AuraButton can't be Masque'd directly: it's forbidden, so its
+-- GetSize() reads back as a secret and Masque's UpdateScale divides by it (taint). The
+-- holder (a child of the button, so it can anchor to the button and stay correctly placed -
+-- group controllers included) stands in, and we shadow its GetSize with the known non-secret
+-- size so Masque never touches the secret. `positioner(holder)` positions + sizes the holder
+-- for the view and returns that (non-secret) size.
 function Module:SkinMasqueHolder(button, lmbGroup, tex, cd, frameLevel, positioner)
 	local holder = button.tmwIconHolder
-	if not holder then
-		holder = CreateFrame("Button", nil, button)
-		button.tmwIconHolder = holder
-	end
 	holder:Show()
 	holder:SetFrameLevel(frameLevel)
 	local w, h = positioner(holder)
@@ -375,8 +399,8 @@ function Module:Emulate_IconView_Icon(icon, button)
 				holder:SetAllPoints(button)
 				return icon:GetSize()
 			end)
-	elseif button.tmwIconHolder then
-		button.tmwIconHolder:Hide()
+	else
+		ResetIconHolder(button)
 	end
 
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
@@ -402,9 +426,20 @@ local function GetBarColor(icon)
 	local unit = spec and spec.unit
 	if icon.BarDisplay_ClassColor and unit then
 		local _, class = UnitClass(unit)
-		local c = class and (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
-		if c then
-			return c.r, c.g, c.b, 1
+		if issecretvalue(class) then
+			-- A restricted unit's class is secret, so it can't index the class color tables.
+			-- C_ClassColor accepts the secret and SetStatusBarColor accepts the secret
+			-- components back out of it; the cost is CUSTOM_CLASS_COLORS support.
+			local c = C_ClassColor.GetClassColor(class)
+			if c then
+				local r, g, b = c:GetRGB()
+				return r, g, b, 1
+			end
+		elseif class then
+			local c = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
+			if c then
+				return c.r, c.g, c.b, 1
+			end
 		end
 	end
 	return TMW:StringToCachedColorMixin(icon.TimerBar_StartColor or "ffff0000"):GetRGBA()
@@ -448,16 +483,17 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 			end)
 			remap[iconSquare] = iconRegion
 		else
+			ResetIconHolder(button)
 			MirrorPoints(tex, iconSquare, remap, button)
 			MirrorPoints(cd, iconSquare, remap, button)
 			remap[iconSquare] = tex
 			iconRegion = tex
 		end
 	else
+		-- No icon square at all: hiding the holder takes the icon texture and any Masque
+		-- skin on it with it.
 		tex:Hide()
-		if button.tmwIconHolder then
-			button.tmwIconHolder:Hide()
-		end
+		button.tmwIconHolder:Hide()
 		button:ClearDurationCooldown()
 		cd:Hide()
 	end
@@ -508,7 +544,6 @@ function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 		frame.tex:SetAllPoints(frame)
 		button.tmwBarBackdrop = frame
 	end
-	frame:SetParent(button)
 	frame:ClearAllPoints()
 	frame:SetAllPoints(bar)
 	frame:SetFrameLevel(base)          -- behind the bar's fill (base + 1)
@@ -557,7 +592,6 @@ function Module:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 			border = TMW.Classes.GenericBorder:New("Frame", nil, button, "TellMeWhen_GenericBorder")
 			button.tmwIconBorder = border
 		end
-		border:SetParent(button)
 		border:ClearAllPoints()
 		border:SetAllPoints(iconRegion)
 		border:SetFrameLevel(button:GetFrameLevel() + 4)  -- on top of the icon square
@@ -646,7 +680,7 @@ function Module:Emulate_IconModule_Texts(icon, button, remap)
 					button:SetSpellName(auraFs)
 				elseif aura == "duration" then
 					-- Format the AuraButton's secret duration the TMW way (see durationFormatter).
-					button:SetDurationText(auraFs, { formatter = durationFormatter })
+					button:SetDurationText(auraFs, { textFormatter = durationFormatter })
 				elseif aura == "stacks" then
 					button:SetApplicationCount(auraFs, {})
 				end
@@ -654,9 +688,19 @@ function Module:Emulate_IconModule_Texts(icon, button, remap)
 		end
 	end
 
-	for _, fs in pairs(button.tmwAuraText) do
+	for aura, fs in pairs(button.tmwAuraText) do
 		if not fs.tmwUsed then
 			fs:Hide()
+			-- Unbind it from the button too, not just hide it: the button keeps its duration
+			-- text binding across reconfiguration, so an abandoned string would still be
+			-- driven by it.
+			if aura == "spell" then
+				button:ClearSpellName()
+			elseif aura == "duration" then
+				button:ClearDurationText()
+			elseif aura == "stacks" then
+				button:ClearApplicationCount()
+			end
 		end
 	end
 end
@@ -724,18 +768,22 @@ function Module:ReskinButtons(settingsIcon)
 
 	self:ConfigureContainerLayout()
 
-	-- Recorded before the secret bail so a deferred replay inherits from the same source.
+	-- Recorded before any deferral so a deferred replay inherits from the same source.
 	if settingsIcon then
 		self.settingsIcon = settingsIcon
 	end
 
-	-- Every button here already carries the access restriction (see pendingReskin).
-	if ShouldAurasBeSecret() then
-		pendingReskin[self] = true
-		return
-	end
+	-- While auras are secret the access restriction denies us every call on a button that
+	-- carries it, so ask each one whether this (tainted) execution may touch it rather than
+	-- assuming from aura secrecy alone - a button whose restriction hasn't landed yet is
+	-- still skinnable. Whatever we skip replays once the restriction lifts.
+	local secret = ShouldAurasBeSecret()
 	for button in pairs(self.buttons) do
-		self:SkinButton(button)
+		if not secret or button:CanBeAccessedInContext() then
+			self:SkinButton(button)
+		else
+			pendingReskin[self] = true
+		end
 	end
 end
 
@@ -744,21 +792,23 @@ end
 -- Container setup + aura spec
 -- ----------------------------------------------------------------------------
 
--- Map a group's LayoutDirection to the anchor corner + flow growth directions its
--- icons use (see IconPosition_Sortable:Icon_SetPoint). Only the corner and the two
--- growth axes are honored (from LayoutDirection % 4); the row-vs-column fill order of
--- directions 5-8 isn't reproduced - Blizzard's flow layout is always row-major - so a
--- column-major group is approximated by the matching corner/axes.
+-- Map a group's LayoutDirection to the anchor corner, the flow growth directions and the
+-- fill axis its icons use (see IconPosition_Sortable:Icon_SetPoint). The corner and the two
+-- growth directions come from LayoutDirection % 4; directions 1-4 fill a row at a time
+-- (horizontal axis, wrapping after Columns icons) and 5-8 fill a column at a time (vertical
+-- axis, wrapping after Rows icons).
 local function LayoutDirectionAnchor(layoutDirection)
-	local m = (layoutDirection or 1) % 4
+	layoutDirection = layoutDirection or 1
+	local axis = layoutDirection >= 5 and FlowLayoutAxis.Vertical or FlowLayoutAxis.Horizontal
+	local m = layoutDirection % 4
 	if m == 1 then
-		return "TOPLEFT", FlowDirection.Right, FlowDirection.Down
+		return "TOPLEFT", FlowDirection.Right, FlowDirection.Down, axis
 	elseif m == 2 then
-		return "TOPRIGHT", FlowDirection.Left, FlowDirection.Down
+		return "TOPRIGHT", FlowDirection.Left, FlowDirection.Down, axis
 	elseif m == 3 then
-		return "BOTTOMRIGHT", FlowDirection.Left, FlowDirection.Up
+		return "BOTTOMRIGHT", FlowDirection.Left, FlowDirection.Up, axis
 	else -- m == 0 (LayoutDirection 4 / 8)
-		return "BOTTOMLEFT", FlowDirection.Right, FlowDirection.Up
+		return "BOTTOMLEFT", FlowDirection.Right, FlowDirection.Up, axis
 	end
 end
 
@@ -771,7 +821,7 @@ end
 --     Point) so it grows from where the group is pinned - a CENTER pin expands
 --     symmetrically - as auras come and go.
 -- In every controller case the auras FILL in the icon layout direction (the
--- LayoutDirection corner + growth), matching Columns and icon spacing.
+-- LayoutDirection corner, growth and fill axis), matching Columns/Rows and icon spacing.
 function Module:ConfigureContainerLayout()
 	local container = self.container
 	if not container then
@@ -782,10 +832,11 @@ function Module:ConfigureContainerLayout()
 	w = (w and w > 0) and w or 1
 	h = (h and h > 0) and h or 1
 
-	container:SetAuraLayoutPadding(0, 0, 0, 0)
+	container:SetFlowLayoutPadding(0, 0, 0, 0)
 	container:ClearAllPoints()
 
 	local spacingX, spacingY = 0, 0
+	local vertical = false
 	local group = icon.group
 	if icon:IsGroupController() then
 		local gs = group:GetSettings()
@@ -793,8 +844,8 @@ function Module:ConfigureContainerLayout()
 		spacingX = gspv.SpacingX or 0
 		spacingY = gspv.SpacingY or 0
 
-		local flowPoint, hGrow, vGrow = LayoutDirectionAnchor(group.LayoutDirection)
-		local columns = max(group.Columns or 1, 1)
+		local flowPoint, hGrow, vGrow, axis = LayoutDirectionAnchor(group.LayoutDirection)
+		vertical = axis == FlowLayoutAxis.Vertical
 
 		-- The auras fill from the LayoutDirection corner; where that block is pinned to
 		-- the group differs. Fixed grid: pin to the LayoutDirection corner itself, so the
@@ -805,34 +856,51 @@ function Module:ConfigureContainerLayout()
 			anchorPoint = gs.Point and gs.Point.point or "CENTER"
 		end
 		container:SetPoint(anchorPoint, group, anchorPoint)
-		container:SetAuraLayoutAnchorPoint(flowPoint)
-		container:SetAuraLayoutGrowthDirection(hGrow, vGrow)
-		-- Wrap after `columns` cells (cell = icon size + spacing).
-		-- A tiny epsilon is added to fight occasional floating point errors that
-		-- cause premature wrapping that makes a row skip placing its last icon.
-		container:SetAuraLayoutRowWidth(columns * (w + spacingX) + 0.1)
+		container:SetFlowLayoutAxis(axis)
+		container:SetFlowLayoutAnchorPoint(flowPoint)
+		container:SetFlowLayoutGrowthDirection(hGrow, vGrow)
+		-- Wrap after `Columns` cells across, or `Rows` cells down when filling by column
+		-- (cell = icon size + spacing). A tiny epsilon is added to fight occasional
+		-- floating point errors that cause premature wrapping that makes a line skip
+		-- placing its last icon.
+		if vertical then
+			container:SetFlowLayoutMaximumLineSize(max(group.Rows or 1, 1) * (h + spacingY) + 0.1)
+		else
+			container:SetFlowLayoutMaximumLineSize(max(group.Columns or 1, 1) * (w + spacingX) + 0.1)
+		end
 	else
 		container:SetPoint("TOPLEFT", icon, "TOPLEFT")
-		container:SetAuraLayoutAnchorPoint("TOPLEFT")
-		container:SetAuraLayoutGrowthDirection(FlowDirection.Right, FlowDirection.Down)
-		container:SetAuraLayoutRowWidth(w)
+		container:SetFlowLayoutAxis(FlowLayoutAxis.Horizontal)
+		container:SetFlowLayoutAnchorPoint("TOPLEFT")
+		container:SetFlowLayoutGrowthDirection(FlowDirection.Right, FlowDirection.Down)
+		container:SetFlowLayoutMaximumLineSize(w)
 	end
 
-	-- Match the group's icon spacing between cells (per active group's frames).
-	for filterString in pairs(self.groups) do
-		container:SetAuraGroupLayout(filterString, {
-			elementSpacingX = spacingX,
-			elementSpacingY = spacingY,
+	-- Match the group's icon spacing between cells (per active group's frames). Spacing is
+	-- axis-relative: elementSpacing runs along the fill axis, lineSpacing across it. The
+	-- layoutIndex keeps the pooled groups laid out in spec order - without it the container
+	-- falls back to registration order, which pooling no longer keeps in step with the spec.
+	for index, auraGroup in ipairs(self.groups) do
+		container:SetAuraGroupLayout(auraGroup.key, {
+			elementSpacing = vertical and spacingY or spacingX,
+			lineSpacing = vertical and spacingX or spacingY,
+			layoutIndex = index,
 		})
 	end
 end
 
--- Ensure an aura group exists for `filterString`. Groups are added once (the filter
--- string is immutable and groups can't be removed) and (de)activated via maxFrameCount.
-function Module:EnsureGroup(filterString, maxFrameCount)
+-- Ensure the index'th aura group exists (group controllers), point it at `filterString` and
+-- return it. The pool is keyed by index rather than by filter string: a group can't be
+-- removed, but its filter string is mutable (SetAuraGroupFilterString), so reassigning by
+-- index avoids accumulating a group - each with its own up-front batch of frames - for every
+-- filter string the icon has ever been configured with. Unused ones are parked via
+-- maxFrameCount 0.
+function Module:EnsureGroup(index, filterString, maxFrameCount)
 	local container = self.container
-	if self.groups[filterString] then
-		return
+	local auraGroup = self.groups[index]
+	if auraGroup then
+		container:SetAuraGroupFilterString(auraGroup.key, filterString)
+		return auraGroup
 	end
 
 	local function initializeFrame(frame)
@@ -840,11 +908,15 @@ function Module:EnsureGroup(filterString, maxFrameCount)
 		self:SkinButton(frame)
 	end
 
-	container:AddAuraGroup(filterString, filterString, {
+	local key = "tmwGroup" .. index
+	container:AddAuraGroup(key, filterString, {
 		maxFrameCount = maxFrameCount,
 		initializeFrame = initializeFrame,
 	})
-	self.groups[filterString] = true
+
+	auraGroup = { key = key }
+	self.groups[index] = auraGroup
+	return auraGroup
 end
 
 -- A deliberately self-contradictory filter (an aura can't be both HELPFUL and HARMFUL),
@@ -853,9 +925,8 @@ local SLOT_PARK_FILTER = "HELPFUL|HARMFUL"
 
 -- Ensure the index'th aura slot exists (single-aura icons), set its filter string, and
 -- return its frame. Slots create ONE frame (no group batch) and are manually anchored, so
--- we place the frame over the icon and record it for skinning. The slot pool is reused
--- across specs: a slot's filter string is mutable, so we reassign by index rather than
--- accumulate one per (unremovable) filter string the way groups must.
+-- we place the frame over the icon and record it for skinning. The pool works like the
+-- group pool above - reassigned by index across specs.
 function Module:EnsureSlot(index, filterString)
 	local container = self.container
 	local slot = self.slots[index]
@@ -889,8 +960,8 @@ function Module:EnsureSlot(index, filterString)
 end
 
 function Module:DeactivateGroups()
-	for filterString in pairs(self.groups) do
-		self.container:SetAuraGroupMaxFrameCount(filterString, 0)
+	for i = 1, #self.groups do
+		self.container:SetAuraGroupMaxFrameCount(self.groups[i].key, 0)
 	end
 end
 
@@ -902,17 +973,14 @@ function Module:DeactivateSlots()
 	end
 end
 
--- Create the AuraContainer if it doesn't exist yet, returning it (or nil). Deferred
--- while in combat: the container is a secure/forbidden frame, and one created during
--- combat has its OnLoad deferred, leaving its internal state (dirtyFlags / event lists)
--- nil - so the first SetAuraLayout*/SetEnabled call on it errors. SetAuraSpec runs every
--- update, so the first update out of combat creates it. Controlled icons never own one.
+-- Create the AuraContainer if it doesn't exist yet, returning it (or nil). Controlled icons
+-- never own one - the controller's shared container covers their cells.
 function Module:EnsureContainer()
 	local container = self.container
 	if container then
 		return container
 	end
-	if self.icon:IsControlled() or InCombatLockdown() then
+	if self.icon:IsControlled() then
 		return nil
 	end
 
@@ -937,8 +1005,6 @@ function Module:SetAuraSpec(auraSpec)
 		return
 	end
 
-	-- NB: Container creation deferred while in combat (see EnsureContainer); 
-	-- the next out-of-combat update creates it and re-runs this.
 	local container = self:EnsureContainer()
 	if not container then
 		return
@@ -956,31 +1022,26 @@ function Module:SetAuraSpec(auraSpec)
 	local filters = auraSpec.filters
 
 	if icon:IsGroupController() then
-		-- Controller: one AuraGroup per filter string, distributing distinct auras across
+		-- Controller: one pooled AuraGroup per filter, distributing distinct auras across
 		-- the group's cells. Park any slots left from a prior standalone setup.
 		self:DeactivateSlots()
 
 		-- maxFrameCount caps PER group (no container-wide cap), so with multiple filters
 		-- each contributes up to this many, flow-laid-out together by the container.
 		local maxFrameCount = icon.group.numIcons
-		local wanted = {}
 		for i = 1, #filters do
 			local f = filters[i]
-			local filterString = f.filterString
-			wanted[filterString] = true
-			self:EnsureGroup(filterString, maxFrameCount)
+			local auraGroup = self:EnsureGroup(i, f.filterString, maxFrameCount)
 
-			container:SetAuraGroupMaxFrameCount(filterString, maxFrameCount)
-			container:SetAuraGroupCandidateFilters(filterString, f.candidateFilters)
+			container:SetAuraGroupMaxFrameCount(auraGroup.key, maxFrameCount)
+			container:SetAuraGroupCandidateFilters(auraGroup.key, f.candidateFilters)
 			if f.sortMethod then
-				container:SetAuraGroupSortMethod(filterString, f.sortMethod, f.sortDirection)
+				container:SetAuraGroupSortMethod(auraGroup.key, f.sortMethod, f.sortDirection)
 			end
 		end
-		-- Deactivate groups whose filter string is no longer in the spec.
-		for filterString in pairs(self.groups) do
-			if not wanted[filterString] then
-				container:SetAuraGroupMaxFrameCount(filterString, 0)
-			end
+		-- Park pooled groups beyond the current filter count.
+		for i = #filters + 1, #self.groups do
+			container:SetAuraGroupMaxFrameCount(self.groups[i].key, 0)
 		end
 
 		self:ConfigureContainerLayout()
@@ -1025,14 +1086,15 @@ Module:SetDataListener("AURASPEC")
 -- be on attributes.texture yet, and it also updates later for dynamic ($item/$spell) textures.
 -- Re-apply the button icon textures whenever it changes so the override actually lands.
 function Module:TEXTURE(icon, texture)
-	-- ApplyButtonSettings calls SetIcon/ClearIcon on the button itself, so it's restricted
-	-- while auras are secret just like a full reskin (see pendingReskin).
-	if ShouldAurasBeSecret() then
-		pendingReskin[self] = true
-		return
-	end
+	-- ApplyButtonSettings calls SetIcon/ClearIcon on the button itself, so it's gated by the
+	-- same access check a full reskin is (see pendingReskin).
+	local secret = ShouldAurasBeSecret()
 	for button in pairs(self.buttons) do
-		self:ApplyButtonSettings(button, self.settingsIcon)
+		if not secret or button:CanBeAccessedInContext() then
+			self:ApplyButtonSettings(button, self.settingsIcon)
+		else
+			pendingReskin[self] = true
+		end
 	end
 end
 Module:SetDataListener("TEXTURE")
@@ -1059,8 +1121,6 @@ function Module:OnEnable()
 		return
 	end
 
-	-- Create the container now if we can; if we're in combat it's deferred to the first
-	-- out-of-combat update (see EnsureContainer).
 	self:EnsureContainer()
 end
 

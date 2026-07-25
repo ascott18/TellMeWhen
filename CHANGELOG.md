@@ -4,7 +4,7 @@
   * Cooldown Manager is not needed or used to provide data to these new icons.
   * These new icons have a few limitations:
     * Only one unit can be checked
-    * Spell filters can only filter buffs on friendly units, and debuffs on enemies.
+    * Spell filters can only filter buffs on friendly units, and debuffs on enemies. Spells that Blizzard flags as never secret are exempt and can be filtered on any unit.
     * Currently, only spell IDs (not spell names) can be filtered for.
     * There is no "Absent" state. Information can only be conveyed when auras are present.
     * tullaCTC is not yet able to style the cooldown swipes on these icons.

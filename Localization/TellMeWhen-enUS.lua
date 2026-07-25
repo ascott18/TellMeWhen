@@ -252,7 +252,7 @@ L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"] = "Limitations"
 L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"] = [[This icon works in combat, but is subject to the following Blizzard-enforced limitations:
 
 - Filtered spells must be IDs - cannot filter by name.
-- Spell filters can only filter for buffs on friendly units and debuffs on enemy units.
+- Spell filters can only filter for buffs on friendly units and debuffs on enemy units. Spells that Blizzard flags as never secret are exempt and can be filtered on any unit.
 - Only the first of the icon's units is checked; multiple units are not supported.]]
 
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
