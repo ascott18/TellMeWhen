@@ -13,9 +13,6 @@ TMW.CHANGELOG = [==[
     * Currently, only spell IDs (not spell names) can be filtered for.
     * There is no "Absent" state. Information can only be conveyed when auras are present.
     * tullaCTC is not yet able to style the cooldown swipes on these icons.
-* 12.1 makes a unit's class, race, role, and PvP flag secret whenever its identity is secret:
-  * The Class, Race, Role, and PvP Flag conditions no longer error on those units, and are now marked as restricted in combat.
-  * Class colors (timer bars, unit names, unit suggestions) still show the right color on those units, but can't come from CUSTOM_CLASS_COLORS for them.
 * The deprecated Edit Mode setting to hide Blizzard Cooldown Manager viewers per edit mode layout has been fully removed. The per-group setting remains.
 * Default text layouts for horizontal and vertical bar groups now show stack text in a separate display.
 * Fix totem.lua:159: attempt to perform arithmetic on local 'start' (a secret number value)

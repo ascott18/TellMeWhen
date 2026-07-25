@@ -1356,8 +1356,10 @@ L["TEXTLAYOUTS_SKINAS_COUNT"] = "Stack Text"
 L["TEXTLAYOUTS_SKINAS_HOTKEY"] = "Binding Text"
 
 L["TEXTLAYOUTS_AURA"] = "Aura Value"
-L["TEXTLAYOUTS_AURA_DESC"] = [[On combat-ready Buff/Debuff icons, drive this text with a real aura value (spell name, duration, or stacks) provided by Blizzard's aura display, instead of a DogTag string. The layout still controls its position and appearance. On all other icon types this setting is ignored and the text works as a normal DogTag string.]]
-L["TEXTLAYOUTS_AURA_NONE"] = "None (DogTag)"
+L["TEXTLAYOUTS_AURA_DESC"] = [[On combat-ready Buff/Debuff icons, drive this text with a real aura value (spell name, duration, or stacks) provided by Blizzard's aura display, instead of a DogTag string. The layout still controls its position and appearance. On all other icon types this setting is ignored and the text works as a normal DogTag string.
+
+Custom Text uses this display's DogTag string, evaluated once when the icon is set up. It does not update afterwards - Blizzard does not allow custom text updates when auras are restricted.]]
+L["TEXTLAYOUTS_AURA_TEXT"] = "Custom Text"
 L["TEXTLAYOUTS_AURA_SPELL"] = "Aura Name"
 L["TEXTLAYOUTS_AURA_DURATION"] = "Aura Duration"
 L["TEXTLAYOUTS_AURA_STACKS"] = "Aura Stacks"

@@ -188,7 +188,19 @@ end
 -- and handed to the CustomAuraButton APIs. The look is produced by MIRRORING the
 -- icon's real (Masque-skinned, bordered, padded) module frames, so it matches a
 -- normal TMW icon.
+--
+-- Everything we place on a button gets an explicit frame level from this stack (offsets
+-- from the button's own level) - two of our frames landing on the same level would order
+-- by creation instead. Text on top mirrors a real icon, where IconModule_Texts sits at
+-- icon level + 3 while the icon square and its border sit at + 0 / + 1.
 -- ----------------------------------------------------------------------------
+
+local LEVEL_BACKDROP = 0  -- the bar views' bar backdrop
+local LEVEL_ICON     = 1  -- icon holder: the icon texture and any Masque skin on it
+local LEVEL_BAR      = 1  -- the bar views' duration bar (never overlaps the icon square)
+local LEVEL_COOLDOWN = 2
+local LEVEL_BORDER   = 3  -- icon square + bar borders
+local LEVEL_TEXT     = 4
 
 -- Copy `source`'s anchor points (and size) onto `region`, remapping each point's
 -- relativeTo frame through `remap` (falling back to `default`). This reproduces a
@@ -284,7 +296,7 @@ function Module:EnsureButtonWidgets(button)
 		local cd = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
 		cd:SetAllPoints(button)
 		cd:SetReverse(true)
-		cd:SetFrameLevel(button:GetFrameLevel() + 1)
+		cd:SetFrameLevel(button:GetFrameLevel() + LEVEL_COOLDOWN)
 		button.tmwCooldown = cd
 	end
 
@@ -354,7 +366,7 @@ local function ResetIconHolder(button)
 	local holder = button.tmwIconHolder
 	holder:ClearAllPoints()
 	holder:SetAllPoints(button)
-	holder:SetFrameLevel(button:GetFrameLevel())
+	holder:SetFrameLevel(button:GetFrameLevel() + LEVEL_ICON)
 	holder:Show()
 end
 
@@ -395,7 +407,7 @@ function Module:Emulate_IconView_Icon(icon, button)
 	local lmbGroup = icon.lmbGroup
 	if lmbGroup then
 		iconRegion = self:SkinMasqueHolder(button, lmbGroup, button.tmwIcon, button.tmwCooldown,
-			button:GetFrameLevel() + 1, function(holder)
+			button:GetFrameLevel() + LEVEL_ICON, function(holder)
 				holder:SetAllPoints(button)
 				return icon:GetSize()
 			end)
@@ -452,23 +464,24 @@ end
 -- -> our mirrored copy of it. The duration StatusBar fills the mirrored bar region and
 -- is driven via SetDurationBar. `vertical` only selects the bar's orientation (barv).
 function Module:Emulate_IconView_Bar(icon, button, vertical)
-	local Modules = icon.Modules
-	local iconContainer = Modules.IconModule_IconContainer_Masque
+	-- Both are wanted for their frames' geometry alone, so take them disabled or unimplemented:
+	-- ReskinButtons disables IconContainer while locked, and this icon type never allows
+	-- TimerBar_BarDisplay at all (the view still lays its frames out for us to mirror).
+	local iconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer_Masque", true, true)
 	local iconSquare = iconContainer and iconContainer.container
-	local timerBar = Modules.IconModule_TimerBar_BarDisplay
+	local timerBar = icon:GetModuleOrModuleChild("IconModule_TimerBar_BarDisplay", true, true)
 	local barRef = timerBar and timerBar.container
 
-	-- Frame levels within the button: the fill/backdrop sit below the cooldown, and
-	-- the button's own children stay below the (button-owned) text frame. base is the
-	-- button's level (set by the container); we only order the children under it.
+	-- base is the button's level (set by the container); we only order our own frames
+	-- under it, from the LEVEL_* stack.
 	local base = button:GetFrameLevel()
 
 	local tex, cd, bar = button.tmwIcon, button.tmwCooldown, button.tmwStatusBar
 	local lmbGroup = icon.lmbGroup
 	local remap = { [icon] = button }
 
-	cd:SetFrameLevel(base + 2)
-	bar:SetFrameLevel(base + 1)
+	cd:SetFrameLevel(base + LEVEL_COOLDOWN)
+	bar:SetFrameLevel(base + LEVEL_BAR)
 
 	-- Icon square. `iconRegion` is whatever ends up playing it (the Masque holder or
 	-- the bare texture), used to anchor the recreated icon border below.
@@ -477,7 +490,7 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 		tex:Show()
 		if lmbGroup then
 			-- Masque-skin the icon square via a holder sized to the mirrored square.
-			iconRegion = self:SkinMasqueHolder(button, lmbGroup, tex, cd, base + 1, function(holder)
+			iconRegion = self:SkinMasqueHolder(button, lmbGroup, tex, cd, base + LEVEL_ICON, function(holder)
 				MirrorPoints(holder, iconSquare, remap, button)
 				return iconSquare:GetSize()
 			end)
@@ -546,7 +559,7 @@ function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 	end
 	frame:ClearAllPoints()
 	frame:SetAllPoints(bar)
-	frame:SetFrameLevel(base)          -- behind the bar's fill (base + 1)
+	frame:SetFrameLevel(base + LEVEL_BACKDROP)
 	frame:Show()
 
 	frame.tex:SetTexture(GetBarTexture(icon))
@@ -573,7 +586,7 @@ function Module:Emulate_IconModule_Backdrop(icon, button, bar, vertical)
 			border = TMW.Classes.GenericBorder:New("Frame", nil, frame, "TellMeWhen_GenericBorder")
 			frame.border = border
 		end
-		border:SetFrameLevel(base + 2)  -- on top of the bar
+		border:SetFrameLevel(base + LEVEL_BORDER)
 		border:SetBorderSize(gspv.BorderBar)
 		border:SetColor(TMW:StringToRGBA(gspv.BorderColor))
 		border:Show()
@@ -594,7 +607,7 @@ function Module:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 		end
 		border:ClearAllPoints()
 		border:SetAllPoints(iconRegion)
-		border:SetFrameLevel(button:GetFrameLevel() + 4)  -- on top of the icon square
+		border:SetFrameLevel(button:GetFrameLevel() + LEVEL_BORDER)
 		-- Inset borders use a negative size (matching IconContainer:SetBorder).
 		border:SetBorderSize(gspv.BorderInset and -gspv.BorderIcon or gspv.BorderIcon)
 		border:SetColor(TMW:StringToRGBA(gspv.BorderColor))
@@ -604,96 +617,109 @@ function Module:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 	end
 end
 
--- Drive text strings flagged with an Aura purpose (see TEXT.AuraContainerTexts)
--- with the AuraButton's real value. IconModule_Texts creates + positions its own
--- fontstring per such string; we create a aura-button-owned fontstring,
--- copy that string's font/justify, mirror its position onto the button, and hand it
--- to the matching AuraButton API.
+-- Mirror the icon's text layout onto the button. IconModule_Texts creates + positions its own
+-- fontstring per string; we create a button-owned copy, style it from the same layout
+-- settings, mirror its position, and give it a value based on the string's Aura purpose (see
+-- TEXT.AuraContainerTexts): "spell"/"duration"/"stacks" are handed to the matching AuraButton
+-- API, which drives them with the aura's real (secret) value, and the default takes a one-shot
+-- evaluation of the display's DogTag string. The icon's own copies go dark while locked (see
+-- Texts:OnKwargsUpdated) - they sit under the container and know nothing about which cells
+-- actually hold an aura.
 function Module:Emulate_IconModule_Texts(icon, button, remap)
-	local realTexts = icon.Modules and icon.Modules.IconModule_Texts
+	-- Disabled/unimplemented included: a reskin can run mid-setup, before the text module has
+	-- been implemented into the icon for this pass (we implement at a lower order than it).
+	local realTexts = icon:GetModuleOrModuleChild("IconModule_Texts", true, true)
 	local layout = realTexts and realTexts.layoutSettings
-	button.tmwAuraText = button.tmwAuraText or {}
+	-- Keyed by IconModule_Texts' own fontstring ID: a layout can hold any number of static
+	-- strings, so the Aura purpose alone doesn't identify one.
+	button.tmwTexts = button.tmwTexts or {}
 
-	-- The fontstrings live on a dedicated frame above everything else on the button
-	-- (the bar/backdrop are child frames that would otherwise draw over button-layer
-	-- text). Matches where IconModule_Texts sits (icon frame level + 3).
+	-- The fontstrings live on a dedicated frame at the top of the LEVEL_* stack: the icon
+	-- holder, bar and backdrop are all child frames that would otherwise draw over text
+	-- placed on the button itself.
 	local textFrame = button.tmwTextFrame
 	if not textFrame then
 		textFrame = CreateFrame("Frame", nil, button)
 		button.tmwTextFrame = textFrame
 	end
 	textFrame:SetAllPoints(button)
-	textFrame:SetFrameLevel(button:GetFrameLevel() + 3)
+	textFrame:SetFrameLevel(button:GetFrameLevel() + LEVEL_TEXT)
 
 	-- Hide any strings we no longer use.
-	for _, fs in pairs(button.tmwAuraText) do
+	for _, fs in pairs(button.tmwTexts) do
 		fs.tmwUsed = nil
 	end
 
 	if layout then
 		for textID, stringSettings in TMW:InNLengthTable(layout) do
 			local aura = stringSettings.Aura
-			if aura and aura ~= "" then
-				local realFs = realTexts.fontStrings[realTexts:GetFontStringID(textID, stringSettings)]
+			local fontStringID = realTexts:GetFontStringID(textID, stringSettings)
+			local realFs = realTexts.fontStrings[fontStringID]
 
-				local auraFs = button.tmwAuraText[aura]
-				if not auraFs then
-					auraFs = textFrame:CreateFontString(nil, "OVERLAY")
-					button.tmwAuraText[aura] = auraFs
-				end
-				auraFs.tmwUsed = true
-				auraFs:Show()
+			local auraFs = button.tmwTexts[fontStringID]
+			if not auraFs then
+				auraFs = textFrame:CreateFontString(nil, "OVERLAY")
+				button.tmwTexts[fontStringID] = auraFs
+			end
+			auraFs.tmwUsed = true
+			auraFs.tmwAura = aura
+			auraFs:Show()
 
-				-- Font/justify/size all come from the layout settings directly.
-				auraFs:SetFont(LSM:Fetch("font", stringSettings.Name), stringSettings.Size, stringSettings.Outline)
-				auraFs:SetJustifyH(stringSettings.Justify)
-				auraFs:SetJustifyV(stringSettings.JustifyV)
-				auraFs:SetShadowOffset(stringSettings.Shadow, -stringSettings.Shadow)
-				auraFs:SetRotation(math.rad(stringSettings.Rotate or 0))
-				-- 0 = auto-size to the text (default layout behavior).
-				auraFs:SetWidth(stringSettings.Width)
-				auraFs:SetHeight(stringSettings.Height)
+			-- Font/justify/size all come from the layout settings directly.
+			auraFs:SetFont(LSM:Fetch("font", stringSettings.Name), stringSettings.Size, stringSettings.Outline)
+			auraFs:SetJustifyH(stringSettings.Justify)
+			auraFs:SetJustifyV(stringSettings.JustifyV)
+			auraFs:SetShadowOffset(stringSettings.Shadow, -stringSettings.Shadow)
+			auraFs:SetRotation(math.rad(stringSettings.Rotate or 0))
+			-- 0 = auto-size to the text (default layout behavior).
+			auraFs:SetWidth(stringSettings.Width)
+			auraFs:SetHeight(stringSettings.Height)
 
-				-- Position from the layout's own Anchors, not by mirroring realFs: a
-				-- Masque-skinned string (SkinAs ~= "", like the stacks "Count") is
-				-- positioned by Masque relative to its button, so realFs's geometry
-				-- would mirror to the wrong spot. Fall back to mirroring realFs (for a
-				-- string with no anchors) or a plain CENTER (no source at all) - either
-				-- way it must be anchored to the button or SetSpellName/etc. rejects it.
-				if not AnchorFromSettings(auraFs, stringSettings, realTexts, icon, remap, button) then
-					if realFs then
-						MirrorPoints(auraFs, realFs, remap, button)
-						auraFs:SetWidth(stringSettings.Width)
-						auraFs:SetHeight(stringSettings.Height)
-					else
-						auraFs:ClearAllPoints()
-						auraFs:SetPoint("CENTER", button)
-					end
-				end
-
-				-- Later strings can anchor to this one ($$N); redirect to our copy.
+			-- Position from the layout's own Anchors, not by mirroring realFs: a
+			-- Masque-skinned string (SkinAs ~= "", like the stacks "Count") is
+			-- positioned by Masque relative to its button, so realFs's geometry
+			-- would mirror to the wrong spot. Fall back to mirroring realFs (for a
+			-- string with no anchors) or a plain CENTER (no source at all) - either
+			-- way it must be anchored to the button or SetSpellName/etc. rejects it.
+			if not AnchorFromSettings(auraFs, stringSettings, realTexts, icon, remap, button) then
 				if realFs then
-					remap[realFs] = auraFs
+					MirrorPoints(auraFs, realFs, remap, button)
+					auraFs:SetWidth(stringSettings.Width)
+					auraFs:SetHeight(stringSettings.Height)
+				else
+					auraFs:ClearAllPoints()
+					auraFs:SetPoint("CENTER", button)
 				end
+			end
 
-				if aura == "spell" then
-					button:SetSpellName(auraFs)
-				elseif aura == "duration" then
-					-- Format the AuraButton's secret duration the TMW way (see durationFormatter).
-					button:SetDurationText(auraFs, { textFormatter = durationFormatter })
-				elseif aura == "stacks" then
-					button:SetApplicationCount(auraFs, {})
-				end
+			-- Later strings can anchor to this one ($$N); redirect to our copy.
+			if realFs then
+				remap[realFs] = auraFs
+			end
+
+			if aura == "spell" then
+				button:SetSpellName(auraFs)
+			elseif aura == "duration" then
+				-- Format the AuraButton's secret duration the TMW way (see durationFormatter).
+				button:SetDurationText(auraFs, { textFormatter = durationFormatter })
+			elseif aura == "stacks" then
+				button:SetApplicationCount(auraFs, {})
+			else
+				-- Evaluated once, here, and left alone: DogTag would have to write to it on
+				-- its own schedule, and this string is a descendant of the button, so it's
+				-- off limits to us for as long as auras are secret.
+				auraFs:SetText(realTexts:EvaluateDogTagText(textID))
 			end
 		end
 	end
 
-	for aura, fs in pairs(button.tmwAuraText) do
+	for _, fs in pairs(button.tmwTexts) do
 		if not fs.tmwUsed then
 			fs:Hide()
 			-- Unbind it from the button too, not just hide it: the button keeps its duration
 			-- text binding across reconfiguration, so an abandoned string would still be
 			-- driven by it.
+			local aura = fs.tmwAura
 			if aura == "spell" then
 				button:ClearSpellName()
 			elseif aura == "duration" then
@@ -1108,16 +1134,27 @@ function Module:SetupForIcon(icon)
 	self:SetAuraSpec(icon.attributes.auraSpec)
 end
 
+-- The container's buttons outlive every icon setup - leaving config mode, a profile change, a
+-- settings change - and nothing re-skins them on their own. SetupForIcon can't do it: modules
+-- are set up as they're implemented, and we implement ahead of IconModule_Texts, so the layout
+-- we'd mirror is still the previous pass's. Wait for the icon to finish setting up instead.
+TMW:RegisterCallback("TMW_ICON_SETUP_POST", function(event, icon)
+	local module = icon:GetModuleOrModuleChild("IconModule_AuraContainer")
+	if module then
+		module:ReskinButtons()
+	end
+end)
+
 function Module:OnEnable()
 	local icon = self.icon
 
 	-- A controlled icon in a group-controller buffcontainer doesn't own a container;
-	-- the controller's container covers this icon's cell. Stay enabled (so
-	-- IconModule_Texts still suppresses this icon's DogTag-driven aura strings - the
-	-- controller's buttons draw the real values) but keep any leftover container from
-	-- a prior standalone setup inert.
+	-- the controller's container covers this icon's cell. We stay enabled so that
+	-- IconModule_Texts keeps this icon's own strings dark - the controller's buttons draw
+	-- them, and only a button knows whether its cell holds an aura - but any leftover
+	-- container from a prior standalone setup is torn down.
 	if icon:IsControlled() then
-		self:Disable()
+		self:TeardownContainer()
 		return
 	end
 

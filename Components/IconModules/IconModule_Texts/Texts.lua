@@ -43,12 +43,13 @@ TEXT.MasqueSkinnableTexts = {
 }
 
 -- Analogous to MasqueSkinnableTexts (SkinAs), but for the "Aura" string setting:
--- on aura-container icon types, a string with an Aura purpose is driven by the
--- Blizzard AuraButton (IconModule_AuraContainer) with the aura's real value instead
--- of a DogTag string. The layout still controls its position/look. Keyed by the
--- value passed to the matching AuraButton API.
+-- on aura-container icon types every string is drawn on each aura rather than on the icon,
+-- and this picks what it says. The three named purposes are handed to the matching AuraButton
+-- API and driven with the aura's real (secret) value; the default is the display's own DogTag
+-- string, evaluated once when the aura display is built. The layout still controls
+-- position/look, and on every other icon type this setting is ignored.
 TEXT.AuraContainerTexts = {
-	[""]     = L["TEXTLAYOUTS_AURA_NONE"],
+	[""]     = L["TEXTLAYOUTS_AURA_TEXT"],
 	spell    = L["TEXTLAYOUTS_AURA_SPELL"],
 	duration = L["TEXTLAYOUTS_AURA_DURATION"],
 	stacks   = L["TEXTLAYOUTS_AURA_STACKS"],
@@ -60,8 +61,7 @@ TEXT.AuraContainerTexts = {
 -- an aura container even though its own type ("meta") doesn't allow it. Used to decide
 -- whether the Aura string setting is live (so those strings skip their DogTag value).
 function TEXT:IconUsesAuraContainer(icon)
-	local module = icon.Modules and icon.Modules.IconModule_AuraContainer
-	return module and module.IsEnabled or false
+	return icon:GetModuleOrModuleChild("IconModule_AuraContainer") ~= nil
 end
 
 -- The DogTag tags whose value comes from per-aura data. On an aura-container icon that data
@@ -944,19 +944,35 @@ function Texts:GetFontStringID(textID, fontStringSettings)
 	return fontStringID
 end
 
+-- Evaluate the DogTag string of layout string `textID` once, right now. Used on aura-container
+-- icons: a string's copy on an aura button is a descendant of a restricted frame, so it can't
+-- be written to whenever auras are secret - the value is taken when the aura display is built
+-- instead of being driven by DogTag.
+function Texts:EvaluateDogTagText(textID)
+	local text = self.Texts and self.layoutSettings
+		and TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, textID)
+
+	if not text or text == "" then
+		return ""
+	end
+
+	return DogTag:Evaluate(text, TMW.DOGTAG.nsList, self.kwargs) or ""
+end
+
 function Texts:OnKwargsUpdated()
 	if self.layoutSettings and self.Texts then
-		local auraContainer = TEXT:IconUsesAuraContainer(self.icon)
+		local auraContainer = self.icon:GetModuleOrModuleChild("IconModule_AuraContainer")
 		for textID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
 			local fontString = self.fontStrings[self:GetFontStringID(textID, fontStringSettings)]
 
 			local text = TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, textID)
 
-			-- On aura-container icons, an Aura-purpose string is driven by the
-			-- AuraButton (IconModule_AuraContainer), not DogTag - skip it here. Our
-			-- fontString still gets created and positioned by SetupForIcon, which is
-			-- what the AuraContainer mirrors onto its own button-owned fontstring.
-			if auraContainer and fontStringSettings.Aura ~= "" then
+			-- On aura-container icons every string is drawn on the auras themselves
+			-- (IconModule_AuraContainer mirrors it onto each AuraButton), so none of them are
+			-- DogTag-driven here - ours only gets created and positioned by SetupForIcon, to
+			-- be mirrored, and is left queued for removal so it goes dark while locked. It
+			-- would otherwise sit under the container, showing even where no aura is present.
+			if auraContainer then
 				if not TMW.Locked and not self.icon:IsControlled() then
 					-- Config placeholders
 					if fontStringSettings.Aura == "spell" then
@@ -966,6 +982,9 @@ function Texts:OnKwargsUpdated()
 							L["TEXTLAYOUTS_AURA_SPELL"])
 					elseif fontStringSettings.Aura == "duration" then
 						fontString:SetText("0")
+					elseif fontStringSettings.Aura == "" then
+						-- The real thing: what each aura will show, evaluated the same way.
+						fontString:SetText(self:EvaluateDogTagText(textID))
 					end
 					fontString:Show()
 					fontString.TMW_QueueForRemoval = nil
