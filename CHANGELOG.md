@@ -11,6 +11,7 @@
 * The deprecated Edit Mode setting to hide Blizzard Cooldown Manager viewers per edit mode layout has been fully removed. The per-group setting remains.
 * Default text layouts for horizontal and vertical bar groups now show stack text in a separate display.
 * Fix totem.lua:159: attempt to perform arithmetic on local 'start' (a secret number value)
+* Fix #2457 - Floating Combat Text notifications stopped working after Blizzard rewrote Blizzard_CombatText (retail 12.0, Classic 2.5.6).
 
 ## v12.0.13
 * Fix #2444 - Auras.lua:245: attempt to index local 'unitData' (a nil value)

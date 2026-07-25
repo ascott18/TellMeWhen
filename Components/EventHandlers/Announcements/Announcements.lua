@@ -601,7 +601,7 @@ Announcements:RegisterEventHandlerDataNonSpecific(85, "PARROT", {
 	end,
 })
 Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
-	-- GLOBALS: CombatText_AddMessage, CombatText_StandardScroll, SHOW_COMBAT_TEXT
+	-- GLOBALS: CombatText, CombatTextUtil, CombatText_AddMessage, CombatText_StandardScroll, C_AddOns
 	text = COMBAT_TEXT_LABEL,
 	desc = L["ANN_FCT_DESC"],
 
@@ -612,8 +612,8 @@ Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 	},
 
 	onUsed = function()
-		if not CombatText_AddMessage then
-			UIParentLoadAddOn("Blizzard_CombatText")
+		if not CombatText then
+			C_AddOns.LoadAddOn("Blizzard_CombatText")
 		end
 	end,
 
@@ -623,7 +623,13 @@ Announcements:RegisterEventHandlerDataNonSpecific(88, "FCT", {
 		end
 		
 		local c = TMW:StringToCachedRGBATable(eventSettings.TextColor)
-		CombatText_AddMessage(Text, CombatText_StandardScroll, c.r, c.g, c.b, eventSettings.Sticky and "crit" or nil, false)
+		local displayType = eventSettings.Sticky and "crit" or nil
+		if CombatText and CombatText.AddMessage then
+			-- Retail 12.0 and Classic 2.5.6 rewrote Blizzard_CombatText as a mixin, dropping the old globals.
+			CombatText:AddMessage(Text, CombatTextUtil.StandardScroll, c.r, c.g, c.b, displayType, false)
+		elseif CombatText_AddMessage then
+			CombatText_AddMessage(Text, CombatText_StandardScroll, c.r, c.g, c.b, displayType, false)
+		end
 	end,
 })
 
