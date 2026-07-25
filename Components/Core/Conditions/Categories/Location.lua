@@ -400,14 +400,37 @@ ConditionCategory:RegisterCondition(13,   "LOC_CONTINENT", {
 			return t
 		else -- post-wow-80000
 			local t = {}
-			for id, mapInfo in pairs(
-				-- 946 is the cosmic map ID.
-				C_Map.GetMapChildrenInfo(946, Enum.UIMapType.Continent, true) or
-				-- 947 is the Azeroth Map ID (will be used on pre-TBC versions)
-				C_Map.GetMapChildrenInfo(947, Enum.UIMapType.Continent, true)
-			) do
-				t[mapInfo.mapID] = mapInfo.name
+
+			-- C_Map.GetMapChildrenInfo doesn't return every continent - continents that
+			-- are themselves nested under another continent get missed (Quel'Thalas under
+			-- Eastern Kingdoms, Argus under the Broken Isles), so walk every map ID instead.
+			-- Map IDs aren't contiguous, but the gaps are small - 500 misses in a row
+			-- is well past the end of the table for any foreseeable client.
+			local mapID, misses = 1, 0
+			while misses < 500 do
+				local mapInfo = C_Map.GetMapInfo(mapID)
+				if not mapInfo then
+					misses = misses + 1
+				else
+					misses = 0
+					if mapInfo.mapType == Enum.UIMapType.Continent then
+						-- Only the continents descending from the cosmic map (946) or the
+						-- Azeroth map (947, used on pre-TBC versions) belong in the menu.
+						-- Every other continent-typed map is a parentless duplicate that
+						-- exists for the taxi map, the minimap, etc.
+						local ancestor = mapInfo
+						while ancestor do
+							if ancestor.mapID == 946 or ancestor.mapID == 947 then
+								t[mapInfo.mapID] = mapInfo.name
+								break
+							end
+							ancestor = ancestor.parentMapID and C_Map.GetMapInfo(ancestor.parentMapID)
+						end
+					end
+				end
+				mapID = mapID + 1
 			end
+
 			return t
 		end
 	end)(),
