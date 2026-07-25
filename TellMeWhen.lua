@@ -100,6 +100,7 @@ TellMeWhen's best guess at where this came from is the addon %q. TellMeWhen will
 end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("TellMeWhen", true)
+L.ToDebugString = function() return "TMW.L" end
 
 LSM:Register("font", "Open Sans Regular", "Interface/Addons/TellMeWhen/Fonts/OpenSans-Regular.ttf")
 LSM:Register("font", "Roboto Mono", "Interface/Addons/TellMeWhen/Fonts/RobotoMono-Regular.ttf")
