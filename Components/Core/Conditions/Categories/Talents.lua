@@ -20,6 +20,7 @@ local print = TMW.print
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
 local strlowerCache = TMW.strlowerCache
+local issecretvalue = TMW.issecretvalue
 
 local _, pclass = UnitClass("Player")
 
@@ -216,8 +217,17 @@ ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 	},
 
 	Env = {
-		UnitClass = UnitClass,
+		UnitClass = not TMW.clientHasSecrets and UnitClass or function(unit)
+			local localizedName, classFile, classID = UnitClass(unit)
+			if issecretvalue(classID) then
+				-- 0 matches none of the class bit flags.
+				return "", "", 0
+			else
+				return localizedName, classFile, classID
+			end
+		end,
 	},
+	maybeSecret = true,
 	funcstr = function(c)
 		return [[ BITFLAGSMAPANDCHECK( select(3, UnitClass(c.Unit)) or 0 ) ]]
 	end,
@@ -257,8 +267,17 @@ ConditionCategory:RegisterCondition(0.3,  "ROLE2", {
 
 	icon = "Interface\\Addons\\TellMeWhen\\Textures\\DAMAGER",
 	Env = {
-		UnitGroupRolesAssigned = UnitGroupRolesAssigned,
+		UnitGroupRolesAssigned = not TMW.clientHasSecrets and UnitGroupRolesAssigned or function(unit)
+			local role = UnitGroupRolesAssigned(unit)
+			if issecretvalue(role) then
+				-- "" matches no flag. Not "NONE" - that's a role the user can select here.
+				return ""
+			else
+				return role
+			end
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[BITFLAGSMAPANDCHECK( UnitGroupRolesAssigned(c.Unit) ) ]],
 	events = function(ConditionObject, c)
 		-- The unit change events should actually cover many of the changes

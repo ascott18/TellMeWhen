@@ -119,9 +119,33 @@ function NAMES:UPDATE_BATTLEFIELD_SCORE()
 	end
 end
 
+-- Color `name` for `class`, also returning whether a color was actually found. A restricted
+-- unit's class is secret, which can't index ClassColors nor be built into a color escape
+-- sequence by hand - C_ClassColor and C_ColorUtil each take the secret and hand back a secret
+-- of their own, and a secret string is still fine to concatenate and display. Note that
+-- UnitName and UnitClass aren't restricted under identical conditions (names stay readable in
+-- a PvP match), so a perfectly readable name can carry a secret class.
+local function ColorNameByClass(name, class)
+	if issecretvalue(class) then
+		local color = C_ClassColor.GetClassColor(class)
+		if color then
+			return C_ColorUtil.WrapTextInColor(name, color), true
+		end
+
+		return name, false
+	end
+
+	local classColor = class and NAMES.ClassColors[class]
+	if classColor then
+		return classColor .. name .. "|r", true
+	end
+
+	return name, false
+end
+
 function NAMES:UPDATE_MOUSEOVER_UNIT()
 	local name, server = UnitName("mouseover")
-	
+
 	if issecretvalue(name) then return end
 	if not name then return end
 
@@ -130,10 +154,9 @@ function NAMES:UPDATE_MOUSEOVER_UNIT()
 	end
 	local _, class = UnitClass("mouseover")
 
-	if class then
-		-- ClientActor type NPCs return nils for UnitClass.
-		local classColor = self.ClassColors[class]
-		self.ClassColoredNameCache[name] = classColor and (classColor .. name .. "|r") or name
+	-- ClientActor type NPCs return nils for UnitClass.
+	if class ~= nil then
+		self.ClassColoredNameCache[name] = ColorNameByClass(name, class)
 	end
 end
 
@@ -207,10 +230,12 @@ function NAMES:TryToAcquireName(input, shouldColor, noServer)
 			name = name .. "-" .. server
 		end
 		if shouldColor then
-			local _, class = UnitClass(input)
-			local nameColored = (self.ClassColors[class] or "") .. name .. "|r"
+			local nameColored = ColorNameByClass(name, select(2, UnitClass(input)))
 
-			self.ClassColoredNameCache[name] = nameColored
+			-- A secret name can't be a table key, so a restricted unit goes uncached.
+			if not issecretvalue(name) then
+				self.ClassColoredNameCache[name] = nameColored
+			end
 
 			name = nameColored
 		end
@@ -224,15 +249,11 @@ function NAMES:TryToAcquireName(input, shouldColor, noServer)
 		local unit = self:GetUnitIDFromName(input)
 		if unit then
 			if shouldColor then
-				local _, class = UnitClass(unit)
-				local colorString = self.ClassColors[class]
-				local nameColored = name
-				if colorString then 
-					nameColored = self.ClassColors[class] .. name .. "|r"
-
+				local nameColored, colored = ColorNameByClass(name, select(2, UnitClass(unit)))
+				if colored then
 					self.ClassColoredNameCache[name] = nameColored
 				end
-				
+
 				name = nameColored
 			else
 				name, server = UnitName(unit)

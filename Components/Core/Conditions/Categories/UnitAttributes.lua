@@ -138,8 +138,16 @@ ConditionCategory:RegisterCondition(5,    "PVPFLAG", {
 	icon = "Interface\\TargetingFrame\\UI-PVP-" .. UnitFactionGroup("player"),
 	tcoords = {0.046875, 0.609375, 0.015625, 0.59375},
 	Env = {
-		UnitIsPVP = UnitIsPVP,
+		UnitIsPVP = not TMW.clientHasSecrets and UnitIsPVP or function(unit)
+			local ret = UnitIsPVP(unit)
+			if issecretvalue(ret) then
+				return false
+			else
+				return ret
+			end
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[BOOLCHECK( UnitIsPVP(c.Unit) )]],
 	events = function(ConditionObject, c)
 		return
@@ -639,8 +647,17 @@ ConditionCategory:RegisterCondition(13.1,   "UNITRACE", {
 	
 	defaultUnit = "target",
 	Env = {
-		UnitRace = UnitRace,
+		UnitRace = not TMW.clientHasSecrets and UnitRace or function(unit)
+			local localizedName, englishName, raceID = UnitRace(unit)
+			if issecretvalue(englishName) then
+				-- "" matches none of the race bit flags.
+				return "", "", 0
+			else
+				return localizedName, englishName, raceID
+			end
+		end,
 	},
+	maybeSecret = true,
 	funcstr = [[BITFLAGSMAPANDCHECK( select(2, UnitRace(c.Unit)) )]],
 	events = function(ConditionObject, c)
 		return

@@ -160,9 +160,32 @@ function TimerBar_BarDisplay:SetupColors(icon, valueColor, unit)
 	if icon.TimerBar_EnableColors then
 		if icon.BarDisplay_ClassColor then
 			local class = unit and select(2, UnitClass(unit))
-			if class then
+			if issecretvalue(class) then
+				-- A restricted unit's class is secret: it can neither index the class color
+				-- tables nor become a color string, but C_ClassColor takes it and hands back a
+				-- secret color, which the bar's own setters accept. The mixin is reused so
+				-- SetColors keeps seeing one stable color object instead of a new one per
+				-- update, and CUSTOM_CLASS_COLORS can't be honored here.
+				local color = self.secretClassColor
+				if not color then
+					color = CreateColor(0, 0, 0, 1)
+					self.secretClassColor = color
+				end
+
+				local classColor = C_ClassColor.GetClassColor(class)
+				if classColor then
+					color:SetRGBA(classColor.r, classColor.g, classColor.b, 1)
+
+					self:SetColors(
+						color,
+						color,
+						color)
+
+					return
+				end
+			elseif class then
 				local color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
-				
+
 				if color then
 					-- GLOBALS: CUSTOM_CLASS_COLORS, RAID_CLASS_COLORS
 					if color.colorStr then

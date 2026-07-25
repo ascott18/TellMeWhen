@@ -268,37 +268,43 @@ function TimerBar:UpdateValue(force)
 			--self.texture:GetSize()
 
 			if value ~= 0 then
-				local completeColor = self.completeColor
-				local halfColor = self.halfColor
-				local startColor = self.startColor
-
-				if Invert then invertColors = not invertColors end
-				if invertColors then
-					completeColor, startColor = startColor, completeColor
-				end
-				
-				-- This is multiplied by 2 because we subtract 100% if it ends up being past
-				-- the point where halfColor will be used.
-				-- If we don't multiply by 2, we would check if (percent > 0.5), but then
-				-- we would have to multiply that percentage by 2 later anyway in order to use the
-				-- full range of colors available (we would only get half the range of colors otherwise, which looks bad)
-				local doublePercent = percent * 2
-
-				if doublePercent > 1 then
-					completeColor = halfColor
-					doublePercent = doublePercent - 1
+				if self.flatColor then
+					-- Nothing to interpolate between, and the components may be secret (a
+					-- restricted unit's class color), which arithmetic would error on.
+					bar:SetStatusBarColor(self.startColor:GetRGBA())
 				else
-					startColor = halfColor
+					local completeColor = self.completeColor
+					local halfColor = self.halfColor
+					local startColor = self.startColor
+
+					if Invert then invertColors = not invertColors end
+					if invertColors then
+						completeColor, startColor = startColor, completeColor
+					end
+
+					-- This is multiplied by 2 because we subtract 100% if it ends up being past
+					-- the point where halfColor will be used.
+					-- If we don't multiply by 2, we would check if (percent > 0.5), but then
+					-- we would have to multiply that percentage by 2 later anyway in order to use the
+					-- full range of colors available (we would only get half the range of colors otherwise, which looks bad)
+					local doublePercent = percent * 2
+
+					if doublePercent > 1 then
+						completeColor = halfColor
+						doublePercent = doublePercent - 1
+					else
+						startColor = halfColor
+					end
+
+					local inv = 1-doublePercent
+
+					bar:SetStatusBarColor(
+						(startColor.r * doublePercent) + (completeColor.r * inv),
+						(startColor.g * doublePercent) + (completeColor.g * inv),
+						(startColor.b * doublePercent) + (completeColor.b * inv),
+						(startColor.a * doublePercent) + (completeColor.a * inv)
+					)
 				end
-
-				local inv = 1-doublePercent
-
-				bar:SetStatusBarColor(
-					(startColor.r * doublePercent) + (completeColor.r * inv),
-					(startColor.g * doublePercent) + (completeColor.g * inv),
-					(startColor.b * doublePercent) + (completeColor.b * inv),
-					(startColor.a * doublePercent) + (completeColor.a * inv)
-				)
 			end
 			self.__value = value
 			self.__oldPercent = percent
@@ -420,10 +426,22 @@ function TimerBar:SetCooldown(start, duration, durObj, chargeStart, chargeDur)
 	end
 end
 
+-- Colors are TMW color strings or plain color tables, both of which StringToCachedColorMixin
+-- turns into a cached mixin. A caller that had to build its color out of secret components
+-- (see TimerBar_BarDisplay's class coloring) hands over a ColorMixin of its own instead: that
+-- one must be used as-is, because the cache is keyed on the argument and so would keep handing
+-- back the first call's components while the real color changes underneath it.
+local function ToColorMixin(color)
+	if type(color) == "table" and color.GetRGBA then
+		return color
+	end
+	return TMW:StringToCachedColorMixin(color)
+end
+
 function TimerBar:SetColors(startColor, halfColor, completeColor)
-	startColor    = startColor and TMW:StringToCachedColorMixin(startColor)
-	halfColor     = halfColor and TMW:StringToCachedColorMixin(halfColor)
-	completeColor = completeColor and TMW:StringToCachedColorMixin(completeColor)
+	startColor    = startColor and ToColorMixin(startColor)
+	halfColor     = halfColor and ToColorMixin(halfColor)
+	completeColor = completeColor and ToColorMixin(completeColor)
 
 	-- Skip curve creation if colors haven't changed
 	if self.startColor == startColor and self.halfColor == halfColor and self.completeColor == completeColor then
@@ -434,11 +452,24 @@ function TimerBar:SetColors(startColor, halfColor, completeColor)
 	self.halfColor     = halfColor
 	self.completeColor = completeColor
 
+	-- One color throughout has no gradient to build. It's also the only shape a secret color
+	-- can take, and secret components can't be compared or done arithmetic on, so both the
+	-- curves here and the interpolation in UpdateValue have to be skipped for it.
+	self.flatColor = startColor ~= nil and startColor == halfColor and halfColor == completeColor
+
 	if C_CurveUtil then
-		self.rCurve, self.rCurveInverted = CreateColorCurves(completeColor.r, halfColor.r, startColor.r)
-		self.gCurve, self.gCurveInverted = CreateColorCurves(completeColor.g, halfColor.g, startColor.g)
-		self.bCurve, self.bCurveInverted = CreateColorCurves(completeColor.b, halfColor.b, startColor.b)
-		self.aCurve, self.aCurveInverted = CreateColorCurves(completeColor.a, halfColor.a, startColor.a)
+		if self.flatColor then
+			-- Clear any curves a previous gradient left behind.
+			self.rCurve, self.rCurveInverted = nil, nil
+			self.gCurve, self.gCurveInverted = nil, nil
+			self.bCurve, self.bCurveInverted = nil, nil
+			self.aCurve, self.aCurveInverted = nil, nil
+		else
+			self.rCurve, self.rCurveInverted = CreateColorCurves(completeColor.r, halfColor.r, startColor.r)
+			self.gCurve, self.gCurveInverted = CreateColorCurves(completeColor.g, halfColor.g, startColor.g)
+			self.bCurve, self.bCurveInverted = CreateColorCurves(completeColor.b, halfColor.b, startColor.b)
+			self.aCurve, self.aCurveInverted = CreateColorCurves(completeColor.a, halfColor.a, startColor.a)
+		end
 	end
 end
 
