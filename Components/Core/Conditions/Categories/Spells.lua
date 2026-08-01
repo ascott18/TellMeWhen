@@ -463,29 +463,19 @@ ConditionCategory:RegisterCondition(3.5,  "OVERLAYED", {
 	icon = "Interface\\Icons\\inv_shield_05",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
-		IsSpellOverlayed = IsSpellOverlayed,
-		OverlayedNameMap = {}
+		-- Handles the spell being entered as either a name or an ID, and matches by name
+		-- as well as by ID since the ID the game reports is usually an override of the
+		-- one the user entered.
+		IsSpellOverlayed = TMW.COMMON.SpellActivationOverlay.IsOverlayed,
 	},
-	funcstr = function(c)
-		local module = CNDT:GetModule("OVERLAYED", true)
-		if not module then
-			module = CNDT:NewModule("OVERLAYED", "AceEvent-3.0")
-
-			local function handleEvent(event, arg1)
-				Env.OverlayedNameMap[strlowerCache[GetSpellName(arg1)]] = arg1
-			end
-
-			module:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", handleEvent)
-			module:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", handleEvent)
-		end
-
-		return [[BOOLCHECK( IsSpellOverlayed(OverlayedNameMap[c.Spells.First] or (isNumber[c.Spells.First] and c.Spells.First) or 0) )]]
-	end,
+	funcstr = [[BOOLCHECK( IsSpellOverlayed(c.Spells.First) )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("SPELL_UPDATE_USABLE"),
-			ConditionObject:GenerateNormalEventString("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"),
-			ConditionObject:GenerateNormalEventString("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
+			-- Fired by TMW.COMMON.SpellActivationOverlay, which has already recorded the
+			-- new state by the time this fires. Listening to the game's own overlay events
+			-- here would race against it.
+			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_OVERLAY")
 	end,
 })
 end

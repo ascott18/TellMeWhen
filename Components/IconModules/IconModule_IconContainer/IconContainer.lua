@@ -30,6 +30,9 @@ function IconContainer:OnNewInstance_IconContainer(icon)
 	self.container = container
 	container.module = self
 
+	-- Everything that currently wants the activation overlay shown. See ShowOverlayGlow.
+	self.overlayOwners = {}
+
 	container:EnableMouse(false)
 
 	-- Start hidden so the container (and its child border) only ever show while the
@@ -84,7 +87,7 @@ end
 
 if CreateFrame("Frame", nil, UIParent, activationAlertTemplate).ProcStartAnim then
 	-- Wow 10.1.5+
-	function IconContainer:ShowOverlayGlow()
+	function IconContainer:ShowOverlayGlowInternal()
 		local container = self.container
 		local overlay = container.overlay
 
@@ -121,7 +124,7 @@ if CreateFrame("Frame", nil, UIParent, activationAlertTemplate).ProcStartAnim th
 		end
 	end
 
-	function IconContainer:HideOverlayGlow()
+	function IconContainer:HideOverlayGlowInternal()
 		local container = self.container
 		local overlay = container.overlay
 
@@ -146,7 +149,7 @@ else
 		end
 	end
 
-	function IconContainer:ShowOverlayGlow()
+	function IconContainer:ShowOverlayGlowInternal()
 		local container = self.container
 		local overlay = container.overlay
 
@@ -176,7 +179,7 @@ else
 		overlay.animIn:Play();
 	end
 
-	function IconContainer:HideOverlayGlow()
+	function IconContainer:HideOverlayGlowInternal()
 		local container = self.container
 		local overlay = container.overlay
 
@@ -191,6 +194,31 @@ else
 			end
 		end
 	end
+end
+
+--- Shows the Blizzard spell activation overlay on this container.
+-- @param owner [any|nil] A token identifying what wants the overlay shown. The overlay
+-- stays up until every owner that showed it has called HideOverlayGlow with its token,
+-- so the Activation Border animation and the automatic activation border
+-- (IconModule_ActivationGlow) don't turn each other off.
+function IconContainer:ShowOverlayGlow(owner)
+	self.overlayOwners[owner or true] = true
+
+	self:ShowOverlayGlowInternal()
+end
+
+--- Releases this owner's claim on the Blizzard spell activation overlay, hiding it
+-- if nothing else still wants it shown. See ShowOverlayGlow.
+-- @param owner [any|nil] The token that was passed to ShowOverlayGlow.
+function IconContainer:HideOverlayGlow(owner)
+	local overlayOwners = self.overlayOwners
+	overlayOwners[owner or true] = nil
+
+	if next(overlayOwners) then
+		return
+	end
+
+	self:HideOverlayGlowInternal()
 end
 
 

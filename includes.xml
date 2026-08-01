@@ -69,6 +69,7 @@
 <Script file="Components\Core\Common\Auras.lua" />
 <Script file="Components\Core\Common\SpellRange.lua" />
 <Script file="Components\Core\Common\SpellUsable.lua" />
+<Script file="Components\Core\Common\SpellActivationOverlay.lua" />
 <Script file="Components\Core\Common\DogTags\DogTags.lua" />
 
 <Script file="Components\Core\Conditions\Conditions.lua" />
@@ -125,6 +126,7 @@
 <Script file="Components\GroupModules\GroupModule_Alpha\module.lua" />
 
 <Script file="Components\IconModules\IconModule_Self\Self.lua" />
+<Script file="Components\IconModules\IconModule_ActivationGlow\ActivationGlow.lua" />
 <Script file="Components\IconModules\IconModule_Alpha\Alpha.lua" />
 <Script file="Components\IconModules\IconModule_CooldownSweep\CooldownSweep.lua" />
 <Script file="Components\IconModules\IconModule_IconContainer\IconContainer.lua" />

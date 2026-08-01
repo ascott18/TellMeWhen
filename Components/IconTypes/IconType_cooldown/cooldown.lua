@@ -60,6 +60,7 @@ Type:UsesAttributes("texture")
 
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
+Type:SetModuleAllowance("IconModule_ActivationGlow", true)
 
 
 

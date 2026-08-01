@@ -27,12 +27,13 @@ local GetSpellCastCount = TMW.COMMON.Cooldowns.GetSpellCastCount
 local IsUsableSpell = TMW.COMMON.SpellUsable.IsUsableSpell
 
 local spellTextureCache = TMW.spellTextureCache
-local strlowerCache = TMW.strlowerCache
 local OnGCD = TMW.OnGCD
 local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 
 local SpellRange = TMW.COMMON.SpellRange
 local IsSpellInRange = SpellRange.IsSpellInRange
+
+local SpellActivationOverlay = TMW.COMMON.SpellActivationOverlay
 
 local Type = TMW.Classes.IconType:New("reactive")
 Type.name = L["ICONMENU_REACTIVE"]
@@ -56,6 +57,7 @@ Type:UsesAttributes("texture")
 
 
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", true)
+Type:SetModuleAllowance("IconModule_ActivationGlow", true)
 
 
 
@@ -155,12 +157,11 @@ local function Reactive_OnEvent(icon, event, arg1)
 			end
 		end
 
-	elseif event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
-	    or event == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE"
-	then
+	elseif event == "TMW_SPELL_UPDATE_OVERLAY" then
 		-- If icon.UseActvtnOverlay == true, treat the icon as usable if the spell has an activation overlay glow.
-		if icon.Spells.First == arg1 or strlowerCache[GetSpellName(arg1)] == icon.Spells.FirstString then
-			icon.activationOverlayActive = event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"
+		local active = SpellActivationOverlay.IsAnyOverlayed(icon.Spells)
+		if active ~= icon.activationOverlayActive then
+			icon.activationOverlayActive = active
 			icon.NextUpdateTime = 0
 		end
 	end
@@ -428,6 +429,7 @@ function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, true)
 
 	icon.forceUsable = nil
+	icon.activationOverlayActive = nil
 
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
@@ -451,8 +453,11 @@ function Type:Setup(icon)
 	icon:SetScript("OnEvent", Reactive_OnEvent)
 
 	if icon.UseActvtnOverlay then
-		icon:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
-		icon:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
+		icon:RegisterEvent("TMW_SPELL_UPDATE_OVERLAY")
+
+		-- Seed the current state, since the overlay events only report changes
+		-- and one may already have been active before this icon was set up.
+		icon.activationOverlayActive = SpellActivationOverlay.IsAnyOverlayed(icon.Spells)
 	end
 	
 	if isManual then

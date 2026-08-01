@@ -200,6 +200,13 @@ View:ImplementsModule("IconModule_IconContainer_Masque", 100, function(Module, i
 	end
 end)
 
+-- Implemented after IconContainer_Masque so the container it draws on has been sized.
+View:ImplementsModule("IconModule_ActivationGlow", 110, function(Module, icon)
+	if icon.ShowActvtnBorder then
+		Module:Enable()
+	end
+end)
+
 View:ImplementsModule("GroupModule_Resizer_ScaleXY", 10, true)
 View:ImplementsModule("GroupModule_IconPosition_Sortable", 20, true)
 	
