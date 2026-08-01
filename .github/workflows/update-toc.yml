@@ -1,0 +1,57 @@
+name: Update TOC Interface version(s)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 16 * * * # 9am Pacific (PDT)
+
+permissions: # required to push the branch and open the pull request
+  contents: write
+  pull-requests: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v6
+
+      - name: Update TOC Interface version
+        uses: p3lim/toc-interface-updater@v4
+        with:
+          beta: true
+          ptr: true
+          flavor: |
+            vanilla
+            tbc
+            mists
+            retail
+
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: interface-version
+        run: |
+          if git diff --quiet; then
+            echo "Interface versions are already up to date."
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git switch --create "$BRANCH"
+          git commit --all --message 'Update Interface version'
+          git push --force origin "$BRANCH"
+
+          if [ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            echo "Existing pull request updated."
+            exit 0
+          fi
+
+          gh pr create \
+            --base '${{ github.ref_name }}' \
+            --head "$BRANCH" \
+            --title 'Update Interface version' \
+            --body 'Automated update of the `## Interface` lines in the TOC files.' \
+            --assignee ascott18
