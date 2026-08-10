@@ -62,6 +62,15 @@ BaseConfig:RegisterConfigPanel_ConstructorFunc(2, "TellMeWhen_Main_GeneralGlobal
 			check:SetSetting("ShowGUIDs")
 		end,
 		function(check)
+			check:SetTexts(L["SHOWAURASPELLIDS_OPTION"], L["SHOWAURASPELLIDS_OPTION_DESC"])
+			check:SetSetting("ShowAuraSpellIDs")
+			check:CScriptAdd("SettingSaved", function()
+				if TMW.db.global.ShowAuraSpellIDs then
+					SetCVar("tooltipShowAuraSpellIDs", "1")
+				end
+			end)
+		end,
+		function(check)
 			check:SetTexts(L["UIPANEL_ALLOWSCALEIE"], L["UIPANEL_ALLOWSCALEIE_DESC"])
 			check:SetSetting("ScaleIE")
 			check:CScriptAdd("SettingTableRequested", function()

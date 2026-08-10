@@ -264,6 +264,7 @@ TMW.Defaults = {
 		ReceiveComm       = true,
 		AllowCombatConfig = false,
 		ShowGUIDs         = false,
+		ShowAuraSpellIDs  = false,
 		Interval          = 0.05,
 		EffThreshold      = 15,
 		BackupDbInOptions = true,
@@ -1070,7 +1071,13 @@ function TMW:PLAYER_LOGIN()
 	-- most commonly used to see if the user has configured an icon at all.
 	TMW.DEFAULT_ICON_SETTINGS = TMW.db.profile.Groups[0].Icons[0]
 	TMW.db.profile.Groups[0] = nil
-	
+
+	-- The CVar doesn't persist across reloads, so it has to be reapplied every login.
+	-- Nothing ever sets it back to 0 - a reload is what turns it off.
+	if TMW.db.global.ShowAuraSpellIDs then
+		SetCVar("tooltipShowAuraSpellIDs", "1")
+	end
+
 	--------------- Communications ---------------
 	-- Channel TMW is used for sharing data.
 	-- ReceiveComm is a setting that allows users to disable receiving shared data.

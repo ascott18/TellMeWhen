@@ -91,6 +91,11 @@ L["GUIDCONFLICT_IGNOREFORSESSION"] = "Ignore conflict for this configuration ses
 L["SHOWGUIDS_OPTION"] = "Show GUIDs in tooltips."
 L["SHOWGUIDS_OPTION_DESC"] = "Enable this setting to see the GUID (globally-unique identifier) of groups and icon in their tooltips. This can be useful in cases where you want to know what GUID corresponds with what icon."
 
+L["SHOWAURASPELLIDS_OPTION"] = "Show aura spell IDs in tooltips."
+L["SHOWAURASPELLIDS_OPTION_DESC"] = [[Enable this setting to see the spell ID of a buff or debuff in its tooltip.
+
+This turns on Blizzard's tooltipShowAuraSpellIDs console variable, which resets when the UI reloads. Disabling this setting takes effect on your next reload.]]
+
 
 
 L["ICON_TOOLTIP_CONTROLLER"] = [[This icon is a group controller.]]
