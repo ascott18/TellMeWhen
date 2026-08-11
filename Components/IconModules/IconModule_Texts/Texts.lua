@@ -55,13 +55,26 @@ TEXT.AuraContainerTexts = {
 	stacks   = L["TEXTLAYOUTS_AURA_STACKS"],
 }
 
--- True if the icon is actually rendering auras via IconModule_AuraContainer right now -
--- i.e. its instance of the module is enabled. Checked against the live instance, not
--- module-allowance-by-type, because a meta icon late-enables the module while inheriting
--- an aura container even though its own type ("meta") doesn't allow it. Used to decide
--- whether the Aura string setting is live (so those strings skip their DogTag value).
+-- The icon's live IconModule_AuraContainer instance, or nil. Asked for the live instance
+-- rather than module-allowance-by-type because a meta icon late-enables the module while
+-- inheriting an aura container even though its own type ("meta") doesn't allow it.
+--
+-- The class only loads on game versions that have Blizzard's aura container (see the TOC),
+-- and GetModuleOrModuleChild raises on a class name it doesn't know, so it has to be
+-- checked for rather than asked for blindly.
+function TEXT:GetAuraContainer(icon)
+	if not TMW.Classes.IconModule_AuraContainer then
+		return nil
+	end
+
+	return icon:GetModuleOrModuleChild("IconModule_AuraContainer")
+end
+
+-- True if the icon is actually rendering auras via IconModule_AuraContainer right now.
+-- Used to decide whether the Aura string setting is live (so those strings skip their
+-- DogTag value).
 function TEXT:IconUsesAuraContainer(icon)
-	return icon:GetModuleOrModuleChild("IconModule_AuraContainer") ~= nil
+	return TEXT:GetAuraContainer(icon) ~= nil
 end
 
 -- The DogTag tags whose value comes from per-aura data. On an aura-container icon that data
@@ -961,7 +974,7 @@ end
 
 function Texts:OnKwargsUpdated()
 	if self.layoutSettings and self.Texts then
-		local auraContainer = self.icon:GetModuleOrModuleChild("IconModule_AuraContainer")
+		local auraContainer = TEXT:GetAuraContainer(self.icon)
 		for textID, fontStringSettings in TMW:InNLengthTable(self.layoutSettings) do
 			local fontString = self.fontStrings[self:GetFontStringID(textID, fontStringSettings)]
 
