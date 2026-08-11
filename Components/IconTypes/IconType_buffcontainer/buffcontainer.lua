@@ -35,8 +35,13 @@ Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
 
+-- Nothing tells us an aura is missing, so there's no absent state to publish. The underlay
+-- gets to the same place from the other end: the icon's own display is left up beneath the
+-- aura container, so each cell falls back to it wherever there's no aura covering it.
+-- IconModule_AuraContainer owns the underlay, and the state these two feed (see its
+-- underlay section).
 local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
-local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
+local STATE_UNDERLAY = TMW.CONST.STATE.DEFAULT_HIDE
 
 Type:UsesAttributes("state")
 Type:UsesAttributes("auraSpec")
@@ -289,7 +294,8 @@ Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_BuffContainerSort", fu
 end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[ STATE_PRESENT ] = { text = "|cFF00FF00" .. L["ICONMENU_PRESENTONANY"], tooltipText = L["ICONMENU_PRESENTONANY_DESC"],	},
+	[ STATE_PRESENT  ] = { text = "|cFF00FF00" .. L["ICONMENU_AURACONTAINER_AURAS"],     tooltipText = L["ICONMENU_AURACONTAINER_AURAS_DESC"],     },
+	[ STATE_UNDERLAY ] = { text = "|cFF7F7F7F" .. L["ICONMENU_AURACONTAINER_UNDERLAY"],  tooltipText = L["ICONMENU_AURACONTAINER_UNDERLAY_DESC"],  },
 })
 
 local function BuildAuraSpec(icon)
@@ -388,10 +394,13 @@ end
 
 -- The icon type's only job in this mode is to publish the spec via SetInfo;
 -- IconModule_AuraContainer consumes it and owns the container, and the container
--- handles ongoing UNIT_AURA updates itself. We hold a shown state so the
--- AuraButtons are free to show/hide their own contents.
+-- handles ongoing UNIT_AURA updates itself. The state we publish is the module's too - it
+-- describes the icon frame that carries the auras and the underlay, not either of them on
+-- its own, so the module builds it (see its underlay section). Built once per setup so it
+-- stays the same table across publishes, which is how the STATE processor tells a real
+-- change from a no-op.
 local function Buff_OnUpdate_AuraContainer(icon, time)
-	icon:SetInfo("state; auraSpec", STATE_PRESENT, BuildAuraSpec(icon))
+	icon:SetInfo("state; auraSpec", icon.AuraContainerState, BuildAuraSpec(icon))
 
 	if icon:IsGroupController() then
 		-- As a group controller we don't harvest aura data ourselves - Blizzard's
@@ -419,6 +428,8 @@ function Type:Setup(icon)
 
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
+
+	icon.AuraContainerState = TMW.C.IconModule_AuraContainer:GetIconState(icon)
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 

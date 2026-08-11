@@ -641,8 +641,9 @@ end
 -- is driven via SetDurationBar. `vertical` only selects the bar's orientation (barv).
 function Module:Emulate_IconView_Bar(icon, button, vertical)
 	-- Both are wanted for their frames' geometry alone, so take them disabled or unimplemented:
-	-- ReskinButtons disables IconContainer while locked, and this icon type never allows
-	-- TimerBar_BarDisplay at all (the view still lays its frames out for us to mirror).
+	-- ApplyOpacities disables IconContainer whenever there's no underlay, and this icon type
+	-- never allows TimerBar_BarDisplay at all (the view still lays its frames out for us to
+	-- mirror).
 	local iconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer_Masque", true, true)
 	local iconSquare = iconContainer and iconContainer.container
 	local timerBar = icon:GetModuleOrModuleChild("IconModule_TimerBar_BarDisplay", true, true)
@@ -1094,34 +1095,162 @@ function Module:SkinButton(button)
 	self:Emulate_IconModule_Texts(icon, button, remap or { [icon] = button })
 end
 
--- (Re-)skin every button the container has created for us. No-op
--- for controlled icons - the controller drives the shared container's buttons.
+-- ----------------------------------------------------------------------------
+-- The underlay
+--
+-- An aura that isn't up can't be drawn - the container only ever creates a button for an
+-- aura it actually found - so the only way to show anything for a missing aura is to put
+-- something behind the container and let it show through. The icon's own display (its
+-- texture, the IconContainer's square/border, the Backdrop and its text) already draws
+-- underneath the container, so that IS the underlay; all this does is decide whether to
+-- leave it up and how opaque to make it.
+--
+-- Its look comes from a second icon state, which reuses the old absent-state slot so
+-- settings from back when this icon type still had an absent state carry over:
+--   * PRESENT is the auras' opacity.
+--   * UNDERLAY is the underlay's opacity, plus its tint / desaturation / texture. Those
+--     ride along on the published state (see GetIconState) - while locked they only ever
+--     reach the icon's own texture, which is the underlay and nothing else (an aura button
+--     carries its own texture, painted in ApplyButtonSettings).
+--
+-- The two opacities are independent of each other, which takes some doing: alpha nests, so
+-- anything put on the icon frame reaches both layers, and TMW's entire opacity pipeline -
+-- the state arbitrator, conditions, group alpha inheritance, fades, config force-show -
+-- arrives there as one already-collapsed number. So the icon frame carries only the more
+-- opaque of the two (GetIconState) and ApplyOpacities scales each layer down from it.
+-- Everything else that dims the icon still dims both layers together, which is right.
+-- ----------------------------------------------------------------------------
+
+local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_UNDERLAY = TMW.CONST.STATE.DEFAULT_HIDE
+
+-- The underlay's opacity, as configured. Zero means there is no underlay at all: the icon's
+-- own display comes down entirely, so nothing else should bother drawing into it either.
+function Module:GetUnderlayAlpha()
+	return self.icon.States[STATE_UNDERLAY].Alpha or 0
+end
+
+-- The underlay is four separate frames/regions: the Texture module's texture (a child of
+-- the icon, not the IconContainer), the IconContainer's container (icon square / Masque
+-- skin / border), the Backdrop's container and the Texts module's container. Run
+-- `fn(module, frame, keepEnabled)` over each one that exists. Disabled modules are included:
+-- one we turned off still has to be handed its alpha back, and a view can have left one off
+-- on its own (a bar view without an icon square).
+--
+-- keepEnabled marks Texts, which has to stay enabled whether or not there's an underlay: the
+-- aura buttons mirror its fontstrings, and the strings that don't belong to the underlay
+-- take themselves dark anyway (Texts:OnKwargsUpdated).
+function Module:ForEachUnderlayFrame(fn)
+	local icon = self.icon
+	local texture = icon:GetModuleOrModuleChild("IconModule_Texture", true)
+	if texture and texture.texture then
+		fn(texture, texture.texture)
+	end
+	local iconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true)
+	if iconContainer and iconContainer.container then
+		fn(iconContainer, iconContainer.container)
+	end
+	local backdrop = icon:GetModuleOrModuleChild("IconModule_Backdrop", true)
+	if backdrop and backdrop.container then
+		fn(backdrop, backdrop.container)
+	end
+	local texts = icon:GetModuleOrModuleChild("IconModule_Texts", true)
+	if texts and texts.container then
+		fn(texts, texts.container, true)
+	end
+end
+
+-- The state an aura-container icon publishes: the icon frame is only the carrier for the
+-- two layers, so its alpha is the more opaque of them and ApplyOpacities takes each layer
+-- down from there. Called by the icon type from its update function; also used for
+-- controlled icons, which have no update function of their own.
+--
+-- The max rather than a flat 1 so realAlpha keeps meaning what it always has - "is any of
+-- this visible" - which the Icon Shown/Hidden conditions, ShrinkGroup, shown-only icon
+-- events and meta icon source selection all read. Both opacities at zero then still gives
+-- an alpha of 0, which the state arbitrator treats as hide-no-matter-what.
+function Module:GetIconState(icon)
+	local underlay = icon.States[STATE_UNDERLAY]
+	return {
+		Alpha = max(icon.States[STATE_PRESENT].Alpha or 0, underlay.Alpha or 0),
+		Color = underlay.Color,
+		Texture = underlay.Texture,
+	}
+end
+
+function Module:ApplyOpacities()
+	local icon = self.icon
+	local locked = TMW.Locked
+	local aurasAlpha = icon.States[STATE_PRESENT].Alpha or 0
+	-- Config mode shows the icon's own display at full opacity: there's no container over
+	-- it there, so it's the icon's preview rather than an underlay.
+	local underlayAlpha = 1
+	if locked then
+		underlayAlpha = self:GetUnderlayAlpha()
+	end
+
+	if icon:IsControlled() then
+		-- A controlled icon draws nothing of its own but the underlay - the controller's
+		-- container covers its cell - and it never runs the icon type's Setup or update
+		-- function, so nothing publishes a state for it and it keeps the nothing-state
+		-- (alpha 0) that TMW_ICON_SETUP_PRE left. Publish the controller's, but with the
+		-- underlay's opacity outright: with no container here the whole icon is the
+		-- underlay, so there's nothing to divide that opacity between.
+		--
+		-- Gated on type allowance because a meta icon can be controlling this group while
+		-- borrowing an inherited aura container, and it drives its controlled icons' states
+		-- itself.
+		if locked and self:IsAllowedByType(icon.Type) then
+			local state = self:GetIconState(icon)
+			state.Alpha = underlayAlpha
+			icon:SetInfo("state", state)
+		end
+		return
+	end
+
+	-- Each layer, relative to the icon frame's own alpha (the more opaque of the two).
+	-- Both off: the published state's alpha is 0 as well, so the icon is hidden outright
+	-- and there's nothing for these to be relative to.
+	local carrier = max(aurasAlpha, underlayAlpha)
+	local scale = carrier > 0 and 1 / carrier or 0
+
+	-- The container is the only frame between the icon and the aura buttons, so it's where
+	-- the auras' opacity goes. Idempotent - OnEnable has already made one by now.
+	local container = self:EnsureContainer()
+	if container then
+		container:SetAlpha(aurasAlpha * scale)
+	end
+
+	-- With no underlay wanted, take the icon's display down entirely rather than leaving it
+	-- at alpha 0: the aura buttons emulate all of it themselves, and a second copy
+	-- underneath would double every semi-transparent border and backdrop (Masque may have
+	-- drawn one we can't detect). Only ever disabling, never enabling - which of these
+	-- belong up at all is the view's call (a bar view without an icon square leaves the
+	-- icon texture and its container off), and it has just made it: we run right after setup.
+	self:ForEachUnderlayFrame(function(module, frame, keepEnabled)
+		if underlayAlpha == 0 and not keepEnabled then
+			module:Disable()
+		else
+			frame:SetAlpha(underlayAlpha * scale)
+		end
+	end)
+end
+
+-- (Re-)skin every button the container has created for us. Only the opacities apply to
+-- controlled icons - the controller drives the shared container's buttons.
 --
 -- `settingsIcon`, when given, becomes the icon ApplyButtonSettings inherits timer/
 -- texture settings from (the source icon for a meta). It's persisted so the deferred
 -- reskin of a later runtime batch uses the same source.
 function Module:ReskinButtons(settingsIcon)
-	if not self.IsEnabled or self.icon:IsControlled() then
+	if not self.IsEnabled then
 		return
 	end
 
-	-- IconContainer and Backdrop are emulated into the aura buttons
-	-- so the show/hide according to aura presence. They're still used in config mode,
-	-- but need to be disabled in locked mode so the aura buttons can take over.
-	local locked = TMW.Locked
-	local iconContainer = self.icon:GetModuleOrModuleChild("IconModule_IconContainer")
-	if iconContainer then
-		if locked then iconContainer:Disable() else iconContainer:Enable() end
-	end
+	self:ApplyOpacities()
 
-	local backdrop = self.icon:GetModuleOrModuleChild("IconModule_Backdrop")
-	if backdrop then
-		if locked then backdrop:Disable() else backdrop:Enable() end
-	end
-
-	local texture = self.icon:GetModuleOrModuleChild("IconModule_Texture")
-	if texture then
-		if locked then texture:Disable() else texture:Enable() end
+	if self.icon:IsControlled() then
+		return
 	end
 
 	self:ConfigureContainerLayout()
@@ -1499,5 +1628,10 @@ function Module:TeardownContainer()
 end
 
 function Module:OnDisable()
+	-- The underlay alpha sits on frames the icon owns, so it outlives us. Hand them back at
+	-- full opacity or whatever displays the icon next inherits our dimming.
+	self:ForEachUnderlayFrame(function(module, frame)
+		frame:SetAlpha(1)
+	end)
 	self:TeardownContainer()
 end

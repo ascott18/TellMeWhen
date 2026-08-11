@@ -6,7 +6,7 @@
     * Only one unit can be checked
     * Spell filters can only filter buffs on friendly units, and debuffs on enemies. Spells that Blizzard flags as never secret are exempt and can be filtered on any unit.
     * Currently, only spell IDs (not spell names) can be filtered for.
-    * There is no "Absent" state. Information can only be conveyed when auras are present.
+    * There is no "Absent" state - an aura that isn't active has nothing to draw. An "Underlay" opacity stands in for it, drawing the icon beneath the auras so that it shows wherever there is no aura.
     * tullaCTC is not yet able to style the cooldown swipes on these icons.
 * Added a "Show activation border" setting to Cooldown and Reactive Ability icons (#2268, #2456). When checked, the icon draws Blizzard's spell activation border whenever the spell it is tracking has one on your action bars, without needing a notification and condition per icon.
 * The deprecated Edit Mode setting to hide Blizzard Cooldown Manager viewers per edit mode layout has been fully removed. The per-group setting remains.

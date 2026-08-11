@@ -545,6 +545,11 @@ L["ICONMENU_PRESENTONANY_DESC"] = "Set the icon opacity level for when any unit 
 L["ICONMENU_ABSENTONALL"] = "All Absent"
 L["ICONMENU_ABSENTONALL_DESC"] = "Set the icon opacity level for when all units being checked are missing all of the buffs/debuffs being checked."
 
+L["ICONMENU_AURACONTAINER_AURAS"] = "Auras"
+L["ICONMENU_AURACONTAINER_AURAS_DESC"] = "Set the opacity of each aura shown by this icon."
+L["ICONMENU_AURACONTAINER_UNDERLAY"] = "Underlay"
+L["ICONMENU_AURACONTAINER_UNDERLAY_DESC"] = "Set the opacity, tint and texture this icon shows where there is no aura. Auras are drawn on top of the underlay - they do not and cannot replace the underlay."
+
 L["ICONMENU_FAIL2"] = "Conditions Fail"
 L["ICONMENU_SUCCEED2"] = "Conditions Succeed"
 L["ICONMENU_ONFAIL"] = "On Fail"

@@ -967,12 +967,21 @@ function Texts:OnKwargsUpdated()
 
 			local text = TEXT:GetTextFromSettingsAndLayout(self.Texts, self.layoutSettings, textID)
 
-			-- On aura-container icons every string is drawn on the auras themselves
-			-- (IconModule_AuraContainer mirrors it onto each AuraButton), so none of them are
-			-- DogTag-driven here - ours only gets created and positioned by SetupForIcon, to
-			-- be mirrored, and is left queued for removal so it goes dark while locked. It
-			-- would otherwise sit under the container, showing even where no aura is present.
-			if auraContainer then
+			-- On aura-container icons a string with an Aura value is drawn on the auras
+			-- themselves (IconModule_AuraContainer mirrors it onto each AuraButton) and is
+			-- never DogTag-driven here - ours only gets created and positioned by
+			-- SetupForIcon, to be mirrored, and is left queued for removal so it goes dark
+			-- while locked. It has nothing to say without an aura to read it from anyway.
+			--
+			-- A plain string says the same thing with or without an aura, so it belongs to the
+			-- icon's underlay: drive it here as usual and let it show through wherever no aura
+			-- covers it (the container still mirrors it onto the auras, which draw over it).
+			-- With no underlay configured the icon's display comes down entirely, so it goes
+			-- dark along with the rest of it.
+			local underlayString = auraContainer and TMW.Locked
+				and fontStringSettings.Aura == "" and auraContainer:GetUnderlayAlpha() > 0
+
+			if auraContainer and not underlayString then
 				if not TMW.Locked and not self.icon:IsControlled() then
 					-- Config placeholders
 					if fontStringSettings.Aura == "spell" then
