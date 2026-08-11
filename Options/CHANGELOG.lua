@@ -13,6 +13,7 @@ TMW.CHANGELOG = [==[
     * Currently, only spell IDs (not spell names) can be filtered for.
     * There is no "Absent" state - an aura that isn't active has nothing to draw. An "Underlay" opacity stands in for it, drawing the icon beneath the auras so that it shows wherever there is no aura.
     * tullaCTC is not yet able to style the cooldown swipes on these icons.
+* Added a "Show tooltips on mouseover" global setting (#2439). When enabled, hovering an icon shows the tooltip of the spell, item, or aura it is currently showing. A companion setting suppresses the tooltips in combat.
 * Added a "Show activation border" setting to Cooldown and Reactive Ability icons (#2268, #2456). When checked, the icon draws Blizzard's spell activation border whenever the spell it is tracking has one on your action bars, without needing a notification and condition per icon.
 * The deprecated Edit Mode setting to hide Blizzard Cooldown Manager viewers per edit mode layout has been fully removed. The per-group setting remains.
 * Default text layouts for horizontal and vertical bar groups now show stack text in a separate display.

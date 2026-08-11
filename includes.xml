@@ -133,6 +133,7 @@
 <Script file="Components\IconModules\IconModule_IconContainer_Masque\IconContainer_Masque.lua" />
 <Script file="Components\IconModules\IconModule_IconEventClickHandler\IconEventClickHandler.lua" />
 <Script file="Components\IconModules\IconModule_IconEventConditionHandler\IconEventConditionHandler.lua" />
+<Script file="Components\IconModules\IconModule_IconTooltip\IconTooltip.lua" />
 <Script file="Components\IconModules\IconModule_PowerBar\PowerBar.lua" />
 <Script file="Components\IconModules\IconModule_PowerBar_Overlay\PowerBar_Overlay.lua" />
 <Script file="Components\IconModules\IconModule_Texts\Texts.lua" />

@@ -61,7 +61,9 @@ end)
 
 function Module:REALALPHA(icon, realAlpha)
 	if TMW.Locked and not icon.IsSettingUp then
-		icon:EnableMouse(realAlpha > 0)
+		-- Clicks only, not EnableMouse: IconModule_IconTooltip owns mouse motion on the
+		-- same icon, and the two axes have to be settable without clobbering each other.
+		icon:SetMouseClickEnabled(realAlpha > 0)
 	end
 end
 Module:SetDataListener("REALALPHA")

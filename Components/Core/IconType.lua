@@ -26,6 +26,10 @@ local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
 local GetSpellLink = C_Spell and C_Spell.GetSpellLink or GetSpellLink
 local GetSpellTexture = TMW.GetSpellTexture
+-- Resolves a spell name (or link, or ID) to a spell ID. On clients without it, spellID is
+-- the 7th return of the old GetSpellInfo.
+local GetSpellIDForSpellIdentifier = C_Spell and C_Spell.GetSpellIDForSpellIdentifier
+	or function(spell) return (select(7, GetSpellInfo(spell))) end
 local tContains = TMW.tContains
 local tDeleteItem = TMW.tDeleteItem
 local OnGCD = TMW.OnGCD
@@ -132,6 +136,62 @@ function IconType:FormatSpellForOutput(icon, data, doInsertLink)
 	end
 	
 	return data, true
+end
+
+-- [OPTIONAL]
+--- The GameTooltip method that {{{IconType:SetTooltip()}}} uses to describe what an icon
+--- is currently showing, called with {{{icon.attributes.spell}}}. Set to false for IconTypes
+--- whose "spell" attribute isn't a spell or an item.
+IconType.tooltipMethod = "SetSpellByID"
+
+-- [REQUIRED, FALLBACK]
+--- Whether the icon currently has anything to describe in a mouseover tooltip. Checked
+--- before the icon is made mouse-interactive at all, so an icon that can never produce a
+--- tooltip doesn't sit between the cursor and whatever is behind it.
+-- @param icon [TMW.Classes.Icon] The icon being queried.
+-- @return [boolean] True if {{{IconType:SetTooltip()}}} would populate a tooltip.
+function IconType:HasTooltip(icon)
+	if not self.tooltipMethod then
+		return false
+	end
+
+	local spell = icon.attributes.spell
+	if spell == nil then
+		return false
+	elseif issecretvalue(spell) then
+		return true
+	end
+
+	return spell ~= ""
+end
+
+-- [REQUIRED, FALLBACK]
+--- Populates a tooltip with a description of what the icon is currently showing, for the
+--- mouseover tooltips enabled by the ShowTooltips setting. Override for IconTypes that need something
+--- other than a plain spell tooltip; set {{{IconType.tooltipMethod}}} instead if the only
+--- difference is which GameTooltip setter to call. Overrides must override
+--- {{{IconType:HasTooltip()}}} to match.
+-- @param icon [TMW.Classes.Icon] The icon being hovered.
+-- @param tooltip [GameTooltip] The tooltip to populate. Already owned by and anchored to the icon.
+-- @return [boolean] True if the tooltip was handed data. It hides itself if that data turned out to be nothing.
+function IconType:SetTooltip(icon, tooltip)
+	if not self:HasTooltip(icon) then
+		return false
+	end
+
+	local spell = icon.attributes.spell
+
+	-- A spell entered by name is stored lowercased (TMW:LowerNames), which the tooltip's
+	-- own spell lookup won't resolve, so trade the name for its ID first. Item IDs are
+	-- always numeric, so this never fires for the SetItemByID types.
+	if type(spell) == "string" and not issecretvalue(spell) then
+		spell = GetSpellIDForSpellIdentifier(spell) or spell
+	end
+
+	-- Secret spell IDs are fine to hand over: the tooltip data accessors are declared
+	-- SecretArguments = "AllowedWhenTainted", so they take them from addon code.
+	tooltip[self.tooltipMethod](tooltip, spell)
+	return true
 end
 
 -- [REQUIRED, FALLBACK]

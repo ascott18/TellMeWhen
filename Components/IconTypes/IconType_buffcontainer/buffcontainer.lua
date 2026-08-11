@@ -58,6 +58,8 @@ Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
 -- Technically TimerBar is on icon views, but whatever.
 Type:SetModuleAllowance("IconModule_PowerBar_Overlay", false)
 Type:SetModuleAllowance("IconModule_TimerBar_Overlay", false)
+-- The container's AuraButtons cover the icon and bring Blizzard's own aura tooltips with them.
+Type:SetModuleAllowance("IconModule_IconTooltip", false)
 
 Type:RegisterIconDefaults{
 	-- The unit(s) to check for auras

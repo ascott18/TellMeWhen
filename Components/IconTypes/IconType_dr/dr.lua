@@ -44,6 +44,9 @@ Type.usePocketWatch = 1
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 
+-- The "spell" attribute is a DR category, not a spell.
+Type.tooltipMethod = false
+
 local STATE_UNDIMINISHED = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_DIMINISHED = TMW.CONST.STATE.DEFAULT_HIDE
 

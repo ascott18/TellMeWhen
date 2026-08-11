@@ -31,6 +31,9 @@ Type.desc = L["ICONMENU_ITEMCOOLDOWN_DESC"]
 Type.menuIcon = "Interface\\Icons\\inv_jewelry_trinketpvp_01"
 Type.checksItems = true
 
+-- The "spell" attribute is an item ID here.
+Type.tooltipMethod = "SetItemByID"
+
 local STATE_USABLE           = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_UNUSABLE         = TMW.CONST.STATE.DEFAULT_HIDE
 local STATE_UNUSABLE_NORANGE = TMW.CONST.STATE.DEFAULT_NORANGE

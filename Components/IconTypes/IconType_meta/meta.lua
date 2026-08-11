@@ -51,6 +51,22 @@ Type:SetModuleAllowance("IconModule_TimerBar_BarDisplay", false)
 Type:SetModuleAllowance("IconModule_Texts", false)
 Type:SetModuleAllowance("IconModule_CooldownSweep", false)
 
+-- A meta icon inherits attributes but not the type that produced them, so hand the
+-- tooltip back to whichever icon is currently supplying the data.
+function Type:HasTooltip(icon)
+	local source = icon.__currentIcon
+	return source ~= nil and source ~= icon and source.typeData:HasTooltip(source)
+end
+
+function Type:SetTooltip(icon, tooltip)
+	local source = icon.__currentIcon
+	if not source or source == icon then
+		return false
+	end
+
+	return source.typeData:SetTooltip(source, tooltip)
+end
+
 
 
 

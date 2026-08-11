@@ -509,6 +509,15 @@ function Module:ApplyButtonSettings(button, settingsIcon)
 	local showTimer = settingsIcon.ShowTimer
 	local showText = settingsIcon.ShowTimerText
 
+	-- The button shows its own (Blizzard) tooltip from its own OnEnter, so the global
+	-- tooltip settings have to be pushed onto it. IconModule_IconTooltip, which handles
+	-- every other icon type, is disallowed here precisely because these already have
+	-- tooltips - but they'd otherwise ignore the setting that turns them off.
+	-- Taking the mouse away is the only off switch: an AuraButton has no "tooltips shown"
+	-- API, only the combat one below.
+	button:SetMouseMotionEnabled(TMW.db.global.ShowTooltips)
+	button:SetHideTooltipInCombat(TMW.db.global.TooltipsHideInCombat)
+
 	-- Custom Texture override: paint it onto our icon and ClearIcon so the container stops
 	-- painting the aura's icon into it (the native Texture_Colored can't help - it can't evaluate
 	-- overrides under our secret state and is gated hidden while the aura is present). Decide off

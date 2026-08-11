@@ -40,6 +40,9 @@ Type.desc = L["ICONMENU_WPNENCHANT_DESC"]
 Type.menuIcon = TMW.GetSpellTexture(8024) or TMW.GetSpellTexture(318038)
 Type.AllowNoName = true
 
+-- The "spell" attribute is an enchant name, not a spell.
+Type.tooltipMethod = false
+
 local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
 

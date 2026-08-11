@@ -96,6 +96,14 @@ L["SHOWAURASPELLIDS_OPTION_DESC"] = [[Enable this setting to see the spell ID of
 
 This turns on Blizzard's tooltipShowAuraSpellIDs console variable, which resets when the UI reloads. Disabling this setting takes effect on your next reload.]]
 
+L["UIPANEL_ICONTOOLTIPS"] = "Tooltips"
+L["UIPANEL_SHOWICONTOOLTIPS"] = "Show tooltips on mouseover"
+L["UIPANEL_SHOWICONTOOLTIPS_DESC"] = [[Enable this setting to show the tooltip of the spell, item, or aura that an icon is currently showing when you hover over it.
+
+Icons will start responding to the mouse, so anything behind them can no longer be moused over. Clicks still pass through unless an icon uses a click notification.]]
+L["UIPANEL_ICONTOOLTIPS_HIDEINCOMBAT"] = "Hide tooltips in combat"
+L["UIPANEL_ICONTOOLTIPS_HIDEINCOMBAT_DESC"] = "Enable this setting to only show these tooltips while out of combat."
+
 
 
 L["ICON_TOOLTIP_CONTROLLER"] = [[This icon is a group controller.]]

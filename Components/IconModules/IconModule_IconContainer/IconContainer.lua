@@ -268,6 +268,13 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 
 
 IconContainer:SetScriptHandler("OnEnter", function(Module, icon)
+	-- While locked, an icon can be taking mouse motion purely so that it can show a
+	-- tooltip (IconModule_IconTooltip). Lighting it up like a button is only right for
+	-- the icons that are actually clickable.
+	if TMW.Locked and not icon:IsMouseClickEnabled() then
+		return
+	end
+
 	Module.container:LockHighlight()
 end)
 IconContainer:SetScriptHandler("OnLeave", function(Module, icon)

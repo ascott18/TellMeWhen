@@ -359,6 +359,11 @@ IconView:ImplementsModule("IconModule_RecieveSpellDrags", 3, true)
 IconView:ImplementsModule("IconModule_IconDragger", 4, true)
 IconView:ImplementsModule("IconModule_GroupMover", 5, true)
 IconView:ImplementsModule("IconModule_Tooltip", 6, true)
+IconView:ImplementsModule("IconModule_IconTooltip", 6.5, function(Module, icon)
+	if TMW.Locked and TMW.db.global.ShowTooltips then
+		Module:Enable()
+	end
+end)
 IconView:ImplementsModule("IconModule_IconEditorLoader", 7, true)
 
 doneImplementingDefaults = true
