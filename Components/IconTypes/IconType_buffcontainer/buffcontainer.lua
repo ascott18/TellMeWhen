@@ -345,11 +345,14 @@ local function BuildAuraSpec(icon)
 	-- - like Blizzard's default unit-frame sort - floats player-cast / priority /
 	-- self-applicable auras to the front before considering duration. Map the icon's Sort
 	-- (1 = longest first, -1 = shortest first, matching buff.lua) onto the sort direction.
+	-- No sort names a method too rather than leaving one unset: groups and slots are pooled
+	-- and reused across specs, so an unset method leaves the icon's previous sort in place.
 	local sortMethod, sortDirection
 	if icon.Sort then
 		sortMethod = AuraContainerSortMethod.ExpirationOnly
 		sortDirection = icon.Sort == -1 and AuraContainerSortDirection.Normal or AuraContainerSortDirection.Reverse
 	else
+		sortMethod = AuraContainerSortMethod.Default
 		sortDirection = AuraContainerSortDirection.Normal
 	end
 

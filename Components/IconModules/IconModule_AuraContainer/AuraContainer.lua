@@ -48,7 +48,7 @@ local max = math.max
 local LSM = LibStub("LibSharedMedia-3.0")
 local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
 
--- GLOBALS: AnchorUtil, AuraContainerSortDirection, AuraContainerSortMethod, CUSTOM_CLASS_COLORS
+-- GLOBALS: AnchorUtil, AuraContainerSortDirection, AuraContainerSortMethod
 local FlowDirection = AnchorUtil.FlowDirection
 local FlowLayoutAxis = AnchorUtil.FlowLayoutAxis
 
@@ -160,6 +160,190 @@ Module:RegisterConfigPanel_ConstructorFunc(200, "TellMeWhen_AuraContainerTimerSe
 	self:SetAutoAdjustHeight(true)
 end)
 
+-- The AuraButton owns the duration bar too, so aura-container types disable
+-- IconModule_TimerBar_BarDisplay, taking its whole panel with it. This is that panel,
+-- reduced to the settings the container can actually honor - the rest need either the GCD
+-- (BarGCD), control of the bar's min/max (FakeMax), or the remaining time (the gradient to
+-- the middle and complete colors), and the remaining time is secret.
+--
+-- Bar views only; the panel hides itself entirely on the icon view, which has no bar.
+Module:RegisterConfigPanel_ConstructorFunc(205, "TellMeWhen_AuraContainerBarSettings", function(self)
+	self:SetTitle(L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"])
+
+	local function NewCheck(key, title, tooltip, setting)
+		local check = TMW.C.Config_CheckButton:New("CheckButton", "$parent" .. key, self, "TellMeWhen_CheckTemplate")
+		check:SetTexts(title, tooltip)
+		check:SetSetting(setting)
+		check:ClearAllPoints()
+		return check
+	end
+
+	local invert = NewCheck("Invert", L["ICONMENU_INVERTBARS"], L["ICONMENU_INVERTBARDISPLAYBAR_DESC"], "BarDisplay_Invert")
+	-- Stored as a StatusBarInterpolation, so the checked values are the enum's.
+	local smoothing = NewCheck("Smoothing", L["ICONMENU_SMOOTHING"], L["ICONMENU_SMOOTHING_DESC"], "BarDisplay_Smoothing")
+	smoothing:SetCheckedValues(1, 0)
+	local reverse = NewCheck("Reverse", L["ICONMENU_REVERSEBARS"], L["ICONMENU_REVERSEBARS_DESC"], "BarDisplay_Reverse")
+	local enableColors = NewCheck("EnableColors", L["COLOR_OVERRIDE_GROUP"], L["COLOR_OVERRIDE_GROUP_DESC"], "TimerBar_EnableColors")
+
+	local startColor = TMW.C.Config_ColorButton:New("Button", "$parentStartColor", self, "TellMeWhen_ColorButtonTemplate")
+	-- Just "the bar color" here rather than BarDisplay's "start color": with no gradient to
+	-- run to, there's no other end for it to be the start of.
+	startColor:SetTexts(L["ICONMENU_BAR_COLOR"], L["ICONMENU_BAR_COLOR_DESC"])
+	startColor:SetSetting("TimerBar_StartColor")
+	startColor:SetHasOpacity(true)
+	startColor:ClearAllPoints()
+
+	-- Laid out the way TellMeWhen_BarDisplayBarOptions does it: only each row's first frame
+	-- gets a vertical anchor, and DistributeFrameAnchorsLaterally spreads the row and carries
+	-- the y across. The rows match that panel's minus the two settings we can't honor, which
+	-- leaves Fill/Flip/Override down the left and Smoothing opposite the first of them.
+	invert:SetPoint("TOP", 0, -1)
+	reverse:SetPoint("TOP", invert, "BOTTOM", 0, 3)
+	enableColors:SetPoint("TOP", reverse, "BOTTOM", 0, 3)
+	startColor:SetPoint("TOPLEFT", enableColors, "BOTTOMLEFT", 5, -3)
+
+	invert:ConstrainLabel(smoothing)
+	smoothing:ConstrainLabel(self, "RIGHT")
+	reverse:ConstrainLabel(self, "RIGHT")
+	enableColors:ConstrainLabel(self, "RIGHT")
+
+	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, invert, smoothing)
+	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, reverse)
+	TMW.IE:DistributeFrameAnchorsLaterally(self, 2, enableColors)
+
+	self:CScriptAdd("ReloadRequested", function()
+		-- Not TMW.CI.gs: that's only populated while the group config is open, and this is
+		-- an icon panel. Take the view from the icon's own group instead.
+		local view = TMW.CI.icon.group:GetSettings().View
+		if view ~= "bar" and view ~= "barv" then
+			-- No bar in this view, so nothing here applies. PositionPanels re-checks
+			-- IsShown after Setup and drops the panel from the column entirely.
+			self:Hide()
+			return
+		end
+
+		startColor:SetShown(TMW.CI.ics.TimerBar_EnableColors)
+
+		self:AdjustHeight(6)
+	end)
+end)
+
+Module:RegisterIconDefaults{
+	ShowPandemic      = false,
+	PandemicStyle     = "ACTVTNBORDER",
+	PandemicColor     = "ffff0000",
+	PandemicThickness = 2,
+}
+
+-- Pandemic indicator styles. A style is a region on the aura button whose visibility alone
+-- says "this aura is in its pandemic window" - the container only ever calls SetShown on it,
+-- so nothing here gets to know when the window opens.
+--
+-- Anything that moves has to move from a declarative AnimationGroup. Script handlers don't
+-- run on descendants of the forbidden AuraButton, which rules out every OnUpdate-driven
+-- effect - LibCustomGlow's pixel/autocast glows and TMW's own Animations handlers included.
+--
+-- Registered further down, next to the code that builds them; declared here because the
+-- config panel below lists them.
+local PandemicStyles = {}
+local PandemicStyleOrder = {}
+
+local function RegisterPandemicStyle(key, data)
+	data.key = key
+	PandemicStyles[key] = data
+	PandemicStyleOrder[#PandemicStyleOrder + 1] = key
+end
+
+Module:RegisterConfigPanel_ConstructorFunc(210, "TellMeWhen_AuraContainerPandemic", function(self)
+	self:SetTitle(L["CONFIGPANEL_PANDEMIC_HEADER"])
+
+	local check = TMW.C.Config_CheckButton:New("CheckButton", "$parentShowPandemic", self, "TellMeWhen_CheckTemplate")
+	self.ShowPandemic = check
+	check:SetTexts(L["ICONMENU_SHOWPANDEMIC"], L["ICONMENU_SHOWPANDEMIC_DESC"])
+	check:SetSetting("ShowPandemic")
+	check:ClearAllPoints()
+	check:SetPoint("TOPLEFT", 5, -1)
+
+	local function Style_OnClick(button)
+		TMW.CI.ics.PandemicStyle = button.value
+		-- Reloading re-runs ReloadRequested below, which relays the panel out for whichever
+		-- controls the newly picked style uses.
+		TMW.IE:LoadIcon(1)
+	end
+
+	local styleDD = TMW.C.Config_DropDownMenu:New("Frame", "$parentPandemicStyle", self, "TMW_DropDownMenuTemplate")
+	self.PandemicStyle = styleDD
+	styleDD:SetTexts(L["ICONMENU_PANDEMICSTYLE"], L["ICONMENU_PANDEMICSTYLE_DESC"])
+	styleDD:ClearAllPoints()
+	-- Right half of the header row, sharing it with the checkbox (the same split
+	-- TellMeWhen_BuffContainerSettings uses for its two filter dropdowns). Dropped by half
+	-- the height difference between the two templates (30 and 20) to sit centered on the
+	-- checkbox rather than riding above it.
+	styleDD:SetPoint("TOPLEFT", self, "TOP", -4, -6)
+	styleDD:SetPoint("RIGHT", -7, 0)
+	styleDD:SetFunction(function()
+		for _, key in ipairs(PandemicStyleOrder) do
+			local style = PandemicStyles[key]
+			local info = TMW.DD:CreateInfo()
+			info.text = style.text
+			info.tooltipTitle = style.text
+			info.tooltipText = style.desc
+			info.value = key
+			info.func = Style_OnClick
+			info.checked = TMW.CI.ics.PandemicStyle == key
+			TMW.DD:AddButton(info)
+		end
+	end)
+
+	-- Every per-style control is built once here; a style names the ones it wants in its
+	-- ConfigFrames and the rest stay hidden. `stretch` marks the ones that fill the panel
+	-- width - the color swatch is a fixed-size button and must not be anchored RIGHT.
+	local controls = {}
+
+	local color = TMW.C.Config_ColorButton:New("Button", "$parentPandemicColor", self, "TellMeWhen_ColorButtonTemplate")
+	color:SetTexts(L["ICONMENU_PANDEMICCOLOR"], L["ICONMENU_PANDEMICCOLOR_DESC"])
+	color:SetSetting("PandemicColor")
+	color:SetHasOpacity(true)
+	controls.Color = color
+
+	local thickness = TMW.C.Config_Slider:New("Slider", "$parentPandemicThickness", self, "TellMeWhen_SliderTemplate")
+	thickness:SetTexts(L["ICONMENU_PANDEMICTHICKNESS"], L["ICONMENU_PANDEMICTHICKNESS_DESC"])
+	thickness:SetSetting("PandemicThickness")
+	thickness:SetMinMaxValues(0, 10)
+	thickness:SetValueStep(0.1)
+	thickness:SetWheelStep(0.1)
+	thickness:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_0)
+	thickness.stretch = true
+	controls.Thickness = thickness
+
+	self:CScriptAdd("ReloadRequested", function()
+		for _, control in pairs(controls) do
+			control:Hide()
+		end
+
+		local style = PandemicStyles[TMW.CI.ics.PandemicStyle]
+		styleDD:SetText(style and style.text or NONE)
+
+		-- Stack the style's controls down the left edge, under the header row - the checkbox
+		-- is both its left-aligned and its taller frame, so it bounds the row.
+		local last = check
+		if style then
+			for _, key in ipairs(style.ConfigFrames) do
+				local control = controls[key]
+				control:ClearAllPoints()
+				control:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -14)
+				if control.stretch then
+					control:SetPoint("RIGHT", -10, 0)
+				end
+				control:Show()
+				last = control
+			end
+		end
+
+		self:AdjustHeight(6)
+	end)
+end)
+
 function Module:OnNewInstance(icon)
 	-- Buttons are created by the container (not us); we record each one the
 	-- container hands to our initializeFrame callback so we can (re-)skin them all.
@@ -200,7 +384,8 @@ local LEVEL_ICON     = 1  -- icon holder: the icon texture and any Masque skin o
 local LEVEL_BAR      = 1  -- the bar views' duration bar (never overlaps the icon square)
 local LEVEL_COOLDOWN = 2
 local LEVEL_BORDER   = 3  -- icon square + bar borders
-local LEVEL_TEXT     = 4
+local LEVEL_PANDEMIC = 4  -- pandemic art, drawn over the icon border it frames
+local LEVEL_TEXT     = 5
 
 -- Copy `source`'s anchor points (and size) onto `region`, remapping each point's
 -- relativeTo frame through `remap` (falling back to `default`). This reproduces a
@@ -416,6 +601,9 @@ function Module:Emulate_IconView_Icon(icon, button)
 	end
 
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
+	-- The button is the icon square in this view, so the square pandemic art always fits.
+	local cellW, cellH = icon:GetSize()
+	self:Emulate_PandemicFX(icon, button, { frame = button, width = cellW, height = cellH })
 
 	return remap
 end
@@ -430,31 +618,19 @@ local function GetBarTexture(icon)
 	return LSM:Fetch("statusbar", name)
 end
 
--- A single static bar color. TMW's normal bar gradients start->complete over the
--- remaining time, but we can't do that here (the remaining time is secret), so we
--- use the "full" (start) color, or the unit's class color if configured.
+-- A single static bar color, resolved the way TimerBar_BarDisplay:SetupColors does it: the
+-- icon's own color while it overrides, else the group's, else the global one.
+--
+-- Static in two senses, both forced. TMW's normal bars gradient start->complete over the
+-- remaining time, which needs a value that's secret here. And nothing unit-dependent (class
+-- color) is possible either: this only runs while skinning a button, which the container's
+-- access restriction blocks for as long as auras are secret, so a color chosen from the
+-- unit would be stuck on whichever unit was current at skin time and could never follow a
+-- target swap.
 local function GetBarColor(icon)
-	local spec = icon.attributes.auraSpec
-	local unit = spec and spec.unit
-	if icon.BarDisplay_ClassColor and unit then
-		local _, class = UnitClass(unit)
-		if issecretvalue(class) then
-			-- A restricted unit's class is secret, so it can't index the class color tables.
-			-- C_ClassColor accepts the secret and SetStatusBarColor accepts the secret
-			-- components back out of it; the cost is CUSTOM_CLASS_COLORS support.
-			local c = C_ClassColor.GetClassColor(class)
-			if c then
-				local r, g, b = c:GetRGB()
-				return r, g, b, 1
-			end
-		elseif class then
-			local c = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
-			if c then
-				return c.r, c.g, c.b, 1
-			end
-		end
-	end
-	return TMW:StringToCachedColorMixin(icon.TimerBar_StartColor or "ffff0000"):GetRGBA()
+	local color = TMW:GetColors("TimerBar_StartColor", "TimerBar_EnableColors",
+		icon:GetSettings(), icon.group:GetSettings(), TMW.db.global)
+	return TMW:StringToCachedColorMixin(color or "ffff0000"):GetRGBA()
 end
 
 -- Bar / barv views: mirror the frames the view already positioned - IconContainer's
@@ -512,6 +688,15 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 	end
 
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
+	-- The art wraps the icon square, same as in the icon view - wrapping the whole cell would
+	-- put the indicator around the bar as well. With the icon square turned off there's
+	-- nothing of the right shape to wrap, so no target and no indicator.
+	local target
+	if iconRegion then
+		local iconW, iconH = iconSquare:GetSize()
+		target = { frame = iconRegion, width = iconW, height = iconH }
+	end
+	self:Emulate_PandemicFX(icon, button, target)
 
 	-- Duration bar: mirror the view's TimerBar container (anchored to the icon and
 	-- the icon square, both remapped above). The bar is scaled to whole screen pixels
@@ -525,7 +710,12 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 		bar:SetRotatesTexture(vertical)
 		bar:SetStatusBarTexture(GetBarTexture(icon))
 		bar:SetStatusBarColor(GetBarColor(icon))
-		button:SetDurationBar(bar, {direction = Enum.StatusBarTimerDirection.RemainingTime})
+		bar:SetReverseFill(icon.BarDisplay_Reverse)
+		button:SetDurationBar(bar, {
+			direction = icon.BarDisplay_Invert and Enum.StatusBarTimerDirection.ElapsedTime
+				or Enum.StatusBarTimerDirection.RemainingTime,
+			interpolation = icon.BarDisplay_Smoothing,
+		})
 
 		-- Bar text (bar1/bar2 layouts) anchors to the TimerBar's bar frame; remap
 		-- both it and the container to our StatusBar so the text wiring places text.
@@ -615,6 +805,148 @@ function Module:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 	elseif border then
 		border:Hide()
 	end
+end
+
+-- Blizzard's Cooldown Manager anchors its pandemic art outside the frame it surrounds -
+-- 6px around a ~40px icon - so the glow reads as a halo rather than an inner border.
+-- Expressed as a fraction of our own size, which varies per icon.
+local PANDEMIC_OVERHANG = 0.15
+
+-- Where a pandemic style draws, built by the view emulation and handed to the style:
+--   frame   the region the art wraps
+--   width   that region's size. Passed rather than read back, because the regions here are
+--   height  children of the forbidden AuraButton and their GetSize is secret - it always
+--           comes from the icon-side frame the button is mirroring.
+--
+-- Wrap `target` with the art, growing it outward by `scale` about its center.
+local function AnchorPandemicRegion(region, button, target, scale)
+	local w, h = target.width, target.height
+	local insetX, insetY = w * (scale - 1) / 2, h * (scale - 1) / 2
+
+	region:ClearAllPoints()
+	region:SetPoint("TOPLEFT", target.frame, "TOPLEFT", -insetX, insetY)
+	region:SetPoint("BOTTOMRIGHT", target.frame, "BOTTOMRIGHT", insetX, -insetY)
+	region:SetFrameLevel(button:GetFrameLevel() + LEVEL_PANDEMIC)
+
+	return w * scale, h * scale
+end
+
+RegisterPandemicStyle("ACTVTNBORDER", {
+	text = L["ICONMENU_PANDEMICSTYLE_ACTVTNBORDER"],
+	desc = L["ICONMENU_PANDEMICSTYLE_ACTVTNBORDER_DESC"],
+	ConfigFrames = {},
+
+	Build = function(button)
+		-- IconModule_IconContainer picks this template by feature detection because it also
+		-- runs on classic; this file is 12.1-only, where the post-11.1.7 name and ProcStartAnim
+		-- are both a given.
+		local overlay = CreateFrame("Frame", nil, button, "ActionButtonSpellAlertTemplate")
+
+		-- Same treatment IconContainer gives it: the 10.1.5 intro animation looks wrong
+		-- looping, so only ProcLoop is used and the flipbook is stopped from re-showing itself.
+		overlay.ProcStartFlipbook:Hide()
+		overlay.ProcStartFlipbook.Show = TMW.NULLFUNC
+
+		overlay.ProcLoop:Play()
+		return overlay
+	end,
+
+	Configure = function(icon, button, overlay, target)
+		-- The overscale IconContainer gives this art, so a container aura matches a normal
+		-- TMW icon wearing the same border.
+		AnchorPandemicRegion(overlay, button, target, 1.4)
+	end,
+})
+
+RegisterPandemicStyle("CDM", {
+	text = L["ICONMENU_PANDEMICSTYLE_CDM"],
+	desc = L["ICONMENU_PANDEMICSTYLE_CDM_DESC"],
+
+	-- No color: the art carries its own, and Blizzard never tints it. Vertex color would
+	-- only multiply it darker rather than recolor it.
+	ConfigFrames = {},
+
+	Build = function(button)
+		local fx = CreateFrame("Frame", nil, button, "CooldownPandemicFXTemplate")
+
+		-- The template inherits AnimateWhileShownTemplate, which starts the loop from OnShow -
+		-- and scripts never fire on a descendant of the forbidden AuraButton. PlayAnims walks
+		-- the frame and its children, so calling it directly reaches the group on the FX child.
+		fx:PlayAnims()
+		return fx
+	end,
+
+	Configure = function(icon, button, fx, target)
+		AnchorPandemicRegion(fx, button, target, 1 + PANDEMIC_OVERHANG * 2)
+	end,
+})
+
+RegisterPandemicStyle("BORDER", {
+	text = L["ICONMENU_PANDEMICSTYLE_BORDER"],
+	desc = L["ICONMENU_PANDEMICSTYLE_BORDER_DESC"],
+	ConfigFrames = { "Color", "Thickness" },
+
+	Build = function(button)
+		-- Built from the class + template rather than by inheriting the template's OnLoad,
+		-- which never fires here (see Emulate_IconModule_Backdrop).
+		return TMW.Classes.GenericBorder:New("Frame", nil, button, "TellMeWhen_GenericBorder")
+	end,
+
+	Configure = function(icon, button, border, target)
+		AnchorPandemicRegion(border, button, target, 1)
+		-- Always inset (negative size, matching IconContainer:SetBorder), regardless of the
+		-- group's own border inset setting: this border is drawn over an aura that already
+		-- fills its cell, and container cells sit at the group's spacing - commonly 0 - so
+		-- an outset border would run into the neighbouring aura.
+		border:SetBorderSize(-icon.PandemicThickness)
+		border:SetColor(TMW:StringToRGBA(icon.PandemicColor))
+	end,
+})
+
+-- Indicator shown while an aura is inside its pandemic window - the tail of its duration
+-- during which recasting carries the remainder over into the new application. The window is
+-- derived from secret durations, so the AuraButton computes it and owns the indicator's
+-- shown state; we only build the art and hand it over.
+--
+-- `target` says what to wrap and how big it is (see AnchorPandemicRegion), or is nil when the
+-- view has nothing to wrap - which tears down whatever was there and draws nothing.
+function Module:Emulate_PandemicFX(icon, button, target)
+	local regions = button.tmwPandemicRegions
+	local style = target and icon.ShowPandemic and PandemicStyles[icon.PandemicStyle]
+
+	-- Regions are cached per style, so a button holds one for each style it has actually been
+	-- configured with and switching back to a previous one reuses it.
+	local cacheKey = style and style.key
+
+	if regions then
+		for key, region in pairs(regions) do
+			if key ~= cacheKey then
+				region:Hide()
+			end
+		end
+	end
+
+	-- Registrations accumulate, so drop the previous one before re-adding on a reskin.
+	button:ClearPandemicRegions()
+
+	if not style then
+		return
+	end
+
+	regions = regions or {}
+	button.tmwPandemicRegions = regions
+
+	local region = regions[cacheKey]
+	if not region then
+		region = style.Build(button, target)
+		regions[cacheKey] = region
+	end
+
+	style.Configure(icon, button, region, target)
+
+	-- No Show() here: registering drives visibility off the current aura, which for a
+	-- button with no aura (or no pandemic window) means hidden.
+	button:AddPandemicRegion(region)
 end
 
 -- Mirror the icon's text layout onto the button. IconModule_Texts creates + positions its own
@@ -1037,10 +1369,7 @@ function Module:SetAuraSpec(auraSpec)
 	end
 
 	if not TMW.Locked or not auraSpec or not auraSpec.filters or #auraSpec.filters == 0 then
-		-- Deactivate everything; the icon's own modules show the config preview. Hiding the
-		-- whole container is what actually clears the display: a child of a hidden frame
-		-- doesn't render regardless of its own shown state, so it doesn't matter that the
-		-- container keeps (re-)showing individual slot frames while disabled.
+		-- Deactivate everything; the icon's own modules show the config preview.
 		self:TeardownContainer()
 		return
 	end
@@ -1061,9 +1390,7 @@ function Module:SetAuraSpec(auraSpec)
 
 			container:SetAuraGroupMaxFrameCount(auraGroup.key, maxFrameCount)
 			container:SetAuraGroupCandidateFilters(auraGroup.key, f.candidateFilters)
-			if f.sortMethod then
-				container:SetAuraGroupSortMethod(auraGroup.key, f.sortMethod, f.sortDirection)
-			end
+			container:SetAuraGroupSortMethod(auraGroup.key, f.sortMethod, f.sortDirection)
 		end
 		-- Park pooled groups beyond the current filter count.
 		for i = #filters + 1, #self.groups do
@@ -1080,9 +1407,7 @@ function Module:SetAuraSpec(auraSpec)
 			local f = filters[i]
 			local slot = self:EnsureSlot(i, f.filterString)
 			container:SetAuraSlotCandidateFilters(slot.key, f.candidateFilters)
-			if f.sortMethod then
-				container:SetAuraSlotSortMethod(slot.key, f.sortMethod, f.sortDirection)
-			end
+			container:SetAuraSlotSortMethod(slot.key, f.sortMethod, f.sortDirection)
 		end
 		-- Park pooled slots beyond the current filter count.
 		for i = #filters + 1, #self.slots do
@@ -1165,6 +1490,9 @@ function Module:TeardownContainer()
 	if self.container then
 		self:DeactivateGroups()
 		self:DeactivateSlots()
+		-- A disabled container drops every aura it had parsed, so this alone empties the
+		-- display. The hide is what keeps it empty: the container still (re-)shows slot
+		-- frames while disabled, and a child of a hidden frame doesn't render regardless.
 		self.container:SetEnabled(false)
 		self.container:Hide()
 	end
