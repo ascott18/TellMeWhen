@@ -2939,6 +2939,10 @@ L["HELP_ONLYONEUNIT"] = [[This condition only accepts one unit, but you have ent
 
 If you need to check many units, consider using a separate icon with an Icon Shown condition to reference that icon.]]
 
+L["HELP_BUFFCONTAINER_NAMENOTID"] = [[%s is a spell name, and this icon type can only filter by spell ID. Names are ignored.
+
+Pick the spell from the suggestion list to insert its ID, or leave the field empty to show every aura matching the icon's other filters.]]
+
 L["HELP_BUFF_NOSOURCERPPM"] = [[It looks like you are trying to track %s, which is a buff that uses the RPPM system.
 
 Due to a Blizzard bug, this buff can't be tracked if you have the %q setting enabled.

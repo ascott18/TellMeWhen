@@ -85,7 +85,7 @@ Type:RegisterIconDefaults{
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
-	SUGType = "buffNoDS",
+	SUGType = "buffcontainer",
 })
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
@@ -429,6 +429,27 @@ function Type:Setup(icon)
 	-- the unit set changes (e.g. target swap).
 	icon:SetScript("OnEvent", Buff_OnEvent_AuraContainer)
 	icon:RegisterEvent(icon.UnitSet.event)
+
+	-- BuildAuraSpec drops anything that isn't a number, so a name entered here matches
+	-- nothing at all and does it quietly. Say so rather than leave the user guessing.
+	-- GLOBALS: TellMeWhen_ChooseName
+	if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
+		TMW.HELP:Hide("ICONTYPE_BUFFCONTAINER_NAMENOTID")
+		for _, entry in ipairs(icon.Spells.Array) do
+			if not tonumber(entry) then
+				TMW.HELP:Show{
+					code = "ICONTYPE_BUFFCONTAINER_NAMENOTID",
+					codeOrder = 2,
+					icon = icon,
+					relativeTo = TellMeWhen_ChooseName,
+					x = 0,
+					y = 0,
+					text = format(L["HELP_BUFFCONTAINER_NAMENOTID"], entry)
+				}
+				break
+			end
+		end
+	end
 
 	icon:Update()
 end

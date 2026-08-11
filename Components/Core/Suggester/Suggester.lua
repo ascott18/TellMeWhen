@@ -1576,3 +1576,16 @@ end
 local Module = SUG:NewModule("buffNoDS", SUG:GetModule("buff"))
 Module.Table_GetSpecialSuggestions_1 = TMW.NULLFUNC
 
+-- Aura container icons can only filter on numeric spell IDs (see IconType_buffcontainer's
+-- BuildAuraSpec), so the ID goes in whichever of the two was typed, and there's no name on
+-- the right click - inserting one here would match nothing.
+local BuffNoDS = SUG:GetModule("buffNoDS")
+local Module = SUG:NewModule("buffcontainer", BuffNoDS)
+function Module:Entry_AddToList_1(f, id)
+	BuffNoDS.Entry_AddToList_1(self, f, id)
+
+	if tonumber(id) then
+		f.insert, f.insert2 = id, nil
+	end
+end
+
