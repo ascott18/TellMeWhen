@@ -4,6 +4,8 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v12.1.1
+* Missing Buffs/Debuffs icons now work in combat, Mythic+, and PvP for spells that Blizzard flags as never secret, which includes the usual raid buffs. Previously they reported every unit as missing everything in those situations.
+* Fix: Missing Buffs/Debuffs icons watching a group of units ignored the Buff or Debuff setting, matching a debuff of the same name as the buff being checked for.
 * Fix: #2463 - try to fix edit mode taint by avoiding use of HookScript
 * Fix #2464 - The "Auras" state's Icon Tint & Texture color and desaturation had no effect on Buff/Debuff (combat allowed) icons.
 * Fix Shadow Priest Voidform detection, which broke in 12.1 when Void Volley became a charge-based spell.

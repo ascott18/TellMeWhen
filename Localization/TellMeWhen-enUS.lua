@@ -862,6 +862,9 @@ L["ICONMENU_HIDEWHILESECRET"] = "Hide while secret"
 L["ICONMENU_HIDEWHILESECRET_DESC"] = [[Check this to cause the icon to hide while aura information is secret.
 
 TellMeWhen cannot automatically determine if an aura will definitely be secret or non-secret in lockdown, so this setting will let you avoid showing an aura as 'Absent' when TMW just isn't allowed to know about it.]]
+L["ICONMENU_HIDEWHILESECRET_BUFFCHECK_DESC"] = [[Check this to cause the icon to hide while any of its spells are secret.
+
+A secret spell is skipped, and no unit is reported as missing anything while one is in the list. Without this setting, the icon still checks the spells that aren't secret.]]
 L["ICONMENU_AURAFILTER"] = "Aura Filters"
 L["ICONMENU_AURAFILTER_DESC"] = "Only show auras that match any of the selected filters."
 L["ICONMENU_DISPELTYPE"] = "Dispel Type"
@@ -1091,6 +1094,12 @@ L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is when trac
 L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
 
 Additionally, duration sorting cannot be performed on any secret durations.]]
+L["UIPANEL_BUFFCHECK_SECRETS_TITLE"] = "Availability in Combat"
+L["UIPANEL_BUFFCHECK_SECRETS_UNREADABLE"] = "Cannot be read in combat, Mythic+, or PvP, and are ignored there:"
+L["UIPANEL_BUFFCHECK_SECRETS_READABLE"] = "Can be read at all times:"
+L["UIPANEL_BUFFCHECK_SECRETS_UNRESOLVED"] = "a name this character cannot look up; enter the spell ID instead"
+L["UIPANEL_BUFFCHECK_SECRETS_RESTRICTED"] = "Blizzard does not allow this spell"
+L["HELP_BUFFCHECK_NAMENOTID"] = [[%s is a spell name that this character cannot look up. Spell names can only be looked up for spells your own class knows - use spell IDs for other class' spells.]]
 L["UIPANEL_SECRETS_TOTEM_DESC"] = [[You CANNOT track any specific totem name WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP).
 
 You CAN leave "What to track" blank to track any totem. Totem slot filters still work while secret.]]

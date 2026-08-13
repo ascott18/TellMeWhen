@@ -1589,3 +1589,22 @@ function Module:Entry_AddToList_1(f, id)
 	end
 end
 
+-- Buff Check icons need the ID for a reason the other types don't have: while auras are secret
+-- they look each spell up by identifier, and only a spell they can resolve to an ID can be
+-- asked whether it's allowed to be read - which is what decides whether the icon may report an
+-- aura as MISSING, its whole purpose. A name resolves only for the player's own class, and
+-- matches case-sensitively besides. So the ID goes on the left click.
+--
+-- The name stays on the right click, unlike the buffcontainer module above: names do work for
+-- finding an aura that IS present, so they're second-class here rather than useless.
+local Module = SUG:NewModule("buffcheck", BuffNoDS)
+function Module:Entry_AddToList_1(f, id)
+	BuffNoDS.Entry_AddToList_1(self, f, id)
+
+	if tonumber(id) then
+		-- The base module puts the ID on one click and the name on the other depending on what
+		-- was typed. Pin the ID to the left click whichever way it landed.
+		f.insert, f.insert2 = id, (f.insert ~= id and f.insert) or f.insert2
+	end
+end
+
