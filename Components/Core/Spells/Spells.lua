@@ -183,7 +183,11 @@ local fixSpellMap = {
 		-- but there's no reason for anyone to be tracking shadowform's CD,
 		-- so it doesn't matter.
 
-		return 1242173
+		-- return 1242173
+		-- NEW IN WOW 12.1: Void volley works differently now, it has 5 charges and then goes away.
+		-- We can detect whether its still active or not with the override of 228260,
+		-- which is the real voidform.
+		return C_Spell.GetOverrideSpell(228260)
 	end,
 }
 
