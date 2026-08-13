@@ -564,6 +564,48 @@ local function ResetIconHolder(button)
 	holder:Show()
 end
 
+-- Masque draws its Backdrop, Gloss and Shadow from a texture cache shared by every button in
+-- the UI (Masque/Core/Regions/{Backdrop,Gloss,Shadow}.lua), moving whichever one it takes onto
+-- the button it's skinning with a bare SetParent. Our holder is a child of the container-owned
+-- AuraButton, and a texture born outside that subtree cannot be moved into it - it would gain
+-- the button's forbidden aspects (UntrustedScriptExecution and the rest), which the engine
+-- rejects outright, killing the whole skin pass and the icon setup around it.
+local MASQUE_POOLED_REGIONS = { "Backdrop", "Gloss", "Shadow" }
+
+-- Replace any pooled region Masque took from that cache with a texture created here, so its
+-- next SetParent has nothing to do. Masque records the region on the holder before the
+-- SetParent that fails, and only reaches for the cache when that record is empty, so a failed
+-- skin leaves exactly what we need to fix it. Regions Masque didn't ask for are left alone:
+-- seeding one would only be handed back to the cache when the skin turns that region off (the
+-- Remove_* half of those files), for some other addon's button to choke on instead.
+local function ClaimPooledMasqueRegions(holder)
+	local cfg = holder._MSQ_CFG
+	if not cfg then
+		return false
+	end
+
+	local claimed = false
+	for _, region in ipairs(MASQUE_POOLED_REGIONS) do
+		local texture = cfg[region]
+		if texture and texture:GetParent() ~= holder then
+			cfg[region] = holder:CreateTexture()
+			claimed = true
+		end
+	end
+	return claimed
+end
+
+-- AddButton registers the holder the first time; on later calls it early-returns (already in
+-- the group) without re-skinning. Masque otherwise re-scales via the frame's OnSizeChanged
+-- hook, but our GetSize is a shadow updated only by the caller below - after the positioner's
+-- SetSize already fired OnSizeChanged with the stale value - so the icon/cooldown scale would
+-- freeze at the size from the first skin. ReSkin re-runs SkinButton now, reading the current
+-- (shadowed) size, so they track the Icon width/height and border-inset changes.
+local function SkinHolder(lmbGroup, holder, regions)
+	lmbGroup:AddButton(holder, regions, "Legacy")
+	lmbGroup:ReSkin(holder)
+end
+
 -- Masque-skin the button's holder (and the icon/cooldown handed to it), returning the
 -- holder. The container-owned AuraButton can't be Masque'd directly: it's forbidden, so its
 -- GetSize() reads back as a secret and Masque's UpdateScale divides by it (taint). The
@@ -577,15 +619,22 @@ function Module:SkinMasqueHolder(button, lmbGroup, tex, cd, frameLevel, position
 	holder:SetFrameLevel(frameLevel)
 	local w, h = positioner(holder)
 	holder.GetSize = function() return w, h end
-	-- AddButton registers the holder the first time; on later calls it early-returns
-	-- (already in the group) without re-skinning. Masque otherwise re-scales via the
-	-- frame's OnSizeChanged hook, but our GetSize is a shadow updated only just above -
-	-- after the positioner's SetSize already fired OnSizeChanged with the stale value - so
-	-- the icon/cooldown scale would freeze at the size from the first skin. ReSkin re-runs
-	-- SkinButton now, reading the current (shadowed) size, so they track the Icon
-	-- width/height and border-inset changes.
-	lmbGroup:AddButton(holder, { Icon = tex, Cooldown = cd }, "Legacy")
-	lmbGroup:ReSkin(holder)
+
+	-- A skin that stops on a pooled region takes the one it stopped on and tries again, so
+	-- the worst case is one pass per region before the skin runs to the end.
+	local regions = { Icon = tex, Cooldown = cd }
+	for _ = 1, #MASQUE_POOLED_REGIONS do
+		if pcall(SkinHolder, lmbGroup, holder, regions) then
+			return holder
+		end
+		if not ClaimPooledMasqueRegions(holder) then
+			break
+		end
+	end
+
+	-- Every pooled region is ours and it still won't skin, so the cache isn't what's wrong.
+	-- Run it unprotected and let the error be seen.
+	SkinHolder(lmbGroup, holder, regions)
 	return holder
 end
 
