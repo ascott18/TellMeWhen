@@ -1,3 +1,6 @@
+## v12.1.1
+* Fix: #2463 - try to fix edit mode taint by avoiding use of HookScript
+
 ## v12.1.0
 * Added support for Blizzard's new 12.1 aura system via a new "Buff/Debuff (combat allowed)" icon type.
   * The existing Buff/Debuff icon type has been renamed to "...(combat restricted)" and no longer functions in combat under any circumstances due to new restrictions.

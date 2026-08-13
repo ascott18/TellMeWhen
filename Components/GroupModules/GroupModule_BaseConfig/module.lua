@@ -230,6 +230,21 @@ if TMW.clientHasSecrets then
 
     local groupHideAnchor
     local groupHideText
+
+    -- Position against UIParent from the dialog's measured rect rather than anchoring to
+    -- the dialog itself. SetPoint'ing to EditModeSystemSettingsDialog would leave an
+    -- insecure frame in its anchor graph; reading GetRect/IsShown off it does not taint it.
+    local function PositionGroupHideAnchor()
+        local left, bottom, _, height = EditModeSystemSettingsDialog:GetRect()
+        if not left then return end
+
+        local scale = EditModeSystemSettingsDialog:GetEffectiveScale() / groupHideAnchor:GetEffectiveScale()
+        groupHideAnchor:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT",
+            (left * scale) + 20,
+            ((bottom + height) * scale) - 30
+        )
+    end
+
     TMW.safecall(function()
         for _, viewer in pairs(viewers) do
             hooksecurefunc(viewer, "RefreshLayout", ApplyViewerOverride)
@@ -239,15 +254,22 @@ if TMW.clientHasSecrets then
         groupHideAnchor = CreateFrame("Frame", "TMWEditModeCDMHidden", TMW)
         groupHideAnchor:SetFrameStrata("FULLSCREEN")
         groupHideAnchor:SetSize(1, 1)
-        groupHideAnchor:SetPoint("TOPLEFT", EditModeSystemSettingsDialog, "TOPLEFT", 20, -30)
+        groupHideAnchor:Hide()
 
         groupHideText = groupHideAnchor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         groupHideText:SetPoint("TOPLEFT")
         groupHideText:SetWidth(280)
         groupHideText:SetJustifyH("LEFT")
 
-        EditModeSystemSettingsDialog:HookScript("OnHide", function(self)
-            groupHideAnchor:Hide()
+        -- HookScript on EditModeSystemSettingsDialog taints every execution path that hides it,
+        -- which includes exiting edit mode - that path goes on to show Blizzard's damage meter,
+        -- whose event registrations then carry TMW's taint forever. Poll instead. #2463
+        groupHideAnchor:SetScript("OnUpdate", function(self)
+            if not EditModeSystemSettingsDialog:IsShown() then
+                self:Hide()
+                return
+            end
+            PositionGroupHideAnchor()
         end)
     end)
 
@@ -267,6 +289,7 @@ if TMW.clientHasSecrets then
 			local hidingGroup = GetGroupHidingViewer(settingName)
 			if hidingGroup then
 				groupHideText:SetText("|cFFFF5050" .. L["CDM_HIDDEN_BY_GROUP"]:format(hidingGroup:GetGroupName()))
+				PositionGroupHideAnchor()
 				groupHideAnchor:Show()
 			else
 				groupHideAnchor:Hide()
