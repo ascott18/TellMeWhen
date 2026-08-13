@@ -5,6 +5,8 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 TMW.CHANGELOG = [==[
 ## v12.1.1
 * Fix: #2463 - try to fix edit mode taint by avoiding use of HookScript
+* Fix #2464 - The "Auras" state's Icon Tint & Texture color and desaturation had no effect on Buff/Debuff (combat allowed) icons.
+* Fix Shadow Priest Voidform detection, which broke in 12.1 when Void Volley became a charge-based spell.
 
 ## v12.1.0
 * Added support for Blizzard's new 12.1 aura system via a new "Buff/Debuff (combat allowed)" icon type.

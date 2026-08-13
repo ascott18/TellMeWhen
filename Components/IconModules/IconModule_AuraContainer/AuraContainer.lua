@@ -52,6 +52,21 @@ local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
 local FlowDirection = AnchorUtil.FlowDirection
 local FlowLayoutAxis = AnchorUtil.FlowLayoutAxis
 
+-- The two icon states an aura-container icon carries - the auras and the underlay. Up here
+-- because the button skinning needs the auras' look; the underlay section explains both.
+local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
+local STATE_UNDERLAY = TMW.CONST.STATE.DEFAULT_HIDE
+
+-- Masque's two profile-wide coloring options, read the same way IconModule_Texture_Colored
+-- reads them so an aura button tints like the icon it stands in for.
+-- GLOBALS: LibMasque
+local LMB = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
+local ColorMSQ, OnlyMSQ
+TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function()
+	ColorMSQ = TMW.db.profile.ColorMSQ
+	OnlyMSQ = TMW.db.profile.OnlyMSQ
+end)
+
 -- The container stamps every aura frame with DenyTaintedAccessWhenAurasAreSecret as soon as
 -- its initializeFrame callback returns (AuraContainerCustomFrameProviderMixin:CreateFrame,
 -- which defers the stamp to PLAYER_ENTERING_WORLD for frames created before login). While
@@ -550,6 +565,41 @@ function Module:ApplyButtonSettings(button, settingsIcon)
 			button:ClearDurationCooldown()
 			cd:Clear()
 			cd:Hide()
+		end
+	end
+end
+
+-- Tint / desaturate the button's icon texture from the Auras state, the way
+-- IconModule_Texture_Colored does it for an ordinary icon's texture. The icon's own texture
+-- takes the UNDERLAY state's color instead (GetIconState publishes it and Texture_Colored
+-- paints it there), so the two layers color independently, like their opacities do.
+--
+-- Read from settingsIcon, like the texture this tints. No secret-state branch: this is the
+-- configured state rather than a runtime-arbitrated one, so there's no boolean secret to
+-- evaluate a curve from - and nothing per-aura, since one skin covers every cell.
+--
+-- The container never touches either property on a texture handed to SetIcon (it only ever
+-- calls SetTexture on it - AuraContainerUtil.SetIconTextureForAura), so this survives every
+-- aura the button goes on to show.
+function Module:ApplyButtonColor(button, settingsIcon)
+	settingsIcon = settingsIcon or self.icon
+	local c = TMW:StringToCachedRGBATable(settingsIcon.States[STATE_PRESENT].Color or "ffffffff")
+
+	if not (LMB and OnlyMSQ) then
+		button.tmwIcon:SetVertexColor(c.r, c.g, c.b, 1)
+	else
+		button.tmwIcon:SetVertexColor(1, 1, 1, 1)
+	end
+	button.tmwIcon:SetDesaturated(c.flags and c.flags.desaturate or false)
+
+	if LMB and ColorMSQ then
+		-- The holder's equivalent of icon.normaltex (IconModule_IconContainer_Masque sets that
+		-- one from the same pair). Nil until Masque has skinned the holder, which is why this
+		-- runs after the view emulation rather than inside ApplyButtonSettings.
+		local holder = button.tmwIconHolder
+		local normaltex = holder.__MSQ_NormalTexture or holder:GetNormalTexture()
+		if normaltex then
+			normaltex:SetVertexColor(c.r, c.g, c.b, 1)
 		end
 	end
 end
@@ -1150,6 +1200,9 @@ function Module:SkinButton(button)
 	-- owned equivalents) so the text wiring can position the aura-driven text the same way.
 	local remap = self.ViewEmulationHandler and self.ViewEmulationHandler(self, icon, button)
 
+	-- After the emulation: the Masque half of this needs the holder Masque has just skinned.
+	self:ApplyButtonColor(button, self.settingsIcon)
+
 	self:Emulate_IconModule_Texts(icon, button, remap or { [icon] = button })
 end
 
@@ -1178,9 +1231,6 @@ end
 -- opaque of the two (GetIconState) and ApplyOpacities scales each layer down from it.
 -- Everything else that dims the icon still dims both layers together, which is right.
 -- ----------------------------------------------------------------------------
-
-local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
-local STATE_UNDERLAY = TMW.CONST.STATE.DEFAULT_HIDE
 
 -- The underlay's opacity, as configured. Zero means there is no underlay at all: the icon's
 -- own display comes down entirely, so nothing else should bother drawing into it either.
