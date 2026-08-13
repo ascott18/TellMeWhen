@@ -84,11 +84,22 @@ Type:RegisterIconDefaults{
 
 	-- Hide auras whose maximum duration exceeds this many seconds (0 = no limit).
 	-- Maps to candidateFilters.maxDuration (which also implicitly hides permanent auras).
-	DurationMax				= 0,
+	AuraMaxDuration			= 0,
 
 	-- Restrict to these dispel types, keyed by dispel name. None selected = no dispel-type restriction.
 	DispelType				= { ["*"] = false },
 }
+
+-- 12.1.0 stored the max-duration cutoff as DurationMax, which is Alpha_DurationReq's setting.
+-- Copy rather than move: on an icon that was converted from a type with a duration requirement,
+-- DurationMax is that requirement's value and has to stay behind for it.
+TMW:RegisterUpgrade(12010103, {
+	icon = function(self, ics)
+		if ics.Type == "buffcontainer" and ics.DurationMax then
+			ics.AuraMaxDuration = ics.DurationMax
+		end
+	end,
+})
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
@@ -257,14 +268,14 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings"
 	end)
 
 	-- Max-duration cutoff (candidateFilters.maxDuration). 0 = no limit.
-	local slider = TMW.C.Config_Slider:New("Slider", "$parentDurationMax", self, "TellMeWhen_SliderTemplate")
-	self.DurationMax = slider
+	local slider = TMW.C.Config_Slider:New("Slider", "$parentAuraMaxDuration", self, "TellMeWhen_SliderTemplate")
+	self.AuraMaxDuration = slider
 	slider:SetTexts(L["ICONMENU_DURATIONMAX"], L["ICONMENU_DURATIONMAX_DESC"])
 	slider:ClearAllPoints()
 	-- Below the filter row, spanning full width from its left element's bottom.
 	slider:SetPoint("TOPLEFT", self.ExtraFilter or self.DispelType, "BOTTOMLEFT", 0, -14)
 	slider:SetPoint("RIGHT", -10, 0)
-	slider:SetSetting("DurationMax")
+	slider:SetSetting("AuraMaxDuration")
 	slider:SetTextFormatter(TMW.C.Formatter.TIME_YDHMS)
 	slider:SetMode(slider.MODE_ADJUSTING)
 	slider:SetMinMaxValues(0, math.huge)
@@ -332,7 +343,7 @@ local function BuildAuraSpec(icon)
 		end
 	end
 
-	local maxDuration = (icon.DurationMax and icon.DurationMax > 0) and icon.DurationMax or nil
+	local maxDuration = (icon.AuraMaxDuration and icon.AuraMaxDuration > 0) and icon.AuraMaxDuration or nil
 
 	-- Only HELPFUL or HARMFUL - there's no "both". No single aura filter string matches
 	-- both categories (a category-less string and "HELPFUL|HARMFUL" both match nothing),
