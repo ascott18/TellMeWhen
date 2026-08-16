@@ -1,3 +1,6 @@
+## v12.1.2
+* Added "Group Contains Class" condition - checks whether you or anyone in your party or raid is one of the selected classes.
+
 ## v12.1.1
 * Missing Buffs/Debuffs icons now work in combat, Mythic+, and PvP for spells that Blizzard flags as never secret, which includes the usual raid buffs. Previously they reported every unit as missing everything in those situations.
 * Fix: Missing Buffs/Debuffs icons watching a group of units ignored the Buff or Debuff setting, matching a debuff of the same name as the buff being checked for.

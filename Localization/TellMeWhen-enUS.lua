@@ -1644,6 +1644,10 @@ L["CONDITIONPANEL_KEYSTONELEVEL"] = "Keystone Level"
 L["CONDITIONPANEL_KEYSTONELEVEL_DESC"] = "Level of the currently active Mythic Keystone"
 L["CONDITIONPANEL_GROUPTYPE"] = "Group Type"
 L["CONDITIONPANEL_GROUPTYPE_DESC"] = "Checks the type of group that you are in (solo, party, or raid)."
+L["CONDITIONPANEL_GROUPCLASS"] = "Group Contains Class"
+L["CONDITIONPANEL_GROUPCLASS_DESC"] = [[Checks the classes of the players in your party or raid. You are always included, so this also works while solo.
+
+Pets and other non-player units are not checked.]]
 L["CONDITIONPANEL_GROUPSIZE"] = "Instance Size"
 L["CONDITIONPANEL_GROUPSIZE_DESC"] = [[Checks against the number of players that the current instance is tuned for.
 

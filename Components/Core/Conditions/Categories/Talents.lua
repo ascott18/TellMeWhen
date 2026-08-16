@@ -183,30 +183,31 @@ TMW:RegisterUpgrade(73019, {
 		end
 	end,
 })
+CNDT.COMMON.classBitFlags = (function()
+	local t = {}
+	for classID = 1, GetMaxClassID() do
+		local name, token = GetClassInfo(classID)
+		if name then
+			t[classID] = {
+				order = classID,
+				text = PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name),
+				icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+				tcoords = {
+					(CLASS_ICON_TCOORDS[token][1]+.02),
+					(CLASS_ICON_TCOORDS[token][2]-.02),
+					(CLASS_ICON_TCOORDS[token][3]+.02),
+					(CLASS_ICON_TCOORDS[token][4]-.02),
+				}
+			}
+		end
+	end
+	return t
+end)()
 ConditionCategory:RegisterCondition(0.2,  "CLASS2", {
 	text = L["CONDITIONPANEL_CLASS"],
 
 	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"],
-	bitFlags = (function()
-		local t = {}
-		for classID = 1, GetMaxClassID() do
-			local name, token = GetClassInfo(classID)
-			if name then
-				t[classID] = {
-					order = classID,
-					text = PLAYER_CLASS_NO_SPEC:format(RAID_CLASS_COLORS[token].colorStr, name),
-					icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
-					tcoords = {
-						(CLASS_ICON_TCOORDS[token][1]+.02),
-						(CLASS_ICON_TCOORDS[token][2]-.02),
-						(CLASS_ICON_TCOORDS[token][3]+.02),
-						(CLASS_ICON_TCOORDS[token][4]-.02),
-					}
-				}
-			end
-		end
-		return t
-	end)(),
+	bitFlags = CNDT.COMMON.classBitFlags,
 
 	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
 	tcoords = {

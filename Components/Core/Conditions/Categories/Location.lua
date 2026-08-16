@@ -18,6 +18,7 @@ local L = TMW.L
 local print = TMW.print
 
 local date = date
+local wipe = wipe
 
 local CNDT = TMW.CNDT
 local Env = CNDT.Env
@@ -25,6 +26,9 @@ local Env = CNDT.Env
 
 local IsInInstance, GetInstanceDifficulty, GetInstanceInfo = 
 	  IsInInstance, GetInstanceDifficulty, GetInstanceInfo
+local UnitClass = UnitClass
+
+local _, pclass = UnitClass("Player")
 
 
 local ConditionCategory = CNDT:GetCategory("LOCATION", 1.5, L["CNDTCAT_LOCATION"], false, true)
@@ -296,6 +300,74 @@ ConditionCategory:RegisterCondition(2,	 "GROUP2", {
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("GROUP_ROSTER_UPDATE")
+	end,
+})
+
+
+local groupClasses = {}
+local groupUnits
+local GROUPCLASSES = CNDT:NewModule("GroupClasses", "AceEvent-3.0")
+function GROUPCLASSES:UpdateGroupClasses()
+	wipe(groupClasses)
+
+	for i = 1, #groupUnits do
+		-- Never secret: unit identities are only restricted for units that aren't
+		-- the player, their pet/vehicle, or a party/raid member.
+		local classID = select(3, UnitClass(groupUnits[i]))
+		if classID then
+			groupClasses[classID] = true
+		end
+	end
+
+	TMW:Fire("TMW_GROUP_CLASSES_UPDATE")
+end
+function GROUPCLASSES:Setup()
+	-- The "group" unit set is the player plus their party or raid,
+	-- and it fires its event on GROUP_ROSTER_UPDATE and PLAYER_ENTERING_WORLD.
+	local unitSet
+	groupUnits, unitSet = TMW:GetUnits(nil, "group")
+	TMW:RegisterCallback(unitSet.event, GROUPCLASSES, "UpdateGroupClasses")
+
+	GROUPCLASSES.Setup = TMW.NULLFUNC
+	GROUPCLASSES:UpdateGroupClasses()
+end
+ConditionCategory:RegisterCondition(2.1, "GROUPCLASS", {
+	text = L["CONDITIONPANEL_GROUPCLASS"],
+	tooltip = L["CONDITIONPANEL_GROUPCLASS_DESC"],
+
+	unit = false,
+	bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSECLASS"],
+	bitFlags = CNDT.COMMON.classBitFlags,
+
+	icon = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+	tcoords = {
+		CLASS_ICON_TCOORDS[pclass][1]+.02,
+		CLASS_ICON_TCOORDS[pclass][2]-.02,
+		CLASS_ICON_TCOORDS[pclass][3]+.02,
+		CLASS_ICON_TCOORDS[pclass][4]-.02,
+	},
+	Env = {
+		GroupHasClass = function(bitFlags)
+			for classID in pairs(bitFlags) do
+				if groupClasses[classID] then
+					return true
+				end
+			end
+			return false
+		end,
+	},
+	funcstr = function(c)
+		GROUPCLASSES:Setup()
+
+		if c.Checked then
+			return [[ not GroupHasClass(c.BitFlagTable) ]]
+		else
+			return [[ GroupHasClass(c.BitFlagTable) ]]
+		end
+	end,
+	events = function(ConditionObject, c)
+		return
+			ConditionObject:GenerateNormalEventString("TMW_GROUP_CLASSES_UPDATE")
 	end,
 })
 
