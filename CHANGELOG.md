@@ -1,5 +1,6 @@
 ## v12.1.2
 * Added "Group Contains Class" condition - checks whether you or anyone in your party or raid is one of the selected classes.
+* Fix the frame suggestion list used by group position anchoring freezing the game in UIs with very large numbers of frames.
 
 ## v12.1.1
 * Missing Buffs/Debuffs icons now work in combat, Mythic+, and PvP for spells that Blizzard flags as never secret, which includes the usual raid buffs. Previously they reported every unit as missing everything in those situations.

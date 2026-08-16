@@ -1,4 +1,4 @@
-﻿-- --------------------
+-- --------------------
 -- TellMeWhen
 -- Originally by NephMakes
 
@@ -59,30 +59,85 @@ Module.helpText = L["SUG_TOOLTIPTITLE_GENERIC"]
 function Module:OnInitialize()
 	self.Table = {}
 end
-function Module:OnSuggest()
-	wipe(self.Table)
-	
-	local frame = EnumerateFrames()
-	while frame do
-		local name = frame:GetName()
-		if name 
-		and _G[name] == frame 
-		and (issecretvalue(frame:GetNumPoints()) or frame:GetNumPoints() > 0)
-		and not frame:IsForbidden()
-		and (
-			-- Don't measure secure frames because reading frame size can 
-			-- trigger size change (???), which can then in turn cause taint.
-			issecurevariable(name)
-			or (
-				(issecretvalue(frame:GetHeight()) or frame:GetHeight() > 0) and
-				(issecretvalue(frame:GetWidth()) or frame:GetWidth() > 0)
-			)
-		)
 
-		then
-			self.Table[frame] = name
+-- OnSuggest runs on focus gain and on every keystroke (debounced by only 50ms),
+-- and SUG:NameOnCursor calls it before its own "did the text actually change"
+-- check, so it fires even when nothing changed. Frames come and go as panels
+-- open, so the pool can't just be built once at load either.
+local REBUILD_INTERVAL = 5
+
+-- Reused between calls so a rebuild doesn't allocate a fresh 40k-entry array.
+local globalNames = {}
+
+-- _G holds plenty of things that aren't widgets, and indexing a table with a
+-- hostile __index can throw, so this is always called through pcall below.
+-- IsForbidden is checked before IsObjectType because calling most methods on a
+-- forbidden object errors.
+local function IsUsableFrame(obj)
+	if type(obj) ~= "table" then return false end
+
+	local isForbidden = obj.IsForbidden
+	if type(isForbidden) ~= "function" then return false end
+	if isForbidden(obj) then return false end
+
+	local isObjectType = obj.IsObjectType
+	return type(isObjectType) == "function" and isObjectType(obj, "Frame")
+end
+
+function Module:OnSuggest()
+	local buildTime = GetTime()
+	if self.lastBuild and buildTime - self.lastBuild < REBUILD_INTERVAL then
+		-- self.Table is still populated from the last build - keep using it.
+		return
+	end
+	self.lastBuild = buildTime
+
+	wipe(self.Table)
+
+	-- Anything that survives the filter below satisfies _G[name] == frame, so it
+	-- is reachable from _G by definition. Walking _G rather than EnumerateFrames
+	-- finds the same set without visiting the tens of thousands of anonymous
+	-- frames that could never qualify - and EnumerateFrames costs more per call
+	-- the deeper into the chain you are, making a full walk superlinear.
+	--
+	-- Snapshot the keys before calling into any frame code: calling out while
+	-- iterating _G risks "invalid key to 'next'" if anything adds a global
+	-- mid-traversal.
+	local nGlobals = 0
+	for k in pairs(_G) do
+		if type(k) == "string" then
+			nGlobals = nGlobals + 1
+			globalNames[nGlobals] = k
 		end
-		frame = EnumerateFrames(frame)
+	end
+	for i = nGlobals + 1, #globalNames do
+		globalNames[i] = nil
+	end
+
+	for i = 1, nGlobals do
+		local obj = _G[globalNames[i]]
+
+		local ok, isFrame = pcall(IsUsableFrame, obj)
+		if ok and isFrame then
+			-- The key we came in on may be an alias, so use the real name.
+			local name = obj:GetName()
+			if name and _G[name] == obj then
+				local points = obj:GetNumPoints()
+				if issecretvalue(points) or points > 0 then
+					-- Don't measure secure frames because reading frame size can
+					-- trigger size change (???), which can then in turn cause taint.
+					if issecurevariable(name) then
+						self.Table[obj] = name
+					else
+						local h = obj:GetHeight()
+						local w = obj:GetWidth()
+						if (issecretvalue(h) or h > 0) and (issecretvalue(w) or w > 0) then
+							self.Table[obj] = name
+						end
+					end
+				end
+			end
+		end
 	end
 end
 function Module:Table_Get()
