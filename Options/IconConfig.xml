@@ -690,6 +690,12 @@
 				--self:GetParent():AdjustHeight()
 				self:SetHeight(self.text:GetStringHeight() + 20)
 			</OnUpdate>
+			<OnHyperlinkEnter>
+				SetCursor("Interface\\CURSOR\\Interact")
+			</OnHyperlinkEnter>
+			<OnHyperlinkLeave>
+				SetCursor(nil)
+			</OnHyperlinkLeave>
 			<OnHyperlinkClick>
 				-- Custom links that switch the icon to another type (e.g. the pointer from the
 				-- combat-restricted Buff/Debuff type to the combat-ready one).
@@ -755,12 +761,6 @@
 				self.LibCustomGlow = LibStub("LibCustomGlow-1.0", true)
 				self.isReallyShown = false
 			</OnLoad>
-			<OnHyperlinkEnter>
-				SetCursor("Interface\\CURSOR\\Interact")
-			</OnHyperlinkEnter>
-			<OnHyperlinkLeave>
-				SetCursor(nil)
-			</OnHyperlinkLeave>
 			<OnShow>
 				if self.showTimer then
 					self.showTimer:Cancel()

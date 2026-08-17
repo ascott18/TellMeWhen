@@ -192,11 +192,13 @@ function Env.AuraVariableNumber(unit, name, filter)
 		end
 	end
 	
+	if not instance then return 0 end
+	
 	for i = 1, #instance.points do
 		local v = instance.points[i]
-		if v and v > 0 then return v end
-	end
-		
+			if v and v > 0 then return v end
+		end
+
 	return 0
 end
 

@@ -20,16 +20,11 @@ local tonumber, pairs, format =
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitIsVisible = UnitIsVisible
 local GetAuraDuration = C_UnitAuras.GetAuraDuration
-local GetAuraDataByIndex = TMW.COMMON.Auras.GetAuraDataByIndex
 
--- Aura lookups by identifier, which survive secrets in a way enumeration doesn't: both are
--- guarded by RequiresNonSecretAura, which returns no values instead of erroring, so a spell
--- Blizzard flags as never secret reads back as real data even under restrictions.
-local GetUnitAuraBySpellID = C_UnitAuras and C_UnitAuras.GetUnitAuraBySpellID
-local GetAuraDataBySpellName = C_UnitAuras and C_UnitAuras.GetAuraDataBySpellName
+local Auras = TMW.COMMON.Auras
+local GetAuraDataByIndex = Auras.GetAuraDataByIndex
+
 local ShouldAurasBeSecret = C_Secrets and C_Secrets.ShouldAurasBeSecret
-local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy
-local SECRECY_NEVER = Enum.SecrecyLevel and Enum.SecrecyLevel.NeverSecret
 
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellTexture = TMW.GetSpellTexture
@@ -85,49 +80,6 @@ Type:RegisterIconDefaults{
 
 
 
--- Report, per entry, whether Blizzard lets us read that spell's aura while auras are secret -
--- which is what decides whether the icon may ever call it MISSING. Mirrors what Setup does, so
--- what the panel claims is what the update function will actually do: an entry is readable only
--- when it resolves to a spell ID that Blizzard flags never secret. Returns two lists of display
--- strings, the readable ones and the rest (each with its reason).
---
--- Deliberately not routed through SpellCache, even though the icon editor has it and could name
--- the spell behind an ID the runtime can't resolve: what matters here is what Setup will
--- actually manage at runtime, and telling the user otherwise would be a nicer-looking lie.
-local function ClassifySpellsForConfig(spellString)
-	local array = TMW:GetSpells(spellString, false).ArrayNoLower
-	local readable, unreadable = {}, {}
-
-	for i = 1, #array do
-		local identifier = array[i]
-
-		-- Fill in whichever half of the pair wasn't typed, so every row reads "Name (ID)".
-		-- ID -> name always works; name -> ID only for spells this character knows, which is
-		-- the whole thing this panel is here to report.
-		local name, spellID
-		if type(identifier) == "number" then
-			spellID = identifier
-			name = GetSpellInfo(identifier)
-		else
-			name = identifier
-			spellID = select(7, GetSpellInfo(identifier))
-		end
-
-		local label = (name and spellID and name .. " (" .. spellID .. ")") or tostring(identifier)
-
-		if not spellID then
-			-- A name this character's client can't resolve - another class's buff, usually.
-			unreadable[#unreadable + 1] = label .. " |cff808080- " .. L["UIPANEL_BUFFCHECK_SECRETS_UNRESOLVED"] .. "|r"
-		elseif GetSpellAuraSecrecy(spellID) ~= SECRECY_NEVER then
-			unreadable[#unreadable + 1] = label .. " |cff808080- " .. L["UIPANEL_BUFFCHECK_SECRETS_RESTRICTED"] .. "|r"
-		else
-			readable[#readable + 1] = label
-		end
-	end
-
-	return readable, unreadable
-end
-
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	-- The buffcheck suggester exists to steer toward spell IDs, which only buys anything where
 	-- auras can be secret. Everywhere else a name is as good as an ID, so leave the shared
@@ -135,39 +87,8 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	SUGType = clientHasSecrets and "buffcheck" or "buffNoDS",
 })
 
--- Below the name field, not above it: every line of it is about what was entered there.
 if clientHasSecrets then
-	Type:RegisterConfigPanel_XMLTemplate(102, "TellMeWhen_TextPanel", {
-		frameName = "TellMeWhen_BuffCheckSecrets",
-		OnSetup = function(self)
-			-- Not the shared "Restricted in Combat" title: the panel is a breakdown, and most of
-			-- the time the answer it gives is that nothing here is restricted.
-			self:SetTitle(L["UIPANEL_BUFFCHECK_SECRETS_TITLE"])
-
-			-- Recomputed on every reload rather than set once: the verdict is per spell, and the
-			-- spell list changes as the user types into the name box.
-			self:CScriptAdd("ReloadRequested", function(panel)
-				-- Read from the settings rather than from icon.Spells: this fires while the name
-				-- box is being edited, before the icon has been set up again.
-				local readable, unreadable = ClassifySpellsForConfig(TMW.CI.ics.Name)
-
-				-- Same two headings whatever the spell list holds, so the panel reads as a
-				-- breakdown rather than as a verdict that appears only when something is wrong.
-				-- A heading with nothing under it is dropped.
-				local sections = {}
-				if #unreadable > 0 then
-					sections[#sections + 1] = "|cffff5959" .. L["UIPANEL_BUFFCHECK_SECRETS_UNREADABLE"] .. "|r\r\n"
-						.. table.concat(unreadable, "\r\n")
-				end
-				if #readable > 0 then
-					sections[#sections + 1] = "|cff00ff00" .. L["UIPANEL_BUFFCHECK_SECRETS_READABLE"] .. "|r\r\n"
-						.. table.concat(readable, "\r\n")
-				end
-
-				panel.text:SetText(table.concat(sections, "\r\n\r\n"))
-			end)
-		end,
-	})
+	Auras.RegisterSecrecyPanel(Type, 102, "TellMeWhen_BuffCheckSecrets")
 end
 
 Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
@@ -304,9 +225,12 @@ local function BuffCheck_OnUpdate(icon, time)
 	icon:YieldInfo(false, foundUnit, foundInstance)
 end
 
-local GetAuras = TMW.COMMON.Auras.GetAuras
+local GetAuras = Auras.GetAuras
 local function BuffCheck_OnUpdate_Packed(icon, time)
-	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+	-- Gated on there actually being a spell we can't read rather than on being
+	-- restricted at all: an icon whose spells are every one of them readable does
+	-- its whole job under restriction, and hiding it would throw that away.
+	if icon.HideWhileSecret and icon.HasUnreadableSpell and ShouldAurasBeSecret() then
 		-- Force hide icon
 		icon:YieldInfo(false, nil)
 		return
@@ -316,7 +240,13 @@ local function BuffCheck_OnUpdate_Packed(icon, time)
 	local Units, SpellsArray, KindKey
 		= icon.Units, icon.Spells.Array, icon.KindKey
 	local NotOnlyMine = not icon.OnlyMine
-	
+
+	-- While restricted, Auras backs the lookups below with GetUnitAuraBySpellID
+	-- and GetAuraDataBySpellName, which return nothing "if querying a unit that is
+	-- not visible (eg. party members on other maps)". Unchecked that reads here as
+	-- "missing every buff", which is this icon type's entire output.
+	local requireVisible = clientHasSecrets and ShouldAurasBeSecret()
+
 	local AbsentAlpha = icon.States[STATE_ABSENT].Alpha
 	local PresentAlpha = icon.States[STATE_PRESENT].Alpha
 
@@ -330,7 +260,8 @@ local function BuffCheck_OnUpdate_Packed(icon, time)
 		-- is known by TMW.UNITS to definitely exist.
 		-- Also don't check dead units since the point of this icon type is to check for
 		-- raid members that are missing raid buffs.
-		if icon.UnitSet:UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+		if icon.UnitSet:UnitExists(unit) and not UnitIsDeadOrGhost(unit)
+		and (not requireVisible or UnitIsVisible(unit)) then
 			local auras = GetAuras(unit)
 			local lookup, instances = auras.lookup, auras.instances
 			
@@ -389,139 +320,6 @@ local function BuffCheck_OnUpdate_Packed(icon, time)
 	else
 		icon:YieldInfo(false, nil)
 	end
-end
-
--- Enumerating a unit's auras finds nothing that's secret, and this icon type's whole job -
--- deciding a unit is MISSING something - can't be built on an enumeration that silently drops
--- entries: the loops above skip every secret aura, so under restrictions they conclude that
--- every unit is missing everything.
---
--- Looking each tracked spell up by identifier survives that. GetUnitAuraBySpellID and
--- GetAuraDataBySpellName are guarded by RequiresNonSecretAura, which returns no values rather
--- than raising a blocked-action error, so a spell Blizzard flags as never secret (raid buffs
--- and the like) reads back as real, comparable data even inside an instance.
---
--- An aura that comes back is present, full stop. It's the nil that's ambiguous - absent, or
--- present but unreadable - so a unit is reported as missing something only when every nil it
--- produced came from a spell we know we were allowed to read.
---
--- Only reached from the dispatcher below, and only while auras are restricted. That's what
--- makes the readable test a bare comparison against NeverSecret: under restrictions, that flag
--- is the only thing that keeps a spell readable.
-local function BuffCheck_OnUpdate_Identifiers(icon, time)
-	if icon.HideWhileSecret and icon.HasUnreadableSpell then
-		-- Force hide icon. Gated on there actually being a spell we can't read rather than on
-		-- being restricted at all: an icon whose spells are every one of them readable does its
-		-- whole job in here, and hiding it would be throwing that away for nothing.
-		icon:YieldInfo(false, nil)
-		return
-	end
-
-	-- Upvalue things that will be referenced a lot in our loops.
-	local Units, Identifiers, Secrecy, Filter, KindKey
-		= icon.Units, icon.SpellIdentifiers, icon.SpellSecrecy, icon.Filter, icon.KindKey
-	local NotOnlyMine = not icon.OnlyMine
-
-	local AbsentAlpha = icon.States[STATE_ABSENT].Alpha
-	local PresentAlpha = icon.States[STATE_PRESENT].Alpha
-
-	-- These variables will hold all the attributes that we pass to YieldInfo().
-	local foundInstance, foundUnit
-	local curSortDur = huge
-
-	for u = 1, #Units do
-		local unit = Units[u]
-		-- The existence and death checks the enumerating paths do, plus visibility.
-		-- GetUnitAuraBySpellID is documented as also returning nil "if querying a unit that is
-		-- not visible (eg. party members on other maps)", which would otherwise read here as
-		-- "missing every buff". GetAuraDataBySpellName carries no such note, but it's the same
-		-- lookup by a different key, so assume the same of it.
-		if icon.UnitSet:UnitExists(unit) and UnitIsVisible(unit) and not UnitIsDeadOrGhost(unit) then
-
-			local foundOnUnit = false
-			-- Cleared by any spell we can't tell present from absent, which bars this unit
-			-- from being reported as missing anything.
-			local allReadable = true
-
-			for i = 1, #Identifiers do
-				-- Ask regardless of what we believe about the spell's secrecy: an answer that
-				-- comes back is proof enough that the aura was readable, whatever we guessed.
-				--
-				-- A name only matches when this client can resolve it, the same limit that stops
-				-- Setup from classifying it - GetAuraDataBySpellName finds nothing for another
-				-- class's buff even when the aura is demonstrably there and the ID would find it.
-				-- So an unresolvable name contributes nothing here, and the config panel says so.
-				local identifier = Identifiers[i]
-				local instance
-				if type(identifier) == "number" then
-					-- Takes no filter, so the kind/source tests happen below - and it returns
-					-- only the FIRST instance, so a second copy from a different caster is
-					-- invisible to OnlyMine.
-					instance = GetUnitAuraBySpellID(unit, identifier)
-				else
-					instance = GetAuraDataBySpellName(unit, identifier, Filter)
-				end
-
-				if instance then
-					if (not KindKey or instance[KindKey])
-					and (NotOnlyMine or instance.sourceUnit == "player")
-					then
-						foundOnUnit = true
-						local remaining =
-							(issecretvalue(instance.expirationTime) and huge) or
-							(instance.expirationTime == 0 and huge) or
-							((instance.expirationTime - time) / instance.timeMod)
-
-						-- If we haven't found anything yet, or if this aura beats the previous by sort order, then use it.
-						if not foundInstance or remaining < curSortDur then
-							foundInstance = instance
-							foundUnit = unit
-							curSortDur = remaining
-						end
-
-						if PresentAlpha == 0 then
-							-- We aren't displaying present auras, so don't bother continuing to
-							-- look after we've found something. allReadable no longer matters -
-							-- this unit isn't missing everything, so it can't be reported absent.
-							break
-						end
-					end
-				elseif Secrecy[i] ~= SECRECY_NEVER then
-					-- Nothing came back, and nothing promises this spell was readable, so absent
-					-- and present-but-secret can't be told apart. (A spell we resolved as never
-					-- secret falls through: its nil is a real absence.)
-					allReadable = false
-				end
-			end
-
-			if not foundOnUnit and allReadable and AbsentAlpha > 0 and not icon:YieldInfo(true, unit) then
-				-- If we didn't find a matching aura, and the icon is set to show when we don't find something
-				-- then report what unit it was. This is the primary point of the icon - to find units that are missing everything.
-				-- If icon:YieldInfo() returns false, it means we don't need to keep harvesting data.
-				return
-			end
-		end
-	end
-
-	-- We didn't find any units that were missing all the auras being checked.
-	-- So, report the lowest duration aura that we did find.
-	if foundInstance then
-		icon:YieldInfo(false, foundUnit, foundInstance)
-	else
-		icon:YieldInfo(false, nil)
-	end
-end
-
--- Whether auras are secret follows combat and instances, not settings, so the choice between
--- enumerating and looking up by identifier can't be made once at setup. The enumerating paths
--- still do more wherever they can run - every instance of a spell rather than just the first,
--- and a spell entered as an ID matched against an aura with the same name - so they keep the
--- job for as long as they can actually see the auras.
-local function BuffCheck_OnUpdate_Secretable(icon, time)
-	if ShouldAurasBeSecret() then
-		return BuffCheck_OnUpdate_Identifiers(icon, time)
-	end
-	return icon.EnumerationUpdateFunction(icon, time)
 end
 
 function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
@@ -627,73 +425,41 @@ function Type:Setup(icon)
 		icon.KindKey = "isHarmful"
 	end
 
-	-- What the by-identifier path looks each spell up by, plus the secrecy Blizzard assigns it.
-	-- That level belongs to the spell, not to the current restriction state, so it resolves once
-	-- here rather than per update.
-	--
-	-- A name this client can't resolve to a spell ID - another class's buff, most likely, since
-	-- name lookups only cover spells you know - has no level to look up and stays nil. Such an
-	-- entry is dead weight under restrictions: GetAuraDataBySpellName can't match it either, so
-	-- it finds nothing AND blocks any absent report, since we can't prove what its nil meant.
-	-- The config panel calls those out, which is the only real fix - use the spell ID.
-	icon.SpellIdentifiers = nil
-	icon.SpellSecrecy = nil
-	if clientHasSecrets and GetUnitAuraBySpellID then
-		local identifiers, secrecy = {}, {}
+	-- Whether any entry is one the game won't let us read under restriction. That belongs to the
+	-- spells rather than to the current restriction state, so it resolves once here.
+	icon.HasUnreadableSpell = false
+	if clientHasSecrets then
+		icon.HasUnreadableSpell = Auras.HasUnreadableSpell(icon.Name)
+
+		-- A name this client can't resolve to a spell ID - another class's buff, most likely,
+		-- since name lookups only cover spells you know. Already counted as unreadable above;
+		-- found again here because the warning needs to name the entry.
 		local array = icon.Spells.ArrayNoLower
+		local unresolved
 		for i = 1, #array do
 			local identifier = array[i]
-
-			local spellID = identifier
-			if type(spellID) ~= "number" then
-				-- GetAuraDataBySpellName matches case-sensitively, so prefer the game's own
-				-- spelling over whatever case was typed. Only available for a name that
-				-- resolves; the rest go in as typed, which is the best we have.
-				local canonicalName, _, _, _, _, _, resolvedID = GetSpellInfo(identifier)
-				if resolvedID then
-					identifier = canonicalName
-				end
-				spellID = resolvedID
-			end
-
-			identifiers[i] = identifier
-			if spellID then
-				secrecy[i] = GetSpellAuraSecrecy(spellID)
-			end
-		end
-		icon.SpellIdentifiers = identifiers
-		icon.SpellSecrecy = secrecy
-
-		-- One unreadable spell blocks the absent report for every unit (see allReadable), so the
-		-- icon would keep showing "present" while only half checking. HideWhileSecret is the
-		-- opt-out from that, and this is what it keys off.
-		icon.HasUnreadableSpell = false
-		for i = 1, #identifiers do
-			if secrecy[i] ~= SECRECY_NEVER then
-				icon.HasUnreadableSpell = true
+			if type(identifier) ~= "number" and not select(7, GetSpellInfo(identifier)) then
+				unresolved = identifier
 				break
 			end
 		end
 
-		-- An entry with no secrecy is one this client couldn't resolve, and the icon can never
-		-- call it missing - which is the whole job. Point at the field naming the entry, since
-		-- nothing about the icon's behaviour would otherwise say why it stopped reporting.
+		-- An entry that doesn't resolve is one the config panel can't classify, and one the
+		-- name lookup can't match either. Point at the field naming it, since nothing about the
+		-- icon's behaviour would otherwise say why it never finds that spell.
 		-- GLOBALS: TellMeWhen_ChooseName
 		if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
 			TMW.HELP:Hide("ICONTYPE_BUFFCHECK_NAMENOTID")
-			for i = 1, #identifiers do
-				if not secrecy[i] then
-					TMW.HELP:Show{
-						code = "ICONTYPE_BUFFCHECK_NAMENOTID",
-						codeOrder = 2,
-						icon = icon,
-						relativeTo = TellMeWhen_ChooseName,
-						x = 0,
-						y = 0,
-						text = format(L["HELP_BUFFCHECK_NAMENOTID"], tostring(identifiers[i]))
-					}
-					break
-				end
+			if unresolved then
+				TMW.HELP:Show{
+					code = "ICONTYPE_BUFFCHECK_NAMENOTID",
+					codeOrder = 2,
+					icon = icon,
+					relativeTo = TellMeWhen_ChooseName,
+					x = 0,
+					y = 0,
+					text = format(L["HELP_BUFFCHECK_NAMENOTID"], tostring(unresolved))
+				}
 			end
 		end
 	end
@@ -713,20 +479,13 @@ function Type:Setup(icon)
 		icon:SetScript("OnEvent", Buff_OnEvent)
 		icon:RegisterEvent(icon.UnitSet.event)
 
-		local canUsePacked, auraEvent = TMW.COMMON.Auras:RequestUnits(icon.UnitSet)
+		local canUsePacked, auraEvent = Auras:RequestUnits(icon.UnitSet)
 		icon.auraEvent = auraEvent
 		icon:RegisterEvent(auraEvent)
 
 		if canUsePacked then
 			icon:SetUpdateFunction(BuffCheck_OnUpdate_Packed)
 		end
-	end
-
-	-- Hand whichever enumerating path was chosen to the dispatcher, which uses it while the
-	-- auras are actually visible to us and falls back to identifier lookups when they aren't.
-	if icon.SpellIdentifiers then
-		icon.EnumerationUpdateFunction = icon.UpdateFunction
-		icon:SetUpdateFunction(BuffCheck_OnUpdate_Secretable)
 	end
 
 	icon:Update()

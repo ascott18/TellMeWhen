@@ -41,7 +41,7 @@ local empty = {}
 
 
 local Type = TMW.Classes.IconType:New("buff")
-Type.name = L["ICONMENU_BUFFDEBUFF"] .. (TMW.wowMajorMinor >= 12.1 and (" " .. L["ICONMENU_BUFFDEBUFF_RESTRICTED"]) or "")
+Type.name = L["ICONMENU_BUFFDEBUFF"] .. (clientHasSecrets and (" " .. L["ICONMENU_BUFFDEBUFF_RESTRICTED"]) or "")
 Type.desc = L["ICONMENU_BUFFDEBUFF_DESC"]
 Type.menuIcon = GetSpellTexture(774)
 Type.usePocketWatch = 1
@@ -108,45 +108,21 @@ Type:RegisterIconDefaults{
 
 
 if clientHasSecrets then
-	-- Clickable link that switches this icon to the combat-ready Buff/Debuff type (handled in
-	-- TellMeWhen_SecretsWarning's OnHyperlinkClick). Named from L so it tracks the type's name.
-	local combatReadyLink = "|HTMW_ICONTYPE:buffcontainer|h|cff3588ff" .. L["ICONMENU_BUFFDEBUFF_CONTAINER"] .. "|r|h"
+	-- Everything this type has to say about combat, in one panel: which of the entered spells
+	-- can be read there, which can't, and where to go for the ones that can't. Registered
+	-- below the name field by RegisterSecrecyPanel, since all of it is about what's in it.
+	--
+	-- The link switches the icon to the combat-ready Buff/Debuff type (handled in
+	-- TellMeWhen_TextPanel's OnHyperlinkClick). The whole "click here to convert" phrase is
+	-- clickable, not just the type's name, so what the click does is what reads as the link.
+	-- Named from L so it tracks the type's name.
+	local combatReadyLink = "|HTMW_ICONTYPE:buffcontainer|h|cff3588ff"
+		.. L["UIPANEL_SECRETS_AURAS_CONVERT_121"]:format(L["ICONMENU_BUFFDEBUFF_CONTAINER"])
+		.. "|r|h"
 
-	Type:RegisterConfigPanel_XMLTemplate(121, "TellMeWhen_SecretsWarning", {
-		text = TMW.wowMajorMinor >= 12.1
-			and L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"]:format(combatReadyLink)
-			 or (L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] ..
-			"\n\n" .. L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"])
-			,
-		OnSetup = function(self)
-			if TMW.wowMajorMinor >= 12.1 then return end
-			
-			if TMW.CI.ics.Name == "" then
-				self:Hide()
-				return
-			end
-
-			-- If all spells entered pass TMW.COMMON.Auras.SpellHasCDMHook(spell), hide.
-			local ics = TMW.CI.ics
-			local spells = TMW:GetSpells(ics.Name, false).Array
-			local _, unitSet = TMW:GetUnits(TMW.CI.icon, ics.Unit)
-			local pass = false
-			if unitSet.unitSettings == "player" then
-				pass = ics.BuffOrDebuff == "HELPFUL" or ics.BuffOrDebuff == "EITHER"
-			elseif unitSet.unitSettings == "target" then
-				pass = ics.BuffOrDebuff == "HARMFUL" or ics.BuffOrDebuff == "EITHER"
-			end
-			for i = 1, #spells do
-				if not Auras.SpellHasCDMHook(spells[i]) then
-					pass = false
-					break;
-				end
-			end
-			if pass then
-				self:Hide()
-			end
-			
-		end,
+	Auras.RegisterSecrecyPanel(Type, 102, "TellMeWhen_BuffSecrets", {
+		trackAll = L["UIPANEL_SECRETS_AURAS_TRACKALL_121"],
+		advice = L["UIPANEL_SECRETS_AURAS_ADVICE_121"]:format(combatReadyLink),
 	})
 end
 
@@ -179,7 +155,9 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuff", functio
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", function(self)
-	self:SetTitle(Type.name)
+	-- The base name, not Type.name: the "(combat restricted)" suffix is there to tell the two
+	-- Buff/Debuff types apart in the type dropdown, and the panel heading isn't choosing.
+	self:SetTitle(L["ICONMENU_BUFFDEBUFF"])
 	self:BuildSimpleCheckSettingFrame({
 		function(check)
 			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
@@ -318,8 +296,15 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffSettings", functio
 			dropdown:OnSettingSaved()
 		end
 		
+		local filterName, filterDesc = L["ICONMENU_AURAFILTER"], L["ICONMENU_AURAFILTER_DESC"]
+		if clientHasSecrets then
+			-- Answering these takes IsAuraFilteredOutByInstanceID, an instance-ID read.
+			filterName = filterName .. " " .. TMW:GetRestrictedTString()
+			filterDesc = filterDesc .. "\n\n" .. L["UIPANEL_SECRETS_DISALLOWED_DESC"]
+		end
+
 		self.ExtraFilter = TMW.C.Config_DropDownMenu:New("Frame", "$parentAuraFilter", self, "TMW_DropDownMenuTemplate")
-		self.ExtraFilter:SetTexts(L["ICONMENU_AURAFILTER"], L["ICONMENU_AURAFILTER_DESC"])
+		self.ExtraFilter:SetTexts(filterName, filterDesc)
 		self.ExtraFilter:SetWidth(200)
 		self.ExtraFilter:SetFunction(function(dropdown)
 			for _, filter in ipairs(AuraFilterData) do
@@ -430,6 +415,13 @@ local function CheckExtraFilter(unit, instance, filterNames)
 		return cached
 	end
 
+	if clientHasSecrets and C_Secrets.ShouldAurasBeSecret() then
+		-- IsAuraFilteredOutByInstanceID is an instance-ID read, so it errors outright here.
+		-- Nothing else answers these filters, so the aura passes unfiltered rather than the
+		-- icon going blank - the default state the setting's description describes.
+		return true
+	end
+
 	-- Check if any of the selected filters allow this aura
 	for i = 1, #filterNames do
 		local filterName = filterNames[i]
@@ -486,7 +478,7 @@ end
 
 local huge = math.huge
 local function Buff_OnUpdate(icon, time)
-	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+	if icon.HideWhileSecret and icon.HasUnreadableSpell and C_Secrets.ShouldAurasBeSecret() then
 		-- Force hide icon
 		icon:YieldInfo(false, nil, "_secrets")
 		return
@@ -596,7 +588,7 @@ local function Buff_OnUpdate(icon, time)
 end
 
 local function Buff_OnUpdate_Packed(icon, time)
-	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+	if icon.HideWhileSecret and icon.HasUnreadableSpell and C_Secrets.ShouldAurasBeSecret() then
 		-- Force hide icon
 		icon:YieldInfo(false, nil, "_secrets")
 		return
@@ -689,7 +681,7 @@ local function Buff_OnUpdate_Packed(icon, time)
 end
 
 local function Buff_OnUpdate_Controller(icon, time)
-	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+	if icon.HideWhileSecret and icon.HasUnreadableSpell and C_Secrets.ShouldAurasBeSecret() then
 		-- Force hide icon
 		icon:YieldInfo(false, nil, "_secrets")
 		return
@@ -765,7 +757,7 @@ local function auraInstanceCompare(a,b)
 end
 local binaryInsert = TMW.binaryInsert
 local function Buff_OnUpdate_Controller_Packed(icon, time)
-	if icon.HideWhileSecret and C_Secrets.ShouldAurasBeSecret() then
+	if icon.HideWhileSecret and icon.HasUnreadableSpell and C_Secrets.ShouldAurasBeSecret() then
 		-- Force hide icon
 		icon:YieldInfo(false, nil, "_secrets")
 		return
@@ -875,18 +867,36 @@ function Type:HandleYieldedInfo(icon, iconToSet, unit, instance)
 		end
 
 		if clientHasSecrets then
-			local start
-			local durObj = GetAuraDuration(unit, instance.auraInstanceID)
-			if durObj then
-				start = durObj:GetStartTime()
-			else
-				-- Sometimes durObj comes out nil????
-				start = 0
+			local start, durObj
+
+			if C_Secrets.ShouldAurasBeSecret() then
+				-- GetAuraDuration is off limits outright while auras are restricted: it's an
+				-- instance-ID read, guarded by RequiresUnitAuraAccess - a blanket "does this
+				-- caller get aura data at all" check that errors for tainted callers, not the
+				-- per-aura guard that let us look this instance up in the first place. Anything
+				-- the lookups yield while restricted came back non-secret, so the instance's
+				-- own timing values are real numbers.
 				if issecretvalue(instance.duration) then
 					-- Match secret state of unknown start so secret tests don't mismatch between start + duration
-					start = secretwrap(start)
+					start = secretwrap(0)
 					-- Ensure non-nil durObj so we don't attempt SetCooldown with secrets.
 					durObj = C_DurationUtil.CreateDuration()
+				else
+					start = instance.expirationTime - instance.duration
+				end
+			else
+				durObj = GetAuraDuration(unit, instance.auraInstanceID)
+				if durObj then
+					start = durObj:GetStartTime()
+				else
+					-- Sometimes durObj comes out nil????
+					start = 0
+					if issecretvalue(instance.duration) then
+						-- Match secret state of unknown start so secret tests don't mismatch between start + duration
+						start = secretwrap(start)
+						-- Ensure non-nil durObj so we don't attempt SetCooldown with secrets.
+						durObj = C_DurationUtil.CreateDuration()
+					end
 				end
 			end
 
@@ -1022,10 +1032,17 @@ Processor:RegisterDogTag("TMW", "AuraSource", {
 
 function Type:Setup(icon)
 	icon.Spells = TMW:GetSpells(icon.Name, false)
-	if not clientHasSecrets then
+
+	-- What HideWhileSecret keys off, rather than the restriction itself: an icon whose spells
+	-- are every one of them readable does its whole job under restriction, and hiding it would
+	-- throw that away. Belongs to the spells, not to the current state, so it resolves once.
+	icon.HasUnreadableSpell = false
+	if clientHasSecrets then
+		icon.HasUnreadableSpell = Auras.HasUnreadableSpell(icon.Name)
+	else
 		icon.HideWhileSecret = false
 	end
-	
+
 	icon.ExtraFilters = nil
 	for k, v in pairs(icon.ExtraFilter) do
 		if v and tContains(AuraUtil.AuraFilters, k) then

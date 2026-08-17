@@ -264,9 +264,11 @@ L["ICONMENU_BUFFDEBUFF_CONTAINER_DESC"] = [[Tracks buffs and/or debuffs via Bliz
 L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"] = "Limitations"
 L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"] = [[This icon works in combat, but is subject to the following Blizzard-enforced limitations:
 
-- Filtered spells must be IDs - cannot filter by name.
-- Spell filters can only filter for buffs on friendly units and debuffs on enemy units. Spells that Blizzard flags as never secret are exempt and can be filtered on any unit.
-- Only the first of the icon's units is checked; multiple units are not supported.]]
+- Filtered spells must be IDs, not spell names.
+- Spell IDs can only filter buffs on friendly units and debuffs on enemy units.
+- Only the first of the icon's units is checked; multiple units are not supported.
+
+To read a spell's ID off an aura tooltip, enable %q in TellMeWhen's general options.]]
 
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_BUFFDEBUFF_RESTRICTED"] = "(combat restricted)"
@@ -859,12 +861,12 @@ L["ICONMENU_STEALABLE_DESC"] = "Check this to only show buffs that can be spells
 L["ICONMENU_HIDENOUNITS"] = "Hide if no units"
 L["ICONMENU_HIDENOUNITS_DESC"] = "Check this to cause the icon to hide if all the units that this icon is checking have been invalidated because of unit conditions and/or units not existing."
 L["ICONMENU_HIDEWHILESECRET"] = "Hide while secret"
-L["ICONMENU_HIDEWHILESECRET_DESC"] = [[Check this to cause the icon to hide while aura information is secret.
+L["ICONMENU_HIDEWHILESECRET_DESC"] = [[Check this to cause the icon to hide while any of its spells are secret.
 
-TellMeWhen cannot automatically determine if an aura will definitely be secret or non-secret in lockdown, so this setting will let you avoid showing an aura as 'Absent' when TMW just isn't allowed to know about it.]]
+A secret spell reads as absent, so without this setting the icon shows its Absent state in combat.]]
 L["ICONMENU_HIDEWHILESECRET_BUFFCHECK_DESC"] = [[Check this to cause the icon to hide while any of its spells are secret.
 
-A secret spell is skipped, and no unit is reported as missing anything while one is in the list. Without this setting, the icon still checks the spells that aren't secret.]]
+A secret spell reads as absent, so without this setting every unit is reported as missing it.]]
 L["ICONMENU_AURAFILTER"] = "Aura Filters"
 L["ICONMENU_AURAFILTER_DESC"] = "Only show auras that match any of the selected filters."
 L["ICONMENU_DISPELTYPE"] = "Dispel Type"
@@ -1084,21 +1086,18 @@ L["UIPANEL_SECRETS_CNDT_DISALLOWED_DESC"] = [[This condition cannot operate on s
 
 In such situations, the data will be assumed to be in a default state (cooldown ready, aura absent, etc).]]
 L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by secret data. Examples of secret data include spell cooldowns and buffs/debuffs while in combat, Mythic+, or PvP; or unit identity in instances.]]
-L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC"] = [[You CANNOT track any specific buff or debuff WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP), except |Hhttps://www.wowhead.com/spells?filter=131;1;0|h|cff3588ffthose flagged as always non-secret|r|h by Blizzard.]]
-L["UIPANEL_SECRETS_AURAS_DISALLOWED_DESC_121"] = [[---- UNAVAILABLE IN COMBAT ----
-
-This icon type DOES NOT WORK IN COMBAT, nor in combat zones (Mythic+ or PvP).
-
-Use the %s icon type instead for those situations.]]
-L["UIPANEL_SECRETS_AURAS_DISALLOWED_EXCEPT_DESC"] = [[One exception is when tracking player buffs or target debuffs that are also displayed by the Blizzard Cooldown Manager. The CDM must be enabled, shown, and have the spell tracked for this to work.]]
+L["UIPANEL_SECRETS_AURAS_TRACKALL_121"] = "Blank name |cff808080- enumerating a unit's auras is not allowed|r"
+L["UIPANEL_SECRETS_AURAS_CONVERT_121"] = "Click here to convert this icon to %s"
+L["UIPANEL_SECRETS_AURAS_ADVICE_121"] = "%s, which can show them in combat."
 L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
 
 Additionally, duration sorting cannot be performed on any secret durations.]]
 L["UIPANEL_BUFFCHECK_SECRETS_TITLE"] = "Availability in Combat"
-L["UIPANEL_BUFFCHECK_SECRETS_UNREADABLE"] = "Cannot be read in combat, Mythic+, or PvP, and are ignored there:"
+L["UIPANEL_BUFFCHECK_SECRETS_UNREADABLE"] = "Cannot be read in combat, Mythic+, or PvP:"
 L["UIPANEL_BUFFCHECK_SECRETS_READABLE"] = "Can be read at all times:"
 L["UIPANEL_BUFFCHECK_SECRETS_UNRESOLVED"] = "a name this character cannot look up; enter the spell ID instead"
-L["UIPANEL_BUFFCHECK_SECRETS_RESTRICTED"] = "Blizzard does not allow this spell"
+L["UIPANEL_BUFFCHECK_SECRETS_RESTRICTED"] = "aura is secret"
+L["UIPANEL_BUFFCHECK_SECRETS_DISPELTYPE"] = "dispel types cannot be looked up"
 L["HELP_BUFFCHECK_NAMENOTID"] = [[%s is a spell name that this character cannot look up. Spell names can only be looked up for spells your own class knows - use spell IDs for other class' spells.]]
 L["UIPANEL_SECRETS_TOTEM_DESC"] = [[You CANNOT track any specific totem name WHILE IN COMBAT, nor in combat-focused content (Mythic+ or PvP).
 
@@ -2967,7 +2966,13 @@ If you need to check many units, consider using a separate icon with an Icon Sho
 
 L["HELP_BUFFCONTAINER_NAMENOTID"] = [[%s is a spell name, and this icon type can only filter by spell ID. Names are ignored.
 
-Pick the spell from the suggestion list to insert its ID, or leave the field empty to show every aura matching the icon's other filters.]]
+Pick the spell from the suggestion list to insert its ID, or leave the field empty to show every aura matching the icon's other filters.
+
+To read a spell's ID off an aura tooltip, enable %q in TellMeWhen's general options]]
+
+L["HELP_BUFFCONTAINER_DISPELTYPE"] = [[%s is a dispel type rather than a spell, and this field only accepts spell IDs. It is ignored here.
+
+Remove it from this field and use the "%s" filter below instead, which works in combat.]]
 
 L["HELP_BUFF_NOSOURCERPPM"] = [[It looks like you are trying to track %s, which is a buff that uses the RPPM system.
 

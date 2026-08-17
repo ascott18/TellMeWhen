@@ -114,7 +114,9 @@ Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_TextPanel", {
 	frameName = "TellMeWhen_BuffContainerLimitations",
 	OnSetup = function(self)
 		self:SetTitle(L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"])
-		self.text:SetText(L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"])
+		-- Named from L so the pointer tracks the option's own label.
+		self.text:SetText(L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"]
+			:format(L["SHOWAURASPELLIDS_OPTION"]))
 	end,
 })
 
@@ -134,7 +136,9 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuffContainer"
 end)
 
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings", function(self)
-	self:SetTitle(Type.name)
+	-- The base name, not Type.name: the "(combat ready)" half is there to tell the two
+	-- Buff/Debuff types apart in the type dropdown, and the panel heading isn't choosing.
+	self:SetTitle(L["ICONMENU_BUFFDEBUFF"])
 	self:BuildSimpleCheckSettingFrame({
 		numPerRow = 2,
 		function(check)
@@ -456,22 +460,37 @@ function Type:Setup(icon)
 
 	-- BuildAuraSpec drops anything that isn't a number, so a name entered here matches
 	-- nothing at all and does it quietly. Say so rather than leave the user guessing.
+	--
+	-- A dispel type gets its own message. The suggestion list can't turn it into a spell ID
+	-- the way it can a spell name, because it isn't one - the Dispel Type filter is where it
+	-- goes, and that filter does work in combat.
 	-- GLOBALS: TellMeWhen_ChooseName
 	if icon:IsBeingEdited() == "MAIN" and TellMeWhen_ChooseName then
 		TMW.HELP:Hide("ICONTYPE_BUFFCONTAINER_NAMENOTID")
+
+		local badName, badDispelType
 		for _, entry in ipairs(icon.Spells.Array) do
-			if not tonumber(entry) then
-				TMW.HELP:Show{
-					code = "ICONTYPE_BUFFCONTAINER_NAMENOTID",
-					codeOrder = 2,
-					icon = icon,
-					relativeTo = TellMeWhen_ChooseName,
-					x = 0,
-					y = 0,
-					text = format(L["HELP_BUFFCONTAINER_NAMENOTID"], entry)
-				}
-				break
+			if TMW.DS[entry] then
+				badDispelType = badDispelType or entry
+			elseif not tonumber(entry) then
+				badName = badName or entry
 			end
+		end
+
+		if badDispelType or badName then
+			TMW.HELP:Show{
+				code = "ICONTYPE_BUFFCONTAINER_NAMENOTID",
+				codeOrder = 2,
+				icon = icon,
+				relativeTo = TellMeWhen_ChooseName,
+				x = 0,
+				y = 0,
+				-- The dispel type wins when both are present: it's the one with somewhere
+				-- to send the user.
+				text = badDispelType
+					and format(L["HELP_BUFFCONTAINER_DISPELTYPE"], badDispelType, L["ICONMENU_DISPELTYPE"])
+					or format(L["HELP_BUFFCONTAINER_NAMENOTID"], badName, L["SHOWAURASPELLIDS_OPTION"])
+			}
 		end
 	end
 

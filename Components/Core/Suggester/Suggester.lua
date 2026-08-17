@@ -1573,6 +1573,36 @@ function Module:Table_GetSpecialSuggestions_1(suggestions)
 	end
 end
 
+-- Flag the entries an icon won't be able to read while auras are secret, by the same rule
+-- Auras.HasUnreadableSpell applies at setup - so what the list shows is what the icon's
+-- "Availability in Combat" panel will say about it once inserted.
+--
+-- In Entry_Colorize rather than Entry_AddToList because the AddToList chain stops at the
+-- first hook that claims an entry, so a third one would never run for an ordinary spell.
+-- The Colorize chain runs all of its hooks, and by then both fontstrings are set.
+--
+-- On the ID rather than the name: names are long enough to truncate, and the marker would
+-- be the first thing cut. A dispel type has no ID, so there it stands alone.
+if TMW.clientHasSecrets then
+	local GetSpellAuraSecrecy = C_Secrets.GetSpellAuraSecrecy
+	local SECRECY_NEVER = Enum.SecrecyLevel and Enum.SecrecyLevel.NeverSecret
+
+	function Module:Entry_Colorize_3(f, id)
+		local restricted
+		if TMW.DS[id] then
+			-- Nothing looks an aura up by dispel type; that takes enumeration.
+			restricted = true
+		elseif tonumber(id) then
+			restricted = GetSpellAuraSecrecy(id) ~= SECRECY_NEVER
+		end
+
+		if restricted then
+			local idText = f.ID:GetText()
+			f.ID:SetText(TMW:GetRestrictedTString() .. (idText and (" " .. idText) or ""))
+		end
+	end
+end
+
 local Module = SUG:NewModule("buffNoDS", SUG:GetModule("buff"))
 Module.Table_GetSpecialSuggestions_1 = TMW.NULLFUNC
 
@@ -1588,6 +1618,9 @@ function Module:Entry_AddToList_1(f, id)
 		f.insert, f.insert2 = id, nil
 	end
 end
+-- Nothing in this list is restricted for this icon type: the filtering happens inside
+-- Blizzard's aura container, which sees secret auras perfectly well.
+Module.Entry_Colorize_3 = TMW.NULLFUNC
 
 -- Buff Check icons need the ID for a reason the other types don't have: while auras are secret
 -- they look each spell up by identifier, and only a spell they can resolve to an ID can be

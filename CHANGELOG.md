@@ -1,4 +1,5 @@
 ## v12.1.2
+* Buff/Debuff icons and conditions once again work for spells that Blizzard flags as never secret (#2470).
 * Added "Group Contains Class" condition - checks whether you or anyone in your party or raid is one of the selected classes.
 * Fix the frame suggestion list used by group position anchoring freezing the game in UIs with very large numbers of frames.
 * Fix animations on Buff/Debuff (combat allowed) icons drawing underneath the auras instead of on top of them, and the Activation Border animation having no effect on Buff/Debuff (combat allowed) icons with an Underlay opacity of 0.
