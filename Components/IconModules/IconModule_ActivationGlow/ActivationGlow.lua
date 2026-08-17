@@ -90,9 +90,6 @@ function ActivationGlow:SetGlowShown(shown)
 		end
 
 		IconContainer:ShowOverlayGlow(self)
-
-		-- overlay is a field created by IconContainer:ShowOverlayGlow()
-		IconContainer.container.overlay:SetFrameLevel(icon:GetFrameLevel() + 3)
 	else
 		local IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true, true)
 		if IconContainer then

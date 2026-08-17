@@ -525,6 +525,7 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		else
 			animation_border = CreateFrame("Frame", nil, icon)
 			icon.animation_border = animation_border
+			animation_border:SetFrameLevel(icon:GetFrameLevel() + TMW.CONST.FRAMELEVEL.ANIMATION)
 
 			local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
 			animation_border.TOP = tex

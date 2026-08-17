@@ -749,9 +749,8 @@ end
 -- is driven via SetDurationBar. `vertical` only selects the bar's orientation (barv).
 function Module:Emulate_IconView_Bar(icon, button, vertical)
 	-- Both are wanted for their frames' geometry alone, so take them disabled or unimplemented:
-	-- ApplyOpacities disables IconContainer whenever there's no underlay, and this icon type
-	-- never allows TimerBar_BarDisplay at all (the view still lays its frames out for us to
-	-- mirror).
+	-- a bar view without an icon square leaves IconContainer off, and this icon type never
+	-- allows TimerBar_BarDisplay at all (the view still lays its frames out for us to mirror).
 	local iconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer_Masque", true, true)
 	local iconSquare = iconContainer and iconContainer.container
 	local timerBar = icon:GetModuleOrModuleChild("IconModule_TimerBar_BarDisplay", true, true)
@@ -1241,13 +1240,9 @@ end
 -- The underlay is four separate frames/regions: the Texture module's texture (a child of
 -- the icon, not the IconContainer), the IconContainer's container (icon square / Masque
 -- skin / border), the Backdrop's container and the Texts module's container. Run
--- `fn(module, frame, keepEnabled)` over each one that exists. Disabled modules are included:
--- one we turned off still has to be handed its alpha back, and a view can have left one off
--- on its own (a bar view without an icon square).
---
--- keepEnabled marks Texts, which has to stay enabled whether or not there's an underlay: the
--- aura buttons mirror its fontstrings, and the strings that don't belong to the underlay
--- take themselves dark anyway (Texts:OnKwargsUpdated).
+-- `fn(module, frame)` over each one that exists. Disabled modules are included: a view can
+-- have left one off on its own (a bar view without an icon square), and its frame still has
+-- to be handed its alpha back.
 function Module:ForEachUnderlayFrame(fn)
 	local icon = self.icon
 	local texture = icon:GetModuleOrModuleChild("IconModule_Texture", true)
@@ -1264,7 +1259,7 @@ function Module:ForEachUnderlayFrame(fn)
 	end
 	local texts = icon:GetModuleOrModuleChild("IconModule_Texts", true)
 	if texts and texts.container then
-		fn(texts, texts.container, true)
+		fn(texts, texts.container)
 	end
 end
 
@@ -1329,18 +1324,13 @@ function Module:ApplyOpacities()
 		container:SetAlpha(aurasAlpha * scale)
 	end
 
-	-- With no underlay wanted, take the icon's display down entirely rather than leaving it
-	-- at alpha 0: the aura buttons emulate all of it themselves, and a second copy
-	-- underneath would double every semi-transparent border and backdrop (Masque may have
-	-- drawn one we can't detect). Only ever disabling, never enabling - which of these
-	-- belong up at all is the view's call (a bar view without an icon square leaves the
-	-- icon texture and its container off), and it has just made it: we run right after setup.
-	self:ForEachUnderlayFrame(function(module, frame, keepEnabled)
-		if underlayAlpha == 0 and not keepEnabled then
-			module:Disable()
-		else
-			frame:SetAlpha(underlayAlpha * scale)
-		end
+	-- Alpha only, never Disable. Alpha is inherited by everything under these frames, so
+	-- zero hides the icon's own display as completely as disabling did, and leaves the
+	-- modules for the view to decide on. Disabling here also took the module out of the
+	-- icon events config for as long as it lasted - IconModule_IconContainer is what
+	-- registers the activation border animation - and nothing undid it before next setup.
+	self:ForEachUnderlayFrame(function(module, frame)
+		frame:SetAlpha(underlayAlpha * scale)
 	end)
 end
 
@@ -1582,7 +1572,11 @@ function Module:EnsureContainer()
 	local icon = self.icon
 	container = CreateFrame("AuraContainer", self:GetChildNameBase() .. "Container", icon, "CustomAuraContainerTemplate")
 	container:SetSize(1, 1)
-	container:SetFrameLevel(icon:GetFrameLevel() + 5)
+	container:SetFrameLevel(icon:GetFrameLevel() + TMW.CONST.FRAMELEVEL.AURACONTAINER)
+	-- The buttons stack another LEVEL_* range on top of this level, so without flattening,
+	-- anything meant to draw over the container would have to beat its deepest child
+	-- rather than its own level.
+	container:SetFlattensRenderLayers(true)
 	self.container = container
 	-- Anchored by one corner only (ConfigureContainerLayout picks the corner): the
 	-- container auto-resizes to fit its flow-laid-out buttons, so SetAllPoints would

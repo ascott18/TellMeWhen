@@ -92,7 +92,10 @@ if CreateFrame("Frame", nil, UIParent, activationAlertTemplate).ProcStartAnim th
 		local overlay = container.overlay
 
 		if not overlay then
-			overlay = CreateFrame("Frame", nil, container, activationAlertTemplate)
+			-- Parented to the icon rather than the container, but still anchored to the
+			-- container: an aura container dims the container to hide the icon's own art,
+			-- and the glow draws over the auras rather than being part of what's hidden.
+			overlay = CreateFrame("Frame", nil, self.icon, activationAlertTemplate)
 			container.overlay = overlay
 
 			-- The intro animation to the new activation alert animation in wow 10.1.5 is extremely weird,
@@ -159,16 +162,18 @@ else
 				overlay.animOut:Stop();
 			end
 		else
-			overlay = CreateFrame("Frame", nil, container, "ActionBarButtonSpellActivationAlert");
+			-- Parented to the icon rather than the container, but still anchored to the
+			-- container: an aura container dims the container to hide the icon's own art,
+			-- and the glow draws over the auras rather than being part of what's hidden.
+			overlay = CreateFrame("Frame", nil, self.icon, "ActionBarButtonSpellActivationAlert");
 			container.overlay = overlay
 
 			-- Override scripts from the blizzard template:
 			-- We do this so we don't have to duplicate the template as well.
 			overlay.animOut:SetScript("OnFinished", OverlayGlowAnimOutFinished)
 			overlay:SetScript("OnHide", OverlayOnHide)
-			
+
 			local frameWidth, frameHeight = container:GetSize();
-			overlay:SetParent(container);
 			overlay:ClearAllPoints();
 			--Make the height/width available before the next frame:
 			overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4);
@@ -205,6 +210,8 @@ function IconContainer:ShowOverlayGlow(owner)
 	self.overlayOwners[owner or true] = true
 
 	self:ShowOverlayGlowInternal()
+
+	self.container.overlay:SetFrameLevel(self.icon:GetFrameLevel() + TMW.CONST.FRAMELEVEL.ANIMATION)
 end
 
 --- Releases this owner's claim on the Blizzard spell activation overlay, hiding it
@@ -250,10 +257,10 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 		local container = IconModule_IconContainer.container
 		
 		IconModule_IconContainer:ShowOverlayGlow()
-		
-		-- overlay is a field created by IconModule_IconContainer:ShowOverlayGlow()
+
+		-- overlay is a field created by IconModule_IconContainer:ShowOverlayGlow(),
+		-- which also picks its frame level.
 		container.overlay:SetScale(table.Scale)
-		container.overlay:SetFrameLevel(icon:GetFrameLevel() + 3)
 	end,
 	OnStop = function(icon, table)
 		local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true, true)

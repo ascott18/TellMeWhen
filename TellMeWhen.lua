@@ -238,7 +238,16 @@ TMW.CONST = {
 		DEFAULT_HIDE = 2,
 		DEFAULT_NORANGE = 3,
 		DEFAULT_NOMANA = 4,
-	}
+	},
+
+	-- Frame levels inside an icon, as offsets from the icon's own level.
+	-- The icon's display occupies 0-3 (container, cooldown, bars, texts).
+	FRAMELEVEL = {
+		-- Covers the icon's display, whose art it re-emulates on its buttons.
+		AURACONTAINER = 4,
+		-- Animations draw over everything, including an aura container.
+		ANIMATION = 5,
+	},
 }
 
 TMW.IconsToUpdate, TMW.GroupsToUpdate = {}, {}
