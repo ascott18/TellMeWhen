@@ -1,3 +1,6 @@
+## v12.1.3
+* Fix the Mounted condition not updating sometimes.
+
 ## v12.1.2
 * Buff/Debuff icons and conditions once again work for spells that Blizzard flags as never secret (#2470).
 * Added "Group Contains Class" condition - checks whether you or anyone in your party or raid is one of the selected classes.
