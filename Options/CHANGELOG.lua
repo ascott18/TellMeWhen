@@ -5,6 +5,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 TMW.CHANGELOG = [==[
 ## v12.1.3
 * Fix the Mounted condition not updating sometimes.
+* Fix Buff/Debuff (combat allowed) icons with an Underlay opacity of 0 drawing their icon texture at full opacity in groups set to only show in combat (#2480).
 
 ## v12.1.2
 * Buff/Debuff icons and conditions once again work for spells that Blizzard flags as never secret (#2470).

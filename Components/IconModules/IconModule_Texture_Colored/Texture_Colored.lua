@@ -115,11 +115,16 @@ function Texture_Colored:STATE(icon, stateData)
 	end
 	
 	local c = TMW:StringToCachedRGBATable(color)
-	
+
+	-- A texture's vertex color alpha is its alpha, and an aura container sets this
+	-- texture's alpha from outside this pipeline to hold its underlay opacity. Carry
+	-- whatever is there through rather than stamping 1 over it.
+	local alpha = self.texture:GetAlpha()
+
 	if not (LMB and OnlyMSQ) then
-		self.texture:SetVertexColor(c.r, c.g, c.b, 1)
+		self.texture:SetVertexColor(c.r, c.g, c.b, alpha)
 	else
-		self.texture:SetVertexColor(1, 1, 1, 1)
+		self.texture:SetVertexColor(1, 1, 1, alpha)
 	end
 
 
