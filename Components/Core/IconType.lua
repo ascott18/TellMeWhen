@@ -73,6 +73,7 @@ local RelevantToAll = {
 -- @field hidden [function->|boolean|nil] True if the IconType should not be displayed in the type selection menu.
 -- @field hasNoGCD [boolean|nil] True if timers/durations reported by the IconType are able to be on the global cooldown, otherwise nil. Default is nil.
 -- @field canControlGroup [boolean|nil] True if the icon type is capable of being a group controller. You must implement IconType:HandleYieldedInfo() if true, and use icon:YieldInfo() in your type's update methods instead of icon:SetInfo().
+-- @field stackedVisibilityUnknown [boolean|nil] True if nothing the icon type publishes says whether the icon is actually drawing anything, so a stacked meta icon can't use it to hide the components underneath it.
 -- 
 -- @field Icons [table] [READ-ONLY] Array of icons that use this IconType. Automatically updated, and should not be modified.
 -- @field type [string] [READ-ONLY] A short string that will identify the IconType across the addon. Set through the constructor, and should not be modified.

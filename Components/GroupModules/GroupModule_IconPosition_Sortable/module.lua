@@ -296,13 +296,20 @@ function IconPosition_Sortable:PositionIcons()
 
 	local maxX, maxY = 0, 0
 	local ShrinkGroup = self.ShrinkGroup
-	for positionID = 1, #SortedIcons do
-		local icon = SortedIcons[positionID]
-		local x, y = self:Icon_SetPoint(icon, positionID)
-		local sizeX, sizeY = self.group.viewData:Icon_GetSize(icon)
-		if ShrinkGroup and icon.attributes.shown and icon.attributes.realAlpha > 0 then
-			maxX = max(maxX, abs(x) + sizeX)
-			maxY = max(maxY, abs(y) + sizeY)
+	local positionID = 0
+	for i = 1, #SortedIcons do
+		local icon = SortedIcons[i]
+		-- An icon a stacked meta icon has taken over is anchored on that meta icon now, so
+		-- it neither takes a position here nor counts towards the group's size. It keeps
+		-- its place in the sort, which doesn't change the order of anything left.
+		if not icon.__stackHost then
+			positionID = positionID + 1
+			local x, y = self:Icon_SetPoint(icon, positionID)
+			local sizeX, sizeY = self.group.viewData:Icon_GetSize(icon)
+			if ShrinkGroup and icon.attributes.shown and icon.attributes.realAlpha > 0 then
+				maxX = max(maxX, abs(x) + sizeX)
+				maxY = max(maxY, abs(y) + sizeY)
+			end
 		end
 	end
 

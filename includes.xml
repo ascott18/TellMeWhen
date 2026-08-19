@@ -161,6 +161,7 @@
 <Script file="Components\IconTypes\IconType_icd\icd.lua" />
 <Script file="Components\IconTypes\IconType_item\item.lua" />
 <Script file="Components\IconTypes\IconType_meta\meta.lua" />
+<Script file="Components\IconTypes\IconType_meta\stack.lua" />
 <Script file="Components\IconTypes\IconType_reactive\reactive.lua" />
 <Script file="Components\IconTypes\IconType_swingtimer\swingtimer.lua" />
 <Script file="Components\IconTypes\IconType_totem\totem.lua" />

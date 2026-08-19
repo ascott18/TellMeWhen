@@ -74,6 +74,10 @@ Type:RegisterIconDefaults{
 	-- Sort meta icons found by their duration
 	Sort						= false,
 
+	-- Stack the component icons into the meta icon's cell instead of copying one of them
+	-- onto it. See stack.lua.
+	Stacked						= false,
+
 	-- Expand sub-metas. Causes the meta icon to expand any meta icons it is checking into that meta icon's component icons.
 	-- Also prevents any other meta icon with this setting enabled from showing the icon that this meta icon is showing.
 	CheckNext					= false,
@@ -226,6 +230,9 @@ local function Meta_OnEvent(icon, event, arg1)
 			-- A re-setup source may have fresh settings,
 			-- so force a re-inherit on next update
 			icon.__metaModuleSource = nil
+			-- A re-setup source has also reverted its own size and frame level, and this
+			-- is the only notice we get that a source we couldn't find before now exists.
+			icon.__stackDirty = true
 			icon.NextUpdateTime = 0
 		end
 	end
@@ -460,10 +467,17 @@ function Type:Setup(icon)
 
 	CompileIcons(icon)
 
-	icon:SetInfo("state; texture", 
-		0, 
-		"Interface\\AddOns\\TellMeWhen\\Textures\\levelupicon-lfd"
-	)
+	-- A stacked meta icon draws its components rather than copying one of them, so
+	-- everything below that inherits data or appearance is left off. Stack.Setup publishes
+	-- the state it carries the stack with in place of the one set here.
+	local stacked = Type.Stack.Setup(icon)
+
+	if not stacked then
+		icon:SetInfo("state; texture",
+			0,
+			"Interface\\AddOns\\TellMeWhen\\Textures\\levelupicon-lfd"
+		)
+	end
 	
 	-- Setup event-driven updates
 	if icon.CheckNext then
@@ -476,7 +490,11 @@ function Type:Setup(icon)
 	icon:SetUpdateMethod("manual")
 	icon:SetScript("OnEvent", Meta_OnEvent)
 		
-	icon:RegisterEvent("TMW_ICON_UPDATED")
+	if not stacked then
+		-- Nothing about a source's data reaches a stacked meta icon - only the setup
+		-- events below, which tell it to rebuild the stack.
+		icon:RegisterEvent("TMW_ICON_UPDATED")
+	end
 	icon:RegisterEvent("TMW_ICON_SETUP_POST")
 	icon:RegisterEvent("TMW_GROUP_SETUP_POST")
 
@@ -488,7 +506,7 @@ function Type:Setup(icon)
 		end
 	end
 		
-	icon:SetUpdateFunction(Meta_OnUpdate)
+	icon:SetUpdateFunction(stacked and Type.Stack.OnUpdate or Meta_OnUpdate)
 end
 
 function Type:OnGCD(icon, duration)

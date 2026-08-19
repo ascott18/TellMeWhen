@@ -304,5 +304,8 @@
         "issecretvalue",
         "Overlayed"
     ],
-    "Lua.type.weakUnionCheck": true
+    "Lua.type.weakUnionCheck": true,
+    "cSpell.enabledFileTypes": {
+        "lua": true
+    }
 }

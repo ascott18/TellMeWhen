@@ -82,7 +82,11 @@ function IconPosition:PositionIcons()
 
 	for iconID = 1, group.numIcons do
 		local icon = group[iconID]
-		self:Icon_SetPoint(icon, icon.ID)
+		-- An icon a stacked meta icon has taken over is anchored on that meta icon now.
+		-- Nil where a stacked meta icon released an icon back to a group mid-setup.
+		if icon and not icon.__stackHost then
+			self:Icon_SetPoint(icon, icon.ID)
+		end
 	end
 end
 

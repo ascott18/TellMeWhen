@@ -1,4 +1,5 @@
 ## v12.1.3
+* Added a "Stack icons" option to meta icons (#2478) - the meta icon draws its component icons in its place, first one showing on top, which is the only way it can show icons whose visibility is secret (cooldowns and auras in combat, Mythic+, or PvP).
 * Fix the Mounted condition not updating sometimes.
 * Fix Buff/Debuff (combat allowed) icons with an Underlay opacity of 0 drawing their icon texture at full opacity in groups set to only show in combat (#2480).
 

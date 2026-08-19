@@ -34,6 +34,7 @@ Type.AllowNoName = true
 Type.unitType = "unitid"
 Type.hasNoGCD = true
 Type.canControlGroup = true
+Type.stackedVisibilityUnknown = true
 
 -- Nothing tells us an aura is missing, so there's no absent state to publish. The underlay
 -- gets to the same place from the other end: the icon's own display is left up beneath the

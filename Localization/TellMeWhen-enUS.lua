@@ -406,6 +406,15 @@ L["ICONMENU_META_DESC"] = [=[Combines multiple icons into one.
 
 Icons that have %q checked will still be shown in a meta icon if they would otherwise be shown.]=]
 L["ICONMENU_META_ICONMENUTOOLTIP"] = "(%d |4Icon:Icons;)"
+L["ICONMENU_META_STACKED"] = "Stack icons (secret-friendly)"
+L["ICONMENU_META_STACKED_DESC"] = [=[Physically repositions and resizes constituent icons into this meta icon's position.
+
+Icons whose visibility comes from secret data (e.g. cooldowns) CAN fully supercede later-listed icons, even at less than 100%% opacity. Combat-ready buff/debuff icons are a step above secret and so cannot do that - they will simply overlay/overlap.
+
+|cff7fffff-|r The listed icons are taken out of their own groups and drawn here, at this icon's size, and therefore cannot be shared by other meta icons.
+|cff7fffff-|r %q is ignored on them.]=]
+L["META_STACKED_TAKEN"] = "%s cannot stack %s, because %s already does."
+L["META_STACKED_RECURSIVE"] = "%s cannot stack %s - they would each be inside the other."
 
 
 L["ICONTYPE_DEFAULT_HEADER"] = "Instructions"
@@ -1089,7 +1098,7 @@ L["UIPANEL_SECRETS_EVENT_DISALLOWED_DESC"] = [[This cannot be triggered by secre
 L["UIPANEL_SECRETS_AURAS_TRACKALL_121"] = "Blank name |cff808080- enumerating a unit's auras is not allowed|r"
 L["UIPANEL_SECRETS_AURAS_CONVERT_121"] = "Click here to convert this icon to %s"
 L["UIPANEL_SECRETS_AURAS_ADVICE_121"] = "%s, which can show them in combat."
-L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown.
+L["UIPANEL_SECRETS_META_DESC"] = [[Any component icons whose visibility is driven by secret data (mainly cooldown icons) are assumed to be always shown. Check %q to draw those icons instead of copying them.
 
 Additionally, duration sorting cannot be performed on any secret durations.]]
 L["UIPANEL_BUFFCHECK_SECRETS_TITLE"] = "Availability in Combat"

@@ -35,11 +35,37 @@ if not Type then return end
 
 if TMW.clientHasSecrets then
 	Type:RegisterConfigPanel_XMLTemplate(90, "TellMeWhen_SecretsWarning", {
-		text = L["UIPANEL_SECRETS_META_DESC"]
+		text = L["UIPANEL_SECRETS_META_DESC"]:format(L["ICONMENU_META_STACKED"])
 	})
 end
 
 Type:RegisterConfigPanel_XMLTemplate(145, "TellMeWhen_IconStates", { })
+
+Type:RegisterConfigPanel_ConstructorFunc(149, "TellMeWhen_MetaStackSettings", function(self)
+	self:SetTitle(L["ICONMENU_META_STACKED"])
+	self:BuildSimpleCheckSettingFrame({
+		function(check)
+			check:SetTexts(L["ICONMENU_META_STACKED"],
+				L["ICONMENU_META_STACKED_DESC"]:format(L["ICONALPHAPANEL_FAKEHIDDEN"]))
+			check:SetSetting("Stacked")
+
+			-- The Sort panel hides itself while this is checked, so redraw the editor.
+			check:CScriptAdd("SettingSaved", function()
+				TMW:Update(function()
+					TMW.IE:LoadIcon(1)
+				end)
+			end)
+		end,
+	})
+
+	self:CScriptAdd("PanelSetup", function()
+		-- A group controller already draws each of its components in a cell of its own,
+		-- which is what stacking would otherwise be doing.
+		if TMW.CI.icon:IsGroupController() then
+			self:Hide()
+		end
+	end)
+end)
 
 Type:RegisterConfigPanel_XMLTemplate(150, "TellMeWhen_MetaIconOptions")
 
@@ -63,7 +89,9 @@ Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_MetaSortSettings", fun
 	})
 
 	self:CScriptAdd("PanelSetup", function()
-		if TMW.CI.icon:IsGroupController() then
+		-- A stack shows its icons in the order they're listed, and reordering the frames
+		-- of a stack every time a duration changes isn't something worth doing.
+		if TMW.CI.icon:IsGroupController() or TMW.CI.ics.Stacked then
 			self:Hide()
 		end
 	end)
