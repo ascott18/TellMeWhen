@@ -2307,7 +2307,9 @@ L["SUG_FINISHHIM_DESC"] = "|cff7fffffClick|r to immediately finish the caching/f
 L["SUG_INSERT_ANY"] = "|cff7fffffClick|r"
 L["SUG_INSERT_LEFT"] = "|cff7fffffLeft-click|r"
 L["SUG_INSERT_RIGHT"] = "|cff7fffffRight-click|r"
+L["SUG_INSERT_SHIFT"] = "|cff7fffffShift-click|r"
 L["SUG_INSERT_TAB"] = " or |cff7fffffTab|r"
+L["SUG_INSERT_SHIFTTAB"] = " or |cff7fffffShift+Tab|r"
 
 L["SUG_INSERTNAME"] = "%s to insert name"
 L["SUG_INSERTID"] = "%s to insert ID"
@@ -2316,6 +2318,7 @@ L["SUG_INSERTEQUIV"] = "%s to insert equivalency"
 L["SUG_INSERTTEXTSUB"] = "%s to insert tag"
 L["SUG_INSERTTUNITID"] = "%s to insert unitID"
 L["SUG_INSERTERROR"] = "%s to insert error message"
+L["SUG_INSERTALLIDS"] = "%s to insert all %d IDs with this name"
 
 L["SUG_INSERTNAME_INTERFERE"] = [[%s to insert as a name
 

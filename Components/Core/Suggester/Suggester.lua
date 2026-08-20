@@ -29,6 +29,7 @@ local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, nex
 	  tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, wipe, next, getmetatable, setmetatable, assert, rawget, rawset, unpack, select
 local strfind, strmatch, strbyte, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10 =
 	  strfind, strmatch, strbyte, format, gsub, strsub, strtrim, strlen, strsplit, strlower, max, min, floor, ceil, log10
+local tconcat = table.concat
 
 local GetItemIcon = C_Item and C_Item.GetItemIconByID or GetItemIcon
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
@@ -226,6 +227,7 @@ function SUG:SuggestingComplete(doSort)
 		f.tooltiptext = nil
 		f.overrideInsertID = nil
 		f.overrideInsertName = nil
+		f.insertAllName = nil
 		f.Background:SetVertexColor(0, 0, 0, 0)
 		f.Icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 		f:UnlockHighlight()
@@ -1611,12 +1613,115 @@ Module.Table_GetSpecialSuggestions_1 = TMW.NULLFUNC
 -- the right click - inserting one here would match nothing.
 local BuffNoDS = SUG:GetModule("buffNoDS")
 local Module = SUG:NewModule("buffcontainer", BuffNoDS)
+
+-- Every spell ID whose name is exactly `loweredName`, ascending.
+--
+-- Memoized per spell cache table: each miss is a full pass over every cached spell, which
+-- is fine on a hover or a click but not once per row while the list rebuilds on every
+-- keystroke. Keyed weakly on the cache itself so a re-cache doesn't answer from the old one.
+local exactNameLookups = setmetatable({}, { __mode = "k" })
+local function GetIDsForExactName(loweredName)
+	local cache = SpellCache:GetCache()
+
+	local lookups = exactNameLookups[cache]
+	if not lookups then
+		lookups = {}
+		exactNameLookups[cache] = lookups
+	end
+
+	local ids = lookups[loweredName]
+	if not ids then
+		ids = {}
+		-- Not the suggester's StartsWithCache: its lookups are built with the fragment as a
+		-- Lua pattern, so a name containing "-" (Anti-Magic Shell) wouldn't match itself.
+		for id, name in pairs(cache) do
+			if name == loweredName then
+				ids[#ids + 1] = id
+			end
+		end
+		sort(ids)
+		lookups[loweredName] = ids
+	end
+
+	return ids
+end
+
 function Module:Entry_AddToList_1(f, id)
 	BuffNoDS.Entry_AddToList_1(self, f, id)
 
 	if tonumber(id) then
 		f.insert, f.insert2 = id, nil
+
+		-- The name, not the IDs behind it: resolving them is a spell cache scan, and this
+		-- runs for every row of every rebuild. Hover and click resolve it when asked.
+		f.insertAllName = SpellCache_Cache[id]
 	end
+end
+
+-- Those of `loweredName`'s IDs that the field doesn't already have. The segment the click is
+-- about to replace is cut out the same way Entry_Insert cuts it, so the partial name being
+-- completed never reads as an entry that's already there.
+--
+-- Compared against the same parse the icon itself uses (TMW:GetSpells, as in BuildAuraSpec),
+-- so an ID already covered by an equivalency in the field counts as present, and one written
+-- with a duration still matches.
+local function GetMissingIDsForExactName(loweredName)
+	local ids = GetIDsForExactName(loweredName)
+
+	local text = SUG.Box:GetText()
+	local start = SUG.startpos - 1
+	local firsthalf = start > 0 and strsub(text, 0, start) or ""
+	local lasthalf = strsub(text, SUG.endpos + 1)
+
+	local present = TMW:GetSpells(firsthalf .. lasthalf, false).Hash
+
+	local missing = {}
+	for i = 1, #ids do
+		if not present[ids[i]] then
+			missing[#missing + 1] = ids[i]
+		end
+	end
+
+	return missing
+end
+
+-- Shift-click inserts every ID sharing the row's name. A talent proc is often several IDs
+-- under one name, only one of which is live for a given build, and the container filter has
+-- no way to say "the one that's up" - it takes the whole set. Left click still inserts one.
+function Module:Entry_OnClick(frame, button)
+	if IsShiftKeyDown() and frame.insertAllName then
+		local missing = GetMissingIDsForExactName(frame.insertAllName)
+
+		-- Empty when the field already has all of them, which inserts nothing and leaves the
+		-- partially typed name consumed - the same end state as inserting them all again.
+		self:Entry_Insert(tconcat(missing, "; "))
+		return
+	end
+
+	BuffNoDS.Entry_OnClick(self, frame, button)
+end
+
+function Module:Entry_ExtraTooltipLine(frame)
+	if not frame.insertAllName then
+		return nil
+	end
+
+	-- Deliberately the count the name covers rather than the count this click would add: the
+	-- number describes the spell, not the field. A name covering one ID has nothing to offer -
+	-- the shift click would insert exactly what the plain click does.
+	local count = #GetIDsForExactName(frame.insertAllName)
+	if count < 2 then
+		return nil
+	end
+
+	-- Shift+Tab reaches this the same way Tab reaches a plain click: OnTabPressed clicks the
+	-- highlighted row, and the click reads the shift key itself.
+	local text = L["SUG_INSERT_SHIFT"]
+	if not self.noTab and frame:GetID() == SUG.tabIndex then
+		text = text .. L["SUG_INSERT_SHIFTTAB"]
+	end
+
+	return L["SUG_INSERTALLIDS"]:format(text, count)
 end
 -- Nothing in this list is restricted for this icon type: the filtering happens inside
 -- Blizzard's aura container, which sees secret auras perfectly well.

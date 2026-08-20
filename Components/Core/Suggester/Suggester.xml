@@ -57,6 +57,12 @@
 					GameTooltip:AddLine(first:format(text), 0, .5, 1, nil)
 				end
 
+				local extraLine = TMW.SUG.CurrentModule.Entry_ExtraTooltipLine
+					and TMW.SUG.CurrentModule:Entry_ExtraTooltipLine(self)
+				if extraLine then
+					GameTooltip:AddLine(extraLine, 0, .5, 1, nil)
+				end
+
 				GameTooltip:Show()
 
 				TMW.SUG.mousedOver = self
