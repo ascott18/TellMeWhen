@@ -80,8 +80,9 @@ Type:RegisterIconDefaults{
 	-- Only show stealable auras. Helpful auras only (candidateFilters.isStealable).
 	Stealable				= false,
 
-	-- Sort shown auras by remaining duration: false / 1 (longest first) / -1 (shortest first).
-	Sort					= false,
+	-- The order shown auras are placed in. A key of the SortMethods table below.
+	-- Not the shared Sort setting: that one is false/-1/1 across seven other icon types.
+	AuraSort				= "DEFAULT",
 
 	-- Hide auras whose maximum duration exceeds this many seconds (0 = no limit).
 	-- Maps to candidateFilters.maxDuration (which also implicitly hides permanent auras).
@@ -98,6 +99,23 @@ TMW:RegisterUpgrade(12010103, {
 	icon = function(self, ics)
 		if ics.Type == "buffcontainer" and ics.DurationMax then
 			ics.AuraMaxDuration = ics.DurationMax
+		end
+	end,
+})
+
+-- 12.1.0-12.1.3 ordered these icons with the shared Sort setting (false / -1 / 1), which
+-- has more orders to choose from here than it does anywhere else and so moved to AuraSort.
+-- Copy rather than move, like AuraMaxDuration above: Sort is still the setting every other
+-- icon type reads, and has to stay behind for whatever this icon gets converted to next.
+-- Sort == false needs no entry - it maps to AuraSort's own default.
+TMW:RegisterUpgrade(12010401, {
+	icon = function(self, ics)
+		if ics.Type ~= "buffcontainer" then return end
+
+		if ics.Sort == -1 then
+			ics.AuraSort = "DUR_LOW"
+		elseif ics.Sort == 1 then
+			ics.AuraSort = "DUR_HIGH"
 		end
 	end,
 })
@@ -135,6 +153,38 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuffContainer"
 		end,
 	})
 end)
+
+-- The orders the AuraSort setting offers, mapped onto the container's per-group sort.
+--
+-- The "Only" comparators are used throughout (ExpirationOnly over Expiration, NameOnly over
+-- Name): the plain ones sort player-cast, priority and self-applicable auras ahead of each
+-- other first, the way Blizzard's unit frames do, and only then by the thing that was asked
+-- for. UnitFrameDebuff is absent because it sorts on a field that only exists under the
+-- ProcessAura processing policy, which this container doesn't use - every aura would compare
+-- equal and it would behave as DEFAULT.
+--
+-- ENTERED is not a comparator. It splits the icon's spell IDs into one aura group each, laid
+-- out in the order they were entered (see BuildAuraSpec); the method named here is the one
+-- each of those groups uses to pick between several instances of its own spell.
+local SortMethods = {
+	DEFAULT   = { method = "Default",            direction = "Normal"  },
+	ENTERED   = { method = "Default",            direction = "Normal"  },
+	DUR_LOW   = { method = "ExpirationOnly",     direction = "Normal"  },
+	DUR_HIGH  = { method = "ExpirationOnly",     direction = "Reverse" },
+	NAME_AZ   = { method = "NameOnly",           direction = "Normal"  },
+	NAME_ZA   = { method = "NameOnly",           direction = "Reverse" },
+	OLDEST    = { method = "AuraInstanceIDOnly", direction = "Normal"  },
+	NEWEST    = { method = "AuraInstanceIDOnly", direction = "Reverse" },
+}
+
+local SortOrder = { "DEFAULT", "ENTERED", "DUR_LOW", "DUR_HIGH", "NAME_AZ", "NAME_ZA", "OLDEST", "NEWEST" }
+
+for key, sort in pairs(SortMethods) do
+	sort.sortMethod = AuraContainerSortMethod[sort.method]
+	sort.sortDirection = AuraContainerSortDirection[sort.direction]
+	sort.text = L["ICONMENU_AURACONTAINER_SORT_" .. key]
+	sort.desc = L["ICONMENU_AURACONTAINER_SORT_" .. key .. "_DESC"]
+end
 
 Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings", function(self)
 	-- The base name, not Type.name: the "(combat ready)" half is there to tell the two
@@ -287,28 +337,39 @@ Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings"
 	slider:SetRange(120)
 	slider:SetValueStep(1)
 
-	self:AdjustHeight(6)
-end)
+	-- The order the shown auras are placed in, below everything that decides which auras
+	-- those are.
+	local function Sort_OnClick(button, dropdown)
+		TMW.CI.ics.AuraSort = button.value
+		dropdown:OnSettingSaved()
+	end
 
--- Sort shown auras by remaining duration (buff.lua's Sort, minus stack sort - the
--- container has no stack sort method).
-Type:RegisterConfigPanel_ConstructorFunc(170, "TellMeWhen_BuffContainerSort", function(self)
-	self:SetTitle(TMW.L["SORTBY"])
-	self:BuildSimpleCheckSettingFrame({
-		numPerRow = 3,
-		function(check)
-			check:SetTexts(TMW.L["SORTBYNONE_DURATION"], TMW.L["SORTBYNONE_DESC"])
-			check:SetSetting("Sort", false)
-		end,
-		function(check)
-			check:SetTexts(TMW.L["ICONMENU_SORTASC"], TMW.L["ICONMENU_SORTASC_DESC"])
-			check:SetSetting("Sort", -1)
-		end,
-		function(check)
-			check:SetTexts(TMW.L["ICONMENU_SORTDESC"], TMW.L["ICONMENU_SORTDESC_DESC"])
-			check:SetSetting("Sort", 1)
-		end,
-	})
+	self.AuraSort = TMW.C.Config_DropDownMenu:New("Frame", "$parentAuraSort", self, "TMW_DropDownMenuTemplate")
+	self.AuraSort:SetTexts(L["ICONMENU_AURACONTAINER_SORT"], L["ICONMENU_AURACONTAINER_SORT_DESC"])
+	self.AuraSort:ClearAllPoints()
+	self.AuraSort:SetPoint("TOPLEFT", slider, "BOTTOMLEFT", 0, -14)
+	self.AuraSort:SetPoint("RIGHT", -7, 0)
+	self.AuraSort:SetFunction(function(dropdown)
+		for _, key in ipairs(SortOrder) do
+			local sort = SortMethods[key]
+			local info = TMW.DD:CreateInfo()
+			info.text = sort.text
+			info.tooltipTitle = sort.text
+			info.tooltipText = sort.desc
+			info.value = key
+			info.func = Sort_OnClick
+			info.arg1 = dropdown
+			info.checked = TMW.CI.ics.AuraSort == key
+			TMW.DD:AddButton(info)
+		end
+	end)
+
+	self:CScriptAdd("ReloadRequested", function()
+		local sort = SortMethods[TMW.CI.ics.AuraSort]
+		self.AuraSort:SetText(L["ICONMENU_AURACONTAINER_SORT"] .. ": " .. (sort and sort.text or NONE))
+	end)
+
+	self:AdjustHeight(6)
 end)
 
 Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
@@ -325,12 +386,17 @@ local function BuildAuraSpec(icon)
 
 	local filters = {}
 
-	-- Numeric spell IDs from the Name field (names aren't filterable yet).
+	-- Numeric spell IDs from the Name field (names aren't filterable yet). Kept in entry
+	-- order too - the ENTERED sort gives each one its own group, in that order.
 	local includeSpellIDs, hasSpellIDs
+	local orderedSpellIDs = {}
 	for _, entry in ipairs(icon.Spells.Array) do
 		local id = tonumber(entry)
 		if id then
 			includeSpellIDs = includeSpellIDs or {}
+			if not includeSpellIDs[id] then
+				orderedSpellIDs[#orderedSpellIDs + 1] = id
+			end
 			includeSpellIDs[id] = true
 			hasSpellIDs = true
 		end
@@ -364,21 +430,11 @@ local function BuildAuraSpec(icon)
 	if maxDuration then cf = cf or {}; cf.maxDuration = maxDuration end
 	if not harmful and icon.Stealable then cf = cf or {}; cf.isStealable = true end
 
-	-- Duration sort. Sort is applied per group/slot, so it rides on each filter entry
-	-- below. Use ExpirationOnly (pure remaining-time order) rather than Expiration, which
-	-- - like Blizzard's default unit-frame sort - floats player-cast / priority /
-	-- self-applicable auras to the front before considering duration. Map the icon's Sort
-	-- (1 = longest first, -1 = shortest first, matching buff.lua) onto the sort direction.
-	-- No sort names a method too rather than leaving one unset: groups and slots are pooled
-	-- and reused across specs, so an unset method leaves the icon's previous sort in place.
-	local sortMethod, sortDirection
-	if icon.Sort then
-		sortMethod = AuraContainerSortMethod.ExpirationOnly
-		sortDirection = icon.Sort == -1 and AuraContainerSortDirection.Normal or AuraContainerSortDirection.Reverse
-	else
-		sortMethod = AuraContainerSortMethod.Default
-		sortDirection = AuraContainerSortDirection.Normal
-	end
+	-- The sort is applied per group/slot, so it rides on each filter entry below. Every
+	-- order names a method rather than leaving one unset: groups and slots are pooled and
+	-- reused across specs, so an unset method leaves the icon's previous sort in place.
+	local sort = SortMethods[icon.AuraSort] or SortMethods.DEFAULT
+	local sortMethod, sortDirection = sort.sortMethod, sort.sortDirection
 
 	-- One filter string: the category, |PLAYER (Only Mine), any selected ExtraFilters
 	-- (IMPORTANT, CrowdControl, ...), and |INCLUDE_NAME_PLATE_ONLY. Pipe-joined flags are
@@ -397,12 +453,64 @@ local function BuildAuraSpec(icon)
 	end
 	filterString = filterString .. "|INCLUDE_NAME_PLATE_ONLY"
 
-	filters[1] = {
-		filterString = filterString,
-		candidateFilters = cf,
-		sortMethod = sortMethod,
-		sortDirection = sortDirection,
-	}
+	-- The entered order isn't a comparator - Blizzard only accepts its own, and the addon
+	-- side of the container has no way to supply one. It falls out of the layout instead:
+	-- one group per spell ID, each holding only that spell, laid out in filter order by
+	-- IconModule_AuraContainer. A group with nothing in it
+	-- contributes no spacing and forces no new line, so absent spells close up rather than
+	-- leaving a hole - which is why this can't be built out of aura slots, whose frames
+	-- hold their position whether or not they have an aura.
+	--
+	-- Two things have to be true before splitting, or it's worse than not splitting:
+	--
+	--   * A group controller, for somewhere to put the cells. A standalone icon draws its
+	--     auras stacked on its one cell, so N groups would pile up on each other.
+	--   * Spell IDs that actually filter. Blizzard drops includeSpellIDs entirely for
+	--     helpful auras on units you can't assist and harmful auras on units you can
+	--     (AuraContainerUtil.CanApplyIdentityCandidateFilters). With one group per spell
+	--     that's not "the filter did nothing", it's every aura matching every group and
+	--     showing once per spell listed.
+	--
+	-- Each group caps at the group's icon count, the same as the single unsplit group does,
+	-- so the order an icon is shown in never decides whether it's shown - a spell up from
+	-- two sources fills two cells here just as it would under any other order.
+	--
+	-- Nothing bounds the total, and nothing can: maxFrameCount caps each group on its own
+	-- and Blizzard has no container-wide cap, so enough spells draws them past the grid.
+	-- Capping the group count here would only trade that for silently dropping the spells
+	-- past the cutoff, off a cell count this spec isn't told about when it changes. The
+	-- setting's tooltip warns instead.
+	local canAssist = UnitCanAssist("player", unit) and true or false
+	local spellIDsAreFiltered = harmful ~= canAssist
+
+	local entered = hasSpellIDs
+		and icon.AuraSort == "ENTERED"
+		and icon:IsGroupController()
+		and spellIDsAreFiltered
+
+	if entered then
+		for i = 1, #orderedSpellIDs do
+			local perSpell = {}
+			for k, v in pairs(cf) do
+				perSpell[k] = v
+			end
+			perSpell.includeSpellIDs = { [orderedSpellIDs[i]] = true }
+
+			filters[i] = {
+				filterString = filterString,
+				candidateFilters = perSpell,
+				sortMethod = sortMethod,
+				sortDirection = sortDirection,
+			}
+		end
+	else
+		filters[1] = {
+			filterString = filterString,
+			candidateFilters = cf,
+			sortMethod = sortMethod,
+			sortDirection = sortDirection,
+		}
+	end
 
 	return {
 		unit = unit,

@@ -569,6 +569,32 @@ L["ICONMENU_AURACONTAINER_AURAS_DESC"] = "Set the opacity of each aura shown by 
 L["ICONMENU_AURACONTAINER_UNDERLAY"] = "Underlay"
 L["ICONMENU_AURACONTAINER_UNDERLAY_DESC"] = "Set the opacity, tint and texture this icon shows where there is no aura. Auras are drawn on top of the underlay - they do not and cannot replace the underlay."
 
+L["ICONMENU_AURACONTAINER_SORT"] = "Order"
+L["ICONMENU_AURACONTAINER_SORT_DESC"] = "The order this icon places the auras it shows in."
+L["ICONMENU_AURACONTAINER_SORT_DEFAULT"] = "Normal"
+L["ICONMENU_AURACONTAINER_SORT_DEFAULT_DESC"] = "Blizzard's order: your own auras first, then priority auras, then ones you can cast."
+L["ICONMENU_AURACONTAINER_SORT_ENTERED"] = "Entered order"
+L["ICONMENU_AURACONTAINER_SORT_ENTERED_DESC"] = [[The order the spell IDs were entered in the Name field. Each spell gets one icon; spells that are absent are skipped and the rest close up.
+
+Requires a group controller. Ignored where spell ID filtering doesn't apply - buffs on enemies and debuffs on friendlies.
+
+|TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t|cffffa500WARNING: |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t
+Due to shortcomings in Blizzard's systems, auras might overflow the group if more auras are present than the group has icons.
+
+Filtering by large numbers of spells will incur nontrivial memory allocation, regardless of how many filters ever end up matching an actual aura.]]
+L["ICONMENU_AURACONTAINER_SORT_DUR_LOW"] = "Low duration"
+L["ICONMENU_AURACONTAINER_SORT_DUR_LOW_DESC"] = "Shortest remaining duration first."
+L["ICONMENU_AURACONTAINER_SORT_DUR_HIGH"] = "High duration"
+L["ICONMENU_AURACONTAINER_SORT_DUR_HIGH_DESC"] = "Longest remaining duration first."
+L["ICONMENU_AURACONTAINER_SORT_NAME_AZ"] = "Name (A-Z)"
+L["ICONMENU_AURACONTAINER_SORT_NAME_AZ_DESC"] = "Alphabetical by aura name."
+L["ICONMENU_AURACONTAINER_SORT_NAME_ZA"] = "Name (Z-A)"
+L["ICONMENU_AURACONTAINER_SORT_NAME_ZA_DESC"] = "Reverse alphabetical by aura name."
+L["ICONMENU_AURACONTAINER_SORT_OLDEST"] = "Oldest first"
+L["ICONMENU_AURACONTAINER_SORT_OLDEST_DESC"] = "The order the auras were applied in."
+L["ICONMENU_AURACONTAINER_SORT_NEWEST"] = "Newest first"
+L["ICONMENU_AURACONTAINER_SORT_NEWEST_DESC"] = "The reverse of the order the auras were applied in."
+
 L["ICONMENU_FAIL2"] = "Conditions Fail"
 L["ICONMENU_SUCCEED2"] = "Conditions Succeed"
 L["ICONMENU_ONFAIL"] = "On Fail"
