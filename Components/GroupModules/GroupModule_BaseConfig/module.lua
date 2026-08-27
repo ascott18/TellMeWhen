@@ -297,11 +297,29 @@ if TMW.clientHasSecrets then
 		end
     end
 
-    TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+    local function ApplyAllViewerOverrides()
         for _, viewer in pairs(viewers) do
             TMW.safecall(ApplyViewerOverride, viewer)
         end
 		TMW.safecall(DrawEditModeSettings)
+    end
+
+    -- A full update spans many frames and fires TMW_GROUP_SETUP_POST per group as it walks them.
+    -- Groups it hasn't reached yet still hold last pass's settings, so applying mid-walk would
+    -- flash the viewers on stale state. Wait for the epilogue instead.
+    local fullUpdateInFlight = false
+    TMW:RegisterCallback("TMW_GLOBAL_UPDATE", function() fullUpdateInFlight = true end)
+
+    TMW:RegisterCallback("TMW_GLOBAL_UPDATE_POST", function()
+        fullUpdateInFlight = false
+        ApplyAllViewerOverrides()
+    end)
+
+    -- Toggling a group's Enabled/spec/role in the config only re-runs that one group's Setup, so
+    -- ShouldUpdateIcons can flip without a full update ever happening to reapply the override.
+    TMW:RegisterCallback("TMW_GROUP_SETUP_POST", function()
+        if fullUpdateInFlight then return end
+        ApplyAllViewerOverrides()
     end)
 
     -- Add the checkbox to the edit mode dialog when appropriate
