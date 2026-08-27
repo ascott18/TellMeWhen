@@ -1,5 +1,6 @@
 ## v12.1.4
 * Added more sort options to Buff/Debuff (combat ready) icons.
+* Buff/Debuff (combat ready) icons now work on mouseover and other units that the game sends no aura updates for.
 
 ## v12.1.3
 * Added a "Stack icons" option to meta icons (#2478) - the meta icon draws its component icons in its place, first one showing on top, which is the only way it can show icons whose visibility is secret (cooldowns and auras in combat, Mythic+, or PvP).

@@ -1586,6 +1586,21 @@ function Module:EnsureContainer()
 	return container
 end
 
+-- Containers whose unit gets no UNIT_AURA of its own (auraSpec.polled) never re-read after
+-- their first parse, so re-parse them off TMW's update. No identity check is possible or
+-- needed - UnitGUID/UnitIsUnit are secret, and a rebuild clears the aura cache regardless.
+-- UpdateAllAuras only marks dirty, so this costs at most one rebuild per frame.
+local polledModules = {}
+
+TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
+	for module in pairs(polledModules) do
+		local container = module.container
+		if container then
+			container:UpdateAllAuras()
+		end
+	end
+end)
+
 function Module:SetAuraSpec(auraSpec)
 	local icon = self.icon
 
@@ -1656,6 +1671,8 @@ function Module:SetAuraSpec(auraSpec)
 	-- icon rebuilds a fresh auraSpec table then). Without this the container keeps the
 	-- previous target's cached auras.
 	container:UpdateAllAuras()
+
+	polledModules[self] = auraSpec.polled or nil
 end
 
 function Module:AURASPEC(icon, auraSpec)
@@ -1718,6 +1735,8 @@ function Module:OnEnable()
 end
 
 function Module:TeardownContainer()
+	polledModules[self] = nil
+
 	if self.container then
 		self:DeactivateGroups()
 		self:DeactivateSlots()

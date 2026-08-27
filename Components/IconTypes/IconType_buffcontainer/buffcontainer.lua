@@ -515,6 +515,10 @@ local function BuildAuraSpec(icon)
 	return {
 		unit = unit,
 		filters = filters,
+
+		-- No UNIT_AURA is fired for these units (mouseover, targettarget, ...), so the
+		-- container would sit forever on whatever it parsed when the unit was set.
+		polled = not icon.UnitSet.allUnitsChangeOnEvent,
 	}
 end
 
