@@ -765,7 +765,7 @@
 										
 										self:SetTexts(TMW.L["UIPANEL_FONT_SIZE"], TMW.L["UIPANEL_FONT_SIZE_DESC2"])
 										self:SetSetting("Size")
-										self:SetMinMaxValues(6, 270)
+										self:SetMinMaxValues(1, 270)
 										self:SetMode(self.MODE_ADJUSTING)
 										self:SetRange(30)
 										self:SetValueStep(1)
