@@ -480,8 +480,16 @@ local function BuildAuraSpec(icon)
 	-- Capping the group count here would only trade that for silently dropping the spells
 	-- past the cutoff, off a cell count this spec isn't told about when it changes. The
 	-- setting's tooltip warns instead.
-	local canAssist = UnitCanAssist("player", unit) and true or false
-	local spellIDsAreFiltered = harmful ~= canAssist
+	-- Mirrors AuraContainerUtil.CanApplyIdentityCandidateFilters, minus its per-aura
+	-- never-secret exemption. The extra args stop immune/uninteractable states (in a
+	-- vehicle, mid-teleport) from reading as can't-assist.
+	local canAssist = UnitCanAssist("player", unit, true, true)
+	local spellIDsAreFiltered
+	if harmful then
+		spellIDsAreFiltered = not canAssist
+	else
+		spellIDsAreFiltered = canAssist or UnitIsPlayerControlledOrGroupMember(unit)
+	end
 
 	local entered = hasSpellIDs
 		and icon.AuraSort == "ENTERED"
