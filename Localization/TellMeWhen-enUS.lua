@@ -143,8 +143,8 @@ To anchor a group to the cursor, |cff7fffffRight-Click-and-drag|r an icon to thi
 
 |cff7fffffLeft-Click and drag|r to move this dummy.]]
 
-L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
-L["ERROR_ANCHOR_CYCLICALDEPS"] = "%s was trying to anchor to %s, but the position of %s depends on the position of %s, so TellMeWhen reset it's anchor to the center of the screen to prevent catastrophic failure."
+L["ERROR_ANCHORSELF"] = "%s was trying to anchor to itself, so TellMeWhen reset its anchor to the center of the screen to prevent catastrophic failure."
+L["ERROR_ANCHOR_CYCLICALDEPS"] = "%s was trying to anchor to %s, but the position of %s depends on the position of %s, so TellMeWhen reset its anchor to the center of the screen to prevent catastrophic failure."
 
 L["ERROR_NO_LOCKTOGGLE_IN_LOCKDOWN"] = "Cannot unlock TellMeWhen in combat if the %q option isn't enabled (type '/tmw options' to access this option)."
 L["ERROR_ACTION_DENIED_IN_LOCKDOWN"] = "Cannot do that in combat if the %q option isn't enabled (type '/tmw options' to access this option)."
@@ -409,7 +409,7 @@ L["ICONMENU_META_ICONMENUTOOLTIP"] = "(%d |4Icon:Icons;)"
 L["ICONMENU_META_STACKED"] = "Stack icons (secret-friendly)"
 L["ICONMENU_META_STACKED_DESC"] = [=[Physically repositions and resizes constituent icons into this meta icon's position.
 
-Icons whose visibility comes from secret data (e.g. cooldowns) CAN fully supercede later-listed icons, even at less than 100%% opacity. Combat-ready buff/debuff icons are a step above secret and so cannot do that - they will simply overlay/overlap.
+Icons whose visibility comes from secret data (e.g. cooldowns) CAN fully supersede later-listed icons, even at less than 100%% opacity. Combat-ready buff/debuff icons are a step above secret and so cannot do that - they will simply overlay/overlap.
 
 |cff7fffff-|r The listed icons are taken out of their own groups and drawn here, at this icon's size, and therefore cannot be shared by other meta icons.
 |cff7fffff-|r %q is ignored on them.]=]
@@ -670,7 +670,7 @@ L["ICONMENU_BAROFFS"] = [[This amount will be added to the bar in order to offse
 Useful for custom indicators of when you should begin casting a spell to prevent a buff from falling off, or to indicate the power required to cast a spell and still have some left over for an interrupt.]]
 
 L["ICONMENU_BAR_COLOR_BACKDROP"] = "Backdrop Color"
-L["ICONMENU_BAR_COLOR_BACKDROP_DESC"] = "Configure the color and opacity of the backdrop beind the bar."
+L["ICONMENU_BAR_COLOR_BACKDROP_DESC"] = "Configure the color and opacity of the backdrop behind the bar."
 
 L["ICONMENU_BAR_COLOR_START"] = "Start Color"
 L["ICONMENU_BAR_COLOR_START_DESC"] = "Color of the bar when a cooldown duration is high, or an aura duration or resource level is low."
@@ -714,7 +714,7 @@ You need to enter, into the %q editbox, the spell name/ID of:
 
 |cff7fffff1)|r The buff/debuff that you gain when the internal cooldown is triggered, or
 |cff7fffff2)|r The spell that does damage (check your combat log), or
-|cff7fffff3)|r The the energize effect (check your combat log), or
+|cff7fffff3)|r The energize effect (check your combat log), or
 |cff7fffff4)|r The spell that triggered the summon (check your combat log).]]
 
 L["ICONMENU_DRPRESENT"] = "Diminished"
@@ -831,7 +831,7 @@ L["ICONMENU_COPYCONDITIONS_DESC_OVERWRITE"] = "This will overwrite %d existing |
 
 L["ANCHORTO"] = "Anchor To"
 
-L["GENERIC_NUMREQ_CHECK_DESC"] = "Check to enable and configue the %s"
+L["GENERIC_NUMREQ_CHECK_DESC"] = "Check to enable and configure the %s"
 
 L["STACKS"] = "Stacks"
 L["STACKSPANEL_TITLE2"] = "Stack Requirements"
@@ -1918,7 +1918,7 @@ Note that this can fail to work for some types of spells - especially spells tha
 L["SPELL_OVERRIDE"] = "Spell Overridden"
 L["SPELL_OVERRIDE_DESC"] = [[Checks if the given base spell is currently overridden by the specified override spell.
 
-To check if the base spell is not overriden by anything, enter the same spell as both the base and override spell.]]
+To check if the base spell is not overridden by anything, enter the same spell as both the base and override spell.]]
 L["SPELL_OVERRIDE_BASE"] = "Base Spell"
 L["SPELL_OVERRIDE_TARGET"] = "Override Spell"
 
@@ -1991,8 +1991,8 @@ L["INCHEALS"] = "Unit Incoming heals"
 L["INCHEALS_DESC"] = [[Checks the total amount of healing that is incoming to the unit (HoTs and casts in progress).
 
 Only works for friendly units. Hostile units will always be reported as having 0 incoming heals.]]
-L["ABSORBAMT"] = "Absorbtion shield amount"
-L["ABSORBAMT_DESC"] = "Checks the total amount of absorbtion shields that the unit has."
+L["ABSORBAMT"] = "Absorption shield amount"
+L["ABSORBAMT_DESC"] = "Checks the total amount of absorption shields that the unit has."
 
 L["CNDT_RANGE"] = "Unit Range"
 L["CNDT_RANGE_DESC"] = "Checks the approximate range of a unit using LibRangeCheck-3.0. Condition will evaluate to false if the unit does not exist."
@@ -2424,10 +2424,10 @@ L["SOUND_EVENT_ONALPHADEC_DESC"] = [[This event triggers when the opacity of an 
 NOTE: This event will not trigger when decreasing to 0% opacity (On Hide).]]
 
 L["SOUND_EVENT_ONUNIT"] = "On Unit Changed"
-L["SOUND_EVENT_ONUNIT_DESC"] = [[This event triggers when the unit that that the icon is displaying information for has changed.]]
+L["SOUND_EVENT_ONUNIT_DESC"] = [[This event triggers when the unit that the icon is displaying information for has changed.]]
 
 L["SOUND_EVENT_ONSPELL"] = "On Spell Changed"
-L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that that the icon is displaying information for has changed.]]
+L["SOUND_EVENT_ONSPELL_DESC"] = [[This event triggers when the spell/item/etc. that the icon is displaying information for has changed.]]
 
 L["SOUND_EVENT_ONSTACK"] = "On Stacks Changed"
 L["SOUND_EVENT_ONSTACKINC"] = "On Stacks Increased"
@@ -2490,7 +2490,7 @@ L["SOUND_TAB"] = "Sound"
 L["SOUND_TAB_DESC"] = "Plays a LibSharedMedia sound or a custom sound file."
 
 L["EVENTS_TAB"] = "Notifications"
-L["EVENTS_TAB_DESC"] = "Configure triggers for sounds, text ouput, and animations."
+L["EVENTS_TAB_DESC"] = "Configure triggers for sounds, text output, and animations."
 L["EVENTS_HANDLERS_HEADER"] = "Notification Handlers"
 L["EVENTS_HANDLERS_ADD"] = "Add Notification..."
 L["EVENTS_HANDLERS_ADD_DESC"] = "|cff7fffffClick|r to choose a notification to add to this icon."
@@ -2531,7 +2531,7 @@ L["EVENTS_SETTINGS_PASSTHROUGH_DESC"] = [[Check to allow another event-triggered
 
 If left unchecked, the icon will not process any more notifications after this notifications if it successfully processes and outputs/displays something.
 
-Exeptions may apply, see individual trigger descriptions for details.]]
+Exceptions may apply, see individual trigger descriptions for details.]]
 
 
 
@@ -2599,7 +2599,7 @@ L["CHAT_MSG_CHANNEL_DESC"] = "Will output to a chat channel, such as Trade, or a
 
 L["CHAT_FRAME"] = "Chat Frame"
 L["RAID_WARNING_FAKE"] = "Raid Warning (Fake)"
-L["RAID_WARNING_FAKE_DESC"] = "Outputs a message as a raid warning, but nobody else will see it, and you do not have to be in a raid or have raid warning privelages"
+L["RAID_WARNING_FAKE_DESC"] = "Outputs a message as a raid warning, but nobody else will see it, and you do not have to be in a raid or have raid warning privileges"
 L["ERRORS_FRAME"] = "Errors Frame"
 L["ERRORS_FRAME_DESC"] = "Outputs the text to the standard errors frame that normally displays messages such as %q"
 
@@ -2661,7 +2661,7 @@ The opacity will alternate between the normal opacity of the icon and the opacit
 L["ANIM_SCREENFLASH"] = "Screen: Flash"
 L["ANIM_SCREENFLASH_DESC"] = "Flashes a colored overlay across the screen."
 L["ANIM_ICONFADE"] = "Icon: Fade In/Out"
-L["ANIM_ICONFADE_DESC"] = "Smoothly applies any opacity changes that occured with the selected event."
+L["ANIM_ICONFADE_DESC"] = "Smoothly applies any opacity changes that occurred with the selected event."
 L["ANIM_ICONBORDER"] = "Icon: Border"
 L["ANIM_ICONBORDER_DESC"] = "Overlays a colored border on the icon."
 L["ANIM_ICONOVERLAYIMG"] = "Icon: Image Overlay"
@@ -2707,7 +2707,7 @@ L["OPERATION_TRESET_DESC"] = "Resets the timer to 0. Does not stop it if it's ru
 L["OPERATION_TSTART"] = "Start"
 L["OPERATION_TSTART_DESC"] = "Starts the timer if it isn't running. Does not reset it."
 L["OPERATION_TRESTART"] = "Restart"
-L["OPERATION_TRESTART_DESC"] = "Resets the timer to 0, and starts it if it isn't runnning."
+L["OPERATION_TRESTART_DESC"] = "Resets the timer to 0, and starts it if it isn't running."
 L["OPERATION_TPAUSE"] = "Pause"
 L["OPERATION_TPAUSE_DESC"] = "Pauses the timer."
 L["OPERATION_TSTOP"] = "Stop"
@@ -2723,7 +2723,7 @@ L["EVENTS_SETTINGS_COUNTER_HEADER"] = "Counter Settings"
 L["EVENTS_SETTINGS_TIMER_HEADER"] = "Timer Settings"
 
 L["EVENTS_SETTINGS_COUNTER_NAME"] = "Counter Name"
-L["EVENTS_SETTINGS_COUNTER_NAME_DESC"] = [[Enter the name of the counter to be modified. If the counter doesn't exist the first time it is modified, it's intial value is 0.
+L["EVENTS_SETTINGS_COUNTER_NAME_DESC"] = [[Enter the name of the counter to be modified. If the counter doesn't exist the first time it is modified, its initial value is 0.
 
 Counter names must be lower-case with no spaces.
 
@@ -2749,7 +2749,7 @@ L["EVENTS_SETTINGS_COUNTER_AMOUNT_DESC"] = "Enter the amount that you want the c
 
 L["CLEU_"] = "Any event" -- match any event
 L["CLEU_DAMAGE_SHIELD"] = "Damage Shield"
-L["CLEU_DAMAGE_SHIELD_DESC"] = "Occurs when a damage shield (%s, %s, etc., but not %s) damage a unit."
+L["CLEU_DAMAGE_SHIELD_DESC"] = "Occurs when a damage shield (%s, %s, etc., but not %s) damages a unit."
 L["CLEU_DAMAGE_SHIELD_MISSED"] = "Damage Shield Missed"
 L["CLEU_DAMAGE_SHIELD_MISSED_DESC"] = "Occurs when a damage shield (%s, %s, etc., but not %s) fails to damage a unit."
 L["CLEU_DAMAGE_SPLIT"] = "Damage Split"
@@ -2783,7 +2783,7 @@ L["CLEU_SPELL_CAST_START_DESC"] = [[Occurs when a spell begins casting.
 NOTE: To prevent potential abuse, Blizzard has excluded the destination unit from this event, so you cannot filter by it.]]
 
 L["CLEU_SPELL_CAST_SUCCESS"] = "Spell Cast Success"
-L["CLEU_SPELL_CAST_SUCCESS_DESC"] = [[Occurs when an spell is successfully cast.]]
+L["CLEU_SPELL_CAST_SUCCESS_DESC"] = [[Occurs when a spell is successfully cast.]]
 
 L["CLEU_SPELL_EMPOWER_START"] = "Empowered Spell Cast Start"
 L["CLEU_SPELL_EMPOWER_START_DESC"] = [[Occurs when an empowered spell begins casting.]]
@@ -3084,7 +3084,7 @@ L["STRATA_TOOLTIP"] = "Tooltip"
 
 L["IMPORT_LUA_DESC"] = [[The data you are importing contains the following Lua code that can be executed by TellMeWhen.
 
-You should be wary of importing any Lua code from untusted sources because it can be used for malicious purposes. Most of the time it is completely safe, but there are people out there who would use it to do you wrong.
+You should be wary of importing any Lua code from untrusted sources because it can be used for malicious purposes. Most of the time it is completely safe, but there are people out there who would use it to do you wrong.
 
 Review the code and confirm that it is either coming from a source that you trust or that it isn't doing things like sending mail or accepting trades on your behalf.]]
 L["IMPORT_LUA_DESC2"] = "|TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t Be sure to review the parts of the code in red, which are common words/phrases that could indicate malicious activity. |TInterface/AddOns/TellMeWhen/Textures/Alert:0:2|t"
