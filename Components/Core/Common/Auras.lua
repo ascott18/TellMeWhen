@@ -469,27 +469,30 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
             local instance = added[i]
             local auraInstanceID = instance.auraInstanceID
 
-            instances[auraInstanceID] = instance
+            -- Sometimes secret, even when the whole payload is not secret??
+            if not issecretvalue(auraInstanceID) then
+                instances[auraInstanceID] = instance
 
-            AugmentInstance(unit, instance)
+                AugmentInstance(unit, instance)
 
-            if not issecretvalue(instance.name) then
-                local name = strlowerCache[instance.name]
-                local spellId = instance.spellId
-                local isMine = instance.isMine
-                eventHasMine = eventHasMine or isMine
-                
-                --print("added", unit, name, auraInstanceID)
+                if not issecretvalue(instance.name) then
+                    local name = strlowerCache[instance.name]
+                    local spellId = instance.spellId
+                    local isMine = instance.isMine
+                    eventHasMine = eventHasMine or isMine
 
-                payload[name] = eventHasMine
-                payload[spellId] = eventHasMine
-                lookup[name][auraInstanceID] = isMine
-                lookup[spellId][auraInstanceID] = isMine
+                    --print("added", unit, name, auraInstanceID)
 
-                local dispelType = instance.dispelName
-                if dispelType and not issecretvalue(dispelType) then
-                    payload[dispelType] = eventHasMine
-                    lookup[dispelType][auraInstanceID] = isMine
+                    payload[name] = eventHasMine
+                    payload[spellId] = eventHasMine
+                    lookup[name][auraInstanceID] = isMine
+                    lookup[spellId][auraInstanceID] = isMine
+
+                    local dispelType = instance.dispelName
+                    if dispelType and not issecretvalue(dispelType) then
+                        payload[dispelType] = eventHasMine
+                        lookup[dispelType][auraInstanceID] = isMine
+                    end
                 end
             end
         end
@@ -499,7 +502,9 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
     if updated then
         for i = 1, #updated do
             local auraInstanceID = updated[i]
-            local instance = GetAuraDataByAuraInstanceID(unit, auraInstanceID)
+            -- Sometimes secret, even when the whole payload is not secret??
+            local instance = not issecretvalue(auraInstanceID)
+                and GetAuraDataByAuraInstanceID(unit, auraInstanceID)
             if not instance then
                 -- Sometimes, updated really means removed!
                 -- Except the remove will still happen, so don't actually remove here. Just do nothing.
@@ -536,7 +541,7 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
     if removed then
         for i = 1, #removed do
             local auraInstanceID = removed[i]
-            local instance = instances[auraInstanceID]
+            local instance = not issecretvalue(auraInstanceID) and instances[auraInstanceID]
 
             -- Sometimes the instance won't exist, for unknown reasons.
             if instance then
@@ -687,7 +692,7 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
 
         -- Check `if instance` because sometimes GetAuraSlots returns invalid slots I guess?
         -- Only ever seen this happen in arena.
-        if instance then
+        if instance and not issecretvalue(instance.auraInstanceID) then
             local auraInstanceID = instance.auraInstanceID
 
             AugmentInstance(unit, instance)
