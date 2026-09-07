@@ -612,16 +612,22 @@ function EVENTS:GetValidEvents(EventHandler)
 	
 	ValidEvents = wipe(ValidEvents or {})
 	
-	for _, Component in ipairs(TMW.CI.icon.Components) do
-		for _, eventData in ipairs(Component.IconEvents) do
+	local icon = TMW.CI.icon
+	for _, Component in ipairs(icon.Components) do
+		-- A module that the icon's type disallows still sits in Components (it is just
+		-- never enabled), so ask each component whether it is part of this icon at all.
+		if Component:ShouldShowConfigPanels(icon) then
+			for _, eventData in ipairs(Component.IconEvents) do
 
-			-- Don't include WhileConditionSetPassing if the event handler doesn't support it.
-			if eventData.event ~= "WCSP" or EventHandler.supportWCSP then
-				-- Put it in the table as an indexed field.
-				ValidEvents[#ValidEvents+1] = eventData
-				
-				-- Put it in the table keyed by the event, for lookups.
-				ValidEvents[eventData.event] = eventData
+				-- An event can demand something of the handler it's used with: WCSP needs
+				-- start/stop semantics, AURAPRESENT needs an animation it can leave running.
+				if not eventData.requiredHandlerFlag or EventHandler[eventData.requiredHandlerFlag] then
+					-- Put it in the table as an indexed field.
+					ValidEvents[#ValidEvents+1] = eventData
+
+					-- Put it in the table keyed by the event, for lookups.
+					ValidEvents[eventData.event] = eventData
+				end
 			end
 		end
 	end
@@ -775,10 +781,17 @@ function ColumnConfig:LoadSettingsForEventID(id)
 	end
 	
 	TMW:SortOrderedTables(subHandlersToDisplay)
-	
+
+	-- An event can restrict which sub-handlers it works with (AURAPRESENT only takes
+	-- animations that can be built into an aura button and left there).
+	local eventData = EVENTS:GetEventData(EVENTS:GetEventSettings(id).Event)
+	local subHandlerFilter = eventData and eventData.subHandlerFilter
+
 	local frameID = 0
 	for _, subHandlerDataParent in ipairs(subHandlersToDisplay) do
-		if not get(subHandlerDataParent.subHandlerData.hidden) then
+		if not get(subHandlerDataParent.subHandlerData.hidden)
+			and (not subHandlerFilter or subHandlerFilter(subHandlerDataParent.subHandlerData))
+		then
 			frameID = frameID + 1
 			local frame = self:GetListItemFrame(frameID)
 			frame:Show()
@@ -792,7 +805,7 @@ function ColumnConfig:LoadSettingsForEventID(id)
 		end
 	end
 	
-	for i = #subHandlersToDisplay + 1, #SubHandlerList do
+	for i = frameID + 1, #SubHandlerList do
 		SubHandlerList[i]:Hide()
 	end
 

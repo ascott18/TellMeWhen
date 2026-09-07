@@ -267,6 +267,73 @@ Animations:RegisterEventHandlerDataNonSpecific(10, "SCREENSHAKE", {
 	end,
 })
 
+-- ----------------------------------------------------------------------------
+-- Persistent animations
+--
+-- An animation that is built into a display once and then left alone, for displays that
+-- Lua never gets to touch again - IconModule_AuraContainer's aura buttons, whose art must
+-- be in place before the aura arrives and then run untouched. An animation opts in by
+-- declaring:
+--     Persistent = {
+--         Build = function(parent) -> region,
+--         Configure = function(region, eventSettings, placement),
+--     }
+-- Build creates the art as a child of `parent`, once; Configure positions and styles it.
+-- `placement` is described by whatever hosts the animation (see IconModule_AuraContainer).
+--
+-- Everything a persistent animation does has to be declarative: the OnUpdate handlers in
+-- this file never run on a restricted frame.
+-- ----------------------------------------------------------------------------
+Animations.supportAuraPresent = true
+
+-- The declarative twin of MakeAlphaFlashOnUpdate below: one looping group that carries
+-- `region` between `alpha` and 0 across each half of the flash period, holding the two
+-- levels instead of ramping when Fade is off, and starting on the same half the OnUpdate
+-- version starts on. A period of zero doesn't flash there either, so it just holds `alpha`.
+local function ApplyPersistentFlash(region, eventSettings, alpha, startFadedOut)
+	local group = region.tmwFlash
+	if not group then
+		group = region:CreateAnimationGroup()
+		group:SetLooping("REPEAT")
+		group.firstHalf = group:CreateAnimation("Alpha")
+		group.firstHalf:SetOrder(1)
+		group.secondHalf = group:CreateAnimation("Alpha")
+		group.secondHalf:SetOrder(2)
+		region.tmwFlash = group
+	end
+
+	-- Stopping restores the alpha the region had before it last played, so the alpha set
+	-- below (or by the next Play) is what sticks.
+	group:Stop()
+
+	local period = eventSettings.Period
+	if period == 0 then
+		region:SetAlpha(alpha)
+		return
+	end
+
+	local from, to = alpha, 0
+	if startFadedOut == 1 then
+		from, to = 0, alpha
+	end
+
+	if eventSettings.Fade then
+		group.firstHalf:SetFromAlpha(from)
+		group.firstHalf:SetToAlpha(to)
+		group.secondHalf:SetFromAlpha(to)
+		group.secondHalf:SetToAlpha(from)
+	else
+		group.firstHalf:SetFromAlpha(from)
+		group.firstHalf:SetToAlpha(from)
+		group.secondHalf:SetFromAlpha(to)
+		group.secondHalf:SetToAlpha(to)
+	end
+
+	group.firstHalf:SetDuration(period)
+	group.secondHalf:SetDuration(period)
+	group:Play()
+end
+
 local function MakeAlphaFlashOnUpdate(target, startFadedOut)
 	return function(self, table)
 		local flashPeriod = table.Period
@@ -467,7 +534,63 @@ Animations:RegisterEventHandlerDataNonSpecific(30, "ICONFLASH", {
 	OnStop = function(icon, table)
 		icon.animation_flasher:Hide()
 	end,
+
+	Persistent = {
+		-- A frame rather than a bare texture: the art has to sit at an explicit frame
+		-- level to draw over the display it's flashing, which only a frame carries.
+		Build = function(parent)
+			local frame = CreateFrame("Frame", nil, parent)
+			frame.tex = frame:CreateTexture(nil, "BACKGROUND", nil, 6)
+			frame.tex:SetAllPoints(frame)
+			return frame
+		end,
+		Configure = function(frame, eventSettings, placement)
+			frame:ClearAllPoints()
+			frame:SetAllPoints(placement.anchor)
+			frame:SetFrameLevel(placement.level)
+
+			local c = TMW:StringToCachedRGBATable(eventSettings.AnimColor)
+			frame.tex:SetColorTexture(c.r, c.g, c.b, 1)
+			ApplyPersistentFlash(frame, eventSettings, c.a, 1)
+		end,
+	},
 })
+
+-- The four edges of the ICONBORDER art, as a child of `parent`.
+local function CreateAnimationBorder(parent)
+	local animation_border = CreateFrame("Frame", nil, parent)
+
+	local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
+	animation_border.TOP = tex
+	tex:SetPoint("TOPLEFT")
+	tex:SetPoint("TOPRIGHT")
+
+	local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
+	animation_border.BOTTOM = tex
+	tex:SetPoint("BOTTOMLEFT")
+	tex:SetPoint("BOTTOMRIGHT")
+
+	local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
+	animation_border.LEFT = tex
+	tex:SetPoint("TOPLEFT", animation_border.TOP, "BOTTOMLEFT")
+	tex:SetPoint("BOTTOMLEFT", animation_border.BOTTOM, "TOPLEFT")
+
+	local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
+	animation_border.RIGHT = tex
+	tex:SetPoint("TOPRIGHT", animation_border.TOP, "BOTTOMRIGHT")
+	tex:SetPoint("BOTTOMRIGHT", animation_border.BOTTOM, "TOPRIGHT")
+
+	return animation_border
+end
+
+local function SetAnimationBorderLook(animation_border, r, g, b, thickness)
+	for _, pos in TMW:Vararg("TOP", "BOTTOM", "LEFT", "RIGHT") do
+		local tex = animation_border[pos]
+
+		tex:SetColorTexture(r, g, b, 1)
+		tex:SetSize(thickness, thickness)
+	end
+end
 
 Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 	text = L["ANIM_ICONBORDER"],
@@ -523,48 +646,39 @@ Animations:RegisterEventHandlerDataNonSpecific(70, "ICONBORDER", {
 		if icon.animation_border then
 			animation_border = icon.animation_border
 		else
-			animation_border = CreateFrame("Frame", nil, icon)
+			animation_border = CreateAnimationBorder(icon)
 			icon.animation_border = animation_border
 			animation_border:SetFrameLevel(icon:GetFrameLevel() + TMW.CONST.FRAMELEVEL.ANIMATION)
-
-			local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
-			animation_border.TOP = tex
-			tex:SetPoint("TOPLEFT")
-			tex:SetPoint("TOPRIGHT")
-
-			local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
-			animation_border.BOTTOM = tex
-			tex:SetPoint("BOTTOMLEFT")
-			tex:SetPoint("BOTTOMRIGHT")
-
-			local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
-			animation_border.LEFT = tex
-			tex:SetPoint("TOPLEFT", animation_border.TOP, "BOTTOMLEFT")
-			tex:SetPoint("BOTTOMLEFT", animation_border.BOTTOM, "TOPLEFT")
-
-			local tex = animation_border:CreateTexture(nil, "BACKGROUND", nil, 5)
-			animation_border.RIGHT = tex
-			tex:SetPoint("TOPRIGHT", animation_border.TOP, "BOTTOMRIGHT")
-			tex:SetPoint("BOTTOMRIGHT", animation_border.BOTTOM, "TOPRIGHT")
 		end
-		
+
 		local offset = table.Size
-		
+
 		animation_border:SetPoint("TOPLEFT", GetAnchorOrWarn(icon, table.AnchorTo), "TOPLEFT", -offset, offset)
 		animation_border:SetPoint("BOTTOMRIGHT", GetAnchorOrWarn(icon, table.AnchorTo), "BOTTOMRIGHT", offset, -offset)
 
 		animation_border:Show()
 
-		for _, pos in TMW:Vararg("TOP", "BOTTOM", "LEFT", "RIGHT") do
-			local tex = animation_border[pos]
-
-			tex:SetColorTexture(table.r, table.g, table.b, 1)
-			tex:SetSize(table.Thickness, table.Thickness)
-		end
+		SetAnimationBorderLook(animation_border, table.r, table.g, table.b, table.Thickness)
 	end,
 	OnStop = function(icon, table)
 		icon.animation_border:Hide()
 	end,
+
+	Persistent = {
+		Build = CreateAnimationBorder,
+		Configure = function(border, eventSettings, placement)
+			local offset = eventSettings.Size_anim
+
+			border:ClearAllPoints()
+			border:SetPoint("TOPLEFT", placement.anchor, "TOPLEFT", -offset, offset)
+			border:SetPoint("BOTTOMRIGHT", placement.anchor, "BOTTOMRIGHT", offset, -offset)
+			border:SetFrameLevel(placement.level)
+
+			local c = TMW:StringToCachedRGBATable(eventSettings.AnimColor)
+			SetAnimationBorderLook(border, c.r, c.g, c.b, eventSettings.Thickness)
+			ApplyPersistentFlash(border, eventSettings, c.a, 0)
+		end,
+	},
 })
 
 local LibCustomGlow = LibStub("LibCustomGlow-1.0", true)
@@ -764,6 +878,25 @@ Animations:RegisterEventHandlerDataNonSpecific(80, "ICONOVERLAYIMG", {
 	OnStop = function(icon, table)
 		icon.animation_overlay:Hide()
 	end,
+
+	Persistent = {
+		-- A frame rather than a bare texture, for the same reason ICONFLASH uses one.
+		Build = function(parent)
+			local frame = CreateFrame("Frame", nil, parent)
+			frame.tex = frame:CreateTexture(nil, "BACKGROUND", nil, 7)
+			frame.tex:SetAllPoints(frame)
+			return frame
+		end,
+		Configure = function(frame, eventSettings, placement)
+			frame:ClearAllPoints()
+			frame:SetPoint("CENTER", placement.anchor)
+			frame:SetSize(eventSettings.SizeX, eventSettings.SizeY)
+			frame:SetFrameLevel(placement.level)
+
+			frame.tex:SetTexture(TMW.COMMON.Textures:GetTexturePathFromSetting(eventSettings.Image))
+			ApplyPersistentFlash(frame, eventSettings, eventSettings.Alpha, 0)
+		end,
+	},
 })
 
 Animations:RegisterEventHandlerDataNonSpecific(200, "ICONCLEAR", {

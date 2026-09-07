@@ -141,6 +141,8 @@ end
 -- 	* table.valueName [string|nil] - An optional string that describes what kind of data is being checked by conditionChecker.
 -- 	* table.valueSuffix [string|nil] - An optional string that describes what kind of data is being checked by conditionChecker.
 -- 	* table.conditionChecker [function|nil] - An optional function with signature (icon, eventSettings) that will return a boolean that indicates if the condition set for the event has succeeded based on the icon's current state.
+-- 	* table.requiredHandlerFlag [string|nil] - An optional field name that an EventHandler must have set for this event to be offered with it.
+-- 	* table.subHandlerFilter [function|nil] - An optional function with signature (subHandlerData) that returns whether this event can use that sub-handler (an animation, an announcement channel).
 -- @usage -- Taken from IconDataProcessor_Alpha_Real
 --  Processor:RegisterIconEvent(12, "OnHide", {
 --    text = L["SOUND_EVENT_ONHIDE"],
@@ -179,7 +181,9 @@ function IconComponent:RegisterIconEvent(order, event, eventData)
 	TMW:ValidateType("valueSuffix", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.valueSuffix, "string;nil")
 	TMW:ValidateType("category", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.category, "string;nil")
 	TMW:ValidateType("conditionChecker", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.conditionChecker, "function;nil")
-	
+	TMW:ValidateType("requiredHandlerFlag", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.requiredHandlerFlag, "string;nil")
+	TMW:ValidateType("subHandlerFilter", "IconComponent:RegisterIconEvent() arg4 (eventData)", eventData.subHandlerFilter, "function;nil")
+
 	eventData.event = event
 	eventData.order = order
 

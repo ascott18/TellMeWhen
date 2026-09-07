@@ -2477,6 +2477,9 @@ This is probably due to this event not being available for the current icon type
 L["SOUND_EVENT_WHILECONDITION"] = "While Condition Set Passing"
 L["SOUND_EVENT_WHILECONDITION_DESC"] = "This notification will trigger for as long as a set of conditions that you configure are passing."
 
+L["SOUND_EVENT_AURAPRESENT"] = "While Aura Present"
+L["SOUND_EVENT_AURAPRESENT_DESC"] = "This animation is built into each aura that the icon shows, so it plays for as long as that aura is present."
+
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
 L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. You can also input a numeric Sound Kit ID.

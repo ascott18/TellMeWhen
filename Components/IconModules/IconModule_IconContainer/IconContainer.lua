@@ -85,7 +85,9 @@ if pcall(CreateFrame, "Frame", nil, UIParent, "ActionButtonSpellAlertTemplate") 
 	activationAlertTemplate = "ActionButtonSpellAlertTemplate"
 end
 
-if CreateFrame("Frame", nil, UIParent, activationAlertTemplate).ProcStartAnim then
+local hasProcAnim = CreateFrame("Frame", nil, UIParent, activationAlertTemplate).ProcStartAnim ~= nil
+
+if hasProcAnim then
 	-- Wow 10.1.5+
 	function IconContainer:ShowOverlayGlowInternal()
 		local container = self.container
@@ -229,7 +231,11 @@ function IconContainer:HideOverlayGlow(owner)
 end
 
 
-IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
+-- The overscale ShowOverlayGlowInternal gives this art, so it reads as a halo around the
+-- icon square rather than a border on it.
+local ACTVTNGLOW_OVERSCALE = 1.4
+
+local ACTVTNGLOW = {
 	text = L["ANIM_ACTVTNGLOW"],
 	desc = L["ANIM_ACTVTNGLOW_DESC"],
 	ConfigFrames = {
@@ -264,10 +270,44 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", {
 	end,
 	OnStop = function(icon, table)
 		local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true, true)
-		
+
 		IconModule_IconContainer:HideOverlayGlow()
 	end,
-})
+}
+
+if hasProcAnim then
+	-- A persistent copy of the overlay, for displays whose art has to run without Lua
+	-- touching it (see IconModule_AuraContainer). The module's own overlay can't be shared:
+	-- it belongs to the icon, and this one is parented to whatever is hosting it.
+	ACTVTNGLOW.Persistent = {
+		Build = function(parent)
+			local overlay = CreateFrame("Frame", nil, parent, activationAlertTemplate)
+
+			-- Same treatment ShowOverlayGlowInternal gives it: the 10.1.5 intro animation
+			-- looks wrong looping, so only ProcLoop is used and the flipbook is kept from
+			-- re-showing itself.
+			overlay.ProcStartFlipbook:Hide()
+			overlay.ProcStartFlipbook.Show = TMW.NULLFUNC
+
+			overlay.ProcLoop:Play()
+			return overlay
+		end,
+		Configure = function(overlay, eventSettings, placement)
+			-- Grown about the center of the icon square by anchoring both corners rather
+			-- than by SetSize: a host can hand us a frame whose size can't be read back.
+			local square = placement.square
+			local scale = ACTVTNGLOW_OVERSCALE * eventSettings.Scale
+			local insetX, insetY = square.width * (scale - 1) / 2, square.height * (scale - 1) / 2
+
+			overlay:ClearAllPoints()
+			overlay:SetPoint("TOPLEFT", square.frame, "TOPLEFT", -insetX, insetY)
+			overlay:SetPoint("BOTTOMRIGHT", square.frame, "BOTTOMRIGHT", insetX, -insetY)
+			overlay:SetFrameLevel(placement.level)
+		end,
+	}
+end
+
+IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", ACTVTNGLOW)
 
 
 

@@ -471,6 +471,7 @@ TMW:RegisterSelfDestructingCallback("TMW_CLASS_NEW", function(event, class)
 			category = L["EVENT_CATEGORY_CONDITION"],
 			text = L["SOUND_EVENT_WHILECONDITION"],
 			desc = L["SOUND_EVENT_WHILECONDITION_DESC"],
+			requiredHandlerFlag = "supportWCSP",
 			settings = {
 				SimplyShown = true,
 				IconEventWhileCondition = true,

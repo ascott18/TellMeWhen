@@ -123,7 +123,8 @@ end
 
 function Animations:IsFrameBlacklisted(frameName)
 	local eventSettings = EVENTS:GetEventSettings()
-	if eventSettings.Event == "WCSP" then
+	-- Both triggers run the animation for as long as they last, so it has no duration.
+	if eventSettings.Event == "WCSP" or eventSettings.Event == "AURAPRESENT" then
 		return frameName == "Duration" or frameName == "Infinite"
 	end
 end

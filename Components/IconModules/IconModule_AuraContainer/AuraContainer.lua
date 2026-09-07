@@ -394,13 +394,14 @@ end
 -- icon level + 3 while the icon square and its border sit at + 0 / + 1.
 -- ----------------------------------------------------------------------------
 
-local LEVEL_BACKDROP = 0  -- the bar views' bar backdrop
-local LEVEL_ICON     = 1  -- icon holder: the icon texture and any Masque skin on it
-local LEVEL_BAR      = 1  -- the bar views' duration bar (never overlaps the icon square)
-local LEVEL_COOLDOWN = 2
-local LEVEL_BORDER   = 3  -- icon square + bar borders
-local LEVEL_PANDEMIC = 4  -- pandemic art, drawn over the icon border it frames
-local LEVEL_TEXT     = 5
+local LEVEL_BACKDROP  = 0  -- the bar views' bar backdrop
+local LEVEL_ICON      = 1  -- icon holder: the icon texture and any Masque skin on it
+local LEVEL_BAR       = 1  -- the bar views' duration bar (never overlaps the icon square)
+local LEVEL_COOLDOWN  = 2
+local LEVEL_BORDER    = 3  -- icon square + bar borders
+local LEVEL_PANDEMIC  = 4  -- pandemic art, drawn over the icon border it frames
+local LEVEL_ANIMATION = 5  -- aura-present animations, which must stay under the text
+local LEVEL_TEXT      = 6
 
 -- Copy `source`'s anchor points (and size) onto `region`, remapping each point's
 -- relativeTo frame through `remap` (falling back to `default`). This reproduces a
@@ -711,9 +712,10 @@ function Module:Emulate_IconView_Icon(icon, button)
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 	-- The button is the icon square in this view, so the square pandemic art always fits.
 	local cellW, cellH = icon:GetSize()
-	self:Emulate_PandemicFX(icon, button, { frame = button, width = cellW, height = cellH })
+	local square = { frame = button, width = cellW, height = cellH }
+	self:Emulate_PandemicFX(icon, button, square)
 
-	return remap
+	return remap, square
 end
 
 -- The bar views' StatusBar texture (the configured LSM statusbar), matching
@@ -798,13 +800,13 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 	-- The art wraps the icon square, same as in the icon view - wrapping the whole cell would
 	-- put the indicator around the bar as well. With the icon square turned off there's
-	-- nothing of the right shape to wrap, so no target and no indicator.
-	local target
+	-- nothing of the right shape to wrap, so no square and no indicator.
+	local square
 	if iconRegion then
 		local iconW, iconH = iconSquare:GetSize()
-		target = { frame = iconRegion, width = iconW, height = iconH }
+		square = { frame = iconRegion, width = iconW, height = iconH }
 	end
-	self:Emulate_PandemicFX(icon, button, target)
+	self:Emulate_PandemicFX(icon, button, square)
 
 	-- Duration bar: mirror the view's TimerBar container (anchored to the icon and
 	-- the icon square, both remapped above). The bar is scaled to whole screen pixels
@@ -841,7 +843,7 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 		button:ClearDurationBar()
 	end
 
-	return remap
+	return remap, square
 end
 
 -- Emulate visual aspects of the IconModule_Backdrop into the aura container.
@@ -1057,6 +1059,106 @@ function Module:Emulate_PandemicFX(icon, button, target)
 	button:AddPandemicRegion(region)
 end
 
+
+-- ----------------------------------------------------------------------------
+-- Aura-present animations
+--
+-- An animation trigger that only these icons have. Nothing ever tells us that an aura came
+-- or went - that's the whole premise of the container - so an animation can't be started
+-- and stopped around one. Instead the art is built into the aura button and left playing:
+-- a button exists (and shows) only while its aura is up, so the animation is on screen
+-- exactly when the aura is.
+--
+-- The trigger therefore carries no conditions and no shown-only check, and only animations
+-- that declare a Persistent implementation can use it - everything else is driven from Lua
+-- every frame, which never runs on a descendant of the restricted button (see the pandemic
+-- styles above).
+-- ----------------------------------------------------------------------------
+
+Module:RegisterIconEvent(10, "AURAPRESENT", {
+	category = L["EVENT_CATEGORY_VISIBILITY"],
+	text = L["SOUND_EVENT_AURAPRESENT"],
+	desc = L["SOUND_EVENT_AURAPRESENT_DESC"],
+	requiredHandlerFlag = "supportAuraPresent",
+	settings = {
+		-- Neither applies: the event is never queued, and the icon is shown whenever it
+		-- has an underlay regardless of whether any aura is up.
+		PassThrough = false,
+		OnlyShown = false,
+	},
+	subHandlerFilter = function(animationData)
+		-- The empty animation is the list's "None", so keep it selectable.
+		return animationData.subHandlerIdentifier == "" or animationData.Persistent ~= nil
+	end,
+})
+
+-- Resolve an animation's Anchor To setting to the button-side frame it names, the same
+-- lookup AnchorFromSettings does for text: the icon-module frame the setting names, remapped
+-- to our copy of it, falling back to the button (which covers the whole cell).
+local function AnchorTarget(icon, button, remap, anchorTo)
+	local frame = anchorTo and anchorTo ~= "" and _G[icon:GetName() .. anchorTo]
+	return (frame and remap[frame]) or button
+end
+
+local builtAnimations = {}
+
+-- Build every aura-present animation into the button and leave it running. Settings come
+-- from settingsIcon (the inherited source for a meta icon), like the icon's other display
+-- settings; the geometry comes from self.icon. `square` is the icon square the view built,
+-- for art that frames the icon rather than the cell (nil when the view has no icon square).
+function Module:Emulate_AuraPresentAnimations(icon, button, remap, square)
+	local animations = TMW.EVENTS:GetEventHandler("Animations").AllSubHandlersByIdentifier
+	local settingsIcon = self.settingsIcon or icon
+	local regions = button.tmwAuraPresentAnimations
+	local built = wipe(builtAnimations)
+	local placement
+
+	for _, eventSettings in TMW:InNLengthTable(settingsIcon.Events) do
+		local animation = eventSettings.Animation
+		local animationData = eventSettings.Event == "AURAPRESENT"
+			and eventSettings.Type == "Animations"
+			and animations[animation]
+
+		-- One region per animation, so a second event asking for the same one would only
+		-- fight the first over it - the same rule DetermineNextPlayingAnimation applies to
+		-- an icon's normal animations.
+		if animationData and animationData.Persistent and not built[animation] then
+			built[animation] = true
+
+			if not placement then
+				local w, h = icon:GetSize()
+				placement = {
+					level = button:GetFrameLevel() + LEVEL_ANIMATION,
+					square = square or { frame = button, width = w, height = h },
+				}
+			end
+			placement.anchor = AnchorTarget(icon, button, remap, eventSettings.AnchorTo)
+
+			regions = regions or {}
+			button.tmwAuraPresentAnimations = regions
+
+			local region = regions[animation]
+			if not region then
+				region = animationData.Persistent.Build(button)
+				regions[animation] = region
+			end
+
+			animationData.Persistent.Configure(region, eventSettings, placement)
+			region:Show()
+		end
+	end
+
+	-- Regions are cached per animation, so a button holds one for each animation it has been
+	-- configured with; the ones no longer asked for just stop drawing.
+	if regions then
+		for animation, region in pairs(regions) do
+			if not built[animation] then
+				region:Hide()
+			end
+		end
+	end
+end
+
 -- Mirror the icon's text layout onto the button. IconModule_Texts creates + positions its own
 -- fontstring per string; we create a button-owned copy, style it from the same layout
 -- settings, mirror its position, and give it a value based on the string's Aura purpose (see
@@ -1196,13 +1298,20 @@ function Module:SkinButton(button)
 
 	-- Each view registers its own emulation handler (see the view files); it skins the
 	-- button for that view and returns a frame remap (icon/square/bar -> our button-
-	-- owned equivalents) so the text wiring can position the aura-driven text the same way.
-	local remap = self.ViewEmulationHandler and self.ViewEmulationHandler(self, icon, button)
+	-- owned equivalents) so the text wiring can position the aura-driven text the same way,
+	-- plus the icon square it built (shaped like the pandemic target, see
+	-- Emulate_PandemicFX) for art that has to be sized against it.
+	local remap, square
+	if self.ViewEmulationHandler then
+		remap, square = self.ViewEmulationHandler(self, icon, button)
+	end
+	remap = remap or { [icon] = button }
 
 	-- After the emulation: the Masque half of this needs the holder Masque has just skinned.
 	self:ApplyButtonColor(button, self.settingsIcon)
 
-	self:Emulate_IconModule_Texts(icon, button, remap or { [icon] = button })
+	self:Emulate_IconModule_Texts(icon, button, remap)
+	self:Emulate_AuraPresentAnimations(icon, button, remap, square)
 end
 
 -- ----------------------------------------------------------------------------

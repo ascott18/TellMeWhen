@@ -4,6 +4,7 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v12.1.4
+* Added a "While Aura Present" animation trigger for Buff/Debuff (combat ready) icons, which plays an animation on each aura for as long as that aura is present (#2491).
 * Added more sort options to Buff/Debuff (combat ready) icons.
 * Buff/Debuff (combat ready) icons now work on mouseover and other units that the game sends no aura updates for.
 
