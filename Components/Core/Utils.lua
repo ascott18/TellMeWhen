@@ -16,6 +16,7 @@ if not TMW then return end
 local TMW = TMW
 local L = TMW.L
 local print = TMW.print
+local issecretvalue = TMW.issecretvalue
 
 
 local tonumber, tostring, type, pairs, ipairs, tinsert, tremove, sort, select, wipe, next, rawget, rawset, assert, pcall, error, getmetatable, setmetatable, unpack =
@@ -1473,7 +1474,15 @@ function TMW.GetSpellCost(spell)
 	end
 
 	if cost.cost == 0 and cost.costPercent > 0 then
-		return UnitPower("player", cost.type) * cost.costPercent / 100, cost
+		-- costPercent is a percentage of max power.
+		local maxPower = UnitPowerMax("player", cost.type)
+
+		-- Callers compare and do arithmetic on the cost, so never hand back a secret.
+		if issecretvalue(maxPower) then
+			return nil, cost
+		end
+
+		return maxPower * cost.costPercent / 100, cost
 	else
 		return cost.cost, cost
 	end
