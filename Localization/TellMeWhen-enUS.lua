@@ -627,22 +627,6 @@ L["ICONMENU_SHOWTIMERTEXT_NOOCC_DESC"] = [[Check this option to display ElvUI's 
 
 This setting only affects ElvUI's timer. If you have another addon that provides timers (like OmniCC), you can control those timers with the %q setting. It is not recommended to have both of these settings enabled.]]
 
-L["ICONMENU_SHOWPANDEMIC"] = "Show pandemic"
-L["ICONMENU_SHOWPANDEMIC_DESC"] = [[Check this option to frame an aura while it is within its pandemic window - the part of its duration during which recasting it will carry the remaining time over into the new application.]]
-L["ICONMENU_PANDEMICSTYLE"] = "Style"
-L["ICONMENU_PANDEMICSTYLE_DESC"] = "The kind of indicator drawn on an aura while it is in its pandemic window."
-L["ICONMENU_PANDEMICSTYLE_CDM"] = "Cooldown Manager"
-L["ICONMENU_PANDEMICSTYLE_CDM_DESC"] = "The animated border Blizzard's Cooldown Manager uses."
-L["ICONMENU_PANDEMICSTYLE_BORDER"] = "Solid border"
-L["ICONMENU_PANDEMICSTYLE_BORDER_DESC"] = "A plain colored border around the aura."
-L["ICONMENU_PANDEMICSTYLE_ACTVTNBORDER"] = "Activation border"
-L["ICONMENU_PANDEMICSTYLE_ACTVTNBORDER_DESC"] = "The sparkly yellow border that Blizzard's action bars draw on activated spells."
-
-L["ICONMENU_PANDEMICCOLOR"] = "Pandemic color"
-L["ICONMENU_PANDEMICCOLOR_DESC"] = "The color of the pandemic indicator."
-L["ICONMENU_PANDEMICTHICKNESS"] = "Border thickness"
-L["ICONMENU_PANDEMICTHICKNESS_DESC"] = "The thickness of the pandemic border."
-
 
 L["ICONMENU_ALLOWGCD"] = "Allow GCD"
 L["ICONMENU_ALLOWGCD_DESC"] = [[Check this option to allow the timer to react to and show the global cooldown instead of simply ignoring it.]]
@@ -2283,7 +2267,6 @@ L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER"] = "Timer Bar"
 L["CONFIGPANEL_TIMERBAR_BARDISPLAY_HEADER_VALUE"] = "Value Bar"
 L["CONFIGPANEL_PBAR_HEADER"] = "Power Bar Overlay"
 L["CONFIGPANEL_ACTVTNBORDER_HEADER"] = "Activation Border"
-L["CONFIGPANEL_PANDEMIC_HEADER"] = "Pandemic"
 L["CONFIGPANEL_CLEU_HEADER"] = "Combat Events"
 L["CONFIGPANEL_CNDTTIMERS_HEADER"] = "Condition Timers"
 
@@ -2480,6 +2463,9 @@ L["SOUND_EVENT_WHILECONDITION_DESC"] = "This notification will trigger for as lo
 L["SOUND_EVENT_AURAPRESENT"] = "While Aura Present"
 L["SOUND_EVENT_AURAPRESENT_DESC"] = "This animation is built into each aura that the icon shows, so it plays for as long as that aura is present."
 
+L["SOUND_EVENT_AURAPANDEMIC"] = "While Aura In Pandemic"
+L["SOUND_EVENT_AURAPANDEMIC_DESC"] = "This animation plays on each aura while it is within its pandemic window - the part of its duration during which recasting it will carry the remaining time over into the new application."
+
 L["SOUND_SOUNDTOPLAY"] = "Sound to Play"
 L["SOUND_CUSTOM"] = "Custom sound file"
 L["SOUND_CUSTOM_DESC"] = [[Insert the path to a custom sound to play. You can also input a numeric Sound Kit ID.
@@ -2655,6 +2641,8 @@ L["ANIM_ICONSHAKE"] = "Icon: Shake"
 L["ANIM_ICONSHAKE_DESC"] = "Shakes the icon when it is triggered."
 L["ANIM_ACTVTNGLOW"] = "Icon: Activation Border"
 L["ANIM_ACTVTNGLOW_DESC"] = "Displays the Blizzard spell activation border on the icon."
+L["ANIM_CDMPANDEMIC"] = "Icon: CDM Pandemic"
+L["ANIM_CDMPANDEMIC_DESC"] = "Displays the pandemic animation Blizzard's Cooldown Manager uses on the icon."
 L["ANIM_ICONFLASH"] = "Icon: Color Flash"
 L["ANIM_ICONFLASH_DESC"] = "Flashes a colored overlay across the icon."
 L["ANIM_ICONALPHAFLASH"] = "Icon: Alpha Flash"

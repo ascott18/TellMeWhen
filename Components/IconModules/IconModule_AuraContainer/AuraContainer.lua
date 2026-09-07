@@ -243,121 +243,6 @@ Module:RegisterConfigPanel_ConstructorFunc(205, "TellMeWhen_AuraContainerBarSett
 	end)
 end)
 
-Module:RegisterIconDefaults{
-	ShowPandemic      = false,
-	PandemicStyle     = "ACTVTNBORDER",
-	PandemicColor     = "ffff0000",
-	PandemicThickness = 2,
-}
-
--- Pandemic indicator styles. A style is a region on the aura button whose visibility alone
--- says "this aura is in its pandemic window" - the container only ever calls SetShown on it,
--- so nothing here gets to know when the window opens.
---
--- Anything that moves has to move from a declarative AnimationGroup. Script handlers don't
--- run on descendants of the forbidden AuraButton, which rules out every OnUpdate-driven
--- effect - LibCustomGlow's pixel/autocast glows and TMW's own Animations handlers included.
---
--- Registered further down, next to the code that builds them; declared here because the
--- config panel below lists them.
-local PandemicStyles = {}
-local PandemicStyleOrder = {}
-
-local function RegisterPandemicStyle(key, data)
-	data.key = key
-	PandemicStyles[key] = data
-	PandemicStyleOrder[#PandemicStyleOrder + 1] = key
-end
-
-Module:RegisterConfigPanel_ConstructorFunc(210, "TellMeWhen_AuraContainerPandemic", function(self)
-	self:SetTitle(L["CONFIGPANEL_PANDEMIC_HEADER"])
-
-	local check = TMW.C.Config_CheckButton:New("CheckButton", "$parentShowPandemic", self, "TellMeWhen_CheckTemplate")
-	self.ShowPandemic = check
-	check:SetTexts(L["ICONMENU_SHOWPANDEMIC"], L["ICONMENU_SHOWPANDEMIC_DESC"])
-	check:SetSetting("ShowPandemic")
-	check:ClearAllPoints()
-	check:SetPoint("TOPLEFT", 5, -1)
-
-	local function Style_OnClick(button)
-		TMW.CI.ics.PandemicStyle = button.value
-		-- Reloading re-runs ReloadRequested below, which relays the panel out for whichever
-		-- controls the newly picked style uses.
-		TMW.IE:LoadIcon(1)
-	end
-
-	local styleDD = TMW.C.Config_DropDownMenu:New("Frame", "$parentPandemicStyle", self, "TMW_DropDownMenuTemplate")
-	self.PandemicStyle = styleDD
-	styleDD:SetTexts(L["ICONMENU_PANDEMICSTYLE"], L["ICONMENU_PANDEMICSTYLE_DESC"])
-	styleDD:ClearAllPoints()
-	-- Right half of the header row, sharing it with the checkbox (the same split
-	-- TellMeWhen_BuffContainerSettings uses for its two filter dropdowns). Dropped by half
-	-- the height difference between the two templates (30 and 20) to sit centered on the
-	-- checkbox rather than riding above it.
-	styleDD:SetPoint("TOPLEFT", self, "TOP", -4, -6)
-	styleDD:SetPoint("RIGHT", -7, 0)
-	styleDD:SetFunction(function()
-		for _, key in ipairs(PandemicStyleOrder) do
-			local style = PandemicStyles[key]
-			local info = TMW.DD:CreateInfo()
-			info.text = style.text
-			info.tooltipTitle = style.text
-			info.tooltipText = style.desc
-			info.value = key
-			info.func = Style_OnClick
-			info.checked = TMW.CI.ics.PandemicStyle == key
-			TMW.DD:AddButton(info)
-		end
-	end)
-
-	-- Every per-style control is built once here; a style names the ones it wants in its
-	-- ConfigFrames and the rest stay hidden. `stretch` marks the ones that fill the panel
-	-- width - the color swatch is a fixed-size button and must not be anchored RIGHT.
-	local controls = {}
-
-	local color = TMW.C.Config_ColorButton:New("Button", "$parentPandemicColor", self, "TellMeWhen_ColorButtonTemplate")
-	color:SetTexts(L["ICONMENU_PANDEMICCOLOR"], L["ICONMENU_PANDEMICCOLOR_DESC"])
-	color:SetSetting("PandemicColor")
-	color:SetHasOpacity(true)
-	controls.Color = color
-
-	local thickness = TMW.C.Config_Slider:New("Slider", "$parentPandemicThickness", self, "TellMeWhen_SliderTemplate")
-	thickness:SetTexts(L["ICONMENU_PANDEMICTHICKNESS"], L["ICONMENU_PANDEMICTHICKNESS_DESC"])
-	thickness:SetSetting("PandemicThickness")
-	thickness:SetMinMaxValues(0, 10)
-	thickness:SetValueStep(0.1)
-	thickness:SetWheelStep(0.1)
-	thickness:SetTextFormatter(TMW.C.Formatter.PIXELS, TMW.C.Formatter.F_0)
-	thickness.stretch = true
-	controls.Thickness = thickness
-
-	self:CScriptAdd("ReloadRequested", function()
-		for _, control in pairs(controls) do
-			control:Hide()
-		end
-
-		local style = PandemicStyles[TMW.CI.ics.PandemicStyle]
-		styleDD:SetText(style and style.text or NONE)
-
-		-- Stack the style's controls down the left edge, under the header row - the checkbox
-		-- is both its left-aligned and its taller frame, so it bounds the row.
-		local last = check
-		if style then
-			for _, key in ipairs(style.ConfigFrames) do
-				local control = controls[key]
-				control:ClearAllPoints()
-				control:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -14)
-				if control.stretch then
-					control:SetPoint("RIGHT", -10, 0)
-				end
-				control:Show()
-				last = control
-			end
-		end
-
-		self:AdjustHeight(6)
-	end)
-end)
 
 function Module:OnNewInstance(icon)
 	-- Buttons are created by the container (not us); we record each one the
@@ -399,9 +284,8 @@ local LEVEL_ICON      = 1  -- icon holder: the icon texture and any Masque skin 
 local LEVEL_BAR       = 1  -- the bar views' duration bar (never overlaps the icon square)
 local LEVEL_COOLDOWN  = 2
 local LEVEL_BORDER    = 3  -- icon square + bar borders
-local LEVEL_PANDEMIC  = 4  -- pandemic art, drawn over the icon border it frames
-local LEVEL_ANIMATION = 5  -- aura-present animations, which must stay under the text
-local LEVEL_TEXT      = 6
+local LEVEL_ANIMATION = 4  -- aura animations, which must stay under the text
+local LEVEL_TEXT      = 5
 
 -- Copy `source`'s anchor points (and size) onto `region`, remapping each point's
 -- relativeTo frame through `remap` (falling back to `default`). This reproduces a
@@ -710,10 +594,10 @@ function Module:Emulate_IconView_Icon(icon, button)
 	end
 
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
-	-- The button is the icon square in this view, so the square pandemic art always fits.
+
+	-- The button is the icon square in this view, so art that frames the icon frames the cell.
 	local cellW, cellH = icon:GetSize()
 	local square = { frame = button, width = cellW, height = cellH }
-	self:Emulate_PandemicFX(icon, button, square)
 
 	return remap, square
 end
@@ -798,15 +682,14 @@ function Module:Emulate_IconView_Bar(icon, button, vertical)
 	end
 
 	self:Emulate_IconModule_IconContainer(icon, button, iconRegion)
-	-- The art wraps the icon square, same as in the icon view - wrapping the whole cell would
-	-- put the indicator around the bar as well. With the icon square turned off there's
-	-- nothing of the right shape to wrap, so no square and no indicator.
+	-- Art that frames the icon wraps the icon square rather than the cell, which here would
+	-- put it around the bar as well. With the icon square turned off there's nothing of the
+	-- right shape to wrap, so the animations fall back to the cell.
 	local square
 	if iconRegion then
 		local iconW, iconH = iconSquare:GetSize()
 		square = { frame = iconRegion, width = iconW, height = iconH }
 	end
-	self:Emulate_PandemicFX(icon, button, square)
 
 	-- Duration bar: mirror the view's TimerBar container (anchored to the icon and
 	-- the icon square, both remapped above). The bar is scaled to whole screen pixels
@@ -917,178 +800,105 @@ function Module:Emulate_IconModule_IconContainer(icon, button, iconRegion)
 	end
 end
 
--- Blizzard's Cooldown Manager anchors its pandemic art outside the frame it surrounds -
--- 6px around a ~40px icon - so the glow reads as a halo rather than an inner border.
--- Expressed as a fraction of our own size, which varies per icon.
-local PANDEMIC_OVERHANG = 0.15
-
--- Where a pandemic style draws, built by the view emulation and handed to the style:
---   frame   the region the art wraps
---   width   that region's size. Passed rather than read back, because the regions here are
---   height  children of the forbidden AuraButton and their GetSize is secret - it always
---           comes from the icon-side frame the button is mirroring.
---
--- Wrap `target` with the art, growing it outward by `scale` about its center.
-local function AnchorPandemicRegion(region, button, target, scale)
-	local w, h = target.width, target.height
-	local insetX, insetY = w * (scale - 1) / 2, h * (scale - 1) / 2
-
-	region:ClearAllPoints()
-	region:SetPoint("TOPLEFT", target.frame, "TOPLEFT", -insetX, insetY)
-	region:SetPoint("BOTTOMRIGHT", target.frame, "BOTTOMRIGHT", insetX, -insetY)
-	region:SetFrameLevel(button:GetFrameLevel() + LEVEL_PANDEMIC)
-
-	return w * scale, h * scale
-end
-
-RegisterPandemicStyle("ACTVTNBORDER", {
-	text = L["ICONMENU_PANDEMICSTYLE_ACTVTNBORDER"],
-	desc = L["ICONMENU_PANDEMICSTYLE_ACTVTNBORDER_DESC"],
-	ConfigFrames = {},
-
-	Build = function(button)
-		-- IconModule_IconContainer picks this template by feature detection because it also
-		-- runs on classic; this file is 12.1-only, where the post-11.1.7 name and ProcStartAnim
-		-- are both a given.
-		local overlay = CreateFrame("Frame", nil, button, "ActionButtonSpellAlertTemplate")
-
-		-- Same treatment IconContainer gives it: the 10.1.5 intro animation looks wrong
-		-- looping, so only ProcLoop is used and the flipbook is stopped from re-showing itself.
-		overlay.ProcStartFlipbook:Hide()
-		overlay.ProcStartFlipbook.Show = TMW.NULLFUNC
-
-		overlay.ProcLoop:Play()
-		return overlay
-	end,
-
-	Configure = function(icon, button, overlay, target)
-		-- The overscale IconContainer gives this art, so a container aura matches a normal
-		-- TMW icon wearing the same border.
-		AnchorPandemicRegion(overlay, button, target, 1.4)
-	end,
-})
-
-RegisterPandemicStyle("CDM", {
-	text = L["ICONMENU_PANDEMICSTYLE_CDM"],
-	desc = L["ICONMENU_PANDEMICSTYLE_CDM_DESC"],
-
-	-- No color: the art carries its own, and Blizzard never tints it. Vertex color would
-	-- only multiply it darker rather than recolor it.
-	ConfigFrames = {},
-
-	Build = function(button)
-		local fx = CreateFrame("Frame", nil, button, "CooldownPandemicFXTemplate")
-
-		-- The template inherits AnimateWhileShownTemplate, which starts the loop from OnShow -
-		-- and scripts never fire on a descendant of the forbidden AuraButton. PlayAnims walks
-		-- the frame and its children, so calling it directly reaches the group on the FX child.
-		fx:PlayAnims()
-		return fx
-	end,
-
-	Configure = function(icon, button, fx, target)
-		AnchorPandemicRegion(fx, button, target, 1 + PANDEMIC_OVERHANG * 2)
-	end,
-})
-
-RegisterPandemicStyle("BORDER", {
-	text = L["ICONMENU_PANDEMICSTYLE_BORDER"],
-	desc = L["ICONMENU_PANDEMICSTYLE_BORDER_DESC"],
-	ConfigFrames = { "Color", "Thickness" },
-
-	Build = function(button)
-		-- Built from the class + template rather than by inheriting the template's OnLoad,
-		-- which never fires here (see Emulate_IconModule_Backdrop).
-		return TMW.Classes.GenericBorder:New("Frame", nil, button, "TellMeWhen_GenericBorder")
-	end,
-
-	Configure = function(icon, button, border, target)
-		AnchorPandemicRegion(border, button, target, 1)
-		-- Always inset (negative size, matching IconContainer:SetBorder), regardless of the
-		-- group's own border inset setting: this border is drawn over an aura that already
-		-- fills its cell, and container cells sit at the group's spacing - commonly 0 - so
-		-- an outset border would run into the neighbouring aura.
-		border:SetBorderSize(-icon.PandemicThickness)
-		border:SetColor(TMW:StringToRGBA(icon.PandemicColor))
-	end,
-})
-
--- Indicator shown while an aura is inside its pandemic window - the tail of its duration
--- during which recasting carries the remainder over into the new application. The window is
--- derived from secret durations, so the AuraButton computes it and owns the indicator's
--- shown state; we only build the art and hand it over.
---
--- `target` says what to wrap and how big it is (see AnchorPandemicRegion), or is nil when the
--- view has nothing to wrap - which tears down whatever was there and draws nothing.
-function Module:Emulate_PandemicFX(icon, button, target)
-	local regions = button.tmwPandemicRegions
-	local style = target and icon.ShowPandemic and PandemicStyles[icon.PandemicStyle]
-
-	-- Regions are cached per style, so a button holds one for each style it has actually been
-	-- configured with and switching back to a previous one reuses it.
-	local cacheKey = style and style.key
-
-	if regions then
-		for key, region in pairs(regions) do
-			if key ~= cacheKey then
-				region:Hide()
-			end
-		end
-	end
-
-	-- Registrations accumulate, so drop the previous one before re-adding on a reskin.
-	button:ClearPandemicRegions()
-
-	if not style then
-		return
-	end
-
-	regions = regions or {}
-	button.tmwPandemicRegions = regions
-
-	local region = regions[cacheKey]
-	if not region then
-		region = style.Build(button, target)
-		regions[cacheKey] = region
-	end
-
-	style.Configure(icon, button, region, target)
-
-	-- No Show() here: registering drives visibility off the current aura, which for a
-	-- button with no aura (or no pandemic window) means hidden.
-	button:AddPandemicRegion(region)
-end
-
 
 -- ----------------------------------------------------------------------------
--- Aura-present animations
+-- Aura animations
 --
--- An animation trigger that only these icons have. Nothing ever tells us that an aura came
--- or went - that's the whole premise of the container - so an animation can't be started
--- and stopped around one. Instead the art is built into the aura button and left playing:
--- a button exists (and shows) only while its aura is up, so the animation is on screen
--- exactly when the aura is.
+-- Two animation triggers that only these icons have. Nothing ever tells us that an aura
+-- came, went, or entered its pandemic window - that's the whole premise of the container -
+-- so an animation can't be started and stopped around one. Instead the art is built into
+-- the aura button and left playing, and something that does know decides when it draws:
+--   * "While Aura Present" is simply shown. A button exists (and shows) only while its
+--     aura is up, so the animation is on screen exactly when the aura is.
+--   * "While Aura In Pandemic" is handed to the button, which shows it over the tail of the
+--     aura's duration during which recasting carries the remainder over into the new
+--     application. That window comes from secret durations, so only the button can know it.
 --
--- The trigger therefore carries no conditions and no shown-only check, and only animations
--- that declare a Persistent implementation can use it - everything else is driven from Lua
--- every frame, which never runs on a descendant of the restricted button (see the pandemic
--- styles above).
+-- Neither carries conditions or a shown-only check, and only animations that declare a
+-- Persistent implementation can use them - everything else is driven from Lua every frame,
+-- which never runs on a descendant of the restricted button.
 -- ----------------------------------------------------------------------------
+
+-- How each trigger's art gets on screen, keyed by the event it belongs to.
+local AuraTriggers = {
+	AURAPRESENT = function(button, region)
+		region:Show()
+	end,
+	AURAPANDEMIC = function(button, region)
+		-- No Show(): registering drives visibility off the current aura, which for a button
+		-- with no aura (or no pandemic window) means hidden.
+		button:AddPandemicRegion(region)
+	end,
+}
+
+-- Only animations that can be left running qualify. The empty animation is the list's
+-- "None", so keep it selectable.
+local function IsPersistentAnimation(animationData)
+	return animationData.subHandlerIdentifier == "" or animationData.Persistent ~= nil
+end
+
+-- Neither setting applies to either trigger: the events are never queued, and the icon is
+-- shown whenever it has an underlay regardless of what its auras are doing.
+local TRIGGER_SETTINGS = {
+	PassThrough = false,
+	OnlyShown = false,
+}
 
 Module:RegisterIconEvent(10, "AURAPRESENT", {
 	category = L["EVENT_CATEGORY_VISIBILITY"],
 	text = L["SOUND_EVENT_AURAPRESENT"],
 	desc = L["SOUND_EVENT_AURAPRESENT_DESC"],
 	requiredHandlerFlag = "supportAuraPresent",
-	settings = {
-		-- Neither applies: the event is never queued, and the icon is shown whenever it
-		-- has an underlay regardless of whether any aura is up.
-		PassThrough = false,
-		OnlyShown = false,
-	},
-	subHandlerFilter = function(animationData)
-		-- The empty animation is the list's "None", so keep it selectable.
-		return animationData.subHandlerIdentifier == "" or animationData.Persistent ~= nil
+	settings = TRIGGER_SETTINGS,
+	subHandlerFilter = IsPersistentAnimation,
+})
+
+Module:RegisterIconEvent(10.5, "AURAPANDEMIC", {
+	category = L["EVENT_CATEGORY_VISIBILITY"],
+	text = L["SOUND_EVENT_AURAPANDEMIC"],
+	desc = L["SOUND_EVENT_AURAPANDEMIC_DESC"],
+	requiredHandlerFlag = "supportAuraPresent",
+	settings = TRIGGER_SETTINGS,
+	subHandlerFilter = IsPersistentAnimation,
+})
+
+-- 12.1.0-12.1.4 drew the pandemic indicator from four icon settings and a closed set of
+-- three styles, all of which the animations above now cover. Convert each icon that had one
+-- into the event that draws the same art. Period 0 throughout: the old indicator held steady.
+TMW:RegisterUpgrade(12010404, {
+	icon = function(self, ics)
+		if not ics.ShowPandemic then
+			return
+		end
+
+		local n = ics.Events.n + 1
+		ics.Events.n = n
+
+		local eventSettings = ics.Events[n]
+		eventSettings.Event = "AURAPANDEMIC"
+		eventSettings.Type = "Animations"
+		eventSettings.Period = 0
+
+		local style = ics.PandemicStyle or "ACTVTNBORDER"
+		if style == "BORDER" then
+			eventSettings.Animation = "ICONBORDER"
+			eventSettings.AnimColor = ics.PandemicColor or "ffff0000"
+			eventSettings.Thickness = ics.PandemicThickness or 2
+			-- The old border wrapped the icon square exactly and drew inside it, which is
+			-- what ICONBORDER does at size 0. The icon view's button IS the square, so the
+			-- anchor only resolves to anything in the bar views.
+			eventSettings.Size_anim = 0
+			eventSettings.AnchorTo = "IconModule_IconContainer_MasqueIconContainer"
+		else
+			-- Both glows carry the overscale the old art had baked in, at scale 1.
+			eventSettings.Animation = style == "CDM" and "CDMPANDEMIC" or "ACTVTNGLOW"
+			eventSettings.Scale = 1
+		end
+
+		ics.ShowPandemic = nil
+		ics.PandemicStyle = nil
+		ics.PandemicColor = nil
+		ics.PandemicThickness = nil
 	end,
 })
 
@@ -1102,28 +912,33 @@ end
 
 local builtAnimations = {}
 
--- Build every aura-present animation into the button and leave it running. Settings come
--- from settingsIcon (the inherited source for a meta icon), like the icon's other display
+-- Build every aura animation into the button and leave it running. Settings come from
+-- settingsIcon (the inherited source for a meta icon), like the icon's other display
 -- settings; the geometry comes from self.icon. `square` is the icon square the view built,
 -- for art that frames the icon rather than the cell (nil when the view has no icon square).
-function Module:Emulate_AuraPresentAnimations(icon, button, remap, square)
+function Module:Emulate_AuraAnimations(icon, button, remap, square)
 	local animations = TMW.EVENTS:GetEventHandler("Animations").AllSubHandlersByIdentifier
 	local settingsIcon = self.settingsIcon or icon
-	local regions = button.tmwAuraPresentAnimations
+	local regions = button.tmwAuraAnimations
 	local built = wipe(builtAnimations)
 	local placement
 
-	for _, eventSettings in TMW:InNLengthTable(settingsIcon.Events) do
-		local animation = eventSettings.Animation
-		local animationData = eventSettings.Event == "AURAPRESENT"
-			and eventSettings.Type == "Animations"
-			and animations[animation]
+	-- Pandemic registrations accumulate, so drop the previous pass's before re-adding.
+	button:ClearPandemicRegions()
 
-		-- One region per animation, so a second event asking for the same one would only
-		-- fight the first over it - the same rule DetermineNextPlayingAnimation applies to
-		-- an icon's normal animations.
-		if animationData and animationData.Persistent and not built[animation] then
-			built[animation] = true
+	for _, eventSettings in TMW:InNLengthTable(settingsIcon.Events) do
+		local show = AuraTriggers[eventSettings.Event]
+		local animationData = show
+			and eventSettings.Type == "Animations"
+			and animations[eventSettings.Animation]
+
+		-- One region per trigger + animation, so a second event asking for the same pair
+		-- would only fight the first over it - the same rule DetermineNextPlayingAnimation
+		-- applies to an icon's normal animations.
+		local key = show and eventSettings.Event .. ":" .. eventSettings.Animation
+
+		if animationData and animationData.Persistent and not built[key] then
+			built[key] = true
 
 			if not placement then
 				local w, h = icon:GetSize()
@@ -1135,24 +950,24 @@ function Module:Emulate_AuraPresentAnimations(icon, button, remap, square)
 			placement.anchor = AnchorTarget(icon, button, remap, eventSettings.AnchorTo)
 
 			regions = regions or {}
-			button.tmwAuraPresentAnimations = regions
+			button.tmwAuraAnimations = regions
 
-			local region = regions[animation]
+			local region = regions[key]
 			if not region then
 				region = animationData.Persistent.Build(button)
-				regions[animation] = region
+				regions[key] = region
 			end
 
 			animationData.Persistent.Configure(region, eventSettings, placement)
-			region:Show()
+			show(button, region)
 		end
 	end
 
-	-- Regions are cached per animation, so a button holds one for each animation it has been
-	-- configured with; the ones no longer asked for just stop drawing.
+	-- Regions are cached per trigger + animation, so a button holds one for each pair it has
+	-- been configured with; the ones no longer asked for just stop drawing.
 	if regions then
-		for animation, region in pairs(regions) do
-			if not built[animation] then
+		for key, region in pairs(regions) do
+			if not built[key] then
 				region:Hide()
 			end
 		end
@@ -1299,8 +1114,8 @@ function Module:SkinButton(button)
 	-- Each view registers its own emulation handler (see the view files); it skins the
 	-- button for that view and returns a frame remap (icon/square/bar -> our button-
 	-- owned equivalents) so the text wiring can position the aura-driven text the same way,
-	-- plus the icon square it built (shaped like the pandemic target, see
-	-- Emulate_PandemicFX) for art that has to be sized against it.
+	-- plus the icon square it built ({frame, width, height}) for animations that have to be
+	-- sized against it.
 	local remap, square
 	if self.ViewEmulationHandler then
 		remap, square = self.ViewEmulationHandler(self, icon, button)
@@ -1311,7 +1126,7 @@ function Module:SkinButton(button)
 	self:ApplyButtonColor(button, self.settingsIcon)
 
 	self:Emulate_IconModule_Texts(icon, button, remap)
-	self:Emulate_AuraPresentAnimations(icon, button, remap, square)
+	self:Emulate_AuraAnimations(icon, button, remap, square)
 end
 
 -- ----------------------------------------------------------------------------

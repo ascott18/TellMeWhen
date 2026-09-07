@@ -235,6 +235,17 @@ end
 -- icon square rather than a border on it.
 local ACTVTNGLOW_OVERSCALE = 1.4
 
+-- Wrap `target` with `region`, grown outward by `scale` about its center. The size is passed
+-- rather than read back because a persistent copy of this art can live on a frame whose
+-- GetSize is secret (see IconModule_AuraContainer).
+local function WrapWithGlow(region, target, w, h, scale)
+	local insetX, insetY = w * (scale - 1) / 2, h * (scale - 1) / 2
+
+	region:ClearAllPoints()
+	region:SetPoint("TOPLEFT", target, "TOPLEFT", -insetX, insetY)
+	region:SetPoint("BOTTOMRIGHT", target, "BOTTOMRIGHT", insetX, -insetY)
+end
+
 local ACTVTNGLOW = {
 	text = L["ANIM_ACTVTNGLOW"],
 	desc = L["ANIM_ACTVTNGLOW_DESC"],
@@ -293,21 +304,93 @@ if hasProcAnim then
 			return overlay
 		end,
 		Configure = function(overlay, eventSettings, placement)
-			-- Grown about the center of the icon square by anchoring both corners rather
-			-- than by SetSize: a host can hand us a frame whose size can't be read back.
 			local square = placement.square
-			local scale = ACTVTNGLOW_OVERSCALE * eventSettings.Scale
-			local insetX, insetY = square.width * (scale - 1) / 2, square.height * (scale - 1) / 2
-
-			overlay:ClearAllPoints()
-			overlay:SetPoint("TOPLEFT", square.frame, "TOPLEFT", -insetX, insetY)
-			overlay:SetPoint("BOTTOMRIGHT", square.frame, "BOTTOMRIGHT", insetX, -insetY)
+			WrapWithGlow(overlay, square.frame, square.width, square.height,
+				ACTVTNGLOW_OVERSCALE * eventSettings.Scale)
 			overlay:SetFrameLevel(placement.level)
 		end,
 	}
 end
 
 IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", ACTVTNGLOW)
+
+
+-- Blizzard's Cooldown Manager draws this art outside the frame it surrounds - 6px around a
+-- ~40px icon - so it reads as a halo rather than an inner border.
+local CDMPANDEMIC_OVERSCALE = 1.3
+
+local cdmPandemicTemplate = "CooldownPandemicFXTemplate"
+
+if pcall(CreateFrame, "Frame", nil, UIParent, cdmPandemicTemplate) then
+	IconContainer:RegisterEventHandlerData("Animations", 61, "CDMPANDEMIC", {
+		text = L["ANIM_CDMPANDEMIC"],
+		desc = L["ANIM_CDMPANDEMIC_DESC"],
+
+		-- No color: the art has its own color.
+		ConfigFrames = {
+			"Duration",
+			"Infinite",
+			"Scale",
+		},
+
+		Play = function(icon, eventSettings)
+			icon:Animations_Start{
+				eventSettings = eventSettings,
+				Start = TMW.time,
+				Scale = eventSettings.Scale,
+				Duration = eventSettings.Infinite and math.huge or eventSettings.Duration,
+			}
+		end,
+
+		OnUpdate = function(icon, table)
+			if table.Duration - (TMW.time - table.Start) < 0 then
+				icon:Animations_Stop(table)
+			end
+		end,
+		OnStart = function(icon, table)
+			local container = icon:GetModuleOrModuleChild("IconModule_IconContainer").container
+
+			local fx = container.cdmPandemic
+			if not fx then
+				-- Parented to the icon rather than the container for the reason
+				-- ShowOverlayGlowInternal gives: an aura container dims the container to hide
+				-- the icon's own art, and this draws over the auras instead.
+				fx = CreateFrame("Frame", nil, icon, cdmPandemicTemplate)
+				container.cdmPandemic = fx
+				fx:SetFrameLevel(icon:GetFrameLevel() + TMW.CONST.FRAMELEVEL.ANIMATION)
+			end
+
+			local w, h = container:GetSize()
+			WrapWithGlow(fx, container, w, h, CDMPANDEMIC_OVERSCALE * table.Scale)
+
+			-- The template inherits AnimateWhileShownTemplate, so showing it starts the loop.
+			fx:Show()
+		end,
+		OnStop = function(icon, table)
+			local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true, true)
+
+			IconModule_IconContainer.container.cdmPandemic:Hide()
+		end,
+
+		Persistent = {
+			Build = function(parent)
+				local fx = CreateFrame("Frame", nil, parent, cdmPandemicTemplate)
+
+				-- AnimateWhileShownTemplate starts the loop from OnShow, and scripts never
+				-- fire on a descendant of a restricted frame. PlayAnims walks the frame and
+				-- its children, so calling it directly reaches the group on the FX child.
+				fx:PlayAnims()
+				return fx
+			end,
+			Configure = function(fx, eventSettings, placement)
+				local square = placement.square
+				WrapWithGlow(fx, square.frame, square.width, square.height,
+					CDMPANDEMIC_OVERSCALE * eventSettings.Scale)
+				fx:SetFrameLevel(placement.level)
+			end,
+		},
+	})
+end
 
 
 
