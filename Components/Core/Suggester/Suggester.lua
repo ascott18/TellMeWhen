@@ -1746,3 +1746,13 @@ function Module:Entry_AddToList_1(f, id)
 	end
 end
 
+-- Only CDM-covered spells: anything else inserts cleanly and then always reads as absent.
+-- A closed list of a few dozen, hence noMin.
+local Module = SUG:NewModule("cdmaura", BuffNoDS)
+Module.noMin = true
+-- No restricted marker: the CDM reads these whether or not the aura is secret.
+Module.Entry_Colorize_3 = TMW.NULLFUNC
+function Module:Table_Get()
+	return TMW.COMMON.Auras.GetCDMTrackedSpells()
+end
+

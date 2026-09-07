@@ -266,6 +266,33 @@ end
 
 local ConditionCategory = CNDT:GetCategory("BUFFSDEBUFFS", 5, L["CNDTCAT_BUFFSDEBUFFS"], false, false)
 
+if TMW.clientHasSecrets and C_CooldownViewer then
+	Env.CDMAuraActive = function(spell)
+		return Auras.GetCDMAuraState(spell) == true
+	end
+
+	ConditionCategory:RegisterCondition(0, "CDMAURA", {
+		text = L["CONDITIONPANEL_CDMAURA"],
+		tooltip = L["CONDITIONPANEL_CDMAURA_DESC"],
+
+		bool = true,
+
+		name = function(editbox)
+			editbox:SetTexts(L["CONDITIONPANEL_CDMAURA_EB"], L["CONDITIONPANEL_CDMAURA_EB_DESC"])
+		end,
+		useSUG = "cdmaura",
+		unit = false,
+		icon = "Interface\\Icons\\spell_holy_borrowedtime",
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = [[BOOLCHECK( CDMAuraActive(c.Spells.First) )]],
+		events = function(ConditionObject)
+			return ConditionObject:GenerateNormalEventString("TMW_CDM_AURA_CHANGED")
+		end,
+	})
+
+	ConditionCategory:RegisterSpacer(0.5)
+end
+
 ConditionCategory:RegisterCondition(1,	 "BUFFDUR", {
 	text = L["ICONMENU_BUFF"] .. " - " .. L["DURATION"],
 	range = 30,

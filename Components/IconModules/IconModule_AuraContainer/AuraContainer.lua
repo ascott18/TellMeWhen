@@ -1176,6 +1176,9 @@ end
 -- arrives there as one already-collapsed number. So the icon frame carries only the more
 -- opaque of the two (GetIconState) and ApplyOpacities scales each layer down from it.
 -- Everything else that dims the icon still dims both layers together, which is right.
+--
+-- All of that is for when absence is unknowable. icon.AuraContainerKnownAbsent makes the
+-- layers alternatives rather than a stack: one is drawn, and UNDERLAY is a real absent state.
 -- ----------------------------------------------------------------------------
 
 -- The underlay's opacity, as configured. Zero means there is no underlay at all: the icon's
@@ -1212,17 +1215,29 @@ end
 
 -- The state an aura-container icon publishes: the icon frame is only the carrier for the
 -- two layers, so its alpha is the more opaque of them and ApplyOpacities takes each layer
--- down from there. Called by the icon type from its update function; also used for
+-- down from there. Built once per outcome at setup by the icon type; also used for
 -- controlled icons, which have no update function of their own.
 --
 -- The max rather than a flat 1 so realAlpha keeps meaning what it always has - "is any of
 -- this visible" - which the Icon Shown/Hidden conditions, ShrinkGroup, shown-only icon
 -- events and meta icon source selection all read. Both opacities at zero then still gives
 -- an alpha of 0, which the state arbitrator treats as hide-no-matter-what.
-function Module:GetIconState(icon)
+--
+-- A non-nil `knownAbsent` leaves one layer up, so the icon carries that layer's opacity.
+function Module:GetIconState(icon, knownAbsent)
 	local underlay = icon.States[STATE_UNDERLAY]
+
+	local alpha
+	if knownAbsent == nil then
+		alpha = max(icon.States[STATE_PRESENT].Alpha or 0, underlay.Alpha or 0)
+	elseif knownAbsent then
+		alpha = underlay.Alpha or 0
+	else
+		alpha = icon.States[STATE_PRESENT].Alpha or 0
+	end
+
 	return {
-		Alpha = max(icon.States[STATE_PRESENT].Alpha or 0, underlay.Alpha or 0),
+		Alpha = alpha,
 		Color = underlay.Color,
 		Texture = underlay.Texture,
 	}
@@ -1258,9 +1273,20 @@ function Module:ApplyOpacities()
 		return
 	end
 
-	-- Each layer, relative to the icon frame's own alpha (the more opaque of the two).
-	-- Both off: the published state's alpha is 0 as well, so the icon is hidden outright
-	-- and there's nothing for these to be relative to.
+	-- Below the controlled-icon branch: only a standalone icon runs the update function that
+	-- sets this.
+	local knownAbsent
+	if locked then
+		knownAbsent = icon.AuraContainerKnownAbsent
+	end
+	if knownAbsent == true then
+		aurasAlpha = 0
+	elseif knownAbsent == false then
+		underlayAlpha = 0
+	end
+
+	-- Each layer, relative to the icon frame's own alpha. Both off: the published state's
+	-- alpha is 0 too, so there's nothing for these to be relative to.
 	local carrier = max(aurasAlpha, underlayAlpha)
 	local scale = carrier > 0 and 1 / carrier or 0
 

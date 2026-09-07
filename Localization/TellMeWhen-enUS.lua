@@ -261,14 +261,13 @@ L["ICONMENU_ITEMCOOLDOWN_DESC"] = [[Tracks the cooldowns of items with Use effec
 
 L["ICONMENU_BUFFDEBUFF_CONTAINER"] = "Buff/Debuff (combat ready)"
 L["ICONMENU_BUFFDEBUFF_CONTAINER_DESC"] = [[Tracks buffs and/or debuffs via Blizzard's Aura Container system. Safe to use when in combat.]]
-L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"] = "Limitations"
-L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"] = [[This icon works in combat, but is subject to the following Blizzard-enforced limitations:
-
-- Filtered spells must be IDs, not spell names.
-- Spell IDs can only filter buffs on friendly units and debuffs on enemy units.
-- Only the first of the icon's units is checked; multiple units are not supported.
-
-To read a spell's ID off an aura tooltip, enable %q in TellMeWhen's general options.]]
+L["ICONMENU_BUFFDEBUFF_CONTAINER_CAVEATS"] = "Caveats"
+L["ICONMENU_BUFFDEBUFF_CONTAINER_NAMENOTID"] = "%s is not a spell ID and will be ignored."
+L["ICONMENU_BUFFDEBUFF_CONTAINER_IDTOOLTIP"] = "To read a spell's ID off an aura tooltip, enable %q in TellMeWhen's general options."
+L["ICONMENU_BUFFDEBUFF_CONTAINER_IDFILTER"] = "Spell IDs only filter buffs on friendly units and debuffs on enemies."
+L["ICONMENU_BUFFDEBUFF_CONTAINER_IDDEBUFFS"] = "This unit is always friendly, so spell IDs will not filter its debuffs; all of them will be shown."
+L["ICONMENU_BUFFDEBUFF_CONTAINER_IDBUFFS"] = "This unit is always hostile, so spell IDs will not filter its buffs; all of them will be shown."
+L["ICONMENU_BUFFDEBUFF_CONTAINER_ONEUNIT"] = "Only the first unit is checked."
 
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"
 L["ICONMENU_BUFFDEBUFF_RESTRICTED"] = "(combat restricted)"
@@ -568,6 +567,17 @@ L["ICONMENU_AURACONTAINER_AURAS"] = "Auras"
 L["ICONMENU_AURACONTAINER_AURAS_DESC"] = "Set the opacity of each aura shown by this icon."
 L["ICONMENU_AURACONTAINER_UNDERLAY"] = "Underlay"
 L["ICONMENU_AURACONTAINER_UNDERLAY_DESC"] = "Set the opacity, tint and texture this icon shows where there is no aura. Auras are drawn on top of the underlay - they do not and cannot replace the underlay."
+L["ICONMENU_AURACONTAINER_ABSENT"] = "Absent"
+L["ICONMENU_AURACONTAINER_ABSENT_DESC"] = "Set the opacity, tint and texture this icon shows while its auras are absent."
+
+L["ICONMENU_AURACONTAINER_CDM_OFF"] = "Absence detection is unavailable. It requires:"
+L["ICONMENU_AURACONTAINER_CDM_CONTROLLER"] = "an icon that does not control its group"
+L["ICONMENU_AURACONTAINER_CDM_UNIT"] = "you or your target as the unit"
+L["ICONMENU_AURACONTAINER_CDM_SELFDEBUFF"] = "Buff rather than Debuff, since the unit is you"
+L["ICONMENU_AURACONTAINER_CDM_REQUIREON"] = "%s to be enabled"
+L["ICONMENU_AURACONTAINER_CDM_REQUIREOFF"] = "%s to be unused"
+L["ICONMENU_AURACONTAINER_CDM_NOSPELLS"] = "a spell ID"
+L["ICONMENU_AURACONTAINER_CDM_UNTRACKED"] = "%s to be in your Cooldown Manager"
 
 L["ICONMENU_AURACONTAINER_SORT"] = "Order"
 L["ICONMENU_AURACONTAINER_SORT_DESC"] = "The order this icon places the auras it shows in."
@@ -1913,6 +1923,12 @@ L["REACTIVECNDT_DESC"] = [[This condition only checks the reactive state of the 
 
 Reactive abilities are those that are only usable under certain conditions in combat, like %s or %s.]]
 L["BUFFCNDT_DESC"] = "Only the first spell will be checked, all others will be ignored."
+L["CONDITIONPANEL_CDMAURA"] = "Aura Present (via CDM)"
+L["CONDITIONPANEL_CDMAURA_DESC"] = [[Checks Blizzard's Cooldown Manager for whether a spell's aura is on you or your target. Works in combat, where reading the aura itself does not.
+
+Only auras you cast, and only spells that are in your Cooldown Manager - anything else reads as absent.]]
+L["CONDITIONPANEL_CDMAURA_EB"] = "Spell to check"
+L["CONDITIONPANEL_CDMAURA_EB_DESC"] = "Only spells in your Cooldown Manager are suggested."
 L["CNDT_ONLYFIRST"] = "Only the first spell/item will be checked - semicolon-delimited lists are not valid for this condition type."
 L["CNDT_MULTIPLEVALID"] = "You can enter multiple names/IDs to check by separating each with a semicolon."
 L["CNDT_TOTEMNAME"] = "Totem Name(s)"

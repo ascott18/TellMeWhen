@@ -36,13 +36,7 @@ Type.hasNoGCD = true
 Type.canControlGroup = true
 Type.stackedVisibilityUnknown = true
 
--- Nothing tells us an aura is missing, so there's no absent state to publish. The underlay
--- gets to the same place from the other end: the icon's own display is left up beneath the
--- aura container, so each cell falls back to it wherever there's no aura covering it.
--- IconModule_AuraContainer owns the underlay, and the state these two feed (see its
--- underlay section).
-local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
-local STATE_UNDERLAY = TMW.CONST.STATE.DEFAULT_HIDE
+local Auras = TMW.COMMON.Auras
 
 Type:UsesAttributes("state")
 Type:UsesAttributes("auraSpec")
@@ -120,40 +114,6 @@ TMW:RegisterUpgrade(12010401, {
 	end,
 })
 
-Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
-	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
-	SUGType = "buffcontainer",
-})
-
-Type:RegisterConfigPanel_XMLTemplate(105, "TellMeWhen_Unit", {
-	implementsConditions = true,
-})
-
-Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_TextPanel", {
-	frameName = "TellMeWhen_BuffContainerLimitations",
-	OnSetup = function(self)
-		self:SetTitle(L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS"])
-		-- Named from L so the pointer tracks the option's own label.
-		self.text:SetText(L["ICONMENU_BUFFDEBUFF_CONTAINER_LIMITATIONS_DESC"]
-			:format(L["SHOWAURASPELLIDS_OPTION"]))
-	end,
-})
-
-Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_BuffOrDebuffContainer", function(self)
-	self:SetTitle(TMW.L["ICONMENU_BUFFTYPE"])
-	self:BuildSimpleCheckSettingFrame({
-		numPerRow = 2,
-		function(check)
-			check:SetTexts("|cFF00FF00" .. L["ICONMENU_BUFF"], nil)
-			check:SetSetting("BuffOrDebuff", "HELPFUL")
-		end,
-		function(check)
-			check:SetTexts("|cFFFF0000" .. L["ICONMENU_DEBUFF"], nil)
-			check:SetSetting("BuffOrDebuff", "HARMFUL")
-		end,
-	})
-end)
-
 -- The orders the AuraSort setting offers, mapped onto the container's per-group sort.
 --
 -- The "Only" comparators are used throughout (ExpirationOnly over Expiration, NameOnly over
@@ -186,196 +146,161 @@ for key, sort in pairs(SortMethods) do
 	sort.desc = L["ICONMENU_AURACONTAINER_SORT_" .. key .. "_DESC"]
 end
 
-Type:RegisterConfigPanel_ConstructorFunc(125, "TellMeWhen_BuffContainerSettings", function(self)
-	-- The base name, not Type.name: the "(combat ready)" half is there to tell the two
-	-- Buff/Debuff types apart in the type dropdown, and the panel heading isn't choosing.
-	self:SetTitle(L["ICONMENU_BUFFDEBUFF"])
-	self:BuildSimpleCheckSettingFrame({
-		numPerRow = 2,
-		function(check)
-			check:SetTexts(L["ICONMENU_ONLYMINE"], L["ICONMENU_ONLYMINE_DESC"])
-			check:SetSetting("OnlyMine")
-		end,
-		function(check)
-			-- Helpful auras only (see BuildAuraSpec / candidateFilters.isStealable).
-			check:SetTexts(L["ICONMENU_STEALABLE"], L["ICONMENU_STEALABLE_DESC"])
-			check:SetSetting("Stealable")
-		end,
-	})
+Type.SortMethods, Type.SortOrder = SortMethods, SortOrder
 
-	local AuraFilterKeys = {
-		"Important",
-		"CrowdControl",
-		"BigDefensive",
-		"ExternalDefensive",
-		"RaidPlayerDispellable",
-		"Raid",
-		"RaidInCombat",
-	}
+local function AuraKind(buffOrDebuff)
+	return buffOrDebuff == "HARMFUL" and "HARMFUL" or "HELPFUL"
+end
 
-	local AuraFilterData = {}
-	for _, key in ipairs(AuraFilterKeys) do
-		local filterValue = AuraUtil.AuraFilters[key]
-		if filterValue then
-			local localeBase = "ICONMENU_AURAFILTER_" .. filterValue
-			table.insert(AuraFilterData, {
-				key = filterValue,
-				text = L[localeBase],
-				desc = L[localeBase .. "_DESC"]
-			})
+-- Tokens whose side never changes, keyed without the trailing index. group1-40 substitutes
+-- to raid/party/player. Absent = follows whoever is there: focus, mouseover, X's target.
+local unitKinds = {
+	player = "HELPFUL",
+	pet = "HELPFUL",
+	vehicle = "HELPFUL",
+	party = "HELPFUL",
+	raid = "HELPFUL",
+	group = "HELPFUL",
+	maintank = "HELPFUL",
+	mainassist = "HELPFUL",
+	target = "HARMFUL",
+	arena = "HARMFUL",
+	boss = "HARMFUL",
+}
+
+local function UnitAuraKind(unit)
+	if not unit then return nil end
+	local base = unit:gsub("%d+$", "")
+	return unitKinds[base]
+end
+
+-- The spell IDs to watch, plus every reason detection isn't running. The IDs hold until the
+-- next setup; two blockers don't, so GetKnownAbsent re-tests those. Takes `ics` so it can
+-- answer while the name box is still being typed into.
+local function GetDetection(ics, icon)
+	local blockers, shapeOk = nil, true
+
+	local function Block(reason)
+		blockers = blockers or {}
+		blockers[#blockers + 1] = reason
+	end
+
+	-- Blocks until the icon is configured differently, unlike the two that come back alone.
+	local function BlockShape(reason)
+		shapeOk = false
+		Block(reason)
+	end
+
+	-- A controller's cells fill and empty independently; this is one answer per icon.
+	if icon and icon:IsGroupController() then
+		BlockShape(L["ICONMENU_AURACONTAINER_CDM_CONTROLLER"])
+	end
+
+	-- originalUnits, not icon.Units: that drops units that don't exist right now.
+	local _, unitSet = TMW:GetUnits(nil, ics.Unit)
+	local unit = unitSet.originalUnits[1]
+	if not Auras.GetCDMAuraKind(unit) then
+		BlockShape(L["ICONMENU_AURACONTAINER_CDM_UNIT"])
+	elseif unit == "player" and AuraKind(ics.BuffOrDebuff) == "HARMFUL" then
+		-- The only fixed mismatch. On any other unit it follows the target, so it's
+		-- GetKnownAbsent's to catch.
+		BlockShape(L["ICONMENU_AURACONTAINER_CDM_SELFDEBUFF"])
+	end
+
+	-- Inverted: the CDM only sees your own auras, so it's Only Mine being off that breaks it.
+	if not ics.OnlyMine then
+		BlockShape(format(L["ICONMENU_AURACONTAINER_CDM_REQUIREON"], L["ICONMENU_ONLYMINE"]))
+	end
+	if ics.Stealable then
+		BlockShape(format(L["ICONMENU_AURACONTAINER_CDM_REQUIREOFF"], L["ICONMENU_STEALABLE"]))
+	end
+	if ics.AuraMaxDuration and ics.AuraMaxDuration > 0 then
+		BlockShape(format(L["ICONMENU_AURACONTAINER_CDM_REQUIREOFF"], L["ICONMENU_DURATIONMAX"]))
+	end
+	for _, on in pairs(ics.ExtraFilter) do
+		if on then
+			BlockShape(format(L["ICONMENU_AURACONTAINER_CDM_REQUIREOFF"], L["ICONMENU_AURAFILTER"]))
+			break
+		end
+	end
+	for _, on in pairs(ics.DispelType) do
+		if on then
+			BlockShape(format(L["ICONMENU_AURACONTAINER_CDM_REQUIREOFF"], L["ICONMENU_DISPELTYPE"]))
+			break
 		end
 	end
 
-	if #AuraFilterData > 0 then
-		local function ExtraFilter_OnClick(button, dropdown)
-			local filterKey = button.value
-			TMW.CI.ics.ExtraFilter[filterKey] = not TMW.CI.ics.ExtraFilter[filterKey]
-			dropdown:OnSettingSaved()
-		end
-		
-		self.ExtraFilter = TMW.C.Config_DropDownMenu:New("Frame", "$parentAuraFilter", self, "TMW_DropDownMenuTemplate")
-		self.ExtraFilter:SetTexts(L["ICONMENU_AURAFILTER"], L["ICONMENU_AURAFILTER_DESC"])
-		self.ExtraFilter:SetWidth(200)
-		self.ExtraFilter:SetFunction(function(dropdown)
-			for _, filter in ipairs(AuraFilterData) do
-				local info = TMW.DD:CreateInfo()
-				info.text = filter.text
-				info.tooltipTitle = filter.text
-				info.tooltipText = filter.desc
-				info.value = filter.key
-				info.func = ExtraFilter_OnClick
-				info.arg1 = dropdown
-				info.keepShownOnClick = true
-				info.isNotRadio = true
-				info.checked = TMW.CI.ics.ExtraFilter[filter.key]
-				
-				TMW.DD:AddButton(info)
-			end
-		end)
-
-		-- Left half of a shared row with the dispel-type filter (anchored to our right).
-		self.ExtraFilter:ClearAllPoints()
-		self.ExtraFilter:SetPoint("TOPLEFT", self.OnlyMine, "BOTTOMLEFT", 0, -0)
-		self.ExtraFilter:SetPoint("RIGHT", self, "CENTER", -4, 0)
-
-		self:CScriptAdd("ReloadRequested", function(self, panel, panelInfo)
-			local n = 0
-			for k, v in pairs(TMW.CI.ics.ExtraFilter) do
-				if v then
-					n = n + 1
-				end
-			end
-
-			if n == 0 then
-				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": " .. NONE)
-			else
-				self.ExtraFilter:SetText(L["ICONMENU_AURAFILTER"] .. ": |cFFFF5959" .. n)
-			end
-		end)
+	local spells
+	local array = TMW:GetSpells(ics.Name, false).ArrayNoLower
+	if #array == 0 then
+		BlockShape(L["ICONMENU_AURACONTAINER_CDM_NOSPELLS"])
 	end
-
-	-- Dispel-type filter (candidateFilters.includeDispelTypes). The filter is a plain
-	-- map keyed by auraData.dispelName, so TMW.DS (dispel name -> icon) is exactly the
-	-- set of valid keys.
-	local function DispelType_OnClick(button, dropdown)
-		local ics = TMW.CI.ics
-		ics.DispelType[button.value] = not ics.DispelType[button.value]
-		dropdown:OnSettingSaved()
-	end
-
-	self.DispelType = TMW.C.Config_DropDownMenu:New("Frame", "$parentDispelType", self, "TMW_DropDownMenuTemplate")
-	self.DispelType:SetTexts(L["ICONMENU_DISPELTYPE"], L["ICONMENU_DISPELTYPE_DESC"])
-	self.DispelType:SetWidth(200)
-	self.DispelType:SetFunction(function(dropdown)
-		for dispelType, texture in TMW:OrderedPairs(TMW.DS) do
-			local info = TMW.DD:CreateInfo()
-			info.text = dispelType
-			info.icon = texture
-			info.value = dispelType
-			info.func = DispelType_OnClick
-			info.arg1 = dropdown
-			info.keepShownOnClick = true
-			info.isNotRadio = true
-			info.checked = TMW.CI.ics.DispelType[dispelType]
-
-			TMW.DD:AddButton(info)
-		end
-	end)
-	self.DispelType:ClearAllPoints()
-	if self.ExtraFilter then
-		-- Right half of the aura-filters row.
-		self.DispelType:SetPoint("TOPLEFT", self.ExtraFilter, "TOPRIGHT", 8, 0)
-	else
-		self.DispelType:SetPoint("TOPLEFT", self.OnlyMine, "BOTTOMLEFT", 0, -8)
-	end
-	self.DispelType:SetPoint("RIGHT", -7, 0)
-
-	self:CScriptAdd("ReloadRequested", function()
-		local n = 0
-		for _, v in pairs(TMW.CI.ics.DispelType) do
-			if v then n = n + 1 end
-		end
-		if n == 0 then
-			self.DispelType:SetText(L["ICONMENU_DISPELTYPE"] .. ": " .. NONE)
+	for i = 1, #array do
+		local id = tonumber(array[i])
+		if not id then
+			-- No reason given: GetLimitations already says the entry is being ignored.
+			shapeOk = false
 		else
-			self.DispelType:SetText(L["ICONMENU_DISPELTYPE"] .. ": |cFFFF5959" .. n)
+			if not Auras.IsCDMTracked(id) then
+				Block(format(L["ICONMENU_AURACONTAINER_CDM_UNTRACKED"], TMW.GetSpellName(id) or id))
+			end
+			spells = spells or {}
+			spells[#spells + 1] = id
 		end
-	end)
-
-	-- Max-duration cutoff (candidateFilters.maxDuration). 0 = no limit.
-	local slider = TMW.C.Config_Slider:New("Slider", "$parentAuraMaxDuration", self, "TellMeWhen_SliderTemplate")
-	self.AuraMaxDuration = slider
-	slider:SetTexts(L["ICONMENU_DURATIONMAX"], L["ICONMENU_DURATIONMAX_DESC"])
-	slider:ClearAllPoints()
-	-- Below the filter row, spanning full width from its left element's bottom.
-	slider:SetPoint("TOPLEFT", self.ExtraFilter or self.DispelType, "BOTTOMLEFT", 0, -14)
-	slider:SetPoint("RIGHT", -10, 0)
-	slider:SetSetting("AuraMaxDuration")
-	slider:SetTextFormatter(TMW.C.Formatter.TIME_YDHMS)
-	slider:SetMode(slider.MODE_ADJUSTING)
-	slider:SetMinMaxValues(0, math.huge)
-	slider:SetRange(120)
-	slider:SetValueStep(1)
-
-	-- The order the shown auras are placed in, below everything that decides which auras
-	-- those are.
-	local function Sort_OnClick(button, dropdown)
-		TMW.CI.ics.AuraSort = button.value
-		dropdown:OnSettingSaved()
 	end
 
-	self.AuraSort = TMW.C.Config_DropDownMenu:New("Frame", "$parentAuraSort", self, "TMW_DropDownMenuTemplate")
-	self.AuraSort:SetTexts(L["ICONMENU_AURACONTAINER_SORT"], L["ICONMENU_AURACONTAINER_SORT_DESC"])
-	self.AuraSort:ClearAllPoints()
-	self.AuraSort:SetPoint("TOPLEFT", slider, "BOTTOMLEFT", 0, -14)
-	self.AuraSort:SetPoint("RIGHT", -7, 0)
-	self.AuraSort:SetFunction(function(dropdown)
-		for _, key in ipairs(SortOrder) do
-			local sort = SortMethods[key]
-			local info = TMW.DD:CreateInfo()
-			info.text = sort.text
-			info.tooltipTitle = sort.text
-			info.tooltipText = sort.desc
-			info.value = key
-			info.func = Sort_OnClick
-			info.arg1 = dropdown
-			info.checked = TMW.CI.ics.AuraSort == key
-			TMW.DD:AddButton(info)
+	return shapeOk and spells or nil, blockers
+end
+
+Type.GetDetection = GetDetection
+
+-- The limits this configuration actually hits, plus advice on fixing them. The advice is
+-- separate so the panel doesn't colour it like a limit.
+local function GetLimitations(ics)
+	local limits, advice
+
+	local function Limit(text)
+		limits = limits or {}
+		limits[#limits + 1] = text
+	end
+
+	local array = TMW:GetSpells(ics.Name, false).ArrayNoLower
+	local hasID, hasName = false, false
+	for i = 1, #array do
+		if tonumber(array[i]) then
+			hasID = true
+		else
+			hasName = true
+			Limit(format(L["ICONMENU_BUFFDEBUFF_CONTAINER_NAMENOTID"], tostring(array[i])))
 		end
-	end)
+	end
+	if hasName then
+		advice = format(L["ICONMENU_BUFFDEBUFF_CONTAINER_IDTOOLTIP"], L["SHOWAURASPELLIDS_OPTION"])
+	end
 
-	self:CScriptAdd("ReloadRequested", function()
-		local sort = SortMethods[TMW.CI.ics.AuraSort]
-		self.AuraSort:SetText(L["ICONMENU_AURACONTAINER_SORT"] .. ": " .. (sort and sort.text or NONE))
-	end)
+	local _, unitSet = TMW:GetUnits(nil, ics.Unit)
+	local units = unitSet.originalUnits
 
-	self:AdjustHeight(6)
-end)
+	-- A kind/side mismatch makes Blizzard drop includeSpellIDs, so the icon quietly shows
+	-- every aura. Only a fact where the token settles the side; otherwise state the rule.
+	if hasID then
+		local unitKind = UnitAuraKind(units[1])
+		if not unitKind then
+			Limit(L["ICONMENU_BUFFDEBUFF_CONTAINER_IDFILTER"])
+		elseif unitKind ~= AuraKind(ics.BuffOrDebuff) then
+			Limit(unitKind == "HELPFUL"
+				and L["ICONMENU_BUFFDEBUFF_CONTAINER_IDDEBUFFS"]
+				or L["ICONMENU_BUFFDEBUFF_CONTAINER_IDBUFFS"])
+		end
+	end
 
-Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
-	[ STATE_PRESENT  ] = { text = "|cFF00FF00" .. L["ICONMENU_AURACONTAINER_AURAS"],     tooltipText = L["ICONMENU_AURACONTAINER_AURAS_DESC"],     },
-	[ STATE_UNDERLAY ] = { text = "|cFF7F7F7F" .. L["ICONMENU_AURACONTAINER_UNDERLAY"],  tooltipText = L["ICONMENU_AURACONTAINER_UNDERLAY_DESC"],  },
-})
+	if #units > 1 then
+		Limit(L["ICONMENU_BUFFDEBUFF_CONTAINER_ONEUNIT"])
+	end
+
+	return limits, advice
+end
+Type.GetLimitations = GetLimitations
 
 local function BuildAuraSpec(icon)
 	-- No unit to watch (e.g. no target) -> no spec; the module hides its display.
@@ -530,15 +455,56 @@ local function BuildAuraSpec(icon)
 	}
 end
 
+-- True when every one of the icon's spells is gone, nil when the CDM can't say.
+local function GetKnownAbsent(icon)
+	local spells = icon.CDMSpells
+	if not spells then
+		return nil
+	end
+
+	-- The configured unit: with no target icon.Units is empty, but the CDM still reads that
+	-- slot as harmful and finds nothing, which is an absence.
+	local unit = icon.UnitSet.originalUnits[1]
+	if Auras.GetCDMAuraKind(unit) ~= AuraKind(icon.BuffOrDebuff) then
+		return nil
+	end
+
+	local absent = true
+	for i = 1, #spells do
+		local state = Auras.GetCDMAuraState(spells[i])
+		if state == nil then
+			return nil
+		elseif state then
+			absent = false
+		end
+	end
+
+	return absent
+end
+
 -- The icon type's only job in this mode is to publish the spec via SetInfo;
 -- IconModule_AuraContainer consumes it and owns the container, and the container
 -- handles ongoing UNIT_AURA updates itself. The state we publish is the module's too - it
 -- describes the icon frame that carries the auras and the underlay, not either of them on
--- its own, so the module builds it (see its underlay section). Built once per setup so it
--- stays the same table across publishes, which is how the STATE processor tells a real
--- change from a no-op.
+-- its own, so the module builds it. One table per outcome, built at setup, so the STATE
+-- processor can tell a real change from a no-op.
 local function Buff_OnUpdate_AuraContainer(icon, time)
-	icon:SetInfo("state; auraSpec", icon.AuraContainerState, BuildAuraSpec(icon))
+	local knownAbsent = GetKnownAbsent(icon)
+	if knownAbsent ~= icon.AuraContainerKnownAbsent then
+		icon.AuraContainerKnownAbsent = knownAbsent
+		-- Nothing else re-derives how the opacity divides between the two layers.
+		local module = icon:GetModuleOrModuleChild("IconModule_AuraContainer", true)
+		if module then
+			module:ApplyOpacities()
+		end
+	end
+
+	local state = icon.AuraContainerState
+	if knownAbsent ~= nil then
+		state = knownAbsent and icon.AuraContainerStateAbsent or icon.AuraContainerStatePresent
+	end
+
+	icon:SetInfo("state; auraSpec", state, BuildAuraSpec(icon))
 
 	if icon:IsGroupController() then
 		-- As a group controller we don't harvest aura data ourselves - Blizzard's
@@ -553,10 +519,10 @@ local function Buff_OnUpdate_AuraContainer(icon, time)
 end
 
 -- We only need to re-publish when the unit set changes (target swap, units
--- added/removed); ongoing aura changes on the current unit are the container's
--- job, not ours.
+-- added/removed) or when the Cooldown Manager reports an aura coming or going; ongoing aura
+-- changes on the current unit are the container's job, not ours.
 local function Buff_OnEvent_AuraContainer(icon, event)
-	if event == icon.UnitSet.event then
+	if event == icon.UnitSet.event or event == "TMW_CDM_AURA_CHANGED" then
 		icon.NextUpdateTime = 0
 	end
 end
@@ -567,7 +533,13 @@ function Type:Setup(icon)
 	icon.Units, icon.UnitSet = TMW:GetUnits(icon, icon.Unit, icon:GetSettings().UnitConditions)
 	icon.FirstTexture = GetSpellTexture(icon.Spells.First)
 
-	icon.AuraContainerState = TMW.C.IconModule_AuraContainer:GetIconState(icon)
+	local Module = TMW.C.IconModule_AuraContainer
+	icon.AuraContainerState = Module:GetIconState(icon)
+	icon.AuraContainerStatePresent = Module:GetIconState(icon, false)
+	icon.AuraContainerStateAbsent = Module:GetIconState(icon, true)
+
+	icon.CDMSpells = GetDetection(icon:GetSettings(), icon)
+	icon.AuraContainerKnownAbsent = nil
 
 	icon:SetInfo("texture; reverse", Type:GetConfigIconTexture(icon), true)
 
@@ -578,6 +550,9 @@ function Type:Setup(icon)
 	-- the unit set changes (e.g. target swap).
 	icon:SetScript("OnEvent", Buff_OnEvent_AuraContainer)
 	icon:RegisterEvent(icon.UnitSet.event)
+	if icon.CDMSpells then
+		icon:RegisterEvent("TMW_CDM_AURA_CHANGED")
+	end
 
 	-- BuildAuraSpec drops anything that isn't a number, so a name entered here matches
 	-- nothing at all and does it quietly. Say so rather than leave the user guessing.

@@ -845,6 +845,259 @@ end
 
 
 -- ---------------------------------------------------------------------------
+-- Cooldown Manager aura detection
+--
+-- `frame.auraInstanceID ~= nil` is the one aura fact restriction leaves reachable:
+-- the ID is a secret, and secrets can still be compared against nil. The cooldown
+-- ID isn't secret, so this answers per CDM entry, not per aura.
+-- ---------------------------------------------------------------------------
+
+-- Keyed by spell ID and by lowered spell name, the way `lookup` is.
+local cdmTracked = {}
+local cdmActive = {}
+
+-- [spellID] = lowered name.
+local cdmSpells = {}
+
+--- true, false, or nil when the CDM can't answer. nil is not an absence.
+function Auras.GetCDMAuraState(identifier)
+    if not cdmTracked[identifier] then
+        return nil
+    end
+    return cdmActive[identifier] or false
+end
+
+function Auras.IsCDMTracked(identifier)
+    return cdmTracked[identifier] or false
+end
+
+--- "HELPFUL", "HARMFUL", or nil for a unit the CDM doesn't scan. Mirrors
+--- CooldownViewerItemData's scanUnits and GetTargetAurasFilterString.
+function Auras.GetCDMAuraKind(unit)
+    if unit ~= "player" and unit ~= "target" then
+        return nil
+    end
+    return (UnitExists(unit) and UnitIsFriend("player", unit)) and "HELPFUL" or "HARMFUL"
+end
+
+--- The same table every call, rebuilt in place as coverage changes.
+function Auras.GetCDMTrackedSpells()
+    return cdmSpells
+end
+
+if TMW.clientHasSecrets and C_CooldownViewer then
+    local GetSpellName = TMW.GetSpellName
+    local GetOverrideSpell = C_Spell.GetOverrideSpell
+    local GetCooldownViewerCooldownInfo = C_CooldownViewer.GetCooldownViewerCooldownInfo
+
+    -- GLOBALS: EssentialCooldownViewer, BuffIconCooldownViewer
+    -- GLOBALS: BuffBarCooldownViewer, UtilityCooldownViewer
+    local viewers = {}
+    for _, name in TMW:Vararg(
+        "EssentialCooldownViewer",
+        "BuffIconCooldownViewer",
+        "BuffBarCooldownViewer",
+        "UtilityCooldownViewer"
+    ) do
+        local viewer = _G[name]
+        if viewer then
+            viewers[#viewers + 1] = viewer
+        end
+    end
+
+    -- [cooldownID] = the identifiers that entry's aura answers to, or false for none.
+    local keysByCooldownID = {}
+
+    -- An overridden spell isn't the one whose aura shows up: Wither replaces Immolate and
+    -- Corruption (#2359, #2371). Never the reverse - the game only says what overrides what.
+    local function AddKey(keys, id)
+        if not id then
+            return
+        end
+
+        local override = GetOverrideSpell(id)
+        if override and override ~= id then
+            id = override
+        end
+
+        keys[id] = true
+
+        local name = GetSpellName(id)
+        if name then
+            keys[strlowerCache[name]] = true
+        end
+    end
+
+    local function GetKeys(cooldownID)
+        local keys = keysByCooldownID[cooldownID]
+        if keys ~= nil then
+            return keys or nil
+        end
+
+        local info = GetCooldownViewerCooldownInfo(cooldownID)
+        if not info then
+            keysByCooldownID[cooldownID] = false
+            return nil
+        end
+
+        -- What GetAssociatedAuraSpellPriority matches on. Never linkedSpellID (singular):
+        -- the viewer writes the secret spellId of whatever aura it found into that one.
+        keys = {}
+        AddKey(keys, info.spellID)
+        AddKey(keys, info.overrideSpellID)
+        AddKey(keys, info.overrideTooltipSpellID)
+        local linked = info.linkedSpellIDs
+        if linked then
+            for i = 1, #linked do
+                AddKey(keys, linked[i])
+            end
+        end
+
+        if not next(keys) then
+            keys = false
+        end
+        keysByCooldownID[cooldownID] = keys
+        return keys or nil
+    end
+
+    local scanTracked, scanActive = {}, {}
+
+    local function Rescan()
+        wipe(scanTracked)
+        wipe(scanActive)
+
+        for i = 1, #viewers do
+            local viewer = viewers[i]
+            -- OnHide unregisters UNIT_AURA. TMW's own hide is alpha 0, which keeps tracking.
+            if viewer:IsShown() then
+                for frame in viewer.itemFramePool:EnumerateActive() do
+                    -- Cleared when the pool releases a frame, so it doubles as in-use.
+                    local keys = frame.cooldownID and GetKeys(frame.cooldownID)
+                    if keys then
+                        local present = frame.auraInstanceID ~= nil
+                        for key in pairs(keys) do
+                            scanTracked[key] = true
+                            if present then
+                                scanActive[key] = true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Same payload shape as TMW_UNIT_AURA: the keys are what changed.
+    local function Diff(payload, new, old)
+        for key in pairs(new) do
+            if not old[key] then
+                payload = payload or {}
+                payload[key] = true
+            end
+        end
+        for key in pairs(old) do
+            if not new[key] then
+                payload = payload or {}
+                payload[key] = true
+            end
+        end
+        return payload
+    end
+
+    local function Apply()
+        local payload = Diff(nil, scanActive, cdmActive)
+        payload = Diff(payload, scanTracked, cdmTracked)
+
+        wipe(cdmActive)
+        for key in pairs(scanActive) do
+            cdmActive[key] = true
+        end
+
+        wipe(cdmTracked)
+        wipe(cdmSpells)
+        for key in pairs(scanTracked) do
+            cdmTracked[key] = true
+            if type(key) == "number" then
+                local name = GetSpellName(key)
+                if name then
+                    cdmSpells[key] = strlowerCache[name]
+                end
+            end
+        end
+
+        if payload then
+            TMW:Fire("TMW_CDM_AURA_CHANGED", payload)
+        end
+    end
+
+    local dirty = true
+    local function MarkDirty()
+        dirty = true
+    end
+
+    -- For what moves which spells an entry answers to, rather than which aura it has.
+    local function MarkStale()
+        wipe(keysByCooldownID)
+        dirty = true
+    end
+
+    -- Frames are pooled, so these go on once per frame object and outlive its cooldown.
+    local hookedFrames = {}
+    local function HookFrame(_, frame)
+        if hookedFrames[frame] or not frame.OnAuraInstanceInfoSet then
+            return
+        end
+        hookedFrames[frame] = true
+
+        -- Not OnActiveStateChanged: CooldownViewerCooldownItemMixin never overrides
+        -- ShouldBeActive, so on Essential and Utility isActive is just cooldownID ~= nil.
+        hooksecurefunc(frame, "OnAuraInstanceInfoSet", MarkDirty)
+        hooksecurefunc(frame, "OnAuraInstanceInfoCleared", MarkDirty)
+
+        MarkDirty()
+    end
+
+    local function HookViewer(viewer)
+        hooksecurefunc(viewer, "OnAcquireItemFrame", HookFrame)
+
+        -- Nothing per-frame says a viewer stopped tracking. Also its own combat/CVar handler.
+        hooksecurefunc(viewer, "UpdateShownState", MarkDirty)
+
+        -- Viewer-level, unlike the per-item RefreshData. Spec, talent, hotfix and layout
+        -- edits all reach these through CooldownViewerSettings.OnDataChanged.
+        hooksecurefunc(viewer, "RefreshLayout", MarkStale)
+        hooksecurefunc(viewer, "RefreshData", MarkStale)
+
+        for frame in viewer.itemFramePool:EnumerateActive() do
+            HookFrame(viewer, frame)
+        end
+    end
+
+    -- Per viewer, so one missing a method doesn't cost the others their hooks.
+    for i = 1, #viewers do
+        TMW.safecall(HookViewer, viewers[i])
+    end
+
+    -- The only path no hook catches: the viewer hands this event straight to its items.
+    local watcher = CreateFrame("Frame")
+    watcher:RegisterEvent("COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED")
+    watcher:SetScript("OnEvent", MarkStale)
+
+    -- One pass per tick however many hooks fired, and after the viewer is done with them.
+    TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
+        if not dirty then
+            return
+        end
+        dirty = false
+
+        if TMW.safecall(Rescan) then
+            Apply()
+        end
+    end)
+end
+
+
+-- ---------------------------------------------------------------------------
 -- Config: which of an icon's spells stay readable while auras are secret
 -- ---------------------------------------------------------------------------
 
@@ -899,7 +1152,7 @@ if TMW.clientHasSecrets then
             end
 
             if reason then
-                unreadable[#unreadable + 1] = label .. " |cff808080- " .. reason .. "|r"
+                unreadable[#unreadable + 1] = label .. " |cffcccccc- " .. reason .. "|r"
             else
                 readable[#readable + 1] = label
             end

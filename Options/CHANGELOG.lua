@@ -4,6 +4,8 @@ TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
 ## v12.1.4
+* Added the "Aura Present (via CDM)" condition - checks an aura presence in combat by reading Blizzard's Cooldown Manager.
+* The Underlay on Buff/Debuff (combat ready) icons now becomes a real Absent state when Blizzard's Cooldown Manager covers the icon's spells.
 * Added a "While Aura Present" animation trigger for Buff/Debuff (combat ready) icons, which plays an animation on each aura for as long as that aura is present (#2491).
 * The pandemic indicator on Buff/Debuff (combat ready) icons is now a "While Aura In Pandemic" animation trigger, so it can use any animation and its color, size, flashing and anchor settings. Existing pandemic settings are converted automatically.
 * Added the "Icon: CDM Pandemic" animation - the pandemic animation Blizzard's Cooldown Manager uses.
