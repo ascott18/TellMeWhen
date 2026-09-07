@@ -868,9 +868,6 @@ function ColumnConfig:IsFrameBlacklisted(frameName)
 end
 
 function ColumnConfig:SetupConfig(subHandlerData)
-	local desiredFrames = subHandlerData.ConfigFrames
-	local subHandlerIdentifier = subHandlerData.subHandlerIdentifier
-
 	local EventSettings = EVENTS:GetEventSettings()
 	local Frames = self.ConfigContainer.ConfigFrames
 
@@ -880,15 +877,17 @@ function ColumnConfig:SetupConfig(subHandlerData)
 
 	assert(Frames, self.className .. " doesn't have a ConfigFrames table!")
 	assert(Frames.ConfigFrames, self.className .. " isn't a TMW.C.Events_ColumnConfigContainer!")
-	
+
 	for i, frame in pairs(Frames.ConfigFrames) do
 		frame:Hide()
 	end
 
+	local desiredFrames = subHandlerData and subHandlerData.ConfigFrames
 	if not desiredFrames then
 		return
 	end
 
+	local subHandlerIdentifier = subHandlerData.subHandlerIdentifier
 	local lastFrame, lastFrameBottomPadding
 	for i, configFrameIdentifier in ipairs(desiredFrames) do
 		if not self:IsFrameBlacklisted(configFrameIdentifier) then
