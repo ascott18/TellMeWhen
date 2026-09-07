@@ -48,6 +48,7 @@ TEXT.MasqueSkinnableTexts = {
 -- API and driven with the aura's real (secret) value; the default is the display's own DogTag
 -- string, evaluated once when the aura display is built. The layout still controls
 -- position/look, and on every other icon type this setting is ignored.
+-- IconModule_AuraContainer adds "caster" here on clients whose aura button can drive it.
 TEXT.AuraContainerTexts = {
 	[""]     = L["TEXTLAYOUTS_AURA_TEXT"],
 	spell    = L["TEXTLAYOUTS_AURA_SPELL"],
@@ -140,7 +141,7 @@ TMW:RegisterDatabaseDefaults{
 					},
 					DefaultText		= "",               --
 					SkinAs			= "",               --
-					Aura			= "",               -- Aura-container purpose (see TEXT.AuraContainerTexts): "", "spell", "duration", "stacks"
+					Aura			= "",               -- Aura-container purpose (see TEXT.AuraContainerTexts): "", "spell", "duration", "stacks", "caster"
 				},
 			},
 			

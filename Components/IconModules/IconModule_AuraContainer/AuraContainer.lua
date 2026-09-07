@@ -141,6 +141,24 @@ durationFormatter:SetBreakpoints({
 })
 
 
+-- 12.1.5's caster name, feature-detected off a throwaway instance the way
+-- IconModule_IconContainer detects its activation alert template. The mixin can't be read
+-- directly: Blizzard_AuraContainer loads its Lua into the secure environment, so only the
+-- templates its XML declares are visible to us.
+local hasCasterName = false
+do
+	local ok, probe = pcall(CreateFrame, "AuraButton", nil, UIParent, "CustomAuraButtonTemplate")
+	if ok and probe then
+		hasCasterName = probe.SetCasterName ~= nil and probe.ClearCasterName ~= nil
+	end
+end
+
+-- An aura's caster, as a fourth Aura purpose for a text display (see TEXT.AuraContainerTexts,
+-- which declares the rest - this one only exists where the button can drive it).
+if hasCasterName then
+	TMW.TEXT.AuraContainerTexts.caster = L["TEXTLAYOUTS_AURA_CASTER"]
+end
+
 local Processor = TMW.Classes.IconDataProcessor:New("AURASPEC", "auraSpec")
 function Processor:CompileFunctionSegment(t)
 	-- GLOBALS: auraSpec
@@ -845,7 +863,7 @@ local TRIGGER_SETTINGS = {
 }
 
 Module:RegisterIconEvent(10, "AURAPRESENT", {
-	category = L["EVENT_CATEGORY_VISIBILITY"],
+	category = L["EVENT_CATEGORY_AURA"],
 	text = L["SOUND_EVENT_AURAPRESENT"],
 	desc = L["SOUND_EVENT_AURAPRESENT_DESC"],
 	requiredHandlerFlag = "supportAuraPresent",
@@ -854,7 +872,7 @@ Module:RegisterIconEvent(10, "AURAPRESENT", {
 })
 
 Module:RegisterIconEvent(10.5, "AURAPANDEMIC", {
-	category = L["EVENT_CATEGORY_VISIBILITY"],
+	category = L["EVENT_CATEGORY_AURA"],
 	text = L["SOUND_EVENT_AURAPANDEMIC"],
 	desc = L["SOUND_EVENT_AURAPANDEMIC_DESC"],
 	requiredHandlerFlag = "supportAuraPresent",
@@ -923,7 +941,8 @@ function Module:Emulate_AuraAnimations(icon, button, remap, square)
 	local built = wipe(builtAnimations)
 	local placement
 
-	-- Pandemic registrations accumulate, so drop the previous pass's before re-adding.
+	-- Registrations accumulate and re-adding the same object errors, 
+	-- so drop the previous pass's before re-adding.
 	button:ClearPandemicRegions()
 
 	for _, eventSettings in TMW:InNLengthTable(settingsIcon.Events) do
@@ -1061,6 +1080,8 @@ function Module:Emulate_IconModule_Texts(icon, button, remap)
 				button:SetDurationText(auraFs, { textFormatter = durationFormatter })
 			elseif aura == "stacks" then
 				button:SetApplicationCount(auraFs, {})
+			elseif aura == "caster" and hasCasterName then
+				button:SetCasterName(auraFs)
 			else
 				-- Evaluated once, here, and left alone: DogTag would have to write to it on
 				-- its own schedule, and this string is a descendant of the button, so it's
@@ -1083,6 +1104,8 @@ function Module:Emulate_IconModule_Texts(icon, button, remap)
 				button:ClearDurationText()
 			elseif aura == "stacks" then
 				button:ClearApplicationCount()
+			elseif aura == "caster" and hasCasterName then
+				button:ClearCasterName()
 			end
 		end
 	end
@@ -1398,6 +1421,44 @@ function Module:ConfigureContainerLayout()
 	end
 end
 
+-- Parking leaves a group or slot in the pool but showing nothing. 12.1.5 can disable one
+-- outright; before that each kind has its own lever. Un-parking is nearly free either way:
+-- the caller assigns the filter string (and, for a group, the frame cap) regardless, which
+-- on an older client is by itself enough to bring a parked item back.
+
+-- A group's frame cap is the only lever before 12.1.5.
+local function ParkGroup(container, key)
+	if container.SetAuraGroupEnabled then
+		container:SetAuraGroupEnabled(key, false)
+	else
+		container:SetAuraGroupMaxFrameCount(key, 0)
+	end
+end
+
+local function UnparkGroup(container, key)
+	if container.SetAuraGroupEnabled then
+		container:SetAuraGroupEnabled(key, true)
+	end
+end
+
+-- A slot has no frame cap, so before 12.1.5 the only lever is a filter that can't match:
+-- an aura is never both HELPFUL and HARMFUL.
+local SLOT_PARK_FILTER = "HELPFUL|HARMFUL"
+
+local function ParkSlot(container, key)
+	if container.SetAuraSlotEnabled then
+		container:SetAuraSlotEnabled(key, false)
+	else
+		container:SetAuraSlotFilterString(key, SLOT_PARK_FILTER)
+	end
+end
+
+local function UnparkSlot(container, key)
+	if container.SetAuraSlotEnabled then
+		container:SetAuraSlotEnabled(key, true)
+	end
+end
+
 -- Ensure the index'th aura group exists (group controllers), point it at `filterString` and
 -- return it. The pool is keyed by index rather than by filter string: a group can't be
 -- removed, but its filter string is mutable (SetAuraGroupFilterString), so reassigning by
@@ -1409,6 +1470,7 @@ function Module:EnsureGroup(index, filterString, maxFrameCount)
 	local auraGroup = self.groups[index]
 	if auraGroup then
 		container:SetAuraGroupFilterString(auraGroup.key, filterString)
+		UnparkGroup(container, auraGroup.key)
 		return auraGroup
 	end
 
@@ -1428,10 +1490,6 @@ function Module:EnsureGroup(index, filterString, maxFrameCount)
 	return auraGroup
 end
 
--- A deliberately self-contradictory filter (an aura can't be both HELPFUL and HARMFUL),
--- used to park an unused slot so it shows nothing - slots have no maxFrameCount = 0 knob.
-local SLOT_PARK_FILTER = "HELPFUL|HARMFUL"
-
 -- Ensure the index'th aura slot exists (single-aura icons), set its filter string, and
 -- return its frame. Slots create ONE frame (no group batch) and are manually anchored, so
 -- we place the frame over the icon and record it for skinning. The pool works like the
@@ -1441,6 +1499,7 @@ function Module:EnsureSlot(index, filterString)
 	local slot = self.slots[index]
 	if slot then
 		container:SetAuraSlotFilterString(slot.key, filterString)
+		UnparkSlot(container, slot.key)
 		return slot
 	end
 
@@ -1470,15 +1529,13 @@ end
 
 function Module:DeactivateGroups()
 	for i = 1, #self.groups do
-		self.container:SetAuraGroupMaxFrameCount(self.groups[i].key, 0)
+		ParkGroup(self.container, self.groups[i].key)
 	end
 end
 
 function Module:DeactivateSlots()
 	for i = 1, #self.slots do
-		-- Note: There's no real API to deactivate a slot.
-		-- Best you can do is give it junk filters.
-		self.container:SetAuraSlotFilterString(self.slots[i].key, SLOT_PARK_FILTER)
+		ParkSlot(self.container, self.slots[i].key)
 	end
 end
 
@@ -1564,7 +1621,7 @@ function Module:SetAuraSpec(auraSpec)
 		end
 		-- Park pooled groups beyond the current filter count.
 		for i = #filters + 1, #self.groups do
-			container:SetAuraGroupMaxFrameCount(self.groups[i].key, 0)
+			ParkGroup(container, self.groups[i].key)
 		end
 
 		self:ConfigureContainerLayout()
@@ -1581,7 +1638,7 @@ function Module:SetAuraSpec(auraSpec)
 		end
 		-- Park pooled slots beyond the current filter count.
 		for i = #filters + 1, #self.slots do
-			container:SetAuraSlotFilterString(self.slots[i].key, SLOT_PARK_FILTER)
+			ParkSlot(container, self.slots[i].key)
 		end
 	end
 
