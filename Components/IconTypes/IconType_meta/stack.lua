@@ -60,7 +60,7 @@ local Stack = {}
 Type.Stack = Stack
 
 -- Frame level room for one component's own display. An icon's modules take levels at fixed
--- offsets from the icon (TMW.CONST.FRAMELEVEL tops out at 5), so consecutive components
+-- offsets from the icon (TMW.CONST.FRAMELEVEL tops out at 6), so consecutive components
 -- have to be at least this far apart to keep their displays from interleaving.
 local LEVEL_STRIDE = 10
 

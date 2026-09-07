@@ -241,12 +241,14 @@ TMW.CONST = {
 	},
 
 	-- Frame levels inside an icon, as offsets from the icon's own level.
-	-- The icon's display occupies 0-3 (container, cooldown, bars, texts).
+	-- The icon's display occupies 0-3 (container, cooldown, bars).
 	FRAMELEVEL = {
 		-- Covers the icon's display, whose art it re-emulates on its buttons.
 		AURACONTAINER = 4,
-		-- Animations draw over everything, including an aura container.
+		-- Animations draw over the icon's display and over an aura container.
 		ANIMATION = 5,
+		-- Text is above both: an animation must never obscure it (#2490).
+		TEXT = 6,
 	},
 }
 

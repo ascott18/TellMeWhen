@@ -710,7 +710,7 @@ function Texts:OnNewInstance(icon)
 	
 	self.container = CreateFrame("Frame", nil, icon)
 	self.container:SetAllPoints(icon)
-	self.container:SetFrameLevel(icon:GetFrameLevel() + 3)
+	self.container:SetFrameLevel(icon:GetFrameLevel() + TMW.CONST.FRAMELEVEL.TEXT)
 	
 	-- We need to make sure that all strings that are Masque skinnable are always created
 	-- so that they can be available to IconModule_IconContainer_Masque when it requests them.

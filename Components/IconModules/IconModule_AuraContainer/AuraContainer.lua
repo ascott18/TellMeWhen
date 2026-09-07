@@ -293,8 +293,8 @@ end
 --
 -- Everything we place on a button gets an explicit frame level from this stack (offsets
 -- from the button's own level) - two of our frames landing on the same level would order
--- by creation instead. Text on top mirrors a real icon, where IconModule_Texts sits at
--- icon level + 3 while the icon square and its border sit at + 0 / + 1.
+-- by creation instead. The order mirrors a real icon's (TMW.CONST.FRAMELEVEL): the icon
+-- square and its border at the bottom, then animations, then text on top.
 -- ----------------------------------------------------------------------------
 
 local LEVEL_BACKDROP  = 0  -- the bar views' bar backdrop
