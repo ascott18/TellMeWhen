@@ -97,25 +97,8 @@ if hasProcAnim then
 			-- Parented to the icon rather than the container, but still anchored to the
 			-- container: an aura container dims the container to hide the icon's own art,
 			-- and the glow draws over the auras rather than being part of what's hidden.
-			overlay = CreateFrame("Frame", nil, self.icon, activationAlertTemplate)
+			overlay = CreateFrame("Frame", nil, self.icon, "TellMeWhen_ProcLoopGlow")
 			container.overlay = overlay
-
-			-- The intro animation to the new activation alert animation in wow 10.1.5 is extremely weird,
-			-- so we're electing to not use it and only use the loop animation (ProcLoop).
-			overlay.ProcStartFlipbook:Hide()
-			-- Masque will keep trying to re-show it, so prevent that.
-			overlay.ProcStartFlipbook.Show = function() end
-
-			-- Remove the default OnHide script that stops the animation when the overlay hides, 
-			-- as otherwise the animation will stop if the parent group hides, e.g. when leaving and entering combat rapidly.
-			overlay:SetScript("OnHide", nil)
-
-			-- Since we're disregarding the intro, add an alpha fade-in:
-			overlay.fadeIn = overlay:CreateAnimationGroup()
-			local alphaFade = overlay.fadeIn:CreateAnimation("Alpha")
-			alphaFade:SetDuration(0.2)
-			alphaFade:SetFromAlpha(0)
-			alphaFade:SetToAlpha(1)
 
 			local frameWidth, frameHeight = container:GetSize()
 			overlay:SetSize(frameWidth * 1.4, frameHeight * 1.4)
@@ -124,7 +107,7 @@ if hasProcAnim then
 		end
 		if not overlay:IsShown() then
 			overlay:Show()
-			overlay.ProcLoop:Play()
+			overlay.anim:Play()
 			overlay.fadeIn:Play()
 		end
 	end
@@ -134,8 +117,7 @@ if hasProcAnim then
 		local overlay = container.overlay
 
 		if overlay then
-			overlay.ProcStartAnim:Stop()
-			overlay.ProcLoop:Stop()
+			overlay.anim:Stop()
 			overlay:Hide()
 		end
 	end
@@ -292,15 +274,13 @@ if hasProcAnim then
 	-- it belongs to the icon, and this one is parented to whatever is hosting it.
 	ACTVTNGLOW.Persistent = {
 		Build = function(parent)
-			local overlay = CreateFrame("Frame", nil, parent, activationAlertTemplate)
+			-- Our own copy of the art (Glows.xml), which Blizzard's template can't be used for
+			-- here. It carries only the loop half, the same half ShowOverlayGlowInternal keeps.
+			local overlay = CreateFrame("Frame", nil, parent, "TellMeWhen_ProcLoopGlow")
 
-			-- Same treatment ShowOverlayGlowInternal gives it: the 10.1.5 intro animation
-			-- looks wrong looping, so only ProcLoop is used and the flipbook is kept from
-			-- re-showing itself.
-			overlay.ProcStartFlipbook:Hide()
-			overlay.ProcStartFlipbook.Show = TMW.NULLFUNC
-
-			overlay.ProcLoop:Play()
+			-- Nothing will ever start it again: scripts don't fire on a descendant of the
+			-- restricted button that hosts this.
+			overlay.anim:Play()
 			return overlay
 		end,
 		Configure = function(overlay, eventSettings, placement)
@@ -319,9 +299,11 @@ IconContainer:RegisterEventHandlerData("Animations", 60, "ACTVTNGLOW", ACTVTNGLO
 -- ~40px icon - so it reads as a halo rather than an inner border.
 local CDMPANDEMIC_OVERSCALE = 1.3
 
-local cdmPandemicTemplate = "CooldownPandemicFXTemplate"
+-- Our own copy of Blizzard's art (Glows.xml), so the atlas is what says whether this
+-- client has it - the template exists everywhere TMW does.
+local cdmPandemicTemplate = "TellMeWhen_CDMPandemicFX"
 
-if pcall(CreateFrame, "Frame", nil, UIParent, cdmPandemicTemplate) then
+if C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo("UI-CooldownManager-PandemicBorder") then
 	IconContainer:RegisterEventHandlerData("Animations", 61, "CDMPANDEMIC", {
 		text = L["ANIM_CDMPANDEMIC"],
 		desc = L["ANIM_CDMPANDEMIC_DESC"],
@@ -363,23 +345,24 @@ if pcall(CreateFrame, "Frame", nil, UIParent, cdmPandemicTemplate) then
 			local w, h = container:GetSize()
 			WrapWithGlow(fx, container, w, h, CDMPANDEMIC_OVERSCALE * table.Scale)
 
-			-- The template inherits AnimateWhileShownTemplate, so showing it starts the loop.
+			fx.FX.anim:Play()
 			fx:Show()
 		end,
 		OnStop = function(icon, table)
 			local IconModule_IconContainer = icon:GetModuleOrModuleChild("IconModule_IconContainer", true, true)
 
-			IconModule_IconContainer.container.cdmPandemic:Hide()
+			local fx = IconModule_IconContainer.container.cdmPandemic
+			fx.FX.anim:Stop()
+			fx:Hide()
 		end,
 
 		Persistent = {
 			Build = function(parent)
 				local fx = CreateFrame("Frame", nil, parent, cdmPandemicTemplate)
 
-				-- AnimateWhileShownTemplate starts the loop from OnShow, and scripts never
-				-- fire on a descendant of a restricted frame. PlayAnims walks the frame and
-				-- its children, so calling it directly reaches the group on the FX child.
-				fx:PlayAnims()
+				-- Nothing will ever start it again: scripts don't fire on a descendant of the
+				-- restricted button that hosts this.
+				fx.FX.anim:Play()
 				return fx
 			end,
 			Configure = function(fx, eventSettings, placement)

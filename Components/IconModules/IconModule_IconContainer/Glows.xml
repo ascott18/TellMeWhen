@@ -1,0 +1,70 @@
+﻿<Ui>
+
+	<!-- Copies of Blizzard's CooldownPandemicFXTemplate and the ProcLoop half of
+	ActionButtonSpellAlertTemplate, minus the OnShow/OnHide handlers theirs bind
+	because those handlers raise warnings inside restricted regions. (aura buttons). -->
+
+	<Frame name="TellMeWhen_CDMPandemicFX" hidden="true" virtual="true">
+		<Frames>
+			<Frame parentKey="Border" setAllPoints="true">
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="Border" atlas="UI-CooldownManager-PandemicBorder" setAllPoints="true"/>
+					</Layer>
+				</Layers>
+			</Frame>
+			<Frame parentKey="FX" setAllPoints="true">
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="01" alphaMode="BLEND" atlas="UI-CooldownManager-PandemicFX-Icon01" setAllPoints="true"/>
+						<Texture parentKey="02" alphaMode="BLEND" atlas="UI-CooldownManager-PandemicFX-Icon02" setAllPoints="true"/>
+						<Texture parentKey="03" alphaMode="BLEND" atlas="UI-CooldownManager-PandemicFX-Icon03" setAllPoints="true"/>
+						<!-- The pulses scale out past the frame; the clamp is what keeps them inside the ring. -->
+						<MaskTexture parentKey="Mask" atlas="UI-CooldownManager-PandemicBorder-Mask" vWrapMode="CLAMPTOBLACKADDITIVE" hWrapMode="CLAMPTOBLACKADDITIVE" setAllPoints="true">
+							<MaskedTextures>
+								<MaskedTexture childKey="01"/>
+								<MaskedTexture childKey="02"/>
+								<MaskedTexture childKey="03"/>
+							</MaskedTextures>
+						</MaskTexture>
+					</Layer>
+				</Layers>
+				<Animations>
+					<!-- Three identical pulses, each starting 1.5s after the last, over a 5s loop. -->
+					<AnimationGroup parentKey="anim" looping="REPEAT" setToFinalAlpha="true">
+						<Scale childKey="01" duration="2" order="1" startDelay="0" smoothing="IN_OUT" fromScaleX="0.25" fromScaleY="0.25" toScaleX="1.5" toScaleY="1.5"/>
+						<Alpha childKey="01" duration="0.5" order="1" startDelay="0" smoothing="IN_OUT" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="01" duration="1" order="1" startDelay="0.5" smoothing="IN_OUT" fromAlpha="1" toAlpha="1"/>
+						<Alpha childKey="01" duration="0.5" order="1" startDelay="1.5" smoothing="IN_OUT" fromAlpha="1" toAlpha="0"/>
+						<Scale childKey="02" duration="2" order="1" startDelay="1.5" smoothing="IN_OUT" fromScaleX="0.25" fromScaleY="0.25" toScaleX="1.5" toScaleY="1.5"/>
+						<Alpha childKey="02" duration="0.5" order="1" startDelay="1.5" smoothing="IN_OUT" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="02" duration="1" order="1" startDelay="2" smoothing="IN_OUT" fromAlpha="1" toAlpha="1"/>
+						<Alpha childKey="02" duration="0.5" order="1" startDelay="3" smoothing="IN_OUT" fromAlpha="1" toAlpha="0"/>
+						<Scale childKey="03" duration="2" order="1" startDelay="3" smoothing="IN_OUT" fromScaleX="0.25" fromScaleY="0.25" toScaleX="1.5" toScaleY="1.5"/>
+						<Alpha childKey="03" duration="0.5" order="1" startDelay="3" smoothing="IN_OUT" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="03" duration="1" order="1" startDelay="3.5" smoothing="IN_OUT" fromAlpha="1" toAlpha="1"/>
+						<Alpha childKey="03" duration="0.5" order="1" startDelay="4.5" smoothing="IN_OUT" fromAlpha="1" toAlpha="0"/>
+					</AnimationGroup>
+				</Animations>
+			</Frame>
+		</Frames>
+	</Frame>
+
+	<Frame name="TellMeWhen_ProcLoopGlow" hidden="true" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Flipbook" atlas="UI-HUD-ActionBar-Proc-Loop-Flipbook" setAllPoints="true"/>
+			</Layer>
+		</Layers>
+		<Animations>
+			<AnimationGroup parentKey="anim" looping="REPEAT">
+				<FlipBook childKey="Flipbook" duration="1" order="1" flipBookRows="6" flipBookColumns="5" flipBookFrames="30" flipBookFrameWidth="0" flipBookFrameHeight="0"/>
+			</AnimationGroup>
+			<!-- Stands in for the intro half that isn't copied. -->
+			<AnimationGroup parentKey="fadeIn">
+				<Alpha duration="0.2" order="1" fromAlpha="0" toAlpha="1"/>
+			</AnimationGroup>
+		</Animations>
+	</Frame>
+
+</Ui>
