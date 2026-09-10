@@ -43,13 +43,185 @@
 ## X-Embeds: LibStub, Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, DRList-1.0, LibDogTag-3.0, LibDogTag-Unit-3.0, LibDogTag-Stats-3.0, LibSpellRange-1.0, LibOO-1.0, LibRangeCheck-3.0, LibBabble-CreatureType-3.0, LibBabble-Race-3.0, LibCustomGlow-1.0
 ## X-Category: Combat
 
-includes.xml
+# Core included files that are agnostic to game version
+
+Lib\LibStub\LibStub.lua
+Lib\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Lib\LibOO-1.0\lib.xml
+Lib\AceAddon-3.0\AceAddon-3.0.xml
+Lib\AceConsole-3.0\AceConsole-3.0.xml
+Lib\AceEvent-3.0\AceEvent-3.0.xml
+Lib\AceTimer-3.0\AceTimer-3.0.xml
+Lib\AceLocale-3.0\AceLocale-3.0.xml
+Lib\AceDB-3.0\AceDB-3.0.xml
+Lib\AceComm-3.0\AceComm-3.0.xml
+Lib\AceSerializer-3.0\AceSerializer-3.0.xml
+Lib\LibSharedMedia-3.0\lib.xml
+Lib\libdatabroker-1-1\LibDataBroker-1.1.lua
+
+# DRList-1.0 uses an unconventional folder layout, requiring the double nesting.
+Lib\DRList-1.0\DRList-1.0\DRList-1.0.xml
+
+Lib\LibDogTag-3.0\lib.xml
+Lib\LibDogTag-Unit-3.0\lib.xml
+Lib\LibDogTag-Stats-3.0\lib.xml
+Lib\LibSpellRange-1.0\lib.xml
+Lib\LibCustomGlow-1.0\LibCustomGlow-1.0.xml
+Lib\LibRangeCheck-3.0\LibRangeCheck-3.0\LibRangeCheck-3.0.lua
+Lib\LibBabble-CreatureType-3.0\lib.xml
+Lib\LibBabble-Race-3.0\lib.xml
+
+# Localization\TellMeWhen-deDE.lua [AllowLoadTextLocale deDE]
+# Localization\TellMeWhen-frFR.lua [AllowLoadTextLocale frFR]
+# Localization\TellMeWhen-koKR.lua [AllowLoadTextLocale koKR]
+# Localization\TellMeWhen-ptBR.lua [AllowLoadTextLocale ptBR]
+# Localization\TellMeWhen-itIT.lua [AllowLoadTextLocale itIT]
+Localization\TellMeWhen-enUS.lua
+Localization\TellMeWhen-esES.lua [AllowLoadTextLocale esES]
+Localization\TellMeWhen-esMX.lua [AllowLoadTextLocale esMX]
+Localization\TellMeWhen-ruRU.lua [AllowLoadTextLocale ruRU]
+Localization\TellMeWhen-zhCN.lua [AllowLoadTextLocale zhCN]
+Localization\TellMeWhen-zhTW.lua [AllowLoadTextLocale zhTW]
+Localization\StaticFormats.lua
+
+TellMeWhen.lua
+
+Components\Core\Utils.lua
+
+Components\Core\Spells\Spells.lua
+Components\Core\Spells\AuraCache.lua
+Components\Core\Spells\ClassSpellCache.lua
+
+Components\Core\BaseClasses\GenericComponentImplementor.lua
+Components\Core\BaseClasses\GenericModuleImplementor.lua
+Components\Core\BaseClasses\GenericComponent.lua
+Components\Core\BaseClasses\IconComponent.lua
+Components\Core\BaseClasses\GroupComponent.lua
+Components\Core\BaseClasses\ObjectModule.lua
+Components\Core\BaseClasses\IconDataProcessorComponent.lua
+
+Components\Core\Common\Textures.lua
+Components\Core\Common\SwingTimerMonitor.lua
+Components\Core\Common\UpdateTableManager.lua
+Components\Core\Common\PlayerNames.lua
+Components\Core\Common\Actions.lua
+Components\Core\Common\Cooldowns.lua
+Components\Core\Common\Item.lua
+Components\Core\Common\Auras.lua
+Components\Core\Common\SpellRange.lua
+Components\Core\Common\SpellUsable.lua
+Components\Core\Common\SpellActivationOverlay.lua
+Components\Core\Common\DogTags\DogTags.lua
+
+Components\Core\Conditions\Conditions.lua
+Components\Core\Conditions\ConditionObject.lua
+Components\Core\Conditions\ConditionObjectConstructor.lua
+Components\Core\Conditions\UpdateEngine.lua
+Components\Core\Conditions\ConditionCategory.lua
+Components\Core\Conditions\Condition.lua
+
+Components\Core\Conditions\Categories\Resources.lua
+Components\Core\Conditions\Categories\Spells.lua
+Components\Core\Conditions\Categories\BuffsDebuffs.lua
+Components\Core\Conditions\Categories\Talents.lua
+Components\Core\Conditions\Categories\Location.lua
+Components\Core\Conditions\Categories\PlayerAttributes.lua
+Components\Core\Conditions\Categories\UnitAttributes.lua
+Components\Core\Conditions\Categories\Currencies.lua
+Components\Core\Conditions\Categories\BossMods.lua
+Components\Core\Conditions\Categories\Misc.lua
+
+Components\Core\Units\Units.lua
+
+Components\Core\IconEvents\EventHandler.lua
+
+Components\Core\IconType.lua
+Components\Core\IconView.lua
+Components\Core\Group.lua
+Components\Core\GroupModule.lua
+Components\Core\Icon.lua
+Components\Core\IconModule.lua
+Components\Core\IconDataProcessor.lua
+Components\Core\IconDataProcessorHook.lua
+Components\Core\IconDataProcessors.lua
+
+Components\Core\Snippets\Snippets.lua
+
+Components\EventHandlers\Sound\Sound.lua
+Components\EventHandlers\Announcements\Announcements.lua
+Components\EventHandlers\Animations\Animations.lua
+Components\EventHandlers\Counter\Counter.lua
+Components\EventHandlers\Timer\Timer.lua
+Components\EventHandlers\Lua\Lua.lua
+
+Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ConditionReq\Alpha_ConditionReq.lua
+Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_DurationReq\Alpha_DurationReq.lua
+Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_StackReq\Alpha_StackReq.lua
+Components\IconDataProcessorHooks\IconDataProcessorHook_Alpha_ValueReq\Alpha_ValueReq.lua
+Components\IconDataProcessorHooks\IconDataProcessorHook_Texture_CustomTex\Texture_CustomTex.lua
+
+Components\GroupModules\GroupModule_BaseConfig\module.lua
+Components\GroupModules\GroupModule_GroupPosition\module.lua
+Components\GroupModules\GroupModule_IconPosition\module.lua
+Components\GroupModules\GroupModule_IconPosition_Sortable\module.lua
+Components\GroupModules\GroupModule_Alpha\module.lua
+
+Components\IconModules\IconModule_Self\Self.lua
+Components\IconModules\IconModule_ActivationGlow\ActivationGlow.lua
+Components\IconModules\IconModule_Alpha\Alpha.lua
+Components\IconModules\IconModule_CooldownSweep\CooldownSweep.lua
+Components\IconModules\IconModule_IconContainer\Glows.xml
+Components\IconModules\IconModule_IconContainer\IconContainer.lua
+Components\IconModules\IconModule_IconContainer_Masque\IconContainer_Masque.lua
+Components\IconModules\IconModule_IconEventClickHandler\IconEventClickHandler.lua
+Components\IconModules\IconModule_IconEventConditionHandler\IconEventConditionHandler.lua
+Components\IconModules\IconModule_IconTooltip\IconTooltip.lua
+Components\IconModules\IconModule_PowerBar\PowerBar.lua
+Components\IconModules\IconModule_PowerBar_Overlay\PowerBar_Overlay.lua
+Components\IconModules\IconModule_Texts\Texts.lua
+Components\IconModules\IconModule_Backdrop\Backdrop.lua
+Components\IconModules\IconModule_Texture\Texture.lua
+Components\IconModules\IconModule_Texture_Colored\Texture_Colored.lua
+Components\IconModules\IconModule_TimerBar\TimerBar.lua
+Components\IconModules\IconModule_TimerBar_BarDisplay\TimerBar_BarDisplay.lua
+Components\IconModules\IconModule_TimerBar_Overlay\TimerBar_Overlay.lua
+
+Components\IconViews\Icon\Icon.lua
+Components\IconViews\Bar\Bar.lua
+Components\IconViews\BarV\BarV.lua
+
+Components\IconTypes\IconType_buff\buff.lua
+Components\IconTypes\IconType_buffcheck\buffcheck.lua
+Components\IconTypes\IconType_cast\cast.lua
+Components\IconTypes\IconType_cleu\cleu.lua
+Components\IconTypes\IconType_conditionicon\conditionicon.lua
+Components\IconTypes\IconType_cooldown\cooldown.lua
+Components\IconTypes\IconType_default\default.lua
+Components\IconTypes\IconType_dotwatch\dotwatch.lua
+Components\IconTypes\IconType_dr\dr.lua
+Components\IconTypes\IconType_guardian\guardian.lua
+Components\IconTypes\IconType_icd\icd.lua
+Components\IconTypes\IconType_item\item.lua
+Components\IconTypes\IconType_meta\meta.lua
+Components\IconTypes\IconType_meta\stack.lua
+Components\IconTypes\IconType_reactive\reactive.lua
+Components\IconTypes\IconType_swingtimer\swingtimer.lua
+Components\IconTypes\IconType_totem\totem.lua
+Components\IconTypes\IconType_uierror\uierror.lua
+Components\IconTypes\IconType_unitcondition\unitcondition.lua
+Components\IconTypes\IconType_unitcooldown\unitcooldown.lua
+Components\IconTypes\IconType_value\value.lua
+Components\IconTypes\IconType_wpnenchant\wpnenchant.lua
+Components\IconTypes\IconType_luavalue\luavalue.lua
+
+LDB.lua
+
+TellMeWhen.xml
 
 # vanilla tbc wrath cata mists standard
 
 Components\Core\Spells\Equivalencies-[Game].lua
 Components\Core\Spells\ClassSpellCache-[Game].lua
-Components\Core\Spells\ClassSpellCache-Cata.lua [AllowLoadGameType cata]
 
 Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua [AllowLoadGameType standard]
 Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua [AllowLoadGameType vanilla, tbc, wrath, cata, mists]
