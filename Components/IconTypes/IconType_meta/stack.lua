@@ -119,10 +119,10 @@ function Stack.UpdateSuppression(host, index)
 			StateShows(state.trueState) and 0 or 1,
 			StateShows(state.falseState) and 0 or 1
 		)
-	elseif issecretvalue(ic.attributes.realAlpha) then
+	elseif state and issecretvalue(state.Alpha) then
 		frame:SetAlpha(1)
 	else
-		frame:SetAlpha(ic.attributes.realAlpha > 0 and 0 or 1)
+		frame:SetAlpha(StateShows(state) and 0 or 1)
 	end
 end
 
