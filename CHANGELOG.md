@@ -1,12 +1,12 @@
 ## v12.1.4
-* Added the "Aura Present (via CDM)" condition - checks an aura presence in combat by reading Blizzard's Cooldown Manager.
 * The Underlay on Buff/Debuff (combat ready) icons now becomes a real Absent state when Blizzard's Cooldown Manager covers the icon's spells.
+* Added the "Aura Present (via CDM)" condition - checks an aura presence in combat by reading Blizzard's Cooldown Manager.
 * Added a "While Aura Present" animation trigger for Buff/Debuff (combat ready) icons, which plays an animation on each aura for as long as that aura is present (#2491).
-* The pandemic indicator on Buff/Debuff (combat ready) icons is now a "While Aura In Pandemic" animation trigger, so it can use any animation and its color, size, flashing and anchor settings. Existing pandemic settings are converted automatically.
+* Added a "While Aura In Pandemic" animation trigger, which replaces the bespoke pandemic animation options on Buff/Debuff (combat ready) icons, allowing for use of more animations with more settings.
 * Added the "Icon: CDM Pandemic" animation - the pandemic animation Blizzard's Cooldown Manager uses.
-* Fix the Activation Border drawing over an icon's text instead of under it (#2490). Animations now draw under text on every icon type.
 * Added more sort options to Buff/Debuff (combat ready) icons.
 * Buff/Debuff (combat ready) icons now work on mouseover and other units that the game sends no aura updates for.
+* Fix the Activation Border drawing over an icon's text instead of under it (#2490). Animations now draw under text on every icon type.
 * Fix stacked meta icons showing nothing after a component icon hid itself, most often seen while the GCD was active (#2488).
 
 ## v12.1.3
