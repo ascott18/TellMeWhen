@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.1.5
+* Forever and ever and ever and ever and ever
+
 ## v12.1.4
 * The Underlay on Buff/Debuff (combat ready) icons now becomes a real Absent state when Blizzard's Cooldown Manager covers the icon's spells.
 * Added the "Aura Present (via CDM)" condition - checks an aura presence in combat by reading Blizzard's Cooldown Manager.
