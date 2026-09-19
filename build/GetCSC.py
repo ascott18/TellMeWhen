@@ -13,7 +13,7 @@ from slpp import slpp as lua
 # Example: '.*shaman.*' to match all shaman URLs, or None to disable
 debug_only_id = None #'.*shaman.*'
 
-VERSION = 'retail'
+VERSION = 'forever'
 
 # Game version configurations
 GAME_VERSIONS = {
@@ -83,6 +83,30 @@ GAME_VERSIONS = {
             'warrior': 1,
         },
         'pet_classes': ['hunter', 'shaman', 'warlock'],
+        'class_spells_urls': [
+            '/spells/abilities/',
+            '/spells/talents/',
+        ]
+    },
+    # Wowhead calls this one "forever"; the client's TOC game type is "camelot".
+    # Only /spells/abilities/ and /spells/talents/ are filtered here - /spells/specialization/
+    # and /spells/pvp-talents/ return wowhead's unfiltered 1000-row listing for every class.
+    'forever': {
+        'base_url': 'https://www.wowhead.com/forever',
+        'output_file': 'CSC-Camelot.lua',
+        'classes': {
+            'druid': 11,
+            'hunter': 3,
+            'mage': 8,
+            'paladin': 2,
+            'priest': 5,
+            'rogue': 4,
+            'shaman': 7,
+            'warlock': 9,
+            'warrior': 1,
+        },
+        # Shaman has no pet listing here, and asking for one returns the unfiltered list.
+        'pet_classes': ['hunter', 'warlock'],
         'class_spells_urls': [
             '/spells/abilities/',
             '/spells/talents/',
@@ -173,6 +197,8 @@ race_bitmasks = {
 	85: 262144,    # earthen horde
     86: 1048576,   # haranir alliance
     91: 524288,    # haranir horde
+	95: 4294967296, # high order skyborne
+	96: 8589934592, # windshaper skyborne
 }
 
 def parse_reqrace_bitmask(reqrace_value):
@@ -203,6 +229,19 @@ racial_no_class_req = [
 
 max_retries = 3
 
+# Wowhead 403s anything that doesn't look like a navigation from a real browser;
+# the Sec-Fetch-* headers are the part it actually checks.
+request_headers = {
+	'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+	'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+	'Accept-Language': 'en-US,en;q=0.9',
+	'Sec-Fetch-Dest': 'document',
+	'Sec-Fetch-Mode': 'navigate',
+	'Sec-Fetch-Site': 'none',
+	'Sec-Fetch-User': '?1',
+	'Upgrade-Insecure-Requests': '1',
+}
+
 def init_worker():
 	"""Initialize logging for worker processes"""
 	logging.basicConfig(
@@ -219,9 +258,7 @@ def try_scrape_url(url, regex, id, tries = 0):
 	logger = logging.getLogger(__name__)
 	# logger.info(f"getting {str(id)}")
 
-	user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
-	headers = {'User-Agent': user_agent}
-	req = urllib.request.Request(url, [], headers)
+	req = urllib.request.Request(url, [], request_headers)
 	response = urllib.request.urlopen(req)
 
 	content = response.read().decode()
