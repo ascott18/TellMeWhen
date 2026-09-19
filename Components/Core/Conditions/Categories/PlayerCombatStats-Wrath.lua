@@ -186,7 +186,7 @@ if GetExpertise and CR_EXPERTISE then
 	})
 end
 
-if ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA) and UnitRangedAttackPower and GetRangedCritChance and GetRangedHaste then
+if TMW.ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA) and UnitRangedAttackPower and GetRangedCritChance and GetRangedHaste then
 	-- Mop and below
 	ConditionCategory:RegisterSpacer(20)
 

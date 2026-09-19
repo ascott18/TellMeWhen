@@ -68,7 +68,7 @@ function SPECS:UpdateUnitSpecs()
 
 		TMW:Fire("TMW_UNITSPEC_UPDATE")
 
-	elseif z == "pvp" and ClassicExpansionAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
+	elseif z == "pvp" and TMW.SpecSystemAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
 		-- NOTE: WOD is a guess here. Unclear on exactly when specs were added as returns of GetBattlefieldScore.
 		RequestBattlefieldScoreData()
 
@@ -392,11 +392,17 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 	},
 	funcstr = [[BITFLAGSMAPANDCHECK( GetCurrentSpecializationRole() ) ]],
 	events = function(ConditionObject, c)
-		if ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
+		if TMW.SpecSystemAtMost(LE_EXPANSION_CATACLYSM) then
 			return
 				ConditionObject:GenerateNormalEventString("PLAYER_TALENT_UPDATE"),
 				ConditionObject:GenerateNormalEventString("ACTIVE_TALENT_GROUP_CHANGED"),
 				ConditionObject:GenerateNormalEventString("TALENT_GROUP_ROLE_CHANGED")
+		elseif UnitHasEffectivelyTankAura then
+			-- The role follows the tank stance, form or buff, so watch those too.
+			return
+				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED", "player"),
+				ConditionObject:GenerateNormalEventString("UPDATE_SHAPESHIFT_FORM"),
+				ConditionObject:GenerateNormalEventString("UNIT_AURA", "player")
 		elseif pclass == "WARRIOR" then
 			return
 				ConditionObject:GenerateNormalEventString("PLAYER_SPECIALIZATION_CHANGED", "player"),
@@ -410,7 +416,7 @@ ConditionCategory:RegisterCondition(8.1, "TREEROLE2", {
 
 CNDT.Env.TalentMap = {}
 CNDT.Env.PvpTalentMap = {}
-if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
+if TMW.SpecSystemAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 	-- Dragonflight
 
 	function CNDT:GetTalentRanksBySpellID()
@@ -618,7 +624,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 				ConditionObject:GenerateNormalEventString("TMW_TALENT_LOADOUT_NAME_UPDATE")
 		end,
 	})
-elseif ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
+elseif TMW.SpecSystemAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 	-- Mop - Shadowlands
 
 	function CNDT:PLAYER_TALENT_UPDATE()
@@ -737,7 +743,7 @@ if GetGlyphSocketInfo then
 	function CNDT:GLYPH_UPDATED()
 		local GlyphLookup = Env.GlyphLookup
 		wipe(GlyphLookup)
-		if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
+		if TMW.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and TMW.ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
 			-- Cata/mop
 			for i = 1, GetNumGlyphSockets() do
 				local _, _, _, spellID = GetGlyphSocketInfo(i)
@@ -997,7 +1003,7 @@ if C_Soulbinds then
 	})
 end
 
-if C_AzeriteEssence and ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
+if C_AzeriteEssence and TMW.ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
 	CNDT.Env.AzeriteEssenceMap = {}
 	CNDT.Env.AzeriteEssenceMap_MAJOR = {}
 	local C_AzeriteEssence = C_AzeriteEssence

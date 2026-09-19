@@ -77,7 +77,9 @@ TMW:RegisterUpgrade(62032, {
 
 local ConditionCategory = CNDT:GetCategory("RESOURCES", 1, L["CNDTCAT_RESOURCES"], false, false)
 
-local healthEvent = ClassicExpansionAtLeast(LE_EXPANSION_SHADOWLANDS) and "UNIT_HEALTH" or "UNIT_HEALTH_FREQUENT"
+-- Which event exists is an engine question, not a content one: Camelot has Classic-era
+-- content but dropped UNIT_HEALTH_FREQUENT along with the rest of the modern engine.
+local healthEvent = C_EventUtils.IsEventValid("UNIT_HEALTH_FREQUENT") and "UNIT_HEALTH_FREQUENT" or "UNIT_HEALTH"
 
 ConditionCategory:RegisterCondition(1.0, "HEALTH", {
 	text = HEALTH .. " - " .. L["CONDITIONPANEL_PERCENT"],
@@ -163,7 +165,7 @@ end
 
 ConditionCategory:RegisterSpacer(3)
 
-if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 	ConditionCategory:RegisterCondition(23, "SOUL_SHARDS", {
 		text = SOUL_SHARDS_POWER,
 		min = 0,
@@ -195,7 +197,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 	})
 end
 
-if ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 	ConditionCategory:RegisterCondition(26, "CHI", {
 		text = CHI_POWER,
 		min = 0,
@@ -269,7 +271,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) then
 	})
 end
 
-if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 	ConditionCategory:RegisterCondition(25, "RUNES2", {
 		text = L["CONDITIONPANEL_RUNES"],
 		tooltip = L["CONDITIONPANEL_RUNES_DESC3"],
@@ -464,7 +466,7 @@ else
 	})
 end
 
-if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 	ConditionCategory:RegisterCondition(29, "ESSENCE", {
 		text = POWER_TYPE_ESSENCE,
 		min = 0,
@@ -480,7 +482,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_DRAGONFLIGHT) then
 	})
 end
 
-if ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA) then
+if TMW.ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA) then
 	local offset = TMW.tContains({"ROGUE", "DRUID"}, pclass) and 0 or 62
 	ConditionCategory:RegisterCondition(27 + offset, "COMBO", {
 		text = L["CONDITIONPANEL_COMBO"],
@@ -522,7 +524,7 @@ ConditionCategory:RegisterSpacer(70)
 -- Public Class Resources that don't need percent/abs/max conditions
 local S = 80
 local offset
-if ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 	
 	offset = pclass == "PRIEST" and S or 0
 	ConditionCategory:RegisterCondition(90.0 - offset, "INSANITY", {
@@ -693,7 +695,7 @@ ConditionCategory:RegisterCondition(102.2, "DEFAULT_MAX", {
 	end,
 })
 
-offset = TMW.tContains({"PALADIN", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID", "MONK", ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and "HUNTER" or nil}, pclass) and S or 0
+offset = TMW.tContains({"PALADIN", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID", "MONK", TMW.ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and "HUNTER" or nil}, pclass) and S or 0
 ConditionCategory:RegisterCondition(103.0 - offset, "MANA", {
 	text = MANA .. " - " .. L["CONDITIONPANEL_PERCENT"],
 	percent = true,
@@ -941,7 +943,7 @@ ConditionCategory:RegisterCondition(107.2 - offset, "RUNIC_POWER_MAX", {
 
 
 
-if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 	ConditionCategory:RegisterSpacer(200)
 	-- Altpower was added in cata
 	ConditionCategory:RegisterCondition(208.0, "ALTPOWER", {
@@ -1002,7 +1004,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) then
 	})
 end
 
-if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and TMW.ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
 	ConditionCategory:RegisterCondition(0, "ECLIPSE", {
 		text = L["ECLIPSE"],
 		tooltip = L["CONDITIONPANEL_ECLIPSE_DESC"],
@@ -1059,7 +1061,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and ClassicExpansionAtMost(LE
 	})
 end
 
-if ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and TMW.ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
 	ConditionCategory:RegisterCondition(19.1, "BURNING_EMBERS", {
 		text = BURNING_EMBERS,
 		min = 0,

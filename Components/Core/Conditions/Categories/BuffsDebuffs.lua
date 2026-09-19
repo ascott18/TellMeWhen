@@ -490,7 +490,7 @@ for i = 1, 3 do -- BUFFTOOLTIPSCAN
 		check = function(check)
 			check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 		end,
-		icon = ClassicExpansionAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR) and "Interface\\Icons\\ability_priest_clarityofwill" or "Interface\\Icons\\spell_ice_lament",
+		icon = TMW.ClassicExpansionAtLeast(LE_EXPANSION_WARLORDS_OF_DRAENOR) and "Interface\\Icons\\ability_priest_clarityofwill" or "Interface\\Icons\\spell_ice_lament",
 		tcoords = CNDT.COMMON.standardtcoords,
 		maybeSecret = true,
 		funcstr = function(c)
@@ -639,7 +639,7 @@ ConditionCategory:RegisterCondition(12.5,"DEBUFFPERC", {
 		check:SetTexts(L["ONLYCHECKMINE"], L["ONLYCHECKMINE_DESC"])
 	end,
 	formatter = TMW.C.Formatter.PERCENT,
-	icon = ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and "Interface\\Icons\\spell_priest_voidshift" or "Interface\\Icons\\ability_rogue_dualweild",
+	icon = TMW.ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and "Interface\\Icons\\spell_priest_voidshift" or "Interface\\Icons\\ability_rogue_dualweild",
 	tcoords = CNDT.COMMON.standardtcoords,
 	maybeSecret = true,
 	funcstr = function(c)

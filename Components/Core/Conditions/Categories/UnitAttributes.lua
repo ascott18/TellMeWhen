@@ -164,7 +164,7 @@ ConditionCategory:RegisterCondition(6,    "REACT", {
 	defaultUnit = "target",
 	texttable = {[1] = L["ICONMENU_HOSTILE"], [2] = L["ICONMENU_FRIEND"]},
 	nooperator = true,
-	icon = ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood" or "Interface\\Icons\\spell_holy_blessingofstamina",
+	icon = TMW.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and "Interface\\Icons\\Warrior_talent_icon_FuryInTheBlood" or "Interface\\Icons\\spell_holy_blessingofstamina",
 	tcoords = CNDT.COMMON.standardtcoords,
 	Env = {
 		UnitIsEnemy = UnitIsEnemy,

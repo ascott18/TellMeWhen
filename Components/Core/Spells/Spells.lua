@@ -664,7 +664,7 @@ TMW:MakeSingleArgFunctionCached(TMW, "EquivToTable")
 ---------------------------------
 -- Constant spell data
 ---------------------------------
-if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and TMW.ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then
 	if pclass == "PALADIN" then
 		local name = GetSpellName(26573) 
 		TMW.COMMON.CurrentClassTotems = {
@@ -754,7 +754,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_CATACLYSM) and ClassicExpansionAtMost(LE
 		}
 	end
 
-elseif ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
+elseif TMW.ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
 	TMW.COMMON.CurrentClassTotems = {
 		name = L["ICONMENU_TOTEM"],
 		desc = L["ICONMENU_TOTEM_DESC"],
@@ -826,7 +826,7 @@ elseif ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
 		end
 	end
 
-	if ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) then
+	if TMW.ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) then
 		Totem(1535, 1)  -- Fire Nova Totem
 		Totem(8498, 2)  -- Fire Nova Totem
 		Totem(8499, 3)  -- Fire Nova Totem

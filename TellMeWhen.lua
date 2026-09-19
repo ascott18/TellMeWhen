@@ -202,6 +202,44 @@ local time = GetTime() TMW.time = time
 local _, pclass = UnitClass("Player")
 
 
+---------------------------------
+-- Expansion level
+---------------------------------
+
+-- "What content is this?" and "which APIs does this client have?" are two questions,
+-- and Camelot answers them differently: it runs 1.60 content on the 12.x engine, so its
+-- spells are Classic's while its specialization and talent systems are Midnight's.
+
+-- Content. Blizzard's expansion APIs can't answer this: on Camelot they contradict each
+-- other, with ClassicExpansionAtLeast reporting Mists or later and GetClassicExpansionLevel
+-- reporting Cataclysm or earlier. The interface version does track content, and vanilla is
+-- 1.x, so expansion N is interface version (N+1)xxxx.
+local interfaceVersion = select(4, GetBuildInfo())
+local classicExpansionLevel = floor(interfaceVersion / 10000) - 1
+
+function TMW.ClassicExpansionAtLeast(expansionLevel)
+	return classicExpansionLevel >= expansionLevel
+end
+
+function TMW.ClassicExpansionAtMost(expansionLevel)
+	return classicExpansionLevel <= expansionLevel
+end
+
+-- Which specialization and talent APIs exist. Camelot is the only client where this
+-- differs from the content, and the interface version is what identifies it: 1.60, where
+-- Classic Era is 1.15. Dragonflight is the generation its trait trees belong to
+-- (Enum.TraitConfigType.CamelotCombat).
+TMW.isCamelot = interfaceVersion >= 16000 and interfaceVersion < 20000
+
+local specSystemExpansionLevel = TMW.isCamelot and LE_EXPANSION_DRAGONFLIGHT or classicExpansionLevel
+
+function TMW.SpecSystemAtLeast(expansionLevel)
+	return specSystemExpansionLevel >= expansionLevel
+end
+
+function TMW.SpecSystemAtMost(expansionLevel)
+	return specSystemExpansionLevel <= expansionLevel
+end
 
 
 

@@ -90,7 +90,7 @@ Type:RegisterConfigPanel_ConstructorFunc(150, "TellMeWhen_CastSettings", functio
 		check:SetSetting("NoPocketwatch")
 	end
 
-	if ClassicExpansionAtMost(LE_EXPANSION_BURNING_CRUSADE) then
+	if TMW.ClassicExpansionAtMost(LE_EXPANSION_BURNING_CRUSADE) then
 		self:BuildSimpleCheckSettingFrame({
 			noPocketwatch,
 		})

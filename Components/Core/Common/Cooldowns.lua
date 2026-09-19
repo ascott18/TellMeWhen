@@ -241,12 +241,17 @@ if TMW.clientHasSecrets then
     
     -- So, we need to fire an event when cooldowns end.
     -- we can't do this for everything, but for the most common cooldown (GCD),
-    -- we can since GCD isn't secret.
+    -- we can when GCDSpell is the 61304 pseudo-spell, whose cooldown isn't secret.
+    -- Camelot has no 61304, so there GCDSpell is a real spell and this can't run.
     TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
         if not currentGCD then return end
 
         local duration = currentGCD.duration
-        if duration == 0 then
+        if issecretvalue(duration) then
+            -- Nothing here can be compared. Clear it so this doesn't retry every frame;
+            -- the next SPELL_UPDATE_COOLDOWN will set it again.
+            currentGCD = nil
+        elseif duration == 0 then
             -- If the duration was zero, it means GCD never actually started, 
             -- so don't fire the event.
             currentGCD = nil

@@ -1549,7 +1549,7 @@ then
 	-- using zero-based indexes instead of 1-based indexes
 
 
-	if not GetSpecializationInfoForClassID(9, 3) and ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) then
+	if not GetSpecializationInfoForClassID(9, 3) and TMW.SpecSystemAtMost(LE_EXPANSION_CLASSIC) then
 		function TMW.GetSpecializationInfoForClassID(classID, i)
 			if not i then
 				return GetSpecializationInfoForClassID(classID, i)
@@ -1562,7 +1562,7 @@ then
 	end
 else
 	local classSpecIds = {
-		DRUID = ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and {102,103,104,105} or {102,103,105},
+		DRUID = TMW.SpecSystemAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and {102,103,104,105} or {102,103,105},
 		HUNTER = {253,254,255},
 		MAGE = {62,63,64},
 		PALADIN = {65,66,70},
@@ -1609,7 +1609,7 @@ end
 
 
 
-if ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
+if TMW.SpecSystemAtMost(LE_EXPANSION_CATACLYSM) then
 	-- Cata-and-earlier style specs (pick and choose talents, dual spec):
 
 	local GetTalentTreeRoles = GetTalentTreeRoles
@@ -1720,7 +1720,7 @@ else
 		return role
 	end
 
-	if ClassicExpansionAtMost(LE_EXPANSION_SHADOWLANDS) then
+	if TMW.SpecSystemAtMost(LE_EXPANSION_SHADOWLANDS) then
 		-- Mop-shadowlands style talents
 		function TMW.GetTalentQueries(specFilter)
 			local ret = {}
@@ -1746,6 +1746,24 @@ else
 			
 			return pairs(ret)
 		end
+	end
+end
+
+
+if UnitHasEffectivelyTankAura then
+	-- Vanilla-era specializations carry no role, so a tank is identified by their stance,
+	-- form or aura instead. Blizzard combines the two the same way in
+	-- PlayerUtil.IsPlayerEffectivelyTank.
+	local GetCurrentSpecializationRole = TMW.GetCurrentSpecializationRole
+
+	function TMW.GetCurrentSpecializationRole()
+		-- Never secret: unit identity is only restricted for units that aren't the player,
+		-- their pet/vehicle, or a party/raid member.
+		if UnitHasEffectivelyTankAura("player") then
+			return "TANK"
+		end
+
+		return GetCurrentSpecializationRole()
 	end
 end
 

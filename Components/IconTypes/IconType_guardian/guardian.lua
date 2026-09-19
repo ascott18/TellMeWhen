@@ -33,7 +33,7 @@ Type.usePocketWatch = 1
 Type.AllowNoName = true
 Type.hasNoGCD = true
 Type.canControlGroup = true
-Type.hidden = ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) and pclass ~= "WARLOCK"
+Type.hidden = TMW.ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) and pclass ~= "WARLOCK"
 
 local STATE_PRESENT = TMW.CONST.STATE.DEFAULT_SHOW
 local STATE_ABSENT = TMW.CONST.STATE.DEFAULT_HIDE
@@ -69,7 +69,7 @@ Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	text = L["ICONMENU_GUARDIAN_CHOOSENAME_DESC"],
 })
 
-if ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
 	Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_GuardianDuration", function(self)
 		self:SetTitle(TMW.L["ICONMENU_GUARDIAN_DUR"])
 		self:BuildSimpleCheckSettingFrame({
@@ -112,7 +112,7 @@ end)
 
 
 
-if pclass == "WARLOCK" and ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
+if pclass == "WARLOCK" and TMW.ClassicExpansionAtLeast(LE_EXPANSION_BATTLE_FOR_AZEROTH) then
 	Type:RegisterConfigPanel_XMLTemplate(165, "TellMeWhen_IconStates", {
 		[ STATE_PRESENT_EMPOWERED  ] = { order = 1, text = "|cFF00FF00" .. L["ICONMENU_PRESENT"] .. " - " .. L["ICONMENU_GUARDIAN_EMPOWERED"],  },
 		[ STATE_PRESENT ] = { order = 2, text = "|cFF00FF00" .. L["ICONMENU_PRESENT"] .. " - " .. L["ICONMENU_GUARDIAN_UNEMPOWERED"], },
@@ -140,9 +140,9 @@ local function Info(duration, spell, triggerMatch, extraData)
 	return data
 end
 
-Type.GuardianInfo = ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
+Type.GuardianInfo = TMW.ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
 	[89] = Info(60 * 5, 1122, false), -- Inferno (warlock)
-} or (ClassicExpansionAtLeast(LE_EXPANSION_BURNING_CRUSADE) and ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA)) and {
+} or (TMW.ClassicExpansionAtLeast(LE_EXPANSION_BURNING_CRUSADE) and TMW.ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA)) and {
 	-- Note: data not verified for MOP
 	[510] = Info(45, 31687, false), -- Water Elemental
 	[19668] = Info(15, 34433, false), -- Shadowfiend

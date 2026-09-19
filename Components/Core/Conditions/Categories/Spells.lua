@@ -66,6 +66,12 @@ function Env.CooldownDuration(spell, gcdAsUnusable)
 	return 0
 end
 
+function Env.GCDActive()
+	local gcd = TMW.GetGCD()
+	if issecretvalue(gcd) then return false end
+	return gcd > 0 and gcd < 1.7
+end
+
 function Env.RechargeDuration(spell)
 	local charges = GetSpellCharges(spell)
 	if charges and not issecretvalue(charges.currentCharges) and charges.currentCharges ~= charges.maxCharges then
@@ -613,14 +619,18 @@ ConditionCategory:RegisterCondition(6,	 "GCD", {
 	unit = PLAYER,
 	icon = "Interface\\Icons\\ability_hunter_steadyshot",
 	tcoords = CNDT.COMMON.standardtcoords,
-	funcstr = [[BOOLCHECK( (TMW.GetGCD() > 0 and TMW.GetGCD() < 1.7) )]],
+	funcstr = [[BOOLCHECK( GCDActive() )]],
 	events = function(ConditionObject, c)
 		return
 			ConditionObject:GenerateNormalEventString("TMW_SPELL_UPDATE_COOLDOWN")
 	end,
 	anticipate = [[
 		local cooldown = GetSpellCooldown(TMW.GCDSpell)
-		VALUE = cooldown.startTime + cooldown.duration -- the time at which we need to update again. (when the GCD ends)
+		if issecretvalue(cooldown.duration) then
+			VALUE = 0
+		else
+			VALUE = cooldown.startTime + cooldown.duration -- the time at which we need to update again. (when the GCD ends)
+		end
 	]],
 })
 
@@ -1084,7 +1094,7 @@ end
 ConditionCategory:RegisterCondition(31,	 "CASTING", {
 	text = L["ICONMENU_CAST"],
 	tooltip = L["ICONMENU_CAST_DESC"],
-	min = ClassicExpansionAtMost(LE_EXPANSION_BURNING_CRUSADE) and 1 or 0,
+	min = TMW.ClassicExpansionAtMost(LE_EXPANSION_BURNING_CRUSADE) and 1 or 0,
 	max = 2,
 	levelChecks = true,
 	nooperator = true,

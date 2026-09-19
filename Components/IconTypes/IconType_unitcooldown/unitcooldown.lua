@@ -267,7 +267,7 @@ resetsOnAura = {
 spellBlacklist = {
 	[50288] = 1, -- Starfall damage effect, causes the cooldown to be off by 10 seconds and prevents proper resets when tracking by name.
 }
-elseif ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
+elseif TMW.ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM) then
 resetsOnCast = {
 	[23989] = { -- readiness
 		[19263] = 1, -- Deterrence

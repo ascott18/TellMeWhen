@@ -29,8 +29,9 @@ TMW.COMMON.SpellUsable = CreateFrame("Frame")
 local SpellUsable = TMW.COMMON.SpellUsable
 local Actions = TMW.COMMON.Actions
 
--- todo: can we feature detect hasPreciseActionEvents?
-local hasPreciseActionEvents = ClassicExpansionAtLeast(LE_EXPANSION_WAR_WITHIN)
+-- This is an engine capability, not a content one: Camelot has the event despite
+-- running Classic-era content.
+local hasPreciseActionEvents = C_EventUtils.IsEventValid("ACTION_USABLE_CHANGED")
 
 if hasPreciseActionEvents then
     SpellUsable:RegisterEvent("ACTION_USABLE_CHANGED")

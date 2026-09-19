@@ -2982,7 +2982,7 @@ TMW:NewClass("Config_ColorButton", "Button", "Config_Frame"){
 	end,
 }
 
-if ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then 
+if TMW.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and TMW.ClassicExpansionAtMost(LE_EXPANSION_WARLORDS_OF_DRAENOR) then 
 	TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
 		-- Constructor
 		Runes = {
@@ -3023,7 +3023,7 @@ if ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpan
 			end
 		end,
 	}
-elseif ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
+elseif TMW.ClassicExpansionAtLeast(LE_EXPANSION_LEGION) then
 	TMW:NewClass("Config_Button_Rune", "Button", "Config_BitflagBase", "Config_Frame"){
 		-- Constructor
 

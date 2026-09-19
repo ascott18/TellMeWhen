@@ -259,7 +259,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	-- The most recent failed spellID that was seen after a success.
 	-- nil if the last spellID was a success.
 	local lastFail = nil
-	local excludeEffect = ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
+	local excludeEffect = TMW.ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA)
 	local INVALID_SPELLS = CONST.INVALID_SPELLS
 
 	local function SpellCacher()

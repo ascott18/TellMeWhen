@@ -183,7 +183,7 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		horror			= "DR-Horrify",
 		taunt			= "DR-Taunt",
 		cyclone			= "DR-Cyclone",
-	} or (ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
+	} or (TMW.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and TMW.ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
 		incapacitate = "DR-Incapacitate",
 		stun =         "DR-ControlledStun",
 		fear =         "DR-Fear",
@@ -215,7 +215,7 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		freezing_trap ="DR-FreezingTrap",
 		sleep =        "DR-Sleep",
 		unstable_affliction = "DR-UnstableAffliction",
-	} or ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
+	} or TMW.ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
 		incapacitate = "DR-Incapacitate",
 		stun =         "DR-ControlledStun",
 		fear =         "DR-Fear",
@@ -236,12 +236,12 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 
 	local ignored = TMW.wowMajor == LE_EXPANSION_MISTS_OF_PANDARIA and {
 		knockback = true,
-	} or (ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
+	} or (TMW.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and TMW.ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
 		knockback = true,
 		counterattack = true,
 		charge = true,
 		dragons = true,
-	} or ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
+	} or TMW.ClassicExpansionAtMost(LE_EXPANSION_CLASSIC) and {
 		knockback = true,
 		frost_shock = true,
 	} or {
