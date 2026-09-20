@@ -1,5 +1,6 @@
 ## v12.1.5
 * Forever and ever and ever and ever and ever
+* Added the "Equipped item type" conditions for main hand and off hand - checks what kind of weapon, shield, or off-hand item is equipped (#2496).
 
 ## v12.1.4
 * The Underlay on Buff/Debuff (combat ready) icons now becomes a real Absent state when Blizzard's Cooldown Manager covers the icon's spells.

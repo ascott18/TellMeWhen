@@ -766,6 +766,96 @@ ConditionCategory:RegisterCondition(15,	 "ITEMEQUIPPED", {
 			ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player")
 	end,
 })
+
+
+local GetInventoryItemID = GetInventoryItemID
+local GetItemInfoInstant = C_Item and C_Item.GetItemInfoInstant or GetItemInfoInstant
+local GetItemSubClassInfo = C_Item and C_Item.GetItemSubClassInfo or GetItemSubClassInfo
+
+-- Item types that can occupy a weapon slot. The keys get saved in user settings, so don't rename them.
+local weaponSlotTypeFlags = {}
+local weaponSlotTypeByClass = {}
+do
+	local order = 0
+	local function AddFlag(key, text)
+		order = order + 1
+		weaponSlotTypeFlags[key] = { order = order, text = text }
+	end
+	local function AddItemType(key, classID, subClassID)
+		-- Subclasses that the client doesn't know about have no name, so they get no flag.
+		local name = subClassID and GetItemSubClassInfo(classID, subClassID)
+		if not name then return end
+
+		AddFlag(key, name)
+		weaponSlotTypeByClass[classID] = weaponSlotTypeByClass[classID] or {}
+		weaponSlotTypeByClass[classID][subClassID] = key
+	end
+
+	local Weapon, Armor = Enum.ItemClass.Weapon, Enum.ItemClass.Armor
+	local WeaponSub, ArmorSub = Enum.ItemWeaponSubclass, Enum.ItemArmorSubclass
+
+	AddFlag("NONE", NONE)
+
+	AddItemType("AXE1H", Weapon, WeaponSub.Axe1H)
+	AddItemType("MACE1H", Weapon, WeaponSub.Mace1H)
+	AddItemType("SWORD1H", Weapon, WeaponSub.Sword1H)
+	AddItemType("WARGLAIVE", Weapon, WeaponSub.Warglaive)
+	AddItemType("DAGGER", Weapon, WeaponSub.Dagger)
+	AddItemType("FIST", Weapon, WeaponSub.Unarmed)
+	AddItemType("WAND", Weapon, WeaponSub.Wand)
+
+	AddItemType("AXE2H", Weapon, WeaponSub.Axe2H)
+	AddItemType("MACE2H", Weapon, WeaponSub.Mace2H)
+	AddItemType("SWORD2H", Weapon, WeaponSub.Sword2H)
+	AddItemType("POLEARM", Weapon, WeaponSub.Polearm)
+	AddItemType("STAFF", Weapon, WeaponSub.Staff)
+
+	AddItemType("BOW", Weapon, WeaponSub.Bows)
+	AddItemType("CROSSBOW", Weapon, WeaponSub.Crossbow)
+	AddItemType("GUN", Weapon, WeaponSub.Guns)
+	AddItemType("THROWN", Weapon, WeaponSub.Thrown)
+
+	AddItemType("SHIELD", Armor, ArmorSub.Shield)
+	-- Off-hand frills are Armor/Miscellaneous, which only their equip location tells apart.
+	AddFlag("HOLDABLE", INVTYPE_HOLDABLE)
+
+	AddItemType("FISHINGPOLE", Weapon, WeaponSub.Fishingpole)
+end
+
+function Env.EquippedItemType(slot)
+	local itemID = GetInventoryItemID("player", slot)
+	if not itemID then return "NONE" end
+
+	local _, _, _, itemEquipLoc, _, classID, subClassID = GetItemInfoInstant(itemID)
+	if itemEquipLoc == "INVTYPE_HOLDABLE" then return "HOLDABLE" end
+
+	local byClass = weaponSlotTypeByClass[classID]
+	return byClass and byClass[subClassID] or ""
+end
+
+local function WeaponSlotTypeCondition(slot, slotName, label)
+	return {
+		text = L["ITEMTYPEEQUIPPED"] .. " - " .. label,
+
+		bitFlagTitle = L["CONDITIONPANEL_BITFLAGS_CHOOSEMENU_TYPES"],
+		bitFlags = weaponSlotTypeFlags,
+
+		unit = false,
+		icon = function() return GetInventoryItemTexture("player", slot) or select(2, GetInventorySlotInfo(slotName)) end,
+		tcoords = CNDT.COMMON.standardtcoords,
+		funcstr = [[BITFLAGSMAPANDCHECK( EquippedItemType(]] .. slot .. [[) )]],
+		events = function(ConditionObject, c)
+			return
+				ConditionObject:GenerateNormalEventString("UNIT_INVENTORY_CHANGED", "player"),
+				ConditionObject:GenerateNormalEventString("PLAYER_EQUIPMENT_CHANGED", slot)
+		end,
+	}
+end
+ConditionCategory:RegisterCondition(15.1, "MHITEMTYPE",
+	WeaponSlotTypeCondition(INVSLOT_MAINHAND, "MainHandSlot", INVTYPE_WEAPONMAINHAND))
+ConditionCategory:RegisterCondition(15.2, "OHITEMTYPE",
+	WeaponSlotTypeCondition(INVSLOT_OFFHAND, "SecondaryHandSlot", INVTYPE_WEAPONOFFHAND))
+
 ConditionCategory:RegisterCondition(16,	 "ITEMSPELL", {
 	text = L["ITEMSPELL"],
 
