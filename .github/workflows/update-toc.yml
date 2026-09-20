@@ -23,6 +23,7 @@ jobs:
           ptr: true
           flavor: |
             vanilla
+            forever
             tbc
             mists
             retail
