@@ -76,6 +76,7 @@ SpellCache.CONST = {
 	  [250168] = true, -- Crashes the 9.0 PTR
 	  [255616] = TMW.wowMajor == 12, -- Crashes the 12.0 Alpha
 	 [1249911] = TMW.wowMajor == 12, -- Crashes the 12.0 Alpha
+	 [1251535] = true, -- Crashes Forever beta
 	},
 
 	BLACKLIST_TRADESKILL_TEXTURES = {
@@ -272,7 +273,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 			if skip then
 				spellID = spellID + skip
 			end
-
+			
 			local name = not INVALID_SPELLS[spellID] and GetSpellName(spellID)
 
 			local fail = false
