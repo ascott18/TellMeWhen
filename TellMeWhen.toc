@@ -218,19 +218,19 @@ LDB.lua
 
 TellMeWhen.xml
 
-# vanilla tbc wrath cata mists standard
+# vanilla camelot tbc wrath cata mists standard
 
 Components\Core\Spells\Equivalencies-[Game].lua
 Components\Core\Spells\ClassSpellCache-[Game].lua
 
-Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua [AllowLoadGameType standard]
+Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua [AllowLoadGameType standard, camelot]
 Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua [AllowLoadGameType vanilla, tbc, wrath, cata, mists]
 
-Components\IconTypes\IconType_buffcontainer\buffcontainer.lua [AllowLoadGameType standard]
-Components\IconModules\IconModule_AuraContainer\AuraContainer.lua [AllowLoadGameType standard]
+Components\IconTypes\IconType_buffcontainer\buffcontainer.lua [AllowLoadGameType standard, camelot]
+Components\IconModules\IconModule_AuraContainer\AuraContainer.lua [AllowLoadGameType standard, camelot]
 
-Components\IconTypes\IconType_runes\runes-Retail.lua [AllowLoadGameType standard]
+Components\IconTypes\IconType_runes\runes-Retail.lua [AllowLoadGameType standard, camelot]
 Components\IconTypes\IconType_runes\runes-Wrath.lua [AllowLoadGameType wrath, cata, mists]
 
-Components\IconTypes\IconType_losecontrol\losecontrol.lua [AllowLoadGameType standard, cata, mists]
+Components\IconTypes\IconType_losecontrol\losecontrol.lua [AllowLoadGameType standard, camelot, cata, mists]
 Components\IconTypes\IconType_lightwell\lightwell.lua [AllowLoadGameType cata, mists]

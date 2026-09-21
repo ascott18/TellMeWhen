@@ -121,6 +121,11 @@ local wowToc = select(4, GetBuildInfo())
 TMW.wowMajor = math.floor(wowToc / 10000)
 TMW.wowMajorMinor = tonumber(TMW.wowMajor .. "." .. (math.floor(wowToc / 100) % 100))
 
+do
+	local ok, probe = pcall(CreateFrame, "AuraButton", nil, UIParent, "CustomAuraButtonTemplate")
+	TMW.hasAuraContainers = ok and probe ~= nil
+end
+
 if false then
 	 -- stress testing for text widths
 	local s = ""

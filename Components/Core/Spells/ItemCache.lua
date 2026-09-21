@@ -17,8 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local clientVersion = select(4, GetBuildInfo())
-
 local ItemCache = TMW:NewModule("ItemCache", "AceEvent-3.0", "AceTimer-3.0")
 
 local CACHE_INVALIDATION_TIME = 28 * 24 * 60 * 60 -- 4 weeks/28 days
@@ -103,7 +101,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	-- Wipe the item cache if user is running a new expansion
 	-- (User probably doesn't have most item in the cache anymore,
 	-- and probably doesn't care about the rest)
-	local XPac = tonumber(strsub(clientVersion, 1, 1))
+	local XPac = TMW.wowMajor
 	if TMW.IE.db.locale.XPac_ItemCache < XPac then
 		wipe(Cache)
 		TMW.IE.db.locale.XPac_ItemCache = XPac

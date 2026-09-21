@@ -234,7 +234,7 @@ TMW:RegisterCallback("TMW_EQUIVS_PROCESSING", function()
 		disarm 			= "DR-Disarm",
 	}
 
-	local ignored = TMW.wowMajor == LE_EXPANSION_MISTS_OF_PANDARIA and {
+	local ignored = (TMW.ClassicExpansionAtLeast(LE_EXPANSION_MISTS_OF_PANDARIA) and TMW.ClassicExpansionAtMost(LE_EXPANSION_MISTS_OF_PANDARIA)) and {
 		knockback = true,
 	} or (TMW.ClassicExpansionAtLeast(LE_EXPANSION_WRATH_OF_THE_LICH_KING) and TMW.ClassicExpansionAtMost(LE_EXPANSION_CATACLYSM)) and {
 		knockback = true,

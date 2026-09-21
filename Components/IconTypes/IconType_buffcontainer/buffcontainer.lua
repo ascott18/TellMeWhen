@@ -14,7 +14,7 @@ local TMW = TMW
 if not TMW then return end
 local L = TMW.L
 
-if TMW.wowMajorMinor < 12.1 then return end
+if not TMW.hasAuraContainers then return end
 
 local print = TMW.print
 local tonumber, pairs, type, format, select =

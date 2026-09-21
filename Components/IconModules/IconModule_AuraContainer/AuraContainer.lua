@@ -1,4 +1,4 @@
--- --------------------
+﻿-- --------------------
 -- TellMeWhen
 -- Originally by NephMakes
 
@@ -42,7 +42,7 @@ local Module = TMW:NewClass("IconModule_AuraContainer", "IconModule")
 -- opt in with Type:SetModuleAllowance("IconModule_AuraContainer", true).
 Module:SetDefaultAllowanceForTypes(false)
 
-if TMW.wowMajorMinor < 12.1 then return end
+if not TMW.hasAuraContainers then return end
 
 local max = math.max
 local LSM = LibStub("LibSharedMedia-3.0")

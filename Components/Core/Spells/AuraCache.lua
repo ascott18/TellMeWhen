@@ -17,7 +17,6 @@ local TMW = TMW
 local L = TMW.L
 local print = TMW.print
 
-local clientVersion = select(4, GetBuildInfo())
 local CL_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER
 local bitband = bit.band
 
@@ -122,7 +121,7 @@ TMW:RegisterCallback("TMW_OPTIONS_LOADED", function()
 	end
 	
 	-- Wipe the aura cache if user is running a new expansion (expansions have drastic spell changes)
-	local XPac = tonumber(strsub(clientVersion, 1, 1))
+	local XPac = TMW.wowMajor
 	if TMW.IE.db.global.XPac_AuraCache < XPac then
 		wipe(Cache_OptDB)
 		TMW.IE.db.global.XPac_AuraCache = XPac
