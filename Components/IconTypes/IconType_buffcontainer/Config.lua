@@ -31,6 +31,12 @@ local GetDetection, GetLimitations = Type.GetDetection, Type.GetLimitations
 -- What TellMeWhen_TextPanel breaks lines on.
 local LINE = "\r\n"
 
+-- The caveats panel's severity ladder: broken now, only broken sometimes, and what to do
+-- about either.
+local COLOR_LIMIT = "|cffff5959"
+local COLOR_CONDITIONAL = "|cffffff59"
+local COLOR_ADVICE = "|cffcccccc"
+
 
 Type:RegisterConfigPanel_XMLTemplate(100, "TellMeWhen_ChooseName", {
 	title = L["ICONMENU_CHOOSENAME3"] .. " " .. L["ICONMENU_CHOOSENAME_ORBLANK"],
@@ -74,17 +80,24 @@ Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_TextPanel", {
 
 			local limits, advice = GetLimitations(TMW.CI.ics)
 			if limits then
-				local section = "|cffff5959" .. table.concat(limits, LINE) .. "|r"
+				local lines = {}
+				for i, limit in ipairs(limits) do
+					local color = limit.conditional and COLOR_CONDITIONAL or COLOR_LIMIT
+					lines[i] = color .. limit.text .. "|r"
+				end
+
+				local section = table.concat(lines, LINE)
 				if advice then
-					section = section .. LINE .. "|cffcccccc" .. advice .. "|r"
+					section = section .. LINE .. COLOR_ADVICE .. advice .. "|r"
 				end
 				sections[#sections + 1] = section
 			end
 
+			-- The requirements are the fix, not the fault, so they read as advice.
 			local _, blockers = GetDetection(TMW.CI.ics, TMW.CI.icon)
 			if blockers then
-				sections[#sections + 1] = "|cffff5959" .. L["ICONMENU_AURACONTAINER_CDM_OFF"] .. "|r" .. LINE
-					.. "|cffcccccc" .. table.concat(blockers, LINE) .. "|r"
+				sections[#sections + 1] = COLOR_LIMIT .. L["ICONMENU_AURACONTAINER_CDM_OFF"] .. "|r" .. LINE
+					.. COLOR_ADVICE .. table.concat(blockers, LINE) .. "|r"
 			end
 
 			panel.text:SetText(table.concat(sections, LINE .. LINE))

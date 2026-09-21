@@ -264,9 +264,10 @@ L["ICONMENU_BUFFDEBUFF_CONTAINER_DESC"] = [[Tracks buffs and/or debuffs via Bliz
 L["ICONMENU_BUFFDEBUFF_CONTAINER_CAVEATS"] = "Caveats"
 L["ICONMENU_BUFFDEBUFF_CONTAINER_NAMENOTID"] = "%s is not a spell ID and will be ignored."
 L["ICONMENU_BUFFDEBUFF_CONTAINER_IDTOOLTIP"] = "To read a spell's ID off an aura tooltip, enable %q in TellMeWhen's general options."
-L["ICONMENU_BUFFDEBUFF_CONTAINER_IDFILTER"] = "Spell IDs only filter buffs on friendly units and debuffs on enemies."
 L["ICONMENU_BUFFDEBUFF_CONTAINER_IDDEBUFFS"] = "This unit is always friendly, so spell IDs will not filter its debuffs; all of them will be shown."
 L["ICONMENU_BUFFDEBUFF_CONTAINER_IDBUFFS"] = "This unit is always hostile, so spell IDs will not filter its buffs; all of them will be shown."
+L["ICONMENU_BUFFDEBUFF_CONTAINER_IDDEBUFFS_VARIES"] = "Spell IDs only filter this unit's debuffs while it is hostile."
+L["ICONMENU_BUFFDEBUFF_CONTAINER_IDBUFFS_VARIES"] = "Spell IDs only filter this unit's buffs while it is friendly."
 L["ICONMENU_BUFFDEBUFF_CONTAINER_ONEUNIT"] = "Only the first unit is checked."
 
 L["ICONMENU_BUFFDEBUFF"] = "Buff/Debuff"

@@ -153,7 +153,7 @@ local function AuraKind(buffOrDebuff)
 end
 
 -- Tokens whose side never changes, keyed without the trailing index. group1-40 substitutes
--- to raid/party/player. Absent = follows whoever is there: focus, mouseover, X's target.
+-- to raid/party/player.
 local unitKinds = {
 	player = "HELPFUL",
 	pet = "HELPFUL",
@@ -163,15 +163,23 @@ local unitKinds = {
 	group = "HELPFUL",
 	maintank = "HELPFUL",
 	mainassist = "HELPFUL",
-	target = "HARMFUL",
 	arena = "HARMFUL",
 	boss = "HARMFUL",
 }
 
+-- Tokens that follow whoever is there, with the side they usually land on. Absent from both
+-- tables (focus, mouseover, X's target) means there isn't even a usual side.
+local likelyUnitKinds = {
+	target = "HARMFUL",
+}
+
+-- Returns the unit's side, and whether that side is fixed.
 local function UnitAuraKind(unit)
 	if not unit then return nil end
 	local base = unit:gsub("%d+$", "")
-	return unitKinds[base]
+	local kind = unitKinds[base]
+	if kind then return kind, true end
+	return likelyUnitKinds[base], false
 end
 
 -- The spell IDs to watch, plus every reason detection isn't running. The IDs hold until the
@@ -259,9 +267,16 @@ Type.GetDetection = GetDetection
 local function GetLimitations(ics)
 	local limits, advice
 
+	-- A limit that always bites.
 	local function Limit(text)
 		limits = limits or {}
-		limits[#limits + 1] = text
+		limits[#limits + 1] = { text = text }
+	end
+
+	-- A limit that bites only some of the time, which the panel colours less severely.
+	local function ConditionalLimit(text)
+		limits = limits or {}
+		limits[#limits + 1] = { text = text, conditional = true }
 	end
 
 	local array = TMW:GetSpells(ics.Name, false).ArrayNoLower
@@ -282,15 +297,21 @@ local function GetLimitations(ics)
 	local units = unitSet.originalUnits
 
 	-- A kind/side mismatch makes Blizzard drop includeSpellIDs, so the icon quietly shows
-	-- every aura. Only a fact where the token settles the side; otherwise state the rule.
+	-- every aura. A unit that can change sides only hits that some of the time.
 	if hasID then
-		local unitKind = UnitAuraKind(units[1])
-		if not unitKind then
-			Limit(L["ICONMENU_BUFFDEBUFF_CONTAINER_IDFILTER"])
-		elseif unitKind ~= AuraKind(ics.BuffOrDebuff) then
-			Limit(unitKind == "HELPFUL"
-				and L["ICONMENU_BUFFDEBUFF_CONTAINER_IDDEBUFFS"]
-				or L["ICONMENU_BUFFDEBUFF_CONTAINER_IDBUFFS"])
+		local unitKind, kindIsFixed = UnitAuraKind(units[1])
+		local auraKind = AuraKind(ics.BuffOrDebuff)
+
+		if unitKind ~= auraKind then
+			if kindIsFixed then
+				Limit(unitKind == "HELPFUL"
+					and L["ICONMENU_BUFFDEBUFF_CONTAINER_IDDEBUFFS"]
+					or L["ICONMENU_BUFFDEBUFF_CONTAINER_IDBUFFS"])
+			else
+				ConditionalLimit(auraKind == "HELPFUL"
+					and L["ICONMENU_BUFFDEBUFF_CONTAINER_IDBUFFS_VARIES"]
+					or L["ICONMENU_BUFFDEBUFF_CONTAINER_IDDEBUFFS_VARIES"])
+			end
 		end
 	end
 
