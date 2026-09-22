@@ -819,6 +819,13 @@ do
 	-- Off-hand frills are Armor/Miscellaneous, which only their equip location tells apart.
 	AddFlag("HOLDABLE", INVTYPE_HOLDABLE)
 
+	-- Ranged-slot armor: one subclass per class until Cataclysm merged them into Relic.
+	AddItemType("LIBRAM", Armor, ArmorSub.Libram)
+	AddItemType("IDOL", Armor, ArmorSub.Idol)
+	AddItemType("TOTEM", Armor, ArmorSub.Totem)
+	AddItemType("SIGIL", Armor, ArmorSub.Sigil)
+	AddItemType("RELIC", Armor, ArmorSub.Relic)
+
 	AddItemType("FISHINGPOLE", Weapon, WeaponSub.Fishingpole)
 end
 
@@ -855,6 +862,13 @@ ConditionCategory:RegisterCondition(15.1, "MHITEMTYPE",
 	WeaponSlotTypeCondition(INVSLOT_MAINHAND, "MainHandSlot", INVTYPE_WEAPONMAINHAND))
 ConditionCategory:RegisterCondition(15.2, "OHITEMTYPE",
 	WeaponSlotTypeCondition(INVSLOT_OFFHAND, "SecondaryHandSlot", INVTYPE_WEAPONOFFHAND))
+
+-- Retail folded the ranged slot into the main hand. This is what Blizzard's own paper doll
+-- asks before it draws the slot.
+if C_PaperDollInfo and C_PaperDollInfo.IsRangedSlotShown() then
+	ConditionCategory:RegisterCondition(15.3, "RANGEDITEMTYPE",
+		WeaponSlotTypeCondition(INVSLOT_RANGED, "RangedSlot", INVTYPE_RANGED))
+end
 
 ConditionCategory:RegisterCondition(16,	 "ITEMSPELL", {
 	text = L["ITEMSPELL"],

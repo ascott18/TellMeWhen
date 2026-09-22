@@ -130,6 +130,7 @@ Components\Core\Conditions\Categories\UnitAttributes.lua
 Components\Core\Conditions\Categories\Currencies.lua
 Components\Core\Conditions\Categories\BossMods.lua
 Components\Core\Conditions\Categories\Misc.lua
+Components\Core\Conditions\Categories\PlayerCombatStats.lua
 
 Components\Core\Units\Units.lua
 
@@ -222,9 +223,6 @@ TellMeWhen.xml
 
 Components\Core\Spells\Equivalencies-[Game].lua
 Components\Core\Spells\ClassSpellCache-[Game].lua
-
-Components\Core\Conditions\Categories\PlayerCombatStats-Retail.lua [AllowLoadGameType standard, camelot]
-Components\Core\Conditions\Categories\PlayerCombatStats-Wrath.lua [AllowLoadGameType vanilla, tbc, wrath, cata, mists]
 
 Components\IconTypes\IconType_buffcontainer\buffcontainer.lua [AllowLoadGameType standard, camelot]
 Components\IconModules\IconModule_AuraContainer\AuraContainer.lua [AllowLoadGameType standard, camelot]
