@@ -3184,6 +3184,14 @@ function TMW:SlashCommand(str)
 		end
 		TMW:ChangeCounter(name, operation, value)
 
+	elseif cmd == "timer" then
+		local name, operation = arg2, arg3 and strlower(arg3)
+		if name == nil or operation == nil then
+			TMW:Print("Usage: /tmw timer timer-name [start||stop||pause||reset||restart]. E.g. '/tmw timer pull start'")
+			return
+		end
+		TMW:ChangeTimer(name, operation)
+
 	elseif cmd == "cpu" then
 		if arg2 == "reset" then
 			TMW:CpuProfileReset()

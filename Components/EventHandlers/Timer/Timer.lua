@@ -77,30 +77,32 @@ function Timer:ProcessIconEventSettings(event, eventSettings)
 	return eventSettings.Counter ~= ""
 end
 
-function Timer:HandleEvent(icon, eventSettings)
-	local Counter = eventSettings.Counter
-	local TimerOperation = eventSettings.TimerOperation
+function TMW:ChangeTimer(name, operation)
+	name = Timer:SanitizeTimerName(name)
 
-	if TimerOperation == "reset" then
-		TIMERS[Counter]:Reset()
-	elseif TimerOperation == "start" then
-		TIMERS[Counter]:Start()
-	elseif TimerOperation == "restart" then
-		TIMERS[Counter]:Reset()
-		TIMERS[Counter]:Start()
-	elseif TimerOperation == "pause" then
-		TIMERS[Counter]:Pause()
-	elseif TimerOperation == "stop" then
-		TIMERS[Counter]:Stop()
-		
+	if operation == "reset" then
+		TIMERS[name]:Reset()
+	elseif operation == "start" then
+		TIMERS[name]:Start()
+	elseif operation == "restart" then
+		TIMERS[name]:Reset()
+		TIMERS[name]:Start()
+	elseif operation == "pause" then
+		TIMERS[name]:Pause()
+	elseif operation == "stop" then
+		TIMERS[name]:Stop()
 	else
-		TMW:Error("Bad timer operation: " .. tostring(icon) .. " " .. Counter .. ": " .. TimerOperation)
+		TMW:Error("Unknown timer operation '" .. tostring(operation) .. "'")
 		return
 	end
-	
-	TMW:Fire("TMW_TIMER_MODIFIED", Counter)
+
+	TMW:Fire("TMW_TIMER_MODIFIED", name)
 
 	return true
+end
+
+function Timer:HandleEvent(icon, eventSettings)
+	return TMW:ChangeTimer(eventSettings.Counter, eventSettings.TimerOperation)
 end
 
 function Timer:OnRegisterEventHandlerDataTable()
