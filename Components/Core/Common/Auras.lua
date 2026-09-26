@@ -159,11 +159,13 @@ end
 -- firing because consumers answer by calling GetAuras, which puts units back into
 -- `data`, and growing a table you're in the middle of iterating is undefined.
 local scratchUnits = {}
-local function WipeAllUnits()
+local function WipeAllUnits(onlyUnreadable)
     local n = 0
-    for unit in pairs(data) do
-        n = n + 1
-        scratchUnits[n] = unit
+    for unit, unitData in pairs(data) do
+        if not onlyUnreadable or unitData.unreadable then
+            n = n + 1
+            scratchUnits[n] = unit
+        end
     end
 
     for i = 1, n do
@@ -177,9 +179,23 @@ end
 local OnUnitAura
 if TMW.clientHasSecrets then
     local blocked = false
+    local combatEnded = false
+
+    -- Auras that were secret in combat unsecret when it ends without any UNIT_AURA,
+    -- so a cache that took in anything unreadable is stale until rebuilt.
+    local combatWatcher = CreateFrame("Frame")
+    combatWatcher:RegisterEvent("PLAYER_REGEN_ENABLED")
+    combatWatcher:SetScript("OnEvent", function()
+        combatEnded = true
+    end)
 
     -- There's no event for the restriction flipping, so watch it off TMW's update.
     TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
+        if combatEnded then
+            combatEnded = false
+            WipeAllUnits(true)
+        end
+
         local newBlocked = ShouldAurasBeSecret()
         if blocked ~= newBlocked then
             blocked = newBlocked
@@ -434,6 +450,10 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
     end
 
     if not unitData or issecretvalue(unitAuraUpdateInfo.isFullUpdate) then
+        if unitData then
+            unitData.unreadable = true
+        end
+
         -- we have no cached unit data for this unitID,
         -- probably because the unitID recently changed to another unit
         -- so there's no compelling reason to process the event.
@@ -462,6 +482,9 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
     -- extra table lookups, we just track if the event had /something/ that was mine,
     -- which is usually good enough.)
     local eventHasMine = false
+    local unreadable = false
+    -- An aura left that the payload can't name, so every consumer has to look.
+    local unnamedRemoval = false
 
     local added = unitAuraUpdateInfo.addedAuras
     if added then
@@ -470,12 +493,16 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
             local auraInstanceID = instance.auraInstanceID
 
             -- Sometimes secret, even when the whole payload is not secret??
-            if not issecretvalue(auraInstanceID) then
+            if issecretvalue(auraInstanceID) then
+                unreadable = true
+            else
                 instances[auraInstanceID] = instance
 
                 AugmentInstance(unit, instance)
 
-                if not issecretvalue(instance.name) then
+                if issecretvalue(instance.name) then
+                    unreadable = true
+                else
                     local name = strlowerCache[instance.name]
                     local spellId = instance.spellId
                     local isMine = instance.isMine
@@ -505,7 +532,9 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
             -- Sometimes secret, even when the whole payload is not secret??
             local instance = not issecretvalue(auraInstanceID)
                 and GetAuraDataByAuraInstanceID(unit, auraInstanceID)
-            if not instance then
+            if issecretvalue(auraInstanceID) then
+                unreadable = true
+            elseif not instance then
                 -- Sometimes, updated really means removed!
                 -- Except the remove will still happen, so don't actually remove here. Just do nothing.
                 -- Example: When Voidform (shadow priest, 194249) expires,
@@ -518,7 +547,9 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
 
                 AugmentInstance(unit, instance)
 
-                if not issecretvalue(instance.name) then
+                if issecretvalue(instance.name) then
+                    unreadable = true
+                else
                     local name = strlowerCache[instance.name]
                     local spellId = instance.spellId
                     local dispelType = instance.dispelName
@@ -543,9 +574,18 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
             local auraInstanceID = removed[i]
             local instance = not issecretvalue(auraInstanceID) and instances[auraInstanceID]
 
+            if issecretvalue(auraInstanceID) then
+                unreadable = true
             -- Sometimes the instance won't exist, for unknown reasons.
-            if instance then
-                if not issecretvalue(instance.name) then
+            elseif instance then
+                if issecretvalue(instance.name) then
+                    -- A secret update replaced the instance that knew its lookup keys.
+                    unreadable = true
+                    unnamedRemoval = true
+                    for _, entry in next, lookup do
+                        entry[auraInstanceID] = nil
+                    end
+                else
                     local name = strlowerCache[instance.name]
                     local spellId = instance.spellId
                     local dispelType = instance.dispelName
@@ -570,7 +610,11 @@ OnUnitAura = function(unit, unitAuraUpdateInfo)
         end
     end
 
-    FireUnitAura(unit, payload)
+    if unreadable then
+        unitData.unreadable = true
+    end
+
+    FireUnitAura(unit, not unnamedRemoval and payload or nil)
 end
 
 
@@ -683,7 +727,8 @@ function Auras:RequestUnits(unitSet)
     end
 end
 
-local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
+local function UpdateAuras(unit, unitData, continuationToken, ...)
+    local instances, lookup = unitData.instances, unitData.lookup
     local n = select('#', ...)
 
     for i = 1, n do
@@ -692,7 +737,9 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
 
         -- Check `if instance` because sometimes GetAuraSlots returns invalid slots I guess?
         -- Only ever seen this happen in arena.
-        if instance and not issecretvalue(instance.auraInstanceID) then
+        if instance and issecretvalue(instance.auraInstanceID) then
+            unitData.unreadable = true
+        elseif instance then
             local auraInstanceID = instance.auraInstanceID
 
             AugmentInstance(unit, instance)
@@ -700,7 +747,9 @@ local function UpdateAuras(unit, instances, lookup, continuationToken, ...)
             --print("scanned", unit, instance.name, auraInstanceID)
 
             instances[auraInstanceID] = instance
-            if not issecretvalue(instance.name) then
+            if issecretvalue(instance.name) then
+                unitData.unreadable = true
+            else
                 local isMine = instance.isMine
                 
                 lookup[strlowerCache[instance.name]][auraInstanceID] = isMine
@@ -747,8 +796,8 @@ function Auras.GetAuras(unit)
 
         -- INCLUDE_NAME_PLATE_ONLY adds additional auras that are otherwise hidden,
         -- like 1226662 Crusading Strikes (ret pally hidden buff)
-        UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HELPFUL|INCLUDE_NAME_PLATE_ONLY"))
-        UpdateAuras(unit, instances, lookup, GetAuraSlots(unit, "HARMFUL|INCLUDE_NAME_PLATE_ONLY"))
+        UpdateAuras(unit, unitData, GetAuraSlots(unit, "HELPFUL|INCLUDE_NAME_PLATE_ONLY"))
+        UpdateAuras(unit, unitData, GetAuraSlots(unit, "HARMFUL|INCLUDE_NAME_PLATE_ONLY"))
     end
     return unitData
 end

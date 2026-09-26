@@ -7,3 +7,4 @@ gh-release.pkgmeta
 readme.bbcode.txt
 
 build/CSC*.lua
+Lib
