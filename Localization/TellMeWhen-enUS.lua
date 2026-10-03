@@ -579,6 +579,7 @@ L["ICONMENU_AURACONTAINER_CDM_REQUIREON"] = "%s to be enabled"
 L["ICONMENU_AURACONTAINER_CDM_REQUIREOFF"] = "%s to be unused"
 L["ICONMENU_AURACONTAINER_CDM_NOSPELLS"] = "a spell ID"
 L["ICONMENU_AURACONTAINER_CDM_UNTRACKED"] = "%s to be in your Cooldown Manager"
+L["ICONMENU_AURACONTAINER_CDM_RANK"] = "Spell ID %s instead of %s. Your Cooldown Manager tracks %s as spell ID %s."
 
 L["ICONMENU_AURACONTAINER_SORT"] = "Order"
 L["ICONMENU_AURACONTAINER_SORT_DESC"] = "The order this icon places the auras it shows in."
@@ -3015,9 +3016,7 @@ If you need to check many units, consider using a separate icon with an Icon Sho
 
 L["HELP_BUFFCONTAINER_NAMENOTID"] = [[%s is a spell name, and this icon type can only filter by spell ID. Names are ignored.
 
-Pick the spell from the suggestion list to insert its ID, or leave the field empty to show every aura matching the icon's other filters.
-
-To read a spell's ID off an aura tooltip, enable %q in TellMeWhen's general options]]
+Pick the spell from the suggestion list to insert its ID, or leave the field empty to show every aura matching the icon's other filters.]]
 
 L["HELP_BUFFCONTAINER_DISPELTYPE"] = [[%s is a dispel type rather than a spell, and this field only accepts spell IDs. It is ignored here.
 

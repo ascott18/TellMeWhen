@@ -96,7 +96,7 @@ Type:RegisterConfigPanel_XMLTemplate(110, "TellMeWhen_TextPanel", {
 			-- The requirements are the fix, not the fault, so they read as advice.
 			local _, blockers = GetDetection(TMW.CI.ics, TMW.CI.icon)
 			if blockers then
-				sections[#sections + 1] = COLOR_LIMIT .. L["ICONMENU_AURACONTAINER_CDM_OFF"] .. "|r" .. LINE
+				sections[#sections + 1] = COLOR_CONDITIONAL .. L["ICONMENU_AURACONTAINER_CDM_OFF"] .. "|r" .. LINE
 					.. COLOR_ADVICE .. table.concat(blockers, LINE) .. "|r"
 			end
 

@@ -182,6 +182,31 @@ local function UnitAuraKind(unit)
 	return likelyUnitKinds[base], false
 end
 
+-- Ranks are separate IDs, so a spell the CDM tracks can still miss on the rank entered.
+local hasSpellRanks = TMW.ClassicExpansionAtMost(LE_EXPANSION_WRATH_OF_THE_LICH_KING)
+
+-- The CDM-tracked IDs sharing id's name, as a display list, or nil.
+local function GetTrackedRanks(id)
+	local name = hasSpellRanks and TMW.GetSpellName(id)
+	if not name then
+		return nil
+	end
+
+	local lowerName = TMW.strlowerCache[name]
+	local ranks
+	for trackedID, trackedName in pairs(Auras.GetCDMTrackedSpells()) do
+		if trackedName == lowerName then
+			ranks = ranks or {}
+			ranks[#ranks + 1] = trackedID
+		end
+	end
+
+	if ranks then
+		table.sort(ranks)
+		return table.concat(ranks, ", ")
+	end
+end
+
 -- The spell IDs to watch, plus every reason detection isn't running. The IDs hold until the
 -- next setup; two blockers don't, so GetKnownAbsent re-tests those. Takes `ics` so it can
 -- answer while the name box is still being typed into.
@@ -250,7 +275,12 @@ local function GetDetection(ics, icon)
 			shapeOk = false
 		else
 			if not Auras.IsCDMTracked(id) then
-				Block(format(L["ICONMENU_AURACONTAINER_CDM_UNTRACKED"], TMW.GetSpellName(id) or id))
+				local ranks = GetTrackedRanks(id)
+				if ranks then
+					Block(format(L["ICONMENU_AURACONTAINER_CDM_RANK"], ranks, id, TMW.GetSpellName(id), ranks))
+				else
+					Block(format(L["ICONMENU_AURACONTAINER_CDM_UNTRACKED"], TMW.GetSpellName(id) or id))
+				end
 			end
 			spells = spells or {}
 			spells[#spells + 1] = id
@@ -289,7 +319,7 @@ local function GetLimitations(ics)
 			Limit(format(L["ICONMENU_BUFFDEBUFF_CONTAINER_NAMENOTID"], tostring(array[i])))
 		end
 	end
-	if hasName then
+	if hasName and not TMW.db.global.ShowAuraSpellIDs then
 		advice = format(L["ICONMENU_BUFFDEBUFF_CONTAINER_IDTOOLTIP"], L["SHOWAURASPELLIDS_OPTION"])
 	end
 
@@ -606,7 +636,9 @@ function Type:Setup(icon)
 				-- to send the user.
 				text = badDispelType
 					and format(L["HELP_BUFFCONTAINER_DISPELTYPE"], badDispelType, L["ICONMENU_DISPELTYPE"])
-					or format(L["HELP_BUFFCONTAINER_NAMENOTID"], badName, L["SHOWAURASPELLIDS_OPTION"])
+					or format(L["HELP_BUFFCONTAINER_NAMENOTID"], badName)
+						.. (TMW.db.global.ShowAuraSpellIDs and ""
+							or "\n\n" .. format(L["ICONMENU_BUFFDEBUFF_CONTAINER_IDTOOLTIP"], L["SHOWAURASPELLIDS_OPTION"]))
 			}
 		end
 	end
