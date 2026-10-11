@@ -1339,14 +1339,12 @@ TMW.IconStateArbitrator = {
 			local state = attributes[handlerToUse.attribute]
 			local secretBool = state.secretBool
 
-			if secretBool ~= nil or issecretvalue(state.Alpha) then
-				if issecretvalue(secretBool) then
-					icon:SetInfo_INTERNAL("realAlpha; calculatedState", 1, state)
-				else
-					-- Secret code paths might be taken even when we're not secret, so escape back to non-secret world.
-					local realState = secretBool and state.trueState or state.falseState
-					icon:SetInfo_INTERNAL("realAlpha; calculatedState", realState.Alpha or 0, realState)
-				end
+			if issecretvalue(secretBool) or (secretBool == nil and issecretvalue(state.Alpha)) then
+				icon:SetInfo_INTERNAL("realAlpha; calculatedState", 1, state)
+			elseif secretBool ~= nil then
+				-- Secret code paths might be taken even when we're not secret, so escape back to non-secret world.
+				local realState = secretBool and state.trueState or state.falseState
+				icon:SetInfo_INTERNAL("realAlpha; calculatedState", realState.Alpha or 0, realState)
 			else
 				if not state.Alpha then
 					-- Attempting to catch an elusive bug. Remove this if it doesn't seem to be happening anymore.
