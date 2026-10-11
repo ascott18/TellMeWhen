@@ -958,6 +958,32 @@ if SwingTimerMonitor then
 			VALUE = duration and start + (duration - c.Level) or huge
 		]],
 	})
+
+	local RANGED_SLOT = SwingTimerMonitor.RANGED_SLOT
+	if RANGED_SLOT then
+		ConditionCategory:RegisterCondition(19.6,	 "RANGEDSWING", {
+			text = L["SWINGTIMER"] .. " - " .. INVTYPE_RANGED,
+			min = 0,
+			range = 3,
+			step = 0.1,
+			unit = PLAYER,
+			formatter = TMW.C.Formatter.TIME_0USABLE,
+			icon = function() return GetInventoryItemTexture("player", RANGED_SLOT) or "Interface\\Icons\\inv_weapon_bow_02" end,
+			tcoords = CNDT.COMMON.standardtcoords,
+			funcstr = [[SwingDuration(]] .. RANGED_SLOT .. [[) c.Operator c.Level]],
+			events = function(ConditionObject, c)
+				ConditionObject:RequestEvent("TMW_COMMON_SWINGTIMER_CHANGED")
+				ConditionObject:SetNumEventArgs(1)
+				
+				return
+					"event == 'TMW_COMMON_SWINGTIMER_CHANGED' and arg1.slot == " .. RANGED_SLOT
+			end,
+			anticipate = [[
+				local start, duration = SwingInfo(]] .. RANGED_SLOT .. [[)
+				VALUE = duration and start + (duration - c.Level) or huge
+			]],
+		})
+	end
 end
 
 

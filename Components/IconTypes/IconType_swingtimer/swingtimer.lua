@@ -23,10 +23,17 @@ local pairs
 local _, pclass = UnitClass("Player")
 local GetSpellTexture = TMW.GetSpellTexture
 
-local INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND =
-	  INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND
+local INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND, INVTYPE_RANGED =
+	  INVTYPE_WEAPONMAINHAND, INVTYPE_WEAPONOFFHAND, INVTYPE_RANGED
 
 local SwingTimerMonitor = TMW.COMMON.SwingTimerMonitor
+local RANGED_SLOT = SwingTimerMonitor and SwingTimerMonitor.RANGED_SLOT
+
+local slotIDs = {
+	MainHandSlot = GetInventorySlotInfo("MainHandSlot"),
+	SecondaryHandSlot = GetInventorySlotInfo("SecondaryHandSlot"),
+	RangedSlot = RANGED_SLOT,
+}
 
 local Type = TMW.Classes.IconType:New("swingtimer")
 Type.obsolete = not SwingTimerMonitor
@@ -47,11 +54,13 @@ Type:UsesAttributes("texture")
 
 
 Type:RegisterIconDefaults{
-	-- Weapon slot to monitor the swing of. Can also be "SecondaryHandSlot".
+	-- Weapon slot to monitor the swing of. Can also be "SecondaryHandSlot" or "RangedSlot".
 	SwingTimerSlot			= "MainHandSlot",
 }
 
-if pclass == "HUNTER" then
+if RANGED_SLOT then
+	-- Ranged swings are tracked directly.
+elseif pclass == "HUNTER" then
 	Type:RegisterConfigPanel_XMLTemplate(130, "TellMeWhen_AutoshootSwingTimerTip", { 
 		spellID = 75
 	})
@@ -78,6 +87,10 @@ Type:RegisterConfigPanel_ConstructorFunc(120, "TellMeWhen_WeaponSlot", function(
 		function(check)
 			check:SetTexts(INVTYPE_WEAPONOFFHAND, nil)
 			check:SetSetting("SwingTimerSlot", "SecondaryHandSlot")
+		end,
+		RANGED_SLOT and function(check)
+			check:SetTexts(INVTYPE_RANGED, nil)
+			check:SetSetting("SwingTimerSlot", "RangedSlot")
 		end,
 	})
 end)
@@ -120,7 +133,7 @@ end
 
 function Type:Setup(icon)
 	-- Convert the slot name to a slotID.
-	icon.Slot = GetInventorySlotInfo(icon.SwingTimerSlot)
+	icon.Slot = slotIDs[icon.SwingTimerSlot]
 
 	local SwingTimer = SwingTimers[icon.Slot]
 	if not SwingTimer then

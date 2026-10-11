@@ -15,14 +15,18 @@
 --[[
 
 -- To use the module, access SwingTimerMonitor.SwingTimers[weaponSlot]
--- where weaponSlot is either MAINHAND_SLOT or OFFHAND_SLOT (currently 16 or 17)
+-- where weaponSlot is either MAINHAND_SLOT or OFFHAND_SLOT (currently 16 or 17),
+-- or SwingTimerMonitor.RANGED_SLOT when the client has C_SwingTimer,
 -- to get a SwingTimer object. Use the SwingTimer.duration and SwingTimer.startTime
 -- to get data about it, and use event TMW_COMMON_SWINGTIMER_CHANGED to listen for swing time starts
 
 ]]
 
 if not TMW then return end
-if not CombatLogGetCurrentEventInfo then return end
+
+-- C_SwingTimer (Camelot) replaces the combat log, which addons can't read on 12.x clients.
+local C_SwingTimer = C_SwingTimer
+if not C_SwingTimer and not CombatLogGetCurrentEventInfo then return end
 
 local TMW = TMW
 local L = TMW.L
@@ -34,6 +38,7 @@ local strsub, pairs
 local UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 	= UnitGUID, GetNetStats, GetInventorySlotInfo, IsDualWielding, UnitAttackSpeed
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
+local issecretvalue = TMW.issecretvalue
 
 local GetSpellInfo = TMW.GetSpellInfo
 local GetSpellName = TMW.GetSpellName
@@ -45,10 +50,19 @@ TMW.COMMON.SwingTimerMonitor = CreateFrame("Frame")
 -- Constants
 local MAINHAND_SLOT = GetInventorySlotInfo("MainHandSlot")
 local OFFHAND_SLOT = GetInventorySlotInfo("SecondaryHandSlot")
+local RANGED_SLOT = C_SwingTimer and INVSLOT_RANGED
+
+local swingTypeSlots = C_SwingTimer and {
+	[Enum.PlayerSwingType.MainHand] = MAINHAND_SLOT,
+	[Enum.PlayerSwingType.OffHand] = OFFHAND_SLOT,
+	[Enum.PlayerSwingType.Ranged] = RANGED_SLOT,
+}
 
 -- Upvalues
 local SwingTimers
 local SwingTimerMonitor = TMW.COMMON.SwingTimerMonitor
+
+SwingTimerMonitor.RANGED_SLOT = RANGED_SLOT
 
 -- Initialize module-wide variables
 SwingTimerMonitor.DualWield = nil
@@ -134,10 +148,14 @@ local SwingTimer = TMW:NewClass("SwingTimer"){
 		self.active = false
 	end,
 	
-	Start = function(self)
+	Start = function(self, duration)
 		self:Reset()
-	
-		self:SetSwingSpeed()
+
+		if duration then
+			self.duration = duration
+		else
+			self:SetSwingSpeed()
+		end
 		SetLatency()
 		
 		self.active = true
@@ -148,23 +166,27 @@ local SwingTimer = TMW:NewClass("SwingTimer"){
 	
 
 	SetSwingSpeed = function(self)
-		local mainhand, offhand = UnitAttackSpeed("player")
-		
+		local mainhand, offhand, ranged = UnitAttackSpeed("player")
+
+		local speed
 		if self.slot == MAINHAND_SLOT then
-			local delta = self.duration - mainhand
+			speed = mainhand
+		elseif self.slot == OFFHAND_SLOT then
+			speed = SwingTimerMonitor.DualWield and offhand
+		else
+			speed = ranged
+		end
+
+		-- Attack speeds are secret while unit stats are restricted.
+		if speed and not issecretvalue(speed) then
+			local delta = self.duration - speed
 
 			-- Shift the start time by the percentage of the delta that has elapsed.
 			-- elapsedTime = (TMW.time - self.startTime) / self.duration
 			if self.duration ~= 0 and delta ~= 0 then
 				self.startTime = self.startTime + ((TMW.time - self.startTime) / self.duration * delta)
 			end
-			self.duration = mainhand
-		elseif SwingTimerMonitor.DualWield and offhand then
-			local delta = self.duration - offhand
-			if self.duration ~= 0 and delta ~= 0 then
-				self.startTime = self.startTime + ((TMW.time - self.startTime) / self.duration * delta)
-			end
-			self.duration = offhand
+			self.duration = speed
 		end
 		self:CheckTime()
 	end,
@@ -172,7 +194,13 @@ local SwingTimer = TMW:NewClass("SwingTimer"){
 
 
 SwingTimerMonitor:SetScript("OnEvent", function(self, event, ...)
-	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+	if event == "PLAYER_SWING" then
+		local duration, swingType = ...
+		local timer = SwingTimers[swingTypeSlots[swingType]]
+		if timer then
+			timer:Start(duration)
+		end
+	elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
 		local _, event, _, src_guid, _, _, _, _, _, _, _, spellID, arg13, _, _, _, _, _, _, _, isOffHandHit = CombatLogGetCurrentEventInfo()
 	
 		if src_guid == pGUID then
@@ -211,8 +239,15 @@ SwingTimerMonitor.SwingTimers = setmetatable({},
 	-- Create the swing timers
 	SwingTimer:New(MAINHAND_SLOT)
 	SwingTimer:New(OFFHAND_SLOT)
+	if RANGED_SLOT then
+		SwingTimer:New(RANGED_SLOT)
+	end
 
-	SwingTimerMonitor:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	if C_SwingTimer then
+		SwingTimerMonitor:RegisterEvent("PLAYER_SWING")
+	else
+		SwingTimerMonitor:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	end
 	SwingTimerMonitor:RegisterEvent("UNIT_ATTACK_SPEED")
 	SwingTimerMonitor:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 

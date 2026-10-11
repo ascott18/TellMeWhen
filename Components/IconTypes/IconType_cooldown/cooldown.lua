@@ -34,6 +34,10 @@ local GetRuneCooldownDuration = TMW.GetRuneCooldownDuration
 local _, pclass = UnitClass("Player")
 
 local IsSpellInRange = TMW.COMMON.SpellRange.IsSpellInRange
+local issecretvalue = TMW.issecretvalue
+
+local SwingTimerMonitor = TMW.COMMON.SwingTimerMonitor
+local RANGED_SLOT = SwingTimerMonitor and SwingTimerMonitor.RANGED_SLOT
 
 
 local Type = TMW.Classes.IconType:New("cooldown")
@@ -137,8 +141,11 @@ local function AutoShot_OnEvent(icon, event, unit, _, spellID)
 		-- When an autoshot happens, set the timer for the next one.
 
 		icon.asStart = TMW.time
-		-- The first return of UnitRangedDamage() is ranged attack speed.
-		icon.asDuration = UnitRangedDamage("player")
+		-- The first return of UnitRangedDamage() is ranged attack speed. Secret while unit stats are restricted.
+		local speed = UnitRangedDamage("player")
+		if not issecretvalue(speed) then
+			icon.asDuration = speed
+		end
 		icon.NextUpdateTime = 0
 	end
 end
@@ -146,9 +153,14 @@ end
 local function AutoShot_OnUpdate(icon, time)
 
 	local NameString = icon.Spells.FirstString
-	local asDuration = icon.asDuration
+	local asStart, asDuration = icon.asStart, icon.asDuration
 
-	local ready = time - icon.asStart > asDuration
+	local RangedSwingTimer = icon.RangedSwingTimer
+	if RangedSwingTimer then
+		asStart, asDuration = RangedSwingTimer.startTime, RangedSwingTimer.duration
+	end
+
+	local ready = time - asStart > asDuration
 	local inrange = true
 	if icon.RangeCheck then
 		inrange = IsSpellInRange(NameString, "target")
@@ -168,7 +180,7 @@ local function AutoShot_OnUpdate(icon, time)
 		icon:SetInfo(
 			"state; start, duration; spell",
 			not inrange and STATE_UNUSABLE_NORANGE or STATE_UNUSABLE,
-			icon.asStart, asDuration,
+			asStart, asDuration,
 			NameString
 		)
 	end
@@ -443,8 +455,13 @@ function Type:Setup(icon)
 			icon:SetUpdateMethod("manual")
 		end
 		
-		icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-		icon:SetScript("OnEvent", AutoShot_OnEvent)
+		if RANGED_SLOT then
+			icon.RangedSwingTimer = SwingTimerMonitor.SwingTimers[RANGED_SLOT]
+			icon:RegisterSimpleUpdateEvent("TMW_COMMON_SWINGTIMER_CHANGED")
+		else
+			icon:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+			icon:SetScript("OnEvent", AutoShot_OnEvent)
+		end
 		
 		icon:SetUpdateFunction(AutoShot_OnUpdate)
 		icon:Update()
