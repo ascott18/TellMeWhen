@@ -2002,6 +2002,10 @@ L["CNDT_RANGE"] = "Unit Range"
 L["CNDT_RANGE_DESC"] = "Checks the approximate range of a unit using LibRangeCheck-3.0. Condition will evaluate to false if the unit does not exist."
 L["CNDT_RANGE_PRECISE"] = "%d yds. (|cff00c322Precise|r)"
 L["CNDT_RANGE_IMPRECISE"] = "%d yds. (|cffff1300Imprecise|r)"
+L["CNDT_ENEMYCOUNT"] = "Enemies in Range"
+L["CNDT_ENEMYCOUNT_DESC"] = "Counts living hostile units with a visible nameplate within the given range, using LibRangeCheck-3.0. Requires enemy nameplates to be enabled."
+L["CNDT_ENEMYCOUNT_RANGE"] = "Range (yards)"
+L["CNDT_ENEMYCOUNT_RANGE_DESC"] = "Maximum distance in yards. Ranges are approximate."
 
 
 L["CODESNIPPET_RENAME"] = "Snippet Name"

@@ -340,6 +340,61 @@ ConditionCategory:RegisterCondition(8.5,  "LIBRANGECHECK", {
 	-- events = absolutely no events
 })
 
+local NamePlateUnits = {}
+ConditionCategory:RegisterCondition(8.6,  "ENEMYCOUNT", {
+	text = L["CNDT_ENEMYCOUNT"],
+	tooltip = L["CNDT_ENEMYCOUNT_DESC"],
+	min = 0,
+	max = 20,
+	unit = false,
+	name = function(editbox)
+		editbox:SetTexts(L["CNDT_ENEMYCOUNT_RANGE"], L["CNDT_ENEMYCOUNT_RANGE_DESC"])
+	end,
+
+	icon = "Interface\\Icons\\ability_warrior_bladestorm",
+	tcoords = CNDT.COMMON.standardtcoords,
+
+	funcstr = function(c)
+		local LRC = LibStub("LibRangeCheck-3.0", true)
+		if not LRC then
+			TMW:Error("The %s condition requires LibRangeCheck-3.0", L["CNDT_ENEMYCOUNT"])
+			return "false"
+		end
+
+		if not Env.CountEnemiesInRange then
+			local frame = CreateFrame("Frame")
+			frame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+			frame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+			frame:SetScript("OnEvent", function(_, event, unit)
+				NamePlateUnits[unit] = event == "NAME_PLATE_UNIT_ADDED" or nil
+			end)
+			for i = 1, 40 do
+				local unit = "nameplate" .. i
+				if UnitExists(unit) then
+					NamePlateUnits[unit] = true
+				end
+			end
+
+			local UnitCanAttack, UnitIsDeadOrGhost = UnitCanAttack, UnitIsDeadOrGhost
+			function Env.CountEnemiesInRange(range)
+				local count = 0
+				for unit in pairs(NamePlateUnits) do
+					if UnitCanAttack("player", unit) and not UnitIsDeadOrGhost(unit) then
+						local _, maxRange = LRC:GetRange(unit)
+						if maxRange and maxRange <= range then
+							count = count + 1
+						end
+					end
+				end
+				return count
+			end
+		end
+
+		return [[CountEnemiesInRange(]] .. (tonumber(c.Name) or 8) .. [[) c.Operator c.Level]]
+	end,
+	-- events = absolutely no events
+})
+
 
 
 ConditionCategory:RegisterSpacer(8.9)

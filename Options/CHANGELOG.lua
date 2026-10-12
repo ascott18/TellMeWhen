@@ -7,6 +7,7 @@ TMW.CHANGELOG = [==[
 * Forever and ever and ever and ever and ever
 * Added the "Equipped item type" conditions for the main hand, off hand, and ranged slots - checks what kind of weapon, shield, or off-hand item is equipped (#2496).
 * Added Armor, Dodge, Parry, Block, and Defense conditions.
+* Added the "Enemies in Range" condition, which counts hostile nameplates within a range (#1951).
 * Added `/tmw timer timer-name [start||stop||pause||reset||restart]`, which controls Timers the same way `/tmw counter` controls Counters.
 
 ## v12.1.4
