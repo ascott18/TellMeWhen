@@ -57,6 +57,7 @@ local GetSpellCost = TMW.GetSpellCost
 local UnitPower = UnitPower
 local GetActionInfo = GetActionInfo
 
+local FixNoManaAction
 if not TMW.clientHasSecrets then
     local function FixNoMana(spell, noMana)
         local cost, data = GetSpellCost(spell)
@@ -65,7 +66,7 @@ if not TMW.clientHasSecrets then
         end
         return noMana
     end
-    local function FixNoManaAction(action, noMana)
+    function FixNoManaAction(action, noMana)
         local type, id = GetActionInfo(action)
         if type == "spell" then
             return FixNoMana(id, noMana)

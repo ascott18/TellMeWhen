@@ -1,5 +1,6 @@
 ## v12.1.6
 * Fix spells showing a cooldown during the global cooldown from wand shots in Classic Forever.
+* Fix SpellUsable.lua:188 error on Classic clients (#2509).
 
 ## v12.1.5
 * Forever and ever and ever and ever and ever
