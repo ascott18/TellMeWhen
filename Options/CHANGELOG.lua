@@ -3,6 +3,9 @@ if not TMW then return end
 TMW.CHANGELOG_LASTVER="10.0.0"
 
 TMW.CHANGELOG = [==[
+## v12.1.6
+* Fix spells showing a cooldown during the global cooldown from wand shots in Classic Forever.
+
 ## v12.1.5
 * Forever and ever and ever and ever and ever
 * Added the "Equipped item type" conditions for the main hand, off hand, and ranged slots - checks what kind of weapon, shield, or off-hand item is equipped (#2496).

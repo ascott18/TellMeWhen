@@ -30,6 +30,16 @@ local CachedCooldowns = {}
 local CachedCharges = {}
 local CachedCounts = {}
 
+-- Camelot has no 61304.
+local GCDSpell = TMW.GetSpellInfo(61304) and 61304 or 53
+TMW.GCDSpell = GCDSpell
+
+-- Wand shots (Shoot) start a GCD that isOnGCD doesn't report: their SPELL_UPDATE_COOLDOWN
+-- has startRecoveryCategory 0, not 133.
+local WAND_SHOOT = 5019
+local wandGCD = false
+local onRealCooldown = {}
+
 if C_Spell.GetSpellCooldown then
 	local C_Spell_GetSpellCooldown = C_Spell.GetSpellCooldown
 
@@ -37,7 +47,22 @@ if C_Spell.GetSpellCooldown then
         -- Assume cooldowns are always secrets. No point doing anything else.
         -- Can't cache because we can't discard stale entries after cache expiration.
         function Cooldowns.GetSpellCooldown(spell)
-            return C_Spell_GetSpellCooldown(spell)
+            local cooldown = C_Spell_GetSpellCooldown(spell)
+            if not cooldown then return end
+
+            if cooldown.isOnGCD then
+                onRealCooldown[spell] = false
+            elseif wandGCD and cooldown.isActive and C_Spell_GetSpellCooldown(GCDSpell).isActive then
+                -- Durations are secret, so an active cooldown during a wand GCD is ambiguous.
+                -- Keep what the spell showed before the wand shot, like Blizzard's CDM does.
+                if not onRealCooldown[spell] then
+                    cooldown.isOnGCD = true
+                end
+            else
+                onRealCooldown[spell] = cooldown.isActive
+            end
+
+            return cooldown
         end
     else
         function Cooldowns.GetSpellCooldown(spell)
@@ -156,8 +181,6 @@ end
 -- Global Cooldown Data
 ---------------------------------
 
-local GCDSpell = TMW.GetSpellInfo(61304) and 61304 or 53
-TMW.GCDSpell = GCDSpell
 local Cooldowns_GetSpellCooldown = Cooldowns.GetSpellCooldown
 function TMW.GetGCD()
 	return Cooldowns_GetSpellCooldown(GCDSpell).duration
@@ -191,8 +214,15 @@ Cooldowns:RegisterEvent("SPELL_UPDATE_CHARGES")
 Cooldowns:RegisterUnitEvent("UNIT_SPELL_HASTE", "player")
 
 local currentGCD
-Cooldowns:SetScript("OnEvent", function(self, event, action, inRange, checksRange)
+Cooldowns:SetScript("OnEvent", function(self, event, spellID)
     if event == "SPELL_UPDATE_COOLDOWN" then
+        -- nil spellID is a refresh of everything, not a new cooldown.
+        if spellID == WAND_SHOOT then
+            wandGCD = true
+        elseif spellID then
+            wandGCD = false
+        end
+
         wipe(CachedCooldowns)
 
         -- Wipe charges when cooldowns change because sometimes charge events don't fire.
@@ -242,15 +272,19 @@ if TMW.clientHasSecrets then
     -- So, we need to fire an event when cooldowns end.
     -- we can't do this for everything, but for the most common cooldown (GCD),
     -- we can when GCDSpell is the 61304 pseudo-spell, whose cooldown isn't secret.
-    -- Camelot has no 61304, so there GCDSpell is a real spell and this can't run.
+    -- Camelot has no 61304, so there GCDSpell's duration is secret and we poll its isActive instead.
+    local C_Spell_GetSpellCooldown = C_Spell.GetSpellCooldown
     TMW:RegisterCallback("TMW_ONUPDATE_TIMECONSTRAINED_PRE", function()
         if not currentGCD then return end
 
         local duration = currentGCD.duration
         if issecretvalue(duration) then
-            -- Nothing here can be compared. Clear it so this doesn't retry every frame;
-            -- the next SPELL_UPDATE_COOLDOWN will set it again.
-            currentGCD = nil
+            if not currentGCD.isActive then
+                currentGCD = nil
+            elseif not C_Spell_GetSpellCooldown(GCDSpell).isActive then
+                currentGCD = nil
+                TMW:Fire("TMW_SPELL_UPDATE_COOLDOWN")
+            end
         elseif duration == 0 then
             -- If the duration was zero, it means GCD never actually started, 
             -- so don't fire the event.
