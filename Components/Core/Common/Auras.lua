@@ -207,6 +207,11 @@ if TMW.clientHasSecrets then
             -- resolved set, so UNIT_AURA knows what to look at.
             --print("wiping all units (restriction changed)")
             WipeAllUnits()
+
+            -- The wipe only reaches units something had cached. A consumer that reads no
+            -- auras while restricted has nothing cached, so it would never hear that the
+            -- restriction lifted.
+            TMW:Fire("TMW_AURAS_SECRECY_CHANGED", newBlocked)
         end
     end)
 

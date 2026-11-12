@@ -153,6 +153,9 @@ local function Buff_OnEvent(icon, event, arg1, arg2, arg3)
 	elseif event == icon.UnitSet.event then
 		-- A unit was just added or removed from icon.Units, so schedule an update.
 		icon.NextUpdateTime = 0
+	elseif event == "TMW_AURAS_SECRECY_CHANGED" then
+		-- A hidden icon reads no auras, so no aura event is coming to bring it back.
+		icon.NextUpdateTime = 0
 	end
 end
 
@@ -478,6 +481,10 @@ function Type:Setup(icon)
 		icon:SetUpdateMethod("manual")
 		icon:SetScript("OnEvent", Buff_OnEvent)
 		icon:RegisterEvent(icon.UnitSet.event)
+
+		if icon.HideWhileSecret and icon.HasUnreadableSpell then
+			icon:RegisterEvent("TMW_AURAS_SECRECY_CHANGED")
+		end
 
 		local canUsePacked, auraEvent = Auras:RequestUnits(icon.UnitSet)
 		icon.auraEvent = auraEvent
